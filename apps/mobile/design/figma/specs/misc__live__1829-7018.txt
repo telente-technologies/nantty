@@ -1,0 +1,18 @@
+# Live  (node 1829:7018, 393x852, reference: screens/misc__live__1829-7018.png)
+FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x44] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 67x20] flex=row gap=16 align=center
+      ICON cancel-20.svg [16,66 20x20] (Cancel)
+      FRAME "Frame 647" [52,66.5 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+        TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [56,68.5 23x15]
+  FRAME "Frame 787" [83,674 228x33] bg=#909090 radius=999 flex=row pad=8,12,8,12 gap=12 align=center
+    TEXT "STORY" Inter 500 13/16.9 ls-0.3 #5B5B5B [95,682 43x17]
+    TEXT "POST" Inter 500 13/16.9 ls-0.3 #5B5B5B [150,682 35x17]
+    TEXT "PRODUCT" Inter 500 13/16.9 ls-0.3 #5B5B5B [197,682 63x17]
+    TEXT "LIVE" Inter 500 13/16.9 ls-0.3 #000000 [272,682 27x17]
+  GROUP "Group 89" [161,726 72x72]
+    CIRCLE "Ellipse 39" [167,732 60x60] bg=#2043F5
+    CIRCLE "Ellipse 40" [161,726 72x72] bg=#2043F5
+  FRAME "Frame 797" [16,123 75x24] flex=row gap=24 align=center
+    ICON text-indent-24.svg [16,123 24x24] (TextIndent)
+    TEXT "Title" Inter 500 13/16.9 ls-0.3 #000000 [64,126.5 27x17]

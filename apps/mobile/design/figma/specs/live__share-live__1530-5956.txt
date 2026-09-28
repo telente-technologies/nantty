@@ -1,0 +1,95 @@
+# Live / Share Live  (node 1530:5956, 393x852, reference: screens/live__share-live__1530-5956.png)
+FRAME "Share Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 579" [0,768 393x49] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=row pad=8,16,8,16 gap=10 justify=center align=center clip
+    FRAME "Frame 542" [16,776 327x33] bg=#FFFFFF border=#D9D9D9/1 radius=4 flex=row pad=8,8,8,8 gap=10 align=center fill=w clip
+      TEXT "Add comment..." Inter 400 14/16.8 ls-0.3 #D9D9D9 [24,784 101x17]
+    ICON paper-plane-tilt-24.svg [353,780.5 24x24] (PaperPlaneTilt)
+  FRAME "Frame 544" [353,731 24x29] flex=col gap=12
+    TEXT "😎" Inter 400 24/28.8 ls-0.5 #000000 [353,731 24x29]
+  FRAME "Frame 589" [16,614 315x146] flex=col gap=10
+    FRAME "Frame 587" [16,614 315x34] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,619 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name commented about the live stream here from the viewer" Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« »«comment»{#000000}«ed»« about the live stream here from the viewer»{#000000} [46,614 285x34]
+    FRAME "Frame 589" [16,658 315x24] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,658 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name commented about the live stream " Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« »«comment»{#000000}«ed»« about the live stream »{#000000} [46,661.5 285x17]
+    FRAME "Frame 588" [16,692 315x24] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,692 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name joined the live stream " Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« joined»« the live stream »{#000000} [46,695.5 285x17]
+    FRAME "Frame 585" [16,726 315x34] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,731 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name replied @user-name on the live stream" Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« replied @user-name on the live s»«tream»{#000000} [46,726 285x34]
+  FRAME "Frame 642" [16,62 160x32] flex=row gap=12 align=center
+    ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+    FRAME "Frame 577" [52,62 124x32] flex=row gap=4 align=center
+      CIRCLE "Ellipse 6" [52,62 32x32] bg=#5B5B5B
+      FRAME "Frame 576" [88,62 88x32] flex=col gap=2
+        TEXT "Live Username" Inter 500 11/15.4 #000000 [88,62 79x15]
+        TEXT "Title of Live here" Inter 500 11/15.4 #000000 [88,79 88x15]
+  ICON dots-three-vertical-24.svg [353,66 24x24] (Frame 641)
+  FRAME "Frame 745" [272,68 76x19] flex=row gap=2 align=center
+    FRAME "Frame 647" [272,68 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+      TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [276,70 23x15]
+    FRAME "Frame 648" [305,68 43x19] bg=#DADADA radius=2 flex=row pad=2,4,2,4 justify=center align=center
+      ICON eye-14.svg [309,70.5 14x14] (tabler-icon-eye)
+      TEXT "268" Inter 500 11/15.4 ls-0.2 #000000 [323,70 21x15]
+  FRAME "Frame 467" [0,0 393x852] bg=#000000 opacity=0.5
+  FRAME "Price in post Popup" [11,361 372x442] bg=#FFFFFF radius=16 clip
+    FRAME "Frame 464" [11,450 372x300] flex=col pad=0,12,0,12 gap=12
+      FRAME "Frame 477" [23,450 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,450 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,450 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,453 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,453 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,453 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,470 221x17]
+            CIRCLE "Ellipse 38" [355,462 16x16] border=#D9D9D9/2
+      FRAME "Frame 479" [23,502 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,502 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,502 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,505 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,505 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,505 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,522 221x17]
+            CIRCLE "Ellipse 38" [355,514 16x16] border=#D9D9D9/2
+      FRAME "Frame 480" [23,554 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,554 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,554 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,557 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,557 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,557 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,574 221x17]
+            CIRCLE "Ellipse 38" [355,566 16x16] border=#D9D9D9/2
+      FRAME "Frame 481" [23,606 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,606 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,606 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,609 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,609 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,609 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,626 221x17]
+            CIRCLE "Ellipse 38" [355,618 16x16] border=#D9D9D9/2
+      FRAME "Frame 482" [23,658 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,658 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,658 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,661 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,661 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,661 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,678 221x17]
+            CIRCLE "Ellipse 38" [355,670 16x16] border=#D9D9D9/2
+      FRAME "Frame 483" [23,710 348x40] flex=col gap=9 justify=center fill=w
+        FRAME "Frame 458" [23,710 348x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [23,710 40x40] bg=#5B5B5B radius=999
+          FRAME "Frame 457" [71,713 300x34] flex=row gap=153 justify=space_between align=center fill=w
+            FRAME "Frame 746" [71,713 221x34] flex=col justify=center
+              TEXT "Enyo d Dev" Inter 400 14/16.8 ls-0.3 #000000 [71,713 221x17]
+              TEXT "@freda_dick" Inter 500 14/16.8 ls-0.3 #909090 [71,730 221x17]
+            CIRCLE "Ellipse 38" [355,722 16x16] border=#D9D9D9/2
+    FRAME "Frame 397" [16,735 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=4 justify=center align=center
+      ICON copy-16.svg [156.5,749 16x16] (tabler-icon-copy)
+      TEXT "Copy link" Inter 500 14/16.8 ls-0.3 #FFFFFF [176.5,748.5 60x17]
+    FRAME "Frame 465" [25,377 345x20] flex=row gap=258 justify=space_between
+      TEXT "Share" Inter 600 16/19.2 ls-0.3 #000000 [25,377 44x19]
+      ICON cancel-20.svg [350,377 20x20] (Cancel)
+    FRAME "Frame 123" [23,405 348x33] border=#909090/1 radius=8 flex=row pad=8,8,8,8 gap=12 align=center
+      ICON magnifying-glass-16.svg [31,413.5 16x16] (MagnifyingGlass)
+      TEXT "Search" Inter 400 13/16.9 ls-0.3 #909090 [59,413 42x17]

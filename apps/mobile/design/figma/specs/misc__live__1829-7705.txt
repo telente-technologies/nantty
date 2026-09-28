@@ -1,0 +1,13 @@
+# Live  (node 1829:7705, 393x852, reference: screens/misc__live__1829-7705.png)
+FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x48] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 71x24] flex=row gap=16 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      FRAME "Frame 647" [56,68.5 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+        TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [60,70.5 23x15]
+  GROUP "Group 89" [161,726 72x72]
+    CIRCLE "Ellipse 39" [167,732 60x60] bg=#2043F5
+    CIRCLE "Ellipse 40" [161,726 72x72] bg=#2043F5
+  FRAME "Frame 797" [16,110 209x40] bg=#8F8F8F radius=4 flex=row pad=8,8,8,8 gap=12 align=center
+    ICON text-indent-24.svg [24,118 24x24] (TextIndent)
+    TEXT "My First Live on Zudomart" Inter 500 13/16.9 ls-0.3 #000000 [60,121.5 157x17]

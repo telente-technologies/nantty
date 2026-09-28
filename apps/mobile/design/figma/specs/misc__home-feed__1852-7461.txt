@@ -1,0 +1,217 @@
+# Home (Feed)  (node 1852:7461, 393x2710, reference: screens/misc__home-feed__1852-7461.png)
+FRAME "Home (Feed)" [0,0 393x2710] bg=#FFFFFF clip
+  INST "Clips Post" [0,1177 393x290] border=#909090/1 borderSides=t1,r0,b1,l0 flex=col pad=12,0,12,0 gap=12 align=center
+    FRAME "Description" [16,1189 361x24] flex=row gap=223 justify=space_between align=max
+      TEXT "Suggested Clips" Inter 600 14/16.9 #000000 [16,1196 112x17]
+      ICON dots-three-vertical-24.svg [353,1189 24x24] (More)
+    FRAME "Clip Box" [0,1225 393x230] flex=col pad=0,16,0,16 gap=10 fill=w
+      FRAME "Clip Box Slider" [16,1225 386x230] flex=row gap=8 align=center
+        RECT "Clip 1" [16,1225 160x230] bg=#D9D9D9 radius=8
+        RECT "Clip 2" [184,1225 160x230] bg=#D9D9D9 radius=8
+        RECT "Clip 3" [352,1225 160x230] bg=#D9D9D9 radius=8
+        RECT "Clip 4" [520,1225 160x230] bg=#D9D9D9 radius=8
+        RECT "Clip 5" [688,1225 160x230] bg=#D9D9D9 radius=8
+  FRAME "Blog Post" [0,143 393x517] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b1,l0 flex=col pad=12,0,12,0 gap=8 align=center clip
+    FRAME "Combo" [0,155 393x60] flex=col gap=4 align=center fill=w
+      FRAME "Liked By" [0,155 393x24] flex=row pad=0,16,0,16 gap=189 justify=space_between align=center fill=w
+        FRAME "Frame 34" [16,155 142x24] flex=row gap=4 align=center
+          ICON group-12-56.svg [16,155 56x24] (Group 12)
+          TEXT "12 friends liked" Inter 400 12/16.8 ls-0.2 #000000 [76,158.5 82x17]
+      FRAME "Username / More" [16,183 361x32] flex=row gap=189 justify=space_between align=center
+        FRAME "Frame 34" [16,183 146x32] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [16,183 32x32] bg=#5B5B5B
+          FRAME "Frame 33" [57,190.5 105x17] flex=row gap=8 align=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [57,190.5 67x17]
+            CIRCLE "Ellipse 7" [132,197 4x4] bg=#5B5B5B
+            TEXT "2d" Inter 500 14/16.8 ls-0.3 #000000 [144,190.5 18x17]
+        ICON dots-three-vertical-24.svg [353,187 24x24] (Frame 83)
+    FRAME "Frame 630" [0,223 393x50] flex=row pad=8,16,8,16 gap=10 justify=center align=center fill=w
+      TEXT "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse " Inter 400 14/16.8 ls-0.3 #000000 [16,231 361x34]
+    FRAME "Post" [0,281 393x335] bg=#1E1E1E flex=row pad=12,16,8,16 gap=261 justify=space_between align=max fill=w clip
+      FRAME "Frame 631" [16,584 361x24] flex=row gap=285 justify=space_between align=max fill=w
+        FRAME "Frame 12" [16,600 50x8] bg=#5B5B5B radius=99 flex=row pad=2,4,2,4 gap=2 align=center
+          CIRCLE "Ellipse 18" [20,602 4x4] bg=#D9D9D9
+          CIRCLE "Ellipse 19" [26,602 4x4] bg=#D9D9D9
+          RECT "Rectangle 130" [32,602 24x4] bg=#0D0D0D radius=21
+          CIRCLE "Ellipse 20" [58,602 4x4] bg=#D9D9D9
+        ICON view-products-24.svg [353,584 24x24] (View Products)
+    FRAME "Interactives" [16,624 361x24] flex=row gap=89 justify=space_between align=center
+      FRAME "Frame 55" [16,624 250x24] flex=row gap=24 align=center
+        FRAME "Frame 37" [16,624 57x24] flex=row gap=8 align=center
+          ICON heart-24-alt.svg [16,624 24x24] (tabler-icon-heart)
+          TEXT "100" Inter 500 14/16.8 ls-0.3 #000000 [48,627.5 25x17]
+        FRAME "Frame 36" [97,624 47x24] flex=row gap=8 align=center
+          ICON brand-line-24.svg [97,624 24x24] (tabler-icon-brand-line)
+          TEXT "21" Inter 500 14/16.8 ls-0.3 #000000 [129,627.5 15x17]
+        FRAME "Frame 38" [168,624 50x24] flex=row gap=8 align=center
+          ICON refresh-24.svg [168,624 24x24] (tabler-icon-refresh)
+          TEXT "20" Inter 500 14/16.8 ls-0.3 #000000 [200,627.5 18x17]
+        ICON share-24.svg [242,624 24x24] (tabler-icon-share)
+  FRAME "Blog Post" [0,660 393x529] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b1,l0 flex=col pad=12,0,12,0 gap=12 align=center clip
+    FRAME "Combo" [0,672 393x60] flex=col gap=4 align=center fill=w
+      FRAME "Liked By" [0,672 393x24] flex=row pad=0,16,0,16 gap=189 justify=space_between align=center fill=w
+        FRAME "Frame 34" [16,672 142x24] flex=row gap=4 align=center
+          ICON group-12-56.svg [16,672 56x24] (Group 12)
+          TEXT "12 friends liked" Inter 400 12/16.8 ls-0.2 #000000 [76,675.5 82x17]
+      FRAME "Username / More" [16,700 361x32] flex=row gap=189 justify=space_between align=center
+        FRAME "Frame 34" [16,700 146x32] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [16,700 32x32] bg=#5B5B5B
+          FRAME "Frame 33" [57,707.5 105x17] flex=row gap=8 align=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [57,707.5 67x17]
+            CIRCLE "Ellipse 7" [132,714 4x4] bg=#5B5B5B
+            TEXT "2d" Inter 500 14/16.8 ls-0.3 #000000 [144,707.5 18x17]
+        FRAME "Frame 633" [274,703.5 103x25] flex=row gap=12 justify=max align=center
+          FRAME "Frame 632" [274,703.5 67x25] bg=#2043F5 radius=4 flex=row pad=4,16,4,16 gap=10 justify=center align=center
+            TEXT "Follow" Inter 400 12/16.8 ls-0.2 #FFFFFF [290,707.5 35x17]
+          ICON dots-three-vertical-24.svg [353,704 24x24] (Frame 83)
+    FRAME "Frame 630" [0,744 393x50] flex=row pad=8,16,8,16 gap=10 justify=center align=center fill=w
+      TEXT "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse " Inter 400 14/16.8 ls-0.3 #000000 [16,752 361x34]
+    FRAME "Post" [0,806 393x335] bg=#1E1E1E flex=row pad=12,16,8,16 gap=261 justify=space_between align=max fill=w clip
+      FRAME "Frame 631" [16,1109 361x24] flex=row gap=285 justify=space_between align=max fill=w
+        FRAME "Frame 13" [16,1125 50x8] bg=#5B5B5B radius=99 flex=row pad=2,4,2,4 gap=2 align=center
+          CIRCLE "Ellipse 18" [20,1127 4x4] bg=#D9D9D9
+          CIRCLE "Ellipse 19" [26,1127 4x4] bg=#D9D9D9
+          RECT "Rectangle 130" [32,1127 24x4] bg=#0D0D0D radius=21
+          CIRCLE "Ellipse 20" [58,1127 4x4] bg=#D9D9D9
+        ICON view-products-24.svg [353,1109 24x24] (View Products)
+    FRAME "Interactives" [16,1153 361x24] flex=row gap=89 justify=space_between align=center
+      FRAME "Frame 55" [16,1153 250x24] flex=row gap=24 align=center
+        FRAME "Frame 37" [16,1153 57x24] flex=row gap=8 align=center
+          ICON heart-24-alt.svg [16,1153 24x24] (tabler-icon-heart)
+          TEXT "100" Inter 500 14/16.8 ls-0.3 #000000 [48,1156.5 25x17]
+        FRAME "Frame 36" [97,1153 47x24] flex=row gap=8 align=center
+          ICON brand-line-24.svg [97,1153 24x24] (tabler-icon-brand-line)
+          TEXT "21" Inter 500 14/16.8 ls-0.3 #000000 [129,1156.5 15x17]
+        FRAME "Frame 38" [168,1153 50x24] flex=row gap=8 align=center
+          ICON refresh-24.svg [168,1153 24x24] (tabler-icon-refresh)
+          TEXT "20" Inter 500 14/16.8 ls-0.3 #000000 [200,1156.5 18x17]
+        ICON share-24.svg [242,1153 24x24] (tabler-icon-share)
+  FRAME "Blog Post" [0,1467 393x574] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b1,l0 flex=col pad=12,0,12,0 gap=8 align=center clip
+    FRAME "Combo" [0,1479 393x32] flex=col gap=4 align=center fill=w
+      FRAME "Username / More" [16,1479 361x32] flex=row gap=189 justify=space_between align=center
+        FRAME "Frame 34" [16,1479 146x32] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [16,1479 32x32] bg=#5B5B5B
+          FRAME "Frame 33" [57,1486.5 105x17] flex=row gap=8 align=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [57,1486.5 67x17]
+            CIRCLE "Ellipse 7" [132,1493 4x4] bg=#5B5B5B
+            TEXT "2d" Inter 500 14/16.8 ls-0.3 #000000 [144,1486.5 18x17]
+        ICON dots-three-vertical-24.svg [353,1483 24x24] (Frame 83)
+    FRAME "Frame 630" [0,1519 393x135] flex=row pad=8,16,8,16 gap=10 justify=center align=center fill=w
+      TEXT "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse image scale. Flows duplicate shadow outline variant rectangle comment edit. Distribute slice overflow layer overflow layer vertical star follower. Connection content export list draft plugin export rotate shadow figma. Select text flatten slice image follower flows. Duplicate object content export slice align." Inter 400 13/16.9 ls-0.3 #000000 [16,1527 361x119]
+    FRAME "Post" [0,1662 393x335] bg=#1E1E1E flex=row pad=12,16,8,16 gap=261 justify=space_between align=max fill=w clip
+      FRAME "Frame 631" [16,1965 369x24] flex=row gap=285 justify=space_between align=max
+        FRAME "Frame 12" [16,1981 50x8] bg=#5B5B5B radius=99 flex=row pad=2,4,2,4 gap=2 align=center
+          CIRCLE "Ellipse 18" [20,1983 4x4] bg=#D9D9D9
+          CIRCLE "Ellipse 19" [26,1983 4x4] bg=#D9D9D9
+          RECT "Rectangle 130" [32,1983 24x4] bg=#0D0D0D radius=21
+          CIRCLE "Ellipse 20" [58,1983 4x4] bg=#D9D9D9
+        ICON view-products-24.svg [361,1965 24x24] (View Products)
+    FRAME "Interactives" [16,2005 361x24] flex=row gap=89 justify=space_between align=center
+      FRAME "Frame 55" [16,2005 250x24] flex=row gap=24 align=center
+        FRAME "Frame 37" [16,2005 57x24] flex=row gap=8 align=center
+          ICON heart-24-alt.svg [16,2005 24x24] (tabler-icon-heart)
+          TEXT "100" Inter 500 14/16.8 ls-0.3 #000000 [48,2008.5 25x17]
+        FRAME "Frame 36" [97,2005 47x24] flex=row gap=8 align=center
+          ICON brand-line-24.svg [97,2005 24x24] (tabler-icon-brand-line)
+          TEXT "21" Inter 500 14/16.8 ls-0.3 #000000 [129,2008.5 15x17]
+        FRAME "Frame 38" [168,2005 50x24] flex=row gap=8 align=center
+          ICON refresh-24.svg [168,2005 24x24] (tabler-icon-refresh)
+          TEXT "20" Inter 500 14/16.8 ls-0.3 #000000 [200,2008.5 18x17]
+        ICON share-24.svg [242,2005 24x24] (tabler-icon-share)
+  FRAME "Blog Post" [0,2041 393x574] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b1,l0 flex=col pad=12,0,12,0 gap=8 align=center clip
+    FRAME "Combo" [0,2053 393x32] flex=col gap=4 align=center fill=w
+      FRAME "Username / More" [16,2053 361x32] flex=row gap=189 justify=space_between align=center
+        FRAME "Frame 34" [16,2053 146x32] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [16,2053 32x32] bg=#5B5B5B
+          FRAME "Frame 33" [57,2060.5 105x17] flex=row gap=8 align=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [57,2060.5 67x17]
+            CIRCLE "Ellipse 7" [132,2067 4x4] bg=#5B5B5B
+            TEXT "2d" Inter 500 14/16.8 ls-0.3 #000000 [144,2060.5 18x17]
+        ICON dots-three-vertical-24.svg [353,2057 24x24] (Frame 83)
+    FRAME "Frame 630" [0,2093 393x135] flex=row pad=8,16,8,16 gap=10 justify=center align=center fill=w
+      TEXT "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse image scale. Flows duplicate shadow outline variant rectangle comment edit. Distribute slice overflow layer overflow layer vertical star follower. Connection content export list draft plugin export rotate shadow figma. Select text flatten slice image follower flows. Duplicate object content export slice align." Inter 400 13/16.9 ls-0.3 #000000 [16,2101 361x119]
+    FRAME "Post" [0,2236 393x335] bg=#1E1E1E flex=row pad=12,12,8,12 gap=261 justify=space_between align=max fill=w clip
+      FRAME "Frame 631" [12,2539 369x24] flex=row gap=285 justify=space_between align=max
+        FRAME "Frame 12" [12,2555 50x8] bg=#5B5B5B radius=99 flex=row pad=2,4,2,4 gap=2 align=center
+          CIRCLE "Ellipse 18" [16,2557 4x4] bg=#D9D9D9
+          CIRCLE "Ellipse 19" [22,2557 4x4] bg=#D9D9D9
+          RECT "Rectangle 130" [28,2557 24x4] bg=#0D0D0D radius=21
+          CIRCLE "Ellipse 20" [54,2557 4x4] bg=#D9D9D9
+        ICON view-products-24.svg [357,2539 24x24] (View Products)
+    FRAME "Interactives" [16,2579 361x24] flex=row gap=89 justify=space_between align=center
+      FRAME "Frame 55" [16,2579 250x24] flex=row gap=24 align=center
+        FRAME "Frame 37" [16,2579 57x24] flex=row gap=8 align=center
+          ICON heart-24-alt.svg [16,2579 24x24] (tabler-icon-heart)
+          TEXT "100" Inter 500 14/16.8 ls-0.3 #000000 [48,2582.5 25x17]
+        FRAME "Frame 36" [97,2579 47x24] flex=row gap=8 align=center
+          ICON brand-line-24.svg [97,2579 24x24] (tabler-icon-brand-line)
+          TEXT "21" Inter 500 14/16.8 ls-0.3 #000000 [129,2582.5 15x17]
+        FRAME "Frame 38" [168,2579 50x24] flex=row gap=8 align=center
+          ICON refresh-24.svg [168,2579 24x24] (tabler-icon-refresh)
+          TEXT "20" Inter 500 14/16.8 ls-0.3 #000000 [200,2582.5 18x17]
+        ICON share-24.svg [242,2579 24x24] (tabler-icon-share)
+  FRAME "Frame 613" [0,2616 393x94] bg=#FFFFFF flex=col background_blur=100
+    FRAME "Navbar" [0,2616 393x60] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 fill=w shadow=#000000@0.04 0,2 blur4 shadow=#000000@0.12 0,8 blur16 spread12 clip
+      FRAME "Frame 81" [16,2628 361x44] flex=row gap=44 justify=space_between align=center fill=w
+        ICON home-33.svg [16,2636 33x28] (Home)
+        ICON flips-34-alt-alt.svg [81.3,2638 34x24] (Flips)
+        FRAME "Search" [147.5,2628 83x44] bg=#2043F5 radius=999 flex=col pad=8,12,8,12 gap=2 justify=center align=center
+          ICON plus-28.svg [175,2636 28x28] (Plus)
+        ICON chat-37-alt-alt.svg [262.8,2638 37x24] (Chat)
+        FRAME "User Profile" [332,2636 45x28] flex=col gap=2 justify=center align=center
+          FRAME "Frame 302" [340.5,2636 28x28] bg=image:avatar-placeholder.jpg radius=50 fill=h
+  FRAME "Frame 715" [0,94 393x49] bg=#FFFFFF flex=row pad=12,0,12,16 gap=8
+    FRAME "Frame 718" [16,106 74x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+      TEXT "For You" Inter 500 13/16.9 ls-0.3 #000000 [20,110 46x17]
+      REGULAR_POLYGON "Polygon 1" [74,112.5 12x12] bg=#000000 radius=1
+    FRAME "Frame 719" [98,106 75x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Computing" Inter 500 13/16.9 ls-0.3 #5B5B5B [102,110 67x17]
+    FRAME "Frame 720" [181,106 78x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Technology" Inter 500 13/16.9 ls-0.3 #5B5B5B [185,110 70x17]
+    FRAME "Frame 721" [267,106 74x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Blockchain" Inter 500 13/16.9 ls-0.3 #5B5B5B [271,110 66x17]
+    FRAME "Frame 722" [349,106 48x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Health" Inter 500 13/16.9 ls-0.3 #5B5B5B [353,110 40x17]
+  FRAME "Frame 397" [0,54 393x40] bg=#FFFFFF flex=row pad=8,16,8,16 gap=81 justify=space_between align=center
+    FRAME "Frame 640" [16,63 90x22] flex=row gap=8 align=center
+      TEXT "Feed" Inter 600 18/21.6 ls-0.4 #2043F5 [16,63 42x22]
+      TEXT "Mart" Inter 500 18/21.6 ls-0.4 #909090 [66,63 40x22]
+    FRAME "Frame 430" [313,62 64x24] flex=row gap=16 align=center
+      ICON magnifying-glass-24.svg [313,62 24x24] (MagnifyingGlass)
+      ICON bell-24.svg [353,62 24x24] (Bell)
+  FRAME "Frame 467" [0,0 393x2710] bg=#000000 opacity=0.5
+  INST "Price in post Popup" [11,2279 372x383] bg=#FFFFFF radius=16 clip
+    FRAME "Frame 464" [16,2331 361x244] flex=col gap=12
+      FRAME "Frame 459" [16,2331 361x52] flex=col pad=0,4,0,4 gap=9 fill=w
+        FRAME "Frame 458" [20,2331 353x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [20,2331 40x40] bg=#5B5B5B radius=4
+          FRAME "Frame 457" [68,2342.5 305x17] flex=row gap=153 justify=space_between align=center fill=w
+            TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [68,2342.5 221x17]
+            TEXT "N20,000" Inter 600 14/16.8 ls-0.3 #000000 [314,2342.5 59x17]
+        LINE "Line 20" [20,2380 353x0] border=#D9D9D9/1/center fill=w stroke=#D9D9D9/1
+      FRAME "Frame 477" [16,2395 361x52] flex=col pad=0,4,0,4 gap=9 fill=w
+        FRAME "Frame 458" [20,2395 353x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [20,2395 40x40] bg=#5B5B5B radius=4
+          FRAME "Frame 457" [68,2406.5 305x17] flex=row gap=153 justify=space_between align=center fill=w
+            TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [68,2406.5 221x17]
+            TEXT "N20,000" Inter 600 14/16.8 ls-0.3 #000000 [314,2406.5 59x17]
+        LINE "Line 20" [20,2444 353x0] border=#D9D9D9/1/center fill=w stroke=#D9D9D9/1
+      FRAME "Frame 478" [16,2459 361x52] flex=col pad=0,4,0,4 gap=9 fill=w
+        FRAME "Frame 458" [20,2459 353x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [20,2459 40x40] bg=#5B5B5B radius=4
+          FRAME "Frame 457" [68,2470.5 305x17] flex=row gap=153 justify=space_between align=center fill=w
+            TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [68,2470.5 221x17]
+            TEXT "N20,000" Inter 600 14/16.8 ls-0.3 #000000 [314,2470.5 59x17]
+        LINE "Line 20" [20,2508 353x0] border=#D9D9D9/1/center fill=w stroke=#D9D9D9/1
+      FRAME "Frame 476" [16,2523 361x52] flex=col pad=0,4,0,4 gap=9 fill=w
+        FRAME "Frame 458" [20,2523 353x40] flex=row gap=8 justify=center align=center fill=w
+          RECT "Rectangle 137" [20,2523 40x40] bg=#5B5B5B radius=4
+          FRAME "Frame 457" [68,2534.5 305x17] flex=row gap=153 justify=space_between align=center fill=w
+            TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [68,2534.5 221x17]
+            TEXT "N20,000" Inter 600 14/16.8 ls-0.3 #000000 [314,2534.5 59x17]
+        LINE "Line 20" [20,2572 353x0] border=#D9D9D9/1/center fill=w stroke=#D9D9D9/1
+    FRAME "Frame 397" [16,2591 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=4 justify=center align=center
+      TEXT "Send Code" Inter 500 14/16.8 ls-0.3 #FFFFFF [160.5,2604.5 72x17]
+    FRAME "Frame 465" [24,2295 345x20] flex=row gap=258 justify=space_between
+      TEXT "In this post" Inter 600 16/19.2 ls-0.3 #000000 [24,2295 83x19]
+      ICON cancel-20.svg [349,2295 20x20] (Cancel)

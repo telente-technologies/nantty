@@ -1,0 +1,16 @@
+# Live / Live Ended  (node 743:4118, 393x852, reference: screens/live__live-ended__743-4118.png)
+FRAME "Live Ended" [0,0 393x852] bg=#FFFFFF clip
+  ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+  ICON dots-three-vertical-24.svg [353,66 24x24] (DotsThreeVertical)
+  FRAME "Frame 591" [109,323 176x124] flex=col gap=12 align=center
+    CIRCLE "Ellipse 6" [161,323 72x72] bg=#5B5B5B
+    FRAME "Frame 590" [109,407 176x40] flex=col gap=4 align=center fill=w
+      TEXT "Username" Inter 600 16/19.2 ls-0.3 #000000 [158.5,407 77x19]
+      TEXT "Live Ended" Inter 400 14/16.8 ls-0.3 #000000 [161.5,430 71x17]
+  INST "Navbar" [0,778 393x40] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 clip
+    FRAME "Frame 82" [16,790 361x24] flex=row gap=44 justify=space_between align=center fill=w
+      ICON home-33-alt.svg [16,790 33x24] (Home)
+      ICON search-46-alt.svg [90.5,790 46x24] (Search)
+      ICON flips-34-alt.svg [178,790 34x24] (Flips)
+      ICON chat-37-alt.svg [253.5,790 37x24] (Chat)
+      ICON user-profile-45-alt.svg [332,790 45x24] (User Profile)

@@ -1,0 +1,23 @@
+# Post  (node 1829:6011, 393x852, reference: screens/misc__post__1829-6011.png)
+FRAME "Post" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x49] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 88x25] flex=row gap=24 align=center
+      ICON cancel-20.svg [16,68.5 20x20] (Cancel)
+      TEXT "Post" Inter 500 21/25.2 ls-0.4 #000000 [60,66 44x25]
+    TEXT "Next" Inter 500 14/16.8 ls-0.3 #000000 [346,70 31x17]
+  TEXT "What’s happening?" Inter 400 16/19.2 ls-0.3 #5B5B5B [16,135 138x19]
+  FRAME "Frame 785" [0,424 393x42] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=row pad=8,16,8,16 gap=24 justify=space_between align=center
+    FRAME "Frame 786" [16,433.5 168x24] flex=row gap=24 align=center
+      ICON camera-24.svg [16,433.5 24x24] (Camera)
+      ICON image-square-24.svg [64,433.5 24x24] (ImageSquare)
+      ICON sliders-horizontal-24.svg [112,433.5 24x24] (SlidersHorizontal)
+      ICON map-pin-24.svg [160,433.5 24x24] (MapPin)
+    FRAME "Frame 718" [292,433 85x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=max
+      TEXT "Everyone" Inter 500 13/16.9 ls-0.3 #000000 [296,437 57x17]
+      REGULAR_POLYGON "Polygon 1" [361,442 12x12] bg=#000000 radius=1
+  FRAME "Frame 774" [0,466 393x50] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,474 361x34] flex=row gap=12 align=center fill=w
+      FRAME "Frame 302" [16,475 32x32] bg=image:avatar-placeholder.jpg radius=50
+      FRAME "Frame 542" [60,474 317x34] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=4,12,4,12 gap=164 justify=space_between align=center fill=w clip
+        TEXT "Add comment..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [73,482.5 94x17]
+        ICON gif-24.svg [340,479 24x24] (Gif)

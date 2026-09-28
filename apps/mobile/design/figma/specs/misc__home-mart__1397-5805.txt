@@ -1,0 +1,126 @@
+# Home (Mart)  (node 1397:5805, 393x2300, reference: screens/misc__home-mart__1397-5805.png)
+FRAME "Home (Mart)" [0,0 393x2300] bg=#FFFFFF clip
+  FRAME "Frame 87" [12,150 369x120] bg=#D9D9D9 radius=4
+  FRAME "Frame 493" [0,581 193x273] flex=col gap=8
+    FRAME "Frame 475" [0,581 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,816 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,816 177x17]
+      FRAME "Frame 634" [8,837 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,837 56x17]
+        ICON plus-16.svg [169,837.5 16x16] (Plus)
+  FRAME "Frame 504" [0,1380 193x273] flex=col gap=8
+    FRAME "Frame 475" [0,1380 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,1615 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,1615 177x17]
+      FRAME "Frame 634" [8,1636 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,1636 56x17]
+        ICON plus-16.svg [169,1636.5 16x16] (Plus)
+  FRAME "Frame 496" [0,862 193x273] flex=col gap=8
+    FRAME "Frame 475" [0,862 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,1097 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,1097 177x17]
+      FRAME "Frame 634" [8,1118 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,1118 56x17]
+        ICON plus-16.svg [169,1118.5 16x16] (Plus)
+  FRAME "Frame 505" [0,1661 193x273] flex=col gap=8
+    FRAME "Frame 475" [0,1661 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,1896 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,1896 177x17]
+      FRAME "Frame 634" [8,1917 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,1917 56x17]
+        ICON plus-16.svg [169,1917.5 16x16] (Plus)
+  FRAME "Frame 498" [201,1055 193x273] flex=col gap=8
+    FRAME "Frame 475" [201,1055 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [201,1290 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [209,1290 177x17]
+      FRAME "Frame 634" [209,1311 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [209,1311 56x17]
+        ICON plus-16.svg [370,1311.5 16x16] (Plus)
+  FRAME "Frame 506" [200,1810 193x273] flex=col gap=8
+    FRAME "Frame 475" [200,1810 193x227] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [200,2045 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [208,2045 177x17]
+      FRAME "Frame 634" [208,2066 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [208,2066 56x17]
+        ICON plus-16.svg [369,2066.5 16x16] (Plus)
+  FRAME "Frame 495" [201,581 193x229] flex=col gap=8
+    FRAME "Frame 475" [201,581 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [201,772 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [209,772 177x17]
+      FRAME "Frame 634" [209,793 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [209,793 56x17]
+        ICON plus-16.svg [370,793.5 16x16] (Plus)
+  FRAME "Frame 507" [201,1336 193x229] flex=col gap=8
+    FRAME "Frame 475" [201,1336 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [201,1527 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [209,1527 177x17]
+      FRAME "Frame 634" [209,1548 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [209,1548 56x17]
+        ICON plus-16.svg [370,1548.5 16x16] (Plus)
+  FRAME "Frame 497" [201,818 193x229] flex=col gap=8
+    FRAME "Frame 475" [201,818 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [201,1009 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [209,1009 177x17]
+      FRAME "Frame 634" [209,1030 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [209,1030 56x17]
+        ICON plus-16.svg [370,1030.5 16x16] (Plus)
+  FRAME "Frame 508" [201,1573 193x229] flex=col gap=8
+    FRAME "Frame 475" [201,1573 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [201,1764 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [209,1764 177x17]
+      FRAME "Frame 634" [209,1785 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [209,1785 56x17]
+        ICON plus-16.svg [370,1785.5 16x16] (Plus)
+  FRAME "Frame 499" [0,1143 193x229] flex=col gap=8
+    FRAME "Frame 475" [0,1143 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,1334 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,1334 177x17]
+      FRAME "Frame 634" [8,1355 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,1355 56x17]
+        ICON plus-16.svg [169,1355.5 16x16] (Plus)
+  FRAME "Frame 509" [0,1942 193x229] flex=col gap=8
+    FRAME "Frame 475" [0,1942 193x183] bg=#D9D9D9 radius=4 fill=w
+    FRAME "PriceTag" [0,2133 193x38] flex=col pad=0,8,0,8 gap=4
+      TEXT "Product Name" Inter 400 12/16.8 ls-0.2 #000000 [8,2133 177x17]
+      FRAME "Frame 634" [8,2154 177x17] flex=row gap=113 justify=space_between align=center fill=w
+        TEXT "$200.00" Inter 500 14/16.8 ls-0.3 #000000 [8,2154 56x17]
+        ICON plus-16.svg [169,2154.5 16x16] (Plus)
+  FRAME "Feed (Mart)" [12,106 369x32] bg=#FFFFFF border=#000000/1 radius=6 clip
+    ICON magnifying-glass-16-alt.svg [24,114 16x16] (MagnifyingGlass)
+    TEXT "Search for anything..." Inter 400 12/16.8 ls-0.2 #909090 [52,114 116x17]
+  FRAME "Frame 716" [0,458 411x135] bg=#FFFFFF flex=row pad=98,12,12,12 gap=12 clip
+    FRAME "Frame 718" [12,556 24x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+      TEXT "All" Inter 500 13/16.9 ls-0.3 #000000 [16,560 16x17]
+    FRAME "Frame 719" [48,556 56x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Fashion" Inter 500 13/16.9 ls-0.3 #5B5B5B [52,560 48x17]
+    FRAME "Frame 721" [116,556 35x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Kids" Inter 500 13/16.9 ls-0.3 #5B5B5B [120,560 27x17]
+    FRAME "Frame 720" [163,556 149x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Beauty & Personal Care" Inter 500 13/16.9 ls-0.3 #5B5B5B [167,560 141x17]
+    FRAME "Frame 722" [324,556 75x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Appliances" Inter 500 13/16.9 ls-0.3 #5B5B5B [328,560 67x17]
+  FRAME "Frame 713" [12,282 369x240] flex=row gap=7 justify=space_between align=center
+    FRAME "Frame 501" [12,282 181x240] bg=#D9D9D9 radius=4 clip
+      TEXT "Sales of the Day" Inter 500 11/15.4 #000000 [22,291 86x15]
+    FRAME "Frame 712" [201,282 180x240] flex=col gap=8
+      FRAME "Frame 502" [201,282 180x116] bg=#D9D9D9 radius=4 fill=w clip
+        TEXT "Featured Brands" Inter 500 11/15.4 #000000 [213,294 87x15]
+      FRAME "Frame 503" [201,406 180x116] bg=#D9D9D9 radius=4 fill=w clip
+        TEXT "New Arrivals" Inter 500 11/15.4 #000000 [213,418 67x15]
+  FRAME "Frame 397" [0,54 393x40] bg=#FFFFFF flex=row pad=8,16,8,16 gap=81 justify=space_between align=center
+    FRAME "Frame 640" [16,63 91x22] flex=row gap=8 align=center
+      TEXT "Feed" Inter 500 18/21.6 ls-0.4 #909090 [16,63 42x22]
+      TEXT "Mart" Inter 600 18/21.6 ls-0.4 #2043F5 [66,63 41x22]
+    FRAME "Frame 430" [313,62 64x24] flex=row gap=16 align=center
+      ICON magnifying-glass-24.svg [313,62 24x24] (MagnifyingGlass)
+      ICON bell-24.svg [353,62 24x24] (Bell)
+  FRAME "Frame 717" [0,2206 393x94] bg=#FFFFFF flex=col background_blur=100
+    FRAME "Navbar" [0,2206 393x60] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 fill=w shadow=#000000@0.04 0,2 blur4 shadow=#000000@0.12 0,8 blur16 spread12 clip
+      FRAME "Frame 81" [16,2218 361x44] flex=row gap=44 justify=space_between align=center fill=w
+        ICON home-33.svg [16,2226 33x28] (Home)
+        ICON flips-34-alt-alt.svg [81.3,2228 34x24] (Flips)
+        FRAME "Search" [147.5,2218 83x44] bg=#2043F5 radius=999 flex=col pad=8,12,8,12 gap=2 justify=center align=center
+          ICON plus-28.svg [175,2226 28x28] (Plus)
+        ICON chat-37-alt-alt.svg [262.8,2228 37x24] (Chat)
+        FRAME "User Profile" [332,2226 45x28] flex=col gap=2 justify=center align=center
+          FRAME "Frame 302" [340.5,2226 28x28] bg=image:avatar-placeholder.jpg radius=50 fill=h

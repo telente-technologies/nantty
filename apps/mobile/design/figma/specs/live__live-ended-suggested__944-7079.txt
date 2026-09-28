@@ -1,0 +1,25 @@
+# Live / Live Ended (Suggested)  (node 944:7079, 393x1413, reference: screens/live__live-ended-suggested__944-7079.png)
+FRAME "Live Ended (Suggested)" [0,0 393x1413] bg=#FFFFFF clip
+  FRAME "Frame 640" [109,1190.5 176x124] flex=col gap=12 align=center
+    CIRCLE "Ellipse 6" [161,1190.5 72x72] bg=#5B5B5B
+    FRAME "Frame 590" [109,1274.5 176x40] flex=col gap=4 align=center fill=w
+      TEXT "Username" Inter 600 16/19.2 ls-0.3 #000000 [158.5,1274.5 77x19]
+      TEXT "Live Ended" Inter 400 14/16.8 ls-0.3 #000000 [161.5,1297.5 71x17]
+  FRAME "Frame 666" [16,0 361x425] flex=col pad=66,0,0,0 gap=213 align=center
+    FRAME "Frame 665" [16,66 361x24] flex=row gap=313 justify=space_between align=center fill=w
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      ICON dots-three-vertical-24.svg [353,66 24x24] (DotsThreeVertical)
+    FRAME "Frame 639" [108.5,303 176x122] flex=col gap=12 align=center
+      CIRCLE "Ellipse 6" [160.5,303 72x72] bg=#5B5B5B
+      FRAME "Frame 590" [108.5,387 176x38] flex=col gap=4 align=center fill=w
+        TEXT "Username" Inter 600 14/16.8 ls-0.3 #000000 [162.5,387 68x17]
+        TEXT "Live Ended" Inter 400 13/16.9 ls-0.3 #000000 [163.5,408 66x17]
+  FRAME "Frame 638" [0.5,447 393x932] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r1,b0,l1 radius=20,20,0,0 clip
+    RECT "Clip 2" [16,522 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Clip 3" [201,522 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Clip 4" [16,784.4 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Clip 5" [201,784.4 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Clip 6" [16,1046.9 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Clip 7" [201,1046.9 177x254.4] bg=#D9D9D9 radius=8
+    RECT "Rectangle 159" [174,459 46x4] bg=#000000 radius=99
+    TEXT "Suggested Live" Inter 600 16/19.2 ls-0.3 #000000 [16.5,487 116x19]

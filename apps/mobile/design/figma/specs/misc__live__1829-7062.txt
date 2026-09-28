@@ -1,0 +1,16 @@
+# Live  (node 1829:7062, 393x852, reference: screens/misc__live__1829-7062.png)
+FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 467" [0,0 393x852] bg=#000000 opacity=0.5
+  FRAME "Frame 782" [0,54 393x48] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 71x24] flex=row gap=16 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      FRAME "Frame 647" [56,68.5 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+        TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [60,70.5 23x15]
+  FRAME "Frame 798" [16,122 58x25] flex=row align=center
+    VECTOR "Line 26" [16.5,122 0x25] border=#2043F5/1.5/center fill=wh
+    TEXT "Title..." Inter 400 21/25.2 ls-0.4 #D9D9D9 [17,122 58x25]
+  FRAME "Frame 774" [0,466 393x50] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,474 361x34] flex=row gap=12 align=center fill=w
+      FRAME "Frame 302" [16,475 32x32] bg=image:avatar-placeholder.jpg radius=50
+      FRAME "Frame 542" [60,474 317x34] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=4,12,4,12 gap=164 justify=space_between align=center fill=w clip
+        TEXT "Add comment..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [73,482.5 94x17]

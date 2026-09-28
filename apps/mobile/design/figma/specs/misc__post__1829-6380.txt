@@ -1,0 +1,28 @@
+# Post  (node 1829:6380, 393x852, reference: screens/misc__post__1829-6380.png)
+FRAME "Post" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x49] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 88x25] flex=row gap=24 align=center
+      ICON cancel-20.svg [16,68.5 20x20] (Cancel)
+      TEXT "Post" Inter 500 21/25.2 ls-0.4 #000000 [60,66 44x25]
+    TEXT "Next" Inter 500 14/16.8 ls-0.3 #000000 [346,70 31x17]
+  TEXT "What’s happening?" Inter 400 16/19.2 ls-0.3 #5B5B5B [16,135 138x19]
+  FRAME "Frame 785" [0,727 393x42] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=row pad=8,16,8,16 gap=24 justify=space_between align=center
+    FRAME "Frame 786" [16,736.5 168x24] flex=row gap=24 align=center
+      ICON camera-24.svg [16,736.5 24x24] (Camera)
+      ICON image-square-24.svg [64,736.5 24x24] (ImageSquare)
+      ICON sliders-horizontal-24.svg [112,736.5 24x24] (SlidersHorizontal)
+      ICON map-pin-24.svg [160,736.5 24x24] (MapPin)
+    FRAME "Frame 718" [292,736 85x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=max
+      TEXT "Everyone" Inter 500 13/16.9 ls-0.3 #000000 [296,740 57x17]
+      REGULAR_POLYGON "Polygon 1" [361,745 12x12] bg=#000000 radius=1
+  FRAME "Frame 787" [83,674 228x33] bg=#909090 radius=999 flex=row pad=8,12,8,12 gap=12 align=center
+    TEXT "STORY" Inter 500 13/16.9 ls-0.3 #5B5B5B [95,682 43x17]
+    TEXT "POST" Inter 500 13/16.9 ls-0.3 #000000 [150,682 35x17]
+    TEXT "PRODUCT" Inter 500 13/16.9 ls-0.3 #5B5B5B [197,682 63x17]
+    TEXT "LIVE" Inter 500 13/16.9 ls-0.3 #5B5B5B [272,682 27x17]
+  FRAME "Frame 774" [0,769 393x50] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,777 361x34] flex=row gap=12 align=center fill=w
+      FRAME "Frame 302" [16,778 32x32] bg=image:avatar-placeholder.jpg radius=50
+      FRAME "Frame 542" [60,777 317x34] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=4,12,4,12 gap=164 justify=space_between align=center fill=w clip
+        TEXT "Add comment..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [73,785.5 94x17]
+        ICON gif-24.svg [340,782 24x24] (Gif)

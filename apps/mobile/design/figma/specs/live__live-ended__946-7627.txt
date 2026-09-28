@@ -1,0 +1,9 @@
+# Live / Live Ended  (node 946:7627, 393x852, reference: screens/live__live-ended__946-7627.png)
+FRAME "Live Ended" [0,0 393x852] bg=#FFFFFF clip
+  ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+  ICON dots-three-vertical-24.svg [353,66 24x24] (DotsThreeVertical)
+  FRAME "Frame 591" [109,323 176x124] flex=col gap=12 align=center
+    CIRCLE "Ellipse 6" [161,323 72x72] bg=#5B5B5B
+    FRAME "Frame 590" [109,407 176x40] flex=col gap=4 align=center fill=w
+      TEXT "Username" Inter 500 16/19.2 ls-0.3 #000000 [159,407 76x19]
+      TEXT "Live Ended" Inter 400 14/16.8 ls-0.3 #000000 [161.5,430 71x17]
