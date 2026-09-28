@@ -1,0 +1,676 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String?   @unique
+  phone           String?   @unique
+  username        String    @unique
+  passwordHash    String?
+  name            String    @default("")
+  bio             String    @default("")
+  avatarUrl       String?
+  bannerUrl       String?
+  birthday        DateTime? @db.Date
+  roles           String[]
+  status          String    @default("active")
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  settings        Json      @default("{}")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model AuthIdentity {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String
+  subject   String
+  createdAt DateTime @default(now())
+
+  @@unique([provider, subject])
+  @@index([userId])
+  @@map("auth_identities")
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  createdAt        DateTime  @default(now())
+  lastUsedAt       DateTime  @default(now())
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revokedReason    String?
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model OtpCode {
+  id         String    @id @default(uuid())
+  target     String
+  purpose    String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([target, purpose])
+  @@map("otp_codes")
+}
+
+model Topic {
+  id    String @id @default(uuid())
+  slug  String @unique
+  name  String
+  order Int    @default(0)
+
+  @@map("topics")
+}
+
+model UserTopic {
+  userId  String
+  topicId String
+
+  @@id([userId, topicId])
+  @@map("user_topics")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  label      String   @default("")
+  fullName   String
+  phoneEnc   String
+  line1      String
+  line2      String   @default("")
+  city       String
+  state      String
+  country    String   @default("NG")
+  postalCode String   @default("")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Block {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@map("blocks")
+}
+
+model Follow {
+  followerId   String
+  followeeType String
+  followeeId   String
+  createdAt    DateTime @default(now())
+
+  @@id([followerId, followeeType, followeeId])
+  @@index([followeeType, followeeId])
+  @@map("follows")
+}
+
+model SellerApplication {
+  id          String    @id @default(uuid())
+  userId      String
+  storeName   String
+  description String    @default("")
+  categoryId  String?
+  phoneEnc    String
+  status      String    @default("pending")
+  reviewerId  String?
+  reviewNote  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@map("seller_applications")
+}
+
+model Store {
+  id             String   @id @default(uuid())
+  ownerId        String
+  name           String
+  slug           String   @unique
+  description    String   @default("")
+  logoUrl        String?
+  bannerUrl      String?
+  status         String   @default("active")
+  featured       Boolean  @default(false)
+  shippingPolicy String   @default("")
+  returnPolicy   String   @default("")
+  shippingFee    BigInt   @default(0)
+  discountBps    Int      @default(0)
+  ratingAvg      Float    @default(0)
+  ratingCount    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("stores")
+}
+
+model StoreMember {
+  storeId   String
+  userId    String
+  role      String
+  createdAt DateTime @default(now())
+
+  @@id([storeId, userId])
+  @@index([userId])
+  @@map("store_members")
+}
+
+model Category {
+  id        String  @id @default(uuid())
+  name      String
+  slug      String  @unique
+  parentId  String?
+  imageUrl  String?
+  sortOrder Int     @default(0)
+
+  @@map("categories")
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  storeId        String
+  categoryId     String?
+  title          String
+  slug           String
+  description    String   @default("")
+  status         String   @default("draft")
+  price          BigInt
+  compareAtPrice BigInt?
+  currency       String   @default("NGN")
+  images         String[]
+  shippingInfo   String   @default("")
+  returnsInfo    String   @default("")
+  featured       Boolean  @default(false)
+  salesCount     Int      @default(0)
+  ratingAvg      Float    @default(0)
+  ratingCount    Int      @default(0)
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([status, createdAt])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  productId String
+  sku       String?
+  size      String?
+  color     String?
+  price     BigInt
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  variantId String
+  quantity  Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, variantId])
+  @@map("cart_items")
+}
+
+model Checkout {
+  id        String   @id @default(uuid())
+  buyerId   String
+  total     BigInt
+  currency  String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@index([buyerId])
+  @@map("checkouts")
+}
+
+model Order {
+  id              String    @id @default(uuid())
+  number          String    @unique
+  checkoutId      String
+  buyerId         String
+  storeId         String
+  status          String
+  currency        String
+  itemsTotal      BigInt
+  discountTotal   BigInt
+  shippingTotal   BigInt
+  total           BigInt
+  shippingAddress Json
+  trackingNumber  String?
+  paidAt          DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  items           OrderItem[]
+
+  @@index([buyerId, createdAt])
+  @@index([storeId, createdAt])
+  @@index([checkoutId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  variantId String
+  title     String
+  size      String?
+  color     String?
+  imageUrl  String?
+  unitPrice BigInt
+  quantity  Int
+  lineTotal BigInt
+  order     Order   @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                    String    @id @default(uuid())
+  checkoutId            String
+  buyerId               String
+  provider              String
+  reference             String    @unique
+  amount                BigInt
+  currency              String
+  status                String    @default("pending")
+  authorizationUrl      String?
+  providerTransactionId String?
+  paidAt                DateTime?
+  refundedAmount        BigInt    @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([checkoutId])
+  @@map("payments")
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid())
+  provider    String
+  eventKey    String
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@unique([provider, eventKey])
+  @@map("webhook_events")
+}
+
+model IdempotencyRecord {
+  id           String   @id @default(uuid())
+  scope        String
+  key          String
+  requestHash  String
+  status       String   @default("in_progress")
+  responseCode Int?
+  responseBody Json?
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  @@unique([scope, key])
+  @@map("idempotency_records")
+}
+
+model Escrow {
+  id           String    @id @default(uuid())
+  orderId      String    @unique
+  paymentId    String
+  storeId      String
+  buyerId      String
+  amount       BigInt
+  currency     String
+  status       String
+  releaseAfter DateTime?
+  heldAt       DateTime  @default(now())
+  releasedAt   DateTime?
+  refundedAt   DateTime?
+  version      Int       @default(0)
+
+  @@index([status, releaseAfter])
+  @@index([storeId])
+  @@map("escrows")
+}
+
+model Dispute {
+  id           String    @id @default(uuid())
+  escrowId     String
+  orderId      String
+  openedById   String
+  reason       String
+  details      String    @default("")
+  status       String    @default("open")
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([escrowId])
+  @@map("disputes")
+}
+
+model LedgerAccount {
+  id            String   @id @default(uuid())
+  key           String   @unique
+  ownerType     String
+  ownerId       String?
+  kind          String
+  currency      String
+  balance       BigInt   @default(0)
+  allowNegative Boolean  @default(false)
+  version       Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@map("ledger_accounts")
+}
+
+model LedgerTransaction {
+  id          String        @id @default(uuid())
+  reference   String        @unique
+  kind        String
+  description String        @default("")
+  createdAt   DateTime      @default(now())
+  entries     LedgerEntry[]
+
+  @@map("ledger_transactions")
+}
+
+model LedgerEntry {
+  id            String            @id @default(uuid())
+  transactionId String
+  accountId     String
+  direction     String
+  amount        BigInt
+  balanceAfter  BigInt
+  createdAt     DateTime          @default(now())
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  @@index([accountId, createdAt])
+  @@map("ledger_entries")
+}
+
+model PayoutAccount {
+  id               String   @id @default(uuid())
+  storeId          String
+  bankCode         String
+  bankName         String
+  accountNumberEnc String
+  accountLast4     String
+  accountName      String
+  recipientCode    String?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([storeId])
+  @@map("payout_accounts")
+}
+
+model Withdrawal {
+  id              String    @id @default(uuid())
+  storeId         String
+  payoutAccountId String
+  amount          BigInt
+  currency        String
+  status          String    @default("pending")
+  reference       String    @unique
+  requestedById   String
+  failureReason   String?
+  processedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([storeId, createdAt])
+  @@map("withdrawals")
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  authorId     String
+  storeId      String?
+  kind         String    @default("post")
+  text         String    @default("")
+  media        Json      @default("[]")
+  audience     String    @default("everyone")
+  topics       String[]
+  productIds   String[]
+  repostOfId   String?
+  likeCount    Int       @default(0)
+  commentCount Int       @default(0)
+  repostCount  Int       @default(0)
+  shareCount   Int       @default(0)
+  viewCount    Int       @default(0)
+  expiresAt    DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([authorId, createdAt])
+  @@index([kind, createdAt])
+  @@map("posts")
+}
+
+model PostLike {
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([postId, userId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  postId    String
+  authorId  String
+  parentId  String?
+  text      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([postId, createdAt])
+  @@map("comments")
+}
+
+model LiveSession {
+  id          String    @id @default(uuid())
+  hostId      String
+  storeId     String?
+  title       String
+  status      String    @default("live")
+  viewerCount Int       @default(0)
+  productIds  String[]
+  pinnedId    String?
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+
+  @@index([status, startedAt])
+  @@map("live_sessions")
+}
+
+model LiveViewer {
+  sessionId String
+  userId    String
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+
+  @@id([sessionId, userId])
+  @@map("live_viewers")
+}
+
+model LiveComment {
+  id        String   @id @default(uuid())
+  sessionId String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([sessionId, createdAt])
+  @@map("live_comments")
+}
+
+model FeedInteraction {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  kind      String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([postId])
+  @@map("feed_interactions")
+}
+
+model Review {
+  id        String    @id @default(uuid())
+  productId String
+  storeId   String
+  orderId   String
+  userId    String
+  rating    Int
+  text      String    @default("")
+  reply     String?
+  repliedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, orderId, productId])
+  @@index([productId, createdAt])
+  @@index([storeId, createdAt])
+  @@map("reviews")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  category  String
+  title     String
+  body      String
+  data      Json      @default("{}")
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model Conversation {
+  id            String   @id @default(uuid())
+  kind          String   @default("direct")
+  pairKey       String?  @unique
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+  lastReadAt     DateTime @default(now())
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  text           String
+  media          Json     @default("[]")
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model Media {
+  id          String   @id @default(uuid())
+  ownerId     String
+  key         String   @unique
+  purpose     String
+  contentType String
+  maxBytes    Int
+  size        Int?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  @@index([ownerId])
+  @@map("media")
+}
+
+model WaitlistEntry {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String   @default("")
+  role      String   @default("buyer")
+  source    String   @default("landing")
+  createdAt DateTime @default(now())
+
+  @@map("waitlist_entries")
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json     @default("{}")
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_events")
+}
