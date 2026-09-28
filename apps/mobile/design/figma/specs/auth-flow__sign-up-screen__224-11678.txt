@@ -1,0 +1,27 @@
+# Auth Flow / Sign up Screen  (node 224:11678, 393x852, reference: screens/auth-flow__sign-up-screen__224-11678.png)
+FRAME "Sign up Screen" [0,0 393x852] bg=#FFFFFF clip
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  INST "arrow-left" [16,66 24x24] clip
+    VECTOR "Vector" [21,71 14x14] border=#000000/2/center
+  FRAME "Frame 394" [0,102 393x41] flex=row justify=center align=center
+    FRAME "Frame 392" [16,102 181x41] border=#000000/1 borderSides=t0,r0,b1,l0 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+      TEXT "Phone number" Inter 500 15/21 ls-0.3 #000000 [55.5,112 102x21]
+    FRAME "Frame 393" [197,102 180x41] flex=row pad=10,10,10,10 gap=10 justify=center align=center
+      TEXT "Email / Username" Inter 500 15/21 ls-0.3 #909090 [226.5,112 121x21]
+  FRAME "Frame 396" [24,183 345x44] border=#909090/1 borderSides=t0,r0,b1,l0 flex=row gap=12 align=center
+    FRAME "Frame 395" [24,194.5 84x21] flex=row gap=5 align=center
+      TEXT "NG +234" Inter 500 15/21 ls-0.3 #000000 [24,194.5 63x21]
+      INST "chevron-down" [92,197 16x16] clip
+        VECTOR "Vector" [96,203 8x4] border=#000000/2/center
+    FRAME "Frame 398" [120,194.5 99x21] flex=row align=center
+      TEXT "9077 505 722" Inter 500 15/21 ls-0.3 #000000 [120,194.5 97x21]
+      RECT "Rectangle 133" [217,195 2x20] bg=#1E3A8A
+  GROUP "Group 77" [24,261 349x34]
+    GROUP "Group 78" [24,262 20x20]
+      CIRCLE "Ellipse 28" [24,262 20x20] bg=#1E3A8A
+      VECTOR "Vector 1" [30,269 9x6] border=#FFFFFF/2/center
+    TEXT "Save login info on your device to log in automatically next time." Inter 500 13/16.9 ls-0.3 #909090 [49,261 324x34]
+  FRAME "Frame 397" [24,334 345x44] bg=#1E3A8A radius=8 flex=row pad=10,10,10,10 gap=4 justify=center align=center
+    TEXT "Send Code" Inter 500 15/21 ls-0.3 #FFFFFF [146,345.5 77x21]
+    FRAME "SpinnerGap" [227,346 20x20] clip
+      VECTOR "Vector" [228.6,347.6 16.9x16.9] bg=#FFFFFF

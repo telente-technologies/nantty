@@ -1,0 +1,11 @@
+# Auth Flow / Sign up Screen  (node 224:12950, 393x852, reference: screens/auth-flow__sign-up-screen__224-12950.png)
+FRAME "Sign up Screen" [0,0 393x852] bg=#FFFFFF clip
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  TEXT "Skip" Inter 400 14/16.8 ls-0.3 #000000 [16,66 28x17]
+  TEXT "This can be anything you like and can be changed later. If you skip this step, you will be automatically be assigned a default name." Inter 500 13/16.9 ls-0.3 #909090 [24,250 345x51]
+  TEXT "Create username" Inter 700 24/28.8 ls-0.5 #000000 [24,106 345x29]
+  FRAME "Frame 414" [24,183 345x44] border=#909090/1 borderSides=t0,r0,b1,l0 flex=row gap=12 align=center
+    FRAME "Frame 414" [24,195 2x20] flex=row align=center
+      RECT "Rectangle 133" [24,195 2x20] bg=#1E3A8A
+  FRAME "Frame 415" [24,423 345x44] bg=#D9D9D9 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Confirm" Inter 500 15/21 ls-0.3 #909090 [168.5,434.5 56x21]

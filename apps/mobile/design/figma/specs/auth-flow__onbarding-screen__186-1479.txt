@@ -1,0 +1,23 @@
+# Auth Flow / Onbarding Screen  (node 186:1479, 393x852, reference: screens/auth-flow__onbarding-screen__186-1479.png)
+FRAME "Onbarding Screen" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 386" [24,485 345x44] border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=70 align=center
+    FRAME "flat-color-icons:google" [36,495 24x24] clip
+      VECTOR "Vector" [38,497 20x20] bg=#FFC107
+      VECTOR "Vector" [39.2,497 15.7x7.8] bg=#FF3D00
+      VECTOR "Vector" [39.1,509 15.6x8] bg=#4CAF50
+      VECTOR "Vector" [48,505 10x9.4] bg=#1976D2
+    TEXT "Continue with Google" Inter 400 14/16.8 ls-0.3 #000000 [130,498.5 138x17]
+  FRAME "Frame 390" [24,365 345x44] border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=42 align=center
+    FRAME "UserCircle" [36,375 24x24] clip
+      VECTOR "Vector" [37.9,376.9 20.3x20.3] bg=#000000
+    TEXT "Use phone / username / email" Inter 400 14/16.8 ls-0.3 #000000 [102,378.5 190x17]
+  TEXT "By continuing, you agree to our Terms of Service and acknowledge you have read our  Privacy Policy  and Cookie Use to learn how we collect, use, and share your data." Inter 400 11/13.2 ls-0.2 #000000 align=center runs: «By continuing, you agree to our »{s11}«Terms of Service »{w700 s11 #000000}«and acknowledge you have read our»{s11}«  Privacy Policy »{w700 s11 #000000}« and »{s11}«Cookie Use »{w700 s11 #000000}«to learn how we collect, use, and share your data.»{s11} [24,644 345x39]
+  GROUP "Group 76" [95,749 204x17] radius=0,0,0,0
+    TEXT "Dont have an account?" Inter 400 14/16.8 ls-0.3 #000000 [95,749 146x17]
+    TEXT "Sign up" Inter 700 14/16.8 ls-0.3 #000000 [249,749 50x17]
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  FRAME "Frame 389" [24,425 345x44] border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=66 align=center
+    FRAME "ic:round-apple" [36,435 24x24] clip
+      VECTOR "Vector" [40.4,438 15.2x18] bg=#000000
+    TEXT "Continue with Apple" Inter 400 14/16.8 ls-0.3 #000000 align=center [126,438.5 129x17]
+  TEXT "Discover real sellers around you." Inter 700 24/28.8 ls-0.5 #000000 align=center [24,181 345x58]

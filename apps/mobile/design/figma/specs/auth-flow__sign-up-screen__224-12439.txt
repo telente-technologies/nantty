@@ -1,0 +1,31 @@
+# Auth Flow / Sign up Screen  (node 224:12439, 393x852, reference: screens/auth-flow__sign-up-screen__224-12439.png)
+FRAME "Sign up Screen" [0,0 393x852] bg=#FFFFFF clip
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  INST "arrow-left" [16,66 24x24] clip
+    VECTOR "Vector" [21,71 14x14] border=#000000/2/center
+  TEXT "Your password must have at least:" Inter 500 13/16.9 ls-0.3 #909090 [24,250 205x17]
+  TEXT "Create password" Inter 700 24/28.8 ls-0.5 #000000 [24,106 345x29]
+  FRAME "Frame 401" [24,183 345x44] border=#909090/1 borderSides=t0,r0,b1,l0 flex=row gap=12 justify=space_between align=center
+    FRAME "Frame 414" [24,194.5 97x21] flex=row align=center
+      TEXT "testpassword" Inter 500 15/21 ls-0.3 #000000 [24,194.5 95x21]
+      RECT "Rectangle 133" [119,195 2x20] bg=#1E3A8A
+    FRAME "Eye" [349,195 20x20] clip
+      VECTOR "Vector" [349.3,198.4 19.4x13.1] bg=#909090
+  TEXT "Password strength: Weak" Inter 500 13/16.9 ls-0.3 #000000 runs: «Password strength: »«Weak»{w700 s13} [24,376 155x17]
+  FRAME "Frame 411" [24,277 153x17] flex=row gap=4 align=center
+    FRAME "Check" [24,277.5 16x16] clip
+      VECTOR "Vector" [25.7,281.2 13x9.5] bg=#10B981
+    TEXT "8 characters (20 max)" Inter 500 13/16.9 ls-0.3 #000000 [44,277 133x17]
+  FRAME "Frame 412" [24,297 145x17] flex=row gap=4 align=center
+    FRAME "Check" [24,297.5 16x16] clip
+      VECTOR "Vector" [25.7,301.2 13x9.5] bg=#909090
+    TEXT "1 letter and 1 number" Inter 500 13/16.9 ls-0.3 #909090 [44,297 125x17]
+  FRAME "Frame 413" [24,317 258x17] flex=row gap=4 align=center
+    FRAME "Check" [24,317.5 16x16] clip
+      VECTOR "Vector" [25.7,321.2 13x9.5] bg=#909090
+    TEXT "1 special character (Example: # $ % ! @)" Inter 500 13/16.9 ls-0.3 #909090 [44,317 238x17]
+  GROUP "Group 79" [24,364 345x4] radius=4
+    RECT "Rectangle 134" [24,364 345x4] bg=#D9D9D9 radius=4
+    RECT "Rectangle 135" [24,364 59x4] bg=#EF4444 radius=4
+  FRAME "Frame 397" [24,423 345x44] bg=#D9D9D9 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Next" Inter 500 15/21 ls-0.3 #909090 [180,434.5 33x21]

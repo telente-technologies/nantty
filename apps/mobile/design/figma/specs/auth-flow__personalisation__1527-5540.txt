@@ -1,0 +1,80 @@
+# Auth Flow / Personalisation  (node 1527:5540, 393x852, reference: screens/auth-flow__personalisation__1527-5540.png)
+FRAME "Personalisation" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 744" [24,740 345x44] bg=#D9D9D9 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Continue" Inter 500 15/21 ls-0.3 #909090 [165,751.5 63x21]
+  FRAME "Frame 695" [0,66 393x24] flex=row pad=0,16,0,16 gap=202 justify=space_between align=center
+    ICON arrow-left-24.svg [16,66 24x24] (Frame 693)
+    TEXT "Skip" Inter 500 13/16.9 ls-0.3 #000000 [350,69.5 27x17]
+  FRAME "Frame 720" [16,110 322x44] flex=col gap=8 align=center
+    TEXT "Personalize your feed" Inter 500 16/19.2 ls-0.3 #000000 [16,110 322x19]
+    TEXT "Add or edit topics you follow. Chose three or more." Inter 400 14/16.8 ls-0.3 #909090 [16,137 322x17]
+  FRAME "Frame 736" [16,183 332x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [16,183 102x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Entertainment" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,191 86x17]
+    FRAME "Frame 729" [130,183 86x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Technology" Inter 500 13/16.9 ls-0.3 #5B5B5B [138,191 70x17]
+    FRAME "Frame 730" [228,183 120x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Entrepreneurship" Inter 500 13/16.9 ls-0.3 #5B5B5B [236,191 104x17]
+  FRAME "Frame 737" [18,232 334x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,232 57x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Nature" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,240 41x17]
+    FRAME "Frame 729" [87,232 52x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "STEM" Inter 500 13/16.9 ls-0.3 #5B5B5B [95,240 36x17]
+    FRAME "Frame 730" [151,232 138x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Artificial Intelligence" Inter 500 13/16.9 ls-0.3 #5B5B5B [159,240 122x17]
+    FRAME "Frame 731" [301,232 51x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "News" Inter 500 13/16.9 ls-0.3 #5B5B5B [309,240 35x17]
+  FRAME "Frame 738" [18,281 331x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,281 60x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Politics" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,289 44x17]
+    FRAME "Frame 729" [90,281 57x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Sports" Inter 500 13/16.9 ls-0.3 #5B5B5B [98,289 41x17]
+    FRAME "Frame 730" [159,281 83x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Computing" Inter 500 13/16.9 ls-0.3 #5B5B5B [167,289 67x17]
+    FRAME "Frame 731" [254,281 95x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Mathematics" Inter 500 13/16.9 ls-0.3 #5B5B5B [262,289 79x17]
+  FRAME "Frame 739" [18,330 300x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,330 56x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Health" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,338 40x17]
+    FRAME "Frame 729" [86,330 82x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Blockchain" Inter 500 13/16.9 ls-0.3 #5B5B5B [94,338 66x17]
+    FRAME "Frame 730" [180,330 58x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Design" Inter 500 13/16.9 ls-0.3 #5B5B5B [188,338 42x17]
+    FRAME "Frame 731" [250,330 68x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Gadgets" Inter 500 13/16.9 ls-0.3 #5B5B5B [258,338 52x17]
+  FRAME "Frame 740" [18,379 303x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,379 60x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Culture" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,387 44x17]
+    FRAME "Frame 729" [90,379 64x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Science" Inter 500 13/16.9 ls-0.3 #5B5B5B [98,387 48x17]
+    FRAME "Frame 730" [166,379 65x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Gossips" Inter 500 13/16.9 ls-0.3 #5B5B5B [174,387 49x17]
+    FRAME "Frame 731" [243,379 78x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Blue chips" Inter 500 13/16.9 ls-0.3 #5B5B5B [251,387 62x17]
+  FRAME "Frame 741" [18,428 339x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,428 97x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Relationships" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,436 81x17]
+    FRAME "Frame 729" [127,428 100x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Mental Health" Inter 500 13/16.9 ls-0.3 #5B5B5B [135,436 84x17]
+    FRAME "Frame 730" [239,428 68x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Startups" Inter 500 13/16.9 ls-0.3 #5B5B5B [247,436 52x17]
+    FRAME "Frame 731" [319,428 38x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Life" Inter 500 13/16.9 ls-0.3 #5B5B5B [327,436 22x17]
+  FRAME "Frame 742" [18,477 342x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [18,477 74x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Parenting" Inter 500 13/16.9 ls-0.3 #5B5B5B [26,485 58x17]
+    FRAME "Frame 729" [104,477 152x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Climate & Environment" Inter 500 13/16.9 ls-0.3 #5B5B5B [112,485 136x17]
+    FRAME "Frame 730" [268,477 92x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "International" Inter 500 13/16.9 ls-0.3 #5B5B5B [276,485 76x17]
+  FRAME "Frame 743" [16,526 345x33] flex=row gap=12 align=center
+    FRAME "Frame 719" [16,526 53x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Travel" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,534 37x17]
+    FRAME "Frame 729" [81,526 55x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Anime" Inter 500 13/16.9 ls-0.3 #5B5B5B [89,534 39x17]
+    FRAME "Frame 730" [148,526 77x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Education" Inter 500 13/16.9 ls-0.3 #5B5B5B [156,534 61x17]
+    FRAME "Frame 731" [237,526 124x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+      TEXT "Faith & Spirituality" Inter 500 13/16.9 ls-0.3 #5B5B5B [245,534 108x17]
+  FRAME "Frame 732" [16,575 57x33] bg=#ECECEC radius=4 flex=row pad=8,8,8,8 gap=10 justify=center align=center
+    TEXT "Humor" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,583 41x17]
