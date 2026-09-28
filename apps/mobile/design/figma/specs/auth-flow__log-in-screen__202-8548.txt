@@ -1,0 +1,18 @@
+# Auth Flow / Log in Screen  (node 202:8548, 393x852, reference: screens/auth-flow__log-in-screen__202-8548.png)
+FRAME "Log in Screen" [0,0 393x852] bg=#FFFFFF clip
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  INST "arrow-left" [16,66 24x24] clip
+    VECTOR "Vector" [21,71 14x14] border=#000000/2/center
+  FRAME "Frame 399" [24,264 106x17] flex=row gap=4 align=center
+    TEXT "Resend code" Inter 500 13/16.9 ls-0.3 #909090 [24,264 79x17]
+    TEXT "58s" Inter 500 13/16.9 ls-0.3 #000000 [107,264 23x17]
+  TEXT "Your code was sent to +234 9077505722" Inter 500 13/16.9 ls-0.3 #909090 [24,139 249x17]
+  TEXT "Enter 6-digit code." Inter 700 24/28.8 ls-0.5 #000000 [24,106 345x29]
+  FRAME "Frame 406" [24,183 345x58] flex=row gap=8 align=center
+    FRAME "Frame 400" [24,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0 clip
+      RECT "Rectangle 133" [49,202 2x20] bg=#1E3A8A
+    FRAME "Frame 401" [83,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0
+    FRAME "Frame 402" [142,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0
+    FRAME "Frame 403" [201,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0
+    FRAME "Frame 404" [260,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0
+    FRAME "Frame 405" [319,183 51x58] border=#909090+#000000@0.2/1 borderSides=t0,r0,b1,l0

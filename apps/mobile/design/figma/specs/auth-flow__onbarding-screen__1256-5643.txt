@@ -1,0 +1,38 @@
+# Auth Flow / Onbarding Screen  (node 1256:5643, 393x852, reference: screens/auth-flow__onbarding-screen__1256-5643.png)
+FRAME "Onbarding Screen" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 596" [16,476 361x164] flex=col gap=16
+    FRAME "Frame 391" [16,476 361x44] bg=#FFFFFF border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=8 justify=center align=center fill=w
+      ICON apple-24.svg [116,486 24x24] (ic:round-apple)
+      TEXT "Continue with Apple" Inter 400 14/16.8 ls-0.3 #000000 [148,489.5 129x17]
+    FRAME "Frame 386" [16,536 361x44] bg=#FFFFFF border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=8 justify=center align=center fill=w
+      ICON google-24.svg [111.5,546 24x24] (flat-color-icons:google)
+      TEXT "Continue with Google" Inter 400 14/16.8 ls-0.3 #000000 [143.5,549.5 138x17]
+    FRAME "Frame 390" [16,596 361x44] bg=#2043F5 radius=8 flex=row pad=10,12,10,12 gap=12 justify=center align=center fill=w
+      ICON user-circle-24.svg [132.5,606 24x24] (UserCircle)
+      TEXT "Use username" Inter 400 14/16.8 ls-0.3 #FFFFFF [168.5,609.5 92x17]
+  FRAME "Frame 721" [16,680 361x96] flex=col gap=28 align=center
+    TEXT "By continuing, you agree to our Terms of Service and acknowledge you have read our  Privacy Policy  and Cookie Use to learn how we collect, use, and share your data." Inter 400 12/16.8 ls-0.2 #909090 align=center runs: «By continuing, you agree to our »{w400 s12}«Terms of Service»{w400 s12 #2043F5}« and acknowledge you have read our  »{w400 s12}«Privacy Policy»{w400 s12 #2043F5}«  and »{w400 s12}«Cookie Use»{w400 s12 #2043F5}« to learn how we collect, use, and share your data.»{w400 s12} [16,680 361x51]
+    FRAME "Frame 76" [105.5,759 182x17] flex=row gap=4 align=center
+      TEXT "Don’t have an account?" Inter 500 12/14.4 ls-0.2 #000000 [105.5,760.5 129x14]
+      TEXT "Sign up" Inter 500 14/16.8 ls-0.3 #2043F5 [238.5,759 49x17]
+  FRAME "Frame 720" [47,404 300x44] flex=col gap=8 align=center
+    TEXT "Discover real sellers around you" Inter 500 16/19.2 ls-0.3 #000000 [80,404 234x19]
+    TEXT "Some tagline about the service being provided." Inter 400 14/16.8 ls-0.3 #909090 [47,431 300x17]
+  FRAME "Frame 597" [-43,172 532x56] flex=row gap=8 align=center
+    RECT "image 27" [-43,172 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 26" [65,172 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 25" [173,172 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 24" [281,172 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 23" [389,172 100x56] bg=image:onboarding-photo.png radius=4
+  FRAME "Frame 599" [-43,316 532x56] flex=row gap=8 align=center
+    RECT "image 27" [-43,316 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 25" [65,316 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 24" [173,316 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 23" [281,316 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 26" [389,316 100x56] bg=image:onboarding-photo.png radius=4
+  FRAME "Frame 598" [-96,244 532x56] flex=row gap=8 align=center
+    RECT "image 27" [-96,244 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 26" [12,244 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 25" [120,244 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 24" [228,244 100x56] bg=image:onboarding-photo.png radius=4
+    RECT "image 23" [336,244 100x56] bg=image:onboarding-photo.png radius=4

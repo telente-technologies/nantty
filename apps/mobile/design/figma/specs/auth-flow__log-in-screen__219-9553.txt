@@ -1,0 +1,25 @@
+# Auth Flow / Log in Screen  (node 219:9553, 393x852, reference: screens/auth-flow__log-in-screen__219-9553.png)
+FRAME "Log in Screen" [0,0 393x852] bg=#FFFFFF clip
+  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  INST "arrow-left" [16,66 24x24] clip
+    VECTOR "Vector" [21,71 14x14] border=#000000/2/center
+  FRAME "Frame 394" [0,102 393x41] flex=row justify=center align=center
+    FRAME "Frame 393" [16,102 180x41] flex=row pad=10,10,10,10 gap=10 justify=center align=center
+      TEXT "Phone" Inter 500 15/21 ls-0.3 #909090 [83.5,112 45x21]
+    FRAME "Frame 392" [196,102 181x41] border=#000000/1 borderSides=t0,r0,b1,l0 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+      TEXT "Email / Username" Inter 500 15/21 ls-0.3 #000000 [226,112 121x21]
+  FRAME "Frame 398" [24,183 345x44] border=#909090/1 borderSides=t0,r0,b1,l0 flex=row gap=12 align=center
+    TEXT "testzudomart@yahoo.com" Inter 500 15/21 ls-0.3 #909090 [24,194.5 185x21]
+  FRAME "Frame 400" [24,252 345x44] border=#909090/1 borderSides=t0,r0,b1,l0 flex=row gap=12 justify=space_between align=center
+    FRAME "Frame 410" [24,263.5 91x21] flex=row align=center
+      TEXT "************" Inter 500 15/21 ls-0.3 #909090 [24,263.5 91x21]
+    FRAME "EyeClosed" [349,264 20x20] clip
+      VECTOR "Vector" [350.6,271.2 16.9x8.7] bg=#909090
+  GROUP "Group 77" [24,399 345x37]
+    GROUP "Group 78" [24,400.5 20.9x20.9]
+      CIRCLE "Ellipse 28" [24,400.5 20.9x20.9] bg=#1E3A8A
+      VECTOR "Vector 1" [30.3,407.8 9.4x6.3] border=#FFFFFF/2/center
+    TEXT "Save login info on your device to log in automatically next time." Inter 500 13/16.9 ls-0.3 #909090 [49,399 320x37]
+  TEXT "Forgot password?" Inter 500 13/16.9 ls-0.3 #909090 [24,304 108x17]
+  FRAME "Frame 397" [24,473 345x47] bg=#1E3A8A radius=8 flex=row pad=10,10,10,10 gap=4 justify=center align=center
+    TEXT "Log in" Inter 500 15/21 ls-0.3 #FFFFFF [175.5,486 42x21]

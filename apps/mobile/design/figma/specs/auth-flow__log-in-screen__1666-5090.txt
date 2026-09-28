@@ -1,0 +1,15 @@
+# Auth Flow / Log in Screen  (node 1666:5090, 393x852, reference: screens/auth-flow__log-in-screen__1666-5090.png)
+FRAME "Log in Screen" [0,0 393x852] bg=#F7F8FE clip
+  ICON arrow-left-24.svg [16,70 24x24] (arrow-left)
+  TEXT "Forgot password?" Inter 500 13/16.9 ls-0.3 #2043F5 [16,296 108x17]
+  FRAME "Frame 400" [16,454 361x44] bg=#D9D9D9 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Log in" Inter 500 15/21 ls-0.3 #909090 [175.5,465.5 42x21]
+  FRAME "Frame 761" [16,114 361x67] flex=col gap=8
+    TEXT "Email or username " Inter 400 14/16.8 ls-0.3 #000000 [16,114 361x17]
+    FRAME "Frame 123" [16,139 361x42] border=#909090/1 radius=8 flex=row pad=12,8,12,8 gap=12 align=center fill=w
+      TEXT "Enter your email" Inter 400 14/16.8 ls-0.3 #909090 [24,151.5 103x17]
+  FRAME "Frame 762" [16,205 361x67] flex=col gap=8
+    TEXT "Password" Inter 400 14/16.8 ls-0.3 #000000 [16,205 361x17]
+    FRAME "Frame 123" [16,230 361x42] border=#909090/1 radius=8 flex=row pad=12,8,12,8 gap=12 justify=space_between align=center fill=w
+      TEXT "Enter password" Inter 400 14/16.8 ls-0.3 #909090 [24,242.5 100x17]
+      ICON eye-20.svg [349,241 20x20] (Eye)

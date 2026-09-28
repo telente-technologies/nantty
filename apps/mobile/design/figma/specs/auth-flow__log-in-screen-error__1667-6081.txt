@@ -1,0 +1,19 @@
+# Auth Flow / Log in Screen/ Error  (node 1667:6081, 393x852, reference: screens/auth-flow__log-in-screen-error__1667-6081.png)
+FRAME "Log in Screen/ Error" [0,0 393x852] bg=#F7F8FE clip
+  ICON arrow-left-24.svg [16,70 24x24] (arrow-left)
+  TEXT "Forgot password?" Inter 500 13/16.9 ls-0.3 #2043F5 [16,296 108x17]
+  FRAME "Frame 400" [16,454 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Log in" Inter 500 15/21 ls-0.3 #FFFFFF [175.5,465.5 42x21]
+  FRAME "Frame 761" [16,114 361x67] flex=col gap=8
+    TEXT "Email or username " Inter 400 14/16.8 ls-0.3 #000000 [16,114 361x17]
+    FRAME "Frame 123" [16,139 361x42] border=#2043F5/1 radius=8 flex=row pad=12,8,12,8 gap=2 align=center fill=w
+      TEXT "testzudomart@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [24,151.5 169x17]
+  FRAME "Frame 762" [16,205 361x67] flex=col gap=8
+    TEXT "Password" Inter 400 14/16.8 ls-0.3 #000000 [16,205 361x17]
+    FRAME "Frame 123" [16,230 361x42] border=#2043F5/1 radius=8 flex=row pad=12,8,12,8 gap=2 justify=space_between align=center fill=w
+      FRAME "Frame 410" [24,240.5 91x21] flex=row align=center
+        TEXT "************" Inter 500 15/21 ls-0.3 #000000 [24,240.5 91x21]
+      ICON eye-closed-20.svg [349,241 20x20] (EyeClosed)
+  FRAME "Frame 401" [16,325 361x52] bg=#FDECEC border=#EF4444/1 radius=8 flex=row pad=16,12,16,12 gap=8 align=center
+    ICON warning-20.svg [28,341 20x20] (Warning)
+    TEXT "Account doesn't exist" Inter 500 12/14.4 ls-0.2 #000000 [56,344 120x14]
