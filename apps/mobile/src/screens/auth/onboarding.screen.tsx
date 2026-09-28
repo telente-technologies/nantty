@@ -1,0 +1,100 @@
+import { Image } from "expo-image";
+import { useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+
+import { LegalText } from "@/components/auth/legal-text";
+import { Apple24Icon, Google24Icon, UserCircle24Icon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { AuthScreenProps } from "@/navigation/navigation.types";
+import { authService } from "@/services/auth.service";
+
+const photo = require("../../../assets/images/onboarding-photo.png");
+const ROWS = [-43, -96, -43];
+
+export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboarding">) {
+  const mode = route.params?.mode ?? "signup";
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const handleSocialSignIn = async (provider: "apple" | "google") => {
+    setNotice(null);
+    try {
+      await authService.signInWithSocialProvider(provider);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Sign-in failed");
+    }
+  };
+
+  return (
+    <Screen>
+      <ScrollView contentContainerStyle={styles.content} bounces={false}>
+        <View style={styles.rows} accessible={false} importantForAccessibility="no-hide-descendants">
+          {ROWS.map((offset, row) => (
+            <View key={row} style={[styles.row, { marginLeft: offset }]}>
+              {Array.from({ length: 5 }, (_, i) => (
+                <Image key={i} source={photo} style={styles.photo} contentFit="cover" />
+              ))}
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.heading}>
+          <Text size={16} weight={500} lineHeight={19.2} align="center" accessibilityRole="header">
+            Discover real sellers around you
+          </Text>
+          <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center">
+            Some tagline about the service being provided.
+          </Text>
+        </View>
+
+        <View style={styles.buttons}>
+          <Button variant="outline" title="Continue with Apple" icon={<Apple24Icon />} onPress={() => handleSocialSignIn("apple")} />
+          <Button variant="outline" title="Continue with Google" icon={<Google24Icon />} onPress={() => handleSocialSignIn("google")} />
+          <Button
+            variant="brand"
+            title="Use username"
+            icon={<UserCircle24Icon />}
+            onPress={() => (mode === "login" ? navigation.navigate("Login") : navigation.navigate("SignUpContact"))}
+          />
+          {notice ? (
+            <Text size={12} lineHeight={14.4} color={colors.error} align="center">
+              {notice}
+            </Text>
+          ) : null}
+        </View>
+
+        <View style={styles.footer}>
+          <LegalText />
+          <View style={styles.switch}>
+            <Text size={12} weight={500} lineHeight={14.4}>
+              {mode === "login" ? "Don’t have an account?" : "Already have an account?"}
+            </Text>
+            <Text
+              size={14}
+              weight={500}
+              lineHeight={16.8}
+              color={colors.primary}
+              accessibilityRole="link"
+              onPress={() => navigation.setParams({ mode: mode === "login" ? "signup" : "login" })}
+            >
+              {mode === "login" ? "Sign up" : "Log in"}
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: { paddingBottom: 24 },
+  rows: { marginTop: 118, gap: 16, overflow: "hidden" },
+  row: { flexDirection: "row", gap: 8 },
+  photo: { width: 100, height: 56, borderRadius: 4 },
+  heading: { marginTop: 32, paddingHorizontal: 47, gap: 8, alignItems: "center" },
+  buttons: { marginTop: 28, paddingHorizontal: 16, gap: 16 },
+  footer: { marginTop: 40, paddingHorizontal: 16, gap: 28, alignItems: "center" },
+  switch: { flexDirection: "row", alignItems: "center", gap: 4 },
+});
