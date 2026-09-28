@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors } from "@/constants/colors";
-import { radius } from "@/constants/spacing";
+import { colors } from "@/constants/colors.constant";
+import { radius } from "@/constants/spacing.constant";
 
 import { Text } from "./text";
 

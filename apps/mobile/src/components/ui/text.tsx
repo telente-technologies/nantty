@@ -1,7 +1,7 @@
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from "react-native";
 
-import { colors } from "@/constants/colors";
-import { fontFamily, letterSpacingFor, lineHeightFor, type FontWeight } from "@/constants/typography";
+import { colors } from "@/constants/colors.constant";
+import { fontFamily, calculateDefaultLetterSpacing, calculateDefaultLineHeight, type FontWeight } from "@/constants/typography.constant";
 
 export interface TextProps extends RNTextProps {
   readonly size?: number;
@@ -33,8 +33,8 @@ export function Text({
         {
           fontFamily: fontFamily[weight],
           fontSize: size,
-          lineHeight: lineHeight ?? lineHeightFor(size),
-          letterSpacing: letterSpacing ?? letterSpacingFor(size),
+          lineHeight: lineHeight ?? calculateDefaultLineHeight(size),
+          letterSpacing: letterSpacing ?? calculateDefaultLetterSpacing(size),
           color,
           ...(align ? { textAlign: align } : null),
           ...(underline ? { textDecorationLine: "underline" as const } : null),

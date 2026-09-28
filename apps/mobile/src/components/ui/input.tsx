@@ -2,8 +2,8 @@ import { forwardRef, useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from "react-native";
 
 import { EyeClosed20Icon, Eye20Icon } from "@/components/icons";
-import { colors } from "@/constants/colors";
-import { fontFamily, letterSpacingFor } from "@/constants/typography";
+import { colors } from "@/constants/colors.constant";
+import { fontFamily, calculateDefaultLetterSpacing } from "@/constants/typography.constant";
 
 import { Text } from "./text";
 
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     padding: 0,
     fontFamily: fontFamily[400],
     fontSize: 14,
-    letterSpacing: letterSpacingFor(14),
+    letterSpacing: calculateDefaultLetterSpacing(14),
     color: colors.text,
   },
 });

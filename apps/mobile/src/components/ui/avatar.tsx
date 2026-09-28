@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors } from "@/constants/colors";
+import { colors } from "@/constants/colors.constant";
 
 export interface AvatarProps {
   readonly uri?: string | null;

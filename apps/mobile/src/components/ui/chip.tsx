@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
-import { colors } from "@/constants/colors";
+import { colors } from "@/constants/colors.constant";
 
 import { Text } from "./text";
 
