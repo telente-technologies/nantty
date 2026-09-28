@@ -1,0 +1,10 @@
+# Auth Flow / Sign up Screen (Birthday)  (node 1668:6704, 393x852, reference: screens/auth-flow__sign-up-screen-birthday__1668-6704.png)
+FRAME "Sign up Screen (Birthday)" [0,0 393x852] bg=#F7F8FE clip
+  ICON arrow-left-24.svg [16,70 24x24] (arrow-left)
+  FRAME "Frame 123" [16,188 361x42] border=#2043F5/1 radius=8 flex=row pad=12,8,12,8 gap=12 align=center
+    TEXT "27/10/2000" Inter 400 14/16.8 ls-0.3 #000000 [24,200.5 74x17]
+  FRAME "Frame 397" [16,454 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Next" Inter 500 15/21 ls-0.3 #FFFFFF [180,465.5 33x21]
+  FRAME "Frame 720" [16,114 245x44] flex=col gap=8
+    TEXT "When’s your birthday?" Inter 500 16/19.2 ls-0.3 #000000 [16,114 164x19]
+    TEXT "Your birthday won’t be shown publicly." Inter 400 14/16.8 ls-0.3 #909090 [16,141 245x17]

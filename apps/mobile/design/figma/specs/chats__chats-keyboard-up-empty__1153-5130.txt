@@ -1,0 +1,31 @@
+# Chats / Chats (Keyboard Up Empty)  (node 1153:5130, 393x852, reference: screens/chats__chats-keyboard-up-empty__1153-5130.png)
+FRAME "Chats (Keyboard Up Empty)" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 695" [0,66 393x24] flex=row pad=0,16,0,16 gap=202
+    FRAME "Frame 693" [16,66 140x24] flex=row gap=18 align=center
+      INST "arrow-left" [16,66 24x24] clip
+        VECTOR "Vector" [21,71 14x14] border=#000000/2/center
+      FRAME "Frame 669" [58,66 98x24] flex=row gap=13 align=center
+        CIRCLE "Ellipse 37" [58,66 24x24] bg=#D9D9D9
+        TEXT "Enyo Dev" Inter 500 14/16.8 ls-0.3 #000000 [95,69.5 61x17]
+    FRAME "DotsThreeVertical" [358,66 24x24] clip
+      VECTOR "Vector" [368.5,70.1 3x15.8] bg=#000000
+  FRAME "Frame 670" [158,114 78x98] flex=col gap=12 justify=center align=center
+    CIRCLE "Ellipse 37" [165,114 64x64] bg=#D9D9D9
+    TEXT "Enyo Dev" Inter 500 18/21.6 ls-0.4 #000000 [158,190 78x22]
+  FRAME "Frame 673" [161,249 71x23] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+    TEXT "View profile" Inter 500 11/15.4 #000000 [165,253 63x15]
+  TEXT "You and Enyo arent friends yet" Inter 500 11/15.4 #5B5B5B runs: «You and »«Enyo»{#000000}« arent friends yet» [116,220 161x15]
+  LINE "Line 27" [0,288 393x0] border=#D9D9D9/0.5/center stroke=#D9D9D9/0.5
+  FRAME "Frame 696" [0,456 393x60] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,464 361x44] flex=row gap=12 justify=space_between align=center fill=w
+      INST "Microphone" [16,474 24x24] clip
+        VECTOR "Vector" [20.5,475.5 15x21.8] bg=#000000
+      FRAME "Frame 674" [55,464 322x44] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=10,12,10,12 gap=148 justify=space_between align=center clip
+        FRAME "Frame 675" [67,477.5 191.5x17] flex=row align=center
+          VECTOR "Line 26" [67,478 0x16] border=#2043F5/1.5/center
+          TEXT "Send a message..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [67,477.5 109x17]
+        FRAME "Frame 711" [309,474 56x24] flex=row gap=8 justify=max align=center
+          INST "Smiley" [309,474 24x24] clip
+            VECTOR "Vector" [310.9,475.9 20.3x20.3] bg=#000000
+          INST "ImageSquare" [341,474 24x24] clip
+            VECTOR "Vector" [344,477 18x18] bg=#000000

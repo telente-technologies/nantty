@@ -1,0 +1,78 @@
+# Chats / Chats  (node 1158:5558, 393x852, reference: screens/chats__chats__1158-5558.png)
+FRAME "Chats" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 692" [0,107 260x81] flex=row pad=0,16,0,16 gap=12
+    FRAME "Frame 687" [16,107 68x79] flex=col gap=4 align=center
+      FRAME "Frame 683" [16,107 68x60] flex=row gap=-24 align=max fill=w
+        CIRCLE "Ellipse 10" [16,107 60x60] bg=#D2DAFD
+        ICON frame-301-32.svg [52,135 32x32] (Frame 301)
+      TEXT "Add Story" Inter 500 11/15.4 #000000 align=center [16,171 68x15]
+    FRAME "Frame 688" [96,107 68x81] flex=col gap=4 align=center
+      FRAME "Frame 683" [96,107 68x60] flex=row gap=-24 align=max fill=w
+        CIRCLE "Ellipse 10" [96,107 60x60] bg=#D2DAFD border=#2043F5/1
+        FRAME "Frame 302" [132,135 32x32] bg=image:avatar-placeholder.jpg radius=50
+      TEXT "Freda" Inter 500 13/16.9 ls-0.3 #000000 align=center [96,171 68x17]
+    FRAME "Frame 689" [176,107 68x81] flex=col gap=4 align=center
+      FRAME "Frame 683" [176,107 68x60] flex=row gap=-24 align=max fill=w
+        CIRCLE "Ellipse 10" [176,107 60x60] bg=#D2DAFD border=#2043F5/1
+        FRAME "Frame 685" [212,135 32x32] bg=image:avatar-chat.jpg radius=50
+      TEXT "Carlos" Inter 500 13/16.9 ls-0.3 #000000 align=center [176,171 68x17]
+  FRAME "Frame 673" [16,204 78x23] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+    TEXT "All Messages" Inter 500 11/15.4 #000000 [20,208 70x15]
+  FRAME "Frame 696" [100,204 96x23] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+    TEXT "Direct Messages" Inter 500 11/15.4 #5B5B5B [104,208 88x15]
+  FRAME "Frame 435" [16,239 361x56] flex=row gap=8 align=center
+    CIRCLE "Ellipse 29" [16,239 56x56] bg=#D2DAFD
+    FRAME "Frame 434" [80,245 297x44] flex=col gap=4 fill=w
+      FRAME "Frame 433" [80,245 297x19] flex=row gap=80 justify=space_between align=center fill=w
+        TEXT "Freda Dickinson" Inter 500 16/19.2 ls-0.3 #000000 [80,245 155x19]
+        TEXT "3h ago" Inter 500 13/16.9 ls-0.3 #909090 [335,246 42x17]
+      FRAME "Frame 748" [80,268 297x21] flex=row gap=4 align=center fill=w
+        TEXT "Pirate ipsum arrgh bounty warp jack buffalo side" Inter 500 14/16.8 ls-0.3 #909090 truncate [80,270 243x17]
+        FRAME "Frame 747" [327,268 50x21] bg=#DADADA radius=999 flex=col pad=2,4,2,4 gap=10 justify=center align=center
+          TEXT "12,900" Inter 500 13/16.9 ls-0.3 #000000 [331,270 42x17]
+  FRAME "Frame 698" [16,375 361x56] flex=row gap=8 align=center
+    CIRCLE "Ellipse 29" [16,375 56x56] bg=#D2DAFD
+    FRAME "Frame 434" [80,381 297x44] flex=col gap=4 fill=w
+      FRAME "Frame 433" [80,381 297x19] flex=row gap=80 justify=space_between align=center fill=w
+        TEXT "Freda Dickinson" Inter 500 16/19.2 ls-0.3 #000000 [80,381 155x19]
+        TEXT "3h ago" Inter 500 13/16.9 ls-0.3 #909090 [335,382 42x17]
+      FRAME "Frame 748" [80,404 297x21] flex=row gap=4 align=center fill=w
+        TEXT "Pirate ipsum arrgh bounty warp jack buffalo side" Inter 500 14/16.8 ls-0.3 #909090 truncate [80,406 272x17]
+        FRAME "Frame 747" [356,404 21x21] bg=#DADADA radius=999 flex=col pad=2,4,2,4 gap=10 justify=center align=center
+          TEXT "1" Inter 500 13/16.9 ls-0.3 #000000 [363,406 7x17]
+  FRAME "Frame 697" [16,307 361x56] flex=row gap=8 align=center
+    CIRCLE "Ellipse 29" [16,307 56x56] bg=#D2DAFD
+    FRAME "Frame 434" [80,313 297x44] flex=col gap=4 fill=w
+      FRAME "Frame 433" [80,313 297x19] flex=row gap=80 justify=space_between align=center fill=w
+        TEXT "Carlos Trantow" Inter 500 16/19.2 ls-0.3 #000000 [80,313 155x19]
+        TEXT "3h ago" Inter 500 13/16.9 ls-0.3 #909090 [335,314 42x17]
+      FRAME "Frame 748" [80,336 297x21] flex=row gap=4 align=center fill=w
+        TEXT "Pizza ipsum dolor meat lovers buffalo jack wrap." Inter 500 14/16.8 ls-0.3 #909090 truncate [80,338 271x17]
+        FRAME "Frame 747" [355,336 22x21] bg=#DADADA radius=999 flex=col pad=2,4,2,4 gap=10 justify=center align=center
+          TEXT "12" Inter 500 13/16.9 ls-0.3 #000000 [359,338 14x17]
+  FRAME "Frame 699" [16,443 361x56] flex=row gap=8 align=center
+    CIRCLE "Ellipse 29" [16,443 56x56] bg=#D2DAFD
+    FRAME "Frame 434" [80,451 297x40] flex=col gap=4 fill=w
+      FRAME "Frame 433" [80,451 297x19] flex=row gap=80 justify=space_between align=center fill=w
+        TEXT "Carlos Trantow" Inter 500 16/19.2 ls-0.3 #000000 [80,451 155x19]
+        TEXT "3h ago" Inter 500 13/16.9 ls-0.3 #909090 [335,452 42x17]
+      FRAME "Frame 748" [80,474 297x17] flex=row gap=4 align=center fill=w
+        TEXT "Pizza ipsum dolor meat lovers buffalo jack wrap." Inter 500 14/16.8 ls-0.3 #909090 truncate [80,474 297x17]
+  ICON wechat-logo-48.svg [333,695 48x48] (WechatLogo)
+  FRAME "Frame 718" [0,66 393x25] flex=row pad=0,16,0,16 gap=202 align=center
+    FRAME "Frame 693" [16,66 100x25] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66.5 24x24] (arrow-left)
+      TEXT "Chats" Inter 500 21/25.2 ls-0.4 #000000 [58,66 58x25]
+    FRAME "Frame 694" [318,66.5 59x24] flex=row gap=11 align=center
+      ICON magnifying-glass-24.svg [318,66.5 24x24] (MagnifyingGlass)
+      ICON dots-three-vertical-24.svg [353,66.5 24x24] (DotsThreeVertical)
+  FRAME "Frame 717" [0,758 393x94] bg=#FFFFFF flex=col background_blur=100
+    FRAME "Navbar" [0,758 393x60] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 fill=w shadow=#000000@0.04 0,2 blur4 shadow=#000000@0.12 0,8 blur16 spread12 clip
+      FRAME "Frame 81" [16,770 361x44] flex=row gap=44 justify=space_between align=center fill=w
+        ICON home-33.svg [16,778 33x28] (Home)
+        ICON flips-34-alt-alt.svg [81.3,780 34x24] (Flips)
+        FRAME "Search" [147.5,770 83x44] bg=#2043F5 radius=999 flex=col pad=8,12,8,12 gap=2 justify=center align=center
+          ICON plus-28.svg [175,778 28x28] (Plus)
+        ICON chat-37-alt-alt.svg [262.8,780 37x24] (Chat)
+        FRAME "User Profile" [332,778 45x28] flex=col gap=2 justify=center align=center
+          FRAME "Frame 302" [340.5,778 28x28] bg=image:avatar-placeholder.jpg radius=50 fill=h

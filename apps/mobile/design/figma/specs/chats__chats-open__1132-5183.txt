@@ -1,0 +1,21 @@
+# Chats / Chats (Open)  (node 1132:5183, 393x852, reference: screens/chats__chats-open__1132-5183.png)
+FRAME "Chats (Open)" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 695" [0,66 393x24] flex=row pad=0,16,0,16 gap=202
+    FRAME "Frame 693" [16,66 140x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      FRAME "Frame 669" [58,66 98x24] flex=row gap=13 align=center
+        CIRCLE "Ellipse 37" [58,66 24x24] bg=#D9D9D9
+        TEXT "Enyo Dev" Inter 500 14/16.8 ls-0.3 #000000 [95,69.5 61x17]
+    ICON dots-three-vertical-24.svg [358,66 24x24] (DotsThreeVertical)
+  FRAME "Frame 670" [158,114 78x98] flex=col gap=12 justify=center align=center
+    CIRCLE "Ellipse 37" [165,114 64x64] bg=#D9D9D9
+    TEXT "Enyo Dev" Inter 500 18/21.6 ls-0.4 #000000 [158,190 78x22]
+  FRAME "Frame 673" [161,249 71x23] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+    TEXT "View profile" Inter 500 11/15.4 #000000 [165,253 63x15]
+  TEXT "You and Enyo arent friends yet" Inter 500 11/15.4 #5B5B5B runs: «You and »«Enyo»{#000000}« arent friends yet» [116,220 161x15]
+  FRAME "Frame 542" [0,758 393x60] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,766 361x44] flex=row gap=12 justify=space_between align=center fill=w
+      ICON plus-24.svg [16,776 24x24] (Plus)
+      FRAME "Frame 542" [55,766 322x44] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=10,12,10,12 gap=148 justify=space_between align=center clip
+        TEXT "Send a message..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [67,779.5 109x17]
+        ICON smiley-24.svg [341,776 24x24] (Smiley)

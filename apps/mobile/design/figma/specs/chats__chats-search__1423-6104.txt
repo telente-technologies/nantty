@@ -1,0 +1,47 @@
+# Chats / Chats (Search)  (node 1423:6104, 393x852, reference: screens/chats__chats-search__1423-6104.png)
+FRAME "Chats (Search)" [0,0 393x852] bg=#FFFFFF clip
+  ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+  ICON dots-three-vertical-24.svg [353,61 24x24] (DotsThreeVertical)
+  FRAME "Frame 123" [16,102 361x44] border=#909090/1 radius=8 flex=row pad=12,8,12,8 gap=12 align=center
+    ICON magnifying-glass-20.svg [24,114 20x20] (MagnifyingGlass)
+    TEXT "Search" Inter 500 14/16.8 ls-0.3 #909090 [56,115.5 46x17]
+  INST "Navbar" [0,778 393x40] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 shadow=#000000@0.04 0,2 blur4 shadow=#000000@0.12 0,8 blur16 spread12 clip
+    FRAME "Frame 82" [16,790 361x24] flex=row gap=44 justify=space_between align=center fill=w
+      ICON home-33-alt.svg [16,790 33x24] (Home)
+      ICON search-46-alt.svg [90.5,790 46x24] (Search)
+      ICON flips-34-alt.svg [178,790 34x24] (Flips)
+      ICON chat-37-alt.svg [253.5,790 37x24] (Chat)
+      FRAME "User Profile" [332,790 45x24] flex=col gap=2 align=center
+        FRAME "Frame 302" [342.5,790 24x24] bg=image:avatar-placeholder.jpg radius=50
+  FRAME "Frame 715" [0,154 393x49] bg=#FFFFFF flex=row pad=12,0,12,16 gap=8
+    FRAME "Frame 718" [16,166 66x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+      TEXT "Followers" Inter 500 13/16.9 ls-0.3 #000000 [20,170 58x17]
+    FRAME "Frame 719" [90,166 65x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Following" Inter 500 13/16.9 ls-0.3 #5B5B5B [94,170 57x17]
+    FRAME "Frame 721" [163,166 63x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Shopped" Inter 500 13/16.9 ls-0.3 #5B5B5B [167,170 55x17]
+    FRAME "Frame 720" [234,166 74x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Suggested" Inter 500 13/16.9 ls-0.3 #5B5B5B [238,170 66x17]
+    FRAME "Frame 722" [316,166 57x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Blocked" Inter 500 13/16.9 ls-0.3 #5B5B5B [320,170 49x17]
+  FRAME "Frame 733" [0,318 393x54] flex=row pad=0,16,0,16 gap=20 justify=space_between align=center
+    CIRCLE "Ellipse 29" [16,318 54x54] bg=#D2DAFD
+    FRAME "Frame 731" [92,325 285x40] flex=row gap=37 align=center
+      FRAME "Frame 729" [92,325 155x40] flex=col gap=4
+        TEXT "Enyo Dev" Inter 500 16/19.2 ls-0.3 #000000 [92,325 155x19]
+        TEXT "@mayweda_dev" Inter 500 14/16.8 ls-0.3 #909090 truncate=1 [92,348 155x17]
+      FRAME "Frame 730" [284,332.5 93x25] flex=row gap=8 align=center
+        FRAME "Frame 718" [284,332.5 61x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+          TEXT "Unfollow" Inter 500 13/16.9 ls-0.3 #000000 [288,336.5 53x17]
+        ICON dots-three-vertical-24.svg [353,333 24x24] (DotsThreeVertical)
+  FRAME "Frame 734" [0,380 393x54] flex=row pad=0,16,0,16 gap=20 justify=space_between align=center
+    CIRCLE "Ellipse 29" [16,380 54x54] bg=#D2DAFD
+    FRAME "Frame 731" [92,387 285x40] flex=row gap=37 align=center
+      FRAME "Frame 729" [92,387 155x40] flex=col gap=4
+        TEXT "Zudo Support" Inter 500 16/19.2 ls-0.3 #000000 [92,387 155x19]
+        TEXT "@zudosupport" Inter 500 14/16.8 ls-0.3 #909090 truncate=1 [92,410 155x17]
+      FRAME "Frame 730" [284,394.5 93x25] flex=row gap=8 align=center
+        FRAME "Frame 718" [284,394.5 61x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+          TEXT "Unfollow" Inter 500 13/16.9 ls-0.3 #000000 [288,398.5 53x17]
+        ICON dots-three-vertical-24.svg [353,395 24x24] (DotsThreeVertical)
+  TEXT "Sort by Default" Inter 500 14/16.8 ls-0.3 #000000 [16,227 97x17]

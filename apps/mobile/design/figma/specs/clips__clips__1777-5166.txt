@@ -1,0 +1,39 @@
+# Clips / Clips  (node 1777:5166, 393x852, reference: screens/clips__clips__1777-5166.png)
+FRAME "Clips" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 645" [0,54 393x48] flex=row pad=12,16,12,16 gap=96 justify=space_between align=center
+    ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+    FRAME "Frame 495" [135.5,69.5 122x17] flex=row gap=13 align=center
+      TEXT "For You" Inter 600 14/16.8 ls-0.3 #000000 [135.5,69.5 49x17]
+      TEXT "Following" Inter 400 14/16.8 ls-0.3 #000000 [197.5,69.5 60x17]
+    ICON magnifying-glass-24.svg [353,66 24x24] (MagnifyingGlass)
+  INST "Frame 773" [12,535 369x207] flex=row gap=60 justify=space_between align=max
+    FRAME "Clips Details (Unfollowed)" [12,643 269x99] flex=col gap=8
+      FRAME "Frame 34" [12,643 140x15] flex=row gap=4 align=center
+        ICON group-12-34.svg [12,643.5 34x14] (Group 12)
+        TEXT "12 friends liked this" Inter 500 11/15.4 #000000 [50,643 102x15]
+      FRAME "Frame 570" [12,666 269x34] flex=row gap=65 justify=space_between align=center fill=w
+        FRAME "Frame 34" [12,666 121x34] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [12,667 32x32] bg=#5B5B5B
+          FRAME "Frame 768" [53,666 80x34] flex=col justify=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [53,666 67x17]
+            TEXT "@username20" Inter 400 12/16.8 ls-0.2 #000000 [53,683 80x17]
+        FRAME "Frame 496" [220,671.5 61x23] bg=#2043F5 radius=4 flex=row pad=4,12,4,12 gap=10 justify=center align=center
+          TEXT "Follow" Inter 400 12/14.5 #FFFFFF [232,675.5 37x15]
+      TEXT "Figma ipsum component variant main layer. Group export vector mask " Inter 400 13/16.9 ls-0.3 #000000 [12,708 269x34]
+    FRAME "Frame 471" [349,535 32x207] flex=col gap=16 justify=center align=center
+      FRAME "Frame 468" [349,535 32x45] flex=col gap=4 align=center fill=w
+        ICON heart-24.svg [353,535 24x24] (Heart)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,563 30x17]
+      FRAME "Frame 470" [349,596 32x45] flex=col gap=4 align=center fill=w
+        ICON chat-circle-24.svg [353,596 24x24] (ChatCircle)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,624 30x17]
+      FRAME "Frame 469" [349,657 32x45] flex=col gap=4 align=center fill=w
+        ICON paper-plane-tilt-24.svg [353,657 24x24] (PaperPlaneTilt)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [349,685 32x17]
+      ICON dots-three-vertical-24.svg [353,718 24x24] (DotsThreeVertical)
+  FRAME "Frame 541" [0,768 393x50] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,12,8,12 gap=10 clip
+    FRAME "Frame 543" [12,776 369x34] flex=row gap=12 align=center fill=w
+      CIRCLE "Ellipse 21" [12,777 32x32] bg=#D9D9D9
+      FRAME "Frame 542" [56,776 325x34] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=4,12,4,12 gap=164 justify=space_between align=center fill=w clip
+        TEXT "Add comment..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [69,784.5 94x17]
+        ICON gif-24.svg [344,781 24x24] (Gif)
