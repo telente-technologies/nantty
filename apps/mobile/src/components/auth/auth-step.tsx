@@ -18,9 +18,21 @@ export interface AuthStepProps {
   readonly onAction: () => void;
   readonly right?: ReactNode;
   readonly footer?: ReactNode;
+  readonly contentGap?: number;
 }
 
-export function AuthStep({ title, subtitle, children, actionTitle, actionDisabled, loading, onAction, right, footer }: AuthStepProps) {
+export function AuthStep({
+  title,
+  subtitle,
+  children,
+  actionTitle,
+  actionDisabled,
+  loading,
+  onAction,
+  right,
+  footer,
+  contentGap = 24,
+}: AuthStepProps) {
   const navigation = useNavigation();
   return (
     <Screen>
@@ -35,7 +47,7 @@ export function AuthStep({ title, subtitle, children, actionTitle, actionDisable
           )}
           {right}
         </View>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.flex} contentContainerStyle={[styles.content, { gap: contentGap }]} keyboardShouldPersistTaps="handled">
           {title ? (
             <View style={styles.heading}>
               <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header">
@@ -62,7 +74,7 @@ export function AuthStep({ title, subtitle, children, actionTitle, actionDisable
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   top: { height: 24, marginTop: 16, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  content: { paddingHorizontal: 16, paddingTop: 20, gap: 24, paddingBottom: 24 },
+  content: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 24 },
   heading: { gap: 8 },
   action: { paddingHorizontal: 16, paddingBottom: 12, gap: 16 },
 });
