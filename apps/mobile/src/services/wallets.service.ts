@@ -1,0 +1,15 @@
+import type { PayoutAccountInput, WithdrawalRequest } from "@/types/account.type";
+import type { PayoutAccount, WalletSummary, WalletTransaction } from "@/types";
+
+import { api, generateIdempotencyKey } from "./api-client.service";
+
+export const walletsService = {
+  fetchMyWalletBalance: () => api.get<WalletSummary>("/api/v1/wallets/me"),
+  listMyWalletTransactions: () => api.get<WalletTransaction[]>("/api/v1/wallets/me/transactions"),
+  listMyPayoutAccounts: () => api.get<PayoutAccount[]>("/api/v1/wallets/me/payout-accounts"),
+  addPayoutAccount: (input: PayoutAccountInput) => api.post<PayoutAccount>("/api/v1/wallets/me/payout-accounts", input),
+  removePayoutAccount: (payoutAccountId: string) =>
+    api.delete<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`),
+  requestWithdrawalToPayoutAccount: (request: WithdrawalRequest, idempotencyKey: string = generateIdempotencyKey()) =>
+    api.post<WalletTransaction>("/api/v1/wallets/me/withdrawals", request, { idempotencyKey }),
+};

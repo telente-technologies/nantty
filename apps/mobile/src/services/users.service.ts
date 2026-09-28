@@ -1,0 +1,29 @@
+import type { AccountSettings, ShippingAddressInput } from "@/types/account.type";
+import type { Address, Page, Post, User } from "@/types";
+
+import { api } from "./api-client.service";
+
+export interface ProfileDetailsUpdate {
+  readonly name?: string;
+  readonly bio?: string;
+  readonly avatarUrl?: string | null;
+  readonly bannerUrl?: string | null;
+}
+
+export const usersService = {
+  fetchMyProfile: () => api.get<User>("/api/v1/users/me"),
+  fetchUserProfileById: (userId: string) => api.get<User>(`/api/v1/users/${encodeURIComponent(userId)}`),
+  fetchPostsByUserId: (userId: string, cursor?: string) =>
+    api.get<Page<Post>>(`/api/v1/users/${encodeURIComponent(userId)}/posts`, { cursor }),
+  updateMyProfileDetails: (update: ProfileDetailsUpdate) => api.patch<User>("/api/v1/users/me", update),
+  fetchMyAccountSettings: () => api.get<AccountSettings>("/api/v1/users/me/settings"),
+  updateMyAccountSettings: (update: Partial<AccountSettings>) => api.patch<AccountSettings>("/api/v1/users/me/settings", update),
+  deactivateMyAccount: () => api.post<void>("/api/v1/users/me/deactivate"),
+  changeMyPassword: (currentPassword: string, newPassword: string) =>
+    api.post<void>("/api/v1/auth/password/change", { currentPassword, newPassword }),
+  listMyShippingAddresses: () => api.get<Address[]>("/api/v1/users/me/addresses"),
+  createShippingAddress: (input: ShippingAddressInput) => api.post<Address>("/api/v1/users/me/addresses", input),
+  updateShippingAddress: (addressId: string, input: ShippingAddressInput) =>
+    api.patch<Address>(`/api/v1/users/me/addresses/${encodeURIComponent(addressId)}`, input),
+  deleteShippingAddress: (addressId: string) => api.delete<void>(`/api/v1/users/me/addresses/${encodeURIComponent(addressId)}`),
+};
