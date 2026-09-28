@@ -1,0 +1,1026 @@
+[
+ {
+  "id": "872:4201",
+  "name": "Feed",
+  "path": "",
+  "w": 393,
+  "h": 2300,
+  "file": "misc__feed__872-4201.png"
+ },
+ {
+  "id": "722:3565",
+  "name": "Product Detail",
+  "path": "",
+  "w": 393,
+  "h": 2450,
+  "file": "misc__product-detail__722-3565.png"
+ },
+ {
+  "id": "186:1479",
+  "name": "Onbarding Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__onbarding-screen__186-1479.png"
+ },
+ {
+  "id": "224:11053",
+  "name": "Onbarding Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__onbarding-screen__224-11053.png"
+ },
+ {
+  "id": "186:1551",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__186-1551.png"
+ },
+ {
+  "id": "224:11014",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11014.png"
+ },
+ {
+  "id": "224:11104",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11104.png"
+ },
+ {
+  "id": "224:11417",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11417.png"
+ },
+ {
+  "id": "202:6155",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-6155.png"
+ },
+ {
+  "id": "224:11566",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11566.png"
+ },
+ {
+  "id": "202:8429",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-8429.png"
+ },
+ {
+  "id": "202:8304",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-8304.png"
+ },
+ {
+  "id": "224:11678",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11678.png"
+ },
+ {
+  "id": "219:9365",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__219-9365.png"
+ },
+ {
+  "id": "219:9461",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__219-9461.png"
+ },
+ {
+  "id": "219:9509",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__219-9509.png"
+ },
+ {
+  "id": "219:9553",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__219-9553.png"
+ },
+ {
+  "id": "219:9669",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__219-9669.png"
+ },
+ {
+  "id": "202:8548",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-8548.png"
+ },
+ {
+  "id": "224:11723",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11723.png"
+ },
+ {
+  "id": "202:8687",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-8687.png"
+ },
+ {
+  "id": "224:11942",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-11942.png"
+ },
+ {
+  "id": "224:12061",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12061.png"
+ },
+ {
+  "id": "224:12204",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12204.png"
+ },
+ {
+  "id": "224:12439",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12439.png"
+ },
+ {
+  "id": "224:12600",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12600.png"
+ },
+ {
+  "id": "224:12761",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12761.png"
+ },
+ {
+  "id": "224:12950",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-12950.png"
+ },
+ {
+  "id": "224:13113",
+  "name": "Sign up Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen__224-13113.png"
+ },
+ {
+  "id": "202:8808",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-8808.png"
+ },
+ {
+  "id": "202:9196",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__202-9196.png"
+ },
+ {
+  "id": "182:1164",
+  "name": "Splash",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__splash__182-1164.png"
+ },
+ {
+  "id": "1256:5643",
+  "name": "Onbarding Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__onbarding-screen__1256-5643.png"
+ },
+ {
+  "id": "1668:10196",
+  "name": "Onbarding Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__onbarding-screen__1668-10196.png"
+ },
+ {
+  "id": "1666:5090",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__1666-5090.png"
+ },
+ {
+  "id": "1668:6644",
+  "name": "Sign up Screen (Birthday)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-birthday__1668-6644.png"
+ },
+ {
+  "id": "1668:6674",
+  "name": "Sign up Screen (Birthday)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-birthday__1668-6674.png"
+ },
+ {
+  "id": "1668:6704",
+  "name": "Sign up Screen (Birthday)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-birthday__1668-6704.png"
+ },
+ {
+  "id": "1668:9453",
+  "name": "Sign up Screen (Password)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-password__1668-9453.png"
+ },
+ {
+  "id": "1668:9502",
+  "name": "Sign up Screen (Password)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-password__1668-9502.png"
+ },
+ {
+  "id": "1668:9671",
+  "name": "Sign up Screen (Password)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-password__1668-9671.png"
+ },
+ {
+  "id": "1668:9844",
+  "name": "Sign up Screen (Password)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-password__1668-9844.png"
+ },
+ {
+  "id": "1668:10017",
+  "name": "Sign up Screen (Password)",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__sign-up-screen-password__1668-10017.png"
+ },
+ {
+  "id": "1666:5443",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__1666-5443.png"
+ },
+ {
+  "id": "1666:5757",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__1666-5757.png"
+ },
+ {
+  "id": "1666:5915",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__1666-5915.png"
+ },
+ {
+  "id": "1667:6081",
+  "name": "Log in Screen/ Error",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen-error__1667-6081.png"
+ },
+ {
+  "id": "320:4775",
+  "name": "Splash",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__splash__320-4775.png"
+ },
+ {
+  "id": "1668:10327",
+  "name": "Welcome Page",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__welcome-page__1668-10327.png"
+ },
+ {
+  "id": "1527:5540",
+  "name": "Personalisation",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__personalisation__1527-5540.png"
+ },
+ {
+  "id": "1527:5641",
+  "name": "Personalisation",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__personalisation__1527-5641.png"
+ },
+ {
+  "id": "1527:5742",
+  "name": "Personalisation",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__personalisation__1527-5742.png"
+ },
+ {
+  "id": "1666:4791",
+  "name": "Log in Screen",
+  "path": "Auth Flow",
+  "w": 393,
+  "h": 852,
+  "file": "auth-flow__log-in-screen__1666-4791.png"
+ },
+ {
+  "id": "1777:5166",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5166.png"
+ },
+ {
+  "id": "1777:5736",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5736.png"
+ },
+ {
+  "id": "1777:5370",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5370.png"
+ },
+ {
+  "id": "1777:5816",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5816.png"
+ },
+ {
+  "id": "1777:5302",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5302.png"
+ },
+ {
+  "id": "1777:5896",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5896.png"
+ },
+ {
+  "id": "762:4137",
+  "name": "Clips/Comments",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips-comments__762-4137.png"
+ },
+ {
+  "id": "1777:5234",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5234.png"
+ },
+ {
+  "id": "946:7915",
+  "name": "Status",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__status__946-7915.png"
+ },
+ {
+  "id": "1777:5656",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5656.png"
+ },
+ {
+  "id": "1777:5976",
+  "name": "Clips/Like Action",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips-like-action__1777-5976.png"
+ },
+ {
+  "id": "1777:5471",
+  "name": "Clips",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips__1777-5471.png"
+ },
+ {
+  "id": "1777:6395",
+  "name": "Clips Promp",
+  "path": "Clips",
+  "w": 393,
+  "h": 852,
+  "file": "clips__clips-promp__1777-6395.png"
+ },
+ {
+  "id": "743:4005",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__743-4005.png"
+ },
+ {
+  "id": "1527:5774",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__1527-5774.png"
+ },
+ {
+  "id": "1530:5956",
+  "name": "Share Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__share-live__1530-5956.png"
+ },
+ {
+  "id": "946:8024",
+  "name": "Join Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__join-live__946-8024.png"
+ },
+ {
+  "id": "946:8199",
+  "name": "Join Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__join-live__946-8199.png"
+ },
+ {
+  "id": "946:7422",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__946-7422.png"
+ },
+ {
+  "id": "749:4263",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__749-4263.png"
+ },
+ {
+  "id": "1871:8783",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__1871-8783.png"
+ },
+ {
+  "id": "749:4347",
+  "name": "Live (Product View)",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live-product-view__749-4347.png"
+ },
+ {
+  "id": "946:7514",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__946-7514.png"
+ },
+ {
+  "id": "743:3858",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__743-3858.png"
+ },
+ {
+  "id": "946:7561",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__946-7561.png"
+ },
+ {
+  "id": "749:4191",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__749-4191.png"
+ },
+ {
+  "id": "1868:8705",
+  "name": "Live",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live__1868-8705.png"
+ },
+ {
+  "id": "743:4118",
+  "name": "Live Ended",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live-ended__743-4118.png"
+ },
+ {
+  "id": "946:7627",
+  "name": "Live Ended",
+  "path": "Live",
+  "w": 393,
+  "h": 852,
+  "file": "live__live-ended__946-7627.png"
+ },
+ {
+  "id": "944:7079",
+  "name": "Live Ended (Suggested)",
+  "path": "Live",
+  "w": 393,
+  "h": 1413,
+  "file": "live__live-ended-suggested__944-7079.png"
+ },
+ {
+  "id": "1829:6011",
+  "name": "Post",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__post__1829-6011.png"
+ },
+ {
+  "id": "1829:6562",
+  "name": "Post",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__post__1829-6562.png"
+ },
+ {
+  "id": "1868:8607",
+  "name": "Post",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__post__1868-8607.png"
+ },
+ {
+  "id": "1829:6380",
+  "name": "Post",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__post__1829-6380.png"
+ },
+ {
+  "id": "1829:7018",
+  "name": "Live",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__live__1829-7018.png"
+ },
+ {
+  "id": "1829:7705",
+  "name": "Live",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__live__1829-7705.png"
+ },
+ {
+  "id": "1829:7062",
+  "name": "Live",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__live__1829-7062.png"
+ },
+ {
+  "id": "1829:7552",
+  "name": "Live",
+  "path": "",
+  "w": 393,
+  "h": 852,
+  "file": "misc__live__1829-7552.png"
+ },
+ {
+  "id": "1609:5118",
+  "name": "Creator's Profiile",
+  "path": "Profile Section",
+  "w": 393,
+  "h": 1682,
+  "file": "profile-section__creator-s-profiile__1609-5118.png"
+ },
+ {
+  "id": "1620:5601",
+  "name": "Own Profiile",
+  "path": "Profile Section",
+  "w": 393,
+  "h": 1682,
+  "file": "profile-section__own-profiile__1620-5601.png"
+ },
+ {
+  "id": "1624:6185",
+  "name": "Own Profiile",
+  "path": "Profile Section",
+  "w": 393,
+  "h": 1682,
+  "file": "profile-section__own-profiile__1624-6185.png"
+ },
+ {
+  "id": "1620:5772",
+  "name": "Follow Creator's Profiile",
+  "path": "Profile Section",
+  "w": 393,
+  "h": 1682,
+  "file": "profile-section__follow-creator-s-profiile__1620-5772.png"
+ },
+ {
+  "id": "1624:6359",
+  "name": "Chats",
+  "path": "Profile Section",
+  "w": 393,
+  "h": 852,
+  "file": "profile-section__chats__1624-6359.png"
+ },
+ {
+  "id": "908:4647",
+  "name": "Chats (Search)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-search__908-4647.png"
+ },
+ {
+  "id": "1158:5558",
+  "name": "Chats",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats__1158-5558.png"
+ },
+ {
+  "id": "1161:6694",
+  "name": "Chats (Skeleton)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-skeleton__1161-6694.png"
+ },
+ {
+  "id": "1161:5903",
+  "name": "Chats",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats__1161-5903.png"
+ },
+ {
+  "id": "1132:5183",
+  "name": "Chats (Open)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-open__1132-5183.png"
+ },
+ {
+  "id": "1153:5130",
+  "name": "Chats (Keyboard Up Empty)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-keyboard-up-empty__1153-5130.png"
+ },
+ {
+  "id": "1153:5390",
+  "name": "Chats (Keyboard Up)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-keyboard-up__1153-5390.png"
+ },
+ {
+  "id": "1423:6104",
+  "name": "Chats (Search)",
+  "path": "Chats",
+  "w": 393,
+  "h": 852,
+  "file": "chats__chats-search__1423-6104.png"
+ },
+ {
+  "id": "874:5002",
+  "name": "Profile for Normal User (Dark Mode)",
+  "path": "",
+  "w": 393,
+  "h": 1339,
+  "file": "misc__profile-for-normal-user-dark-mode__874-5002.png"
+ },
+ {
+  "id": "1527:5243",
+  "name": "Personalisation",
+  "path": "Personalization",
+  "w": 393,
+  "h": 852,
+  "file": "personalization__personalisation__1527-5243.png"
+ },
+ {
+  "id": "1527:5406",
+  "name": "Personalisation",
+  "path": "Personalization",
+  "w": 393,
+  "h": 852,
+  "file": "personalization__personalisation__1527-5406.png"
+ },
+ {
+  "id": "1252:5488",
+  "name": "Personalisation",
+  "path": "Personalization",
+  "w": 393,
+  "h": 852,
+  "file": "personalization__personalisation__1252-5488.png"
+ },
+ {
+  "id": "1397:5412",
+  "name": "Home (Feed)",
+  "path": "",
+  "w": 393,
+  "h": 2710,
+  "file": "misc__home-feed__1397-5412.png"
+ },
+ {
+  "id": "1800:4913",
+  "name": "Home (Feed)/Product Overlay",
+  "path": "",
+  "w": 393,
+  "h": 2710,
+  "file": "misc__home-feed-product-overlay__1800-4913.png"
+ },
+ {
+  "id": "1397:5805",
+  "name": "Home (Mart)",
+  "path": "",
+  "w": 393,
+  "h": 2300,
+  "file": "misc__home-mart__1397-5805.png"
+ },
+ {
+  "id": "1608:5029",
+  "name": "Cart",
+  "path": "Shopping Cart",
+  "w": 393,
+  "h": 852,
+  "file": "shopping-cart__cart__1608-5029.png"
+ },
+ {
+  "id": "1624:6646",
+  "name": "Cart (Empty state)",
+  "path": "Shopping Cart",
+  "w": 393,
+  "h": 1418,
+  "file": "shopping-cart__cart-empty-state__1624-6646.png"
+ },
+ {
+  "id": "1852:7461",
+  "name": "Home (Feed)",
+  "path": "",
+  "w": 393,
+  "h": 2710,
+  "file": "misc__home-feed__1852-7461.png"
+ },
+ {
+  "id": "1861:7735",
+  "name": "Settings (Account)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-account__1861-7735.png"
+ },
+ {
+  "id": "1863:8217",
+  "name": "Settings (Notifications)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-notifications__1863-8217.png"
+ },
+ {
+  "id": "1863:8142",
+  "name": "Settings (Security)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-security__1863-8142.png"
+ },
+ {
+  "id": "1863:8328",
+  "name": "Settings (App Preference)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-app-preference__1863-8328.png"
+ },
+ {
+  "id": "1863:8448",
+  "name": "Settings (Support)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-support__1863-8448.png"
+ },
+ {
+  "id": "1863:8286",
+  "name": "Settings (Payment Methods)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-payment-methods__1863-8286.png"
+ },
+ {
+  "id": "1863:8352",
+  "name": "Settings (Payment Methods)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-payment-methods__1863-8352.png"
+ },
+ {
+  "id": "1863:8466",
+  "name": "Settings (About)",
+  "path": "Settings",
+  "w": 393,
+  "h": 852,
+  "file": "settings__settings-about__1863-8466.png"
+ },
+ {
+  "id": "1924:5668",
+  "name": "Settings",
+  "path": "Settings",
+  "w": 393,
+  "h": 894,
+  "file": "settings__settings__1924-5668.png"
+ },
+ {
+  "id": "1915:5100",
+  "name": "Settings for Sellers",
+  "path": "Settings",
+  "w": 393,
+  "h": 984,
+  "file": "settings__settings-for-sellers__1915-5100.png"
+ },
+ {
+  "id": "1937:6027",
+  "name": "Seller Dahbooard",
+  "path": "",
+  "w": 393,
+  "h": 1074,
+  "file": "misc__seller-dahbooard__1937-6027.png"
+ },
+ {
+  "id": "1829:6788",
+  "name": "Story",
+  "path": "Story",
+  "w": 393,
+  "h": 852,
+  "file": "story__story__1829-6788.png"
+ },
+ {
+  "id": "1829:6852",
+  "name": "Story",
+  "path": "Story",
+  "w": 393,
+  "h": 1003,
+  "file": "story__story__1829-6852.png"
+ },
+ {
+  "id": "1829:6953",
+  "name": "Story",
+  "path": "Story",
+  "w": 393,
+  "h": 852,
+  "file": "story__story__1829-6953.png"
+ }
+]
