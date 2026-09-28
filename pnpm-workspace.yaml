@@ -23,6 +23,8 @@ allowBuilds:
   "unrs-resolver": true
   "lmdb": true
   "msgpackr-extract": true
+  '@prisma/engines': set this to true or false
+  prisma: set this to true or false
 
 # ── Supply-chain hardening ──────────────────────────────────────────────
 # Refuse versions published less than 24h ago: most hijacked releases are
