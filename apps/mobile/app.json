@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Zudomart",
+    "slug": "zudomart",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.zudomart.app"
+    },
+    "android": {
+      "package": "com.zudomart.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png"
+      }
+    },
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    }
+  }
+}
