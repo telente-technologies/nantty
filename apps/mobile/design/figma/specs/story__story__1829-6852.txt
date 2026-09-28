@@ -1,0 +1,45 @@
+# Story / Story  (node 1829:6852, 393x1003, reference: screens/story__story__1829-6852.png)
+FRAME "Story" [0,0 393x1003] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x49] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 97x25] flex=row gap=24 align=center
+      ICON cancel-20.svg [16,68.5 20x20] (Cancel)
+      TEXT "Story" Inter 500 21/25.2 ls-0.4 #000000 [60,66 53x25]
+  FRAME "Frame 783" [16,123 77x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+    TEXT "Recents" Inter 500 13/16.9 ls-0.3 #000000 [20,127 49x17]
+    REGULAR_POLYGON "Polygon 1" [77,129.5 12x12] bg=#000000 radius=1
+  FRAME "Frame 784" [303,123 74x25] bg=#DADADA radius=4 flex=row pad=4,8,4,8 gap=8 justify=center align=center
+    ICON selection-12.svg [311,129.5 12x12] (Selection)
+    TEXT "Select" Inter 400 13/16.9 ls-0.3 #000000 [331,127 38x17]
+  FRAME "Frame 796" [0,172 393x800] flex=col
+    FRAME "Frame 792" [0,172 393x200] flex=row align=center fill=w
+      FRAME "Frame 789" [0,172 131x200] bg=#DADADA
+      LINE "Line 28" [131,172 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 790" [131,172 131x200] bg=#DADADA
+      LINE "Line 29" [262,172 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 791" [262,172 131x200] bg=#DADADA
+    LINE "Line 33" [0,372 393x0] border=#5B5B5B/1/center stroke=#5B5B5B/1
+    FRAME "Frame 793" [0,372 393x200] flex=row align=center fill=w
+      FRAME "Frame 789" [0,372 131x200] bg=#DADADA
+      LINE "Line 28" [131,372 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 790" [131,372 131x200] bg=#DADADA
+      LINE "Line 29" [262,372 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 791" [262,372 131x200] bg=#DADADA
+    LINE "Line 34" [0,572 393x0] border=#5B5B5B/1/center stroke=#5B5B5B/1
+    FRAME "Frame 794" [0,572 393x200] flex=row align=center fill=w
+      FRAME "Frame 789" [0,572 131x200] bg=#DADADA
+      LINE "Line 28" [131,572 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 790" [131,572 131x200] bg=#DADADA
+      LINE "Line 29" [262,572 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 791" [262,572 131x200] bg=#DADADA
+    LINE "Line 35" [0,772 393x0] border=#5B5B5B/1/center stroke=#5B5B5B/1
+    FRAME "Frame 795" [0,772 393x200] flex=row align=center fill=w
+      FRAME "Frame 789" [0,772 131x200] bg=#DADADA
+      LINE "Line 28" [131,772 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 790" [131,772 131x200] bg=#DADADA
+      LINE "Line 29" [262,772 0x200] border=#2C2C2C/0.5/center stroke=#2C2C2C/0.5
+      FRAME "Frame 791" [262,772 131x200] bg=#DADADA
+  FRAME "Frame 787" [83,753 228x33] bg=#909090 radius=999 flex=row pad=8,12,8,12 gap=12 align=center
+    TEXT "STORY" Inter 500 13/16.9 ls-0.3 #000000 [95,761 43x17]
+    TEXT "POST" Inter 500 13/16.9 ls-0.3 #5B5B5B [150,761 35x17]
+    TEXT "PRODUCT" Inter 500 13/16.9 ls-0.3 #5B5B5B [197,761 63x17]
+    TEXT "LIVE" Inter 500 13/16.9 ls-0.3 #5B5B5B [272,761 27x17]

@@ -1,0 +1,16 @@
+# Settings / Settings (Support)  (node 1863:8448, 393x852, reference: screens/settings__settings-support__1863-8448.png)
+FRAME "Settings (Support)" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 829" [16,142 361x132] flex=col
+    FRAME "Frame 826" [16,142 361x44] bg=#FFFFFF radius=12,12,0,0 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "FAQs" Inter 400 14/16.8 ls-0.3 #000000 [28,155.5 34x17]
+      ICON caret-right-24.svg [341,152 24x24] (CaretRight)
+    FRAME "Frame 829" [16,186 361x44] bg=#FFFFFF flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Contact Us" Inter 400 14/16.8 ls-0.3 #000000 [28,199.5 72x17]
+      ICON arrow-up-right-24.svg [341,196 24x24] (ArrowUpRight)
+    FRAME "Frame 828" [16,230 361x44] bg=#FFFFFF radius=0,0,12,12 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Report a bug" Inter 400 14/16.8 ls-0.3 #000000 [28,243.5 83x17]
+      ICON arrow-up-right-24.svg [341,240 24x24] (ArrowUpRight)
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,16,12,16 gap=202 align=center
+    FRAME "Frame 693" [16,66 110x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      TEXT "Support" Inter 500 18/21.6 ls-0.4 #000000 [58,67 68x22]

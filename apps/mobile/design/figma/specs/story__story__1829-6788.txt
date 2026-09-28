@@ -1,0 +1,17 @@
+# Story / Story  (node 1829:6788, 393x852, reference: screens/story__story__1829-6788.png)
+FRAME "Story" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x49] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 97x25] flex=row gap=24 align=center
+      ICON cancel-20.svg [16,68.5 20x20] (Cancel)
+      TEXT "Story" Inter 500 21/25.2 ls-0.4 #000000 [60,66 53x25]
+  FRAME "Frame 787" [83,674 228x33] bg=#909090 radius=999 flex=row pad=8,12,8,12 gap=12 align=center
+    TEXT "STORY" Inter 500 13/16.9 ls-0.3 #000000 [95,682 43x17]
+    TEXT "POST" Inter 500 13/16.9 ls-0.3 #5B5B5B [150,682 35x17]
+    TEXT "PRODUCT" Inter 500 13/16.9 ls-0.3 #5B5B5B [197,682 63x17]
+    TEXT "LIVE" Inter 500 13/16.9 ls-0.3 #5B5B5B [272,682 27x17]
+  FRAME "Frame 788" [113,726 168x72] flex=row gap=24 align=center
+    ICON image-24.svg [113,750 24x24] (Image)
+    GROUP "Group 89" [161,726 72x72]
+      CIRCLE "Ellipse 39" [167,732 60x60] bg=#2043F5
+      CIRCLE "Ellipse 40" [161,726 72x72] bg=#2043F5
+    ICON video-camera-24.svg [257,750 24x24] (VideoCamera)

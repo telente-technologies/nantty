@@ -1,0 +1,81 @@
+# Shopping Cart / Cart (Empty state)  (node 1624:6646, 393x1418, reference: screens/shopping-cart__cart-empty-state__1624-6646.png)
+FRAME "Cart (Empty state)" [0,0 393x1418] bg=#F7F8FE clip
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,12,12,12 gap=202 justify=space_between align=center
+    FRAME "Frame 693" [12,66 79x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [12,66 24x24] (arrow-left)
+      TEXT "Cart" Inter 500 18/21.6 ls-0.4 #000000 [54,67 37x22]
+    ICON frame-694-24.svg [357,66 24x24] (Frame 694)
+  FRAME "Frame 719" [53,351 288x137] flex=col gap=24 align=center
+    ICON shopping-cart-48.svg [173,351 48x48] (ShoppingCart)
+    FRAME "Frame 716" [53,423 288x65] flex=col gap=12 align=center fill=w
+      TEXT "Add items to start a Cart" Inter 500 16/19.2 ls-0.3 #000000 align=center [53,423 288x19]
+      TEXT "Once you add items from stores or vendors, your cart will show up here." Inter 400 13/16.9 ls-0.3 #909090 align=center [53,454 288x34]
+  FRAME "Frame 568" [0,610 393x708] flex=col gap=23 align=center
+    TEXT "Featured with" Inter 500 16/19.2 ls-0.3 #5B5B5B [16,610 361x19]
+    FRAME "Frame 118" [0,652 393x666] flex=col gap=12 fill=w
+      FRAME "Frame 119" [0,652 393x214] flex=row pad=0,12,0,12 gap=7 justify=space_between align=center
+        INST "Product Card" [12,652 175x214] flex=col gap=8
+          FRAME "Product Image" [12,652 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,830 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,830 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,830 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,849 140x17]
+            ICON like-16.svg [171,830 16x16] (Like)
+        INST "Product Card" [206,652 175x214] flex=col gap=8
+          FRAME "Product Image" [206,652 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,830 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,830 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,830 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,849 140x17]
+            ICON like-16.svg [365,830 16x16] (Like)
+      FRAME "Frame 116" [0,878 393x214] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+        INST "Product Card" [12,878 175x214] flex=col gap=8
+          FRAME "Product Image" [12,878 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,1056 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,1056 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,1056 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,1075 140x17]
+            ICON like-16.svg [171,1056 16x16] (Like)
+        INST "Product Card" [206,878 175x214] flex=col gap=8
+          FRAME "Product Image" [206,878 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,1056 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,1056 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,1056 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,1075 140x17]
+            ICON like-16.svg [365,1056 16x16] (Like)
+      FRAME "Frame 121" [0,1104 393x214] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+        INST "Product Card" [12,1104 175x214] flex=col gap=8
+          FRAME "Product Image" [12,1104 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,1282 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,1282 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,1282 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,1301 140x17]
+            ICON like-16.svg [171,1282 16x16] (Like)
+        INST "Product Card" [206,1104 175x214] flex=col gap=8
+          FRAME "Product Image" [206,1104 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,1282 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,1282 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,1282 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,1301 140x17]
+            ICON like-16.svg [365,1282 16x16] (Like)
+  FRAME "Frame 716" [0,503 393x107] bg=#F7F8FE flex=row pad=70,12,12,12 gap=12 clip
+    FRAME "Frame 718" [12,573 24x25] bg=#D2DAFD radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
+      TEXT "All" Inter 500 13/16.9 ls-0.3 #2043F5 [16,577 16x17]
+    FRAME "Frame 719" [48,573 56x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Fashion" Inter 500 13/16.9 ls-0.3 #5B5B5B [52,577 48x17]
+    FRAME "Frame 721" [116,573 35x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Kids" Inter 500 13/16.9 ls-0.3 #5B5B5B [120,577 27x17]
+    FRAME "Frame 720" [163,573 149x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Beauty & Personal Care" Inter 500 13/16.9 ls-0.3 #5B5B5B [167,577 141x17]
+    FRAME "Frame 722" [324,573 75x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Appliances" Inter 500 13/16.9 ls-0.3 #5B5B5B [328,577 67x17]
+  FRAME "Frame 717" [0,1324 393x94] bg=#F7F8FE flex=col background_blur=100
+    FRAME "Navbar" [0,1324 393x60] border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 fill=w shadow=#000000@0.04 0,2 blur4 shadow=#000000@0.12 0,8 blur16 spread12 clip
+      FRAME "Frame 81" [16,1336 361x44] flex=row gap=44 justify=space_between align=center fill=w
+        ICON home-33.svg [16,1344 33x28] (Home)
+        ICON flips-34-alt-alt.svg [81.3,1346 34x24] (Flips)
+        FRAME "Search" [147.5,1336 83x44] bg=#2043F5 radius=999 flex=col pad=8,12,8,12 gap=2 justify=center align=center
+          ICON plus-28.svg [175,1344 28x28] (Plus)
+        ICON chat-37-alt-alt.svg [262.8,1346 37x24] (Chat)
+        FRAME "User Profile" [332,1344 45x28] flex=col gap=2 justify=center align=center
+          FRAME "Frame 302" [340.5,1344 28x28] bg=image:avatar-placeholder.jpg radius=50 fill=h

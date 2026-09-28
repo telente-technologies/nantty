@@ -1,0 +1,69 @@
+# Shopping Cart / Cart  (node 1608:5029, 393x852, reference: screens/shopping-cart__cart__1608-5029.png)
+FRAME "Cart" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 761" [0,54 393x48] flex=row pad=12,12,12,12 gap=202 justify=space_between align=center
+    FRAME "Frame 693" [12,66 79x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [12,66 24x24] (arrow-left)
+      TEXT "Cart" Inter 500 18/21.6 ls-0.4 #000000 [54,67 37x22]
+    ICON frame-694-24.svg [357,66 24x24] (Frame 694)
+  FRAME "Frame 863" [12,497 369x171] flex=col gap=12
+    TEXT "Order Summary" Inter 600 14/16.8 ls-0.3 #000000 [12,497 369x17]
+    FRAME "Frame 862" [12,526 369x142] border=#D9D9D9/1 radius=12 flex=col pad=16,16,16,16 gap=24 fill=w
+      FRAME "Frame 861" [29,543 335x67] flex=col gap=8 fill=w
+        FRAME "Frame 859" [29,543 335x17] flex=row gap=236 justify=space_between align=center fill=w
+          TEXT "Item(s) total" Inter 400 13/16.9 ls-0.3 #000000 [29,543 72x17]
+          FRAME "Frame 855" [321,543 43x17] flex=row align=center
+            TEXT "N" Inter 500 11/15.4 ls-0.2 #000000 [321,544 9x15]
+            TEXT "1,200" Inter 500 13/16.9 ls-0.3 #000000 [330,543 34x17]
+        FRAME "Frame 858" [29,568 335x17] flex=row gap=222 justify=space_between align=center fill=w
+          TEXT "Shop discount" Inter 400 13/16.9 ls-0.3 #000000 [29,568 86x17]
+          FRAME "Frame 857" [321,568 43x17] flex=row align=center
+            TEXT "N" Inter 500 11/15.4 ls-0.2 #000000 [321,569 9x15]
+            TEXT "1,200" Inter 500 13/16.9 ls-0.3 #000000 [330,568 34x17]
+        FRAME "Frame 860" [29,593 335x17] flex=row gap=275 justify=space_between align=center fill=w
+          TEXT "Shipping" Inter 400 13/16.9 ls-0.3 #000000 [29,593 52x17]
+          TEXT "Free" Inter 400 12/16.8 ls-0.2 #000000 [339,593 25x17]
+      FRAME "Frame 856" [29,634 335x17] flex=row gap=217 justify=space_between align=center fill=w
+        TEXT "Estimated total" Inter 500 13/16.9 ls-0.3 #000000 [29,634 91x17]
+        FRAME "Frame 855" [321,634 43x17] flex=row align=center
+          TEXT "N" Inter 500 11/15.4 ls-0.2 #000000 [321,635 9x15]
+          TEXT "1,200" Inter 500 13/16.9 ls-0.3 #000000 [330,634 34x17]
+  FRAME "Frame 397" [16,750 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Proceed to Checkout" Inter 500 14/16.8 ls-0.3 #FFFFFF [128.5,763.5 136x17]
+  FRAME "Frame 846" [12,102 369x88] flex=row pad=12,0,12,0 gap=24 align=center
+    FRAME "Frame 841" [12,114 281x64] flex=row gap=12 align=center fill=w
+      RECT "Rectangle 176" [12,114 64x64] bg=#D9D9D9 radius=12
+      FRAME "Frame 840" [88,114 193x64] flex=col gap=12
+        TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [88,114 193x17]
+        FRAME "Frame 838" [88,143 91x35] bg=#D2DAFD border=#2043F5/1 radius=99 flex=row pad=8,8,8,8 gap=16 justify=center align=center
+          ICON minus-16.svg [97,152.5 16x16] (Minus)
+          TEXT "2" Inter 500 14/16.8 ls-0.3 #2043F5 [129,152 9x17]
+          ICON plus-16-alt.svg [154,152.5 16x16] (Plus)
+    FRAME "Frame 839" [317,118.5 64x55] flex=col gap=12 align=max
+      TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [317,118.5 64x19]
+      ICON trash-24.svg [357,149.5 24x24] (Trash)
+  FRAME "Frame 864" [12,190 369x88] flex=row pad=12,0,12,0 gap=24 align=center
+    FRAME "Frame 841" [12,202 281x64] flex=row gap=12 align=center fill=w
+      RECT "Rectangle 176" [12,202 64x64] bg=#D9D9D9 radius=12
+      FRAME "Frame 840" [88,202 193x64] flex=col gap=12
+        TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [88,202 193x17]
+        FRAME "Frame 838" [88,231 91x35] bg=#D2DAFD border=#2043F5/1 radius=99 flex=row pad=8,8,8,8 gap=16 justify=center align=center
+          ICON minus-16.svg [97,240.5 16x16] (Minus)
+          TEXT "2" Inter 500 14/16.8 ls-0.3 #2043F5 [129,240 9x17]
+          ICON plus-16-alt.svg [154,240.5 16x16] (Plus)
+    FRAME "Frame 839" [317,206.5 64x55] flex=col gap=12 align=max
+      TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [317,206.5 64x19]
+      ICON trash-24.svg [357,237.5 24x24] (Trash)
+  FRAME "Frame 865" [12,278 369x88] flex=row pad=12,0,12,0 gap=24 align=center
+    FRAME "Frame 841" [12,290 281x64] flex=row gap=12 align=center fill=w
+      RECT "Rectangle 176" [12,290 64x64] bg=#D9D9D9 radius=12
+      FRAME "Frame 840" [88,290 193x64] flex=col gap=12
+        TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [88,290 193x17]
+        FRAME "Frame 838" [88,319 91x35] bg=#D2DAFD border=#2043F5/1 radius=99 flex=row pad=8,8,8,8 gap=16 justify=center align=center
+          ICON minus-16.svg [97,328.5 16x16] (Minus)
+          TEXT "2" Inter 500 14/16.8 ls-0.3 #2043F5 [129,328 9x17]
+          ICON plus-16-alt.svg [154,328.5 16x16] (Plus)
+    FRAME "Frame 839" [317,294.5 64x55] flex=col gap=12 align=max
+      TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [317,294.5 64x19]
+      ICON trash-24.svg [357,325.5 24x24] (Trash)
+  TEXT "By making a purchase, you agree to our Terms of Service and Privacy Policy." Inter 400 12/16.8 ls-0.2 #909090 align=center runs: «By »{w400 s12}«making a purchase»«, you agree to our »{w400 s12}«Terms of Service»{w400 s12 #2043F5}« and»{w400 s12}« »«Privacy Policy»{w400 s12 #2043F5}«.»{w400 s12} [12,684 361x34]
+  FRAME "Frame 717" [0,818 393x34] bg=#F7F8FE flex=col background_blur=100
