@@ -13,7 +13,7 @@ export function subscribeToEvent<TType extends string, TPayload>(
 export async function publishEvent<TType extends string, TPayload>(
   events: EventBus,
   definition: EventDefinition<TType, TPayload>,
-  payload: TPayload,
+  payload: NoInfer<TPayload>,
 ): Promise<void> {
   await events.publish(definition.create(payload));
 }
