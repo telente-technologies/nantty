@@ -6,4 +6,4 @@ export interface UserLoggedInPayload {
   readonly method: "password" | "google" | "apple" | "one_time_code";
 }
 
-export const UserLoggedInEvent = defineEvent<"auth.user-logged-in", UserLoggedInPayload>("auth.user-logged-in");
+export const UserLoggedInEvent = defineEvent<"auth.userLoggedIn", UserLoggedInPayload>("auth.userLoggedIn");

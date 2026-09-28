@@ -6,4 +6,4 @@ export interface UserRegisteredPayload {
   readonly method: "password" | "google" | "apple";
 }
 
-export const UserRegisteredEvent = defineEvent<"auth.user-registered", UserRegisteredPayload>("auth.user-registered");
+export const UserRegisteredEvent = defineEvent<"auth.userRegistered", UserRegisteredPayload>("auth.userRegistered");

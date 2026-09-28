@@ -1,3 +1,3 @@
-export * from "./password-reset-completed.event.js";
-export * from "./user-logged-in.event.js";
-export * from "./user-registered.event.js";
+export * from "./passwordResetCompleted.event.js";
+export * from "./userLoggedIn.event.js";
+export * from "./userRegistered.event.js";
