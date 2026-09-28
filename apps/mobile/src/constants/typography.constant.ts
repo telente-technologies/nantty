@@ -8,8 +8,8 @@ export const fontFamily = {
 
 export type FontWeight = keyof typeof fontFamily;
 
-export const lineHeightFor = (size: number): number => Math.round(size * 1.2 * 10) / 10;
-export const letterSpacingFor = (size: number): number => Math.round(size * -0.02 * 100) / 100;
+export const calculateDefaultLineHeight = (size: number): number => Math.round(size * 1.2 * 10) / 10;
+export const calculateDefaultLetterSpacing = (size: number): number => Math.round(size * -0.02 * 100) / 100;
 
 export const textStyles = {
   h1: { size: 21, lineHeight: 25 },
