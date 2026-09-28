@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   rows: { marginTop: 118, gap: 16, overflow: "hidden" },
   row: { flexDirection: "row", gap: 8 },
   photo: { width: 100, height: 56, borderRadius: 4 },
-  heading: { marginTop: 32, paddingHorizontal: 47, gap: 8, alignItems: "center" },
+  heading: { marginTop: 32, paddingHorizontal: 40, gap: 8, alignItems: "center" },
   buttons: { marginTop: 28, paddingHorizontal: 16, gap: 16 },
   footer: { marginTop: 40, paddingHorizontal: 16, gap: 28, alignItems: "center" },
   switch: { flexDirection: "row", alignItems: "center", gap: 4 },
