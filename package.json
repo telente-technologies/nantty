@@ -1,0 +1,20 @@
+{
+  "name": "zudomart",
+  "private": true,
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r --parallel run build",
+    "test": "pnpm -r --parallel run test",
+    "lint": "pnpm -r --parallel run lint",
+    "typecheck": "pnpm -r --parallel run typecheck",
+    "audit": "pnpm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}
