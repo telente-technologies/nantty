@@ -1,11 +1,17 @@
 import { BaseModule, type ModuleContext } from "@zudojs/core";
+import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 
-/**
- * follows module.
- *
- * Registered with the runtime in app.ts. The runtime calls onInitialize
- * during start and onShutdown during stop.
- */
+import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
+import { BlockUserHandler } from "./commands/blockUser/blockUser.handler.js";
+import { FollowHandler } from "./commands/follow/follow.handler.js";
+import { UnblockUserHandler } from "./commands/unblockUser/unblockUser.handler.js";
+import { UnfollowHandler } from "./commands/unfollow/unfollow.handler.js";
+import { GetFollowStatusHandler } from "./queries/getFollowStatus/getFollowStatus.handler.js";
+import { ListBlockedUsersHandler } from "./queries/listBlockedUsers/listBlockedUsers.handler.js";
+import { ListFollowersHandler } from "./queries/listFollowers/listFollowers.handler.js";
+import { ListFollowingHandler } from "./queries/listFollowing/listFollowing.handler.js";
+import type { FollowsService } from "./services/follows.service.js";
+
 export class FollowsModule extends BaseModule {
   public readonly id = "follows";
   public readonly name = "follows";
@@ -21,4 +27,19 @@ export class FollowsModule extends BaseModule {
   public override async onShutdown(context: ModuleContext): Promise<void> {
     context.logger.info("follows module stopped");
   }
+}
+
+export function registerFollowsCommandAndQueryHandlers(commands: CommandBus, queries: QueryBus, followsService: FollowsService): void {
+  registerCommandHandlers(commands, [
+    new FollowHandler(followsService),
+    new UnfollowHandler(followsService),
+    new BlockUserHandler(followsService),
+    new UnblockUserHandler(followsService),
+  ]);
+  registerQueryHandlers(queries, [
+    new GetFollowStatusHandler(followsService),
+    new ListFollowersHandler(followsService),
+    new ListFollowingHandler(followsService),
+    new ListBlockedUsersHandler(followsService),
+  ]);
 }
