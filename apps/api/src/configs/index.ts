@@ -6,6 +6,8 @@ import {
 import { resolveEnvironment } from "@zudojs/constants";
 import { ConfigurationError } from "@zudojs/errors";
 
+import { loadApplicationSettings } from "./settings.config.js";
+
 const DEFAULT_PORT = 3000;
 
 /** Loads `.env` into process.env when it exists; real variables win. */
@@ -83,6 +85,7 @@ export async function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     websockets: Object.freeze({ path: text(config, "websocket_path", "/ws") }),
     email: Object.freeze({ transport: text(config, "email_transport", "console"), from: text(config, "email_from", "no-reply@localhost"), smtpHost: text(config, "smtp_host", "localhost"), smtpPort: int(config, "smtp_port", 1025), smtpSecure: text(config, "smtp_secure", "false") === "true", smtpUser: text(config, "smtp_user", ""), smtpPassword: text(config, "smtp_password", "") }),
     // zudojs:config:end
+    ...loadApplicationSettings(config),
   });
 }
 
