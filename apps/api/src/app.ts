@@ -1,0 +1,102 @@
+import type { Server } from "node:http";
+
+import { createContainer } from "@zudojs/container";
+import type { Module } from "@zudojs/core";
+import { createEventBus } from "@zudojs/events";
+import { createLogger } from "@zudojs/logger";
+import { createRuntime, type Runtime } from "@zudojs/runtime";
+
+import type { AppConfig } from "./configs/index.js";
+import { IntegrationsModule, integrations } from "./integrations/index.js";
+import { AuthModule } from "./modules/auth/index.js";
+import { UsersModule } from "./modules/users/index.js";
+import { StoresModule } from "./modules/stores/index.js";
+import { CategoriesModule } from "./modules/categories/index.js";
+import { ProductsModule } from "./modules/products/index.js";
+import { CartsModule } from "./modules/carts/index.js";
+import { OrdersModule } from "./modules/orders/index.js";
+import { PaymentsModule } from "./modules/payments/index.js";
+import { EscrowsModule } from "./modules/escrows/index.js";
+import { WalletsModule } from "./modules/wallets/index.js";
+import { PostsModule } from "./modules/posts/index.js";
+import { FeedsModule } from "./modules/feeds/index.js";
+import { FollowsModule } from "./modules/follows/index.js";
+import { ReviewsModule } from "./modules/reviews/index.js";
+import { NotificationsModule } from "./modules/notifications/index.js";
+import { MessagesModule } from "./modules/messages/index.js";
+import { SearchModule } from "./modules/search/index.js";
+import { MediaModule } from "./modules/media/index.js";
+import { WaitlistModule } from "./modules/waitlist/index.js";
+import { AuditModule } from "./modules/index.js";
+
+/** What {@link createApp} needs. */
+export interface AppOptions {
+  readonly config: AppConfig;
+  /** The Node HTTP server, for integrations that attach to it. */
+  readonly httpServer?: Server;
+}
+
+/**
+ * Assembles the application runtime.
+ *
+ * `createRuntime` takes two arguments: the dependencies the runtime and its
+ * modules share, and the options describing this application. Integrations
+ * (`src/integrations`) are registered first so they start before, and stop
+ * after, every other module.
+ *
+ * The runtime's container is the one modules see as
+ * `context.application.container`; server.ts registers the composition
+ * root (`container.ts`) in it under `APP_DEPENDENCIES`.
+ */
+export function createApp(options: AppOptions): Runtime {
+  const logger = createLogger({ name: "zudomart" });
+  const container = createContainer();
+  const eventBus = createEventBus();
+
+  const modules = new Map<string, Module>();
+  const integrationsModule = new IntegrationsModule(integrations, {
+    config: options.config,
+    ...(options.httpServer === undefined ? {} : { httpServer: options.httpServer }),
+  });
+  modules.set(integrationsModule.id, integrationsModule);
+  for (const module of [
+    new AuditModule(),
+    new AuthModule(),
+    new UsersModule(),
+    new StoresModule(),
+    new CategoriesModule(),
+    new ProductsModule(),
+    new CartsModule(),
+    new OrdersModule(),
+    new PaymentsModule(),
+    new EscrowsModule(),
+    new WalletsModule(),
+    new PostsModule(),
+    new FeedsModule(),
+    new FollowsModule(),
+    new ReviewsModule(),
+    new NotificationsModule(),
+    new MessagesModule(),
+    new SearchModule(),
+    new MediaModule(),
+    new WaitlistModule(),
+  ] as Module[]) {
+    modules.set(module.id, module);
+  }
+
+  const runtime = createRuntime(
+    { modules, logger, container, eventBus },
+    {
+      applicationName: "zudomart",
+      applicationVersion: "0.1.0",
+      // Resolved once by loadConfig (configs/index.ts) from NODE_ENV.
+      environment: options.config.nodeEnv,
+      // Signals are handled explicitly in server.ts.
+      handleSignals: false,
+    },
+  );
+
+  runtime.registerReadinessCheck("modules", () => runtime.state === "running");
+
+  return runtime;
+}
