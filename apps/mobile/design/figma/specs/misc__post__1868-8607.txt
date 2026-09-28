@@ -1,0 +1,10 @@
+# Post  (node 1868:8607, 393x852, reference: screens/misc__post__1868-8607.png)
+FRAME "Post" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 782" [0,54 393x49] flex=row pad=12,16,12,16 gap=310 justify=space_between align=center
+    FRAME "Frame 784" [16,66 88x25] flex=row gap=24 align=center
+      ICON cancel-20.svg [16,68.5 20x20] (Cancel)
+      TEXT "Post" Inter 500 21/25.2 ls-0.4 #000000 [60,66 44x25]
+  TEXT "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse image scale. Flows duplicate shadow outline variant rectangle comment edit. " Inter 400 14/16.8 ls-0.3 #000000 [16,115 361x68]
+  FRAME "Frame 397" [16,589 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Post" Inter 500 15/21 ls-0.3 #FFFFFF [180.5,600.5 32x21]
+  RECT "Rectangle 170" [16,204 361x361] bg=#D9D9D9 radius=12

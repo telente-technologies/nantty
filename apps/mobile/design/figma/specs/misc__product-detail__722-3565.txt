@@ -1,0 +1,140 @@
+# Product Detail  (node 722:3565, 393x2450, reference: screens/misc__product-detail__722-3565.png)
+FRAME "Product Detail" [0,0 393x2450] bg=#F7F8FE clip
+  FRAME "Frame 560" [0,110 393x451] bg=#F7F8FE flex=col
+    FRAME "Frame 445" [0,110 393x418] bg=#909090 fill=w
+    FRAME "ProductMini Banner" [0,528 393x33] bg=#F7F8FE border=#8F8F8F/1 borderSides=t1,r0,b1,l0 flex=row pad=8,12,8,12 gap=10 align=center fill=w clip
+      TEXT "New customer deal * Free Shipping" Inter 400 13/16.9 ls-0.3 #000000 [12,536 209x17]
+  FRAME "Frame 547" [12,572 72x4] flex=row gap=4 align=center
+    RECT "Rectangle 134" [12,572 12x4] bg=#D9D9D9 radius=21
+    RECT "Rectangle 133" [28,572 12x4] bg=#D9D9D9 radius=21
+    RECT "Rectangle 131" [44,572 24x4] bg=#0D0D0D radius=21
+    RECT "Rectangle 132" [72,572 12x4] bg=#D9D9D9 radius=21
+  RECT "Rectangle 142" [0,1208 393x4] bg=#D9D9D9
+  RECT "Rectangle 143" [0,959 393x4] bg=#D9D9D9
+  FRAME "Price tag" [12,600 369x98] flex=col gap=11
+    FRAME "Frame 562" [12,600 369x71] flex=col gap=12
+      FRAME "Frame 561" [12,600 369x25] flex=row gap=32 justify=space_between align=center fill=w
+        TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w700 s14 #000000}«200.00»{#000000} [12,600 269x25]
+        FRAME "Frame 549" [321,600.5 60x24] flex=row gap=12 align=center
+          ICON share-24.svg [321,600.5 24x24] (tabler-icon-share)
+          ICON bookmark-simple-24.svg [357,600.5 24x24] (BookmarkSimple)
+      TEXT "A product card title for a product that will  be here. A product card title for a product" Inter 400 13/16.9 ls-0.3 #5B5B5B [12,637 369x34]
+    FRAME "Frame 449" [12,682 39x16] flex=row gap=4 align=center
+      TEXT "2.4" Inter 500 12/14.4 ls-0.2 #000000 [12,683 19x14]
+      ICON star-16.svg [35,682 16x16] (Star)
+  FRAME "Size/color selector" [12,722 452x225] flex=col gap=12
+    FRAME "Size selector" [12,722 369x67] flex=col gap=12
+      TEXT "Size" Inter 500 14/16.8 ls-0.3 #000000 [12,722 369x17]
+      FRAME "Frame 569" [12,751 369x38] bg=#FFFFFF border=#909090/1 radius=5 flex=row pad=7,12,7,12 gap=259 justify=space_between align=center fill=w clip
+        TEXT "Size (UK)" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,761.5 56x17]
+        ICON caret-down-24.svg [345,758 24x24] (CaretDown)
+    FRAME "Size selector" [12,801 369x67] flex=col gap=12
+      TEXT "Color" Inter 500 14/16.8 ls-0.3 #000000 [12,801 369x17]
+      FRAME "Frame 569" [12,830 369x38] bg=#FFFFFF border=#909090/1 radius=5 flex=row pad=7,12,7,12 gap=259 justify=space_between align=center fill=w clip
+        TEXT "Select an option" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,840.5 97x17]
+        ICON caret-down-24.svg [345,837 24x24] (CaretDown)
+    FRAME "Size selector" [12,880 369x67] flex=col gap=12
+      TEXT "Quantity" Inter 500 14/16.8 ls-0.3 #000000 [12,880 369x17]
+      FRAME "Frame 569" [12,909 369x38] bg=#FFFFFF border=#909090/1 radius=5 flex=row pad=7,12,7,12 gap=199 justify=space_between align=center fill=w clip
+        TEXT "Number of items" Inter 500 13/16.9 ls-0.3 #5B5B5B [24,919.5 100x17]
+        FRAME "Frame 764" [334,916 35x24] flex=row gap=4 align=center
+          TEXT "1" Inter 500 14/16.8 ls-0.3 #5B5B5B [334,919.5 7x17]
+          ICON caret-down-24.svg [345,916 24x24] (CaretDown)
+  FRAME "Shipping and description" [12,975 369x221] flex=col gap=18
+    FRAME "Shipping and returns" [12,975 369x99] flex=col gap=12 fill=w
+      FRAME "Frame 450" [12,975 369x19] flex=row gap=250 justify=space_between align=center fill=w
+        TEXT "Shipping & returns" Inter 600 16/19.2 ls-0.3 #000000 [12,975 138x19]
+      TEXT "Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer." Inter 400 13/16.9 ls-0.3 #5B5B5B [12,1006 369x68]
+    FRAME "Description" [12,1092 369x104] flex=col gap=12 fill=w
+      FRAME "Frame 450" [12,1092 369x24] flex=row gap=250 justify=space_between align=center fill=w
+        TEXT "Description" Inter 600 16/19.2 ls-0.3 #000000 [12,1094.5 87x19]
+        ICON caret-down-24.svg [357,1092 24x24] (CaretDown)
+      TEXT "Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer." Inter 400 13/16.9 ls-0.3 #5B5B5B [12,1128 369x68]
+  FRAME "Frame 568" [0,1224 393x1104] flex=col gap=23 align=center
+    FRAME "About shop" [12,1224 369x147] flex=col gap=12
+      TEXT "About this shop" Inter 600 16/19.2 ls-0.3 #000000 [12,1224 369x19]
+      FRAME "Frame 566" [12,1255 254x60] flex=row gap=16 align=center
+        RECT "Rectangle 145" [12,1255 60x60] bg=#D9D9D9 radius=8
+        FRAME "Frame 565" [88,1264 178x42] flex=col gap=8
+          TEXT "Usershop Name" Inter 500 14/16.8 ls-0.3 #000000 [88,1264 178x17]
+          FRAME "Frame 564" [88,1289 178x17] flex=row gap=16 align=center
+            FRAME "Frame 455" [88,1289 41x17] flex=row gap=2 align=center
+              TEXT "3.4" Inter 700 14/16.8 ls-0.3 #000000 [88,1289 23x17]
+              ICON star-16.svg [113,1289.5 16x16] (Star)
+            FRAME "Frame 835" [145,1289 121x17] flex=row gap=4 align=center
+              TEXT "(200)" Inter 400 13/16.9 ls-0.3 #000000 [145,1289 33x17]
+              LINE "Line 21" [182,1291.5 0x12] border=#000000/1/center stroke=#000000/1
+              TEXT "(103 reviews)" Inter 400 13/16.9 ls-0.3 #000000 [186,1289 80x17]
+      FRAME "Frame 456" [12,1327 369x44] flex=row gap=8 align=center fill=w
+        FRAME "Frame 397" [12,1327 180.5x44] bg=#D9D9D9 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center fill=w
+          TEXT "Follow" Inter 500 14/16.8 ls-0.3 #000000 [81.3,1340.5 42x17]
+        FRAME "Frame 446" [200.5,1327 180.5x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center fill=w
+          TEXT "View Shop" Inter 500 14/16.8 ls-0.3 #FFFFFF [255.8,1340.5 70x17]
+    TEXT "Featured with" Inter 500 16/19.2 ls-0.3 #5B5B5B [16,1394 361x19]
+    FRAME "Frame 118" [0,1436 393x892] flex=col gap=12 fill=w
+      FRAME "Frame 119" [0,1436 393x214] flex=row pad=0,12,0,12 gap=7 justify=space_between align=center
+        INST "Product Card" [12,1436 175x214] flex=col gap=8
+          FRAME "Product Image" [12,1436 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,1614 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,1614 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,1614 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,1633 140x17]
+            ICON like-16.svg [171,1614 16x16] (Like)
+        INST "Product Card" [206,1436 175x214] flex=col gap=8
+          FRAME "Product Image" [206,1436 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,1614 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,1614 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,1614 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,1633 140x17]
+            ICON like-16.svg [365,1614 16x16] (Like)
+      FRAME "Frame 116" [0,1662 393x214] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+        INST "Product Card" [12,1662 175x214] flex=col gap=8
+          FRAME "Product Image" [12,1662 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,1840 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,1840 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,1840 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,1859 140x17]
+            ICON like-16.svg [171,1840 16x16] (Like)
+        INST "Product Card" [206,1662 175x214] flex=col gap=8
+          FRAME "Product Image" [206,1662 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,1840 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,1840 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,1840 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,1859 140x17]
+            ICON like-16.svg [365,1840 16x16] (Like)
+      FRAME "Frame 121" [0,1888 393x214] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+        INST "Product Card" [12,1888 175x214] flex=col gap=8
+          FRAME "Product Image" [12,1888 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,2066 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,2066 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,2066 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,2085 140x17]
+            ICON like-16.svg [171,2066 16x16] (Like)
+        INST "Product Card" [206,1888 175x214] flex=col gap=8
+          FRAME "Product Image" [206,1888 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,2066 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,2066 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,2066 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,2085 140x17]
+            ICON like-16.svg [365,2066 16x16] (Like)
+      FRAME "Frame 122" [0,2114 393x214] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+        INST "Product Card" [12,2114 175x214] flex=col gap=8
+          FRAME "Product Image" [12,2114 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [12,2292 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [12,2292 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [12,2292 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [12,2311 140x17]
+            ICON like-16.svg [171,2292 16x16] (Like)
+        INST "Product Card" [206,2114 175x214] flex=col gap=8
+          FRAME "Product Image" [206,2114 175x170] bg=#D9D9D9 fill=w
+          FRAME "Product Info" [206,2292 175x36] flex=row gap=19 fill=w
+            FRAME "Frame 131" [206,2292 140x36] flex=col gap=2
+              TEXT "Product Name" Inter 400 13/16.9 ls-0.3 #000000 [206,2292 140x17]
+              TEXT "N200.00" Inter 500 13/16.9 ls-0.3 #000000 [206,2311 140x17]
+            ICON like-16.svg [365,2292 16x16] (Like)
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,12,12,12 gap=202 justify=space_between align=center
+    ICON arrow-left-24.svg [12,66 24x24] (Frame 693)
+    ICON frame-694-24.svg [357,66 24x24] (Frame 694)
+  FRAME "Frame 552" [0,2349 393x68] bg=#F7F8FE flex=col pad=12,12,12,12 gap=10 shadow=#000000@0.04 0,-2 blur4 shadow=#000000@0.12 0,-8 blur16 spread12
+    FRAME "Frame 446" [12,2361 369x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center fill=w
+      TEXT "Add to Cart" Inter 500 15/21 ls-0.3 #FFFFFF [156,2372.5 81x21]

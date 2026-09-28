@@ -1,0 +1,111 @@
+# Seller Dahbooard  (node 1937:6027, 393x1074, reference: screens/misc__seller-dahbooard__1937-6027.png)
+FRAME "Seller Dahbooard" [0,0 393x1074] bg=#F7F8FE clip
+  FRAME "Frame 836" [142,162 110x84] flex=col gap=8 justify=center align=center
+    TEXT "Total sales" Inter 500 14/16.8 ls-0.3 #5B5B5B [162.5,162 69x17]
+    FRAME "Frame 847" [142,187 110x34] flex=row align=center
+      TEXT "N" Inter 600 18/21.6 ls-0.4 #000000 [142,193 14x22]
+      TEXT "200.00" Inter 600 28/33.6 ls-0.6 #000000 [156,187 96x34]
+    TEXT "1 order" Inter 500 14/16.8 ls-0.3 #000000 [174.5,229 45x17]
+  FRAME "Frame 837" [12,271 369x188] bg=#FFFFFF radius=12 clip
+    FRAME "Frame 851" [12,282 8x166] flex=col pad=0,2,0,2 gap=24 align=center
+      TEXT "12" Inter 500 12/14.4 ls-0.2 #909090 [9.5,282 13x14]
+      TEXT "9" Inter 500 12/14.4 ls-0.2 #909090 [14,320 4x14]
+      TEXT "6" Inter 500 12/14.4 ls-0.2 #909090 [14,358 4x14]
+      TEXT "3" Inter 500 12/14.4 ls-0.2 #909090 [14,396 4x14]
+      TEXT "0" Inter 500 12/14.4 ls-0.2 #909090 [14,434 4x14]
+    FRAME "Frame 852" [27,441 358x18] border=#4563F7/2/center/dashed borderSides=t2,r0,b0,l0 flex=row pad=2,0,2,0 gap=28
+      TEXT "12 AM" Inter 500 12/14.4 ls-0.2 #909090 [27,443 35x14]
+      TEXT "3 PM" Inter 500 12/14.4 ls-0.2 #909090 [90,443 29x14]
+      TEXT "6 PM" Inter 500 12/14.4 ls-0.2 #909090 [147,443 29x14]
+      TEXT "9 PM" Inter 500 12/14.4 ls-0.2 #909090 [204,443 29x14]
+      TEXT "12 PM" Inter 500 12/14.4 ls-0.2 #909090 [261,443 34x14]
+      TEXT "3 AM" Inter 500 12/14.4 ls-0.2 #909090 [323,443 30x14]
+    FRAME "Frame 853" [45,271 300x169] flex=row gap=60 align=center
+      LINE "Line 41" [45,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+      LINE "Line 36" [105,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+      LINE "Line 37" [165,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+      LINE "Line 38" [225,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+      LINE "Line 39" [285,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+      LINE "Line 40" [345,271 0x169] border=#ECECEC/1/center stroke=#ECECEC/1
+    FRAME "Frame 854" [37,285 344x120] flex=col gap=40
+      LINE "Line 37" [37,285 344x0] border=#ECECEC/1/center fill=w stroke=#ECECEC/1
+      LINE "Line 38" [37,325 344x0] border=#ECECEC/1/center fill=w stroke=#ECECEC/1
+      LINE "Line 40" [37,365 344x0] border=#ECECEC/1/center fill=w stroke=#ECECEC/1
+      LINE "Line 41" [37,405 344x0] border=#ECECEC/1/center fill=w stroke=#ECECEC/1
+    FRAME "Seller Dahbooard" [119,424 20x18] bg=#2043F5 radius=4,4,0,0
+  FRAME "Frame 847" [12,747 369x24] flex=row gap=250 justify=space_between align=center
+    TEXT "Inventory" Inter 500 16/19.2 ls-0.3 #000000 [12,749.5 70x19]
+    ICON caret-down-24.svg [357,747 24x24] (CaretDown)
+  FRAME "Frame 849" [12,475 369x256] border=#ECECEC/2 radius=24 flex=col pad=12,12,12,12 gap=24
+    FRAME "Frame 450" [26,489 341x24] flex=row gap=250 justify=space_between align=center fill=w
+      TEXT "Recent orders" Inter 500 16/19.2 ls-0.3 #000000 [26,491.5 104x19]
+      ICON caret-down-24.svg [343,489 24x24] (CaretDown)
+    FRAME "Frame 848" [26,537 341x180] flex=col gap=12 fill=w
+      FRAME "Frame 842" [26,537 341x52] flex=row gap=24 align=center fill=w
+        FRAME "Frame 841" [26,537 251x52] flex=row gap=12 align=center fill=w
+          RECT "Rectangle 176" [26,537 52x52] bg=#D9D9D9 radius=8
+          FRAME "Frame 840" [90,542 193x42] flex=col gap=8
+            TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [90,542 193x17]
+            TEXT "Buyer: Enyo Dev" Inter 500 13/16.9 ls-0.3 #5B5B5B [90,567 193x17]
+        FRAME "Frame 839" [301,538.5 66x49] flex=col gap=5 align=max
+          FRAME "Frame 838" [301,538.5 66x25] bg=#D2DAFD radius=99 flex=row pad=4,8,4,8 gap=10 justify=center align=center
+            TEXT "Pending" Inter 500 13/16.9 ls-0.3 #2043F5 [309,542.5 50x17]
+          TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [301,568.5 66x19]
+      FRAME "Frame 845" [26,601 341x52] flex=row gap=24 align=center fill=w
+        FRAME "Frame 841" [26,601 251x52] flex=row gap=12 align=center fill=w
+          RECT "Rectangle 176" [26,601 52x52] bg=#D9D9D9 radius=8
+          FRAME "Frame 840" [90,606 193x42] flex=col gap=8
+            TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [90,606 193x17]
+            TEXT "Buyer: Enyo Dev" Inter 500 13/16.9 ls-0.3 #5B5B5B [90,631 193x17]
+        FRAME "Frame 839" [301,602.5 66x49] flex=col gap=5 align=max
+          FRAME "Frame 838" [301,602.5 66x25] bg=#FEF5E7 radius=99 flex=row pad=4,8,4,8 gap=10 justify=center align=center
+            TEXT "Shipped" Inter 500 13/16.9 ls-0.3 #F59E0B [309,606.5 50x17]
+          TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [301,632.5 66x19]
+      FRAME "Frame 846" [26,665 341x52] flex=row gap=24 align=center fill=w
+        FRAME "Frame 841" [26,665 244x52] flex=row gap=12 align=center fill=w
+          RECT "Rectangle 176" [26,665 52x52] bg=#D9D9D9 radius=8
+          FRAME "Frame 840" [90,670 193x42] flex=col gap=8
+            TEXT "Custom Mechanical Keyboard" Inter 500 14/16.8 ls-0.3 #000000 truncate=1 [90,670 193x17]
+            TEXT "Buyer: Enyo Dev" Inter 500 13/16.9 ls-0.3 #5B5B5B [90,695 193x17]
+        FRAME "Frame 839" [294,666.5 73x49] flex=col gap=5 align=max
+          FRAME "Frame 838" [294,666.5 73x25] bg=#E7F8F2 radius=99 flex=row pad=4,8,4,8 gap=10 justify=center align=center
+            TEXT "Delivered" Inter 500 13/16.9 ls-0.3 #10B981 [302,670.5 57x17]
+          TEXT "N200.00" Inter 600 21/25.2 ls-0.4 #000000 runs: «N»{w600 s12 #000000}«200.00»{w600 s16 #000000} [303,696.5 64x19]
+  FRAME "Frame 788" [0,783 393x227] flex=row pad=0,12,0,12 gap=12 justify=space_between align=center
+    FRAME "Product Card" [12,783 175x227] flex=col gap=8
+      FRAME "Product Image" [12,783 175x170] bg=#D9D9D9 fill=w
+      FRAME "Product Info" [12,961 175x49] flex=col gap=8 fill=w
+        FRAME "Frame 131" [12,961 175x17] flex=row gap=2 justify=space_between align=center fill=w
+          TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [12,961 92x17]
+          TEXT "N200.00" Inter 500 14/16.8 ls-0.3 #000000 [130,961 57x17]
+        FRAME "Frame 850" [12,986 101x24] flex=row gap=8 align=center
+          ICON box-arrow-down-24.svg [12,986 24x24] (BoxArrowDown)
+          TEXT "12 in stock" Inter 500 14/16.8 ls-0.3 #10B981 [44,989.5 69x17]
+    FRAME "Product Card" [206,783 175x227] flex=col gap=8
+      FRAME "Product Image" [206,783 175x170] bg=#D9D9D9 fill=w
+      FRAME "Product Info" [206,961 175x49] flex=col gap=8 fill=w
+        FRAME "Frame 131" [206,961 175x17] flex=row gap=2 justify=space_between align=center fill=w
+          TEXT "Product Name" Inter 400 14/16.8 ls-0.3 #000000 [206,961 92x17]
+          TEXT "N200.00" Inter 500 14/16.8 ls-0.3 #000000 [324,961 57x17]
+        FRAME "Frame 850" [206,986 95x24] flex=row gap=8 align=center
+          ICON box-arrow-down-24.svg [206,986 24x24] (BoxArrowDown)
+          TEXT "3 in stock" Inter 500 14/16.8 ls-0.3 #EF4444 [238,989.5 63x17]
+  FRAME "Frame 718" [0,54 393x48] bg=#F7F8FE flex=row pad=12,16,12,16 gap=202 justify=space_between align=center
+    FRAME "Frame 693" [16,66 134x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      TEXT "Dashboard" Inter 500 18/21.6 ls-0.4 #000000 [58,67 92x22]
+    ICON magnifying-glass-24.svg [353,66 24x24] (MagnifyingGlass)
+  FRAME "Frame 715" [0,102 393x48] bg=#F7F8FE flex=row pad=12,0,12,16 gap=17
+    FRAME "Frame 718" [16,114 43x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=4 justify=center align=center
+      CIRCLE "Ellipse 41" [20,123.5 6x6] bg=#EF4444
+      TEXT "Live" Inter 500 13/16.9 ls-0.3 #5B5B5B [30,118 25x17]
+    FRAME "Frame 722" [76,114 69x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Yesterday" Inter 500 13/16.9 ls-0.3 #5B5B5B [80,118 61x17]
+    FRAME "Frame 719" [162,114 45x25] bg=#D2DAFD radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "Today" Inter 500 13/16.9 ls-0.3 #2043F5 [166,118 37x17]
+    FRAME "Frame 720" [224,114 69x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "This week" Inter 500 13/16.9 ls-0.3 #5B5B5B [228,118 61x17]
+    FRAME "Frame 721" [310,114 76x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "This month" Inter 500 13/16.9 ls-0.3 #5B5B5B [314,118 68x17]
+    FRAME "Frame 723" [403,114 53x25] bg=#FFFFFF radius=4 flex=row pad=4,4,4,4 gap=10 justify=center align=center
+      TEXT "All time" Inter 500 13/16.9 ls-0.3 #5B5B5B [407,118 45x17]

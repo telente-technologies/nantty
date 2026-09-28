@@ -1,0 +1,16 @@
+# Settings / Settings (App Preference)  (node 1863:8328, 393x852, reference: screens/settings__settings-app-preference__1863-8328.png)
+FRAME "Settings (App Preference)" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 829" [16,142 361x132] flex=col
+    FRAME "Frame 826" [16,142 361x44] bg=#FFFFFF radius=12,12,0,0 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Theme " Inter 400 14/16.8 ls-0.3 #000000 [28,155.5 45x17]
+      TEXT "Light Mode" Inter 500 13/16.9 ls-0.3 #2043F5 [297,155.5 68x17]
+    FRAME "Frame 829" [16,186 361x44] bg=#FFFFFF flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Language" Inter 400 14/16.8 ls-0.3 #000000 [28,199.5 64x17]
+      TEXT "English" Inter 500 13/16.9 ls-0.3 #2043F5 [321,199.5 44x17]
+    FRAME "Frame 828" [16,230 361x44] bg=#FFFFFF radius=0,0,12,12 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Accessibility" Inter 400 14/16.8 ls-0.3 #000000 [28,243.5 80x17]
+      ICON caret-right-24.svg [341,240 24x24] (CaretRight)
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,16,12,16 gap=202 align=center
+    FRAME "Frame 693" [16,66 172x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      TEXT "App Preference" Inter 500 18/21.6 ls-0.4 #000000 [58,67 130x22]

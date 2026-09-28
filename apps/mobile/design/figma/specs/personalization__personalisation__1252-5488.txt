@@ -1,0 +1,11 @@
+# Personalization / Personalisation  (node 1252:5488, 393x852, reference: screens/personalization__personalisation__1252-5488.png)
+FRAME "Personalisation" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 695" [0,66 393x24] flex=row pad=0,16,0,16 gap=202 justify=space_between align=center
+    ICON arrow-left-24.svg [16,66 24x24] (Frame 693)
+    TEXT "Skip" Inter 500 13/16.9 ls-0.3 #000000 [350,69.5 27x17]
+  RECT "Rectangle 171" [184.7,314.2 173.5x188.5] bg=#5B5B5B radius=12
+  RECT "Rectangle 172" [31,315 173.5x188.5] bg=#5B5B5B radius=12
+  RECT "Rectangle 170" [93,278 207x251] bg=#D9D9D9 radius=12
+  FRAME "Frame 721" [16,110 361x44] flex=col gap=8
+    TEXT "Personalize your feed" Inter 500 16/19.2 ls-0.3 #000000 [16,110 361x19]
+    TEXT "Customizing your feed..." Inter 400 14/16.8 ls-0.3 #909090 [16,137 155x17]

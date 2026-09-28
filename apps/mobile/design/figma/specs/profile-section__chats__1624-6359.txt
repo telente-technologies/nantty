@@ -1,0 +1,26 @@
+# Profile Section / Chats  (node 1624:6359, 393x852, reference: screens/profile-section__chats__1624-6359.png)
+FRAME "Chats" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,12,12,12 gap=202 align=center
+    FRAME "Frame 693" [12,66 95x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [12,66 24x24] (arrow-left)
+      TEXT "Profile" Inter 500 18/21.6 ls-0.4 #000000 [54,67 53x22]
+  FRAME "Frame 756" [12,103 369x123] bg=#DADADA radius=8 clip
+    ICON camera-bolt-24.svg [185,153 24x24] (tabler-icon-camera-bolt)
+  FRAME "Frame 757" [12,239 64x64] bg=#DADADA radius=8 clip
+    ICON camera-bolt-24.svg [32,259 24x24] (tabler-icon-camera-bolt)
+  FRAME "Frame 499" [88,238 192x62] flex=col gap=4
+    GROUP "Group 82" [88,238 119x20]
+      TEXT "Profile Name" Inter 500 16/19.2 ls-0.3 #000000 [88,238 95x19]
+      ICON seal-check-20.svg [187,238 20x20] (SealCheck)
+    TEXT "@username" Inter 400 14/16.8 ls-0.3 #5B5B5B [88,262 192x17]
+    FRAME "Frame 498" [88,283 192x17] flex=row gap=8 align=center fill=w
+      TEXT "300 followers" Inter 500 14/16.8 ls-0.3 #000000 runs: «300 »«followers»{w400 s14 #5B5B5B} [88,283 88x17]
+      TEXT "300 following" Inter 500 14/16.8 ls-0.3 #000000 runs: «300 »«following»{w400 s14 #5B5B5B} [184,283 87x17]
+  TEXT "Name" Inter 400 14/16.8 ls-0.3 #5B5B5B [12,327 38x17]
+  TEXT "Bio" Inter 400 14/16.8 ls-0.3 #5B5B5B [12,417 21x17]
+  FRAME "Feed (Mart)" [12,352 369x41] bg=#FFFFFF border=#D9D9D9/1 radius=4 flex=row pad=12,16,12,16 gap=10 align=center clip
+    TEXT "Profile Name" Inter 400 12/16.8 ls-0.2 #000000 [28,364 70x17]
+  FRAME "Feed (Mart)" [12,442 369x41] bg=#FFFFFF border=#D9D9D9/1 radius=4 flex=row pad=12,16,12,16 gap=10 align=center clip
+    TEXT "Bio about the user in this space" Inter 400 13/16.9 ls-0.3 #000000 [28,454 186x17]
+  FRAME "Frame 526" [12,740 369x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Save" Inter 500 15/21 ls-0.3 #FFFFFF [179,751.5 35x21]

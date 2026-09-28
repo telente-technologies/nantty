@@ -1,0 +1,16 @@
+# Settings / Settings (About)  (node 1863:8466, 393x852, reference: screens/settings__settings-about__1863-8466.png)
+FRAME "Settings (About)" [0,0 393x852] bg=#F7F8FE clip
+  FRAME "Frame 829" [16,142 361x132] flex=col
+    FRAME "Frame 826" [16,142 361x44] bg=#FFFFFF radius=12,12,0,0 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Terms of Service" Inter 400 14/16.8 ls-0.3 #000000 [28,155.5 108x17]
+      ICON caret-right-24.svg [341,152 24x24] (CaretRight)
+    FRAME "Frame 827" [16,186 361x44] bg=#FFFFFF flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Privacy Policy" Inter 400 14/16.8 ls-0.3 #000000 [28,199.5 89x17]
+      ICON caret-right-24.svg [341,196 24x24] (CaretRight)
+    FRAME "Frame 828" [16,230 361x44] bg=#FFFFFF radius=0,0,12,12 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
+      TEXT "Version" Inter 400 14/16.8 ls-0.3 #000000 [28,243.5 48x17]
+      TEXT "1.0.0" Inter 500 13/16.9 ls-0.3 #000000 [337,243.5 28x17]
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,16,12,16 gap=202 align=center
+    FRAME "Frame 693" [16,66 93x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      TEXT "About" Inter 500 18/21.6 ls-0.4 #000000 [58,67 51x22]

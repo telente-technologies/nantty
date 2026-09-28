@@ -1,0 +1,67 @@
+# Settings / Settings for Sellers  (node 1915:5100, 393x984, reference: screens/settings__settings-for-sellers__1915-5100.png)
+FRAME "Settings for Sellers" [0,0 393x984] bg=#F7F8FE clip
+  FRAME "Frame 808" [16,126 361x80] bg=#FFFFFF radius=12 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center
+    FRAME "Frame 822" [28,142 229x48] flex=row gap=12 align=center
+      FRAME "Frame 302" [28,142 48x48] bg=image:avatar-placeholder.jpg radius=50
+      FRAME "Frame 821" [88,147 169x38] flex=col gap=4
+        TEXT "Enyo Dev" Inter 600 14/16.8 ls-0.3 #000000 [88,147 169x17]
+        TEXT "testzudomart@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [88,168 169x17]
+    ICON caret-right-24.svg [341,154 24x24] (CaretRight)
+  FRAME "Frame 828" [16,248 361x144] radius=12 flex=col align=center
+    FRAME "Frame 820" [16,248 361x48] bg=#FFFFFF radius=12,12,0,0 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,260 90x24] flex=row gap=12 align=center
+        ICON user-circle-24.svg [28,260 24x24] (UserCircle)
+        TEXT "Account" Inter 400 14/16.8 ls-0.3 #000000 [64,263.5 54x17]
+      ICON caret-right-24.svg [341,260 24x24] (CaretRight)
+    FRAME "Frame 821" [16,296 361x48] bg=#FFFFFF flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,308 167x24] flex=row gap=12 align=center
+        ICON shield-24.svg [28,308 24x24] (Shield)
+        TEXT "Security & Password" Inter 400 14/16.8 ls-0.3 #000000 [64,311.5 131x17]
+      ICON caret-right-24.svg [341,308 24x24] (CaretRight)
+    FRAME "Frame 822" [16,344 361x48] bg=#FFFFFF flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,356 110x24] flex=row gap=12 align=center
+        ICON bell-ringing-24.svg [28,356 24x24] (BellRinging)
+        TEXT "Notification" Inter 400 14/16.8 ls-0.3 #000000 [64,359.5 74x17]
+      ICON caret-right-24.svg [341,356 24x24] (CaretRight)
+  FRAME "Frame 830" [16,434 361x144] radius=12 flex=col align=center
+    FRAME "Frame 824" [16,434 361x48] bg=#FFFFFF flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,446 135x24] flex=row gap=12 align=center
+        ICON squares-four-24.svg [28,446 24x24] (SquaresFour)
+        TEXT "App Preference" Inter 400 14/16.8 ls-0.3 #000000 [64,449.5 99x17]
+      ICON caret-right-24.svg [341,446 24x24] (CaretRight)
+    FRAME "Frame 826" [16,482 361x48] bg=#FFFFFF flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,494 153x24] flex=row gap=12 align=center
+        ICON credit-card-24.svg [28,494 24x24] (CreditCard)
+        TEXT "Payment Methods" Inter 400 14/16.8 ls-0.3 #000000 [64,497.5 117x17]
+      ICON caret-right-24.svg [341,494 24x24] (CaretRight)
+    FRAME "Frame 827" [16,530 361x48] bg=#FFFFFF radius=0,0,12,12 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,542 148x24] flex=row gap=12 align=center
+        ICON truck-24.svg [28,542 24x24] (Truck)
+        TEXT "Shipping Address" Inter 400 14/16.8 ls-0.3 #000000 [64,545.5 112x17]
+      ICON caret-right-24.svg [341,542 24x24] (CaretRight)
+  FRAME "Frame 831" [16,620 361x48] radius=12 flex=col align=center
+    FRAME "Frame 824" [16,620 361x48] bg=#FFFFFF flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,632 145x24] flex=row gap=12 align=center
+        ICON tag-24.svg [28,632 24x24] (Tag)
+        TEXT "Seller Dashboard" Inter 400 14/16.8 ls-0.3 #000000 [64,635.5 109x17]
+      ICON caret-right-24.svg [341,632 24x24] (CaretRight)
+  FRAME "Frame 829" [16,710 361x96] flex=col
+    FRAME "Frame 826" [16,710 361x48] bg=#FFFFFF radius=12,12,0,0 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,722 88x24] flex=row gap=12 align=center
+        ICON headset-24.svg [28,722 24x24] (Headset)
+        TEXT "Support" Inter 400 14/16.8 ls-0.3 #000000 [64,725.5 52x17]
+      ICON caret-right-24.svg [341,722 24x24] (CaretRight)
+    FRAME "Frame 827" [16,758 361x48] bg=#FFFFFF radius=0,0,12,12 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w
+      FRAME "Frame 822" [28,770 75x24] flex=row gap=12 align=center
+        ICON question-24.svg [28,770 24x24] (Question)
+        TEXT "About" Inter 400 14/16.8 ls-0.3 #000000 [64,773.5 39x17]
+      ICON caret-right-24.svg [341,770 24x24] (CaretRight)
+  FRAME "Frame 827" [16,854 361x48] bg=#FFFFFF radius=12 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center
+    FRAME "Frame 822" [28,862 93x32] flex=row gap=12 align=center
+      ICON frame-830-32.svg [28,862 32x32] (Frame 830)
+      TEXT "Log out" Inter 400 14/16.8 ls-0.3 #EF4444 [72,869.5 49x17]
+  FRAME "Frame 718" [0,54 393x48] flex=row pad=12,16,12,16 gap=202 justify=space_between align=center
+    FRAME "Frame 693" [16,66 112x24] flex=row gap=18 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      TEXT "Settings" Inter 500 18/21.6 ls-0.4 #000000 [58,67 70x22]
+    ICON magnifying-glass-24.svg [353,66 24x24] (MagnifyingGlass)

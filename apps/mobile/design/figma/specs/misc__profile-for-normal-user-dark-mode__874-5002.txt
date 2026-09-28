@@ -1,0 +1,55 @@
+# Profile for Normal User (Dark Mode)  (node 874:5002, 393x1339, reference: screens/misc__profile-for-normal-user-dark-mode__874-5002.png)
+FRAME "Profile for Normal User (Dark Mode)" [0,0 393x1339] bg=#0E0E10 clip
+  FRAME "Frame 548" [0,485 393x854] flex=col gap=1
+    GROUP "Group 83" [0,485 392x170]
+      FRAME "Frame 428" [0,485 130x170] bg=#2C2C2C
+      FRAME "Frame 502" [131,485 130x170] bg=#2C2C2C
+      FRAME "Frame 503" [262,485 130x170] bg=#2C2C2C
+    GROUP "Group 84" [0,656 392x170]
+      FRAME "Frame 428" [0,656 130x170] bg=#2C2C2C
+      FRAME "Frame 502" [131,656 130x170] bg=#2C2C2C
+      FRAME "Frame 503" [262,656 130x170] bg=#2C2C2C
+    GROUP "Group 85" [0,827 392x170]
+      FRAME "Frame 428" [0,827 130x170] bg=#2C2C2C
+      FRAME "Frame 502" [131,827 130x170] bg=#2C2C2C
+      FRAME "Frame 503" [262,827 130x170] bg=#2C2C2C
+    GROUP "Group 86" [0,998 392x170]
+      FRAME "Frame 428" [0,998 130x170] bg=#2C2C2C
+      FRAME "Frame 502" [131,998 130x170] bg=#2C2C2C
+      FRAME "Frame 503" [262,998 130x170] bg=#2C2C2C
+    GROUP "Group 87" [0,1169 392x170]
+      FRAME "Frame 428" [0,1169 130x170] bg=#2C2C2C
+      FRAME "Frame 502" [131,1169 130x170] bg=#2C2C2C
+      FRAME "Frame 503" [262,1169 130x170] bg=#2C2C2C
+  FRAME "Frame 501" [0,383 393x37] flex=row pad=0,12,0,12 gap=8 justify=space_between align=center
+    FRAME "Frame 397" [12,383 177x37] bg=#2043F5 radius=4 flex=row pad=8,10,8,10 gap=4 justify=center align=center
+      TEXT "Follow" Inter 500 15/21 ls-0.3 #FFFFFF [78,391 45x21]
+    FRAME "Frame 398" [205,383 176x37] bg=#2C2C2C radius=4 flex=row pad=8,10,8,10 gap=4 justify=center align=center
+      TEXT "Message" Inter 500 15/21 ls-0.3 #FFFFFF [261,391 64x21]
+  FRAME "Frame 618" [12,292 187x35] flex=col gap=1
+    TEXT "Bio about the user in this space" Inter 400 13/16.9 ls-0.3 #FFFFFF [12,292 187x17]
+    TEXT "Bio about the user in this space" Inter 400 13/16.9 ls-0.3 #FFFFFF [12,310 187x17]
+  FRAME "Frame 549" [12,347 269x20] flex=row gap=4 align=center
+    ICON group-80-44.svg [12,347 44x20] (Group 80)
+    TEXT "Followed by Enyo, Oyin and 13 others" Inter 400 13/16.9 ls-0.3 #FFFFFF [60,348.5 221x17]
+  FRAME "Frame 394" [0,436 393x33] flex=row pad=0,12,0,12 justify=space_between align=center
+    FRAME "Frame 392" [12,436 115x33] borderSides=t0,r0,b1,l0 flex=row pad=8,10,8,10 gap=10 justify=center align=center
+      TEXT "Post" Inter 400 14/16.8 ls-0.3 #909090 [55,444 29x17]
+    FRAME "Frame 394" [139,436 115x33] border=#FFFFFF/1 borderSides=t0,r0,b1,l0 flex=row pad=8,10,8,10 gap=10 justify=center align=center
+      TEXT "Clips" Inter 400 14/16.8 ls-0.3 #FFFFFF [180.5,444 32x17]
+    FRAME "Frame 395" [266,436 115x33] borderSides=t0,r0,b1,l0 flex=row pad=8,10,8,10 gap=10 justify=center align=center
+      TEXT "Featured" Inter 400 14/16.8 ls-0.3 #909090 [295,444 57x17]
+  FRAME "Frame 617" [12,208 369x64] flex=row gap=11 align=center
+    CIRCLE "Ellipse 33" [12,208 64x64] bg=#2C2C2C
+    FRAME "Frame 499" [87,209 280x62] flex=col gap=4
+      GROUP "Group 82" [87,209 119x20]
+        TEXT "Profile Name" Inter 500 16/19.2 ls-0.3 #FFFFFF [87,209 95x19]
+        ICON seal-check-20.svg [186,209 20x20] (SealCheck)
+      TEXT "@username" Inter 400 14/16.8 ls-0.3 #5B5B5B [87,233 280x17]
+      FRAME "Frame 498" [87,254 280x17] flex=row gap=16 align=center
+        TEXT "300 Posts" Inter 500 14/16.8 ls-0.3 #FFFFFF runs: «300»{w600 s14}« »«Posts»{w400 s14} [87,254 66x17]
+        TEXT "300 Followers" Inter 500 14/16.8 ls-0.3 #FFFFFF runs: «300»{w600 s14}« »«Followers»{w400 s14} [169,254 91x17]
+        TEXT "300 Following" Inter 500 14/16.8 ls-0.3 #FFFFFF runs: «300»{w600 s14}« »«Following»{w400 s14} [276,254 91x17]
+  RECT "Rectangle 136" [12,102 369x90] bg=#2C2C2C radius=8
+  ICON arrow-left-24.svg [12,66 24x24] (arrow-left)
+  ICON dots-three-vertical-24.svg [357,66 24x24] (DotsThreeVertical)
