@@ -1,0 +1,46 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Dependencies allowed to run install scripts (pnpm 10).
+onlyBuiltDependencies:
+  - "esbuild"
+  - "@swc/core"
+  - "sharp"
+  - "@parcel/watcher"
+  - "@tailwindcss/oxide"
+  - "unrs-resolver"
+  - "lmdb"
+  - "msgpackr-extract"
+
+# The same list in the form pnpm 11 reads.
+allowBuilds:
+  "esbuild": true
+  "@swc/core": true
+  "sharp": true
+  "@parcel/watcher": true
+  "@tailwindcss/oxide": true
+  "unrs-resolver": true
+  "lmdb": true
+  "msgpackr-extract": true
+
+# ── Supply-chain hardening ──────────────────────────────────────────────
+# Refuse versions published less than 24h ago: most hijacked releases are
+# caught and unpublished within hours.
+minimumReleaseAge: 1440
+# Fail the install when a dependency wants to run a build script that is not
+# in the allow-list above, instead of silently skipping it.
+strictDepBuilds: true
+# Transitive dependencies may only come from the registry, never git or tarball URLs.
+blockExoticSubdeps: true
+# Refuse a version whose publishing trust (provenance) is weaker than earlier ones.
+trustPolicy: no-downgrade
+# Apply the trust check to versions published in the last 30 days (minutes). Takeovers are
+# caught within days; older releases predate provenance signing (React Native and Babel
+# still depend on many of these), and would otherwise need approving one at a time.
+trustPolicyIgnoreAfter: 43200
+# Reviewed exceptions to trustPolicy. Each entry names one exact version and why it is safe.
+trustPolicyExclude:
+  # Published 2025-01-08 by the same maintainer as 3.2.1 (jkoops), from the official
+  # mafintosh/why-is-node-running repo, only without a provenance attestation. Needed by vitest.
+  - "why-is-node-running@3.2.2"
