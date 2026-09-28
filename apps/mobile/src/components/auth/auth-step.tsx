@@ -1,0 +1,68 @@
+import type { ReactNode } from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
+import { ArrowLeft24Icon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+
+export interface AuthStepProps {
+  readonly title?: string;
+  readonly subtitle?: string;
+  readonly children: ReactNode;
+  readonly actionTitle: string;
+  readonly actionDisabled?: boolean;
+  readonly loading?: boolean;
+  readonly onAction: () => void;
+  readonly right?: ReactNode;
+  readonly footer?: ReactNode;
+}
+
+export function AuthStep({ title, subtitle, children, actionTitle, actionDisabled, loading, onAction, right, footer }: AuthStepProps) {
+  const navigation = useNavigation();
+  return (
+    <Screen>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <View style={styles.top}>
+          {navigation.canGoBack() ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={() => navigation.goBack()}>
+              <ArrowLeft24Icon />
+            </Pressable>
+          ) : (
+            <View />
+          )}
+          {right}
+        </View>
+        <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          {title ? (
+            <View style={styles.heading}>
+              <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header">
+                {title}
+              </Text>
+              {subtitle ? (
+                <Text size={14} lineHeight={16.8} color={colors.textSubtle}>
+                  {subtitle}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+          {children}
+        </ScrollView>
+        <View style={styles.action}>
+          {footer}
+          <Button title={actionTitle} onPress={onAction} disabled={actionDisabled} loading={loading} />
+        </View>
+      </KeyboardAvoidingView>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  top: { height: 24, marginTop: 16, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  content: { paddingHorizontal: 16, paddingTop: 20, gap: 24, paddingBottom: 24 },
+  heading: { gap: 8 },
+  action: { paddingHorizontal: 16, paddingBottom: 12, gap: 16 },
+});
