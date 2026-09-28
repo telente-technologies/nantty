@@ -4,7 +4,7 @@ import {
   type CacheService,
 } from "@zudojs/cache";
 
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 let service: CacheService | undefined;
 

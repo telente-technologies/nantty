@@ -1,6 +1,6 @@
 import { WebSocketServer, type WebSocket } from "ws";
 
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 let server: WebSocketServer | undefined;
 

@@ -6,7 +6,7 @@ import {
 import { ConfigurationError } from "@zudojs/errors";
 
 import { PrismaClient } from "../generated/prisma/client.js";
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 let client: PrismaClient | undefined;
 let database: DatabaseClient | undefined;

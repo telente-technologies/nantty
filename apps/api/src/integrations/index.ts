@@ -1,12 +1,12 @@
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 // zudojs:integration-imports:start
-import { redisIntegration } from "./redis.js";
-import { cacheIntegration } from "./cache.js";
-import { storageIntegration } from "./storage.js";
-import { websocketsIntegration } from "./websockets.js";
-import { emailIntegration } from "./email.js";
-import { schedulerIntegration } from "./scheduler.js";
-import { databaseIntegration } from "./database.js";
+import { redisIntegration } from "./redis.integration.js";
+import { cacheIntegration } from "./cache.integration.js";
+import { storageIntegration } from "./storage.integration.js";
+import { websocketsIntegration } from "./websockets.integration.js";
+import { emailIntegration } from "./email.integration.js";
+import { schedulerIntegration } from "./scheduler.integration.js";
+import { databaseIntegration } from "./database.integration.js";
 // zudojs:integration-imports:end
 
 export {
@@ -15,7 +15,7 @@ export {
   drainIntegrations,
   type Integration,
   type IntegrationContext,
-} from "./integration.js";
+} from "./lifecycle.integration.js";
 
 /**
  * Started with the runtime in this order and stopped in reverse.

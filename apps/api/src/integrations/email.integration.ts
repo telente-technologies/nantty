@@ -1,7 +1,7 @@
 import { createTransport } from "nodemailer";
 
 import type { AppConfig } from "../configs/index.js";
-import type { Integration, IntegrationContext } from "./integration.js";
+import type { Integration, IntegrationContext } from "./lifecycle.integration.js";
 
 /** A message to send. */
 export interface EmailMessage {

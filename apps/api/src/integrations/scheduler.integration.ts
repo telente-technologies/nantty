@@ -1,6 +1,6 @@
 import { Scheduler } from "@zudojs/scheduler";
 
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 let scheduler: Scheduler | undefined;
 

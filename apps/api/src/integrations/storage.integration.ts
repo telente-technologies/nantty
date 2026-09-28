@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 
 import { LocalObjectStorage } from "@zudojs/storage";
 
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 let storage: LocalObjectStorage | undefined;
 

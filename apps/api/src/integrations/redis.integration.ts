@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-import type { Integration } from "./integration.js";
+import type { Integration } from "./lifecycle.integration.js";
 
 /** Connection attempts before start() gives up on an unreachable server. */
 const STARTUP_ATTEMPTS = 5;
