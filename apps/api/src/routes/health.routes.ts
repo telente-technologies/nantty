@@ -1,6 +1,6 @@
 import type { HttpRouter } from "@zudojs/http";
 
-import { json } from "../utils/http.js";
+import { json } from "../utils/http.util.js";
 
 /** What /health reports. */
 export interface HealthReport {

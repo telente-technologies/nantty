@@ -3,7 +3,7 @@ import type { Server } from "node:http";
 import { createContainer } from "@zudojs/container";
 import type { Module } from "@zudojs/core";
 import { createEventBus } from "@zudojs/events";
-import { createLogger } from "@zudojs/logger";
+import { createAppLogger } from "./loggers/index.js";
 import { createRuntime, type Runtime } from "@zudojs/runtime";
 
 import type { AppConfig } from "./configs/index.js";
@@ -49,7 +49,7 @@ export interface AppOptions {
  * root (`container.ts`) in it under `APP_DEPENDENCIES`.
  */
 export function createApp(options: AppOptions): Runtime {
-  const logger = createLogger({ name: "zudomart" });
+  const logger = createAppLogger("zudomart");
   const container = createContainer();
   const eventBus = createEventBus();
 

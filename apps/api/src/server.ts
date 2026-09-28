@@ -20,7 +20,7 @@ import { loadConfig } from "./configs/index.js";
 import { APP_DEPENDENCIES, createDependencies } from "./container.js";
 import { checkIntegrations, drainIntegrations, integrations } from "./integrations/index.js";
 import { registerRoutes } from "./routes/index.js";
-import { errorDetails, errorResponse, json, securityHeaders } from "./utils/http.js";
+import { errorDetails, errorResponse, json, securityHeaders } from "./utils/http.util.js";
 
 const config = await loadConfig();
 const httpServer = createServer();
