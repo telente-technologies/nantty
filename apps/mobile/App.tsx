@@ -32,7 +32,7 @@ export default function App() {
   const ready = (fontsLoaded || !!fontError) && authStatus !== "loading";
 
   useEffect(() => {
-    useAuthStore.getState().restore().catch(() => useAuthStore.setState({ status: "signedOut" }));
+    useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
   }, []);
 
   useEffect(() => {
