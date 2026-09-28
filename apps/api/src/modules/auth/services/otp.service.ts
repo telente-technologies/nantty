@@ -4,7 +4,7 @@ import { TooManyRequestsError } from "@zudojs/errors";
 import type { AppSettings } from "../../../configs/settings.config.js";
 import { OTP_LENGTH, OTP_RESEND_COOLDOWN_SECONDS } from "../../../constants/security.constant.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
-import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hash-token.util.js";
+import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hashToken.util.js";
 import type { OtpPurpose } from "../models/auth.model.js";
 import type { OneTimeCodesRepository } from "../repositories/auth.repository.js";
 import type { ContactAddress } from "./contact.service.js";

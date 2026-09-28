@@ -1,4 +1,4 @@
-import { createPublicKey, verify as verifySignature, type JsonWebKey } from "node:crypto";
+import { createPublicKey, verify as verifySignature, type webcrypto } from "node:crypto";
 
 import { UnauthorizedError } from "@zudojs/errors";
 
@@ -16,7 +16,7 @@ interface ProviderSettings {
 }
 
 interface CachedKeys {
-  readonly keys: readonly (JsonWebKey & { kid?: string })[];
+  readonly keys: readonly (webcrypto.JsonWebKey & { kid?: string })[];
   readonly fetchedAt: number;
 }
 
@@ -87,7 +87,7 @@ export class JsonWebKeyIdentityTokenVerifier implements IdentityTokenVerifier {
     if (!valid) throw new UnauthorizedError("Invalid identity token.");
   }
 
-  private async findSigningKey(provider: SocialProvider, keyId: string): Promise<JsonWebKey> {
+  private async findSigningKey(provider: SocialProvider, keyId: string): Promise<webcrypto.JsonWebKey> {
     const cached = this.cachedKeys.get(provider);
     const fresh = cached !== undefined && Date.now() - cached.fetchedAt < KEY_CACHE_MILLISECONDS;
     const keys = fresh ? cached.keys : await this.downloadSigningKeys(provider);

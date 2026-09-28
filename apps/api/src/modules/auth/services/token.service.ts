@@ -6,11 +6,14 @@ import { UnauthorizedError } from "@zudojs/errors";
 import type { AppSettings } from "../../../configs/settings.config.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { AccessTokenVerifier, Principal } from "../../../interfaces/principal.interface.js";
-import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hash-token.util.js";
+import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hashToken.util.js";
 import type { UserRecord } from "../../users/models/users.model.js";
 import type { UsersRepository } from "../../users/repositories/users.repository.js";
 import type { ClientDetails, IssuedTokens, SessionRecord } from "../models/auth.model.js";
 import type { SessionsRepository } from "../repositories/auth.repository.js";
+
+type TokenSubject = Parameters<typeof createTokenPair>[0];
+type TokenSessionId = NonNullable<NonNullable<Parameters<typeof createTokenPair>[2]>["sessionId"]>;
 
 export class TokenService implements AccessTokenVerifier {
   private readonly tokenConfig: TokenConfig;
@@ -37,7 +40,7 @@ export class TokenService implements AccessTokenVerifier {
 
   public async startSessionForUser(user: UserRecord, client: ClientDetails): Promise<IssuedTokens> {
     const sessionId = randomUUID();
-    const pair = createTokenPair(user.id, this.tokenConfig, { roles: user.roles, sessionId });
+    const pair = createTokenPair(user.id as TokenSubject, this.tokenConfig, { roles: user.roles, sessionId: sessionId as TokenSessionId });
     await this.sessions.create({
       id: sessionId,
       userId: user.id,
@@ -63,7 +66,7 @@ export class TokenService implements AccessTokenVerifier {
       await this.sessions.revoke(session.id, "account_inactive", this.clock.now());
       throw new UnauthorizedError("Invalid refresh token.");
     }
-    const pair = createTokenPair(user.id, this.tokenConfig, { roles: user.roles, sessionId: session.id });
+    const pair = createTokenPair(user.id as TokenSubject, this.tokenConfig, { roles: user.roles, sessionId: session.id as TokenSessionId });
     const nextHash = await this.hashRefreshTokenForStorage(pair.refreshToken);
     const swapped = await this.sessions.replaceRefreshTokenHash(session.id, presentedHash, nextHash, this.clock.now());
     if (!swapped) await this.revokeSessionAfterRefreshTokenReuse(session.id);

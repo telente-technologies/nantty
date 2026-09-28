@@ -8,7 +8,7 @@ import type { NewUserInput, UserRecord } from "../../users/models/users.model.js
 import type { UsersRepository } from "../../users/repositories/users.repository.js";
 import type { OneTimeCodesRepository, SessionsRepository, SocialIdentitiesRepository } from "../repositories/auth.repository.js";
 import { normalizePhoneNumber, type ContactAddress } from "./contact.service.js";
-import type { IdentityTokenVerifier } from "./identity-token.service.js";
+import type { IdentityTokenVerifier } from "./identityToken.service.js";
 import type { OtpService } from "./otp.service.js";
 import type { PasswordService } from "./password.service.js";
 import type { TokenService } from "./token.service.js";
