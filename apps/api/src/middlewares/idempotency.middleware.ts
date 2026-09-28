@@ -6,7 +6,7 @@ import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
 import { IDEMPOTENCY_KEY_HEADER, IDEMPOTENCY_TTL_SECONDS } from "../constants/security.constant.js";
 import type { Clock, Principal } from "../interfaces/index.js";
 import type { IdempotencyStore } from "../repositories/idempotency.repository.js";
-import { readRawRequestBody } from "./verify-webhook-signature.middleware.js";
+import { readRawRequestBody } from "./verifyWebhookSignature.middleware.js";
 
 const KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
 

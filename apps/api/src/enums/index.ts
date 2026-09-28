@@ -1,4 +1,4 @@
 export * from "./currency.enum.js";
-export * from "./escrow-status.enum.js";
-export * from "./order-status.enum.js";
-export * from "./payment-status.enum.js";
+export * from "./escrowStatus.enum.js";
+export * from "./orderStatus.enum.js";
+export * from "./paymentStatus.enum.js";

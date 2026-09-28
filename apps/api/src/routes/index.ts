@@ -25,10 +25,6 @@ import { registerWaitlistModuleRoutes } from "../modules/waitlist/routes/index.j
 import { registerAuditModuleRoutes } from "../modules/audit/routes/index.js";
 // zudojs:route-imports:end
 
-/**
- * Registers every route of the application. `zudojs generate resource`
- * and `zudojs generate module` add their registrations between the markers.
- */
 export function registerRoutes(router: HttpRouter, deps: AppDependencies): void {
   registerHealthRoutes(router, deps.health);
   // zudojs:routes:start

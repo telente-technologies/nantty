@@ -6,7 +6,6 @@ import type { Integration } from "./lifecycle.integration.js";
 
 let storage: LocalObjectStorage | undefined;
 
-/** The object store. Throws before the runtime has started. */
 export function objectStorage(): LocalObjectStorage {
   if (storage === undefined) {
     throw new Error("Object storage is not ready: start the runtime first.");

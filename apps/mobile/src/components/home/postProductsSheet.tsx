@@ -1,0 +1,65 @@
+import { Image } from "expo-image";
+import { Pressable, StyleSheet, View } from "react-native";
+
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { ProductSummary } from "@/types";
+import { formatKoboAsNaira } from "@/utils/format-money.util";
+
+export interface PostProductsSheetProps {
+  readonly products: readonly ProductSummary[] | null;
+  readonly onClose: () => void;
+  readonly onPressProduct: (productId: string) => void;
+  readonly onAddAllToCart: (products: readonly ProductSummary[]) => void;
+  readonly adding?: boolean;
+}
+
+export function PostProductsSheet({ products, onClose, onPressProduct, onAddAllToCart, adding }: PostProductsSheetProps) {
+  return (
+    <BottomSheet visible={products !== null} onClose={onClose} title="In this post" floating>
+      <View style={styles.list}>
+        {(products ?? []).map((product) => (
+          <Pressable
+            key={product.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${product.name}, ${formatKoboAsNaira(product.price, { decimals: false })}`}
+            onPress={() => onPressProduct(product.id)}
+            style={styles.item}
+          >
+            <View style={styles.row}>
+              <View style={styles.thumbnail}>
+                {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+              </View>
+              <Text size={14} lineHeight={16.8} numberOfLines={1} style={styles.name}>
+                {product.name}
+              </Text>
+              <Text size={14} weight={600} lineHeight={16.8}>
+                {formatKoboAsNaira(product.price, { decimals: false })}
+              </Text>
+            </View>
+            <View style={styles.divider} />
+          </Pressable>
+        ))}
+      </View>
+      <Button
+        title="Add to Cart"
+        height={44}
+        loading={adding}
+        onPress={() => products && onAddAllToCart(products)}
+        style={styles.button}
+      />
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({
+  list: { paddingHorizontal: 5, gap: 12 },
+  item: { paddingHorizontal: 4, gap: 9 },
+  row: { height: 40, flexDirection: "row", alignItems: "center", gap: 8 },
+  thumbnail: { width: 40, height: 40, borderRadius: 4, backgroundColor: colors.avatar, overflow: "hidden" },
+  name: { flex: 1 },
+  divider: { height: 1, backgroundColor: colors.divider },
+  button: { marginHorizontal: 5, marginTop: 16, marginBottom: 27 },
+});

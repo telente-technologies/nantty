@@ -4,7 +4,6 @@ import type { Integration } from "./lifecycle.integration.js";
 
 let server: WebSocketServer | undefined;
 
-/** The WebSocket server. Throws before the runtime has started. */
 export function websockets(): WebSocketServer {
   if (server === undefined) {
     throw new Error("The WebSocket server is not running: start the runtime first.");
@@ -12,7 +11,6 @@ export function websockets(): WebSocketServer {
   return server;
 }
 
-/** Sends `data` to every open connection. */
 export function broadcast(data: string): void {
   for (const socket of websockets().clients) {
     if (socket.readyState === socket.OPEN) socket.send(data);
@@ -38,8 +36,6 @@ export const websocketsIntegration: Integration = {
     });
     server.on("connection", (socket: WebSocket) => {
       socket.on("error", (error: Error) => logger.warn("WebSocket error", { error }));
-      // Example handler: echo each message back. Replace with your protocol.
-      socket.on("message", (data) => socket.send(data.toString()));
     });
   },
 

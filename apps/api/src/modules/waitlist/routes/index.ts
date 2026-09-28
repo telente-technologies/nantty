@@ -2,11 +2,11 @@ import type { HttpRouter } from "@zudojs/http";
 
 import type { AppDependencies } from "../../../container.js";
 // zudojs:route-imports:start
+import { registerWaitlistRoutes } from "./waitlist.routes.js";
 // zudojs:route-imports:end
 
-/** Registers this module's routes; called from the app's routes/index.ts. */
 export function registerWaitlistModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
-  void deps;
   // zudojs:routes:start
+  registerWaitlistRoutes(router, deps.waitlistController, deps.web);
   // zudojs:routes:end
 }

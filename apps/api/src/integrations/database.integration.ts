@@ -11,7 +11,6 @@ import type { Integration } from "./lifecycle.integration.js";
 let client: PrismaClient | undefined;
 let database: DatabaseClient | undefined;
 
-/** The connected Prisma client. Throws before the runtime has started. */
 export function prisma(): PrismaClient {
   if (client === undefined) {
     throw new Error("The database is not connected: start the runtime first.");

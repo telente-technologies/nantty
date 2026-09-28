@@ -1,11 +1,12 @@
 import { BaseModule, type ModuleContext } from "@zudojs/core";
+import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 
-/**
- * waitlist module.
- *
- * Registered with the runtime in app.ts. The runtime calls onInitialize
- * during start and onShutdown during stop.
- */
+import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
+import { JoinWaitlistHandler } from "./commands/joinWaitlist/joinWaitlist.handler.js";
+import { CountWaitlistEntriesHandler } from "./queries/countWaitlistEntries/countWaitlistEntries.handler.js";
+import { ListWaitlistEntriesHandler } from "./queries/listWaitlistEntries/listWaitlistEntries.handler.js";
+import type { WaitlistService } from "./services/waitlist.service.js";
+
 export class WaitlistModule extends BaseModule {
   public readonly id = "waitlist";
   public readonly name = "waitlist";
@@ -21,4 +22,9 @@ export class WaitlistModule extends BaseModule {
   public override async onShutdown(context: ModuleContext): Promise<void> {
     context.logger.info("waitlist module stopped");
   }
+}
+
+export function registerWaitlistCommandAndQueryHandlers(commands: CommandBus, queries: QueryBus, waitlistService: WaitlistService): void {
+  registerCommandHandlers(commands, [new JoinWaitlistHandler(waitlistService)]);
+  registerQueryHandlers(queries, [new ListWaitlistEntriesHandler(waitlistService), new CountWaitlistEntriesHandler(waitlistService)]);
 }

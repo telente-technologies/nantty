@@ -1,5 +1,132 @@
-import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
+import { useNavigation } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
+
+import { ChatSearchPanel } from "@/components/chat/chatSearchPanel";
+import { ChatsEmptyState } from "@/components/chat/chatsEmptyState";
+import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
+import { ConversationRow } from "@/components/chat/conversationRow";
+import { SmallTab } from "@/components/chat/smallTab";
+import { StoryTray } from "@/components/chat/storyTray";
+import { ArrowLeft24Icon, DotsThreeVertical24Icon, MagnifyingGlass24Icon, WechatLogo48Icon } from "@/components/icons";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import { messagesService } from "@/services/messages.service";
+import { storiesService } from "@/services/stories.service";
+import { useAuthStore } from "@/store/auth.store";
+import type { ConversationFilter } from "@/types";
 
 export function ChatsScreen() {
-  return <PlaceholderScreen name="Chats" />;
+  const navigation = useNavigation();
+  const [filter, setFilter] = useState<ConversationFilter>("all");
+  const [isSearching, setIsSearching] = useState(false);
+  const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const conversations = useQuery({
+    queryKey: ["conversations", filter],
+    queryFn: () => messagesService.fetchConversationList(filter),
+  });
+  const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray });
+
+  const isEmpty = conversations.isSuccess && conversations.data.length === 0;
+  const goBackFromChats = () => (isSearching ? setIsSearching(false) : navigation.navigate("Tabs", { screen: "Home" }));
+
+  return (
+    <Screen background={isEmpty ? colors.background : colors.white}>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={goBackFromChats}>
+            <ArrowLeft24Icon />
+          </Pressable>
+          {isSearching ? null : (
+            <Text size={isEmpty ? 18 : 21} weight={500} lineHeight={isEmpty ? 21.6 : 25.2} letterSpacing={-0.42} accessibilityRole="header">
+              Chats
+            </Text>
+          )}
+        </View>
+        <View style={styles.headerRight}>
+          {isSearching ? null : (
+            <Pressable accessibilityRole="button" accessibilityLabel="Search chats" hitSlop={10} onPress={() => setIsSearching(true)}>
+              <MagnifyingGlass24Icon />
+            </Pressable>
+          )}
+          <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10}>
+            <DotsThreeVertical24Icon />
+          </Pressable>
+        </View>
+      </View>
+
+      {isSearching ? (
+        <ChatSearchPanel
+          onOpenConversation={(conversationId, name) => navigation.navigate("Chat", { conversationId, name })}
+          onOpenPerson={(person) => navigation.navigate("Chat", { userId: person.id, name: person.name })}
+        />
+      ) : conversations.isLoading ? (
+        <View style={styles.skeleton}>
+          <ChatsSkeleton />
+        </View>
+      ) : (
+        <FlatList
+          data={conversations.data ?? []}
+          keyExtractor={(c) => c.id}
+          contentContainerStyle={[styles.list, isEmpty && styles.listEmpty]}
+          refreshing={conversations.isRefetching}
+          onRefresh={() => conversations.refetch()}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <View style={styles.tray}>
+                <StoryTray
+                  items={storyTray.data ?? []}
+                  myAvatarUrl={myAvatarUrl}
+                  onPressAddStory={() => navigation.navigate("CreatePost", { mode: "story" })}
+                  onPressStory={(userId) => navigation.navigate("Story", { userId })}
+                />
+              </View>
+              <View style={styles.tabs} accessibilityRole="tablist">
+                <SmallTab label="All Messages" selected={filter === "all"} onPress={() => setFilter("all")} />
+                <SmallTab label="Direct Messages" selected={filter === "direct"} onPress={() => setFilter("direct")} />
+              </View>
+            </View>
+          }
+          ListEmptyComponent={<ChatsEmptyState />}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          renderItem={({ item }) => (
+            <View style={styles.rowWrap}>
+              <ConversationRow
+                conversation={item}
+                onPress={() => navigation.navigate("Chat", { conversationId: item.id, name: item.peer.name })}
+              />
+            </View>
+          )}
+        />
+      )}
+
+      {isSearching ? null : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="New message"
+          onPress={() => navigation.navigate("NewMessage")}
+          style={styles.compose}
+        >
+          <WechatLogo48Icon />
+        </Pressable>
+      )}
+    </Screen>
+  );
 }
+
+const styles = StyleSheet.create({
+  header: { marginTop: 12, height: 25, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 18 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 11 },
+  skeleton: { flex: 1, marginTop: 16 },
+  list: { paddingBottom: 96 },
+  listEmpty: { flexGrow: 1 },
+  listHeader: { paddingTop: 16 },
+  tray: { minHeight: 81 },
+  tabs: { flexDirection: "row", gap: 6, paddingHorizontal: 16, marginTop: 16, marginBottom: 12 },
+  rowWrap: { paddingHorizontal: 16 },
+  separator: { height: 12 },
+  compose: { position: "absolute", right: 12, bottom: 15 },
+});

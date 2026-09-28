@@ -1,6 +1,5 @@
-import type { AppLogger } from "../../../loggers/app.logger.js";
-
 import { email } from "../../../integrations/email.integration.js";
+import type { AppLogger } from "../../../loggers/app.logger.js";
 import type { OtpPurpose } from "../models/auth.model.js";
 import type { ContactAddress } from "./contact.service.js";
 import type { OneTimeCodeDelivery } from "./otp.service.js";

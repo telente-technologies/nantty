@@ -2,7 +2,7 @@ import { CommandHandler } from "@zudojs/cqrs";
 
 import { unprocessable } from "../../../../errors/domain.error.js";
 import { publishEvent } from "../../../../loaders/events.loader.js";
-import { UserRegisteredEvent } from "../../events/user-registered.event.js";
+import { UserRegisteredEvent } from "../../events/userRegistered.event.js";
 import type { AuthenticationResult } from "../../models/auth.model.js";
 import type { AuthService } from "../../services/auth.service.js";
 import { normalizeUsername, parseContactAddress, type ContactAddress } from "../../services/contact.service.js";

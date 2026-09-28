@@ -8,17 +8,14 @@ import {
 import type { SchemaIssue } from "@zudojs/schema";
 import { generateSecurityHeaders } from "@zudojs/security";
 
-/** A JSON response with `status`. */
 export function json(status: number, data: unknown): HttpResponseContext {
   return createResponseContext({ status }).json(data);
 }
 
-/** A response with no body (for example 204). */
 export function empty(status: number): HttpResponseContext {
   return createResponseContext({ status });
 }
 
-/** 400 listing where the input failed validation, without echoing it back. */
 export function validationFailed(issues: readonly SchemaIssue[]): HttpResponseContext {
   return json(400, {
     error: "Validation failed",
@@ -29,10 +26,6 @@ export function validationFailed(issues: readonly SchemaIssue[]): HttpResponseCo
   });
 }
 
-/**
- * The request body parsed as JSON; `undefined` when there is none.
- * Malformed JSON is answered with 400.
- */
 export function readJsonBody(ctx: HttpRouterContext): unknown {
   const body: unknown = ctx.request.body;
   if (body === undefined || body === null) return undefined;
@@ -51,12 +44,6 @@ export function readJsonBody(ctx: HttpRouterContext): unknown {
   }
 }
 
-/**
- * The response for an error that carries an exposed HTTP status
- * (NotFoundError, badRequest(), an exposed 503, ...): its status, message
- * and code. `undefined` for anything else; server.ts then logs the error
- * and answers a generic 500 that never leaks the message.
- */
 export function errorResponse(error: unknown): HttpResponseContext | undefined {
   if (typeof error !== "object" || error === null) return undefined;
   const candidate = error as {
@@ -74,7 +61,6 @@ export function errorResponse(error: unknown): HttpResponseContext | undefined {
   });
 }
 
-/** What the log records about an unexpected error: name, message, code, stack. */
 export function errorDetails(error: unknown): Record<string, string> {
   if (!(error instanceof Error)) return { error: String(error) };
   const { code } = error as { readonly code?: unknown };
@@ -87,11 +73,6 @@ export function errorDetails(error: unknown): Record<string, string> {
   };
 }
 
-/**
- * Adds the @zudojs/security default headers (CSP, HSTS, nosniff,
- * X-Frame-Options DENY, ...) to every response that does not set its own:
- * the /docs page, for instance, sends a CSP that allows its assets.
- */
 export function securityHeaders(): HttpMiddleware {
   const defaults = Object.entries(generateSecurityHeaders());
   return async (_context, next) => {

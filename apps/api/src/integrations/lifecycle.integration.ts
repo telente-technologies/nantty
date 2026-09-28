@@ -4,26 +4,20 @@ import { BaseModule, type ModuleContext } from "@zudojs/core";
 
 import type { AppConfig } from "../configs/index.js";
 
-/** What an integration receives when it starts. */
 export interface IntegrationContext {
   readonly config: AppConfig;
   readonly logger: ModuleContext["logger"];
-  /** The Node HTTP server, for integrations that attach to it (WebSockets). */
   readonly httpServer?: Server;
 }
 
-/** A client or server with a lifecycle, started and stopped with the runtime. */
 export interface Integration {
   readonly name: string;
   start(context: IntegrationContext): Promise<void>;
   stop(): Promise<void>;
-  /** Called when shutdown begins, before HTTP stops: close long-lived connections. */
   drain?(): Promise<void>;
-  /** Whether the integration is healthy; reported by /health. */
   health?(): Promise<boolean>;
 }
 
-/** Runs the integrations as one runtime module. */
 export class IntegrationsModule extends BaseModule {
   public readonly id = "integrations";
   public readonly name = "integrations";
@@ -56,14 +50,12 @@ export class IntegrationsModule extends BaseModule {
   }
 }
 
-/** Lets each integration close long-lived connections before HTTP stops. */
 export async function drainIntegrations(integrations: readonly Integration[]): Promise<void> {
   for (const integration of integrations) {
     await integration.drain?.().catch(() => undefined);
   }
 }
 
-/** Health of every integration that reports one. */
 export async function checkIntegrations(
   integrations: readonly Integration[],
 ): Promise<Record<string, "up" | "down">> {

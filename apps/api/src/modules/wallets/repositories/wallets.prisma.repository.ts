@@ -1,0 +1,62 @@
+import type { PayoutAccount, Withdrawal } from "../../../generated/prisma/client.js";
+import { prisma } from "../../../integrations/database.integration.js";
+import type { Page, PageRequest } from "../../../types/pagination.type.js";
+import { convertDatabaseAmountToKobo } from "../../../utils/money.util.js";
+import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
+import type { NewPayoutAccount, NewWithdrawal, PayoutAccountRecord, WithdrawalRecord, WithdrawalStatus } from "../models/wallets.model.js";
+import type { PayoutAccountsRepository, WithdrawalsRepository } from "./wallets.repository.js";
+
+function convertPayoutAccountRowToRecord(row: PayoutAccount): PayoutAccountRecord {
+  const { accountNumberEnc, ...rest } = row;
+  return { ...rest, accountNumberEncrypted: accountNumberEnc };
+}
+
+function convertWithdrawalRowToRecord(row: Withdrawal): WithdrawalRecord {
+  return { ...row, amount: convertDatabaseAmountToKobo(row.amount), status: row.status as WithdrawalStatus };
+}
+
+export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository {
+  public async listForStore(storeId: string): Promise<readonly PayoutAccountRecord[]> {
+    const rows = await prisma().payoutAccount.findMany({ where: { storeId }, orderBy: { createdAt: "asc" } });
+    return rows.map(convertPayoutAccountRowToRecord);
+  }
+
+  public async findForStore(storeId: string, payoutAccountId: string): Promise<PayoutAccountRecord | undefined> {
+    const row = await prisma().payoutAccount.findFirst({ where: { id: payoutAccountId, storeId } });
+    return row === null ? undefined : convertPayoutAccountRowToRecord(row);
+  }
+
+  public async create(input: NewPayoutAccount): Promise<PayoutAccountRecord> {
+    const { accountNumberEncrypted, ...rest } = input;
+    return convertPayoutAccountRowToRecord(await prisma().payoutAccount.create({ data: { ...rest, accountNumberEnc: accountNumberEncrypted } }));
+  }
+
+  public async delete(storeId: string, payoutAccountId: string): Promise<boolean> {
+    return (await prisma().payoutAccount.deleteMany({ where: { id: payoutAccountId, storeId } })).count > 0;
+  }
+
+  public async saveRecipientCode(payoutAccountId: string, recipientCode: string): Promise<void> {
+    await prisma().payoutAccount.updateMany({ where: { id: payoutAccountId }, data: { recipientCode } });
+  }
+}
+
+export class PrismaWithdrawalsRepository implements WithdrawalsRepository {
+  public async create(input: NewWithdrawal): Promise<WithdrawalRecord> {
+    return convertWithdrawalRowToRecord(await prisma().withdrawal.create({ data: { ...input, amount: BigInt(input.amount) } }));
+  }
+
+  public async findById(id: string): Promise<WithdrawalRecord | undefined> {
+    const row = await prisma().withdrawal.findUnique({ where: { id } });
+    return row === null ? undefined : convertWithdrawalRowToRecord(row);
+  }
+
+  public async listForStore(storeId: string, page: PageRequest): Promise<Page<WithdrawalRecord>> {
+    const rows = await prisma().withdrawal.findMany({ where: { storeId }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], ...buildPrismaPageArguments(page) });
+    return mapPageItems(buildPageFromFetchedRows(rows, page), convertWithdrawalRowToRecord);
+  }
+
+  public async changeStatus(id: string, from: WithdrawalStatus, to: WithdrawalStatus, processedAt: Date, failureReason: string | null): Promise<boolean> {
+    const result = await prisma().withdrawal.updateMany({ where: { id, status: from }, data: { status: to, processedAt, failureReason } });
+    return result.count === 1;
+  }
+}

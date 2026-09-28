@@ -2,7 +2,7 @@ import { CommandHandler } from "@zudojs/cqrs";
 import { ForbiddenError, UnauthorizedError } from "@zudojs/errors";
 
 import { publishEvent } from "../../../../loaders/events.loader.js";
-import { UserLoggedInEvent } from "../../events/user-logged-in.event.js";
+import { UserLoggedInEvent } from "../../events/userLoggedIn.event.js";
 import type { AuthenticationResult } from "../../models/auth.model.js";
 import type { AuthService } from "../../services/auth.service.js";
 import type { LoginCommand } from "./login.command.js";

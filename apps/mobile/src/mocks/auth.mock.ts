@@ -21,7 +21,9 @@ export const authMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/auth/register", () => buildMockAuthSession()),
   createMockRoute("POST", "/api/v1/auth/otp/send", () => ({ expiresIn: 60 })),
   createMockRoute("POST", "/api/v1/auth/otp/verify", ({ body }) => {
-    if ((body as { code: string }).code.length !== 6) throw new ApiError(400, "Enter the 6-digit code");
+    const { code } = body as { code: string };
+    if (code.length !== 6) throw new ApiError(400, "Enter the 6-digit code");
+    if (code === "000000") throw new ApiError(400, "That code is incorrect. Check it and try again.", "INVALID_CODE");
     return { otpToken: "mock-otp-token" };
   }),
   createMockRoute("GET", "/api/v1/auth/username-available", ({ query }) => ({ available: query.get("username") !== "taken" })),

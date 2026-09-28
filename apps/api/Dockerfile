@@ -15,7 +15,8 @@ COPY packages/shared-types/package.json packages/shared-types/
 FROM base AS build
 RUN pnpm install --frozen-lockfile --filter @zudomart/api...
 COPY packages packages
-COPY apps/api/tsconfig.json apps/api/
+COPY apps/api/tsconfig.json apps/api/prisma.config.ts apps/api/
+COPY apps/api/prisma apps/api/prisma
 COPY apps/api/src apps/api/src
 RUN pnpm --filter @zudomart/api run build
 

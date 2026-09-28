@@ -1,0 +1,18 @@
+import type { LiveComment, LiveSessionDetails, Page, SuggestedLive, UserSummary } from "@/types";
+
+import { api } from "./api-client.service";
+
+export const liveService = {
+  fetchLiveSessionById: (liveId: string) => api.get<LiveSessionDetails>(`/api/v1/lives/${liveId}`),
+  joinLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/join`),
+  leaveLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/leave`),
+  fetchLiveComments: (liveId: string, cursor?: string) => api.get<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`, { cursor }),
+  sendCommentToLive: (liveId: string, text: string) => api.post<LiveComment>(`/api/v1/lives/${liveId}/comments`, { text }),
+  sendReactionToLive: (liveId: string, emoji: string) => api.post<void>(`/api/v1/lives/${liveId}/reactions`, { emoji }),
+  startLiveSessionWithTitle: (title: string) => api.post<LiveSessionDetails>("/api/v1/lives", { title }),
+  endLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/end`),
+  fetchSuggestedLives: () => api.get<SuggestedLive[]>("/api/v1/lives/suggested"),
+  fetchPeopleToShareLiveWith: (query: string) => api.get<UserSummary[]>("/api/v1/search/people", { q: query }),
+  shareLiveWithPeople: (liveId: string, userIds: readonly string[]) => api.post<void>(`/api/v1/lives/${liveId}/share`, { userIds }),
+  followLiveHost: (userId: string) => api.post<void>(`/api/v1/users/${userId}/follow`),
+};

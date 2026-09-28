@@ -10,7 +10,6 @@ import { loadApplicationSettings } from "./settings.config.js";
 
 const DEFAULT_PORT = 3000;
 
-/** Loads `.env` into process.env when it exists; real variables win. */
 function loadDotEnv(): void {
   try {
     process.loadEnvFile(".env");
@@ -19,12 +18,10 @@ function loadDotEnv(): void {
   }
 }
 
-/** A string setting, or `fallback` when the variable is unset. */
 export function text(config: ConfigManager, key: string, fallback: string): string {
   return config.string(key, fallback) ?? fallback;
 }
 
-/** A comma-separated list setting. */
 export function list(config: ConfigManager, key: string): readonly string[] {
   return (config.string(key, "") ?? "")
     .split(",")
@@ -32,7 +29,6 @@ export function list(config: ConfigManager, key: string): readonly string[] {
     .filter((entry) => entry.length > 0);
 }
 
-/** A non-negative integer setting; anything else is a configuration error. */
 export function int(config: ConfigManager, key: string, fallback: number): number {
   const raw = config.string(key);
   if (raw === undefined || raw.trim() === "") return fallback;
@@ -43,7 +39,6 @@ export function int(config: ConfigManager, key: string, fallback: number): numbe
   return value;
 }
 
-/** PORT, refusing anything that is not a TCP port. */
 function port(config: ConfigManager): number {
   const raw = config.string("port");
   if (raw === undefined || raw.trim() === "") return DEFAULT_PORT;
@@ -54,10 +49,6 @@ function port(config: ConfigManager): number {
   return value;
 }
 
-/**
- * Reads the application configuration from the environment (and `.env`).
- * `zudojs add <feature>` adds the feature's settings between the markers.
- */
 export async function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   if (env === process.env) loadDotEnv();
   const config = createConfigManager({
@@ -89,5 +80,4 @@ export async function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   });
 }
 
-/** The loaded configuration. */
 export type AppConfig = Awaited<ReturnType<typeof loadConfig>>;

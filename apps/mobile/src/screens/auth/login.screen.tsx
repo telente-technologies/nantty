@@ -81,10 +81,10 @@ export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
 
 const styles = StyleSheet.create({
   fields: { gap: 24 },
-  forgot: { alignSelf: "flex-start", marginTop: -24 + 24 },
+  forgot: { alignSelf: "flex-start" },
   error: {
     height: 52,
-    marginTop: 5,
+    marginTop: -12,
     paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",

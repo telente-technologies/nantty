@@ -3,7 +3,6 @@ import { createTransport } from "nodemailer";
 import type { AppConfig } from "../configs/index.js";
 import type { Integration, IntegrationContext } from "./lifecycle.integration.js";
 
-/** A message to send. */
 export interface EmailMessage {
   readonly to: string | readonly string[];
   readonly subject: string;
@@ -11,7 +10,6 @@ export interface EmailMessage {
   readonly html?: string;
 }
 
-/** Sends email; swap implementations through EMAIL_TRANSPORT. */
 export interface EmailTransport {
   send(message: EmailMessage): Promise<void>;
   verify(): Promise<boolean>;
@@ -63,7 +61,6 @@ function smtpTransport(settings: AppConfig["email"]): EmailTransport {
 
 let transport: EmailTransport | undefined;
 
-/** The configured transport. Throws before the runtime has started. */
 export function email(): EmailTransport {
   if (transport === undefined) {
     throw new Error("Email is not configured: start the runtime first.");

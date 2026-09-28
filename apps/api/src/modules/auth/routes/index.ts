@@ -2,11 +2,11 @@ import type { HttpRouter } from "@zudojs/http";
 
 import type { AppDependencies } from "../../../container.js";
 // zudojs:route-imports:start
+import { registerAuthRoutes } from "./auth.routes.js";
 // zudojs:route-imports:end
 
-/** Registers this module's routes; called from the app's routes/index.ts. */
 export function registerAuthModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
-  void deps;
   // zudojs:routes:start
+  registerAuthRoutes(router, deps.authController, deps.web);
   // zudojs:routes:end
 }

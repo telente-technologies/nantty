@@ -1,3 +1,3 @@
-export * from "./check-username-availability/index.js";
-export * from "./get-session/index.js";
-export * from "./list-sessions/index.js";
+export * from "./checkUsernameAvailability/index.js";
+export * from "./getSession/index.js";
+export * from "./listSessions/index.js";

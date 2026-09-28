@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function AuthStep({
   contentGap = 24,
 }: AuthStepProps) {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   return (
     <Screen>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -62,7 +64,7 @@ export function AuthStep({
           ) : null}
           {children}
         </ScrollView>
-        <View style={styles.action}>
+        <View style={[styles.action, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           {footer}
           <Button title={actionTitle} onPress={onAction} disabled={actionDisabled} loading={loading} />
         </View>
@@ -76,5 +78,5 @@ const styles = StyleSheet.create({
   top: { height: 24, marginTop: 16, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   content: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 24 },
   heading: { gap: 8 },
-  action: { paddingHorizontal: 16, paddingBottom: 12, gap: 16 },
+  action: { paddingHorizontal: 16, gap: 16 },
 });

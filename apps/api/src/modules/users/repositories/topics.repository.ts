@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { DEFAULT_TOPICS } from "../../../constants/seed-data.constant.js";
+import { DEFAULT_TOPICS } from "../../../constants/seedData.constant.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { TopicRecord } from "../models/users.model.js";
 

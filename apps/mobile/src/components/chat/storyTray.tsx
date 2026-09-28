@@ -1,0 +1,60 @@
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+
+import { Frame30132Icon } from "@/components/icons";
+import { Avatar } from "@/components/ui/avatar";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { StoryTrayItem } from "@/types";
+
+export interface StoryTrayProps {
+  readonly items: readonly StoryTrayItem[];
+  readonly myAvatarUrl: string | null;
+  readonly onPressAddStory: () => void;
+  readonly onPressStory: (userId: string) => void;
+}
+
+export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory }: StoryTrayProps) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Add story" onPress={onPressAddStory} style={styles.item}>
+        <View style={styles.bubble}>
+          <Avatar uri={myAvatarUrl} size={60} placeholderColor={colors.primaryTint} />
+          <View style={styles.badge}>
+            <Frame30132Icon />
+          </View>
+        </View>
+        <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} align="center">
+          Add Story
+        </Text>
+      </Pressable>
+      {items.map((item) => (
+        <Pressable
+          key={item.user.id}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${item.user.name}'s story`}
+          onPress={() => onPressStory(item.user.id)}
+          style={styles.item}
+        >
+          <View style={styles.bubble}>
+            <View style={[styles.ring, item.hasUnseen && styles.ringUnseen]} />
+            <View style={styles.badge}>
+              <Avatar uri={item.user.avatarUrl} size={32} />
+            </View>
+          </View>
+          <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
+            {item.user.name}
+          </Text>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: { paddingHorizontal: 16, gap: 12 },
+  item: { width: 68, alignItems: "center", gap: 4 },
+  bubble: { width: 68, height: 60 },
+  ring: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primaryTint },
+  ringUnseen: { borderWidth: 1, borderColor: colors.primary },
+  badge: { position: "absolute", right: 0, bottom: 0 },
+});

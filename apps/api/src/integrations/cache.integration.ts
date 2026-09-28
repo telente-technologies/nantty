@@ -8,7 +8,6 @@ import type { Integration } from "./lifecycle.integration.js";
 
 let service: CacheService | undefined;
 
-/** The cache. Throws before the runtime has started. */
 export function cache(): CacheService {
   if (service === undefined) {
     throw new Error("The cache is not ready: start the runtime first.");

@@ -17,10 +17,6 @@ export {
   type IntegrationContext,
 } from "./lifecycle.integration.js";
 
-/**
- * Started with the runtime in this order and stopped in reverse.
- * `zudojs add <feature>` adds entries between the markers.
- */
 export const integrations: readonly Integration[] = [
   // zudojs:integrations:start
   redisIntegration,

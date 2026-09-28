@@ -19,6 +19,9 @@ import { createApp } from "./app.js";
 import { loadConfig } from "./configs/index.js";
 import { APP_DEPENDENCIES, createDependencies } from "./container.js";
 import { checkIntegrations, drainIntegrations, integrations } from "./integrations/index.js";
+import { schedules } from "./integrations/scheduler.integration.js";
+import { registerScheduledJobs } from "./jobs/scheduledJobs.job.js";
+import { addRequestIdResponseHeader } from "./middlewares/requestId.middleware.js";
 import { registerRoutes } from "./routes/index.js";
 import { errorDetails, errorResponse, json, securityHeaders } from "./utils/http.util.js";
 
@@ -28,6 +31,8 @@ const runtime = createApp({ config, httpServer });
 const logger = runtime.context.logger;
 
 const dependencies = createDependencies({
+  settings: config,
+  logger,
   health: async () => {
     const checks = await checkIntegrations(integrations);
     const ready =
@@ -66,14 +71,21 @@ const pipeline = new HttpMiddlewarePipeline({
       : []),
     // zudojs:server-middleware:start
     // zudojs:server-middleware:end
+    addRequestIdResponseHeader(),
     dispatch,
   ],
 });
 
 await runtime.start();
+registerScheduledJobs(schedules(), dependencies.scheduledJobs);
 
 const server = createHttpServer({
-  adapter: createNodeHttpAdapter({ server: httpServer, host: config.host, port: config.port }),
+  adapter: createNodeHttpAdapter({
+    server: httpServer,
+    host: config.host,
+    port: config.port,
+    maxBodySize: Math.max(config.media.maxImageBytes, config.media.maxVideoBytes) + 1024,
+  }),
   handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
 });
 

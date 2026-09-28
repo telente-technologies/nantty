@@ -3,11 +3,11 @@ import type { Server } from "node:http";
 import { createContainer } from "@zudojs/container";
 import type { Module } from "@zudojs/core";
 import { createEventBus } from "@zudojs/events";
-import { createAppLogger } from "./loggers/index.js";
 import { createRuntime, type Runtime } from "@zudojs/runtime";
 
 import type { AppConfig } from "./configs/index.js";
 import { IntegrationsModule, integrations } from "./integrations/index.js";
+import { createAppLogger } from "./loggers/index.js";
 import { AuthModule } from "./modules/auth/index.js";
 import { UsersModule } from "./modules/users/index.js";
 import { StoresModule } from "./modules/stores/index.js";
@@ -29,25 +29,11 @@ import { MediaModule } from "./modules/media/index.js";
 import { WaitlistModule } from "./modules/waitlist/index.js";
 import { AuditModule } from "./modules/index.js";
 
-/** What {@link createApp} needs. */
 export interface AppOptions {
   readonly config: AppConfig;
-  /** The Node HTTP server, for integrations that attach to it. */
   readonly httpServer?: Server;
 }
 
-/**
- * Assembles the application runtime.
- *
- * `createRuntime` takes two arguments: the dependencies the runtime and its
- * modules share, and the options describing this application. Integrations
- * (`src/integrations`) are registered first so they start before, and stop
- * after, every other module.
- *
- * The runtime's container is the one modules see as
- * `context.application.container`; server.ts registers the composition
- * root (`container.ts`) in it under `APP_DEPENDENCIES`.
- */
 export function createApp(options: AppOptions): Runtime {
   const logger = createAppLogger("zudomart");
   const container = createContainer();
@@ -89,7 +75,6 @@ export function createApp(options: AppOptions): Runtime {
     {
       applicationName: "zudomart",
       applicationVersion: "0.1.0",
-      // Resolved once by loadConfig (configs/index.ts) from NODE_ENV.
       environment: options.config.nodeEnv,
       // Signals are handled explicitly in server.ts.
       handleSignals: false,
