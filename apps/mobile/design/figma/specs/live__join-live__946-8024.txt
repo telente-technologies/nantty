@@ -1,0 +1,10 @@
+# Live / Join Live  (node 946:8024, 393x852, reference: screens/live__join-live__946-8024.png)
+FRAME "Join Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 397" [16,758.1 361x44] bg=#2043F5 radius=8 flex=row pad=10,10,10,10 gap=10 justify=center align=center
+    TEXT "Watch live" Inter 600 14/16.8 ls-0.3 #FFFFFF [162.5,771.6 68x17]
+  FRAME "Frame 571" [317,70 60x24] flex=row gap=12 align=center
+    ICON magnifying-glass-24.svg [317,70 24x24] (MagnifyingGlass)
+    ICON dots-three-vertical-24.svg [353,70 24x24] (DotsThreeVertical)
+  TEXT "Join 200 others watching this live right now" Inter 500 21/25.2 ls-0.4 #000000 [16,696.1 361x50]
+  FRAME "Frame 647" [16,665 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+    TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [20,667 23x15]

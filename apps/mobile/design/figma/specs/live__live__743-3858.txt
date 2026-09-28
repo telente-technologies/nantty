@@ -1,0 +1,35 @@
+# Live / Live  (node 743:3858, 393x852, reference: screens/live__live__743-3858.png)
+FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
+  INST "Navbar" [0,778 393x40] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=12,16,4,16 gap=10 clip
+    FRAME "Frame 82" [16,790 361x24] flex=row gap=44 justify=space_between align=center fill=w
+      ICON home-33-alt.svg [16,790 33x24] (Home)
+      ICON search-46-alt.svg [90.5,790 46x24] (Search)
+      ICON flips-34-alt.svg [178,790 34x24] (Flips)
+      ICON chat-37-alt.svg [253.5,790 37x24] (Chat)
+      ICON user-profile-45-alt.svg [332,790 45x24] (User Profile)
+  FRAME "Frame 579" [0,722 393x40] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=row pad=8,16,8,16 gap=10 justify=center align=center clip
+    FRAME "Frame 542" [16,730 327x24] bg=#FFFFFF border=#D9D9D9/1 radius=4 flex=row pad=0,8,0,8 gap=10 align=center fill=w clip
+      TEXT "Add comment..." Inter 400 14/16.8 ls-0.3 #D9D9D9 [24,733.5 101x17]
+    ICON smiley-24.svg [353,730 24x24] (Smiley)
+  FRAME "Frame 544" [353,476 24x234] flex=col gap=12
+    TEXT "😂" Inter 400 24/28.8 ls-0.5 #000000 [353,476 24x29]
+    TEXT "😍" Inter 400 24/28.8 ls-0.5 #000000 [353,517 24x29]
+    TEXT "😊" Inter 400 24/28.8 ls-0.5 #000000 [353,558 24x29]
+    TEXT "🥰" Inter 400 24/28.8 ls-0.5 #000000 [353,599 24x29]
+    TEXT "😆" Inter 400 24/28.8 ls-0.5 #000000 [353,640 24x29]
+    TEXT "😎" Inter 400 24/28.8 ls-0.5 #000000 [353,681 24x29]
+  FRAME "Frame 643" [0,62 393x32] flex=row pad=0,16,0,16 gap=111 justify=space_between align=center
+    FRAME "Frame 642" [16,62 151x32] flex=row gap=12 align=center
+      ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+      FRAME "Frame 577" [52,62 115x32] flex=row gap=4 align=center
+        CIRCLE "Ellipse 6" [52,62 32x32] bg=#5B5B5B
+        FRAME "Frame 576" [88,62 79x32] flex=col gap=2
+          TEXT "Live Username" Inter 500 11/15.4 #000000 [88,62 79x15]
+          FRAME "Frame 575" [88,79 79x15] flex=row gap=4 align=center fill=w
+            FRAME "Frame 573" [88,79 35x15] flex=row gap=2 align=center
+              CIRCLE "Ellipse 7" [88,80.5 12x12] bg=#5B5B5B
+              TEXT "200" Inter 500 11/15.4 #000000 [102,79 21x15]
+            FRAME "Frame 574" [127,79 36x15] flex=row gap=2 align=center
+              CIRCLE "Ellipse 7" [127,80.5 12x12] bg=#5B5B5B
+              TEXT "300" Inter 500 11/15.4 #000000 [141,79 22x15]
+    ICON dots-three-vertical-24.svg [353,66 24x24] (Frame 641)

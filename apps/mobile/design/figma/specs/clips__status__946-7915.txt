@@ -1,0 +1,20 @@
+# Clips / Status  (node 946:7915, 393x852, reference: screens/clips__status__946-7915.png)
+FRAME "Status" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 637" [0,64 393x32] flex=row pad=0,16,0,16 gap=157 justify=space_between align=center
+    FRAME "Frame 636" [16,64 138x32] flex=row gap=12 align=center
+      FRAME "Frame 34" [16,64 138x32] flex=row gap=9 align=center
+        CIRCLE "Ellipse 6" [16,64 32x32] bg=#5B5B5B
+        FRAME "Frame 34" [57,71.5 97x17] flex=row gap=4 align=center
+          TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [57,71.5 67x17]
+          CIRCLE "Ellipse 7" [128,78 4x4] bg=#5B5B5B
+          TEXT "2d" Inter 500 14/16.8 ls-0.3 #5B5B5B [136,71.5 18x17]
+    ICON dots-three-vertical-24.svg [353,68 24x24] (Frame 635)
+  FRAME "Frame 646" [0,58 393x2] flex=row pad=0,12,0,12 gap=4 align=center
+    RECT "Rectangle 160" [12,58 182.5x2] bg=#000000 radius=4 fill=w
+    RECT "Rectangle 161" [198.5,58 182.5x2] bg=#000000 radius=4 fill=w
+  FRAME "Frame 542" [0,758 393x60] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
+    FRAME "Frame 543" [16,766 361x44] flex=row gap=12 justify=space_between align=center fill=w
+      FRAME "Frame 542" [16,766 322x44] bg=#FFFFFF border=#D9D9D9/1 radius=8 flex=row pad=10,12,10,12 gap=148 justify=space_between align=center clip
+        TEXT "Send a message..." Inter 400 13/16.9 ls-0.3 #D9D9D9 [28,779.5 109x17]
+        ICON smiley-24.svg [302,776 24x24] (Smiley)
+      ICON plus-24.svg [353,776 24x24] (Plus)

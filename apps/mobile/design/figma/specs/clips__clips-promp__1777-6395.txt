@@ -1,0 +1,56 @@
+# Clips / Clips Promp  (node 1777:6395, 393x852, reference: screens/clips__clips-promp__1777-6395.png)
+FRAME "Clips Promp" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 646" [0,766 393x2] flex=row gap=4 align=center
+    RECT "Rectangle 160" [0,766 343x2] bg=#000000 radius=4
+    RECT "Rectangle 161" [347,766 46x2] bg=#000000 radius=4 fill=w
+  FRAME "Frame 773" [0,54 393x48] flex=row pad=12,16,12,16 gap=96 justify=space_between align=center
+    ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+    ICON magnifying-glass-24.svg [353,66 24x24] (MagnifyingGlass)
+  INST "Frame 772" [12,535 369x207] flex=row gap=60 justify=space_between align=max
+    FRAME "Clips Details (Unfollowed)" [12,666 269x76] flex=col gap=8
+      FRAME "Frame 570" [12,666 269x34] flex=row gap=65 justify=space_between align=center fill=w
+        FRAME "Frame 34" [12,666 121x34] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [12,667 32x32] bg=#5B5B5B
+          FRAME "Frame 768" [53,666 80x34] flex=col justify=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [53,666 67x17]
+            TEXT "@username20" Inter 400 12/16.8 ls-0.2 #000000 [53,683 80x17]
+        FRAME "Frame 496" [220,671.5 61x23] bg=#2043F5 radius=4 flex=row pad=4,12,4,12 gap=10 justify=center align=center
+          TEXT "Follow" Inter 400 12/14.5 #FFFFFF [232,675.5 37x15]
+      TEXT "Figma ipsum component variant main layer. Group export vector mask " Inter 400 13/16.9 ls-0.3 #000000 [12,708 269x34]
+    FRAME "Frame 471" [349,535 32x207] flex=col gap=16 justify=center align=center
+      FRAME "Frame 468" [349,535 32x45] flex=col gap=4 align=center fill=w
+        ICON heart-24.svg [353,535 24x24] (Heart)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,563 30x17]
+      FRAME "Frame 470" [349,596 32x45] flex=col gap=4 align=center fill=w
+        ICON chat-circle-24.svg [353,596 24x24] (ChatCircle)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,624 30x17]
+      FRAME "Frame 469" [349,657 32x45] flex=col gap=4 align=center fill=w
+        ICON paper-plane-tilt-24.svg [353,657 24x24] (PaperPlaneTilt)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [349,685 32x17]
+      ICON dots-three-vertical-24.svg [353,718 24x24] (DotsThreeVertical)
+  FRAME "Frame 771" [16,776 361x34] flex=row pad=4,0,4,0 gap=168 justify=space_between align=center
+    FRAME "Frame 769" [16,781 77x24] flex=row gap=14 align=center
+      ICON play-24.svg [16,781 24x24] (Play)
+      TEXT "-10:42" Inter 400 13/16.9 ls-0.3 #000000 [54,784.5 39x17]
+    FRAME "Frame 770" [261,781 116x24] flex=row gap=22 align=max
+      ICON speedometer-24.svg [261,781 24x24] (Speedometer)
+      ICON speaker-high-24.svg [307,781 24x24] (SpeakerHigh)
+      ICON arrows-out-simple-24.svg [353,781 24x24] (ArrowsOutSimple)
+  FRAME "Frame 467" [0,0 393x852] bg=#000000@0.2 opacity=0.5
+  FRAME "Frame 780" [109,244 175.8x356.1] flex=col gap=128 align=center
+    FRAME "Frame 781" [109,244 175.8x211.1] flex=col gap=32 align=center fill=w
+      FRAME "Frame 776" [109,244 175.8x51.1] flex=col align=center fill=w
+        TEXT "Watching stories" Inter 500 14/16.8 ls-0.3 #000000 align=center [109,244 175.8x17]
+        TEXT "You can use these gestures to control playback" Inter 400 12/16.8 ls-0.2 #5B5B5B align=center [109,261 175.9x34.1]
+      FRAME "Frame 779" [133.4,327.1 127x128] flex=col gap=48
+        FRAME "Frame 777" [133.4,327.1 127x40] flex=row gap=13 align=center fill=w
+          RECT "Rectangle 175" [133.4,327.1 32x40] bg=#444444
+          FRAME "Frame 775" [178.4,330.1 82x34.1] flex=col justify=center
+            TEXT "Go forward" Inter 500 13/16.9 ls-0.3 #000000 align=center [178.4,330.1 68x17]
+            TEXT "Tap the screen" Inter 400 12/16.8 ls-0.2 #5B5B5B align=center [178.4,347.1 82x17]
+        FRAME "Frame 778" [133.4,415.1 105x40] flex=row gap=13 align=center
+          RECT "Rectangle 175" [133.4,415.1 32x40] bg=#444444
+          FRAME "Frame 774" [178.4,418.1 60x34.1] flex=col
+            TEXT "Go back" Inter 500 13/16.9 ls-0.3 #000000 align=center [178.4,418.1 50x17]
+            TEXT "Drag down" Inter 400 12/16.8 ls-0.2 #5B5B5B align=center [178.4,435.1 60x17]
+    TEXT "Tap to keep watching" Inter 500 13/16.9 ls-0.3 #000000 align=center [132.4,583.1 129x17]

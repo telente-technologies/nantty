@@ -1,0 +1,127 @@
+# Clips / Clips/Comments  (node 762:4137, 393x852, reference: screens/clips__clips-comments__762-4137.png)
+FRAME "Clips/Comments" [0,0 393x852] bg=#FFFFFF clip
+  ICON arrow-left-24.svg [16,66 24x24] (arrow-left)
+  ICON dots-three-vertical-24.svg [351,66 24x24] (DotsThreeVertical)
+  FRAME "Frame 34" [16,614 148x32] flex=row gap=9 align=center
+    CIRCLE "Ellipse 6" [16,614 32x32] bg=#5B5B5B
+    FRAME "Frame 33" [57,621.5 107x17] flex=row gap=8 align=center
+      TEXT "Username" Inter 500 14/16.9 #000000 [57,621.5 69x17]
+      CIRCLE "Ellipse 7" [134,628 4x4] bg=#5B5B5B
+      TEXT "2d" Inter 500 14/16.9 #000000 [146,621.5 18x17]
+  TEXT "Figma ipsum component variant main layer. Group export vector mask " Inter 400 12/14.5 #000000 [16,655.7 269x30]
+  FRAME "Frame 96" [183,618.5 61x23] border=#000000/1 radius=4 flex=row pad=4,12,4,12 gap=10 justify=center align=center
+    TEXT "Follow" Inter 400 12/14.5 #000000 [195,622.5 37x15]
+  FRAME "Frame 471" [345,533 32x217] flex=col gap=12 justify=center align=center
+    FRAME "Frame 468" [345,533 32x43] flex=col gap=4 align=center fill=w
+      ICON heart-24.svg [349,533 24x24] (Heart)
+      TEXT "11.2k" Inter 600 12/14.5 #000000 [345,561 32x15]
+    FRAME "Frame 470" [345,588 32x43] flex=col gap=4 align=center fill=w
+      ICON chat-circle-24.svg [349,588 24x24] (ChatCircle)
+      TEXT "11.2k" Inter 600 12/14.5 #000000 [345,616 32x15]
+    FRAME "Frame 469" [345,643 32x43] flex=col gap=4 align=center fill=w
+      ICON paper-plane-tilt-24.svg [349,643 24x24] (PaperPlaneTilt)
+      TEXT "11.2k" Inter 600 12/14.5 #000000 [345,671 32x15]
+    ICON dots-three-vertical-24.svg [349,698 24x24] (DotsThreeVertical)
+    RECT "Rectangle 143" [353,734 16x16] bg=#D9D9D9 radius=4
+  FRAME "Frame 472" [16,734 158x16] flex=row gap=5
+    RECT "Rectangle 144" [16,734 16x16] bg=#D9D9D9 radius=4
+    TEXT "Original sound . username" Inter 500 11/15.4 #000000 [37,734 137x15]
+  FRAME "Frame 34" [16,698 147x24] flex=row gap=9 align=center
+    ICON group-12-56.svg [16,698 56x24] (Group 12)
+    TEXT "12 friends liked" Inter 400 12/15.6 ls-0.2 #000000 [81,702 82x16]
+  FRAME "Frame 495" [136,70 122x17] flex=row gap=13 align=center
+    TEXT "For You" Inter 600 14/16.8 ls-0.3 #000000 [136,70 49x17]
+    TEXT "Following" Inter 400 14/16.8 ls-0.3 #000000 [198,70 60x17]
+  FRAME "Frame 467" [0,0 393x852] bg=#000000 opacity=0.5
+  FRAME "Comments" [0,252 393x566] bg=#FFFFFF border=#D9D9D9/1 radius=20,20,0,0 clip
+    FRAME "Frame 465" [16,276 361x20] flex=row gap=258 justify=space_between
+      TEXT "Comments" Inter 600 16/19.2 ls-0.3 #000000 [16,276 83x19]
+      ICON cancel-20.svg [357,276 20x20] (Cancel)
+    FRAME "Frame 535" [16,320 361x658] flex=col gap=20
+      INST "Frame 535" [16,320 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,320 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,320 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,320 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,320 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,320 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,321.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,341 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,396 277x17]
+          FRAME "Frame 468" [345,346 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,346 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,370 32x17]
+      INST "Frame 536" [16,433 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,433 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,433 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,433 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,433 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,433 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,434.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,454 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,509 277x17]
+          FRAME "Frame 468" [345,459 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,459 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,483 32x17]
+      INST "Frame 530" [16,546 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,546 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,546 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,546 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,546 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,546 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,547.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,567 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,622 277x17]
+          FRAME "Frame 468" [345,572 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,572 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,596 32x17]
+      INST "Frame 537" [16,659 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,659 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,659 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,659 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,659 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,659 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,660.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,680 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,735 277x17]
+          FRAME "Frame 468" [345,685 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,685 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,709 32x17]
+      INST "Frame 538" [16,772 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,772 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,772 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,772 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,772 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,772 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,773.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,793 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,848 277x17]
+          FRAME "Frame 468" [345,798 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,798 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,822 32x17]
+      INST "Frame 539" [16,885 361x93] bg=#FFFFFF flex=row gap=8
+        CIRCLE "Ellipse 21" [16,885 36x36] bg=#D9D9D9
+        FRAME "Frame 545" [60,885 317x93] flex=row gap=8 justify=center align=center
+          FRAME "Frame 528" [60,885 277x93] flex=col gap=4
+            FRAME "Frame 527" [60,885 99x17] flex=row gap=4 align=center
+              TEXT "testUsername" Inter 600 12/16.8 ls-0.2 #000000 [60,885 80x17]
+              TEXT "8h" Inter 500 12/14.4 ls-0.2 #5B5B5B [144,886.5 15x14]
+            TEXT "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom." Inter 400 12/16.8 ls-0.2 #000000 [60,906 277x51]
+            TEXT "Reply" Inter 600 12/16.8 ls-0.2 #000000 [60,961 277x17]
+          FRAME "Frame 468" [345,911 32x41] flex=col gap=4 align=center
+            ICON heart-20.svg [351,911 20x20] (Heart)
+            TEXT "11.2k" Inter 600 12/16.8 ls-0.2 #000000 [345,935 32x17]
+  FRAME "Frame 541" [0,698 393x121] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=16,16,16,16 gap=16 clip
+    FRAME "Frame 544" [16,714 361x29] flex=row gap=12 justify=space_between align=center fill=w
+      TEXT "😂" Inter 400 24/28.8 ls-0.5 #000000 [16,714 24x29]
+      TEXT "😍" Inter 400 24/28.8 ls-0.5 #000000 [64.1,714 24x29]
+      TEXT "💕" Inter 400 24/28.8 ls-0.5 #000000 [112.3,714 24x29]
+      TEXT "😊" Inter 400 24/28.8 ls-0.5 #000000 [160.4,714 24x29]
+      TEXT "🥰" Inter 400 24/28.8 ls-0.5 #000000 [208.6,714 24x29]
+      TEXT "😆" Inter 400 24/28.8 ls-0.5 #000000 [256.7,714 24x29]
+      TEXT "😎" Inter 400 24/28.8 ls-0.5 #000000 [304.9,714 24x29]
+      TEXT "🤔" Inter 400 24/28.8 ls-0.5 #000000 [353,714 24x29]
+    FRAME "Frame 543" [16,759 361x44] flex=row gap=12 justify=space_between align=center fill=w
+      CIRCLE "Ellipse 21" [16,761 40x40] bg=#D9D9D9
+      FRAME "Frame 542" [68,759 309x44] bg=#FFFFFF border=#D9D9D9/1 radius=8 clip
+        TEXT "Add comment..." Inter 400 14/16.8 ls-0.3 #D9D9D9 [80,773 101x17]
+        ICON gif-24.svg [345,769 24x24] (Gif)

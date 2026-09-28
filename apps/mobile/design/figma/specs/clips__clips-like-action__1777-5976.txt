@@ -1,0 +1,39 @@
+# Clips / Clips/Like Action  (node 1777:5976, 393x852, reference: screens/clips__clips-like-action__1777-5976.png)
+FRAME "Clips/Like Action" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 646" [0,766 393x2] flex=row gap=4 align=center
+    RECT "Rectangle 160" [0,766 343x2] bg=#000000 radius=4
+    RECT "Rectangle 161" [347,766 46x2] bg=#000000 radius=4 fill=w
+  FRAME "Frame 773" [0,54 393x48] flex=row pad=12,16,12,16 gap=96 justify=space_between align=center
+    ICON magnifying-glass-24.svg [184.5,66 24x24] (MagnifyingGlass)
+  INST "Frame 772" [12,535 369x207] flex=row gap=60 justify=space_between align=max
+    FRAME "Clips Details (Unfollowed)" [12,666 269x76] flex=col gap=8
+      FRAME "Frame 570" [12,666 269x34] flex=row gap=65 justify=space_between align=center fill=w
+        FRAME "Frame 34" [12,666 121x34] flex=row gap=9 align=center
+          CIRCLE "Ellipse 6" [12,667 32x32] bg=#5B5B5B
+          FRAME "Frame 768" [53,666 80x34] flex=col justify=center
+            TEXT "Username" Inter 500 14/16.8 ls-0.3 #000000 [53,666 67x17]
+            TEXT "@username20" Inter 400 12/16.8 ls-0.2 #000000 [53,683 80x17]
+        FRAME "Frame 496" [220,671.5 61x23] bg=#2043F5 radius=4 flex=row pad=4,12,4,12 gap=10 justify=center align=center
+          TEXT "Follow" Inter 400 12/14.5 #FFFFFF [232,675.5 37x15]
+      TEXT "Figma ipsum component variant main layer. Group export vector mask " Inter 400 13/16.9 ls-0.3 #000000 [12,708 269x34]
+    FRAME "Frame 471" [349,535 32x207] flex=col gap=16 justify=center align=center
+      FRAME "Frame 468" [349,535 32x45] flex=col gap=4 align=center fill=w
+        ICON heart-24.svg [353,535 24x24] (Heart)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,563 30x17]
+      FRAME "Frame 470" [349,596 32x45] flex=col gap=4 align=center fill=w
+        ICON chat-circle-24.svg [353,596 24x24] (ChatCircle)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [350,624 30x17]
+      FRAME "Frame 469" [349,657 32x45] flex=col gap=4 align=center fill=w
+        ICON paper-plane-tilt-24.svg [353,657 24x24] (PaperPlaneTilt)
+        TEXT "11.2k" Inter 400 13/16.9 ls-0.3 #000000 [349,685 32x17]
+      ICON dots-three-vertical-24.svg [353,718 24x24] (DotsThreeVertical)
+  INST "Heart" [161,390.5 72x72] clip
+    VECTOR "Vector" [165.5,401.8 63x54] bg=#EF4444
+  FRAME "Frame 771" [16,776 361x34] flex=row pad=4,0,4,0 gap=168 justify=space_between align=center
+    FRAME "Frame 769" [16,781 77x24] flex=row gap=14 align=center
+      ICON play-24.svg [16,781 24x24] (Play)
+      TEXT "-10:42" Inter 400 13/16.9 ls-0.3 #000000 [54,784.5 39x17]
+    FRAME "Frame 770" [261,781 116x24] flex=row gap=22 align=max
+      ICON speedometer-24.svg [261,781 24x24] (Speedometer)
+      ICON speaker-high-24.svg [307,781 24x24] (SpeakerHigh)
+      ICON arrows-out-simple-24.svg [353,781 24x24] (ArrowsOutSimple)

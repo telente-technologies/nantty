@@ -1,0 +1,38 @@
+# Live / Live  (node 1527:5774, 393x852, reference: screens/live__live__1527-5774.png)
+FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
+  FRAME "Frame 579" [0,768 393x49] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=row pad=8,16,8,16 gap=10 justify=center align=center clip
+    FRAME "Frame 542" [16,776 327x33] bg=#FFFFFF border=#D9D9D9/1 radius=4 flex=row pad=8,8,8,8 gap=10 align=center fill=w clip
+      TEXT "Add comment..." Inter 400 14/16.8 ls-0.3 #D9D9D9 [24,784 101x17]
+    ICON paper-plane-tilt-24.svg [353,780.5 24x24] (PaperPlaneTilt)
+  FRAME "Frame 544" [353,731 24x29] flex=col gap=12
+    TEXT "😎" Inter 400 24/28.8 ls-0.5 #000000 [353,731 24x29]
+  FRAME "Frame 589" [16,620 315x140] flex=col gap=8
+    FRAME "Frame 587" [16,620 315x34] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,625 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name commented about the live stream here from the viewer" Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« »«comment»{#000000}«ed»« about the live stream here from the viewer»{#000000} [46,620 285x34]
+    FRAME "Frame 589" [16,662 315x24] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,662 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name commented about the live stream " Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« »«comment»{#000000}«ed»« about the live stream »{#000000} [46,665.5 285x17]
+    FRAME "Frame 588" [16,694 315x24] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,694 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name joined the live stream " Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« joined»« the live stream »{#000000} [46,697.5 285x17]
+    FRAME "Frame 585" [16,726 315x34] flex=row gap=6 align=center fill=w
+      RECT "Rectangle 144" [16,731 24x24] bg=#D9D9D9 radius=999
+      TEXT "@user-name replied @user-name on the live stream" Inter 400 13/16.9 ls-0.3 #000000 runs: «@user-name»{#5B5B5B}« replied @user-name on the live s»«tream»{#000000} [46,726 285x34]
+  FRAME "Frame 801" [16,66 361x32] flex=row gap=97 justify=space_between align=center
+    FRAME "Frame 642" [16,66 160x32] flex=row gap=12 align=center
+      ICON arrow-left-24.svg [16,70 24x24] (arrow-left)
+      FRAME "Frame 577" [52,66 124x32] flex=row gap=4 align=center
+        CIRCLE "Ellipse 6" [52,66 32x32] bg=#5B5B5B
+        FRAME "Frame 576" [88,66 88x32] flex=col gap=2
+          TEXT "Live Username" Inter 500 11/15.4 #000000 [88,66 79x15]
+          TEXT "Title of Live here" Inter 500 11/15.4 #000000 [88,83 88x15]
+    FRAME "Frame 800" [273,70 104x24] flex=row gap=4 align=center
+      FRAME "Frame 745" [273,72.5 76x19] flex=row gap=2 align=center
+        FRAME "Frame 799" [273,72.5 76x19] flex=row gap=2 justify=space_between align=center
+          FRAME "Frame 647" [273,72.5 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
+            TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [277,74.5 23x15]
+          FRAME "Frame 648" [306,72.5 43x19] bg=#5B5B5B radius=2 flex=row pad=2,4,2,4 justify=center align=center
+            ICON eye-14.svg [310,75 14x14] (tabler-icon-eye)
+            TEXT "268" Inter 500 11/15.4 ls-0.2 #FFFFFF [324,74.5 21x15]
+      ICON dots-three-vertical-24.svg [353,70 24x24] (Frame 641)
