@@ -1,0 +1,71 @@
+{
+  "name": "@zudomart/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "zudojs": {
+    "projectType": "backend",
+    "architecture": "modular-monolith",
+    "features": [
+      "cqrs",
+      "messaging",
+      "observability",
+      "openapi",
+      "database",
+      "queue",
+      "events",
+      "security",
+      "redis",
+      "cache",
+      "storage",
+      "websockets",
+      "email",
+      "scheduler",
+      "docker"
+    ]
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@zudojs/core": "^1.3.0",
+    "@zudojs/runtime": "^1.4.0",
+    "@zudojs/container": "^1.3.0",
+    "@zudojs/events": "^1.4.0",
+    "@zudojs/logger": "^1.5.0",
+    "@zudojs/constants": "^1.2.0",
+    "@zudojs/config": "^1.3.4",
+    "@zudojs/errors": "^1.4.0",
+    "@zudojs/http": "^1.5.0",
+    "@zudojs/middleware": "^1.1.3",
+    "@zudojs/schema": "^1.3.0",
+    "@zudojs/security": "^1.3.4",
+    "@zudojs/types": "^1.3.0",
+    "@zudojs/validation": "^1.2.0",
+    "@zudojs/cqrs": "^1.3.0",
+    "@zudojs/messaging": "^1.2.4",
+    "@zudojs/observability": "^1.3.0",
+    "@zudojs/openapi": "^1.6.0",
+    "@zudojs/database": "^1.5.0",
+    "@zudojs/queue": "^1.6.0",
+    "redis": "^6.2.1",
+    "@zudojs/cache": "^1.2.4",
+    "@zudojs/storage": "^1.3.0",
+    "ws": "^8.21.3",
+    "nodemailer": "^10.0.10",
+    "@zudojs/scheduler": "^1.3.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "@types/node": "^26.6.2",
+    "vitest": "^5.0.1",
+    "@zudojs/testing": "^1.3.0",
+    "@types/ws": "^8.18.1"
+  }
+}
