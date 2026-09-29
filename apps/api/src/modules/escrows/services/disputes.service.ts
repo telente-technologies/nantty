@@ -16,7 +16,7 @@ export class DisputesService {
     private readonly ordersService: OrdersService,
   ) {}
 
-  public async openDisputeForOrder(buyerId: string, orderId: string, reason: string, details: string): Promise<DisputeRecord> {
+  public async openDisputeForOrder(buyerId: string, orderId: string, reason: string, details: string, evidenceMediaIds: readonly string[] = []): Promise<DisputeRecord> {
     const { escrows, orders, clock } = this.escrowsService.dependencies;
     const order = await this.ordersService.findOrderForBuyer(buyerId, orderId);
     const escrow = await escrows.findByOrderId(order.id);
@@ -24,7 +24,7 @@ export class DisputesService {
     const disputed = await escrows.transitionStatus(escrow.id, ["held"], "disputed", {});
     if (disputed === undefined) throw invalidState("This order can no longer be disputed.");
     await orders.transitionStatus(order.id, ["paid", "shipped", "delivered"], "disputed", {});
-    const dispute = await this.disputes.create({ escrowId: escrow.id, orderId: order.id, openedById: buyerId, reason, details, createdAt: clock.now() });
+    const dispute = await this.disputes.create({ escrowId: escrow.id, orderId: order.id, openedById: buyerId, reason, details, evidenceMediaIds, createdAt: clock.now() });
     await this.escrowsService.notifyStoreOwner(order.storeId, "Order disputed", `The buyer opened a dispute on order ${order.number}. Funds are on hold.`, order.id);
     await publishEvent(this.escrowsService.dependencies.events, EscrowDisputedEvent, { escrowId: escrow.id, orderId: order.id, storeId: order.storeId, amount: escrow.amount });
     return dispute;
