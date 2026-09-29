@@ -24,7 +24,8 @@ export function registerPosShiftMockHandlers(): void {
   registerMockRoute("GET", "/seller/pos/registers", (request) => {
     requireMockStorePrincipal(request);
     const locationId = request.query.get("locationId");
-    const registers = readMockDatabase().registers.filter((register) => register.active && (!locationId || register.locationId === locationId));
+    const includeInactive = request.query.get("includeInactive") === "true";
+    const registers = readMockDatabase().registers.filter((register) => (includeInactive || register.active) && (!locationId || register.locationId === locationId));
     return respondWithJson(200, { data: registers, nextCursor: null });
   });
 
