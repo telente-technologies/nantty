@@ -3,7 +3,7 @@ import type { PosRegister, StoreLocation, StoreSettings } from "@/types/store.ty
 
 export const demoMainStoreId = "store_ife_lifestyle";
 
-export function buildDemoStoreSettings(): StoreSettings {
+export function buildIfeLifestyleStoreSettings(): StoreSettings {
   return {
     storeId: demoMainStoreId,
     name: "Ìfẹ́ Lifestyle",
@@ -40,7 +40,7 @@ export function buildDemoStoreSettings(): StoreSettings {
   };
 }
 
-export function buildDemoLocations(): StoreLocation[] {
+export function buildIfeLifestyleLocations(): StoreLocation[] {
   return [
     { id: "loc_lekki", name: "Lekki flagship", kind: "store", address: "12 Admiralty Way, Lekki Phase 1", city: "Lagos", state: "Lagos", country: "NG", phone: "+234 803 555 0142", isDefault: true, active: true },
     { id: "loc_ikeja", name: "Ikeja City Mall kiosk", kind: "store", address: "Obafemi Awolowo Way, Alausa", city: "Ikeja", state: "Lagos", country: "NG", phone: "+234 809 555 0177", isDefault: false, active: true },
@@ -49,7 +49,7 @@ export function buildDemoLocations(): StoreLocation[] {
   ];
 }
 
-export function buildDemoRegisters(): PosRegister[] {
+export function buildIfeLifestyleRegisters(): PosRegister[] {
   return [
     { id: "reg_lekki_1", locationId: "loc_lekki", name: "Front counter", openShiftId: null, active: true },
     { id: "reg_lekki_2", locationId: "loc_lekki", name: "Tablet by the door", openShiftId: null, active: true },
@@ -58,7 +58,7 @@ export function buildDemoRegisters(): PosRegister[] {
   ];
 }
 
-export function buildDemoCategories(): ProductCategory[] {
+export function buildIfeLifestyleCategories(): ProductCategory[] {
   return [
     { id: "cat_fashion", name: "Fashion" },
     { id: "cat_bags", name: "Bags" },
