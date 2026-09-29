@@ -13,6 +13,9 @@ export const BUYER_PERMISSIONS = [
   "notifications:manage",
   "media:upload",
   "seller:apply",
+  "wallet:use",
+  "verification:apply",
+  "subscriptions:use",
 ] as const;
 
 export const SELLER_PERMISSIONS = [
@@ -33,6 +36,10 @@ export const ADMIN_PERMISSIONS = [
   "audit:read",
   "waitlist:read",
   "exchange-rates:manage",
+  "verifications:review",
+  "subscriptions:manage",
+  "creators:review",
+  "media:read-private",
 ] as const;
 
 export type Permission =
