@@ -1,0 +1,270 @@
+.container {
+  width: 100%;
+  max-width: calc(var(--content-width) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.featureSection {
+  padding-block: var(--section-space);
+}
+
+.featureSectionTinted {
+  background: #fff;
+}
+
+.featureLayout {
+  display: grid;
+  gap: 40px;
+  align-items: center;
+}
+
+.featureLayout > * {
+  min-width: 0;
+}
+
+.pointList {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin-top: -16px;
+}
+
+.pointList li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--ink-muted);
+}
+
+.pointIcon {
+  margin-top: 5px;
+  color: var(--blue-500);
+}
+
+.stateList {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: -12px 0 24px;
+}
+
+.stateList li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+  color: var(--ink-muted);
+}
+
+.stateBadge {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.stateInfo {
+  background: var(--blue-tint);
+  color: var(--blue-700);
+}
+
+.stateSuccess {
+  background: var(--success-tint);
+  color: var(--success-ink);
+}
+
+.stateError {
+  background: var(--error-tint);
+  color: var(--error-ink);
+}
+
+.inlineLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 650;
+}
+
+.questionsLayout {
+  display: grid;
+  gap: 32px;
+}
+
+.contactNote {
+  color: var(--ink-muted);
+  margin-top: -24px;
+}
+
+.contactNote a {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.questionList {
+  display: grid;
+  gap: 10px;
+}
+
+.questionItem {
+  border-radius: 18px;
+  background: var(--surface-app);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  font-weight: 650;
+  font-size: 1.02rem;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 18px;
+}
+
+.question::-webkit-details-marker {
+  display: none;
+}
+
+.question:focus-visible {
+  box-shadow: 0 0 0 3px var(--blue-500);
+}
+
+.questionToggle {
+  flex: none;
+  color: var(--blue-500);
+  transition: transform 160ms ease;
+}
+
+.questionItem[open] .questionToggle {
+  transform: rotate(45deg);
+}
+
+.answer {
+  padding: 0 20px 20px;
+  color: var(--ink-muted);
+}
+
+.callToActionSection {
+  padding-block: var(--section-space);
+}
+
+.callToActionPanel {
+  position: relative;
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  padding: clamp(28px, 5vw, 64px);
+  border-radius: 32px;
+  background: radial-gradient(90% 120% at 100% 0%, var(--blue-400), transparent 60%), var(--blue-500);
+  color: #fff;
+  overflow: hidden;
+}
+
+.callToActionCopy {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+
+.callToActionHeading {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  max-width: 16ch;
+}
+
+.callToActionLede {
+  max-width: 46ch;
+  color: var(--blue-50);
+  font-size: 1.05rem;
+}
+
+.callToActionActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.callToActionSecondary {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.callToActionArt {
+  display: flex;
+  justify-content: center;
+}
+
+.callToActionArt figure {
+  max-width: 260px;
+  transform: rotate(4deg);
+}
+
+@media (min-width: 1000px) {
+  .featureLayout {
+    grid-template-columns: 0.85fr 1.15fr;
+  }
+
+  .featureLayoutReversed > :first-child {
+    order: 2;
+  }
+
+  .featureLayoutReversed {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .questionsLayout {
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+
+  .callToActionPanel {
+    grid-template-columns: 1.4fr 0.8fr;
+  }
+}
+
+.pillarGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  list-style: none;
+}
+
+.pillar {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 24px;
+  border-radius: 22px;
+  background: var(--surface-app);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.pillarIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--blue-900);
+  color: var(--yellow-500);
+}
+
+.pillarTitle {
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.pillarText {
+  color: var(--ink-muted);
+}
