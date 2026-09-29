@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
   salesTile: { flex: 181 },
   tileColumn: { flex: 180, gap: 8 },
   smallTile: { flex: 1 },
-  salesLabel: { position: "absolute", top: 9, left: 10 },
-  tileLabel: { position: "absolute", top: 12, left: 12 },
+  salesLabel: { position: "absolute", top: 9, left: 10, backgroundColor: "rgba(255,255,255,0.88)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
+  tileLabel: { position: "absolute", top: 12, left: 12, backgroundColor: "rgba(255,255,255,0.88)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
 });
