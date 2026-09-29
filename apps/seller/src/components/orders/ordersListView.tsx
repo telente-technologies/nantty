@@ -43,7 +43,7 @@ export function OrdersListView({ initialStatusFilter = "all" }: { readonly initi
 
   return (
     <PageStack>
-      <PageHeader title="Orders" description="Marketplace orders paid into escrow. Pack and ship paid orders; you are paid when the buyer confirms delivery." />
+      <PageHeader title="Orders" description="Orders customers placed in the Zudomart app, paid into escrow. They sync here automatically — pack and ship paid orders; you are paid when the buyer confirms delivery in the app." />
       <LinkTabs label="Order sections" tabs={ordersSectionTabs} />
       <div className={styles.chipRow} role="group" aria-label="Filter by status">
         {statusFilterOrder.map((status) => (
@@ -60,7 +60,7 @@ export function OrdersListView({ initialStatusFilter = "all" }: { readonly initi
       {ordersList.errorMessage ? <Callout tone="error">{ordersList.errorMessage}</Callout> : null}
       <Panel padded={false}>
         <DataTable
-          caption="Online orders"
+          caption="Orders from the Zudomart app"
           columns={columns}
           rows={ordersList.items}
           readRowKey={(order) => order.id}
