@@ -16,6 +16,8 @@ export const BUYER_PERMISSIONS = [
   "wallet:use",
   "verification:apply",
   "subscriptions:use",
+  "sounds:use",
+  "copyright:claim",
 ] as const;
 
 export const SELLER_PERMISSIONS = [
@@ -40,6 +42,24 @@ export const ADMIN_PERMISSIONS = [
   "subscriptions:manage",
   "creators:review",
   "media:read-private",
+  "admins:manage",
+  "users:read",
+  "users:manage",
+  "usernames:manage",
+  "verifications:review-blue",
+  "verifications:review-gold",
+  "verifications:review-black",
+  "moderation:review",
+  "moderation:appeals",
+  "copyright:review",
+  "refunds:approve",
+  "payouts:approve",
+  "ads:review",
+  "plans:manage",
+  "perks:manage",
+  "fees:manage",
+  "feature-flags:manage",
+  "analytics:read",
 ] as const;
 
 export type Permission =
@@ -50,9 +70,22 @@ export type Permission =
 export const ROLE_PERMISSIONS: Readonly<Record<Role, ReadonlySet<Permission>>> = {
   [Role.BUYER]: new Set<Permission>(BUYER_PERMISSIONS),
   [Role.SELLER]: new Set<Permission>([...BUYER_PERMISSIONS, ...SELLER_PERMISSIONS]),
-  [Role.ADMIN]: new Set<Permission>([...BUYER_PERMISSIONS, ...SELLER_PERMISSIONS, ...ADMIN_PERMISSIONS]),
+  [Role.ADMIN]: new Set<Permission>([...BUYER_PERMISSIONS, ...SELLER_PERMISSIONS]),
 };
 
+export const SUPERADMIN_ONLY_PERMISSIONS: ReadonlySet<Permission> = new Set<Permission>(["admins:manage"]);
+
+export const PLATFORM_PERMISSION_ROLE_PREFIX = "platform-permission:";
+
+export function isPlatformPermission(permission: string): permission is Permission {
+  return (ADMIN_PERMISSIONS as readonly string[]).includes(permission);
+}
+
+export function describePlatformPermissionAsRole(permission: Permission): string {
+  return `${PLATFORM_PERMISSION_ROLE_PREFIX}${permission}`;
+}
+
 export function rolesGrantPermission(roles: readonly string[], permission: Permission): boolean {
+  if (isPlatformPermission(permission)) return roles.includes(describePlatformPermissionAsRole(permission));
   return roles.some((role) => ROLE_PERMISSIONS[role as Role]?.has(permission) === true);
 }
