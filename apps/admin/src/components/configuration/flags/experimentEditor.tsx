@@ -12,6 +12,8 @@ export function findExperimentDraftProblem(experiment: ExperimentContent): strin
   if (experiment.name.trim().length < 3) return "Give the experiment a name.";
   if (experiment.variants.length < 2) return "An experiment needs at least two variants.";
   if (totalWeight !== 100) return `Variant weights add up to ${totalWeight}%. They must add up to 100%.`;
+  if (experiment.variants.some((variant) => variant.key.length < 2 || variant.description.trim().length < 2)) return "Each variant needs a key and a description (at least 2 characters).";
+  if (experiment.hypothesis.trim().length < 5 || experiment.primaryMetric.length < 3) return "Add a hypothesis and a primary metric.";
   if (new Set(experiment.variants.map((variant) => variant.key)).size !== experiment.variants.length) return "Variant keys must be unique.";
   return null;
 }
