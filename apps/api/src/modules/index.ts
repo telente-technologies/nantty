@@ -20,3 +20,5 @@ export * from "./waitlist/index.js";
 export { AuditModule } from "./audit/index.js";
 export * from "./currency/index.js";
 export * from "./coins/index.js";
+export * from "./creatorSubscriptions/index.js";
+export * from "./loyalty/index.js";
