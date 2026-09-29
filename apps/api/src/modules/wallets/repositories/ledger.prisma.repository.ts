@@ -1,5 +1,4 @@
 import { isUniqueConstraintViolation, runInSerializableTransaction, type TransactionClient } from "../../../databases/prisma.database.js";
-import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import { insufficientFunds } from "../../../errors/domain.error.js";
 import type { LedgerAccount, LedgerEntry } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
@@ -16,16 +15,17 @@ import {
   type LedgerPostingResult,
   type LedgerTransactionInput,
   type LedgerTransactionRecord,
+  type LedgerUnit,
 } from "../models/wallets.model.js";
 import type { LedgerRepository } from "./ledger.repository.js";
 
 type TransactionRow = { id: string; reference: string; kind: string; description: string; createdAt: Date; entries: LedgerEntry[] };
 
 function convertAccountRowToRecord(row: LedgerAccount): LedgerAccountRecord {
-  return { ...row, kind: row.kind as LedgerAccountKind, currency: row.currency as CurrencyCode, balance: convertDatabaseAmountToMinorUnits(row.balance) };
+  return { ...row, kind: row.kind as LedgerAccountKind, currency: row.currency as LedgerUnit, balance: convertDatabaseAmountToMinorUnits(row.balance) };
 }
 
-function convertEntryRowToRecord(row: LedgerEntry, currency: CurrencyCode): LedgerEntryRecord {
+function convertEntryRowToRecord(row: LedgerEntry, currency: LedgerUnit): LedgerEntryRecord {
   return {
     ...row,
     direction: row.direction as LedgerDirection,
@@ -107,7 +107,7 @@ export class PrismaLedgerRepository implements LedgerRepository {
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       ...buildPrismaPageArguments(page),
     });
-    return mapPageItems(buildPageFromFetchedRows(rows, page), (row) => convertEntryRowToRecord(row, account.currency as CurrencyCode));
+    return mapPageItems(buildPageFromFetchedRows(rows, page), (row) => convertEntryRowToRecord(row, account.currency as LedgerUnit));
   }
 
   public async listAccountsForOwner(ownerType: string, ownerId: string): Promise<readonly LedgerAccountRecord[]> {
@@ -117,14 +117,14 @@ export class PrismaLedgerRepository implements LedgerRepository {
 
   private async convertTransaction(row: TransactionRow, client: TransactionClient): Promise<LedgerTransactionRecord> {
     const accounts = await client.ledgerAccount.findMany({ where: { id: { in: row.entries.map((entry) => entry.accountId) } } });
-    const currencyByAccountId = new Map(accounts.map((account) => [account.id, account.currency as CurrencyCode]));
+    const currencyByAccountId = new Map(accounts.map((account) => [account.id, account.currency as LedgerUnit]));
     return {
       id: row.id,
       reference: row.reference,
       kind: row.kind,
       description: row.description,
       createdAt: row.createdAt,
-      entries: row.entries.map((entry) => convertEntryRowToRecord(entry, currencyByAccountId.get(entry.accountId) ?? ("USD" as CurrencyCode))),
+      entries: row.entries.map((entry) => convertEntryRowToRecord(entry, currencyByAccountId.get(entry.accountId) ?? ("USD" as LedgerUnit))),
     };
   }
 }
