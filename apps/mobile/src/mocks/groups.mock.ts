@@ -143,7 +143,8 @@ export const groupsMocks: MockRoute[] = [
   createMockRoute("PATCH", "/api/v1/conversations/:conversationId", ({ params, body }) => {
     const update = body as ConversationSettingsUpdate;
     const me = getSignedInMockUser();
-    if (update.name !== undefined) postSystemNotice(params.conversationId!, `${me.name} renamed the group to "${update.name}"`);
+    const conversationNoun = mockConversations.find((c) => c.id === params.conversationId)?.kind === "channel" ? "channel" : "group";
+    if (update.name !== undefined) postSystemNotice(params.conversationId!, `${me.name} renamed the ${conversationNoun} to "${update.name}"`);
     if (update.disappearingMessagesSeconds !== undefined) {
       postSystemNotice(params.conversationId!, `${me.name} ${describeDisappearingSetting(update.disappearingMessagesSeconds)}`);
     }
@@ -169,6 +170,7 @@ export const groupsMocks: MockRoute[] = [
       myRole: "owner",
     };
     mockConversations.unshift(channel);
+    postSystemNotice(channel.id, `${me.name} created the channel`);
     return channel;
   }),
   createMockRoute("POST", "/api/v1/channels/:channelId/subscribe", ({ params }) =>
