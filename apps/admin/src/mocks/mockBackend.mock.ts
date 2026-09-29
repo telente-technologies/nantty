@@ -1,7 +1,7 @@
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { registerEveryMockHandler } from "@/mocks/mockHandlerRegistry.mock";
 import { MockHttpError, respondWithError } from "@/mocks/mockResponses.mock";
-import { findMockRouteForRequest, type MockPrincipal, type MockResponse } from "@/mocks/mockRouter.mock";
+import { clearEveryMockRoute, findMockRouteForRequest, type MockPrincipal, type MockResponse } from "@/mocks/mockRouter.mock";
 
 export interface MockApiCall {
   readonly method: string;
@@ -11,13 +11,13 @@ export interface MockApiCall {
   readonly body: Uint8Array | null;
 }
 
-const registrationKey = Symbol.for("zudomart.admin.mockHandlersRegistered");
+let areHandlersRegisteredForThisModuleInstance = false;
 
 function ensureMockHandlersAreRegistered(): void {
-  const globalScope = globalThis as unknown as Record<symbol, boolean | undefined>;
-  if (globalScope[registrationKey]) return;
+  if (areHandlersRegisteredForThisModuleInstance) return;
+  clearEveryMockRoute();
   registerEveryMockHandler();
-  globalScope[registrationKey] = true;
+  areHandlersRegisteredForThisModuleInstance = true;
 }
 
 function resolveMockPrincipalFromHeaders(headers: Headers): MockPrincipal | null {
