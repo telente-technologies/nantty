@@ -117,15 +117,23 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     const username = overrides.username ?? `user${userCounter}${randomBytes(2).toString("hex")}`;
     const email = `${username}@example.com`;
     const password = "Secret-pass-123";
+    const otpToken = await verifyDestinationForSignup(email);
     const registered = await client
       .post("/api/v1/auth/register")
-      .send({ email, username, password, birthday: "1995-05-20", name: `User ${userCounter}` })
+      .send({ email, username, password, birthday: "1995-05-20", name: `User ${userCounter}`, otpToken })
       .expect(201);
     const userId = registered.json<{ user: { id: string } }>().user.id;
     for (const role of overrides.roles ?? []) await dependencies.ports.userDirectory.grantRole(userId, role);
     const login = await client.post("/api/v1/auth/login").send({ identifier: email, password }).expect(200);
-    const tokens = login.json<{ tokens: { accessToken: string; refreshToken: string } }>().tokens;
+    const tokens = login.json<{ accessToken: string; refreshToken: string }>();
     return { userId, username, email, password, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+  }
+
+  async function verifyDestinationForSignup(destination: string): Promise<string> {
+    await client.post("/api/v1/auth/otp/send").send({ destination, purpose: "signup" }).expect(200);
+    const code = oneTimeCodes.latestCodeFor(destination.toLowerCase(), "signup");
+    const verified = await client.post("/api/v1/auth/otp/verify").send({ destination, code, purpose: "signup" }).expect(200);
+    return verified.json<{ otpToken: string }>().otpToken;
   }
 
   return {
@@ -137,6 +145,7 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     registerUser,
     registerSeller: () => registerUser({ roles: [Role.SELLER] }),
     registerAdmin: () => registerUser({ roles: [Role.ADMIN] }),
+    verifyDestinationForSignup,
     close: () => client.close(),
   };
 }
