@@ -1,0 +1,82 @@
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+
+import { CoinBalanceChip } from "./coinBalanceChip";
+import { describeCoinError, formatCoinAmount, useBuyCoinsWithInAppBrowser, type CoinPurchaseOutcome } from "./coinWallet.hook";
+
+const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
+  if (outcome.kind === "credited") return `${formatCoinAmount(outcome.coins)} added to your balance.`;
+  if (outcome.kind === "pending") return "Your payment is still being confirmed. Your coins will appear shortly.";
+  if (outcome.kind === "availableOnWebsiteOnly") return "Coin purchases are available on zudomart.com";
+  return "The payment wasn't completed. You have not been charged.";
+};
+
+export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { coinPackages, buyCoinPackage, lastOutcome } = useBuyCoinsWithInAppBrowser();
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating>
+      <View style={styles.body}>
+        <CoinBalanceChip />
+        {coinPackages.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
+        {(coinPackages.data ?? []).map((coinPackage) => (
+          <Pressable
+            key={coinPackage.id}
+            accessibilityRole="button"
+            accessibilityLabel={`Buy ${formatCoinAmount(coinPackage.coins + (coinPackage.bonusCoins ?? 0))} for ${formatMoneyForDisplay(coinPackage.price)}`}
+            disabled={buyCoinPackage.isPending}
+            onPress={() => buyCoinPackage.mutate(coinPackage)}
+            style={styles.packageRow}
+          >
+            <View>
+              <Text size={14} weight={600} lineHeight={16.8}>
+                🪙 {formatCoinAmount(coinPackage.coins)}
+              </Text>
+              {coinPackage.bonusCoins ? (
+                <Text size={12} lineHeight={14.4} color={colors.success}>
+                  +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
+                </Text>
+              ) : null}
+            </View>
+            <Text size={14} weight={600} lineHeight={16.8} color={colors.primary}>
+              {formatMoneyForDisplay(coinPackage.price)}
+            </Text>
+          </Pressable>
+        ))}
+        {buyCoinPackage.isPending ? (
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+            Complete the payment in the secure browser. We'll confirm it with our server when you return.
+          </Text>
+        ) : null}
+        {lastOutcome ? (
+          <Text size={13} lineHeight={16.9} color={lastOutcome.kind === "credited" ? colors.success : colors.textMuted} accessibilityLiveRegion="polite">
+            {describePurchaseOutcome(lastOutcome)}
+          </Text>
+        ) : null}
+        {buyCoinPackage.isError ? (
+          <Text size={13} lineHeight={16.9} color={colors.error}>
+            {describeCoinError(buyCoinPackage.error)}
+          </Text>
+        ) : null}
+      </View>
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({
+  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  packageRow: {
+    minHeight: 56,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.divider,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});
