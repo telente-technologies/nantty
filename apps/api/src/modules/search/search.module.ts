@@ -1,11 +1,12 @@
 import { BaseModule, type ModuleContext } from "@zudojs/core";
+import type { QueryBus } from "@zudojs/cqrs";
 
-/**
- * search module.
- *
- * Registered with the runtime in app.ts. The runtime calls onInitialize
- * during start and onShutdown during stop.
- */
+import { registerQueryHandlers } from "../../utils/cqrs.util.js";
+import { SearchProductsHandler } from "./queries/searchProducts/searchProducts.handler.js";
+import { SearchStoresHandler } from "./queries/searchStores/searchStores.handler.js";
+import { SearchUsersHandler } from "./queries/searchUsers/searchUsers.handler.js";
+import type { SearchService } from "./services/search.service.js";
+
 export class SearchModule extends BaseModule {
   public readonly id = "search";
   public readonly name = "search";
@@ -21,4 +22,12 @@ export class SearchModule extends BaseModule {
   public override async onShutdown(context: ModuleContext): Promise<void> {
     context.logger.info("search module stopped");
   }
+}
+
+export function registerSearchQueryHandlers(queries: QueryBus, searchService: SearchService): void {
+  registerQueryHandlers(queries, [
+    new SearchProductsHandler(searchService),
+    new SearchStoresHandler(searchService),
+    new SearchUsersHandler(searchService),
+  ]);
 }
