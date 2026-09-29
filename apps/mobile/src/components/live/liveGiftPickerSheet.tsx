@@ -80,13 +80,13 @@ export function LiveGiftPickerSheet(props: LiveGiftPickerSheetProps) {
             </Text>
             <View style={styles.stepper}>
               <Pressable accessibilityRole="button" accessibilityLabel="Fewer gifts" hitSlop={10} onPress={() => changeQuantityBy(-1)}>
-                <Minus16Icon />
+                <Minus16Icon color={quantity > 1 ? colors.text : colors.placeholder} />
               </Pressable>
               <Text size={14} weight={600} lineHeight={16.8} accessibilityLabel={`${quantity} gifts`}>
                 {quantity}
               </Text>
               <Pressable accessibilityRole="button" accessibilityLabel="More gifts" hitSlop={10} onPress={() => changeQuantityBy(1)}>
-                <Plus16Icon />
+                <Plus16Icon color={colors.text} />
               </Pressable>
             </View>
           </View>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   giftTile: {
-    width: "31%",
+    width: "31.9%",
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
