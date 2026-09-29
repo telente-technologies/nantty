@@ -9,6 +9,7 @@ export interface FollowsRepository {
   listFollowing(followerId: string, targetType: FollowTargetType, page: PageRequest): Promise<Page<FollowRecord>>;
   listFollowedTargetIds(followerId: string, targetType: FollowTargetType): Promise<readonly string[]>;
   countFollowers(targetType: FollowTargetType, targetId: string): Promise<number>;
+  countFollowersSince(targetType: FollowTargetType, targetId: string, since: Date): Promise<number>;
   countFollowing(followerId: string): Promise<number>;
   removeUserFollowsBetween(userId: string, otherUserId: string): Promise<void>;
 }
@@ -65,6 +66,10 @@ export class InMemoryFollowsRepository implements FollowsRepository {
 
   public async countFollowers(targetType: FollowTargetType, targetId: string): Promise<number> {
     return [...this.follows.values()].filter((record) => record.targetType === targetType && record.targetId === targetId).length;
+  }
+
+  public async countFollowersSince(targetType: FollowTargetType, targetId: string, since: Date): Promise<number> {
+    return [...this.follows.values()].filter((record) => record.targetType === targetType && record.targetId === targetId && record.createdAt >= since).length;
   }
 
   public async countFollowing(followerId: string): Promise<number> {
