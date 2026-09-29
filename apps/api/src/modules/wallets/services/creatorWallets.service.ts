@@ -1,24 +1,33 @@
+import { isSupportedCurrencyCode } from "../../../enums/currency.enum.js";
 import { unprocessable } from "../../../errors/domain.error.js";
-import type { AffiliateCommissionCredit, CreatorWallets, LiveGiftPayment, UserWalletSummary } from "../../../interfaces/creatorWallets.interface.js";
+import type {
+  AffiliateCommissionCredit,
+  CreatorCoinBalances,
+  CreatorCoinPayment,
+  CreatorCoinPaymentReceipt,
+  CreatorWallets,
+  EarnedCoinConversion,
+  UserWalletSummary,
+} from "../../../interfaces/creatorWallets.interface.js";
 import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
 import { Money } from "../../../utils/money.util.js";
-import type { LedgerLineInput } from "../models/wallets.model.js";
+import type { CoinLedgerService } from "../../coins/services/coinLedger.service.js";
 import { LedgerAccounts, type LedgerService } from "./ledger.service.js";
 
 export class LedgerCreatorWallets implements CreatorWallets {
-  public constructor(private readonly ledger: LedgerService, private readonly storeAccess: StoreAccess) {}
+  public constructor(private readonly ledger: LedgerService, private readonly storeAccess: StoreAccess, private readonly coins: CoinLedgerService) {}
 
-  public async payForLiveGift(payment: LiveGiftPayment): Promise<void> {
-    const { amount, senderUserId, recipientUserId, platformCutBasisPoints } = payment;
-    if (amount.amountMinor <= 0) throw unprocessable("Gift amounts must be positive.");
-    if (senderUserId === recipientUserId) throw unprocessable("You cannot send a gift to yourself.");
-    if (!Number.isInteger(platformCutBasisPoints) || platformCutBasisPoints < 0 || platformCutBasisPoints > 10_000) throw unprocessable("The platform cut must be between 0 and 10000 basis points.");
-    const platformCut = amount.calculateBasisPointsShareRoundingDown(platformCutBasisPoints);
-    const recipientShare = amount.subtract(platformCut);
-    const lines: LedgerLineInput[] = [{ account: LedgerAccounts.userWallet(senderUserId, amount.currency), direction: "debit", amount: amount.amountMinor, currency: amount.currency }];
-    if (recipientShare.amountMinor > 0) lines.push({ account: LedgerAccounts.userWallet(recipientUserId, amount.currency), direction: "credit", amount: recipientShare.amountMinor, currency: amount.currency });
-    if (platformCut.amountMinor > 0) lines.push({ account: LedgerAccounts.platformCommission(amount.currency), direction: "credit", amount: platformCut.amountMinor, currency: amount.currency });
-    await this.ledger.postLedgerTransaction({ reference: `live-gift:${payment.reference}`, kind: "live_gift", description: "Live gift", lines });
+  public payForLiveGift(payment: CreatorCoinPayment): Promise<CreatorCoinPaymentReceipt> {
+    return this.coins.payCreatorInCoins(payment);
+  }
+
+  public async findCreatorCoinBalances(userId: string): Promise<CreatorCoinBalances> {
+    const [spendableCoins, earnedCoins] = await Promise.all([this.coins.readCoinBalance(userId), this.coins.readEarnedCoinBalance(userId)]);
+    return { spendableCoins, earnedCoins };
+  }
+
+  public convertEarnedCoinsToCash(conversion: EarnedCoinConversion): Promise<{ readonly created: boolean }> {
+    return this.coins.convertEarnedCoinsToCash(conversion);
   }
 
   public async creditAffiliateCommission(credit: AffiliateCommissionCredit): Promise<void> {
@@ -40,7 +49,7 @@ export class LedgerCreatorWallets implements CreatorWallets {
 
   public async findUserWalletSummary(userId: string): Promise<UserWalletSummary> {
     const accounts = await this.ledger.repository.listAccountsForOwner("user", userId);
-    const walletAccounts = accounts.filter((account) => account.key === LedgerAccounts.userWallet(userId, account.currency).key);
+    const walletAccounts = accounts.filter((account) => isSupportedCurrencyCode(account.currency) && account.key === LedgerAccounts.userWallet(userId, account.currency).key);
     return { userId, balances: walletAccounts.map((account) => Money.of(account.balance, account.currency)) };
   }
 }
