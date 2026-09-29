@@ -10,6 +10,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
 import type { ContentSource } from "@/types/creative.type";
 import { formatCompactCount } from "@/utils/numberFormatting.util";
+import { formatDateAndTime } from "@/utils/dateRange.util";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import styles from "./creativeEditor.module.css";
@@ -21,7 +22,10 @@ interface ContentSourcePickerProps {
   readonly onSourceSelected: (source: ContentSource) => void;
 }
 
+const pluralSourceNames: Record<ContentSource["type"], string> = { post: "posts", clip: "reels", product: "products", store: "stores", live: "live sessions" };
+
 function describeSourceEngagement(source: ContentSource): string {
+  if (source.live) return source.live.status === "live" ? `Live now · ${formatCompactCount(source.live.viewerCount)} watching` : `Scheduled · ${formatDateAndTime(source.live.startsAt)}`;
   if (source.product) return formatMoneyForDisplay(source.product.price);
   if (source.type === "store") return "Your store";
   return `${formatCompactCount(source.engagement.views)} views · ${formatCompactCount(source.engagement.likes)} likes`;
@@ -34,7 +38,7 @@ export function ContentSourcePicker({ accountId, sourceType, selectedSourceId, o
   const sources = sourcesQuery.data?.items ?? [];
   return (
     <div className={styles.picker}>
-      <TextField label={`Search your ${sourceType === "store" ? "stores" : `${sourceType}s`}`} hideLabel placeholder={`Search ${sourceType}s`} value={searchText} onValueChange={setSearchText} type="search" />
+      <TextField label={`Search your ${pluralSourceNames[sourceType]}`} hideLabel placeholder={`Search ${pluralSourceNames[sourceType]}`} value={searchText} onValueChange={setSearchText} type="search" />
       {sourcesQuery.errorMessage ? <ErrorState message={sourcesQuery.errorMessage} onRetry={sourcesQuery.reload} /> : null}
       {sourcesQuery.isLoading && sources.length === 0 ? <LoadingBlock height={120} label="Loading content" /> : null}
       {!sourcesQuery.isLoading && sources.length === 0 && !sourcesQuery.errorMessage ? <p className={styles.muted}>Nothing to promote here yet. Publish from the Zudomart app first, or upload new media.</p> : null}
