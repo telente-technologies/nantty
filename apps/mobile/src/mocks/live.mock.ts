@@ -1,7 +1,7 @@
 import type { LiveComment, LiveSessionDetails } from "@/types";
 
-import { clipsMocks } from "./clips.mock";
 import { buildMockUserSummary, me } from "./fixtures.mock";
+import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const viewer = (i: number) => ({ ...buildMockUserSummary(70 + i), username: "user-name" });
@@ -24,7 +24,7 @@ const buildLiveSession = (liveId: string, host = { ...buildMockUserSummary(80, "
   title: "Title of Live here",
   viewers: 268,
   status: liveId.startsWith("ended") ? "ended" : "live",
-  products: [1, 2, 3, 4].map((n) => ({ id: `pr_${n}`, name: "Product Name", price: 2_000_000, imageUrl: null })),
+  products: [1, 2, 3, 4].map((n) => ({ id: `pr_${n}`, name: "Product Name", price: convertUsdCentsToViewerCurrency(1_290), imageUrl: null })),
   isFollowingHost: false,
   startedAt: new Date().toISOString(),
 });
@@ -32,7 +32,6 @@ const buildLiveSession = (liveId: string, host = { ...buildMockUserSummary(80, "
 const hostedLives = new Map<string, LiveSessionDetails>();
 
 export const liveMocks: MockRoute[] = [
-  ...clipsMocks,
   createMockRoute("GET", "/api/v1/lives/suggested", () =>
     Array.from({ length: 6 }, (_, i) => ({ id: `live_s${i}`, host: buildMockUserSummary(90 + i), title: "Live", coverUrl: null })),
   ),
