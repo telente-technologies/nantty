@@ -3,7 +3,7 @@ import { unprocessable } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 import type { Money } from "../../../utils/money.util.js";
-import type { LedgerAccountSpecification, LedgerLineInput, LedgerPostingResult, LedgerTransactionInput, WalletOwner } from "../models/wallets.model.js";
+import type { LedgerAccountSpecification, LedgerLineInput, LedgerPostingResult, LedgerTransactionInput, LedgerUnit, WalletOwner } from "../models/wallets.model.js";
 import type { LedgerRepository } from "../repositories/ledger.repository.js";
 
 export const LedgerAccounts = {
@@ -44,8 +44,8 @@ export function findPayoutPendingAccountForOwner(owner: WalletOwner, currency: C
   return owner.kind === "store" ? LedgerAccounts.storePayoutPending(owner.storeId, currency) : LedgerAccounts.userPayoutPending(owner.userId, currency);
 }
 
-export function sumLineAmountsByCurrencyAndDirection(input: LedgerTransactionInput, direction: "debit" | "credit"): ReadonlyMap<CurrencyCode, MinorUnits> {
-  const totals = new Map<CurrencyCode, MinorUnits>();
+export function sumLineAmountsByCurrencyAndDirection(input: LedgerTransactionInput, direction: "debit" | "credit"): ReadonlyMap<LedgerUnit, MinorUnits> {
+  const totals = new Map<LedgerUnit, MinorUnits>();
   for (const line of input.lines) {
     if (line.direction === direction) totals.set(line.currency, (totals.get(line.currency) ?? 0) + line.amount);
   }
