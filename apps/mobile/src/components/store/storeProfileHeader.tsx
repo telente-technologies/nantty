@@ -1,11 +1,12 @@
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { CalendarDots16Icon, SealCheck20Icon } from "@/components/icons";
+import { CalendarDots16Icon } from "@/components/icons";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { StoreDetail } from "@/types/commerce.type";
-import { formatJoinedDate } from "@/utils/formatDate.util";
+import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 
 export interface StoreProfileHeaderProps {
   readonly store: StoreDetail;
@@ -34,12 +35,12 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
         <View style={styles.names}>
           <View style={styles.nameRow}>
             <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header">{store.name}</Text>
-            {store.verified ? <SealCheck20Icon /> : null}
+            <VerificationBadge verification={store.verification} legacyVerified={store.verified} size={20} />
           </View>
-          <Text size={14} lineHeight={16.8}>@{store.handle}</Text>
+          <Text size={14} lineHeight={16.8} color={colors.textSubtle}>@{store.handle}</Text>
           <View style={styles.stats}>
             <Text size={14} weight={500} lineHeight={16.8}>
-              {store.followers} <Text size={14} lineHeight={16.8}>followers</Text>
+              {formatCountWithThousandsSuffix(store.followers)} <Text size={14} lineHeight={16.8}>followers</Text>
             </Text>
             <Text size={14} weight={500} lineHeight={16.8}>
               {store.rating.toFixed(1)} ★ <Text size={14} lineHeight={16.8}>({store.reviewCount})</Text>
