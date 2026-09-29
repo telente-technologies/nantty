@@ -7,7 +7,8 @@ import type { CommentRecord } from "../models/posts.model.js";
 export interface NewCommentInput {
   readonly postId: string;
   readonly authorId: string;
-  readonly parentId: string | null;
+  readonly parentCommentId: string | null;
+  readonly rootCommentId: string | null;
   readonly text: string;
   readonly createdAt: Date;
 }
@@ -19,8 +20,21 @@ export interface PostInteractionsRepository {
   listLikersAmongUsers(postIds: readonly string[], userIds: readonly string[]): Promise<ReadonlyMap<string, readonly string[]>>;
   createComment(input: NewCommentInput): Promise<CommentRecord>;
   findComment(commentId: string): Promise<CommentRecord | undefined>;
+  findCommentsByIds(commentIds: readonly string[]): Promise<readonly CommentRecord[]>;
   markCommentDeleted(commentId: string, deletedAt: Date): Promise<boolean>;
-  listComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>>;
+  changeReplyCount(commentIds: readonly string[], delta: number): Promise<void>;
+  listTopLevelComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>>;
+  listThreadReplies(rootCommentId: string, page: PageRequest): Promise<Page<CommentRecord>>;
+  listDirectReplies(parentCommentId: string, page: PageRequest): Promise<Page<CommentRecord>>;
+  listEarliestThreadReplies(rootCommentIds: readonly string[], limitPerThread: number): Promise<ReadonlyMap<string, readonly CommentRecord[]>>;
+}
+
+export function isCommentShownInThread(comment: CommentRecord): boolean {
+  return comment.deletedAt === null || comment.replyCount > 0;
+}
+
+function compareOldestFirst(left: CommentRecord, right: CommentRecord): number {
+  return left.createdAt.getTime() - right.createdAt.getTime() || left.id.localeCompare(right.id);
 }
 
 function groupLikersByPost(likes: readonly { postId: string; userId: string }[]): ReadonlyMap<string, readonly string[]> {
@@ -54,13 +68,17 @@ export class InMemoryPostInteractionsRepository implements PostInteractionsRepos
   }
 
   public async createComment(input: NewCommentInput): Promise<CommentRecord> {
-    const comment: CommentRecord = { ...input, id: randomUUID(), likeCount: 0, deletedAt: null };
+    const comment: CommentRecord = { ...input, id: randomUUID(), likeCount: 0, replyCount: 0, deletedAt: null };
     this.comments.set(comment.id, comment);
     return comment;
   }
 
   public async findComment(commentId: string): Promise<CommentRecord | undefined> {
     return this.comments.get(commentId);
+  }
+
+  public async findCommentsByIds(commentIds: readonly string[]): Promise<readonly CommentRecord[]> {
+    return commentIds.map((commentId) => this.comments.get(commentId)).filter((comment): comment is CommentRecord => comment !== undefined);
   }
 
   public async markCommentDeleted(commentId: string, deletedAt: Date): Promise<boolean> {
@@ -70,10 +88,35 @@ export class InMemoryPostInteractionsRepository implements PostInteractionsRepos
     return true;
   }
 
-  public async listComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>> {
-    const matches = [...this.comments.values()]
-      .filter((comment) => comment.postId === postId && comment.deletedAt === null)
-      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime() || left.id.localeCompare(right.id));
-    return paginateSortedItems(matches, page);
+  public async changeReplyCount(commentIds: readonly string[], delta: number): Promise<void> {
+    for (const commentId of new Set(commentIds)) {
+      const comment = this.comments.get(commentId);
+      if (comment !== undefined) this.comments.set(commentId, { ...comment, replyCount: Math.max(0, comment.replyCount + delta) });
+    }
+  }
+
+  public async listTopLevelComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments((comment) => comment.postId === postId && comment.parentCommentId === null, page);
+  }
+
+  public async listThreadReplies(rootCommentId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments((comment) => comment.rootCommentId === rootCommentId, page);
+  }
+
+  public async listDirectReplies(parentCommentId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments((comment) => comment.parentCommentId === parentCommentId, page);
+  }
+
+  public async listEarliestThreadReplies(rootCommentIds: readonly string[], limitPerThread: number): Promise<ReadonlyMap<string, readonly CommentRecord[]>> {
+    const previews = new Map<string, readonly CommentRecord[]>();
+    for (const rootCommentId of new Set(rootCommentIds)) {
+      previews.set(rootCommentId, (await this.listThreadReplies(rootCommentId, { limit: limitPerThread })).data);
+    }
+    return previews;
+  }
+
+  private paginateShownComments(matches: (comment: CommentRecord) => boolean, page: PageRequest): Page<CommentRecord> {
+    const shown = [...this.comments.values()].filter((comment) => matches(comment) && isCommentShownInThread(comment)).sort(compareOldestFirst);
+    return paginateSortedItems(shown, page);
   }
 }

@@ -54,9 +54,11 @@ export interface CommentRecord {
   readonly id: string;
   readonly postId: string;
   readonly authorId: string;
-  readonly parentId: string | null;
+  readonly parentCommentId: string | null;
+  readonly rootCommentId: string | null;
   readonly text: string;
   readonly likeCount: number;
+  readonly replyCount: number;
   readonly deletedAt: Date | null;
   readonly createdAt: Date;
 }

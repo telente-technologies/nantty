@@ -1,4 +1,5 @@
 import { isUniqueConstraintViolation } from "../../../databases/prisma.database.js";
+import type { Prisma } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments } from "../../../utils/pagination.util.js";
@@ -43,13 +44,46 @@ export class PrismaPostInteractionsRepository implements PostInteractionsReposit
     return (await prisma().comment.findUnique({ where: { id: commentId } })) ?? undefined;
   }
 
+  public async findCommentsByIds(commentIds: readonly string[]): Promise<readonly CommentRecord[]> {
+    if (commentIds.length === 0) return [];
+    return prisma().comment.findMany({ where: { id: { in: [...new Set(commentIds)] } } });
+  }
+
   public async markCommentDeleted(commentId: string, deletedAt: Date): Promise<boolean> {
     return (await prisma().comment.updateMany({ where: { id: commentId, deletedAt: null }, data: { deletedAt } })).count === 1;
   }
 
-  public async listComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+  public async changeReplyCount(commentIds: readonly string[], delta: number): Promise<void> {
+    const ids = [...new Set(commentIds)];
+    if (ids.length === 0) return;
+    if (delta >= 0) {
+      await prisma().comment.updateMany({ where: { id: { in: ids } }, data: { replyCount: { increment: delta } } });
+      return;
+    }
+    await prisma().comment.updateMany({ where: { id: { in: ids }, replyCount: { gte: -delta } }, data: { replyCount: { decrement: -delta } } });
+  }
+
+  public listTopLevelComments(postId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments({ postId, parentCommentId: null }, page);
+  }
+
+  public listThreadReplies(rootCommentId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments({ rootCommentId }, page);
+  }
+
+  public listDirectReplies(parentCommentId: string, page: PageRequest): Promise<Page<CommentRecord>> {
+    return this.paginateShownComments({ parentCommentId }, page);
+  }
+
+  public async listEarliestThreadReplies(rootCommentIds: readonly string[], limitPerThread: number): Promise<ReadonlyMap<string, readonly CommentRecord[]>> {
+    const unique = [...new Set(rootCommentIds)];
+    const previews = await Promise.all(unique.map(async (rootCommentId) => [rootCommentId, (await this.listThreadReplies(rootCommentId, { limit: limitPerThread })).data] as const));
+    return new Map(previews);
+  }
+
+  private async paginateShownComments(where: Prisma.CommentWhereInput, page: PageRequest): Promise<Page<CommentRecord>> {
     const rows = await prisma().comment.findMany({
-      where: { postId, deletedAt: null },
+      where: { ...where, OR: [{ deletedAt: null }, { replyCount: { gt: 0 } }] },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       ...buildPrismaPageArguments(page),
     });
