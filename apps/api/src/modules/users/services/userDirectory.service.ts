@@ -1,5 +1,6 @@
 import { Role } from "../../../constants/roles.constant.js";
 import type { UserAccountStanding, UserAccountStandingLookup, UserContact, UserDirectory, UserLocalePreference, UserSummary } from "../../../interfaces/userDirectory.interface.js";
+import { UNVERIFIED_PERSONAL_BADGE, type VerificationBadgeLookup } from "../../../interfaces/verificationBadge.interface.js";
 import type { UserRecord } from "../models/users.model.js";
 import type { TopicsRepository } from "../repositories/topics.repository.js";
 import type { UsersRepository } from "../repositories/users.repository.js";
@@ -9,11 +10,17 @@ export function convertUserToSummary(user: UserRecord): UserSummary {
 }
 
 export class RepositoryUserDirectory implements UserDirectory, UserAccountStandingLookup {
-  public constructor(private readonly users: UsersRepository, private readonly topics: TopicsRepository) {}
+  public constructor(private readonly users: UsersRepository, private readonly topics: TopicsRepository, private readonly verificationBadges?: VerificationBadgeLookup) {}
+
+  private async attachVerification(summaries: readonly UserSummary[]): Promise<readonly UserSummary[]> {
+    if (this.verificationBadges === undefined || summaries.length === 0) return summaries;
+    const badges = await this.verificationBadges.findVerificationBadges(summaries.map((summary) => summary.id));
+    return summaries.map((summary) => ({ ...summary, verification: badges.get(summary.id) ?? UNVERIFIED_PERSONAL_BADGE }));
+  }
 
   public async findUserSummaries(userIds: readonly string[]): Promise<readonly UserSummary[]> {
     const users = await this.users.findManyByIds([...new Set(userIds)]);
-    return users.filter((user) => user.status === "active").map(convertUserToSummary);
+    return this.attachVerification(users.filter((user) => user.status === "active").map(convertUserToSummary));
   }
 
   public async findUserLocalePreference(userId: string): Promise<UserLocalePreference | undefined> {
@@ -35,7 +42,7 @@ export class RepositoryUserDirectory implements UserDirectory, UserAccountStandi
 
   public async searchUsers(term: string, limit: number): Promise<readonly UserSummary[]> {
     const page = await this.users.searchByNameOrUsername(term, { limit });
-    return page.data.map(convertUserToSummary);
+    return this.attachVerification(page.data.map(convertUserToSummary));
   }
 
   public async grantRole(userId: string, role: string): Promise<void> {
