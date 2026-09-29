@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { ArrowLeft24Icon, DotsThreeVertical24Icon } from "@/components/icons";
 import { FollowPill } from "@/components/clips/followPill";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -45,9 +46,12 @@ export function LiveHeader(props: LiveHeaderProps) {
         <View style={styles.host}>
           <Avatar uri={session.host.avatarUrl} size={32} />
           <View style={styles.hostText}>
-            <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} numberOfLines={1}>
-              {session.host.name}
-            </Text>
+            <View style={styles.hostNameRow}>
+              <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} numberOfLines={1}>
+                {session.host.name}
+              </Text>
+              <VerificationBadge verification={session.host.verification} legacyVerified={session.host.verified} size={12} />
+            </View>
             {props.showTitle ? (
               <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} numberOfLines={1}>
                 {session.title}
@@ -72,6 +76,7 @@ export function LiveHeader(props: LiveHeaderProps) {
 }
 
 const styles = StyleSheet.create({
+  hostNameRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   bar: { height: 32, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   left: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
   host: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 },
