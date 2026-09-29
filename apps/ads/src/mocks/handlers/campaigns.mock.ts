@@ -1,5 +1,5 @@
 import { findRecordInAccount, requireAccountAccess } from "@/mocks/mockAccountAccess.mock";
-import { throwIfValidationIssues, validateAdInputs, validateAdSetInput, validateCampaignInput } from "@/mocks/mockCampaignValidation.mock";
+import { collectPlacementIssuesForAds, throwIfValidationIssues, validateAdInputs, validateAdSetInput, validateCampaignInput } from "@/mocks/mockCampaignValidation.mock";
 import { resolveCreativeFromInput } from "@/mocks/mockCreativeResolver.mock";
 import { appendMockActivity, readMockDatabase, type MockAdRecord, type MockCampaignRecord } from "@/mocks/mockDatabase.mock";
 import { presentAd, presentAdSet, presentCampaign } from "@/mocks/mockDeliveryPresenter.mock";
@@ -50,11 +50,14 @@ export function registerCampaignMockHandlers(): void {
     const adInputs = validateAdInputs(body.ads, account.id, issues);
     throwIfValidationIssues(issues);
     if (account.status !== "active") throw new MockHttpError(409, "AD_ACCOUNT_NOT_ACTIVE", "This ad account cannot run ads right now.");
+    const resolvedCreatives = adInputs.map((adInput) => ({ creative: resolveCreativeFromInput(adInput.creative, account) }));
+    collectPlacementIssuesForAds(resolvedCreatives, adSetInput.placements, issues);
+    throwIfValidationIssues(issues);
     const database = readMockDatabase();
     const now = readIsoNow();
     const campaign: MockCampaignRecord = { ...campaignInput, id: createMockId("cmp"), accountId: account.id, status: "draft", createdAt: now, updatedAt: now };
     const adSet = { ...adSetInput, id: createMockId("ads"), accountId: account.id, campaignId: campaign.id, status: "draft" as DeliveryStatus, experimentId: null, createdAt: now, updatedAt: now };
-    const ads: MockAdRecord[] = adInputs.map((adInput) => ({
+    const ads: MockAdRecord[] = adInputs.map((adInput, index) => ({
       id: createMockId("ad"),
       accountId: account.id,
       campaignId: campaign.id,
@@ -62,7 +65,7 @@ export function registerCampaignMockHandlers(): void {
       name: adInput.name,
       status: "draft",
       review: { status: "not_submitted", policyCode: null, policyReason: null, reviewedAt: null, appeal: null },
-      creative: resolveCreativeFromInput(adInput.creative, account),
+      creative: resolvedCreatives[index]?.creative ?? resolveCreativeFromInput(adInput.creative, account),
       submittedAt: null,
       createdAt: now,
       updatedAt: now,
