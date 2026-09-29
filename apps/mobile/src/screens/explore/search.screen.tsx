@@ -79,7 +79,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
             {data.products.length > 0 && scope !== "stores" && scope !== "people" ? (
               <View>
                 <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} style={styles.productsTitle}>Products</Text>
-                <ProductMasonry products={data.products} />
+                <ProductMasonry products={data.products} adPlacement="search" />
               </View>
             ) : null}
           </>
