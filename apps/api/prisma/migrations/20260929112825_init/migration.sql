@@ -62,6 +62,8 @@ CREATE TABLE "cart_items" (
     "userId" TEXT NOT NULL,
     "variantId" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
+    "attributionSource" TEXT,
+    "attributionId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "cart_items_pkey" PRIMARY KEY ("id")
@@ -77,6 +79,103 @@ CREATE TABLE "categories" (
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "creator_applications" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "eligibility" JSONB NOT NULL DEFAULT '{}',
+    "reviewerId" TEXT,
+    "reviewNote" TEXT,
+    "reviewedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "creator_applications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "creator_profiles" (
+    "userId" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'approved',
+    "tier" TEXT NOT NULL DEFAULT 'standard',
+    "approvedAt" TIMESTAMP(3) NOT NULL,
+    "suspendedAt" TIMESTAMP(3),
+    "suspensionReason" TEXT,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "creator_profiles_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
+CREATE TABLE "creator_violations" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "recordedById" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "creator_violations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "creator_earnings" (
+    "id" TEXT NOT NULL,
+    "creatorId" TEXT NOT NULL,
+    "kind" TEXT NOT NULL,
+    "reference" TEXT NOT NULL,
+    "sourceType" TEXT NOT NULL,
+    "sourceId" TEXT NOT NULL,
+    "grossAmount" BIGINT NOT NULL,
+    "netAmount" BIGINT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "orderId" TEXT,
+    "productId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "creator_earnings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "live_gifts" (
+    "id" TEXT NOT NULL,
+    "liveSessionId" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "creatorId" TEXT NOT NULL,
+    "giftId" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "reference" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "live_gifts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "affiliate_commissions" (
+    "id" TEXT NOT NULL,
+    "targetKey" TEXT NOT NULL,
+    "storeId" TEXT NOT NULL,
+    "productId" TEXT,
+    "commissionBps" INTEGER NOT NULL,
+    "updatedById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "affiliate_commissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "creator_affiliations" (
+    "creatorId" TEXT NOT NULL,
+    "targetKey" TEXT NOT NULL,
+    "storeId" TEXT NOT NULL,
+    "productId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "creator_affiliations_pkey" PRIMARY KEY ("creatorId","targetKey")
 );
 
 -- CreateTable
@@ -116,6 +215,7 @@ CREATE TABLE "disputes" (
     "openedById" TEXT NOT NULL,
     "reason" TEXT NOT NULL,
     "details" TEXT NOT NULL DEFAULT '',
+    "evidenceMediaIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "status" TEXT NOT NULL DEFAULT 'open',
     "resolution" TEXT,
     "resolvedById" TEXT,
@@ -123,6 +223,19 @@ CREATE TABLE "disputes" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "disputes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "dispute_messages" (
+    "id" TEXT NOT NULL,
+    "disputeId" TEXT NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "authorRole" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "attachmentMediaIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "dispute_messages_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -209,18 +322,77 @@ CREATE TABLE "live_comments" (
 );
 
 -- CreateTable
-CREATE TABLE "media" (
+CREATE TABLE "media_uploads" (
     "id" TEXT NOT NULL,
     "ownerId" TEXT NOT NULL,
-    "key" TEXT NOT NULL,
+    "fileName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
     "purpose" TEXT NOT NULL,
-    "contentType" TEXT NOT NULL,
-    "maxBytes" INTEGER NOT NULL,
-    "size" INTEGER,
-    "status" TEXT NOT NULL DEFAULT 'pending',
+    "sizeBytes" INTEGER NOT NULL,
+    "chunkSizeBytes" INTEGER NOT NULL,
+    "totalChunks" INTEGER NOT NULL,
+    "expectedSha256" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'uploading',
+    "failureReason" TEXT,
+    "mediaId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "media_uploads_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "media_upload_chunks" (
+    "uploadId" TEXT NOT NULL,
+    "chunkIndex" INTEGER NOT NULL,
+    "sizeBytes" INTEGER NOT NULL,
+    "sha256" TEXT NOT NULL,
+    "storageKey" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "media_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "media_upload_chunks_pkey" PRIMARY KEY ("uploadId","chunkIndex")
+);
+
+-- CreateTable
+CREATE TABLE "media_assets" (
+    "id" TEXT NOT NULL,
+    "ownerId" TEXT NOT NULL,
+    "purpose" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'processing',
+    "originalKey" TEXT NOT NULL,
+    "sizeBytes" INTEGER NOT NULL,
+    "sha256" TEXT NOT NULL,
+    "width" INTEGER,
+    "height" INTEGER,
+    "durationSeconds" DOUBLE PRECISION,
+    "blurhash" TEXT,
+    "posterKey" TEXT,
+    "hlsMasterKey" TEXT,
+    "failureReason" TEXT,
+    "processingAttempts" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "readyAt" TIMESTAMP(3),
+
+    CONSTRAINT "media_assets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "media_variants" (
+    "id" TEXT NOT NULL,
+    "assetId" TEXT NOT NULL,
+    "storageKey" TEXT NOT NULL,
+    "format" TEXT NOT NULL,
+    "contentType" TEXT NOT NULL,
+    "width" INTEGER NOT NULL,
+    "height" INTEGER NOT NULL,
+    "sizeBytes" INTEGER NOT NULL,
+    "bitrateKbps" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "media_variants_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -312,6 +484,7 @@ CREATE TABLE "orders" (
     "shippingAddress" JSONB NOT NULL,
     "customerName" TEXT NOT NULL DEFAULT '',
     "trackingNumber" TEXT,
+    "courier" TEXT,
     "paidAt" TIMESTAMP(3),
     "shippedAt" TIMESTAMP(3),
     "deliveredAt" TIMESTAMP(3),
@@ -336,6 +509,8 @@ CREATE TABLE "order_items" (
     "unitPrice" BIGINT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "lineTotal" BIGINT NOT NULL,
+    "attributionSource" TEXT,
+    "attributionId" TEXT,
 
     CONSTRAINT "order_items_pkey" PRIMARY KEY ("id")
 );
@@ -410,8 +585,10 @@ CREATE TABLE "comments" (
     "postId" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
     "parentId" TEXT,
+    "rootCommentId" TEXT,
     "text" TEXT NOT NULL,
     "likeCount" INTEGER NOT NULL DEFAULT 0,
+    "replyCount" INTEGER NOT NULL DEFAULT 0,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -518,6 +695,7 @@ CREATE TABLE "seller_applications" (
     "description" TEXT NOT NULL DEFAULT '',
     "categoryId" TEXT,
     "phoneEnc" TEXT NOT NULL,
+    "onboarding" JSONB,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "reviewerId" TEXT,
     "reviewNote" TEXT,
@@ -559,6 +737,107 @@ CREATE TABLE "store_members" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "store_members_pkey" PRIMARY KEY ("storeId","userId")
+);
+
+-- CreateTable
+CREATE TABLE "subscription_plans" (
+    "id" TEXT NOT NULL,
+    "color" TEXT NOT NULL,
+    "tier" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL DEFAULT '',
+    "purchasable" BOOLEAN NOT NULL DEFAULT true,
+    "trialDays" INTEGER NOT NULL DEFAULT 0,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscription_plan_prices" (
+    "id" TEXT NOT NULL,
+    "planId" TEXT NOT NULL,
+    "interval" TEXT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+
+    CONSTRAINT "subscription_plan_prices_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscription_plan_entitlements" (
+    "id" TEXT NOT NULL,
+    "planId" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" JSONB NOT NULL,
+
+    CONSTRAINT "subscription_plan_entitlements_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscription_plan_perks" (
+    "id" TEXT NOT NULL,
+    "planId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL DEFAULT '',
+    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "subscription_plan_perks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "profile_subscriptions" (
+    "id" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
+    "profileKind" TEXT NOT NULL,
+    "profileType" TEXT NOT NULL,
+    "ownerUserId" TEXT NOT NULL,
+    "plan" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "autoRenew" BOOLEAN NOT NULL DEFAULT true,
+    "interval" TEXT NOT NULL,
+    "provider" TEXT,
+    "currency" TEXT,
+    "amount" BIGINT,
+    "authorizationEncrypted" TEXT,
+    "payerEmail" TEXT,
+    "startsAt" TIMESTAMP(3) NOT NULL,
+    "endsAt" TIMESTAMP(3),
+    "trialEndsAt" TIMESTAMP(3),
+    "trialUsed" BOOLEAN NOT NULL DEFAULT false,
+    "pastDueSince" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "lastChargeAttemptAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "profile_subscriptions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscription_charges" (
+    "id" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
+    "profileKind" TEXT NOT NULL,
+    "profileType" TEXT NOT NULL,
+    "ownerUserId" TEXT NOT NULL,
+    "payerUserId" TEXT NOT NULL,
+    "plan" TEXT NOT NULL,
+    "interval" TEXT NOT NULL,
+    "kind" TEXT NOT NULL,
+    "reference" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "providerTransactionId" TEXT,
+    "paidAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "subscription_charges_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -623,6 +902,29 @@ CREATE TABLE "addresses" (
 );
 
 -- CreateTable
+CREATE TABLE "profile_verifications" (
+    "id" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
+    "profileKind" TEXT NOT NULL,
+    "ownerUserId" TEXT NOT NULL,
+    "profileType" TEXT NOT NULL,
+    "verificationType" TEXT NOT NULL,
+    "color" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "tier" TEXT,
+    "badgeVisible" BOOLEAN NOT NULL DEFAULT false,
+    "applicationSubmittedAt" TIMESTAMP(3),
+    "reviewedAt" TIMESTAMP(3),
+    "reviewedById" TEXT,
+    "reason" TEXT,
+    "details" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "profile_verifications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "waitlist_entries" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -677,7 +979,8 @@ CREATE TABLE "ledger_entries" (
 -- CreateTable
 CREATE TABLE "payout_accounts" (
     "id" TEXT NOT NULL,
-    "storeId" TEXT NOT NULL,
+    "storeId" TEXT,
+    "userId" TEXT,
     "bankCode" TEXT NOT NULL,
     "bankName" TEXT NOT NULL,
     "accountNumberEnc" TEXT NOT NULL,
@@ -693,7 +996,8 @@ CREATE TABLE "payout_accounts" (
 -- CreateTable
 CREATE TABLE "withdrawals" (
     "id" TEXT NOT NULL,
-    "storeId" TEXT NOT NULL,
+    "storeId" TEXT,
+    "userId" TEXT,
     "payoutAccountId" TEXT NOT NULL,
     "amount" BIGINT NOT NULL,
     "currency" TEXT NOT NULL,
@@ -705,6 +1009,24 @@ CREATE TABLE "withdrawals" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "withdrawals_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "wallet_top_ups" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "reference" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "authorizationUrl" TEXT,
+    "providerTransactionId" TEXT,
+    "creditedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "wallet_top_ups_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -732,6 +1054,39 @@ CREATE UNIQUE INDEX "cart_items_userId_variantId_key" ON "cart_items"("userId", 
 CREATE UNIQUE INDEX "categories_slug_key" ON "categories"("slug");
 
 -- CreateIndex
+CREATE INDEX "creator_applications_userId_createdAt_idx" ON "creator_applications"("userId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "creator_applications_status_createdAt_idx" ON "creator_applications"("status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "creator_violations_userId_createdAt_idx" ON "creator_violations"("userId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "creator_earnings_reference_key" ON "creator_earnings"("reference");
+
+-- CreateIndex
+CREATE INDEX "creator_earnings_creatorId_createdAt_idx" ON "creator_earnings"("creatorId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "creator_earnings_creatorId_kind_createdAt_idx" ON "creator_earnings"("creatorId", "kind", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "live_gifts_reference_key" ON "live_gifts"("reference");
+
+-- CreateIndex
+CREATE INDEX "live_gifts_liveSessionId_createdAt_idx" ON "live_gifts"("liveSessionId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "live_gifts_creatorId_createdAt_idx" ON "live_gifts"("creatorId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "affiliate_commissions_targetKey_key" ON "affiliate_commissions"("targetKey");
+
+-- CreateIndex
+CREATE INDEX "affiliate_commissions_storeId_idx" ON "affiliate_commissions"("storeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "escrows_orderId_key" ON "escrows"("orderId");
 
 -- CreateIndex
@@ -747,13 +1102,16 @@ CREATE INDEX "disputes_status_idx" ON "disputes"("status");
 CREATE INDEX "disputes_escrowId_idx" ON "disputes"("escrowId");
 
 -- CreateIndex
+CREATE INDEX "dispute_messages_disputeId_createdAt_idx" ON "dispute_messages"("disputeId", "createdAt");
+
+-- CreateIndex
 CREATE INDEX "feed_interactions_userId_createdAt_idx" ON "feed_interactions"("userId", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "feed_interactions_postId_idx" ON "feed_interactions"("postId");
 
 -- CreateIndex
-CREATE INDEX "follows_followeeType_followeeId_idx" ON "follows"("followeeType", "followeeId");
+CREATE INDEX "follows_followeeType_followeeId_createdAt_idx" ON "follows"("followeeType", "followeeId", "createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "idempotency_records_scope_key_key" ON "idempotency_records"("scope", "key");
@@ -762,13 +1120,34 @@ CREATE UNIQUE INDEX "idempotency_records_scope_key_key" ON "idempotency_records"
 CREATE INDEX "live_sessions_status_startedAt_idx" ON "live_sessions"("status", "startedAt");
 
 -- CreateIndex
+CREATE INDEX "live_sessions_hostId_startedAt_idx" ON "live_sessions"("hostId", "startedAt");
+
+-- CreateIndex
 CREATE INDEX "live_comments_sessionId_createdAt_idx" ON "live_comments"("sessionId", "createdAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "media_key_key" ON "media"("key");
+CREATE UNIQUE INDEX "media_uploads_mediaId_key" ON "media_uploads"("mediaId");
 
 -- CreateIndex
-CREATE INDEX "media_ownerId_idx" ON "media"("ownerId");
+CREATE INDEX "media_uploads_ownerId_createdAt_idx" ON "media_uploads"("ownerId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "media_uploads_status_createdAt_idx" ON "media_uploads"("status", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "media_assets_originalKey_key" ON "media_assets"("originalKey");
+
+-- CreateIndex
+CREATE INDEX "media_assets_ownerId_createdAt_idx" ON "media_assets"("ownerId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "media_assets_status_updatedAt_idx" ON "media_assets"("status", "updatedAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "media_variants_storageKey_key" ON "media_variants"("storageKey");
+
+-- CreateIndex
+CREATE INDEX "media_variants_assetId_format_idx" ON "media_variants"("assetId", "format");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "conversations_pairKey_key" ON "conversations"("pairKey");
@@ -807,6 +1186,9 @@ CREATE INDEX "orders_checkoutId_idx" ON "orders"("checkoutId");
 CREATE INDEX "order_items_orderId_idx" ON "order_items"("orderId");
 
 -- CreateIndex
+CREATE INDEX "order_items_attributionSource_attributionId_idx" ON "order_items"("attributionSource", "attributionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "payments_reference_key" ON "payments"("reference");
 
 -- CreateIndex
@@ -826,6 +1208,12 @@ CREATE INDEX "post_likes_userId_idx" ON "post_likes"("userId");
 
 -- CreateIndex
 CREATE INDEX "comments_postId_createdAt_idx" ON "comments"("postId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "comments_postId_parentId_createdAt_idx" ON "comments"("postId", "parentId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "comments_rootCommentId_createdAt_idx" ON "comments"("rootCommentId", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "comment_likes_userId_idx" ON "comment_likes"("userId");
@@ -876,6 +1264,33 @@ CREATE INDEX "stores_ownerId_idx" ON "stores"("ownerId");
 CREATE INDEX "store_members_userId_idx" ON "store_members"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "subscription_plans_color_tier_key" ON "subscription_plans"("color", "tier");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscription_plan_prices_planId_interval_currency_key" ON "subscription_plan_prices"("planId", "interval", "currency");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscription_plan_entitlements_planId_key_key" ON "subscription_plan_entitlements"("planId", "key");
+
+-- CreateIndex
+CREATE INDEX "subscription_plan_perks_planId_idx" ON "subscription_plan_perks"("planId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "profile_subscriptions_profileId_key" ON "profile_subscriptions"("profileId");
+
+-- CreateIndex
+CREATE INDEX "profile_subscriptions_status_endsAt_idx" ON "profile_subscriptions"("status", "endsAt");
+
+-- CreateIndex
+CREATE INDEX "profile_subscriptions_ownerUserId_idx" ON "profile_subscriptions"("ownerUserId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscription_charges_reference_key" ON "subscription_charges"("reference");
+
+-- CreateIndex
+CREATE INDEX "subscription_charges_profileId_createdAt_idx" ON "subscription_charges"("profileId", "createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
@@ -891,10 +1306,22 @@ CREATE UNIQUE INDEX "topics_slug_key" ON "topics"("slug");
 CREATE INDEX "addresses_userId_idx" ON "addresses"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "profile_verifications_profileId_key" ON "profile_verifications"("profileId");
+
+-- CreateIndex
+CREATE INDEX "profile_verifications_status_verificationType_idx" ON "profile_verifications"("status", "verificationType");
+
+-- CreateIndex
+CREATE INDEX "profile_verifications_ownerUserId_idx" ON "profile_verifications"("ownerUserId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "waitlist_entries_email_key" ON "waitlist_entries"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ledger_accounts_key_key" ON "ledger_accounts"("key");
+
+-- CreateIndex
+CREATE INDEX "ledger_accounts_ownerType_ownerId_idx" ON "ledger_accounts"("ownerType", "ownerId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ledger_transactions_reference_key" ON "ledger_transactions"("reference");
@@ -906,13 +1333,49 @@ CREATE INDEX "ledger_entries_accountId_createdAt_idx" ON "ledger_entries"("accou
 CREATE INDEX "payout_accounts_storeId_idx" ON "payout_accounts"("storeId");
 
 -- CreateIndex
+CREATE INDEX "payout_accounts_userId_idx" ON "payout_accounts"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "withdrawals_reference_key" ON "withdrawals"("reference");
 
 -- CreateIndex
 CREATE INDEX "withdrawals_storeId_createdAt_idx" ON "withdrawals"("storeId", "createdAt");
 
+-- CreateIndex
+CREATE INDEX "withdrawals_userId_createdAt_idx" ON "withdrawals"("userId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "wallet_top_ups_reference_key" ON "wallet_top_ups"("reference");
+
+-- CreateIndex
+CREATE INDEX "wallet_top_ups_userId_createdAt_idx" ON "wallet_top_ups"("userId", "createdAt");
+
+-- AddForeignKey
+ALTER TABLE "media_uploads" ADD CONSTRAINT "media_uploads_mediaId_fkey" FOREIGN KEY ("mediaId") REFERENCES "media_assets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "media_upload_chunks" ADD CONSTRAINT "media_upload_chunks_uploadId_fkey" FOREIGN KEY ("uploadId") REFERENCES "media_uploads"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "media_variants" ADD CONSTRAINT "media_variants_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "media_assets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "comments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_rootCommentId_fkey" FOREIGN KEY ("rootCommentId") REFERENCES "comments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subscription_plan_prices" ADD CONSTRAINT "subscription_plan_prices_planId_fkey" FOREIGN KEY ("planId") REFERENCES "subscription_plans"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subscription_plan_entitlements" ADD CONSTRAINT "subscription_plan_entitlements_planId_fkey" FOREIGN KEY ("planId") REFERENCES "subscription_plans"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subscription_plan_perks" ADD CONSTRAINT "subscription_plan_perks_planId_fkey" FOREIGN KEY ("planId") REFERENCES "subscription_plans"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ledger_entries" ADD CONSTRAINT "ledger_entries_transactionId_fkey" FOREIGN KEY ("transactionId") REFERENCES "ledger_transactions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
