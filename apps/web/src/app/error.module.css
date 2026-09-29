@@ -1,0 +1,14 @@
+.retryButton {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--ink-strong);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  background: #fff;
+}
