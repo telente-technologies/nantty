@@ -13,12 +13,13 @@ import { fetchLedgerAccounts, fetchLedgerCurrencies, fetchLedgerEntries } from "
 import type { JournalEntry } from "@/types/ledger.type";
 import { formatDateTime, formatMoneyForDisplay, humanizeConstantName } from "@/utils/formatting.util";
 
+import ledgerStyles from "./ledger.module.css";
 import styles from "./money.module.css";
 
 function JournalEntryCard({ journal }: { readonly journal: JournalEntry }) {
   return (
-    <article className={styles.journal}>
-      <header className={styles.journalHeader}>
+    <article className={ledgerStyles.journal}>
+      <header className={ledgerStyles.journalHeader}>
         <span className={styles.stack}>
           <strong>{journal.description}</strong>
           <span className={styles.muted}>
@@ -27,7 +28,7 @@ function JournalEntryCard({ journal }: { readonly journal: JournalEntry }) {
         </span>
         {journal.isBalanced ? <StatusBadge label="Balanced" tone="success" /> : <StatusBadge label="Out of balance" tone="danger" />}
       </header>
-      <table className={styles.legs}>
+      <table className={ledgerStyles.legs}>
         <caption className="visuallyHidden">Journal legs</caption>
         <tbody>
           {journal.legs.map((leg, index) => (
@@ -56,15 +57,15 @@ function LedgerForCurrency({ currency }: { readonly currency: string }) {
   const entries = useAdminQuery((signal) => fetchLedgerEntries(entryFilters, signal), JSON.stringify(entryFilters));
 
   return (
-    <div className={styles.ledgerLayout}>
+    <div className={ledgerStyles.ledgerLayout}>
       <Card title={`Accounts · ${currency}`} isFlush>
         {accounts.errorMessage ? <ErrorBlock message={accounts.errorMessage} onRetry={accounts.reload} /> : null}
         {accounts.isLoading && !accounts.data ? <LoadingBlock /> : null}
-        <button type="button" className={`${styles.accountButton} ${accountId === null ? styles.accountButtonActive : ""}`} onClick={() => { setAccountId(null); setPage(1); }} aria-pressed={accountId === null}>
+        <button type="button" className={`${ledgerStyles.accountButton} ${accountId === null ? ledgerStyles.accountButtonActive : ""}`} onClick={() => { setAccountId(null); setPage(1); }} aria-pressed={accountId === null}>
           <strong>All accounts</strong>
         </button>
         {accounts.data?.items.map((account) => (
-          <button key={account.id} type="button" className={`${styles.accountButton} ${accountId === account.id ? styles.accountButtonActive : ""}`} onClick={() => { setAccountId(account.id); setPage(1); }} aria-pressed={accountId === account.id}>
+          <button key={account.id} type="button" className={`${ledgerStyles.accountButton} ${accountId === account.id ? ledgerStyles.accountButtonActive : ""}`} onClick={() => { setAccountId(account.id); setPage(1); }} aria-pressed={accountId === account.id}>
             <span className={styles.stack}>
               <strong>{account.name}</strong>
               <span className={styles.muted}>{humanizeConstantName(account.kind)} · {account.entryCount} legs</span>
@@ -77,8 +78,8 @@ function LedgerForCurrency({ currency }: { readonly currency: string }) {
         {entries.errorMessage ? <ErrorBlock message={entries.errorMessage} onRetry={entries.reload} /> : null}
         {entries.isLoading && !entries.data ? <LoadingBlock lines={6} /> : null}
         {entries.data?.items.map((journal) => <JournalEntryCard key={journal.id} journal={journal} />)}
-        {entries.data && entries.data.items.length === 0 ? <p className={styles.journal}>No entries for this account.</p> : null}
-        {entries.data ? <div className={styles.journal}><Pagination page={entries.data.page} pageSize={entries.data.pageSize} total={entries.data.total} onPageChange={setPage} /></div> : null}
+        {entries.data && entries.data.items.length === 0 ? <p className={ledgerStyles.journal}>No entries for this account.</p> : null}
+        {entries.data ? <div className={ledgerStyles.journal}><Pagination page={entries.data.page} pageSize={entries.data.pageSize} total={entries.data.total} onPageChange={setPage} /></div> : null}
       </Card>
     </div>
   );
