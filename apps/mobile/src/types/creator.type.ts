@@ -102,3 +102,48 @@ export interface CreatorEarning {
   readonly availableAt: ISODate | null;
   readonly createdAt: ISODate;
 }
+
+export interface CreatorRevenueRules {
+  readonly giftCreatorSharePercentUpTo: number;
+  readonly adsRevenueCreatorSharePercent: number;
+  readonly coinTransferPlatformFeePercent: number;
+  readonly affiliateCommissionReleasedAfterEscrow: boolean;
+  readonly withdrawalFeeDescription: string;
+}
+
+export interface CreatorSubscriptionPlan {
+  readonly id: ID;
+  readonly name: string;
+  readonly price: Money;
+  readonly interval: "month" | "year";
+  readonly benefits: readonly string[];
+  readonly subscriberCount: number;
+  readonly active: boolean;
+}
+
+export interface CreatorSubscriptionPlanInput {
+  readonly name: string;
+  readonly price: Money;
+  readonly interval: "month" | "year";
+  readonly benefits: readonly string[];
+}
+
+export interface CreatorSubscriber {
+  readonly id: ID;
+  readonly user: import("./models.type").UserSummary;
+  readonly planName: string;
+  readonly since: ISODate;
+  readonly renewsAt: ISODate | null;
+}
+
+export interface CreatorSubscriptionCheckout {
+  readonly subscriptionId: ID;
+  readonly checkoutUrl: string;
+}
+
+export interface CreatorSubscriptionState {
+  readonly subscriptionId: ID;
+  readonly status: "pending" | "active" | "cancelled" | "failed";
+  readonly planId: ID;
+  readonly renewsAt: ISODate | null;
+}
