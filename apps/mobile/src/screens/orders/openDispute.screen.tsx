@@ -3,6 +3,9 @@ import { useRef, useState } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { SelectableRow } from "@/components/cart/selectableRow";
+import { escrowQueryKeys } from "@/components/escrow/escrowQueries.hook";
+import { DISPUTE_REASON_OPTIONS } from "@/components/escrow/escrowStage.util";
+import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -11,74 +14,101 @@ import { colors } from "@/constants/colors.constant";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { ordersService } from "@/services/orders.service";
+import { disputesService } from "@/services/disputes.service";
 import type { DisputeReason } from "@/types/commerce.type";
 
-const REASONS: { id: DisputeReason; label: string }[] = [
-  { id: "not_received", label: "I didn't receive my order" },
-  { id: "not_as_described", label: "Item isn't as described" },
-  { id: "damaged", label: "Item arrived damaged" },
-  { id: "wrong_item", label: "I received the wrong item" },
-  { id: "other", label: "Something else" },
-];
+const MINIMUM_DESCRIPTION_LENGTH = 20;
+const REASONS_THAT_NEED_PHOTOS = new Set<DisputeReason>(["damaged", "not_as_described", "wrong_item"]);
 
 export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDispute">) {
   const { orderId } = route.params;
   const queryClient = useQueryClient();
   const [reason, setReason] = useState<DisputeReason | null>(null);
-  const [details, setDetails] = useState("");
-  const disputeKey = useRef(generateIdempotencyKey());
+  const [description, setDescription] = useState("");
+  const [evidenceUrls, setEvidenceUrls] = useState<string[]>([]);
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const idempotencyKeyForThisDispute = useRef(generateIdempotencyKey());
 
   const submitDispute = useMutation({
-    mutationFn: () => ordersService.openOrderDispute(orderId, reason!, details.trim(), disputeKey.current),
-    onSuccess: () => {
+    mutationFn: () =>
+      disputesService.openDisputeForOrder(orderId, { reason: reason!, description: description.trim(), evidenceUrls }, idempotencyKeyForThisDispute.current),
+    onSuccess: (dispute) => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      navigation.goBack();
+      queryClient.invalidateQueries({ queryKey: escrowQueryKeys.forOrder(orderId) });
+      queryClient.setQueryData(escrowQueryKeys.dispute(dispute.id), dispute);
+      navigation.replace("DisputeDetail", { disputeId: dispute.id });
     },
   });
 
+  const photosRequired = reason !== null && REASONS_THAT_NEED_PHOTOS.has(reason);
+  const descriptionLongEnough = description.trim().length >= MINIMUM_DESCRIPTION_LENGTH;
+  const readyToSubmit = !!reason && descriptionLongEnough && (!photosRequired || evidenceUrls.length > 0) && !uploadingEvidence;
+
   return (
     <Screen>
-      <Header title="Report a problem" paddingHorizontal={12} />
+      <Header title="Open a dispute" />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-          Opening a dispute pauses the escrow release. Our team will review it with you and the seller.
+        <View style={styles.notice}>
+          <Text size={13} weight={500} lineHeight={16.9} color={colors.primary}>
+            Your payment is paused while we look into this
+          </Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+            The seller can't receive the money until the dispute is resolved. They have 48 hours to respond, then Zudomart support steps in.
+          </Text>
+        </View>
+
+        <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">
+          What went wrong?
         </Text>
-        <View style={styles.reasons}>
-          {REASONS.map((option) => (
+        <View style={styles.reasons} accessibilityRole="radiogroup">
+          {DISPUTE_REASON_OPTIONS.map((option) => (
             <SelectableRow key={option.id} selected={reason === option.id} onPress={() => setReason(option.id)} accessibilityLabel={option.label}>
               <Text size={14} lineHeight={16.8}>{option.label}</Text>
+              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{option.hint}</Text>
             </SelectableRow>
           ))}
         </View>
+
         <View style={styles.field}>
-          <Text size={14} lineHeight={16.8}>Tell us what happened</Text>
+          <Text size={16} weight={600} lineHeight={19.2}>Describe the problem</Text>
           <TextInput
-            value={details}
-            onChangeText={setDetails}
+            value={description}
+            onChangeText={setDescription}
             multiline
             maxLength={1000}
-            placeholder="Add details that will help us resolve this"
+            placeholder="E.g. The heel of the left shoe is peeling and there's a glue stain on the toe."
             placeholderTextColor={colors.textSubtle}
-            accessibilityLabel="Dispute details"
+            accessibilityLabel="Describe the problem"
             style={styles.input}
           />
+          <Text size={12} lineHeight={16} color={descriptionLongEnough ? colors.textSubtle : colors.caution}>
+            {descriptionLongEnough ? `${description.trim().length}/1000` : `At least ${MINIMUM_DESCRIPTION_LENGTH} characters`}
+          </Text>
+        </View>
+
+        <View style={styles.field}>
+          <Text size={16} weight={600} lineHeight={19.2}>Photo evidence{photosRequired ? "" : " (optional)"}</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+            Clear photos of the item, packaging and label help us resolve this faster. Only you, the seller and Zudomart support can see them.
+          </Text>
+          <PhotoEvidencePicker photoUrls={evidenceUrls} onChangePhotoUrls={setEvidenceUrls} onUploadingChange={setUploadingEvidence} />
         </View>
       </ScrollView>
       <View style={styles.footer}>
         {submitDispute.isError ? (
           <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-            Couldn't open the dispute. Try again.
+            {submitDispute.error.message || "Couldn't open the dispute. Try again."}
           </Text>
         ) : null}
-        <Button title="Submit" disabled={!reason || details.trim().length < 10} loading={submitDispute.isPending} onPress={() => submitDispute.mutate()} />
+        <Button title="Submit dispute" disabled={!readyToSubmit} loading={submitDispute.isPending} onPress={() => submitDispute.mutate()} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingBottom: 24, gap: 20 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  notice: { backgroundColor: colors.primaryTint, borderRadius: 12, padding: 12, gap: 4 },
   reasons: { gap: 8 },
   field: { gap: 8 },
   input: {
@@ -93,5 +123,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
   },
-  footer: { paddingHorizontal: 16, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
 });
