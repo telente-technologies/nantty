@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import styles from "./sellerFeesSection.module.css";
@@ -29,7 +29,7 @@ export function SellerFeesPlaceholderSection() {
               Placeholder: the Zudomart team will replace this section with the confirmed fee schedule.
             </p>
             <p className={styles.contact}>
-              Questions about pricing? Email <a href={`mailto:${siteConfig.contactEmails.sellers}`}>{siteConfig.contactEmails.sellers}</a>.
+              Questions about pricing? Email <a href={contactMailtoHref}>{contactEmailDisplayText}</a>.
             </p>
           </div>
           <div>
