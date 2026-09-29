@@ -1,3 +1,4 @@
+import { buildDemoPlatformUsers } from "@/mocks/seed/demoPlatformUsers.mock";
 import type { SupportMacro, SupportMessage, SupportTicketCategory, SupportTicketPriority, SupportTicketStatus } from "@/types/support.type";
 
 export interface MockSupportTicketRecord {
@@ -34,7 +35,7 @@ interface TicketSeed {
   readonly category: SupportTicketCategory;
   readonly priority: SupportTicketPriority;
   readonly status: SupportTicketStatus;
-  readonly userNumber: number;
+  readonly requesterUsername: string;
   readonly assignee: string | null;
   readonly orderId?: string;
   readonly disputeId?: string;
@@ -44,21 +45,22 @@ interface TicketSeed {
 }
 
 const ticketSeeds: readonly TicketSeed[] = [
-  { subject: "Paid for wig but seller has not shipped in 6 days", category: "ORDERS", priority: "HIGH", status: "OPEN", userNumber: 18, assignee: null, orderId: "ord_7F3K2Q", ageMinutes: 310, conversation: [["CUSTOMER", "Halima Sadiq", "I paid on Tuesday and the seller keeps saying tomorrow. The escrow says held. Can you help?"]] },
-  { subject: "Withdrawal to GTBank stuck on processing", category: "PAYMENTS", priority: "URGENT", status: "OPEN", userNumber: 13, assignee: "adm_0003", ageMinutes: 95, conversation: [["CUSTOMER", "Funke Naturals", "My withdrawal has been processing since morning. I need to pay my suppliers today."], ["INTERNAL_NOTE", "Ngozi Eze", "Flutterwave transfers to GTBank are degraded. Checking with payouts desk."]] },
-  { subject: "Someone is using my brand name and photos", category: "SAFETY", priority: "HIGH", status: "OPEN", userNumber: 1, assignee: "adm_0003", ageMinutes: 540, respondedAfterMinutes: 40, conversation: [["CUSTOMER", "Adaeze Styles", "An account called adaeze_styles_official is copying my product photos and taking orders."], ["AGENT", "Ngozi Eze", "Thanks Adaeze. We've passed this to our trust team and will update you within a day."]] },
-  { subject: "Gold verification still pending after 5 days", category: "VERIFICATION", priority: "NORMAL", status: "PENDING", userNumber: 4, assignee: "adm_0002", ageMinutes: 2_900, respondedAfterMinutes: 120, conversation: [["CUSTOMER", "Chioma Threads", "I uploaded my CAC documents last week. When will my Gold badge be approved?"], ["AGENT", "Chidi Okafor", "Your documents are in review. We need a clearer photo of the director ID — please upload it from Settings > Verification."]] },
-  { subject: "Item received is different from the listing", category: "ORDERS", priority: "NORMAL", status: "OPEN", userNumber: 27, assignee: null, orderId: "ord_9M1X4B", disputeId: "dsp_4Q8N2L", ageMinutes: 620, conversation: [["CUSTOMER", "Ken Otieno", "I ordered black sneakers size 44 and got brown size 42. I opened a dispute but nobody replied."]] },
-  { subject: "Boosted post was rejected without a reason", category: "ADS", priority: "LOW", status: "OPEN", userNumber: 16, assignee: null, ageMinutes: 1_700, conversation: [["CUSTOMER", "Bolu Films", "My boost for the new short film trailer got rejected. What did I do wrong?"]] },
-  { subject: "Can't log in after changing my phone number", category: "ACCOUNT", priority: "NORMAL", status: "OPEN", userNumber: 24, assignee: "adm_0003", ageMinutes: 200, conversation: [["CUSTOMER", "Ngozi Bakes", "I changed my SIM and now the OTP goes to my old number."]] },
-  { subject: "Charged twice for coins", category: "PAYMENTS", priority: "HIGH", status: "PENDING", userNumber: 22, assignee: "adm_0003", ageMinutes: 1_100, respondedAfterMinutes: 90, conversation: [["CUSTOMER", "Tomi Travels", "My card was charged twice for the 5,000 coin pack."], ["AGENT", "Ngozi Eze", "We can see one successful and one reversed charge. The reversal usually shows within 3 working days. Can you confirm by Friday?"]] },
-  { subject: "Seller is threatening me in DMs", category: "SAFETY", priority: "URGENT", status: "OPEN", userNumber: 26, assignee: null, ageMinutes: 150, conversation: [["CUSTOMER", "Grace Decor", "A buyer I refunded keeps sending insults and threats in my messages. Screenshots attached."]] },
-  { subject: "How do I become a Creator Program member?", category: "ACCOUNT", priority: "LOW", status: "SOLVED", userNumber: 9, assignee: "adm_0003", ageMinutes: 4_300, respondedAfterMinutes: 300, conversation: [["CUSTOMER", "Sipho Fits", "I want to go live and receive gifts. How do I join?"], ["AGENT", "Ngozi Eze", "You can apply from Profile > Creator Program once you meet the eligibility rules shown there."]] },
-  { subject: "Refund not received after dispute won", category: "PAYMENTS", priority: "HIGH", status: "OPEN", userNumber: 11, assignee: "adm_0002", orderId: "ord_2C6T9W", disputeId: "dsp_8H3R5K", ageMinutes: 1_600, respondedAfterMinutes: 600, conversation: [["CUSTOMER", "Ifeoma Art", "The dispute was decided in my favour 3 days ago but my wallet still shows zero."], ["AGENT", "Chidi Okafor", "Looking into the refund ledger entry now."]] },
-  { subject: "Account suspended by mistake", category: "ACCOUNT", priority: "NORMAL", status: "CLOSED", userNumber: 12, assignee: "adm_0002", ageMinutes: 9_000, respondedAfterMinutes: 200, conversation: [["CUSTOMER", "Dayo Deals", "Why is my shop suspended?"], ["AGENT", "Chidi Okafor", "Your store was suspended for repeated counterfeit listings. You can appeal from the app."]] },
+  { subject: "Paid for wig but seller has not shipped in 6 days", category: "ORDERS", priority: "HIGH", status: "OPEN", requesterUsername: "halima.hijabs", assignee: null, orderId: "ord_7F3K2Q", ageMinutes: 310, conversation: [["CUSTOMER", "Halima Sadiq", "I paid on Tuesday and the seller keeps saying tomorrow. The escrow says held. Can you help?"]] },
+  { subject: "Withdrawal to GTBank stuck on processing", category: "PAYMENTS", priority: "URGENT", status: "OPEN", requesterUsername: "funke.naturals", assignee: "adm_0003", ageMinutes: 95, conversation: [["CUSTOMER", "Funke Naturals", "My withdrawal has been processing since morning. I need to pay my suppliers today."], ["INTERNAL_NOTE", "Ngozi Eze", "Flutterwave transfers to GTBank are degraded. Checking with payouts desk."]] },
+  { subject: "Someone is using my brand name and photos", category: "SAFETY", priority: "HIGH", status: "OPEN", requesterUsername: "adaeze.styles", assignee: "adm_0003", ageMinutes: 540, respondedAfterMinutes: 40, conversation: [["CUSTOMER", "Adaeze Styles", "An account called adaeze_styles_official is copying my product photos and taking orders."], ["AGENT", "Ngozi Eze", "Thanks Adaeze. We've passed this to our trust team and will update you within a day."]] },
+  { subject: "Gold verification still pending after 5 days", category: "VERIFICATION", priority: "NORMAL", status: "PENDING", requesterUsername: "chioma_threads", assignee: "adm_0002", ageMinutes: 2_900, respondedAfterMinutes: 120, conversation: [["CUSTOMER", "Chioma Threads", "I uploaded my CAC documents last week. When will my Gold badge be approved?"], ["AGENT", "Chidi Okafor", "Your documents are in review. We need a clearer photo of the director ID — please upload it from Settings > Verification."]] },
+  { subject: "Item received is different from the listing", category: "ORDERS", priority: "NORMAL", status: "OPEN", requesterUsername: "ken.otieno", assignee: null, orderId: "ord_9M1X4B", disputeId: "dsp_4Q8N2L", ageMinutes: 620, conversation: [["CUSTOMER", "Ken Otieno", "I ordered black sneakers size 44 and got brown size 42. I opened a dispute but nobody replied."]] },
+  { subject: "Boosted post was rejected without a reason", category: "ADS", priority: "LOW", status: "OPEN", requesterUsername: "bolu.films", assignee: null, ageMinutes: 1_700, conversation: [["CUSTOMER", "Bolu Films", "My boost for the new short film trailer got rejected. What did I do wrong?"]] },
+  { subject: "Can't log in after changing my phone number", category: "ACCOUNT", priority: "NORMAL", status: "OPEN", requesterUsername: "ngozi_bakes", assignee: "adm_0003", ageMinutes: 200, conversation: [["CUSTOMER", "Ngozi Bakes", "I changed my SIM and now the OTP goes to my old number."]] },
+  { subject: "Charged twice for coins", category: "PAYMENTS", priority: "HIGH", status: "PENDING", requesterUsername: "tomi.travels", assignee: "adm_0003", ageMinutes: 1_100, respondedAfterMinutes: 90, conversation: [["CUSTOMER", "Tomi Travels", "My card was charged twice for the 5,000 coin pack."], ["AGENT", "Ngozi Eze", "We can see one successful and one reversed charge. The reversal usually shows within 3 working days. Can you confirm by Friday?"]] },
+  { subject: "Seller is threatening me in DMs", category: "SAFETY", priority: "URGENT", status: "OPEN", requesterUsername: "grace.decor", assignee: null, ageMinutes: 150, conversation: [["CUSTOMER", "Grace Decor", "A buyer I refunded keeps sending insults and threats in my messages. Screenshots attached."]] },
+  { subject: "How do I become a Creator Program member?", category: "ACCOUNT", priority: "LOW", status: "SOLVED", requesterUsername: "sipho.fits", assignee: "adm_0003", ageMinutes: 4_300, respondedAfterMinutes: 300, conversation: [["CUSTOMER", "Sipho Fits", "I want to go live and receive gifts. How do I join?"], ["AGENT", "Ngozi Eze", "You can apply from Profile > Creator Program once you meet the eligibility rules shown there."]] },
+  { subject: "Refund not received after dispute won", category: "PAYMENTS", priority: "HIGH", status: "OPEN", requesterUsername: "ifeoma.art", assignee: "adm_0002", orderId: "ord_2C6T9W", disputeId: "dsp_8H3R5K", ageMinutes: 1_600, respondedAfterMinutes: 600, conversation: [["CUSTOMER", "Ifeoma Art", "The dispute was decided in my favour 3 days ago but my wallet still shows zero."], ["AGENT", "Chidi Okafor", "Looking into the refund ledger entry now."]] },
+  { subject: "Account suspended by mistake", category: "ACCOUNT", priority: "NORMAL", status: "CLOSED", requesterUsername: "dayo_deals", assignee: "adm_0002", ageMinutes: 9_000, respondedAfterMinutes: 200, conversation: [["CUSTOMER", "Dayo Deals", "Why is my shop suspended?"], ["AGENT", "Chidi Okafor", "Your store was suspended for repeated counterfeit listings. You can appeal from the app."]] },
 ];
 
 export function buildDemoSupportTickets(): MockSupportTicketRecord[] {
+  const userIdByUsername = new Map(buildDemoPlatformUsers().map((user) => [user.username, user.id]));
   return ticketSeeds.map((seed, index) => {
     const createdAt = minutesAgoIso(seed.ageMinutes);
     const messages: SupportMessage[] = seed.conversation.map(([authorKind, authorName, body], messageIndex) => ({
@@ -74,7 +76,7 @@ export function buildDemoSupportTickets(): MockSupportTicketRecord[] {
       category: seed.category,
       priority: seed.priority,
       status: seed.status,
-      requesterUserId: `usr_${String(seed.userNumber).padStart(4, "0")}`,
+      requesterUserId: userIdByUsername.get(seed.requesterUsername) ?? "usr_0001",
       assigneeAdminId: seed.assignee,
       linkedOrderId: seed.orderId ?? null,
       linkedDisputeId: seed.disputeId ?? null,
