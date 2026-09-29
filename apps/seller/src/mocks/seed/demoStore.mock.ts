@@ -35,7 +35,7 @@ export function buildDemoStoreSettings(): StoreSettings {
       { method: "pay_link", enabled: true, label: "Pay link", instructions: null },
     ],
     discountApprovalThresholdBasisPoints: 1500,
-    loyalty: { enabled: true, pointsEarnedPerMajorUnit: 1, redeemValuePerPoint: { amountMinor: 100, currency: "NGN" }, minimumPointsToRedeem: 500 },
+    loyalty: { enabled: true, spendRequiredPerPoint: { amountMinor: 100_000, currency: "NGN" }, redeemValuePerPoint: { amountMinor: 1_000, currency: "NGN" }, minimumPointsToRedeem: 100 },
     notifications: { newOrderEmail: true, newOrderSms: true, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: false },
   };
 }
