@@ -3,12 +3,12 @@ import { useNavigation } from "@react-navigation/native";
 
 import { ProductCard } from "@/components/product/productCard";
 import { useCartActions } from "@/hooks/useCart.hook";
-import type { ProductSummary } from "@/types";
+import type { AdPlacement, ProductSummary } from "@/types";
 
 const TALL_IMAGE = 227;
 const SHORT_IMAGE = 183;
 
-export function ProductMasonry({ products }: { products: readonly ProductSummary[] }) {
+export function ProductMasonry({ products, adPlacement = "mart" }: { products: readonly ProductSummary[]; adPlacement?: AdPlacement }) {
   const navigation = useNavigation();
   const { addProductToCart } = useCartActions();
   const columns: [ProductSummary[], ProductSummary[]] = [[], []];
@@ -23,6 +23,7 @@ export function ProductMasonry({ products }: { products: readonly ProductSummary
               key={product.id}
               product={product}
               variant="mart"
+              adPlacement={adPlacement}
               width="100%"
               imageHeight={(rowIndex + columnIndex) % 2 === 0 ? TALL_IMAGE : SHORT_IMAGE}
               onPress={() => navigation.navigate("ProductDetail", { productId: product.id })}
