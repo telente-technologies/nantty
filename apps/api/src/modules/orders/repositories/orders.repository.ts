@@ -35,6 +35,7 @@ export class InMemoryOrdersRepository implements OrdersRepository {
         id: orderId,
         checkoutId: checkout.id,
         trackingNumber: null,
+        courier: null,
         paidAt: null,
         shippedAt: null,
         deliveredAt: null,
