@@ -1,3 +1,4 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { PaymentProvider, PaymentStatus } from "../../../enums/paymentStatus.enum.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 
@@ -8,7 +9,7 @@ export interface PaymentRecord {
   readonly provider: PaymentProvider;
   readonly reference: string;
   readonly amount: MinorUnits;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly status: PaymentStatus;
   readonly authorizationUrl: string | null;
   readonly providerTransactionId: string | null;

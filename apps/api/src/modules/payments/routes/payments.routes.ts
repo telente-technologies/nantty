@@ -5,7 +5,7 @@ import { createWebhookSignatureVerificationMiddleware } from "../../../middlewar
 import { describeRoute } from "../../../utils/openapi.util.js";
 import { OrderParamsSchema } from "../../orders/validators/orders.validator.js";
 import type { PaymentsController } from "../controllers/payments.controller.js";
-import { InitializePaymentBodySchema, PaymentParamsSchema, VerifyPaymentBodySchema, WebhookParamsSchema } from "../validators/payments.validator.js";
+import { InitializePaymentBodySchema, PaymentParamsSchema, OrderPaymentParamsSchema, WebhookParamsSchema } from "../validators/payments.validator.js";
 
 const TAG = "payments";
 
@@ -15,9 +15,9 @@ export function registerPaymentsRoutes(router: HttpRouter, controller: PaymentsC
 
   router.post("/api/v1/payments/initialize", controller.initialize, {
     ...guard.requirePermission("orders:place", requireIdempotencyKey),
-    ...describeRoute(TAG, "Start paying for a checkout (Idempotency-Key required)", { body: InitializePaymentBodySchema }),
+    ...describeRoute(TAG, "Start paying for an order's checkout (Idempotency-Key required)", { body: InitializePaymentBodySchema }),
   });
-  router.post("/api/v1/payments/verify", controller.verify, { ...buyer, ...describeRoute(TAG, "Confirm a payment with the provider", { body: VerifyPaymentBodySchema }) });
+  router.post("/api/v1/payments/orders/:orderId/verify", controller.verify, { ...buyer, ...describeRoute(TAG, "Check an order's payment with the provider", { params: OrderPaymentParamsSchema }) });
   router.post("/api/v1/payments/webhooks/:provider", controller.receiveWebhook, {
     ...guard.allowAnyone(createWebhookSignatureVerificationMiddleware(controller.webhookVerifiers)),
     ...describeRoute(TAG, "Payment provider webhook (signature verified)", { params: WebhookParamsSchema }),

@@ -43,6 +43,15 @@ export interface WebhookOutcome {
   readonly duplicate: boolean;
 }
 
+export interface InitializedOrderPayment {
+  readonly orderId: string;
+  readonly reference: string;
+  readonly authorizationUrl: string;
+  readonly payment: PaymentRecord;
+}
+
+export type OrderPaymentStatus = "pending" | "paid" | "failed";
+
 export class PaymentsService implements EscrowPaymentRefunder {
   public constructor(public readonly dependencies: PaymentsDependencies) {}
 
@@ -69,6 +78,24 @@ export class PaymentsService implements EscrowPaymentRefunder {
     });
     await payments.saveAuthorizationUrl(payment.id, initialized.authorizationUrl);
     return { payment: { ...payment, authorizationUrl: initialized.authorizationUrl }, authorizationUrl: initialized.authorizationUrl };
+  }
+
+  public async initializeOrderPayment(buyerId: string, orderId: string, provider: PaymentProvider): Promise<InitializedOrderPayment> {
+    const order = await this.dependencies.orders.findById(orderId);
+    if (order === undefined || order.buyerId !== buyerId) throw notFound("Order");
+    const initialized = await this.initializeCheckoutPayment(buyerId, order.checkoutId, provider);
+    return { orderId, reference: initialized.payment.reference, authorizationUrl: initialized.authorizationUrl, payment: initialized.payment };
+  }
+
+  public async verifyOrderPaymentForBuyer(buyerId: string, orderId: string): Promise<OrderPaymentStatus> {
+    const order = await this.dependencies.orders.findById(orderId);
+    if (order === undefined || order.buyerId !== buyerId) throw notFound("Order");
+    const attempts = [...(await this.dependencies.payments.listForCheckout(order.checkoutId))].sort(
+      (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+    );
+    const confirmed = await Promise.all(attempts.map((payment) => this.confirmPaymentWithProvider(payment)));
+    if (confirmed.some((payment) => payment.status === "succeeded" || payment.status === "refunded")) return "paid";
+    return confirmed[0]?.status === "failed" ? "failed" : "pending";
   }
 
   public async verifyPaymentForBuyer(buyerId: string, reference: string): Promise<PaymentRecord> {

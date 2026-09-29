@@ -16,8 +16,9 @@ import type { PaymentGateway } from "../gateways/paymentGateway.interface.js";
 import type { PaymentRecord } from "../models/payments.model.js";
 import { GetPaymentQuery } from "../queries/getPayment/getPayment.query.js";
 import { ListCheckoutPaymentsQuery } from "../queries/listCheckoutPayments/listCheckoutPayments.query.js";
-import type { InitializedCheckoutPayment, WebhookOutcome } from "../services/payments.service.js";
-import { InitializePaymentBodySchema, PaymentParamsSchema, VerifyPaymentBodySchema, WebhookParamsSchema } from "../validators/payments.validator.js";
+import type { InitializedOrderPayment,
+  OrderPaymentStatus, WebhookOutcome } from "../services/payments.service.js";
+import { InitializePaymentBodySchema, PaymentParamsSchema, OrderPaymentParamsSchema, WebhookParamsSchema } from "../validators/payments.validator.js";
 
 export class PaymentsController {
   public readonly webhookVerifiers: Readonly<Record<string, WebhookVerifier>>;
@@ -31,16 +32,16 @@ export class PaymentsController {
   public readonly initialize = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = InitializePaymentBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new InitializePaymentCommand(requireAuthenticatedPrincipal(ctx), body.data.checkoutId, body.data.provider);
-    const result = await this.commands.execute<InitializePaymentCommand, InitializedCheckoutPayment>(command);
-    return json(201, { payment: convertPaymentToDto(result.payment), authorizationUrl: result.authorizationUrl });
+    const command = new InitializePaymentCommand(requireAuthenticatedPrincipal(ctx), body.data.orderId, body.data.provider);
+    const result = await this.commands.execute<InitializePaymentCommand, InitializedOrderPayment>(command);
+    return json(201, { orderId: result.orderId, reference: result.reference, authorizationUrl: result.authorizationUrl, payment: convertPaymentToDto(result.payment) });
   };
 
   public readonly verify = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const body = VerifyPaymentBodySchema.safeParse(readJsonBody(ctx));
-    if (!body.success) return validationFailed(body.issues);
-    const payment = await this.commands.execute<VerifyPaymentCommand, PaymentRecord>(new VerifyPaymentCommand(requireAuthenticatedPrincipal(ctx), body.data.reference));
-    return json(200, convertPaymentToDto(payment));
+    const params = OrderPaymentParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const command = new VerifyPaymentCommand(requireAuthenticatedPrincipal(ctx), params.data.orderId);
+    return json(200, { status: await this.commands.execute<VerifyPaymentCommand, OrderPaymentStatus>(command) });
   };
 
   public readonly receiveWebhook = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -62,7 +63,7 @@ export class PaymentsController {
     const params = PaymentParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
     const payments = await this.queries.execute<ListCheckoutPaymentsQuery, readonly PaymentRecord[]>(new ListCheckoutPaymentsQuery(requireAuthenticatedPrincipal(ctx), params.data.id));
-    return json(200, { items: payments.map(convertPaymentToDto) });
+    return json(200, payments.map(convertPaymentToDto));
   };
 
   public readonly refundOrder = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
