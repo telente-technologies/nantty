@@ -9,11 +9,11 @@ from typing import Any
 import httpx
 import pytest
 
-from app.configs.settings_config import IntelligenceSettings
-from app.core.application_container import ApplicationContainer, build_application_container
-from app.main import create_application
-from app.security.request_signature_security import compute_request_signature_header_value
-from app.stores.in_memory_feature_backend import InMemoryFeatureBackend
+from src.app import create_application
+from src.configs.settings_config import IntelligenceSettings
+from src.container import ApplicationContainer, build_application_container
+from src.databases.in_memory_feature_database import InMemoryFeatureBackend
+from src.utils.request_signature_util import compute_request_signature_header_value
 
 TEST_SHARED_SECRET = "test-shared-secret-that-is-long-enough-000"
 
