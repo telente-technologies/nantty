@@ -27,7 +27,7 @@ describe("Paystack webhook signatures", () => {
   });
 
   it("reads the event key and reference", () => {
-    expect(gateway.readWebhookNotice(body)).toEqual({ eventKey: "charge.success:42", reference: "zm_abc" });
+    expect(gateway.readWebhookNotice(body)).toEqual({ eventKey: "charge.success:42", reference: "zm_abc", eventType: "charge.success" });
   });
 });
 
