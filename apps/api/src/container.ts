@@ -9,7 +9,7 @@ import { createCommunicationModules, type CommunicationExternalServices } from "
 import { createCore } from "./loaders/core.loader.js";
 import { createCurrencyModule, type CurrencyExternalServices } from "./loaders/currency.loader.js";
 import { createIdentityModules, type IdentityExternalServices } from "./loaders/identity.loader.js";
-import { createSocialModules } from "./loaders/social.loader.js";
+import { createSocialModules, type SocialExternalServices } from "./loaders/social.loader.js";
 import { createWebKit } from "./loaders/web.loader.js";
 import type { AppLogger } from "./loggers/app.logger.js";
 import { AuditController } from "./modules/audit/controllers/audit.controller.js";
@@ -26,7 +26,7 @@ export const APP_DEPENDENCIES = createToken<AppDependencies>("app.dependencies")
 export interface ExternalServices
   extends IdentityExternalServices,
     CurrencyExternalServices,
-    CatalogExternalServices, CommerceExternalServices, CommunicationExternalServices {}
+    CatalogExternalServices, CommerceExternalServices, CommunicationExternalServices, SocialExternalServices {}
 
 export interface DependencyOptions {
   readonly settings: AppSettings;
@@ -65,20 +65,22 @@ export function createDependencies(options: DependencyOptions) {
     currencyConverter,
     ...catalog,
     orderLookup: commerce.orderLookup,
-  });
+  }, external);
   const communication = createCommunicationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph }, external);
 
   return {
     health,
     core,
     web,
-    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs],
+    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs, ...catalog.scheduledJobs],
     ports: {
       audit,
       currencyConverter,
       userDirectory: identity.userDirectory,
       storeAccess: catalog.storeAccess,
       productCatalog: catalog.productCatalog,
+      mediaLibrary: catalog.mediaLibrary,
+      mediaProcessingQueue: catalog.mediaProcessingQueue,
       orderLookup: commerce.orderLookup,
       socialGraph: social.socialGraph,
     },
