@@ -151,6 +151,15 @@ export function registerAuthenticationMockHandlers(): void {
     return respondWithJson(200, { stepUpToken, expiresIn: stepUpLifetimeInSeconds });
   });
 
+  registerMockRoute("POST", "/admin/auth/step-up/webauthn/options", (request) => {
+    const principal = requireMockPrincipal(request);
+    const admin = readMockDatabase().admins.find((candidate) => candidate.id === principal.adminId);
+    if (!admin || admin.passkeys.length === 0) throw new MockHttpError(404, "NO_PASSKEYS", "You have no passkeys. Use your authenticator code.");
+    const challenge = createRandomMockToken("chl").slice(4);
+    readMockDatabase().webauthnChallenges.set(challenge, { adminId: admin.id, expiresAtEpochMs: Date.now() + 120_000 });
+    return respondWithJson(200, { challenge, rpId: "localhost", timeout: 60_000, userVerification: "required", allowCredentials: admin.passkeys.map((passkey) => ({ type: "public-key", id: passkey.credentialId })) });
+  });
+
   registerMockRoute("POST", "/admin/auth/logout", (request) => {
     const refreshToken = String(readJsonObjectBody(request).refreshToken ?? "");
     const record = readMockDatabase().refreshTokens.get(refreshToken);
