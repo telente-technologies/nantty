@@ -18,11 +18,12 @@ export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"Order
           Order placed
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textSubtle} align="center">
-          Your payment is held in escrow. We'll release it to the seller once you confirm the order arrived.
+          Your payment is safe in Zudomart escrow. The seller is paid only after you confirm the order arrived as described — or 3 days after delivery if you don't report a problem.
         </Text>
       </View>
       <View style={styles.footer}>
-        <Button title="Track order" onPress={() => navigation.replace("OrderDetail", { orderId: route.params.orderId })} />
+        <Button title="See payment protection" onPress={() => navigation.replace("EscrowStatus", { orderId: route.params.orderId })} />
+        <Button variant="subtle" title="View order" onPress={() => navigation.replace("OrderDetail", { orderId: route.params.orderId })} />
         <Button variant="subtle" title="Continue shopping" onPress={() => navigation.popToTop()} />
       </View>
     </Screen>
