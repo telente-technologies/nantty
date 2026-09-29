@@ -16,7 +16,7 @@ export function SellersTeaserSection() {
     <section className={styles.section} aria-labelledby="sellers-teaser-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.visual}>
-          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="Zudomart seller profile with posts, followers and a store tab" className={styles.phone} sizes="(min-width: 960px) 300px, 60vw" />
+          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="TundeTech seller profile with a gold business badge, followers and a View Shop button" className={styles.phone} sizes="(min-width: 960px) 300px, 60vw" />
           <SellerWalletPreviewCard className={styles.walletCard} />
         </div>
         <div className={styles.copyColumn}>

@@ -50,7 +50,7 @@ export function AppDownloadCallToActionPanel({
             </ul>
           </div>
           <div className={styles.phoneColumn}>
-            <PhoneFrameWithAppScreen screen="onboardingScreen" alt="Zudomart welcome screen: discover real sellers around you, with Apple, Google and username sign-in" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />
+            <PhoneFrameWithAppScreen screen="homeMartScreen" alt="Zudomart Mart tab with Sales of the Day, Featured Brands and New Arrivals" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />
           </div>
         </div>
       </div>

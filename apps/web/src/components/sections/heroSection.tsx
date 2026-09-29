@@ -34,9 +34,9 @@ export function HomeHeroSectionWithPhoneStage() {
         </div>
         <div className={styles.stage}>
           <div className={styles.stagePanel} aria-hidden="true" />
-          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="Zudomart seller profile with posts, followers and a store tab" className={`${styles.phone} ${styles.phoneLeft}`} sizes="(min-width: 900px) 220px, 34vw" />
-          <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed showing posts from sellers and friends" className={`${styles.phone} ${styles.phoneCenter}`} priority sizes="(min-width: 900px) 280px, 46vw" />
-          <PhoneFrameWithAppScreen screen="productDetailScreen" alt="Zudomart product page with price and add to cart" className={`${styles.phone} ${styles.phoneRight}`} sizes="(min-width: 900px) 220px, 34vw" />
+          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="TundeTech seller profile with a gold business badge, followers and a View Shop button" className={`${styles.phone} ${styles.phoneLeft}`} sizes="(min-width: 900px) 220px, 34vw" />
+          <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed showing a new Ankara collection post from Adaeze Okafor" className={`${styles.phone} ${styles.phoneCenter}`} priority sizes="(min-width: 900px) 280px, 46vw" />
+          <PhoneFrameWithAppScreen screen="productDetailScreen" alt="Ankara wrap midi dress product page with its naira price, official store badge and Add to Cart" className={`${styles.phone} ${styles.phoneRight}`} sizes="(min-width: 900px) 220px, 34vw" />
           <p className={`${styles.floatingChip} ${styles.liveChip}`}>
             <span className={styles.liveDot} aria-hidden="true" />
             Live now: shop while you watch

@@ -14,26 +14,26 @@ const buyerJourneySteps: readonly BuyerJourneyStep[] = [
   {
     title: "Discover",
     description: "Scroll posts, clips and live streams from sellers and creators. Tap a tagged item to see the product.",
-    screen: "homeMartScreen",
-    screenAlt: "Zudomart Mart tab with categories and a grid of products",
+    screen: "martProductsScreen",
+    screenAlt: "Zudomart Mart tab with Ankara dresses, earbuds and skincare priced in naira",
   },
   {
     title: "Ask the seller",
     description: "Message the seller about sizes, colours or delivery before you pay. The chat stays attached to your order.",
     screen: "chatWithSellerScreen",
-    screenAlt: "Zudomart chat screen with a seller",
+    screenAlt: "Chat with Adaeze Styles asking if an Adire kaftan is available in size L",
   },
   {
     title: "Pay into escrow",
     description: "Check out from one or many stores in your local currency. Your payment is held by Zudomart, not sent to the seller yet.",
     screen: "shoppingCartScreen",
-    screenAlt: "Zudomart cart with items, order summary and a checkout button",
+    screenAlt: "Zudomart cart with earbuds, a vitamin C serum and suya spice, with the order summary",
   },
   {
     title: "Confirm and release",
     description: "When your order arrives as described, confirm delivery. Only then is the seller paid.",
-    screen: "productDetailScreen",
-    screenAlt: "Zudomart product page with shop details and reviews",
+    screen: "escrowStatusScreen",
+    screenAlt: "Payment protection timeline for a delivered order, with the payment still held in escrow until the buyer confirms",
   },
 ];
 

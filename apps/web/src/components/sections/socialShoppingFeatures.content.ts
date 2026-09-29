@@ -19,7 +19,7 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "A feed where every post can be a shop window",
     description: "Follow sellers and creators, see what your friends liked, and tap the bag icon on a post to open the products in it.",
     screen: "homeFeedScreen",
-    screenAlt: "Zudomart feed with posts from sellers, likes and shares",
+    screenAlt: "Zudomart feed with Adaeze Okafor's Owambe Edit post and a shop bag on the photo",
   },
   {
     id: "clips",
@@ -28,7 +28,7 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "Short clips that show the real thing",
     description: "See the fabric move, the sneaker from every side and the phone switched on. Follow the seller or comment without leaving the clip.",
     screen: "shoppableClipsScreen",
-    screenAlt: "Zudomart clips screen with a full-screen video, likes and comments",
+    screenAlt: "Zudomart clip of Adaeze Styles packing orders, with likes, comments and share",
   },
   {
     id: "live",
@@ -37,7 +37,7 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "Live shopping, like the market but from your couch",
     description: "Join a seller's live stream, ask questions in the comments, and open the product they are showing while they talk.",
     screen: "liveShoppingScreen",
-    screenAlt: "Zudomart live stream with viewer comments and a product button",
+    screenAlt: "A live barber session promoted in Clips with a Watch live button and viewer count",
   },
   {
     id: "stories",
@@ -46,6 +46,6 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "Stories for new drops and restocks",
     description: "Sellers post what just arrived and what is almost gone. Reply to a story to start a chat about it.",
     screen: "storyScreen",
-    screenAlt: "Zudomart story screen with a reply box",
+    screenAlt: "Tunde Bakare's story showing headphones back in stock, with a reply box",
   },
 ];
