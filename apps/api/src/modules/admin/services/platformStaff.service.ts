@@ -1,123 +1,103 @@
-import { ForbiddenError, UnauthorizedError } from "@zudojs/errors";
-
 import type { AppSettings } from "../../../configs/settings.config.js";
-import { isPlatformPermission, type Permission } from "../../../constants/permissions.constant.js";
-import { PlatformRole, platformRoleGrantsPermission } from "../../../constants/platformRoles.constant.js";
-import { notFound } from "../../../errors/domain.error.js";
-import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
+import { listEffectivePlatformPermissions } from "../../../constants/platformRoles.constant.js";
+import type { AuditEntry, AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
-import type { PlatformStaffAccessCheck, StaffRequestDetails } from "../../../interfaces/platformStaffAccess.interface.js";
-import type { Principal } from "../../../interfaces/principal.interface.js";
+import type { TransactionalMailer } from "../../../interfaces/transactionalMailer.interface.js";
+import { adminError } from "../../../utils/adminHttp.util.js";
+import { hashSecretWithKey } from "../../../utils/hashToken.util.js";
+import type { AuditRepository } from "../../audit/repositories/audit.repository.js";
 import type { PasswordService } from "../../auth/services/password.service.js";
-import type { TokenService } from "../../auth/services/token.service.js";
-import type { UserRecord } from "../../users/models/users.model.js";
-import type { UsersRepository } from "../../users/repositories/users.repository.js";
-import { snapshotStaffAccountForAudit, type StaffAccountRecord, type StaffSessionRecord } from "../models/platformStaff.model.js";
-import type { StaffAccountsRepository, StaffSecurityRepository } from "../repositories/platformStaff.repository.js";
-import { ipAddressIsInAllowList } from "./ipAllowList.service.js";
+import { presentStaffStatus, type StaffAccountRecord } from "../models/platformStaff.model.js";
+import type { StaffAccountsRepository } from "../repositories/staffAccounts.repository.js";
+import type { StaffSecurityRepository } from "../repositories/staffSecurity.repository.js";
+import type { AdminTokenService } from "./adminTokens.service.js";
 import type { StaffMfaService } from "./staffMfa.service.js";
-import type { WebAuthnVerifier } from "./webAuthn.service.js";
+import type { WebAuthnCeremonies } from "./staffWebAuthn.service.js";
+
+export interface StaffTokenHashKeys {
+  readonly challenge: Uint8Array;
+  readonly stepUp: Uint8Array;
+  readonly invitation: Uint8Array;
+}
 
 export interface PlatformStaffDependencies {
   readonly accounts: StaffAccountsRepository;
   readonly security: StaffSecurityRepository;
-  readonly users: UsersRepository;
-  readonly tokens: TokenService;
+  readonly tokens: AdminTokenService;
   readonly passwords: PasswordService;
   readonly mfa: StaffMfaService;
-  readonly webAuthn: WebAuthnVerifier;
+  readonly webAuthn: WebAuthnCeremonies;
   readonly clock: Clock;
   readonly audit: AuditRecorder;
+  readonly auditLog: AuditRepository;
+  readonly mailer: TransactionalMailer;
   readonly settings: AppSettings["platformAdmin"];
+  readonly hashKeys: StaffTokenHashKeys;
 }
 
-const ADMIN_CONSOLE_REQUIRED = "Sign in to the admin console with two-factor authentication to do this.";
+export interface AdminIdentityDto {
+  readonly id: string;
+  readonly email: string;
+  readonly name: string;
+  readonly role: string;
+  readonly permissions: readonly string[];
+}
 
-export class PlatformStaffService implements PlatformStaffAccessCheck {
+export interface AdminAccountSummaryDto extends AdminIdentityDto {
+  readonly status: string;
+  readonly mfaEnrolled: boolean;
+  readonly passkeyCount: number;
+  readonly lastLoginAt: string | null;
+  readonly createdAt: string;
+  readonly createdByName: string | null;
+}
+
+export class PlatformStaffService {
   public constructor(public readonly dependencies: PlatformStaffDependencies) {}
 
-  public async assertStaffMayUsePermission(principal: Principal, permission: Permission | undefined, request: StaffRequestDetails): Promise<void> {
-    const { account } = await this.findVerifiedStaffSessionOrThrow(principal);
-    if (!ipAddressIsInAllowList(request.clientIp, account.ipAllowList)) {
-      throw new ForbiddenError("The admin console cannot be used from this network.");
-    }
-    if (permission !== undefined && !platformRoleGrantsPermission(account.role, account.permissions, permission)) {
-      throw new ForbiddenError("You do not have permission to do this.");
-    }
-  }
-
-  public async assertRecentStepUp(principal: Principal): Promise<void> {
-    const { session } = await this.findVerifiedStaffSessionOrThrow(principal);
-    if (!this.stepUpIsStillValid(session)) {
-      throw new ForbiddenError("Confirm it is you: verify your authenticator code again to continue.");
-    }
-  }
-
-  public async recordStaffAction(principal: Principal, request: StaffRequestDetails, outcome: { readonly permission: string; readonly status: number }): Promise<void> {
-    await this.dependencies.audit.record({
-      actorId: principal.userId,
-      action: "admin.request",
-      entityType: "admin_route",
-      entityId: `${request.method} ${request.path}`,
-      metadata: { permission: outcome.permission, status: outcome.status, sessionId: principal.sessionId },
-      ...(request.clientIp === null ? {} : { ip: request.clientIp }),
-    });
-  }
-
-  public async findVerifiedStaffSessionOrThrow(principal: Principal): Promise<{ readonly account: StaffAccountRecord; readonly session: StaffSessionRecord }> {
-    if (principal.sessionKind !== "admin") throw new ForbiddenError(ADMIN_CONSOLE_REQUIRED);
-    const [account, session] = await Promise.all([
-      this.dependencies.accounts.findByUserId(principal.userId),
-      this.dependencies.security.findStaffSession(principal.sessionId),
-    ]);
-    if (account === undefined || account.status !== "active") throw new ForbiddenError("You do not have permission to do this.");
-    if (session === undefined || session.userId !== principal.userId) throw new UnauthorizedError(ADMIN_CONSOLE_REQUIRED);
-    return { account, session };
-  }
-
-  public stepUpIsStillValid(session: StaffSessionRecord): boolean {
-    const verifiedAt = session.stepUpVerifiedAt ?? session.mfaVerifiedAt;
-    return this.dependencies.clock.now().getTime() - verifiedAt.getTime() <= this.dependencies.settings.stepUpWindowSeconds * 1000;
-  }
-
-  public stepUpValidUntil(session: StaffSessionRecord): Date {
-    const verifiedAt = session.stepUpVerifiedAt ?? session.mfaVerifiedAt;
-    return new Date(verifiedAt.getTime() + this.dependencies.settings.stepUpWindowSeconds * 1000);
-  }
-
-  public async findStaffAccountOrThrow(userId: string): Promise<StaffAccountRecord> {
-    const account = await this.dependencies.accounts.findByUserId(userId);
-    if (account === undefined) throw notFound("Staff account");
+  public async findAccountOrThrow(staffId: string): Promise<StaffAccountRecord> {
+    const account = await this.dependencies.accounts.findById(staffId);
+    if (account === undefined) throw adminError(404, "NOT_FOUND", "Admin was not found.");
     return account;
   }
 
-  public async findUserOrThrow(userId: string): Promise<UserRecord> {
-    const user = await this.dependencies.users.findById(userId);
-    if (user === undefined) throw notFound("User");
-    return user;
+  public hashToken(purpose: keyof StaffTokenHashKeys, token: string): Promise<string> {
+    return hashSecretWithKey(token, this.dependencies.hashKeys[purpose]);
   }
 
-  public describeAccountLabel(user: UserRecord): string {
-    return user.email ?? user.username;
+  public presentIdentity(account: StaffAccountRecord): AdminIdentityDto {
+    return {
+      id: account.id,
+      email: account.email,
+      name: account.name,
+      role: account.role,
+      permissions: account.role === "SUPERADMIN" ? listEffectivePlatformPermissions(account.role, account.permissions) : [...account.permissions],
+    };
   }
 
-  public assertPermissionsAreAssignable(role: PlatformRole, permissions: readonly string[]): readonly Permission[] {
-    const unknown = permissions.filter((permission) => !isPlatformPermission(permission));
-    if (unknown.length > 0) throw new ForbiddenError(`Unknown admin permissions: ${unknown.join(", ")}.`);
-    if (role !== PlatformRole.SUPERADMIN && permissions.includes("admins:manage")) {
-      throw new ForbiddenError("Only superadmins can manage admin accounts.");
-    }
-    return [...new Set(permissions)] as Permission[];
+  public async presentAccountSummaries(accounts: readonly StaffAccountRecord[]): Promise<readonly AdminAccountSummaryDto[]> {
+    const { security, clock } = this.dependencies;
+    const creatorIds = [...new Set(accounts.flatMap((account) => (account.createdById === null ? [] : [account.createdById])))];
+    const creators = new Map((await this.dependencies.accounts.findManyByIds(creatorIds)).map((creator) => [creator.id, creator.name]));
+    const passkeyCounts = await Promise.all(accounts.map(async (account) => (await security.listWebAuthnCredentials(account.id)).length));
+    const now = clock.now();
+    return accounts.map((account, index) => ({
+      ...this.presentIdentity(account),
+      status: presentStaffStatus(account, now),
+      mfaEnrolled: account.totpEnabledAt !== null,
+      passkeyCount: passkeyCounts[index] ?? 0,
+      lastLoginAt: account.lastLoginAt?.toISOString() ?? null,
+      createdAt: account.createdAt.toISOString(),
+      createdByName: account.createdById === null ? null : creators.get(account.createdById) ?? null,
+    }));
   }
 
-  public async recordAdminChange(actorId: string | null, action: string, targetUserId: string, before: StaffAccountRecord | undefined, after: StaffAccountRecord | undefined): Promise<void> {
-    await this.dependencies.audit.record({
-      actorId,
-      action,
-      entityType: "platform_staff_account",
-      entityId: targetUserId,
-      before: before === undefined ? null : snapshotStaffAccountForAudit(before),
-      after: after === undefined ? null : snapshotStaffAccountForAudit(after),
-    });
+  public async presentAccountSummary(account: StaffAccountRecord): Promise<AdminAccountSummaryDto> {
+    const [summary] = await this.presentAccountSummaries([account]);
+    return summary as AdminAccountSummaryDto;
+  }
+
+  public recordAudit(entry: Omit<AuditEntry, "area"> & { readonly area?: string }): Promise<void> {
+    return this.dependencies.audit.record({ area: "admins", ...entry });
   }
 }
