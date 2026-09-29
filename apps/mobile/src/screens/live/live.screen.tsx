@@ -1,5 +1,118 @@
-import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
+import { useEffect, useState } from "react";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export function LiveScreen() {
-  return <PlaceholderScreen name="Live" />;
+import { DotsThreeVertical24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { JoinLiveCard } from "@/components/live/joinLiveCard";
+import { LiveCommentBar } from "@/components/live/liveCommentBar";
+import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
+import { LiveHeader } from "@/components/live/liveHeader";
+import { LiveProductsSheet } from "@/components/live/liveProductsSheet";
+import { LiveReactionRail } from "@/components/live/liveReactionRail";
+import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
+import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
+import { colors } from "@/constants/colors.constant";
+import type { MainScreenProps } from "@/navigation/navigation.types";
+import { liveService } from "@/services/live.service";
+
+export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
+  const { liveId, host: isHost = false } = route.params;
+  const insets = useSafeAreaInsets();
+  const [hasJoined, setHasJoined] = useState(isHost);
+  const [reactionsExpanded, setReactionsExpanded] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
+  const live = useLiveSessionWithActions(liveId, hasJoined);
+  const session = live.session.data;
+
+  useEffect(() => {
+    if (session?.status === "ended") navigation.replace("LiveEnded", { liveId });
+  }, [session?.status, navigation, liveId]);
+
+  useEffect(() => {
+    if (!hasJoined || isHost) return;
+    liveService.joinLiveSession(liveId).catch(() => undefined);
+    return () => {
+      liveService.leaveLiveSession(liveId).catch(() => undefined);
+    };
+  }, [hasJoined, isHost, liveId]);
+
+  const endLiveAsHost = () =>
+    liveService
+      .endLiveSession(liveId)
+      .then(() => navigation.replace("LiveEnded", { liveId }))
+      .catch(() => undefined);
+
+  const openLiveOptions = () => {
+    if (isHost) {
+      Alert.alert("End live?", "Viewers will be told the live has ended.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "End live", style: "destructive", onPress: endLiveAsHost },
+      ]);
+    } else {
+      setShowShare(true);
+    }
+  };
+
+  if (!session) return <View style={[styles.root, { paddingTop: insets.top }]} />;
+
+  if (!hasJoined) {
+    return (
+      <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom + 50 }]}>
+        <View style={styles.joinTop}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={10} onPress={() => navigation.navigate("Search")}>
+            <MagnifyingGlass24Icon />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Share live" hitSlop={10} onPress={() => setShowShare(true)}>
+            <DotsThreeVertical24Icon />
+          </Pressable>
+        </View>
+        <View style={styles.flex} />
+        <JoinLiveCard session={session} showHost={session.isFollowingHost} onWatch={() => setHasJoined(true)} />
+        <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
+      </View>
+    );
+  }
+
+  const showsTitle = isHost || live.isFollowingHost;
+  return (
+    <View style={[styles.root, { paddingTop: insets.top + 8, paddingBottom: insets.bottom }]}>
+      <LiveHeader
+        session={session}
+        showTitle={showsTitle}
+        isHost={isHost}
+        isFollowingHost={live.isFollowingHost}
+        onBack={() => navigation.goBack()}
+        onToggleFollow={live.followHost}
+        onMore={openLiveOptions}
+      />
+      <View style={styles.flex} />
+      <View style={styles.bottomRow}>
+        <LiveCommentsFeed comments={live.comments.data?.data ?? []} />
+        <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} />
+      </View>
+      <LiveCommentBar
+        onSend={(text) => live.sendComment.mutate(text)}
+        onToggleReactions={() => setReactionsExpanded((e) => !e)}
+        onPressProducts={session.products.length > 0 ? () => setShowProducts(true) : undefined}
+      />
+      <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
+      <LiveProductsSheet
+        visible={showProducts}
+        products={session.products}
+        onClose={() => setShowProducts(false)}
+        onOpenProduct={(productId) => {
+          setShowProducts(false);
+          navigation.navigate("ProductDetail", { productId });
+        }}
+      />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.white },
+  flex: { flex: 1 },
+  joinTop: { height: 40, paddingHorizontal: 16, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 12 },
+  bottomRow: { paddingHorizontal: 16, paddingBottom: 12, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
+});
