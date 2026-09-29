@@ -11,10 +11,12 @@ import type {
   InitializePaymentRequest,
   PaymentGateway,
   RefundPaymentRequest,
+  SavedAuthorizationChargeRequest,
+  SavedAuthorizationChargeResult,
   VerifiedPayment,
   WebhookNotice,
 } from "./paymentGateway.interface.js";
-import { parseWebhookJson, providerUnavailable, readTextField, sendProviderRequest } from "./providerRequest.gateway.js";
+import { parseWebhookJson, providerUnavailable, readNestedRecord, readTextField, sendProviderRequest } from "./providerRequest.gateway.js";
 
 const PAYSTACK_API = "https://api.paystack.co";
 
@@ -44,11 +46,13 @@ export class PaystackGateway implements PaymentGateway {
   public async verifyPayment(reference: string): Promise<VerifiedPayment> {
     const response = await sendProviderRequest(`${PAYSTACK_API}/transaction/verify/${encodeURIComponent(reference)}`, this.secretKey, "GET");
     const status = readTextField(response.data, "status");
+    const authorization = readNestedRecord(response.data, "authorization");
     return {
       status: status === "success" ? "succeeded" : status === "failed" || status === "abandoned" || status === "reversed" ? "failed" : "pending",
       amount: Number(readTextField(response.data, "amount") ?? 0),
       currency: (readTextField(response.data, "currency") ?? "").toUpperCase(),
       providerTransactionId: readTextField(response.data, "id"),
+      reusableAuthorization: authorization?.["reusable"] === true ? readTextField(authorization, "authorization_code") : null,
     };
   }
 
@@ -66,7 +70,23 @@ export class PaystackGateway implements PaymentGateway {
     const body = parseWebhookJson(rawBody);
     const data = (body["data"] ?? {}) as Record<string, unknown>;
     const reference = readTextField(data, "reference");
-    return { eventKey: `${readTextField(body, "event") ?? "event"}:${readTextField(data, "id") ?? reference ?? "unknown"}`, reference };
+    const eventType = readTextField(body, "event") ?? "event";
+    return { eventKey: `${eventType}:${readTextField(data, "id") ?? reference ?? "unknown"}`, reference, eventType };
+  }
+
+  public async chargeSavedAuthorization(request: SavedAuthorizationChargeRequest): Promise<SavedAuthorizationChargeResult> {
+    const response = await sendProviderRequest(`${PAYSTACK_API}/transaction/charge_authorization`, this.secretKey, "POST", {
+      authorization_code: request.authorization,
+      email: request.email,
+      amount: request.amount,
+      currency: request.currency,
+      reference: request.reference,
+    });
+    const status = readTextField(response.data, "status");
+    return {
+      status: status === "success" ? "succeeded" : status === "failed" || status === "reversed" ? "failed" : "pending",
+      providerTransactionId: readTextField(response.data, "id"),
+    };
   }
 
   public async transferToBank(request: BankTransferRequest): Promise<BankTransferResult> {
