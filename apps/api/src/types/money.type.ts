@@ -1,8 +1,8 @@
-import type { Currency } from "../enums/currency.enum.js";
+import type { CurrencyCode } from "../enums/currency.enum.js";
 
-export type Kobo = number;
+export type MinorUnits = number;
 
-export interface Money {
-  readonly amount: Kobo;
-  readonly currency: Currency;
+export interface MoneyAmount {
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
 }
