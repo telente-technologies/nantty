@@ -69,6 +69,7 @@ import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.scre
 
 import { MainTabsNavigator } from "./mainTabs.navigator";
 import type { MainStackParamList } from "./navigation.types";
+import { SoundScreen } from "@/screens/sounds/sound.screen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 const modal = { presentation: "fullScreenModal", animation: "slide_from_bottom" } as const;
@@ -143,6 +144,7 @@ export function MainNavigator() {
       <Stack.Screen name="SupportTicketDetail" component={SupportTicketDetailScreen} />
       <Stack.Screen name="MyReports" component={MyReportsScreen} />
       <Stack.Screen name="SettingsUsername" component={SettingsUsernameScreen} />
+      <Stack.Screen name="Sound" component={SoundScreen} />
     </Stack.Navigator>
   );
 }
