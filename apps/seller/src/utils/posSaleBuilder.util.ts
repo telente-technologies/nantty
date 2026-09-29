@@ -2,7 +2,6 @@ import type { CreateSaleRequest, PosSale } from "@/types/pos.type";
 import type { PendingPayment, PosCartState } from "@/types/posExtra.type";
 import type { StoreSettings } from "@/types/store.type";
 import type { PricedCart } from "@/utils/posCartPricing.util";
-import { readMinorUnitsPerMajorUnit } from "@/utils/money.util";
 
 export interface SaleContext {
   readonly registerId: string;
@@ -74,7 +73,7 @@ export function buildLocalPosSaleFromCart(cart: PosCartState, pricedCart: Priced
       status: "pending",
     })),
     changeDue: money(changeMinor),
-    loyaltyPointsEarned: cart.customer && settings.loyalty.enabled ? Math.floor((pricedCart.totalMinor / readMinorUnitsPerMajorUnit(currency)) * settings.loyalty.pointsEarnedPerMajorUnit) : 0,
+    loyaltyPointsEarned: cart.customer && settings.loyalty.enabled ? Math.floor(pricedCart.totalMinor / Math.max(1, settings.loyalty.spendRequiredPerPoint.amountMinor)) : 0,
     loyaltyPointsRedeemed: cart.loyaltyPointsToRedeem,
     status: "completed",
     refundIds: [],
