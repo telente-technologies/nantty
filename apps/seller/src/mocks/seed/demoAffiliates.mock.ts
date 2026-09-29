@@ -1,4 +1,5 @@
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
+import { demoMainStoreId } from "@/mocks/seed/demoStore.mock";
 import type { AffiliateCreator, AffiliateCreatorStatus, AffiliateProgramSettings, AffiliateRequest, LiveInvitation } from "@/types/affiliate.type";
 
 export interface HistoricalCommissionSeed {
@@ -33,7 +34,7 @@ export function buildDemoCreatorDirectory(): AffiliateCreator[] {
   ];
 }
 
-export function buildDemoAffiliatesState(): AffiliatesMockState {
+function buildIfeLifestyleAffiliatesState(): AffiliatesMockState {
   const directory = buildDemoCreatorDirectory();
   const findCreator = (creatorId: string): AffiliateCreator => directory.find((creator) => creator.id === creatorId) ?? directory[0]!;
   return {
@@ -69,5 +70,24 @@ export function buildDemoAffiliatesState(): AffiliatesMockState {
       { id: "liv_2", creator: findCreator("usr_cr2"), products: [{ id: "prod_earbuds", name: "Wireless Earbuds", imageUrl: null }], proposedStartAt: buildIsoDateDaysAgo(-6, 19), commissionBasisPoints: null, message: "Unboxing live for the new earbuds batch.", status: "pending", createdAt: buildIsoDateDaysAgo(1) },
       { id: "liv_3", creator: findCreator("usr_cr3"), products: [{ id: "prod_face_serum", name: "Glow Face Serum 30ml", imageUrl: null }], proposedStartAt: buildIsoDateDaysAgo(12, 18), commissionBasisPoints: 1200, message: "Skincare night.", status: "ended", createdAt: buildIsoDateDaysAgo(20) },
     ],
+  };
+}
+
+const approvedCreatorIdsByStoreId: Record<string, readonly string[]> = {
+  store_adire_lab_studio: ["usr_cr1"],
+  store_funmi_bakes: ["usr_cr4"],
+};
+
+export function buildDemoAffiliatesStateForStore(storeId: string): AffiliatesMockState {
+  if (storeId === demoMainStoreId) return buildIfeLifestyleAffiliatesState();
+  const approvedCreatorIds = approvedCreatorIdsByStoreId[storeId] ?? [];
+  return {
+    settings: { enabled: approvedCreatorIds.length > 0, defaultCommissionBasisPoints: 1000, autoApproveCreatorsWithFollowersAbove: null, cookieWindowDays: 7 },
+    directory: buildDemoCreatorDirectory(),
+    approvedCreators: new Map(approvedCreatorIds.map((creatorId, index) => [creatorId, { status: "active", clicks: 640 - index * 200, approvedAt: buildIsoDateDaysAgo(35) }])),
+    requests: [],
+    productOverrides: new Map(),
+    historicalCommissions: [],
+    liveInvitations: [],
   };
 }
