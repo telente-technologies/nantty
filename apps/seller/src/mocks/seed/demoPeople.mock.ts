@@ -43,6 +43,12 @@ export function buildDemoUserAccounts(): MockUserAccount[] {
     { id: "usr_kelechi", name: "Kelechi Obi", username: "kelechi.kicks", email: "kelechi@kelechikicks.ng", phone: "+2348075550155", avatarUrl: null },
     { id: "usr_funmi", name: "Funmilayo Adeyemi", username: "funmibakes", email: "funmi@funmibakes.ng", phone: "+2348145550166", avatarUrl: null },
     { id: "usr_dayo", name: "Dayo Ogunleye", username: "dayo.ogunleye", email: "dayo@gmail.com", phone: "+2348185550199", avatarUrl: null },
+    { id: "usr_chidi", name: "Chidi Amadi", username: "chidi.amadi", email: "chidi.amadi@example.com", phone: "+2348105550133", avatarUrl: null },
+    { id: "usr_amina", name: "Amina Bello", username: "amina.bello", email: "amina.bello@example.com", phone: "+2348105550144", avatarUrl: null },
+    { id: "usr_seun", name: "Seun Alabi", username: "seun.alabi", email: "seun.alabi@example.com", phone: "+2348105550155", avatarUrl: null },
+    { id: "usr_zainab", name: "Zainab Yusuf", username: "zainab.yusuf", email: "zainab.yusuf@example.com", phone: "+2348105550166", avatarUrl: null },
+    { id: "usr_emeka", name: "Emeka Nnaji", username: "emeka.sells", email: "emeka.nnaji@example.com", phone: "+2348105550177", avatarUrl: null },
+    { id: "usr_toyin", name: "Toyin Afolabi", username: "toyin.afolabi", email: "toyin.afolabi@example.com", phone: "+2348105550188", avatarUrl: null },
   ];
 }
 
@@ -59,9 +65,10 @@ export function buildDemoMemberships(): MockStoreMembership[] {
   ];
 }
 
-function buildStaffRecord(partial: Pick<StaffMember, "id" | "userId" | "name" | "email" | "phone" | "role" | "locationIds">, pin: string | null, lastActiveDaysAgo: number): MockStaffRecord {
+function buildStaffRecord(partial: Pick<StaffMember, "id" | "userId" | "name" | "username" | "role" | "locationIds">, pin: string | null, lastActiveDaysAgo: number): MockStaffRecord {
   return {
     ...partial,
+    avatarUrl: null,
     status: "active",
     hasPosPin: pin !== null,
     pinHash: pin ? hashPosPinForStorage(pin) : null,
@@ -75,13 +82,13 @@ function buildStaffRecord(partial: Pick<StaffMember, "id" | "userId" | "name" | 
 export function buildDemoStaffRecords(): MockStaffRecord[] {
   const everyLocation = ["loc_lekki", "loc_ikeja", "loc_wuse", "loc_apapa"];
   return [
-    buildStaffRecord({ id: "stf_adaeze", userId: "usr_adaeze", name: "Adaeze Okafor", email: "adaeze@ifelifestyle.ng", phone: "+2348035550142", role: "owner", locationIds: everyLocation }, "1111", 0),
-    buildStaffRecord({ id: "stf_tunde", userId: "usr_tunde", name: "Tunde Bakare", email: "tunde@ifelifestyle.ng", phone: "+2348095550177", role: "manager", locationIds: ["loc_lekki", "loc_ikeja"] }, "2580", 0),
-    buildStaffRecord({ id: "stf_blessing", userId: "usr_blessing", name: "Blessing Eze", email: "blessing@ifelifestyle.ng", phone: "+2348125550190", role: "cashier", locationIds: ["loc_lekki"] }, "1234", 0),
-    buildStaffRecord({ id: "stf_chidi", userId: null, name: "Chidi Amadi", email: null, phone: "+2348105550133", role: "cashier", locationIds: ["loc_ikeja"] }, "4321", 1),
-    buildStaffRecord({ id: "stf_amina", userId: null, name: "Amina Bello", email: "amina@ifelifestyle.ng", phone: null, role: "cashier", locationIds: ["loc_wuse"] }, "9876", 2),
-    buildStaffRecord({ id: "stf_ibrahim", userId: "usr_ibrahim", name: "Ibrahim Musa", email: "ibrahim@ifelifestyle.ng", phone: "+2348025550111", role: "inventory", locationIds: ["loc_apapa", "loc_lekki"] }, null, 1),
-    buildStaffRecord({ id: "stf_ngozi", userId: "usr_ngozi", name: "Ngozi Nwosu", email: "ngozi@ifelifestyle.ng", phone: "+2348065550123", role: "support", locationIds: everyLocation }, null, 3),
-    { ...buildStaffRecord({ id: "stf_seun", userId: null, name: "Seun Alabi", email: "seun.alabi@gmail.com", phone: null, role: "cashier", locationIds: ["loc_lekki"] }, null, 0), status: "invited", lastActiveAt: null },
+    buildStaffRecord({ id: "stf_adaeze", userId: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", role: "owner", locationIds: everyLocation }, "1111", 0),
+    buildStaffRecord({ id: "stf_tunde", userId: "usr_tunde", name: "Tunde Bakare", username: "tunde.bakare", role: "manager", locationIds: ["loc_lekki", "loc_ikeja"] }, "2580", 0),
+    buildStaffRecord({ id: "stf_blessing", userId: "usr_blessing", name: "Blessing Eze", username: "blessing.eze", role: "cashier", locationIds: ["loc_lekki"] }, "1234", 0),
+    buildStaffRecord({ id: "stf_chidi", userId: "usr_chidi", name: "Chidi Amadi", username: "chidi.amadi", role: "cashier", locationIds: ["loc_ikeja"] }, "4321", 1),
+    buildStaffRecord({ id: "stf_amina", userId: "usr_amina", name: "Amina Bello", username: "amina.bello", role: "cashier", locationIds: ["loc_wuse"] }, "9876", 2),
+    buildStaffRecord({ id: "stf_ibrahim", userId: "usr_ibrahim", name: "Ibrahim Musa", username: "ibrahim.musa", role: "inventory", locationIds: ["loc_apapa", "loc_lekki"] }, null, 1),
+    buildStaffRecord({ id: "stf_ngozi", userId: "usr_ngozi", name: "Ngozi Nwosu", username: "ngozi.nwosu", role: "support", locationIds: everyLocation }, null, 3),
+    { ...buildStaffRecord({ id: "stf_seun", userId: "usr_seun", name: "Seun Alabi", username: "seun.alabi", role: "cashier", locationIds: ["loc_lekki"] }, null, 0), status: "invited", lastActiveAt: null },
   ];
 }
