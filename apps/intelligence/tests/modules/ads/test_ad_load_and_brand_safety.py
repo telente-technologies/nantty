@@ -2,9 +2,6 @@ import itertools
 from datetime import datetime, timedelta
 from typing import Any
 
-import pytest
-from pydantic import ValidationError
-
 from src.container import ApplicationContainer
 from src.modules.ads.dtos.ad_selection_dto import AdSelectionRequest, AdSelectionResponse
 from src.modules.model_registry.models.model_bundle_model import ItemSimilarityBundle, LoadedModel
@@ -23,6 +20,7 @@ def build_ad(index: int, **overrides: Any) -> dict[str, Any]:
         "spentToday": {"amountMinor": 0, "currency": "USD"},
         "spentTotal": {"amountMinor": 0, "currency": "USD"},
         "placements": ["feed", "clips", "live"],
+        "creative": {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 15000},
         **overrides,
     }
 
@@ -69,37 +67,27 @@ async def test_first_ad_is_never_above_the_first_two_posts(
 ) -> None:
     response = await select(application_container, reference_now, [build_ad(1)], adLoad={"firstAdAfterOrganicItems": 2})
     assert response.placements[0].position == 2
-    with pytest.raises(ValidationError):
-        AdSelectionRequest.model_validate(
-            {
-                "placement": "feed",
-                "viewer": build_viewer(),
-                "organicItems": [],
-                "candidates": [],
-                "exchangeRates": [{"currency": "NGN", "usdPerMajorUnit": "0.00065"}],
-                "adLoad": {"firstAdAfterOrganicItems": 1},
-            }
-        )
+    too_early = await select(
+        application_container, reference_now, [build_ad(1)], adLoad={"firstAdAfterOrganicItems": 1}
+    )
+    assert too_early.placements[0].position == 2
 
 
-async def test_maximum_ads_and_spacing_below_six_are_enforced(
+async def test_maximum_ads_and_spacing_below_six_are_clamped(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
     response = await select(
         application_container, reference_now, [build_ad(index) for index in range(8)], adLoad={"maximumAds": 2}
     )
     assert len(response.placements) == 2
-    with pytest.raises(ValidationError):
-        AdSelectionRequest.model_validate(
-            {
-                "placement": "feed",
-                "viewer": build_viewer(),
-                "organicItems": [],
-                "candidates": [],
-                "exchangeRates": [{"currency": "NGN", "usdPerMajorUnit": "0.00065"}],
-                "adLoad": {"organicItemsBetweenAds": 5},
-            }
-        )
+    dense = await select(
+        application_container,
+        reference_now,
+        [build_ad(index) for index in range(8)],
+        adLoad={"organicItemsBetweenAds": 3},
+    )
+    positions = [placement.position for placement in dense.placements]
+    assert all(second - first >= 7 for first, second in itertools.pairwise(positions))
 
 
 async def test_slot_moves_past_sensitive_and_reported_neighbours(
