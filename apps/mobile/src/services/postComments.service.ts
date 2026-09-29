@@ -1,12 +1,13 @@
-import type { CommentWithReplies, Page } from "@/types";
+import type { Comment, CommentWithReplies, NewCommentInput, Page } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const postCommentsService = {
-  fetchCommentsForPost: (postId: string, cursor?: string) =>
+  fetchTopLevelCommentsForPost: (postId: string, cursor?: string) =>
     api.get<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { cursor }),
-  addCommentToPost: (postId: string, text: string, replyToCommentId?: string) =>
-    api.post<CommentWithReplies>(`/api/v1/posts/${postId}/comments`, { text, replyToCommentId }),
+  fetchRepliesForComment: (commentId: string, cursor?: string) => api.get<Page<Comment>>(`/api/v1/comments/${commentId}/replies`, { cursor }),
+  addCommentToPost: (postId: string, input: NewCommentInput) => api.post<Comment>(`/api/v1/posts/${postId}/comments`, input),
   likeComment: (commentId: string) => api.post<void>(`/api/v1/comments/${commentId}/like`),
   unlikeComment: (commentId: string) => api.delete<void>(`/api/v1/comments/${commentId}/like`),
+  deleteComment: (commentId: string) => api.delete<void>(`/api/v1/comments/${commentId}`),
 };

@@ -1,6 +1,6 @@
 import type { PaymentInitialization, PaymentProvider } from "@/types/commerce.type";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const paymentsService = {
   initializeOrderPayment: (orderId: string, provider: PaymentProvider, idempotencyKey: string) =>
