@@ -4,6 +4,8 @@ packages:
 
 # Dependencies allowed to run install scripts (pnpm 10).
 onlyBuiltDependencies:
+  - "prisma"
+  - "@prisma/engines"
   - "esbuild"
   - "@swc/core"
   - "sharp"
@@ -15,6 +17,8 @@ onlyBuiltDependencies:
 
 # The same list in the form pnpm 11 reads.
 allowBuilds:
+  "prisma": true
+  "@prisma/engines": true
   "esbuild": true
   "@swc/core": true
   "sharp": true
@@ -23,10 +27,7 @@ allowBuilds:
   "unrs-resolver": true
   "lmdb": true
   "msgpackr-extract": true
-  '@prisma/engines': set this to true or false
-  prisma: set this to true or false
 
-# ── Supply-chain hardening ──────────────────────────────────────────────
 # Refuse versions published less than 24h ago: most hijacked releases are
 # caught and unpublished within hours.
 minimumReleaseAge: 1440
