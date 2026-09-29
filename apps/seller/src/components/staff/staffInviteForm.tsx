@@ -5,15 +5,17 @@ import { useState, type FormEvent } from "react";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StaffLocationChecklist } from "@/components/staff/staffLocationChecklist";
+import { ZudomartUserPicker } from "@/components/staff/zudomartUserPicker";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
-import { FormErrorSummary, SelectField, TextField } from "@/components/ui/formFields";
+import { FormErrorSummary, SelectField } from "@/components/ui/formFields";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { useToast } from "@/components/ui/toastProvider";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest, SellerApiRequestError } from "@/services/clientApi.service";
 import type { StaffRole } from "@/types/sellerAccess.type";
+import type { ZudomartUserCandidate } from "@/types/staff.type";
 import { convertIssuesToFieldErrorMap, fieldChecks, validateObjectAgainstChecks } from "@/utils/formValidation.util";
 import { listRolesActorMayAssign } from "@/utils/staffEditingRules.util";
 
@@ -34,27 +36,23 @@ export function StaffInviteForm() {
   const { locations, selectedLocationId } = useStoreContext();
   const { showToast } = useToast();
   const assignableRoles = listRolesActorMayAssign(sessionView?.effectiveRole ?? null);
-  const [draft, setDraft] = useState({ name: "", email: "", phone: "", role: "cashier" as StaffRole });
+  const [role, setRole] = useState<StaffRole>("cashier");
+  const [selectedUser, setSelectedUser] = useState<ZudomartUserCandidate | null>(null);
   const [locationIds, setLocationIds] = useState<string[]>(selectedLocationId ? [selectedLocationId] : []);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function sendStaffInvite(event: FormEvent<HTMLFormElement>) {
+  async function addZudomartUserToTeam(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const issues = validateObjectAgainstChecks(draft, {
-      name: fieldChecks.text({ label: "Name", min: 2, max: 80 }),
-      email: fieldChecks.optional(fieldChecks.email()),
-      phone: fieldChecks.optional(fieldChecks.phone()),
-      role: fieldChecks.oneOf("Role", assignableRoles),
-    });
-    if (!draft.email.trim() && !draft.phone.trim()) issues.push({ path: "email", message: "Add an email or a phone number to send the invite to." });
+    const issues = validateObjectAgainstChecks({ role }, { role: fieldChecks.oneOf("Role", assignableRoles) });
+    if (!selectedUser) issues.push({ path: "userId", message: "Search for the person's Zudomart username and select them." });
     if (locationIds.length === 0) issues.push({ path: "locationIds", message: "Pick at least one location." });
     setFieldErrors(convertIssuesToFieldErrorMap(issues));
-    if (issues.length > 0) return;
+    if (issues.length > 0 || !selectedUser) return;
     setIsSubmitting(true);
     try {
-      await sendSellerApiRequest("/seller/staff", { method: "POST", body: { name: draft.name.trim(), email: draft.email.trim() || null, phone: draft.phone.trim() || null, role: draft.role, locationIds } });
-      showToast(`Invite sent to ${draft.name.trim()}.`);
+      await sendSellerApiRequest("/seller/staff", { method: "POST", body: { userId: selectedUser.userId, role, locationIds } });
+      showToast(`Team request sent to @${selectedUser.username}. They accept it in the Zudomart app.`);
       router.push("/staff");
     } catch (error) {
       if (error instanceof SellerApiRequestError && error.issues?.length) setFieldErrors(convertIssuesToFieldErrorMap(error.issues));
@@ -65,19 +63,19 @@ export function StaffInviteForm() {
 
   return (
     <PageStack>
-      <PageHeader title="Invite staff" description="They sign in with their own Zudomart account. Invites go to the email or phone you enter." actions={<ButtonLink href="/staff">Back to staff</ButtonLink>} />
-      <form onSubmit={sendStaffInvite} noValidate>
-        <Panel title="New team member" actions={<Button type="submit" variant="primary" isBusy={isSubmitting}>Send invite</Button>}>
+      <PageHeader
+        title="Add staff"
+        description="Staff are people who already use the Zudomart app. They accept your request in the app and sign in here with their own Zudomart account."
+        actions={<ButtonLink href="/staff">Back to staff</ButtonLink>}
+      />
+      <form onSubmit={addZudomartUserToTeam} noValidate>
+        <Panel title="New team member" actions={<Button type="submit" variant="primary" isBusy={isSubmitting}>Send team request</Button>}>
           <div className={styles.stack}>
             <FormErrorSummary messages={Object.values(fieldErrors)} />
-            <div className={styles.twoColumns}>
-              <TextField label="Full name" value={draft.name} maxLength={80} onChange={(event) => setDraft({ ...draft, name: event.target.value })} errorMessage={fieldErrors.name} />
-              <TextField label="Email" type="email" value={draft.email} maxLength={254} onChange={(event) => setDraft({ ...draft, email: event.target.value })} errorMessage={fieldErrors.email} />
-              <TextField label="Phone" type="tel" value={draft.phone} maxLength={20} onChange={(event) => setDraft({ ...draft, phone: event.target.value })} errorMessage={fieldErrors.phone} hint="Either email or phone is enough." />
-              <SelectField label="Role" value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value as StaffRole })} options={assignableRoles.map((role) => ({ value: role, label: staffRoleLabels[role] }))} errorMessage={fieldErrors.role} hint={roleDescriptions[draft.role]} />
-            </div>
+            <ZudomartUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} searchApiPath="/seller/staff/candidates" />
+            <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as StaffRole)} options={assignableRoles.map((assignableRole) => ({ value: assignableRole, label: staffRoleLabels[assignableRole] }))} errorMessage={fieldErrors.role} hint={roleDescriptions[role]} />
             <StaffLocationChecklist locations={locations} selectedLocationIds={locationIds} onChange={setLocationIds} errorMessage={fieldErrors.locationIds} />
-            {draft.role === "cashier" ? <Callout tone="info">After they accept, set a register PIN for them from the staff list so they can unlock shared tills.</Callout> : null}
+            {role === "cashier" ? <Callout tone="info">After they accept, set a register PIN for them from the staff list so they can unlock shared tills.</Callout> : null}
           </div>
         </Panel>
       </form>

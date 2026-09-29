@@ -53,7 +53,7 @@ export function StaffTeamView() {
         </Callout>
       ) : null}
       {staffQuery.errorMessage ? <Callout tone="error">{staffQuery.errorMessage}</Callout> : null}
-      <Panel padded={false} title={<SearchInput label="Search staff" placeholder="Search by name, email or phone" value={searchText} onValueChange={setSearchText} />}>
+      <Panel padded={false} title={<SearchInput label="Search staff" placeholder="Search by name or @username" value={searchText} onValueChange={setSearchText} />}>
         <DataTable<StaffMember>
           caption="Team members"
           rows={staffQuery.data ? members : null}
@@ -68,7 +68,7 @@ export function StaffTeamView() {
               render: (member) => (
                 <span className={styles.memberName}>
                   <strong>{member.name}</strong>
-                  <span className={styles.memberContact}>{member.email ?? member.phone ?? "—"}</span>
+                  <span className={styles.memberContact}>@{member.username}</span>
                 </span>
               ),
             },

@@ -87,7 +87,7 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
       onClose={onClose}
       width="medium"
       title={member.name}
-      description={[member.email, member.phone].filter(Boolean).join(" · ")}
+      description={`@${member.username}`}
       footer={
         <>
           <Button onClick={onClose}>Close</Button>

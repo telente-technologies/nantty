@@ -83,3 +83,36 @@
   color: var(--ink-muted);
   font-size: 13px;
 }
+
+.candidateList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.candidateButton {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d9d9d9);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.candidateButton:hover,
+.candidateButton:focus-visible {
+  border-color: #2043f5;
+}
+
+.linkButton {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #2043f5;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
