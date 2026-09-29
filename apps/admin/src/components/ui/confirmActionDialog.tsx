@@ -18,6 +18,7 @@ interface ConfirmActionDialogProps {
   readonly requiresReason?: boolean;
   readonly reasonLabel?: string;
   readonly reasonPlaceholder?: string;
+  readonly reasonHint?: string;
   readonly typedConfirmationText?: string;
   readonly requiresStepUp?: boolean;
   readonly isBusy?: boolean;
@@ -34,7 +35,7 @@ export function ConfirmActionDialog(props: ConfirmActionDialogProps) {
 
 function OpenConfirmActionDialog({
   isOpen, title, description, consequences = [], confirmLabel, tone = "default", requiresReason = true, reasonLabel = "Reason (saved to the audit log)", reasonPlaceholder,
-  typedConfirmationText, requiresStepUp = false, isBusy = false, errorMessage, children, isConfirmDisabled = false, onConfirm, onClose,
+  reasonHint = "At least 5 characters. The person affected may see this.", typedConfirmationText, requiresStepUp = false, isBusy = false, errorMessage, children, isConfirmDisabled = false, onConfirm, onClose,
 }: ConfirmActionDialogProps) {
   const [reason, setReason] = useState("");
   const [typedConfirmation, setTypedConfirmation] = useState("");
@@ -68,7 +69,7 @@ function OpenConfirmActionDialog({
         </ul>
       ) : null}
       {children}
-      {requiresReason ? <TextAreaField label={reasonLabel} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={reasonPlaceholder} maxLength={1000} hint="At least 5 characters. The person affected may see this." rows={3} /> : null}
+      {requiresReason ? <TextAreaField label={reasonLabel} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={reasonPlaceholder} maxLength={1000} hint={reasonHint} rows={3} /> : null}
       {typedConfirmationText ? (
         <TextField label={`Type ${typedConfirmationText} to confirm`} value={typedConfirmation} onChange={(event) => setTypedConfirmation(event.target.value)} autoComplete="off" spellCheck={false} />
       ) : null}
