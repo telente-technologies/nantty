@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
 import { DotsThreeVertical24Icon } from "@/components/icons";
+import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
 import { useStoryAutoAdvance } from "@/components/story/storyAutoAdvance.hook";
 import { StoryProgressBar } from "@/components/story/storyProgressBar";
 import { Avatar } from "@/components/ui/avatar";
@@ -22,8 +23,20 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   const stories = useQuery({ queryKey: ["stories", route.params.userId], queryFn: () => storiesService.fetchStoriesForUser(route.params.userId) });
   const list = stories.data ?? [];
   const closeStoryViewer = useCallback(() => navigation.goBack(), [navigation]);
-  const { activeIndex, progress, goToNextStory, goToPreviousStory } = useStoryAutoAdvance(list.length, isReplying, closeStoryViewer);
+  const [videoStoryProgress, setVideoStoryProgress] = useState(0);
+  const isFirstStoryVideo = list[0]?.media.type === "video";
+  const [isActiveStoryVideo, setIsActiveStoryVideo] = useState(isFirstStoryVideo);
+  const { activeIndex, progress, goToNextStory, goToPreviousStory } = useStoryAutoAdvance(
+    list.length,
+    isReplying || isActiveStoryVideo,
+    closeStoryViewer,
+  );
   const story = list[activeIndex];
+
+  useEffect(() => {
+    setIsActiveStoryVideo(story?.media.type === "video");
+    setVideoStoryProgress(0);
+  }, [story]);
 
   useEffect(() => {
     if (story && !story.seen) storiesService.markStoryAsSeen(story.id).catch(() => undefined);
@@ -41,7 +54,11 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
       style={[styles.root, { paddingTop: insets.top + 4, paddingBottom: insets.bottom }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <StoryProgressBar count={Math.max(list.length, 1)} activeIndex={activeIndex} progress={progress} />
+      <StoryProgressBar
+        count={Math.max(list.length, 1)}
+        activeIndex={activeIndex}
+        progress={isActiveStoryVideo ? videoStoryProgress : progress}
+      />
       <View style={styles.header}>
         <View style={styles.author}>
           <Avatar uri={story?.author.avatarUrl} size={32} />
@@ -60,7 +77,22 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         </Pressable>
       </View>
       <View style={styles.media} {...dragDownToClose.panHandlers}>
-        {story?.media.url ? <Image source={{ uri: story.media.url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+        {story?.media.type === "video" ? (
+          <ClipVideoPlayer
+            key={story.id}
+            media={story.media}
+            isActive={!isReplying}
+            isMuted={Platform.OS === "web"}
+            loop={false}
+            style={StyleSheet.absoluteFill}
+            onPlaybackProgress={({ currentSeconds, durationSeconds }) =>
+              setVideoStoryProgress(durationSeconds > 0 ? Math.min(currentSeconds / durationSeconds, 1) : 0)
+            }
+            onPlaybackFinished={goToNextStory}
+          />
+        ) : story?.media.url ? (
+          <Image source={{ uri: story.media.url }} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" />
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Previous story"

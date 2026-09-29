@@ -23,8 +23,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
   const commentThread = useCommentThreadController(postId);
 
-  const updateCachedPost = (change: (p: Post) => Post) =>
-    queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
+  const updateCachedPost = (change: (p: Post) => Post) => queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
 
   const toggleLikeOnPost = useMutation({
     mutationFn: (liked: boolean) => (liked ? postsService.unlikePost(postId) : postsService.likePost(postId)),
@@ -40,41 +39,41 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   return (
     <Screen background={colors.white}>
       <CommentThreadContext.Provider value={commentThread}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Header title="Post" />
-        <ThreadedCommentList
-          commentHorizontalPadding={16}
-          listHeader={
-            post.data ? (
-              <View style={styles.postBlock}>
-                <PostCard
-                  post={post.data}
-                  onPressAuthor={() => navigation.navigate("UserProfile", { userId: post.data!.author.id })}
-                  onToggleFollow={() => {
-                    updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
-                    postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
-                  }}
-                  onToggleLike={() => toggleLikeOnPost.mutate(post.data!.liked)}
-                  onPressComments={() => composerRef.current?.focus()}
-                  onRepost={() => postsService.repostPost(postId).catch(() => undefined)}
-                  onShare={sharePostLink}
-                />
-                <Text size={16} weight={600} lineHeight={19.2} style={styles.commentsTitle}>
-                  Comments
-                </Text>
-              </View>
-            ) : null
-          }
-          contentContainerStyle={styles.list}
-        />
-        <CommentComposer
-          ref={composerRef}
-          myAvatarUrl={myAvatarUrl}
-          replyTarget={commentThread.replyTarget}
-          onCancelReply={commentThread.cancelReplyingToComment}
-          onSubmit={commentThread.submitCommentOrReplyText}
-        />
-      </KeyboardAvoidingView>
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <Header title="Post" />
+          <ThreadedCommentList
+            commentHorizontalPadding={16}
+            listHeader={
+              post.data ? (
+                <View style={styles.postBlock}>
+                  <PostCard
+                    post={post.data}
+                    onPressAuthor={() => navigation.navigate("UserProfile", { userId: post.data!.author.id })}
+                    onToggleFollow={() => {
+                      updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
+                      postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
+                    }}
+                    onToggleLike={() => toggleLikeOnPost.mutate(post.data!.liked)}
+                    onPressComments={() => composerRef.current?.focus()}
+                    onRepost={() => postsService.repostPost(postId).catch(() => undefined)}
+                    onShare={sharePostLink}
+                  />
+                  <Text size={16} weight={600} lineHeight={19.2} style={styles.commentsTitle}>
+                    Comments
+                  </Text>
+                </View>
+              ) : null
+            }
+            contentContainerStyle={styles.list}
+          />
+          <CommentComposer
+            ref={composerRef}
+            myAvatarUrl={myAvatarUrl}
+            replyTarget={commentThread.replyTarget}
+            onCancelReply={commentThread.cancelReplyingToComment}
+            onSubmit={commentThread.submitCommentOrReplyText}
+          />
+        </KeyboardAvoidingView>
       </CommentThreadContext.Provider>
     </Screen>
   );
