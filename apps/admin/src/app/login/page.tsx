@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { readonly searchParam
   const reason = typeof parameters.reason === "string" ? parameters.reason : "";
   const nextPath = typeof parameters.next === "string" ? parameters.next : "";
   return (
-    <AuthCard environment={readAdminDeploymentEnvironment()} title="Sign in to the admin console" description="Use your @zudomart.com account. An authenticator code is always required.">
+    <AuthCard environment={readAdminDeploymentEnvironment()} title="Sign in to the admin console" description="Use your work email. An authenticator code is always required.">
       <LoginForm reasonMessage={reasonMessages[reason] ?? null} nextPath={nextPath} isMockBackend={isMockBackendEnabled()} />
     </AuthCard>
   );
