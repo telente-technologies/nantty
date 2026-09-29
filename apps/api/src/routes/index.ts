@@ -27,8 +27,13 @@ import { registerCurrencyModuleRoutes } from "../modules/currency/routes/index.j
 import { registerCreatorsModuleRoutes } from "../modules/creators/routes/index.js";
 import { registerVerificationsModuleRoutes } from "../modules/verifications/routes/index.js";
 import { registerSubscriptionsModuleRoutes } from "../modules/subscriptions/routes/index.js";
+import { registerModerationModuleRoutes } from "../modules/moderation/routes/index.js";
+import { registerSupportModuleRoutes } from "../modules/support/routes/index.js";
+import { registerAutomationModuleRoutes } from "../modules/automation/routes/index.js";
 import { registerAdminModuleRoutes } from "../modules/admin/routes/index.js";
 import { registerCoinsModuleRoutes } from "../modules/coins/routes/index.js";
+import { registerCreatorSubscriptionsModuleRoutes } from "../modules/creatorSubscriptions/routes/index.js";
+import { registerLoyaltyModuleRoutes } from "../modules/loyalty/routes/index.js";
 // zudojs:route-imports:end
 
 export function registerRoutes(router: HttpRouter, deps: AppDependencies): void {
@@ -60,5 +65,10 @@ export function registerRoutes(router: HttpRouter, deps: AppDependencies): void 
   registerSubscriptionsModuleRoutes(router, deps);
   registerAdminModuleRoutes(router, deps);
   registerCoinsModuleRoutes(router, deps);
+  registerCreatorSubscriptionsModuleRoutes(router, deps);
+  registerModerationModuleRoutes(router, deps);
+  registerSupportModuleRoutes(router, deps);
+  registerAutomationModuleRoutes(router, deps);
+  registerLoyaltyModuleRoutes(router, deps);
   // zudojs:routes:end
 }
