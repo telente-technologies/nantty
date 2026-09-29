@@ -11,6 +11,8 @@ import type {
   InitializePaymentRequest,
   PaymentGateway,
   RefundPaymentRequest,
+  SavedAuthorizationChargeRequest,
+  SavedAuthorizationChargeResult,
   VerifiedPayment,
   WebhookNotice,
 } from "../../../src/modules/payments/gateways/paymentGateway.interface.js";
@@ -25,6 +27,8 @@ export class FakePaymentGateway implements PaymentGateway {
   public readonly verifyCalls: string[] = [];
   public verificationOverrides = new Map<string, Partial<VerifiedPayment>>();
   public transferResult: BankTransferResult = { status: "succeeded", recipientCode: "RCP_fake", failureReason: null };
+  public readonly savedAuthorizationCharges: SavedAuthorizationChargeRequest[] = [];
+  public savedAuthorizationChargeStatus: SavedAuthorizationChargeResult["status"] = "succeeded";
 
   public constructor(public readonly provider: PaymentProvider) {}
 
@@ -35,12 +39,13 @@ export class FakePaymentGateway implements PaymentGateway {
 
   public async verifyPayment(reference: string): Promise<VerifiedPayment> {
     this.verifyCalls.push(reference);
-    const request = this.initialized.find((entry) => entry.reference === reference);
+    const request = this.initialized.find((entry) => entry.reference === reference) ?? this.savedAuthorizationCharges.find((entry) => entry.reference === reference);
     return {
-      status: "succeeded",
+      status: this.savedAuthorizationCharges.some((entry) => entry.reference === reference) && this.savedAuthorizationChargeStatus === "failed" ? "failed" : "succeeded",
       amount: request?.amount ?? 0,
       currency: request?.currency ?? "NGN",
       providerTransactionId: `txn_${reference}`,
+      reusableAuthorization: `AUTH_${reference}`,
       ...this.verificationOverrides.get(reference),
     };
   }
@@ -54,8 +59,13 @@ export class FakePaymentGateway implements PaymentGateway {
   }
 
   public readWebhookNotice(rawBody: Uint8Array): WebhookNotice {
-    const body = JSON.parse(new TextDecoder().decode(rawBody)) as { id: string; reference: string };
-    return { eventKey: body.id, reference: body.reference };
+    const body = JSON.parse(new TextDecoder().decode(rawBody)) as { id: string; reference: string; event?: string };
+    return { eventKey: body.id, reference: body.reference, eventType: body.event ?? "charge.success" };
+  }
+
+  public async chargeSavedAuthorization(request: SavedAuthorizationChargeRequest): Promise<SavedAuthorizationChargeResult> {
+    this.savedAuthorizationCharges.push(request);
+    return { status: this.savedAuthorizationChargeStatus, providerTransactionId: `txn_${request.reference}` };
   }
 
   public async transferToBank(request: BankTransferRequest): Promise<BankTransferResult> {
@@ -191,8 +201,23 @@ export function createCommerceTestApplication() {
     return placed;
   }
 
+  async function grantSellerToolsAccess(store: Pick<StoreWithProduct, "seller" | "storeId">, plan: "PRO" | "PREMIUM" = "PRO"): Promise<void> {
+    const checkout = await app.client
+      .post(`/api/v1/seller/subscription/checkout?storeId=${store.storeId}`)
+      .auth(store.seller.accessToken)
+      .set("idempotency-key", createIdempotencyKey())
+      .send({ plan })
+      .expect(201);
+    const reference = checkout.json<{ reference: string }>().reference;
+    await app.client.post("/api/v1/seller/subscription/verify").auth(store.seller.accessToken).send({ reference }).expect(200);
+    await app.client.post("/api/v1/verification/apply").auth(store.seller.accessToken).send({ profileType: "STORE", storeId: store.storeId }).expect(201);
+    const admin = await app.registerAdmin();
+    await app.client.post(`/api/v1/verification/${store.storeId}/approve`).auth(admin.accessToken).send({}).expect(200);
+  }
+
   return {
     ...app,
+    grantSellerToolsAccess,
     paystack,
     flutterwave,
     exchangeRates,
