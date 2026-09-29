@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 
 import { AuthStep } from "@/components/auth/authStep";
@@ -7,7 +7,9 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
+import { useUsernameAvailability } from "@/components/settings/usernameAvailability.hook";
 import { authService } from "@/services/auth.service";
+import { usersService } from "@/services/users.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useSignUpStore } from "@/store/signup.store";
 import { isValidUsername } from "@/utils/validators.util";
@@ -18,6 +20,19 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
   const [username, setUsername] = useState(draft.username);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [creatingAccount, setCreatingAccount] = useState(false);
+  const [suggestedUsername, setSuggestedUsername] = useState<string | null>(null);
+  const { isAvailable, message: availabilityMessage } = useUsernameAvailability(username);
+
+  useEffect(() => {
+    if (draft.username) return;
+    usersService
+      .fetchSuggestedUsername(draft.channel === "email" ? draft.destination : "zudo")
+      .then(({ username: suggestion }) => {
+        setSuggestedUsername(suggestion);
+        setUsername((current) => current || suggestion);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const createAccountAndContinue = async (chosenUsername: string | undefined) => {
     if (!draft.otpToken) {
@@ -30,7 +45,7 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
       if (chosenUsername) {
         const { available } = await authService.checkIfUsernameIsAvailable(chosenUsername);
         if (!available) {
-          setErrorMessage("That username is taken. Try another one.");
+          setErrorMessage(availabilityMessage ?? "That username isn't available. Try another one.");
           return;
         }
       }
@@ -54,13 +69,13 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
   return (
     <AuthStep
       title="Create username"
-      subtitle="This can be anything you like and can be changed later. If you skip this step, you will be automatically assigned a default name."
+      subtitle="We've suggested one for you. Keep it, change it, or skip — you'll keep the suggested username and can change it later in Settings."
       actionTitle="Confirm"
-      actionDisabled={!isValidUsername(username)}
+      actionDisabled={!isValidUsername(username) || !isAvailable}
       loading={creatingAccount}
       onAction={() => createAccountAndContinue(username)}
       right={
-        <Pressable accessibilityRole="button" hitSlop={12} disabled={creatingAccount} onPress={() => createAccountAndContinue(undefined)}>
+        <Pressable accessibilityRole="button" hitSlop={12} disabled={creatingAccount} onPress={() => createAccountAndContinue(suggestedUsername ?? undefined)}>
           <Text size={13} weight={500} lineHeight={16.9}>
             Skip
           </Text>
@@ -86,8 +101,8 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
           {errorMessage}
         </Text>
       ) : (
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
-          3–20 characters. Letters, numbers, underscores and full stops only.
+        <Text size={12} lineHeight={16.8} color={isAvailable ? colors.success : colors.textSubtle}>
+          {availabilityMessage ?? "3–20 characters. Letters, numbers, underscores and full stops only."}
         </Text>
       )}
     </AuthStep>
