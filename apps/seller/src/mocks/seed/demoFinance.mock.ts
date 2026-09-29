@@ -4,19 +4,33 @@ import type { Promotion } from "@/types/promotion.type";
 import type { SubscriptionDetails, SubscriptionPlan } from "@/types/subscription.type";
 import type { Payout, PayoutAccount, WalletBalances, WalletTransaction } from "@/types/wallet.type";
 import type { AuditLogEntry } from "@/types/staff.type";
-import type { VerificationStatus } from "@/types/sellerAccess.type";
+import type { GoldEntitlements, VerificationStatus } from "@/types/sellerAccess.type";
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
 
 function naira(amountMinor: number): Money {
   return { amountMinor, currency: "NGN" };
 }
 
+const goldProEntitlements: GoldEntitlements = { maxStaffSeats: 5, maxLocations: 2, reducedCommission: false, priorityPlacement: false, adCredits: { amountMinor: 1_000_000, currency: "NGN" }, apiAccess: false };
+const goldPremiumEntitlements: GoldEntitlements = { maxStaffSeats: 25, maxLocations: 10, reducedCommission: true, priorityPlacement: true, adCredits: { amountMinor: 5_000_000, currency: "NGN" }, apiAccess: true };
+
 export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
+  const proPerks = [
+    { title: "Gold badge", description: "A gold check on your store, posts and clips." },
+    { title: "Zudomart Dashboard", description: "Point of sale, stock, orders and payouts on the web." },
+    { title: "Monthly ad credit", description: "Credit you can spend in Ads Manager each month." },
+  ];
+  const premiumPerks = [
+    ...proPerks,
+    { title: "Lower commission", description: "A reduced marketplace commission on every online order." },
+    { title: "Priority placement", description: "Your products rank higher in Mart and search." },
+    { title: "API access", description: "Connect your own tools to your store data." },
+  ];
   return [
-    { id: "plan_starter", name: "Starter", tagline: "One shop, one till.", price: naira(1_500_000), interval: "month", trialDays: 14, limits: { locations: 1, registers: 1, staff: 3, products: 500 }, features: ["Point of sale with offline mode", "Online marketplace sync", "Basic reports", "Email receipts"], recommended: false },
-    { id: "plan_growth", name: "Growth", tagline: "For busy shops and small chains.", price: naira(4_500_000), interval: "month", trialDays: 14, limits: { locations: 3, registers: 6, staff: 15, products: 5000 }, features: ["Everything in Starter", "Multiple locations and stock transfers", "Staff roles and cashier PINs", "Loyalty points and promotions", "Ads manager and affiliates"], recommended: true },
-    { id: "plan_business", name: "Business", tagline: "Unlimited stores and staff.", price: naira(12_000_000), interval: "month", trialDays: 14, limits: { locations: null, registers: null, staff: null, products: null }, features: ["Everything in Growth", "Unlimited locations and registers", "Priority support", "Advanced reports and exports"], recommended: false },
-    { id: "plan_growth_yearly", name: "Growth (yearly)", tagline: "Two months free.", price: naira(45_000_000), interval: "year", trialDays: 14, limits: { locations: 3, registers: 6, staff: 15, products: 5000 }, features: ["Everything in Growth", "Billed once a year"], recommended: false },
+    { id: "gold_pro_monthly", tier: "PRO", price: naira(2_500_000), interval: "month", entitlements: goldProEntitlements, perks: proPerks },
+    { id: "gold_premium_monthly", tier: "PREMIUM", price: naira(6_000_000), interval: "month", entitlements: goldPremiumEntitlements, perks: premiumPerks },
+    { id: "gold_pro_yearly", tier: "PRO", price: naira(25_000_000), interval: "year", entitlements: goldProEntitlements, perks: proPerks },
+    { id: "gold_premium_yearly", tier: "PREMIUM", price: naira(60_000_000), interval: "year", entitlements: goldPremiumEntitlements, perks: premiumPerks },
   ];
 }
 
@@ -29,7 +43,7 @@ export interface MockGateStore {
 }
 
 export function buildDemoGateStores(): MockGateStore[] {
-  const noSubscription: SubscriptionDetails = { status: "none", plan: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, paymentMethodSummary: null, provider: null, invoices: [] };
+  const noSubscription: SubscriptionDetails = { subscription: null, planId: null, cancelAtPeriodEnd: false, paymentMethodSummary: null, provider: null, invoices: [] };
   return [
     {
       storeId: "store_ife_lifestyle",
@@ -37,13 +51,12 @@ export function buildDemoGateStores(): MockGateStore[] {
       verificationStatus: "verified",
       verificationNote: null,
       subscription: {
-        status: "active",
-        plan: { id: "plan_growth", name: "Growth" },
-        currentPeriodEnd: buildIsoDateDaysAgo(-18, 0),
+        subscription: { status: "active", plan: "PREMIUM", currentPeriodEnd: buildIsoDateDaysAgo(-18, 0) },
+        planId: "gold_premium_monthly",
         cancelAtPeriodEnd: false,
         paymentMethodSummary: "Visa •••• 4081",
         provider: "paystack",
-        invoices: [0, 1, 2].map((monthsAgo) => ({ id: `inv_${monthsAgo}`, number: `ZD-INV-2026-${String(9 - monthsAgo).padStart(4, "0")}`, amount: naira(4_500_000), status: "paid" as const, periodStart: buildIsoDateDaysAgo(12 + monthsAgo * 30), periodEnd: buildIsoDateDaysAgo(-18 + monthsAgo * 30), paidAt: buildIsoDateDaysAgo(12 + monthsAgo * 30) })),
+        invoices: [0, 1, 2].map((monthsAgo) => ({ id: `inv_${monthsAgo}`, number: `ZD-INV-2026-${String(9 - monthsAgo).padStart(4, "0")}`, amount: naira(6_000_000), status: "paid" as const, periodStart: buildIsoDateDaysAgo(12 + monthsAgo * 30), periodEnd: buildIsoDateDaysAgo(-18 + monthsAgo * 30), paidAt: buildIsoDateDaysAgo(12 + monthsAgo * 30) })),
       },
     },
     { storeId: "store_kelechi_kicks", storeName: "Kelechi Kicks", verificationStatus: "pending", verificationNote: "We are checking your CAC certificate. This usually takes 1–2 working days.", subscription: noSubscription },
