@@ -1,6 +1,7 @@
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import {
@@ -11,22 +12,27 @@ import {
   Headset24Icon,
   MagnifyingGlass24Icon,
   Question24Icon,
+  SealCheck20Icon,
+  Share24Icon,
   Shield24Icon,
   SquaresFour24Icon,
   Tag24Icon,
   Truck24Icon,
   UserCircle24Icon,
+  VideoCamera24Icon,
 } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { HeaderAction } from "@/components/ui/header";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { data: profile } = useMyProfileQuery();
+  const { isApprovedCreator } = useCreatorStatus();
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const clearSessionAndSignOut = useAuthStore((s) => s.clearSessionAndSignOut);
 
@@ -61,9 +67,12 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         <View style={styles.profileIdentity}>
           <Avatar uri={profile?.avatarUrl} size={48} />
           <View style={styles.profileText}>
-            <Text size={14} weight={600} lineHeight={16.8} numberOfLines={1}>
-              {profile?.name ?? " "}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text size={14} weight={600} lineHeight={16.8} numberOfLines={1}>
+                {profile?.name ?? " "}
+              </Text>
+              <VerificationBadge verification={profile?.verification} legacyVerified={profile?.verified} size={16} />
+            </View>
             <Text size={14} lineHeight={16.8} numberOfLines={1}>
               {profile?.email ?? " "}
             </Text>
@@ -88,8 +97,15 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         {profile?.isSeller ? (
           <SettingsRow label="Seller Dashboard" icon={<Tag24Icon />} onPress={() => navigation.navigate("SellerDashboard")} />
         ) : (
-          <SettingsRow label="Become a seller" icon={<Tag24Icon />} onPress={() => navigation.navigate("SellerApplication")} />
+          <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
+        <SettingsRow
+          label={isApprovedCreator ? "Creator dashboard" : "Creator Program"}
+          icon={<VideoCamera24Icon />}
+          onPress={() => navigation.navigate(isApprovedCreator ? "CreatorDashboard" : "CreatorProgram")}
+        />
+        <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.black} />} onPress={() => navigation.navigate("Verification")} />
+        <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />
       </SettingsGroup>
 
       <SettingsGroup>
@@ -120,6 +136,7 @@ const styles = StyleSheet.create({
   },
   profileIdentity: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
   profileText: { gap: 4, flexShrink: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   logOut: {
     height: 48,
     backgroundColor: colors.white,
