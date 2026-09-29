@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { LiveGift } from "@/types";
+import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
 
 const MAXIMUM_GIFTS_PER_SEND = 99;
 
@@ -68,9 +69,7 @@ export function LiveGiftPickerSheet(props: LiveGiftPickerSheetProps) {
                   <Text size={12} weight={500} lineHeight={14.4} numberOfLines={1}>
                     {gift.name}
                   </Text>
-                  <Text size={11} lineHeight={13.2} color={colors.textMuted}>
-                    🪙 {gift.priceCoins.toLocaleString("en-US")}
-                  </Text>
+                  <CoinAmountWithIcon size={11} weight={400} color={colors.textMuted} label={gift.priceCoins.toLocaleString("en-US")} />
                 </Pressable>
               );
             })}
