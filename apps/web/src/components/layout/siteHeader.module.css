@@ -1,0 +1,177 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px var(--gutter) 0;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding: 8px 8px 8px 22px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.82);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.08);
+  transition: box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.scrolled .pill {
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06), var(--shadow-float);
+}
+
+.desktopNavigation {
+  display: none;
+  margin-left: auto;
+}
+
+.navigationList {
+  display: flex;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.navigationLink {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.navigationLink:hover,
+.navigationLink[aria-current="page"] {
+  background: var(--surface-app);
+  color: var(--ink-strong);
+}
+
+.waitlistButton {
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-500);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.waitlistButton:hover {
+  background: var(--blue-600);
+}
+
+.menuToggleButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink-strong);
+  color: #fff;
+  cursor: pointer;
+}
+
+.menuToggleBars,
+.menuToggleBars::before {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 200ms ease;
+}
+
+.menuToggleBars {
+  position: relative;
+  transform: translateY(-3px);
+}
+
+.menuToggleBars::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+}
+
+.menuToggleButton[aria-expanded="true"] .menuToggleBars {
+  transform: translateY(0) rotate(45deg);
+}
+
+.menuToggleButton[aria-expanded="true"] .menuToggleBars::before {
+  top: 0;
+  transform: rotate(-90deg);
+}
+
+.mobileMenu {
+  position: fixed;
+  inset: 76px 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px var(--gutter) 40px;
+  background: var(--blue-500);
+  overflow-y: auto;
+}
+
+.mobileMenu[hidden] {
+  display: none;
+}
+
+.mobileNavigationList {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.mobileNavigationLink {
+  display: block;
+  padding: 6px 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 10vw, 3rem);
+  font-weight: 800;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.mobileNavigationLink:hover {
+  color: var(--yellow-500);
+}
+
+.mobileWaitlistButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--ink-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (min-width: 880px) {
+  .desktopNavigation,
+  .waitlistButton {
+    display: flex;
+  }
+
+  .menuToggleButton,
+  .mobileMenu {
+    display: none;
+  }
+}
