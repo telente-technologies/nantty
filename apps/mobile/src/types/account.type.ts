@@ -112,3 +112,17 @@ export interface CountryOption {
   readonly currency: CurrencyCode;
   readonly currencyName: string;
 }
+
+export type UsernameUnavailableReason = "taken" | "reserved" | "invalid" | "recently_used" | "withheld";
+
+export interface UsernameAvailability {
+  readonly available: boolean;
+  readonly reason?: UsernameUnavailableReason;
+}
+
+export interface UsernamePolicy {
+  readonly canChangeNow: boolean;
+  readonly nextChangeAvailableAt: string | null;
+  readonly changesRemainingThisYear: number;
+  readonly rules: readonly string[];
+}
