@@ -27,7 +27,7 @@ describe("posts with uploaded media", () => {
     });
     const mediaId = await app.uploadWholeFile(author.accessToken, buildPngBytes(900));
     const pending = await app.client.post("/api/v1/posts").auth(author.accessToken).send({ text: "look", mediaIds: [mediaId] }).expect(409);
-    expect(pending.json<{ error: string }>().error).toBe("Media is still processing");
+    expect(pending.json<{ message: string }>().message).toBe("Media is still processing");
     app.imageProcessor.gate = undefined;
     openGate();
     await app.processingQueue.waitUntilIdle();
