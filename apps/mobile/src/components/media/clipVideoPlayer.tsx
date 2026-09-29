@@ -1,0 +1,125 @@
+import { useEvent, useEventListener } from "expo";
+import { Image } from "expo-image";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { useEffect, useMemo, useState } from "react";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+
+import { colors } from "@/constants/colors.constant";
+import type { Media } from "@/types";
+
+import { buildCachedVideoSourceForMedia, hasPlayableHlsStream } from "./videoSource.util";
+
+export interface VideoPlaybackProgress {
+  readonly currentSeconds: number;
+  readonly durationSeconds: number;
+}
+
+export interface ClipVideoPlayerProps {
+  readonly media: Media;
+  readonly isActive: boolean;
+  readonly isMuted: boolean;
+  readonly isPausedByUser?: boolean;
+  readonly loop?: boolean;
+  readonly contentFit?: "cover" | "contain";
+  readonly style?: StyleProp<ViewStyle>;
+  readonly onPlaybackProgress?: (progress: VideoPlaybackProgress) => void;
+  readonly onPlaybackFinished?: () => void;
+  readonly playbackRate?: number;
+}
+
+export function ClipVideoPlayer({
+  media,
+  isActive,
+  isMuted,
+  isPausedByUser = false,
+  loop = true,
+  contentFit = "cover",
+  style,
+  onPlaybackProgress,
+  onPlaybackFinished,
+  playbackRate = 1,
+}: ClipVideoPlayerProps) {
+  const [hasHlsStreamFailed, setHasHlsStreamFailed] = useState(false);
+  const [hasRenderedFirstFrame, setHasRenderedFirstFrame] = useState(false);
+  const isUsingHlsStream = hasPlayableHlsStream(media) && !hasHlsStreamFailed;
+  const videoSource = useMemo(() => buildCachedVideoSourceForMedia(media, !hasHlsStreamFailed), [media, hasHlsStreamFailed]);
+
+  const player = useVideoPlayer(videoSource, (createdPlayer) => {
+    createdPlayer.loop = loop;
+    createdPlayer.muted = isMuted;
+    createdPlayer.timeUpdateEventInterval = onPlaybackProgress ? 0.25 : 0;
+  });
+
+  const { status } = useEvent(player, "statusChange", { status: player.status });
+
+  useEffect(() => {
+    if (status === "error" && isUsingHlsStream) setHasHlsStreamFailed(true);
+  }, [status, isUsingHlsStream]);
+
+  useEffect(() => {
+    player.playbackRate = playbackRate;
+  }, [player, playbackRate]);
+
+  useEffect(() => {
+    player.muted = isMuted;
+  }, [player, isMuted]);
+
+  useEffect(() => {
+    player.loop = loop;
+  }, [player, loop]);
+
+  useEffect(() => {
+    if (isActive && !isPausedByUser) player.play();
+    else player.pause();
+  }, [player, isActive, isPausedByUser, status]);
+
+  useEventListener(player, "timeUpdate", ({ currentTime }) =>
+    onPlaybackProgress?.({ currentSeconds: currentTime, durationSeconds: player.duration }),
+  );
+  useEventListener(player, "playToEnd", () => onPlaybackFinished?.());
+
+  const posterUrl = media.posterUrl ?? null;
+  return (
+    <View style={[styles.root, style]}>
+      <VideoView
+        player={player}
+        style={StyleSheet.absoluteFill}
+        contentFit={contentFit}
+        nativeControls={false}
+        allowsPictureInPicture={false}
+        playsInline
+        onFirstFrameRender={() => setHasRenderedFirstFrame(true)}
+      />
+      {!hasRenderedFirstFrame && posterUrl ? (
+        <Image
+          source={{ uri: posterUrl }}
+          placeholder={media.blurhash ? { blurhash: media.blurhash } : undefined}
+          style={StyleSheet.absoluteFill}
+          contentFit={contentFit}
+          cachePolicy="memory-disk"
+          pointerEvents="none"
+        />
+      ) : null}
+    </View>
+  );
+}
+
+export function VideoPosterOnly({ media, contentFit = "cover", style }: Pick<ClipVideoPlayerProps, "media" | "contentFit" | "style">) {
+  return (
+    <View style={[styles.root, style]}>
+      {media.posterUrl ? (
+        <Image
+          source={{ uri: media.posterUrl }}
+          placeholder={media.blurhash ? { blurhash: media.blurhash } : undefined}
+          style={StyleSheet.absoluteFill}
+          contentFit={contentFit}
+          cachePolicy="memory-disk"
+        />
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { overflow: "hidden", backgroundColor: colors.black },
+});
