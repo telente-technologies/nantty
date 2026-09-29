@@ -69,7 +69,9 @@ describe("posts", () => {
     await app.client.delete(`/api/v1/comments/${comment.id}/like`).auth(author.accessToken).expect(200).expectJson({ liked: false, likes: 0 });
 
     const listed = await app.client.get(`/api/v1/posts/${post.id}/comments`).expect(200);
-    expect(listed.json<{ data: unknown[] }>().data).toHaveLength(2);
+    const topLevel = listed.json<{ data: { replyCount: number; previewReplies: unknown[] }[] }>().data;
+    expect(topLevel).toHaveLength(1);
+    expect(topLevel[0]).toMatchObject({ replyCount: 1, previewReplies: [expect.anything()] });
     await app.client.get(`/api/v1/posts/${post.id}`).expect(200).expectJson({ comments: 2 });
 
     await app.client.delete(`/api/v1/posts/${post.id}/comments/${comment.id}`).auth(stranger.accessToken).expect(403);
@@ -102,7 +104,7 @@ describe("posts", () => {
   it("lists a user's posts by kind", async () => {
     const author = await app.registerUser();
     await createTextPost(author.accessToken);
-    await app.client.post("/api/v1/posts").auth(author.accessToken).send({ kind: "clip", media: [{ mediaId: "11111111-1111-4111-8111-111111111111", type: "video" }] }).expect(201);
+    await app.client.post("/api/v1/posts").auth(author.accessToken).send({ kind: "clip", media: [{ url: "https://cdn.example.com/clip.mp4", type: "video" }] }).expect(201);
     const posts = await app.client.get(`/api/v1/users/${author.userId}/posts`).expect(200);
     expect(posts.json<{ data: PostBody[] }>().data).toHaveLength(2);
     const clips = await app.client.get(`/api/v1/users/${author.userId}/posts`).query({ kind: "clip" }).expect(200);
