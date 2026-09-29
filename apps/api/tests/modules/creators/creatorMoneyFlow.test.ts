@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 
 import { createCommerceTestApplication, createIdempotencyKey, naira, type MoneyShape } from "../orders/commerceSetup.fixture.js";
+import { buyCoins, readCoinBalance } from "../coins/coinsSetup.fixture.js";
 import { registerApprovedCreator } from "./creatorSetup.fixture.js";
 
 const app = createCommerceTestApplication();
@@ -31,17 +32,18 @@ describe("creator earnings with the ledger wallets", () => {
 
     const host = await registerApprovedCreator(app);
     const live = (await app.client.post("/api/v1/lives").auth(host.accessToken).send({ title: "Gifts please" }).expect(201)).json<{ id: string }>();
-    const sendRose = (key = createIdempotencyKey()) =>
-      app.client.post(`/api/v1/lives/${live.id}/gifts`).auth(creator.accessToken).set("idempotency-key", key).send({ giftId: "rose" });
-    const key = createIdempotencyKey();
-    await sendRose(key).expect(201);
-    await sendRose(key).expect(201);
-    expect(await readPersonalWallet(creator.accessToken)).toEqual([naira(5_000)]);
-    expect(await readPersonalWallet(host.accessToken)).toEqual([naira(7_000)]);
-    const refused = await sendRose();
+    const sendFire = (key = createIdempotencyKey()) =>
+      app.client.post(`/api/v1/lives/${live.id}/gifts`).auth(creator.accessToken).set("idempotency-key", key).send({ giftId: "fire", quantity: 4 });
+    const refused = await sendFire();
     expect(refused.status).toBe(422);
     expect(refused.text).toContain("Insufficient");
-    expect(await readPersonalWallet(creator.accessToken)).toEqual([naira(5_000)]);
+    await buyCoins(app, creator, "coins-70");
+    const key = createIdempotencyKey();
+    await sendFire(key).expect(201);
+    await sendFire(key).expect(201);
+    expect(await readCoinBalance(app, creator)).toEqual({ coins: 30, earnedCoins: 0 });
+    expect(await readCoinBalance(app, host)).toEqual({ coins: 0, earnedCoins: 28 });
+    expect(await readPersonalWallet(creator.accessToken)).toEqual([naira(15_000)]);
   });
 
   it("pays no commission when the creator buys through their own clip", async () => {
