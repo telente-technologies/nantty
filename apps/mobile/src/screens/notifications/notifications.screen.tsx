@@ -1,5 +1,92 @@
-import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
-export function NotificationsScreen() {
-  return <PlaceholderScreen name="Notifications" />;
+import { BellRinging24Icon } from "@/components/icons";
+import { Avatar } from "@/components/ui/avatar";
+import { Header, HeaderAction } from "@/components/ui/header";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { MainScreenProps } from "@/navigation/navigation.types";
+import { notificationsService } from "@/services/notifications.service";
+import type { CategorizedNotification } from "@/types/commerce.type";
+import { formatTimeSincePosted } from "@/utils/formatDate.util";
+
+const notificationsQueryKey = ["notifications"] as const;
+
+export function NotificationsScreen({ navigation }: MainScreenProps<"Notifications">) {
+  const queryClient = useQueryClient();
+  const notifications = useQuery({ queryKey: notificationsQueryKey, queryFn: notificationsService.fetchMyNotifications });
+  const refreshNotifications = () => queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+  const markAllRead = useMutation({ mutationFn: notificationsService.markAllNotificationsAsRead, onSuccess: refreshNotifications });
+  const markOneRead = useMutation({ mutationFn: notificationsService.markNotificationAsRead, onSuccess: refreshNotifications });
+
+  const openNotification = (notification: CategorizedNotification) => {
+    if (!notification.read) markOneRead.mutate(notification.id);
+    if (notification.category === "orders") navigation.navigate("Orders");
+    else if (notification.actor) navigation.navigate("UserProfile", { userId: notification.actor.id });
+  };
+
+  const hasUnread = (notifications.data ?? []).some((n) => !n.read);
+  return (
+    <Screen>
+      <Header
+        title="Notifications"
+        right={
+          hasUnread ? (
+            <HeaderAction label="Mark all as read" onPress={() => markAllRead.mutate()}>
+              <Text size={13} weight={500} lineHeight={16.9} color={colors.primary}>Mark all read</Text>
+            </HeaderAction>
+          ) : null
+        }
+      />
+      <FlatList
+        data={notifications.data ?? []}
+        keyExtractor={(n) => n.id}
+        refreshControl={<RefreshControl refreshing={notifications.isRefetching} onRefresh={() => notifications.refetch()} tintColor={colors.primary} />}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${item.title} ${item.body}${item.read ? "" : ", unread"}`}
+            onPress={() => openNotification(item)}
+            style={[styles.row, !item.read && styles.unreadRow]}
+          >
+            {item.actor ? (
+              <Avatar uri={item.actor.avatarUrl} size={40} placeholderColor={colors.primaryTint} />
+            ) : (
+              <View style={styles.iconCircle}>
+                <BellRinging24Icon size={20} color={colors.primary} />
+              </View>
+            )}
+            <View style={styles.text}>
+              <Text size={13} lineHeight={16.9}>
+                <Text size={13} weight={600} lineHeight={16.9}>{item.title} </Text>
+                {item.body}
+              </Text>
+              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatTimeSincePosted(item.createdAt)} ago</Text>
+            </View>
+            {!item.read ? <View style={styles.unreadDot} /> : null}
+          </Pressable>
+        )}
+        ListEmptyComponent={
+          notifications.isLoading ? (
+            <ActivityIndicator style={styles.state} color={colors.primary} />
+          ) : (
+            <Text align="center" color={colors.textSubtle} style={styles.state}>You're all caught up.</Text>
+          )
+        }
+      />
+    </Screen>
+  );
 }
+
+const styles = StyleSheet.create({
+  list: { paddingVertical: 8 },
+  row: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  unreadRow: { backgroundColor: colors.white },
+  iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
+  text: { flex: 1, gap: 2 },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  state: { marginTop: 64 },
+});
