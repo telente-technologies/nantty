@@ -20,6 +20,8 @@ export function convertWithdrawalToDto(withdrawal: WithdrawalRecord) {
     userId: withdrawal.userId,
     payoutAccountId: withdrawal.payoutAccountId,
     amount: Money.of(withdrawal.amount, withdrawal.currency).toDto(),
+    fee: Money.of(withdrawal.fee, withdrawal.currency).toDto(),
+    netAmount: Money.of(withdrawal.amount - withdrawal.fee, withdrawal.currency).toDto(),
     status: withdrawal.status,
     reference: withdrawal.reference,
     failureReason: withdrawal.failureReason,
