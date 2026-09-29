@@ -1,0 +1,83 @@
+.receipt {
+  margin: 0 auto;
+  padding: 10px 8px 16px;
+  background: #fff;
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+.wide {
+  width: 80mm;
+  max-width: 100%;
+}
+
+.narrow {
+  width: 58mm;
+  max-width: 100%;
+  font-size: 10px;
+}
+
+.center {
+  text-align: center;
+}
+
+.logo {
+  max-width: 40mm;
+  max-height: 20mm;
+  margin: 0 auto 4px;
+  filter: grayscale(1);
+}
+
+.storeName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gap {
+  margin-top: 6px;
+}
+
+.rule {
+  border: 0;
+  border-top: 1px dashed #000;
+  margin: 6px 0;
+}
+
+.rows > div,
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rows dd {
+  text-align: right;
+}
+
+.items li {
+  margin-bottom: 4px;
+}
+
+.items li > div {
+  padding-left: 8px;
+}
+
+.total {
+  margin: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.small {
+  font-size: 10px;
+}
+
+@media print {
+  .receipt {
+    padding: 2mm 3mm 6mm;
+    margin: 0;
+  }
+}
