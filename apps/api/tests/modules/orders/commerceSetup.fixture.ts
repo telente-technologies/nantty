@@ -120,6 +120,9 @@ export function createCommerceTestApplication() {
     await app.client.post("/api/v1/admin/exchange-rates/refresh").auth(admin.accessToken).expect(200);
   }
 
+  const productIdsByVariantId = new Map<string, string>();
+  const addressIdsByBuyerId = new Map<string, string>();
+
   async function createStoreWithProduct(setup: ProductSetup = {}, existingSeller?: SignedInUser): Promise<StoreWithProduct> {
     const seller = existingSeller ?? (await app.registerSeller());
     const store = await app.client
@@ -129,49 +132,79 @@ export function createCommerceTestApplication() {
       .expect(201);
     const storeId = store.json<{ id: string }>().id;
     const product = await app.client
-      .post(`/api/v1/stores/${storeId}/products`)
+      .post(`/api/v1/seller/products?storeId=${storeId}`)
       .auth(seller.accessToken)
       .send({ title: "Ankara Dress", price: setup.price ?? 10_000, stock: setup.stock ?? 12 })
       .expect(201);
     const created = product.json<{ id: string; variants: { id: string }[] }>();
-    await app.client.post(`/api/v1/stores/${storeId}/products/${created.id}/publish`).auth(seller.accessToken).expect(200);
-    return { seller, storeId, productId: created.id, variantId: created.variants[0]?.id ?? "" };
+    await app.client.post(`/api/v1/seller/products/${created.id}/publish`).auth(seller.accessToken).expect(200);
+    const variantId = created.variants[0]?.id ?? "";
+    productIdsByVariantId.set(variantId, created.id);
+    return { seller, storeId, productId: created.id, variantId };
   }
 
   async function addToCart(buyer: SignedInUser, variantId: string, quantity: number): Promise<void> {
-    await app.client.post("/api/v1/cart/items").auth(buyer.accessToken).send({ variantId, quantity }).expect(201);
+    await app.client.post("/api/v1/cart/items").auth(buyer.accessToken).send({ productId: productIdsByVariantId.get(variantId), quantity }).expect(201);
+  }
+
+  async function findOrCreateShippingAddressId(buyer: SignedInUser): Promise<string> {
+    const existing = addressIdsByBuyerId.get(buyer.userId);
+    if (existing !== undefined) return existing;
+    const address = { fullName: "Ada Buyer", phone: "08031234567", line1: "12 Allen Avenue", city: "Ikeja", state: "Lagos" };
+    const created = (await app.client.post("/api/v1/users/me/addresses").auth(buyer.accessToken).send(address).expect(201)).json<{ id: string }>();
+    addressIdsByBuyerId.set(buyer.userId, created.id);
+    return created.id;
   }
 
   async function checkout(buyer: SignedInUser) {
     const response = await app.client
-      .post("/api/v1/checkout")
+      .post("/api/v1/orders/checkout")
       .auth(buyer.accessToken)
       .set("idempotency-key", createIdempotencyKey())
-      .send({ shippingAddress: { fullName: "Ada Buyer", phone: "08031234567", line1: "12 Allen Avenue", city: "Ikeja", state: "Lagos" } })
+      .send({ addressId: await findOrCreateShippingAddressId(buyer) })
       .expect(201);
-    return response.json<{ checkout: { id: string; total: MoneyShape }; orders: { id: string; storeId: string; total: MoneyShape; status: string; charged: { total: MoneyShape; exchangeRate: string } }[] }>();
+    const body = response.json<{
+      checkoutId: string;
+      payableOrderId: string;
+      total: MoneyShape;
+      orders: { id: string; storeId: string; total: MoneyShape; status: string; charged: { total: MoneyShape; exchangeRate: string } }[];
+    }>();
+    return { ...body, checkout: { id: body.checkoutId, total: body.total } };
   }
 
-  async function payCheckout(buyer: SignedInUser, checkoutId: string): Promise<{ reference: string; paymentId: string }> {
+  async function payCheckout(buyer: SignedInUser, orderId: string): Promise<{ reference: string; paymentId: string }> {
     const initialized = await app.client
       .post("/api/v1/payments/initialize")
       .auth(buyer.accessToken)
       .set("idempotency-key", createIdempotencyKey())
-      .send({ checkoutId, provider: "paystack" })
+      .send({ orderId, provider: "paystack" })
       .expect(201);
     const payment = initialized.json<{ payment: { id: string; reference: string } }>().payment;
-    await app.client.post("/api/v1/payments/verify").auth(buyer.accessToken).send({ reference: payment.reference }).expect(200);
+    await app.client.post(`/api/v1/payments/orders/${orderId}/verify`).auth(buyer.accessToken).expect(200);
     return { reference: payment.reference, paymentId: payment.id };
   }
 
   async function buyAndPay(buyer: SignedInUser, store: StoreWithProduct, quantity = 1) {
     await addToCart(buyer, store.variantId, quantity);
     const placed = await checkout(buyer);
-    await payCheckout(buyer, placed.checkout.id);
+    await payCheckout(buyer, placed.payableOrderId);
     return placed;
   }
 
-  return { ...app, paystack, flutterwave, exchangeRates, registerBuyer, refreshExchangeRates, createStoreWithProduct, addToCart, checkout, payCheckout, buyAndPay };
+  return {
+    ...app,
+    paystack,
+    flutterwave,
+    exchangeRates,
+    registerBuyer,
+    refreshExchangeRates,
+    createStoreWithProduct,
+    addToCart,
+    checkout,
+    payCheckout,
+    buyAndPay,
+    findOrCreateShippingAddressId,
+  };
 }
 
 export type CommerceTestApplication = ReturnType<typeof createCommerceTestApplication> & TestApplication;

@@ -61,6 +61,10 @@ class FakeUserDirectory implements UserDirectory {
     return undefined;
   }
 
+  public async findTopicSlugById(): Promise<string | undefined> {
+    return undefined;
+  }
+
   public async searchUsers(): Promise<readonly UserSummary[]> {
     return [];
   }
