@@ -1,3 +1,4 @@
+import type { ProductBrandTag } from "@/types/brand.type";
 import type { Product, ProductVariant, StockLevel } from "@/types/catalog.type";
 import { buildEan13FromTwelveDigits } from "@/utils/ean13.util";
 import { buildIsoDateDaysAgo, createSeededRandomNumberGenerator, pickRandomIntegerInclusive } from "@/mocks/seed/seededRandom.mock";
@@ -48,6 +49,18 @@ const demoProductBlueprints: DemoProductBlueprint[] = [
   { key: "watermelon", name: "Watermelon (whole)", categoryId: "cat_food", categoryName: "Food & drinks", unsplashPhotoId: "1587049352846-4a222e784d38", priceNaira: 3500, costNaira: 2000, description: "Sweet watermelon from Kano farms.", taxable: false, publishedOnline: false },
 ];
 
+const ownBrandTag: ProductBrandTag = { brandId: "brand_ife_lifestyle", name: "Ìfẹ́ Lifestyle", relationship: "own" };
+const demoBrandTagsByProductKey: Record<string, ProductBrandTag> = {
+  "adire-shirt": ownBrandTag,
+  "crew-tee": ownBrandTag,
+  "adire-tote": ownBrandTag,
+  candle: ownBrandTag,
+  earbuds: { brandId: "brand_oja_tech", name: "Ọjà Tech", relationship: "authorised_reseller" },
+  "headphones": { brandId: "brand_oja_tech", name: "Ọjà Tech", relationship: "authorised_reseller" },
+  "crossbody": { brandId: "brand_kano_leather", name: "Kano Leatherworks", relationship: "genuine_resale" },
+  "face-serum": { brandId: "brand_lekki_glow", name: "Lekki Glow Cosmetics", relationship: "authorised_reseller" },
+};
+
 const demoStockLocationIds = ["loc_lekki", "loc_ikeja", "loc_wuse", "loc_apapa"];
 
 function buildUnsplashImageUrl(photoId: string): string {
@@ -62,11 +75,11 @@ function listEveryOptionCombination(options: readonly { readonly name: string; r
 }
 
 function buildDemoStockLevels(random: () => number, isLowStockVariant: boolean): StockLevel[] {
-  return demoStockLocationIds.map((locationId) => ({
-    locationId,
-    onHand: isLowStockVariant && locationId === "loc_lekki" ? pickRandomIntegerInclusive(0, 3, random) : pickRandomIntegerInclusive(locationId === "loc_apapa" ? 20 : 4, locationId === "loc_apapa" ? 120 : 40, random),
-    reserved: locationId === "loc_lekki" ? pickRandomIntegerInclusive(0, 2, random) : 0,
-  }));
+  return demoStockLocationIds.map((locationId) => {
+    const onHand = isLowStockVariant && locationId === "loc_lekki" ? pickRandomIntegerInclusive(0, 3, random) : pickRandomIntegerInclusive(locationId === "loc_apapa" ? 20 : 4, locationId === "loc_apapa" ? 120 : 40, random);
+    const reserved = locationId === "loc_lekki" ? Math.min(onHand, pickRandomIntegerInclusive(0, 2, random)) : 0;
+    return { locationId, onHand, reserved };
+  });
 }
 
 export function buildDemoProducts(): Product[] {
@@ -106,6 +119,7 @@ export function buildDemoProducts(): Product[] {
       taxable: blueprint.taxable ?? true,
       trackInventory: true,
       tags: blueprint.tags ?? [],
+      brand: demoBrandTagsByProductKey[blueprint.key] ?? null,
       createdAt: buildIsoDateDaysAgo(120 - productIndex * 3),
       updatedAt: buildIsoDateDaysAgo(productIndex % 10),
     };
