@@ -3,7 +3,7 @@ import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
 import type { CounterField, NewPostInput, PostKind, PostListFilter, PostMedia, PostRecord } from "../models/posts.model.js";
-import type { PostsRepository } from "./posts.repository.js";
+import { CREATOR_CONTENT_KINDS, type AuthorContentSummary, type PostsRepository } from "./posts.repository.js";
 
 function convertPostRowToRecord(row: Post): PostRecord {
   return {
@@ -49,7 +49,7 @@ export class PrismaPostsRepository implements PostsRepository {
     const row = await prisma().post.create({
       data: {
         ...input,
-        media: input.media.map((item) => ({ url: item.url, type: item.type })),
+        media: input.media.map((item) => ({ ...item })),
         topics: [...input.topics],
         productIds: [...input.productIds],
       },
@@ -99,5 +99,14 @@ export class PrismaPostsRepository implements PostsRepository {
       take: limit,
     });
     return rows.map(convertPostRowToRecord);
+  }
+
+  public async summarizeAuthorContent(authorId: string): Promise<AuthorContentSummary> {
+    const summary = await prisma().post.aggregate({
+      where: { authorId, deletedAt: null, kind: { in: [...CREATOR_CONTENT_KINDS] } },
+      _count: { _all: true },
+      _sum: { viewCount: true },
+    });
+    return { postCount: summary._count._all, viewCount: summary._sum.viewCount ?? 0 };
   }
 }
