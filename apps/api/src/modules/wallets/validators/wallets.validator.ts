@@ -32,6 +32,12 @@ export const RequestWithdrawalBodySchema = schema.object({
   payoutAccountId: schema.string().uuid(),
 });
 
+export const WithdrawalQuoteQuerySchema = schema.object({
+  ...scopeFields,
+  amount: schema.coerce.number().int().min(100).max(1_000_000_000_000),
+  payoutAccountId: schema.string().uuid(),
+});
+
 export const StartWalletTopUpBodySchema = schema.object({
   amount: schema.number().int().min(100).max(10_000_000_000),
   currency: schema.enum(SUPPORTED_CURRENCY_CODES),

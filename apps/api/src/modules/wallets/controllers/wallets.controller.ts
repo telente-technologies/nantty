@@ -17,6 +17,8 @@ import type { LedgerEntryRecord, PayoutAccountRecord, WalletScopeInput, WalletTo
 import { GetWalletQuery } from "../queries/getWallet/getWallet.query.js";
 import { ListPayoutAccountsQuery } from "../queries/listPayoutAccounts/listPayoutAccounts.query.js";
 import { ListWalletTransactionsQuery } from "../queries/listWalletTransactions/listWalletTransactions.query.js";
+import { QuoteWithdrawalQuery } from "../queries/quoteWithdrawal/quoteWithdrawal.query.js";
+import type { WithdrawalQuote } from "../services/withdrawals.service.js";
 import { ListWithdrawalsQuery } from "../queries/listWithdrawals/listWithdrawals.query.js";
 import type { BankDirectory } from "../services/bankDirectory.service.js";
 import type { StartedWalletTopUp } from "../services/walletTopUps.service.js";
@@ -31,6 +33,7 @@ import {
   WalletPageQuerySchema,
   WalletScopeQuerySchema,
   WithdrawalParamsSchema,
+  WithdrawalQuoteQuerySchema,
 } from "../validators/wallets.validator.js";
 
 type ScopeQuery = { readonly scope?: "store" | "user" | undefined; readonly storeId?: string | undefined; readonly currency?: WalletScopeInput["currency"] | undefined };
@@ -102,6 +105,13 @@ export class WalletsController {
     if (!body.success) return validationFailed(body.issues);
     const command = new RequestWithdrawalCommand(requireAuthenticatedPrincipal(ctx), buildWalletScope(ctx, scope.data), body.data.amount, body.data.payoutAccountId);
     return json(201, convertWithdrawalToDto(await this.commands.execute<RequestWithdrawalCommand, WithdrawalRecord>(command)));
+  };
+
+  public readonly quoteWithdrawal = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const query = WithdrawalQuoteQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const quote = new QuoteWithdrawalQuery(requireAuthenticatedPrincipal(ctx), buildWalletScope(ctx, query.data), query.data.amount, query.data.payoutAccountId);
+    return json(200, await this.queries.execute<QuoteWithdrawalQuery, WithdrawalQuote>(quote));
   };
 
   public readonly startTopUp = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

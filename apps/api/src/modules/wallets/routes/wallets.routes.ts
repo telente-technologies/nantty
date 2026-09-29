@@ -13,6 +13,7 @@ import {
   WalletPageQuerySchema,
   WalletScopeQuerySchema,
   WithdrawalParamsSchema,
+  WithdrawalQuoteQuerySchema,
 } from "../validators/wallets.validator.js";
 
 const WALLET = "/api/v1/wallets/me";
@@ -28,6 +29,10 @@ export function registerWalletsRoutes(router: HttpRouter, controller: WalletsCon
   router.post(`${WALLET}/payout-accounts`, controller.addPayoutAccount, { ...wallet, ...describeRoute(TAG, "Add a payout bank account", { query: WalletScopeQuerySchema, body: AddPayoutAccountBodySchema }) });
   router.delete(`${WALLET}/payout-accounts/:id`, controller.removePayoutAccount, { ...wallet, ...describeRoute(TAG, "Remove a payout bank account", { params: PayoutAccountParamsSchema, query: WalletScopeQuerySchema }) });
   router.get(`${WALLET}/withdrawals`, controller.listWithdrawals, { ...wallet, ...describeRoute(TAG, "List my withdrawals", { query: WalletPageQuerySchema }) });
+  router.get(`${WALLET}/withdrawals/quote`, controller.quoteWithdrawal, {
+    ...wallet,
+    ...describeRoute(TAG, "Preview a withdrawal: the provider transfer fee passed through and the amount you receive", { query: WithdrawalQuoteQuerySchema }),
+  });
   router.post(`${WALLET}/withdrawals`, controller.requestWithdrawal, {
     ...moneyMoving,
     ...describeRoute(TAG, "Request a withdrawal (Idempotency-Key required)", { query: WalletScopeQuerySchema, body: RequestWithdrawalBodySchema }),

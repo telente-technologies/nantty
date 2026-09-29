@@ -11,6 +11,7 @@ import { VerifyWalletTopUpHandler } from "./commands/verifyWalletTopUp/verifyWal
 import { GetWalletHandler } from "./queries/getWallet/getWallet.handler.js";
 import { ListPayoutAccountsHandler } from "./queries/listPayoutAccounts/listPayoutAccounts.handler.js";
 import { ListWalletTransactionsHandler } from "./queries/listWalletTransactions/listWalletTransactions.handler.js";
+import { QuoteWithdrawalHandler } from "./queries/quoteWithdrawal/quoteWithdrawal.handler.js";
 import { ListWithdrawalsHandler } from "./queries/listWithdrawals/listWithdrawals.handler.js";
 import type { WalletTopUpsService } from "./services/walletTopUps.service.js";
 import type { WalletsService } from "./services/wallets.service.js";
@@ -51,5 +52,6 @@ export function registerWalletsCommandAndQueryHandlers(
     new ListPayoutAccountsHandler(services.wallets),
     new ListWalletTransactionsHandler(services.wallets),
     new ListWithdrawalsHandler(services.withdrawals),
+    new QuoteWithdrawalHandler(services.withdrawals),
   ]);
 }
