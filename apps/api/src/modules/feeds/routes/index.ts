@@ -2,11 +2,11 @@ import type { HttpRouter } from "@zudojs/http";
 
 import type { AppDependencies } from "../../../container.js";
 // zudojs:route-imports:start
+import { registerFeedsRoutes } from "./feeds.routes.js";
 // zudojs:route-imports:end
 
-/** Registers this module's routes; called from the app's routes/index.ts. */
 export function registerFeedsModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
-  void deps;
   // zudojs:routes:start
+  registerFeedsRoutes(router, deps.feedsController, deps.web);
   // zudojs:routes:end
 }
