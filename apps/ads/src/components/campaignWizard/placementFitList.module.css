@@ -1,0 +1,71 @@
+.panel {
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+  padding: 10px 12px;
+  background: var(--surface-app);
+}
+
+.heading {
+  font-size: 12.5px;
+  font-weight: 650;
+  margin-bottom: 6px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  column-gap: 8px;
+  row-gap: 1px;
+  align-items: center;
+}
+
+.icon {
+  grid-row: span 2;
+  align-self: start;
+  margin-top: 2px;
+}
+
+.placementName {
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.statusLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.message {
+  grid-column: 2 / 4;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.ready .icon,
+.ready .statusLabel {
+  color: var(--success-ink);
+}
+
+.adjusted .icon,
+.adjusted .statusLabel {
+  color: var(--caution-ink);
+}
+
+.blocked .icon,
+.blocked .statusLabel {
+  color: var(--error-ink);
+}
+
+.error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--error-ink);
+}
