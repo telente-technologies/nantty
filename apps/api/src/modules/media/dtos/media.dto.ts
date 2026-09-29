@@ -8,6 +8,7 @@ export interface UploadInstructionsDto {
   readonly maxBytes: number;
   readonly expiresAt: string;
   readonly url: string;
+  readonly fileUrl: string;
 }
 
 export function convertMediaToDto(media: MediaRecord, url: string) {

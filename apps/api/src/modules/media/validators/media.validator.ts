@@ -5,7 +5,7 @@ import { MEDIA_CONTENT_TYPES, MEDIA_PURPOSES } from "../models/media.model.js";
 export const CreateUploadBodySchema = schema.object({
   purpose: schema.enum(MEDIA_PURPOSES),
   contentType: schema.enum(MEDIA_CONTENT_TYPES),
-  size: schema.number().int().min(1),
+  size: schema.number().int().min(1).optional(),
 });
 
 export const MediaParamsSchema = schema.object({ id: schema.string().uuid() });
