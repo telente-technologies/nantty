@@ -1,0 +1,11 @@
+{
+  "license": "Unsplash License (https://unsplash.com/license) — free to use, no permission needed; credited here as good practice. Verified not Unsplash+ (premium: false, plus: false) on 2026-09-29.",
+  "photos": [
+    { "file": "public/photos/shopCounterOwner.webp", "unsplashId": "EOkN2pRjFsg", "source": "https://unsplash.com/photos/a-woman-sitting-at-a-counter-in-a-store-EOkN2pRjFsg", "photographer": "Ali Mkumbwa", "profile": "https://unsplash.com/@mkumbwajr" },
+    { "file": "public/photos/fruitStandSeller.webp", "unsplashId": "5dFuO02OHh0", "source": "https://unsplash.com/photos/a-woman-standing-in-front-of-a-fruit-stand-holding-a-cell-phone-5dFuO02OHh0", "photographer": "Ali Mkumbwa", "profile": "https://unsplash.com/@mkumbwajr" },
+    { "file": "public/photos/shopkeeperPhone.webp", "unsplashId": "uk3ey_vhDKA", "source": "https://unsplash.com/photos/a-man-in-an-apron-looking-at-a-cell-phone-uk3ey_vhDKA", "photographer": "Ali Mkumbwa", "profile": "https://unsplash.com/@mkumbwajr" },
+    { "file": "public/photos/boutiqueFriends.webp", "unsplashId": "VJVo6XH7p9I", "source": "https://unsplash.com/photos/two-stylish-women-standing-near-racks-of-clothing-VJVo6XH7p9I", "photographer": "Dwayne joe", "profile": "https://unsplash.com/@spliff_dj_joe" }
+  ],
+  "demoProductImages": "Demo catalogue images are hot-linked from images.unsplash.com (free Unsplash License, IDs in src/mocks/seed/demoProducts.mock.ts; each checked with curl -I).",
+  "screenshots": "public/screenshots/*.webp are screenshots of this dashboard rendered with its own demo data."
+}
