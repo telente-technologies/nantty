@@ -1,7 +1,7 @@
-import type { AccountSettings, ShippingAddressInput } from "@/types/account.type";
+import type { AccountSettings, CountryOption, ShippingAddressInput } from "@/types/account.type";
 import type { Address, Page, Post, User } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export interface ProfileDetailsUpdate {
   readonly name?: string;
@@ -18,6 +18,8 @@ export const usersService = {
   updateMyProfileDetails: (update: ProfileDetailsUpdate) => api.patch<User>("/api/v1/users/me", update),
   fetchMyAccountSettings: () => api.get<AccountSettings>("/api/v1/users/me/settings"),
   updateMyAccountSettings: (update: Partial<AccountSettings>) => api.patch<AccountSettings>("/api/v1/users/me/settings", update),
+  updateMyCountryPreference: (countryCode: string) => api.patch<void>("/api/v1/users/me/preferences", { countryCode }),
+  listSupportedCountries: () => api.get<CountryOption[]>("/api/v1/locale/countries"),
   deactivateMyAccount: () => api.post<void>("/api/v1/users/me/deactivate"),
   changeMyPassword: (currentPassword: string, newPassword: string) =>
     api.post<void>("/api/v1/auth/password/change", { currentPassword, newPassword }),
