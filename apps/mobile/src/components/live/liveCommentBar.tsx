@@ -11,9 +11,10 @@ export interface LiveCommentBarProps {
   readonly onToggleReactions: () => void;
   readonly onPressProducts?: () => void;
   readonly onPressGift?: () => void;
+  readonly onPressTip?: () => void;
 }
 
-export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift }: LiveCommentBarProps) {
+export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip }: LiveCommentBarProps) {
   const [text, setText] = useState("");
   const sendTypedLiveComment = () => {
     if (!text.trim()) return;
@@ -48,6 +49,13 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
         <Pressable accessibilityRole="button" accessibilityLabel="Send a gift" hitSlop={8} onPress={onPressGift}>
           <Text size={22} lineHeight={26}>
             🎁
+          </Text>
+        </Pressable>
+      ) : null}
+      {onPressTip ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Tip the host with coins" hitSlop={8} onPress={onPressTip}>
+          <Text size={22} lineHeight={26}>
+            🪙
           </Text>
         </Pressable>
       ) : null}
