@@ -1,5 +1,5 @@
 import { StoreRole } from "../../../constants/roles.constant.js";
-import { notFound, unprocessable } from "../../../errors/domain.error.js";
+import { notFound } from "../../../errors/domain.error.js";
 import type { Principal } from "../../../interfaces/principal.interface.js";
 import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
 import type { ProfileType } from "../../../interfaces/verificationBadge.interface.js";
@@ -16,7 +16,6 @@ export class ProfileResolver {
     if (profileType === "PERSONAL" || profileType === "GOVERNMENT") {
       return { profileId: principal.userId, profileKind: "user", profileType, ownerUserId: principal.userId };
     }
-    if (storeId === undefined) throw unprocessable("Choose the store this applies to.");
     return this.resolveStoreProfile(principal, storeId, STORE_PROFILE_MANAGERS, profileType);
   }
 
