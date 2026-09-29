@@ -3,14 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { findFirstPageAllowedForRole } from "@/config/rolePermissions.config";
 import { readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 import { renewSellerAccessCache, writeRenewedSessionCookies } from "@/server/sellerAuthentication.service";
-import { clearEverySessionCookie, readApiTokensFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
+import { clearEverySessionCookie, readApiTokensFromCookies, readSelectedStoreIdFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
 import { decideSellerAccessDestination, gatePagePathByDestination } from "@/utils/sellerAccessDestination.util";
 
 export async function GET(request: NextRequest) {
   const requestedPath = readSafeRelativeRedirectPath(request.nextUrl.searchParams.get("next"), "/");
   const sessionId = readSessionIdFromCookies(request.cookies);
   const tokens = readApiTokensFromCookies(request.cookies);
-  const renewed = sessionId ? await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null }) : null;
+  const renewed = sessionId ? await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null, storeId: readSelectedStoreIdFromCookies(request.cookies) }) : null;
   if (!renewed) {
     const loginUrl = new URL(requestedPath === "/" ? "/" : "/login", request.nextUrl.origin);
     if (requestedPath !== "/") loginUrl.searchParams.set("next", requestedPath);
