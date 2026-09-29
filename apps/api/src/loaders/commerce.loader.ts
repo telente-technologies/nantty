@@ -35,12 +35,14 @@ import { InMemoryPaymentsRepository, InMemoryWebhookEventsRepository } from "../
 import { PaymentReturnUrls } from "../modules/payments/services/paymentReturnUrl.service.js";
 import { PaymentWebhookRegistry } from "../modules/payments/services/paymentWebhookRegistry.service.js";
 import { PaymentsService } from "../modules/payments/services/payments.service.js";
+import { CoinLedgerService } from "../modules/coins/services/coinLedger.service.js";
 import { WalletsController } from "../modules/wallets/controllers/wallets.controller.js";
 import { PrismaLedgerRepository } from "../modules/wallets/repositories/ledger.prisma.repository.js";
 import { InMemoryLedgerRepository } from "../modules/wallets/repositories/ledger.repository.js";
 import { PrismaPayoutAccountsRepository, PrismaWithdrawalsRepository } from "../modules/wallets/repositories/wallets.prisma.repository.js";
 import { InMemoryWalletTopUpsRepository, PrismaWalletTopUpsRepository } from "../modules/wallets/repositories/walletTopUps.repository.js";
 import { InMemoryPayoutAccountsRepository, InMemoryWithdrawalsRepository } from "../modules/wallets/repositories/wallets.repository.js";
+import { LedgerAdvertiserBilling } from "../modules/wallets/services/advertiserBilling.service.js";
 import { LedgerCreatorWallets } from "../modules/wallets/services/creatorWallets.service.js";
 import { LedgerService } from "../modules/wallets/services/ledger.service.js";
 import { PaystackBankDirectory, type BankDirectory } from "../modules/wallets/services/bankDirectory.service.js";
@@ -75,6 +77,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   const ordersRepository = usePrisma ? new PrismaOrdersRepository() : new InMemoryOrdersRepository();
   const escrowsRepository = usePrisma ? new PrismaEscrowsRepository() : new InMemoryEscrowsRepository();
   const ledger = new LedgerService(usePrisma ? new PrismaLedgerRepository() : new InMemoryLedgerRepository(), clock);
+  const coinLedger = new CoinLedgerService(ledger);
   const webhookRegistry = new PaymentWebhookRegistry();
   const returnUrls = new PaymentReturnUrls(settings.payments.returnUrlAllowList);
 
@@ -135,8 +138,9 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
 
   return {
     orderLookup: new RepositoryOrderLookup(ordersRepository),
-    creatorWallets: new LedgerCreatorWallets(ledger, shared.storeAccess),
-    payments: { gateways, ledger, webhookRegistry, returnUrls, walletsService },
+    creatorWallets: new LedgerCreatorWallets(ledger, shared.storeAccess, coinLedger),
+    advertiserBilling: new LedgerAdvertiserBilling(ledger, shared.audit),
+    payments: { gateways, ledger, webhookRegistry, returnUrls, walletsService, coinLedger, paymentsService, escrowsService, ordersRepository },
     scheduledJobs: [createEscrowAutoReleaseJob(escrowsService)],
     controllers: {
       cartsController: new CartsController(commands, queries),
