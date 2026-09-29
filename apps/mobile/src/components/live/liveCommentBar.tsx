@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
+import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 
@@ -9,9 +10,10 @@ export interface LiveCommentBarProps {
   readonly onSend: (text: string) => void;
   readonly onToggleReactions: () => void;
   readonly onPressProducts?: () => void;
+  readonly onPressGift?: () => void;
 }
 
-export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts }: LiveCommentBarProps) {
+export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift }: LiveCommentBarProps) {
   const [text, setText] = useState("");
   const sendTypedLiveComment = () => {
     if (!text.trim()) return;
@@ -42,6 +44,13 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts }: L
           <Smiley24Icon />
         </Pressable>
       )}
+      {onPressGift ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Send a gift" hitSlop={8} onPress={onPressGift}>
+          <Text size={22} lineHeight={26}>
+            🎁
+          </Text>
+        </Pressable>
+      ) : null}
       {onPressProducts ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Products in this live" hitSlop={8} onPress={onPressProducts}>
           <ViewProducts24Icon />
