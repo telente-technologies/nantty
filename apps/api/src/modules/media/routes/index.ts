@@ -7,6 +7,6 @@ import { registerMediaRoutes } from "./media.routes.js";
 
 export function registerMediaModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
   // zudojs:routes:start
-  registerMediaRoutes(router, deps.mediaController, deps.web);
+  registerMediaRoutes(router, deps.mediaController, deps.mediaFilesController, deps.web);
   // zudojs:routes:end
 }
