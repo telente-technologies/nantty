@@ -172,6 +172,7 @@ Server rules:
 - Recompute every price, discount, coupon, loyalty redemption and tax on the server from current product prices and StoreSettings (same algorithm as `apps/seller/src/utils/posCartPricing.util.ts`); client totals are ignored.
 - Sum of payment amounts must equal the server total (online sales). Offline sales (offlineCreatedAt set) are accepted even if prices changed since, and are accepted into a shift that was open at offlineCreatedAt.
 - A line or cart discount above settings.discountApprovalThresholdBasisPoints needs discount.approvedByStaffId matching an unexpired approval from POST /discount-approvals, unless the cashier has pos:approve_discount.
+- Offline sales sync with the `X-Seller-Store` (and `X-Seller-Operator`, when the cashier was PIN-unlocked) of the store they were rung up in, even if the dashboard has since switched store. Reject with 403 when the caller is not a member of that store or lacks `pos:sell` there — never re-home the sale into another store.
 - Online sales fail with INSUFFICIENT_STOCK when available (onHand − reserved) at the shift's location is too low; offline sales always decrement (stock may go negative and should be flagged).
 - Decrement stock at the shift's location (shared with the online marketplace), update customer totals/loyalty (earn `floor(totalMajor × pointsEarnedPerMajorUnit)`, subtract redeemed points), increment coupon usage, and attach to the shift totals.
 - pay_link / zudomart_wallet payments must reference a paid pay link for exactly that amount.
