@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 
 import { adminProductName } from "@/config/siteMetadata.config";
@@ -25,7 +26,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  await connection();
   return (
     <html lang="en-NG" className={`${interFont.variable} ${monoFont.variable}`}>
       <body>{children}</body>

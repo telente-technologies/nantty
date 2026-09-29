@@ -11,7 +11,7 @@ import { ChangeCreatorAffiliationCommand } from "../commands/changeCreatorAffili
 import { SendLiveGiftCommand } from "../commands/sendLiveGift/sendLiveGift.command.js";
 import { SubmitCreatorApplicationCommand } from "../commands/submitCreatorApplication/submitCreatorApplication.command.js";
 import type { SubmitCreatorApplicationResult } from "../commands/submitCreatorApplication/submitCreatorApplication.handler.js";
-import type { CreatorAffiliationDto, CreatorApplicationDto, CreatorDashboardDto, CreatorEarningDto, GiftCatalogEntryDto, LiveGiftReceiptDto } from "../dtos/creators.dto.js";
+import type { CreatorAffiliationDto, CreatorApplicationDto, CreatorDashboardDto, CreatorEarningDto, GiftCatalogEntryDto, GiftReceiptDto } from "../dtos/creators.dto.js";
 import type { CreatorEligibility } from "../models/creators.model.js";
 import { GetCreatorDashboardQuery } from "../queries/getCreatorDashboard/getCreatorDashboard.query.js";
 import { GetCreatorEligibilityQuery } from "../queries/getCreatorEligibility/getCreatorEligibility.query.js";
@@ -84,9 +84,8 @@ export class CreatorsController {
       giftId: body.data.giftId,
       quantity: body.data.quantity,
       idempotencyKey: ctx.request.getHeader(IDEMPOTENCY_KEY_HEADER)?.trim() ?? "",
-      currency: findViewerLocale(ctx).currency,
     });
-    return json(201, await this.commands.execute<SendLiveGiftCommand, LiveGiftReceiptDto>(command));
+    return json(201, await this.commands.execute<SendLiveGiftCommand, GiftReceiptDto>(command));
   };
 
   private async changeAffiliation(ctx: HttpRouterContext, affiliated: boolean): Promise<HttpResponseContext> {

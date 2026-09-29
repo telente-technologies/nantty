@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
+import { StoreSwitcher } from "@/components/layout/storeSwitcher";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { IconButton } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/statusBadge";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
@@ -16,7 +16,6 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
   const { sessionView } = useSellerSession();
   const { locations, selectedLocationId, selectLocation } = useStoreContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const access = sessionView?.access;
   const displayName = sessionView?.operator?.name ?? sessionView?.user.name ?? sessionView?.user.username ?? "You";
 
   async function signOutOfDashboard() {
@@ -27,14 +26,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
   return (
     <header className={`${styles.topBar} noPrint`}>
       <IconButton iconName="textIndent24" label="Open navigation" className={styles.menuButton} onClick={onOpenNavigation} />
-      <div className={styles.storeIdentity}>
-        <span className={styles.storeName}>{access?.storeName ?? "Your store"}</span>
-        {access?.verification.badgeVisible ? (
-          <StatusBadge tone="highlight">
-            <ZudoIcon name="sealCheck20" size={14} /> Gold {access.verification.tier === "PREMIUM" ? "Premium" : "Pro"}
-          </StatusBadge>
-        ) : null}
-      </div>
+      <StoreSwitcher />
       {locations.length > 0 ? (
         <label className={styles.locationSwitcher}>
           <ZudoIcon name="mapPin24" size={16} />

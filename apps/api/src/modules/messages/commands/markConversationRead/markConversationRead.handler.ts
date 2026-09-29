@@ -11,8 +11,11 @@ export class MarkConversationReadHandler extends CommandHandler<MarkConversation
   }
 
   public async execute(command: MarkConversationReadCommand): Promise<void> {
-    const { messages, clock } = this.messagesService.dependencies;
-    const conversation = await this.messagesService.requireConversationForParticipant(command.conversationId, command.principal.userId);
-    await messages.markConversationRead(conversation.id, command.principal.userId, clock.now());
+    const { conversations, clock } = this.messagesService.dependencies;
+    const access = await this.messagesService.requireConversationAccess(command.conversationId, command.principal.userId);
+    if (access.participant === undefined) return;
+    const readAt = clock.now();
+    await conversations.markRead(access.conversation.id, command.principal.userId, readAt);
+    await this.messagesService.broadcaster.announceReadReceipt(access.conversation, command.principal.userId, readAt);
   }
 }

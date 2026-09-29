@@ -1,5 +1,8 @@
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { VerificationBadgeLookup } from "../interfaces/verificationBadge.interface.js";
+import { PrismaStaffAccountsRepository } from "../modules/admin/repositories/platformStaff.prisma.repository.js";
+import { InMemoryStaffAccountsRepository } from "../modules/admin/repositories/platformStaff.repository.js";
+import { RepositoryPlatformPermissionGrants } from "../modules/admin/services/platformPermissionGrants.service.js";
 import { registerAuthCommandAndQueryHandlers } from "../modules/auth/auth.module.js";
 import { AuthController } from "../modules/auth/controllers/auth.controller.js";
 import { PrismaOneTimeCodesRepository, PrismaSessionsRepository, PrismaSocialIdentitiesRepository } from "../modules/auth/repositories/auth.prisma.repository.js";
@@ -35,7 +38,8 @@ export function createIdentityModules(core: Core, audit: AuditRecorder, external
   const addresses = usePrisma ? new PrismaAddressesRepository() : new InMemoryAddressesRepository();
   const topics = usePrisma ? new PrismaTopicsRepository() : new InMemoryTopicsRepository();
 
-  const tokens = new TokenService(core.settings.auth, sessions, users, core.clock);
+  const staffAccounts = usePrisma ? new PrismaStaffAccountsRepository() : new InMemoryStaffAccountsRepository();
+  const tokens = new TokenService(core.settings.auth, sessions, users, core.clock, core.settings.platformAdmin, new RepositoryPlatformPermissionGrants(staffAccounts));
   const otp = new OtpService(
     oneTimeCodes,
     external.oneTimeCodeDelivery ?? new EmailOneTimeCodeDelivery(core.logger),
@@ -46,9 +50,10 @@ export function createIdentityModules(core: Core, audit: AuditRecorder, external
   const identityTokens =
     external.identityTokenVerifier ??
     new JsonWebKeyIdentityTokenVerifier(core.settings.auth.googleClientIds, core.settings.auth.appleClientIds, core.clock);
+  const passwords = new PasswordService();
   const authService = new AuthService({
     users, sessions, oneTimeCodes, socialIdentities, tokens, otp, identityTokens,
-    passwords: new PasswordService(),
+    passwords,
     events: core.events,
     clock: core.clock,
     audit,
@@ -60,6 +65,7 @@ export function createIdentityModules(core: Core, audit: AuditRecorder, external
 
   return {
     accessTokenVerifier: tokens,
+    internals: { users, sessions, staffAccounts, tokens, passwords, authService },
     userDirectory: new RepositoryUserDirectory(users, topics, verificationBadges),
     addressBook: new RepositoryAddressBook(addresses, core.cipher),
     authController: new AuthController(core.commands, core.queries),

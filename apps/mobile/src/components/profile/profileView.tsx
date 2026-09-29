@@ -6,6 +6,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Post, User } from "@/types";
 
+import { ProfileSoundsList } from "./profileSoundsList";
 import { ProfileSummary, type ProfileAction } from "./profileSummary";
 import { ProfileTabs, type ProfileTabKey } from "./profileTabs";
 
@@ -30,6 +31,7 @@ const EMPTY_TAB_MESSAGES: Record<ProfileTabKey, string> = {
   posts: "No posts yet",
   reposts: "No reposts yet",
   clips: "No clips yet",
+  sounds: "",
   store: "",
 };
 
@@ -75,7 +77,9 @@ export function ProfileView(props: ProfileViewProps) {
         <PostCard post={item} onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
       )}
       ListEmptyComponent={
-        props.loading ? (
+        activeTab === "sounds" ? (
+          <ProfileSoundsList profile={props.profile} />
+        ) : props.loading ? (
           <ActivityIndicator style={styles.empty} color={colors.primary} />
         ) : (
           <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>

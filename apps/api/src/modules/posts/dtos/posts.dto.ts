@@ -1,3 +1,4 @@
+import type { SponsoredDto } from "../../../interfaces/discovery.interface.js";
 import type { MoneyDto } from "../../../utils/money.util.js";
 import type { PostKind, PostMedia } from "../models/posts.model.js";
 
@@ -48,6 +49,7 @@ export interface PostDto {
   readonly bookmarked: boolean;
   readonly isFollowingAuthor: boolean;
   readonly friendsLiked: FriendsLikedDto | null;
+  readonly sponsored: SponsoredDto | null;
   readonly products: readonly ProductCardDto[];
   readonly store: StoreBadgeDto | null;
   readonly topics: readonly string[];
@@ -93,6 +95,7 @@ export interface LiveSessionDto {
   readonly pinnedProduct: ProductCardDto | null;
   readonly startedAt: string;
   readonly endedAt: string | null;
+  readonly sponsored: SponsoredDto | null;
 }
 
 export interface LiveCommentDto {

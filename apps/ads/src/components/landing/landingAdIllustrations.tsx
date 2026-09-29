@@ -4,6 +4,7 @@ import { formatMoneyForDisplay } from "@/utils/money.util";
 import { AdBadge, CallToActionBar, StoreIdentityRow } from "./landingIllustrationParts";
 import { buildLandingPhotoUrl, feedShowcasePost, liveShowcaseStream, marketplaceGridTiles, reelsShowcaseClip, type ShowcaseFeedPost, type ShowcaseProductTile } from "./landingShowcase.content";
 import styles from "./landingIllustrations.module.css";
+import liveStyles from "./landingLiveCard.module.css";
 
 function MarketplaceProductTile({ tile }: { readonly tile: ShowcaseProductTile }) {
   return (
@@ -88,20 +89,20 @@ export function ReelsIllustration() {
 
 export function LiveCardIllustration() {
   return (
-    <figure className={`${styles.screen} ${styles.liveScreen}`} aria-label="Promoted live stream card in live discovery">
-      <div className={styles.liveImageWrap}>
-        <img src={buildLandingPhotoUrl(liveShowcaseStream.photoKey, 600)} alt="Bags on display during the live stream" className={styles.liveImage} loading="lazy" width={600} height={750} />
-        <span className={styles.liveBadge}>
-          <span className={styles.liveDot} aria-hidden />
+    <figure className={`${styles.screen} ${liveStyles.liveScreen}`} aria-label="Promoted live stream card in live discovery">
+      <div className={liveStyles.liveImageWrap}>
+        <img src={buildLandingPhotoUrl(liveShowcaseStream.photoKey, 600)} alt="Bags on display during the live stream" className={liveStyles.liveImage} loading="lazy" width={600} height={750} />
+        <span className={liveStyles.liveBadge}>
+          <span className={liveStyles.liveDot} aria-hidden />
           LIVE
         </span>
-        <span className={styles.liveWatching}>
+        <span className={liveStyles.liveWatching}>
           <ZudoIcon name="eye16" size={12} /> {liveShowcaseStream.watching}
         </span>
       </div>
-      <div className={styles.liveBody}>
+      <div className={liveStyles.liveBody}>
         <StoreIdentityRow storeName={liveShowcaseStream.storeName} isVerifiedBusiness={false} labelText="Promoted" />
-        <p className={styles.liveTitle}>{liveShowcaseStream.title}</p>
+        <p className={liveStyles.liveTitle}>{liveShowcaseStream.title}</p>
         <CallToActionBar label="Join live" />
       </div>
     </figure>

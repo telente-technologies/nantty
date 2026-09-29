@@ -1,15 +1,16 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { BrandBilibili20Icon, BuildingStore20Icon, MessageShare20Icon, Refresh20Icon } from "@/components/icons";
+import { BrandBilibili20Icon, BuildingStore20Icon, MessageShare20Icon, Refresh20Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 
-export type ProfileTabKey = "posts" | "reposts" | "clips" | "store";
+export type ProfileTabKey = "posts" | "reposts" | "clips" | "sounds" | "store";
 
 const TAB_DEFINITIONS: Record<ProfileTabKey, { label: string; icon: () => React.ReactNode }> = {
   posts: { label: "Posts", icon: () => <MessageShare20Icon /> },
   reposts: { label: "Reposts", icon: () => <Refresh20Icon /> },
   clips: { label: "Clips", icon: () => <BrandBilibili20Icon /> },
+  sounds: { label: "Sounds", icon: () => <SpeakerHigh24Icon size={20} /> },
   store: { label: "Store", icon: () => <BuildingStore20Icon /> },
 };
 

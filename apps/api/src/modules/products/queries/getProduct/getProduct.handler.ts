@@ -8,6 +8,7 @@ import {
   convertStoreSummaryToShopDto,
   type PublicProductDetailDto,
 } from "../../dtos/products.dto.js";
+import { rankProductsForViewer } from "../../services/productDiscovery.service.js";
 import type { ProductsService } from "../../services/products.service.js";
 import type { GetProductQuery } from "./getProduct.query.js";
 
@@ -21,12 +22,13 @@ export class GetProductHandler extends QueryHandler<GetProductQuery, PublicProdu
   }
 
   public async execute(query: GetProductQuery): Promise<PublicProductDetailDto> {
-    const { products, variants, stores, currencyConverter } = this.productsService.dependencies;
+    const { products, variants, stores, currencyConverter, discovery } = this.productsService.dependencies;
     const convert = await currencyConverter.prepareConversionInto(query.displayCurrency);
     const product = await this.productsService.findPubliclyVisibleProductOrThrow(query.productId);
     const store = await stores.findById(product.storeId);
     if (store === undefined) throw notFound("Product");
-    const related = await products.listRelatedPublished(product, await this.productsService.listHiddenStoreIds(), FEATURED_WITH_LIMIT);
+    const relatedCandidates = await products.listRelatedPublished(product, await this.productsService.listHiddenStoreIds(), FEATURED_WITH_LIMIT);
+    const related = await rankProductsForViewer(discovery, relatedCandidates, "featured_with", { viewerId: undefined, country: null }, new Date(), product);
     return {
       ...convertProductToDetailDto(product, await variants.listForProducts([product.id]), convert),
       store: { ...convertStoreSummaryToShopDto(convertStoreToSummary(store), convert), rating: store.ratingAverage, reviewCount: store.ratingCount },

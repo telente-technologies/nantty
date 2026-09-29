@@ -6,10 +6,12 @@ import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
 import type { UserAccountStandingLookup, UserDirectory } from "../interfaces/userDirectory.interface.js";
 import { CreatorAdminController } from "../modules/creators/controllers/creatorAdmin.controller.js";
+import { CreatorMonetizationController } from "../modules/creators/controllers/creatorMonetization.controller.js";
 import { CreatorsController } from "../modules/creators/controllers/creators.controller.js";
 import { registerCreatorsCommandAndQueryHandlers } from "../modules/creators/creators.module.js";
 import { PrismaAffiliatesRepository } from "../modules/creators/repositories/affiliates.prisma.repository.js";
 import { InMemoryAffiliatesRepository } from "../modules/creators/repositories/affiliates.repository.js";
+import { InMemoryBrandDealsRepository, PrismaBrandDealsRepository } from "../modules/creators/repositories/brandDeals.repository.js";
 import { PrismaCreatorEarningsRepository } from "../modules/creators/repositories/creatorEarnings.prisma.repository.js";
 import { InMemoryCreatorEarningsRepository } from "../modules/creators/repositories/creatorEarnings.repository.js";
 import { PrismaCreatorProgramRepository } from "../modules/creators/repositories/creatorProgram.prisma.repository.js";
@@ -53,6 +55,8 @@ export function createCreatorModule(core: Core, program: CreatorProgramRepositor
     events: core.events,
     clock: core.clock,
     settings: core.settings.creators,
+    monetization: core.settings.monetization,
+    brandDeals: usePrisma ? new PrismaBrandDealsRepository() : new InMemoryBrandDealsRepository(),
     logger: core.logger,
   });
   registerCreatorsCommandAndQueryHandlers(core.commands, core.queries, services);
@@ -68,6 +72,7 @@ export function createCreatorModule(core: Core, program: CreatorProgramRepositor
     controllers: {
       creatorsController: new CreatorsController(core.commands, core.queries),
       creatorAdminController: new CreatorAdminController(core.commands, core.queries),
+      creatorMonetizationController: new CreatorMonetizationController(core.commands, core.queries),
     },
   };
 }

@@ -16,6 +16,12 @@ export interface MediaLibraryItem {
   readonly failureReason: string | null;
 }
 
+export interface MediaOriginalFile {
+  readonly bytes: Uint8Array;
+  readonly contentType: string;
+}
+
 export interface MediaLibrary {
   findMediaByIds(mediaIds: readonly string[]): Promise<readonly MediaLibraryItem[]>;
+  readMediaOriginal(mediaId: string): Promise<MediaOriginalFile | undefined>;
 }

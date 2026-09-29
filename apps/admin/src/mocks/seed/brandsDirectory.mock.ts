@@ -88,7 +88,7 @@ export function buildDemoBrands(): MockBrandRecord[] {
       members: [{ userId: "usr_0003", role: "OWNER", addedAt: daysAgoIso(300) }, { userId: "usr_0024", role: "ADMIN", addedAt: daysAgoIso(60) }],
       linkedStores: [{ id: "sto_1003", storeName: "Kemi's Kitchen", sellerUserId: "usr_0003", linkedAt: daysAgoIso(290), isVerified: true, hasOfficialBadge: false }],
       createdAt: daysAgoIso(300),
-      officialRequest: buildOfficialRequest("brd_0002", { submittedDaysAgo: 3, submittedByUserId: "usr_0003", trademark: { registrationNumber: "NG/TM/O/2023/77120", jurisdiction: "Nigeria Trademarks, Patents and Designs Registry", niceClass: 30, registeredOwner: "Kemi's Kitchen Foods Limited", registeredOn: "2023-02-02", expiresOn: daysFromNowDateOnly(2400) }, cacRegistrationNumber: "RC 1893377", cacCompanyName: "Kemi's Kitchen Foods Limited", contactEmail: "hello@kemiskitchen.example.com" }),
+      officialRequest: buildOfficialRequest("brd_0002", { submittedDaysAgo: 2, submittedByUserId: "usr_0003", trademark: { registrationNumber: "NG/TM/O/2023/77120", jurisdiction: "Nigeria Trademarks, Patents and Designs Registry", niceClass: 30, registeredOwner: "Kemi's Kitchen Foods Limited", registeredOn: "2023-02-02", expiresOn: daysFromNowDateOnly(2400) }, cacRegistrationNumber: "RC 1893377", cacCompanyName: "Kemi's Kitchen Foods Limited", contactEmail: "hello@kemiskitchen.example.com" }),
     },
     {
       id: "brd_0003", name: "Funke Naturals", slug: "funke-naturals", logoPhotoId: "1643185450492-6ba77dea00f6", category: "Beauty", country: "NG", website: "https://funkenaturals.example.com", status: "ACTIVE", officialStatus: "PENDING",

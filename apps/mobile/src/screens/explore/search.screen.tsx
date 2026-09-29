@@ -5,6 +5,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { PersonRow } from "@/components/search/personRow";
 import { SearchBar } from "@/components/search/searchBar";
+import { BrandRow } from "@/components/store/brandRow";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -17,6 +18,7 @@ const SCOPES: { label: string; scope: SearchScope }[] = [
   { label: "All", scope: "all" },
   { label: "Products", scope: "products" },
   { label: "Stores", scope: "stores" },
+  { label: "Brands", scope: "brands" },
   { label: "People", scope: "people" },
 ];
 
@@ -56,11 +58,11 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
           <Text align="center" color={colors.textSubtle} style={styles.state}>Search products, stores and people.</Text>
         ) : results.isLoading ? (
           <ActivityIndicator style={styles.state} color={colors.primary} />
-        ) : !data || (data.products.length + data.stores.length + data.people.length === 0) ? (
+        ) : !data || (data.products.length + data.stores.length + data.people.length + (data.brands?.length ?? 0) === 0) ? (
           <Text align="center" color={colors.textSubtle} style={styles.state}>No results for “{debouncedQuery}”.</Text>
         ) : (
           <>
-            {data.stores.length > 0 && scope !== "products" && scope !== "people" ? (
+            {data.stores.length > 0 && (scope === "all" || scope === "stores") ? (
               <View style={styles.section}>
                 <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>Stores</Text>
                 {data.stores.map((store) => (
@@ -68,7 +70,15 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
                 ))}
               </View>
             ) : null}
-            {data.people.length > 0 && scope !== "products" && scope !== "stores" ? (
+            {(data.brands?.length ?? 0) > 0 && (scope === "all" || scope === "brands") ? (
+              <View style={styles.section}>
+                <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>Brands</Text>
+                {data.brands!.map((brand) => (
+                  <BrandRow key={brand.id} brand={brand} onPress={() => navigation.navigate("BrandProfile", { brandId: brand.id })} />
+                ))}
+              </View>
+            ) : null}
+            {data.people.length > 0 && (scope === "all" || scope === "people") ? (
               <View style={styles.section}>
                 <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>People</Text>
                 {data.people.map((person) => (
@@ -76,7 +86,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
                 ))}
               </View>
             ) : null}
-            {data.products.length > 0 && scope !== "stores" && scope !== "people" ? (
+            {data.products.length > 0 && (scope === "all" || scope === "products") ? (
               <View>
                 <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} style={styles.productsTitle}>Products</Text>
                 <ProductMasonry products={data.products} adPlacement="search" />
@@ -91,7 +101,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
 
 const styles = StyleSheet.create({
   searchRow: { paddingHorizontal: 16, flexDirection: "row" },
-  scopes: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", gap: 8 },
+  scopes: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", flexWrap: "wrap", gap: 8 },
   content: { paddingBottom: 24, gap: 20 },
   section: { paddingHorizontal: 16, gap: 4 },
   productsTitle: { marginBottom: 8, paddingHorizontal: 16 },

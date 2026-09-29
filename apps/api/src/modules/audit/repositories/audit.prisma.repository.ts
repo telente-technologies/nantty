@@ -14,6 +14,8 @@ function convertAuditRowToRecord(row: AuditEvent): AuditEventRecord {
     entityType: row.entityType,
     entityId: row.entityId,
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
+    ...(row.before === null ? {} : { before: row.before }),
+    ...(row.after === null ? {} : { after: row.after }),
     ...(row.ip === null ? {} : { ip: row.ip }),
     createdAt: row.createdAt,
   };
@@ -28,6 +30,8 @@ export class PrismaAuditRepository implements AuditRepository {
         entityType: entry.entityType,
         entityId: entry.entityId,
         metadata: JSON.parse(JSON.stringify(entry.metadata ?? {})),
+        ...(entry.before === undefined || entry.before === null ? {} : { before: JSON.parse(JSON.stringify(entry.before)) }),
+        ...(entry.after === undefined || entry.after === null ? {} : { after: JSON.parse(JSON.stringify(entry.after)) }),
         ip: entry.ip ?? null,
         createdAt,
       },

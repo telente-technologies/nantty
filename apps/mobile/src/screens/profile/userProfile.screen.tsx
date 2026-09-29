@@ -54,7 +54,13 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         profile={viewingOwnProfile ? undefined : profile}
         posts={postsQuery.data?.data ?? []}
         variant="other"
-        tabs={profile?.isSeller ? ["posts", "reposts", "clips", "store"] : ["posts", "reposts", "clips"]}
+        tabs={[
+          "posts",
+          "reposts",
+          "clips",
+          ...(profile?.isCreator || (subscriptionPlans.data?.length ?? 0) > 0 ? (["sounds"] as const) : []),
+          ...(profile?.isSeller ? (["store"] as const) : []),
+        ]}
         actions={actions}
         loading={postsQuery.isLoading}
         refreshing={profileQuery.isRefetching || postsQuery.isRefetching}

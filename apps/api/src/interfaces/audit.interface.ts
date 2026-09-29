@@ -4,6 +4,8 @@ export interface AuditEntry {
   readonly entityType: string;
   readonly entityId: string;
   readonly metadata?: Readonly<Record<string, unknown>>;
+  readonly before?: unknown;
+  readonly after?: unknown;
   readonly ip?: string;
 }
 

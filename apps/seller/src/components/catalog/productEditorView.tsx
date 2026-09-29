@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
+import { ProductBrandSection } from "@/components/catalog/productBrandSection";
 import { convertDraftToUpsertRequest, convertProductToDraft, createEmptyProductDraft, regenerateVariantDraftsForOptions, type OptionDraft, type ProductDraft, type VariantDraft } from "@/components/catalog/productEditorDraft.util";
 import { ProductImagesSection } from "@/components/catalog/productImagesSection";
 import { ProductOptionsSection } from "@/components/catalog/productOptionsSection";
@@ -118,6 +119,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
         </div>
         <div className={styles.sideColumn}>
           <ProductImagesSection images={draft.images} onUploadingChange={setIsUploading} onImagesChange={(updater) => setDraft((current) => (current ? { ...current, images: updater(current.images) } : current))} />
+          <ProductBrandSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
           {!isNewProduct ? <Callout tone="info">Stock changes go through <a href="/inventory/adjustments">stock adjustments</a> or <a href="/inventory/transfers">transfers</a> so every unit is accounted for.</Callout> : null}
         </div>
       </div>

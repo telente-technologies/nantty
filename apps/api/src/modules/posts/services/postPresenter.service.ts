@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "../../../enums/currency.enum.js";
+import type { SponsoredDto } from "../../../interfaces/discovery.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
 import type { UserSummary } from "../../../interfaces/userDirectory.interface.js";
 import { Money } from "../../../utils/money.util.js";
@@ -16,6 +17,16 @@ import type { PostsDependencies } from "./posts.service.js";
 
 const FRIEND_AVATAR_SAMPLE_SIZE = 3;
 
+export interface SelectedFriendsLiked {
+  readonly totalFriendCount: number;
+  readonly friendUserIds: readonly string[];
+}
+
+export interface PostDecorations {
+  readonly friendsLiked?: ReadonlyMap<string, SelectedFriendsLiked>;
+  readonly sponsored?: ReadonlyMap<string, SponsoredDto>;
+}
+
 function convertStoreToBadge(store: StoreSummary | undefined): StoreBadgeDto | null {
   return store === undefined ? null : { id: store.id, name: store.name, slug: store.slug, logoUrl: store.logoUrl };
 }
@@ -31,24 +42,29 @@ export function indexById<T extends { readonly id: string }>(items: readonly T[]
 export class PostPresenter {
   public constructor(private readonly dependencies: PostsDependencies) {}
 
-  public async presentPosts(posts: readonly PostRecord[], viewerId: string | undefined, displayCurrency: CurrencyCode): Promise<PostDto[]> {
+  public async presentPosts(
+    posts: readonly PostRecord[],
+    viewerId: string | undefined,
+    displayCurrency: CurrencyCode,
+    decorations: PostDecorations = {},
+  ): Promise<PostDto[]> {
     const { interactions, socialGraph, posts: postsRepository } = this.dependencies;
     const originalIds = [...new Set(posts.map((post) => post.repostOfId).filter((id): id is string => id !== null))];
     const originals = originalIds.length === 0 ? [] : await postsRepository.findManyByIds(originalIds);
     const everyPost = [...posts, ...originals];
     const postIds = everyPost.map((post) => post.id);
     const followedUserIds = viewerId === undefined ? [] : await socialGraph.listFollowedUserIds(viewerId);
-    const [stores, products, liked, friendLikes] = await Promise.all([
+    const [stores, products, liked] = await Promise.all([
       this.findStores(everyPost.map((post) => post.storeId).filter((id): id is string => id !== null)),
       this.findProductCards(everyPost.flatMap((post) => post.productIds), displayCurrency),
       viewerId === undefined ? new Set<string>() : interactions.listPostIdsLikedByUser(viewerId, postIds),
-      followedUserIds.length === 0 ? new Map<string, readonly string[]>() : interactions.listLikersAmongUsers(postIds, followedUserIds),
     ]);
-    const sampledFriendIds = [...friendLikes.values()].flatMap((likers) => likers.slice(0, FRIEND_AVATAR_SAMPLE_SIZE));
+    const friendsLiked = decorations.friendsLiked ?? new Map<string, SelectedFriendsLiked>();
+    const sampledFriendIds = [...friendsLiked.values()].flatMap((selection) => selection.friendUserIds.slice(0, FRIEND_AVATAR_SAMPLE_SIZE));
     const users = await this.findUsers([...everyPost.map((post) => post.authorId), ...sampledFriendIds]);
     const followed = new Set(followedUserIds);
     const presentOne = (post: PostRecord, repostOf: PostDto | null): PostDto => {
-      const friendLikers = friendLikes.get(post.id) ?? [];
+      const selection = friendsLiked.get(post.id);
       return {
         id: post.id,
         kind: post.kind,
@@ -65,9 +81,10 @@ export class PostPresenter {
         bookmarked: false,
         isFollowingAuthor: followed.has(post.authorId),
         friendsLiked:
-          friendLikers.length === 0
+          selection === undefined || selection.totalFriendCount === 0
             ? null
-            : { count: friendLikers.length, avatars: friendLikers.slice(0, FRIEND_AVATAR_SAMPLE_SIZE).map((id) => users.get(id)?.avatarUrl ?? null) },
+            : { count: selection.totalFriendCount, avatars: selection.friendUserIds.slice(0, FRIEND_AVATAR_SAMPLE_SIZE).map((id) => users.get(id)?.avatarUrl ?? null) },
+        sponsored: decorations.sponsored?.get(post.id) ?? null,
         products: post.productIds.map((id) => products.get(id)).filter((product): product is ProductCardDto => product !== undefined),
         store: convertStoreToBadge(post.storeId === null ? undefined : stores.get(post.storeId)),
         topics: post.topics,
@@ -111,7 +128,11 @@ export class PostPresenter {
     });
   }
 
-  public async presentLiveSessions(sessions: readonly LiveSessionRecord[], displayCurrency: CurrencyCode): Promise<LiveSessionDto[]> {
+  public async presentLiveSessions(
+    sessions: readonly LiveSessionRecord[],
+    displayCurrency: CurrencyCode,
+    sponsored: ReadonlyMap<string, SponsoredDto> = new Map(),
+  ): Promise<LiveSessionDto[]> {
     const [hosts, stores, products] = await Promise.all([
       this.findUsers(sessions.map((session) => session.hostId)),
       this.findStores(sessions.map((session) => session.storeId).filter((id): id is string => id !== null)),
@@ -129,6 +150,7 @@ export class PostPresenter {
       pinnedProduct: session.pinnedProductId === null ? null : products.get(session.pinnedProductId) ?? null,
       startedAt: session.startedAt.toISOString(),
       endedAt: session.endedAt?.toISOString() ?? null,
+      sponsored: sponsored.get(session.id) ?? null,
     }));
   }
 

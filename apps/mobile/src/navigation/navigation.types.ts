@@ -91,6 +91,8 @@ export type MainStackParamList = {
   SupportTicketDetail: { ticketId: string };
   MyReports: undefined;
   SettingsUsername: undefined;
+  BrandProfile: { brandId: string };
+  CreateBrand: undefined;
   Sound: { soundId: string };
 };
 

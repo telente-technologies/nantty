@@ -3,6 +3,7 @@ import type { EventBus } from "@zudojs/events";
 import { notFound } from "../../../errors/domain.error.js";
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { CurrencyConverter } from "../../../interfaces/currencyConverter.interface.js";
+import type { DiscoveryServices } from "../../../interfaces/discovery.interface.js";
 import type { InventoryLine } from "../../../interfaces/productCatalog.interface.js";
 import type { CategoriesRepository } from "../../categories/repositories/categories.repository.js";
 import type { StoresRepository } from "../../stores/repositories/stores.repository.js";
@@ -22,6 +23,7 @@ export interface ProductsDependencies {
   readonly events: EventBus;
   readonly audit: AuditRecorder;
   readonly currencyConverter: CurrencyConverter;
+  readonly discovery?: DiscoveryServices;
 }
 
 export class ProductsService {

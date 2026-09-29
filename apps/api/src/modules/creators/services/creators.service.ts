@@ -1,6 +1,7 @@
 import type { EventBus } from "@zudojs/events";
 
 import type { CreatorProgramSettings } from "../../../configs/creators.config.js";
+import type { MonetizationSettings } from "../../../configs/monetization.config.js";
 import { forbidden } from "../../../errors/domain.error.js";
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
@@ -17,6 +18,7 @@ import type { PostsService } from "../../posts/services/posts.service.js";
 import type { CreatorApplicationDto } from "../dtos/creators.dto.js";
 import type { CreatorApplicationRecord, CreatorProfileRecord, CreatorProgramStatus } from "../models/creators.model.js";
 import type { AffiliatesRepository } from "../repositories/affiliates.repository.js";
+import type { BrandDealsRepository } from "../repositories/brandDeals.repository.js";
 import type { CreatorEarningsRepository } from "../repositories/creatorEarnings.repository.js";
 import type { CreatorProgramRepository } from "../repositories/creatorProgram.repository.js";
 
@@ -36,6 +38,8 @@ export interface CreatorsDependencies {
   readonly events: EventBus;
   readonly clock: Clock;
   readonly settings: CreatorProgramSettings;
+  readonly monetization: MonetizationSettings;
+  readonly brandDeals: BrandDealsRepository;
   readonly logger: AppLogger;
 }
 

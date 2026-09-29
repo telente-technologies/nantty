@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { CalendarDots16Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
+
+import { OfficialStoreBadge } from "./officialStoreBadge";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { StoreDetail } from "@/types/commerce.type";
@@ -38,6 +40,7 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
             <VerificationBadge verification={store.verification} legacyVerified={store.verified} size={20} />
           </View>
           <Text size={14} lineHeight={16.8} color={colors.textSubtle}>@{store.handle}</Text>
+          {store.officialBrand ? <OfficialStoreBadge /> : null}
           <View style={styles.stats}>
             <Text size={14} weight={500} lineHeight={16.8}>
               {formatCountWithThousandsSuffix(store.followers)} <Text size={14} lineHeight={16.8}>followers</Text>

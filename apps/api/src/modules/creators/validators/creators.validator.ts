@@ -1,5 +1,6 @@
 import { schema, type Infer } from "@zudojs/schema";
 
+import { SUPPORTED_CURRENCY_CODES } from "../../../enums/currency.enum.js";
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 
 const MAX_GIFT_QUANTITY = 99;
@@ -52,3 +53,24 @@ export const AffiliateCommissionQuerySchema = schema.object({
 
 export type ReviewCreatorApplicationBody = Infer<typeof ReviewCreatorApplicationBodySchema>;
 export type AffiliateTargetBody = Infer<typeof AffiliateTargetBodySchema>;
+
+export const SendTipBodySchema = schema.object({
+  targetType: schema.enum(["post", "clip", "live"]),
+  targetId: schema.string().uuid(),
+  coins: schema.number().int().min(1).max(1_000_000),
+});
+
+export const ConvertEarnedCoinsBodySchema = schema.object({
+  coins: schema.number().int().min(1).max(100_000_000),
+  currency: schema.enum(SUPPORTED_CURRENCY_CODES).optional(),
+});
+
+export const BrandDealBodySchema = schema.object({
+  brandName: schema.string().min(1).max(120),
+  amount: schema.number().int().min(0).max(1_000_000_000_000),
+  currency: schema.enum(SUPPORTED_CURRENCY_CODES),
+  startsAt: schema.string().datetime(),
+  endsAt: schema.string().datetime().optional(),
+  disclosure: schema.string().min(2).max(300),
+  notes: schema.string().max(1000).optional(),
+});

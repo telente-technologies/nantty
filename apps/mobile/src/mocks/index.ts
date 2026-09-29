@@ -4,6 +4,7 @@ import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
 import { boostsMocks } from "./boosts.mock";
+import { brandsMocks } from "./brands.mock";
 import { cartMocks } from "./cart.mock";
 import { chatsMocks } from "./chats.mock";
 import { groupsMocks } from "./groups.mock";
@@ -53,6 +54,7 @@ const routes: MockRoute[] = [
   ...rewardsMocks,
   ...verificationMocks,
   ...boostsMocks,
+  ...brandsMocks,
   ...supportMocks,
   ...groupsMocks,
   ...chatsMocks,

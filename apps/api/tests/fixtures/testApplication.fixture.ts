@@ -15,6 +15,7 @@ import type { ContactAddress } from "../../src/modules/auth/services/contact.ser
 import { StaticBankDirectory } from "../../src/modules/wallets/services/bankDirectory.service.js";
 import { registerRoutes } from "../../src/routes/index.js";
 import { createApplicationRouterOptions } from "../../src/utils/http.util.js";
+import { provisionPlatformStaffAndSignIn, signInPlatformStaffAgain as signInPlatformStaffAgainThroughAdminConsole, type PlatformStaffOptions, type SignedInStaffSession } from "./platformAdmin.fixture.js";
 
 export class AdjustableClock implements Clock {
   private current = new Date("2026-09-01T09:00:00.000Z");
@@ -176,6 +177,20 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     return { userId, username, email, password, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
   }
 
+  async function registerPlatformStaff(options: PlatformStaffOptions = {}): Promise<SignedInUser & SignedInStaffSession & { readonly userAccessToken: string }> {
+    const user = await registerUser({ roles: [Role.ADMIN] });
+    const session = await provisionPlatformStaffAndSignIn(client, dependencies, clock, user, options);
+    return { ...user, ...session, userAccessToken: user.accessToken };
+  }
+
+  function registerAdmin() {
+    return registerPlatformStaff();
+  }
+
+  function signInPlatformStaffAgain(staff: { readonly email: string; readonly password: string; readonly totpSecret: string }): Promise<string> {
+    return signInPlatformStaffAgainThroughAdminConsole(client, clock, staff);
+  }
+
   async function verifyDestinationForSignup(destination: string): Promise<string> {
     await client.post("/api/v1/auth/otp/send").send({ destination, purpose: "signup" }).expect(200);
     const code = oneTimeCodes.latestCodeFor(destination.toLowerCase(), "signup");
@@ -191,7 +206,9 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     identityTokens,
     registerUser,
     registerSeller: () => registerUser({ roles: [Role.SELLER] }),
-    registerAdmin: () => registerUser({ roles: [Role.ADMIN] }),
+    registerAdmin,
+    registerPlatformStaff,
+    signInPlatformStaffAgain,
     verifyDestinationForSignup,
     close: () => client.close(),
   };

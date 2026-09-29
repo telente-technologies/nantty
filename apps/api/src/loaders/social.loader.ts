@@ -1,4 +1,5 @@
 import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
+import type { DiscoveryServices } from "../interfaces/discovery.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { MediaLibrary } from "../interfaces/mediaLibrary.interface.js";
 import type { OrderLookup } from "../interfaces/orderLookup.interface.js";
@@ -11,7 +12,9 @@ import type { UserAccountStandingLookup, UserDirectory } from "../interfaces/use
 import { FeedsController } from "../modules/feeds/controllers/feeds.controller.js";
 import { registerFeedsCommandAndQueryHandlers } from "../modules/feeds/feeds.module.js";
 import { InMemoryFeedInteractionsRepository, PrismaFeedInteractionsRepository } from "../modules/feeds/repositories/feeds.repository.js";
+import { FeedSignalsService } from "../modules/feeds/services/feedSignals.service.js";
 import { FeedsService } from "../modules/feeds/services/feeds.service.js";
+import { TrendingService } from "../modules/feeds/services/trending.service.js";
 import { FollowsController } from "../modules/follows/controllers/follows.controller.js";
 import { registerFollowsCommandAndQueryHandlers } from "../modules/follows/follows.module.js";
 import { InMemoryBlocksRepository, PrismaBlocksRepository } from "../modules/follows/repositories/blocks.repository.js";
@@ -54,6 +57,7 @@ export interface SocialSharedServices {
   readonly productCatalog: ProductCatalog;
   readonly orderLookup: OrderLookup;
   readonly mediaLibrary: MediaLibrary;
+  readonly discovery: DiscoveryServices;
 }
 
 export interface SocialExternalServices {
@@ -94,8 +98,13 @@ export function createSocialModules(core: Core, shared: SocialSharedServices, ex
     socialGraph,
     userDirectory: shared.userDirectory,
     clock,
+    discovery: shared.discovery,
   });
-  registerFeedsCommandAndQueryHandlers(commands, queries, feedsService);
+  registerFeedsCommandAndQueryHandlers(commands, queries, {
+    feeds: feedsService,
+    signals: new FeedSignalsService(feedsService, shared.productCatalog),
+    trending: new TrendingService(feedsService),
+  });
 
   const reviewsService = new ReviewsService({
     reviews: usePrisma ? new PrismaReviewsRepository() : new InMemoryReviewsRepository(),
@@ -115,6 +124,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices, ex
 
   return {
     socialGraph,
+    postsService,
     creatorProgram: creators.creatorProgram,
     controllers: {
       ...creators.controllers,

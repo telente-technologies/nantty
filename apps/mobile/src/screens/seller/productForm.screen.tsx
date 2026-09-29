@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
+import { BrandPickerField } from "@/components/seller/brandPickerField";
 import { ProductFormFields, type ProductFormValues } from "@/components/seller/productFormFields";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { SettingsCenteredAction } from "@/components/settings/settingsGroup";
@@ -29,6 +30,7 @@ export function ProductFormScreen({ navigation, route }: MainScreenProps<"Produc
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [brand, setBrand] = useState<{ id: string; name: string } | null>(null);
   const viewerCurrency = useLocaleStore((s) => s.currency);
   const { data: existing } = useQuery({
     queryKey: sellerQueryKeys.product(productId ?? "new"),
@@ -66,6 +68,7 @@ export function ProductFormScreen({ navigation, route }: MainScreenProps<"Produc
         sizes: splitCommaSeparatedList(form.sizes),
         colors: splitCommaSeparatedList(form.colors),
         imageUrls,
+        brandId: brand?.id ?? null,
       };
       return productId ? sellerService.updateStoreProduct(productId, input) : sellerService.createStoreProduct(input);
     },
@@ -108,6 +111,7 @@ export function ProductFormScreen({ navigation, route }: MainScreenProps<"Produc
             </Text>
           </Pressable>
         </ScrollView>
+        <BrandPickerField selectedBrandName={brand?.name ?? null} onSelectBrand={(chosen) => setBrand(chosen ? { id: chosen.id, name: chosen.name } : null)} />
         <ProductFormFields values={form} currency={currency} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} />
         {saveProduct.isError ? (
           <Text size={12} lineHeight={14.4} color={colors.error}>

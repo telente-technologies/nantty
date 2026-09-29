@@ -4,8 +4,9 @@ import type { MinorUnits } from "../../../types/money.type.js";
 export type CreatorApplicationStatus = "pending" | "approved" | "rejected";
 export type CreatorProfileStatus = "approved" | "suspended";
 export type CreatorProgramStatus = "none" | CreatorApplicationStatus | "suspended";
-export type CreatorEarningKind = "gift" | "affiliate";
-export type CreatorEarningSource = "live" | "post" | "clip";
+export type CreatorEarningKind = "gift" | "affiliate" | "tip" | "subscription";
+export type EarningUnit = CurrencyCode | "COIN";
+export type CreatorEarningSource = "live" | "post" | "clip" | "subscription";
 
 export interface EligibilityCriterion {
   readonly met: boolean;
@@ -55,7 +56,7 @@ export interface CreatorEarningRecord {
   readonly sourceId: string;
   readonly grossAmount: MinorUnits;
   readonly netAmount: MinorUnits;
-  readonly currency: CurrencyCode;
+  readonly currency: EarningUnit;
   readonly orderId: string | null;
   readonly productId: string | null;
   readonly createdAt: Date;
@@ -71,7 +72,7 @@ export interface LiveGiftRecord {
   readonly giftId: string;
   readonly quantity: number;
   readonly amount: MinorUnits;
-  readonly currency: CurrencyCode;
+  readonly currency: EarningUnit;
   readonly reference: string;
   readonly createdAt: Date;
 }
@@ -97,3 +98,18 @@ export interface CreatorAffiliationRecord {
 export function buildAffiliateTargetKey(storeId: string, productId: string | null): string {
   return productId === null ? `store:${storeId}` : `product:${productId}`;
 }
+
+export interface BrandDealRecord {
+  readonly id: string;
+  readonly creatorId: string;
+  readonly brandName: string;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
+  readonly startsAt: Date;
+  readonly endsAt: Date | null;
+  readonly disclosure: string;
+  readonly notes: string | null;
+  readonly createdAt: Date;
+}
+
+export type NewBrandDeal = Omit<BrandDealRecord, "id">;

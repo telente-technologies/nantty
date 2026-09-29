@@ -11,6 +11,7 @@ export interface BackendCall {
   readonly accessToken?: string | null;
   readonly operatorToken?: string | null;
   readonly locationId?: string | null;
+  readonly storeId?: string | null;
   readonly forwardedHeaders?: Record<string, string>;
 }
 
@@ -29,6 +30,7 @@ function buildOutgoingHeaders(call: BackendCall): Headers {
   if (call.accessToken) headers.set("Authorization", `Bearer ${call.accessToken}`);
   if (call.operatorToken) headers.set("X-Seller-Operator", call.operatorToken);
   if (call.locationId) headers.set("X-Seller-Location", call.locationId);
+  if (call.storeId) headers.set("X-Seller-Store", call.storeId);
   headers.set("X-Request-Id", crypto.randomUUID());
   for (const [headerName, headerValue] of Object.entries(call.forwardedHeaders ?? {})) headers.set(headerName, headerValue);
   return headers;

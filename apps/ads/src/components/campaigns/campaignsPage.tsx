@@ -74,7 +74,7 @@ export function CampaignsPage() {
     <EmptyState
       iconName="squaresFour24"
       title={searchText || statusFilter || objectiveFilter ? "Nothing matches these filters" : "No campaigns yet"}
-      description={searchText || statusFilter || objectiveFilter ? "Clear a filter or pick a longer date range." : "Create a campaign to promote a post, clip, product or your whole store."}
+      description={searchText || statusFilter || objectiveFilter ? "Clear a filter or pick a longer date range." : "Create a campaign to promote a post, reel, product, live session or your whole store."}
       action={canCreate && !searchText && !statusFilter ? <ButtonLink href={buildAccountPagePath("/campaigns/new")} variant="primary" iconName="plus16">Create campaign</ButtonLink> : undefined}
     />
   );

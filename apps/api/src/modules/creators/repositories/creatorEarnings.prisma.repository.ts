@@ -1,11 +1,10 @@
 import { isUniqueConstraintViolation } from "../../../databases/prisma.database.js";
 import type { CreatorEarning, LiveGift } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
-import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
-import type { CreatorEarningKind, CreatorEarningRecord, CreatorEarningSource, LiveGiftRecord, NewCreatorEarning, NewLiveGift } from "../models/creators.model.js";
+import type { EarningUnit, CreatorEarningKind, CreatorEarningRecord, CreatorEarningSource, LiveGiftRecord, NewCreatorEarning, NewLiveGift } from "../models/creators.model.js";
 import type { CreatorEarningsRepository, EarningTotal } from "./creatorEarnings.repository.js";
 
 function convertEarningRowToRecord(row: CreatorEarning): CreatorEarningRecord {
@@ -15,12 +14,12 @@ function convertEarningRowToRecord(row: CreatorEarning): CreatorEarningRecord {
     sourceType: row.sourceType as CreatorEarningSource,
     grossAmount: convertDatabaseAmountToMinorUnits(row.grossAmount),
     netAmount: convertDatabaseAmountToMinorUnits(row.netAmount),
-    currency: row.currency as CurrencyCode,
+    currency: row.currency as EarningUnit,
   };
 }
 
 function convertGiftRowToRecord(row: LiveGift): LiveGiftRecord {
-  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), currency: row.currency as CurrencyCode };
+  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), currency: row.currency as EarningUnit };
 }
 
 export class PrismaCreatorEarningsRepository implements CreatorEarningsRepository {
@@ -52,7 +51,7 @@ export class PrismaCreatorEarningsRepository implements CreatorEarningsRepositor
     });
     return groups.map((group) => ({
       kind: group.kind as CreatorEarningKind,
-      currency: group.currency as CurrencyCode,
+      currency: group.currency as EarningUnit,
       netAmount: convertDatabaseAmountToMinorUnits(group._sum.netAmount ?? 0n),
       count: group._count._all,
     }));

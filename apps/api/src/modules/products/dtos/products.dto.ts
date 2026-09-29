@@ -1,4 +1,5 @@
 import type { MoneyConversion } from "../../../interfaces/currencyConverter.interface.js";
+import type { SponsoredDto } from "../../../interfaces/discovery.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
 import type { MoneyDto } from "../../../utils/money.util.js";
 import { calculateDiscountFraction, type ProductRecord, type ProductVariantRecord } from "../models/products.model.js";
@@ -15,7 +16,9 @@ export function convertVariantToDto(variant: ProductVariantRecord, product: Prod
   };
 }
 
-export function convertProductToCardDto(product: ProductRecord, convert: MoneyConversion) {
+export type SponsorableProduct = ProductRecord & { readonly sponsored?: SponsoredDto | null };
+
+export function convertProductToCardDto(product: SponsorableProduct, convert: MoneyConversion) {
   return {
     id: product.id,
     name: product.title,
@@ -29,6 +32,7 @@ export function convertProductToCardDto(product: ProductRecord, convert: MoneyCo
     ratingAverage: product.ratingAverage,
     ratingCount: product.ratingCount,
     salesCount: product.salesCount,
+    sponsored: product.sponsored ?? null,
   };
 }
 

@@ -7,6 +7,8 @@ export interface AuditEventDto {
   readonly entityType: string;
   readonly entityId: string;
   readonly metadata: Readonly<Record<string, unknown>>;
+  readonly before: unknown;
+  readonly after: unknown;
   readonly createdAt: string;
 }
 
@@ -18,6 +20,8 @@ export function convertAuditEventToDto(event: AuditEventRecord): AuditEventDto {
     entityType: event.entityType,
     entityId: event.entityId,
     metadata: event.metadata,
+    before: event.before ?? null,
+    after: event.after ?? null,
     createdAt: event.createdAt.toISOString(),
   };
 }

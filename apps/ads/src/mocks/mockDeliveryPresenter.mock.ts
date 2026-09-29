@@ -13,6 +13,10 @@ function estimateSpendSoFarToday(dailyBudgetMinor: number | null, isActive: bool
   return Math.round(dailyBudgetMinor * Math.min(fractionOfDayElapsed, 1) * 0.93);
 }
 
+function hasDeliveredBeforeToday(campaign: MockCampaignRecord): boolean {
+  return campaign.schedule.startAt.slice(0, 10) < new Date().toISOString().slice(0, 10);
+}
+
 function buildDeliverySummary(filter: StatFilter, campaign: MockCampaignRecord, dailyBudgetMinor: number | null, isActive: boolean): DeliverySummary {
   const currency = readAccountCurrency(filter.accountId);
   const weightedStats = collectWeightedStats(filter);
@@ -26,7 +30,7 @@ function buildDeliverySummary(filter: StatFilter, campaign: MockCampaignRecord, 
     spend: metrics.spend,
     costPerResult: results > 0 ? { amountMinor: Math.round(metrics.spend.amountMinor / results), currency } : null,
     conversionValue: metrics.conversionValue,
-    spentToday: { amountMinor: estimateSpendSoFarToday(dailyBudgetMinor, isActive), currency },
+    spentToday: { amountMinor: estimateSpendSoFarToday(dailyBudgetMinor, isActive && hasDeliveredBeforeToday(campaign)), currency },
   };
 }
 

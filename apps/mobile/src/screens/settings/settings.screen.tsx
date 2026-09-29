@@ -6,6 +6,7 @@ import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup"
 import { SettingsPage } from "@/components/settings/settingsPage";
 import {
   BellRinging24Icon,
+  BuildingStore20Icon,
   CaretRight24Icon,
   CreditCard24Icon,
   Frame83032Icon,
@@ -105,6 +106,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
           onPress={() => navigation.navigate(isApprovedCreator ? "CreatorDashboard" : "CreatorProgram")}
         />
         <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.black} />} onPress={() => navigation.navigate("Verification")} />
+        <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
         <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />
       </SettingsGroup>
 

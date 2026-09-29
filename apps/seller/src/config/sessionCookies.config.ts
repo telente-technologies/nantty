@@ -20,6 +20,9 @@ export const sessionCookieNames = {
   get posOperator() {
     return prefixCookieNameForHost("zd_operator");
   },
+  get selectedStore() {
+    return prefixCookieNameForHost("zd_store");
+  },
   get selectedLocation() {
     return prefixCookieNameForHost("zd_location");
   },

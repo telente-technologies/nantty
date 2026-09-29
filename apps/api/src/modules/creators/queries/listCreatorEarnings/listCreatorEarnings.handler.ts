@@ -1,7 +1,6 @@
 import { QueryHandler } from "@zudojs/cqrs";
 
 import type { Page } from "../../../../types/pagination.type.js";
-import { Money } from "../../../../utils/money.util.js";
 import { mapPageItems } from "../../../../utils/pagination.util.js";
 import type { CreatorEarningDto } from "../../dtos/creators.dto.js";
 import type { CreatorProgramServices } from "../../services/creatorProgramServices.service.js";
@@ -20,8 +19,8 @@ export class ListCreatorEarningsHandler extends QueryHandler<ListCreatorEarnings
       id: earning.id,
       kind: earning.kind,
       source: { type: earning.sourceType, id: earning.sourceId },
-      amount: Money.of(earning.netAmount, earning.currency).toDto(),
-      grossAmount: Money.of(earning.grossAmount, earning.currency).toDto(),
+      amount: { amountMinor: earning.netAmount, currency: earning.currency },
+      grossAmount: { amountMinor: earning.grossAmount, currency: earning.currency },
       orderId: earning.orderId,
       productId: earning.productId,
       createdAt: earning.createdAt.toISOString(),

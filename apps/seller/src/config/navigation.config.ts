@@ -58,6 +58,7 @@ export function buildNavigationGroups(adsManagerUrl: string): NavigationGroup[] 
       label: "Team",
       items: [
         { label: "Staff", href: "/staff", iconName: "shield24", permission: "staff:manage", keywords: "roles pin audit" },
+        { label: "Brand", href: "/brand", iconName: "sealCheck20", permission: "settings:view", keywords: "official store trademark counterfeit protection" },
         { label: "Settings", href: "/settings", iconName: "slidersHorizontal24", permission: "settings:view", keywords: "store locations taxes receipt billing" },
       ],
     },

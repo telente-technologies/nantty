@@ -12,6 +12,35 @@ export function describeWhyCreativeFileIsNotAccepted(file: File): string | null 
   return null;
 }
 
+export interface BrowserMediaMetadata {
+  readonly width: number;
+  readonly height: number;
+  readonly durationSeconds: number | null;
+}
+
+export async function readMediaMetadataInBrowser(file: File): Promise<BrowserMediaMetadata | null> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    if (file.type.startsWith("image/")) {
+      const bitmap = await createImageBitmap(file);
+      const metadata = { width: bitmap.width, height: bitmap.height, durationSeconds: null };
+      bitmap.close();
+      return metadata;
+    }
+    return await new Promise<BrowserMediaMetadata | null>((resolve) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => resolve({ width: video.videoWidth, height: video.videoHeight, durationSeconds: Number.isFinite(video.duration) ? Math.round(video.duration * 10) / 10 : null });
+      video.onerror = () => resolve(null);
+      video.src = objectUrl;
+    });
+  } catch {
+    return null;
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  }
+}
+
 async function sendChunkWithOneRetry(uploadId: string, chunkIndex: number, chunkBytes: Uint8Array, chunkSha256: string): Promise<void> {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
@@ -28,9 +57,10 @@ async function sendChunkWithOneRetry(uploadId: string, chunkIndex: number, chunk
 }
 
 export async function uploadCreativeFileInChunks(accountId: string, file: File, onProgress: (fractionComplete: number) => void): Promise<UploadedMedia> {
+  const metadata = await readMediaMetadataInBrowser(file);
   const session = await sendAdsApiRequest<UploadSession>("/media/uploads", {
     method: "POST",
-    body: { fileName: file.name.slice(0, 200), mimeType: file.type, sizeBytes: file.size, purpose: "ad_creative", adAccountId: accountId },
+    body: { fileName: file.name.slice(0, 200), mimeType: file.type, sizeBytes: file.size, purpose: "ad_creative", adAccountId: accountId, clientMetadata: metadata },
   });
   const alreadyUploaded = new Set(session.uploadedChunks);
   for (let chunkIndex = 0; chunkIndex < session.totalChunks; chunkIndex += 1) {

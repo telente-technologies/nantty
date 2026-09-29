@@ -8,6 +8,8 @@ export interface UnreadMessageCounts {
   readonly conversationsWithUnread: number;
 }
 
+const CONVERSATION_SCAN_LIMIT = 200;
+
 export class GetUnreadMessageCountHandler extends QueryHandler<GetUnreadMessageCountQuery, UnreadMessageCounts> {
   public readonly queryType = "messages.getUnreadMessageCount" as const;
 
@@ -16,13 +18,14 @@ export class GetUnreadMessageCountHandler extends QueryHandler<GetUnreadMessageC
   }
 
   public async execute(query: GetUnreadMessageCountQuery): Promise<UnreadMessageCounts> {
-    const { messages } = this.messagesService.dependencies;
+    const { conversations, messages, clock } = this.messagesService.dependencies;
     const userId = query.principal.userId;
-    const conversations = await messages.listConversationsForUser(userId);
+    const now = clock.now();
+    const joined = await conversations.listConversationsForUser(userId, CONVERSATION_SCAN_LIMIT);
     const counts = await Promise.all(
-      conversations.map(async (conversation) => {
-        const participant = await messages.findParticipant(conversation.id, userId);
-        return messages.countUnreadMessages(conversation.id, userId, participant?.lastReadAt ?? conversation.createdAt);
+      joined.map(async (conversation) => {
+        const participant = await conversations.findParticipant(conversation.id, userId);
+        return messages.countUnreadMessages(conversation.id, userId, participant?.lastReadAt ?? conversation.createdAt, now);
       }),
     );
     return { total: counts.reduce((sum, count) => sum + count, 0), conversationsWithUnread: counts.filter((count) => count > 0).length };

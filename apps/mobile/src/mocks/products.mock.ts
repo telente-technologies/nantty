@@ -2,12 +2,15 @@ import { ApiError } from "@/errors/api.error";
 import type { Page, ProductSummary } from "@/types";
 import type { MartHome, ProductCollection, SearchResults, StoreDetail } from "@/types/commerce.type";
 
+import { BRAND_ID_BY_PRODUCT_KEY, brandTagForProductKey, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandSummary } from "./brandDirectory.mock";
+import { followedBrandIds } from "./brands.mock";
 import { martImageUrl } from "./mockImages.mock";
 import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock";
 import {
   buildCatalogProductDetail,
   buildCatalogProductSummary,
   catalogProductSeeds,
+  findCatalogSeedByProductId,
   isMartSponsoredSeed,
   listMartProductSummaries,
   listProductSummariesInStore,
@@ -44,6 +47,10 @@ const buildStoreDetail = (storeId: string): StoreDetail => {
     verified: store.verified,
     joinedAt: store.joinedAt,
     posts: listPostsByAuthor(store.ownerUserKey).map(withCurrentProductPrices),
+    officialBrand: (() => {
+      const brand = mockBrandRecords.find((candidate) => isVerifiedOfficialStoreOfBrand(candidate, store.id));
+      return brand ? presentBrandSummary(brand, followedBrandIds) : null;
+    })(),
   };
 };
 
@@ -61,6 +68,9 @@ function searchCatalog(term: string): SearchResults {
   return {
     products: [...sponsored, ...organic].slice(0, 16).map(withLikeState),
     stores: directoryStores.filter((store) => matchesSearch(store.name, term) || matchesSearch(store.bio, term)).map(summariseStore),
+    brands: mockBrandRecords
+      .filter((brand) => matchesSearch(brand.name, term) || matchesSearch(brand.handle, term) || matchesSearch(brand.description, term))
+      .map((brand) => presentBrandSummary(brand, followedBrandIds)),
     people: directoryUsersExcludingAccounts
       .filter((user) => matchesSearch(user.name, term) || matchesSearch(user.username, term))
       .slice(0, 8)
@@ -88,8 +98,16 @@ export const productsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/products/featured", () => listProductsInCollection("featured_brands").slice(0, 8).map(withLikeState)),
   createMockRoute("GET", "/api/v1/products/:productId", ({ params }) => {
     const detail = buildCatalogProductDetail(params.productId!);
-    if (!detail) throw new ApiError(404, "This product is no longer available");
-    return { ...detail, liked: likedProductIds.has(detail.id), related: detail.related.map(withLikeState) };
+    const seed = findCatalogSeedByProductId(params.productId!);
+    if (!detail || !seed) throw new ApiError(404, "This product is no longer available");
+    const brand = findBrandRecord(BRAND_ID_BY_PRODUCT_KEY[seed.key] ?? "");
+    return {
+      ...detail,
+      liked: likedProductIds.has(detail.id),
+      related: detail.related.map(withLikeState),
+      brand: brandTagForProductKey(seed.key),
+      isOfficialStore: !!brand && isVerifiedOfficialStoreOfBrand(brand, seed.storeId),
+    };
   }),
   createMockRoute("POST", "/api/v1/products/:productId/like", ({ params }) => void likedProductIds.add(params.productId!)),
   createMockRoute("DELETE", "/api/v1/products/:productId/like", ({ params }) => void likedProductIds.delete(params.productId!)),

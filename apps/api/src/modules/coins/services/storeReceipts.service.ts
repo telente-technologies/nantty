@@ -12,7 +12,7 @@ export interface StoreReceiptRequest {
   readonly countryCode: string | null;
   readonly productId: string;
   readonly receipt: string;
-  readonly transactionId: string | undefined;
+  readonly transactionId?: string | undefined;
 }
 
 export class StoreReceiptsService {

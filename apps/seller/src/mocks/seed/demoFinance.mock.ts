@@ -61,6 +61,13 @@ export function buildDemoGateStores(): MockGateStore[] {
     },
     { storeId: "store_kelechi_kicks", storeName: "Kelechi Kicks", verificationStatus: "pending", verificationNote: "We are checking your CAC certificate. This usually takes 1–2 working days.", subscription: noSubscription },
     { storeId: "store_funmi_bakes", storeName: "Funmi Bakes", verificationStatus: "verified", verificationNote: null, subscription: noSubscription },
+    {
+      storeId: "store_adire_lab_studio",
+      storeName: "Adire Lab Studio",
+      verificationStatus: "verified",
+      verificationNote: null,
+      subscription: { subscription: { status: "active", plan: "PRO", currentPeriodEnd: buildIsoDateDaysAgo(-9, 0) }, planId: "gold_pro_monthly", cancelAtPeriodEnd: false, paymentMethodSummary: "Mastercard •••• 2210", provider: "flutterwave", invoices: [] },
+    },
   ];
 }
 

@@ -7,7 +7,7 @@ import type { ListGiftCatalogQuery } from "./listGiftCatalog.query.js";
 export class ListGiftCatalogHandler extends QueryHandler<ListGiftCatalogQuery, readonly GiftCatalogEntryDto[]> {
   public readonly queryType = "creators.listGiftCatalog" as const;
 
-  public async execute(query: ListGiftCatalogQuery): Promise<readonly GiftCatalogEntryDto[]> {
-    return presentGiftCatalog(query.displayCurrency);
+  public async execute(_query: ListGiftCatalogQuery): Promise<readonly GiftCatalogEntryDto[]> {
+    return presentGiftCatalog();
   }
 }

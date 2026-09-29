@@ -70,6 +70,7 @@ const pagePermissionRules: { readonly pathPrefix: string; readonly permission: S
   { pathPrefix: "/reports", permission: "reports:view" },
   { pathPrefix: "/wallet", permission: "wallet:view" },
   { pathPrefix: "/affiliates", permission: "affiliates:manage" },
+  { pathPrefix: "/brand", permission: "settings:view" },
   { pathPrefix: "/settings/billing", permission: "billing:manage" },
   { pathPrefix: "/settings", permission: "settings:view" },
 ];
@@ -126,6 +127,9 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "GET", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:view" },
   { method: "ANY", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/seller\/affiliates\//, permission: "affiliates:manage" },
+  { method: "GET", pathPattern: /^\/seller\/stores\/mine$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/brands(\/|$)/, permission: "settings:view" },
+  { method: "WRITE", pathPattern: /^\/seller\/brands\//, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },
 ];
 

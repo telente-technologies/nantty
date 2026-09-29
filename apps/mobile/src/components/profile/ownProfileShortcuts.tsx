@@ -6,6 +6,7 @@ import { colors } from "@/constants/colors.constant";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
+import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
 type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings";
@@ -24,6 +25,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
   ];
   return (
     <>
+      <ProfileSwitcher />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {shortcuts.map((shortcut) => (
           <Pressable

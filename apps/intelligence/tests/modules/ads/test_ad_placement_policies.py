@@ -8,10 +8,15 @@ from src.container import ApplicationContainer
 from src.modules.ads.dtos.ad_selection_dto import AdSelectionRequest, AdSelectionResponse
 from tests.conftest import build_viewer
 
-VIDEO_PORTRAIT = {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 20_000}
-VIDEO_LANDSCAPE = {"mediaType": "video", "aspectRatio": "16:9", "durationMs": 45_000}
-PRODUCT_TILE = {"mediaType": "product_tile", "aspectRatio": "1:1", "productId": "product_1"}
-LIVE_STREAM = {"mediaType": "live_stream", "aspectRatio": "9:16", "isLiveNow": True, "liveStreamId": "live_1"}
+VIDEO_PORTRAIT: dict[str, Any] = {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 20_000}
+VIDEO_LANDSCAPE: dict[str, Any] = {"mediaType": "video", "aspectRatio": "16:9", "durationMs": 45_000}
+PRODUCT_TILE: dict[str, Any] = {"mediaType": "product_tile", "aspectRatio": "1:1", "productId": "product_1"}
+LIVE_STREAM: dict[str, Any] = {
+    "mediaType": "live_stream",
+    "aspectRatio": "9:16",
+    "isLiveNow": True,
+    "liveStreamId": "live_1",
+}
 ALL_PLACEMENTS = ["feed", "clips", "mart", "search", "stories", "live", "live_discovery"]
 
 

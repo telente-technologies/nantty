@@ -3,6 +3,7 @@ import type { HttpMiddleware } from "@zudojs/http";
 import type { AppSettings } from "../configs/settings.config.js";
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { Persistence } from "../interfaces/persistence.interface.js";
+import type { PlatformStaffAccessCheck } from "../interfaces/platformStaffAccess.interface.js";
 import type { AccessTokenVerifier } from "../interfaces/principal.interface.js";
 import { createRouteGuard, type RouteGuard } from "../middlewares/authorize.middleware.js";
 import { createIdempotencyKeyMiddleware } from "../middlewares/idempotency.middleware.js";
@@ -21,10 +22,11 @@ export function createWebKit(
   clock: Clock,
   accessTokens: AccessTokenVerifier,
   resolveViewerLocale: HttpMiddleware,
+  platformStaffAccess?: PlatformStaffAccessCheck,
 ): WebKit {
   const idempotencyStore = persistence === "prisma" ? new PrismaIdempotencyStore() : new InMemoryIdempotencyStore();
   return {
-    guard: createRouteGuard(accessTokens, resolveViewerLocale),
+    guard: createRouteGuard(accessTokens, resolveViewerLocale, platformStaffAccess),
     requireIdempotencyKey: createIdempotencyKeyMiddleware(idempotencyStore, clock),
     limitSensitiveRequests: createSensitiveEndpointRateLimit(settings.auth.sensitiveRateLimit),
   };

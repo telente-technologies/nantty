@@ -3,7 +3,7 @@ import type { HttpRouter } from "@zudojs/http";
 import type { WebKit } from "../../../loaders/web.loader.js";
 import { describeRoute } from "../../../utils/openapi.util.js";
 import type { FeedsController } from "../controllers/feeds.controller.js";
-import { ClipsQuerySchema, FeedInteractionBodySchema, FeedQuerySchema } from "../validators/feeds.validator.js";
+import { ClipsQuerySchema, FeedFeedbackBodySchema, FeedInteractionBodySchema, FeedQuerySchema, TrendingQuerySchema } from "../validators/feeds.validator.js";
 
 const BASE_PATH = "/api/v1/feeds";
 
@@ -13,6 +13,11 @@ export function registerFeedsRoutes(router: HttpRouter, controller: FeedsControl
   router.get(`${BASE_PATH}/for-you`, controller.forYou, { ...feedRead, ...describeRoute("feeds", "Ranked For You feed (optional topic chip)", query) });
   router.get(`${BASE_PATH}/following`, controller.following, { ...feedRead, ...describeRoute("feeds", "Posts from people and stores I follow", query) });
   router.get(`${BASE_PATH}/suggested-clips`, controller.suggestedClips, { ...feedRead, ...describeRoute("feeds", "Suggested clip thumbnails") });
+  router.get(`${BASE_PATH}/trending`, controller.trending, { ...feedRead, ...describeRoute("feeds", "Trending hashtags, topics, posts or clips", { query: TrendingQuerySchema }) });
   router.get("/api/v1/clips", controller.clips, { ...feedRead, ...describeRoute("feeds", "Clips for you or from people I follow", { query: ClipsQuerySchema }) });
-  router.post(`${BASE_PATH}/interactions`, controller.recordInteraction, { ...feedRead, ...describeRoute("feeds", "Record a feed interaction", { body: FeedInteractionBodySchema }) });
+  router.post(`${BASE_PATH}/interactions`, controller.recordInteraction, {
+    ...feedRead,
+    ...describeRoute("feeds", "Record a client-side signal (view, dwell, clip watch %, share, product view, add to cart)", { body: FeedInteractionBodySchema }),
+  });
+  router.post(`${BASE_PATH}/feedback`, controller.recordFeedback, { ...feedRead, ...describeRoute("feeds", "Hide a post or mark it not interesting", { body: FeedFeedbackBodySchema }) });
 }

@@ -1,6 +1,6 @@
 import { campaignCreationSteps } from "./landingCopy.content";
 import { ScreenshotInBrowserFrame, SectionIntro } from "./landingPrimitives";
-import styles from "./landingSections.module.css";
+import styles from "./campaignStepsSection.module.css";
 
 export function CampaignStepsSection() {
   return (

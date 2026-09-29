@@ -9,3 +9,13 @@ export function readAdsManagerUrl(): string {
   if (configuredUrl) return configuredUrl.replace(/\/+$/, "");
   return process.env.NODE_ENV === "production" ? "https://ads.zudomart.com" : "http://localhost:3300";
 }
+
+export const contactEmailRecipients = ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"] as const;
+export const contactMailtoHref = `mailto:${contactEmailRecipients.join(",")}`;
+export const contactEmailDisplayText = contactEmailRecipients.join(" and ");
+
+export function readMarketingSiteUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/+$/, "");
+  return process.env.NODE_ENV === "production" ? "https://zudomart.com" : "http://localhost:3100";
+}

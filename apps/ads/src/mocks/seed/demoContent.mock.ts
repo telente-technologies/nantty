@@ -32,6 +32,28 @@ export function buildDemoClipMedia(photoKey: DemoPhotoKey, durationSeconds: numb
   return { id: `med_clip_${photoKey}`, kind: "video", url: "", posterUrl: buildUnsplashImageUrl(demoPhotoIds[photoKey]), width: 720, height: 1280, durationSeconds };
 }
 
+export function buildDemoLandscapeVideoMedia(photoKey: DemoPhotoKey, durationSeconds: number): CreativeMedia {
+  return { id: `med_wide_${photoKey}`, kind: "video", url: "", posterUrl: buildUnsplashImageUrl(demoPhotoIds[photoKey]), width: 1920, height: 1080, durationSeconds };
+}
+
+function buildDemoLiveSource(accountId: string, id: string, title: string, text: string, photoKey: DemoPhotoKey, status: "scheduled" | "live", viewerCount: number): ContentSource & { accountId: string } {
+  const startsAt = status === "live" ? shiftTimestampByDays(0, new Date().getUTCHours()) : shiftTimestampByDays(2, 18);
+  return {
+    id,
+    accountId,
+    type: "live",
+    title,
+    text,
+    media: [{ id: `med_live_${id}`, kind: "image", url: buildUnsplashImageUrl(demoPhotoIds[photoKey]), posterUrl: null, width: 720, height: 1280, durationSeconds: null }],
+    createdAt: shiftTimestampByDays(-1, 12),
+    engagement: { likes: 0, comments: 0, views: viewerCount },
+    product: null,
+    live: { liveSessionId: id, status, startsAt, viewerCount },
+    eligible: true,
+    ineligibleReason: null,
+  };
+}
+
 export const demoIdentitiesByAccountId: Record<string, CreativeIdentity> = {
   act_ifelifestyle: { name: "Ife Lifestyle", handle: "ifelifestyle", avatarUrl: null, verifiedBusiness: true },
   act_adaeze: { name: "Adaeze Okafor", handle: "adaeze.okafor", avatarUrl: null, verifiedBusiness: false },
@@ -69,6 +91,7 @@ export function buildDemoContentSources(): (ContentSource & { accountId: string 
       ["pst_ife_bomber", "post", "Harmattan layers", "Rust bomber for cool harmattan evenings. Light satin, warm lining.", [buildDemoImageMedia("bomber")], 12, 960, 14_100, null],
       ["pst_ife_giveaway", "post", "Giveaway Friday", "Giveaway! Tag 3 friends to win an adire tote.", [buildDemoImageMedia("crossbodyBag")], 3, 4120, 51_000, null],
       ["clp_ife_serum", "clip", "30-second glow routine", "Our Glow Serum, 3 drops, morning and night. Watch the full routine.", [buildDemoClipMedia("faceSerum", 31)], 9, 5300, 88_000, null],
+      ["pst_ife_workshop", "post", "Inside our Abeokuta dye workshop", "A day with the women who dye every Ife Lifestyle adire panel by hand. Full documentary, 1 minute 34.", [buildDemoLandscapeVideoMedia("adireShirt", 94)], 18, 2650, 61_200, null],
       ["clp_ife_styling", "clip", "3 ways to style adire", "Office, owambe, weekend: one shirt, three looks.", [buildDemoClipMedia("adireShirt", 42)], 15, 7210, 130_400, null],
       ["prd_ife_adire", "product", "Adire Oxford Shirt", "Hand-dyed adire panels on breathable cotton oxford.", [buildDemoImageMedia("adireShirt")], 40, 0, 0, { productId: "prd_ife_adire", title: "Adire Oxford Shirt", price: naira(18_500), compareAtPrice: naira(22_000), rating: 4.8 }],
       ["prd_ife_bag", "product", "Leather Top-Handle Bag", "Structured leather bag with a detachable strap.", [buildDemoImageMedia("topHandleBag")], 55, 0, 0, { productId: "prd_ife_bag", title: "Leather Top-Handle Bag", price: naira(68_000), compareAtPrice: null, rating: 4.6 }],
@@ -76,6 +99,9 @@ export function buildDemoContentSources(): (ContentSource & { accountId: string 
       ["prd_ife_pearls", "product", "Pearl Strand Necklace", "Freshwater pearls on a silk thread.", [buildDemoImageMedia("pearlNecklace")], 25, 0, 0, { productId: "prd_ife_pearls", title: "Pearl Strand Necklace", price: naira(27_500), compareAtPrice: naira(31_000), rating: 4.7 }],
       ["str_ife", "store", "Ife Lifestyle store", "Fashion, bags and beauty made in Nigeria. Delivery in 2–4 days nationwide.", [buildDemoImageMedia("topHandleBag"), buildDemoImageMedia("adireShirt"), buildDemoImageMedia("faceSerum")], 210, 0, 0, null],
     ]),
+    buildDemoLiveSource("act_ifelifestyle", "liv_ife_now", "Live now: pearls & pendants restock", "Join us live — every piece shown up close, questions answered, pay on delivery in Lagos.", "pearlNecklace", "live", 1240),
+    buildDemoLiveSource("act_ifelifestyle", "liv_ife_friday", "Friday live: new bag drop", "Seven new leather bags, live prices, first 20 orders get free delivery.", "topHandleBag", "scheduled", 0),
+    buildDemoLiveSource("act_kelechikicks", "liv_kk_now", "Sneaker restock live from Aba", "Every colourway on camera. Ask for your size in the comments.", "trailRunner", "live", 430),
     ...convertSeedsToSources("act_adaeze", [
       ["clp_adaeze_lekki", "clip", "Saturday at Lekki market", "Come thrift with me at Lekki market — best finds under ₦10k.", [buildDemoClipMedia("sunglasses", 58)], 4, 2100, 40_300, null],
       ["pst_adaeze_candle", "post", "Lagos Rain candle review", "Honest review of the Lagos Rain candle. It smells like the first rain in April.", [buildDemoImageMedia("candle")], 11, 380, 5200, null],

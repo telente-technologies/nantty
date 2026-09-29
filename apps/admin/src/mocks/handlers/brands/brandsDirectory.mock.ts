@@ -19,7 +19,7 @@ function applyOfficialDecision(request: MockRequest, action: OfficialStoreDecisi
   const brand = findBrandRecordOrFail(request.params.brandId);
   const reason = readRequiredReason(readJsonObjectBody(request));
   if (!readAllowedOfficialActions(brand).includes(action)) {
-    throw new MockHttpError(409, "INVALID_OFFICIAL_STATUS_TRANSITION", `A brand that is ${brand.officialStatus.toLowerCase().replace("_", " ")} cannot be moved with "${action}".`);
+    throw new MockHttpError(409, "INVALID_OFFICIAL_STATUS_TRANSITION", `Official Store status is ${brand.officialStatus.toLowerCase().replace("_", " ")}, so "${action}" is not allowed.`);
   }
   const before = snapshotOfficialState(brand);
   brand.officialStatus = nextStatusForAction[action];

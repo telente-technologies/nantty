@@ -10,6 +10,7 @@ import {
   readCachedSellerAccessFromCookies,
   readPosOperatorFromCookies,
   readSelectedLocationIdFromCookies,
+  readSelectedStoreIdFromCookies,
   readSessionIdFromCookies,
   writeApiTokenCookies,
   type ApiTokenPair,
@@ -21,7 +22,7 @@ const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-ma
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
 const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$/;
 const pathsNeverProxied = /^\/seller\/staff\/pin-sessions/;
-const gateApiPathPattern = /^\/seller\/(access|verification|subscription)(\/|$)/;
+const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
@@ -60,7 +61,7 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
   let renewedSession: RenewedSellerSession | null = null;
   let cachedAccess = readCachedSellerAccessFromCookies(request.cookies);
   if (!cachedAccess) {
-    renewedSession = await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null });
+    renewedSession = await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null, storeId: readSelectedStoreIdFromCookies(request.cookies) });
     if (!renewedSession) {
       const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
       clearEverySessionCookie(expiredResponse);
@@ -102,6 +103,7 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
       accessToken,
       operatorToken: operator?.operatorToken ?? null,
       locationId: readSelectedLocationIdFromCookies(request.cookies),
+      storeId: readSelectedStoreIdFromCookies(request.cookies),
       forwardedHeaders,
     });
 

@@ -1,4 +1,4 @@
-import type { MediaLibrary, MediaLibraryItem } from "../../../interfaces/mediaLibrary.interface.js";
+import type { MediaLibrary, MediaLibraryItem, MediaOriginalFile } from "../../../interfaces/mediaLibrary.interface.js";
 import type { MediaAssetRecord, MediaVariantRecord } from "../models/mediaAsset.model.js";
 import { isPrivatePurpose } from "../models/mediaUpload.model.js";
 import type { MediaService } from "./media.service.js";
@@ -20,6 +20,14 @@ export class RepositoryMediaLibrary implements MediaLibrary {
   public async findMediaByIds(mediaIds: readonly string[]): Promise<readonly MediaLibraryItem[]> {
     const assets = await this.mediaService.dependencies.assets.findManyByIds([...new Set(mediaIds)]);
     return assets.map((asset) => this.convertAssetToLibraryItem(asset));
+  }
+
+  public async readMediaOriginal(mediaId: string): Promise<MediaOriginalFile | undefined> {
+    const { assets, blobs } = this.mediaService.dependencies;
+    const asset = await assets.findById(mediaId);
+    if (asset === undefined || asset.status === "failed") return undefined;
+    const file = await blobs.read(asset.originalKey);
+    return file === undefined ? undefined : { bytes: file.bytes, contentType: asset.mimeType };
   }
 
   private convertAssetToLibraryItem(asset: MediaAssetRecord): MediaLibraryItem {

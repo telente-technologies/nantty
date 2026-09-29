@@ -10,7 +10,7 @@ import type { CustomAudience, EngagementSource } from "@/types/audience.type";
 
 const engagementSourceDescriptions: Record<EngagementSource, string> = {
   any_post: "Liked, commented on or saved any post.",
-  clips_watched: "Watched at least half of a clip.",
+  clips_watched: "Watched at least half of a reel.",
   live_viewers: "Joined one of your live shopping sessions.",
   saved_products: "Saved one of your products.",
   messaged: "Sent your profile a message.",

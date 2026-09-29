@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AdsWordmark } from "@/components/shell/adsWordmark";
 import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
 
-import styles from "./landingLayout.module.css";
+import styles from "./landingFooter.module.css";
 
 export function LandingFooterWithContact() {
   const mainSiteUrl = readZudomartMainSiteUrl();

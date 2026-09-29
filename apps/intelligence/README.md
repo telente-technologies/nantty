@@ -13,21 +13,50 @@ The endpoint and event contract is in [apiContract.md](apiContract.md).
 
 ## Layout
 
+The project mirrors a Zudojs app (`apps/api/src`): shared kinds at the top of `src/`, one folder per
+domain under `src/modules/`, CQRS commands/queries with handlers, controllers, routes and a module entry.
+
 ```
-app/
-  configs/      settings (pydantic-settings) and heuristic weights
-  core/         application container, structured JSON logging
-  middlewares/  HMAC signature + replay protection, body limits, rate limit, access log
-  security/     signature, token bucket, model artifact integrity
-  models/       Pydantic request/response/event models (the contract)
-  features/     feature vector builders shared by serving and training
-  services/     algorithms (ranking, diversity, social proof, ads, recs, trending, search, risk, experiments, ingestion)
-  stores/       Redis / in-memory feature backend, online feature store, Parquet sinks
-  registry/     versioned model registry and hot-reloading model holder
-  routes/       FastAPI routers
-pipelines/      offline jobs: synthetic data, dataset building, training, evaluation, promotion, compaction
-tests/          pytest suite
+src/
+  app.py            create_application(): container, modules, error handlers, middlewares (app.ts)
+  server.py         uvicorn entry point (server.ts)
+  container.py      builds settings, feature store, model holder, services, command/query buses (container.ts)
+  configs/          settings (pydantic-settings), heuristic ranking weights
+  constants/        signed-request header names
+  controllers/      health controller
+  databases/        Redis and in-memory feature backends
+  dtos/             shared contract DTOs (money, viewer context, response metadata)
+  enums/            ranking surfaces
+  errors/           error types and JSON error handlers
+  events/           event envelope and payload DTOs (the ingestion contract)
+  integrations/     dataset storage (local directory or S3-compatible)
+  interfaces/       feature backend protocol, CQRS base classes, module protocol
+  jobs/             training, evaluation, synthetic data and compaction jobs + CLI (pipeline_cli_job.py)
+  loaders/          module/route loading, security middlewares, lifespan background jobs
+  loggers/          structured JSON logging
+  middlewares/      HMAC signature + replay protection, body limits, rate limit, access log
+  models/           shared domain models (viewer online features)
+  repositories/     online feature repository + keyspace, feature-log Parquet repository
+  routes/           health routes
+  services/         shared algorithms (candidate filtering, diversity re-rank, prediction, currency)
+  types/            shared type aliases
+  utils/            decay maths, signing, CQRS buses, dataset/metrics/training helpers
+  validators/       constrained field types (opaque ids, topics, country/currency codes)
+  modules/<module>/
+    <module>_module.py   module entry: registers handlers, builds the router
+    commands/<name>/<name>_command.py + <name>_handler.py
+    queries/<name>/<name>_query.py + <name>_handler.py
+    controllers/ routes/ services/ dtos/ (+ repositories/ models/ constants/ validators/ where needed)
+tests/              mirrors src: tests/modules/<module>/, tests/middlewares/, tests/databases/, tests/jobs/
 ```
+
+Modules: `feed`, `clips`, `social_proof`, `recommendations`, `ads`, `trending`, `search`, `risk`,
+`experiments`, `audio`, `events_ingestion`, `model_registry`. Mutations (event ingestion, fingerprint
+registration, sound status, experiment exposure) are commands; ranking/scoring/matching are queries.
+
+**Naming**: Zudojs uses `<name>.<kind>.ts`; a dot inside a Python module name cannot be imported, so
+the same intent is kept with a snake_case `_<kind>` suffix (`feed_ranking_service.py`,
+`rank_feed_candidates_query.py`, `rank_feed_candidates_handler.py`, `feed_module.py`).
 
 ## Algorithms
 
@@ -38,7 +67,7 @@ tests/          pytest suite
 | Clips | completion + rewatch heads, freshness half-life 72 h, exploration slots (default 1 in 5) for new creators via seeded Thompson sampling, no duplicates, no consecutive creator |
 | Social proof | close friends (API closeness or learned affinity ≥ 0.3), ≥ 2 friends, value threshold, banners ≥ 5 positions apart |
 | Recommendations | item co-occurrence cosine blended with implicit ALS (16 factors) similarity, bought-together from baskets, decayed popularity, store customer topic centroids for lookalike ads; accounts and clips by rule blends |
-| Ads | eligibility (status, schedule, budget, frequency caps, geo, age, interests, lookalike), logistic CTR model, GSP with quality (eCPM), reserve price, probabilistic pacing throttle, ad-load and brand-safety slotting, host creator echo for revenue share |
+| Ads | placements feed, clips (reels, portrait + landscape), stories, mart/search (sponsored product tiles), live (in-stream), live_discovery (promoted live streams) with per-placement creative formats and ad-load rules; eligibility (status, schedule, budget, frequency caps, geo, age, interests, lookalike), logistic CTR model, GSP with quality (eCPM), reserve price, probabilistic pacing throttle, ad-load and brand-safety slotting, host creator echo for revenue share |
 | Trending | forward-decayed short (6 h) vs long (7 d) velocity, one contribution per actor per item per hour, distinct-actor threshold, report/hide penalty |
 | Search | 0.7 text relevance + 0.2 personalisation + 0.1 popularity (+ small freshness tie-break) |
 | Risk | rule sets per subject (orders, payouts, account events, coin purchases, coin transfers, gifts, referrals, cashback) combined with noisy-OR, value-flow graph signals from events, logistic model for orders; recommends allow / review / hold, never bans |

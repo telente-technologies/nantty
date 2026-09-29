@@ -7,6 +7,7 @@ import { buildMockProductFromRequest, collectSkusAndBarcodesOutsideProduct, find
 import type { Product, ProductStatus } from "@/types/catalog.type";
 import type { ProductBulkAction, ProductUpsertRequest } from "@/types/productRequests.type";
 import { buildEan13FromTwelveDigits } from "@/utils/ean13.util";
+import { resolveProductBrandTagForStore } from "@/mocks/brandsMockStore.mock";
 
 function readStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
@@ -116,9 +117,10 @@ export function registerProductCatalogMockRoutes(): void {
   registerMockRoute("POST", "/seller/products", (request) => {
     const principal = requireMockStorePrincipal(request);
     const productRequest = coerceProductUpsertRequest(readJsonObjectBody(request));
-    const issues = validateProductRequestAgainstStore(productRequest, null);
+    const brandResolution = resolveProductBrandTagForStore(principal.storeId, readJsonObjectBody(request).brand);
+    const issues = [...validateProductRequestAgainstStore(productRequest, null), ...brandResolution.issues];
     if (issues.length > 0) return respondWithValidationFailure(issues);
-    const product = buildMockProductFromRequest(productRequest, null);
+    const product = { ...buildMockProductFromRequest(productRequest, null), brand: brandResolution.tag ?? null };
     replaceMockProduct(product);
     recordCatalogAuditEntry(principal, "product.created", "product", product.id, `Created ${product.name} with ${product.variants.length} variant(s)`);
     return respondWithJson(201, product);
@@ -169,9 +171,10 @@ export function registerProductCatalogMockRoutes(): void {
     const principal = requireMockStorePrincipal(request);
     const existingProduct = findMockProductOrThrow(request.params.productId ?? "");
     const productRequest = coerceProductUpsertRequest(readJsonObjectBody(request));
-    const issues = validateProductRequestAgainstStore(productRequest, existingProduct.id);
+    const brandResolution = resolveProductBrandTagForStore(principal.storeId, readJsonObjectBody(request).brand);
+    const issues = [...validateProductRequestAgainstStore(productRequest, existingProduct.id), ...brandResolution.issues];
     if (issues.length > 0) return respondWithValidationFailure(issues);
-    const product = buildMockProductFromRequest(productRequest, existingProduct);
+    const product = { ...buildMockProductFromRequest(productRequest, existingProduct), brand: brandResolution.tag === undefined ? existingProduct.brand ?? null : brandResolution.tag };
     replaceMockProduct(product);
     recordCatalogAuditEntry(principal, "product.updated", "product", product.id, `Updated ${product.name}`);
     return respondWithJson(200, product);

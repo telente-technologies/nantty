@@ -1,7 +1,7 @@
 # Zudomart Intelligence API Contract (v1)
 
 This is the authoritative contract between the TypeScript API (`apps/api`) and the Python
-intelligence service (`apps/intelligence`). The Pydantic models in `app/models/*.py` are the source
+intelligence service (`apps/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
 of truth; this document mirrors them.
 
 Rule: **the TS API owns the product, Python owns intelligence, events connect them.** Python never
@@ -244,7 +244,7 @@ They feed topic affinity and trending, so send them.
 | referral_rewarded | referralId, refereeId |
 
 `targetType`: `post` \| `clip` \| `story` \| `live` \| `product` \| `store` \| `account` \| `comment` \| `ad`.
-`placement`: `feed` \| `clips` \| `mart` \| `search` \| `live` \| `story` \| `post_detail`.
+`placement` (ad events): `feed` \| `clips` \| `mart` \| `search` \| `stories` \| `live` \| `live_discovery`.
 
 Forward "shown" events (post_viewed, clip_watched, ad_impression) for every item actually displayed —
 shown ≠ clicked ≠ liked, and training depends on all three. Events are stored append-only as Parquet
@@ -370,12 +370,14 @@ and the charge price.
     "frequencyCapPerDay": 3, "placements": ["feed", "clips"],
     "targeting": {"countries": ["NG"], "regions": [], "topics": ["fashion"], "ageBrackets": ["18-24", "25-34"],
                   "lookalikeStoreId": "st_1", "lookalikeMinimumSimilarity": 0.3},
+    "creative": {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 15000, "isLiveNow": false,
+                 "productId": null, "liveStreamId": null},
     "brandSafety": "standard", "dayStartUtcOffsetMinutes": 60, "creativeTopics": ["fashion"],
     "lifetimeImpressions": 12000, "lifetimeClicks": 140
   }],
   "exchangeRates": [{"currency": "NGN", "usdPerMajorUnit": "0.00065"}],
   "reservePricePerMille": {"amountMinor": 20000, "currency": "NGN"},
-  "adLoad": {"firstAdAfterOrganicItems": 3, "organicItemsBetweenAds": 6, "maximumAds": 5},
+  "adLoad": {"firstAdAfterOrganicItems": null, "organicItemsBetweenAds": null, "maximumAds": 5, "gridColumns": 2},
   "viewerImpressionsTodayByCampaign": {"cmp_1": 1},
   "now": "2026-09-29T12:00:00Z"
 }
@@ -383,19 +385,21 @@ and the charge price.
 
 | field | limits / default |
 |---|---|
-| placement | `feed` \| `clips` \| `mart` \| `search` \| `live` \| `story` \| `post_detail` |
+| placement | `feed` \| `clips` \| `mart` \| `search` \| `stories` \| `live` \| `live_discovery` (see placement table) |
 | organicItems | ≤200 in display order |
 | candidates | ≤300 |
 | candidates[].status | `active` \| `paused` \| `ended` \| `pending_review` \| `rejected` (only active can win) |
 | candidates[].bidType | `cpc` (bid per click) \| `cpm` (bid per 1000 impressions) |
 | candidates[].frequencyCapPerDay | 1..50, default 3 |
 | candidates[].placements | 1..7 placements |
+| candidates[].creative | required: `mediaType` (`image` \| `video` \| `carousel` \| `live_stream` \| `product_tile`), `aspectRatio` (`1:1` \| `4:5` \| `9:16` \| `16:9`), `durationMs` (video), `isLiveNow` (live_stream), `productId` (required for product_tile), `liveStreamId` |
 | candidates[].brandSafety | `strict` \| `standard` (default) |
 | candidates[].dayStartUtcOffsetMinutes | -720..840, default 60 (WAT) — budget day boundary |
 | exchangeRates | 1..50, required |
-| adLoad.firstAdAfterOrganicItems | 2..50, default 3 |
-| adLoad.organicItemsBetweenAds | 6..50, default 6 |
+| adLoad.firstAdAfterOrganicItems | optional 0..50; can only make the placement rule stricter |
+| adLoad.organicItemsBetweenAds | optional 1..50; can only make the placement rule stricter |
 | adLoad.maximumAds | 0..20, default 5 |
+| adLoad.gridColumns | 1..6, default 2 — row width for `mart`/`search` grids (first row never gets an ad) |
 
 Response:
 
@@ -404,7 +408,7 @@ Response:
   "placements": [{
     "adId": "ad_1", "campaignId": "cmp_1", "advertiserId": "st_1", "placement": "feed",
     "position": 3, "insertAfterItemId": "p_3", "hostContentId": null, "hostCreatorId": null,
-    "chargeModel": "cpc", "chargePrice": {"amountMinor": 9120, "currency": "NGN"},
+    "chargeModel": "cpc", "chargePrice": {"amountMinor": 9120, "currency": "NGN"}, "creativeMediaType": "video",
     "predictedClickRate": 0.0143, "auctionId": "auction_789"
   }],
   "rejected": [{"adId": "ad_2", "reason": "frequency_capped"}],
@@ -442,14 +446,31 @@ Semantics:
   checks are **advisory**: the API must still debit budgets atomically and refuse a charge that would
   overspend.
 - **Frequency caps**: per campaign per user per UTC day, max(`viewerImpressionsTodayByCampaign`, Python's own count).
-- **Ad load**: first ad after at least `firstAdAfterOrganicItems` (never above the first 2 posts), at least
-  `organicItemsBetweenAds` organic items between ads, never two ads adjacent, never after the last organic item.
+- **Placements, formats and ad load** (organic items = posts, clips, stories, product tiles or live
+  cards, in display order; values the API sends in `adLoad` are clamped so they can only be stricter):
+
+  | placement | what it is | allowed creatives | aspect ratios | first ad after ≥ organic | organic between ads (≈ max 1 ad per N) |
+  |---|---|---|---|---|---|
+  | `feed` | home feed; live cards allowed | image, video (≤60 s), carousel, live_stream | any | 3 (min 2 — never above the first 2 posts) | 6 (1 per 7) |
+  | `clips` | reels, promoted clips incl. landscape | video (≤60 s), live_stream | 9:16, 16:9 | 2 | 4 (max 1 per 5 clips) |
+  | `stories` | story tray | image, video (≤15 s) | 9:16 | 2 | 4 (1 per 5) |
+  | `mart` | Mart grids, category pages, "Featured with" — sponsored product tiles labelled "Ad" | product_tile | 1:1, 4:5 | `gridColumns` (never in the first row) | 5 (max 1 per 6 tiles) |
+  | `search` | sponsored search results / product grid | product_tile, image | 1:1, 4:5 | `gridColumns` | 5 (1 per 6) |
+  | `live_discovery` | live discovery grid, promoted live streams | live_stream (`isLiveNow` must be true) | 9:16, 16:9 | 1 | 7 (max 1 per 8) |
+  | `live` | inside a live stream (in-content) | image, video (≤30 s), product_tile | any | single slot at position 0; requires `hostContentId` | — |
+
+  Never two ads adjacent, never after the last organic item. Format rejections:
+  `creative_media_type_not_allowed`, `creative_aspect_ratio_not_allowed`, `creative_video_too_long`,
+  `live_stream_not_live`, `product_tile_missing_product`; `live` without a host =>
+  `in_content_placement_requires_host_content`. Promoted clips/live cards inside `feed` or `clips` are
+  selected with those placements and a `video`/`live_stream` creative. Render marketplace/search
+  winners with a visible "Ad" label.
 - **Brand safety**: no ad directly next to an organic item with `isSensitive` or `isReported` (the slot moves
   later); `strict` ads also need the two neighbours on each side clean. If `hostContentId` is given and
   the host is sensitive or reported, no ads are returned (`host_content_not_brand_safe`). A winner that
   fits no safe slot is rejected with `no_brand_safe_slot`.
-- **In-content placements** (clips mid-roll, live, story, post detail): send `hostContentId` +
-  `hostCreatorId` and an empty `organicItems`; one slot at position 0 is offered.
+- **In-content placements** (`live`, or any placement with a `hostContentId` and an empty
+  `organicItems`, e.g. a clip mid-roll): send `hostContentId` + `hostCreatorId`; one slot at position 0 is offered.
 - **Creator revenue share**: every placement echoes `placement`, `hostContentId` and `hostCreatorId`
   (null for in-feed interstitials unless the API supplied a host). The TS ledger uses them to credit the
   creator 40% of the revenue from ads served on/within their content. Python never moves money.

@@ -1,46 +1,71 @@
 import { CommandHandler } from "@zudojs/cqrs";
 
-import { forbidden } from "../../../../errors/domain.error.js";
-import { NotificationRequestedEvent } from "../../../../events/notificationRequested.event.js";
-import { publishEvent } from "../../../../loaders/events.loader.js";
-import { MessageSentEvent } from "../../events/messageSent.event.js";
-import type { MessageRecord } from "../../models/messages.model.js";
-import type { MessagesService } from "../../services/messages.service.js";
+import { notFound, unprocessable } from "../../../../errors/domain.error.js";
+import type { MessageDto } from "../../dtos/messages.dto.js";
+import type { MessageKind } from "../../models/messages.model.js";
+import type { ConversationAccess, MessagesService } from "../../services/messages.service.js";
+import type { SendMessageBody } from "../../validators/messages.validator.js";
 import type { SendMessageCommand } from "./sendMessage.command.js";
 
-const NOTIFICATION_PREVIEW_LENGTH = 80;
+interface VoiceNoteAttachment {
+  readonly mediaId: string;
+  readonly durationSeconds: number;
+}
 
-export class SendMessageHandler extends CommandHandler<SendMessageCommand, MessageRecord> {
+export class SendMessageHandler extends CommandHandler<SendMessageCommand, MessageDto> {
   public readonly commandType = "messages.sendMessage" as const;
 
   public constructor(private readonly messagesService: MessagesService) {
     super();
   }
 
-  public async execute(command: SendMessageCommand): Promise<MessageRecord> {
-    const { messages, socialGraph, userDirectory, events, clock } = this.messagesService.dependencies;
+  public async execute(command: SendMessageCommand): Promise<MessageDto> {
+    const { messages, conversations, clock } = this.messagesService.dependencies;
     const senderId = command.principal.userId;
-    const conversation = await this.messagesService.requireConversationForParticipant(command.conversationId, senderId);
-    const recipientIds = conversation.participantIds.filter((participantId) => participantId !== senderId);
-    for (const recipientId of recipientIds) {
-      if (await socialGraph.isBlockedEitherWay(senderId, recipientId)) throw forbidden("You cannot message this user.");
-    }
+    const access = await this.messagesService.requireConversationAccess(command.conversationId, senderId);
+    await this.messagesService.assertMayPostMessage(access);
+    const voiceNote = await this.findVoiceNoteAttachment(command.input, senderId);
+    const text = command.input.text?.trim() ?? "";
+    const attachments = command.input.media ?? [];
+    if (voiceNote === undefined && text === "" && attachments.length === 0) throw unprocessable("Write a message or attach a voice note.");
+    const kind: MessageKind = voiceNote !== undefined ? "voice" : attachments.length > 0 && text === "" ? "image" : "text";
+    const now = clock.now();
+    const { conversation } = access;
     const message = await messages.appendMessage(
-      { conversationId: conversation.id, senderId, text: command.input.text.trim(), media: command.input.media ?? [] },
-      clock.now(),
+      {
+        conversationId: conversation.id,
+        senderId,
+        senderStoreId: access.actsForStoreId,
+        kind,
+        text,
+        media: attachments,
+        voiceMediaId: voiceNote?.mediaId ?? null,
+        voiceDurationSeconds: voiceNote?.durationSeconds ?? null,
+        expiresAt: conversation.disappearingMessagesSeconds === null ? null : new Date(now.getTime() + conversation.disappearingMessagesSeconds * 1000),
+      },
+      now,
     );
-    const [sender] = await userDirectory.findUserSummaries([senderId]);
-    const senderName = sender === undefined ? "Someone" : sender.name || `@${sender.username}`;
-    for (const recipientId of recipientIds) {
-      await publishEvent(events, NotificationRequestedEvent, {
-        userId: recipientId,
-        category: "messages",
-        title: `New message from ${senderName}`,
-        body: message.text.slice(0, NOTIFICATION_PREVIEW_LENGTH),
-        data: { conversationId: conversation.id, messageId: message.id },
-      });
-    }
-    await publishEvent(events, MessageSentEvent, { conversationId: conversation.id, messageId: message.id, senderId, recipientIds });
-    return message;
+    await conversations.touchLastMessageAt(conversation.id, now);
+    await conversations.markRead(conversation.id, senderId, now);
+    const recipients = await this.findRecipientsToNotify(access, senderId);
+    await this.messagesService.broadcaster.announceNewMessage(conversation, message, recipients);
+    const [dto] = await this.messagesService.messagePresenter.presentMessages([message], senderId);
+    if (dto === undefined) throw notFound("Message");
+    return dto;
+  }
+
+  private async findVoiceNoteAttachment(input: SendMessageBody, senderId: string): Promise<VoiceNoteAttachment | undefined> {
+    if (input.kind !== "voice" && input.mediaId === undefined) return undefined;
+    if (input.mediaId === undefined || input.durationSeconds === undefined) throw unprocessable("A voice note needs mediaId and durationSeconds.");
+    const [media] = await this.messagesService.dependencies.mediaLibrary.findMediaByIds([input.mediaId]);
+    const usable = media !== undefined && media.ownerId === senderId && media.purpose === "voice" && media.type === "audio" && media.status !== "failed";
+    if (!usable) throw unprocessable("Upload the voice note with purpose \"voice\" before sending it.");
+    return { mediaId: input.mediaId, durationSeconds: input.durationSeconds };
+  }
+
+  private async findRecipientsToNotify(access: ConversationAccess, senderId: string): Promise<readonly string[]> {
+    if (access.conversation.kind === "channel") return [];
+    const audience = await this.messagesService.listAudienceUserIds(access.conversation);
+    return audience.filter((userId) => userId !== senderId);
   }
 }

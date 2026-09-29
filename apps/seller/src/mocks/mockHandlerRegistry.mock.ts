@@ -1,5 +1,6 @@
 import { registerAccessAndAuthMockHandlers } from "@/mocks/handlers/accessAndAuth.mock";
 import { registerAffiliatesMockHandlers } from "@/mocks/handlers/affiliates.mock";
+import { registerBrandsMockHandlers } from "@/mocks/handlers/brands.mock";
 import { registerCatalogMockHandlers } from "@/mocks/handlers/catalog.mock";
 import { registerCommerceMockHandlers } from "@/mocks/handlers/commerce.mock";
 import { registerInsightsMockHandlers } from "@/mocks/handlers/insights.mock";
@@ -14,4 +15,5 @@ export function registerEveryMockHandler(): void {
   registerCommerceMockHandlers();
   registerInsightsMockHandlers();
   registerAffiliatesMockHandlers();
+  registerBrandsMockHandlers();
 }

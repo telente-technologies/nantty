@@ -18,6 +18,13 @@ import { ListCreatorAffiliationsHandler } from "./queries/listCreatorAffiliation
 import { ListCreatorApplicationsHandler } from "./queries/listCreatorApplications/listCreatorApplications.handler.js";
 import { ListCreatorEarningsHandler } from "./queries/listCreatorEarnings/listCreatorEarnings.handler.js";
 import { ListGiftCatalogHandler } from "./queries/listGiftCatalog/listGiftCatalog.handler.js";
+import { ConvertEarnedCoinsHandler } from "./commands/convertEarnedCoins/convertEarnedCoins.handler.js";
+import { RecordBrandDealHandler } from "./commands/recordBrandDeal/recordBrandDeal.handler.js";
+import { RemoveBrandDealHandler } from "./commands/removeBrandDeal/removeBrandDeal.handler.js";
+import { SendPostGiftHandler } from "./commands/sendPostGift/sendPostGift.handler.js";
+import { SendTipHandler } from "./commands/sendTip/sendTip.handler.js";
+import { GetCreatorRevenueRulesHandler } from "./queries/getCreatorRevenueRules/getCreatorRevenueRules.handler.js";
+import { ListBrandDealsHandler } from "./queries/listBrandDeals/listBrandDeals.handler.js";
 import type { CreatorProgramServices } from "./services/creatorProgramServices.service.js";
 
 export class CreatorsModule extends BaseModule {
@@ -46,6 +53,11 @@ export function registerCreatorsCommandAndQueryHandlers(commands: CommandBus, qu
     new ChangeCreatorAffiliationHandler(services),
     new SetAffiliateCommissionHandler(services),
     new RemoveAffiliateCommissionHandler(services),
+    new SendPostGiftHandler(services),
+    new SendTipHandler(services),
+    new ConvertEarnedCoinsHandler(services),
+    new RecordBrandDealHandler(services),
+    new RemoveBrandDealHandler(services),
   ]);
   registerQueryHandlers(queries, [
     new GetMyCreatorStatusHandler(services),
@@ -57,5 +69,7 @@ export function registerCreatorsCommandAndQueryHandlers(commands: CommandBus, qu
     new ListCreatorAffiliationsHandler(services),
     new ListGiftCatalogHandler(),
     new ListAffiliateCommissionsHandler(services),
+    new ListBrandDealsHandler(services),
+    new GetCreatorRevenueRulesHandler(services),
   ]);
 }

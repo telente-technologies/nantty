@@ -1,14 +1,13 @@
 import { randomUUID } from "node:crypto";
 
-import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
-import type { CreatorEarningKind, CreatorEarningRecord, LiveGiftRecord, NewCreatorEarning, NewLiveGift } from "../models/creators.model.js";
+import type { CreatorEarningKind, CreatorEarningRecord, EarningUnit, LiveGiftRecord, NewCreatorEarning, NewLiveGift } from "../models/creators.model.js";
 
 export interface EarningTotal {
   readonly kind: CreatorEarningKind;
-  readonly currency: CurrencyCode;
+  readonly currency: EarningUnit;
   readonly netAmount: MinorUnits;
   readonly count: number;
 }

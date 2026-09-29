@@ -1,67 +1,105 @@
 import type { EventBus } from "@zudojs/events";
 
-import { notFound } from "../../../errors/domain.error.js";
+import { forbidden, notFound } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
+import type { MediaLibrary } from "../../../interfaces/mediaLibrary.interface.js";
+import type { RealtimePublisher } from "../../../interfaces/realtimePublisher.interface.js";
 import type { SocialGraph } from "../../../interfaces/socialGraph.interface.js";
-import type { UserDirectory, UserSummary } from "../../../interfaces/userDirectory.interface.js";
-import { convertMessageToDto, type ConversationSummaryDto, type FriendshipDto } from "../dtos/messages.dto.js";
-import type { ConversationRecord } from "../models/messages.model.js";
+import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
+import type { UserDirectory } from "../../../interfaces/userDirectory.interface.js";
+import { isAdministratorRole, type ConversationRecord, type ParticipantRecord } from "../models/messages.model.js";
+import type { ConversationsRepository } from "../repositories/conversations.repository.js";
 import type { MessagesRepository } from "../repositories/messages.repository.js";
+import { ConversationBroadcaster } from "./conversationBroadcaster.service.js";
+import { ConversationPresenter } from "./conversationPresenter.service.js";
+import { MessagePresenter } from "./messagePresenter.service.js";
+
+export interface MessagingSettings {
+  readonly publicBaseUrl: string;
+  readonly maximumGroupMembers: number;
+}
 
 export interface MessagesDependencies {
+  readonly conversations: ConversationsRepository;
   readonly messages: MessagesRepository;
   readonly userDirectory: UserDirectory;
   readonly socialGraph: SocialGraph;
+  readonly storeAccess: StoreAccess;
+  readonly mediaLibrary: MediaLibrary;
+  readonly realtime: RealtimePublisher;
   readonly events: EventBus;
   readonly clock: Clock;
+  readonly settings: MessagingSettings;
+}
+
+export interface ConversationAccess {
+  readonly conversation: ConversationRecord;
+  readonly viewerId: string;
+  readonly participant: ParticipantRecord | undefined;
+  readonly actsForStoreId: string | null;
 }
 
 export class MessagesService {
-  public constructor(public readonly dependencies: MessagesDependencies) {}
+  public readonly messagePresenter: MessagePresenter;
+  public readonly conversationPresenter: ConversationPresenter;
+  public readonly broadcaster: ConversationBroadcaster;
 
-  public async requireConversationForParticipant(conversationId: string, userId: string): Promise<ConversationRecord> {
-    const conversation = await this.dependencies.messages.findConversationById(conversationId);
-    if (conversation === undefined || !conversation.participantIds.includes(userId)) throw notFound("Conversation");
-    return conversation;
+  public constructor(public readonly dependencies: MessagesDependencies) {
+    this.messagePresenter = new MessagePresenter(this);
+    this.conversationPresenter = new ConversationPresenter(this, this.messagePresenter);
+    this.broadcaster = new ConversationBroadcaster(this);
   }
 
-  public findOtherParticipantId(conversation: ConversationRecord, userId: string): string | undefined {
-    return conversation.participantIds.find((participantId) => participantId !== userId);
+  public async requireConversationAccess(conversationId: string, userId: string): Promise<ConversationAccess> {
+    const { conversations, storeAccess } = this.dependencies;
+    const conversation = await conversations.findById(conversationId);
+    if (conversation === undefined) throw notFound("Conversation");
+    const participant = await conversations.findParticipant(conversation.id, userId);
+    if (participant !== undefined) return { conversation, viewerId: userId, participant, actsForStoreId: null };
+    if (conversation.kind === "business" && conversation.storeId !== null) {
+      const isStoreMember = await storeAccess.assertStoreMember(userId, conversation.storeId).then(() => true, () => false);
+      if (isStoreMember) return { conversation, viewerId: userId, participant: undefined, actsForStoreId: conversation.storeId };
+    }
+    throw notFound("Conversation");
   }
 
-  public async describeFriendship(userId: string, otherUserId: string | undefined): Promise<FriendshipDto> {
-    if (otherUserId === undefined) return { following: false, followedBy: false, areFriends: false };
-    const { socialGraph } = this.dependencies;
-    const [following, followedBy] = await Promise.all([
-      socialGraph.isFollowingUser(userId, otherUserId),
-      socialGraph.isFollowingUser(otherUserId, userId),
-    ]);
-    return { following, followedBy, areFriends: following && followedBy };
+  public async requireGroupAdministrator(conversationId: string, userId: string): Promise<ConversationAccess> {
+    const access = await this.requireConversationAccess(conversationId, userId);
+    if (access.conversation.kind !== "group" && access.conversation.kind !== "channel") throw forbidden("Only groups and channels have administrators.");
+    if (!isAdministratorRole(access.participant?.role)) throw forbidden("Only group admins can do this.");
+    return access;
   }
 
-  public async buildConversationSummaries(conversations: readonly ConversationRecord[], userId: string): Promise<readonly ConversationSummaryDto[]> {
-    const { messages, userDirectory } = this.dependencies;
-    const otherIds = conversations.map((conversation) => this.findOtherParticipantId(conversation, userId)).filter((id): id is string => id !== undefined);
-    const summaries = new Map<string, UserSummary>((await userDirectory.findUserSummaries(otherIds)).map((summary) => [summary.id, summary]));
-    return Promise.all(
-      conversations.map(async (conversation) => {
-        const otherUserId = this.findOtherParticipantId(conversation, userId);
-        const participant = await messages.findParticipant(conversation.id, userId);
-        const [lastMessage, unreadCount, friendship] = await Promise.all([
-          messages.findLatestMessage(conversation.id),
-          messages.countUnreadMessages(conversation.id, userId, participant?.lastReadAt ?? conversation.createdAt),
-          this.describeFriendship(userId, otherUserId),
-        ]);
-        return {
-          id: conversation.id,
-          kind: conversation.kind,
-          otherParticipant: otherUserId === undefined ? null : (summaries.get(otherUserId) ?? null),
-          lastMessage: lastMessage === undefined ? null : convertMessageToDto(lastMessage),
-          unreadCount,
-          friendship,
-          lastMessageAt: conversation.lastMessageAt.toISOString(),
-        };
-      }),
-    );
+  public async assertMayPostMessage(access: ConversationAccess): Promise<void> {
+    const { conversation, participant, viewerId } = access;
+    if (conversation.kind === "channel" && !isAdministratorRole(participant?.role)) throw forbidden("Only channel admins can post in this channel.");
+    if (conversation.kind !== "direct") return;
+    const others = (await this.dependencies.conversations.listParticipantUserIds(conversation.id)).filter((userId) => userId !== viewerId);
+    for (const otherUserId of others) {
+      if (await this.dependencies.socialGraph.isBlockedEitherWay(viewerId, otherUserId)) throw forbidden("You cannot message this user.");
+    }
+  }
+
+  public async listAudienceUserIds(conversation: ConversationRecord): Promise<readonly string[]> {
+    const participantIds = await this.dependencies.conversations.listParticipantUserIds(conversation.id);
+    if (conversation.kind !== "business" || conversation.storeId === null) return participantIds;
+    const [store] = await this.dependencies.storeAccess.findStoreSummaries([conversation.storeId]);
+    return [...new Set([...participantIds, ...(store === undefined ? [] : [store.ownerId])])];
+  }
+
+  public buildVoiceNoteUrl(conversationId: string, messageId: string): string {
+    return `${this.dependencies.settings.publicBaseUrl}/api/v1/conversations/${conversationId}/messages/${messageId}/voice`;
+  }
+
+  public async findPhotoUrls(mediaIds: readonly (string | null)[]): Promise<ReadonlyMap<string, string | null>> {
+    const wanted = mediaIds.filter((mediaId): mediaId is string => mediaId !== null);
+    if (wanted.length === 0) return new Map();
+    const items = await this.dependencies.mediaLibrary.findMediaByIds(wanted);
+    return new Map(items.map((item) => [item.id, item.url]));
+  }
+
+  public async assertOwnedImageMedia(mediaId: string, ownerId: string): Promise<void> {
+    const [item] = await this.dependencies.mediaLibrary.findMediaByIds([mediaId]);
+    if (item === undefined || item.ownerId !== ownerId || item.type !== "image" || item.status === "failed") throw notFound("Photo");
   }
 }

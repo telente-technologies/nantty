@@ -66,6 +66,8 @@ import { NewSupportTicketScreen } from "@/screens/support/newSupportTicket.scree
 import { SupportTicketDetailScreen } from "@/screens/support/supportTicketDetail.screen";
 import { MyReportsScreen } from "@/screens/support/myReports.screen";
 import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.screen";
+import { BrandProfileScreen } from "@/screens/brand/brandProfile.screen";
+import { CreateBrandScreen } from "@/screens/brand/createBrand.screen";
 
 import { MainTabsNavigator } from "./mainTabs.navigator";
 import type { MainStackParamList } from "./navigation.types";
@@ -144,6 +146,8 @@ export function MainNavigator() {
       <Stack.Screen name="SupportTicketDetail" component={SupportTicketDetailScreen} />
       <Stack.Screen name="MyReports" component={MyReportsScreen} />
       <Stack.Screen name="SettingsUsername" component={SettingsUsernameScreen} />
+      <Stack.Screen name="BrandProfile" component={BrandProfileScreen} />
+      <Stack.Screen name="CreateBrand" component={CreateBrandScreen} />
       <Stack.Screen name="Sound" component={SoundScreen} />
     </Stack.Navigator>
   );

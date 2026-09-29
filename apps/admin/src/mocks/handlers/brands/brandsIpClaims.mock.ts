@@ -32,7 +32,7 @@ function applyIpClaimDecision(request: MockRequest, action: IpClaimDecisionActio
   const body = readJsonObjectBody(request);
   const reason = readRequiredReason(body);
   if (!readAllowedIpClaimActions(claim).includes(action)) {
-    throw new MockHttpError(409, "INVALID_CLAIM_TRANSITION", `A ${claim.status.toLowerCase().replace("_", " ")} claim cannot be moved with "${action}".`);
+    throw new MockHttpError(409, "INVALID_CLAIM_TRANSITION", `This claim is ${claim.status.toLowerCase().replace("_", " ")}, so "${action}" is not allowed.`);
   }
   const seller = readMockDatabase().platformUsers.find((candidate) => candidate.id === claim.accusedSellerUserId);
   const before = snapshotClaimState(claim, seller?.strikeCount ?? 0);

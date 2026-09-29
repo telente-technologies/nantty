@@ -96,3 +96,19 @@ model CreatorAffiliation {
   @@id([creatorId, targetKey])
   @@map("creator_affiliations")
 }
+
+model BrandDeal {
+  id         String    @id @default(uuid())
+  creatorId  String
+  brandName  String
+  amount     BigInt
+  currency   String
+  startsAt   DateTime
+  endsAt     DateTime?
+  disclosure String
+  notes      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([creatorId, createdAt])
+  @@map("brand_deals")
+}

@@ -9,6 +9,7 @@ export class GetFollowingFeedQuery extends Query<"feeds.getFollowingFeed"> {
     public readonly principal: Principal,
     public readonly page: PageRequest,
     public readonly displayCurrency: CurrencyCode,
+    public readonly country: string | null,
   ) {
     super("feeds.getFollowingFeed");
   }

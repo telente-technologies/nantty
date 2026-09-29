@@ -30,6 +30,7 @@ export interface ApiTokenPair {
 const accessCachePurpose = "seller-access";
 const operatorPurpose = "pos-operator";
 const sessionIdPurpose = "session-id";
+const selectedStorePurpose = "selected-store";
 
 export function createNewSessionId(): string {
   return randomBytes(24).toString("base64url");
@@ -82,6 +83,22 @@ export function writePosOperatorCookie(response: NextResponse, payload: PosOpera
   response.cookies.set(sessionCookieNames.posOperator, signPayloadIntoCookieValue(payload, operatorPurpose, lifetime), buildHardenedCookieOptions(lifetime));
 }
 
+export function readSelectedStoreIdFromCookies(cookies: CookieReader): string | null {
+  const payload = verifySignedCookieValueAndReadPayload<{ readonly sessionId: string; readonly storeId: string }>(cookies.get(sessionCookieNames.selectedStore)?.value, selectedStorePurpose);
+  return payload && payload.sessionId === readSessionIdFromCookies(cookies) ? payload.storeId : null;
+}
+
+export function writeSelectedStoreCookie(response: NextResponse, sessionId: string, storeId: string): void {
+  const lifetime = sessionLifetimesInSeconds.session;
+  response.cookies.set(sessionCookieNames.selectedStore, signPayloadIntoCookieValue({ sessionId, storeId }, selectedStorePurpose, lifetime), buildHardenedCookieOptions(lifetime));
+}
+
+export function clearStoreScopedCookies(response: NextResponse): void {
+  for (const cookieName of [sessionCookieNames.sellerAccess, sessionCookieNames.posOperator, sessionCookieNames.selectedLocation]) {
+    response.cookies.set(cookieName, "", buildHardenedCookieOptions(0));
+  }
+}
+
 export function writeSelectedLocationCookie(response: NextResponse, locationId: string): void {
   response.cookies.set(sessionCookieNames.selectedLocation, locationId, buildHardenedCookieOptions(sessionLifetimesInSeconds.session));
 }
@@ -91,7 +108,7 @@ export function clearPosOperatorCookie(response: NextResponse): void {
 }
 
 export function clearEverySessionCookie(response: NextResponse): void {
-  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.sellerAccess, sessionCookieNames.posOperator]) {
+  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.sellerAccess, sessionCookieNames.posOperator, sessionCookieNames.selectedStore]) {
     response.cookies.set(cookieName, "", buildHardenedCookieOptions(0));
   }
 }

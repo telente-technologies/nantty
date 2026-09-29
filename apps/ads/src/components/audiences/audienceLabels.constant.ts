@@ -18,7 +18,7 @@ export const customAudienceStatusDisplay: Record<CustomAudienceStatus, { label: 
 
 export const engagementSourceOptions: readonly { value: EngagementSource; label: string }[] = [
   { value: "any_post", label: "Liked, commented on or saved a post" },
-  { value: "clips_watched", label: "Watched at least half of a clip" },
+  { value: "clips_watched", label: "Watched at least half of a reel" },
   { value: "live_viewers", label: "Joined a live shopping session" },
   { value: "saved_products", label: "Saved one of your products" },
   { value: "messaged", label: "Sent you a message" },

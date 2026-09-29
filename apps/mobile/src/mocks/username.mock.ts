@@ -24,7 +24,7 @@ export const generateAutomaticUsername = (seed: string) => {
 
 const takenUsernames = () => new Set([...directoryUsers.map((user) => user.username.toLowerCase()), "taken", signedInProfile().username.toLowerCase()]);
 
-function checkAvailability(rawUsername: string): UsernameAvailability {
+export function checkAvailability(rawUsername: string): UsernameAvailability {
   const username = rawUsername.trim().toLowerCase();
   if (!isValidUsername(username)) return { available: false, reason: "invalid" };
   if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return { available: false, reason: "reserved" };

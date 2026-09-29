@@ -3,11 +3,13 @@ import { createToken } from "@zudojs/container";
 import type { AppSettings } from "./configs/settings.config.js";
 import type { Clock } from "./interfaces/clock.interface.js";
 import type { Persistence } from "./interfaces/persistence.interface.js";
+import { createAdminModule, type AdminExternalServices } from "./loaders/admin.loader.js";
 import { createCatalogModules, type CatalogExternalServices } from "./loaders/catalog.loader.js";
 import { createCommerceModules, type CommerceExternalServices } from "./loaders/commerce.loader.js";
 import { createCommunicationModules, type CommunicationExternalServices } from "./loaders/communication.loader.js";
 import { createCore } from "./loaders/core.loader.js";
 import { createCurrencyModule, type CurrencyExternalServices } from "./loaders/currency.loader.js";
+import { createMonetizationModules, type MonetizationExternalServices } from "./loaders/monetization.loader.js";
 import { createIdentityModules, type IdentityExternalServices } from "./loaders/identity.loader.js";
 import { createSellerProgramModules, createVerificationBadgeSource } from "./loaders/sellerProgram.loader.js";
 import { createSocialModules, type SocialExternalServices } from "./loaders/social.loader.js";
@@ -26,7 +28,9 @@ export const APP_DEPENDENCIES = createToken<AppDependencies>("app.dependencies")
 
 export interface ExternalServices
   extends IdentityExternalServices,
+    AdminExternalServices,
     CurrencyExternalServices,
+    MonetizationExternalServices,
     CatalogExternalServices, CommerceExternalServices, CommunicationExternalServices, SocialExternalServices {}
 
 export interface DependencyOptions {
@@ -52,8 +56,9 @@ export function createDependencies(options: DependencyOptions) {
   registerAuditCommandAndQueryHandlers(core.commands, core.queries, audit);
   const badgeSource = createVerificationBadgeSource(core);
   const identity = createIdentityModules(core, audit, external, badgeSource.lookup);
+  const admin = createAdminModule(core, identity.internals, audit, external);
   const currency = createCurrencyModule(core, identity.userDirectory, external);
-  const web = createWebKit(core.settings, core.persistence, core.clock, identity.accessTokenVerifier, currency.resolveViewerLocale);
+  const web = createWebKit(core.settings, core.persistence, core.clock, identity.accessTokenVerifier, currency.resolveViewerLocale, admin.platformStaff);
   const { currencyConverter } = currency;
   const catalog = createCatalogModules(core, { audit, userDirectory: identity.userDirectory, currencyConverter, verificationBadges: badgeSource.lookup }, external);
   const commerce = createCommerceModules(
@@ -73,15 +78,17 @@ export function createDependencies(options: DependencyOptions) {
     creatorWallets: commerce.creatorWallets,
     verificationBadges: badgeSource.lookup,
   }, external);
+  const monetization = createMonetizationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph, payments: commerce.payments }, external);
   const communication = createCommunicationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph }, external);
 
   return {
     health,
     core,
     web,
-    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs, ...catalog.scheduledJobs, ...sellerProgram.scheduledJobs],
+    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs, ...catalog.scheduledJobs, ...sellerProgram.scheduledJobs, ...monetization.scheduledJobs],
     ports: {
       audit,
+      platformStaff: admin.platformStaff,
       currencyConverter,
       userDirectory: identity.userDirectory,
       storeAccess: catalog.storeAccess,
@@ -91,6 +98,7 @@ export function createDependencies(options: DependencyOptions) {
       orderLookup: commerce.orderLookup,
       creatorWallets: commerce.creatorWallets,
       advertiserBilling: commerce.advertiserBilling,
+      ledger: commerce.payments.ledger,
       sellerAccess: sellerProgram.sellerAccess,
       entitlements: sellerProgram.entitlements,
       requireSellerEntitlement: sellerProgram.requireSellerEntitlement,
@@ -98,6 +106,7 @@ export function createDependencies(options: DependencyOptions) {
       socialGraph: social.socialGraph,
     },
     // zudojs:container:start
+    ...admin.controllers,
     auditController: new AuditController(core.queries),
     authController: identity.authController,
     usersController: identity.usersController,
@@ -106,6 +115,7 @@ export function createDependencies(options: DependencyOptions) {
     ...commerce.controllers,
     ...sellerProgram.controllers,
     ...social.controllers,
+    ...monetization.controllers,
     ...communication.controllers,
     // zudojs:container:end
   };

@@ -23,8 +23,8 @@ export async function exchangeRefreshTokenForNewTokenPair(refreshToken: string):
   return tokens?.accessToken && tokens.refreshToken ? tokens : null;
 }
 
-export async function fetchSellerAccessWithAccessToken(accessToken: string): Promise<{ status: number; access: SellerAccess | null }> {
-  const result = await callSellerBackend({ method: "GET", path: "/seller/access", accessToken });
+export async function fetchSellerAccessWithAccessToken(accessToken: string, storeId: string | null = null): Promise<{ status: number; access: SellerAccess | null }> {
+  const result = await callSellerBackend({ method: "GET", path: "/seller/access", accessToken, storeId });
   return { status: result.status, access: result.status === 200 ? readJsonFromBackendResult<SellerAccess>(result) : null };
 }
 
@@ -44,15 +44,16 @@ export async function renewSellerAccessCache(options: {
   readonly accessToken: string | null;
   readonly refreshToken: string | null;
   readonly knownUser: SignedInUser | null;
+  readonly storeId?: string | null;
 }): Promise<RenewedSellerSession | null> {
   let accessToken = options.accessToken;
   let renewedTokens: ApiTokenPair | null = null;
-  let accessLookup = accessToken ? await fetchSellerAccessWithAccessToken(accessToken) : { status: 401, access: null };
+  let accessLookup = accessToken ? await fetchSellerAccessWithAccessToken(accessToken, options.storeId ?? null) : { status: 401, access: null };
   if (accessLookup.status === 401 && options.refreshToken) {
     renewedTokens = await exchangeRefreshTokenForNewTokenPair(options.refreshToken);
     if (!renewedTokens) return null;
     accessToken = renewedTokens.accessToken;
-    accessLookup = await fetchSellerAccessWithAccessToken(accessToken);
+    accessLookup = await fetchSellerAccessWithAccessToken(accessToken, options.storeId ?? null);
   }
   if (!accessLookup.access || !accessToken) return null;
   const user = options.knownUser ?? (await fetchSignedInUserWithAccessToken(accessToken));

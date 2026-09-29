@@ -3,6 +3,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, readJsonObjectBody, respondWithError, respondWithJson, respondWithNoContent, requireMockStorePrincipal } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
+import { doesPasswordMatchOverrideForUser, registerPasswordResetMockHandlers } from "@/mocks/handlers/passwordReset.mock";
 import { demoAccountPassword, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
 import type { SellerAccess } from "@/types/sellerAccess.type";
 
@@ -87,12 +88,14 @@ export function checkStaffPinWithLockout(staffId: string, pin: string, storeId: 
 }
 
 export function registerAccessAndAuthMockHandlers(): void {
+  registerPasswordResetMockHandlers();
   registerMockRoute("POST", "/auth/login", (request) => {
     const body = readJsonObjectBody(request);
     const identifier = typeof body.identifier === "string" ? body.identifier.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
     const user = readMockDatabase().users.find((candidate) => candidate.email === identifier || candidate.username === identifier || candidate.phone === identifier);
-    if (!user || !isDemoPasswordCorrect(password)) return respondWithError(401, "INVALID_CREDENTIALS", "That email, phone or password is not right.");
+    const overrideMatch = user ? doesPasswordMatchOverrideForUser(user.id, password) : null;
+    if (!user || !(overrideMatch ?? isDemoPasswordCorrect(password))) return respondWithError(401, "INVALID_CREDENTIALS", "That email, phone or password is not right.");
     const tokens = issueMockTokenPair(user.id, randomBytes(12).toString("hex"));
     return respondWithJson(200, { ...tokens, user: convertMockUserToCurrentUser(user.id), isNewUser: false });
   }, { public: true });
@@ -140,7 +143,7 @@ export function registerAccessAndAuthMockHandlers(): void {
     });
   });
 
-  registerMockRoute("GET", "/seller/subscription/plans", () => respondWithJson(200, { data: readMockDatabase().subscriptionPlans, nextCursor: null }));
+  registerMockRoute("GET", "/seller/subscription/plans", () => respondWithJson(200, { data: readMockDatabase().subscriptionPlans, nextCursor: null }), { public: true });
 
   registerMockRoute("GET", "/seller/subscription", (request) => respondWithJson(200, readGateStoreForRequest(request).gateStore.subscription));
 

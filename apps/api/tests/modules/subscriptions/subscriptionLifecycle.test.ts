@@ -96,7 +96,7 @@ describe("personal subscription state machine", () => {
     await sendWebhook(`evt_again_${retry}`, retry).expect(200).expectJson({ duplicate: false });
     const recovered = await mySubscription(user);
     expect(recovered.status).toBe("ACTIVE");
-    const renewals = (await app.client.get("/api/v1/admin/audit-events").query({ entityId: user.userId, action: "subscriptions.renewed" }).auth(await signIn(admin)).expect(200)).json<{ data: unknown[] }>();
+    const renewals = (await app.client.get("/api/v1/admin/audit-events").query({ entityId: user.userId, action: "subscriptions.renewed" }).auth(await app.signInPlatformStaffAgain(admin)).expect(200)).json<{ data: unknown[] }>();
     expect(renewals.data).toHaveLength(1);
     await app.client.get(`/api/v1/verification/${user.userId}`).expect(200).expectJson({ badgeVisible: true });
   });

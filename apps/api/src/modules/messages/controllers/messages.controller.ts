@@ -1,28 +1,32 @@
 import type { CommandBus, QueryBus } from "@zudojs/cqrs";
-import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
+import { createResponseContext, type HttpResponseContext, type HttpRouterContext } from "@zudojs/http";
 
+import type { MediaOriginalFile } from "../../../interfaces/mediaLibrary.interface.js";
 import { requireAuthenticatedPrincipal } from "../../../middlewares/authenticate.middleware.js";
 import type { Page } from "../../../types/pagination.type.js";
 import { empty, json, readJsonBody, validationFailed } from "../../../utils/http.util.js";
-import { buildPageRequest, mapPageItems } from "../../../utils/pagination.util.js";
+import { buildPageRequest } from "../../../utils/pagination.util.js";
 import { MarkConversationReadCommand } from "../commands/markConversationRead/markConversationRead.command.js";
 import { SendMessageCommand } from "../commands/sendMessage/sendMessage.command.js";
 import { StartConversationCommand } from "../commands/startConversation/startConversation.command.js";
-import { convertMessageToDto, type ConversationSummaryDto, type MessageSearchResultDto } from "../dtos/messages.dto.js";
-import type { MessageRecord } from "../models/messages.model.js";
+import { UpdateConversationSettingsCommand } from "../commands/updateConversationSettings/updateConversationSettings.command.js";
+import type { ConversationDto, MessageDto, MessageSearchResultDto } from "../dtos/messages.dto.js";
 import { GetConversationQuery } from "../queries/getConversation/getConversation.query.js";
 import { GetUnreadMessageCountQuery } from "../queries/getUnreadMessageCount/getUnreadMessageCount.query.js";
 import type { UnreadMessageCounts } from "../queries/getUnreadMessageCount/getUnreadMessageCount.handler.js";
+import { GetVoiceNoteQuery } from "../queries/getVoiceNote/getVoiceNote.query.js";
 import { ListConversationsQuery } from "../queries/listConversations/listConversations.query.js";
 import { ListMessagesQuery } from "../queries/listMessages/listMessages.query.js";
 import { SearchMessagesQuery } from "../queries/searchMessages/searchMessages.query.js";
 import {
+  ConversationMessageParamsSchema,
   ConversationParamsSchema,
   ListConversationsQuerySchema,
   ListMessagesQuerySchema,
   SearchMessagesQuerySchema,
   SendMessageBodySchema,
   StartConversationBodySchema,
+  UpdateConversationBodySchema,
 } from "../validators/messages.validator.js";
 
 export class MessagesController {
@@ -32,14 +36,14 @@ export class MessagesController {
     const body = StartConversationBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
     const command = new StartConversationCommand(requireAuthenticatedPrincipal(ctx), body.data.userId);
-    return json(200, await this.commands.execute<StartConversationCommand, ConversationSummaryDto>(command));
+    return json(200, await this.commands.execute<StartConversationCommand, ConversationDto>(command));
   };
 
   public readonly listConversations = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const query = ListConversationsQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const listQuery = new ListConversationsQuery(requireAuthenticatedPrincipal(ctx), query.data.filter ?? "all", query.data.q);
-    const conversations = await this.queries.execute<ListConversationsQuery, readonly ConversationSummaryDto[]>(listQuery);
+    const conversations = await this.queries.execute<ListConversationsQuery, readonly ConversationDto[]>(listQuery);
     return json(200, { data: conversations, nextCursor: null });
   };
 
@@ -47,7 +51,16 @@ export class MessagesController {
     const params = ConversationParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
     const query = new GetConversationQuery(requireAuthenticatedPrincipal(ctx), params.data.id);
-    return json(200, await this.queries.execute<GetConversationQuery, ConversationSummaryDto>(query));
+    return json(200, await this.queries.execute<GetConversationQuery, ConversationDto>(query));
+  };
+
+  public readonly updateConversation = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = ConversationParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const body = UpdateConversationBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    const command = new UpdateConversationSettingsCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data);
+    return json(200, await this.commands.execute<UpdateConversationSettingsCommand, ConversationDto>(command));
   };
 
   public readonly listMessages = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -55,9 +68,8 @@ export class MessagesController {
     if (!params.success) return validationFailed(params.issues);
     const query = ListMessagesQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
-    const listQuery = new ListMessagesQuery(requireAuthenticatedPrincipal(ctx), params.data.id, buildPageRequest(query.data));
-    const page = await this.queries.execute<ListMessagesQuery, Page<MessageRecord>>(listQuery);
-    return json(200, mapPageItems(page, convertMessageToDto));
+    const listQuery = new ListMessagesQuery(requireAuthenticatedPrincipal(ctx), params.data.id, buildPageRequest(query.data), query.data.after);
+    return json(200, await this.queries.execute<ListMessagesQuery, Page<MessageDto>>(listQuery));
   };
 
   public readonly sendMessage = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -66,7 +78,7 @@ export class MessagesController {
     const body = SendMessageBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
     const command = new SendMessageCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data);
-    return json(201, convertMessageToDto(await this.commands.execute<SendMessageCommand, MessageRecord>(command)));
+    return json(201, await this.commands.execute<SendMessageCommand, MessageDto>(command));
   };
 
   public readonly markRead = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -74,6 +86,18 @@ export class MessagesController {
     if (!params.success) return validationFailed(params.issues);
     await this.commands.execute<MarkConversationReadCommand, void>(new MarkConversationReadCommand(requireAuthenticatedPrincipal(ctx), params.data.id));
     return empty(204);
+  };
+
+  public readonly downloadVoiceNote = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = ConversationMessageParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const query = new GetVoiceNoteQuery(requireAuthenticatedPrincipal(ctx), params.data.id, params.data.messageId);
+    const file = await this.queries.execute<GetVoiceNoteQuery, MediaOriginalFile>(query);
+    return createResponseContext({
+      status: 200,
+      headers: { "content-type": file.contentType, "cache-control": "private, no-store", "x-content-type-options": "nosniff", "content-disposition": "inline" },
+      body: file.bytes,
+    });
   };
 
   public readonly unreadCount = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

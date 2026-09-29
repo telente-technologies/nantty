@@ -10,6 +10,7 @@ export class GetForYouFeedQuery extends Query<"feeds.getForYouFeed"> {
     public readonly topic: string | undefined,
     public readonly page: PageRequest,
     public readonly displayCurrency: CurrencyCode,
+    public readonly country: string | null,
   ) {
     super("feeds.getForYouFeed");
   }

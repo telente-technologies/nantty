@@ -18,6 +18,8 @@ export const BUYER_PERMISSIONS = [
   "subscriptions:use",
   "sounds:use",
   "copyright:claim",
+  "reports:create",
+  "support:use",
 ] as const;
 
 export const SELLER_PERMISSIONS = [
@@ -42,6 +44,7 @@ export const ADMIN_PERMISSIONS = [
   "subscriptions:manage",
   "creators:review",
   "media:read-private",
+  "monetization:manage",
   "admins:manage",
   "users:read",
   "users:manage",
@@ -60,6 +63,8 @@ export const ADMIN_PERMISSIONS = [
   "fees:manage",
   "feature-flags:manage",
   "analytics:read",
+  "support:manage",
+  "automation:manage",
 ] as const;
 
 export type Permission =

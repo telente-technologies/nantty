@@ -8,6 +8,7 @@ export class ListMessagesQuery extends Query<"messages.listMessages"> {
     public readonly principal: Principal,
     public readonly conversationId: string,
     public readonly page: PageRequest,
+    public readonly after: string | undefined,
   ) {
     super("messages.listMessages");
   }

@@ -8,7 +8,9 @@ import { FeaturedProductsGrid } from "@/components/product/featuredProductsGrid"
 import { OptionSelect } from "@/components/product/optionSelect";
 import { ProductGallery } from "@/components/product/productGallery";
 import { ProductInfoSection } from "@/components/product/productInfoSection";
+import { ProductBrandRow } from "@/components/product/productBrandRow";
 import { ProductPriceBlock } from "@/components/product/productPriceBlock";
+import { ReportProductSheet } from "@/components/product/reportProductSheet";
 import { Button } from "@/components/ui/button";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -30,6 +32,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const [bookmarked, setBookmarked] = useState(false);
   const [followingShop, setFollowingShop] = useState(false);
   const [cartError, setCartError] = useState<string | null>(null);
+  const [reportSheetVisible, setReportSheetVisible] = useState(false);
   const { addProductToCart } = useCartActions();
 
   const toggleShopFollow = useMutation({
@@ -101,6 +104,9 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           onToggleBookmark={bookmarkProduct}
           onPressRating={() => navigation.navigate("ProductReviews", { productId })}
         />
+        {detail.brand ? (
+          <ProductBrandRow brand={detail.brand} isOfficialStore={detail.isOfficialStore ?? false} onPress={() => navigation.navigate("BrandProfile", { brandId: detail.brand!.id })} />
+        ) : null}
         <View style={styles.selectors}>
           <OptionSelect label="Size" placeholder="Size (UK)" options={detail.sizes} value={selectedSize} onChange={setSelectedSize} />
           <OptionSelect label="Color" placeholder="Select an option" options={detail.colors} value={selectedColor} onChange={setSelectedColor} />
@@ -127,6 +133,9 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
             onViewShop={() => navigation.navigate("Store", { storeId: detail.store.id })}
           />
           <FeaturedProductsGrid products={detail.related} />
+          <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} align="center" accessibilityRole="button" onPress={() => setReportSheetVisible(true)}>
+            Report this product
+          </Text>
         </View>
       </ScrollView>
       <View style={styles.bottomBar}>
@@ -137,6 +146,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         ) : null}
         <Button title="Add to Cart" loading={addProductToCart.isPending} onPress={addSelectedProductToCart} />
       </View>
+      <ReportProductSheet productId={productId} visible={reportSheetVisible} onClose={() => setReportSheetVisible(false)} />
     </Screen>
   );
 }

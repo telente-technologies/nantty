@@ -8,8 +8,7 @@ import type { Page } from "../../../types/pagination.type.js";
 import { json, validationFailed } from "../../../utils/http.util.js";
 import { buildPageRequest } from "../../../utils/pagination.util.js";
 import { ChangeProductEngagementCommand } from "../commands/changeProductEngagement/changeProductEngagement.command.js";
-import { convertProductToCardDto, type MartHomeDto, type PublicProductDetailDto } from "../dtos/products.dto.js";
-import type { ProductRecord } from "../models/products.model.js";
+import { convertProductToCardDto, type MartHomeDto, type PublicProductDetailDto, type SponsorableProduct } from "../dtos/products.dto.js";
 import { GetMartHomeQuery } from "../queries/getMartHome/getMartHome.query.js";
 import { GetProductQuery } from "../queries/getProduct/getProduct.query.js";
 import type { ViewerProductEngagement } from "../queries/getViewerProductEngagement/getViewerProductEngagement.handler.js";
@@ -59,7 +58,9 @@ export class ProductsController {
   };
 
   public readonly martHome = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    return json(200, await this.queries.execute<GetMartHomeQuery, MartHomeDto>(new GetMartHomeQuery(findViewerLocale(ctx).currency)));
+    const locale = findViewerLocale(ctx);
+    const viewer = { viewerId: findAuthenticatedPrincipal(ctx)?.userId, country: locale.countryCode };
+    return json(200, await this.queries.execute<GetMartHomeQuery, MartHomeDto>(new GetMartHomeQuery(locale.currency, viewer)));
   };
 
   public readonly like = (ctx: HttpRouterContext) => this.changeEngagement(ctx, "like", true);
@@ -80,7 +81,8 @@ export class ProductsController {
 
   private async respondWithProductPage(ctx: HttpRouterContext, filter: ListProductsQueryInput): Promise<HttpResponseContext> {
     const displayCurrency = findViewerLocale(ctx).currency;
-    const page = await this.queries.execute<ListProductsQuery, Page<ProductRecord>>(new ListProductsQuery(filter, buildPageRequest(filter), displayCurrency));
+    const viewer = { viewerId: findAuthenticatedPrincipal(ctx)?.userId, country: findViewerLocale(ctx).countryCode };
+    const page = await this.queries.execute<ListProductsQuery, Page<SponsorableProduct>>(new ListProductsQuery(filter, buildPageRequest(filter), displayCurrency, viewer));
     const convert = await this.currencyConverter.prepareConversionInto(displayCurrency);
     const engagement = await this.findViewerEngagement(ctx, page.data.map((product) => product.id));
     return json(200, {

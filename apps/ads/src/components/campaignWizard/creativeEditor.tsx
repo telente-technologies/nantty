@@ -24,7 +24,7 @@ const sourceTabs: readonly { readonly value: CreativeSourceType; readonly label:
   { value: "upload", label: "Upload new" },
 ];
 
-const destinationLabels: Record<DestinationType, string> = { post: "The post or clip", profile: "Your profile", store: "Your store", product: "The product page", messages: "Zudomart messages", url: "A website" };
+const destinationLabels: Record<DestinationType, string> = { post: "The post, reel or live", profile: "Your profile", store: "Your store", product: "The product page", messages: "Zudomart messages", url: "A website" };
 
 const formatBySourceType: Record<Exclude<CreativeSourceType, "upload">, CreativeFormat> = { post: "feed_post", clip: "clip", product: "product", store: "store", live: "live" };
 

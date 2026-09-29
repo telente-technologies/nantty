@@ -72,6 +72,8 @@ const DIRECTORY_USER_SEEDS: readonly DirectoryUserSeed[] = [
   { key: "u_25", name: "Zudomart Support", username: "zudomart", bio: "Official help desk. We never ask for your password or card PIN.", followers: 58200, following: 12, posts: 140, joinedAt: "2024-04-01T00:00:00.000Z" },
 ];
 
+const CREATOR_USER_IDS = new Set<DirectoryUserId>(["u_me", "u_9", "u_10", "u_12", "u_13", "u_18"]);
+
 const avatarForSeed = (key: DirectoryUserId) =>
   key === "u_gov" ? buildUnsplashImageUrl(unsplashPhotoIds.posts.lagosSkyline[1] ?? unsplashPhotoIds.posts.lagosSkyline[0], 200) : avatarImageUrlForUser(key);
 const coverForSeed = (key: DirectoryUserId) =>
@@ -85,6 +87,7 @@ const buildUserFromSeed = (seed: DirectoryUserSeed): User => ({
   bannerUrl: coverForSeed(seed.key),
   verified: VERIFICATION_BY_USER_ID[seed.key]?.badgeVisible ?? false,
   verification: VERIFICATION_BY_USER_ID[seed.key] ?? null,
+  isCreator: CREATOR_USER_IDS.has(seed.key),
   bio: seed.bio,
   followers: seed.followers,
   following: seed.following,
@@ -107,6 +110,7 @@ export const summariseUser = (user: User): UserSummary => ({
   avatarUrl: user.avatarUrl,
   verified: user.verified,
   verification: user.verification ?? null,
+  isCreator: user.isCreator ?? false,
 });
 
 export const userSummaryById = (userId: DirectoryUserId): UserSummary => summariseUser(findDirectoryUserById(userId)!);

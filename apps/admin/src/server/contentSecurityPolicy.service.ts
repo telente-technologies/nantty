@@ -1,4 +1,4 @@
-import { readPrivateMediaOrigin } from "@/config/adminEnvironment.config";
+import { readAdminConsoleOrigin, readPrivateMediaOrigin } from "@/config/adminEnvironment.config";
 
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
@@ -26,6 +26,6 @@ export function buildContentSecurityPolicyHeaderValue(nonce: string): string {
     "worker-src": ["'self'"],
   };
   const serialized = Object.entries(directives).map(([directiveName, sources]) => `${directiveName} ${sources.join(" ")}`);
-  if (!isDevelopmentBuild) serialized.push("upgrade-insecure-requests");
+  if (!isDevelopmentBuild && readAdminConsoleOrigin().startsWith("https://")) serialized.push("upgrade-insecure-requests");
   return serialized.join("; ");
 }

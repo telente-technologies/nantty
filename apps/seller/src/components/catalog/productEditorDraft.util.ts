@@ -1,3 +1,4 @@
+import type { ProductBrandRelationship } from "@/types/brand.type";
 import type { Product, ProductImage, ProductStatus, StockLevel } from "@/types/catalog.type";
 import type { CurrencyCode } from "@/types/money.type";
 import type { ProductUpsertRequest, ProductVariantUpsertRequest } from "@/types/productRequests.type";
@@ -37,6 +38,8 @@ export interface ProductDraft {
   readonly options: OptionDraft[];
   readonly variants: VariantDraft[];
   readonly images: ProductImage[];
+  readonly brandId: string;
+  readonly brandRelationship: ProductBrandRelationship | "";
 }
 
 let draftKeyCounter = 0;
@@ -60,7 +63,7 @@ function createEmptyVariantDraft(optionValues: Record<string, string>, template:
 export function createEmptyProductDraft(): ProductDraft {
   return {
     name: "", description: "", categoryId: "", status: "active", taxable: true, trackInventory: true, publishedOnline: false, tagsText: "",
-    options: [], variants: [createEmptyVariantDraft({}, undefined)], images: [],
+    options: [], variants: [createEmptyVariantDraft({}, undefined)], images: [], brandId: "", brandRelationship: "",
   };
 }
 
@@ -71,6 +74,8 @@ export function convertProductToDraft(product: Product): ProductDraft {
     trackInventory: product.trackInventory, publishedOnline: product.publishedOnline, tagsText: product.tags.join(", "),
     options: product.options.map((option) => ({ key: createDraftKey(), name: option.name, valuesText: option.values.join(", ") })),
     images: product.images,
+    brandId: product.brand?.brandId ?? "",
+    brandRelationship: product.brand?.relationship ?? "",
     variants: product.variants.map((variant) => ({
       key: variant.id, id: variant.id, optionValues: variant.optionValues, sku: variant.sku, barcode: variant.barcode ?? "",
       priceText: toText(variant.price.amountMinor, variant.price.currency),
@@ -145,6 +150,7 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       options: draft.options.map((option) => ({ name: option.name.trim(), values: splitOptionValuesText(option.valuesText) })).filter((option) => option.name || option.values.length > 0),
       imageMediaIds: draft.images.map((image) => image.mediaId),
       variants,
+      brand: draft.brandId && draft.brandRelationship ? { brandId: draft.brandId, relationship: draft.brandRelationship } : null,
     },
   };
 }
