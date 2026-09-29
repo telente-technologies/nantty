@@ -68,7 +68,7 @@ export type MainStackParamList = {
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
-  CreatePost: { mode?: "story" | "post" | "product" | "live" } | undefined;
+  CreatePost: { mode?: "story" | "post" | "product" | "live"; soundId?: string } | undefined;
   PostDetail: { postId: string };
   Live: { liveId: string; host?: boolean };
   LiveEnded: { liveId: string };
@@ -91,6 +91,7 @@ export type MainStackParamList = {
   SupportTicketDetail: { ticketId: string };
   MyReports: undefined;
   SettingsUsername: undefined;
+  Sound: { soundId: string };
 };
 
 export type RootStackParamList = AuthStackParamList & MainStackParamList;
