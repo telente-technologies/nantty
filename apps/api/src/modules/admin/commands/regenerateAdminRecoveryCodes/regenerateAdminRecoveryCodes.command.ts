@@ -1,10 +1,10 @@
 import { Command } from "@zudojs/cqrs";
 
-import type { Principal } from "../../../../interfaces/principal.interface.js";
+import type { StaffRequestState } from "../../services/staffRequestGuard.service.js";
 
 export class RegenerateAdminRecoveryCodesCommand extends Command<"admin.regenerateAdminRecoveryCodes"> {
   public constructor(
-    public readonly principal: Principal,
+    public readonly staff: StaffRequestState,
   ) {
     super("admin.regenerateAdminRecoveryCodes");
   }
