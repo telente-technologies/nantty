@@ -1,10 +1,18 @@
 import type { Page, Post } from "@/types";
 
+import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const TOPICS = ["For You", "Fashion", "Gadgets", "Food", "Beauty", "Home & Living", "Football", "Travel"];
 const POSTS_PER_PAGE = 7;
+const SUGGESTED_CLIPS_COUNT = 6;
+
+const listSuggestedClipsWithPosterThumbnails = () =>
+  clipVideoSeeds
+    .filter((seed) => !seed.sponsoredCampaign)
+    .slice(0, SUGGESTED_CLIPS_COUNT)
+    .map((seed) => ({ id: seed.id, thumbnailUrl: seed.posterUrl }));
 
 const byNewestFirst = (a: Post, b: Post) => b.createdAt.localeCompare(a.createdAt);
 
@@ -24,6 +32,6 @@ const pageOfPostsWithSponsoredSlot = (cursor: string | null, filter: (post: Post
 export const feedMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/feeds/for-you", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"))),
   createMockRoute("GET", "/api/v1/feeds/following", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"), (p) => p.isFollowingAuthor)),
-  createMockRoute("GET", "/api/v1/feeds/suggested-clips", () => Array.from({ length: 6 }, (_, i) => ({ id: `clip_${i}`, thumbnailUrl: null }))),
+  createMockRoute("GET", "/api/v1/feeds/suggested-clips", listSuggestedClipsWithPosterThumbnails),
   createMockRoute("GET", "/api/v1/users/me/topics", () => TOPICS.slice(1).map((name, i) => ({ id: `t_${i + 1}`, name }))),
 ];
