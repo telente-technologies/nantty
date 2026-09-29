@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react";
 
+import type { PosSale } from "@/types/pos.type";
 import type { PosCatalogSnapshot, QueuedOfflineSale } from "@/types/posExtra.type";
 import type { PosRegister } from "@/types/store.type";
 
@@ -16,6 +17,7 @@ export interface PosRegisterContextValue {
   readonly isCatalogFromCache: boolean;
   readonly isCatalogLoading: boolean;
   readonly reloadCatalog: () => void;
+  readonly applySaleToLocalStock: (sale: PosSale) => Promise<void>;
   readonly isOnline: boolean;
   readonly reportRequestOutcome: (wasOffline: boolean) => void;
   readonly queuedSales: QueuedOfflineSale[];
