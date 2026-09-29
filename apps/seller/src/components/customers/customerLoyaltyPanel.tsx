@@ -12,7 +12,6 @@ import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { Customer } from "@/types/customer.type";
-import { readMinorUnitsPerMajorUnit } from "@/utils/money.util";
 
 import styles from "./customers.module.css";
 
@@ -58,7 +57,7 @@ export function CustomerLoyaltyPanel({ customer, onCustomerChanged }: { readonly
       <p className={styles.loyaltyPoints}>{customer.loyaltyPoints.toLocaleString()}</p>
       {loyalty?.enabled && pointsValue ? (
         <p className={styles.muted}>
-          Worth {formatMoney(pointsValue)}. Earns {loyalty.pointsEarnedPerMajorUnit} point per {formatMoney({ amountMinor: readMinorUnitsPerMajorUnit(loyalty.redeemValuePerPoint.currency), currency: loyalty.redeemValuePerPoint.currency })} spent; redeemable from {loyalty.minimumPointsToRedeem} points at {formatMoney(loyalty.redeemValuePerPoint)} each.
+          Worth {formatMoney(pointsValue)}. Earns 1 point per {formatMoney(loyalty.spendRequiredPerPoint)} spent; redeemable from {loyalty.minimumPointsToRedeem} points at {formatMoney(loyalty.redeemValuePerPoint)} each.
         </p>
       ) : (
         <p className={styles.muted}>Loyalty is switched off in Settings.</p>
