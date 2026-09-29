@@ -21,25 +21,25 @@ const ROLE_LABELS: Record<ConversationMember["role"], string> = { owner: "Owner"
 export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmin, onDemoteToMember, onRemoveFromGroup }: GroupMemberRowProps) {
   const canManageThisMember = canManageMembers && !isMe && member.role !== "owner";
   const [isShowingActions, setIsShowingActions] = useState(false);
-  const roleLabel = isMe ? "You" : ROLE_LABELS[member.role];
+  const roleLabel = isMe && member.role !== "member" ? `You · ${ROLE_LABELS[member.role]}` : isMe ? "You" : ROLE_LABELS[member.role];
   const runActionAndCollapse = (action: () => void) => () => {
     setIsShowingActions(false);
     action();
   };
   return (
     <View>
-    <PersonRow
-      person={member.user}
-      avatarSize={40}
-      onPress={canManageThisMember ? () => setIsShowingActions((showing) => !showing) : undefined}
-      right={
-        roleLabel ? (
-          <Text size={12} weight={500} lineHeight={16.8} color={member.role === "member" ? colors.textMuted : colors.primary} style={styles.role}>
-            {roleLabel}
-          </Text>
-        ) : null
-      }
-    />
+      <PersonRow
+        person={member.user}
+        avatarSize={40}
+        onPress={canManageThisMember ? () => setIsShowingActions((showing) => !showing) : undefined}
+        right={
+          roleLabel ? (
+            <Text size={12} weight={500} lineHeight={16.8} color={member.role === "member" ? colors.textMuted : colors.primary} style={styles.role}>
+              {roleLabel}
+            </Text>
+          ) : null
+        }
+      />
       {isShowingActions ? (
         <View style={styles.actions}>
           <MemberActionButton
