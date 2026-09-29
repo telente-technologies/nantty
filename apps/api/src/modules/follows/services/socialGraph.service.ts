@@ -29,6 +29,10 @@ export class RepositorySocialGraph implements SocialGraph {
     return this.follows.countFollowers(targetType, targetId);
   }
 
+  public countFollowersSince(targetType: "user" | "store", targetId: string, since: Date): Promise<number> {
+    return this.follows.countFollowersSince(targetType, targetId, since);
+  }
+
   public listUserIdsBlockedEitherWay(userId: string): Promise<readonly string[]> {
     return this.blocks.listUserIdsBlockedEitherWay(userId);
   }
