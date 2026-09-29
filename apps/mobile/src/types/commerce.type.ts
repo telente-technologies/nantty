@@ -18,6 +18,7 @@ export interface SearchResults {
   readonly products: readonly ProductSummary[];
   readonly stores: readonly StoreSummary[];
   readonly people: readonly UserSummary[];
+  readonly brands?: readonly import("./brand.type").BrandSummary[];
 }
 
 export interface ProductReview {
@@ -36,6 +37,7 @@ export interface ProductReviewSummary {
 
 export interface StoreDetail extends StoreSummary {
   readonly ownerUserId: ID;
+  readonly officialBrand?: import("./brand.type").BrandSummary | null;
   readonly bannerUrl: string | null;
   readonly handle: string;
   readonly bio: string;
