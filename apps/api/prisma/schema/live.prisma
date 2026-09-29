@@ -12,6 +12,7 @@ model LiveSession {
   endedAt       DateTime?
 
   @@index([status, startedAt])
+  @@index([hostId, startedAt])
   @@map("live_sessions")
 }
 
