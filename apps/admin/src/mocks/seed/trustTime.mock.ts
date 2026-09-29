@@ -7,3 +7,5 @@ export function isoMinutesFromNow(minutes: number): string {
 }
 
 export const reportSlaMinutesByPriority = { URGENT: 60, HIGH: 240, NORMAL: 1440, LOW: 4320 } as const;
+
+export type WritableRecord<Shape> = { -readonly [Key in keyof Shape]: Shape[Key] };
