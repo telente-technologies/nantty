@@ -44,12 +44,17 @@ export function registerPostsRoutes(router: HttpRouter, controller: PostsControl
   router.post(`${POSTS}/:id/products`, controller.tagProducts, { ...write, ...describeRoute("posts", "Tag products on my post", { ...params, body: TagProductsBodySchema }) });
   router.get(`${POSTS}/:id/comments`, controller.listComments, { ...anyone, ...describeRoute("posts", "List comments", { ...params, query: PageQuerySchemaForLists }) });
   router.post(`${POSTS}/:id/comments`, controller.addComment, { ...write, ...describeRoute("posts", "Comment or reply", { ...params, body: CommentBodySchema }) });
-  router.delete(`${POSTS}/:id/comments/:commentId`, controller.deleteComment, { ...write, ...describeRoute("posts", "Delete a comment", { params: CommentParamsSchema }) });
+  router.delete(`${POSTS}/:id/comments/:commentId`, controller.deleteComment, { ...write, ...describeRoute("posts", "Delete a comment (legacy path)", { params: CommentParamsSchema }) });
   router.get("/api/v1/users/:id/posts", controller.listUserPosts, { ...anyone, ...describeRoute("posts", "List a user's posts", { ...params, query: PostListQuerySchema }) });
   router.get("/api/v1/stores/:id", controller.getStoreDetail, { ...anyone, ...describeRoute("stores", "Store profile with followers and recent posts", params) });
   router.get("/api/v1/stores/:id/posts", controller.listStorePosts, { ...anyone, ...describeRoute("posts", "List a store's posts", { ...params, query: PageQuerySchemaForLists }) });
   router.post("/api/v1/comments/:id/like", controller.likeComment, { ...write, ...describeRoute("posts", "Like a comment", { params: CommentLikeParamsSchema }) });
   router.delete("/api/v1/comments/:id/like", controller.unlikeComment, { ...write, ...describeRoute("posts", "Unlike a comment", { params: CommentLikeParamsSchema }) });
+  router.get("/api/v1/comments/:id/replies", controller.listReplies, {
+    ...anyone,
+    ...describeRoute("posts", "Replies in a comment thread: every descendant for a top-level comment, direct replies otherwise", { params: CommentLikeParamsSchema, query: PageQuerySchemaForLists }),
+  });
+  router.delete("/api/v1/comments/:id", controller.deleteCommentById, { ...write, ...describeRoute("posts", "Delete a comment (author or post owner)", { params: CommentLikeParamsSchema }) });
 }
 
 export function registerStoriesRoutes(router: HttpRouter, controller: StoriesController, web: WebKit): void {
