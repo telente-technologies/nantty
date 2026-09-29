@@ -20,7 +20,7 @@ export interface VoiceNoteBubbleProps {
 export function VoiceNoteBubble({ media, isMine, deliveryStatus }: VoiceNoteBubbleProps) {
   const player = useAudioPlayer(media.url ? { uri: media.url } : null);
   const status = useAudioPlayerStatus(player);
-  const durationSeconds = status.duration || media.durationSeconds || 0;
+  const durationSeconds = media.durationSeconds || status.duration || 0;
   const playedFraction = durationSeconds > 0 ? Math.min(status.currentTime / durationSeconds, 1) : 0;
   const foregroundColor = isMine ? colors.white : colors.text;
 
