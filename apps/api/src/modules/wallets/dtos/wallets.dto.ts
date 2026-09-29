@@ -1,5 +1,5 @@
 import { Money } from "../../../utils/money.util.js";
-import type { LedgerEntryRecord, PayoutAccountRecord, WithdrawalRecord } from "../models/wallets.model.js";
+import type { LedgerEntryRecord, PayoutAccountRecord, WalletTopUpRecord, WithdrawalRecord } from "../models/wallets.model.js";
 
 export function convertPayoutAccountToDto(account: PayoutAccountRecord) {
   return {
@@ -17,6 +17,7 @@ export function convertWithdrawalToDto(withdrawal: WithdrawalRecord) {
   return {
     id: withdrawal.id,
     storeId: withdrawal.storeId,
+    userId: withdrawal.userId,
     payoutAccountId: withdrawal.payoutAccountId,
     amount: Money.of(withdrawal.amount, withdrawal.currency).toDto(),
     status: withdrawal.status,
@@ -34,5 +35,17 @@ export function convertLedgerEntryToDto(entry: LedgerEntryRecord) {
     amount: Money.of(entry.amount, entry.currency).toDto(),
     balanceAfter: Money.of(entry.balanceAfter, entry.currency).toDto(),
     createdAt: entry.createdAt.toISOString(),
+  };
+}
+
+export function convertWalletTopUpToDto(topUp: WalletTopUpRecord) {
+  return {
+    id: topUp.id,
+    reference: topUp.reference,
+    provider: topUp.provider,
+    amount: Money.of(topUp.amount, topUp.currency).toDto(),
+    status: topUp.status,
+    creditedAt: topUp.creditedAt === null ? null : topUp.creditedAt.toISOString(),
+    createdAt: topUp.createdAt.toISOString(),
   };
 }
