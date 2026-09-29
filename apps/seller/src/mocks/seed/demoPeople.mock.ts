@@ -50,6 +50,7 @@ export function buildDemoMemberships(): MockStoreMembership[] {
   return [
     { userId: "usr_adaeze", storeId: demoMainStoreId, role: "owner", staffId: "stf_adaeze" },
     { userId: "usr_tunde", storeId: demoMainStoreId, role: "manager", staffId: "stf_tunde" },
+    { userId: "usr_adaeze", storeId: "store_adire_lab_studio", role: "owner", staffId: "stf_adaeze_adire" },
     { userId: "usr_blessing", storeId: demoMainStoreId, role: "cashier", staffId: "stf_blessing" },
     { userId: "usr_ibrahim", storeId: demoMainStoreId, role: "inventory", staffId: "stf_ibrahim" },
     { userId: "usr_ngozi", storeId: demoMainStoreId, role: "support", staffId: "stf_ngozi" },
