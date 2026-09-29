@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, Refresh24Icon, Share24Icon } from "@/components/icons";
+import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
+import { TipSheet, type TipTarget } from "@/components/coins/tipSheet";
+import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { useAuthStore } from "@/store/auth.store";
 import type { AdPlacement, Post } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 
@@ -29,6 +35,18 @@ export function PostCard(props: PostCardProps) {
   const { post } = props;
   const hasMedia = post.media.length > 0;
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
+  const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
+  const [tipTarget, setTipTarget] = useState<TipTarget | null>(null);
+  const canTipAuthor = post.author.isCreator === true && post.author.id !== signedInUserId;
+  const isMediaLockedForViewer = isContentLockedForViewer(post);
+  const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
+  const [hasOpenedOptionsSheet, setHasOpenedOptionsSheet] = useState(false);
+  const openMoreOptions =
+    props.onPressMore ??
+    (() => {
+      setHasOpenedOptionsSheet(true);
+      setIsOptionsSheetOpen(true);
+    });
   return (
     <View style={styles.card}>
       <View style={styles.combo}>
@@ -47,6 +65,7 @@ export function PostCard(props: PostCardProps) {
               <Text size={14} weight={500} lineHeight={16.8}>
                 {post.author.name}
               </Text>
+              <VerificationBadge verification={post.author.verification} legacyVerified={post.author.verified} size={16} />
               <View style={styles.dot} />
               <Text size={14} weight={500} lineHeight={16.8}>
                 {formatTimeSincePosted(post.createdAt)}
@@ -62,7 +81,7 @@ export function PostCard(props: PostCardProps) {
                 </Text>
               </Pressable>
             ) : null}
-            <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10} onPress={props.onPressMore}>
+            <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10} onPress={openMoreOptions}>
               <DotsThreeVertical24Icon />
             </Pressable>
           </View>
@@ -77,7 +96,15 @@ export function PostCard(props: PostCardProps) {
             </Text>
           </View>
         ) : null}
-        {hasMedia || post.products.length > 0 ? (
+        {isMediaLockedForViewer ? (
+          <View style={styles.lockedMedia}>
+            <SubscriberOnlyLock
+              creatorId={post.author.id}
+              creatorName={post.author.name}
+              blurredPreviewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}
+            />
+          </View>
+        ) : hasMedia || post.products.length > 0 ? (
           <MediaPager
             media={post.media}
             isVisibleOnScreen={isVisibleForAutoplay}
@@ -105,8 +132,31 @@ export function PostCard(props: PostCardProps) {
           <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={8} onPress={props.onShare}>
             <Share24Icon />
           </Pressable>
+          {canTipAuthor ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Tip ${post.author.name} with coins`}
+              hitSlop={8}
+              onPress={() => setTipTarget({ targetType: "post", targetId: post.id, creatorName: post.author.name })}
+            >
+              <Text size={14} weight={500} lineHeight={16.8}>
+                🪙 Tip
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
+        {tipTarget ? <TipSheet target={tipTarget} onClose={() => setTipTarget(null)} /> : null}
       </View>
+      {hasOpenedOptionsSheet ? (
+        <ContentOptionsSheet
+          target={
+            isOptionsSheetOpen
+              ? { targetType: "post", targetId: post.id, authorId: post.author.id, shareUrl: `https://zudomart.com/posts/${post.id}` }
+              : null
+          }
+          onClose={() => setIsOptionsSheetOpen(false)}
+        />
+      ) : null}
     </View>
   );
 }
@@ -143,5 +193,6 @@ const styles = StyleSheet.create({
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
   interactions: { paddingHorizontal: 16, marginTop: 8 },
   counters: { flexDirection: "row", alignItems: "center", gap: 24 },
+  lockedMedia: { height: 335, overflow: "hidden" },
   counter: { flexDirection: "row", alignItems: "center", gap: 8 },
 });
