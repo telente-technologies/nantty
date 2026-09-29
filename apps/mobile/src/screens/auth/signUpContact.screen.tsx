@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { AuthStep } from "@/components/auth/auth-step";
+import { AuthStep } from "@/components/auth/authStep";
 import { ContactChannelTabs } from "@/components/auth/contactChannelTabs";
 import { RoundCheckbox } from "@/components/auth/roundCheckbox";
 import { TextField } from "@/components/ui/input";

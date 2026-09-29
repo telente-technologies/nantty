@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-import { LegalText } from "@/components/auth/legal-text";
+import { LegalText } from "@/components/auth/legalText";
 import { Apple24Icon, Google24Icon, UserCircle24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";

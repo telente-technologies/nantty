@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { AuthStep } from "@/components/auth/auth-step";
+import { AuthStep } from "@/components/auth/authStep";
 import { OTP_CODE_LENGTH, OtpCodeInput } from "@/components/auth/otpCodeInput";
 import { ResendCodeTimer } from "@/components/auth/resendCodeTimer";
 import { Text } from "@/components/ui/text";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { AuthStep } from "@/components/auth/auth-step";
+import { AuthStep } from "@/components/auth/authStep";
 import { Warning20Icon } from "@/components/icons";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -40,6 +40,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
           onChangeText={setIdentifier}
           autoCapitalize="none"
           autoComplete="username"
+          autoFocus
           textContentType="username"
           keyboardType="email-address"
           returnKeyType="next"

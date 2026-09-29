@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { AuthStep } from "@/components/auth/auth-step";
+import { AuthStep } from "@/components/auth/authStep";
 import { PasswordRequirements } from "@/components/auth/passwordRequirements";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
