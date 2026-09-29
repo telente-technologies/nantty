@@ -30,6 +30,14 @@ export const adminPermissionGroups = [
     ],
   },
   {
+    area: "Brands",
+    permissions: [
+      { key: "brands:review", label: "Review brands and Official Store requests" },
+      { key: "brands:revoke", label: "Revoke Official Store status" },
+      { key: "ip-claims:review", label: "Decide trademark and counterfeit claims" },
+    ],
+  },
+  {
     area: "Moderation",
     permissions: [
       { key: "moderation:reports", label: "Work the reports queue" },
