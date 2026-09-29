@@ -23,7 +23,8 @@
     "plugins": [
       "expo-video",
       "expo-background-task",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-audio"
     ]
   }
 }
