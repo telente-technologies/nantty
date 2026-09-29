@@ -2,12 +2,7 @@ import { createHash, createHmac, randomBytes } from "node:crypto";
 
 export const SIGNATURE_VERSION = "v1";
 
-export interface SignedRequestHeaders {
-  readonly "content-type": "application/json";
-  readonly "x-zudo-timestamp": string;
-  readonly "x-zudo-nonce": string;
-  readonly "x-zudo-signature": string;
-}
+export type SignedRequestHeaders = Readonly<Record<"content-type" | "x-zudo-timestamp" | "x-zudo-nonce" | "x-zudo-signature", string>>;
 
 export interface SigningInput {
   readonly secret: string;
