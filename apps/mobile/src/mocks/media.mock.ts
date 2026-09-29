@@ -37,7 +37,7 @@ const currentMediaAsset = (mediaId: string): MediaAsset | null => {
   return Date.now() >= stored.readyAt ? { ...stored.asset, status: "ready" } : stored.asset;
 };
 
-const convertMediaAssetToPostMedia = (asset: MediaAsset): Media => ({
+const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type: Media["type"] }): Media => ({
   id: asset.id,
   type: asset.type,
   url: asset.variants[0]?.url ?? null,
@@ -53,7 +53,8 @@ const convertMediaAssetToPostMedia = (asset: MediaAsset): Media => ({
 export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/media/uploads", ({ body }) => {
     const request = body as CreateUploadSessionRequest;
-    if (!request.mimeType.startsWith("image/") && !request.mimeType.startsWith("video/")) {
+    const isSupportedMimeType = ["image/", "video/", "audio/"].some((prefix) => request.mimeType.startsWith(prefix));
+    if (!isSupportedMimeType) {
       throw new ApiError(415, "Unsupported media type", "UNSUPPORTED_MEDIA_TYPE");
     }
     const uploadId = nextMockId("up");
@@ -84,10 +85,10 @@ export const mediaMocks: MockRoute[] = [
     if (session.uploadedChunks.size < session.totalChunks) throw new ApiError(409, "Some chunks are missing", "CHUNKS_MISSING");
     if (!session.mediaId) {
       const mediaId = nextMockId("med");
-      const isVideo = session.request.mimeType.startsWith("video/");
+      const mediaType = session.request.mimeType.startsWith("video/") ? "video" : session.request.mimeType.startsWith("audio/") ? "audio" : "image";
       storedMediaById.set(mediaId, {
         readyAt: Date.now() + MOCK_PROCESSING_DELAY_MS,
-        asset: { id: mediaId, type: isVideo ? "video" : "image", status: "processing", width: 1080, height: 1350, variants: [] },
+        asset: { id: mediaId, type: mediaType, status: "processing", width: mediaType === "audio" ? 0 : 1080, height: mediaType === "audio" ? 0 : 1350, variants: [] },
       });
       session.mediaId = mediaId;
     }
@@ -104,7 +105,8 @@ export const mediaMocks: MockRoute[] = [
     const media = input.mediaIds.map((mediaId) => {
       const asset = currentMediaAsset(mediaId);
       if (!asset) throw new ApiError(422, "One of the uploads could not be found", "MEDIA_NOT_FOUND");
-      return convertMediaAssetToPostMedia(asset);
+      if (asset.type === "audio") throw new ApiError(422, "Audio can't be posted on its own", "UNSUPPORTED_POST_MEDIA");
+      return convertMediaAssetToPostMedia({ ...asset, type: asset.type });
     });
     if (input.soundId) {
       const sound = findMutableSoundState(input.soundId);
