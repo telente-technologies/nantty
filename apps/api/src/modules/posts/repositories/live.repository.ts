@@ -23,6 +23,12 @@ export interface LiveSessionsRepository {
   createComment(sessionId: string, userId: string, text: string, createdAt: Date): Promise<LiveCommentRecord>;
   listComments(sessionId: string, page: PageRequest): Promise<Page<LiveCommentRecord>>;
   addReaction(sessionId: string): Promise<LiveSessionRecord | undefined>;
+  summarizeHostedSessions(hostId: string, startedSince: Date | null): Promise<HostedLiveSummary>;
+}
+
+export interface HostedLiveSummary {
+  readonly sessions: number;
+  readonly reactions: number;
 }
 
 export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
@@ -100,5 +106,10 @@ export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
     const updated = { ...session, reactionCount: session.reactionCount + 1 };
     this.sessions.set(sessionId, updated);
     return updated;
+  }
+
+  public async summarizeHostedSessions(hostId: string, startedSince: Date | null): Promise<HostedLiveSummary> {
+    const hosted = [...this.sessions.values()].filter((session) => session.hostId === hostId && (startedSince === null || session.startedAt >= startedSince));
+    return { sessions: hosted.length, reactions: hosted.reduce((total, session) => total + session.reactionCount, 0) };
   }
 }
