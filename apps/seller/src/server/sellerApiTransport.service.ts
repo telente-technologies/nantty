@@ -1,0 +1,88 @@
+import { isMockBackendEnabled, readSellerApiBaseUrl } from "@/config/sellerEnvironment.config";
+import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
+import type { ApiErrorBody } from "@/types/pagination.type";
+
+export interface BackendCall {
+  readonly method: string;
+  readonly path: string;
+  readonly query?: URLSearchParams;
+  readonly body?: Uint8Array | null;
+  readonly contentType?: string | null;
+  readonly accessToken?: string | null;
+  readonly operatorToken?: string | null;
+  readonly locationId?: string | null;
+  readonly forwardedHeaders?: Record<string, string>;
+}
+
+export interface BackendResult {
+  readonly status: number;
+  readonly headers: Headers;
+  readonly body: Uint8Array;
+}
+
+const backendTimeoutInMilliseconds = 20_000;
+const textEncoder = new TextEncoder();
+
+function buildOutgoingHeaders(call: BackendCall): Headers {
+  const headers = new Headers({ Accept: "application/json, text/csv;q=0.9" });
+  if (call.contentType) headers.set("Content-Type", call.contentType);
+  if (call.accessToken) headers.set("Authorization", `Bearer ${call.accessToken}`);
+  if (call.operatorToken) headers.set("X-Seller-Operator", call.operatorToken);
+  if (call.locationId) headers.set("X-Seller-Location", call.locationId);
+  headers.set("X-Request-Id", crypto.randomUUID());
+  for (const [headerName, headerValue] of Object.entries(call.forwardedHeaders ?? {})) headers.set(headerName, headerValue);
+  return headers;
+}
+
+async function callMockBackend(call: BackendCall, headers: Headers): Promise<BackendResult> {
+  const mockResponse = await dispatchMockApiRequest({ method: call.method, path: call.path, query: call.query ?? new URLSearchParams(), headers, body: call.body ?? null });
+  const responseHeaders = new Headers(mockResponse.headers);
+  if (mockResponse.status === 204 || mockResponse.body === null || mockResponse.body === undefined) return { status: mockResponse.status, headers: responseHeaders, body: new Uint8Array() };
+  if (typeof mockResponse.body === "string") {
+    responseHeaders.set("Content-Type", mockResponse.contentType ?? "text/plain; charset=utf-8");
+    return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(mockResponse.body) };
+  }
+  responseHeaders.set("Content-Type", "application/json; charset=utf-8");
+  return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(JSON.stringify(mockResponse.body)) };
+}
+
+async function callRealBackend(call: BackendCall, headers: Headers): Promise<BackendResult> {
+  const queryText = call.query?.toString();
+  const url = `${readSellerApiBaseUrl()}/api/v1${call.path}${queryText ? `?${queryText}` : ""}`;
+  const timeoutController = new AbortController();
+  const timeoutHandle = setTimeout(() => timeoutController.abort(), backendTimeoutInMilliseconds);
+  try {
+    const response = await fetch(url, {
+      method: call.method,
+      headers,
+      body: call.body && call.body.byteLength > 0 ? Buffer.from(call.body) : undefined,
+      signal: timeoutController.signal,
+      redirect: "manual",
+      cache: "no-store",
+    });
+    return { status: response.status, headers: response.headers, body: new Uint8Array(await response.arrayBuffer()) };
+  } catch {
+    const unavailableBody: ApiErrorBody = { message: "The Zudomart service is not reachable right now. Try again in a moment.", code: "UPSTREAM_UNAVAILABLE" };
+    return { status: 503, headers: new Headers({ "Content-Type": "application/json" }), body: textEncoder.encode(JSON.stringify(unavailableBody)) };
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
+}
+
+export async function callSellerBackend(call: BackendCall): Promise<BackendResult> {
+  const headers = buildOutgoingHeaders(call);
+  return isMockBackendEnabled() ? callMockBackend(call, headers) : callRealBackend(call, headers);
+}
+
+export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {
+  if (result.body.byteLength === 0 || !(result.headers.get("content-type") ?? "").includes("json")) return null;
+  try {
+    return JSON.parse(new TextDecoder().decode(result.body)) as Payload;
+  } catch {
+    return null;
+  }
+}
+
+export function encodeJsonRequestBody(payload: unknown): Uint8Array {
+  return textEncoder.encode(JSON.stringify(payload));
+}
