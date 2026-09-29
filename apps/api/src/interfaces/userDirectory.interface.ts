@@ -27,4 +27,5 @@ export interface UserDirectory {
   searchUsers(term: string, limit: number): Promise<readonly UserSummary[]>;
   grantRole(userId: string, role: string): Promise<void>;
   listSelectedTopicSlugs(userId: string): Promise<readonly string[]>;
+  findTopicSlugById(topicId: string): Promise<string | undefined>;
 }

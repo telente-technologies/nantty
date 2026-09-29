@@ -24,6 +24,9 @@ import { PrismaPostInteractionsRepository } from "../modules/posts/repositories/
 import { InMemoryPostInteractionsRepository } from "../modules/posts/repositories/postInteractions.repository.js";
 import { PrismaPostsRepository } from "../modules/posts/repositories/posts.prisma.repository.js";
 import { InMemoryPostsRepository } from "../modules/posts/repositories/posts.repository.js";
+import { PrismaSocialEngagementRepository } from "../modules/posts/repositories/socialEngagement.prisma.repository.js";
+import { InMemorySocialEngagementRepository } from "../modules/posts/repositories/socialEngagement.repository.js";
+import { StoriesController } from "../modules/posts/controllers/stories.controller.js";
 import { PostsService } from "../modules/posts/services/posts.service.js";
 import { ReviewsController } from "../modules/reviews/controllers/reviews.controller.js";
 import { PrismaReviewsRepository } from "../modules/reviews/repositories/reviews.prisma.repository.js";
@@ -47,12 +50,13 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
   const follows = usePrisma ? new PrismaFollowsRepository() : new InMemoryFollowsRepository();
   const blocks = usePrisma ? new PrismaBlocksRepository() : new InMemoryBlocksRepository();
   const socialGraph = new RepositorySocialGraph(follows, blocks);
-  const followsService = new FollowsService({ follows, blocks, userDirectory: shared.userDirectory, storeAccess: shared.storeAccess, events, clock });
+  const followsService = new FollowsService({ follows, blocks, userDirectory: shared.userDirectory, storeAccess: shared.storeAccess, orderLookup: shared.orderLookup, events, clock });
   registerFollowsCommandAndQueryHandlers(commands, queries, followsService);
 
   const postsService = new PostsService({
     posts: usePrisma ? new PrismaPostsRepository() : new InMemoryPostsRepository(),
     interactions: usePrisma ? new PrismaPostInteractionsRepository() : new InMemoryPostInteractionsRepository(),
+    engagement: usePrisma ? new PrismaSocialEngagementRepository() : new InMemorySocialEngagementRepository(),
     liveSessions: usePrisma ? new PrismaLiveSessionsRepository() : new InMemoryLiveSessionsRepository(),
     userDirectory: shared.userDirectory,
     productCatalog: shared.productCatalog,
@@ -90,6 +94,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
       followsController: new FollowsController(commands, queries),
       postsController: new PostsController(commands, queries),
       liveController: new LiveController(commands, queries),
+      storiesController: new StoriesController(commands, queries),
       feedsController: new FeedsController(commands, queries),
       reviewsController: new ReviewsController(commands, queries),
     },
