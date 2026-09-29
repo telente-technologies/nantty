@@ -89,6 +89,11 @@ export function securityHeaders(): HttpMiddleware {
 
 export function createApplicationRouterOptions(): RouterOptions {
   return {
+    onError: (error) => {
+      const response = errorResponse(error);
+      if (response === undefined || response.status >= 500) throw error;
+      return response;
+    },
     notFoundHandler: () => json(404, { message: "Not found", code: "NOT_FOUND" }),
     methodNotAllowedHandler: (_context, allowedMethods) => {
       const response = json(405, { message: "Method not allowed", code: "METHOD_NOT_ALLOWED", allowed: allowedMethods });
