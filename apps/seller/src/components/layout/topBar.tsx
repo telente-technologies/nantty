@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
-import { sendRequestToDashboardServer } from "@/services/clientApi.service";
+import { signOutOfDashboardAndClearCachedPages } from "@/services/signOut.service";
 
 import styles from "./topBar.module.css";
 
@@ -21,8 +21,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
 
   async function signOutOfDashboard() {
     setIsSigningOut(true);
-    await sendRequestToDashboardServer("/bff/auth/logout", { method: "POST" }).catch(() => undefined);
-    window.location.assign("/login");
+    await signOutOfDashboardAndClearCachedPages();
   }
 
   return (
