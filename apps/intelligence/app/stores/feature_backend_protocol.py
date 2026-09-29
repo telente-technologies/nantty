@@ -31,6 +31,13 @@ class HashFieldIncrement:
 
 
 @dataclass(frozen=True, slots=True)
+class HashFieldAssign:
+    key: str
+    field: str
+    value: float
+
+
+@dataclass(frozen=True, slots=True)
 class DistinctMemberAdd:
     key: str
     member: str
@@ -47,6 +54,7 @@ type FeatureWriteOperation = (
     | SortedSetAssignScore
     | SortedSetKeepHighestScores
     | HashFieldIncrement
+    | HashFieldAssign
     | DistinctMemberAdd
     | KeyExpiry
 )
