@@ -13,7 +13,9 @@ from src.validators.common_field_validator import (
     UnitInterval,
 )
 
-AdPlacement = Literal["feed", "clips", "mart", "search", "live", "story", "post_detail"]
+AdPlacement = Literal["feed", "clips", "mart", "search", "stories", "live", "live_discovery"]
+AdMediaType = Literal["image", "video", "carousel", "live_stream", "product_tile"]
+AdAspectRatio = Literal["1:1", "4:5", "9:16", "16:9"]
 AdBidType = Literal["cpc", "cpm"]
 
 
@@ -24,6 +26,15 @@ class AdTargeting(ContractModel):
     age_brackets: list[AgeBracket] = Field(default_factory=list, max_length=7)
     lookalike_store_id: OpaqueIdentifier | None = None
     lookalike_minimum_similarity: UnitInterval = 0.3
+
+
+class AdCreative(ContractModel):
+    media_type: AdMediaType
+    aspect_ratio: AdAspectRatio
+    duration_ms: int | None = Field(default=None, ge=0, le=600_000)
+    is_live_now: bool = False
+    product_id: OpaqueIdentifier | None = None
+    live_stream_id: OpaqueIdentifier | None = None
 
 
 class AdCandidate(ContractModel):
@@ -42,6 +53,7 @@ class AdCandidate(ContractModel):
     frequency_cap_per_day: int = Field(default=3, ge=1, le=50)
     placements: list[AdPlacement] = Field(min_length=1, max_length=7)
     targeting: AdTargeting = Field(default_factory=AdTargeting)
+    creative: AdCreative
     brand_safety: Literal["strict", "standard"] = "standard"
     day_start_utc_offset_minutes: int = Field(default=60, ge=-720, le=840)
     creative_topics: list[TopicSlug] = Field(default_factory=list, max_length=20)
@@ -56,9 +68,10 @@ class OrganicSlotItem(ContractModel):
 
 
 class AdLoadOptions(ContractModel):
-    first_ad_after_organic_items: int = Field(default=3, ge=2, le=50)
-    organic_items_between_ads: int = Field(default=6, ge=6, le=50)
+    first_ad_after_organic_items: int | None = Field(default=None, ge=0, le=50)
+    organic_items_between_ads: int | None = Field(default=None, ge=1, le=50)
     maximum_ads: int = Field(default=5, ge=0, le=20)
+    grid_columns: int = Field(default=2, ge=1, le=6)
 
 
 class AdSelectionRequest(ContractModel):
@@ -89,6 +102,7 @@ class AdPlacementDecision(ContractModel):
     host_creator_id: OpaqueIdentifier | None
     charge_model: AdBidType
     charge_price: MoneyAmount
+    creative_media_type: AdMediaType
     predicted_click_rate: float
     auction_id: str
 
