@@ -86,14 +86,27 @@ Validation (mirror `src/mocks/mockCampaignValidation.mock.ts`): name ≤120; lif
 
 Policy review: run automated checks at submit (prohibited categories in `src/constants/policy.constant.ts`), then human review. On rejection set `review.policyCode` (a code from the policy page, used for `/policy#<code>` links) and a plain-language `policyReason`.
 
+## Placements and ad formats
+
+Ads take the shape of the content in the slot. `AdPlacement` values map to four formats advertisers pick from:
+
+| Format | Placements | Creative accepted | Shown as |
+|---|---|---|---|
+| Marketplace | `mart` (Mart grids, categories), `search` | product sources only | product tile marked **Ad**, inserted at fixed slots (2nd, 7th, 12th, 19th…), never adjacent |
+| Feed | `feed` | images 4:5–1.91:1 (others cropped to 4:5); videos only if landscape or ≥60 s; live sessions as live cards | sponsored post card |
+| Reels | `clips` (reels pager), `stories` | vertical 9:16 video 3–90 s; landscape video ≤10 min letterboxed with **View full screen**; stories also accept vertical images; live sessions as full-screen live cards in `clips` | full-screen clip / story |
+| Live | `live` (live discovery) | live sessions (`ContentSource.type = "live"`, scheduled or live) | promoted live card; also eligible in `feed` and `clips` |
+
+The rules live in `src/utils/adPlacementRules.util.ts` and must be mirrored server-side: on create/update of an ad, reject with `400` and path `ads.N.creative.placements` (or `creative.placements` for single-ad endpoints) when the creative fits **none** of its ad set's placements; when it fits only some, deliver only where it fits (automatic placements = all six). The mobile app's `AdPlacement` type currently lacks `stories` and `live`; the API should send those values once the app renders them.
+
 ## Creatives and media
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
-| GET | /ads/accounts/:accountId/content-sources | campaigns:view | `?type=post\|clip\|product\|store&search=&cursor=&limit=` | `Page<ContentSource>` from the account owner's profile or linked store; `eligible:false` + `ineligibleReason` for giveaways, removed or age-restricted content | 404 |
+| GET | /ads/accounts/:accountId/content-sources | campaigns:view | `?type=post\|clip\|product\|live\|store&search=&cursor=&limit=` (live = scheduled or ongoing sessions with `live: CreativeLiveStream`) | `Page<ContentSource>` from the account owner's profile or linked store; `eligible:false` + `ineligibleReason` for giveaways, removed or age-restricted content | 404 |
 | POST | /ads/accounts/:accountId/creatives/preview | campaigns:view | `CreativeInput` | `Creative` resolved exactly as it will render (identity, verified badge, media, product price) | 400 |
 | GET | /ads/accounts/:accountId/creatives/media/:mediaId | campaigns:view | — | `UploadedMedia` (`processing` until transcoded) | 404 |
-| POST | /media/uploads | signed in | `{ fileName, mimeType, sizeBytes, purpose: "ad_creative", adAccountId }` | 201 `UploadSession` | 413, 415 |
+| POST | /media/uploads | signed in | `{ fileName, mimeType, sizeBytes, purpose: "ad_creative", adAccountId, clientMetadata?: { width, height, durationSeconds } }` (hints read in the browser; the server re-derives them when processing) | 201 `UploadSession` | 413, 415 |
 | PUT | /media/uploads/:uploadId/chunks/:index | uploader | raw bytes, `Content-Type: application/octet-stream`, `X-Chunk-Sha256: <hex>` | `{ uploadedChunks: number[] }` | 400 BAD_CHUNK_INDEX/LENGTH, 422 CHUNK_CHECKSUM_MISMATCH |
 | POST | /media/uploads/:uploadId/complete | uploader | — | `{ mediaId, status: "processing" }` | 409 UPLOAD_INCOMPLETE |
 | GET | /media/:mediaId | signed in | — | file bytes (or a redirect to the CDN) | 404 |
@@ -157,7 +170,7 @@ Metric definitions: CTR = clicks/impressions; CPC = spend/clicks; CPM = spend/im
 | POST | /ads/accounts/:accountId/experiments | tools:manage | `ExperimentInput` (2–5 ad sets of one campaign, split sums to 100, ≥4 days, ad set in one test at a time) | 201 `Experiment` | 400 |
 | POST | /ads/accounts/:accountId/experiments/:experimentId/stop | tools:manage | — | `Experiment` | 409 NOT_RUNNING |
 | GET | /ads/accounts/:accountId/rules | campaigns:view | — | `Page<AutomatedRule>` | 404 |
-| POST | /ads/accounts/:accountId/rules | tools:manage | `AutomatedRuleInput` (1–5 conditions; thresholds for money metrics are in major units of the account currency) | 201 `AutomatedRule` | 400 |
+| POST | /ads/accounts/:accountId/rules | tools:manage | `AutomatedRuleInput` (1–5 conditions; money thresholds in major units of the account currency, `ctr` as a percent number e.g. `1.5`) | 201 `AutomatedRule` | 400 |
 | PATCH | /ads/accounts/:accountId/rules/:ruleId | tools:manage | `Partial<AutomatedRuleInput> & { status? }` | `AutomatedRule` | 400 |
 | DELETE | /ads/accounts/:accountId/rules/:ruleId | tools:manage | — | 204 | 404 |
 
