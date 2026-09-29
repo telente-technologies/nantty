@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { TextIndent24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode } from "@/types";
 
@@ -26,6 +27,7 @@ export interface LiveSetupPanelProps {
 export function LiveSetupPanel(props: LiveSetupPanelProps) {
   const cameraRef = useRef<CameraView>(null);
   const [draftTitle, setDraftTitle] = useState(props.title);
+  const { canGoLive } = useCreatorStatus();
 
   return (
     <View style={styles.flex}>
@@ -72,7 +74,7 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
           </Pressable>
           <View style={styles.bottom} pointerEvents="box-none">
             {props.title ? null : <CreateModePill mode="live" onChangeMode={props.onChangeMode} />}
-            <RecordButton label="Go live" disabled={props.starting} onPress={props.onGoLive} />
+            <RecordButton label="Go live" disabled={props.starting || !canGoLive} onPress={props.onGoLive} />
           </View>
         </>
       )}

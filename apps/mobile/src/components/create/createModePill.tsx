@@ -2,27 +2,36 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { CreateMode } from "@/types";
 
 const MODES: readonly CreateMode[] = ["story", "post", "product", "live"];
 
 export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onChangeMode: (mode: CreateMode) => void }) {
+  const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
+  const isLiveModeLocked = !canGoLive && !isCreatorStatusLoading;
   return (
     <View style={styles.pill} accessibilityRole="tablist">
-      {MODES.map((m) => (
-        <Text
-          key={m}
-          size={13}
-          weight={500}
-          lineHeight={16.9}
-          color={m === mode ? colors.black : colors.textMuted}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: m === mode }}
-          onPress={() => onChangeMode(m)}
-        >
-          {m.toUpperCase()}
-        </Text>
-      ))}
+      {MODES.map((m) => {
+        const isLockedMode = m === "live" && isLiveModeLocked;
+        return (
+          <View key={m} style={styles.modeItem}>
+            <Text
+              size={13}
+              weight={500}
+              lineHeight={16.9}
+              color={m === mode ? colors.black : colors.textMuted}
+              accessibilityRole="tab"
+              accessibilityLabel={isLockedMode ? "LIVE, locked. Join the Creator Program to go live" : m.toUpperCase()}
+              accessibilityState={{ selected: m === mode, disabled: isLockedMode }}
+              onPress={() => onChangeMode(m)}
+            >
+              {m.toUpperCase()}
+            </Text>
+            {isLockedMode ? <View style={styles.lockedModeDot} /> : null}
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -38,4 +47,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  modeItem: { flexDirection: "row", alignItems: "center", gap: 3 },
+  lockedModeDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.textMuted },
 });
