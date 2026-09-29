@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { UnprocessableEntityError } from "@zudojs/errors";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { Money } from "../../../src/utils/money.util.js";
 import type { SignedInUser } from "../../fixtures/testApplication.fixture.js";
+import { Money } from "../../../src/utils/money.util.js";
+import { buyCoins } from "../coins/coinsSetup.fixture.js";
 import { createCommerceTestApplication, createIdempotencyKey, FAKE_WEBHOOK_SECRET, naira } from "../orders/commerceSetup.fixture.js";
 
 const app = createCommerceTestApplication();
@@ -60,22 +61,21 @@ describe("wallet top-ups", () => {
 });
 
 describe("creator wallets", () => {
-  it("pays a live gift from viewer to creator minus the platform cut, idempotently, and refuses overdrafts", async () => {
-    const viewer = await app.registerUser();
+  it("pays a live gift in coins from viewer to creator minus the platform cut, idempotently, and refuses overdrafts", async () => {
+    const viewer = await app.registerBuyer();
     const creator = await app.registerUser();
-    await topUp(viewer, 20_000);
+    await buyCoins(app, viewer, "coins-70");
     const reference = randomUUID();
-    const gift = { reference, senderUserId: viewer.userId, recipientUserId: creator.userId, amount: Money.of(10_000, "NGN"), platformCutBasisPoints: 3_000 };
-    await creatorWallets().payForLiveGift(gift);
-    await creatorWallets().payForLiveGift(gift);
-    expect(await personalBalance(viewer)).toBe(10_000);
-    expect(await personalBalance(creator)).toBe(7_000);
-    expect((await creatorWallets().findUserWalletSummary(creator.userId)).balances.map((balance) => balance.toDto())).toEqual([naira(7_000)]);
-    await expect(creatorWallets().payForLiveGift({ ...gift, reference: randomUUID(), amount: Money.of(10_001, "NGN") })).rejects.toBeInstanceOf(UnprocessableEntityError);
+    const gift = { reference, kind: "live_gift" as const, senderUserId: viewer.userId, recipientUserId: creator.userId, coins: 20, creatorShareBasisPoints: 7_000 };
+    const first = await creatorWallets().payForLiveGift(gift);
+    const replay = await creatorWallets().payForLiveGift(gift);
+    expect(first).toMatchObject({ coinBalance: 50, creatorCoins: 14, platformCoins: 6, created: true });
+    expect(replay.created).toBe(false);
+    expect(await creatorWallets().findCreatorCoinBalances(creator.userId)).toEqual({ spendableCoins: 0, earnedCoins: 14 });
+    await expect(creatorWallets().payForLiveGift({ ...gift, reference: randomUUID(), coins: 51 })).rejects.toBeInstanceOf(UnprocessableEntityError);
     await expect(creatorWallets().payForLiveGift({ ...gift, reference: randomUUID(), recipientUserId: viewer.userId })).rejects.toBeInstanceOf(UnprocessableEntityError);
-    expect(await personalBalance(viewer)).toBe(10_000);
-    const transactions = (await app.client.get("/api/v1/wallets/me/transactions?scope=user&currency=NGN").auth(creator.accessToken).expect(200)).json<{ data: { type: string; amount: unknown }[] }>();
-    expect(transactions.data).toEqual([expect.objectContaining({ type: "credit", amount: naira(7_000) })]);
+    expect((await creatorWallets().findCreatorCoinBalances(viewer.userId)).spendableCoins).toBe(50);
+    expect(await personalBalance(creator)).toBe(0);
   });
 
   it("credits affiliate commission from the store wallet once per reference", async () => {
@@ -113,7 +113,7 @@ describe("personal wallet for users without a store", () => {
     expect(await personalBalance(user)).toBe(5_000);
     const admin = await app.registerAdmin();
     await app.client.post(`/api/v1/admin/withdrawals/${withdrawal.id}/process`).auth(admin.accessToken).set("idempotency-key", createIdempotencyKey()).expect(200).expectJson({ status: "paid" });
-    expect(app.paystack.transfers.at(-1)).toMatchObject({ amount: 25_000, accountNumber: "0123456789" });
+    expect(app.paystack.transfers.at(-1)).toMatchObject({ amount: 24_000, accountNumber: "0123456789" });
     const listed = (await app.client.get("/api/v1/wallets/me/withdrawals?scope=user").auth(user.accessToken).expect(200)).json<{ data: { id: string; status: string }[] }>();
     expect(listed.data.map((item) => item.status).sort()).toEqual(["failed", "paid"]);
     expect(listed.data.map((item) => item.id)).toContain(withdrawal.id);
