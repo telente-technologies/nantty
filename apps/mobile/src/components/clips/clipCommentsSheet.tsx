@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+import { useEffect } from "react";
 import { Modal, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -18,6 +20,9 @@ export interface ClipCommentsSheetProps {
 export function ClipCommentsSheet({ postId, myAvatarUrl, onClose }: ClipCommentsSheetProps) {
   const insets = useSafeAreaInsets();
   const commentThread = useCommentThreadController(postId);
+  const navigation = useNavigation();
+
+  useEffect(() => navigation.addListener("blur", onClose), [navigation, onClose]);
 
   return (
     <Modal visible={!!postId} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
