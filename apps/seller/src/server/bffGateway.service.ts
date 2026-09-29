@@ -21,6 +21,7 @@ const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-ma
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
 const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$/;
 const pathsNeverProxied = /^\/seller\/staff\/pin-sessions/;
+const gateApiPathPattern = /^\/seller\/(access|verification|subscription)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
@@ -72,9 +73,12 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
   const effectiveRole = operator?.operator.role ?? cachedAccess.access.role;
   const requiredPermission = findPermissionRequiredForApiCall(request.method, apiPath);
   if (requiredPermission === null) return respondWithBffError(403, "FORBIDDEN", "You do not have access to this.");
-  if (requiredPermission !== "signed_in") {
-    if (decideSellerAccessDestination(cachedAccess.access) !== "app") return respondWithBffError(403, "STORE_NOT_ACTIVE", "Your store needs verification and an active plan first.");
-    if (!doesRoleHavePermission(effectiveRole, requiredPermission)) return respondWithBffError(403, "FORBIDDEN", "Your role does not allow this. Ask a manager or the store owner.");
+  const isAvailableBeforeStoreIsActive = gateApiPathPattern.test(apiPath);
+  if (!isAvailableBeforeStoreIsActive && decideSellerAccessDestination(cachedAccess.access) !== "app") {
+    return respondWithBffError(403, "STORE_NOT_ACTIVE", "Your store needs Gold verification and an active plan first.");
+  }
+  if (requiredPermission !== "signed_in" && !doesRoleHavePermission(effectiveRole, requiredPermission)) {
+    return respondWithBffError(403, "FORBIDDEN", "Your role does not allow this. Ask a manager or the store owner.");
   }
 
   const body = await readRequestBodyWithinLimit(request);
