@@ -17,6 +17,7 @@ import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/f
 import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { MediaPager } from "./mediaPager";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
+import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
 
 export interface PostCardProps {
   readonly post: Post;
@@ -143,9 +144,7 @@ export function PostCard(props: PostCardProps) {
               hitSlop={8}
               onPress={() => setTipTarget({ targetType: "post", targetId: post.id, creatorName: post.author.name })}
             >
-              <Text size={14} weight={500} lineHeight={16.8}>
-                🪙 Tip
-              </Text>
+              <CoinAmountWithIcon weight={500} label="Tip" />
             </Pressable>
           ) : null}
         </View>
