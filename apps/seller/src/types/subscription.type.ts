@@ -1,16 +1,18 @@
 import type { Money } from "@/types/money.type";
-import type { SubscriptionSummary } from "@/types/sellerAccess.type";
+import type { GoldEntitlements, GoldTier, SubscriptionSummary } from "@/types/sellerAccess.type";
+
+export interface SubscriptionPlanPerk {
+  readonly title: string;
+  readonly description: string;
+}
 
 export interface SubscriptionPlan {
   readonly id: string;
-  readonly name: string;
-  readonly tagline: string;
+  readonly tier: GoldTier;
   readonly price: Money;
   readonly interval: "month" | "year";
-  readonly trialDays: number;
-  readonly limits: { readonly locations: number | null; readonly registers: number | null; readonly staff: number | null; readonly products: number | null };
-  readonly features: string[];
-  readonly recommended: boolean;
+  readonly entitlements: GoldEntitlements;
+  readonly perks: SubscriptionPlanPerk[];
 }
 
 export interface SubscriptionInvoice {
@@ -23,7 +25,9 @@ export interface SubscriptionInvoice {
   readonly paidAt: string | null;
 }
 
-export interface SubscriptionDetails extends SubscriptionSummary {
+export interface SubscriptionDetails {
+  readonly subscription: SubscriptionSummary | null;
+  readonly planId: string | null;
   readonly cancelAtPeriodEnd: boolean;
   readonly paymentMethodSummary: string | null;
   readonly provider: "paystack" | "flutterwave" | null;
