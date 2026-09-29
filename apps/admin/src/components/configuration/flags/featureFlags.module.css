@@ -1,0 +1,83 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.toggles,
+.platforms {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.platforms legend,
+.variants legend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.rollout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rollout input {
+  accent-color: var(--blue-500);
+}
+
+.rolloutLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.twoFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: 10px;
+}
+
+.variants {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantRow {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 90px auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.weightError {
+  color: var(--error-ink);
+}
+
+.note {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.targeting {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.rowActions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.flagKey {
+  font-weight: 600;
+}
