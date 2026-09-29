@@ -6,11 +6,14 @@ import { invalidState, notFound, unprocessable } from "../../../errors/domain.er
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { Principal } from "../../../interfaces/principal.interface.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { MinorUnits } from "../../../types/money.type.js";
+import { Money, type MoneyDto } from "../../../utils/money.util.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import type { FieldCipher } from "../../../utils/crypto.util.js";
 import type { PaymentGateway } from "../../payments/gateways/paymentGateway.interface.js";
-import { describeWalletOwner, findWalletOwnerOfRecord, type WalletScopeInput, type WithdrawalRecord } from "../models/wallets.model.js";
+import { describeWalletOwner, findWalletOwnerOfRecord, type WalletOwner, type WalletScopeInput, type WithdrawalRecord } from "../models/wallets.model.js";
+import type { PayoutTransferFeeSchedule } from "./payoutTransferFees.service.js";
 import type { PayoutAccountsRepository, WithdrawalsRepository } from "../repositories/wallets.repository.js";
 import { findPayoutPendingAccountForOwner, findWalletAccountForOwner, LedgerAccounts, type LedgerService } from "./ledger.service.js";
 import { WALLET_OWNER_ROLES, WALLET_VIEWER_ROLES, type WalletOwnerResolver } from "./walletOwnerResolver.service.js";
@@ -26,6 +29,15 @@ export interface WithdrawalsDependencies {
   readonly audit: AuditRecorder;
   readonly clock: Clock;
   readonly paymentGateways: Readonly<Record<string, PaymentGateway>>;
+  readonly transferFees: PayoutTransferFeeSchedule;
+}
+
+export interface WithdrawalQuote {
+  readonly amount: MoneyDto;
+  readonly fee: MoneyDto;
+  readonly netAmount: MoneyDto;
+  readonly provider: string;
+  readonly payoutAccountId: string;
 }
 
 export class WithdrawalsService {
@@ -39,10 +51,9 @@ export class WithdrawalsService {
   public async requestWithdrawal(principal: Principal, scope: WalletScopeInput, amount: MinorUnits, payoutAccountId: string): Promise<WithdrawalRecord> {
     const { payoutAccounts, withdrawals, ledger, audit, clock, owners } = this.dependencies;
     const { owner, currency } = await owners.resolveWallet(principal, scope, WALLET_OWNER_ROLES);
-    if (!providerSupportsCurrency(PAYOUT_PROVIDER, currency)) throw unprocessable(`Payouts in ${currency} are not supported yet.`);
-    if ((await payoutAccounts.findForOwner(owner, payoutAccountId)) === undefined) throw notFound("Payout account");
+    const fee = await this.calculateFeeForOwner(owner, currency, amount, payoutAccountId);
     const withdrawal = await withdrawals.create({
-      ...describeWalletOwner(owner), payoutAccountId, amount, currency, reference: `withdrawal-${randomUUID()}`, requestedById: principal.userId,
+      ...describeWalletOwner(owner), payoutAccountId, amount, fee, currency, reference: `withdrawal-${randomUUID()}`, requestedById: principal.userId,
     });
     try {
       await ledger.postLedgerTransaction({
@@ -62,6 +73,26 @@ export class WithdrawalsService {
     return withdrawal;
   }
 
+  public async quoteWithdrawal(principal: Principal, scope: WalletScopeInput, amount: MinorUnits, payoutAccountId: string): Promise<WithdrawalQuote> {
+    const { owner, currency } = await this.dependencies.owners.resolveWallet(principal, scope, WALLET_VIEWER_ROLES);
+    const fee = await this.calculateFeeForOwner(owner, currency, amount, payoutAccountId);
+    return {
+      amount: Money.of(amount, currency).toDto(),
+      fee: Money.of(fee, currency).toDto(),
+      netAmount: Money.of(amount - fee, currency).toDto(),
+      provider: PAYOUT_PROVIDER,
+      payoutAccountId,
+    };
+  }
+
+  private async calculateFeeForOwner(owner: WalletOwner, currency: CurrencyCode, amount: MinorUnits, payoutAccountId: string): Promise<MinorUnits> {
+    if (!providerSupportsCurrency(PAYOUT_PROVIDER, currency)) throw unprocessable(`Payouts in ${currency} are not supported yet.`);
+    if ((await this.dependencies.payoutAccounts.findForOwner(owner, payoutAccountId)) === undefined) throw notFound("Payout account");
+    const fee = this.dependencies.transferFees.calculateTransferFee(PAYOUT_PROVIDER, currency, amount);
+    if (fee >= amount) throw unprocessable("This withdrawal is too small to cover the bank transfer fee.");
+    return fee;
+  }
+
   public async processWithdrawal(adminId: string, withdrawalId: string): Promise<WithdrawalRecord> {
     const { withdrawals, payoutAccounts, cipher, paymentGateways, audit } = this.dependencies;
     const withdrawal = await withdrawals.findById(withdrawalId);
@@ -72,7 +103,7 @@ export class WithdrawalsService {
     if (payoutAccount === undefined || gateway === undefined) return this.failWithdrawal(adminId, withdrawal, "payout_account_unavailable");
     const result = await gateway.transferToBank({
       reference: withdrawal.reference,
-      amount: withdrawal.amount,
+      amount: withdrawal.amount - withdrawal.fee,
       currency: withdrawal.currency,
       bankCode: payoutAccount.bankCode,
       accountNumber: await cipher.decryptText(payoutAccount.accountNumberEncrypted),
