@@ -20,6 +20,7 @@ export interface LedgerRepository {
   findAccountByKey(key: string): Promise<LedgerAccountRecord | undefined>;
   findTransactionByReference(reference: string): Promise<LedgerTransactionRecord | undefined>;
   listEntriesForAccount(accountKey: string, page: PageRequest): Promise<Page<LedgerEntryRecord>>;
+  listAccountsForOwner(ownerType: string, ownerId: string): Promise<readonly LedgerAccountRecord[]>;
 }
 
 export class InMemoryLedgerRepository implements LedgerRepository {
@@ -49,6 +50,10 @@ export class InMemoryLedgerRepository implements LedgerRepository {
       .filter((entry) => entry.accountId === account.id)
       .sort(compareByNewestFirst);
     return paginateSortedItems(entries, page);
+  }
+
+  public async listAccountsForOwner(ownerType: string, ownerId: string): Promise<readonly LedgerAccountRecord[]> {
+    return [...this.accounts.values()].filter((account) => account.ownerType === ownerType && account.ownerId === ownerId);
   }
 
   public listAllAccounts(): readonly LedgerAccountRecord[] {
