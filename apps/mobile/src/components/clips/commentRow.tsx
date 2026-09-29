@@ -5,6 +5,7 @@ import { Heart20Icon, HeartFill72Icon } from "@/components/icons";
 import { ReportSheet } from "@/components/moderation/reportSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Comment } from "@/types";
@@ -36,6 +37,7 @@ export function CommentRow({
 }: CommentRowProps) {
   const isReply = visualIndentLevel > 0;
   const [isReportSheetOpen, setIsReportSheetOpen] = useState(false);
+  const openUserProfile = useOpenUserProfile();
   const offerToReportComment = () =>
     Alert.alert("Comment options", undefined, [
       { text: "Cancel", style: "cancel" },
@@ -58,10 +60,12 @@ export function CommentRow({
       }}
       style={[styles.row, isPending && styles.pending]}
     >
-      <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
+      <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
+        <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
+      </Pressable>
       <View style={styles.body}>
         <View style={styles.meta}>
-          <Text size={12} weight={600} lineHeight={16.8}>
+          <Text size={12} weight={600} lineHeight={16.8} accessibilityRole="link" onPress={() => openUserProfile(comment.author.id)}>
             {comment.author.username}
           </Text>
           <VerificationBadge verification={comment.author.verification} legacyVerified={comment.author.verified} size={12} />
