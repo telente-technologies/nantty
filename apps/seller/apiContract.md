@@ -650,16 +650,24 @@ Response 200: PosRegister
 Errors: 404 REGISTER_NOT_FOUND; 409 OPEN_SHIFT (cannot deactivate with an open shift)
 Note: GET /seller/pos/registers?locationId (documented in the POS section) is read by the settings page with `includeInactive=true` so deactivated registers can be re-activated; please support that flag.
 
+Staff are always existing Zudomart app users. There are no separate staff accounts and no email/SMS invites: the store adds a Zudomart user, the user gets a team request in the Zudomart app, accepts it there, and signs in to the dashboard with their own Zudomart credentials.
+
+### GET /api/v1/seller/zudomart-users
+Permission: any signed-in store member. Query: `q` (≥2 chars; username with or without "@", or display name). Response 200: `{ data: ZudomartUserCandidate[] }` (max 10) where `ZudomartUserCandidate = { userId, name, username, avatarUrl }`. Public profile fields only — never email, phone or other private data. Excludes suspended/banned accounts and accounts that block the caller.
+
+### GET /api/v1/seller/staff/candidates
+Permission: staff:manage. Same as `/seller/zudomart-users` but excludes users already on this store's team.
+
 ### GET /api/v1/seller/staff
 Permission: staff:manage (owner, admin)
-Query: q? (name/email/phone), cursor?, limit? (≤200)
+Query: q? (name/username), cursor?, limit? (≤200)
 Response 200: CursorPage<StaffMember> — never includes PIN hashes or attempt counters.
 
 ### POST /api/v1/seller/staff
 Permission: staff:manage
-Body: { name 2–80, email?, phone? (at least one), role one of admin|manager|cashier|inventory|support, locationIds: non-empty array of the store's location ids }
-Response 201: StaffMember with status "invited" (invite sent by email/SMS; accepting links it to the invitee's Zudomart account → userId).
-Errors: 400 VALIDATION_FAILED; 403 OWNER_ROLE_RESERVED; 403 OWNER_ONLY (only the owner may create admins); 409 STAFF_EXISTS (email/phone already on the team); 409 SEAT_LIMIT_REACHED when non-suspended staff (active + invited, owner included) ≥ entitlements.maxStaffSeats.
+Body: { userId (an existing Zudomart user), role one of admin|manager|cashier|inventory|support, locationIds: non-empty array of the store's location ids }
+Response 201: StaffMember `{ id, userId, name, username, avatarUrl, role, status: "invited", ... }` — the user receives a team request in the Zudomart app (push + in-app notification) and becomes "active" when they accept there.
+Errors: 400 VALIDATION_FAILED (unknown userId); 403 OWNER_ROLE_RESERVED; 403 OWNER_ONLY (only the owner may create admins); 409 STAFF_EXISTS (user already on the team); 409 SEAT_LIMIT_REACHED when non-suspended staff (active + invited, owner included) ≥ entitlements.maxStaffSeats.
 
 ### PATCH /api/v1/seller/staff/:staffId
 Permission: staff:manage
@@ -819,8 +827,8 @@ Response 200: `Brand`. Errors: 400 VALIDATION_FAILED, 403 BRAND_ROLE_FORBIDDEN, 
 Response 200: `CursorPage<BrandMember>`.
 
 ### POST /api/v1/seller/brands/:brandId/members
-Permission: settings:manage + brand owner/admin. Body: `{ name: 2–80, email, role: "admin"|"editor"|"viewer" }` (only the owner may add admins). Creates an `invited` member and emails an invitation (joins with their Zudomart account).
-Response 201: `BrandMember`. Errors: 409 MEMBER_EXISTS, 409 MEMBER_LIMIT_REACHED (30), 403 BRAND_ROLE_FORBIDDEN.
+Permission: settings:manage + brand owner/admin. Body: `{ userId, role: "admin"|"editor"|"viewer" }` — `userId` is an existing Zudomart user found via `GET /seller/zudomart-users` (only the owner may add admins). Creates an `invited` member `{ id, userId, name, username, role, status }`; the user accepts the brand team request in the Zudomart app. No email invitations.
+Response 201: `BrandMember`. Errors: 400 VALIDATION_FAILED (unknown userId), 409 MEMBER_EXISTS, 409 MEMBER_LIMIT_REACHED (30), 403 BRAND_ROLE_FORBIDDEN.
 
 ### PATCH /api/v1/seller/brands/:brandId/members/:memberId
 Body: `{ role: "admin"|"editor"|"viewer" }`. Rules: owner's role is locked (409 OWNER_ROLE_LOCKED), nobody changes their own role (409 OWN_ROLE_LOCKED), only the owner makes or changes admins. Response 200: `BrandMember`.
