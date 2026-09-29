@@ -6,7 +6,7 @@
 }
 
 .phoneFrame {
-  width: 300px;
+  width: 340px;
   max-width: 100%;
   border: 8px solid #0b1752;
   border-radius: 28px;
@@ -47,7 +47,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 130px;
 }
 
 .dot {
@@ -278,4 +278,9 @@
   aspect-ratio: 1 / 1;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.postedTime {
+  flex: none;
+  font-weight: 500;
 }
