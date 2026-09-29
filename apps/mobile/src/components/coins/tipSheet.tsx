@@ -14,6 +14,7 @@ import type { ID, TipTargetType } from "@/types";
 import { BuyCoinsSheet } from "./buyCoinsSheet";
 import { CoinBalanceChip } from "./coinBalanceChip";
 import { COIN_BALANCE_QUERY_KEY, describeCoinError, formatCoinAmount, isNotEnoughCoinsError } from "./coinWallet.hook";
+import { CoinAmountWithIcon } from "./coinAmount";
 
 const PRESET_TIP_AMOUNTS = [10, 50, 100, 500] as const;
 
@@ -82,9 +83,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
                       })}
                       style={[styles.preset, isSelected ? styles.presetSelected : null]}
                     >
-                      <Text size={14} weight={600} lineHeight={16.8}>
-                        🪙 {amount}
-                      </Text>
+                      <CoinAmountWithIcon label={String(amount)} />
                     </Pressable>
                   );
                 })}
