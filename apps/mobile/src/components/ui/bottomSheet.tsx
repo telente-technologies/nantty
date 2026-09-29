@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
 import { colors } from "@/constants/colors.constant";
 
 import { Text } from "./text";
 import { FrameAwareModal } from "./frameAwareModal";
+
+const SHEET_TOP_GAP = 12;
 
 export interface BottomSheetProps {
   readonly visible: boolean;
@@ -20,6 +22,8 @@ export interface BottomSheetProps {
 
 export function BottomSheet({ visible, onClose, title, titleSize = 16, floating = false, children, style }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const frame = useSafeAreaFrame();
+  const tallestSheetHeight = frame.height - insets.top - SHEET_TOP_GAP;
   return (
     <FrameAwareModal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -27,6 +31,7 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
         <View
           style={[
             styles.sheet,
+            { maxHeight: tallestSheetHeight },
             floating ? [styles.floating, { marginBottom: Math.max(insets.bottom, 12) + 14 }] : { paddingBottom: insets.bottom },
             style,
           ]}

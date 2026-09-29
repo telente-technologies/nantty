@@ -14,9 +14,10 @@ export interface ProfileMoreSheetProps {
   readonly visible: boolean;
   readonly onClose: () => void;
   readonly onBlocked: () => void;
+  readonly onSendCoins?: () => void;
 }
 
-export function ProfileMoreSheet({ profile, visible, onClose, onBlocked }: ProfileMoreSheetProps) {
+export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendCoins }: ProfileMoreSheetProps) {
   const [mode, setMode] = useState<"menu" | "report" | "reported">("menu");
   const closeAndReset = () => {
     setMode("menu");
@@ -43,6 +44,12 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked }: Profi
       {mode === "menu" ? (
         <View style={styles.menu}>
           {option("Share or copy profile link", shareProfileLink)}
+          {onSendCoins
+            ? option(`Send coins to ${profile.name}`, () => {
+                closeAndReset();
+                onSendCoins();
+              })
+            : null}
           {option(`Report @${profile.username}`, () => setMode("report"), colors.error)}
           {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => block.mutate(), colors.error)}
         </View>

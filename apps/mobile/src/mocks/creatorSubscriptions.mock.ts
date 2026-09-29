@@ -30,10 +30,16 @@ const plans: MockPlan[] = [
   { id: "plan_1", creatorId: "u_me", name: "Kitchen Circle", usdCents: 300, interval: "month", benefits: ["Subscriber-only recipe lives", "Early access to new pots", "Monthly discount code"], subscriberCount: 86, active: true },
   { id: "plan_2", creatorId: "u_me", name: "Home Insiders", usdCents: 3_000, interval: "year", benefits: ["Everything in Kitchen Circle", "Free delivery once a quarter"], subscriberCount: 12, active: true },
   { id: "plan_3", creatorId: "u_13", name: "Amaka's Besties", usdCents: 400, interval: "month", benefits: ["Behind-the-scenes clips", "Subscriber badge in lives", "Monthly GRWM Q&A"], subscriberCount: 2_310, active: true },
+  { id: "plan_5", creatorId: "u_9", name: "Kelechi's Studio Pass", usdCents: 300, interval: "month", benefits: ["Behind-the-scenes shoot clips", "Monthly editing walkthrough"], subscriberCount: 418, active: true },
+  { id: "plan_6", creatorId: "u_10", name: "Jollof Tasting Club", usdCents: 200, interval: "month", benefits: ["Subscriber-only food reviews", "Early restaurant picks"], subscriberCount: 1_120, active: true },
   { id: "plan_4", creatorId: "u_12", name: "Coach Segun Crew", usdCents: 500, interval: "month", benefits: ["Weekly workout plans", "Live form checks"], subscriberCount: 640, active: true },
 ];
 
 const subscriptionStates = new Map<string, CreatorSubscriptionState>();
+const subscribedCreatorIdsByViewerId = new Map<string, Set<string>>();
+
+export const hasSignedInViewerSubscribedToCreator = (creatorId: string) =>
+  subscribedCreatorIdsByViewerId.get(getSignedInMockUser().id)?.has(creatorId) ?? false;
 
 const presentPlan = (plan: MockPlan): CreatorSubscriptionPlan => ({
   id: plan.id,
@@ -92,6 +98,8 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const subscriptionId = `subs_${Date.now()}`;
     subscriptionStates.set(subscriptionId, { subscriptionId, status: "active", planId, renewsAt: isoDateHoursAgo(plan.interval === "month" ? -720 : -8760) });
     plan.subscriberCount += 1;
+    const viewerId = getSignedInMockUser().id;
+    subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
     return { subscriptionId, checkoutUrl: `https://checkout.paystack.com/mock-subscription/${subscriptionId}` };
   }),
   createMockRoute("GET", "/api/v1/subscriptions/:subscriptionId", ({ params }) => {

@@ -1,5 +1,5 @@
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from "expo-audio";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Platform } from "react-native";
 
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
@@ -8,10 +8,19 @@ import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 const MINIMUM_VOICE_NOTE_SECONDS = 1;
 const MAXIMUM_VOICE_NOTE_SECONDS = 300;
 
+const stopRecorderIgnoringErrors = async (recorder: ReturnType<typeof useAudioRecorder>) => {
+  try {
+    if (recorder.isRecording) await recorder.stop();
+  } catch {
+    return;
+  }
+};
+
 export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMediaFile) => void) {
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder, 250);
   const [isPreparing, setIsPreparing] = useState(false);
+  const recordingStartedAtRef = useRef<number | null>(null);
 
   const startRecordingVoiceNote = useCallback(async () => {
     setIsPreparing(true);
@@ -24,6 +33,7 @@ export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMedia
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record({ forDuration: MAXIMUM_VOICE_NOTE_SECONDS });
+      recordingStartedAtRef.current = Date.now();
     } catch {
       showAlertWithButtons("Couldn't start recording", "Please try again.");
     } finally {
@@ -32,13 +42,15 @@ export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMedia
   }, [recorder]);
 
   const stopRecordingAndDiscard = useCallback(async () => {
-    await recorder.stop().catch(() => undefined);
+    await stopRecorderIgnoringErrors(recorder);
     await setAudioModeAsync({ allowsRecording: false }).catch(() => undefined);
   }, [recorder]);
 
   const stopRecordingAndSend = useCallback(async () => {
-    const durationSeconds = recorderState.durationMillis / 1000;
-    await recorder.stop().catch(() => undefined);
+    const wallClockSeconds = recordingStartedAtRef.current ? (Date.now() - recordingStartedAtRef.current) / 1000 : 0;
+    const durationSeconds = Math.min(wallClockSeconds || recorderState.durationMillis / 1000, MAXIMUM_VOICE_NOTE_SECONDS);
+    recordingStartedAtRef.current = null;
+    await stopRecorderIgnoringErrors(recorder);
     await setAudioModeAsync({ allowsRecording: false }).catch(() => undefined);
     const recordedUri = recorder.uri;
     if (!recordedUri || durationSeconds < MINIMUM_VOICE_NOTE_SECONDS) return;

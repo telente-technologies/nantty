@@ -7,16 +7,12 @@ import { colors } from "@/constants/colors.constant";
 import type { ID } from "@/types";
 import { LockSimpleFill24Icon } from "@/components/icons";
 
-type NavigationThatMayKnowCreatorSubscribe = {
-  getState: () => { routeNames?: readonly string[] } | undefined;
-  navigate: (routeName: string, params?: object) => void;
+type NavigationThatCanOpenCreatorSubscribe = {
+  navigate: (routeName: "CreatorSubscribe", params: { creatorId: ID }) => void;
 };
 
 export function openCreatorSubscriptionPage(navigation: unknown, creatorId: ID) {
-  const navigator = navigation as NavigationThatMayKnowCreatorSubscribe;
-  const knownRouteNames = navigator.getState()?.routeNames ?? [];
-  if (knownRouteNames.includes("CreatorSubscribe")) navigator.navigate("CreatorSubscribe", { creatorId });
-  else navigator.navigate("UserProfile", { userId: creatorId });
+  (navigation as NavigationThatCanOpenCreatorSubscribe).navigate("CreatorSubscribe", { creatorId });
 }
 
 export const isContentLockedForViewer = (content: { subscriberOnly?: boolean; viewerHasAccess?: boolean }) =>

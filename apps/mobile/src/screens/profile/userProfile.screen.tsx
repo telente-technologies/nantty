@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { creatorQueryKeys } from "@/components/creator/creatorQueries.hook";
 import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
+import { TransferCoinsSheet } from "@/components/coins/transferCoinsSheet";
 import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
 import { useToggleFollowMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { ProfileAction } from "@/components/profile/profileSummary";
@@ -26,6 +27,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     enabled: !viewingOwnProfile,
   });
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
+  const [isTransferCoinsSheetOpen, setIsTransferCoinsSheetOpen] = useState(false);
   const profile = profileQuery.data;
   const isFollowing = profile?.isFollowing ?? false;
 
@@ -74,8 +76,19 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         onOpenStoreTab={profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
       />
       {profile ? (
-        <ProfileMoreSheet profile={profile} visible={moreSheetVisible} onClose={() => setMoreSheetVisible(false)} onBlocked={() => navigation.goBack()} />
+        <ProfileMoreSheet
+          profile={profile}
+          visible={moreSheetVisible}
+          onClose={() => setMoreSheetVisible(false)}
+          onBlocked={() => navigation.goBack()}
+          onSendCoins={() => setIsTransferCoinsSheetOpen(true)}
+        />
       ) : null}
+      <TransferCoinsSheet
+        visible={isTransferCoinsSheetOpen}
+        recipient={profile ?? null}
+        onClose={() => setIsTransferCoinsSheetOpen(false)}
+      />
     </Screen>
   );
 }

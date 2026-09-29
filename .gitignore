@@ -21,4 +21,5 @@ coverage/
 google-services.json
 GoogleService-Info.plist
 AGENTS.md
-CLAUDE.mdapps/intelligence/**/__pycache__/
+CLAUDE.md
+apps/intelligence/**/__pycache__/

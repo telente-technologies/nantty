@@ -4,6 +4,7 @@ import { clipVideoSeeds, type ClipVideoSeed } from "./clipsVideoCatalog.mock";
 import { isoDateHoursAgo } from "./fixtures.mock";
 import { productSummaryByKey } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { hasSignedInViewerSubscribedToCreator } from "./creatorSubscriptions.mock";
 import { currentSoundForClip } from "./soundCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
 import { userSummaryById } from "./userDirectory.mock";
@@ -66,7 +67,11 @@ const turnIntoPromotedLiveStream = (clip: Clip): Clip =>
 
 const allClips: readonly Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream);
 
-const withCurrentSound = (clip: Clip): Clip => ({ ...clip, sound: currentSoundForClip(clip.id) });
+const withCurrentSound = (clip: Clip): Clip => ({
+  ...clip,
+  sound: currentSoundForClip(clip.id),
+  viewerHasAccess: clip.viewerHasAccess || hasSignedInViewerSubscribedToCreator(clip.author.id),
+});
 
 export const findMockClipsByIds = (clipIds: readonly string[]): Clip[] =>
   clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip).map(withCurrentSound);

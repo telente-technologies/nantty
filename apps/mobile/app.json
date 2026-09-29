@@ -16,15 +16,27 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptiveIconForeground.png",
         "backgroundColor": "#2043F5"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:3000"
+      "apiUrl": "http://localhost:3000",
+      "eas": {
+        "projectId": "47fadf5d-9059-49f9-8673-56453ca26a58"
+      }
     },
-    "scheme": ["zudomart", "com.zudomart.app"],
+    "scheme": [
+      "zudomart",
+      "com.zudomart.app"
+    ],
     "plugins": [
       "expo-video",
       "expo-background-task",
@@ -41,6 +53,7 @@
           "backgroundColor": "#F7F8FE"
         }
       ]
-    ]
+    ],
+    "owner": "oyinlola141"
   }
 }

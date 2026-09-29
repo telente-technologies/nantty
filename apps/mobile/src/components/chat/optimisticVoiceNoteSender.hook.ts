@@ -57,8 +57,7 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
         replacePendingMessageWithDeliveredMessageLocally(pendingMessage.id, deliveredWithPlayableUrl);
         replacePendingMessage({ ...deliveredWithPlayableUrl, deliveryStatus: "sent" });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      } catch (debugError) {
-        console.warn("DBGVOICE", debugError instanceof Error ? debugError.message + " " + debugError.stack : String(debugError));
+      } catch {
         markPendingMessageAsFailedLocally(pendingMessage.id);
         replacePendingMessage({ ...pendingMessage, deliveryStatus: "failed" });
       }

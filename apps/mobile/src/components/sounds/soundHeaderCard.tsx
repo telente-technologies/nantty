@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import { describeClipSoundForDisplay, explainWhySoundCannotBeReused } from "@/services/sounds.service";
+import { explainWhySoundCannotBeReused } from "@/services/sounds.service";
 import type { ClipSound } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
@@ -40,7 +40,6 @@ export function SoundHeaderCard({ sound, onPressOwner, onToggleSaved, onUseSound
           </Pressable>
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
             {formatCountWithThousandsSuffix(sound.usageCount)} {sound.usageCount === 1 ? "clip" : "clips"}
-            {sound.isOriginal ? "" : ` · credit: ${describeClipSoundForDisplay(sound)}`}
           </Text>
         </View>
         <Pressable

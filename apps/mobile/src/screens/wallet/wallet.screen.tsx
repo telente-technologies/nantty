@@ -1,6 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
+import { BuyCoinsSheet } from "@/components/coins/buyCoinsSheet";
+import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -25,6 +28,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
   const { data: transactions = [] } = useWalletTransactionsQuery();
   const { data: escrowHolds = [] } = useEscrowHoldsQuery();
   const { data: loyalty } = useLoyaltySummaryQuery();
+  const [isBuyCoinsSheetOpen, setIsBuyCoinsSheetOpen] = useState(false);
 
   return (
     <Screen>
@@ -50,6 +54,14 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
           </View>
         ) : null}
 
+        <View style={styles.section}>
+          <Text size={16} weight={500} lineHeight={19.2}>Coins</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+            Use coins to send gifts and tips to creators, or send them to friends from their profile.
+          </Text>
+          <CoinBalanceChip onPress={() => setIsBuyCoinsSheetOpen(true)} />
+        </View>
+
         {loyalty ? <LoyaltyCard loyalty={loyalty} /> : null}
 
         <SettingsGroup>
@@ -67,6 +79,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
           </SettingsGroup>
         </View>
       </ScrollView>
+      <BuyCoinsSheet visible={isBuyCoinsSheetOpen} onClose={() => setIsBuyCoinsSheetOpen(false)} />
     </Screen>
   );
 }
