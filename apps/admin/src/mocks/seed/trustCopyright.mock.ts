@@ -1,10 +1,10 @@
 import { buildUnsplashImageUrl, unsplashPhotoIds } from "@/mocks/seed/unsplashPhotoIds.mock";
-import { isoMinutesAgo, isoMinutesFromNow } from "@/mocks/seed/trustTime.mock";
+import { isoMinutesAgo, isoMinutesFromNow, type WritableRecord } from "@/mocks/seed/trustTime.mock";
 import type { CopyrightClaimDetail } from "@/types/copyright.type";
 
-export interface MockCopyrightClaimRecord extends Omit<CopyrightClaimDetail, "infringer" | "infringerStrikeCount" | "history" | "topAudioMatchConfidencePercent" | "repeatInfringerThreshold"> {
+export type MockCopyrightClaimRecord = WritableRecord<Omit<CopyrightClaimDetail, "infringer" | "infringerStrikeCount" | "history" | "topAudioMatchConfidencePercent" | "repeatInfringerThreshold">> & {
   infringerUserId: string;
-}
+};
 
 const image = (photoId: string) => buildUnsplashImageUrl(photoId, 480);
 
