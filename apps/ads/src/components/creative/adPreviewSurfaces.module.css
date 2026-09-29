@@ -1,0 +1,273 @@
+.marketplace,
+.liveDiscovery {
+  background: #f7f8fe;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marketplaceBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ebecf2;
+  font-size: 12px;
+  color: #5b5b5b;
+}
+
+.marketplaceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tile {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ebecf2;
+  display: flex;
+  flex-direction: column;
+}
+
+.sponsoredTile {
+  border-color: #b5c1fc;
+}
+
+.tileImageFrame {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.tileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.adSign {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.94);
+  color: #000;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
+
+.tileBody {
+  padding: 7px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tileTitle {
+  font-size: 12.5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tilePrice {
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.compareAt {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: #909090;
+}
+
+.tileMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 11px;
+  color: #5b5b5b;
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--caution);
+}
+
+.storeLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slotNote {
+  font-size: 11px;
+  color: #909090;
+  text-align: center;
+}
+
+.liveGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.liveCard {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b1752;
+  color: #fff;
+}
+
+.liveCardFullScreen {
+  aspect-ratio: 9 / 16;
+  border-radius: 0;
+}
+
+.liveCardMedia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.liveCardTop {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent);
+}
+
+.liveBadgeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.liveBadge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #ef4444;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.scheduledBadge {
+  background: #2043f5;
+}
+
+.viewerCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sponsoredOnDark {
+  font-size: 10.5px;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.liveCardBottom {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 24px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.75), transparent);
+}
+
+.liveHost {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.liveTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.liveTime {
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.liveButton {
+  margin-top: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  border-radius: 4px;
+  background: #2043f5;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.liveCardFullScreen .liveTitle {
+  font-size: 15px;
+}
+
+.liveCardFullScreen .liveButton {
+  height: 36px;
+  font-size: 14px;
+}
+
+.blockedNotice {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #5b5b5b;
+  background: #fef4e2;
+}
+
+.blockedNotice > :first-child {
+  color: #9a5b00;
+}
+
+.blockedTitle {
+  font-weight: 700;
+  color: #000;
+}
