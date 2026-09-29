@@ -1,9 +1,12 @@
 import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
+import type { MediaLibrary } from "../interfaces/mediaLibrary.interface.js";
 import type { OrderLookup } from "../interfaces/orderLookup.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
-import type { UserDirectory } from "../interfaces/userDirectory.interface.js";
+import type { PersonalVerificationLookup } from "../interfaces/creatorEligibility.interface.js";
+import type { CreatorWallets } from "../interfaces/creatorWallets.interface.js";
+import type { UserAccountStandingLookup, UserDirectory } from "../interfaces/userDirectory.interface.js";
 import { FeedsController } from "../modules/feeds/controllers/feeds.controller.js";
 import { registerFeedsCommandAndQueryHandlers } from "../modules/feeds/feeds.module.js";
 import { InMemoryFeedInteractionsRepository, PrismaFeedInteractionsRepository } from "../modules/feeds/repositories/feeds.repository.js";
@@ -33,18 +36,29 @@ import { PrismaReviewsRepository } from "../modules/reviews/repositories/reviews
 import { InMemoryReviewsRepository } from "../modules/reviews/repositories/reviews.repository.js";
 import { registerReviewsCommandAndQueryHandlers } from "../modules/reviews/reviews.module.js";
 import { ReviewsService } from "../modules/reviews/services/reviews.service.js";
+import { RepositoryCreatorAccess } from "../modules/creators/services/creators.service.js";
+import { NoPublicBlueVerification, UnavailableCreatorWallets } from "../modules/creators/services/unavailablePorts.service.js";
 import type { Core } from "./core.loader.js";
+import { createCreatorModule, createCreatorProgramRepository } from "./creators.loader.js";
 
 export interface SocialSharedServices {
   readonly currencyConverter: CurrencyConverter;
   readonly audit: AuditRecorder;
-  readonly userDirectory: UserDirectory;
+  readonly userDirectory: UserDirectory & UserAccountStandingLookup;
+  readonly creatorWallets?: CreatorWallets;
+  readonly personalVerification?: PersonalVerificationLookup;
   readonly storeAccess: StoreAccess;
   readonly productCatalog: ProductCatalog;
   readonly orderLookup: OrderLookup;
+  readonly mediaLibrary: MediaLibrary;
 }
 
-export function createSocialModules(core: Core, shared: SocialSharedServices) {
+export interface SocialExternalServices {
+  readonly creatorWallets?: CreatorWallets;
+  readonly personalVerification?: PersonalVerificationLookup;
+}
+
+export function createSocialModules(core: Core, shared: SocialSharedServices, external: SocialExternalServices = {}) {
   const usePrisma = core.persistence === "prisma";
   const { commands, queries, events, clock } = core;
   const follows = usePrisma ? new PrismaFollowsRepository() : new InMemoryFollowsRepository();
@@ -53,6 +67,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
   const followsService = new FollowsService({ follows, blocks, userDirectory: shared.userDirectory, storeAccess: shared.storeAccess, orderLookup: shared.orderLookup, events, clock });
   registerFollowsCommandAndQueryHandlers(commands, queries, followsService);
 
+  const creatorProgramRepository = createCreatorProgramRepository(core);
   const postsService = new PostsService({
     posts: usePrisma ? new PrismaPostsRepository() : new InMemoryPostsRepository(),
     interactions: usePrisma ? new PrismaPostInteractionsRepository() : new InMemoryPostInteractionsRepository(),
@@ -65,6 +80,8 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
     events,
     clock,
     currencyConverter: shared.currencyConverter,
+    mediaLibrary: shared.mediaLibrary,
+    creatorAccess: new RepositoryCreatorAccess(creatorProgramRepository),
   });
   registerPostsCommandAndQueryHandlers(commands, queries, postsService);
 
@@ -87,10 +104,17 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
     clock,
   });
   registerReviewsCommandAndQueryHandlers(commands, queries, reviewsService);
+  const creators = createCreatorModule(core, creatorProgramRepository, postsService, socialGraph, {
+    ...shared,
+    creatorWallets: external.creatorWallets ?? shared.creatorWallets ?? new UnavailableCreatorWallets(),
+    personalVerification: external.personalVerification ?? shared.personalVerification ?? new NoPublicBlueVerification(),
+  });
 
   return {
     socialGraph,
+    creatorProgram: creators.creatorProgram,
     controllers: {
+      ...creators.controllers,
       followsController: new FollowsController(commands, queries),
       postsController: new PostsController(commands, queries),
       liveController: new LiveController(commands, queries),
