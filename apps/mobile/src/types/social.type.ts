@@ -90,7 +90,7 @@ export interface MediaVariant {
 
 export interface MediaAsset {
   readonly id: ID;
-  readonly type: "image" | "video";
+  readonly type: "image" | "video" | "audio";
   readonly status: "processing" | "ready" | "failed";
   readonly width: number;
   readonly height: number;
@@ -170,6 +170,8 @@ export interface SentLiveGiftReceipt {
 }
 
 export interface LiveSessionDetails {
+  readonly coverUrl?: string | null;
+  readonly playbackUrl?: string | null;
   readonly giftsEnabled?: boolean;
   readonly hostIsCreator?: boolean;
   readonly pinnedProductId?: ID | null;
