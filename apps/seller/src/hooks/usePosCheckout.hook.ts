@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import type { PosCartController } from "@/hooks/usePosCart.hook";
 import { usePosRegisterContext } from "@/hooks/usePosRegisterContext.hook";
 import { SellerApiRequestError, createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
+import { readOfflineOperatorPassForStaff } from "@/services/posDeviceMemory.service";
 import { isOfflineRequestError, submitPosSaleOrQueueWhenOffline } from "@/services/posOfflineSaleQueue.service";
 import type { PosSale } from "@/types/pos.type";
 import type { LocallyParkedSale, PendingPayment } from "@/types/posExtra.type";
@@ -18,7 +19,7 @@ import { buildCreateSaleRequestFromCart, buildLocalPosSaleFromCart } from "@/uti
 export function usePosCheckout(cartController: PosCartController, settings: StoreSettings | null) {
   const { showToast } = useToast();
   const { sessionView } = useSellerSession();
-  const { selectedRegister, locationId, rememberRegisterShift, refreshQueuedSales, reportRequestOutcome, reloadCatalog } = usePosRegisterContext();
+  const { selectedRegister, locationId, rememberRegisterShift, refreshQueuedSales, reportRequestOutcome, reloadCatalog, applySaleToLocalStock } = usePosRegisterContext();
   const [isCompleting, setIsCompleting] = useState(false);
   const [completedSale, setCompletedSale] = useState<{ sale: PosSale; isPendingSync: boolean } | null>(null);
   const [isParking, setIsParking] = useState(false);
@@ -36,10 +37,13 @@ export function usePosCheckout(cartController: PosCartController, settings: Stor
       };
       setIsCompleting(true);
       try {
-        const outcome = await submitPosSaleOrQueueWhenOffline(buildCreateSaleRequestFromCart(cart, payments, context), buildLocalPosSaleFromCart(cart, pricedCart, settings, payments, context));
+        const storeId = sessionView?.access.storeId ?? null;
+        const operatorPass = storeId && operator ? await readOfflineOperatorPassForStaff(storeId, operator.staffId) : null;
+        const outcome = await submitPosSaleOrQueueWhenOffline(buildCreateSaleRequestFromCart(cart, payments, context), buildLocalPosSaleFromCart(cart, pricedCart, settings, payments, context), { storeId, operatorPass });
         setCompletedSale({ sale: outcome.sale, isPendingSync: outcome.kind === "queued" });
         if (outcome.kind === "queued") {
           reportRequestOutcome(true);
+          await applySaleToLocalStock(outcome.sale);
           await refreshQueuedSales();
         } else {
           reportRequestOutcome(false);
@@ -54,7 +58,7 @@ export function usePosCheckout(cartController: PosCartController, settings: Stor
         setIsCompleting(false);
       }
     },
-    [cartController, settings, selectedRegister, locationId, sessionView, reportRequestOutcome, refreshQueuedSales, reloadCatalog, rememberRegisterShift, showToast],
+    [cartController, settings, selectedRegister, locationId, sessionView, reportRequestOutcome, applySaleToLocalStock, refreshQueuedSales, reloadCatalog, rememberRegisterShift, showToast],
   );
 
   const parkCurrentSale = useCallback(async () => {
