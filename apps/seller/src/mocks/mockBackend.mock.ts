@@ -1,8 +1,9 @@
-import { readMockDatabase } from "@/mocks/mockDatabase.mock";
+import { readMockDatabase, readMockStoreDataset } from "@/mocks/mockDatabase.mock";
 import { registerEveryMockHandler } from "@/mocks/mockHandlerRegistry.mock";
 import { findMockMembershipForUserAndStore } from "@/mocks/mockStoreMembership.mock";
 import { MockHttpError, respondWithError } from "@/mocks/mockResponses.mock";
 import { findMockRouteForRequest, type MockPrincipal, type MockResponse } from "@/mocks/mockRouter.mock";
+import { runWithinMockStoreScope } from "@/mocks/mockStoreScope.mock";
 
 export interface MockApiCall {
   readonly method: string;
@@ -35,7 +36,7 @@ function resolveMockPrincipalFromHeaders(headers: Headers): MockPrincipal | null
   if (!operatorToken || !membership) return principal;
   const operatorSession = database.operatorSessions.get(operatorToken);
   if (!operatorSession || operatorSession.expiresAtEpochMs < Date.now() || operatorSession.storeId !== membership.storeId) return principal;
-  const operatorStaff = database.staff.find((staff) => staff.id === operatorSession.staffId && staff.status === "active");
+  const operatorStaff = readMockStoreDataset(membership.storeId).staff.find((staff) => staff.id === operatorSession.staffId && staff.status === "active");
   if (!operatorStaff) return principal;
   return { ...principal, role: operatorStaff.role, staffId: operatorStaff.id, actorName: operatorStaff.name };
 }
@@ -57,7 +58,9 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
   try {
     const principal = resolveMockPrincipalFromHeaders(call.headers);
     if (matched.route.requiresPrincipal && !principal) return respondWithError(401, "UNAUTHENTICATED", "Your session has expired. Sign in again.");
-    return await matched.route.handler({
+    if (principal && call.headers.get("x-seller-store") && principal.storeId === null) return respondWithError(403, "NOT_A_STORE_MEMBER", "You are not a member of that store.");
+    const handler = matched.route.handler;
+    return await runWithinMockStoreScope(principal?.storeId ?? null, () => handler({
       method: call.method,
       path: call.path,
       params: matched.params,
@@ -67,7 +70,7 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
       headers: call.headers,
       principal,
       locationId: call.headers.get("x-seller-location"),
-    });
+    }));
   } catch (error) {
     if (error instanceof MockHttpError) return respondWithError(error.status, error.code, error.message);
     console.error("Mock handler failed", error);
