@@ -12,6 +12,6 @@ export class InitializePaymentHandler extends CommandHandler<InitializePaymentCo
   }
 
   public execute(command: InitializePaymentCommand): Promise<InitializedOrderPayment> {
-    return this.service.initializeOrderPayment(command.principal.userId, command.orderId, command.provider);
+    return this.service.initializeOrderPayment(command.principal.userId, command.orderId, command.provider, command.returnTo);
   }
 }
