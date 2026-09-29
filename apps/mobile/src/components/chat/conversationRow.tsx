@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Conversation } from "@/types";
-import { formatTimeSincePosted } from "@/utils/format-date.util";
+import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
 export interface ConversationRowProps {
   readonly conversation: Conversation;

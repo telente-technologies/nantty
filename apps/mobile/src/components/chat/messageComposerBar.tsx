@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { ImageSquare24Icon, PaperPlaneTilt24Icon, Plus24Icon, Smiley24Icon } from "@/components/icons";
+import { ImageSquare24Icon, PaperPlaneTilt24Icon, Plus24Icon, Smiley24Icon, Microphone24Icon } from "@/components/icons";
 import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 
-import { Microphone24Icon } from "./microphoneIcon";
 
 export interface MessageComposerBarProps {
   readonly onSend: (text: string) => void;
