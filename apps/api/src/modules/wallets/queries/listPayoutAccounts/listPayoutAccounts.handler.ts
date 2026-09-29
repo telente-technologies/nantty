@@ -12,6 +12,6 @@ export class ListPayoutAccountsHandler extends QueryHandler<ListPayoutAccountsQu
   }
 
   public execute(query: ListPayoutAccountsQuery): Promise<readonly PayoutAccountRecord[]> {
-    return this.service.listPayoutAccounts(query.principal.userId, query.storeId);
+    return this.service.listPayoutAccounts(query.principal, query.scope);
   }
 }
