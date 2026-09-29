@@ -62,7 +62,7 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
 }
 
 const styles = StyleSheet.create({
-  filtersBar: { flexGrow: 0 },
+  filtersBar: { flexGrow: 0, flexShrink: 0 },
   filters: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
   list: { paddingHorizontal: 12, paddingBottom: 40 },
   separator: { height: 12 },
