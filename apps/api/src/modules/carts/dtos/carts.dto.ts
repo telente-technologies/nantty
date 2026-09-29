@@ -9,6 +9,7 @@ function convertCartLineToDto(line: PricedCartLine, available: boolean) {
     variant: { id: line.variant.variantId, size: line.variant.size, color: line.variant.color },
     storeId: line.variant.storeId,
     lineTotal: line.lineTotal.toDto(),
+    attribution: line.attribution,
     available,
   };
 }

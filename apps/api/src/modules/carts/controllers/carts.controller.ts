@@ -23,7 +23,7 @@ export class CartsController {
   public readonly addItem = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = AddCartItemBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    await this.commands.execute<AddCartItemCommand, void>(new AddCartItemCommand(requireAuthenticatedPrincipal(ctx), { productId: body.data.productId, size: body.data.size, color: body.data.color, quantity: body.data.quantity }));
+    await this.commands.execute<AddCartItemCommand, void>(new AddCartItemCommand(requireAuthenticatedPrincipal(ctx), { productId: body.data.productId, size: body.data.size, color: body.data.color, quantity: body.data.quantity, attribution: body.data.attribution }));
     return this.respondWithCart(ctx, 201);
   };
 

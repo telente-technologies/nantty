@@ -3,6 +3,7 @@ import type { MoneyConversion } from "../../../interfaces/currencyConverter.inte
 import type { PurchasableVariant } from "../../../interfaces/productCatalog.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
 import { Money } from "../../../utils/money.util.js";
+import type { SaleAttribution } from "../models/carts.model.js";
 
 export interface PricedCartLine {
   readonly cartItemId: string;
@@ -10,6 +11,7 @@ export interface PricedCartLine {
   readonly quantity: number;
   readonly unitPrice: Money;
   readonly lineTotal: Money;
+  readonly attribution: SaleAttribution | null;
 }
 
 export interface PricedStoreGroup {
@@ -28,9 +30,9 @@ export interface CartTotals {
   readonly estimatedTotal: Money;
 }
 
-export function priceCartLine(cartItemId: string, variant: PurchasableVariant, quantity: number): PricedCartLine {
+export function priceCartLine(cartItemId: string, variant: PurchasableVariant, quantity: number, attribution: SaleAttribution | null = null): PricedCartLine {
   const unitPrice = Money.of(variant.unitPrice, variant.currency);
-  return { cartItemId, variant, quantity, unitPrice, lineTotal: unitPrice.multiplyByQuantity(quantity) };
+  return { cartItemId, variant, quantity, unitPrice, lineTotal: unitPrice.multiplyByQuantity(quantity), attribution };
 }
 
 export function priceStoreGroup(store: StoreSummary, lines: readonly PricedCartLine[]): PricedStoreGroup {

@@ -3,7 +3,7 @@ import { notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { CurrencyConverter } from "../../../interfaces/currencyConverter.interface.js";
 import type { ProductCatalog, PurchasableVariant } from "../../../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
-import { MAXIMUM_CART_LINE_QUANTITY } from "../models/carts.model.js";
+import { MAXIMUM_CART_LINE_QUANTITY, type SaleAttribution } from "../models/carts.model.js";
 import type { CartsRepository } from "../repositories/carts.repository.js";
 import {
   calculateCartTotalsInDisplayCurrency,
@@ -27,6 +27,7 @@ export interface ProductChoice {
   readonly size: string | undefined;
   readonly color: string | undefined;
   readonly quantity: number;
+  readonly attribution?: SaleAttribution | undefined;
 }
 
 export interface PricedCart {
@@ -50,7 +51,8 @@ export class CartsService {
     const variants = new Map((await productCatalog.findPurchasableVariants(lines.map((line) => line.variantId))).map((variant) => [variant.variantId, variant]));
     const pricedLines = lines.flatMap((line) => {
       const variant = variants.get(line.variantId);
-      return variant === undefined ? [] : [priceCartLine(line.id, variant, line.quantity)];
+      const attribution = line.attributionSource === null || line.attributionId === null ? null : { source: line.attributionSource, id: line.attributionId };
+      return variant === undefined ? [] : [priceCartLine(line.id, variant, line.quantity, attribution)];
     });
     const stores = new Map((await storeAccess.findStoreSummaries([...new Set(pricedLines.map((line) => line.variant.storeId))])).map((store) => [store.id, store]));
     const isAvailable = (line: PricedCartLine) =>
@@ -76,7 +78,7 @@ export class CartsService {
   public async addProductToCart(userId: string, choice: ProductChoice): Promise<void> {
     const variantId = await this.findVariantIdMatchingChoice(choice);
     const existing = await this.dependencies.carts.findLine(userId, variantId);
-    await this.saveValidatedQuantity(userId, variantId, (existing?.quantity ?? 0) + choice.quantity);
+    await this.saveValidatedQuantity(userId, variantId, (existing?.quantity ?? 0) + choice.quantity, choice.attribution);
   }
 
   public async changeCartItemQuantity(userId: string, cartItemId: string, quantity: number): Promise<void> {
@@ -113,11 +115,11 @@ export class CartsService {
     return this.dependencies.carts.clear(userId);
   }
 
-  private async saveValidatedQuantity(userId: string, variantId: string, quantity: number): Promise<void> {
+  private async saveValidatedQuantity(userId: string, variantId: string, quantity: number, attribution?: SaleAttribution): Promise<void> {
     const variant = await this.findPurchasableVariantOrThrow(variantId);
     if (quantity < 1 || quantity > MAXIMUM_CART_LINE_QUANTITY) throw unprocessable(`Quantity must be between 1 and ${MAXIMUM_CART_LINE_QUANTITY}.`);
     if (quantity > variant.stock) throw unprocessable(`Only ${variant.stock} left in stock.`);
-    await this.dependencies.carts.saveLineQuantity(userId, variantId, quantity);
+    await this.dependencies.carts.saveLineQuantity(userId, variantId, quantity, attribution);
   }
 
   private async findPurchasableVariantOrThrow(variantId: string): Promise<PurchasableVariant> {

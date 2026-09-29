@@ -1,15 +1,25 @@
 import { randomUUID } from "node:crypto";
 
+import type { CartItem } from "../../../generated/prisma/client.js";
+import type { SaleAttributionSource } from "../../../interfaces/orderLookup.interface.js";
 import { prisma } from "../../../integrations/database.integration.js";
-import type { CartItemRecord } from "../models/carts.model.js";
+import type { CartItemRecord, SaleAttribution } from "../models/carts.model.js";
 
 export interface CartsRepository {
   listForUser(userId: string): Promise<readonly CartItemRecord[]>;
   findLine(userId: string, variantId: string): Promise<CartItemRecord | undefined>;
-  saveLineQuantity(userId: string, variantId: string, quantity: number): Promise<CartItemRecord>;
+  saveLineQuantity(userId: string, variantId: string, quantity: number, attribution?: SaleAttribution): Promise<CartItemRecord>;
   removeLine(userId: string, variantId: string): Promise<boolean>;
   removeLines(userId: string, variantIds: readonly string[]): Promise<void>;
   clear(userId: string): Promise<void>;
+}
+
+function convertAttributionToColumns(attribution: SaleAttribution | undefined) {
+  return attribution === undefined ? {} : { attributionSource: attribution.source, attributionId: attribution.id };
+}
+
+function convertCartRowToRecord(row: CartItem): CartItemRecord {
+  return { ...row, attributionSource: row.attributionSource as SaleAttributionSource | null };
 }
 
 export class InMemoryCartsRepository implements CartsRepository {
@@ -23,12 +33,12 @@ export class InMemoryCartsRepository implements CartsRepository {
     return this.lines.get(`${userId}:${variantId}`);
   }
 
-  public async saveLineQuantity(userId: string, variantId: string, quantity: number): Promise<CartItemRecord> {
+  public async saveLineQuantity(userId: string, variantId: string, quantity: number, attribution?: SaleAttribution): Promise<CartItemRecord> {
     const key = `${userId}:${variantId}`;
     const existing = this.lines.get(key);
     const line: CartItemRecord = existing === undefined
-      ? { id: randomUUID(), userId, variantId, quantity, createdAt: new Date() }
-      : { ...existing, quantity };
+      ? { id: randomUUID(), userId, variantId, quantity, attributionSource: null, attributionId: null, createdAt: new Date(), ...convertAttributionToColumns(attribution) }
+      : { ...existing, quantity, ...convertAttributionToColumns(attribution) };
     this.lines.set(key, line);
     return line;
   }
@@ -47,20 +57,22 @@ export class InMemoryCartsRepository implements CartsRepository {
 }
 
 export class PrismaCartsRepository implements CartsRepository {
-  public listForUser(userId: string): Promise<readonly CartItemRecord[]> {
-    return prisma().cartItem.findMany({ where: { userId }, orderBy: { createdAt: "asc" } });
+  public async listForUser(userId: string): Promise<readonly CartItemRecord[]> {
+    return (await prisma().cartItem.findMany({ where: { userId }, orderBy: { createdAt: "asc" } })).map(convertCartRowToRecord);
   }
 
   public async findLine(userId: string, variantId: string): Promise<CartItemRecord | undefined> {
-    return (await prisma().cartItem.findUnique({ where: { userId_variantId: { userId, variantId } } })) ?? undefined;
+    const row = await prisma().cartItem.findUnique({ where: { userId_variantId: { userId, variantId } } });
+    return row === null ? undefined : convertCartRowToRecord(row);
   }
 
-  public saveLineQuantity(userId: string, variantId: string, quantity: number): Promise<CartItemRecord> {
-    return prisma().cartItem.upsert({
+  public async saveLineQuantity(userId: string, variantId: string, quantity: number, attribution?: SaleAttribution): Promise<CartItemRecord> {
+    const columns = convertAttributionToColumns(attribution);
+    return convertCartRowToRecord(await prisma().cartItem.upsert({
       where: { userId_variantId: { userId, variantId } },
-      create: { userId, variantId, quantity },
-      update: { quantity },
-    });
+      create: { userId, variantId, quantity, ...columns },
+      update: { quantity, ...columns },
+    }));
   }
 
   public async removeLine(userId: string, variantId: string): Promise<boolean> {

@@ -64,7 +64,12 @@ const dispatch: HttpMiddleware = async (context) => {
 const pipeline = new HttpMiddlewarePipeline({
   middlewares: [
     securityHeaders(),
-    createCorsMiddleware({ allowOrigin: config.corsOrigins }),
+    createCorsMiddleware({
+      allowOrigin: config.corsOrigins,
+      allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Region, X-Request-Id, X-Chunk-Sha256, If-None-Match",
+      exposeHeaders: "ETag, X-Request-Id, Retry-After, Idempotent-Replayed",
+      credentials: false,
+    }),
     // RATE_LIMIT_MAX=0 turns the limit off (load tests, local development).
     ...(config.rateLimit.max > 0
       ? [createRateLimitMiddleware({ windowMs: config.rateLimit.windowMs, max: config.rateLimit.max })]
