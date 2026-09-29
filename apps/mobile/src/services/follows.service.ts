@@ -1,6 +1,6 @@
 import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const followsService = {
   followUser: (userId: string) => api.post<void>(`/api/v1/users/${encodeURIComponent(userId)}/follow`),

@@ -1,6 +1,6 @@
 import { apiConfig } from "@/config/api.config";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export type MediaUploadPurpose = "avatar" | "banner" | "product" | "post";
 

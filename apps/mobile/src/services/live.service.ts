@@ -1,6 +1,6 @@
 import type { LiveComment, LiveSessionDetails, Page, SuggestedLive, UserSummary } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const liveService = {
   fetchLiveSessionById: (liveId: string) => api.get<LiveSessionDetails>(`/api/v1/lives/${liveId}`),
