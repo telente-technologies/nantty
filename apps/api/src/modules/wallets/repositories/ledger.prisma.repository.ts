@@ -110,6 +110,11 @@ export class PrismaLedgerRepository implements LedgerRepository {
     return mapPageItems(buildPageFromFetchedRows(rows, page), (row) => convertEntryRowToRecord(row, account.currency as CurrencyCode));
   }
 
+  public async listAccountsForOwner(ownerType: string, ownerId: string): Promise<readonly LedgerAccountRecord[]> {
+    const rows = await prisma().ledgerAccount.findMany({ where: { ownerType, ownerId }, orderBy: { createdAt: "asc" } });
+    return rows.map(convertAccountRowToRecord);
+  }
+
   private async convertTransaction(row: TransactionRow, client: TransactionClient): Promise<LedgerTransactionRecord> {
     const accounts = await client.ledgerAccount.findMany({ where: { id: { in: row.entries.map((entry) => entry.accountId) } } });
     const currencyByAccountId = new Map(accounts.map((account) => [account.id, account.currency as CurrencyCode]));
