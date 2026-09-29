@@ -12,10 +12,12 @@ import type {
   InitializePaymentRequest,
   PaymentGateway,
   RefundPaymentRequest,
+  SavedAuthorizationChargeRequest,
+  SavedAuthorizationChargeResult,
   VerifiedPayment,
   WebhookNotice,
 } from "./paymentGateway.interface.js";
-import { parseWebhookJson, providerUnavailable, readTextField, sendProviderRequest } from "./providerRequest.gateway.js";
+import { parseWebhookJson, providerUnavailable, readNestedRecord, readTextField, sendProviderRequest } from "./providerRequest.gateway.js";
 
 const FLUTTERWAVE_API = "https://api.flutterwave.com/v3";
 
@@ -56,6 +58,7 @@ export class FlutterwaveGateway implements PaymentGateway {
       amount: isSupportedCurrencyCode(currency) ? convertMajorUnitsToMinorUnits(Number(readTextField(response.data, "amount") ?? 0), currency) : -1,
       currency,
       providerTransactionId: readTextField(response.data, "id"),
+      reusableAuthorization: readTextField(readNestedRecord(response.data, "card"), "token"),
     };
   }
 
@@ -76,7 +79,23 @@ export class FlutterwaveGateway implements PaymentGateway {
     const body = parseWebhookJson(rawBody);
     const data = (body["data"] ?? {}) as Record<string, unknown>;
     const reference = readTextField(data, "tx_ref");
-    return { eventKey: `${readTextField(body, "event") ?? "event"}:${readTextField(data, "id") ?? reference ?? "unknown"}`, reference };
+    const eventType = readTextField(body, "event") ?? "event";
+    return { eventKey: `${eventType}:${readTextField(data, "id") ?? reference ?? "unknown"}`, reference, eventType };
+  }
+
+  public async chargeSavedAuthorization(request: SavedAuthorizationChargeRequest): Promise<SavedAuthorizationChargeResult> {
+    const response = await sendProviderRequest(`${FLUTTERWAVE_API}/tokenized-charges`, this.secretKey, "POST", {
+      token: request.authorization,
+      email: request.email,
+      currency: request.currency,
+      amount: convertMinorUnitsToMajorUnits(request.amount, request.currency),
+      tx_ref: request.reference,
+    });
+    const status = readTextField(response.data, "status");
+    return {
+      status: status === "successful" ? "succeeded" : status === "failed" ? "failed" : "pending",
+      providerTransactionId: readTextField(response.data, "id"),
+    };
   }
 
   public async transferToBank(request: BankTransferRequest): Promise<BankTransferResult> {
