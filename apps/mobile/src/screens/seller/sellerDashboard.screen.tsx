@@ -5,6 +5,8 @@ import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { InventoryCard } from "@/components/seller/inventoryCard";
 import { PeriodChips } from "@/components/seller/periodChips";
 import { SalesChart } from "@/components/seller/salesChart";
+import { SellerWebAppNote } from "@/components/seller/sellerWebAppNote";
+import { Button } from "@/components/ui/button";
 import { splitMoneyIntoSymbolAndAmount } from "@/components/seller/splitMoney.util";
 import { useSellerDashboardQuery } from "@/components/seller/sellerQueries.hook";
 import { StoreOrderRow } from "@/components/seller/storeOrderRow";
@@ -53,6 +55,12 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
             </Text>
           </View>
 
+          <View style={styles.quickLinks}>
+            <Button variant="subtle" title="Orders" height={38} style={styles.quickLink} onPress={() => navigation.navigate("SellerOrders")} />
+            <Button variant="subtle" title="Products" height={38} style={styles.quickLink} onPress={() => navigation.navigate("SellerProducts")} />
+            <Button variant="subtle" title="Wallet" height={38} style={styles.quickLink} onPress={() => navigation.navigate("Wallet")} />
+          </View>
+
           <SalesChart values={dashboard.series.map((point) => point.value)} />
 
           <View style={styles.ordersCard}>
@@ -77,6 +85,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
               ))}
             </View>
           ) : null}
+          <SellerWebAppNote />
         </ScrollView>
       )}
     </Screen>
@@ -105,5 +114,7 @@ const styles = StyleSheet.create({
   orders: { gap: 12 },
   sectionTitle: { height: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   collapsed: { transform: [{ rotate: "-90deg" }] },
+  quickLinks: { flexDirection: "row", gap: 8 },
+  quickLink: { flex: 1 },
   inventory: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 16 },
 });
