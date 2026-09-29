@@ -1,8 +1,9 @@
+import { LiveCardPreview } from "@/components/creative/adPreviewMarketplaceAndLive";
 import { PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { callToActionLabels } from "@/constants/campaignOptions.constant";
 import type { Creative } from "@/types/creative.type";
-import { formatMoneyForDisplay } from "@/utils/money.util";
+import { isLandscapeMedia } from "@/utils/adPlacementRules.util";
 
 import styles from "./adPreview.module.css";
 
@@ -15,6 +16,8 @@ function CallToActionButton({ creative }: { readonly creative: Creative }) {
 }
 
 export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
+  const firstMedia = creative.media[0];
+  const isWideVideo = firstMedia?.kind === "video" && isLandscapeMedia(firstMedia);
   return (
     <article className={styles.feedCard} aria-label="Feed ad preview">
       <div className={styles.authorRow}>
@@ -23,13 +26,19 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
           <span className={styles.authorName}>{creative.identity.name}</span>
           <VerifiedSeal creative={creative} />
           <span className={styles.dot} aria-hidden />
-          <span className={styles.authorName}>Now</span>
+          <span className={styles.postedTime}>Now</span>
           <SponsoredLabel />
         </div>
         <ZudoIcon name="dotsThreeVertical24" size={20} />
       </div>
       {creative.primaryText ? <p className={styles.bodyText}>{creative.primaryText}</p> : null}
-      <PreviewMedia media={creative.media[0]} altText={creative.headline} className={styles.squareMedia} />
+      {creative.live ? (
+        <div className={styles.feedLiveCard}>
+          <LiveCardPreview creative={creative} variant="feed" />
+        </div>
+      ) : (
+        <PreviewMedia media={firstMedia} altText={creative.headline} className={isWideVideo ? styles.wideMedia : styles.squareMedia} />
+      )}
       {creative.media.length > 1 ? <p className={styles.carouselHint}>1 / {creative.media.length}</p> : null}
       <div className={styles.feedCallToAction}>
         <CallToActionButton creative={creative} />
@@ -51,9 +60,22 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
 }
 
 export function ClipPreview({ creative, variant }: { readonly creative: Creative; readonly variant: "clip" | "story" }) {
+  if (creative.live && variant === "clip") return <LiveCardPreview creative={creative} variant="reels" />;
+  const firstMedia = creative.media[0];
+  const isLandscapeVideo = firstMedia?.kind === "video" && isLandscapeMedia(firstMedia);
   return (
-    <article className={styles.fullScreen} aria-label={variant === "clip" ? "Clip ad preview" : "Story ad preview"}>
-      <PreviewMedia media={creative.media[0]} altText={creative.headline} className={styles.fullScreenMedia} />
+    <article className={styles.fullScreen} aria-label={variant === "clip" ? "Reel ad preview" : "Story ad preview"}>
+      {isLandscapeVideo ? (
+        <div className={styles.letterbox}>
+          <PreviewMedia media={firstMedia} altText={creative.headline} className={styles.wideMedia} />
+          <span className={styles.viewFullScreen}>
+            <ZudoIcon name="arrowsOutSimple24" size={14} />
+            View full screen
+          </span>
+        </div>
+      ) : (
+        <PreviewMedia media={firstMedia} altText={creative.headline} className={styles.fullScreenMedia} />
+      )}
       {variant === "story" ? (
         <div className={styles.storyTop}>
           <span className={styles.storyProgress} />
@@ -86,36 +108,6 @@ export function ClipPreview({ creative, variant }: { readonly creative: Creative
         </div>
       ) : null}
     </article>
-  );
-}
-
-export function ProductTilePreview({ creative }: { readonly creative: Creative }) {
-  const product = creative.product;
-  return (
-    <div className={styles.martGrid}>
-      <article className={styles.productTile} aria-label="Mart product tile preview">
-        <PreviewMedia media={creative.media[0]} altText={product?.title ?? creative.headline} className={styles.squareMedia} />
-        <div className={styles.productBody}>
-          <p className={styles.productTitle}>{product?.title ?? creative.headline}</p>
-          {product ? (
-            <p className={styles.productPrice}>
-              {formatMoneyForDisplay(product.price)}
-              {product.compareAtPrice ? <s className={styles.compareAt}>{formatMoneyForDisplay(product.compareAtPrice)}</s> : null}
-            </p>
-          ) : null}
-          <p className={styles.productMeta}>
-            {product?.rating ? (
-              <span className={styles.rating}>
-                <ZudoIcon name="star16" size={12} />
-                {product.rating.toFixed(1)}
-              </span>
-            ) : null}
-            <SponsoredLabel />
-          </p>
-        </div>
-      </article>
-      <div className={styles.ghostTile} aria-hidden />
-    </div>
   );
 }
 
