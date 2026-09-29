@@ -205,6 +205,43 @@
   accent-color: var(--blue-500);
 }
 
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.meterTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.meterValue {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  width: 24px;
+  text-align: right;
+}
+
+.reasons {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 @media (max-width: 1000px) {
   .splitPreview {
     grid-template-columns: 1fr;
