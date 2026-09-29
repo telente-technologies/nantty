@@ -8,6 +8,8 @@ import {
   BanksQuerySchema,
   PayoutAccountParamsSchema,
   RequestWithdrawalBodySchema,
+  StartWalletTopUpBodySchema,
+  TopUpParamsSchema,
   WalletPageQuerySchema,
   WalletScopeQuerySchema,
   WithdrawalParamsSchema,
@@ -18,17 +20,23 @@ const TAG = "wallets";
 
 export function registerWalletsRoutes(router: HttpRouter, controller: WalletsController, web: WebKit): void {
   const { guard, requireIdempotencyKey } = web;
-  const wallet = guard.requirePermission("wallet:manage");
-  router.get(WALLET, controller.getWallet, { ...wallet, ...describeRoute(TAG, "Get my store wallet balance", { query: WalletScopeQuerySchema }) });
+  const wallet = guard.requirePermission("wallet:use");
+  const moneyMoving = guard.requirePermission("wallet:use", requireIdempotencyKey);
+  router.get(WALLET, controller.getWallet, { ...wallet, ...describeRoute(TAG, "Get my store wallet (default) or personal wallet (scope=user)", { query: WalletScopeQuerySchema }) });
   router.get(`${WALLET}/transactions`, controller.listTransactions, { ...wallet, ...describeRoute(TAG, "List my wallet ledger entries", { query: WalletPageQuerySchema }) });
   router.get(`${WALLET}/payout-accounts`, controller.listPayoutAccounts, { ...wallet, ...describeRoute(TAG, "List my payout bank accounts", { query: WalletScopeQuerySchema }) });
   router.post(`${WALLET}/payout-accounts`, controller.addPayoutAccount, { ...wallet, ...describeRoute(TAG, "Add a payout bank account", { query: WalletScopeQuerySchema, body: AddPayoutAccountBodySchema }) });
-  router.delete(`${WALLET}/payout-accounts/:id`, controller.removePayoutAccount, { ...wallet, ...describeRoute(TAG, "Remove a payout bank account", { params: PayoutAccountParamsSchema }) });
+  router.delete(`${WALLET}/payout-accounts/:id`, controller.removePayoutAccount, { ...wallet, ...describeRoute(TAG, "Remove a payout bank account", { params: PayoutAccountParamsSchema, query: WalletScopeQuerySchema }) });
   router.get(`${WALLET}/withdrawals`, controller.listWithdrawals, { ...wallet, ...describeRoute(TAG, "List my withdrawals", { query: WalletPageQuerySchema }) });
   router.post(`${WALLET}/withdrawals`, controller.requestWithdrawal, {
-    ...guard.requirePermission("wallet:manage", requireIdempotencyKey),
+    ...moneyMoving,
     ...describeRoute(TAG, "Request a withdrawal (Idempotency-Key required)", { query: WalletScopeQuerySchema, body: RequestWithdrawalBodySchema }),
   });
+  router.post(`${WALLET}/top-ups`, controller.startTopUp, {
+    ...moneyMoving,
+    ...describeRoute(TAG, "Start a personal wallet top-up; credited only after provider verification (Idempotency-Key required)", { body: StartWalletTopUpBodySchema }),
+  });
+  router.post(`${WALLET}/top-ups/:reference/verify`, controller.verifyTopUp, { ...wallet, ...describeRoute(TAG, "Verify a wallet top-up with the provider", { params: TopUpParamsSchema }) });
   router.get("/api/v1/banks", controller.listBanks, { ...guard.allowAnyone(), ...describeRoute(TAG, "List banks for payout accounts in a country", { query: BanksQuerySchema }) });
   router.post("/api/v1/admin/withdrawals/:id/process", controller.processWithdrawal, {
     ...guard.requirePermission("withdrawals:process", requireIdempotencyKey),
