@@ -1,0 +1,58 @@
+model PlatformStaffAccount {
+  userId                     String    @id
+  role                       String
+  permissions                String[]
+  status                     String    @default("active")
+  ipAllowList                String[]
+  totpSecretEncrypted        String?
+  pendingTotpSecretEncrypted String?
+  totpEnabledAt              DateTime?
+  totpLastUsedStep           Int?
+  recoveryCodeHashes         String[]
+  createdById                String?
+  disabledAt                 DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  @@index([role, status])
+  @@map("platform_staff_accounts")
+}
+
+model PlatformStaffLoginChallenge {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String    @unique
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@map("platform_staff_login_challenges")
+}
+
+model PlatformStaffSession {
+  sessionId        String    @id
+  userId           String
+  mfaVerifiedAt    DateTime
+  stepUpVerifiedAt DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@map("platform_staff_sessions")
+}
+
+model WebAuthnCredential {
+  id           String    @id @default(uuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    String
+  signCount    Int       @default(0)
+  transports   String[]
+  nickname     String    @default("")
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([userId])
+  @@map("webauthn_credentials")
+}
