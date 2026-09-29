@@ -12,10 +12,12 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/posts.service";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useAuthStore } from "@/store/auth.store";
 import type { Post } from "@/types";
 
 export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDetail">) {
+  const openUserProfile = useOpenUserProfile();
   const { postId } = route.params;
   const queryClient = useQueryClient();
   const composerRef = useRef<TextInput>(null);
@@ -48,7 +50,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                 <View style={styles.postBlock}>
                   <PostCard
                     post={post.data}
-                    onPressAuthor={() => navigation.navigate("UserProfile", { userId: post.data!.author.id })}
+                    onPressAuthor={() => openUserProfile(post.data!.author.id)}
                     onToggleFollow={() => {
                       updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
                       postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
