@@ -1,10 +1,14 @@
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { SponsoredCallToAction, SponsoredLabel } from "@/components/feed/sponsoredContent";
 import { Group1234Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
+import { ClipSoundRow } from "@/components/sounds/clipSoundRow";
+import { openSoundScreen } from "@/components/sounds/soundNavigation.util";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 import type { Clip } from "@/types";
 
 import { FollowPill } from "./followPill";
@@ -15,9 +19,11 @@ export interface ClipDetailsProps {
   readonly onToggleFollow: () => void;
   readonly onPressAuthor: () => void;
   readonly foregroundColor?: string;
+  readonly isActive?: boolean;
 }
 
-export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor }: ClipDetailsProps) {
+export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true }: ClipDetailsProps) {
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const readableTextStyle = foregroundColor ? styles.readableOnVideo : undefined;
   return (
     <View style={styles.root}>
@@ -50,6 +56,19 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
       <Text size={13} lineHeight={16.9} numberOfLines={2} color={foregroundColor} style={readableTextStyle}>
         {clip.text}
       </Text>
+      {clip.sound ? (
+        <ClipSoundRow
+          sound={clip.sound}
+          isActive={isActive}
+          foregroundColor={foregroundColor}
+          onPress={() => openSoundScreen(navigation, clip.sound.id)}
+        />
+      ) : null}
+      {clip.sound?.status === "under_copyright_review" ? (
+        <Text size={11} lineHeight={15.4} letterSpacing={0} color={foregroundColor} style={readableTextStyle}>
+          This sound is unavailable while under copyright review
+        </Text>
+      ) : null}
       {clip.sponsored ? <SponsoredCallToAction sponsored={clip.sponsored} placement="clips" itemId={clip.id} /> : null}
     </View>
   );
