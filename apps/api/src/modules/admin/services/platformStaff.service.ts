@@ -1,12 +1,12 @@
 import { ForbiddenError, UnauthorizedError } from "@zudojs/errors";
 
 import type { AppSettings } from "../../../configs/settings.config.js";
-import { ADMIN_PERMISSIONS, isPlatformPermission, type Permission } from "../../../constants/permissions.constant.js";
+import { isPlatformPermission, type Permission } from "../../../constants/permissions.constant.js";
 import { PlatformRole, platformRoleGrantsPermission } from "../../../constants/platformRoles.constant.js";
 import { notFound } from "../../../errors/domain.error.js";
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
-import type { PlatformPermissionGrants, PlatformStaffAccessCheck, StaffRequestDetails } from "../../../interfaces/platformStaffAccess.interface.js";
+import type { PlatformStaffAccessCheck, StaffRequestDetails } from "../../../interfaces/platformStaffAccess.interface.js";
 import type { Principal } from "../../../interfaces/principal.interface.js";
 import type { PasswordService } from "../../auth/services/password.service.js";
 import type { TokenService } from "../../auth/services/token.service.js";
@@ -33,14 +33,8 @@ export interface PlatformStaffDependencies {
 
 const ADMIN_CONSOLE_REQUIRED = "Sign in to the admin console with two-factor authentication to do this.";
 
-export class PlatformStaffService implements PlatformStaffAccessCheck, PlatformPermissionGrants {
+export class PlatformStaffService implements PlatformStaffAccessCheck {
   public constructor(public readonly dependencies: PlatformStaffDependencies) {}
-
-  public async findGrantedPlatformPermissions(userId: string): Promise<readonly Permission[]> {
-    const account = await this.dependencies.accounts.findByUserId(userId);
-    if (account === undefined || account.status !== "active") return [];
-    return ADMIN_PERMISSIONS.filter((permission) => platformRoleGrantsPermission(account.role, account.permissions, permission));
-  }
 
   public async assertStaffMayUsePermission(principal: Principal, permission: Permission | undefined, request: StaffRequestDetails): Promise<void> {
     const { account } = await this.findVerifiedStaffSessionOrThrow(principal);
