@@ -8,7 +8,6 @@ import { fetchConversationListAndSaveLocally, readSavedConversationsForInstantDi
 import { ChatSearchPanel } from "@/components/chat/chatSearchPanel";
 import { ChatsOptionsMenu } from "@/components/chat/chatsOptionsMenu";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
-import { useRealtimeMessagingConnection } from "@/components/chat/realtimeMessaging.hook";
 import { ChatsEmptyState } from "@/components/chat/chatsEmptyState";
 import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
 import { ConversationRow } from "@/components/chat/conversationRow";
@@ -28,7 +27,6 @@ export function ChatsScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
   const insets = useSafeAreaInsets();
-  useRealtimeMessagingConnection();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const conversations = useQuery({
     queryKey: ["conversations", filter],
