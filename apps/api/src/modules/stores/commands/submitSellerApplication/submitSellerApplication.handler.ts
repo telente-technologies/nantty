@@ -5,6 +5,7 @@ import { publishEvent } from "../../../../loaders/events.loader.js";
 import { normalizePhoneNumber } from "../../../auth/services/contact.service.js";
 import type { SellerApplicationDto } from "../../dtos/stores.dto.js";
 import { SellerApplicationSubmittedEvent } from "../../events/sellerApplicationSubmitted.event.js";
+import { prepareSellerOnboardingDetails } from "../../services/sellerOnboarding.service.js";
 import type { StoresService } from "../../services/stores.service.js";
 import type { SubmitSellerApplicationCommand } from "./submitSellerApplication.command.js";
 
@@ -28,6 +29,7 @@ export class SubmitSellerApplicationHandler extends CommandHandler<SubmitSellerA
       description: command.input.description ?? "",
       categoryId: command.input.categoryId ?? null,
       phoneEncrypted: await cipher.encryptText(normalizePhoneNumber(command.input.phone)),
+      onboarding: await prepareSellerOnboardingDetails(this.storesService, userId, command.input),
     });
     await publishEvent(events, SellerApplicationSubmittedEvent, { applicationId: application.id, userId });
     return this.storesService.convertApplicationWithDecryptedPhone(application);
