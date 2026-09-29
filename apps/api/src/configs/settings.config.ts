@@ -1,6 +1,8 @@
 import type { ConfigManager } from "@zudojs/config";
 import { ConfigurationError } from "@zudojs/errors";
 
+import { loadCreatorProgramSettings } from "./creators.config.js";
+
 const MIN_SECRET_LENGTH = 32;
 const DURATION_UNITS: Readonly<Record<string, number>> = { s: 1, m: 60, h: 3_600, d: 86_400 };
 
@@ -60,6 +62,11 @@ function readExchangeRateProvider(config: ConfigManager): "static" | "open-excha
   return provider;
 }
 
+function readPaymentReturnUrlAllowList(config: ConfigManager): readonly string[] {
+  const configured = readCommaSeparatedList(config, "payment_return_urls");
+  return configured.length > 0 ? configured : ["zudomart://payments/return"];
+}
+
 export function loadApplicationSettings(config: ConfigManager) {
   const accessSecret = readRequiredSecret(config, "jwt_access_secret");
   const refreshSecret = readRequiredSecret(config, "jwt_refresh_secret");
@@ -98,14 +105,30 @@ export function loadApplicationSettings(config: ConfigManager) {
       flutterwaveSecretKey: readTrimmedSetting(config, "flutterwave_secret_key"),
       flutterwaveWebhookHash: readTrimmedSetting(config, "flutterwave_webhook_hash"),
       callbackUrl: readTrimmedSetting(config, "payment_callback_url"),
+      returnUrlAllowList: readPaymentReturnUrlAllowList(config),
+    }),
+    subscriptions: Object.freeze({
+      gracePeriodDays: readNonNegativeInteger(config, "subscription_grace_period_days", 3),
     }),
     media: Object.freeze({
-      signingSecret: readRequiredSecret(config, "media_url_signing_secret"),
       publicBaseUrl: readTrimmedSetting(config, "public_base_url"),
-      maxImageBytes: readNonNegativeInteger(config, "media_max_image_bytes", 10 * 1024 * 1024),
-      maxVideoBytes: readNonNegativeInteger(config, "media_max_video_bytes", 50 * 1024 * 1024),
-      urlTtlSeconds: readNonNegativeInteger(config, "media_url_ttl_seconds", 900),
+      chunkSizeBytes: readNonNegativeInteger(config, "media_chunk_size_bytes", 5 * 1024 * 1024) || 5 * 1024 * 1024,
+      maxImageBytes: readNonNegativeInteger(config, "media_max_image_bytes", 20 * 1024 * 1024),
+      maxProfileImageBytes: readNonNegativeInteger(config, "media_max_profile_image_bytes", 10 * 1024 * 1024),
+      maxVideoBytes: readNonNegativeInteger(config, "media_max_video_bytes", 200 * 1024 * 1024),
+      maxKycBytes: readNonNegativeInteger(config, "media_max_kyc_bytes", 15 * 1024 * 1024),
+      maxVoiceBytes: readNonNegativeInteger(config, "media_max_voice_bytes", 10 * 1024 * 1024),
+      maxClipSeconds: readNonNegativeInteger(config, "media_max_clip_seconds", 180),
+      maxStorySeconds: readNonNegativeInteger(config, "media_max_story_seconds", 60),
+      maxVideoSeconds: readNonNegativeInteger(config, "media_max_video_seconds", 600),
+      processingMaxAttempts: readNonNegativeInteger(config, "media_processing_max_attempts", 4) || 1,
+      processingBackoffMs: readNonNegativeInteger(config, "media_processing_backoff_ms", 5_000),
+      processingConcurrency: readNonNegativeInteger(config, "media_processing_concurrency", 2) || 1,
+      abandonedUploadSeconds: readDurationInSeconds(config, "media_abandoned_upload_after", 86_400),
+      ffmpegPath: readTrimmedSetting(config, "ffmpeg_path") || "ffmpeg",
+      ffprobePath: readTrimmedSetting(config, "ffprobe_path") || "ffprobe",
     }),
+    creators: loadCreatorProgramSettings(config),
   });
 }
 
