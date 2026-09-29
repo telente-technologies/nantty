@@ -18,6 +18,12 @@
     },
     "extra": {
       "apiUrl": "http://localhost:3000"
-    }
+    },
+    "scheme": "zudomart",
+    "plugins": [
+      "expo-video",
+      "expo-background-task",
+      "expo-sqlite"
+    ]
   }
 }
