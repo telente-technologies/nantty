@@ -6,7 +6,7 @@ import type { MediaUploadPurpose } from "@/types";
 
 export interface LocalMediaFile {
   readonly uri: string;
-  readonly mediaType: "image" | "video";
+  readonly mediaType: "image" | "video" | "audio";
   readonly mimeType: string | null;
   readonly fileName: string | null;
   readonly sizeBytes: number | null;
@@ -28,6 +28,8 @@ export class MediaValidationError extends Error {}
 
 const ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const ALLOWED_VIDEO_MIME_TYPES = ["video/mp4", "video/quicktime", "video/webm"];
+const ALLOWED_AUDIO_MIME_TYPES = ["audio/mp4", "audio/m4a", "audio/x-m4a", "audio/aac", "audio/mpeg", "audio/webm", "audio/ogg"];
+const MAXIMUM_VOICE_NOTE_BYTES = 25 * 1024 * 1024;
 const MEGABYTE = 1024 * 1024;
 const MAXIMUM_IMAGE_BYTES_BEFORE_COMPRESSION = 40 * MEGABYTE;
 const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
@@ -38,12 +40,13 @@ const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
   product: 300 * MEGABYTE,
   avatar: 0,
   banner: 0,
+  voice: 0,
 };
 const MAXIMUM_VIDEO_SECONDS_BY_PURPOSE: Partial<Record<MediaUploadPurpose, number>> = { story: 60, clip: 600, post: 600 };
 const MAXIMUM_IMAGE_LONG_EDGE_PIXELS = 2048;
 const IMAGE_COMPRESSION_QUALITY = 0.8;
 
-const guessMimeTypeFromFileName = (fileName: string, mediaType: "image" | "video") => {
+const guessMimeTypeFromFileName = (fileName: string, mediaType: LocalMediaFile["mediaType"]) => {
   const extension = fileName.split(".").pop()?.toLowerCase() ?? "";
   const byExtension: Record<string, string> = {
     jpg: "image/jpeg",
@@ -54,14 +57,24 @@ const guessMimeTypeFromFileName = (fileName: string, mediaType: "image" | "video
     heif: "image/heif",
     mp4: "video/mp4",
     mov: "video/quicktime",
-    webm: "video/webm",
+    webm: mediaType === "audio" ? "audio/webm" : "video/webm",
+    m4a: "audio/mp4",
+    aac: "audio/aac",
+    mp3: "audio/mpeg",
+    ogg: "audio/ogg",
   };
-  return byExtension[extension] ?? (mediaType === "image" ? "image/jpeg" : "video/mp4");
+  return byExtension[extension] ?? (mediaType === "image" ? "image/jpeg" : mediaType === "audio" ? "audio/mp4" : "video/mp4");
 };
 
 export function validateLocalMediaBeforeUpload(media: LocalMediaFile, purpose: MediaUploadPurpose) {
   const fileName = media.fileName ?? media.uri.split("/").pop() ?? "upload";
   const mimeType = (media.mimeType ?? guessMimeTypeFromFileName(fileName, media.mediaType)).toLowerCase();
+  if (media.mediaType === "audio") {
+    if (purpose !== "voice" && purpose !== "chat") throw new MediaValidationError("Audio can't be used here.");
+    if (!ALLOWED_AUDIO_MIME_TYPES.includes(mimeType)) throw new MediaValidationError("This audio format isn't supported.");
+    if ((media.sizeBytes ?? 0) > MAXIMUM_VOICE_NOTE_BYTES) throw new MediaValidationError("This voice note is too long.");
+    return;
+  }
   if (media.mediaType === "image") {
     if (!ALLOWED_IMAGE_MIME_TYPES.includes(mimeType)) throw new MediaValidationError("This photo format isn't supported.");
     if ((media.sizeBytes ?? 0) > MAXIMUM_IMAGE_BYTES_BEFORE_COMPRESSION) throw new MediaValidationError("This photo is too large.");
@@ -122,8 +135,8 @@ export async function prepareLocalMediaForChunkedUpload(
       height: compressed.height,
     };
   }
-  const mimeType = (media.mimeType ?? guessMimeTypeFromFileName(originalFileName, "video")).toLowerCase();
-  const extension = mimeType === "video/quicktime" ? "mov" : mimeType === "video/webm" ? "webm" : "mp4";
+  const mimeType = (media.mimeType ?? guessMimeTypeFromFileName(originalFileName, media.mediaType)).toLowerCase();
+  const extension = originalFileName.includes(".") ? originalFileName.split(".").pop()!.toLowerCase() : media.mediaType === "audio" ? "m4a" : "mp4";
   const fileUri = Platform.OS === "web" ? media.uri : copyIntoPersistentUploadsDirectory(media.uri, `${jobId}.${extension}`);
   return {
     fileUri,
