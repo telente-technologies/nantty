@@ -1,4 +1,5 @@
 import type { PayoutAccountInput, WithdrawalRequest } from "@/types/account.type";
+import type { EscrowHold } from "@/types/commerce.type";
 import type { PayoutAccount, WalletSummary, WalletTransaction } from "@/types";
 
 import { api, generateIdempotencyKey } from "./apiClient.service";
@@ -6,6 +7,7 @@ import { api, generateIdempotencyKey } from "./apiClient.service";
 export const walletsService = {
   fetchMyWalletBalance: () => api.get<WalletSummary>("/api/v1/wallets/me"),
   listMyWalletTransactions: () => api.get<WalletTransaction[]>("/api/v1/wallets/me/transactions"),
+  listMyEscrowHolds: () => api.get<EscrowHold[]>("/api/v1/wallets/me/escrow-holds"),
   listMyPayoutAccounts: () => api.get<PayoutAccount[]>("/api/v1/wallets/me/payout-accounts"),
   addPayoutAccount: (input: PayoutAccountInput) => api.post<PayoutAccount>("/api/v1/wallets/me/payout-accounts", input),
   removePayoutAccount: (payoutAccountId: string) =>

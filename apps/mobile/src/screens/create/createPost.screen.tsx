@@ -4,7 +4,8 @@ import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
 import { LiveSetupPanel } from "@/components/create/liveSetupPanel";
-import { PostComposerPanel } from "@/components/create/postComposerPanel";
+import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
+import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
@@ -12,28 +13,39 @@ import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreat
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
+import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
 import { storiesService } from "@/services/stories.service";
-import type { CreateMode, Media, NewPostInput } from "@/types";
+import type { CreateMode } from "@/types";
 
-const EMPTY_POST_DRAFT: NewPostInput = { text: "", media: [], audience: "everyone" };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone" };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<CreateMode>(route.params?.mode ?? "post");
   const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
-  const [postDraft, setPostDraft] = useState<NewPostInput>(EMPTY_POST_DRAFT);
+  const [postDraft, setPostDraft] = useState<PostComposerDraft>(EMPTY_POST_DRAFT);
+  const postDraftUploads = usePostDraftMediaUploads("post");
   const [liveTitle, setLiveTitle] = useState("");
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
 
   const publishPost = useMutation({
-    mutationFn: () => storiesService.publishPost(postDraft),
+    mutationFn: async () => {
+      const mediaIds = await postDraftUploads.waitForAllDraftMediaIds();
+      return storiesService.publishPost({ text: postDraft.text.trim(), audience: postDraft.audience, mediaIds });
+    },
     onSuccess: (post) => {
+      queryClient.setQueryData(["post", post.id], fillProcessingPostMediaWithLocalPreviews(post, postDraftUploads.draftMediaItems));
       queryClient.invalidateQueries({ queryKey: ["feed"] });
       navigation.replace("PostDetail", { postId: post.id });
     },
   });
   const publishStory = useMutation({
-    mutationFn: (media: Media) => storiesService.publishStory({ media }),
+    mutationFn: async (capturedFile: LocalMediaFile) => {
+      const jobId = await enqueueLocalMediaForUpload(capturedFile, "story");
+      const mediaId = await waitForUploadedMediaId(jobId);
+      return storiesService.publishStory({ mediaId, media: { id: mediaId, type: capturedFile.mediaType, url: capturedFile.uri } });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story-tray"] });
       navigation.goBack();
@@ -72,7 +84,13 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     else navigation.goBack();
   };
 
-  const canContinuePost = postDraft.text.trim().length > 0 || postDraft.media.length > 0;
+  const canContinuePost = postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0;
+  const isWaitingForUploads = publishPost.isPending && postDraftUploads.combinedUploadedFraction < 1;
+  const publishButtonTitle = isWaitingForUploads
+    ? `Uploading ${Math.round(postDraftUploads.combinedUploadedFraction * 100)}%…`
+    : publishPost.isPending
+      ? "Posting…"
+      : "Post";
 
   return (
     <Screen background={colors.white} edges={["top", "bottom"]}>
@@ -98,8 +116,13 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             stage={postStage}
             draft={postDraft}
             onChangeDraft={setPostDraft}
+            draftMediaItems={postDraftUploads.draftMediaItems}
+            onAddPickedMedia={postDraftUploads.addPickedMediaAndStartUploading}
+            onRemoveDraftMedia={postDraftUploads.removeDraftMediaItem}
             onChangeMode={switchCreateMode}
             publishing={publishPost.isPending}
+            publishButtonTitle={publishButtonTitle}
+            publishErrorMessage={publishPost.error ? publishPost.error.message : null}
             onPublish={() => publishPost.mutate()}
           />
         ) : mode === "story" ? (
