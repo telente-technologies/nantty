@@ -10,6 +10,13 @@ import { productsService } from "@/services/products.service";
 import { CategoryTabs } from "./categoryTabs";
 import { MartShowcase } from "./martShowcase";
 import { ProductMasonry } from "./productMasonry";
+import { SellOnZudomartBanner } from "./sellOnZudomartBanner";
+
+const COLLECTION_FOR_TILE = {
+  sales: { collection: "sales_of_the_day", name: "Sales of the Day" },
+  brands: { collection: "featured_brands", name: "Featured Brands" },
+  arrivals: { collection: "new_arrivals", name: "New Arrivals" },
+} as const;
 
 const isNearBottom = ({ layoutMeasurement, contentOffset, contentSize }: NativeScrollEvent) =>
   layoutMeasurement.height + contentOffset.y >= contentSize.height - 600;
@@ -45,8 +52,12 @@ export function MartTab() {
       <MartShowcase
         martHome={martHome.data}
         onPressSearch={() => navigation.navigate("Search", { scope: "mart" })}
-        onPressTile={() => navigation.navigate("Search", { scope: "mart" })}
+        onPressTile={(tile) => {
+          const target = COLLECTION_FOR_TILE[tile];
+          navigation.navigate("Category", { categoryId: target.collection, name: target.name, collection: target.collection });
+        }}
       />
+      <SellOnZudomartBanner />
       <View style={styles.categories}>
         <CategoryTabs
           categories={martHome.data?.categories ?? []}
