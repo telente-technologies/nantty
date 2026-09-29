@@ -12,8 +12,9 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { DeviceFrame } from "@/components/ui/device-frame";
+import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { RootNavigator } from "@/navigation/root.navigator";
+import { localeService } from "@/services/locale.service";
 import { useAuthStore } from "@/store/auth.store";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -34,6 +35,14 @@ export default function App() {
   useEffect(() => {
     useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
   }, []);
+
+  useEffect(() => {
+    if (authStatus === "loading") return;
+    localeService
+      .loadViewerLocaleIntoStore()
+      .then(() => queryClient.invalidateQueries())
+      .catch(() => undefined);
+  }, [authStatus, queryClient]);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => undefined);
