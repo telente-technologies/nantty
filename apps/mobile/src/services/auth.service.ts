@@ -1,6 +1,10 @@
 import type { AuthSession, Topic } from "@/types";
 
+import type { SocialSignInProvider } from "@/errors/socialSignIn.error";
+
 import { api } from "./apiClient.service";
+import { requestAppleIdentityTokenWithNonce, type AppleFullName } from "./appleSignIn.service";
+import { requestGoogleIdTokenWithNonce } from "./googleSignIn.service";
 
 export interface RegisterInput {
   readonly email?: string;
@@ -24,7 +28,16 @@ export const authService = {
   logOutCurrentSession: (refreshToken: string | null) => api.post<void>("/api/v1/auth/logout", { refreshToken }),
   fetchPersonalizationTopics: () => api.get<Topic[]>("/api/v1/topics"),
   saveSelectedTopics: (topicIds: readonly string[]) => api.put<void>("/api/v1/users/me/topics", { topicIds }),
-  signInWithSocialProvider: async (provider: "apple" | "google"): Promise<AuthSession> => {
-    throw new Error(`${provider === "apple" ? "Apple" : "Google"} sign-in isn't configured yet.`);
+  exchangeGoogleIdTokenForSession: (idToken: string, nonce: string) =>
+    api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce }, { auth: false }),
+  exchangeAppleIdentityTokenForSession: (identityToken: string, nonce: string, fullName: AppleFullName | null) =>
+    api.post<AuthSession>("/api/v1/auth/apple", { identityToken, nonce, ...(fullName ? { fullName } : {}) }, { auth: false }),
+  signInWithSocialProvider: async (provider: SocialSignInProvider): Promise<AuthSession> => {
+    if (provider === "google") {
+      const { idToken, nonce } = await requestGoogleIdTokenWithNonce();
+      return authService.exchangeGoogleIdTokenForSession(idToken, nonce);
+    }
+    const { identityToken, nonce, fullName } = await requestAppleIdentityTokenWithNonce();
+    return authService.exchangeAppleIdentityTokenForSession(identityToken, nonce, fullName);
   },
 };
