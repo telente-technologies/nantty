@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
@@ -18,9 +19,11 @@ export function LiveProductsSheet({ visible, products, onClose, onOpenProduct }:
     <BottomSheet visible={visible} onClose={onClose} title="In this live" floating>
       <View style={styles.list}>
         {products.map((product) => (
-          <Pressable key={product.id} accessibilityRole="button" onPress={() => onOpenProduct(product.id)} style={styles.item}>
+          <Pressable key={product.id} accessibilityRole="button" accessibilityLabel={product.name} onPress={() => onOpenProduct(product.id)} style={styles.item}>
             <View style={styles.row}>
-              <View style={styles.thumb} />
+              <View style={styles.thumb}>
+                {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+              </View>
               <Text size={14} lineHeight={16.8} numberOfLines={1} style={styles.name}>
                 {product.name}
               </Text>
@@ -40,7 +43,7 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
   item: { paddingHorizontal: 4, gap: 9 },
   row: { height: 40, flexDirection: "row", alignItems: "center", gap: 8 },
-  thumb: { width: 40, height: 40, borderRadius: 4, backgroundColor: colors.avatar },
+  thumb: { width: 40, height: 40, borderRadius: 4, overflow: "hidden", backgroundColor: colors.placeholder },
   name: { flex: 1 },
   divider: { height: 1, backgroundColor: colors.divider },
 });
