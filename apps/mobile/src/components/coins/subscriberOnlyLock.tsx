@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { ID } from "@/types";
+import { LockSimpleFill24Icon } from "@/components/icons";
 
 type NavigationThatMayKnowCreatorSubscribe = {
   getState: () => { routeNames?: readonly string[] } | undefined;
@@ -35,9 +36,7 @@ export function SubscriberOnlyLock({ creatorId, creatorName, blurredPreviewUrl }
         <Image source={{ uri: blurredPreviewUrl }} blurRadius={40} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" />
       ) : null}
       <View style={styles.dim} pointerEvents="none" />
-      <Text size={28} lineHeight={34}>
-        🔒
-      </Text>
+      <LockSimpleFill24Icon size={28} color={colors.white} />
       <Text size={14} weight={600} lineHeight={16.8} color={colors.white} align="center">
         For {creatorName}'s subscribers
       </Text>
