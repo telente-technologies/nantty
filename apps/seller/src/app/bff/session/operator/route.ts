@@ -4,7 +4,8 @@ import { respondWithBffError } from "@/server/bffGateway.service";
 import { applyRotatedTokensToResponse, callBackendAsSignedInSeller } from "@/server/authenticatedBackendCall.service";
 import { isMutationProtectedAgainstCsrf } from "@/server/requestOriginGuard.service";
 import { encodeJsonRequestBody, readJsonFromBackendResult } from "@/server/sellerApiTransport.service";
-import { clearPosOperatorCookie, readPosOperatorFromCookies, readSessionIdFromCookies, writePosOperatorCookie } from "@/server/sellerSession.service";
+import { sealOfflineOperatorPass } from "@/server/offlineOperatorPass.service";
+import { clearPosOperatorCookie, readCachedSellerAccessFromCookies, readPosOperatorFromCookies, readSessionIdFromCookies, writePosOperatorCookie } from "@/server/sellerSession.service";
 import type { ApiErrorBody } from "@/types/pagination.type";
 import type { PosOperator } from "@/types/sellerAccess.type";
 
@@ -33,7 +34,9 @@ export async function POST(request: NextRequest) {
   }
   const pinSession = readJsonFromBackendResult<PinSessionResponse>(outcome.result);
   if (!pinSession) return respondWithBffError(502, "BAD_UPSTREAM_RESPONSE", "Could not switch cashier. Try again.");
-  const response = NextResponse.json({ operator: pinSession.operator }, { headers: { "Cache-Control": "no-store" } });
+  const storeId = readCachedSellerAccessFromCookies(request.cookies)?.access.storeId ?? null;
+  const offlineOperatorPass = storeId ? sealOfflineOperatorPass({ sessionId, storeId, staffId: pinSession.operator.staffId, operatorToken: pinSession.operatorToken }) : null;
+  const response = NextResponse.json({ operator: pinSession.operator, storeId, offlineOperatorPass }, { headers: { "Cache-Control": "no-store" } });
   writePosOperatorCookie(response, { sessionId, operator: pinSession.operator, operatorToken: pinSession.operatorToken });
   applyRotatedTokensToResponse(response, outcome);
   return response;
