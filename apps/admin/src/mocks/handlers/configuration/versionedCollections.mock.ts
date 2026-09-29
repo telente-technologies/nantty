@@ -59,7 +59,8 @@ function appendNewVersion<Content>(request: MockRequest, definition: VersionedCo
   const versions = store.history.get(recordId) ?? [];
   const current = versions[versions.length - 1] ?? null;
   const currentVersion = current?.version ?? 0;
-  if (expectedVersion !== currentVersion) {
+  const isRecreatingArchivedRecord = current?.isArchived === true && expectedVersion === 0;
+  if (expectedVersion !== currentVersion && !isRecreatingArchivedRecord) {
     throw new MockHttpError(409, "VERSION_CONFLICT", `Someone saved version ${currentVersion} after you started editing. Reload to see their changes, then apply yours again.`, [], { currentVersion });
   }
   const principal = request.principal!;
