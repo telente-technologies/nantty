@@ -2,10 +2,10 @@ import type { StaffRole } from "@/types/sellerAccess.type";
 
 export interface StaffMember {
   readonly id: string;
-  readonly userId: string | null;
+  readonly userId: string;
   readonly name: string;
-  readonly email: string | null;
-  readonly phone: string | null;
+  readonly username: string;
+  readonly avatarUrl: string | null;
   readonly role: StaffRole;
   readonly status: "invited" | "active" | "suspended";
   readonly hasPosPin: boolean;
@@ -24,4 +24,11 @@ export interface AuditLogEntry {
   readonly summary: string;
   readonly ipAddress: string | null;
   readonly createdAt: string;
+}
+
+export interface ZudomartUserCandidate {
+  readonly userId: string;
+  readonly name: string;
+  readonly username: string;
+  readonly avatarUrl: string | null;
 }

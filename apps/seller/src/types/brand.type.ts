@@ -29,9 +29,9 @@ export interface BrandOfficialStore {
 
 export interface BrandMember {
   readonly id: string;
-  readonly userId: string | null;
+  readonly userId: string;
   readonly name: string;
-  readonly email: string;
+  readonly username: string;
   readonly role: BrandMemberRole;
   readonly status: "invited" | "active";
 }
