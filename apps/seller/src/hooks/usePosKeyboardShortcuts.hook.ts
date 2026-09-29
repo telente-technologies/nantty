@@ -11,6 +11,8 @@ export interface PosShortcutHandlers {
   readonly decreaseSelectedQuantity: () => void;
   readonly removeSelectedLine: () => void;
   readonly showShortcuts: () => void;
+  readonly selectPreviousLine: () => void;
+  readonly selectNextLine: () => void;
 }
 
 const minimumGapBeforeSingleKeyShortcutInMilliseconds = 80;
@@ -53,6 +55,8 @@ export function usePosKeyboardShortcuts(handlers: PosShortcutHandlers, isEnabled
         "=": currentHandlers.increaseSelectedQuantity,
         "-": currentHandlers.decreaseSelectedQuantity,
         Delete: currentHandlers.removeSelectedLine,
+        ArrowUp: currentHandlers.selectPreviousLine,
+        ArrowDown: currentHandlers.selectNextLine,
       };
       const singleKeyAction = singleKeyActions[event.key];
       if (singleKeyAction && isDeliberateSingleKey) {
