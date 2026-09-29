@@ -11,6 +11,6 @@ export class RemovePayoutAccountHandler extends CommandHandler<RemovePayoutAccou
   }
 
   public execute(command: RemovePayoutAccountCommand): Promise<void> {
-    return this.service.removePayoutAccount(command.principal.userId, command.storeId, command.payoutAccountId);
+    return this.service.removePayoutAccount(command.principal, command.scope, command.payoutAccountId);
   }
 }
