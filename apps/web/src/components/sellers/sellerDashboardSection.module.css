@@ -68,3 +68,64 @@
     gap: 72px;
   }
 }
+
+.webDashboardCard {
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+  border-radius: var(--radius-large);
+  background: var(--blue-900);
+  color: #fff;
+}
+
+.webDashboardBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--ink-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.webDashboardHeading {
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.webDashboardDescription {
+  color: var(--blue-100);
+}
+
+.webDashboardFeatureList {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.webDashboardFeatureList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.webDashboardFeatureList li > span {
+  color: var(--yellow-500);
+}
+
+.webDashboardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+@media (min-width: 640px) {
+  .webDashboardFeatureList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
