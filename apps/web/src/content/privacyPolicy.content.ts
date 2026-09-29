@@ -1,5 +1,5 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 export const privacyPolicySections: readonly LegalDocumentSection[] = [
   {
@@ -41,7 +41,7 @@ export const privacyPolicySections: readonly LegalDocumentSection[] = [
     heading: "Your rights",
     paragraphs: [
       "Depending on where you live, including under the Nigeria Data Protection Act 2023, you may have the right to access, correct, delete or move your data, and to object to certain uses.",
-      `To make a request, email ${siteConfig.contactEmails.privacy}. You can leave the waitlist at any time using the link in our emails.`,
+      `To make a request, email ${contactEmailDisplayText}. You can leave the waitlist at any time using the link in our emails.`,
     ],
   },
   {
