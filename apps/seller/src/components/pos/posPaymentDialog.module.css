@@ -1,0 +1,143 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dueBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  border-radius: var(--radius-large);
+  background: var(--blue-900);
+  color: #fff;
+}
+
+.dueAmount {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.dueBlock .muted {
+  color: #9aa8ef;
+}
+
+.changeBlock {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  border-radius: var(--radius-large);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 650;
+}
+
+.changeBlock strong {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-variant-numeric: tabular-nums;
+}
+
+.paymentList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--divider);
+}
+
+.amount {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.methodButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  font-weight: 650;
+  text-align: left;
+}
+
+.methodButton[aria-checked="true"] {
+  border-color: var(--blue-500);
+  background: var(--blue-tint);
+  box-shadow: inset 0 0 0 1px var(--blue-500);
+}
+
+.methodButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.entryForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quickTender {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.quickTenderButton {
+  height: 48px;
+  border: 1px solid #e0cf1a;
+  border-radius: var(--radius-medium);
+  background: var(--yellow-50);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quickTenderButton:hover {
+  background: var(--yellow-100);
+}
+
+.changePreview {
+  font-weight: 650;
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
