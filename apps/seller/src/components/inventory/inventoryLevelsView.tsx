@@ -32,12 +32,12 @@ export function LocationPicker({ value, onValueChange, label = "Location" }: { r
   );
 }
 
-export function InventoryLevelsView() {
+export function InventoryLevelsView({ initialLowStockOnly = false }: { readonly initialLowStockOnly?: boolean }) {
   const { formatMoney } = useMoneyFormatter();
   const { selectedLocationId, locations } = useStoreContext();
   const [chosenLocationId, setChosenLocationId] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [lowStockOnly, setLowStockOnly] = useState(initialLowStockOnly);
   const locationId = chosenLocationId || selectedLocationId || locations[0]?.id || "";
   const levels = useCursorPagedList<InventoryLevelRow>("/seller/inventory/levels", { locationId, q: searchText, lowStockOnly: lowStockOnly ? "true" : undefined, limit: 50 });
 
