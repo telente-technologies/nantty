@@ -2,6 +2,8 @@ import { ApiError } from "@/errors/api.error";
 
 import { demoFanAccount, getSignedInMockUser, me, mockSession } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { generateAutomaticUsername } from "./username.mock";
+import { applyProfileEditForSignedInUser, signedInProfile } from "./users.mock";
 
 const buildMockAuthSession = () => ({ accessToken: "mock-access", refreshToken: "mock-refresh", user: getSignedInMockUser() });
 
@@ -26,9 +28,11 @@ export const authMocks: MockRoute[] = [
     signInDemoAccountMatchingIdentifier(identifier);
     return buildMockAuthSession();
   }),
-  createMockRoute("POST", "/api/v1/auth/register", () => {
+  createMockRoute("POST", "/api/v1/auth/register", ({ body }) => {
+    const { username, email, phone } = body as { username?: string; email?: string; phone?: string };
     mockSession.signedInUserId = demoFanAccount.id;
-    return buildMockAuthSession();
+    applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? phone ?? "zudo") });
+    return { ...buildMockAuthSession(), user: signedInProfile() };
   }),
   createMockRoute("POST", "/api/v1/auth/otp/send", () => ({ expiresIn: 60 })),
   createMockRoute("POST", "/api/v1/auth/otp/verify", ({ body }) => {
@@ -37,7 +41,6 @@ export const authMocks: MockRoute[] = [
     if (code === "000000") throw new ApiError(400, "That code is incorrect. Check it and try again.", "INVALID_CODE");
     return { otpToken: "mock-otp-token" };
   }),
-  createMockRoute("GET", "/api/v1/auth/username-available", ({ query }) => ({ available: query.get("username") !== "taken" })),
   createMockRoute("POST", "/api/v1/auth/password/reset", () => undefined),
   createMockRoute("POST", "/api/v1/auth/logout", () => undefined),
   createMockRoute("POST", "/api/v1/auth/refresh", () => ({ accessToken: "mock-access", refreshToken: "mock-refresh" })),
