@@ -1,0 +1,68 @@
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { useEffect } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+
+import { Play24Icon } from "@/components/icons";
+import { UploadProgressBar } from "@/components/media/uploadProgressBar";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
+import type { MessageAttachedMedia } from "@/types";
+
+import { formatVoiceNoteDuration } from "./voiceNoteRecorder.hook";
+
+export interface VoiceNoteBubbleProps {
+  readonly media: MessageAttachedMedia;
+  readonly isMine: boolean;
+  readonly deliveryStatus: LocalMessageDeliveryStatus;
+}
+
+export function VoiceNoteBubble({ media, isMine, deliveryStatus }: VoiceNoteBubbleProps) {
+  const player = useAudioPlayer(media.url ? { uri: media.url } : null);
+  const status = useAudioPlayerStatus(player);
+  const durationSeconds = status.duration || media.durationSeconds || 0;
+  const playedFraction = durationSeconds > 0 ? Math.min(status.currentTime / durationSeconds, 1) : 0;
+  const foregroundColor = isMine ? colors.white : colors.text;
+
+  useEffect(() => {
+    if (status.didJustFinish) player.seekTo(0).catch(() => undefined);
+  }, [player, status.didJustFinish]);
+
+  const togglePlayback = () => (status.playing ? player.pause() : player.play());
+
+  return (
+    <View style={styles.root}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={status.playing ? "Pause voice note" : `Play voice note, ${formatVoiceNoteDuration(durationSeconds)}`}
+        accessibilityState={{ disabled: !media.url }}
+        disabled={!media.url}
+        hitSlop={8}
+        onPress={togglePlayback}
+        style={[styles.playButton, status.playing && styles.playingButton]}
+      >
+        <Play24Icon size={18} color={foregroundColor} />
+      </Pressable>
+      <View style={styles.track}>
+        <View style={[styles.trackBackground, { backgroundColor: isMine ? "rgba(255,255,255,0.35)" : colors.placeholder }]}>
+          <View style={[styles.trackFill, { width: `${Math.round(playedFraction * 100)}%`, backgroundColor: foregroundColor }]} />
+        </View>
+        {deliveryStatus === "pending" ? (
+          <UploadProgressBar jobId={media.id} showLabel={false} />
+        ) : null}
+      </View>
+      <Text size={12} lineHeight={14.4} color={foregroundColor}>
+        {formatVoiceNoteDuration(status.playing ? status.currentTime : durationSeconds)}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { width: 200, flexDirection: "row", alignItems: "center", gap: 10 },
+  playButton: { width: 24, height: 24, alignItems: "center", justifyContent: "center" },
+  playingButton: { opacity: 0.5 },
+  track: { flex: 1, gap: 4 },
+  trackBackground: { height: 3, borderRadius: 2, overflow: "hidden" },
+  trackFill: { height: 3 },
+});
