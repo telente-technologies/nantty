@@ -59,6 +59,10 @@ export function registerMockRoute(method: string, pathTemplate: string, handler:
   registeredMockRoutes.push({ method, pathPattern, parameterNames, handler, requiresPrincipal: !options.public });
 }
 
+export function clearEveryMockRoute(): void {
+  registeredMockRoutes.length = 0;
+}
+
 export function findMockRouteForRequest(method: string, path: string): { route: RegisteredMockRoute; params: Record<string, string> } | null {
   for (const route of registeredMockRoutes) {
     if (route.method !== method) continue;
