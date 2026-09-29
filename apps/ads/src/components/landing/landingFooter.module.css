@@ -1,0 +1,87 @@
+.footer {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(56px, 8vw, 96px);
+  background: var(--blue-900);
+  color: var(--blue-50);
+}
+
+.footerTop {
+  display: grid;
+  gap: 40px;
+}
+
+.footerBrand {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  max-width: 380px;
+}
+
+.footerEmail {
+  color: var(--yellow-500);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 24px;
+}
+
+.footerLinks h2 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue-200);
+  margin-bottom: 12px;
+}
+
+.footerLinks ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.footerLinks a {
+  color: #fff;
+}
+
+.footerBottom {
+  margin-top: 48px;
+  padding-block: 20px;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  font-size: 0.875rem;
+  color: var(--blue-200);
+}
+
+.giantWordmark {
+  margin: 0 0 -0.22em;
+  padding-inline: var(--gutter);
+  font-size: clamp(4rem, 17vw, 15rem);
+  font-weight: 850;
+  letter-spacing: -0.07em;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.06);
+  user-select: none;
+}
+
+.footer a:focus-visible {
+  box-shadow: 0 0 0 3px var(--yellow-500);
+}
+
+.container {
+  width: 100%;
+  max-width: calc(var(--content-width) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@media (min-width: 960px) {
+  .footerTop {
+    grid-template-columns: 1fr 1.4fr;
+  }
+}
