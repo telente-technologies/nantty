@@ -21,7 +21,7 @@ function convertPayoutAccountRowToRecord(row: PayoutAccount): PayoutAccountRecor
 }
 
 function convertWithdrawalRowToRecord(row: Withdrawal): WithdrawalRecord {
-  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), currency: row.currency as CurrencyCode, status: row.status as WithdrawalStatus };
+  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), fee: convertDatabaseAmountToMinorUnits(row.fee), currency: row.currency as CurrencyCode, status: row.status as WithdrawalStatus };
 }
 
 export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository {
@@ -51,7 +51,7 @@ export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository 
 
 export class PrismaWithdrawalsRepository implements WithdrawalsRepository {
   public async create(input: NewWithdrawal): Promise<WithdrawalRecord> {
-    return convertWithdrawalRowToRecord(await prisma().withdrawal.create({ data: { ...input, amount: BigInt(input.amount) } }));
+    return convertWithdrawalRowToRecord(await prisma().withdrawal.create({ data: { ...input, amount: BigInt(input.amount), fee: BigInt(input.fee) } }));
   }
 
   public async findById(id: string): Promise<WithdrawalRecord | undefined> {
