@@ -21,12 +21,16 @@ import { APP_DEPENDENCIES, createDependencies } from "./container.js";
 import { checkIntegrations, drainIntegrations, integrations } from "./integrations/index.js";
 import { schedules } from "./integrations/scheduler.integration.js";
 import { registerScheduledJobs } from "./jobs/scheduledJobs.job.js";
+import { DEFAULT_REQUEST_BODY_LIMIT_BYTES, limitRequestBodySize } from "./middlewares/requestBodyLimit.middleware.js";
 import { addRequestIdResponseHeader } from "./middlewares/requestId.middleware.js";
 import { registerRoutes } from "./routes/index.js";
 import { createApplicationRouterOptions, errorDetails, errorResponse, json, securityHeaders } from "./utils/http.util.js";
 
 const config = await loadConfig();
 const httpServer = createServer();
+// The Node adapter buffers bodies before routing with one global limit, so it admits one chunk and
+// limitRequestBodySize keeps every other route at 1 MiB.
+const chunkUploadBodyLimitBytes = config.media.chunkSizeBytes + 64 * 1024;
 const runtime = createApp({ config, httpServer });
 const logger = runtime.context.logger;
 
@@ -75,6 +79,9 @@ const pipeline = new HttpMiddlewarePipeline({
       ? [createRateLimitMiddleware({ windowMs: config.rateLimit.windowMs, max: config.rateLimit.max })]
       : []),
     // zudojs:server-middleware:start
+    limitRequestBodySize(DEFAULT_REQUEST_BODY_LIMIT_BYTES, [
+      { method: "PUT", pathPattern: /^\/api\/v1\/media\/uploads\/[^/]+\/chunks\/\d+\/?$/i, maxBytes: chunkUploadBodyLimitBytes },
+    ]),
     // zudojs:server-middleware:end
     addRequestIdResponseHeader(),
     dispatch,
@@ -89,7 +96,7 @@ const server = createHttpServer({
     server: httpServer,
     host: config.host,
     port: config.port,
-    maxBodySize: Math.max(config.media.maxImageBytes, config.media.maxVideoBytes) + 1024,
+    maxBodySize: chunkUploadBodyLimitBytes,
   }),
   handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
 });
