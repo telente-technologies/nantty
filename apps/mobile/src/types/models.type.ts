@@ -51,6 +51,7 @@ export interface ProductSummary {
   readonly imageUrl: string | null;
   readonly liked?: boolean;
   readonly stock?: number;
+  readonly sponsored?: SponsoredPlacement | null;
 }
 
 export interface Product extends ProductSummary {
@@ -66,9 +67,27 @@ export interface Product extends ProductSummary {
   readonly related: readonly ProductSummary[];
 }
 
+export type MediaProcessingStatus = "processing" | "ready" | "failed";
+
 export interface Media {
   readonly type: "image" | "video";
   readonly url: string | null;
+  readonly id?: ID;
+  readonly posterUrl?: string | null;
+  readonly hlsUrl?: string | null;
+  readonly width?: number;
+  readonly height?: number;
+  readonly durationSeconds?: number;
+  readonly status?: MediaProcessingStatus;
+  readonly blurhash?: string | null;
+}
+
+export interface SponsoredPlacement {
+  readonly campaignId: ID;
+  readonly label: "Sponsored";
+  readonly advertiserName: string;
+  readonly ctaLabel?: string;
+  readonly ctaUrl?: string;
 }
 
 export interface Post {
@@ -87,15 +106,21 @@ export interface Post {
   readonly isFollowingAuthor: boolean;
   readonly friendsLiked: { readonly count: number; readonly avatars: readonly (string | null)[] } | null;
   readonly products: readonly ProductSummary[];
+  readonly sponsored?: SponsoredPlacement | null;
 }
 
 export interface Comment {
   readonly id: ID;
+  readonly postId: ID;
+  readonly parentCommentId: ID | null;
+  readonly rootCommentId: ID | null;
   readonly author: UserSummary;
   readonly text: string;
   readonly createdAt: ISODate;
   readonly likes: number;
   readonly liked: boolean;
+  readonly replyCount: number;
+  readonly replyingTo?: { readonly userId: ID; readonly username: string };
 }
 
 export interface CartItem {
@@ -175,7 +200,8 @@ export interface LiveComment {
   readonly id: ID;
   readonly author: UserSummary;
   readonly text: string;
-  readonly kind: "comment" | "joined" | "reply";
+  readonly kind: "comment" | "joined" | "reply" | "gift";
+  readonly gift?: { readonly giftId: ID; readonly name: string; readonly emoji: string; readonly quantity: number };
 }
 
 export interface AppNotification {

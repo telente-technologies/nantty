@@ -28,18 +28,57 @@ export interface ShippingAddressInput {
 
 export type SellerDashboardPeriod = "live" | "yesterday" | "today" | "week" | "month" | "all";
 
-export interface SellerApplicationInput {
+export type IdentityDocumentType = "nin_slip" | "drivers_licence" | "voters_card" | "international_passport";
+
+export interface SellerApplicationDraft {
   readonly storeName: string;
-  readonly category: string;
-  readonly phone: string;
-  readonly address: string;
+  readonly categoryId: string;
   readonly description: string;
+  readonly phone: string;
+  readonly addressLine: string;
+  readonly city: string;
+  readonly state: string;
+  readonly identityDocumentType: IdentityDocumentType | null;
+  readonly identityDocumentNumber: string;
+  readonly identityDocumentPhotoUrl: string | null;
+  readonly payoutBankCode: string;
+  readonly payoutBankName: string;
+  readonly payoutAccountNumber: string;
+  readonly payoutAccountName: string;
 }
 
-export interface SellerApplication extends SellerApplicationInput {
+export interface SellerApplicationInput {
+  readonly storeName: string;
+  readonly categoryId: string;
+  readonly description: string;
+  readonly phone: string;
+  readonly addressLine: string;
+  readonly city: string;
+  readonly state: string;
+  readonly identityDocument: {
+    readonly documentType: IdentityDocumentType;
+    readonly documentNumber: string;
+    readonly documentPhotoUrl: string;
+  };
+  readonly payoutAccount: { readonly bankCode: string; readonly accountNumber: string };
+}
+
+export type SellerApplicationStatus = "pending" | "approved" | "rejected";
+
+export interface SellerApplication {
   readonly id: ID;
-  readonly status: "pending" | "approved" | "rejected";
+  readonly status: SellerApplicationStatus;
+  readonly storeName: string;
+  readonly categoryName: string;
+  readonly city: string;
+  readonly state: string;
+  readonly identityDocumentType: IdentityDocumentType;
+  readonly identityDocumentNumberMasked: string;
+  readonly payoutBankName: string;
+  readonly payoutAccountNumberMasked: string;
   readonly submittedAt: ISODate;
+  readonly reviewedAt: ISODate | null;
+  readonly rejectionReason: string | null;
 }
 
 export interface StoreProductInput {

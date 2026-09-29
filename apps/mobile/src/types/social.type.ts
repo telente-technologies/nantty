@@ -21,7 +21,12 @@ export interface Clip extends Post {
 }
 
 export interface CommentWithReplies extends Comment {
-  readonly replies: number;
+  readonly previewReplies: readonly Comment[];
+}
+
+export interface NewCommentInput {
+  readonly text: string;
+  readonly parentCommentId?: ID;
 }
 
 export interface LiveSessionDetails extends LiveSession {
@@ -38,10 +43,105 @@ export interface SuggestedLive {
 
 export interface NewPostInput {
   readonly text: string;
-  readonly media: readonly Media[];
+  readonly mediaIds: readonly ID[];
   readonly audience: PostAudience;
 }
 
+export type MediaUploadPurpose = "post" | "clip" | "story" | "avatar" | "banner" | "product" | "chat";
+export type MediaUploadStatus = "uploading" | "processing" | "ready" | "failed";
+export type MediaVariantFormat = "avif" | "webp" | "jpeg" | "mp4" | "hls";
+
+export interface MediaVariant {
+  readonly url: string;
+  readonly width: number;
+  readonly height: number;
+  readonly format: MediaVariantFormat;
+  readonly bitrateKbps?: number;
+}
+
+export interface MediaAsset {
+  readonly id: ID;
+  readonly type: "image" | "video";
+  readonly status: "processing" | "ready" | "failed";
+  readonly width: number;
+  readonly height: number;
+  readonly durationSeconds?: number;
+  readonly blurhash?: string;
+  readonly posterUrl?: string;
+  readonly hlsUrl?: string;
+  readonly variants: readonly MediaVariant[];
+}
+
+export interface CreateUploadSessionRequest {
+  readonly fileName: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+  readonly purpose: MediaUploadPurpose;
+  readonly sha256?: string;
+}
+
+export interface UploadSession {
+  readonly uploadId: ID;
+  readonly chunkSizeBytes: number;
+  readonly totalChunks: number;
+  readonly uploadedChunks: readonly number[];
+}
+
+export interface UploadSessionStatus {
+  readonly status: MediaUploadStatus;
+  readonly uploadedChunks: readonly number[];
+  readonly media?: MediaAsset;
+}
+
+export interface CompletedUpload {
+  readonly mediaId: ID;
+  readonly status: "processing";
+}
+
+export type AdPlacement = "feed" | "clips" | "mart" | "search";
+export type AdEventType = "impression" | "click";
+
+export interface AdEvent {
+  readonly campaignId: ID;
+  readonly placement: AdPlacement;
+  readonly type: AdEventType;
+  readonly itemId: ID;
+}
+
 export interface NewStoryInput {
+  readonly mediaId: ID;
   readonly media: Media;
+}
+
+export type CreatorProgramStatus = "none" | "pending" | "approved" | "rejected" | "suspended";
+
+export interface CreatorStatus {
+  readonly status: CreatorProgramStatus;
+  readonly canGoLive: boolean;
+  readonly tier?: string;
+}
+
+export interface LiveGift {
+  readonly id: ID;
+  readonly name: string;
+  readonly emoji: string;
+  readonly imageUrl?: string | null;
+  readonly price: import("./money.type").Money;
+}
+
+export interface SendLiveGiftInput {
+  readonly giftId: ID;
+  readonly quantity: number;
+}
+
+export interface SentLiveGiftReceipt {
+  readonly giftId: ID;
+  readonly quantity: number;
+  readonly walletAvailable: import("./money.type").Money;
+}
+
+export interface LiveSessionDetails {
+  readonly giftsEnabled?: boolean;
+  readonly hostIsCreator?: boolean;
+  readonly pinnedProductId?: ID | null;
 }
