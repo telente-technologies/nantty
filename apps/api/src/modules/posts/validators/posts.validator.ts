@@ -14,6 +14,7 @@ export const CreatePostBodySchema = schema.object({
   kind: schema.enum(["post", "clip", "story"]).default("post"),
   text: schema.string().max(2000).optional(),
   media: schema.array(PostMediaSchema).max(10).optional(),
+  mediaIds: schema.array(schema.string().uuid()).max(10).optional(),
   productIds: productIds.optional(),
   topics: schema.array(schema.string().min(2).max(40).regex(/^[a-z0-9-]+$/)).max(5).optional(),
   storeId: schema.string().uuid().optional(),
@@ -34,6 +35,7 @@ export const TagProductsBodySchema = schema.object({ productIds: productIds.min(
 
 export const CommentBodySchema = schema.object({
   text: schema.string().min(1).max(1000),
+  parentCommentId: schema.string().uuid().optional(),
   replyToCommentId: schema.string().uuid().optional(),
   parentId: schema.string().uuid().optional(),
 });
