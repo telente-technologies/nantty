@@ -1,5 +1,15 @@
 import { runNowOrQueueWhenOffline } from "@/store/offline.store";
-import type { ChatSearchResults, ConversationFilter, Conversation, Message, Page, UserSummary } from "@/types";
+import type {
+  ChatSearchResults,
+  ConversationFilter,
+  Conversation,
+  ConversationSettingsUpdate,
+  Message,
+  MessageReactionSummary,
+  OutgoingVoiceNote,
+  Page,
+  UserSummary,
+} from "@/types";
 
 import { api } from "./apiClient.service";
 
@@ -34,6 +44,14 @@ export const messagesService = {
       ? { message: deliveredMessage, delivered: true }
       : { message: buildLocalPendingMessageFromDraft(draft), delivered: false };
   },
+  sendVoiceNoteToConversation: (conversationId: string, voiceNote: OutgoingVoiceNote, idempotencyKey: string) =>
+    api.post<Message>(`/api/v1/conversations/${conversationId}/messages`, { ...voiceNote, text: "" }, { idempotencyKey }),
+  updateConversationSettings: (conversationId: string, update: ConversationSettingsUpdate) =>
+    api.patch<Conversation>(`/api/v1/conversations/${conversationId}`, update),
+  addReactionToMessage: (messageId: string, emoji: string) =>
+    api.post<MessageReactionSummary[]>(`/api/v1/messages/${messageId}/reactions`, { emoji }),
+  removeReactionFromMessage: (messageId: string, emoji: string) =>
+    api.delete<MessageReactionSummary[]>(`/api/v1/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`),
   markConversationAsRead: (conversationId: string) => api.post<void>(`/api/v1/conversations/${conversationId}/read`),
   searchConversationsAndPeople: (query: string) => api.get<ChatSearchResults>("/api/v1/conversations/search", { q: query }),
   fetchPeopleToMessage: (query: string) => api.get<UserSummary[]>("/api/v1/search/people", { q: query }),
