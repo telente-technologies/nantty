@@ -26,7 +26,7 @@ import { useDeliveryToggles } from "./deliveryToggles.hook";
 import { useReloadWhileReviewIsPending } from "./reviewPolling.hook";
 import styles from "./detailPages.module.css";
 
-const sourceTypeLabels = { post: "Existing post", clip: "Existing clip", product: "Product from your store", store: "Your store", upload: "Uploaded media" } as const;
+const sourceTypeLabels = { post: "Existing post", clip: "Existing reel", product: "Product from your store", live: "Live session", store: "Your store", upload: "Uploaded media" } as const;
 
 export function AdDetailPage({ adId }: { readonly adId: string }) {
   const { accountId, canPerform, buildAccountPagePath } = useAdAccount();
