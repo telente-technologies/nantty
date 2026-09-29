@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
@@ -22,6 +22,8 @@ export interface ProfileViewProps {
   readonly onPressFollowing: () => void;
   readonly onPressPost: (post: Post) => void;
   readonly onOpenStoreTab?: () => void;
+  readonly headerAccessory?: ReactNode;
+  readonly onPressPostMore?: (post: Post) => void;
 }
 
 const EMPTY_TAB_MESSAGES: Record<ProfileTabKey, string> = {
@@ -65,10 +67,13 @@ export function ProfileView(props: ProfileViewProps) {
             onPressFollowers={props.onPressFollowers}
             onPressFollowing={props.onPressFollowing}
           />
+          {props.headerAccessory}
           <ProfileTabs tabs={props.tabs} activeTab={activeTab} onChangeTab={changeTabOrOpenStore} />
         </View>
       }
-      renderItem={({ item }) => <PostCard post={item} onPress={() => props.onPressPost(item)} />}
+      renderItem={({ item }) => (
+        <PostCard post={item} onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
+      )}
       ListEmptyComponent={
         props.loading ? (
           <ActivityIndicator style={styles.empty} color={colors.primary} />
