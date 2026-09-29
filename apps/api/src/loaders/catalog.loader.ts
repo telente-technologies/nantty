@@ -3,6 +3,7 @@ import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
 import type { UserDirectory } from "../interfaces/userDirectory.interface.js";
+import type { VerificationBadgeLookup } from "../interfaces/verificationBadge.interface.js";
 import { registerCategoriesCommandAndQueryHandlers } from "../modules/categories/categories.module.js";
 import { CategoriesController } from "../modules/categories/controllers/categories.controller.js";
 import { PrismaCategoriesRepository } from "../modules/categories/repositories/categories.prisma.repository.js";
@@ -31,15 +32,19 @@ import { InMemoryStoresRepository } from "../modules/stores/repositories/stores.
 import { StoreAccessService } from "../modules/stores/services/storeAccess.service.js";
 import { StoresService } from "../modules/stores/services/stores.service.js";
 import { registerStoresCommandAndQueryHandlers } from "../modules/stores/stores.module.js";
+import { PaystackBankDirectory, type BankDirectory } from "../modules/wallets/services/bankDirectory.service.js";
 import type { Core } from "./core.loader.js";
 import { createMediaModule, type MediaExternalServices } from "./media.loader.js";
 
-export interface CatalogExternalServices extends MediaExternalServices {}
+export interface CatalogExternalServices extends MediaExternalServices {
+  readonly bankDirectory?: BankDirectory;
+}
 
 export interface CatalogSharedServices {
   readonly currencyConverter: CurrencyConverter;
   readonly audit: AuditRecorder;
   readonly userDirectory: UserDirectory;
+  readonly verificationBadges?: VerificationBadgeLookup;
 }
 
 export function createCatalogModules(core: Core, shared: CatalogSharedServices, external: CatalogExternalServices) {
@@ -51,7 +56,7 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
   const products = usePrisma ? new PrismaProductsRepository() : new InMemoryProductsRepository();
   const variants = usePrisma ? new PrismaProductVariantsRepository() : new InMemoryProductVariantsRepository();
 
-  const storeAccess = new StoreAccessService(stores);
+  const storeAccess = new StoreAccessService(stores, shared.verificationBadges);
   const storesService = new StoresService({
     stores, applications, storeAccess, events,
     cipher: core.cipher,
@@ -59,6 +64,7 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
     userDirectory: shared.userDirectory,
     countPublishedProductsForStore: (storeId) => products.countPublishedForStore(storeId),
     countAllProductsForStore: (storeId) => products.countAllForStore(storeId),
+    bankDirectory: external.bankDirectory ?? new PaystackBankDirectory(core.settings.payments.paystackSecretKey),
   });
   registerStoresCommandAndQueryHandlers(commands, queries, storesService);
 
@@ -81,7 +87,7 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
     mediaProcessingQueue: media.mediaProcessingQueue,
     scheduledJobs: media.scheduledJobs,
     controllers: {
-      storesController: new StoresController(commands, queries, shared.currencyConverter),
+      storesController: new StoresController(commands, queries, shared.currencyConverter, shared.verificationBadges),
       sellerApplicationsController: new SellerApplicationsController(commands, queries),
       categoriesController: new CategoriesController(commands, queries),
       productsController: new ProductsController(commands, queries, shared.currencyConverter),
