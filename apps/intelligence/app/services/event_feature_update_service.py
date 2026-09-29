@@ -22,6 +22,7 @@ from app.services.trending_contribution_service import (
     TrendingContribution,
     list_trending_contributions_for_event,
 )
+from app.services.value_flow_feature_service import build_value_flow_operations
 from app.stores.feature_backend_protocol import (
     DistinctMemberAdd,
     FeatureWriteOperation,
@@ -245,5 +246,6 @@ def plan_online_feature_updates_for_events(
                 )
         operations += build_advertising_operations(event, keyspace)
         operations += build_experiment_operations(event, keyspace)
+        operations += build_value_flow_operations(event, keyspace)
         trending_contributions += list_trending_contributions_for_event(event)
     return EventFeatureUpdatePlan(operations, trending_contributions)
