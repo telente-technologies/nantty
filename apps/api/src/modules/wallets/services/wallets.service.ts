@@ -1,4 +1,4 @@
-import type { CurrencyCode } from "../../../enums/currency.enum.js";
+import { isSupportedCurrencyCode, type CurrencyCode } from "../../../enums/currency.enum.js";
 import { notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Principal } from "../../../interfaces/principal.interface.js";
@@ -69,7 +69,7 @@ export class WalletsService {
 
   public async buildPersonalWalletSummary(userId: string, preferredCurrency: CurrencyCode): Promise<PersonalWalletSummary> {
     const accounts = await this.dependencies.ledger.repository.listAccountsForOwner("user", userId);
-    const currencies = new Set<CurrencyCode>([preferredCurrency, ...accounts.map((account) => account.currency)]);
+    const currencies = new Set<CurrencyCode>([preferredCurrency, ...accounts.map((account) => account.currency).filter(isSupportedCurrencyCode)]);
     const balanceFor = (key: string) => accounts.find((account) => account.key === key)?.balance ?? 0;
     return {
       scope: "user",
