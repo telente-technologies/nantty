@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Linking, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
+import { Shield24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -9,57 +10,72 @@ import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { paymentsService } from "@/services/payments.service";
 
-type PaymentStatus = "waiting" | "checking" | "paid" | "failed";
+type PaymentStatus = "opening" | "checking" | "waiting" | "failed";
+
+const VERIFY_ATTEMPTS_AFTER_RETURN = 4;
+const DELAY_BETWEEN_VERIFY_ATTEMPTS_MS = 1500;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">) {
   const { orderId, authorizationUrl } = route.params;
-  const [status, setStatus] = useState<PaymentStatus>("waiting");
-  const openedCheckout = useRef(false);
+  const [status, setStatus] = useState<PaymentStatus>("opening");
+  const openedOnce = useRef(false);
 
-  const askServerToVerifyPayment = useCallback(async () => {
+  const verifyWithServerUntilSettled = useCallback(async () => {
     setStatus("checking");
-    try {
-      const result = await paymentsService.verifyOrderPayment(orderId);
-      if (result.status === "paid") {
-        setStatus("paid");
-        navigation.replace("OrderSuccess", { orderId });
-      } else setStatus(result.status === "failed" ? "failed" : "waiting");
-    } catch {
-      setStatus("waiting");
+    for (let attempt = 0; attempt < VERIFY_ATTEMPTS_AFTER_RETURN; attempt++) {
+      try {
+        const result = await paymentsService.verifyOrderPayment(orderId);
+        if (result.status === "paid") {
+          navigation.replace("OrderSuccess", { orderId });
+          return;
+        }
+        if (result.status === "failed") {
+          setStatus("failed");
+          return;
+        }
+      } catch {
+        break;
+      }
+      await wait(DELAY_BETWEEN_VERIFY_ATTEMPTS_MS);
     }
+    setStatus("waiting");
   }, [navigation, orderId]);
 
-  const openHostedCheckout = useCallback(() => {
-    if (!authorizationUrl) return;
-    openedCheckout.current = true;
-    Linking.openURL(authorizationUrl).catch(() => setStatus("failed"));
-  }, [authorizationUrl]);
+  const openCheckoutThenVerify = useCallback(async () => {
+    if (!authorizationUrl) {
+      setStatus("waiting");
+      return;
+    }
+    setStatus("opening");
+    await paymentsService.openHostedCheckoutInAppBrowser(authorizationUrl).catch(() => "dismissed");
+    await verifyWithServerUntilSettled();
+  }, [authorizationUrl, verifyWithServerUntilSettled]);
 
   useEffect(() => {
-    openHostedCheckout();
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active" && openedCheckout.current) askServerToVerifyPayment();
-    });
-    return () => subscription.remove();
-  }, [openHostedCheckout, askServerToVerifyPayment]);
+    if (openedOnce.current) return;
+    openedOnce.current = true;
+    openCheckoutThenVerify();
+  }, [openCheckoutThenVerify]);
 
+  const busy = status === "opening" || status === "checking";
   return (
     <Screen>
-      <Header title="Payment" paddingHorizontal={12} />
+      <Header title="Payment" />
       <View style={styles.body}>
-        {status === "checking" ? <ActivityIndicator color={colors.primary} /> : null}
+        {busy ? <ActivityIndicator color={colors.primary} /> : <Shield24Icon color={status === "failed" ? colors.error : colors.primary} />}
         <Text size={16} weight={500} lineHeight={19.2} align="center" accessibilityRole="header">
-          {status === "failed" ? "Payment didn't go through" : "Complete your payment"}
+          {status === "failed" ? "Payment didn't go through" : status === "checking" ? "Confirming your payment…" : status === "opening" ? "Opening secure checkout…" : "Waiting for your payment"}
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textSubtle} align="center">
           {status === "failed"
             ? "No money was taken. You can try again or choose another method."
-            : "Finish paying in the secure checkout page. When you're done, come back here and we'll confirm it with your bank."}
+            : "Your money goes into Zudomart escrow, not to the seller. We confirm every payment with the provider before your order is placed."}
         </Text>
       </View>
       <View style={styles.footer}>
-        <Button title="I've paid, check status" loading={status === "checking"} onPress={askServerToVerifyPayment} />
-        <Button variant="subtle" title="Open checkout again" onPress={openHostedCheckout} disabled={!authorizationUrl} />
+        <Button title="Open checkout again" disabled={busy || !authorizationUrl} onPress={openCheckoutThenVerify} />
+        <Button variant="subtle" title="I've paid, check status" disabled={busy} onPress={verifyWithServerUntilSettled} />
         <Button variant="danger" title="View my orders" onPress={() => navigation.replace("Orders")} />
       </View>
     </Screen>
