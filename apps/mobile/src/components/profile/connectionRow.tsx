@@ -4,6 +4,8 @@ import { DotsThreeVertical24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+
+import { VerificationBadge } from "./verificationBadge";
 import type { UserSummary } from "@/types";
 
 export interface ConnectionRowProps {
@@ -21,9 +23,12 @@ export function ConnectionRow({ user, actionLabel, actionHighlighted, onPressAct
       <Pressable accessibilityRole="button" accessibilityLabel={`${user.name}, @${user.username}`} onPress={onPressUser} style={styles.identity}>
         <Avatar uri={user.avatarUrl} size={54} placeholderColor={colors.primaryTint} />
         <View style={styles.names}>
-          <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1}>
-            {user.name}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1} style={styles.name}>
+              {user.name}
+            </Text>
+            <VerificationBadge verification={user.verification} legacyVerified={user.verified} size={16} />
+          </View>
           <Text size={14} weight={500} lineHeight={16.8} color={colors.textSubtle} numberOfLines={1}>
             @{user.username}
           </Text>
@@ -56,6 +61,8 @@ const styles = StyleSheet.create({
   row: { height: 54, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 20 },
   identity: { flex: 1, flexDirection: "row", alignItems: "center", gap: 22 },
   names: { flex: 1, gap: 4 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  name: { flexShrink: 1 },
   actions: { flexDirection: "row", alignItems: "center", gap: 8 },
   action: { height: 25, paddingHorizontal: 4, borderRadius: 4, justifyContent: "center" },
 });
