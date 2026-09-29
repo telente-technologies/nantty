@@ -105,6 +105,7 @@ export interface WithdrawalRecord {
   readonly userId: string | null;
   readonly payoutAccountId: string;
   readonly amount: MinorUnits;
+  readonly fee: MinorUnits;
   readonly currency: CurrencyCode;
   readonly status: WithdrawalStatus;
   readonly reference: string;
