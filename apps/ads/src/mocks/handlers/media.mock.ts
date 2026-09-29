@@ -20,9 +20,11 @@ export function registerMediaMockHandlers(): void {
     const sizeBytes = Number(body.sizeBytes);
     if (!acceptedMimeTypes.includes(mimeType)) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Use a JPG, PNG, WebP, AVIF, MP4 or MOV file.");
     if (!Number.isInteger(sizeBytes) || sizeBytes <= 0 || sizeBytes > maximumMockUploadBytes) throw new MockHttpError(413, "FILE_TOO_LARGE", "The demo backend accepts files up to 60 MB.");
+    const rawMetadata = typeof body.clientMetadata === "object" && body.clientMetadata ? (body.clientMetadata as Record<string, unknown>) : null;
+    const clientMetadata = rawMetadata && Number.isInteger(rawMetadata.width) && Number.isInteger(rawMetadata.height) ? { width: rawMetadata.width as number, height: rawMetadata.height as number, durationSeconds: typeof rawMetadata.durationSeconds === "number" ? rawMetadata.durationSeconds : null } : null;
     const uploadId = createMockId("upl");
     const totalChunks = Math.ceil(sizeBytes / chunkSizeBytes);
-    readMockDatabase().uploads.set(uploadId, { uploadId, userId: principal.userId, fileName: String(body.fileName ?? "upload").slice(0, 200), mimeType, sizeBytes, chunkSizeBytes, totalChunks, uploadedChunks: new Set(), mediaId: null });
+    readMockDatabase().uploads.set(uploadId, { uploadId, userId: principal.userId, fileName: String(body.fileName ?? "upload").slice(0, 200), mimeType, sizeBytes, chunkSizeBytes, totalChunks, uploadedChunks: new Set(), clientMetadata, mediaId: null });
     chunkStore.set(uploadId, new Map());
     return respondWithJson(201, { uploadId, chunkSizeBytes, totalChunks, uploadedChunks: [] });
   });
@@ -56,7 +58,7 @@ export function registerMediaMockHandlers(): void {
     upload.mediaId = mediaId;
     fileStore.set(mediaId, { mimeType: upload.mimeType, bytes });
     const isVideo = upload.mimeType.startsWith("video/");
-    database.media.set(mediaId, { createdAtEpochMs: Date.now(), media: { id: mediaId, kind: isVideo ? "video" : "image", url: `/bff/media/${mediaId}`, posterUrl: null, width: isVideo ? 1080 : 1080, height: isVideo ? 1920 : 1080, durationSeconds: isVideo ? 15 : null } });
+    database.media.set(mediaId, { createdAtEpochMs: Date.now(), media: { id: mediaId, kind: isVideo ? "video" : "image", url: `/bff/media/${mediaId}`, posterUrl: null, width: upload.clientMetadata?.width ?? 1080, height: upload.clientMetadata?.height ?? (isVideo ? 1920 : 1080), durationSeconds: isVideo ? (upload.clientMetadata?.durationSeconds ?? 15) : null } });
     return respondWithJson(200, { mediaId, status: "processing" });
   });
 
