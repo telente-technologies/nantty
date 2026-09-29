@@ -17,7 +17,7 @@ from app.models.common_model import (
     ViewerContext,
 )
 
-AdPlacement = Literal["feed", "clips", "mart", "search"]
+AdPlacement = Literal["feed", "clips", "mart", "search", "live", "story", "post_detail"]
 AdBidType = Literal["cpc", "cpm"]
 
 
@@ -44,7 +44,7 @@ class AdCandidate(ContractModel):
     spent_today: MoneyAmount
     spent_total: MoneyAmount
     frequency_cap_per_day: int = Field(default=3, ge=1, le=50)
-    placements: list[AdPlacement] = Field(min_length=1, max_length=4)
+    placements: list[AdPlacement] = Field(min_length=1, max_length=7)
     targeting: AdTargeting = Field(default_factory=AdTargeting)
     brand_safety: Literal["strict", "standard"] = "standard"
     day_start_utc_offset_minutes: int = Field(default=60, ge=-720, le=840)
@@ -68,6 +68,10 @@ class AdLoadOptions(ContractModel):
 class AdSelectionRequest(ContractModel):
     request_id: OpaqueIdentifier | None = None
     placement: AdPlacement
+    host_content_id: OpaqueIdentifier | None = None
+    host_creator_id: OpaqueIdentifier | None = None
+    host_content_is_sensitive: bool = False
+    host_content_is_reported: bool = False
     viewer: ViewerContext
     organic_items: list[OrganicSlotItem] = Field(max_length=200)
     candidates: list[AdCandidate] = Field(max_length=300)
@@ -82,10 +86,13 @@ class AdPlacementDecision(ContractModel):
     ad_id: OpaqueIdentifier
     campaign_id: OpaqueIdentifier
     advertiser_id: OpaqueIdentifier
+    placement: AdPlacement
     position: int
-    insert_after_item_id: OpaqueIdentifier
+    insert_after_item_id: OpaqueIdentifier | None
+    host_content_id: OpaqueIdentifier | None
+    host_creator_id: OpaqueIdentifier | None
     charge_model: AdBidType
-    clearing_price: MoneyAmount
+    charge_price: MoneyAmount
     predicted_click_rate: float
     auction_id: str
 
