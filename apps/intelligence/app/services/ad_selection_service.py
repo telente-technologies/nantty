@@ -20,7 +20,11 @@ from app.services.ad_auction_service import (
     run_generalized_second_price_auction,
 )
 from app.services.ad_eligibility_service import AdEligibilityContext, EligibleAd, evaluate_ad_eligibility
-from app.services.ad_load_service import assign_ranked_ads_to_slots, calculate_brand_safe_ad_slots
+from app.services.ad_load_service import (
+    AdSlot,
+    assign_ranked_ads_to_slots,
+    calculate_brand_safe_ad_slots,
+)
 from app.services.currency_conversion_service import build_usd_rate_lookup, convert_money_to_usd_micros
 from app.services.head_probability_predictor_service import predict_heads_with_model_or_heuristic
 from app.services.ranking_context_service import (
@@ -43,6 +47,23 @@ class AdOnlineSignals:
     impressions_today_by_campaign: dict[str, float] = field(default_factory=dict)
     spend_today_by_campaign: dict[str, dict[str, float]] = field(default_factory=dict)
     viewer_topic_affinity: dict[str, float] = field(default_factory=dict)
+
+
+def calculate_ad_slots_for_request(request: AdSelectionRequest) -> list[AdSlot]:
+    if request.host_content_id is not None:
+        if request.host_content_is_sensitive or request.host_content_is_reported:
+            return []
+        if not request.organic_items:
+            return [AdSlot(organic_items_before_slot=0, is_safe_for_strict_brand_safety=True)][
+                : request.ad_load.maximum_ads
+            ]
+    return calculate_brand_safe_ad_slots(request.organic_items, request.ad_load)
+
+
+def describe_missing_slot_reason(request: AdSelectionRequest) -> str:
+    if request.host_content_id is not None and (request.host_content_is_sensitive or request.host_content_is_reported):
+        return "host_content_not_brand_safe"
+    return "no_brand_safe_slot"
 
 
 class AdSelectionService:
@@ -148,14 +169,18 @@ class AdSelectionService:
         for index, eligible in enumerate(eligible_ads):
             click_rate = float(prediction.probabilities_by_head["click"][index])
             entries.append(AuctionEntry(eligible, click_rate, calculate_effective_cpm_usd_micros(eligible, click_rate)))
-        slots = calculate_brand_safe_ad_slots(request.organic_items, request.ad_load)
+        slots = calculate_ad_slots_for_request(request)
         reserve_usd_micros = Decimal(0)
         if request.reserve_price_per_mille is not None:
             reserve_usd_micros = convert_money_to_usd_micros(
                 request.reserve_price_per_mille, usd_rate_lookup
             ) or Decimal(0)
         auction = run_generalized_second_price_auction(entries, len(slots), reserve_usd_micros, usd_rate_lookup)
-        rejected += [RejectedAd(ad_id=ad_id, reason=reason) for ad_id, reason in auction.losing_reasons.items()]
+        missing_slot_reason = describe_missing_slot_reason(request)
+        rejected += [
+            RejectedAd(ad_id=ad_id, reason=missing_slot_reason if not slots and reason == "outbid" else reason)
+            for ad_id, reason in auction.losing_reasons.items()
+        ]
         assignments = assign_ranked_ads_to_slots(
             auction.winners,
             slots,
@@ -166,7 +191,7 @@ class AdSelectionService:
         )
         assigned_ad_ids = {winner.entry.eligible_ad.candidate.ad_id for _slot, winner in assignments}
         rejected += [
-            RejectedAd(ad_id=winner.entry.eligible_ad.candidate.ad_id, reason="no_brand_safe_slot")
+            RejectedAd(ad_id=winner.entry.eligible_ad.candidate.ad_id, reason=missing_slot_reason)
             for winner in auction.winners
             if winner.entry.eligible_ad.candidate.ad_id not in assigned_ad_ids
         ]
@@ -213,10 +238,15 @@ class AdSelectionService:
             ad_id=candidate.ad_id,
             campaign_id=candidate.campaign_id,
             advertiser_id=candidate.advertiser_id,
+            placement=request.placement,
             position=organic_items_before_slot + ads_already_placed,
-            insert_after_item_id=request.organic_items[organic_items_before_slot - 1].item_id,
+            insert_after_item_id=(
+                request.organic_items[organic_items_before_slot - 1].item_id if organic_items_before_slot > 0 else None
+            ),
+            host_content_id=request.host_content_id,
+            host_creator_id=request.host_creator_id,
             charge_model=candidate.bid_type,
-            clearing_price=MoneyAmount(amount_minor=winner.clearing_price_minor, currency=candidate.bid.currency),
+            charge_price=MoneyAmount(amount_minor=winner.clearing_price_minor, currency=candidate.bid.currency),
             predicted_click_rate=round(winner.entry.predicted_click_rate, 6),
             auction_id=auction_id,
         )
