@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -23,6 +24,7 @@ export function JoinLiveCard({ session, showHost, onWatch }: JoinLiveCardProps) 
           <Text size={14} weight={500} lineHeight={16.8}>
             {session.host.name}
           </Text>
+          <VerificationBadge verification={session.host.verification} legacyVerified={session.host.verified} size={16} />
         </View>
       ) : (
         <Text size={21} weight={500} lineHeight={25.2} letterSpacing={-0.42}>
