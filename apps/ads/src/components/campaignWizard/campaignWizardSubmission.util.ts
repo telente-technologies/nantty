@@ -3,6 +3,7 @@ import type { AdAccount } from "@/types/adAccount.type";
 import type { AudienceEstimateRequest } from "@/types/audience.type";
 import type { AdPlacement, BidStrategy, Budget, CampaignDraftSubmission, Schedule } from "@/types/campaign.type";
 import type { Creative, CreativeInput } from "@/types/creative.type";
+import type { CreativeShape } from "@/utils/adPlacementRules.util";
 import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
 const everyPlacement: readonly AdPlacement[] = ["feed", "clips", "mart", "search", "stories", "live"];
@@ -58,6 +59,7 @@ export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAc
       verifiedBusiness: account.verifiedBusiness,
     },
     product: ad.sourceType === "upload" ? null : (ad.selectedSource?.product ?? null),
+    live: ad.sourceType === "live" ? (ad.selectedSource?.live ?? null) : null,
   };
 }
 
@@ -92,4 +94,9 @@ export function buildEstimateRequestFromWizard(state: CampaignWizardState, curre
     bidStrategy: buildBidStrategyFromWizard(state, currency),
     schedule: buildScheduleFromWizard(state),
   };
+}
+
+export function buildCreativeShapeFromAdDraft(ad: WizardAdDraft): CreativeShape {
+  const media = ad.sourceType === "upload" ? ad.uploadedMedia : (ad.selectedSource?.media ?? []);
+  return { sourceType: ad.sourceType, media, hasProduct: ad.sourceType !== "upload" && Boolean(ad.selectedSource?.product), hasLiveStream: ad.sourceType === "live" && Boolean(ad.selectedSource?.live) };
 }
