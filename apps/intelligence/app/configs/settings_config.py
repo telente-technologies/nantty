@@ -42,6 +42,7 @@ class IntelligenceSettings(BaseSettings):
 
     max_request_body_bytes: int = Field(default=1_048_576, ge=1024)
     max_event_batch_body_bytes: int = Field(default=4_194_304, ge=1024)
+    request_deadline_seconds: float = Field(default=0.25, gt=0, le=10)
     rate_limit_requests_per_second: float = Field(default=2000.0, gt=0)
     rate_limit_burst_size: int = Field(default=4000, ge=1)
 
@@ -61,6 +62,12 @@ class IntelligenceSettings(BaseSettings):
                 raise ValueError("INTELLIGENCE_MODEL_SIGNING_SECRET must be at least 32 characters")
         elif secret_length == 0:
             raise ValueError("INTELLIGENCE_SHARED_SECRET must be set, even in development")
+        return self
+
+    @model_validator(mode="after")
+    def require_nonce_retention_to_cover_signature_window(self) -> IntelligenceSettings:
+        if self.nonce_retention_seconds < 2 * self.signature_max_clock_skew_seconds:
+            raise ValueError("nonce retention must be at least twice the allowed clock skew")
         return self
 
     @property
