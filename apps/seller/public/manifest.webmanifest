@@ -1,0 +1,16 @@
+{
+  "name": "Zudomart Dashboard",
+  "short_name": "Zudomart POS",
+  "description": "Point of sale and back office for Zudomart sellers.",
+  "start_url": "/pos",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F7F8FE",
+  "theme_color": "#2043F5",
+  "icons": [
+    { "src": "/images/appIcon192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/appIcon512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/appIcon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
