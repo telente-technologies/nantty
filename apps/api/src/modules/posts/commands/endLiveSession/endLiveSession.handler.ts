@@ -14,7 +14,7 @@ export class EndLiveSessionHandler extends CommandHandler<EndLiveSessionCommand,
   public async execute(command: EndLiveSessionCommand): Promise<LiveSessionDto> {
     const { liveSessions, clock } = this.postsService.dependencies;
     const session = await this.postsService.findLiveSessionOrThrow(command.sessionId);
-    this.postsService.assertIsLiveHost(session, command.principal.userId);
+    await this.postsService.assertIsApprovedLiveHost(session, command.principal.userId);
     await liveSessions.end(session.id, clock.now());
     const [dto] = await this.postsService.presenter.presentLiveSessions([await this.postsService.findLiveSessionOrThrow(session.id)], command.displayCurrency);
     return dto as LiveSessionDto;
