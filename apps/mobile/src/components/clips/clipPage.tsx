@@ -1,8 +1,11 @@
 import { memo, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { Play24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
+import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
+import { isLandscapeMedia } from "@/components/media/videoOrientation.util";
+import { ViewFullScreenButton } from "@/components/media/viewFullScreenButton";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
@@ -16,6 +19,7 @@ import { ClipDetails } from "./clipDetails";
 import { ClipPlaybackControls } from "./clipPlaybackControls";
 import { ClipReadabilityScrim } from "./clipReadabilityScrim";
 import { LikeBurst } from "./likeBurst";
+import { PromotedLiveOverlay } from "./promotedLiveOverlay";
 
 export interface ClipEngagement {
   readonly liked: boolean;
@@ -40,6 +44,7 @@ export interface ClipPageProps {
   readonly onOpenComments: () => void;
   readonly onShare: () => void;
   readonly onPressAuthor: () => void;
+  readonly onOpenPromotedLive?: (liveSessionId: string) => void;
 }
 
 const DOUBLE_TAP_WINDOW_MS = 280;
@@ -62,6 +67,10 @@ function ClipPageComponent(props: ClipPageProps) {
   const lastTapAt = useRef(0);
   const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const video = clip.media.find((item) => item.type === "video") ?? clip.media[0];
+  const isLandscapeVideo = isLandscapeMedia(video);
+  const { width: windowWidth } = useWindowDimensions();
+  const letterboxedVideoHeight = video?.width && video.height ? (windowWidth * video.height) / video.width : (windowWidth * 9) / 16;
+  const [isFullScreenPlayerOpen, setIsFullScreenPlayerOpen] = useState(false);
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const [isTipSheetOpen, setIsTipSheetOpen] = useState(false);
   const canTipAuthor = clip.author.isCreator === true && clip.author.id !== signedInUserId;
@@ -77,7 +86,10 @@ function ClipPageComponent(props: ClipPageProps) {
       return;
     }
     lastTapAt.current = now;
-    singleTapTimer.current = setTimeout(() => setIsPausedByUser((paused) => !paused), DOUBLE_TAP_WINDOW_MS);
+    singleTapTimer.current = setTimeout(() => {
+      if (clip.promotedLive && props.onOpenPromotedLive) props.onOpenPromotedLive(clip.promotedLive.liveSessionId);
+      else setIsPausedByUser((paused) => !paused);
+    }, DOUBLE_TAP_WINDOW_MS);
   };
 
   const showPlaybackControls = isActive && isPausedByUser;
@@ -96,7 +108,8 @@ function ClipPageComponent(props: ClipPageProps) {
         ) : video && props.shouldMountVideoPlayer ? (
           <ClipVideoPlayer
             media={video}
-            isActive={isActive}
+            isActive={isActive && !isFullScreenPlayerOpen}
+            contentFit={isLandscapeVideo ? "contain" : "cover"}
             isMuted={props.isMuted || clip.sound?.status === "under_copyright_review"}
             isPausedByUser={isPausedByUser}
             playbackRate={PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
@@ -104,7 +117,7 @@ function ClipPageComponent(props: ClipPageProps) {
             style={StyleSheet.absoluteFill}
           />
         ) : video ? (
-          <VideoPosterOnly media={video} style={StyleSheet.absoluteFill} />
+          <VideoPosterOnly media={video} contentFit={isLandscapeVideo ? "contain" : "cover"} style={StyleSheet.absoluteFill} />
         ) : null}
         <ClipReadabilityScrim edge="top" height={props.topInset + 96} />
         <ClipReadabilityScrim edge="bottom" height={bottomChromeHeight + 260} />
@@ -115,6 +128,18 @@ function ClipPageComponent(props: ClipPageProps) {
         ) : null}
         <LikeBurst burstKey={burstKey} />
       </Pressable>
+      {clip.promotedLive ? (
+        <PromotedLiveOverlay
+          topInset={props.topInset}
+          viewers={clip.promotedLive.viewers}
+          onWatchLive={() => props.onOpenPromotedLive?.(clip.promotedLive!.liveSessionId)}
+        />
+      ) : null}
+      {isLandscapeVideo && video ? (
+        <View style={[styles.fullScreenButtonRow, { top: props.height / 2 + letterboxedVideoHeight / 2 + 12 }]} pointerEvents="box-none">
+          <ViewFullScreenButton onPress={() => setIsFullScreenPlayerOpen(true)} />
+        </View>
+      ) : null}
       <View style={[styles.overlay, { bottom: bottomChromeHeight + 16 }]} pointerEvents="box-none">
         <ClipDetails
           isActive={isActive}
@@ -147,7 +172,7 @@ function ClipPageComponent(props: ClipPageProps) {
             onPressPlay={() => setIsPausedByUser(false)}
             onPressSpeed={() => setPlaybackSpeedStepIndex((index) => (index + 1) % PLAYBACK_SPEED_STEPS.length)}
             onPressVolume={props.onToggleMute}
-            onPressFullscreen={() => setIsPausedByUser(false)}
+            onPressFullscreen={() => (isLandscapeVideo ? setIsFullScreenPlayerOpen(true) : setIsPausedByUser(false))}
           />
         ) : (
           <ClipCommentBar myAvatarUrl={props.myAvatarUrl} onPress={props.onOpenComments} />
@@ -163,6 +188,11 @@ function ClipPageComponent(props: ClipPageProps) {
           onClose={() => setIsOptionsSheetOpen(false)}
         />
       ) : null}
+      <LandscapeVideoFullScreenModal
+        media={isFullScreenPlayerOpen && video ? video : null}
+        isMuted={props.isMuted}
+        onClose={() => setIsFullScreenPlayerOpen(false)}
+      />
       {isTipSheetOpen ? (
         <TipSheet target={{ targetType: "clip", targetId: clip.id, creatorName: clip.author.name }} onClose={() => setIsTipSheetOpen(false)} />
       ) : null}
@@ -183,5 +213,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
+  fullScreenButtonRow: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   bottomChrome: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: colors.white },
 });
