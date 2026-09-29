@@ -2,15 +2,12 @@ import type { Money } from "@/types/money.type";
 
 export const landingPhotoIds = {
   adireShirt: "1602810318383-e386cc2a3ccf",
-  crewTee: "1618354691373-d851c5c3a990",
-  bomber: "1591047139829-d91aecb6caea",
   streetSneakers: "1560769629-975ec94e6a86",
   topHandleBag: "1584917865442-de89df76afd3",
   crossbodyBag: "1600857062241-98e5dba7f214",
   faceSerum: "1608571423902-eed4a5ad8108",
   pearlNecklace: "1515562141207-7a88fb7ce338",
   earbuds: "1606220588913-b3aacb4d2f46",
-  smartwatch: "1523275335684-37898b6baf30",
 } as const;
 
 export type LandingPhotoKey = keyof typeof landingPhotoIds;
