@@ -8,6 +8,7 @@ export class OpenDisputeCommand extends Command<"escrows.openDispute"> {
     public readonly orderId: string,
     public readonly reason: string,
     public readonly details: string,
+    public readonly evidenceMediaIds: readonly string[] = [],
   ) {
     super("escrows.openDispute");
   }
