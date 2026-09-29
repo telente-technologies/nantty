@@ -1,0 +1,177 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.greeting {
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+
+.subtle {
+  color: var(--ink-muted);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sideStack,
+.mainStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.statusCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--radius-medium);
+  background: var(--surface-app);
+  color: var(--ink-strong);
+}
+
+.statusCell:hover {
+  text-decoration: none;
+  background: var(--blue-tint);
+}
+
+.statusCount {
+  font-size: 20px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusLabel {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.listRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--divider-soft);
+  min-width: 0;
+}
+
+.listRow:last-child {
+  border-bottom: 0;
+}
+
+.thumbnail {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--radius-small);
+  object-fit: cover;
+  background: var(--surface-sunken);
+}
+
+.thumbnailFallback {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--radius-small);
+  background: var(--blue-tint);
+  color: var(--blue-700);
+  font-weight: 700;
+}
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rowTitle {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowMeta {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.rowValue {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.shareBar {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--blue-500);
+}
+
+.balanceRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.balanceRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.balanceAmount {
+  font-size: 18px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.availableAmount {
+  box-shadow: inset 0 -6px 0 var(--yellow-100);
+}
+
+@media (max-width: 1100px) {
+  .mainGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
