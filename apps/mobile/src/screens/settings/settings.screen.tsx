@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -30,6 +30,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { data: profile } = useMyProfileQuery();
@@ -43,7 +44,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   };
 
   const confirmLogOut = () =>
-    Alert.alert("Log out?", "You'll need to log in again to use Zudomart.", [
+    showAlertWithButtons("Log out?", "You'll need to log in again to use Zudomart.", [
       { text: "Cancel", style: "cancel" },
       { text: "Log out", style: "destructive", onPress: logOutAndClearSession },
     ]);
