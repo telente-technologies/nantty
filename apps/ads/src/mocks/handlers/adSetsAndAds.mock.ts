@@ -1,5 +1,5 @@
 import { findRecordInAccount, requireAccountAccess } from "@/mocks/mockAccountAccess.mock";
-import { throwIfValidationIssues, validateAdSetInput, validateCreativeInput } from "@/mocks/mockCampaignValidation.mock";
+import { collectPlacementIssuesForAds, throwIfValidationIssues, validateAdSetInput, validateCreativeInput } from "@/mocks/mockCampaignValidation.mock";
 import { resolveCreativeFromInput } from "@/mocks/mockCreativeResolver.mock";
 import { appendMockActivity, readMockDatabase, type MockAdRecord, type MockAdSetRecord } from "@/mocks/mockDatabase.mock";
 import { presentAd, presentAdSet } from "@/mocks/mockDeliveryPresenter.mock";
@@ -83,6 +83,9 @@ export function registerAdSetAndAdMockHandlers(): void {
     const issues: { path: string; message: string }[] = [];
     const creativeInput = validateCreativeInput(body.creative, "creative", account.id, issues);
     throwIfValidationIssues(issues);
+    const resolvedCreative = resolveCreativeFromInput(creativeInput, account);
+    collectPlacementIssuesForAds([{ creative: resolvedCreative }], adSet.placements, issues);
+    throwIfValidationIssues(issues.map((issue) => ({ ...issue, path: issue.path.replace(/^ads\.0\./, "") })));
     const now = readIsoNow();
     const ad: MockAdRecord = {
       id: createMockId("ad"),
@@ -92,7 +95,7 @@ export function registerAdSetAndAdMockHandlers(): void {
       name: typeof body.name === "string" && body.name.trim() ? body.name.trim().slice(0, 120) : "New ad",
       status: "draft",
       review: { status: "not_submitted", policyCode: null, policyReason: null, reviewedAt: null, appeal: null },
-      creative: resolveCreativeFromInput(creativeInput, account),
+      creative: resolvedCreative,
       submittedAt: null,
       createdAt: now,
       updatedAt: now,
@@ -110,7 +113,11 @@ export function registerAdSetAndAdMockHandlers(): void {
       const issues: { path: string; message: string }[] = [];
       const creativeInput = validateCreativeInput(body.creative, "creative", account.id, issues);
       throwIfValidationIssues(issues);
-      ad.creative = resolveCreativeFromInput(creativeInput, account);
+      const resolvedCreative = resolveCreativeFromInput(creativeInput, account);
+      const adSet = findRecordInAccount(readMockDatabase().adSets, account.id, ad.adSetId, "ad set");
+      collectPlacementIssuesForAds([{ creative: resolvedCreative }], adSet.placements, issues);
+      throwIfValidationIssues(issues.map((issue) => ({ ...issue, path: issue.path.replace(/^ads\.0\./, "") })));
+      ad.creative = resolvedCreative;
       if (ad.status !== "draft") markAdAsSubmittedForReview(ad);
     }
     applyStatusChange(ad, body.status);
