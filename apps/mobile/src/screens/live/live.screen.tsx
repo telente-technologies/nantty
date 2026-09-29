@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DotsThreeVertical24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
+import { TipSheet } from "@/components/coins/tipSheet";
 import { LiveGiftBurst } from "@/components/live/liveGiftBurst";
 import { LiveGiftPickerSheet } from "@/components/live/liveGiftPickerSheet";
 import { useLiveGifting } from "@/components/live/liveGifting.hook";
@@ -15,6 +16,7 @@ import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
+import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
 import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -28,7 +30,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [showShare, setShowShare] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
+  const [showTipSheet, setShowTipSheet] = useState(false);
   const [showPinProducts, setShowPinProducts] = useState(false);
+  const [showViewerLiveOptions, setShowViewerLiveOptions] = useState(false);
   const live = useLiveSessionWithActions(liveId, hasJoined);
   const gifting = useLiveGifting(liveId, showGiftPicker);
   const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
@@ -68,9 +72,21 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         { text: "End live", style: "destructive", onPress: endLiveAsHost },
       ]);
     } else {
-      setShowShare(true);
+      setShowViewerLiveOptions(true);
     }
   };
+
+  const viewerLiveOptionsSheet = (
+    <ContentOptionsSheet
+      target={
+        showViewerLiveOptions && session
+          ? { targetType: "live", targetId: liveId, authorId: session.host.id, shareUrl: `https://zudomart.com/lives/${liveId}` }
+          : null
+      }
+      onClose={() => setShowViewerLiveOptions(false)}
+      additionalActions={[{ label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => setShowShare(true) }]}
+    />
+  );
 
   if (!session) return <View style={[styles.root, { paddingTop: insets.top }]} />;
 
@@ -81,13 +97,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={10} onPress={() => navigation.navigate("Search")}>
             <MagnifyingGlass24Icon />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Share live" hitSlop={10} onPress={() => setShowShare(true)}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Live options" hitSlop={10} onPress={() => setShowViewerLiveOptions(true)}>
             <DotsThreeVertical24Icon />
           </Pressable>
         </View>
         <View style={styles.flex} />
         <JoinLiveCard session={session} showHost={session.isFollowingHost} onWatch={() => setHasJoined(true)} />
         <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
+        {viewerLiveOptionsSheet}
       </View>
     );
   }
@@ -116,7 +133,11 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           hostCanPinAffiliatedProducts ? () => setShowPinProducts(true) : session.products.length > 0 ? () => setShowProducts(true) : undefined
         }
         onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
+        onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
       />
+      {showTipSheet ? (
+        <TipSheet target={{ targetType: "live", targetId: liveId, creatorName: session.host.name }} onClose={() => setShowTipSheet(false)} />
+      ) : null}
       <LiveGiftBurst burst={gifting.latestGiftBurst} />
       {viewerCanSendGifts ? (
         <LiveGiftPickerSheet
@@ -125,7 +146,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           isLoadingGifts={gifting.giftCatalog.isPending && showGiftPicker}
           isSendingGift={gifting.sendGift.isPending}
           errorMessage={gifting.giftSendingErrorMessage}
-          walletAvailable={gifting.walletAvailableAfterLastGift}
+          hasNotEnoughCoins={gifting.hasNotEnoughCoinsForGift}
           onChangeSelection={gifting.forgetPendingGiftAttempt}
           onSendGift={(gift, quantity) =>
             gifting.sendGift.mutate({ gift, quantity }, { onSuccess: () => setShowGiftPicker(false) })
@@ -142,6 +163,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         />
       ) : null}
       <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
+      {isHost ? null : viewerLiveOptionsSheet}
       <LiveProductsSheet
         visible={showProducts}
         products={session.products}
