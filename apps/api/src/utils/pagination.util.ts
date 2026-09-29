@@ -23,12 +23,12 @@ export function paginateSortedItems<T extends { readonly id: string }>(sorted: r
   let start = 0;
   if (page.cursor !== undefined) {
     const at = sorted.findIndex((item) => item.id === page.cursor);
-    if (at === -1) return { items: [], nextCursor: null };
+    if (at === -1) return { data: [], nextCursor: null };
     start = at + 1;
   }
   const items = sorted.slice(start, start + page.limit);
   const last = items.at(-1);
-  return { items, nextCursor: last !== undefined && start + page.limit < sorted.length ? last.id : null };
+  return { data: items, nextCursor: last !== undefined && start + page.limit < sorted.length ? last.id : null };
 }
 
 export function buildPrismaPageArguments(page: PageRequest) {
@@ -41,11 +41,11 @@ export function buildPrismaPageArguments(page: PageRequest) {
 export function buildPageFromFetchedRows<T extends { readonly id: string }>(rows: readonly T[], page: PageRequest): Page<T> {
   const items = rows.slice(0, page.limit);
   const last = items.at(-1);
-  return { items, nextCursor: rows.length > page.limit && last !== undefined ? last.id : null };
+  return { data: items, nextCursor: rows.length > page.limit && last !== undefined ? last.id : null };
 }
 
 export function mapPageItems<T, U>(page: Page<T>, map: (item: T) => U): Page<U> {
-  return { items: page.items.map(map), nextCursor: page.nextCursor };
+  return { data: page.data.map(map), nextCursor: page.nextCursor };
 }
 
 export function compareByNewestFirst<T extends { readonly id: string; readonly createdAt: string | Date }>(left: T, right: T): number {

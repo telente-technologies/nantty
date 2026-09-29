@@ -18,7 +18,8 @@ export function empty(status: number): HttpResponseContext {
 
 export function validationFailed(issues: readonly SchemaIssue[]): HttpResponseContext {
   return json(400, {
-    error: "Validation failed",
+    message: "Validation failed",
+    code: "VALIDATION_FAILED",
     issues: issues.map((issue) => ({
       path: issue.path.map(String).join("."),
       message: issue.message,
@@ -56,8 +57,8 @@ export function errorResponse(error: unknown): HttpResponseContext | undefined {
   if (typeof status !== "number" || status < 400 || status > 599) return undefined;
   if (candidate.expose !== true || typeof candidate.message !== "string") return undefined;
   return json(status, {
-    error: candidate.message,
-    ...(typeof candidate.code === "string" ? { code: candidate.code } : {}),
+    message: candidate.message,
+    code: typeof candidate.code === "string" ? candidate.code : `HTTP_${status}`,
   });
 }
 
