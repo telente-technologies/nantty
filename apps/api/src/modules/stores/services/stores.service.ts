@@ -14,6 +14,7 @@ import { MAXIMUM_STORES_PER_OWNER, type SellerApplicationRecord, type StoreRecor
 import type { SellerApplicationsRepository } from "../repositories/sellerApplications.repository.js";
 import type { StoresRepository } from "../repositories/stores.repository.js";
 import type { CreateStoreBody } from "../validators/stores.validator.js";
+import type { BankDirectory } from "../../wallets/services/bankDirectory.service.js";
 import type { StoreAccessService } from "./storeAccess.service.js";
 
 export interface StoresDependencies {
@@ -26,6 +27,7 @@ export interface StoresDependencies {
   readonly userDirectory: UserDirectory;
   readonly countPublishedProductsForStore: (storeId: string) => Promise<number>;
   readonly countAllProductsForStore: (storeId: string) => Promise<number>;
+  readonly bankDirectory?: BankDirectory;
 }
 
 export class StoresService {
