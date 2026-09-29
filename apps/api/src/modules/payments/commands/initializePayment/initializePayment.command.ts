@@ -8,6 +8,7 @@ export class InitializePaymentCommand extends Command<"payments.initializePaymen
     public readonly principal: Principal,
     public readonly orderId: string,
     public readonly provider: PaymentProvider,
+    public readonly returnTo?: string,
   ) {
     super("payments.initializePayment");
   }
