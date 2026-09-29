@@ -39,7 +39,8 @@ export class MessagesController {
     const query = ListConversationsQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const listQuery = new ListConversationsQuery(requireAuthenticatedPrincipal(ctx), query.data.filter ?? "all", query.data.q);
-    return json(200, { items: await this.queries.execute<ListConversationsQuery, readonly ConversationSummaryDto[]>(listQuery) });
+    const conversations = await this.queries.execute<ListConversationsQuery, readonly ConversationSummaryDto[]>(listQuery);
+    return json(200, { data: conversations, nextCursor: null });
   };
 
   public readonly getConversation = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
