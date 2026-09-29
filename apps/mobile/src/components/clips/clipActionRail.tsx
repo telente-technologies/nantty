@@ -14,6 +14,7 @@ export interface ClipActionRailProps {
   readonly onOpenComments: () => void;
   readonly onShare: () => void;
   readonly onMore: () => void;
+  readonly onTip?: () => void;
   readonly foregroundColor?: string;
 }
 
@@ -53,6 +54,16 @@ export function ClipActionRail(props: ClipActionRailProps) {
       <RailButton label="Share" count={props.shares} onPress={props.onShare} foregroundColor={color}>
         <PaperPlaneTilt24Icon color={color} />
       </RailButton>
+      {props.onTip ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={8} onPress={props.onTip} style={styles.button}>
+          <Text size={20} lineHeight={24}>
+            🪙
+          </Text>
+          <Text size={13} lineHeight={16.9} color={color} style={color ? styles.readableOnVideo : undefined}>
+            Tip
+          </Text>
+        </Pressable>
+      ) : null}
       <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={8} onPress={props.onMore}>
         <DotsThreeVertical24Icon color={color} />
       </Pressable>
