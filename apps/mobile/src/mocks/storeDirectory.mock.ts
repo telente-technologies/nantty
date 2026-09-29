@@ -83,6 +83,9 @@ export const summariseStore = (store: DirectoryStore): StoreSummary => ({
   rating: store.rating,
   ratingCount: store.ratingCount,
   reviewCount: store.reviewCount,
+  verification: store.verified
+    ? { status: "active", type: "business", color: "gold", tier: store.followers > 40_000 ? "PREMIUM" : "PRO", badgeVisible: true }
+    : null,
 });
 
 export const storeBannerUrl = (store: DirectoryStore) => coverImageUrlForUser(store.ownerUserKey);
