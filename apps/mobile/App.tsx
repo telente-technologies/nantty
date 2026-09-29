@@ -21,6 +21,7 @@ import {
   reactQueryPersistOptions,
 } from "@/cache/queryClient.config";
 import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offlineReplayInvalidation.util";
+import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/appWideRealtimeConnection";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/locale.service";
@@ -94,6 +95,7 @@ export default function App() {
       <DeviceFrame>
         <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
           <StatusBar style="dark" />
+          <KeepRealtimeMessagingConnectedWhileSignedIn />
           <RootNavigator />
           <OfflineIndicator />
         </PersistQueryClientProvider>
