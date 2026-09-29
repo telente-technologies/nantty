@@ -9,7 +9,7 @@ export type UploadJobStatus = "preparing" | "queued" | "uploading" | "waitingFor
 export interface UploadJob {
   readonly jobId: ID;
   readonly purpose: MediaUploadPurpose;
-  readonly mediaType: "image" | "video";
+  readonly mediaType: "image" | "video" | "audio";
   readonly previewUri: string;
   readonly preparedFileUri: string | null;
   readonly fileName: string;
