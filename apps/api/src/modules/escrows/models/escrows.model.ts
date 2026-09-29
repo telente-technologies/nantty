@@ -34,6 +34,7 @@ export interface DisputeRecord {
   readonly openedById: string;
   readonly reason: string;
   readonly details: string;
+  readonly evidenceMediaIds: readonly string[];
   readonly status: DisputeStatus;
   readonly resolution: string | null;
   readonly resolvedById: string | null;
@@ -41,7 +42,29 @@ export interface DisputeRecord {
   readonly createdAt: Date;
 }
 
-export type NewDispute = Pick<DisputeRecord, "escrowId" | "orderId" | "openedById" | "reason" | "details" | "createdAt">;
+export type NewDispute = Pick<DisputeRecord, "escrowId" | "orderId" | "openedById" | "reason" | "details" | "evidenceMediaIds" | "createdAt">;
+
+export type DisputeParticipantRole = "buyer" | "seller" | "admin";
+
+export interface DisputeMessageRecord {
+  readonly id: string;
+  readonly disputeId: string;
+  readonly authorId: string;
+  readonly authorRole: DisputeParticipantRole;
+  readonly text: string;
+  readonly attachmentMediaIds: readonly string[];
+  readonly createdAt: Date;
+}
+
+export type NewDisputeMessage = Omit<DisputeMessageRecord, "id">;
+
+export type EscrowTimelineEventType = "held" | "shipped" | "delivered" | "dispute_opened" | "dispute_resolved" | "released" | "refunded";
+
+export interface EscrowTimelineEvent {
+  readonly type: EscrowTimelineEventType;
+  readonly at: Date;
+  readonly details: Readonly<Record<string, string | null>>;
+}
 
 export const ESCROW_TRANSITIONS: Readonly<Record<EscrowStatus, readonly EscrowStatus[]>> = {
   held: ["released", "refunded", "disputed"],
