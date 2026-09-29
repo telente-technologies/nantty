@@ -1,0 +1,106 @@
+.creative {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-app);
+}
+
+.creativeImage {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+}
+
+.creativeCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.headline {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.callToAction {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: var(--radius-small);
+  background: var(--blue-500);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.landingUrl {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.flagList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flagItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-small);
+  background: var(--caution-tint);
+}
+
+.flagCritical {
+  background: var(--error-tint);
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.policyForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr 160px;
+  gap: 10px;
+  align-items: end;
+}
+
+.policyFormWide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .creative {
+    grid-template-columns: 1fr;
+  }
+
+  .policyForm {
+    grid-template-columns: 1fr;
+  }
+}
