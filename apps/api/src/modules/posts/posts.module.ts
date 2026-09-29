@@ -25,6 +25,7 @@ import { UnlikePostHandler } from "./commands/unlikePost/unlikePost.handler.js";
 import { GetLiveSessionHandler } from "./queries/getLiveSession/getLiveSession.handler.js";
 import { GetStoreDetailHandler } from "./queries/getStoreDetail/getStoreDetail.handler.js";
 import { GetPostHandler } from "./queries/getPost/getPost.handler.js";
+import { ListCommentRepliesHandler } from "./queries/listCommentReplies/listCommentReplies.handler.js";
 import { ListActiveStoriesHandler } from "./queries/listActiveStories/listActiveStories.handler.js";
 import { ListLiveCommentsHandler } from "./queries/listLiveComments/listLiveComments.handler.js";
 import { ListLiveSessionsHandler } from "./queries/listLiveSessions/listLiveSessions.handler.js";
@@ -78,6 +79,7 @@ export function registerPostsCommandAndQueryHandlers(commands: CommandBus, queri
     new GetPostHandler(postsService),
     new GetStoreDetailHandler(postsService),
     new ListActiveStoriesHandler(postsService),
+    new ListCommentRepliesHandler(postsService),
     new ListLiveCommentsHandler(postsService),
     new ListLiveSessionsHandler(postsService),
     new ListPostCommentsHandler(postsService),
