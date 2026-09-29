@@ -74,9 +74,8 @@
   justify-content: center;
 }
 
-.walletCard {
-  max-width: 340px;
-  color: var(--ink-strong);
+.walletPhone {
+  width: min(300px, 66vw);
   transform: rotate(-2deg);
 }
 

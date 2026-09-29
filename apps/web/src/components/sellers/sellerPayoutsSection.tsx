@@ -1,6 +1,6 @@
 import { FigmaIconTintedWithCurrentColor, type FigmaIconName } from "../ui/figmaIcon";
 import { SectionIntroWithEyebrowAndHeading } from "../ui/sectionIntro";
-import { SellerWalletPreviewCard } from "../ui/sellerWalletPreviewCard";
+import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./sellerPayoutsSection.module.css";
 
 const payoutFlowStages: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string }> = [
@@ -37,7 +37,7 @@ export function SellerPayoutsSection() {
           </ol>
         </div>
         <div className={styles.walletColumn}>
-          <SellerWalletPreviewCard className={styles.walletCard} />
+          <PhoneFrameWithAppScreen screen="sellerWalletScreen" alt="Seller wallet with the balance available to withdraw, money pending in escrow and each order's release date" className={styles.walletPhone} sizes="(min-width: 960px) 300px, 66vw" />
         </div>
       </div>
     </section>
