@@ -1,5 +1,5 @@
 import { Role } from "../../../constants/roles.constant.js";
-import type { UserContact, UserDirectory, UserSummary } from "../../../interfaces/userDirectory.interface.js";
+import type { UserContact, UserDirectory, UserLocalePreference, UserSummary } from "../../../interfaces/userDirectory.interface.js";
 import type { UserRecord } from "../models/users.model.js";
 import type { TopicsRepository } from "../repositories/topics.repository.js";
 import type { UsersRepository } from "../repositories/users.repository.js";
@@ -16,6 +16,11 @@ export class RepositoryUserDirectory implements UserDirectory {
     return users.filter((user) => user.status === "active").map(convertUserToSummary);
   }
 
+  public async findUserLocalePreference(userId: string): Promise<UserLocalePreference | undefined> {
+    const user = await this.users.findById(userId);
+    return user === undefined ? undefined : { countryCode: user.settings.countryCode, currency: user.settings.currency };
+  }
+
   public async findUserContact(userId: string): Promise<UserContact | undefined> {
     const user = await this.users.findById(userId);
     if (user === undefined || user.status !== "active") return undefined;
@@ -24,7 +29,7 @@ export class RepositoryUserDirectory implements UserDirectory {
 
   public async searchUsers(term: string, limit: number): Promise<readonly UserSummary[]> {
     const page = await this.users.searchByNameOrUsername(term, { limit });
-    return page.items.map(convertUserToSummary);
+    return page.data.map(convertUserToSummary);
   }
 
   public async grantRole(userId: string, role: string): Promise<void> {
