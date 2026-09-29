@@ -20,6 +20,7 @@ export interface DisputesRepository {
   create(input: NewDispute): Promise<DisputeRecord>;
   findById(disputeId: string): Promise<DisputeRecord | undefined>;
   findOpenForEscrow(escrowId: string): Promise<DisputeRecord | undefined>;
+  listForEscrow(escrowId: string): Promise<readonly DisputeRecord[]>;
   list(status: DisputeStatus | undefined, page: PageRequest): Promise<Page<DisputeRecord>>;
   resolve(disputeId: string, status: DisputeStatus, resolution: string, resolvedById: string, resolvedAt: Date): Promise<DisputeRecord | undefined>;
 }
@@ -84,6 +85,10 @@ export class InMemoryDisputesRepository implements DisputesRepository {
 
   public async findOpenForEscrow(escrowId: string): Promise<DisputeRecord | undefined> {
     return [...this.disputes.values()].find((dispute) => dispute.escrowId === escrowId && dispute.status === "open");
+  }
+
+  public async listForEscrow(escrowId: string): Promise<readonly DisputeRecord[]> {
+    return [...this.disputes.values()].filter((dispute) => dispute.escrowId === escrowId).sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
   }
 
   public async list(status: DisputeStatus | undefined, page: PageRequest): Promise<Page<DisputeRecord>> {
