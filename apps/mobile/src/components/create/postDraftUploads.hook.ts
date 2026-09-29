@@ -33,7 +33,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
         if (latestDraftMediaItems.current.length >= MAXIMUM_MEDIA_PER_POST) break;
         try {
           const jobId = await enqueueLocalMediaForUpload(pickedFile, purpose);
-          const newItem = { jobId, previewUri: pickedFile.uri, mediaType: pickedFile.mediaType, width: pickedFile.width, height: pickedFile.height };
+          const newItem: PostDraftMediaItem = { jobId, previewUri: pickedFile.uri, mediaType: pickedFile.mediaType === "video" ? "video" : "image", width: pickedFile.width, height: pickedFile.height };
           setDraftMediaItems([...latestDraftMediaItems.current, newItem]);
         } catch (error) {
           rejectedMessages.push(error instanceof MediaValidationError ? error.message : "We couldn't add one of the files.");
