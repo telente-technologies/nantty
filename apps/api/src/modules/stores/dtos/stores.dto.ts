@@ -1,7 +1,9 @@
 import type { MoneyConversion } from "../../../interfaces/currencyConverter.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
+import type { VerificationBadge } from "../../../interfaces/verificationBadge.interface.js";
 import type { MoneyDto } from "../../../utils/money.util.js";
 import { presentPriceInCurrency } from "../../products/dtos/price.dto.js";
+import { maskVerificationDetails } from "../../verifications/services/verificationDetails.service.js";
 import type { SellerApplicationRecord, StoreMemberRecord, StoreRecord } from "../models/stores.model.js";
 
 export interface StoreDto {
@@ -21,6 +23,7 @@ export interface StoreDto {
   readonly ratingAverage: number;
   readonly ratingCount: number;
   readonly productCount?: number;
+  readonly verification?: VerificationBadge;
   readonly createdAt: string;
 }
 
@@ -70,6 +73,16 @@ export function convertStoreMemberToDto(member: StoreMemberRecord) {
   return { storeId: member.storeId, userId: member.userId, role: member.role, createdAt: member.createdAt.toISOString() };
 }
 
+function maskOnboarding(application: SellerApplicationRecord) {
+  const onboarding = application.onboarding;
+  if (onboarding === null) return null;
+  const payout = onboarding.payoutAccount;
+  return {
+    verification: maskVerificationDetails(onboarding.verification),
+    payoutAccount: payout === null ? null : { bankCode: payout.bankCode, bankName: payout.bankName, accountNumber: `******${payout.accountLast4}`, accountName: payout.accountName },
+  };
+}
+
 export function convertSellerApplicationToDto(application: SellerApplicationRecord, phone: string) {
   return {
     id: application.id,
@@ -78,6 +91,7 @@ export function convertSellerApplicationToDto(application: SellerApplicationReco
     description: application.description,
     categoryId: application.categoryId,
     phone,
+    onboarding: maskOnboarding(application),
     status: application.status,
     reviewNote: application.reviewNote,
     reviewedAt: application.reviewedAt?.toISOString() ?? null,
