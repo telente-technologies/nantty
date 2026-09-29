@@ -10,6 +10,7 @@ import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
 import { useStoryAutoAdvance } from "@/components/story/storyAutoAdvance.hook";
 import { StoryProgressBar } from "@/components/story/storyProgressBar";
 import { Avatar } from "@/components/ui/avatar";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -18,6 +19,7 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
 export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   const insets = useSafeAreaInsets();
+  const openUserProfile = useOpenUserProfile();
   const { width } = useWindowDimensions();
   const [isReplying, setIsReplying] = useState(false);
   const stories = useQuery({ queryKey: ["stories", route.params.userId], queryFn: () => storiesService.fetchStoriesForUser(route.params.userId) });
@@ -60,7 +62,12 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         progress={isActiveStoryVideo ? videoStoryProgress : progress}
       />
       <View style={styles.header}>
-        <View style={styles.author}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={story ? `${story.author.name}'s profile` : "Profile"}
+          onPress={() => story && openUserProfile(story.author.id)}
+          style={styles.author}
+        >
           <Avatar uri={story?.author.avatarUrl} size={32} />
           <View style={styles.nameRow}>
             <Text size={14} weight={500} lineHeight={16.8}>
@@ -71,7 +78,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
               {story ? formatTimeSincePosted(story.createdAt) : ""}
             </Text>
           </View>
-        </View>
+        </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Story options" hitSlop={10}>
           <DotsThreeVertical24Icon />
         </Pressable>
