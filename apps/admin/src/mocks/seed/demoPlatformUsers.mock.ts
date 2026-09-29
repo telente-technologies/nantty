@@ -45,7 +45,7 @@ const seedRows: readonly SeedRow[] = [
   { username: "funke.naturals", displayName: "Funke Naturals", legalName: "Olufunke Adeyemi", country: "NG", avatar: "u_12", verification: gold("PRO"), seller: true, followers: 31_500, joinedDaysAgo: 520 },
   { username: "musa.motors", displayName: "Musa Motors", legalName: "Musa Ibrahim Danjuma", country: "NG", avatar: "u_13", seller: true, followers: 4_020, joinedDaysAgo: 60 },
   { username: "amara.reads", displayName: "Amara Reads", legalName: "Amarachi Nwosu", country: "NG", avatar: "u_14", verification: blue("VERIFIED", "PENDING"), creator: true, followers: 18_900, joinedDaysAgo: 240 },
-  { username: "bolu.films", displayName: "Bolu Films", legalName: "Boluwatife Ogunleye", country: "NG", avatar: "u_15", creator: true, followers: 39_700, strikes: 1, joinedDaysAgo: 310 },
+  { username: "bolu.films", displayName: "Bolu Films", legalName: "Boluwatife Ogunleye", country: "NG", avatar: "u_15", creator: true, followers: 39_700, strikes: 2, joinedDaysAgo: 310 },
   { username: "nana.ama.shop", displayName: "Nana Ama Shop", legalName: "Nana Ama Owusu", country: "GH", avatar: "u_16", seller: true, followers: 9_870, joinedDaysAgo: 180 },
   { username: "segun.snaps", displayName: "Segun Snaps", legalName: "Olusegun Fashola", country: "NG", avatar: "u_17", followers: 1_240, joinedDaysAgo: 45 },
   { username: "halima.hijabs", displayName: "Halima Hijabs", legalName: "Halima Sadiq", country: "NG", avatar: "u_18", seller: true, verification: gold("PRO", "PENDING"), followers: 14_600, joinedDaysAgo: 220 },
