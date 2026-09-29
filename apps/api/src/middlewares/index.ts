@@ -4,3 +4,4 @@ export * from "./idempotency.middleware.js";
 export * from "./rateLimitSensitive.middleware.js";
 export * from "./requestId.middleware.js";
 export * from "./verifyWebhookSignature.middleware.js";
+export * from "./viewerLocale.middleware.js";
