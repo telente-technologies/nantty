@@ -1,14 +1,20 @@
 model PlatformStaffAccount {
-  userId                     String    @id
+  id                         String    @id @default(uuid())
+  email                      String    @unique
+  name                       String
+  passwordHash               String?
   role                       String
   permissions                String[]
-  status                     String    @default("active")
+  status                     String    @default("INVITED")
   ipAllowList                String[]
   totpSecretEncrypted        String?
   pendingTotpSecretEncrypted String?
   totpEnabledAt              DateTime?
   totpLastUsedStep           Int?
   recoveryCodeHashes         String[]
+  failedLoginCount           Int       @default(0)
+  lockedUntil                DateTime?
+  lastLoginAt                DateTime?
   createdById                String?
   disabledAt                 DateTime?
   createdAt                  DateTime  @default(now())
@@ -18,41 +24,65 @@ model PlatformStaffAccount {
   @@map("platform_staff_accounts")
 }
 
-model PlatformStaffLoginChallenge {
-  id         String    @id @default(uuid())
-  userId     String
-  tokenHash  String    @unique
-  attempts   Int       @default(0)
-  expiresAt  DateTime
-  consumedAt DateTime?
-  createdAt  DateTime  @default(now())
+model PlatformStaffInvitation {
+  id          String    @id @default(uuid())
+  staffId     String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
 
-  @@index([userId])
-  @@map("platform_staff_login_challenges")
+  @@index([staffId])
+  @@map("platform_staff_invitations")
+}
+
+model PlatformStaffChallenge {
+  id                String    @id @default(uuid())
+  staffId           String
+  tokenHash         String    @unique
+  attempts          Int       @default(0)
+  webAuthnChallenge String?
+  expiresAt         DateTime
+  consumedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([staffId])
+  @@map("platform_staff_challenges")
 }
 
 model PlatformStaffSession {
-  sessionId        String    @id
-  userId           String
-  mfaVerifiedAt    DateTime
-  stepUpVerifiedAt DateTime?
-  createdAt        DateTime  @default(now())
+  id                         String    @id
+  staffId                    String
+  refreshTokenHash           String
+  ipAddress                  String?
+  userAgent                  String?
+  stepUpTokenHash            String?
+  stepUpExpiresAt            DateTime?
+  webAuthnChallenge          String?
+  webAuthnChallengeExpiresAt DateTime?
+  createdAt                  DateTime  @default(now())
+  lastSeenAt                 DateTime  @default(now())
+  expiresAt                  DateTime
+  revokedAt                  DateTime?
+  revokedReason              String?
 
-  @@index([userId])
+  @@index([staffId])
   @@map("platform_staff_sessions")
 }
 
 model WebAuthnCredential {
   id           String    @id @default(uuid())
-  userId       String
+  staffId      String
   credentialId String    @unique
   publicKey    String
   signCount    Int       @default(0)
   transports   String[]
-  nickname     String    @default("")
+  label        String    @default("")
   createdAt    DateTime  @default(now())
   lastUsedAt   DateTime?
 
-  @@index([userId])
+  @@index([staffId])
   @@map("webauthn_credentials")
 }
