@@ -49,6 +49,7 @@ export class InMemoryPostsRepository implements PostsRepository {
       ...input,
       id: randomUUID(),
       audience: "everyone",
+      visibility: input.visibility ?? "public",
       likeCount: 0,
       commentCount: 0,
       repostCount: 0,

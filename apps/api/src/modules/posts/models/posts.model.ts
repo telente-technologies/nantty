@@ -1,3 +1,5 @@
+import type { ContentVisibility } from "../../../interfaces/creatorSubscriberLookup.interface.js";
+
 export type PostKind = "post" | "clip" | "story";
 export type MediaType = "image" | "video";
 export type CounterField = "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount";
@@ -20,6 +22,7 @@ export interface PostRecord {
   readonly text: string;
   readonly media: readonly PostMedia[];
   readonly audience: "everyone";
+  readonly visibility: ContentVisibility;
   readonly topics: readonly string[];
   readonly productIds: readonly string[];
   readonly repostOfId: string | null;
@@ -44,6 +47,7 @@ export interface NewPostInput {
   readonly repostOfId: string | null;
   readonly expiresAt: Date | null;
   readonly createdAt: Date;
+  readonly visibility?: ContentVisibility;
 }
 
 export interface PostListFilter {
@@ -80,6 +84,7 @@ export interface LiveSessionRecord {
   readonly reactionCount: number;
   readonly productIds: readonly string[];
   readonly pinnedProductId: string | null;
+  readonly visibility: ContentVisibility;
   readonly startedAt: Date;
   readonly endedAt: Date | null;
 }

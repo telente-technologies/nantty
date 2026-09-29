@@ -16,6 +16,7 @@ function convertLiveRowToRecord(row: LiveSession): LiveSessionRecord {
     reactionCount: row.reactionCount,
     productIds: row.productIds,
     pinnedProductId: row.pinnedId,
+    visibility: row.visibility === "subscribers" ? "subscribers" : "public",
     startedAt: row.startedAt,
     endedAt: row.endedAt,
   };

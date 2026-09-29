@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import type { ContentVisibility } from "../../../interfaces/creatorSubscriberLookup.interface.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
 import type { LiveCommentRecord, LiveSessionRecord } from "../models/posts.model.js";
@@ -10,6 +11,7 @@ export interface NewLiveSessionInput {
   readonly title: string;
   readonly productIds: readonly string[];
   readonly startedAt: Date;
+  readonly visibility?: ContentVisibility;
 }
 
 export interface LiveSessionsRepository {
@@ -37,7 +39,7 @@ export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
   private readonly comments: LiveCommentRecord[] = [];
 
   public async create(input: NewLiveSessionInput): Promise<LiveSessionRecord> {
-    const session = { ...input, id: randomUUID(), status: "live" as const, viewerCount: 0, reactionCount: 0, pinnedProductId: null, endedAt: null, createdAt: input.startedAt };
+    const session = { ...input, id: randomUUID(), status: "live" as const, viewerCount: 0, reactionCount: 0, pinnedProductId: null, endedAt: null, createdAt: input.startedAt, visibility: input.visibility ?? "public" };
     this.sessions.set(session.id, session);
     this.viewers.set(session.id, new Set());
     return session;

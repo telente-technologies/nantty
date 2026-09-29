@@ -20,6 +20,7 @@ export const CreatePostBodySchema = schema.object({
   storeId: schema.string().uuid().optional(),
   repostOfId: schema.string().uuid().optional(),
   audience: schema.enum(["everyone"]).optional(),
+  visibility: schema.enum(["public", "subscribers"]).optional(),
 });
 
 export const CreateStoryBodySchema = schema.object({
@@ -54,6 +55,7 @@ export const StartLiveBodySchema = schema.object({
   title: schema.string().min(1).max(120),
   storeId: schema.string().uuid().optional(),
   productIds: productIds.optional(),
+  visibility: schema.enum(["public", "subscribers"]).optional(),
 });
 
 export const LiveCommentBodySchema = schema.object({ text: schema.string().min(1).max(500) });

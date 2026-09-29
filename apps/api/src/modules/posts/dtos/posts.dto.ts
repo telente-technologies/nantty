@@ -1,3 +1,4 @@
+import type { ContentVisibility } from "../../../interfaces/creatorSubscriberLookup.interface.js";
 import type { SponsoredDto } from "../../../interfaces/discovery.interface.js";
 import type { MoneyDto } from "../../../utils/money.util.js";
 import type { PostKind, PostMedia } from "../models/posts.model.js";
@@ -54,6 +55,9 @@ export interface PostDto {
   readonly store: StoreBadgeDto | null;
   readonly topics: readonly string[];
   readonly audience: "everyone";
+  readonly visibility: ContentVisibility;
+  readonly locked: boolean;
+  readonly lockedMediaCount: number;
   readonly repostOf: PostDto | null;
   readonly expiresAt: string | null;
 }
@@ -95,6 +99,7 @@ export interface LiveSessionDto {
   readonly pinnedProduct: ProductCardDto | null;
   readonly startedAt: string;
   readonly endedAt: string | null;
+  readonly visibility: ContentVisibility;
   readonly sponsored: SponsoredDto | null;
 }
 

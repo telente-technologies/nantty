@@ -13,6 +13,7 @@ import type {
   StoryTrayEntryDto,
 } from "../dtos/posts.dto.js";
 import type { LiveCommentRecord, LiveSessionRecord, PostRecord } from "../models/posts.model.js";
+import { lockSubscriberOnlyPosts } from "./subscriberContent.service.js";
 import type { PostsDependencies } from "./posts.service.js";
 
 const FRIEND_AVATAR_SAMPLE_SIZE = 3;
@@ -89,15 +90,19 @@ export class PostPresenter {
         store: convertStoreToBadge(post.storeId === null ? undefined : stores.get(post.storeId)),
         topics: post.topics,
         audience: post.audience,
+        visibility: post.visibility,
+        locked: false,
+        lockedMediaCount: 0,
         repostOf,
         expiresAt: post.expiresAt?.toISOString() ?? null,
       };
     };
     const originalsById = indexById(originals);
-    return posts.map((post) => {
+    const presented = posts.map((post) => {
       const original = post.repostOfId === null ? undefined : originalsById.get(post.repostOfId);
       return presentOne(post, original !== undefined && original.deletedAt === null ? presentOne(original, null) : null);
     });
+    return lockSubscriberOnlyPosts(presented, viewerId, this.dependencies.subscriberLookup);
   }
 
   public async presentStoryTray(stories: readonly PostRecord[], viewerId: string | undefined): Promise<StoryTrayEntryDto[]> {
@@ -150,6 +155,7 @@ export class PostPresenter {
       pinnedProduct: session.pinnedProductId === null ? null : products.get(session.pinnedProductId) ?? null,
       startedAt: session.startedAt.toISOString(),
       endedAt: session.endedAt?.toISOString() ?? null,
+      visibility: session.visibility,
       sponsored: sponsored.get(session.id) ?? null,
     }));
   }

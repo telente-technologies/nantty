@@ -14,6 +14,7 @@ function convertPostRowToRecord(row: Post): PostRecord {
     text: row.text,
     media: (Array.isArray(row.media) ? row.media : []) as unknown as PostMedia[],
     audience: "everyone",
+    visibility: row.visibility === "subscribers" ? "subscribers" : "public",
     topics: row.topics,
     productIds: row.productIds,
     repostOfId: row.repostOfId,

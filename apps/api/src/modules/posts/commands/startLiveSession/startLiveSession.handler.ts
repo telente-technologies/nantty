@@ -23,6 +23,7 @@ export class StartLiveSessionHandler extends CommandHandler<StartLiveSessionComm
       title: command.input.title.trim(),
       productIds: [...new Set(command.input.productIds ?? [])],
       startedAt: clock.now(),
+      visibility: command.input.visibility ?? "public",
     });
     const [dto] = await this.postsService.presenter.presentLiveSessions([session], command.displayCurrency);
     return dto as LiveSessionDto;

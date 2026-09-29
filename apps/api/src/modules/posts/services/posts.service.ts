@@ -4,6 +4,7 @@ import { NotificationRequestedEvent, type NotificationRequestedPayload } from ".
 import { forbidden, notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { CreatorAccess } from "../../../interfaces/creatorAccess.interface.js";
+import type { CreatorSubscriberLookup } from "../../../interfaces/creatorSubscriberLookup.interface.js";
 import type { CurrencyConverter } from "../../../interfaces/currencyConverter.interface.js";
 import type { MediaLibrary } from "../../../interfaces/mediaLibrary.interface.js";
 import type { ProductCatalog, ProductSummary } from "../../../interfaces/productCatalog.interface.js";
@@ -33,6 +34,7 @@ export interface PostsDependencies {
   readonly currencyConverter: CurrencyConverter;
   readonly creatorAccess: CreatorAccess;
   readonly mediaLibrary: MediaLibrary;
+  readonly subscriberLookup?: CreatorSubscriberLookup;
 }
 
 export class PostsService {
@@ -84,7 +86,14 @@ export class PostsService {
     const session = await this.findLiveSessionOrThrow(sessionId);
     if (session.status !== "live") throw unprocessable("This live session has ended.");
     await this.assertUsersAreNotBlocked(viewerId, session.hostId);
+    await this.assertCanWatchSubscriberOnlyLive(session, viewerId);
     return session;
+  }
+
+  public async assertCanWatchSubscriberOnlyLive(session: LiveSessionRecord, viewerId: string): Promise<void> {
+    if (session.visibility !== "subscribers" || session.hostId === viewerId) return;
+    const subscribed = (await this.dependencies.subscriberLookup?.listCreatorIdsViewerSubscribesTo(viewerId, [session.hostId])) ?? new Set<string>();
+    if (!subscribed.has(session.hostId)) throw forbidden("This live is for subscribers only. Subscribe to watch.");
   }
 
   public async assertIsApprovedLiveHost(session: LiveSessionRecord, userId: string): Promise<void> {

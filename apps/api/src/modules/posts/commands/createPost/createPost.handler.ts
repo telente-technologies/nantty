@@ -78,6 +78,7 @@ export class CreatePostHandler extends CommandHandler<CreatePostCommand, PostDto
     const text = input.text?.trim() ?? "";
     assertMediaFitsPostKind(input.kind, media, text, input.repostOfId !== undefined);
     if (input.storeId !== undefined) await storeAccess.assertStoreMember(authorId, input.storeId);
+    if (input.visibility === "subscribers") await this.postsService.dependencies.creatorAccess.assertApprovedCreator(authorId);
     await this.postsService.findPublishedProductsOrThrow(input.productIds ?? []);
     const original = input.repostOfId === undefined ? undefined : await this.postsService.findVisiblePostOrThrow(input.repostOfId, authorId);
     const now = clock.now();
@@ -92,6 +93,7 @@ export class CreatePostHandler extends CommandHandler<CreatePostCommand, PostDto
       repostOfId: original === undefined ? null : original.repostOfId ?? original.id,
       expiresAt: input.kind === "story" ? new Date(now.getTime() + STORY_TTL_SECONDS * 1000) : null,
       createdAt: now,
+      visibility: input.visibility ?? "public",
     });
     if (post.repostOfId !== null) await posts.changeCounter(post.repostOfId, "repostCount", 1);
     await publishEvent(events, PostCreatedEvent, { postId: post.id, authorId, kind: post.kind });
