@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
 import { colors } from "@/constants/colors.constant";
 
 import { Text } from "./text";
+import { FrameAwareModal } from "./frameAwareModal";
 
 export interface BottomSheetProps {
   readonly visible: boolean;
@@ -20,7 +21,7 @@ export interface BottomSheetProps {
 export function BottomSheet({ visible, onClose, title, titleSize = 16, floating = false, children, style }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <FrameAwareModal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <Pressable accessibilityLabel="Close" style={styles.backdrop} onPress={onClose} />
         <View
@@ -44,7 +45,7 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
           {children}
         </View>
       </KeyboardAvoidingView>
-    </Modal>
+    </FrameAwareModal>
   );
 }
 
