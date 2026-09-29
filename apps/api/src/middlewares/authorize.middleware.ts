@@ -1,9 +1,9 @@
 import { ForbiddenError, UnauthorizedError } from "@zudojs/errors";
-import type { HttpMiddleware, HttpMiddlewareContext, RouteOptions } from "@zudojs/http";
+import type { HttpMiddleware, RouteOptions } from "@zudojs/http";
 
 import { isPlatformPermission, rolesGrantPermission, type Permission } from "../constants/permissions.constant.js";
-import type { AccessTokenVerifier, Principal } from "../interfaces/index.js";
-import type { PlatformStaffAccessCheck, StaffRequestDetails } from "../interfaces/platformStaffAccess.interface.js";
+import type { AccessTokenVerifier } from "../interfaces/index.js";
+import type { PlatformStaffAccessCheck, StaffRouteRequirement } from "../interfaces/platformStaffAccess.interface.js";
 import { authenticateBearerToken } from "./authenticate.middleware.js";
 
 export const PUBLIC_ROUTE = "public";
@@ -11,26 +11,11 @@ export const PLATFORM_STAFF_ROUTE = "platform-staff";
 
 export interface RouteGuard {
   requirePermission(permission: Permission, ...extra: readonly HttpMiddleware[]): RouteOptions;
-  requireStepUpPermission(permission: Permission, ...extra: readonly HttpMiddleware[]): RouteOptions;
+  requireAnyPermission(permissions: readonly Permission[], ...extra: readonly HttpMiddleware[]): RouteOptions;
+  requireStepUpPermission(permission: Permission | readonly Permission[], ...extra: readonly HttpMiddleware[]): RouteOptions;
   requirePlatformStaff(...extra: readonly HttpMiddleware[]): RouteOptions;
   requireSignedInUser(...extra: readonly HttpMiddleware[]): RouteOptions;
   allowAnyone(...extra: readonly HttpMiddleware[]): RouteOptions;
-}
-
-const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-
-function describeStaffRequest(context: HttpMiddlewareContext): StaffRequestDetails {
-  return {
-    clientIp: context.request.remoteAddress ?? null,
-    method: context.request.method.toUpperCase(),
-    path: context.request.path,
-  };
-}
-
-async function requirePrincipal(context: HttpMiddlewareContext, verifier: AccessTokenVerifier): Promise<Principal> {
-  const principal = await authenticateBearerToken(context, verifier);
-  if (principal === undefined) throw new UnauthorizedError("Authentication required.");
-  return principal;
 }
 
 export function createRouteGuard(
@@ -38,29 +23,17 @@ export function createRouteGuard(
   resolveViewerLocale: HttpMiddleware,
   staffAccess?: PlatformStaffAccessCheck,
 ): RouteGuard {
-  const requireStaffAccess = (): PlatformStaffAccessCheck => {
-    if (staffAccess === undefined) throw new ForbiddenError("You do not have permission to do this.");
-    return staffAccess;
-  };
-
-  const createStaffCheckMiddleware = (permission: Permission | undefined, requireStepUp: boolean): HttpMiddleware =>
+  const createStaffMiddleware = (requirement: StaffRouteRequirement): HttpMiddleware =>
     async (context, next) => {
-      const principal = await requirePrincipal(context, verifier);
-      const access = requireStaffAccess();
-      const request = describeStaffRequest(context);
-      await access.assertStaffMayUsePermission(principal, permission, request);
-      if (requireStepUp) await access.assertRecentStepUp(principal);
-      const response = await next();
-      if (MUTATING_METHODS.has(request.method)) {
-        await access.recordStaffAction(principal, request, { permission: permission ?? PLATFORM_STAFF_ROUTE, status: response.status });
-      }
-      return response;
+      if (staffAccess === undefined) throw new ForbiddenError("You do not have permission to do this.");
+      return staffAccess.handleStaffRequest(context, requirement, next);
     };
 
   const createPermissionCheckMiddleware = (permission: Permission | undefined): HttpMiddleware => {
-    if (permission !== undefined && isPlatformPermission(permission)) return createStaffCheckMiddleware(permission, false);
+    if (permission !== undefined && isPlatformPermission(permission)) return createStaffMiddleware({ anyOfPermissions: [permission], requireStepUp: false });
     return async (context, next) => {
-      const principal = await requirePrincipal(context, verifier);
+      const principal = await authenticateBearerToken(context, verifier);
+      if (principal === undefined) throw new UnauthorizedError("Authentication required.");
       if (permission !== undefined && !rolesGrantPermission(principal.roles, permission)) {
         throw new ForbiddenError("You do not have permission to do this.");
       }
@@ -77,17 +50,26 @@ export function createRouteGuard(
     return next();
   };
 
+  const describePermissions = (permissions: readonly Permission[]): string => permissions.join("|");
+
   return {
     requirePermission: (permission, ...extra) => ({
       middleware: [createPermissionCheckMiddleware(permission), resolveViewerLocale, ...extra],
       metadata: { permission },
     }),
-    requireStepUpPermission: (permission, ...extra) => ({
-      middleware: [createStaffCheckMiddleware(permission, true), resolveViewerLocale, ...extra],
-      metadata: { permission, stepUp: true },
+    requireAnyPermission: (permissions, ...extra) => ({
+      middleware: [createStaffMiddleware({ anyOfPermissions: permissions, requireStepUp: false }), resolveViewerLocale, ...extra],
+      metadata: { permission: describePermissions(permissions) },
     }),
+    requireStepUpPermission: (permission, ...extra) => {
+      const permissions: readonly Permission[] = typeof permission === "string" ? [permission] : permission;
+      return {
+        middleware: [createStaffMiddleware({ anyOfPermissions: permissions, requireStepUp: true }), resolveViewerLocale, ...extra],
+        metadata: { permission: describePermissions(permissions), stepUp: true },
+      };
+    },
     requirePlatformStaff: (...extra) => ({
-      middleware: [createStaffCheckMiddleware(undefined, false), resolveViewerLocale, ...extra],
+      middleware: [createStaffMiddleware({ anyOfPermissions: [], requireStepUp: false }), resolveViewerLocale, ...extra],
       metadata: { permission: PLATFORM_STAFF_ROUTE },
     }),
     requireSignedInUser: (...extra) => ({
