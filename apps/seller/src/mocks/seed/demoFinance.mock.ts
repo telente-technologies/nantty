@@ -1,10 +1,12 @@
-import type { Money } from "@/types/money.type";
+import type { CurrencyCode, Money } from "@/types/money.type";
 import type { OnlineOrder } from "@/types/order.type";
 import type { Promotion } from "@/types/promotion.type";
 import type { SubscriptionDetails, SubscriptionPlan } from "@/types/subscription.type";
 import type { Payout, PayoutAccount, WalletBalances, WalletTransaction } from "@/types/wallet.type";
 import type { AuditLogEntry } from "@/types/staff.type";
 import type { GoldEntitlements, VerificationStatus } from "@/types/sellerAccess.type";
+import type { MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
+import { buildStoreScopedRecordId, type DemoAuditEntry, type DemoWalletPlan } from "@/mocks/seed/demoStoreProfile.mock";
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
 
 function naira(amountMinor: number): Money {
@@ -71,11 +73,12 @@ export function buildDemoGateStores(): MockGateStore[] {
   ];
 }
 
-export function buildDemoPromotions(): Promotion[] {
+export function buildIfeLifestylePromotions(currency: CurrencyCode): Promotion[] {
+  const toStoreMoney = (amountMinor: number): Money => ({ amountMinor, currency });
   return [
-    { id: "promo_welcome", name: "Welcome 10%", kind: "coupon", code: "WELCOME10", discount: { kind: "percent", value: 1000 }, scope: { kind: "all", ids: [] }, minimumSpend: naira(1_000_000), usageLimit: null, usageLimitPerCustomer: 1, usedCount: 38, channels: ["online", "pos"], startsAt: buildIsoDateDaysAgo(90), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(90) },
+    { id: "promo_welcome", name: "Welcome 10%", kind: "coupon", code: "WELCOME10", discount: { kind: "percent", value: 1000 }, scope: { kind: "all", ids: [] }, minimumSpend: toStoreMoney(1_000_000), usageLimit: null, usageLimitPerCustomer: 1, usedCount: 38, channels: ["online", "pos"], startsAt: buildIsoDateDaysAgo(90), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(90) },
     { id: "promo_detty", name: "Detty December sale", kind: "scheduled_sale", code: null, discount: { kind: "percent", value: 2000 }, scope: { kind: "categories", ids: ["cat_fashion", "cat_bags"] }, minimumSpend: null, usageLimit: null, usageLimitPerCustomer: null, usedCount: 0, channels: ["online", "pos"], startsAt: "2026-12-01T00:00:00.000Z", endsAt: "2026-12-31T23:59:59.000Z", status: "scheduled", createdAt: buildIsoDateDaysAgo(3) },
-    { id: "promo_glow", name: "Serum bundle ₦2,000 off", kind: "automatic", code: null, discount: { kind: "amount", value: 200_000 }, scope: { kind: "products", ids: ["prod_face_serum", "prod_body_oil"] }, minimumSpend: naira(2_500_000), usageLimit: 200, usageLimitPerCustomer: null, usedCount: 61, channels: ["online"], startsAt: buildIsoDateDaysAgo(20), endsAt: buildIsoDateDaysAgo(-10), status: "active", createdAt: buildIsoDateDaysAgo(21) },
+    { id: "promo_glow", name: "Serum bundle ₦2,000 off", kind: "automatic", code: null, discount: { kind: "amount", value: 200_000 }, scope: { kind: "products", ids: ["prod_face_serum", "prod_body_oil"] }, minimumSpend: toStoreMoney(2_500_000), usageLimit: 200, usageLimitPerCustomer: null, usedCount: 61, channels: ["online"], startsAt: buildIsoDateDaysAgo(20), endsAt: buildIsoDateDaysAgo(-10), status: "active", createdAt: buildIsoDateDaysAgo(21) },
     { id: "promo_easter", name: "Easter treats", kind: "coupon", code: "EASTER15", discount: { kind: "percent", value: 1500 }, scope: { kind: "all", ids: [] }, minimumSpend: null, usageLimit: 100, usageLimitPerCustomer: 1, usedCount: 100, channels: ["pos"], startsAt: "2026-04-01T00:00:00.000Z", endsAt: "2026-04-07T23:59:59.000Z", status: "expired", createdAt: "2026-03-25T09:00:00.000Z" },
   ];
 }
@@ -87,10 +90,11 @@ export interface DemoWalletState {
   payouts: Payout[];
 }
 
-export function buildDemoWalletState(orders: readonly OnlineOrder[]): DemoWalletState {
+export function buildDemoWalletState(orders: readonly OnlineOrder[], plan: DemoWalletPlan, recordKey: string | null, currency: CurrencyCode): DemoWalletState {
+  const toStoreMoney = (amountMinor: number): Money => ({ amountMinor, currency });
   const escrowMinor = orders.filter((order) => order.escrowStatus === "held" || order.escrowStatus === "disputed").reduce((sum, order) => sum + order.sellerPayout.amountMinor, 0);
   const transactions: WalletTransaction[] = orders.slice(0, 30).map((order, index) => ({
-    id: `wtx_${index + 1}`,
+    id: buildStoreScopedRecordId("wtx", recordKey, index + 1),
     kind: order.escrowStatus === "released" ? "escrow_release" : order.escrowStatus === "refunded" ? "refund" : "escrow_hold",
     description: `${order.escrowStatus === "released" ? "Escrow released" : order.escrowStatus === "refunded" ? "Refunded to buyer" : "Held in escrow"} · ${order.orderNumber}`,
     amount: order.sellerPayout,
@@ -99,49 +103,43 @@ export function buildDemoWalletState(orders: readonly OnlineOrder[]): DemoWallet
     reference: order.orderNumber,
     createdAt: order.createdAt,
   }));
-  const payoutAccounts: PayoutAccount[] = [
-    { id: "pac_gtb", bankName: "Guaranty Trust Bank", bankCode: "058", accountNameMasked: "IFE LIFE***LE LTD", accountNumberMasked: "******4471", isDefault: true, verified: true },
-    { id: "pac_opay", bankName: "OPay", bankCode: "999992", accountNameMasked: "ADAEZE O***FOR", accountNumberMasked: "******0142", isDefault: false, verified: true },
-  ];
-  const payouts: Payout[] = [3, 10, 17, 24].map((daysAgo, index) => ({
-    id: `pyt_${index + 1}`,
-    amount: naira([48_500_000, 61_200_000, 39_900_000, 52_000_000][index] ?? 0),
-    fee: naira(5_000),
-    accountId: "pac_gtb",
-    accountSummary: "GTBank ******4471",
-    status: "paid",
-    reference: `PYT-${202609 - index}-${1000 + index}`,
-    requestedAt: buildIsoDateDaysAgo(daysAgo, 10),
-    completedAt: buildIsoDateDaysAgo(daysAgo, 10, 7),
-  }));
+  const defaultAccount = plan.payoutAccounts.find((account) => account.isDefault) ?? plan.payoutAccounts[0];
+  const payouts: Payout[] = defaultAccount
+    ? plan.payoutAmountsMinor.map((amountMinor, index) => {
+        const daysAgo = 3 + index * 7;
+        return {
+          id: buildStoreScopedRecordId("pyt", recordKey, index + 1),
+          amount: toStoreMoney(amountMinor),
+          fee: toStoreMoney(plan.payoutFeeMinor),
+          accountId: defaultAccount.id,
+          accountSummary: plan.payoutAccountSummary,
+          status: "paid",
+          reference: `PYT-${202609 - index}-${1000 + index}${recordKey ? `-${recordKey.toUpperCase()}` : ""}`,
+          requestedAt: buildIsoDateDaysAgo(daysAgo, 10),
+          completedAt: buildIsoDateDaysAgo(daysAgo, 10, 7),
+        };
+      })
+    : [];
   return {
-    balances: { escrow: naira(escrowMinor), pending: naira(18_450_000), available: naira(73_280_000), nextEscrowReleaseAt: buildIsoDateDaysAgo(-1, 9) },
+    balances: { escrow: toStoreMoney(escrowMinor), pending: toStoreMoney(plan.pendingMinor), available: toStoreMoney(plan.availableMinor), nextEscrowReleaseAt: buildIsoDateDaysAgo(-1, 9) },
     transactions,
-    payoutAccounts,
+    payoutAccounts: [...plan.payoutAccounts],
     payouts,
   };
 }
 
-export function buildDemoAuditLog(): AuditLogEntry[] {
-  const entries: [string, string, string, string, number][] = [
-    ["stf_adaeze", "staff.invited", "staff", "Invited Seun Alabi as cashier", 0],
-    ["stf_tunde", "pos.discount_approved", "sale", "Approved 20% discount on IFE-1432", 0],
-    ["stf_ibrahim", "inventory.adjusted", "variant", "Counted Raw Shea Butter 250g: +12 at Apapa warehouse", 1],
-    ["stf_adaeze", "payout.requested", "payout", "Withdrew ₦485,000 to GTBank ******4471", 3],
-    ["stf_tunde", "pos.refund_issued", "sale", "Refunded 1 × Wireless Earbuds on IFE-1398", 4],
-    ["stf_adaeze", "settings.updated", "store", "Changed receipt return policy", 6],
-    ["stf_ngozi", "order.shipped", "order", "Marked ZM-58244 as shipped with GIG Logistics", 7],
-  ];
-  const roleByStaffId: Record<string, AuditLogEntry["actor"]["role"]> = { stf_adaeze: "owner", stf_tunde: "manager", stf_ibrahim: "inventory", stf_ngozi: "support" };
-  const nameByStaffId: Record<string, string> = { stf_adaeze: "Adaeze Okafor", stf_tunde: "Tunde Bakare", stf_ibrahim: "Ibrahim Musa", stf_ngozi: "Ngozi Nwosu" };
-  return entries.map(([staffId, action, targetType, summary, daysAgo], index) => ({
-    id: `aud_${index + 1}`,
-    actor: { id: staffId, name: nameByStaffId[staffId] ?? staffId, role: roleByStaffId[staffId] ?? "manager" },
-    action,
-    targetType,
-    targetId: null,
-    summary,
-    ipAddress: "102.89.23.14",
-    createdAt: buildIsoDateDaysAgo(daysAgo, 10 + index),
-  }));
+export function buildDemoAuditLog(entries: readonly DemoAuditEntry[], staff: readonly MockStaffRecord[], recordKey: string | null): AuditLogEntry[] {
+  return entries.map(([staffId, action, targetType, summary, daysAgo], index) => {
+    const actor = staff.find((member) => member.id === staffId);
+    return {
+      id: buildStoreScopedRecordId("aud", recordKey, index + 1),
+      actor: { id: staffId, name: actor?.name ?? staffId, role: actor?.role ?? "manager" },
+      action,
+      targetType,
+      targetId: null,
+      summary,
+      ipAddress: "102.89.23.14",
+      createdAt: buildIsoDateDaysAgo(daysAgo, 10 + index),
+    };
+  });
 }
