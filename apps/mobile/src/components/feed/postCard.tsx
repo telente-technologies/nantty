@@ -4,10 +4,12 @@ import { BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import type { Post } from "@/types";
+import type { AdPlacement, Post } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 
+import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { MediaPager } from "./mediaPager";
+import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
 
 export interface PostCardProps {
   readonly post: Post;
@@ -20,11 +22,13 @@ export interface PostCardProps {
   readonly onPressMore?: () => void;
   readonly onPressViewProducts?: () => void;
   readonly onPress?: () => void;
+  readonly adPlacement?: AdPlacement;
 }
 
 export function PostCard(props: PostCardProps) {
   const { post } = props;
   const hasMedia = post.media.length > 0;
+  const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
   return (
     <View style={styles.card}>
       <View style={styles.combo}>
@@ -47,6 +51,7 @@ export function PostCard(props: PostCardProps) {
               <Text size={14} weight={500} lineHeight={16.8}>
                 {formatTimeSincePosted(post.createdAt)}
               </Text>
+              {post.sponsored ? <SponsoredLabel sponsored={post.sponsored} /> : null}
             </View>
           </Pressable>
           <View style={styles.authorActions}>
@@ -73,7 +78,16 @@ export function PostCard(props: PostCardProps) {
           </View>
         ) : null}
         {hasMedia || post.products.length > 0 ? (
-          <MediaPager media={post.media} onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined} />
+          <MediaPager
+            media={post.media}
+            isVisibleOnScreen={isVisibleForAutoplay}
+            onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
+          />
+        ) : null}
+        {post.sponsored ? (
+          <View style={styles.sponsoredCallToAction}>
+            <SponsoredCallToAction sponsored={post.sponsored} placement={props.adPlacement ?? "feed"} itemId={post.id} />
+          </View>
         ) : null}
       </Pressable>
 
@@ -126,6 +140,7 @@ const styles = StyleSheet.create({
   authorActions: { flexDirection: "row", alignItems: "center", gap: 12 },
   follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primary, justifyContent: "center" },
   body: { paddingHorizontal: 16, paddingVertical: 8 },
+  sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
   interactions: { paddingHorizontal: 16, marginTop: 8 },
   counters: { flexDirection: "row", alignItems: "center", gap: 24 },
   counter: { flexDirection: "row", alignItems: "center", gap: 8 },
