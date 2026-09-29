@@ -21,6 +21,13 @@ export const UpdateSettingsBodySchema = schema.object({
   theme: schema.enum(["system", "light", "dark"]).optional(),
   language: schema.string().min(2).max(10).optional(),
   notifications: schema.object(notificationPreferenceShape).partial().optional(),
+  countryCode: schema.optional(schema.nullable(schema.string().regex(/^[A-Za-z]{2}$/))),
+  currency: schema.optional(schema.nullable(schema.enum(["NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD"]))),
+});
+
+export const UpdateLocalePreferencesBodySchema = schema.object({
+  countryCode: schema.optional(schema.nullable(schema.string().regex(/^[A-Za-z]{2}$/))),
+  currency: schema.optional(schema.nullable(schema.enum(["NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD"]))),
 });
 
 export const SaveTopicsBodySchema = schema.object({
