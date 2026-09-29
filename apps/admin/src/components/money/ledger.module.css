@@ -1,0 +1,107 @@
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.meterTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.meterValue {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  width: 24px;
+  text-align: right;
+}
+
+.reasons {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.legs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.legs td {
+  padding: 3px 0;
+  border-top: 1px dashed var(--divider-soft);
+}
+
+.legs td:last-child,
+.legs td:nth-child(2) {
+  text-align: right;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  padding-left: 12px;
+}
+
+.journal {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.journal:last-child {
+  border-bottom: none;
+}
+
+.journalHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ledgerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.accountButton {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 9px 14px;
+  border: none;
+  border-bottom: 1px solid var(--divider-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.accountButton:hover {
+  background: var(--surface-hover);
+}
+
+.accountButtonActive {
+  background: var(--blue-50);
+  box-shadow: inset 3px 0 0 var(--blue-500);
+}
+
+@media (max-width: 1000px) {
+  .ledgerLayout {
+    grid-template-columns: 1fr;
+  }
+}

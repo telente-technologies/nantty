@@ -1,0 +1,127 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+import { AuditHistoryList } from "@/components/audit/auditHistoryList";
+import { useAdminPermissions } from "@/components/session/adminSessionProvider";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { ErrorBlock, LoadingBlock } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/pageHeader";
+import { StatusBadge } from "@/components/ui/statusBadge";
+import { Card, KeyValueList, TwoColumnLayout } from "@/components/ui/surfaces";
+import { UserIdentity } from "@/components/ui/userIdentity";
+import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
+import { fetchOrderDetail } from "@/services/moneyApi.service";
+import type { OrderDetail } from "@/types/commerce.type";
+import { formatBasisPointsAsPercent, formatDateTime, formatMoneyForDisplay, humanizeConstantName } from "@/utils/formatting.util";
+
+import { EscrowTimeline } from "./escrowTimeline";
+import { IssueRefundDialog } from "./issueRefundDialog";
+import styles from "./money.module.css";
+import { RefundsTable } from "./refundsTable";
+
+function OrderItemsCard({ order }: { readonly order: OrderDetail }) {
+  return (
+    <Card title={`Items (${order.itemCount})`}>
+      <ul className={styles.items}>
+        {order.items.map((item) => (
+          <li key={item.id}>
+            {item.imageUrl ? <img src={item.imageUrl} alt="" className={styles.thumbnail} referrerPolicy="no-referrer" loading="lazy" /> : <span className={styles.thumbnail} />}
+            <span className={styles.stack}>
+              <strong>{item.productName}</strong>
+              <span className={styles.muted}>
+                {item.quantity} × {formatMoneyForDisplay(item.unitPrice)}
+              </span>
+            </span>
+            <span className={styles.amount}>{formatMoneyForDisplay(item.lineTotal)}</span>
+          </li>
+        ))}
+      </ul>
+      <dl className={styles.totals}>
+        <dt>Subtotal</dt>
+        <dd>{formatMoneyForDisplay(order.subtotal)}</dd>
+        <dt>Delivery</dt>
+        <dd>{formatMoneyForDisplay(order.deliveryFee)}</dd>
+        <dt className={styles.grandTotal}>Buyer paid</dt>
+        <dd className={styles.grandTotal}>{formatMoneyForDisplay(order.total)}</dd>
+        <dt>Refunded</dt>
+        <dd>{formatMoneyForDisplay(order.refundedTotal)}</dd>
+        <dt>Commission ({formatBasisPointsAsPercent(order.commissionBasisPoints)})</dt>
+        <dd>{formatMoneyForDisplay(order.commission)}</dd>
+      </dl>
+    </Card>
+  );
+}
+
+export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) {
+  const { can } = useAdminPermissions();
+  const { data: order, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchOrderDetail(orderId, signal), orderId);
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
+
+  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (isLoading || !order) return <LoadingBlock lines={8} />;
+  const canRefund = can("refunds:issue") && order.refundable.amountMinor > 0 && order.status !== "DISPUTED";
+
+  return (
+    <>
+      <PageHeader
+        area="Money · Orders"
+        title={<span className="mono">{order.orderNumber}</span>}
+        description={`${order.storeName} · placed ${formatDateTime(order.placedAt)} · delivering to ${order.deliveryCity}`}
+        meta={
+          <>
+            <StatusBadge status={order.status} />
+            <StatusBadge status={order.deliveryStatus} hasDot={false} />
+          </>
+        }
+        actions={
+          <>
+            <ButtonLink href="/commerce/orders" variant="ghost" iconName="arrowLeft24">All orders</ButtonLink>
+            {order.disputeId && can("disputes:resolve") ? <ButtonLink href={`/commerce/disputes/${order.disputeId}`} iconName="chatCircle24">Open dispute</ButtonLink> : null}
+            {canRefund ? <Button variant="quietDanger" iconName="arrowLeft24" onClick={() => setIsRefundDialogOpen(true)}>Issue refund</Button> : null}
+          </>
+        }
+      />
+      <TwoColumnLayout
+        main={
+          <>
+            <OrderItemsCard order={order} />
+            <Card title="Escrow timeline">
+              <EscrowTimeline escrow={order.escrow} />
+            </Card>
+            <Card title="Refunds" isFlush>
+              <RefundsTable refunds={order.refunds} emptyMessage="No refunds on this order." />
+            </Card>
+          </>
+        }
+        aside={
+          <>
+            <Card title="People">
+              <KeyValueList
+                items={[
+                  { label: "Buyer", value: <Link href={`/users/${order.buyer.id}`}><UserIdentity user={order.buyer} size={24} /></Link> },
+                  { label: "Seller", value: <Link href={`/users/${order.seller.id}`}><UserIdentity user={order.seller} size={24} /></Link> },
+                ]}
+              />
+            </Card>
+            <Card title="Delivery">
+              <KeyValueList
+                items={[
+                  { label: "Status", value: humanizeConstantName(order.deliveryStatus) },
+                  { label: "Courier", value: order.courier ?? "Not shipped yet" },
+                  { label: "Tracking", value: order.trackingNumber ?? "—", isMono: true },
+                  { label: "Refundable now", value: formatMoneyForDisplay(order.refundable) },
+                ]}
+              />
+            </Card>
+            <Card title="Admin history">
+              <AuditHistoryList entries={order.history} />
+            </Card>
+          </>
+        }
+      />
+      {isRefundDialogOpen ? <IssueRefundDialog order={order} isOpen onClose={() => setIsRefundDialogOpen(false)} onRefunded={reload} /> : null}
+    </>
+  );
+}
