@@ -1,0 +1,144 @@
+.figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendLine {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid var(--chart-1);
+}
+
+.legendDashed {
+  border-top: 2px dashed var(--chart-compare);
+}
+
+.plotArea {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+.svg:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.gridLine {
+  stroke: var(--divider-soft);
+  stroke-width: 1;
+}
+
+.baseline {
+  stroke: var(--divider);
+  stroke-width: 1;
+}
+
+.axisText {
+  fill: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.area {
+  fill: var(--chart-1);
+  opacity: 0.08;
+}
+
+.line {
+  fill: none;
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.comparisonLine {
+  fill: none;
+  stroke: var(--chart-compare);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
+}
+
+.crosshair {
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.marker {
+  fill: var(--chart-1);
+  stroke: var(--surface-card);
+  stroke-width: 2;
+}
+
+.comparisonMarker {
+  fill: var(--chart-compare);
+  stroke: var(--surface-card);
+  stroke-width: 2;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  width: 180px;
+  padding: 8px 10px;
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  box-shadow: var(--shadow-float);
+  pointer-events: none;
+  font-size: 12px;
+  z-index: 2;
+}
+
+.tooltipLabel {
+  font-weight: 650;
+  margin-bottom: 4px;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  flex-wrap: wrap;
+}
+
+.tooltipRow strong {
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltipSwatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--chart-1);
+}
+
+.tooltipSwatchCompare {
+  background: var(--chart-compare);
+}

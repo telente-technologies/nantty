@@ -1,0 +1,113 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(320px, 5fr) 7fr;
+  min-height: 100dvh;
+}
+
+.brandPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 40px;
+  background: var(--surface-rail);
+  color: var(--ink-on-rail);
+  position: relative;
+  overflow: hidden;
+}
+
+.brandPanel::after {
+  content: "";
+  position: absolute;
+  right: -110px;
+  bottom: -70px;
+  width: 240px;
+  height: 240px;
+  border-radius: 48px;
+  border: 28px solid var(--yellow-500);
+  transform: rotate(-14deg);
+  opacity: 0.9;
+}
+
+.pitch {
+  position: relative;
+  z-index: 1;
+  max-width: 400px;
+}
+
+.pitchHeadline {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.pitchList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+}
+
+.pitchList li {
+  padding-left: 18px;
+  position: relative;
+}
+
+.pitchList li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--yellow-500);
+}
+
+.small {
+  font-size: 12.5px;
+  color: var(--blue-200);
+  position: relative;
+  z-index: 1;
+}
+
+.formPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 24px;
+}
+
+.demoHint {
+  max-width: 380px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-medium);
+  background: var(--yellow-50);
+  border: 1px solid var(--yellow-100);
+  color: var(--yellow-900);
+  font-size: 12.5px;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .brandPanel {
+    padding: 24px;
+  }
+
+  .brandPanel::after {
+    display: none;
+  }
+
+  .pitchHeadline {
+    font-size: 22px;
+  }
+}

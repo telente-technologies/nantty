@@ -1,0 +1,37 @@
+.container {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  min-width: 220px;
+  max-height: 340px;
+  overflow: auto;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-float);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.option:hover {
+  background: var(--surface-sunken);
+}
+
+.option input {
+  accent-color: var(--blue-500);
+}

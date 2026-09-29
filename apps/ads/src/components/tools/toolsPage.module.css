@@ -1,0 +1,140 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.listRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.listRow:last-child {
+  border-bottom: 0;
+}
+
+.listMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+.conditionList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.conditionList li::before {
+  content: "•";
+  color: var(--blue-500);
+  margin-right: 6px;
+}
+
+.rowEnd {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.arms {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.arm {
+  padding: 10px 12px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+  background: var(--surface-app);
+}
+
+.armWinner {
+  border-color: var(--success);
+  background: var(--success-tint);
+}
+
+.confidence {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+  max-width: 280px;
+}
+
+.confidenceFill {
+  height: 100%;
+  background: var(--blue-500);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.conditionEditor {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.9fr 1.2fr auto;
+  gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+}
+
+.armEditor {
+  display: grid;
+  grid-template-columns: auto 1fr 110px;
+  gap: 10px;
+  align-items: center;
+}
+
+.targetList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+}
+
+@media (max-width: 760px) {
+  .formGrid,
+  .conditionEditor {
+    grid-template-columns: 1fr;
+  }
+
+  .listRow {
+    flex-direction: column;
+  }
+}

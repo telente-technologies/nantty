@@ -1,0 +1,14 @@
+.control {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.presetField {
+  width: 170px;
+}
+
+.dateField {
+  width: 150px;
+}

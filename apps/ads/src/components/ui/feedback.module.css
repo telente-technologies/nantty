@@ -1,0 +1,111 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 40px 24px;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--blue-tint);
+  color: var(--blue-500);
+  margin-bottom: 4px;
+}
+
+.emptyDescription {
+  max-width: 420px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.errorState {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-medium);
+  background: var(--error-tint);
+  color: var(--error-ink);
+}
+
+.retryButton {
+  margin-left: auto;
+  border: 1px solid currentColor;
+  background: transparent;
+  border-radius: var(--radius-small);
+  height: 28px;
+  padding: 0 10px;
+  font-weight: 600;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-medium);
+  border: 1px solid;
+}
+
+.noticeIcon {
+  margin-top: 2px;
+}
+
+.noticeBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info {
+  background: var(--blue-tint);
+  border-color: var(--blue-50);
+  color: var(--blue-900);
+}
+
+.success {
+  background: var(--success-tint);
+  border-color: #bfeedd;
+  color: var(--success-ink);
+}
+
+.caution {
+  background: var(--caution-tint);
+  border-color: #fbd9a0;
+  color: var(--caution-ink);
+}
+
+.error {
+  background: var(--error-tint);
+  border-color: #f8c4c4;
+  color: var(--error-ink);
+}
+
+.loadingBlock,
+.skeletonLine {
+  display: block;
+  border-radius: var(--radius-medium);
+  background: linear-gradient(90deg, var(--surface-sunken) 0%, #e7eaf6 50%, var(--surface-sunken) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.skeletonLine {
+  height: 12px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}

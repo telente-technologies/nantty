@@ -1,0 +1,42 @@
+.filterRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.searchField {
+  width: 200px;
+}
+
+.filterField {
+  width: 180px;
+}
+
+.cardPadding {
+  padding: 16px;
+}
+
+.bulkBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--radius-medium);
+  background: var(--blue-tint);
+}
+
+.bulkCount {
+  padding: 0 8px;
+  font-weight: 650;
+  color: var(--blue-800);
+}
+
+@media (max-width: 900px) {
+  .searchField,
+  .filterField {
+    width: calc(50% - 5px);
+  }
+}

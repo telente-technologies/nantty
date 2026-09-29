@@ -1,0 +1,115 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.idRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+.formRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.formRow > :first-child {
+  flex: 1;
+  min-width: 200px;
+}
+
+.businessRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.storeMark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--blue-tint);
+  color: var(--blue-600);
+}
+
+.memberCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.memberAvatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--blue-500);
+  color: #fff;
+  font-weight: 700;
+  flex: none;
+}
+
+.roleSelect {
+  height: 30px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  padding: 0 6px;
+}
+
+.roleGuide {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.roleGuideItem {
+  padding: 10px;
+  border-radius: var(--radius-medium);
+  background: var(--surface-app);
+  border: 1px solid var(--divider-soft);
+}
+
+.inviteForm {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--divider-soft);
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .inviteForm {
+    grid-template-columns: 1fr;
+  }
+}

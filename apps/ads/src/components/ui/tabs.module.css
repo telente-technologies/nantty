@@ -1,0 +1,41 @@
+.tabList {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--ink-muted);
+  font-weight: 550;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.tab:hover {
+  color: var(--ink-strong);
+  text-decoration: none;
+}
+
+.active {
+  color: var(--blue-500);
+  border-bottom-color: var(--blue-500);
+}
+
+.count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}

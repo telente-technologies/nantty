@@ -1,0 +1,66 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kindChoices {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.kindCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1.5px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.kindCard:focus-within {
+  box-shadow: var(--focus-ring);
+}
+
+.kindCardSelected {
+  border-color: var(--blue-500);
+  background: var(--blue-tint);
+}
+
+.kindTitle {
+  font-weight: 650;
+}
+
+.kindDescription {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .kindChoices {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,173 @@
+.wizard {
+  display: flex;
+  flex-direction: column;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.layoutWithEstimate {
+  grid-template-columns: 220px minmax(0, 1fr) 280px;
+}
+
+.stepper {
+  position: sticky;
+  top: calc(var(--topbar-height) + 16px);
+}
+
+.stepper ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  counter-reset: none;
+}
+
+.stepButton {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--radius-medium);
+  background: transparent;
+  text-align: left;
+  color: var(--ink-muted);
+}
+
+.stepButton:hover:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+.stepButton:disabled {
+  opacity: 0.55;
+}
+
+.stepMarker {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--divider);
+  background: var(--surface-card);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stepCurrent {
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.stepCurrent .stepMarker {
+  border-color: var(--blue-500);
+  background: var(--blue-500);
+  color: #fff;
+}
+
+.stepComplete .stepMarker {
+  border-color: var(--success);
+  background: var(--success-tint);
+  color: var(--success-ink);
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stepLabel {
+  font-weight: 600;
+}
+
+.stepDescription {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.stepColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.stepCard {
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  outline: none;
+}
+
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 0;
+  background: linear-gradient(to top, var(--surface-app) 70%, transparent);
+}
+
+.actionBarEnd {
+  display: flex;
+  gap: 8px;
+}
+
+.estimateColumn {
+  position: sticky;
+  top: calc(var(--topbar-height) + 16px);
+}
+
+@media (max-width: 1280px) {
+  .layoutWithEstimate {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+
+  .estimateColumn {
+    position: static;
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 1000px) {
+  .layout,
+  .layoutWithEstimate {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stepper {
+    position: static;
+    overflow-x: auto;
+  }
+
+  .stepper ol {
+    flex-direction: row;
+  }
+
+  .stepDescription {
+    display: none;
+  }
+
+  .stepButton {
+    white-space: nowrap;
+  }
+
+  .estimateColumn {
+    grid-column: 1;
+  }
+}

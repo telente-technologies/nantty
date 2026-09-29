@@ -1,0 +1,40 @@
+.frame {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 60px;
+  padding: 0 24px;
+  background: var(--surface-rail);
+}
+
+.wordmarkLink:hover {
+  text-decoration: none;
+}
+
+.links {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+}
+
+.links a {
+  color: var(--blue-100);
+  font-weight: 500;
+}
+
+.main {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.narrow {
+  max-width: 640px;
+}

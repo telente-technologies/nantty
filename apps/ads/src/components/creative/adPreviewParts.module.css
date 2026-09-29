@@ -1,0 +1,71 @@
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.avatarFallback {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.seal {
+  color: var(--blue-500);
+}
+
+.sponsored {
+  font-size: 12px;
+  color: #909090;
+  white-space: nowrap;
+}
+
+.sponsoredInverted {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.mediaFrame {
+  position: relative;
+  width: 100%;
+  background: var(--surface-sunken);
+}
+
+.media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mediaPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 100%;
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.playBadge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 4px;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}

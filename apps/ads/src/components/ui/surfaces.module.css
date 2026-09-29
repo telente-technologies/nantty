@@ -1,0 +1,101 @@
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+
+.cardDescription {
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cardBody {
+  padding: 14px 16px 16px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.pageHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.pageDescription {
+  color: var(--ink-muted);
+  max-width: 640px;
+}
+
+.pageActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.keyValueList {
+  display: flex;
+  flex-direction: column;
+}
+
+.keyValueRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.keyValueRow:last-child {
+  border-bottom: 0;
+}
+
+.keyValueRow dt {
+  color: var(--ink-muted);
+}
+
+.keyValueRow dd {
+  font-weight: 550;
+  text-align: right;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
