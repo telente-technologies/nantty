@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react";
-import { Alert } from "react-native";
 
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { MediaValidationError } from "@/services/mediaPreparation.service";
@@ -8,6 +7,7 @@ import { useCombinedUploadProgress } from "@/store/uploadQueue.store";
 import type { ID, Media, MediaUploadPurpose, Post } from "@/types";
 
 import { MAXIMUM_MEDIA_PER_POST } from "./pickMedia.util";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export interface PostDraftMediaItem {
   readonly jobId: ID;
@@ -39,7 +39,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
           rejectedMessages.push(error instanceof MediaValidationError ? error.message : "We couldn't add one of the files.");
         }
       }
-      if (rejectedMessages.length > 0) Alert.alert("Some files weren't added", [...new Set(rejectedMessages)].join("\n"));
+      if (rejectedMessages.length > 0) showAlertWithButtons("Some files weren't added", [...new Set(rejectedMessages)].join("\n"));
     },
     [purpose, setDraftMediaItems],
   );
