@@ -18,6 +18,7 @@ export const landingTickerItems = [
   "Tax reports",
   "Payouts to your bank",
   "Creator affiliates",
+  "Official Store badge",
 ] as const;
 
 export interface LandingFeature {
@@ -38,6 +39,7 @@ export const landingFeatures: LandingFeature[] = [
   { id: "staff", title: "Staff, roles and cashier PINs", description: "Owners, managers, cashiers, inventory and support each see only what they need. Cashiers switch in on a shared tablet with a PIN.", screenshot: "staffRoles", screenshotAlt: "The staff list with roles, locations and PIN status", size: "regular" },
   { id: "wallet", title: "Wallet and payouts", description: "Money in escrow, pending and available, every transaction, and withdrawals to your bank account.", screenshot: "walletPayouts", screenshotAlt: "Wallet balances and recent transactions", size: "regular" },
   { id: "affiliates", title: "Creators who sell for you", description: "Set commissions, approve creators from the Zudomart Creator Program and invite them to live-sell your products. Commissions settle automatically from escrow.", screenshot: "affiliateCreators", screenshotAlt: "The affiliates overview with top creators and commissions", size: "regular" },
+  { id: "brand", title: "Your brand, protected", description: "Run your brand profile and team, link your stores, earn the Official Store badge when your brand is registered and Gold verified, and report listings that misuse your name.", screenshot: "brandProtection", screenshotAlt: "Brand protection listings ranked by risk with a file-claim button", size: "wide" },
 ];
 
 export const landingQuestions = [
@@ -47,5 +49,6 @@ export const landingQuestions = [
   { question: "Is stock shared between the app and my shop?", answer: "Yes. There is one stock count per location. An online order reserves stock and a counter sale reduces it, so you never sell the same item twice." },
   { question: "What happens if the internet goes off at the counter?", answer: "The register keeps working. Sales are saved on the device and sent to Zudomart in order when you reconnect, without duplicates." },
   { question: "When do I get paid for online orders?", answer: "Buyers pay into escrow. The money moves to your available balance after the buyer confirms delivery, and you can withdraw it to your bank." },
+  { question: "How do I get the Official Store badge?", answer: "Register your brand in the Zudomart app with your trademark or CAC documents, keep your business Gold verified with an active plan, then apply from Brand → Official Store in the dashboard." },
   { question: "Which hardware works?", answer: "Any laptop or tablet with a modern browser. USB and Bluetooth barcode scanners, receipt printers set up in your browser, and the card terminal you already use for card payments." },
 ];
