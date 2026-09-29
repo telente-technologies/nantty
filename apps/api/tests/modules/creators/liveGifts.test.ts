@@ -21,11 +21,9 @@ async function startLive(): Promise<{ hostToken: string; hostId: string; liveId:
 }
 
 describe("live gifts", () => {
-  it("lists the gift catalog with prices per currency", async () => {
-    const catalog = (await app.client.get("/api/v1/gifts").expect(200)).json<{ data: { id: string; price: MoneyBody; prices: MoneyBody[] }[] }>();
-    const rose = catalog.data.find((gift) => gift.id === "rose");
-    expect(rose?.prices.map((price) => price.currency)).toEqual(expect.arrayContaining(["NGN", "USD", "GHS"]));
-    expect(rose?.price.amountMinor).toBeGreaterThan(0);
+  it("lists the gift catalog priced in coins", async () => {
+    const catalog = (await app.client.get("/api/v1/gifts").expect(200)).json<{ data: { id: string; priceCoins: number }[] }>();
+    expect(catalog.data.find((gift) => gift.id === "rose")?.priceCoins).toBe(1);
   });
 
   it("charges the viewer once per Idempotency-Key and records the creator's net earning", async () => {
@@ -33,18 +31,18 @@ describe("live gifts", () => {
     const viewer = await app.registerUser();
     await app.client.post(`/api/v1/lives/${liveId}/gifts`).auth(viewer.accessToken).send({ giftId: "rose" }).expect(400);
     const key = createIdempotencyKey();
-    const first = (await app.client.post(`/api/v1/lives/${liveId}/gifts`).auth(viewer.accessToken).set("idempotency-key", key).send({ giftId: "fire", quantity: 2 }).expect(201)).json<{ id: string; amount: MoneyBody }>();
+    const first = (await app.client.post(`/api/v1/lives/${liveId}/gifts`).auth(viewer.accessToken).set("idempotency-key", key).send({ giftId: "fire", quantity: 2 }).expect(201)).json<{ id: string; coins: number; coinBalance: number }>();
     const replay = await app.client.post(`/api/v1/lives/${liveId}/gifts`).auth(viewer.accessToken).set("idempotency-key", key).send({ giftId: "fire", quantity: 2 }).expect(201);
     expect(replay.json<{ id: string }>().id).toBe(first.id);
     const payments = [...wallets.giftPayments.values()].filter((payment) => payment.recipientUserId === hostId);
     expect(payments).toHaveLength(1);
-    expect(payments[0]).toMatchObject({ senderUserId: viewer.userId, platformCutBasisPoints: 3_000 });
-    expect(payments[0]?.amount.amountMinor).toBe(first.amount.amountMinor);
+    expect(payments[0]).toMatchObject({ senderUserId: viewer.userId, creatorShareBasisPoints: 7_000, coins: 20 });
+    expect(first).toMatchObject({ coins: 20, coinBalance: 1_000 });
 
     const earnings = (await app.client.get("/api/v1/creators/earnings").auth(hostToken).expect(200)).json<{ data: { kind: string; amount: MoneyBody; grossAmount: MoneyBody; source: { type: string; id: string } }[] }>();
     expect(earnings.data).toHaveLength(1);
-    expect(earnings.data[0]).toMatchObject({ kind: "gift", source: { type: "live", id: liveId }, grossAmount: first.amount });
-    expect(earnings.data[0]?.amount.amountMinor).toBe(first.amount.amountMinor - Math.floor((first.amount.amountMinor * 3_000) / 10_000));
+    expect(earnings.data[0]).toMatchObject({ kind: "gift", source: { type: "live", id: liveId }, grossAmount: { amountMinor: 20, currency: "COIN" } });
+    expect(earnings.data[0]?.amount).toEqual({ amountMinor: 14, currency: "COIN" });
 
     const dashboard = (await app.client.get("/api/v1/creators/dashboard?period=today").auth(hostToken).expect(200)).json<{ live: { sessionsHosted: number; giftsReceived: number }; earnings: { gifts: MoneyBody[] } }>();
     expect(dashboard.live).toMatchObject({ sessionsHosted: 1, giftsReceived: 1 });
