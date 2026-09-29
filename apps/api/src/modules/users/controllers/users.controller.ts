@@ -22,6 +22,7 @@ import {
   IdParamsSchema,
   SaveTopicsBodySchema,
   UpdateAddressBodySchema,
+  UpdateLocalePreferencesBodySchema,
   UpdateProfileBodySchema,
   UpdateSettingsBodySchema,
   UsernameParamsSchema,
@@ -54,6 +55,14 @@ export class UsersController {
     return json(200, (await this.commands.execute<UpdatePreferencesCommand, UserRecord>(command)).settings);
   };
 
+  public readonly updateLocalePreferences = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const body = UpdateLocalePreferencesBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    const command = new UpdatePreferencesCommand(requireAuthenticatedPrincipal(ctx), body.data);
+    const { countryCode, currency } = (await this.commands.execute<UpdatePreferencesCommand, UserRecord>(command)).settings;
+    return json(200, { countryCode, currency });
+  };
+
   public readonly deactivate = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     await this.commands.execute<DeactivateAccountCommand, void>(new DeactivateAccountCommand(requireAuthenticatedPrincipal(ctx)));
     return empty(204);
@@ -61,12 +70,12 @@ export class UsersController {
 
   public readonly listTopics = async (): Promise<HttpResponseContext> => {
     const topics = await this.queries.execute<ListTopicsQuery, readonly TopicRecord[]>(new ListTopicsQuery());
-    return json(200, { items: topics.map(convertTopicToDto) });
+    return json(200, topics.map(convertTopicToDto));
   };
 
   public readonly listMyTopics = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const topics = await this.queries.execute<ListMyTopicsQuery, readonly TopicRecord[]>(new ListMyTopicsQuery(requireAuthenticatedPrincipal(ctx)));
-    return json(200, { items: topics.map(convertTopicToDto) });
+    return json(200, topics.map(convertTopicToDto));
   };
 
   public readonly saveMyTopics = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -74,12 +83,12 @@ export class UsersController {
     if (!body.success) return validationFailed(body.issues);
     const command = new SaveTopicsCommand(requireAuthenticatedPrincipal(ctx), body.data.topicIds);
     const topics = await this.commands.execute<SaveTopicsCommand, readonly TopicRecord[]>(command);
-    return json(200, { items: topics.map(convertTopicToDto) });
+    return json(200, topics.map(convertTopicToDto));
   };
 
   public readonly listAddresses = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const addresses = await this.queries.execute<ListAddressesQuery, readonly AddressDto[]>(new ListAddressesQuery(requireAuthenticatedPrincipal(ctx)));
-    return json(200, { items: addresses });
+    return json(200, addresses);
   };
 
   public readonly addAddress = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
