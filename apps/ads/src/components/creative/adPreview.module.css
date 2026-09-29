@@ -175,71 +175,14 @@
   background: rgb(255 255 255 / 0.9);
 }
 
-.martGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 12px;
-  background: #f7f8fe;
-}
 
-.productTile {
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #ebecf2;
-}
 
-.productBody {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
 
-.productTitle {
-  font-size: 13px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 
-.productPrice {
-  font-weight: 700;
-  font-size: 14px;
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
-  flex-wrap: wrap;
-}
 
-.compareAt {
-  font-weight: 400;
-  font-size: 11px;
-  color: #909090;
-}
 
-.productMeta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 4px;
-}
 
-.rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 12px;
-  color: var(--caution);
-}
 
-.ghostTile {
-  border-radius: 8px;
-  background: repeating-linear-gradient(135deg, #eef1fe, #eef1fe 8px, #f7f8fe 8px, #f7f8fe 16px);
-  min-height: 200px;
-}
 
 .storeCard {
   padding: 14px 0;
@@ -283,4 +226,38 @@
 .postedTime {
   flex: none;
   font-weight: 500;
+}
+
+.wideMedia {
+  aspect-ratio: 16 / 9;
+}
+
+.feedLiveCard {
+  padding: 0 16px;
+}
+
+.letterbox {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 90px;
+}
+
+.letterbox > :first-child {
+  width: 100%;
+}
+
+.viewFullScreen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  font-size: 12.5px;
+  font-weight: 600;
 }
