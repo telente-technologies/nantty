@@ -1,0 +1,10 @@
+.venv/
+data/
+model_registry/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.env
