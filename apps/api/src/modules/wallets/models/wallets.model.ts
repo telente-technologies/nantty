@@ -60,9 +60,29 @@ export interface LedgerPostingResult {
 
 export type WithdrawalStatus = "pending" | "processing" | "paid" | "failed";
 
+export type WalletOwner = { readonly kind: "store"; readonly storeId: string } | { readonly kind: "user"; readonly userId: string };
+
+export type WalletScopeName = "store" | "user";
+
+export interface WalletScopeInput {
+  readonly scope: WalletScopeName;
+  readonly storeId: string | undefined;
+  readonly currency: CurrencyCode;
+}
+
+export function describeWalletOwner(owner: WalletOwner): { readonly storeId: string | null; readonly userId: string | null } {
+  return owner.kind === "store" ? { storeId: owner.storeId, userId: null } : { storeId: null, userId: owner.userId };
+}
+
+export function findWalletOwnerOfRecord(record: { readonly storeId: string | null; readonly userId: string | null }): WalletOwner {
+  if (record.storeId !== null) return { kind: "store", storeId: record.storeId };
+  return { kind: "user", userId: record.userId ?? "" };
+}
+
 export interface PayoutAccountRecord {
   readonly id: string;
-  readonly storeId: string;
+  readonly storeId: string | null;
+  readonly userId: string | null;
   readonly bankCode: string;
   readonly bankName: string;
   readonly accountNumberEncrypted: string;
@@ -77,7 +97,8 @@ export type NewPayoutAccount = Omit<PayoutAccountRecord, "id" | "createdAt" | "r
 
 export interface WithdrawalRecord {
   readonly id: string;
-  readonly storeId: string;
+  readonly storeId: string | null;
+  readonly userId: string | null;
   readonly payoutAccountId: string;
   readonly amount: MinorUnits;
   readonly currency: CurrencyCode;
@@ -95,3 +116,21 @@ export function calculateBalanceChange(kind: LedgerAccountKind, direction: Ledge
   const increasesOnDebit = kind === "asset";
   return (direction === "debit") === increasesOnDebit ? amount : -amount;
 }
+
+export type WalletTopUpStatus = "pending" | "succeeded" | "failed";
+
+export interface WalletTopUpRecord {
+  readonly id: string;
+  readonly userId: string;
+  readonly provider: string;
+  readonly reference: string;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
+  readonly status: WalletTopUpStatus;
+  readonly authorizationUrl: string | null;
+  readonly providerTransactionId: string | null;
+  readonly creditedAt: Date | null;
+  readonly createdAt: Date;
+}
+
+export type NewWalletTopUp = Pick<WalletTopUpRecord, "userId" | "provider" | "reference" | "amount" | "currency">;
