@@ -27,6 +27,7 @@ import { MessagesModule } from "./modules/messages/index.js";
 import { SearchModule } from "./modules/search/index.js";
 import { MediaModule } from "./modules/media/index.js";
 import { WaitlistModule } from "./modules/waitlist/index.js";
+import { CurrencyModule } from "./modules/currency/index.js";
 import { AuditModule } from "./modules/index.js";
 
 export interface AppOptions {
@@ -66,6 +67,7 @@ export function createApp(options: AppOptions): Runtime {
     new SearchModule(),
     new MediaModule(),
     new WaitlistModule(),
+    new CurrencyModule(),
   ] as Module[]) {
     modules.set(module.id, module);
   }
