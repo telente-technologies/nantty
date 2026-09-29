@@ -11,6 +11,7 @@ import type { Clock } from "../../src/interfaces/clock.interface.js";
 import { createAppLogger } from "../../src/loggers/app.logger.js";
 import type { OtpPurpose, SocialProvider, VerifiedSocialIdentity } from "../../src/modules/auth/models/auth.model.js";
 import type { ContactAddress } from "../../src/modules/auth/services/contact.service.js";
+import { StaticBankDirectory } from "../../src/modules/wallets/services/bankDirectory.service.js";
 import { registerRoutes } from "../../src/routes/index.js";
 
 export class AdjustableClock implements Clock {
@@ -61,7 +62,9 @@ export function createTestSettings(overrides: Partial<AppSettings> = {}): AppSet
       sensitiveRateLimit: { windowMs: 60_000, max: 0 },
     },
     dataEncryptionKey: new Uint8Array(randomBytes(32)),
-    money: { currency: "NGN", commissionBps: 500, escrowInspectionDays: 3 },
+    money: { commissionBps: 500, escrowInspectionDays: 3 },
+    locale: { trustedCountryHeader: "cf-ipcountry" },
+    exchangeRates: { provider: "static", refreshIntervalMinutes: 60 },
     payments: {
       paystackSecretKey: "sk_test_paystack_secret",
       flutterwaveSecretKey: "FLWSECK_TEST-secret",
@@ -102,7 +105,7 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     persistence: "memory",
     clock,
     logger: createAppLogger("test"),
-    external: { oneTimeCodeDelivery: oneTimeCodes, identityTokenVerifier: identityTokens, ...options.external },
+    external: { oneTimeCodeDelivery: oneTimeCodes, identityTokenVerifier: identityTokens, bankDirectory: new StaticBankDirectory(), ...options.external },
   });
   const router = createRouter();
   registerRoutes(router, dependencies);
