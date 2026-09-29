@@ -8,17 +8,16 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { mediaService, type MediaUploadPurpose } from "@/services/media.service";
 
-const PRIVATE_EVIDENCE_UPLOAD_PURPOSE: MediaUploadPurpose = "chat";
-
 export interface PhotoEvidencePickerProps {
   readonly photoUrls: readonly string[];
   readonly onChangePhotoUrls: (photoUrls: string[]) => void;
   readonly maximumPhotos?: number;
   readonly addLabel?: string;
   readonly onUploadingChange?: (uploading: boolean) => void;
+  readonly privateUploadPurpose?: Extract<MediaUploadPurpose, "dispute_evidence" | "identity_document" | "verification_document">;
 }
 
-export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhotos = 5, addLabel = "Add photo", onUploadingChange }: PhotoEvidencePickerProps) {
+export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhotos = 5, addLabel = "Add photo", onUploadingChange, privateUploadPurpose = "dispute_evidence" }: PhotoEvidencePickerProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -29,7 +28,7 @@ export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhoto
     setUploading(true);
     onUploadingChange?.(true);
     try {
-      const uploadedUrl = await mediaService.uploadLocalImageAndReturnPublicUrl(picked.uri, picked.contentType, PRIVATE_EVIDENCE_UPLOAD_PURPOSE);
+      const uploadedUrl = await mediaService.uploadLocalImageAndReturnPublicUrl(picked.uri, picked.contentType, privateUploadPurpose);
       onChangePhotoUrls([...photoUrls, uploadedUrl]);
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Upload failed. Try again.");
