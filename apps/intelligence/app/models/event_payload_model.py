@@ -96,7 +96,9 @@ class AdImpressionPayload(ContractModel):
     campaign_id: OpaqueIdentifier
     advertiser_id: OpaqueIdentifier
     auction_id: OpaqueIdentifier
-    placement: Literal["feed", "clips", "mart", "search"]
+    placement: Literal["feed", "clips", "mart", "search", "live", "story", "post_detail"]
+    host_content_id: OpaqueIdentifier | None = None
+    host_creator_id: OpaqueIdentifier | None = None
     charge: MoneyAmount | None = None
 
 
@@ -129,6 +131,26 @@ class HiddenPayload(ContractModel):
 
 
 class RiskOutcomeLabeledPayload(ContractModel):
-    subject_type: Literal["order", "payout", "account_event"]
+    subject_type: Literal[
+        "order", "payout", "account_event", "coin_purchase", "coin_transfer", "gift", "referral_reward", "cashback"
+    ]
     subject_id: OpaqueIdentifier
     outcome: Literal["fraud_confirmed", "fraud_cleared"]
+
+
+class CoinTransferredPayload(ContractModel):
+    transfer_id: OpaqueIdentifier
+    recipient_id: OpaqueIdentifier
+    coin_amount: int = Field(ge=1, le=10**12)
+
+
+class GiftSentPayload(ContractModel):
+    gift_id: OpaqueIdentifier
+    creator_id: OpaqueIdentifier
+    coin_amount: int = Field(ge=1, le=10**12)
+    host_content_id: OpaqueIdentifier | None = None
+
+
+class ReferralRewardedPayload(ContractModel):
+    referral_id: OpaqueIdentifier
+    referee_id: OpaqueIdentifier
