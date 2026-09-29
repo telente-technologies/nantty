@@ -8,7 +8,6 @@ import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
-import { useAuthStore } from "@/store/auth.store";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useAuthStore } from "@/store/auth.store";
@@ -41,7 +40,6 @@ export function PostCard(props: PostCardProps) {
     post.author.id === signedInUserId || !props.onPressAuthor ? openUserProfile(post.author.id) : props.onPressAuthor();
   const hasMedia = post.media.length > 0;
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
-  const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const [tipTarget, setTipTarget] = useState<TipTarget | null>(null);
   const canTipAuthor = post.author.isCreator === true && post.author.id !== signedInUserId;
   const isMediaLockedForViewer = isContentLockedForViewer(post);
