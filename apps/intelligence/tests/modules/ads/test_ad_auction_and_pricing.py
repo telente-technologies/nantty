@@ -30,6 +30,7 @@ def build_ad_candidate(
             "spentToday": {"amountMinor": 0, "currency": currency},
             "spentTotal": {"amountMinor": 0, "currency": currency},
             "placements": ["feed"],
+            "creative": {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 15000},
             **overrides,
         }
     )
