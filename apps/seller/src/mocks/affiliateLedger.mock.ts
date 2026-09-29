@@ -1,7 +1,7 @@
-import { appendMockAuditLogEntry, readGlobalMockSlice, readMockDatabase } from "@/mocks/mockDatabase.mock";
+import { appendMockAuditLogEntry, readMockDatabase, readStoreScopedMockSlice } from "@/mocks/mockDatabase.mock";
 import { requireMockStorePrincipal } from "@/mocks/mockResponses.mock";
 import type { MockRequest } from "@/mocks/mockRouter.mock";
-import { buildDemoAffiliatesState, type AffiliatesMockState } from "@/mocks/seed/demoAffiliates.mock";
+import { buildDemoAffiliatesStateForStore, type AffiliatesMockState } from "@/mocks/seed/demoAffiliates.mock";
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
 import type { AffiliateCreatorPerformance, CommissionLedgerEntry, CommissionLedgerStatus } from "@/types/affiliate.type";
 import type { Money } from "@/types/money.type";
@@ -9,7 +9,7 @@ import type { EscrowStatus } from "@/types/order.type";
 import { calculateBasisPointsShareOfMinorAmount } from "@/utils/money.util";
 
 export function readAffiliatesMockState(): AffiliatesMockState {
-  return readGlobalMockSlice("affiliates", buildDemoAffiliatesState);
+  return readStoreScopedMockSlice("affiliates", buildDemoAffiliatesStateForStore);
 }
 
 function buildStoreMoney(amountMinor: number): Money {
