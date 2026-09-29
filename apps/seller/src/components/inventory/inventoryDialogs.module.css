@@ -16,6 +16,11 @@
   gap: 6px;
 }
 
+.picker > label {
+  flex: none;
+  max-width: none;
+}
+
 .pickerResults {
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
