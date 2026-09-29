@@ -90,7 +90,7 @@ class AdImpressionPayload(ContractModel):
     campaign_id: OpaqueIdentifier
     advertiser_id: OpaqueIdentifier
     auction_id: OpaqueIdentifier
-    placement: Literal["feed", "clips", "mart", "search", "live", "story", "post_detail"]
+    placement: Literal["feed", "clips", "mart", "search", "stories", "live", "live_discovery"]
     host_content_id: OpaqueIdentifier | None = None
     host_creator_id: OpaqueIdentifier | None = None
     charge: MoneyAmount | None = None
