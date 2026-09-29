@@ -1,7 +1,11 @@
 import type { ConfigManager } from "@zudojs/config";
 import { ConfigurationError } from "@zudojs/errors";
 
+import { loadCommunicationSettings } from "./communication.config.js";
 import { loadCreatorProgramSettings } from "./creators.config.js";
+import { loadCopyrightSettings, loadPlatformAdminSettings, loadUsernamePolicySettings } from "./platformAdmin.config.js";
+import { loadMonetizationSettings } from "./monetization.config.js";
+import { loadAdsSettings, loadIntelligenceSettings } from "./intelligence.config.js";
 
 const MIN_SECRET_LENGTH = 32;
 const DURATION_UNITS: Readonly<Record<string, number>> = { s: 1, m: 60, h: 3_600, d: 86_400 };
@@ -129,6 +133,13 @@ export function loadApplicationSettings(config: ConfigManager) {
       ffprobePath: readTrimmedSetting(config, "ffprobe_path") || "ffprobe",
     }),
     creators: loadCreatorProgramSettings(config),
+    communication: loadCommunicationSettings(config),
+    platformAdmin: loadPlatformAdminSettings(config),
+    usernames: loadUsernamePolicySettings(config),
+    copyright: loadCopyrightSettings(config),
+    monetization: loadMonetizationSettings(config),
+    intelligence: loadIntelligenceSettings(config),
+    ads: loadAdsSettings(config),
   });
 }
 
