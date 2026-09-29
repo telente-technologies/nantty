@@ -1,0 +1,75 @@
+{
+  "description": "Media shown inside the app screenshots in public/screens. The screenshots were captured from the Zudomart mobile app's Expo web preview using its demo data; all names, usernames, stores and brands are fictional demo data.",
+  "sources": [
+    {
+      "provider": "Unsplash",
+      "license": "Unsplash License (https://unsplash.com/license)",
+      "usage": "Product, profile, cover, post and story photos",
+      "catalog": "apps/mobile/src/mocks/unsplashPhotoIds.mock.ts"
+    },
+    {
+      "provider": "Mixkit",
+      "license": "Mixkit Stock Video Free License (https://mixkit.co/license/#videoFree)",
+      "usage": "Clip video frames in shoppableClipsScreen.webp (video 42137) and liveShoppingScreen.webp (video 40128)",
+      "catalog": "apps/mobile/src/mocks/clipsVideoCatalog.mock.ts"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "public/screens/homeFeedScreen.webp",
+      "shows": "Home feed: Adaeze Okafor's Owambe Edit post"
+    },
+    {
+      "file": "public/screens/homeMartScreen.webp",
+      "shows": "Mart tab: banner, Sales of the Day, Featured Brands, New Arrivals and product grid"
+    },
+    {
+      "file": "public/screens/martProductsScreen.webp",
+      "shows": "Mart product grid with naira prices"
+    },
+    {
+      "file": "public/screens/productDetailScreen.webp",
+      "shows": "Ankara Wrap Midi Dress product page (Adire House official store)"
+    },
+    {
+      "file": "public/screens/shoppingCartScreen.webp",
+      "shows": "Cart with earbuds, vitamin C serum and suya spice"
+    },
+    {
+      "file": "public/screens/creatorProfileScreen.webp",
+      "shows": "TundeTech seller profile with cover and avatar"
+    },
+    {
+      "file": "public/screens/chatWithSellerScreen.webp",
+      "shows": "Chat with Adaeze Styles"
+    },
+    {
+      "file": "public/screens/shoppableClipsScreen.webp",
+      "shows": "Clip: Adaeze Styles packing orders"
+    },
+    {
+      "file": "public/screens/liveShoppingScreen.webp",
+      "shows": "Promoted live barber session in Clips"
+    },
+    {
+      "file": "public/screens/storyScreen.webp",
+      "shows": "Tunde Bakare story: headphones back in stock"
+    },
+    {
+      "file": "public/screens/escrowStatusScreen.webp",
+      "shows": "Escrow payment protection timeline for order ZM-44105"
+    },
+    {
+      "file": "public/screens/sellerDashboardScreen.webp",
+      "shows": "In-app seller dashboard"
+    },
+    {
+      "file": "public/screens/sellerWalletScreen.webp",
+      "shows": "Seller wallet with escrow holds"
+    },
+    {
+      "file": "public/screens/creatorDashboardScreen.webp",
+      "shows": "Creator dashboard earnings"
+    }
+  ]
+}
