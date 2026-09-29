@@ -14,6 +14,8 @@ export interface MessageComposerBarProps {
   readonly onPressImage?: () => void;
   readonly onPressEmoji?: () => void;
   readonly sending?: boolean;
+  readonly onPressMicrophone?: () => void;
+  readonly onTypingChange?: (isTyping: boolean) => void;
 }
 
 export function MessageComposerBar({
@@ -24,6 +26,8 @@ export function MessageComposerBar({
   onPressImage,
   onPressEmoji,
   sending = false,
+  onPressMicrophone,
+  onTypingChange,
 }: MessageComposerBarProps) {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
@@ -33,7 +37,21 @@ export function MessageComposerBar({
     if (!canSend) return;
     onSend(text.trim());
     setText("");
+    onTypingChange?.(false);
   };
+
+  const updateTypedText = (nextText: string) => {
+    if ((nextText.length > 0) !== (text.length > 0)) onTypingChange?.(nextText.length > 0);
+    setText(nextText);
+  };
+
+  const microphoneButton = onPressMicrophone ? (
+    <Pressable accessibilityRole="button" accessibilityLabel="Record a voice note" hitSlop={10} onPress={onPressMicrophone}>
+      <Microphone24Icon />
+    </Pressable>
+  ) : (
+    <Microphone24Icon />
+  );
 
   const plusButton = (
     <Pressable accessibilityRole="button" accessibilityLabel="Add attachment" hitSlop={10} onPress={onPressPlus}>
@@ -43,11 +61,11 @@ export function MessageComposerBar({
 
   return (
     <View style={styles.bar}>
-      {!plusOnRight ? (focused ? <Microphone24Icon /> : plusButton) : null}
+      {!plusOnRight ? (focused ? microphoneButton : plusButton) : null}
       <View style={styles.field}>
         <TextInput
           value={text}
-          onChangeText={setText}
+          onChangeText={updateTypedText}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder={placeholder}
@@ -71,6 +89,8 @@ export function MessageComposerBar({
             <Pressable accessibilityRole="button" accessibilityLabel="Send an image" hitSlop={8} onPress={onPressImage}>
               <ImageSquare24Icon />
             </Pressable>
+          ) : onPressMicrophone && !plusOnRight ? (
+            microphoneButton
           ) : null}
         </View>
       </View>
