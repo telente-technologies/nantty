@@ -1,0 +1,60 @@
+.reportLinkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 10px;
+}
+
+.reportLink {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 14px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+  color: var(--ink-strong);
+}
+
+.reportLink:hover {
+  text-decoration: none;
+  border-color: var(--blue-300);
+  background: var(--blue-tint);
+}
+
+.reportLinkTitle {
+  font-weight: 650;
+}
+
+.reportLinkDescription {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.filterSelect {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+}
+
+.totalsRow {
+  font-weight: 700;
+}
+
+.backLink {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summaryTiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+
+@media print {
+  .filters {
+    display: none;
+  }
+}
