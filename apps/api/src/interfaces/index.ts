@@ -15,3 +15,4 @@ export * from "./sellerAccess.interface.js";
 export * from "./mediaLibrary.interface.js";
 export * from "./verificationBadge.interface.js";
 export * from "./entitlements.interface.js";
+export * from "./advertiserBilling.interface.js";
