@@ -1,3 +1,4 @@
+from app.features.ad_feature_vector_builder import AD_FEATURE_NAMES
 from app.features.clip_feature_vector_builder import CLIP_FEATURE_NAMES
 from app.features.feed_feature_vector_builder import FEED_FEATURE_NAMES
 from app.services.head_probability_predictor_service import HeuristicLogisticHeads
@@ -102,6 +103,22 @@ CLIP_HEURISTIC_HEADS = HeuristicLogisticHeads(
                 "creator_affinity": 1.5,
                 "topic_affinity_max": 1.0,
                 "log_duration_seconds": -0.4,
+            },
+        ),
+    },
+)
+
+AD_CLICK_HEURISTIC_HEADS = HeuristicLogisticHeads(
+    feature_names=AD_FEATURE_NAMES,
+    intercept_and_weights_by_head={
+        "click": (
+            0.0,
+            {
+                "logit_smoothed_click_rate": 1.0,
+                "creative_topic_affinity_max": 1.2,
+                "chosen_topic_match_count": 0.2,
+                "lookalike_similarity": 0.8,
+                "viewer_follows_advertiser": 0.3,
             },
         ),
     },

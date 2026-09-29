@@ -27,7 +27,9 @@ CLIP_FEATURE_NAMES: tuple[str, ...] = (
 )
 
 
-def read_clip_watch_counts(candidate: ClipCandidate, online_features: ViewerOnlineFeatures) -> tuple[float, float, float]:
+def read_clip_watch_counts(
+    candidate: ClipCandidate, online_features: ViewerOnlineFeatures
+) -> tuple[float, float, float]:
     item_statistics = online_features.item_statistics_by_item.get(candidate.item_id, {})
     watches = max(float(candidate.view_count), item_statistics.get("watches", 0.0))
     completions = max(float(candidate.completion_count), item_statistics.get("completions", 0.0))
