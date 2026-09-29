@@ -1,7 +1,8 @@
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export interface ChatsOptionsMenuProps {
   readonly visible: boolean;
@@ -17,7 +18,7 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
     { label: "New channel", onPress: onCreateChannel },
   ];
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable accessibilityLabel="Close menu" style={styles.backdrop} onPress={onClose}>
         <View style={[styles.menu, { top: topOffset }]} accessibilityRole="menu">
           {menuItems.map((item) => (
@@ -37,7 +38,7 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
           ))}
         </View>
       </Pressable>
-    </Modal>
+    </FrameAwareModal>
   );
 }
 
