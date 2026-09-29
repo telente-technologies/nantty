@@ -1,0 +1,1 @@
+export function registerTeamAndSettingsMockHandlers(): void {}
