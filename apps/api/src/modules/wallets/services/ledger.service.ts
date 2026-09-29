@@ -3,7 +3,7 @@ import { unprocessable } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 import type { Money } from "../../../utils/money.util.js";
-import type { LedgerAccountSpecification, LedgerLineInput, LedgerPostingResult, LedgerTransactionInput } from "../models/wallets.model.js";
+import type { LedgerAccountSpecification, LedgerLineInput, LedgerPostingResult, LedgerTransactionInput, WalletOwner } from "../models/wallets.model.js";
 import type { LedgerRepository } from "../repositories/ledger.repository.js";
 
 export const LedgerAccounts = {
@@ -22,10 +22,27 @@ export const LedgerAccounts = {
   storePayoutPending: (storeId: string, currency: CurrencyCode): LedgerAccountSpecification => ({
     key: `liability:payout-pending:${storeId}:${currency}`, ownerType: "store", ownerId: storeId, kind: "liability", allowNegative: false,
   }),
+  userWallet: (userId: string, currency: CurrencyCode): LedgerAccountSpecification => ({
+    key: `liability:user-wallet:${userId}:${currency}`, ownerType: "user", ownerId: userId, kind: "liability", allowNegative: false,
+  }),
+  userPayoutPending: (userId: string, currency: CurrencyCode): LedgerAccountSpecification => ({
+    key: `liability:user-payout-pending:${userId}:${currency}`, ownerType: "user", ownerId: userId, kind: "liability", allowNegative: false,
+  }),
+  platformSubscriptionRevenue: (currency: CurrencyCode): LedgerAccountSpecification => ({
+    key: `revenue:subscriptions:${currency}`, ownerType: "platform", ownerId: null, kind: "revenue", allowNegative: false,
+  }),
   platformCommission: (currency: CurrencyCode): LedgerAccountSpecification => ({
     key: `revenue:commission:${currency}`, ownerType: "platform", ownerId: null, kind: "revenue", allowNegative: false,
   }),
 };
+
+export function findWalletAccountForOwner(owner: WalletOwner, currency: CurrencyCode): LedgerAccountSpecification {
+  return owner.kind === "store" ? LedgerAccounts.storeWallet(owner.storeId, currency) : LedgerAccounts.userWallet(owner.userId, currency);
+}
+
+export function findPayoutPendingAccountForOwner(owner: WalletOwner, currency: CurrencyCode): LedgerAccountSpecification {
+  return owner.kind === "store" ? LedgerAccounts.storePayoutPending(owner.storeId, currency) : LedgerAccounts.userPayoutPending(owner.userId, currency);
+}
 
 export function sumLineAmountsByCurrencyAndDirection(input: LedgerTransactionInput, direction: "debit" | "credit"): ReadonlyMap<CurrencyCode, MinorUnits> {
   const totals = new Map<CurrencyCode, MinorUnits>();
