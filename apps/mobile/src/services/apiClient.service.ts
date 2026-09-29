@@ -44,13 +44,9 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
   const url = appendQueryStringToPath(path, options.query);
   if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body);
 
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = { Accept: "application/json", ...getAuthorizedRequestHeaders(options.auth !== false) };
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
-  const deviceRegionCode = useLocaleStore.getState().deviceRegionCode;
-  if (deviceRegionCode) headers["X-Client-Region"] = deviceRegionCode;
-  const token = useAuthStore.getState().accessToken;
-  if (options.auth !== false && token) headers.Authorization = `Bearer ${token}`;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), apiConfig.timeoutMs);
@@ -72,15 +68,28 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
   }
 }
 
+export function getAuthorizedRequestHeaders(includeAuthorization = true): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const deviceRegionCode = useLocaleStore.getState().deviceRegionCode;
+  if (deviceRegionCode) headers["X-Client-Region"] = deviceRegionCode;
+  const token = useAuthStore.getState().accessToken;
+  if (includeAuthorization && token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+export function refreshSessionAfterUnauthorizedResponse(): Promise<boolean> {
+  refreshing ??= refreshAccessTokenWithRefreshToken().finally(() => {
+    refreshing = null;
+  });
+  return refreshing;
+}
+
 async function sendRequestWithTokenRefresh<T>(method: Method, path: string, options?: RequestOptions): Promise<T> {
   try {
     return await sendHttpRequest<T>(method, path, options);
   } catch (error) {
     if (!(error instanceof ApiError) || error.status !== 401 || options?.auth === false) throw error;
-    refreshing ??= refreshAccessTokenWithRefreshToken().finally(() => {
-      refreshing = null;
-    });
-    if (!(await refreshing)) throw error;
+    if (!(await refreshSessionAfterUnauthorizedResponse())) throw error;
     return sendHttpRequest<T>(method, path, options);
   }
 }
