@@ -98,7 +98,12 @@ export interface PendingPayment {
   readonly reference: string | null;
 }
 
-export interface QueuedOfflineSale {
+export interface OfflineSaleOrigin {
+  readonly storeId: string | null;
+  readonly operatorPass: string | null;
+}
+
+export interface QueuedOfflineSale extends Partial<OfflineSaleOrigin> {
   readonly clientSaleId: string;
   readonly request: CreateSaleRequest;
   readonly localSale: PosSale;
