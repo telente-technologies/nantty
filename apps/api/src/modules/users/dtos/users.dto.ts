@@ -72,6 +72,6 @@ export function convertAddressToDto(address: AddressRecord, phone: string): Addr
   return { ...visible, phone };
 }
 
-export function convertTopicToDto(topic: TopicRecord): { readonly id: string; readonly slug: string; readonly name: string } {
-  return { id: topic.id, slug: topic.slug, name: topic.name };
+export function convertTopicToDto(topic: TopicRecord): { readonly id: string; readonly name: string; readonly slug: string } {
+  return { id: topic.id, name: topic.name, slug: topic.slug };
 }
