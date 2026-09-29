@@ -1,17 +1,16 @@
 import { CommandHandler } from "@zudojs/cqrs";
 
-import type { AdminModuleServices } from "../../services/adminModule.service.js";
+import type { AdminServices } from "../../services/adminServices.service.js";
 import type { StepUpAdminSessionCommand } from "./stepUpAdminSession.command.js";
 
-export class StepUpAdminSessionHandler extends CommandHandler<StepUpAdminSessionCommand, { readonly stepUpValidUntil: string }> {
+export class StepUpAdminSessionHandler extends CommandHandler<StepUpAdminSessionCommand, { readonly stepUpToken: string; readonly expiresIn: number }> {
   public readonly commandType = "admin.stepUpAdminSession" as const;
 
-  public constructor(private readonly service: AdminModuleServices) {
+  public constructor(private readonly service: AdminServices) {
     super();
   }
 
-  public async execute(command: StepUpAdminSessionCommand): Promise<{ readonly stepUpValidUntil: string }> {
-    const validUntil = await this.service.sessions.stepUp(command.principal, command.proof);
-    return { stepUpValidUntil: validUntil.toISOString() };
+  public execute(command: StepUpAdminSessionCommand): Promise<{ readonly stepUpToken: string; readonly expiresIn: number }> {
+    return this.service.signIn.stepUp(command.staff.account, command.staff.session, command.proof);
   }
 }
