@@ -32,6 +32,7 @@ import { PaystackGateway } from "../modules/payments/gateways/paystack.gateway.j
 import { registerPaymentsCommandAndQueryHandlers } from "../modules/payments/payments.module.js";
 import { PrismaPaymentsRepository, PrismaWebhookEventsRepository } from "../modules/payments/repositories/payments.prisma.repository.js";
 import { InMemoryPaymentsRepository, InMemoryWebhookEventsRepository } from "../modules/payments/repositories/payments.repository.js";
+import { CheckoutDiscountSlot } from "../modules/payments/services/checkoutDiscounts.service.js";
 import { PaymentReturnUrls } from "../modules/payments/services/paymentReturnUrl.service.js";
 import { PaymentWebhookRegistry } from "../modules/payments/services/paymentWebhookRegistry.service.js";
 import { PaymentsService } from "../modules/payments/services/payments.service.js";
@@ -79,6 +80,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   const escrowsRepository = usePrisma ? new PrismaEscrowsRepository() : new InMemoryEscrowsRepository();
   const ledger = new LedgerService(usePrisma ? new PrismaLedgerRepository() : new InMemoryLedgerRepository(), clock);
   const coinLedger = new CoinLedgerService(ledger);
+  const checkoutDiscounts = new CheckoutDiscountSlot();
   const webhookRegistry = new PaymentWebhookRegistry();
   const returnUrls = new PaymentReturnUrls(settings.payments.returnUrlAllowList);
 
@@ -110,6 +112,8 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     clock,
     returnUrls,
     webhookRegistry,
+    checkoutDiscounts,
+    ledger,
   });
   const disputesService = new DisputesService(usePrisma ? new PrismaDisputesRepository() : new InMemoryDisputesRepository(), escrowsService, ordersService);
   const disputeMessages = usePrisma ? new PrismaDisputeMessagesRepository() : new InMemoryDisputeMessagesRepository();
@@ -133,7 +137,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   const dashboardService = new StoreDashboardService(ordersRepository, shared.storeAccess, shared.productCatalog, clock);
 
   registerCartsCommandAndQueryHandlers(commands, queries, cartsService);
-  registerOrdersCommandAndQueryHandlers(commands, queries, { orders: ordersService, dashboard: dashboardService, escrows: escrowsService });
+  registerOrdersCommandAndQueryHandlers(commands, queries, { orders: ordersService, dashboard: dashboardService, escrows: escrowsService, checkoutDiscounts });
   registerPaymentsCommandAndQueryHandlers(commands, queries, paymentsService, escrowsService);
   registerEscrowsCommandAndQueryHandlers(commands, queries, { escrows: escrowsService, disputes: disputesService, orders: ordersService, conversation: conversationService });
   registerWalletsCommandAndQueryHandlers(commands, queries, { wallets: walletsService, withdrawals: withdrawalsService, topUps: topUpsService });
@@ -142,7 +146,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     orderLookup: new RepositoryOrderLookup(ordersRepository),
     creatorWallets: new LedgerCreatorWallets(ledger, shared.storeAccess, coinLedger),
     advertiserBilling: new LedgerAdvertiserBilling(ledger, shared.audit),
-    payments: { gateways, ledger, webhookRegistry, returnUrls, walletsService, coinLedger, paymentsService, escrowsService, ordersRepository },
+    payments: { gateways, ledger, webhookRegistry, returnUrls, walletsService, coinLedger, paymentsService, escrowsService, ordersRepository, checkoutDiscounts },
     scheduledJobs: [createEscrowAutoReleaseJob(escrowsService)],
     controllers: {
       cartsController: new CartsController(commands, queries),
