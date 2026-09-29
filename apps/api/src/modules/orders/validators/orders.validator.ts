@@ -13,7 +13,10 @@ export const CheckoutBodySchema = schema.object({ addressId: schema.string().uui
 
 export const OrderParamsSchema = schema.object({ id: schema.string().uuid() });
 
-export const ShipOrderBodySchema = schema.object({ trackingNumber: schema.string().max(80).optional() });
+export const ShipOrderBodySchema = schema.object({
+  courier: schema.string().min(2).max(80).optional(),
+  trackingNumber: schema.string().max(80).optional(),
+});
 
 export const ListBuyerOrdersQuerySchema = schema.object({
   status: schema.enum([...PUBLIC_ORDER_STATUSES, "all"]).optional(),
