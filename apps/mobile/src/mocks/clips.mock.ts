@@ -52,7 +52,19 @@ const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
   };
 };
 
-const allClips: readonly Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed);
+const PROMOTED_LIVE_CLIP_ID = "clip_olumide_barber";
+
+const turnIntoPromotedLiveStream = (clip: Clip): Clip =>
+  clip.id !== PROMOTED_LIVE_CLIP_ID
+    ? clip
+    : {
+        ...clip,
+        text: "LIVE now: Friday fade specials, walk-ins welcome in Yaba 💈 Join and ask me anything",
+        sponsored: { campaignId: "cmp_live_olumide_cuts", label: "Sponsored", advertiserName: clip.author.name },
+        promotedLive: { liveSessionId: "live_olumide_cuts", title: "Friday fade specials", viewers: 1284 },
+      };
+
+const allClips: readonly Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream);
 
 const withCurrentSound = (clip: Clip): Clip => ({ ...clip, sound: currentSoundForClip(clip.id) });
 
