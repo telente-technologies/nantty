@@ -24,4 +24,13 @@ export const sellerQuestions: readonly QuestionAndAnswer[] = [
     question: "Can I sell through live streams?",
     answer: "Yes. Approved sellers can go live, pin products during the stream, and let viewers buy without leaving the live.",
   },
+  {
+    question: "What is the Zudomart Dashboard?",
+    answer:
+      "The Zudomart Dashboard is a web app for verified Gold businesses with a subscription. It adds point of sale for your physical shop, advanced inventory, staff accounts and sales reports. Sign in with the same account you use in the Zudomart app.",
+  },
+  {
+    question: "How do I advertise my store?",
+    answer: "Boost a post or clip from the app, or use Zudomart Ads on the web to run campaigns for your posts, clips, lives and products. Sign in with your Zudomart account.",
+  },
 ];

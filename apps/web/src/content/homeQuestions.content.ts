@@ -26,6 +26,16 @@ export const homeQuestions: readonly QuestionAndAnswer[] = [
       "Businesses and individual sellers can apply to open a store. Applications are reviewed before a store goes live, so buyers know they are dealing with real sellers.",
   },
   {
+    question: "What do the blue, gold and black badges mean?",
+    answer:
+      "Blue is a verified personal account, such as a creator. Gold is a verified business or brand, and gold brands can run an official store. Black is an official government account. Badges only appear after Zudomart has checked who is behind the account.",
+  },
+  {
+    question: "Can creators earn on Zudomart?",
+    answer:
+      "Yes. Through the Creator Program you can receive gifts when you go live, earn affiliate commissions on products you promote, get a share of ad revenue on your content, and offer paid subscriptions to your fans.",
+  },
+  {
     question: "When and where does Zudomart launch?",
     answer: "Zudomart launches first across Nigeria, on iPhone and Android, with more countries after. Join the waitlist and we will email you when it is ready for you.",
   },
