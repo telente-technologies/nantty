@@ -55,7 +55,10 @@ gets back and falls back to deterministic logic whenever Python is slow, down or
 
 `degraded: true` means the online feature store (Redis) was unavailable and the answer used request
 data only. It is still valid; the API may log it and may prefer its fallback for money-sensitive paths.
-`rankingSource` suffix `heuristic` means no trained model was active (rule-based cold start).
+`rankingSource` suffix `heuristic` means no trained model was active (rule-based cold start). For
+For You requests with more than 120 candidates the source is `for_you:model_two_stage` (all candidates
+pre-ranked by the rule heads, the best 120 re-scored by the model; the rest are not returned). Treat
+`rankingSource` as informational only.
 
 `ExcludedItem`: `{"itemId": "...", "reason": "duplicate_candidate" | "blocked_or_muted_author" | "hidden_by_viewer" | "already_seen"}`.
 
