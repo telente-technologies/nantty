@@ -1,0 +1,31 @@
+import { ActionLinkStyledAsButton } from "../ui/actionLink";
+import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
+import styles from "./sellersHeroSection.module.css";
+
+export function SellersPageHeroSection() {
+  return (
+    <section className={styles.hero} aria-labelledby="sellers-hero-heading">
+      <div className={`pageContainer ${styles.layout}`}>
+        <div className={styles.copyColumn}>
+          <p className={styles.eyebrow}>Sell on Zudomart</p>
+          <h1 id="sellers-hero-heading" className={styles.heading}>
+            Turn your followers into paying customers.
+          </h1>
+          <p className={styles.lede}>
+            Post, go live and tag your products. Buyers check out inside the app, pay into escrow, and you get paid to your wallet once they confirm delivery.
+          </p>
+          <div className={styles.actions}>
+            <ActionLinkStyledAsButton href="#apply">Apply to sell</ActionLinkStyledAsButton>
+            <ActionLinkStyledAsButton href="#how-selling-works" appearance="secondary">
+              How selling works
+            </ActionLinkStyledAsButton>
+          </div>
+        </div>
+        <div className={styles.visual}>
+          <PhoneFrameWithAppScreen screen="liveShoppingScreen" alt="Zudomart live stream where a seller shows products to viewers" className={`${styles.phone} ${styles.phoneBack}`} sizes="(min-width: 960px) 240px, 40vw" />
+          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="Zudomart seller profile with posts and a store tab" className={`${styles.phone} ${styles.phoneFront}`} priority sizes="(min-width: 960px) 280px, 50vw" />
+        </div>
+      </div>
+    </section>
+  );
+}

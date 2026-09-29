@@ -1,0 +1,88 @@
+.section {
+  padding-block: var(--section-space);
+  background:
+    radial-gradient(60% 60% at 90% 70%, rgb(32 67 245 / 0.5), transparent 70%),
+    var(--blue-900);
+  color: #fff;
+}
+
+.layout {
+  display: grid;
+  gap: 56px;
+  align-items: center;
+}
+
+.copyColumn {
+  display: grid;
+  gap: 40px;
+}
+
+.flowList {
+  position: relative;
+  display: grid;
+  gap: 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.flowList::before {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 22px;
+  bottom: 22px;
+  border-left: 2px dashed rgb(181 193 252 / 0.35);
+}
+
+.flowStage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.flowIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--blue-500);
+  color: #fff;
+  box-shadow: 0 0 0 6px var(--blue-900);
+}
+
+.flowStage:last-child .flowIcon {
+  background: var(--yellow-500);
+  color: var(--ink-strong);
+}
+
+.flowTitle {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.flowDescription {
+  display: block;
+  margin-top: 2px;
+  color: var(--blue-100);
+}
+
+.walletColumn {
+  display: flex;
+  justify-content: center;
+}
+
+.walletCard {
+  max-width: 340px;
+  color: var(--ink-strong);
+  transform: rotate(-2deg);
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 72px;
+  }
+}

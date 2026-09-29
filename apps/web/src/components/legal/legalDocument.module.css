@@ -1,0 +1,97 @@
+.document {
+  padding-block: clamp(48px, 8vw, 96px) var(--section-space);
+}
+
+.header {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+
+.summary {
+  font-size: 1.15rem;
+  color: var(--ink-muted);
+}
+
+.updated {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+
+.placeholderNotice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.body {
+  display: grid;
+  gap: 40px;
+  margin-top: 56px;
+}
+
+.tableOfContents {
+  align-self: start;
+  font-size: 0.95rem;
+}
+
+.tableOfContentsHeading {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.tableOfContents ol {
+  display: grid;
+  gap: 8px;
+  padding-left: 20px;
+  color: var(--ink-muted);
+}
+
+.tableOfContents a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.tableOfContents a:hover {
+  color: var(--blue-600);
+}
+
+.sections {
+  display: grid;
+  gap: 40px;
+  max-width: 68ch;
+}
+
+.sectionHeading {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.paragraph {
+  color: #333;
+}
+
+.paragraph + .paragraph {
+  margin-top: 12px;
+}
+
+@media (min-width: 960px) {
+  .body {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 64px;
+  }
+
+  .tableOfContents {
+    position: sticky;
+    top: 120px;
+  }
+}

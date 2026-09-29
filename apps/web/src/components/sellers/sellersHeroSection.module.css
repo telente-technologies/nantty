@@ -1,0 +1,78 @@
+.hero {
+  margin-top: -72px;
+  padding-top: calc(72px + clamp(40px, 7vw, 80px));
+  background: var(--yellow-500);
+  overflow: hidden;
+}
+
+.layout {
+  display: grid;
+  gap: 40px;
+  align-items: end;
+}
+
+.copyColumn {
+  display: grid;
+  gap: 22px;
+  justify-items: start;
+  padding-bottom: clamp(40px, 7vw, 96px);
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--yellow-900);
+}
+
+.heading {
+  font-size: clamp(2.6rem, 7.6vw, 5.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  max-width: 12ch;
+}
+
+.lede {
+  max-width: 46ch;
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  color: #2b2806;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: clamp(340px, 60vw, 560px);
+}
+
+.phone {
+  position: absolute;
+  bottom: -30%;
+}
+
+.phoneBack {
+  width: min(240px, 42vw);
+  left: calc(50% - min(240px, 42vw) + 10px);
+  bottom: -22%;
+  transform: rotate(-8deg);
+}
+
+.phoneFront {
+  width: min(280px, 50vw);
+  left: calc(50% - 20px);
+  transform: rotate(4deg);
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+}
