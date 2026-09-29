@@ -5,9 +5,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Post } from "@/types";
-import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/format-date.util";
+import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 
-import { MediaPager } from "./media-pager";
+import { MediaPager } from "./mediaPager";
 
 export interface PostCardProps {
   readonly post: Post;
