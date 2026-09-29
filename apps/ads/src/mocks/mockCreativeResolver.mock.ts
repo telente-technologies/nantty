@@ -22,5 +22,6 @@ export function resolveCreativeFromInput(input: CreativeInput, account: MockAdAc
     destination: input.destination,
     identity,
     product: source?.product ?? null,
+    live: source?.live ?? null,
   };
 }
