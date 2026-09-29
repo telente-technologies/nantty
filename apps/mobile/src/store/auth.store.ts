@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
-import { storageKeys } from "@/constants/storage-keys.constant";
+import { storageKeys } from "@/constants/storageKeys.constant";
 import type { User } from "@/types";
-import { secureStorage } from "@/utils/secure-storage.util";
+import { secureStorage } from "@/utils/secureStorage.util";
 
 interface Tokens {
   readonly accessToken: string;
