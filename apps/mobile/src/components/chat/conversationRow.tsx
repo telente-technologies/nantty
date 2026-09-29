@@ -1,10 +1,14 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Conversation } from "@/types";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+
+import { BusinessLabel } from "./businessLabel";
+import { describeConversationForDisplay } from "./conversationDisplay.util";
 
 export interface ConversationRowProps {
   readonly conversation: Conversation;
@@ -12,20 +16,27 @@ export interface ConversationRowProps {
 }
 
 export function ConversationRow({ conversation, onPress }: ConversationRowProps) {
-  const { peer, lastMessage, lastMessageAt, unread } = conversation;
+  const { lastMessage, lastMessageAt, unread } = conversation;
+  const display = describeConversationForDisplay(conversation);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${peer.name}, ${lastMessage}${unread > 0 ? `, ${unread} unread` : ""}`}
+      accessibilityLabel={`${display.displayName}${display.isBusiness ? ", business" : ""}, ${lastMessage}${unread > 0 ? `, ${unread} unread` : ""}`}
       onPress={onPress}
       style={styles.row}
     >
-      <Avatar uri={peer.avatarUrl} size={56} placeholderColor={colors.primaryTint} />
+      <Avatar uri={display.avatarUrl} size={56} placeholderColor={colors.primaryTint} />
       <View style={styles.body}>
         <View style={styles.topLine}>
-          <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1} style={styles.name}>
-            {peer.name}
-          </Text>
+          <View style={styles.nameWithBadge}>
+            <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1} style={styles.name}>
+              {display.displayName}
+            </Text>
+            {display.isGroup || display.isChannel ? null : (
+              <VerificationBadge verification={conversation.peer.verification} legacyVerified={conversation.peer.verified} size={16} />
+            )}
+            {display.isBusiness ? <BusinessLabel /> : null}
+          </View>
           <Text size={13} weight={500} lineHeight={16.9} color={colors.textSubtle}>
             {formatTimeSincePosted(lastMessageAt)} ago
           </Text>
@@ -52,6 +63,7 @@ const styles = StyleSheet.create({
   body: { flex: 1, gap: 4 },
   topLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   name: { flexShrink: 1 },
+  nameWithBadge: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 },
   bottomLine: { flexDirection: "row", alignItems: "center", gap: 4 },
   message: { flex: 1 },
   badge: { minWidth: 21, height: 21, paddingHorizontal: 4, borderRadius: 999, backgroundColor: colors.chip, alignItems: "center", justifyContent: "center" },
