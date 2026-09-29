@@ -1,0 +1,45 @@
+"use client";
+
+import { FilterBar, SearchInput } from "@/components/ui/filterControls";
+import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
+import type { ProductCategory } from "@/types/catalog.type";
+import type { CursorPage } from "@/types/pagination.type";
+
+import styles from "./productListFilters.module.css";
+
+export interface ProductListFilterValues {
+  readonly searchText: string;
+  readonly categoryId: string;
+  readonly status: string;
+  readonly online: string;
+  readonly stock: string;
+  readonly sort: string;
+}
+
+function CompactSelect({ label, value, options, onChange }: { readonly label: string; readonly value: string; readonly options: readonly [string, string][]; readonly onChange: (value: string) => void }) {
+  return (
+    <label className={styles.compactSelect}>
+      <span className="visuallyHidden">{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} aria-label={label}>
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>{optionLabel}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function ProductListFilters({ value, onValueChange }: { readonly value: ProductListFilterValues; readonly onValueChange: (value: ProductListFilterValues) => void }) {
+  const categoriesQuery = useSellerQuery<CursorPage<ProductCategory>>("/seller/categories");
+  const update = (patch: Partial<ProductListFilterValues>) => onValueChange({ ...value, ...patch });
+  return (
+    <FilterBar>
+      <SearchInput label="Search products" placeholder="Search name, SKU or barcode" value={value.searchText} onValueChange={(searchText) => update({ searchText })} />
+      <CompactSelect label="Category" value={value.categoryId} onChange={(categoryId) => update({ categoryId })} options={[["", "All categories"], ...(categoriesQuery.data?.data ?? []).map((category): [string, string] => [category.id, category.name])]} />
+      <CompactSelect label="Status" value={value.status} onChange={(status) => update({ status })} options={[["", "Active and draft"], ["active", "Active"], ["draft", "Draft"], ["archived", "Archived"], ["all", "All statuses"]]} />
+      <CompactSelect label="Marketplace" value={value.online} onChange={(online) => update({ online })} options={[["", "Online and in store"], ["true", "Published online"], ["false", "In store only"]]} />
+      <CompactSelect label="Stock" value={value.stock} onChange={(stock) => update({ stock })} options={[["", "Any stock"], ["low", "Low stock"], ["out", "Out of stock"]]} />
+      <CompactSelect label="Sort by" value={value.sort} onChange={(sort) => update({ sort })} options={[["updated", "Recently updated"], ["name", "Name A–Z"], ["price_asc", "Price: low to high"], ["price_desc", "Price: high to low"], ["stock", "Stock: lowest first"]]} />
+    </FilterBar>
+  );
+}

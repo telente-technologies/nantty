@@ -1,0 +1,8 @@
+.compactSelect select {
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  font-weight: 500;
+}
