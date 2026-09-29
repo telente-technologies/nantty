@@ -10,11 +10,13 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { useLoyaltySummaryQuery } from "@/components/wallet/walletQueries.hook";
 import { useMyCart } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { ordersService } from "@/services/orders.service";
 import { paymentsService } from "@/services/payments.service";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { PaymentProvider } from "@/types/commerce.type";
 
 const PROVIDERS: { id: PaymentProvider; name: string; note: string }[] = [
@@ -27,12 +29,14 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   const addresses = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses });
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
   const [provider, setProvider] = useState<PaymentProvider>("paystack");
+  const [redeemLoyaltyPoints, setRedeemLoyaltyPoints] = useState(false);
+  const loyalty = useLoyaltySummaryQuery();
   const checkoutKey = useRef(generateIdempotencyKey());
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
-      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current);
+      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, redeemLoyaltyPoints);
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, provider, `${checkoutKey.current}-pay`);
       return payment;
     },
@@ -79,6 +83,12 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
             </SelectableRow>
           ))}
         </View>
+        {loyalty.data?.redeemableAtCheckout ? (
+          <SelectableRow selected={redeemLoyaltyPoints} onPress={() => setRedeemLoyaltyPoints((value) => !value)} accessibilityLabel="Use loyalty points">
+            <Text size={14} weight={500} lineHeight={16.8}>Use {loyalty.data.points.toLocaleString()} loyalty points</Text>
+            <Text size={13} lineHeight={16.9} color={colors.textMuted}>Save up to {formatMoneyForDisplay(loyalty.data.pointsValue)} on this order</Text>
+          </SelectableRow>
+        ) : null}
         {cart.data ? (
           <OrderSummaryCard itemsTotal={cart.data.itemsTotal} shopDiscount={cart.data.shopDiscount} shipping={cart.data.shipping} total={cart.data.total} />
         ) : null}
