@@ -5,6 +5,7 @@ import { InfoSheet } from "@/components/settings/infoSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
+import { buildContactMailtoUrl } from "@/constants/contactEmails.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function SettingsSecurityScreen({ navigation }: MainScreenProps<"SettingsSecurity">) {
@@ -41,7 +42,7 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
         actionTitle="Request my data"
         onAction={() => {
           setOpenSheet(null);
-          Linking.openURL("mailto:privacy@zudomart.com?subject=Data%20export%20request");
+          Linking.openURL(buildContactMailtoUrl("Data export request"));
         }}
         onClose={() => setOpenSheet(null)}
       />
