@@ -2,7 +2,12 @@
   display: flex;
   gap: 4px;
   overflow-x: auto;
+  scrollbar-width: none;
   border-bottom: 1px solid var(--divider);
+}
+
+.tabList::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
