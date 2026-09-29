@@ -8,23 +8,39 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.zudomart.app"
+      "bundleIdentifier": "com.zudomart.app",
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.zudomart.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png"
+        "foregroundImage": "./assets/adaptiveIconForeground.png",
+        "backgroundColor": "#2043F5"
       }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "apiUrl": "http://localhost:3000"
     },
-    "scheme": "zudomart",
+    "scheme": ["zudomart", "com.zudomart.app"],
     "plugins": [
       "expo-video",
       "expo-background-task",
       "expo-sqlite",
-      "expo-audio"
+      "expo-audio",
+      "expo-apple-authentication",
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splashLogo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#F7F8FE"
+        }
+      ]
     ]
   }
 }
