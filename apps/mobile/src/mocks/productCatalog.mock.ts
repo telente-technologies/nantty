@@ -74,6 +74,12 @@ export const listProductSummariesInStore = (storeId: string): ProductSummary[] =
   catalogProductSeeds.filter((seed) => seed.storeId === storeId).map((seed) => buildCatalogProductSummary(seed));
 
 export const listProductsInCollection = (collection: ProductCollection): ProductSummary[] => {
+  const organic = listOrganicProductsInCollection(collection);
+  const sponsoredSeed = catalogProductSeeds.find((seed) => isMartSponsoredSeed(seed) && !organic.some((product) => product.id === productIdForKey(seed.key)));
+  return sponsoredSeed ? [organic[0]!, buildCatalogProductSummary(sponsoredSeed, { sponsored: true }), ...organic.slice(1)].filter(Boolean) : organic;
+};
+
+const listOrganicProductsInCollection = (collection: ProductCollection): ProductSummary[] => {
   if (collection === "sales_of_the_day") return catalogProductSeeds.filter((seed) => seed.salePercent).map((seed) => buildCatalogProductSummary(seed));
   if (collection === "new_arrivals") {
     return [...catalogProductSeeds]
@@ -89,7 +95,11 @@ export const listProductsInCollection = (collection: ProductCollection): Product
 const buildFeaturedWithProducts = (seed: CatalogProductSeed): ProductSummary[] => {
   const sameStore = catalogProductSeeds.filter((other) => other.storeId === seed.storeId && other.key !== seed.key);
   const sameCategoryElsewhere = catalogProductSeeds.filter((other) => other.categoryId === seed.categoryId && other.storeId !== seed.storeId);
-  return [...sameStore, ...sameCategoryElsewhere].slice(0, 6).map((other) => buildCatalogProductSummary(other));
+  const organic = [...sameStore, ...sameCategoryElsewhere].slice(0, 5).map((other) => buildCatalogProductSummary(other));
+  const sponsoredSeed =
+    catalogProductSeeds.find((other) => isMartSponsoredSeed(other) && other.categoryId === seed.categoryId && other.key !== seed.key) ??
+    catalogProductSeeds.find((other) => isMartSponsoredSeed(other) && other.key !== seed.key)!;
+  return [buildCatalogProductSummary(sponsoredSeed, { sponsored: true }), ...organic.filter((product) => product.id !== productIdForKey(sponsoredSeed.key))];
 };
 
 const buildPromoLine = (seed: CatalogProductSeed) => {
