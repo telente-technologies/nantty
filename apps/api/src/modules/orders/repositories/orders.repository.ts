@@ -1,18 +1,20 @@
 import { randomUUID } from "node:crypto";
 
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { OrderStatus } from "../../../enums/orderStatus.enum.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
 import type { CheckoutRecord, CheckoutStatus, NewOrder, OrderRecord, OrderStatusChange } from "../models/orders.model.js";
 
 export interface OrdersRepository {
-  createCheckoutWithOrders(buyerId: string, currency: string, orders: readonly NewOrder[]): Promise<{ checkout: CheckoutRecord; orders: readonly OrderRecord[] }>;
+  createCheckoutWithOrders(buyerId: string, chargeCurrency: CurrencyCode, orders: readonly NewOrder[]): Promise<{ checkout: CheckoutRecord; orders: readonly OrderRecord[] }>;
   findCheckoutById(checkoutId: string): Promise<CheckoutRecord | undefined>;
   changeCheckoutStatus(checkoutId: string, from: CheckoutStatus, to: CheckoutStatus): Promise<boolean>;
   findById(orderId: string): Promise<OrderRecord | undefined>;
   listByCheckout(checkoutId: string): Promise<readonly OrderRecord[]>;
   listForBuyer(buyerId: string, statuses: readonly OrderStatus[] | undefined, page: PageRequest): Promise<Page<OrderRecord>>;
-  listForStore(storeId: string, statuses: readonly OrderStatus[] | undefined, page: PageRequest): Promise<Page<OrderRecord>>;
+  listForStore(storeId: string, statuses: readonly OrderStatus[] | undefined, page: PageRequest, searchTerm?: string): Promise<Page<OrderRecord>>;
+  listAllForBuyer(buyerId: string, statuses: readonly OrderStatus[]): Promise<readonly OrderRecord[]>;
   transitionStatus(orderId: string, from: readonly OrderStatus[], to: OrderStatus, change: OrderStatusChange): Promise<OrderRecord | undefined>;
   listStoreOrdersPaidSince(storeId: string, since: Date, statuses: readonly OrderStatus[]): Promise<readonly OrderRecord[]>;
 }
@@ -21,9 +23,10 @@ export class InMemoryOrdersRepository implements OrdersRepository {
   private readonly checkouts = new Map<string, CheckoutRecord>();
   private readonly orders = new Map<string, OrderRecord>();
 
-  public async createCheckoutWithOrders(buyerId: string, currency: string, orders: readonly NewOrder[]) {
+  public async createCheckoutWithOrders(buyerId: string, chargeCurrency: CurrencyCode, orders: readonly NewOrder[]) {
     const now = new Date();
-    const checkout: CheckoutRecord = { id: randomUUID(), buyerId, currency, status: "pending", total: orders.reduce((sum, order) => sum + order.total, 0), createdAt: now };
+    const total = orders.reduce((sum, order) => sum + order.chargeTotal, 0);
+    const checkout: CheckoutRecord = { id: randomUUID(), buyerId, currency: chargeCurrency, status: "pending", total, createdAt: now };
     this.checkouts.set(checkout.id, checkout);
     const created = orders.map((order) => {
       const orderId = randomUUID();
@@ -69,8 +72,19 @@ export class InMemoryOrdersRepository implements OrdersRepository {
     return this.listMatching((order) => order.buyerId === buyerId && (statuses === undefined || statuses.includes(order.status)), page);
   }
 
-  public async listForStore(storeId: string, statuses: readonly OrderStatus[] | undefined, page: PageRequest): Promise<Page<OrderRecord>> {
-    return this.listMatching((order) => order.storeId === storeId && (statuses === undefined || statuses.includes(order.status)), page);
+  public async listForStore(storeId: string, statuses: readonly OrderStatus[] | undefined, page: PageRequest, searchTerm?: string): Promise<Page<OrderRecord>> {
+    const needle = searchTerm?.toLowerCase();
+    return this.listMatching(
+      (order) =>
+        order.storeId === storeId &&
+        (statuses === undefined || statuses.includes(order.status)) &&
+        (needle === undefined || order.number.toLowerCase().includes(needle) || order.customerName.toLowerCase().includes(needle)),
+      page,
+    );
+  }
+
+  public async listAllForBuyer(buyerId: string, statuses: readonly OrderStatus[]): Promise<readonly OrderRecord[]> {
+    return [...this.orders.values()].filter((order) => order.buyerId === buyerId && statuses.includes(order.status)).sort(compareByNewestFirst);
   }
 
   public async transitionStatus(orderId: string, from: readonly OrderStatus[], to: OrderStatus, change: OrderStatusChange): Promise<OrderRecord | undefined> {

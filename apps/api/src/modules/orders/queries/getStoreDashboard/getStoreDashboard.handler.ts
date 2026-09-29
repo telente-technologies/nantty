@@ -12,6 +12,6 @@ export class GetStoreDashboardHandler extends QueryHandler<GetStoreDashboardQuer
   }
 
   public execute(query: GetStoreDashboardQuery): Promise<StoreDashboard> {
-    return this.service.buildStoreDashboard(query.principal.userId, query.storeId);
+    return this.service.buildStoreDashboard(query.principal.userId, query.requestedStoreId, query.period);
   }
 }

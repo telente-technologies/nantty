@@ -12,6 +12,6 @@ export class GetStoreOrderHandler extends QueryHandler<GetStoreOrderQuery, Order
   }
 
   public execute(query: GetStoreOrderQuery): Promise<OrderRecord> {
-    return this.service.findOrderForStoreMember(query.principal.userId, query.storeId, query.orderId);
+    return this.service.findOrderForStoreMember(query.principal.userId, query.orderId);
   }
 }

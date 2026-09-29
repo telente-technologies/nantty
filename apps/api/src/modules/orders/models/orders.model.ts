@@ -1,3 +1,4 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { OrderStatus } from "../../../enums/orderStatus.enum.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 
@@ -32,12 +33,17 @@ export interface OrderRecord {
   readonly buyerId: string;
   readonly storeId: string;
   readonly status: OrderStatus;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly itemsTotal: MinorUnits;
   readonly discountTotal: MinorUnits;
   readonly shippingTotal: MinorUnits;
   readonly total: MinorUnits;
+  readonly chargeCurrency: CurrencyCode;
+  readonly chargeTotal: MinorUnits;
+  readonly exchangeRate: bigint;
+  readonly rateLockedAt: Date;
   readonly shippingAddress: ShippingAddressSnapshot;
+  readonly customerName: string;
   readonly trackingNumber: string | null;
   readonly paidAt: Date | null;
   readonly shippedAt: Date | null;
@@ -54,7 +60,7 @@ export interface CheckoutRecord {
   readonly id: string;
   readonly buyerId: string;
   readonly total: MinorUnits;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly status: CheckoutStatus;
   readonly createdAt: Date;
 }
@@ -74,13 +80,23 @@ export interface OrderStatusChange {
   readonly cancelledAt?: Date;
 }
 
-export type BuyerOrderFilter = "all" | "pending" | "shipped" | "delivered";
+export const PUBLIC_ORDER_STATUSES = ["pending", "paid", "shipped", "delivered", "completed", "cancelled", "disputed"] as const;
+export type PublicOrderStatus = (typeof PUBLIC_ORDER_STATUSES)[number];
 
-export const BUYER_FILTER_STATUSES: Readonly<Record<BuyerOrderFilter, readonly OrderStatus[] | undefined>> = {
-  all: undefined,
-  pending: ["pending_payment", "paid"],
+export const INTERNAL_STATUSES_FOR_PUBLIC_STATUS: Readonly<Record<PublicOrderStatus, readonly OrderStatus[]>> = {
+  pending: ["pending_payment"],
+  paid: ["paid"],
   shipped: ["shipped"],
-  delivered: ["delivered", "completed"],
+  delivered: ["delivered"],
+  completed: ["completed"],
+  cancelled: ["cancelled", "refunded"],
+  disputed: ["disputed"],
 };
+
+export function convertInternalStatusToPublicStatus(status: OrderStatus): PublicOrderStatus {
+  if (status === "pending_payment") return "pending";
+  if (status === "refunded") return "cancelled";
+  return status;
+}
 
 export const SALE_STATUSES: readonly OrderStatus[] = ["paid", "shipped", "delivered", "completed", "disputed"];

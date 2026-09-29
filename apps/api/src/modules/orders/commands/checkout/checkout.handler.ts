@@ -12,6 +12,6 @@ export class CheckoutHandler extends CommandHandler<CheckoutCommand, CheckoutRes
   }
 
   public execute(command: CheckoutCommand): Promise<CheckoutResult> {
-    return this.service.placeOrdersFromCart(command.principal.userId, command.shippingAddress);
+    return this.service.placeOrdersFromCart(command.principal.userId, command.addressId, command.displayCurrency);
   }
 }

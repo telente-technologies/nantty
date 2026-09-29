@@ -13,7 +13,7 @@ export class MarkOrderDeliveredHandler extends CommandHandler<MarkOrderDelivered
   }
 
   public async execute(command: MarkOrderDeliveredCommand): Promise<OrderRecord> {
-    const order = await this.ordersService.markOrderDelivered(command.principal.userId, command.storeId, command.orderId);
+    const order = await this.ordersService.markOrderDelivered(command.principal.userId, command.orderId);
     await this.escrowsService.scheduleAutomaticRelease(order.id, order.deliveredAt ?? new Date());
     return order;
   }

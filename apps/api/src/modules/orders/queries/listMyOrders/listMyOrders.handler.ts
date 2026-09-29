@@ -13,6 +13,6 @@ export class ListMyOrdersHandler extends QueryHandler<ListMyOrdersQuery, Page<Or
   }
 
   public execute(query: ListMyOrdersQuery): Promise<Page<OrderRecord>> {
-    return this.service.listBuyerOrders(query.principal.userId, query.filter, query.page);
+    return this.service.listBuyerOrders(query.principal.userId, query.status, query.page);
   }
 }
