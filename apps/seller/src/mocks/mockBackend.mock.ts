@@ -1,5 +1,6 @@
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { registerEveryMockHandler } from "@/mocks/mockHandlerRegistry.mock";
+import { findMockMembershipForUserAndStore } from "@/mocks/mockStoreMembership.mock";
 import { MockHttpError, respondWithError } from "@/mocks/mockResponses.mock";
 import { findMockRouteForRequest, type MockPrincipal, type MockResponse } from "@/mocks/mockRouter.mock";
 
@@ -28,7 +29,7 @@ function resolveMockPrincipalFromHeaders(headers: Headers): MockPrincipal | null
   if (!session || session.revoked) return null;
   const user = database.users.find((candidate) => candidate.id === tokenRecord.userId);
   if (!user) return null;
-  const membership = database.memberships.find((candidate) => candidate.userId === user.id);
+  const membership = findMockMembershipForUserAndStore(user.id, headers.get("x-seller-store"));
   const principal: MockPrincipal = { userId: user.id, storeId: membership?.storeId ?? null, role: membership?.role ?? null, staffId: membership?.staffId ?? null, actorName: user.name };
   const operatorToken = headers.get("x-seller-operator");
   if (!operatorToken || !membership) return principal;
