@@ -18,7 +18,7 @@ export const storageIntegration: Integration = {
 
   async start({ config }) {
     await mkdir(config.storage.directory, { recursive: true });
-    storage = new LocalObjectStorage(config.storage.directory);
+    storage = new LocalObjectStorage(config.storage.directory, { maxObjectBytes: Math.max(64 * 1024 * 1024, config.media.maxVideoBytes) });
   },
 
   async stop() {
