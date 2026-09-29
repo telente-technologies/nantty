@@ -1,11 +1,14 @@
 import { campaignNameMaximumLength, headlineMaximumLength, primaryTextMaximumLength } from "@/constants/campaignOptions.constant";
 import type { CampaignWizardState, WizardAdDraft } from "@/components/campaignWizard/campaignWizardState.store";
+import { buildCreativeShapeFromAdDraft, readChosenPlacements } from "@/components/campaignWizard/campaignWizardSubmission.util";
+import type { AdPlacement } from "@/types/campaign.type";
+import { describeWhyCreativeCannotRunAnywhere } from "@/utils/adPlacementRules.util";
 import { isSafeHttpsUrl } from "@/utils/formValidation.util";
 import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
 export type WizardFieldErrors = Record<string, string>;
 
-function validateAdDraft(ad: WizardAdDraft, index: number, errors: WizardFieldErrors): void {
+function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly AdPlacement[], errors: WizardFieldErrors): void {
   const prefix = `ads.${index}`;
   if (ad.sourceType === "upload" && ad.uploadedMedia.length === 0) errors[`${prefix}.media`] = "Upload at least one image or video.";
   if (ad.sourceType !== "upload" && !ad.selectedSource) errors[`${prefix}.source`] = "Choose a post, clip, product or store to promote.";
@@ -13,6 +16,9 @@ function validateAdDraft(ad: WizardAdDraft, index: number, errors: WizardFieldEr
   if (ad.headline.trim().length > headlineMaximumLength) errors[`${prefix}.headline`] = `Keep the headline under ${headlineMaximumLength} characters.`;
   if (ad.primaryText.trim().length > primaryTextMaximumLength) errors[`${prefix}.primaryText`] = `Keep the text under ${primaryTextMaximumLength} characters.`;
   if (ad.destinationType === "url" && !isSafeHttpsUrl(ad.destinationUrl.trim())) errors[`${prefix}.destinationUrl`] = "Enter a full https:// website address.";
+  const hasCreative = ad.sourceType === "upload" ? ad.uploadedMedia.length > 0 : Boolean(ad.selectedSource);
+  const placementProblem = hasCreative ? describeWhyCreativeCannotRunAnywhere(buildCreativeShapeFromAdDraft(ad), placements) : null;
+  if (placementProblem) errors[`${prefix}.placements`] = placementProblem;
 }
 
 export function validateWizardStep(state: CampaignWizardState, stepIndex: number, currency: string): WizardFieldErrors {
@@ -41,7 +47,7 @@ export function validateWizardStep(state: CampaignWizardState, stepIndex: number
       if (!Number.isInteger(impressions) || impressions < 1 || impressions > 20 || !Number.isInteger(perDays) || perDays < 1 || perDays > 30) errors.frequencyCap = "Use 1–20 impressions per 1–30 days.";
     }
   }
-  if (stepIndex === 4) state.ads.forEach((ad, index) => validateAdDraft(ad, index, errors));
+  if (stepIndex === 4) state.ads.forEach((ad, index) => validateAdDraft(ad, index, readChosenPlacements(state), errors));
   return errors;
 }
 
