@@ -1,0 +1,101 @@
+.muted {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.matchList,
+.noticeList,
+.segmentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.segmentList {
+  gap: 2px;
+  font-size: 11px;
+}
+
+.matchItem,
+.noticeItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+}
+
+.matchHeader,
+.noticeHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.confidenceHigh,
+.confidenceMedium,
+.confidenceLow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.confidenceHigh {
+  color: var(--error-ink);
+}
+
+.confidenceMedium {
+  color: var(--caution-ink);
+}
+
+.confidenceLow {
+  color: var(--ink-muted);
+}
+
+.noticeActions {
+  display: flex;
+  gap: 6px;
+}
+
+.statement {
+  white-space: pre-wrap;
+  padding: 8px 10px;
+  border-left: 3px solid var(--blue-500);
+  background: var(--blue-50);
+}
+
+.urlList {
+  margin: 0;
+  padding-left: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.decisionActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.strikeMeter {
+  display: flex;
+  gap: 4px;
+}
+
+.strikePip {
+  width: 22px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--surface-sunken);
+}
+
+.strikePipFilled {
+  background: var(--error);
+}
