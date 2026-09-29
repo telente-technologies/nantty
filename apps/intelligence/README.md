@@ -33,7 +33,7 @@ tests/          pytest suite
 
 | area | method |
 |---|---|
-| Feed (For You) | HistGradientBoosting, 5 heads (like, comment, share, long dwell, purchase intent), blended 1 / 2 / 3 / 0.8 / 4, × freshness (half-life 36 h, floor 0.08) × (1 + 0.5 · creator affinity); greedy diversity re-rank: max consecutive posts per author/store, max consecutive product posts, product share ≤ 40%, topic repetition penalty; dedupe seen, drop blocked/muted/hidden |
+| Feed (For You) | two-stage: heuristic logistic heads pre-rank all candidates, the top 120 are re-scored by HistGradientBoosting (60 trees), 5 heads (like, comment, share, long dwell, purchase intent), blended 1 / 2 / 3 / 0.8 / 4, × freshness (half-life 36 h, floor 0.08) × (1 + 0.5 · creator affinity); greedy diversity re-rank: max consecutive posts per author/store, max consecutive product posts, product share ≤ 40%, topic repetition penalty; dedupe seen, drop blocked/muted/hidden |
 | Feed (Following) | chronological with at most 90 min boost from affinity/engagement |
 | Clips | completion + rewatch heads, freshness half-life 72 h, exploration slots (default 1 in 5) for new creators via seeded Thompson sampling, no duplicates, no consecutive creator |
 | Social proof | close friends (API closeness or learned affinity ≥ 0.3), ≥ 2 friends, value threshold, banners ≥ 5 positions apart |
@@ -52,6 +52,16 @@ calibration error per head, NDCG@10 of the feed blend versus the heuristic basel
 **Training/serving parity**: the online service logs the exact feature vector it scored for every
 served item (`feature_logs/surface=feed|clips|ads|risk`). Training joins those logs with later events
 (24 h attribution window), so the model always trains on what it will see at serving time.
+
+**Latency** (dev laptop, loaded, Redis on localhost, 500 feed candidates, trained model): service call
+p50 ≈ 32 ms; full in-process HTTP path incl. HMAC check, validation and serialisation p50 ≈ 43 ms,
+p95 ≈ 55–67 ms depending on machine load. Levers: `MODEL_SCORED_CANDIDATE_LIMIT`, tree count,
+`OMP_NUM_THREADS` (set to 2 in the image), sending fewer candidates.
+
+**Redis notes**: online features are read with pipelines plus one Lua script (multi-key `HGETALL`), with
+`hiredis` for fast parsing. Keys span hash slots, so use a single Redis node / primary-replica, not
+Redis Cluster. Nonce, dedupe and trending-claim keys use TTLs; forward-decayed scores rotate key
+generations every 64 half-lives so floats never overflow.
 
 ## Run locally
 
@@ -141,7 +151,7 @@ that finishes in seconds.
 docker build -t zudomart-intelligence apps/intelligence
 ```
 
-The image runs as a non-root user with only runtime dependencies. Audio fingerprinting is pure
+The image runs as a non-root user (code owned by root, only `data/` and `model_registry/` writable) with only runtime dependencies. Audio fingerprinting is pure
 numpy/scipy, so no ffmpeg or other system package is needed in this image (the TS media worker does the decoding). Keep it off the public network:
 
 ```yaml
@@ -173,5 +183,6 @@ volumes:
 - Only opaque/hashed ids and behavioural features are accepted; no names, emails, phones or raw search text.
 - Strict Pydantic validation (unknown fields rejected), body size limits, per-client rate limiting,
   per-request deadline, JSON logs without payloads, docs disabled outside development.
-- Model artifacts are integrity-checked (SHA-256 + optional HMAC) before loading.
+- Model artifacts are integrity-checked (SHA-256 + HMAC, required outside development) and rejected if
+  trained with a different scikit-learn version; the registry directory must be write-restricted.
 - Python returns decisions and scores only; it never moves money or bans accounts.
