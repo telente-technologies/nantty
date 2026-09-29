@@ -4,7 +4,6 @@ import type { UserSummary } from "../../../interfaces/userDirectory.interface.js
 import { Money } from "../../../utils/money.util.js";
 import type {
   AuthorDto,
-  CommentDto,
   LiveCommentDto,
   LiveSessionDto,
   PostDto,
@@ -12,7 +11,7 @@ import type {
   StoreBadgeDto,
   StoryTrayEntryDto,
 } from "../dtos/posts.dto.js";
-import type { CommentRecord, LiveCommentRecord, LiveSessionRecord, PostRecord } from "../models/posts.model.js";
+import type { LiveCommentRecord, LiveSessionRecord, PostRecord } from "../models/posts.model.js";
 import type { PostsDependencies } from "./posts.service.js";
 
 const FRIEND_AVATAR_SAMPLE_SIZE = 3;
@@ -21,11 +20,11 @@ function convertStoreToBadge(store: StoreSummary | undefined): StoreBadgeDto | n
   return store === undefined ? null : { id: store.id, name: store.name, slug: store.slug, logoUrl: store.logoUrl };
 }
 
-function convertUserToAuthor(user: UserSummary | undefined): AuthorDto | null {
+export function convertUserToAuthor(user: UserSummary | undefined): AuthorDto | null {
   return user === undefined ? null : { id: user.id, name: user.name, username: user.username, avatarUrl: user.avatarUrl, verified: user.isSeller };
 }
 
-function indexById<T extends { readonly id: string }>(items: readonly T[]): Map<string, T> {
+export function indexById<T extends { readonly id: string }>(items: readonly T[]): Map<string, T> {
   return new Map(items.map((item) => [item.id, item]));
 }
 
@@ -82,26 +81,6 @@ export class PostPresenter {
       const original = post.repostOfId === null ? undefined : originalsById.get(post.repostOfId);
       return presentOne(post, original !== undefined && original.deletedAt === null ? presentOne(original, null) : null);
     });
-  }
-
-  public async presentComments(comments: readonly CommentRecord[], viewerId: string | undefined): Promise<CommentDto[]> {
-    const { engagement } = this.dependencies;
-    const commentIds = comments.map((comment) => comment.id);
-    const [authors, likeCounts, liked] = await Promise.all([
-      this.findUsers(comments.map((comment) => comment.authorId)),
-      engagement.countLikesForComments(commentIds),
-      viewerId === undefined ? new Set<string>() : engagement.listCommentIdsLikedByUser(viewerId, commentIds),
-    ]);
-    return comments.map((comment) => ({
-      id: comment.id,
-      postId: comment.postId,
-      replyToCommentId: comment.parentId,
-      text: comment.text,
-      author: convertUserToAuthor(authors.get(comment.authorId)),
-      likes: likeCounts.get(comment.id) ?? comment.likeCount,
-      liked: liked.has(comment.id),
-      createdAt: comment.createdAt.toISOString(),
-    }));
   }
 
   public async presentStoryTray(stories: readonly PostRecord[], viewerId: string | undefined): Promise<StoryTrayEntryDto[]> {
@@ -163,7 +142,7 @@ export class PostPresenter {
     }));
   }
 
-  private async findUsers(userIds: readonly string[]): Promise<Map<string, UserSummary>> {
+  public async findUsers(userIds: readonly string[]): Promise<Map<string, UserSummary>> {
     const unique = [...new Set(userIds)];
     return indexById(unique.length === 0 ? [] : await this.dependencies.userDirectory.findUserSummaries(unique));
   }
