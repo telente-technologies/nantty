@@ -1,0 +1,72 @@
+model LedgerAccount {
+  id            String   @id @default(uuid())
+  key           String   @unique
+  ownerType     String
+  ownerId       String?
+  kind          String
+  currency      String
+  balance       BigInt   @default(0)
+  allowNegative Boolean  @default(false)
+  version       Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@map("ledger_accounts")
+}
+
+model LedgerTransaction {
+  id          String        @id @default(uuid())
+  reference   String        @unique
+  kind        String
+  description String        @default("")
+  createdAt   DateTime      @default(now())
+  entries     LedgerEntry[]
+
+  @@map("ledger_transactions")
+}
+
+model LedgerEntry {
+  id            String            @id @default(uuid())
+  transactionId String
+  accountId     String
+  direction     String
+  amount        BigInt
+  balanceAfter  BigInt
+  createdAt     DateTime          @default(now())
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  @@index([accountId, createdAt])
+  @@map("ledger_entries")
+}
+
+model PayoutAccount {
+  id               String   @id @default(uuid())
+  storeId          String
+  bankCode         String
+  bankName         String
+  accountNumberEnc String
+  accountLast4     String
+  accountName      String
+  recipientCode    String?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([storeId])
+  @@map("payout_accounts")
+}
+
+model Withdrawal {
+  id              String    @id @default(uuid())
+  storeId         String
+  payoutAccountId String
+  amount          BigInt
+  currency        String
+  status          String    @default("pending")
+  reference       String    @unique
+  requestedById   String
+  failureReason   String?
+  processedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([storeId, createdAt])
+  @@map("withdrawals")
+}

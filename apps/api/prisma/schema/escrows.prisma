@@ -1,0 +1,37 @@
+model Escrow {
+  id           String    @id @default(uuid())
+  orderId      String    @unique
+  paymentId    String
+  storeId      String
+  buyerId      String
+  amount       BigInt
+  currency     String
+  status       String
+  releaseAfter DateTime?
+  heldAt       DateTime  @default(now())
+  releasedAt   DateTime?
+  refundedAt   DateTime?
+  version      Int       @default(0)
+
+  @@index([status, releaseAfter])
+  @@index([storeId])
+  @@map("escrows")
+}
+
+model Dispute {
+  id           String    @id @default(uuid())
+  escrowId     String
+  orderId      String
+  openedById   String
+  reason       String
+  details      String    @default("")
+  status       String    @default("open")
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([escrowId])
+  @@map("disputes")
+}

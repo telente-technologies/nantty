@@ -1,0 +1,14 @@
+model Media {
+  id          String   @id @default(uuid())
+  ownerId     String
+  key         String   @unique
+  purpose     String
+  contentType String
+  maxBytes    Int
+  size        Int?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  @@index([ownerId])
+  @@map("media")
+}

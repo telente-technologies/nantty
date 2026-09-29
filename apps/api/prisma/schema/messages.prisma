@@ -1,0 +1,31 @@
+model Conversation {
+  id            String   @id @default(uuid())
+  kind          String   @default("direct")
+  pairKey       String?  @unique
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+  lastReadAt     DateTime @default(now())
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  text           String
+  media          Json     @default("[]")
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
