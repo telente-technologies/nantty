@@ -1,12 +1,13 @@
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect } from "react";
-import { Modal, Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StatusBar, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon } from "@/components/icons";
 import { colors } from "@/constants/colors.constant";
 import type { Media } from "@/types";
 
 import { ClipVideoPlayer } from "./clipVideoPlayer";
+import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export interface LandscapeVideoFullScreenModalProps {
   readonly media: Media | null;
@@ -28,7 +29,7 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose }: Lands
   }, [isOpen]);
 
   return (
-    <Modal visible={isOpen} animationType="fade" onRequestClose={onClose} supportedOrientations={["portrait", "landscape"]}>
+    <FrameAwareModal visible={isOpen} animationType="fade" onRequestClose={onClose} supportedOrientations={["portrait", "landscape"]}>
       <StatusBar hidden />
       <View style={styles.root}>
         {media ? <ClipVideoPlayer media={media} isActive isMuted={isMuted} contentFit="contain" style={StyleSheet.absoluteFill} /> : null}
@@ -36,7 +37,7 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose }: Lands
           <Cancel20Icon color={colors.white} />
         </Pressable>
       </View>
-    </Modal>
+    </FrameAwareModal>
   );
 }
 
