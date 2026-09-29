@@ -5,6 +5,12 @@ import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 export const OpenDisputeBodySchema = schema.object({
   reason: schema.string().min(2).max(200),
   details: schema.string().max(2000).optional(),
+  evidenceMediaIds: schema.array(schema.string().uuid()).max(10).optional(),
+});
+
+export const PostDisputeMessageBodySchema = schema.object({
+  text: schema.string().min(1).max(2000),
+  attachmentMediaIds: schema.array(schema.string().uuid()).max(10).optional(),
 });
 
 export const ResolveDisputeBodySchema = schema.object({
