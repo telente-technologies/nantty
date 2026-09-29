@@ -4,6 +4,8 @@ import { Bell24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 
+import { CartHeaderButtonShownOnlyWhenCartHasItems } from "./cartHeaderButton";
+
 export type HomeSection = "feed" | "mart";
 
 export interface HomeHeaderProps {
@@ -35,6 +37,7 @@ export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPr
         <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={10} onPress={onPressSearch}>
           <MagnifyingGlass24Icon />
         </Pressable>
+        <CartHeaderButtonShownOnlyWhenCartHasItems />
         <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={10} onPress={onPressNotifications}>
           <Bell24Icon />
         </Pressable>

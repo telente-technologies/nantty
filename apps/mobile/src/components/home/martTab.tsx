@@ -30,6 +30,7 @@ export function MartTab() {
     <ScrollView
       style={styles.root}
       scrollEventThrottle={200}
+      showsVerticalScrollIndicator={false}
       onScroll={({ nativeEvent }) => {
         if (isNearBottom(nativeEvent) && products.hasNextPage && !products.isFetchingNextPage) products.fetchNextPage();
       }}

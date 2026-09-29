@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
-import { PostCard } from "@/components/feed/post-card";
+import { PostCard } from "@/components/feed/postCard";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useCartActions } from "@/hooks/useCart.hook";
@@ -58,6 +58,7 @@ export function FeedTab() {
           <TopicFilterRow topics={topics.data ?? []} selectedTopicId={selectedTopicId} onSelectTopic={setSelectedTopicId} />
         }
         stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) =>
           item.type === "suggestedClips" ? (
             <SuggestedClipsRow clips={suggestedClips.data ?? []} onPressClip={(clipId) => navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId } })} />
