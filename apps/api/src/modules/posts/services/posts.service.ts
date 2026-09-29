@@ -3,17 +3,20 @@ import type { EventBus } from "@zudojs/events";
 import { NotificationRequestedEvent, type NotificationRequestedPayload } from "../../../events/notificationRequested.event.js";
 import { forbidden, notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
+import type { CreatorAccess } from "../../../interfaces/creatorAccess.interface.js";
 import type { CurrencyConverter } from "../../../interfaces/currencyConverter.interface.js";
+import type { MediaLibrary } from "../../../interfaces/mediaLibrary.interface.js";
 import type { ProductCatalog, ProductSummary } from "../../../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
 import type { UserDirectory } from "../../../interfaces/userDirectory.interface.js";
 import { publishEvent } from "../../../loaders/events.loader.js";
 import type { RepositorySocialGraph } from "../../follows/services/socialGraph.service.js";
-import type { LiveSessionRecord, PostRecord } from "../models/posts.model.js";
+import type { CommentRecord, LiveSessionRecord, PostRecord } from "../models/posts.model.js";
 import type { LiveSessionsRepository } from "../repositories/live.repository.js";
 import type { SocialEngagementRepository } from "../repositories/socialEngagement.repository.js";
 import type { PostInteractionsRepository } from "../repositories/postInteractions.repository.js";
 import { isPostVisibleAt, type PostsRepository } from "../repositories/posts.repository.js";
+import { CommentPresenter } from "./commentPresenter.service.js";
 import { PostPresenter } from "./postPresenter.service.js";
 
 export interface PostsDependencies {
@@ -28,13 +31,17 @@ export interface PostsDependencies {
   readonly events: EventBus;
   readonly clock: Clock;
   readonly currencyConverter: CurrencyConverter;
+  readonly creatorAccess: CreatorAccess;
+  readonly mediaLibrary: MediaLibrary;
 }
 
 export class PostsService {
   public readonly presenter: PostPresenter;
+  public readonly commentPresenter: CommentPresenter;
 
   public constructor(public readonly dependencies: PostsDependencies) {
     this.presenter = new PostPresenter(dependencies);
+    this.commentPresenter = new CommentPresenter(dependencies, this.presenter);
   }
 
   public async findVisiblePostOrThrow(postId: string, viewerId: string | undefined): Promise<PostRecord> {
@@ -44,6 +51,12 @@ export class PostsService {
       throw notFound("Post");
     }
     return post;
+  }
+
+  public async findCommentOnVisiblePostOrThrow(commentId: string, viewerId: string | undefined): Promise<{ readonly comment: CommentRecord; readonly post: PostRecord }> {
+    const comment = await this.dependencies.interactions.findComment(commentId);
+    if (comment === undefined) throw notFound("Comment");
+    return { comment, post: await this.findVisiblePostOrThrow(comment.postId, viewerId) };
   }
 
   public async assertUsersAreNotBlocked(userId: string, otherUserId: string): Promise<void> {
@@ -74,8 +87,9 @@ export class PostsService {
     return session;
   }
 
-  public assertIsLiveHost(session: LiveSessionRecord, userId: string): void {
+  public async assertIsApprovedLiveHost(session: LiveSessionRecord, userId: string): Promise<void> {
     if (session.hostId !== userId) throw forbidden("Only the host can manage this live session.");
+    await this.dependencies.creatorAccess.assertApprovedCreator(userId);
   }
 
   public async notifyUserUnlessSelf(actorId: string, payload: NotificationRequestedPayload): Promise<void> {
