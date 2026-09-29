@@ -1,5 +1,7 @@
 import type { EventBus } from "@zudojs/events";
 
+import { findCurrencyForCountry } from "../../../configs/currency.config.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import { notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { UserDirectory } from "../../../interfaces/userDirectory.interface.js";
@@ -22,8 +24,8 @@ export interface StoresDependencies {
   readonly audit: AuditRecorder;
   readonly events: EventBus;
   readonly userDirectory: UserDirectory;
-  readonly currency: string;
   readonly countPublishedProductsForStore: (storeId: string) => Promise<number>;
+  readonly countAllProductsForStore: (storeId: string) => Promise<number>;
 }
 
 export class StoresService {
@@ -42,7 +44,7 @@ export class StoresService {
     return store;
   }
 
-  public async createStoreOwnedBy(ownerId: string, input: CreateStoreBody): Promise<StoreRecord> {
+  public async createStoreOwnedBy(ownerId: string, input: CreateStoreBody, currency: CurrencyCode): Promise<StoreRecord> {
     const { stores, events } = this.dependencies;
     if ((await stores.countOwnedBy(ownerId)) >= MAXIMUM_STORES_PER_OWNER) {
       throw unprocessable(`A seller can own at most ${MAXIMUM_STORES_PER_OWNER} stores.`);
@@ -52,6 +54,7 @@ export class StoresService {
       name: input.name.trim(),
       slug: createUniqueSlugFromText(input.name),
       description: input.description ?? "",
+      currency,
       shippingFee: input.shippingFee ?? 0,
       discountBps: input.discountBps ?? 0,
       shippingPolicy: input.shippingPolicy ?? "",
@@ -61,6 +64,18 @@ export class StoresService {
     });
     await publishEvent(events, StoreCreatedEvent, { storeId: store.id, ownerId });
     return store;
+  }
+
+  public async chooseStoreCurrencyForUser(userId: string): Promise<CurrencyCode> {
+    const preference = await this.dependencies.userDirectory.findUserLocalePreference(userId);
+    return preference?.currency ?? findCurrencyForCountry(preference?.countryCode ?? null).currency;
+  }
+
+  public async assertStoreCurrencyCanChange(store: StoreRecord, requestedCurrency: CurrencyCode | undefined): Promise<void> {
+    if (requestedCurrency === undefined || requestedCurrency === store.currency) return;
+    if ((await this.dependencies.countAllProductsForStore(store.id)) > 0) {
+      throw unprocessable("The store currency cannot change once the store has products.");
+    }
   }
 
   public async convertApplicationWithDecryptedPhone(application: SellerApplicationRecord): Promise<SellerApplicationDto> {

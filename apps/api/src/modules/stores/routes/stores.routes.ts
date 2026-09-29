@@ -31,7 +31,6 @@ export function registerStoresRoutes(router: HttpRouter, controller: StoresContr
   router.get(STORES, controller.list, { ...guard.allowAnyone(), ...describeRoute(TAG, "List stores", { query: ListStoresQuerySchema }) });
   router.get(`${STORES}/mine`, controller.listMine, { ...seller, ...describeRoute(TAG, "List the stores I belong to") });
   router.get(`${STORES}/slug/:slug`, controller.getBySlug, { ...guard.allowAnyone(), ...describeRoute(TAG, "Get a store by its link", { params: StoreSlugParamsSchema }) });
-  router.get(`${STORES}/:id`, controller.getById, { ...guard.allowAnyone(), ...describeRoute(TAG, "Get a store", { params: StoreParamsSchema }) });
   router.post(STORES, controller.create, { ...seller, ...describeRoute(TAG, "Create a store", { body: CreateStoreBodySchema }) });
   router.patch(`${STORES}/:id`, controller.update, { ...seller, ...describeRoute(TAG, "Update a store", { params: StoreParamsSchema, body: UpdateStoreBodySchema }) });
   router.get(`${STORES}/:id/members`, controller.listMembers, { ...seller, ...describeRoute(TAG, "List store members", { params: StoreParamsSchema }) });
@@ -43,8 +42,8 @@ export function registerStoresRoutes(router: HttpRouter, controller: StoresContr
 
 export function registerSellerApplicationRoutes(router: HttpRouter, controller: SellerApplicationsController, web: WebKit): void {
   const { guard } = web;
-  router.post("/api/v1/seller-applications", controller.submit, { ...guard.requirePermission("seller:apply"), ...describeRoute(TAG, "Apply to open a store", { body: SubmitSellerApplicationBodySchema }) });
-  router.get("/api/v1/seller-applications/mine", controller.listMine, { ...guard.requirePermission("seller:apply"), ...describeRoute(TAG, "List my seller applications") });
+  router.post("/api/v1/seller/applications", controller.submit, { ...guard.requirePermission("seller:apply"), ...describeRoute(TAG, "Apply to open a store", { body: SubmitSellerApplicationBodySchema }) });
+  router.get("/api/v1/seller/applications/me", controller.listMine, { ...guard.requirePermission("seller:apply"), ...describeRoute(TAG, "Get my latest seller application") });
   router.get("/api/v1/admin/seller-applications", controller.listForReview, {
     ...guard.requirePermission("seller-applications:review"),
     ...describeRoute(TAG, "List seller applications", { query: ListSellerApplicationsQuerySchema }),

@@ -1,4 +1,7 @@
+import type { MoneyConversion } from "../../../interfaces/currencyConverter.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
+import type { MoneyDto } from "../../../utils/money.util.js";
+import { presentPriceInCurrency } from "../../products/dtos/price.dto.js";
 import type { SellerApplicationRecord, StoreMemberRecord, StoreRecord } from "../models/stores.model.js";
 
 export interface StoreDto {
@@ -12,16 +15,16 @@ export interface StoreDto {
   readonly featured: boolean;
   readonly shippingPolicy: string;
   readonly returnPolicy: string;
-  readonly shippingFee: number;
-  readonly discountBps: number;
   readonly currency: string;
+  readonly shippingFee: MoneyDto;
+  readonly discountBps: number;
   readonly ratingAverage: number;
   readonly ratingCount: number;
   readonly productCount?: number;
   readonly createdAt: string;
 }
 
-export function convertStoreToDto(store: StoreRecord, currency: string, productCount?: number): StoreDto {
+export function convertStoreToDto(store: StoreRecord, convert: MoneyConversion, productCount?: number): StoreDto {
   return {
     id: store.id,
     name: store.name,
@@ -33,9 +36,9 @@ export function convertStoreToDto(store: StoreRecord, currency: string, productC
     featured: store.featured,
     shippingPolicy: store.shippingPolicy,
     returnPolicy: store.returnPolicy,
-    shippingFee: store.shippingFee,
+    currency: store.currency,
+    shippingFee: presentPriceInCurrency(store.shippingFee, store.currency, convert),
     discountBps: store.discountBps,
-    currency,
     ratingAverage: store.ratingAverage,
     ratingCount: store.ratingCount,
     ...(productCount === undefined ? {} : { productCount }),
@@ -51,10 +54,15 @@ export function convertStoreToSummary(store: StoreRecord): StoreSummary {
     slug: store.slug,
     logoUrl: store.logoUrl,
     status: store.status,
+    currency: store.currency,
     shippingFee: store.shippingFee,
     discountBps: store.discountBps,
     ratingAverage: store.ratingAverage,
     ratingCount: store.ratingCount,
+    description: store.description,
+    bannerUrl: store.bannerUrl,
+    featured: store.featured,
+    createdAt: store.createdAt,
   };
 }
 

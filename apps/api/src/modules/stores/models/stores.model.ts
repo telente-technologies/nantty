@@ -1,4 +1,5 @@
 import type { StoreRole } from "../../../constants/roles.constant.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 
 export type StoreStatus = "active" | "suspended";
 export type SellerApplicationStatus = "pending" | "approved" | "rejected";
@@ -12,6 +13,7 @@ export interface StoreRecord {
   readonly logoUrl: string | null;
   readonly bannerUrl: string | null;
   readonly status: StoreStatus;
+  readonly currency: CurrencyCode;
   readonly featured: boolean;
   readonly shippingPolicy: string;
   readonly returnPolicy: string;
@@ -28,6 +30,7 @@ export interface NewStoreInput {
   readonly name: string;
   readonly slug: string;
   readonly description: string;
+  readonly currency: CurrencyCode;
   readonly shippingFee: number;
   readonly discountBps: number;
   readonly shippingPolicy: string;
@@ -37,7 +40,7 @@ export interface NewStoreInput {
 }
 
 export type StoreChanges = Partial<
-  Pick<StoreRecord, "name" | "description" | "logoUrl" | "bannerUrl" | "shippingPolicy" | "returnPolicy" | "shippingFee" | "discountBps" | "featured">
+  Pick<StoreRecord, "name" | "description" | "logoUrl" | "bannerUrl" | "shippingPolicy" | "returnPolicy" | "shippingFee" | "discountBps" | "featured" | "currency">
 >;
 
 export interface StoreFilter {

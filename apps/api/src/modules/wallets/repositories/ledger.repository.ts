@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import { insufficientFunds } from "../../../errors/domain.error.js";
+import { CurrencyMismatchError } from "../../../utils/money.util.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
 import {
@@ -41,7 +43,7 @@ export class InMemoryLedgerRepository implements LedgerRepository {
 
   public async listEntriesForAccount(accountKey: string, page: PageRequest): Promise<Page<LedgerEntryRecord>> {
     const account = this.accounts.get(accountKey);
-    if (account === undefined) return { items: [], nextCursor: null };
+    if (account === undefined) return { data: [], nextCursor: null };
     const entries = [...this.transactions.values()]
       .flatMap((transaction) => transaction.entries)
       .filter((entry) => entry.accountId === account.id)
@@ -63,11 +65,12 @@ export class InMemoryLedgerRepository implements LedgerRepository {
     const workingAccounts = new Map<string, LedgerAccountRecord>();
     const transactionId = randomUUID();
     const entries: LedgerEntryRecord[] = input.lines.map((line) => {
-      const account = workingAccounts.get(line.account.key) ?? this.findOrOpenAccount(line.account, input.currency);
+      const account = workingAccounts.get(line.account.key) ?? this.findOrOpenAccount(line.account, line.currency);
+      if (account.currency !== line.currency) throw new CurrencyMismatchError(account.currency, line.currency);
       const balance = account.balance + calculateBalanceChange(account.kind, line.direction, line.amount);
       if (balance < 0 && !account.allowNegative) throw insufficientFunds();
       workingAccounts.set(account.key, { ...account, balance, version: account.version + 1 });
-      return { id: randomUUID(), transactionId, accountId: account.id, direction: line.direction, amount: line.amount, balanceAfter: balance, createdAt: postedAt };
+      return { id: randomUUID(), transactionId, accountId: account.id, direction: line.direction, amount: line.amount, currency: line.currency, balanceAfter: balance, createdAt: postedAt };
     });
     for (const account of workingAccounts.values()) this.accounts.set(account.key, account);
     const transaction: LedgerTransactionRecord = {
@@ -82,7 +85,7 @@ export class InMemoryLedgerRepository implements LedgerRepository {
     return { transaction, created: true };
   }
 
-  private findOrOpenAccount(specification: LedgerAccountSpecification, currency: string): LedgerAccountRecord {
+  private findOrOpenAccount(specification: LedgerAccountSpecification, currency: CurrencyCode): LedgerAccountRecord {
     return this.accounts.get(specification.key) ?? { ...specification, id: randomUUID(), currency, balance: 0, version: 0 };
   }
 }

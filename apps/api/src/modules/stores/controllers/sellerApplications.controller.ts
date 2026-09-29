@@ -29,7 +29,8 @@ export class SellerApplicationsController {
 
   public readonly listMine = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const query = new ListMySellerApplicationsQuery(requireAuthenticatedPrincipal(ctx));
-    return json(200, { items: await this.queries.execute<ListMySellerApplicationsQuery, readonly SellerApplicationDto[]>(query) });
+    const applications = await this.queries.execute<ListMySellerApplicationsQuery, readonly SellerApplicationDto[]>(query);
+    return json(200, applications[0] ?? null);
   };
 
   public readonly listForReview = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

@@ -26,6 +26,15 @@ export class StoreAccessService implements StoreAccess {
     return this.stores.listStoreIdsForMember(userId);
   }
 
+  public async findPrimaryStoreIdForMember(userId: string): Promise<string | undefined> {
+    const memberStoreIds = await this.stores.listStoreIdsForMember(userId);
+    const memberStores = await this.stores.findManyByIds(memberStoreIds);
+    const ownedStores = memberStores
+      .filter((store) => store.ownerId === userId)
+      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
+    return ownedStores[0]?.id ?? memberStoreIds[0];
+  }
+
   public async findStoreSummaries(storeIds: readonly string[]): Promise<readonly StoreSummary[]> {
     return (await this.stores.findManyByIds([...new Set(storeIds)])).map(convertStoreToSummary);
   }

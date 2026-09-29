@@ -1,5 +1,6 @@
 import { schema, type Infer } from "@zudojs/schema";
 
+import { SUPPORTED_CURRENCY_CODES } from "../../../enums/currency.enum.js";
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 
 const kobo = schema.number().int().min(0).max(100_000_000_000);
@@ -22,6 +23,7 @@ export const CreateStoreBodySchema = schema.object({
   description: schema.string().max(2000).optional(),
   shippingFee: kobo.optional(),
   discountBps: schema.number().int().min(0).max(9_000).optional(),
+  currency: schema.enum(SUPPORTED_CURRENCY_CODES).optional(),
   shippingPolicy: schema.string().max(2000).optional(),
   returnPolicy: schema.string().max(2000).optional(),
   logoUrl: imageUrl,
