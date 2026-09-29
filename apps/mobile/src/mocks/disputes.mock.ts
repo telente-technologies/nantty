@@ -8,7 +8,9 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
 import { findDirectoryUserById } from "./userDirectory.mock";
 
-type MockDisputeRecord = Omit<Dispute, "orderReference" | "productName" | "amount" | "viewerRole" | "counterpartyName" | "messages"> & {
+type Writable<T> = { -readonly [K in keyof T]: T[K] };
+
+type MockDisputeRecord = Writable<Omit<Dispute, "orderReference" | "productName" | "amount" | "viewerRole" | "counterpartyName" | "messages">> & {
   messages: Array<Omit<DisputeMessage, "authorName" | "authorAvatarUrl">>;
 };
 

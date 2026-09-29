@@ -1,30 +1,34 @@
 import type { LiveComment, LiveSessionDetails } from "@/types";
 
-import { buildMockUserSummary, me } from "./fixtures.mock";
-import { convertUsdCentsToViewerCurrency } from "./locale.mock";
+import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
+import { productImageUrlsForProduct } from "./mockImages.mock";
+import { productSummaryByKey } from "./productCatalog.mock";
+import { findDirectoryUserById, summariseUser, userSummaryById } from "./userDirectory.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const viewer = (i: number) => ({ ...buildMockUserSummary(70 + i), username: "user-name" });
+const viewer = (i: number) => buildMockUserSummary(70 + i);
 
 const liveComments = new Map<string, LiveComment[]>();
 const seedLiveComments = (): LiveComment[] => [
-  { id: "lc_1", author: viewer(1), text: "comment about the live stream here from the viewer", kind: "comment" },
-  { id: "lc_2", author: viewer(2), text: "comment about the live stream", kind: "comment" },
-  { id: "lc_3", author: viewer(3), text: "the live stream", kind: "joined" },
-  { id: "lc_4", author: viewer(4), text: "@user-name on the live stream", kind: "reply" },
+  { id: "lc_1", author: viewer(1), text: "Does the green print come in UK 14? 😍", kind: "comment" },
+  { id: "lc_2", author: viewer(2), text: "Just ordered the wrap dress, can't wait!", kind: "comment" },
+  { id: "lc_3", author: viewer(3), text: "joined the live", kind: "joined" },
+  { id: "lc_4", author: viewer(4), text: `@${viewer(1).username} yes she has UK 14 in stock`, kind: "reply" },
 ];
 const commentsFor = (liveId: string) => {
   if (!liveComments.has(liveId)) liveComments.set(liveId, seedLiveComments());
   return liveComments.get(liveId)!;
 };
 
-const buildLiveSession = (liveId: string, host = { ...buildMockUserSummary(80, "Live Username") }): LiveSessionDetails => ({
+const LIVE_HOST_USER_ID = "u_1";
+
+const buildLiveSession = (liveId: string, host = userSummaryById(LIVE_HOST_USER_ID)): LiveSessionDetails => ({
   id: liveId,
-  host: { ...host, followers: 200, following: 300 },
-  title: "Title of Live here",
-  viewers: 268,
+  host: { ...host, followers: findDirectoryUserById(host.id)?.followers ?? 0, following: findDirectoryUserById(host.id)?.following ?? 0 },
+  title: host.id === LIVE_HOST_USER_ID ? "Owambe Edit try-on 👗 ask me anything" : "Live on Zudomart",
+  viewers: 1268,
   status: liveId.startsWith("ended") ? "ended" : "live",
-  products: [1, 2, 3, 4].map((n) => ({ id: `pr_${n}`, name: "Product Name", price: convertUsdCentsToViewerCurrency(1_290), imageUrl: null })),
+  products: (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),
   isFollowingHost: false,
   startedAt: new Date().toISOString(),
 });
@@ -33,11 +37,23 @@ const hostedLives = new Map<string, LiveSessionDetails>();
 
 export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/suggested", () =>
-    Array.from({ length: 6 }, (_, i) => ({ id: `live_s${i}`, host: buildMockUserSummary(90 + i), title: "Live", coverUrl: null })),
+    ([
+      ["u_2", "Unboxing the new ANC headphones 🎧", "g6"],
+      ["u_3", "Harmattan skincare Q&A ✨", "b3"],
+      ["u_4", "Cooking ofada stew with mama 🍲", "fd1"],
+      ["u_6", "Aba leather workshop tour 👞", "s1"],
+      ["u_5", "Back-to-school haul 🎒", "k3"],
+      ["u_me", "Clay pot seasoning 101 🏺", "h2"],
+    ] as const).map(([userId, title, productKey], index) => ({
+      id: `live_s${index}`,
+      host: summariseUser(findDirectoryUserById(userId)!),
+      title,
+      coverUrl: productImageUrlsForProduct(productKey)[0] ?? null,
+    })),
   ),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
-    const session = { ...buildLiveSession(`live_${Date.now()}`, me), title: (body as { title: string }).title, viewers: 0 };
+    const session = { ...buildLiveSession(`live_${Date.now()}`, summariseUser(getSignedInMockUser())), title: (body as { title: string }).title, viewers: 0 };
     hostedLives.set(session.id, session);
     return session;
   }),
@@ -48,7 +64,7 @@ export const liveMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/lives/:liveId/share", () => undefined),
   createMockRoute("GET", "/api/v1/lives/:liveId/comments", ({ params }) => ({ data: commentsFor(params.liveId!), nextCursor: null })),
   createMockRoute("POST", "/api/v1/lives/:liveId/comments", ({ params, body }) => {
-    const comment: LiveComment = { id: `lc_${Date.now()}`, author: me, text: (body as { text: string }).text, kind: "comment" };
+    const comment: LiveComment = { id: `lc_${Date.now()}`, author: summariseUser(getSignedInMockUser()), text: (body as { text: string }).text, kind: "comment" };
     liveComments.set(params.liveId!, [...commentsFor(params.liveId!), comment]);
     return comment;
   }),

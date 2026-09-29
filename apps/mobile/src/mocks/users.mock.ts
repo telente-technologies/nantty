@@ -1,73 +1,78 @@
-import type { ConnectionEntry } from "@/types/account.type";
-import type { Post, User } from "@/types";
+import { ApiError } from "@/errors/api.error";
+import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";
+import type { User } from "@/types";
 
-import { buildMockUserSummary, isoDateHoursAgo, me } from "./fixtures.mock";
-import { convertUsdCentsToViewerCurrency } from "./locale.mock";
+import { getSignedInMockUser } from "./fixtures.mock";
+import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
+import { listPostsByAuthor, mockPostsState, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { blockedUserIds, followedUserIds, followerUserIds } from "./socialGraph.mock";
+import { findDirectoryStoreById } from "./storeDirectory.mock";
+import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
-const LONG_POST_TEXT =
-  "Figma ipsum component variant main layer. Group export vector mask community object arrow ellipse image scale. Flows duplicate shadow outline variant rectangle comment edit. Distribute slice overflow layer overflow layer vertical star follower. Connection content export list draft plugin export rotate shadow figma. Select text flatten slice image follower flows. Duplicate object content export slice align.";
+const profileEditsByUserId = new Map<string, Partial<User>>();
 
-let myProfile: User = { ...me, name: "Profile Name", username: "username" };
+const signedInProfile = (): User => {
+  const base = getSignedInMockUser();
+  return { ...base, ...profileEditsByUserId.get(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
+};
 
-const creatorProfile = (userId: string): User => ({
-  ...me,
-  id: userId,
-  name: "Profile Name",
-  username: "username",
-  isFollowing: false,
-  isSeller: true,
-  storeId: "s_1",
-});
+const toConnectionEntry = (user: User): ConnectionEntry => ({ ...summariseUser(user), isFollowing: followedUserIds.has(user.id) });
 
-const buildProfilePost = (index: number, authorId: string): Post => ({
-  id: `p_${authorId}_${index}`,
-  kind: "post",
-  author: { ...buildMockUserSummary(index), id: authorId },
-  createdAt: isoDateHoursAgo(48),
-  text: LONG_POST_TEXT,
-  media: [{ type: "image", url: null }],
-  likes: 100,
-  comments: 21,
-  reposts: 20,
-  views: 0,
-  liked: false,
-  bookmarked: false,
-  isFollowingAuthor: true,
-  friendsLiked: null,
-  products: [{ id: "pr_1", name: "Product Name", price: convertUsdCentsToViewerCurrency(1_300), imageUrl: null }],
-});
+const storeOwnersIBoughtFrom = () =>
+  [...new Set(mockOrderRecords.filter((record) => record.buyerUserId === SIGNED_IN_BUYER).map((record) => findDirectoryStoreById(record.storeId).ownerUserKey))];
 
-const connections: ConnectionEntry[] = [
-  { id: "u_enyo", name: "Enyo Dev", username: "mayweda_dev", avatarUrl: null, verified: false, isFollowing: true },
-  { id: "u_support", name: "Zudo Support", username: "zudosupport", avatarUrl: null, verified: true, isFollowing: true },
-];
+function listConnections(tab: ConnectionTab): ConnectionEntry[] {
+  const usersByIds = (ids: readonly string[]) => ids.map((id) => findDirectoryUserById(id)).filter((user): user is User => !!user);
+  switch (tab) {
+    case "followers":
+      return usersByIds(followerUserIds).map(toConnectionEntry);
+    case "following":
+      return usersByIds([...followedUserIds]).map(toConnectionEntry);
+    case "shopped":
+      return usersByIds(storeOwnersIBoughtFrom()).map(toConnectionEntry);
+    case "blocked":
+      return usersByIds([...blockedUserIds]).map((user) => ({ ...toConnectionEntry(user), isFollowing: false }));
+    default:
+      return directoryUsersExcludingAccounts
+        .filter((user) => !followedUserIds.has(user.id) && !blockedUserIds.has(user.id))
+        .slice(0, 10)
+        .map(toConnectionEntry);
+  }
+}
 
-let blocked: ConnectionEntry[] = [
-  { id: "u_blocked", name: "Carlos Trantow", username: "carlos_t", avatarUrl: null, verified: false, isFollowing: false },
-];
+const setFollowingAuthor = (userId: string, following: boolean) => {
+  if (following) followedUserIds.add(userId);
+  else followedUserIds.delete(userId);
+  for (const [postId, post] of mockPostsState) {
+    if (post.author.id === userId) mockPostsState.set(postId, { ...post, isFollowingAuthor: following });
+  }
+};
 
 export const usersMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/users/me", () => myProfile),
+  createMockRoute("GET", "/api/v1/users/me", () => signedInProfile()),
   createMockRoute("PATCH", "/api/v1/users/me", ({ body }) => {
-    myProfile = { ...myProfile, ...(body as Partial<User>) };
-    return myProfile;
+    const userId = getSignedInMockUser().id;
+    profileEditsByUserId.set(userId, { ...profileEditsByUserId.get(userId), ...(body as Partial<User>) });
+    return signedInProfile();
   }),
-  createMockRoute("GET", "/api/v1/users/me/blocked", () => blocked),
-  createMockRoute("GET", "/api/v1/users/:userId", ({ params }) =>
-    params.userId === myProfile.id ? myProfile : creatorProfile(params.userId!),
-  ),
+  createMockRoute("GET", "/api/v1/users/me/blocked", () => listConnections("blocked")),
+  createMockRoute("GET", "/api/v1/users/:userId", ({ params }) => {
+    if (params.userId === getSignedInMockUser().id || params.userId === "me") return signedInProfile();
+    const user = findDirectoryUserById(params.userId!);
+    if (!user) throw new ApiError(404, "This account doesn't exist");
+    return { ...user, isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
+  }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: [0, 1, 2].map((i) => buildProfilePost(i, params.userId!)),
+    data: listPostsByAuthor(params.userId!).map(withCurrentProductPrices),
     nextCursor: null,
   })),
-  createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) =>
-    query.get("tab") === "blocked" ? blocked : connections,
-  ),
-  createMockRoute("POST", "/api/v1/users/:userId/follow", () => undefined),
-  createMockRoute("DELETE", "/api/v1/users/:userId/follow", () => undefined),
-  createMockRoute("POST", "/api/v1/users/:userId/block", () => undefined),
-  createMockRoute("DELETE", "/api/v1/users/:userId/block", ({ params }) => {
-    blocked = blocked.filter((entry) => entry.id !== params.userId);
+  createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),
+  createMockRoute("POST", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, true)),
+  createMockRoute("DELETE", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, false)),
+  createMockRoute("POST", "/api/v1/users/:userId/block", ({ params }) => {
+    blockedUserIds.add(params.userId!);
+    setFollowingAuthor(params.userId!, false);
   }),
+  createMockRoute("DELETE", "/api/v1/users/:userId/block", ({ params }) => void blockedUserIds.delete(params.userId!)),
 ];

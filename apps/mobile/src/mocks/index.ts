@@ -2,11 +2,14 @@ import { ApiError } from "@/errors/api.error";
 
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
+import { banksMocks } from "./banks.mock";
 import { cartMocks } from "./cart.mock";
 import { chatsMocks } from "./chats.mock";
 import { clipsMocks } from "./clips.mock";
 import { commentsMocks } from "./comments.mock";
+import { creatorProgramMocks } from "./creatorProgram.mock";
 import { creatorsMocks } from "./creators.mock";
+import { disputesMocks } from "./disputes.mock";
 import { feedMocks } from "./feed.mock";
 import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
@@ -32,6 +35,9 @@ const routes: MockRoute[] = [
   ...productsMocks,
   ...cartMocks,
   ...ordersMocks,
+  ...disputesMocks,
+  ...banksMocks,
+  ...creatorProgramMocks,
   ...chatsMocks,
   ...clipsMocks,
   ...commentsMocks,

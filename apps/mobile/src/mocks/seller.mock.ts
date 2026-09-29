@@ -4,7 +4,7 @@ import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import type { SellerDashboard } from "@/types";
 
 import { bankNameForCode } from "./banks.mock";
-import { buildEscrowDetailFromRecord, buildOrderFromRecord } from "./escrowBuilders.mock";
+import { buildOrderFromRecord } from "./escrowBuilders.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { buildShipment, mockOrderRecords, usdCentsForOrderRecord, type MockOrderRecord } from "./orderFixtures.mock";
@@ -130,7 +130,6 @@ export const sellerMocks: MockRoute[] = [
   }),
   createMockRoute("GET", "/api/v1/seller/orders", () => listSignedInStoreOrderRecords().map(buildOrderFromRecord)),
   createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => buildOrderFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
-  createMockRoute("GET", "/api/v1/seller/orders/:orderId/escrow", ({ params }) => buildEscrowDetailFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
   createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params, body }) => {
     const record = findStoreOrderRecordOrThrow(params.orderId!);
     if (record.status === "shipped") return buildOrderFromRecord(record);

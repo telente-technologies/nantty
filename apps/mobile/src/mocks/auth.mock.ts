@@ -1,9 +1,16 @@
 import { ApiError } from "@/errors/api.error";
 
-import { me } from "./fixtures.mock";
+import { demoFanAccount, getSignedInMockUser, me, mockSession } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const buildMockAuthSession = () => ({ accessToken: "mock-access", refreshToken: "mock-refresh", user: me });
+const buildMockAuthSession = () => ({ accessToken: "mock-access", refreshToken: "mock-refresh", user: getSignedInMockUser() });
+
+const DEMO_FAN_IDENTIFIER_HINTS = ["fan", "buyer"];
+
+const signInDemoAccountMatchingIdentifier = (identifier: string) => {
+  const lowered = identifier.toLowerCase();
+  mockSession.signedInUserId = DEMO_FAN_IDENTIFIER_HINTS.some((hint) => lowered.includes(hint)) ? demoFanAccount.id : me.id;
+};
 
 const TOPICS = [
   "Entertainment", "Technology", "Entrepreneurship", "Nature", "STEM", "Artificial Intelligence", "News", "Politics",
@@ -15,10 +22,14 @@ const TOPICS = [
 export const authMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/auth/login", ({ body }) => {
     const { identifier } = body as { identifier: string };
-    if (!identifier.includes("zudomart")) throw new ApiError(401, "Account doesn't exist", "ACCOUNT_NOT_FOUND");
+    if (!identifier.toLowerCase().includes("zudomart")) throw new ApiError(401, "Account doesn't exist", "ACCOUNT_NOT_FOUND");
+    signInDemoAccountMatchingIdentifier(identifier);
     return buildMockAuthSession();
   }),
-  createMockRoute("POST", "/api/v1/auth/register", () => buildMockAuthSession()),
+  createMockRoute("POST", "/api/v1/auth/register", () => {
+    mockSession.signedInUserId = demoFanAccount.id;
+    return buildMockAuthSession();
+  }),
   createMockRoute("POST", "/api/v1/auth/otp/send", () => ({ expiresIn: 60 })),
   createMockRoute("POST", "/api/v1/auth/otp/verify", ({ body }) => {
     const { code } = body as { code: string };

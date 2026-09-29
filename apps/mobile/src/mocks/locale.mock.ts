@@ -17,6 +17,10 @@ export function convertUsdCentsToViewerCurrency(usdCents: number): Money {
   return { amountMinor: Math.round(usdCents * UNITS_PER_US_DOLLAR[currency]), currency };
 }
 
+export function convertViewerMoneyToUsdCents(money: Money): number {
+  return Math.round(money.amountMinor / UNITS_PER_US_DOLLAR[money.currency]);
+}
+
 export const localeMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/locale", () => {
     const countryCode = useLocaleStore.getState().deviceRegionCode;
