@@ -1,11 +1,12 @@
 import { StoreRole } from "../../../constants/roles.constant.js";
 import { forbidden, notFound } from "../../../errors/domain.error.js";
 import type { StoreAccess, StoreSummary } from "../../../interfaces/storeAccess.interface.js";
+import { UNVERIFIED_STORE_BADGE, type VerificationBadgeLookup } from "../../../interfaces/verificationBadge.interface.js";
 import { convertStoreToSummary } from "../dtos/stores.dto.js";
 import type { StoresRepository } from "../repositories/stores.repository.js";
 
 export class StoreAccessService implements StoreAccess {
-  public constructor(private readonly stores: StoresRepository) {}
+  public constructor(private readonly stores: StoresRepository, private readonly verificationBadges?: VerificationBadgeLookup) {}
 
   public async assertStoreMember(userId: string, storeId: string, allowedRoles?: readonly StoreRole[]): Promise<void> {
     if ((await this.stores.findById(storeId)) === undefined) throw notFound("Store");
@@ -36,7 +37,10 @@ export class StoreAccessService implements StoreAccess {
   }
 
   public async findStoreSummaries(storeIds: readonly string[]): Promise<readonly StoreSummary[]> {
-    return (await this.stores.findManyByIds([...new Set(storeIds)])).map(convertStoreToSummary);
+    const summaries = (await this.stores.findManyByIds([...new Set(storeIds)])).map(convertStoreToSummary);
+    if (this.verificationBadges === undefined || summaries.length === 0) return summaries;
+    const badges = await this.verificationBadges.findVerificationBadges(summaries.map((summary) => summary.id));
+    return summaries.map((summary) => ({ ...summary, verification: badges.get(summary.id) ?? UNVERIFIED_STORE_BADGE }));
   }
 
   public updateStoreRating(storeId: string, ratingAverage: number, ratingCount: number): Promise<void> {
