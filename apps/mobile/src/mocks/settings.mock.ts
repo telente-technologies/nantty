@@ -1,6 +1,9 @@
 import type { AccountSettings, ShippingAddressInput } from "@/types/account.type";
 import type { Address } from "@/types";
 
+import { useLocaleStore } from "@/store/locale.store";
+import type { CountryOption } from "@/types/account.type";
+
 import { me } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -9,6 +12,7 @@ let settings: AccountSettings = {
   phone: null,
   theme: "light",
   language: "en",
+  countryCode: null,
   pushNotificationsEnabled: true,
   twoFactorEnabled: false,
 };
@@ -29,7 +33,23 @@ const applyDefaultAddress = (id: string, isDefault: boolean) => {
   if (isDefault) addresses = addresses.map((a) => ({ ...a, isDefault: a.id === id }));
 };
 
+const SUPPORTED_COUNTRIES: CountryOption[] = [
+  { countryCode: "NG", countryName: "Nigeria", currency: "NGN", currencyName: "Nigerian naira" },
+  { countryCode: "GH", countryName: "Ghana", currency: "GHS", currencyName: "Ghanaian cedi" },
+  { countryCode: "KE", countryName: "Kenya", currency: "KES", currencyName: "Kenyan shilling" },
+  { countryCode: "ZA", countryName: "South Africa", currency: "ZAR", currencyName: "South African rand" },
+  { countryCode: "GB", countryName: "United Kingdom", currency: "GBP", currencyName: "British pound" },
+  { countryCode: "IE", countryName: "Ireland", currency: "EUR", currencyName: "Euro" },
+  { countryCode: "US", countryName: "United States", currency: "USD", currencyName: "US dollar" },
+];
+
 export const settingsMocks: MockRoute[] = [
+  createMockRoute("GET", "/api/v1/locale/countries", () => SUPPORTED_COUNTRIES),
+  createMockRoute("PATCH", "/api/v1/users/me/preferences", ({ body }) => {
+    const { countryCode } = body as { countryCode: string };
+    settings = { ...settings, countryCode };
+    useLocaleStore.setState({ deviceRegionCode: countryCode });
+  }),
   createMockRoute("GET", "/api/v1/users/me/settings", () => settings),
   createMockRoute("PATCH", "/api/v1/users/me/settings", ({ body }) => {
     settings = { ...settings, ...(body as Partial<AccountSettings>) };
