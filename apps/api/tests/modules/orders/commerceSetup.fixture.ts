@@ -41,7 +41,7 @@ export class FakePaymentGateway implements PaymentGateway {
     this.verifyCalls.push(reference);
     const request = this.initialized.find((entry) => entry.reference === reference) ?? this.savedAuthorizationCharges.find((entry) => entry.reference === reference);
     return {
-      status: this.savedAuthorizationCharges.some((entry) => entry.reference === reference) && this.savedAuthorizationChargeStatus === "failed" ? "failed" : "succeeded",
+      status: this.savedAuthorizationCharges.some((entry) => entry.reference === reference) ? this.savedAuthorizationChargeStatus : "succeeded",
       amount: request?.amount ?? 0,
       currency: request?.currency ?? "NGN",
       providerTransactionId: `txn_${reference}`,
