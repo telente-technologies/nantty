@@ -63,6 +63,7 @@ model Withdrawal {
   userId          String?
   payoutAccountId String
   amount          BigInt
+  fee             BigInt    @default(0)
   currency        String
   status          String    @default("pending")
   reference       String    @unique
