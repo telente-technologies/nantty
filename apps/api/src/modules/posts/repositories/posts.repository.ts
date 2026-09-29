@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
-import type { CounterField, NewPostInput, PostListFilter, PostRecord } from "../models/posts.model.js";
+import type { CounterField, NewPostInput, PostKind, PostListFilter, PostRecord } from "../models/posts.model.js";
 
 export interface PostsRepository {
   create(input: NewPostInput): Promise<PostRecord>;
@@ -13,7 +13,15 @@ export interface PostsRepository {
   changeCounter(id: string, field: CounterField, delta: number): Promise<void>;
   listVisible(filter: PostListFilter, now: Date, page: PageRequest): Promise<Page<PostRecord>>;
   listRecentCandidates(filter: PostListFilter, now: Date, limit: number): Promise<readonly PostRecord[]>;
+  summarizeAuthorContent(authorId: string): Promise<AuthorContentSummary>;
 }
+
+export interface AuthorContentSummary {
+  readonly postCount: number;
+  readonly viewCount: number;
+}
+
+export const CREATOR_CONTENT_KINDS: readonly PostKind[] = ["post", "clip"];
 
 export function isPostVisibleAt(post: PostRecord, now: Date): boolean {
   return post.deletedAt === null && (post.expiresAt === null || post.expiresAt > now);
@@ -87,5 +95,10 @@ export class InMemoryPostsRepository implements PostsRepository {
 
   public async listRecentCandidates(filter: PostListFilter, now: Date, limit: number): Promise<readonly PostRecord[]> {
     return (await this.listVisible(filter, now, { limit })).data;
+  }
+
+  public async summarizeAuthorContent(authorId: string): Promise<AuthorContentSummary> {
+    const posts = [...this.posts.values()].filter((post) => post.authorId === authorId && post.deletedAt === null && CREATOR_CONTENT_KINDS.includes(post.kind));
+    return { postCount: posts.length, viewCount: posts.reduce((total, post) => total + post.viewCount, 0) };
   }
 }
