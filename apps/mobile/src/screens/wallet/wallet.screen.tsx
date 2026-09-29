@@ -1,54 +1,77 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
+import { EscrowHoldRow } from "@/components/wallet/escrowHoldRow";
+import { LoyaltyCard } from "@/components/wallet/loyaltyCard";
 import { TransactionRow } from "@/components/wallet/transactionRow";
-import { useWalletBalanceQuery, useWalletTransactionsQuery } from "@/components/wallet/walletQueries.hook";
+import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
+import {
+  useEscrowHoldsQuery,
+  useLoyaltySummaryQuery,
+  useWalletBalanceQuery,
+  useWalletTransactionsQuery,
+} from "@/components/wallet/walletQueries.hook";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
-  const { data: wallet } = useWalletBalanceQuery();
+  const queryClient = useQueryClient();
+  const { data: wallet, isRefetching } = useWalletBalanceQuery();
   const { data: transactions = [] } = useWalletTransactionsQuery();
+  const { data: escrowHolds = [] } = useEscrowHoldsQuery();
+  const { data: loyalty } = useLoyaltySummaryQuery();
 
   return (
     <Screen>
       <Header title="Wallet" />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.balance} accessibilityLabel={`Available balance ${wallet ? formatMoneyForDisplay(wallet.available) : ""}`}>
-          <Text size={14} weight={500} lineHeight={16.8} color={colors.textMuted}>
-            Available balance
-          </Text>
-          <Text size={28} weight={600} lineHeight={33.6}>
-            {wallet ? formatMoneyForDisplay(wallet.available) : " "}
-          </Text>
-          <Text size={13} lineHeight={16.9} color={colors.textSubtle}>
-            {wallet ? `${formatMoneyForDisplay(wallet.pending)} held in escrow` : " "}
-          </Text>
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => queryClient.invalidateQueries({ queryKey: ["wallet"] })} tintColor={colors.primary} />}
+      >
+        <WalletBalanceCards wallet={wallet} />
+        <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+          Pending money is held in escrow until buyers confirm delivery (or 3 days after delivery). It then moves to your available balance.
+        </Text>
         <Button title="Withdraw" disabled={!wallet || wallet.available.amountMinor <= 0} onPress={() => navigation.navigate("Withdraw")} />
+
+        {escrowHolds.length > 0 ? (
+          <View style={styles.section}>
+            <Text size={16} weight={500} lineHeight={19.2}>Held in escrow</Text>
+            <SettingsGroup>
+              {escrowHolds.map((hold) => (
+                <EscrowHoldRow key={hold.orderId} hold={hold} onPress={() => navigation.navigate("SellerOrderDetail", { orderId: hold.orderId })} />
+              ))}
+            </SettingsGroup>
+          </View>
+        ) : null}
+
+        {loyalty ? <LoyaltyCard loyalty={loyalty} /> : null}
+
         <SettingsGroup>
           <SettingsRow label="Payout accounts" onPress={() => navigation.navigate("PayoutAccounts")} />
           <SettingsRow label="All transactions" onPress={() => navigation.navigate("Transactions")} />
+          <SettingsRow label="Invite friends, earn cashback" onPress={() => navigation.navigate("Referral")} />
         </SettingsGroup>
-        <Text size={16} weight={500} lineHeight={19.2}>
-          Recent activity
-        </Text>
-        <SettingsGroup>
-          {transactions.slice(0, 5).map((transaction) => (
-            <TransactionRow key={transaction.id} transaction={transaction} />
-          ))}
-        </SettingsGroup>
+
+        <View style={styles.section}>
+          <Text size={16} weight={500} lineHeight={19.2}>Recent activity</Text>
+          <SettingsGroup>
+            {transactions.slice(0, 5).map((transaction) => (
+              <TransactionRow key={transaction.id} transaction={transaction} />
+            ))}
+          </SettingsGroup>
+        </View>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingBottom: 40, gap: 24 },
-  balance: { alignItems: "center", gap: 8, paddingVertical: 24 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
+  section: { gap: 12 },
 });
