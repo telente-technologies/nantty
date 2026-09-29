@@ -14,7 +14,6 @@ import { MessageReactionPicker } from "@/components/chat/messageReactionPicker";
 import { useMessageReactionToggle } from "@/components/chat/messageReactions.hook";
 import { useOptimisticChatMessageSender } from "@/components/chat/optimisticChatMessageSender.hook";
 import { useOptimisticVoiceNoteSender } from "@/components/chat/optimisticVoiceNoteSender.hook";
-import { useRealtimeMessagingConnection } from "@/components/chat/realtimeMessaging.hook";
 import { useUsersTypingInConversation } from "@/components/chat/typingIndicators.store";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -39,7 +38,6 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const myUserId = useAuthStore((s) => s.user?.id ?? "u_me");
   const listRef = useRef<FlatList<LocallyStoredMessage>>(null);
   const [messageBeingReactedTo, setMessageBeingReactedTo] = useState<LocallyStoredMessage | null>(null);
-  useRealtimeMessagingConnection();
 
   const conversation = useQuery({
     queryKey: ["conversation", route.params.conversationId ?? `user:${userId}`],
