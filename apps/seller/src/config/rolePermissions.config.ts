@@ -101,6 +101,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "GET", pathPattern: /^\/seller\/subscription(\/plans)?$/, permission: "signed_in" },
   { method: "WRITE", pathPattern: /^\/seller\/subscription\//, permission: "billing:manage" },
   { method: "GET", pathPattern: /^\/seller\/verification$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/zudomart-users$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/dashboard/, permission: "dashboard:view" },
   { method: "ANY", pathPattern: /^\/seller\/staff\/pin-sessions/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/staff\/pin-roster$/, permission: "signed_in" },
