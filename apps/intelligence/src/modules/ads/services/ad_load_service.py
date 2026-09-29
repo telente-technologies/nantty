@@ -1,9 +1,9 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from src.modules.ads.dtos.ad_selection_dto import AdLoadOptions, OrganicSlotItem
+from src.modules.ads.constants.ad_placement_policy_constant import AD_PLACEMENT_POLICIES
+from src.modules.ads.dtos.ad_selection_dto import AdLoadOptions, AdPlacement, OrganicSlotItem
 
-MINIMUM_ORGANIC_ITEMS_BEFORE_FIRST_AD = 2
 STRICT_BRAND_SAFETY_NEIGHBOUR_RADIUS = 2
 
 
@@ -23,10 +23,23 @@ def are_neighbours_safe(organic_items: Sequence[OrganicSlotItem], organic_items_
     return not any(is_organic_item_unsafe_for_ads(item) for item in organic_items[first_index:last_index])
 
 
-def calculate_brand_safe_ad_slots(organic_items: Sequence[OrganicSlotItem], options: AdLoadOptions) -> list[AdSlot]:
+def resolve_first_slot_and_gap(options: AdLoadOptions, placement: AdPlacement) -> tuple[int, int]:
+    policy = AD_PLACEMENT_POLICIES[placement]
+    requested_first = options.first_ad_after_organic_items
+    first_slot = max(
+        policy.minimum_organic_items_before_first_ad,
+        policy.default_organic_items_before_first_ad if requested_first is None else requested_first,
+        options.grid_columns if policy.excludes_first_grid_row else 0,
+    )
+    gap = max(policy.minimum_organic_items_between_ads, options.organic_items_between_ads or 0)
+    return first_slot, gap
+
+
+def calculate_brand_safe_ad_slots(
+    organic_items: Sequence[OrganicSlotItem], options: AdLoadOptions, placement: AdPlacement
+) -> list[AdSlot]:
     slots: list[AdSlot] = []
-    earliest_allowed = max(options.first_ad_after_organic_items, MINIMUM_ORGANIC_ITEMS_BEFORE_FIRST_AD)
-    organic_items_before_slot = earliest_allowed
+    organic_items_before_slot, organic_items_between_ads = resolve_first_slot_and_gap(options, placement)
     while organic_items_before_slot < len(organic_items) and len(slots) < options.maximum_ads:
         if not are_neighbours_safe(organic_items, organic_items_before_slot, 1):
             organic_items_before_slot += 1
@@ -39,7 +52,7 @@ def calculate_brand_safe_ad_slots(organic_items: Sequence[OrganicSlotItem], opti
                 ),
             )
         )
-        organic_items_before_slot += options.organic_items_between_ads
+        organic_items_before_slot += organic_items_between_ads
     return slots
 
 
