@@ -57,7 +57,7 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
       ) : null}
       {onPressProducts ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Products in this live" hitSlop={8} onPress={onPressProducts}>
-          <ViewProducts24Icon />
+          <ViewProducts24Icon color={colors.black} />
         </Pressable>
       ) : null}
     </View>
@@ -66,7 +66,7 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
 
 const styles = StyleSheet.create({
   bar: {
-    height: 49,
+    height: 40,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderTopWidth: 1,
@@ -76,6 +76,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  field: { flex: 1, height: 33, borderWidth: 1, borderColor: colors.divider, borderRadius: 4, paddingHorizontal: 8, justifyContent: "center" },
+  field: { flex: 1, height: 24, borderWidth: 1, borderColor: colors.divider, borderRadius: 4, paddingHorizontal: 8, justifyContent: "center" },
   input: { padding: 0, fontFamily: fontFamily[400], fontSize: 14, letterSpacing: calculateDefaultLetterSpacing(14), color: colors.text },
 });
