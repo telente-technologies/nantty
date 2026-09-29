@@ -6,7 +6,7 @@ import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button, IconButton } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
 import { Callout } from "@/components/ui/feedback";
-import { FormErrorSummary, SelectField, TextField } from "@/components/ui/formFields";
+import { FormErrorSummary, SelectField } from "@/components/ui/formFields";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -15,6 +15,8 @@ import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/cli
 import type { BrandMember, BrandMemberRole } from "@/types/brand.type";
 import { brandMemberRoleDescriptions, brandMemberRoleLabels, canBrandRoleManage } from "@/utils/brandPresentation.util";
 import { fieldChecks, validateObjectAgainstChecks } from "@/utils/formValidation.util";
+import { ZudomartUserPicker } from "@/components/staff/zudomartUserPicker";
+import type { ZudomartUserCandidate } from "@/types/staff.type";
 
 type AssignableRole = Exclude<BrandMemberRole, "owner">;
 const assignableRoles: AssignableRole[] = ["admin", "editor", "viewer"];
@@ -22,22 +24,21 @@ const assignableRoles: AssignableRole[] = ["admin", "editor", "viewer"];
 function InviteBrandMemberDialog({ isOpen, onClose, allowAdmin }: { readonly isOpen: boolean; readonly onClose: () => void; readonly allowAdmin: boolean }) {
   const { brand, reloadBrand } = useBrandWorkspace();
   const { showToast } = useToast();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [selectedUser, setSelectedUser] = useState<ZudomartUserCandidate | null>(null);
   const [role, setRole] = useState<AssignableRole>("editor");
   const [errors, setErrors] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
 
   async function sendBrandInvitation() {
-    const issues = validateObjectAgainstChecks({ name, email, role }, { name: fieldChecks.text({ label: "Name", min: 2, max: 80 }), email: fieldChecks.email(), role: fieldChecks.oneOf("Role", assignableRoles) });
+    const issues = validateObjectAgainstChecks({ role }, { role: fieldChecks.oneOf("Role", assignableRoles) });
+    if (!selectedUser) issues.push({ path: "userId", message: "Search for the person's Zudomart username and select them." });
     setErrors(issues.map((issue) => issue.message));
-    if (issues.length > 0) return;
+    if (issues.length > 0 || !selectedUser) return;
     setIsSending(true);
     try {
-      await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/members`, { method: "POST", body: { name: name.trim(), email: email.trim(), role } });
-      showToast(`Invitation sent to ${email.trim()}.`);
-      setName("");
-      setEmail("");
+      await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/members`, { method: "POST", body: { userId: selectedUser.userId, role } });
+      showToast(`Brand team request sent to @${selectedUser.username}. They accept it in the Zudomart app.`);
+      setSelectedUser(null);
       reloadBrand();
       onClose();
     } catch (error) {
@@ -48,11 +49,10 @@ function InviteBrandMemberDialog({ isOpen, onClose, allowAdmin }: { readonly isO
   }
 
   return (
-    <ModalDialog isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="They get an email to join with their Zudomart account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
+    <ModalDialog isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="Add someone who already uses the Zudomart app. They accept in the app and sign in with their own account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <FormErrorSummary messages={errors} />
-        <TextField label="Name" value={name} maxLength={80} onChange={(event) => setName(event.target.value)} />
-        <TextField label="Email" type="email" value={email} maxLength={254} onChange={(event) => setEmail(event.target.value)} />
+        <ZudomartUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} />
         <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as AssignableRole)} options={assignableRoles.filter((candidate) => allowAdmin || candidate !== "admin").map((candidate) => ({ value: candidate, label: brandMemberRoleLabels[candidate] }))} hint={brandMemberRoleDescriptions[role]} />
       </div>
     </ModalDialog>
@@ -108,7 +108,7 @@ export function BrandMembersView() {
         rows={brand.members}
         readRowKey={(member) => member.id}
         columns={[
-          { key: "name", header: "Name", render: (member) => <div><strong>{member.name}</strong><div style={{ color: "var(--ink-faint)", fontSize: 12 }}>{member.email}</div></div> },
+          { key: "name", header: "Name", render: (member) => <div><strong>{member.name}</strong><div style={{ color: "var(--ink-faint)", fontSize: 12 }}>@{member.username}</div></div> },
           {
             key: "role",
             header: "Role",
