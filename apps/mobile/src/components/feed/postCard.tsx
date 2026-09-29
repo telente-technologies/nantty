@@ -6,6 +6,7 @@ import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins
 import { TipSheet, type TipTarget } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
+import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarStack";
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
@@ -57,7 +58,7 @@ export function PostCard(props: PostCardProps) {
       <View style={styles.combo}>
         {post.friendsLiked ? (
           <View style={styles.likedBy}>
-            <Group1256Icon />
+            <FriendsLikedAvatarStack avatarUrls={post.friendsLiked.avatars} avatarSize={24} overlapOffset={16} fallbackIcon={<Group1256Icon />} />
             <Text size={12} lineHeight={16.8}>
               {post.friendsLiked.count} friends liked
             </Text>
