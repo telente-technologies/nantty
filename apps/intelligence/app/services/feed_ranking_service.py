@@ -1,13 +1,4 @@
-from app.configs.ranking_heuristics_config import (
-    FEED_CREATOR_AFFINITY_BOOST,
-    FEED_ENGAGEMENT_BLEND_WEIGHTS,
-    FEED_FRESHNESS_HALF_LIFE_HOURS,
-    FEED_FRESHNESS_MINIMUM_MULTIPLIER,
-    FEED_HEURISTIC_HEADS,
-    FOLLOWING_FEED_MAXIMUM_BOOST_MINUTES,
-)
 from app.features.feed_feature_vector_builder import (
-    FEED_FEATURE_NAMES,
     FEED_FEATURE_SCHEMA_VERSION,
     build_feed_feature_values,
     convert_feature_values_to_mapping,
@@ -23,10 +14,7 @@ from app.models.feed_ranking_model import (
 from app.registry.active_model_holder import ActiveModelHolder
 from app.services.candidate_filtering_service import filter_candidates_for_viewer
 from app.services.feed_diversity_service import DiversityCandidate, DiversityRules, rerank_candidates_for_diversity
-from app.services.head_probability_predictor_service import (
-    blend_head_probabilities,
-    predict_heads_with_model_or_heuristic,
-)
+from app.services.feed_scoring_service import score_feed_candidates_in_two_stages
 from app.services.ranking_context_service import (
     log_served_feature_rows,
     read_viewer_online_features_safely,
@@ -40,10 +28,6 @@ from app.services.social_proof_service import (
 )
 from app.stores.feature_log_sink import FeatureLogParquetSink
 from app.stores.online_feature_store import OnlineFeatureStore, ViewerOnlineFeatures
-from app.utils.decay_math_util import (
-    calculate_freshness_decay_multiplier,
-    squash_non_negative_value_into_unit_interval,
-)
 
 
 def explain_feed_score_reasons(features: dict[str, float]) -> list[str]:
@@ -69,12 +53,6 @@ def build_diversity_candidate(candidate: FeedCandidate, score: float) -> Diversi
         is_product=candidate.content_kind == "product",
         topics=frozenset([*candidate.topics, *candidate.hashtags]),
     )
-
-
-def calculate_following_feed_boosted_timestamp(candidate: FeedCandidate, features: dict[str, float]) -> float:
-    engagement_signal = squash_non_negative_value_into_unit_interval(features["like_rate"] * 10, 1.0)
-    boost_strength = 0.6 * max(features["creator_affinity"], 0.0) + 0.4 * engagement_signal
-    return candidate.created_at.timestamp() + boost_strength * FOLLOWING_FEED_MAXIMUM_BOOST_MINUTES * 60
 
 
 class FeedRankingService:
@@ -128,32 +106,17 @@ class FeedRankingService:
             build_feed_feature_values(candidate, viewer, followed_account_ids, chosen_topics, online_features, now)
             for candidate in candidates
         ]
-        loaded_model = self.model_holder.get_loaded_model("feed_engagement")
-        prediction = predict_heads_with_model_or_heuristic(
-            feature_rows,
-            FEED_FEATURE_NAMES,
-            loaded_model.bundle if loaded_model else None,
-            loaded_model.version if loaded_model else None,
-            FEED_HEURISTIC_HEADS,
-        )
-        blended_engagement = (
-            blend_head_probabilities(prediction.probabilities_by_head, FEED_ENGAGEMENT_BLEND_WEIGHTS).tolist()
-            if candidates
-            else []
-        )
         feature_mappings = [convert_feature_values_to_mapping(row) for row in feature_rows]
-        final_scores: dict[str, float] = {}
-        for candidate, features, engagement in zip(candidates, feature_mappings, blended_engagement, strict=True):
-            if request.feed_mode == "following":
-                final_scores[candidate.item_id] = calculate_following_feed_boosted_timestamp(candidate, features)
-                continue
-            freshness = calculate_freshness_decay_multiplier(
-                features["age_hours"], FEED_FRESHNESS_HALF_LIFE_HOURS, FEED_FRESHNESS_MINIMUM_MULTIPLIER
-            )
-            affinity_multiplier = 1.0 + FEED_CREATOR_AFFINITY_BOOST * max(features["creator_affinity"], 0.0)
-            reported_multiplier = 0.3 if candidate.is_reported else 1.0
-            final_scores[candidate.item_id] = float(engagement) * freshness * affinity_multiplier * reported_multiplier
-        ordered = self.order_candidates_with_diversity(request, candidates, final_scores)
+        scoring = score_feed_candidates_in_two_stages(
+            candidates,
+            feature_rows,
+            feature_mappings,
+            request.feed_mode,
+            self.model_holder.get_loaded_model("feed_engagement"),
+        )
+        final_scores = scoring.final_score_by_item
+        scored_candidates = [candidate for candidate in candidates if candidate.item_id in final_scores]
+        ordered = self.order_candidates_with_diversity(request, scored_candidates, final_scores)
         if request.feed_mode == "following":
             seen_ids = {candidate.item_id for candidate in filter_outcome.previously_seen_candidates}
             ordered = [item for item in ordered if item.item_id not in seen_ids] + [
@@ -180,7 +143,7 @@ class FeedRankingService:
             viewer.user_id,
             [item.item_id for item in ordered],
             {candidate.item_id: row for candidate, row in zip(candidates, feature_rows, strict=True)},
-            prediction.model_version,
+            scoring.model_version,
             FEED_FEATURE_SCHEMA_VERSION,
             now,
         )
@@ -189,8 +152,8 @@ class FeedRankingService:
             excluded=excluded,
             metadata=RankingResponseMetadata(
                 request_id=request_id,
-                ranking_source=f"{request.feed_mode}:{prediction.ranking_source}",
-                model_version=prediction.model_version,
+                ranking_source=f"{request.feed_mode}:{scoring.ranking_source}",
+                model_version=scoring.model_version,
                 degraded=degraded,
                 generated_at=now,
             ),
