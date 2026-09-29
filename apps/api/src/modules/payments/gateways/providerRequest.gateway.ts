@@ -39,6 +39,11 @@ export function parseWebhookJson(rawBody: Uint8Array): Record<string, unknown> {
   }
 }
 
+export function readNestedRecord(record: Record<string, unknown> | undefined, field: string): Record<string, unknown> | undefined {
+  const value = record?.[field];
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+}
+
 export function readTextField(record: Record<string, unknown> | undefined, field: string): string | null {
   const value = record?.[field];
   return typeof value === "string" || typeof value === "number" ? String(value) : null;
