@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import sklearn
+
 from app.registry.model_bundle_types import LoadedModel
 from app.security.artifact_integrity_security import (
     calculate_file_sha256_hex,
@@ -97,6 +99,9 @@ class ModelRegistry:
         )
         if integrity_failure is not None:
             raise ModelArtifactRejectedError(integrity_failure)
+        trained_with_version = metadata.get("environment", {}).get("scikitLearn")
+        if trained_with_version is not None and trained_with_version != sklearn.__version__:
+            raise ModelArtifactRejectedError("incompatible_scikit_learn_version")
         with (version_directory / ARTIFACT_FILE_NAME).open("rb") as artifact_file:
             bundle = pickle.load(artifact_file)  # noqa: S301 - digest and HMAC verified above
         return LoadedModel(model_name, version, metadata, bundle)
