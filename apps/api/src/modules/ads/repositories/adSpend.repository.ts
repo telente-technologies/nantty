@@ -3,8 +3,8 @@ import type { SpendCounterKey, SpendReservation } from "../models/adDelivery.mod
 export interface AdSpendRepository {
   reserveAll(reservations: readonly SpendReservation[]): Promise<boolean>;
   release(reservations: readonly SpendReservation[]): Promise<void>;
-  readSpentMicros(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>>;
-  addToCounter(key: SpendCounterKey, deltaMicros: number): Promise<number>;
+  readSpentMilliMinor(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>>;
+  addToCounter(key: SpendCounterKey, deltaMilliMinor: number): Promise<number>;
 }
 
 export function describeCounterKey(key: SpendCounterKey): string {
@@ -17,12 +17,12 @@ export class InMemoryAdSpendRepository implements AdSpendRepository {
   public async reserveAll(reservations: readonly SpendReservation[]): Promise<boolean> {
     const fits = reservations.every((reservation) => {
       const spent = this.counters.get(describeCounterKey(reservation)) ?? 0;
-      return reservation.limitMicros === null || spent + reservation.amountMicros <= reservation.limitMicros;
+      return reservation.limitMilliMinor === null || spent + reservation.amountMilliMinor <= reservation.limitMilliMinor;
     });
     if (!fits) return false;
     for (const reservation of reservations) {
       const key = describeCounterKey(reservation);
-      this.counters.set(key, (this.counters.get(key) ?? 0) + reservation.amountMicros);
+      this.counters.set(key, (this.counters.get(key) ?? 0) + reservation.amountMilliMinor);
     }
     return true;
   }
@@ -30,16 +30,16 @@ export class InMemoryAdSpendRepository implements AdSpendRepository {
   public async release(reservations: readonly SpendReservation[]): Promise<void> {
     for (const reservation of reservations) {
       const key = describeCounterKey(reservation);
-      this.counters.set(key, Math.max(0, (this.counters.get(key) ?? 0) - reservation.amountMicros));
+      this.counters.set(key, Math.max(0, (this.counters.get(key) ?? 0) - reservation.amountMilliMinor));
     }
   }
 
-  public async readSpentMicros(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>> {
+  public async readSpentMilliMinor(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>> {
     return new Map(keys.map((key) => [describeCounterKey(key), this.counters.get(describeCounterKey(key)) ?? 0]));
   }
 
-  public async addToCounter(key: SpendCounterKey, deltaMicros: number): Promise<number> {
-    const next = (this.counters.get(describeCounterKey(key)) ?? 0) + deltaMicros;
+  public async addToCounter(key: SpendCounterKey, deltaMilliMinor: number): Promise<number> {
+    const next = (this.counters.get(describeCounterKey(key)) ?? 0) + deltaMilliMinor;
     this.counters.set(describeCounterKey(key), next);
     return next;
   }

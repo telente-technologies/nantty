@@ -12,6 +12,7 @@ export interface AdAccountsRepository {
   listMembers(accountId: string): Promise<readonly AdAccountMemberRecord[]>;
   listMembershipsForUser(userId: string): Promise<readonly AdAccountMemberRecord[]>;
   findAccountsByIds(accountIds: readonly string[]): Promise<readonly AdAccountRecord[]>;
+  listAllAccounts(): Promise<readonly AdAccountRecord[]>;
   addMember(accountId: string, userId: string, role: AdAccountRole, now: Date): Promise<AdAccountMemberRecord>;
   changeMemberRole(accountId: string, userId: string, role: AdAccountRole): Promise<AdAccountMemberRecord>;
   removeMember(accountId: string, userId: string): Promise<void>;
@@ -23,7 +24,7 @@ export class InMemoryAdAccountsRepository implements AdAccountsRepository {
   private readonly members = new Map<string, AdAccountMemberRecord>();
 
   public async createAccountWithOwner(input: NewAdAccountInput, now: Date): Promise<AdAccountRecord> {
-    const account: AdAccountRecord = { ...input, id: randomUUID(), status: "active", disabledReason: null, monthlySpendLimitMinor: null, createdAt: now, updatedAt: now };
+    const account: AdAccountRecord = { ...input, id: randomUUID(), status: "active", disabledReason: null, monthlySpendLimitMinor: null, violationCount: 0, lastViolationAt: null, createdAt: now, updatedAt: now };
     this.accounts.set(account.id, account);
     await this.addMember(account.id, input.ownerId, "admin", now);
     return account;
@@ -63,6 +64,10 @@ export class InMemoryAdAccountsRepository implements AdAccountsRepository {
 
   public async findAccountsByIds(accountIds: readonly string[]): Promise<readonly AdAccountRecord[]> {
     return accountIds.map((id) => this.accounts.get(id)).filter((account): account is AdAccountRecord => account !== undefined);
+  }
+
+  public async listAllAccounts(): Promise<readonly AdAccountRecord[]> {
+    return [...this.accounts.values()];
   }
 
   public async addMember(accountId: string, userId: string, role: AdAccountRole, now: Date): Promise<AdAccountMemberRecord> {

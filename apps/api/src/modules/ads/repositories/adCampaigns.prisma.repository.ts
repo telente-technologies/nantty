@@ -57,6 +57,7 @@ function toAd(row: AdRow): AdRecord {
     status: row.status as AdRecord["status"],
     reviewStatus: row.reviewStatus as AdRecord["reviewStatus"],
     appeal: row.appeal as unknown as AdRecord["appeal"],
+    autoCheckFlags: row.autoCheckFlags as unknown as AdRecord["autoCheckFlags"],
     creativeInput: row.creativeInput as unknown as AdRecord["creativeInput"],
     creative: row.creative as unknown as AdRecord["creative"],
     deliverablePlacements: row.deliverablePlacements as AdRecord["deliverablePlacements"],
@@ -80,9 +81,10 @@ function adSetData(changes: AdSetChanges | NewAdSetInput) {
 }
 
 function adData(changes: AdChanges | NewAdInput) {
-  const { appeal, creativeInput, creative, deliverablePlacements, ...rest } = changes;
+  const { appeal, creativeInput, creative, deliverablePlacements, autoCheckFlags, ...rest } = changes;
   return {
     ...rest,
+    ...(autoCheckFlags === undefined ? {} : { autoCheckFlags: toJson(autoCheckFlags) }),
     ...(appeal === undefined ? {} : { appeal: appeal === null ? (null as unknown as Prisma.InputJsonValue) : toJson(appeal) }),
     ...(creativeInput === undefined ? {} : { creativeInput: toJson(creativeInput) }),
     ...(creative === undefined ? {} : { creative: toJson(creative) }),

@@ -10,11 +10,11 @@ export class PrismaAdSpendRepository implements AdSpendRepository {
       await prisma().$transaction(async (transaction) => {
         for (const reservation of reservations) {
           const key = { scopeId: reservation.scopeId, period: reservation.period };
-          await transaction.adSpendCounter.upsert({ where: { scopeId_period: key }, create: { ...key, spentMicros: 0n }, update: {} });
-          const amount = BigInt(reservation.amountMicros);
+          await transaction.adSpendCounter.upsert({ where: { scopeId_period: key }, create: { ...key, spentMilliMinor: 0n }, update: {} });
+          const amount = BigInt(reservation.amountMilliMinor);
           const updated = await transaction.adSpendCounter.updateMany({
-            where: { ...key, ...(reservation.limitMicros === null ? {} : { spentMicros: { lte: BigInt(reservation.limitMicros) - amount } }) },
-            data: { spentMicros: { increment: amount } },
+            where: { ...key, ...(reservation.limitMilliMinor === null ? {} : { spentMilliMinor: { lte: BigInt(reservation.limitMilliMinor) - amount } }) },
+            data: { spentMilliMinor: { increment: amount } },
           });
           if (updated.count === 0) throw new BudgetExceededError();
         }
@@ -31,24 +31,24 @@ export class PrismaAdSpendRepository implements AdSpendRepository {
       reservations.map((reservation) =>
         prisma().adSpendCounter.updateMany({
           where: { scopeId: reservation.scopeId, period: reservation.period },
-          data: { spentMicros: { decrement: BigInt(reservation.amountMicros) } },
+          data: { spentMilliMinor: { decrement: BigInt(reservation.amountMilliMinor) } },
         })),
     );
   }
 
-  public async readSpentMicros(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>> {
+  public async readSpentMilliMinor(keys: readonly SpendCounterKey[]): Promise<ReadonlyMap<string, number>> {
     if (keys.length === 0) return new Map();
     const rows = await prisma().adSpendCounter.findMany({ where: { OR: keys.map((key) => ({ scopeId: key.scopeId, period: key.period })) } });
-    const found = new Map(rows.map((row) => [describeCounterKey(row), Number(row.spentMicros)]));
+    const found = new Map(rows.map((row) => [describeCounterKey(row), Number(row.spentMilliMinor)]));
     return new Map(keys.map((key) => [describeCounterKey(key), found.get(describeCounterKey(key)) ?? 0]));
   }
 
-  public async addToCounter(key: SpendCounterKey, deltaMicros: number): Promise<number> {
+  public async addToCounter(key: SpendCounterKey, deltaMilliMinor: number): Promise<number> {
     const row = await prisma().adSpendCounter.upsert({
       where: { scopeId_period: { scopeId: key.scopeId, period: key.period } },
-      create: { scopeId: key.scopeId, period: key.period, spentMicros: BigInt(deltaMicros) },
-      update: { spentMicros: { increment: BigInt(deltaMicros) } },
+      create: { scopeId: key.scopeId, period: key.period, spentMilliMinor: BigInt(deltaMilliMinor) },
+      update: { spentMilliMinor: { increment: BigInt(deltaMilliMinor) } },
     });
-    return Number(row.spentMicros);
+    return Number(row.spentMilliMinor);
   }
 }

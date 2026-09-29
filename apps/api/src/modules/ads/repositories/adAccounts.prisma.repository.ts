@@ -72,6 +72,10 @@ export class PrismaAdAccountsRepository implements AdAccountsRepository {
     return (await prisma().adAccount.findMany({ where: { id: { in: [...accountIds] } } })).map(toAccount);
   }
 
+  public async listAllAccounts(): Promise<readonly AdAccountRecord[]> {
+    return (await prisma().adAccount.findMany({ orderBy: { createdAt: "asc" }, take: 5_000 })).map(toAccount);
+  }
+
   public async addMember(accountId: string, userId: string, role: AdAccountRole, now: Date): Promise<AdAccountMemberRecord> {
     const row = await prisma().adAccountMember.upsert({
       where: { accountId_userId: { accountId, userId } },
