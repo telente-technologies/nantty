@@ -53,11 +53,14 @@ export function errorResponse(error: unknown): HttpResponseContext | undefined {
     readonly expose?: unknown;
     readonly message?: unknown;
     readonly code?: unknown;
+    readonly responseDetails?: unknown;
   };
   const status = candidate.statusCode;
   if (typeof status !== "number" || status < 400 || status > 599) return undefined;
   if (candidate.expose !== true || typeof candidate.message !== "string") return undefined;
+  const details = typeof candidate.responseDetails === "object" && candidate.responseDetails !== null ? candidate.responseDetails : {};
   return json(status, {
+    ...details,
     message: candidate.message,
     code: typeof candidate.code === "string" ? candidate.code : `HTTP_${status}`,
   });
