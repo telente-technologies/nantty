@@ -9,6 +9,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
+import { isCopyrightClaimTargetType } from "@/services/copyrightClaims.service";
 import {
   MAXIMUM_REPORT_DETAILS_LENGTH,
   REPORT_REASON_OPTIONS,
@@ -17,6 +18,8 @@ import {
   type ReportTargetType,
 } from "@/services/reports.service";
 import type { ID } from "@/types";
+
+import { CopyrightClaimForm } from "./copyrightClaimForm";
 
 export interface ReportTarget {
   readonly targetType: ReportTargetType;
@@ -29,7 +32,7 @@ export interface ReportSheetProps {
 }
 
 const describeReportTarget = (targetType: ReportTargetType) =>
-  ({ post: "post", clip: "clip", comment: "comment", live: "live", user: "account", product: "product", message: "message" })[targetType];
+  ({ post: "post", clip: "clip", comment: "comment", live: "live", user: "account", product: "product", message: "message", sound: "sound" })[targetType];
 
 export function ReportSheet({ target, onClose }: ReportSheetProps) {
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
@@ -48,18 +51,25 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
     if (!target) return;
     setSelectedReason(null);
     setDetails("");
+    setHasSubmittedCopyrightClaim(false);
     idempotencyKeyForThisReport.current = generateIdempotencyKey();
     submitReport.reset();
   }, [target?.targetType, target?.targetId]);
 
   const targetName = target ? describeReportTarget(target.targetType) : "content";
+  const [hasSubmittedCopyrightClaim, setHasSubmittedCopyrightClaim] = useState(false);
+  const isShowingCopyrightClaimForm =
+    selectedReason === "intellectual_property" && !!target && isCopyrightClaimTargetType(target.targetType);
+  const hasFinishedReporting = submitReport.isSuccess || hasSubmittedCopyrightClaim;
 
   return (
-    <BottomSheet visible={!!target} onClose={onClose} title={submitReport.isSuccess ? "Thanks for letting us know" : `Report ${targetName}`}>
-      {submitReport.isSuccess ? (
+    <BottomSheet visible={!!target} onClose={onClose} title={hasFinishedReporting ? "Thanks for letting us know" : `Report ${targetName}`}>
+      {hasFinishedReporting ? (
         <View style={styles.body}>
           <Text size={14} lineHeight={19.6} color={colors.textMuted}>
-            Our safety team will review this {targetName}. We won't tell the person who reported it.
+            {hasSubmittedCopyrightClaim
+              ? `Our copyright team will review your claim and contact you by email. The ${targetName} may be restricted while it's under review.`
+              : `Our safety team will review this ${targetName}. We won't tell the person who reported it.`}
           </Text>
           <Button title="Done" onPress={onClose} />
         </View>
@@ -87,6 +97,14 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
               );
             })}
           </View>
+          {isShowingCopyrightClaimForm && target && isCopyrightClaimTargetType(target.targetType) ? (
+            <CopyrightClaimForm
+              targetType={target.targetType}
+              targetId={target.targetId}
+              onSubmitted={() => setHasSubmittedCopyrightClaim(true)}
+            />
+          ) : null}
+          {isShowingCopyrightClaimForm ? null : (
           <TextInput
             value={details}
             onChangeText={(text) => setDetails(text.slice(0, MAXIMUM_REPORT_DETAILS_LENGTH))}
@@ -98,15 +116,20 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
             accessibilityLabel="Report details"
             style={styles.detailsInput}
           />
-          <Text size={12} lineHeight={16.8} color={colors.textSubtle} align="right">
-            {details.length}/{MAXIMUM_REPORT_DETAILS_LENGTH}
-          </Text>
+          )}
+          {isShowingCopyrightClaimForm ? null : (
+            <Text size={12} lineHeight={16.8} color={colors.textSubtle} align="right">
+              {details.length}/{MAXIMUM_REPORT_DETAILS_LENGTH}
+            </Text>
+          )}
           {submitReport.isError ? (
             <Text size={13} lineHeight={16.9} color={colors.error} accessibilityLiveRegion="polite">
               {submitReport.error instanceof Error ? submitReport.error.message : "Couldn't send your report. Please try again."}
             </Text>
           ) : null}
-          <Button title="Submit report" disabled={!selectedReason} loading={submitReport.isPending} onPress={() => submitReport.mutate()} />
+          {isShowingCopyrightClaimForm ? null : (
+            <Button title="Submit report" disabled={!selectedReason} loading={submitReport.isPending} onPress={() => submitReport.mutate()} />
+          )}
         </ScrollView>
       )}
     </BottomSheet>
