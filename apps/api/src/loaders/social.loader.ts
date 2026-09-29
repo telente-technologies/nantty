@@ -1,3 +1,4 @@
+import type { CreatorSubscriberLookup } from "../interfaces/creatorSubscriberLookup.interface.js";
 import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
 import type { DiscoveryServices } from "../interfaces/discovery.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
@@ -35,6 +36,7 @@ import { PrismaSocialEngagementRepository } from "../modules/posts/repositories/
 import { InMemorySocialEngagementRepository } from "../modules/posts/repositories/socialEngagement.repository.js";
 import { StoriesController } from "../modules/posts/controllers/stories.controller.js";
 import { PostsService } from "../modules/posts/services/posts.service.js";
+import { createPostsModerationTargets } from "../modules/posts/services/postsModerationTargets.service.js";
 import { ReviewsController } from "../modules/reviews/controllers/reviews.controller.js";
 import { PrismaReviewsRepository } from "../modules/reviews/repositories/reviews.prisma.repository.js";
 import { InMemoryReviewsRepository } from "../modules/reviews/repositories/reviews.repository.js";
@@ -57,6 +59,7 @@ export interface SocialSharedServices {
   readonly productCatalog: ProductCatalog;
   readonly orderLookup: OrderLookup;
   readonly mediaLibrary: MediaLibrary;
+  readonly subscriberLookup?: CreatorSubscriberLookup;
   readonly discovery: DiscoveryServices;
 }
 
@@ -89,6 +92,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices, ex
     currencyConverter: shared.currencyConverter,
     mediaLibrary: shared.mediaLibrary,
     creatorAccess: new RepositoryCreatorAccess(creatorProgramRepository),
+    ...(shared.subscriberLookup === undefined ? {} : { subscriberLookup: shared.subscriberLookup }),
   });
   registerPostsCommandAndQueryHandlers(commands, queries, postsService);
 
@@ -126,6 +130,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices, ex
     socialGraph,
     postsService,
     creatorProgram: creators.creatorProgram,
+    moderationTargets: createPostsModerationTargets(postsService),
     controllers: {
       ...creators.controllers,
       followsController: new FollowsController(commands, queries),
