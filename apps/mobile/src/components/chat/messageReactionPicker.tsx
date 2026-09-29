@@ -1,7 +1,8 @@
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export const MESSAGE_REACTION_EMOJI = ["❤️", "😂", "🔥", "👍", "😮", "🙏"] as const;
 
@@ -13,7 +14,7 @@ export interface MessageReactionPickerProps {
 
 export function MessageReactionPicker({ visible, onPickEmoji, onClose }: MessageReactionPickerProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable accessibilityLabel="Close reactions" style={styles.backdrop} onPress={onClose}>
         <View style={styles.bar} accessibilityRole="menu">
           {MESSAGE_REACTION_EMOJI.map((emoji) => (
@@ -31,7 +32,7 @@ export function MessageReactionPicker({ visible, onPickEmoji, onClose }: Message
           ))}
         </View>
       </Pressable>
-    </Modal>
+    </FrameAwareModal>
   );
 }
 
