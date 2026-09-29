@@ -29,7 +29,7 @@ export interface PaymentMethodSetting {
 
 export interface LoyaltyRules {
   readonly enabled: boolean;
-  readonly pointsEarnedPerMajorUnit: number;
+  readonly spendRequiredPerPoint: Money;
   readonly redeemValuePerPoint: Money;
   readonly minimumPointsToRedeem: number;
 }
