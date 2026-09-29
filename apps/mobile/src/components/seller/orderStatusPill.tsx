@@ -5,8 +5,8 @@ import { colors, palette } from "@/constants/colors.constant";
 import type { OrderStatus } from "@/types";
 
 const STATUS_APPEARANCE: Record<OrderStatus, { label: string; text: string; background: string }> = {
-  pending: { label: "Pending", text: colors.primary, background: palette.primary[50] },
-  paid: { label: "Pending", text: colors.primary, background: palette.primary[50] },
+  pending: { label: "Unpaid", text: colors.textMuted, background: colors.skeleton },
+  paid: { label: "To ship", text: colors.primary, background: palette.primary[50] },
   shipped: { label: "Shipped", text: palette.caution[500], background: palette.caution[50] },
   delivered: { label: "Delivered", text: palette.success[500], background: palette.success[50] },
   completed: { label: "Completed", text: palette.success[500], background: palette.success[50] },
