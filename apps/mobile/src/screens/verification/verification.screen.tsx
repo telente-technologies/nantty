@@ -13,6 +13,7 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { buildContactMailtoUrl } from "@/constants/contactEmails.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { verificationService } from "@/services/verification.service";
@@ -85,7 +86,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
           <Text size={13} lineHeight={17.5} color={colors.textMuted}>
             Official government bodies apply through our official process. This badge can't be bought.
           </Text>
-          <Text size={13} weight={500} lineHeight={17.5} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL("mailto:government@zudomart.com?subject=Official%20verification")}>
+          <Text size={13} weight={500} lineHeight={17.5} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL(buildContactMailtoUrl("Official government verification"))}>
             Contact our government partnerships team
           </Text>
         </View>
