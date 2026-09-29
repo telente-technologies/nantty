@@ -1,0 +1,68 @@
+[project]
+name = "zudomart-intelligence"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "httptools>=0.8.0",
+    "numpy>=2.5.3",
+    "polars>=1.44.2",
+    "pyarrow>=25.0.1",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "redis>=8.1.0",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "uvicorn>=0.54.0",
+    "uvloop>=0.22.1",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.9",
+]
+
+[project.scripts]
+zudomart-intelligence-serve = "app.server_entrypoint:run_intelligence_server"
+zudomart-intelligence-pipeline = "pipelines.run_pipeline_cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = ["app", "pipelines"]
+module-root = ""
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+src = ["app", "pipelines", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM", "N", "S", "RUF", "PL", "ASYNC", "PT", "RET", "ARG"]
+ignore = ["PLR0913", "PLR2004", "PLR0911", "PLR0912", "PLR0917", "S101", "S311"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "PLR0915", "ARG001"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+files = ["app", "pipelines", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["pyarrow.*", "sklearn.*", "scipy.*", "joblib.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q"
