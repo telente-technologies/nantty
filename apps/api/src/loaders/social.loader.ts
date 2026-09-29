@@ -6,6 +6,7 @@ import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
 import type { PersonalVerificationLookup } from "../interfaces/creatorEligibility.interface.js";
 import type { CreatorWallets } from "../interfaces/creatorWallets.interface.js";
+import type { VerificationBadgeLookup } from "../interfaces/verificationBadge.interface.js";
 import type { UserAccountStandingLookup, UserDirectory } from "../interfaces/userDirectory.interface.js";
 import { FeedsController } from "../modules/feeds/controllers/feeds.controller.js";
 import { registerFeedsCommandAndQueryHandlers } from "../modules/feeds/feeds.module.js";
@@ -37,6 +38,7 @@ import { InMemoryReviewsRepository } from "../modules/reviews/repositories/revie
 import { registerReviewsCommandAndQueryHandlers } from "../modules/reviews/reviews.module.js";
 import { ReviewsService } from "../modules/reviews/services/reviews.service.js";
 import { RepositoryCreatorAccess } from "../modules/creators/services/creators.service.js";
+import { BadgeBackedPersonalVerification } from "../modules/creators/services/badgePersonalVerification.service.js";
 import { NoPublicBlueVerification, UnavailableCreatorWallets } from "../modules/creators/services/unavailablePorts.service.js";
 import type { Core } from "./core.loader.js";
 import { createCreatorModule, createCreatorProgramRepository } from "./creators.loader.js";
@@ -47,6 +49,7 @@ export interface SocialSharedServices {
   readonly userDirectory: UserDirectory & UserAccountStandingLookup;
   readonly creatorWallets?: CreatorWallets;
   readonly personalVerification?: PersonalVerificationLookup;
+  readonly verificationBadges?: VerificationBadgeLookup;
   readonly storeAccess: StoreAccess;
   readonly productCatalog: ProductCatalog;
   readonly orderLookup: OrderLookup;
@@ -107,7 +110,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices, ex
   const creators = createCreatorModule(core, creatorProgramRepository, postsService, socialGraph, {
     ...shared,
     creatorWallets: external.creatorWallets ?? shared.creatorWallets ?? new UnavailableCreatorWallets(),
-    personalVerification: external.personalVerification ?? shared.personalVerification ?? new NoPublicBlueVerification(),
+    personalVerification: external.personalVerification ?? shared.personalVerification ?? (shared.verificationBadges === undefined ? new NoPublicBlueVerification() : new BadgeBackedPersonalVerification(shared.verificationBadges)),
   });
 
   return {
