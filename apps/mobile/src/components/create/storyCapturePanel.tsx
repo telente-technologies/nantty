@@ -3,7 +3,8 @@ import { useRef } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Image24Icon, VideoCamera24Icon } from "@/components/icons";
-import type { CreateMode, Media } from "@/types";
+import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import type { CreateMode } from "@/types";
 
 import { CameraBackdrop } from "./cameraBackdrop";
 import { CreateModePill } from "./createModePill";
@@ -13,7 +14,7 @@ import { RecordButton } from "./recordButton";
 export interface StoryCapturePanelProps {
   readonly publishing: boolean;
   readonly onChangeMode: (mode: CreateMode) => void;
-  readonly onCaptured: (media: Media) => void;
+  readonly onCaptured: (media: LocalMediaFile) => void;
 }
 
 export function StoryCapturePanel({ publishing, onChangeMode, onCaptured }: StoryCapturePanelProps) {
@@ -21,10 +22,20 @@ export function StoryCapturePanel({ publishing, onChangeMode, onCaptured }: Stor
 
   const captureStoryPhoto = async () => {
     const picture = await cameraRef.current?.takePictureAsync({ quality: 0.85 }).catch(() => undefined);
-    if (picture?.uri) onCaptured({ type: "image", url: picture.uri });
+    if (!picture?.uri) return;
+    onCaptured({
+      uri: picture.uri,
+      mediaType: "image",
+      mimeType: "image/jpeg",
+      fileName: null,
+      sizeBytes: null,
+      width: picture.width,
+      height: picture.height,
+      durationSeconds: null,
+    });
   };
   const pickStoryFromLibrary = async () => {
-    const [media] = await pickPhotosAndVideosFromLibrary(false);
+    const [media] = await pickPhotosAndVideosFromLibrary(1);
     if (media) onCaptured(media);
   };
   const recordStoryVideo = async () => {

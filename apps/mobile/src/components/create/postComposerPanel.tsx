@@ -1,30 +1,54 @@
-import { Image } from "expo-image";
 import { useState } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 
+import { MediaPager } from "@/components/feed/mediaPager";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import type { CreateMode, Media, NewPostInput, PostAudience } from "@/types";
+import type { CreateMode, ID, PostAudience } from "@/types";
 
 import { CreateModePill } from "./createModePill";
-import { pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
+import { DraftMediaStrip } from "./draftMediaStrip";
+import { MAXIMUM_MEDIA_PER_POST, pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
+import { convertDraftItemsToPreviewMedia, type PostDraftMediaItem } from "./postDraftUploads.hook";
 import { PostToolbar } from "./postToolbar";
+
+export interface PostComposerDraft {
+  readonly text: string;
+  readonly audience: PostAudience;
+}
 
 export interface PostComposerPanelProps {
   readonly stage: "compose" | "preview";
-  readonly draft: NewPostInput;
-  readonly onChangeDraft: (draft: NewPostInput) => void;
+  readonly draft: PostComposerDraft;
+  readonly onChangeDraft: (draft: PostComposerDraft) => void;
+  readonly draftMediaItems: readonly PostDraftMediaItem[];
+  readonly onAddPickedMedia: (files: Awaited<ReturnType<typeof takePhotoWithSystemCamera>>) => void;
+  readonly onRemoveDraftMedia: (jobId: ID) => void;
   readonly onChangeMode: (mode: CreateMode) => void;
   readonly publishing: boolean;
+  readonly publishButtonTitle: string;
+  readonly publishErrorMessage: string | null;
   readonly onPublish: () => void;
 }
 
-export function PostComposerPanel({ stage, draft, onChangeDraft, onChangeMode, publishing, onPublish }: PostComposerPanelProps) {
+export function PostComposerPanel({
+  stage,
+  draft,
+  onChangeDraft,
+  draftMediaItems,
+  onAddPickedMedia,
+  onRemoveDraftMedia,
+  onChangeMode,
+  publishing,
+  publishButtonTitle,
+  publishErrorMessage,
+  onPublish,
+}: PostComposerPanelProps) {
   const [focused, setFocused] = useState(false);
-  const addMediaToDraft = (media: Media[]) => onChangeDraft({ ...draft, media: [...draft.media, ...media].slice(0, 10) });
-  const toggleAudience = () => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? ("followers" as PostAudience) : "everyone" });
+  const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
+  const toggleAudience = () => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" });
 
   if (stage === "preview") {
     return (
@@ -34,12 +58,17 @@ export function PostComposerPanel({ stage, draft, onChangeDraft, onChangeMode, p
             {draft.text}
           </Text>
         ) : null}
-        {draft.media[0] ? (
+        {draftMediaItems.length > 0 ? (
           <View style={styles.previewMedia}>
-            {draft.media[0].url ? <Image source={{ uri: draft.media[0].url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+            <MediaPager media={convertDraftItemsToPreviewMedia(draftMediaItems)} height={335} />
           </View>
         ) : null}
-        <Button title="Post" loading={publishing} onPress={onPublish} />
+        {publishErrorMessage ? (
+          <Text size={13} lineHeight={16.9} color={colors.error} accessibilityLiveRegion="polite">
+            {publishErrorMessage}
+          </Text>
+        ) : null}
+        <Button title={publishButtonTitle} disabled={publishing} onPress={onPublish} />
       </ScrollView>
     );
   }
@@ -61,15 +90,7 @@ export function PostComposerPanel({ stage, draft, onChangeDraft, onChangeMode, p
           accessibilityLabel="What’s happening?"
           style={styles.input}
         />
-        {draft.media.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
-            {draft.media.map((m, i) => (
-              <View key={`${m.url}-${i}`} style={styles.thumb}>
-                {m.url ? <Image source={{ uri: m.url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
-              </View>
-            ))}
-          </ScrollView>
-        ) : null}
+        <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={onRemoveDraftMedia} />
       </ScrollView>
       {focused ? null : (
         <View style={styles.pill}>
@@ -79,9 +100,11 @@ export function PostComposerPanel({ stage, draft, onChangeDraft, onChangeMode, p
       <PostToolbar
         audience={draft.audience}
         onToggleAudience={toggleAudience}
-        onTakePhoto={async () => addMediaToDraft(await takePhotoWithSystemCamera())}
-        onPickFromLibrary={async () => addMediaToDraft(await pickPhotosAndVideosFromLibrary(true))}
-        onEditMedia={async () => addMediaToDraft(await pickPhotosAndVideosFromLibrary(false))}
+        onTakePhoto={async () => {
+          if (remainingMediaSlots > 0) onAddPickedMedia(await takePhotoWithSystemCamera());
+        }}
+        onPickFromLibrary={async () => onAddPickedMedia(await pickPhotosAndVideosFromLibrary(remainingMediaSlots))}
+        onEditMedia={async () => onAddPickedMedia(await pickPhotosAndVideosFromLibrary(Math.min(remainingMediaSlots, 1)))}
         onAddLocation={() => undefined}
       />
     </View>
@@ -101,9 +124,7 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(16),
     color: colors.text,
   },
-  thumbs: { gap: 8 },
-  thumb: { width: 96, height: 96, borderRadius: 12, backgroundColor: colors.placeholder, overflow: "hidden" },
   pill: { paddingBottom: 29 },
   preview: { paddingHorizontal: 16, paddingTop: 20, gap: 24, paddingBottom: 40 },
-  previewMedia: { width: "100%", aspectRatio: 1, borderRadius: 12, backgroundColor: colors.placeholder, overflow: "hidden" },
+  previewMedia: { marginHorizontal: -16, overflow: "hidden" },
 });
