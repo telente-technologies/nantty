@@ -25,6 +25,8 @@ import { registerWaitlistModuleRoutes } from "../modules/waitlist/routes/index.j
 import { registerAuditModuleRoutes } from "../modules/audit/routes/index.js";
 import { registerCurrencyModuleRoutes } from "../modules/currency/routes/index.js";
 import { registerCreatorsModuleRoutes } from "../modules/creators/routes/index.js";
+import { registerVerificationsModuleRoutes } from "../modules/verifications/routes/index.js";
+import { registerSubscriptionsModuleRoutes } from "../modules/subscriptions/routes/index.js";
 // zudojs:route-imports:end
 
 export function registerRoutes(router: HttpRouter, deps: AppDependencies): void {
@@ -52,5 +54,7 @@ export function registerRoutes(router: HttpRouter, deps: AppDependencies): void 
   registerAuditModuleRoutes(router, deps);
   registerCurrencyModuleRoutes(router, deps);
   registerCreatorsModuleRoutes(router, deps);
+  registerVerificationsModuleRoutes(router, deps);
+  registerSubscriptionsModuleRoutes(router, deps);
   // zudojs:routes:end
 }
