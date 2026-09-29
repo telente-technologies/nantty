@@ -62,7 +62,7 @@ export function SiteFooterWithGiantWordmark() {
                   <li key={footerLink.href}>
                     {isExternalFooterHref(footerLink.href) ? (
                       <a href={footerLink.href} className={styles.footerLink} target="_blank" rel="noopener noreferrer">
-                        {footerLink.label} ↗<span className="visuallyHidden"> (opens in a new tab)</span>
+                        {footerLink.label}{"\u00a0↗"}<span className="visuallyHidden"> (opens in a new tab)</span>
                       </a>
                     ) : (
                       <Link href={footerLink.href} className={styles.footerLink}>

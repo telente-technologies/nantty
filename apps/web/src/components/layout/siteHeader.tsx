@@ -115,7 +115,7 @@ export function SiteHeaderWithFloatingNavigation() {
             {[businessAppLinks.sellerDashboard, businessAppLinks.adsManager].map((businessAppLink) => (
               <li key={businessAppLink.href}>
                 <a href={businessAppLink.href} className={styles.mobileBusinessLink} target="_blank" rel="noopener noreferrer">
-                  {businessAppLink.label} ↗<span className="visuallyHidden"> (opens in a new tab)</span>
+                  {businessAppLink.label}{"\u00a0↗"}<span className="visuallyHidden"> (opens in a new tab)</span>
                 </a>
               </li>
             ))}
