@@ -28,7 +28,7 @@ export const buildMockFeedPost = (index: number): Post => ({
   bookmarked: false,
   isFollowingAuthor: index % 3 !== 1,
   friendsLiked: index % 3 === 2 ? null : { count: 12, avatars: [null, null, null] },
-  products: Array.from({ length: 4 }, (_, i) => buildMockProductSummary(200 + i, "Product Name", 2_000_000)),
+  products: Array.from({ length: 4 }, (_, i) => buildMockProductSummary(200 + i, "Product Name", 1_300)),
 });
 
 export const mockPostsState = new Map<string, Post>(Array.from({ length: 30 }, (_, i) => [`post_${i}`, buildMockFeedPost(i)]));
