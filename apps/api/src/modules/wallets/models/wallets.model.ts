@@ -1,6 +1,10 @@
 import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 
+export const COIN_LEDGER_UNIT = "COIN";
+export const LOYALTY_POINT_LEDGER_UNIT = "POINT";
+export type LedgerUnit = CurrencyCode | typeof COIN_LEDGER_UNIT | typeof LOYALTY_POINT_LEDGER_UNIT;
+
 export type LedgerAccountKind = "asset" | "liability" | "revenue";
 export type LedgerDirection = "debit" | "credit";
 
@@ -14,7 +18,7 @@ export interface LedgerAccountSpecification {
 
 export interface LedgerAccountRecord extends LedgerAccountSpecification {
   readonly id: string;
-  readonly currency: CurrencyCode;
+  readonly currency: LedgerUnit;
   readonly balance: MinorUnits;
   readonly version: number;
 }
@@ -23,7 +27,7 @@ export interface LedgerLineInput {
   readonly account: LedgerAccountSpecification;
   readonly direction: LedgerDirection;
   readonly amount: MinorUnits;
-  readonly currency: CurrencyCode;
+  readonly currency: LedgerUnit;
 }
 
 export interface LedgerTransactionInput {
@@ -39,7 +43,7 @@ export interface LedgerEntryRecord {
   readonly accountId: string;
   readonly direction: LedgerDirection;
   readonly amount: MinorUnits;
-  readonly currency: CurrencyCode;
+  readonly currency: LedgerUnit;
   readonly balanceAfter: MinorUnits;
   readonly createdAt: Date;
 }
