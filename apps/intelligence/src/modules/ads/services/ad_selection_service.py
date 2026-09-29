@@ -7,6 +7,7 @@ from src.configs.ranking_heuristics_config import AD_CLICK_HEURISTIC_HEADS
 from src.dtos.common_dto import MoneyAmount, RankingResponseMetadata
 from src.enums.ranking_surface_enum import RankingSurface
 from src.interfaces.feature_backend_interface import FeatureBackendUnavailableError
+from src.modules.ads.constants.ad_placement_policy_constant import AD_PLACEMENT_POLICIES
 from src.modules.ads.dtos.ad_selection_dto import (
     AdPlacementDecision,
     AdSelectionRequest,
@@ -52,19 +53,22 @@ class AdOnlineSignals:
 
 
 def calculate_ad_slots_for_request(request: AdSelectionRequest) -> list[AdSlot]:
-    if request.host_content_id is not None:
-        if request.host_content_is_sensitive or request.host_content_is_reported:
-            return []
-        if not request.organic_items:
-            return [AdSlot(organic_items_before_slot=0, is_safe_for_strict_brand_safety=True)][
-                : request.ad_load.maximum_ads
-            ]
-    return calculate_brand_safe_ad_slots(request.organic_items, request.ad_load)
+    host_is_unsafe = request.host_content_is_sensitive or request.host_content_is_reported
+    if request.host_content_id is not None and host_is_unsafe:
+        return []
+    in_content_slot = [AdSlot(organic_items_before_slot=0, is_safe_for_strict_brand_safety=True)]
+    if AD_PLACEMENT_POLICIES[request.placement].is_in_content_placement:
+        return in_content_slot[: request.ad_load.maximum_ads] if request.host_content_id is not None else []
+    if request.host_content_id is not None and not request.organic_items:
+        return in_content_slot[: request.ad_load.maximum_ads]
+    return calculate_brand_safe_ad_slots(request.organic_items, request.ad_load, request.placement)
 
 
 def describe_missing_slot_reason(request: AdSelectionRequest) -> str:
     if request.host_content_id is not None and (request.host_content_is_sensitive or request.host_content_is_reported):
         return "host_content_not_brand_safe"
+    if AD_PLACEMENT_POLICIES[request.placement].is_in_content_placement and request.host_content_id is None:
+        return "in_content_placement_requires_host_content"
     return "no_brand_safe_slot"
 
 
@@ -248,6 +252,7 @@ class AdSelectionService:
             host_content_id=request.host_content_id,
             host_creator_id=request.host_creator_id,
             charge_model=candidate.bid_type,
+            creative_media_type=candidate.creative.media_type,
             charge_price=MoneyAmount(amount_minor=winner.clearing_price_minor, currency=candidate.bid.currency),
             predicted_click_rate=round(winner.entry.predicted_click_rate, 6),
             auction_id=auction_id,
