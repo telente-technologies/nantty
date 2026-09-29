@@ -4,6 +4,7 @@ import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
 import type { EscrowsService } from "../escrows/services/escrows.service.js";
 import { CancelOrderHandler } from "./commands/cancelOrder/cancelOrder.handler.js";
+import type { CheckoutDiscountSource } from "../payments/services/checkoutDiscounts.service.js";
 import { CheckoutHandler } from "./commands/checkout/checkout.handler.js";
 import { ConfirmOrderReceiptHandler } from "./commands/confirmOrderReceipt/confirmOrderReceipt.handler.js";
 import { MarkOrderDeliveredHandler } from "./commands/markOrderDelivered/markOrderDelivered.handler.js";
@@ -36,10 +37,10 @@ export class OrdersModule extends BaseModule {
 export function registerOrdersCommandAndQueryHandlers(
   commands: CommandBus,
   queries: QueryBus,
-  services: { readonly orders: OrdersService; readonly dashboard: StoreDashboardService; readonly escrows: EscrowsService },
+  services: { readonly orders: OrdersService; readonly dashboard: StoreDashboardService; readonly escrows: EscrowsService; readonly checkoutDiscounts?: CheckoutDiscountSource },
 ): void {
   registerCommandHandlers(commands, [
-    new CheckoutHandler(services.orders),
+    new CheckoutHandler(services.orders, services.checkoutDiscounts),
     new CancelOrderHandler(services.orders),
     new MarkOrderShippedHandler(services.orders),
     new MarkOrderDeliveredHandler(services.orders, services.escrows),

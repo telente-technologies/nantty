@@ -15,6 +15,7 @@ import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
 import { publishEvent } from "../../../loaders/events.loader.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import type { FieldCipher } from "../../../utils/crypto.util.js";
+import type { Money } from "../../../utils/money.util.js";
 import { applyLockedExchangeRate } from "../../../utils/lockedRate.util.js";
 import { resolveSellerStoreIdForUser } from "../../../utils/sellerStore.util.js";
 import type { CartsService } from "../../carts/services/carts.service.js";
@@ -37,6 +38,7 @@ export interface OrdersDependencies {
 export interface CheckoutResult {
   readonly checkout: CheckoutRecord;
   readonly orders: readonly OrderRecord[];
+  readonly loyaltyDiscount?: Money;
 }
 
 const STORE_STAFF = [StoreRole.OWNER, StoreRole.MANAGER, StoreRole.STAFF];

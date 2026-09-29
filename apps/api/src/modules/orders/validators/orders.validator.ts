@@ -9,7 +9,7 @@ const pageFields = {
   cursor: schema.string().uuid().optional(),
 };
 
-export const CheckoutBodySchema = schema.object({ addressId: schema.string().uuid() });
+export const CheckoutBodySchema = schema.object({ addressId: schema.string().uuid(), redeemLoyaltyPoints: schema.boolean().default(false) });
 
 export const OrderParamsSchema = schema.object({ id: schema.string().uuid() });
 

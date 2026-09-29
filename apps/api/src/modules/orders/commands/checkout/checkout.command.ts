@@ -8,6 +8,7 @@ export class CheckoutCommand extends Command<"orders.checkout"> {
     public readonly principal: Principal,
     public readonly addressId: string,
     public readonly displayCurrency: CurrencyCode,
+    public readonly redeemLoyaltyPoints: boolean = false,
   ) {
     super("orders.checkout");
   }

@@ -31,13 +31,15 @@ export class OrdersController {
   public readonly checkout = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = CheckoutBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new CheckoutCommand(requireAuthenticatedPrincipal(ctx), body.data.addressId, findViewerLocale(ctx).currency);
+    const command = new CheckoutCommand(requireAuthenticatedPrincipal(ctx), body.data.addressId, findViewerLocale(ctx).currency, body.data.redeemLoyaltyPoints);
     const result = await this.commands.execute<CheckoutCommand, CheckoutResult>(command);
     return json(201, {
       orders: await this.convertOrdersForBuyer(ctx, result.orders),
       payableOrderId: result.orders[0]?.id ?? null,
       checkoutId: result.checkout.id,
       total: Money.of(result.checkout.total, result.checkout.currency).toDto(),
+      loyaltyDiscount: result.loyaltyDiscount?.toDto() ?? null,
+      payableTotal: Money.of(result.checkout.total - (result.loyaltyDiscount?.amountMinor ?? 0), result.checkout.currency).toDto(),
     });
   };
 
