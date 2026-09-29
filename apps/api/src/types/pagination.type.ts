@@ -4,6 +4,6 @@ export interface PageRequest {
 }
 
 export interface Page<T> {
-  readonly items: readonly T[];
+  readonly data: readonly T[];
   readonly nextCursor: string | null;
 }

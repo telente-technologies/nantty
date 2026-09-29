@@ -57,7 +57,7 @@ const dispatch: HttpMiddleware = async (context) => {
     const response = errorResponse(error);
     if (response !== undefined && response.status < 500) return response;
     logger.error(`Unhandled error: ${context.request.method} ${context.request.path}`, errorDetails(error));
-    return response ?? json(500, { error: "Internal Server Error" });
+    return response ?? json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
   }
 };
 
