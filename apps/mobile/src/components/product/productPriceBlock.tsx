@@ -6,6 +6,7 @@ import { colors } from "@/constants/colors.constant";
 import type { Product } from "@/types";
 
 import { MoneyAmount } from "./moneyAmount";
+import { SponsoredLabel } from "./productCard";
 
 export interface ProductPriceBlockProps {
   readonly product: Product;
@@ -19,6 +20,7 @@ export function ProductPriceBlock({ product, bookmarked, onShare, onToggleBookma
   return (
     <View style={styles.block}>
       <View style={styles.top}>
+        {product.sponsored ? <SponsoredLabel /> : null}
         <View style={styles.priceRow}>
           <MoneyAmount money={product.price} symbolSize={14} symbolWeight={700} amountSize={21} amountWeight={600} />
           <View style={styles.actions}>
