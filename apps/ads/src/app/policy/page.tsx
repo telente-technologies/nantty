@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { StandaloneFrame } from "@/components/shell/standaloneFrame";
 import { Card, PageHeader } from "@/components/ui/surfaces";
 import { prohibitedCategories, restrictedCategories, reviewStateDescriptions, type PolicySection } from "@/constants/policy.constant";
+import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
 import { buildSessionViewFromCookies } from "@/server/adsSessionView.service";
 
 import styles from "./policyPage.module.css";
@@ -63,6 +64,9 @@ export default async function PolicyPage() {
           <Card title="Appeals">
             <p id="appeals" className={styles.summary}>
               If you think a rejection is wrong, open the ad and choose Appeal. Explain why it follows the policy. A person reviews every appeal, usually within 24 hours. You can appeal each decision once; after that, edit the ad and it will be reviewed again.
+            </p>
+            <p className={styles.summary}>
+              Questions about a policy? Email <a href={buildContactMailtoLinkForBothAddresses("Zudomart Ads policy question")}>{contactEmailDisplayText}</a>.
             </p>
           </Card>
         </div>
