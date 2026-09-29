@@ -3,7 +3,7 @@ import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
 import type { LiveCommentRecord, LiveSessionRecord } from "../models/posts.model.js";
-import type { LiveSessionsRepository, NewLiveSessionInput } from "./live.repository.js";
+import type { HostedLiveSummary, LiveSessionsRepository, NewLiveSessionInput } from "./live.repository.js";
 
 function convertLiveRowToRecord(row: LiveSession): LiveSessionRecord {
   return {
@@ -95,5 +95,14 @@ export class PrismaLiveSessionsRepository implements LiveSessionsRepository {
   public async addReaction(sessionId: string): Promise<LiveSessionRecord | undefined> {
     const result = await prisma().liveSession.updateMany({ where: { id: sessionId, status: "live" }, data: { reactionCount: { increment: 1 } } });
     return result.count === 0 ? undefined : this.findById(sessionId);
+  }
+
+  public async summarizeHostedSessions(hostId: string, startedSince: Date | null): Promise<HostedLiveSummary> {
+    const summary = await prisma().liveSession.aggregate({
+      where: { hostId, ...(startedSince === null ? {} : { startedAt: { gte: startedSince } }) },
+      _count: { _all: true },
+      _sum: { reactionCount: true },
+    });
+    return { sessions: summary._count._all, reactions: summary._sum.reactionCount ?? 0 };
   }
 }
