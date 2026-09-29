@@ -7,7 +7,7 @@ afterAll(() => app.close());
 
 async function signInAgain(user: SignedInUser): Promise<string> {
   const login = await app.client.post("/api/v1/auth/login").send({ identifier: user.email, password: user.password }).expect(200);
-  return login.json<{ tokens: { accessToken: string } }>().tokens.accessToken;
+  return login.json<{ accessToken: string }>().accessToken;
 }
 
 async function createStoreFor(seller: SignedInUser, name = "Ada Fabrics"): Promise<string> {
@@ -20,14 +20,14 @@ describe("seller applications", () => {
     const applicant = await app.registerUser();
     const admin = await app.registerAdmin();
     const submitted = await app.client
-      .post("/api/v1/seller-applications")
+      .post("/api/v1/seller/applications")
       .auth(applicant.accessToken)
       .send({ storeName: "Lagos Kicks", phone: "08012345678", description: "Sneakers" })
       .expect(201);
     await app.client.patch("/api/v1/users/me/preferences").auth(applicant.accessToken).send({ countryCode: "GB" }).expect(200);
     const applicationId = submitted.json<{ id: string; phone: string }>().id;
     expect(submitted.json<{ phone: string }>().phone).toBe("+2348012345678");
-    await app.client.post("/api/v1/seller-applications").auth(applicant.accessToken).send({ storeName: "Again", phone: "08012345678" }).expect(409);
+    await app.client.post("/api/v1/seller/applications").auth(applicant.accessToken).send({ storeName: "Again", phone: "08012345678" }).expect(409);
 
     await app.client.get("/api/v1/admin/seller-applications").auth(applicant.accessToken).expect(403);
     const pending = await app.client.get("/api/v1/admin/seller-applications").query({ status: "pending" }).auth(admin.accessToken).expect(200);
@@ -116,7 +116,7 @@ describe("stores", () => {
     await app.client.post("/api/v1/stores").auth(seller.accessToken).send({ name: "Bad Currency", currency: "XYZ" }).expect(400);
     const storeId = ghana.json<{ id: string }>().id;
     await app.client.patch(`/api/v1/stores/${storeId}`).auth(seller.accessToken).send({ currency: "NGN" }).expect(200).expectJson({ currency: "NGN" });
-    await app.client.post(`/api/v1/stores/${storeId}/products`).auth(seller.accessToken).send({ title: "Kente", price: 500_000 }).expect(201).expectJson({ price: { currency: "NGN" } });
+    await app.client.post(`/api/v1/seller/products?storeId=${storeId}`).auth(seller.accessToken).send({ title: "Kente", price: 500_000 }).expect(201).expectJson({ price: { currency: "NGN" } });
     await app.client.patch(`/api/v1/stores/${storeId}`).auth(seller.accessToken).send({ currency: "GBP" }).expect(422);
   });
 });

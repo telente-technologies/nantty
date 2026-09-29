@@ -11,7 +11,7 @@ async function sellerWithEarnings(price: number) {
   const placed = await app.buyAndPay(buyer, store);
   await app.client.post(`/api/v1/orders/${placed.orders[0]?.id ?? ""}/confirm-receipt`).auth(buyer.accessToken).set("idempotency-key", createIdempotencyKey()).expect(200);
   const account = await app.client
-    .post(`/api/v1/stores/${store.storeId}/wallet/payout-accounts`)
+    .post(`/api/v1/wallets/me/payout-accounts?storeId=${store.storeId}`)
     .auth(store.seller.accessToken)
     .send({ bankCode: "058", bankName: "GTBank", accountNumber: "0123456789", accountName: "Shop Owner" })
     .expect(201);
@@ -19,35 +19,35 @@ async function sellerWithEarnings(price: number) {
 }
 
 function requestWithdrawal(accessToken: string, storeId: string, amount: number, payoutAccountId: string) {
-  return app.client.post(`/api/v1/stores/${storeId}/wallet/withdrawals`).auth(accessToken).set("idempotency-key", createIdempotencyKey()).send({ amount, payoutAccountId });
+  return app.client.post(`/api/v1/wallets/me/withdrawals?storeId=${storeId}`).auth(accessToken).set("idempotency-key", createIdempotencyKey()).send({ amount, payoutAccountId });
 }
 
 describe("store wallet", () => {
   it("stores payout accounts encrypted and returns only the last four digits", async () => {
     const { store } = await sellerWithEarnings(10_000);
-    const accounts = await app.client.get(`/api/v1/stores/${store.storeId}/wallet/payout-accounts`).auth(store.seller.accessToken).expect(200);
+    const accounts = await app.client.get(`/api/v1/wallets/me/payout-accounts?storeId=${store.storeId}`).auth(store.seller.accessToken).expect(200);
     expect(JSON.stringify(accounts.json())).not.toContain("0123456789");
-    expect(accounts.json<{ items: { accountNumber: string }[] }>().items[0]?.accountNumber).toBe("******6789");
+    expect(accounts.json<{ accountNumber: string }[]>()[0]?.accountNumber).toBe("******6789");
   });
 
   it("keeps wallets private to store members", async () => {
     const { store } = await sellerWithEarnings(10_000);
     const otherSeller = await app.registerSeller();
     const buyer = await app.registerBuyer();
-    await app.client.get(`/api/v1/stores/${store.storeId}/wallet`).auth(otherSeller.accessToken).expect(403);
-    await app.client.get(`/api/v1/stores/${store.storeId}/wallet`).auth(buyer.accessToken).expect(403);
+    await app.client.get(`/api/v1/wallets/me?storeId=${store.storeId}`).auth(otherSeller.accessToken).expect(403);
+    await app.client.get(`/api/v1/wallets/me?storeId=${store.storeId}`).auth(buyer.accessToken).expect(403);
   });
 
   it("requires an Idempotency-Key and never lets concurrent withdrawals overdraw", async () => {
     const { store, payoutAccountId } = await sellerWithEarnings(20_000);
-    await app.client.post(`/api/v1/stores/${store.storeId}/wallet/withdrawals`).auth(store.seller.accessToken).send({ amount: 1_000, payoutAccountId }).expect(400);
+    await app.client.post(`/api/v1/wallets/me/withdrawals?storeId=${store.storeId}`).auth(store.seller.accessToken).send({ amount: 1_000, payoutAccountId }).expect(400);
     const attempts = await Promise.all(Array.from({ length: 4 }, () => requestWithdrawal(store.seller.accessToken, store.storeId, 7_000, payoutAccountId)));
     expect(attempts.filter((attempt) => attempt.status === 201)).toHaveLength(2);
     expect(attempts.filter((attempt) => attempt.status === 422)).toHaveLength(2);
-    const wallet = (await app.client.get(`/api/v1/stores/${store.storeId}/wallet`).auth(store.seller.accessToken).expect(200)).json<{ availableBalance: MoneyShape; pendingWithdrawals: MoneyShape }>();
+    const wallet = (await app.client.get(`/api/v1/wallets/me?storeId=${store.storeId}`).auth(store.seller.accessToken).expect(200)).json<{ availableBalance: MoneyShape; pendingWithdrawals: MoneyShape }>();
     expect(wallet).toMatchObject({ availableBalance: naira(5_000), pendingWithdrawals: naira(14_000) });
-    const transactions = (await app.client.get(`/api/v1/stores/${store.storeId}/wallet/transactions`).auth(store.seller.accessToken).expect(200)).json<{ items: { type: string }[] }>();
-    expect(transactions.items.map((entry) => entry.type).sort()).toEqual(["credit", "debit", "debit"]);
+    const transactions = (await app.client.get(`/api/v1/wallets/me/transactions?storeId=${store.storeId}`).auth(store.seller.accessToken).expect(200)).json<{ data: { type: string }[] }>();
+    expect(transactions.data.map((entry) => entry.type).sort()).toEqual(["credit", "debit", "debit"]);
   });
 
   it("pays out a processed withdrawal and returns funds when the transfer fails", async () => {
@@ -63,9 +63,9 @@ describe("store wallet", () => {
     const failed = (await requestWithdrawal(store.seller.accessToken, store.storeId, 5_000, payoutAccountId).expect(201)).json<{ id: string }>();
     await app.client.post(`/api/v1/admin/withdrawals/${failed.id}/process`).auth(admin.accessToken).set("idempotency-key", createIdempotencyKey()).expect(200).expectJson({ status: "failed" });
     app.paystack.transferResult = { status: "succeeded", recipientCode: "RCP_fake", failureReason: null };
-    const wallet = (await app.client.get(`/api/v1/stores/${store.storeId}/wallet`).auth(store.seller.accessToken).expect(200)).json<{ availableBalance: MoneyShape; pendingWithdrawals: MoneyShape }>();
+    const wallet = (await app.client.get(`/api/v1/wallets/me?storeId=${store.storeId}`).auth(store.seller.accessToken).expect(200)).json<{ availableBalance: MoneyShape; pendingWithdrawals: MoneyShape }>();
     expect(wallet).toMatchObject({ availableBalance: naira(5_500), pendingWithdrawals: naira(0) });
-    const audit = (await app.client.get("/api/v1/admin/audit-events").query({ entityType: "withdrawal" }).auth(admin.accessToken).expect(200)).json<{ items: { action: string }[] }>();
-    expect(audit.items.map((item) => item.action)).toEqual(expect.arrayContaining(["wallets.withdrawal_requested", "wallets.withdrawal_succeeded", "wallets.withdrawal_failed"]));
+    const audit = (await app.client.get("/api/v1/admin/audit-events").query({ entityType: "withdrawal" }).auth(admin.accessToken).expect(200)).json<{ data: { action: string }[] }>();
+    expect(audit.data.map((item) => item.action)).toEqual(expect.arrayContaining(["wallets.withdrawal_requested", "wallets.withdrawal_succeeded", "wallets.withdrawal_failed"]));
   });
 });

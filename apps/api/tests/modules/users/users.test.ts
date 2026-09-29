@@ -49,7 +49,7 @@ describe("settings and topics", () => {
 
   it("requires at least three known topics", async () => {
     const user = await app.registerUser();
-    const topics = (await app.client.get("/api/v1/topics").expect(200)).json<{ items: { id: string }[] }>().items;
+    const topics = (await app.client.get("/api/v1/topics").expect(200)).json<{ id: string }[]>();
     expect(topics.length).toBeGreaterThanOrEqual(3);
     const [first, second, third] = topics;
     await app.client.put("/api/v1/users/me/topics").auth(user.accessToken).send({ topicIds: [first?.id, second?.id] }).expect(400);
@@ -60,7 +60,7 @@ describe("settings and topics", () => {
       .expect(422);
     await app.client.put("/api/v1/users/me/topics").auth(user.accessToken).send({ topicIds: [first?.id, second?.id, third?.id] }).expect(200);
     const mine = await app.client.get("/api/v1/users/me/topics").auth(user.accessToken).expect(200);
-    expect(mine.json<{ items: unknown[] }>().items).toHaveLength(3);
+    expect(mine.json<unknown[]>()).toHaveLength(3);
   });
 });
 
@@ -73,7 +73,7 @@ describe("addresses", () => {
     const second = (
       await app.client.post("/api/v1/users/me/addresses").auth(user.accessToken).send({ ...address, line1: "3 Broad Street", isDefault: true }).expect(201)
     ).json<{ id: string }>();
-    const list = (await app.client.get("/api/v1/users/me/addresses").auth(user.accessToken).expect(200)).json<{ items: { id: string; isDefault: boolean }[] }>().items;
+    const list = (await app.client.get("/api/v1/users/me/addresses").auth(user.accessToken).expect(200)).json<{ id: string; isDefault: boolean }[]>();
     expect(list.filter((entry) => entry.isDefault).map((entry) => entry.id)).toEqual([second.id]);
     expect(JSON.stringify(list)).not.toContain("phoneEncrypted");
   });
@@ -84,8 +84,8 @@ describe("addresses", () => {
     const created = (await app.client.post("/api/v1/users/me/addresses").auth(owner.accessToken).send(address).expect(201)).json<{ id: string }>();
     await app.client.patch(`/api/v1/users/me/addresses/${created.id}`).auth(intruder.accessToken).send({ city: "Abuja" }).expect(404);
     await app.client.delete(`/api/v1/users/me/addresses/${created.id}`).auth(intruder.accessToken).expect(404);
-    const intruderList = (await app.client.get("/api/v1/users/me/addresses").auth(intruder.accessToken).expect(200)).json<{ items: unknown[] }>();
-    expect(intruderList.items).toHaveLength(0);
+    const intruderList = (await app.client.get("/api/v1/users/me/addresses").auth(intruder.accessToken).expect(200)).json<unknown[]>();
+    expect(intruderList).toHaveLength(0);
     await app.client.delete(`/api/v1/users/me/addresses/${created.id}`).auth(owner.accessToken).expect(204);
   });
 });
