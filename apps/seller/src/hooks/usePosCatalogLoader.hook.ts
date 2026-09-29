@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { isOfflineRequestError } from "@/services/posOfflineSaleQueue.service";
+import { isOfflineRequestError, listQueuedOfflineSales } from "@/services/posOfflineSaleQueue.service";
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
+import type { PosSale } from "@/types/pos.type";
 import type { PosCatalogSnapshot } from "@/types/posExtra.type";
 import type { PosRegister } from "@/types/store.type";
 import { posObjectStoreNames, readKeyValueFromOfflineStore, readRecordFromOfflineStore, writeKeyValueToOfflineStore, writeRecordToOfflineStore } from "@/utils/posOfflineDatabase.util";
+import { subtractUnsyncedSalesFromCatalogStock } from "@/utils/posOfflineStock.util";
 
 export function usePosCatalogLoader(locationId: string | null, reportRequestOutcome: (wasOffline: boolean) => void) {
   const [catalog, setCatalog] = useState<PosCatalogSnapshot | null>(null);
@@ -15,6 +17,8 @@ export function usePosCatalogLoader(locationId: string | null, reportRequestOutc
   const [isCatalogFromCache, setIsCatalogFromCache] = useState(false);
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [reloadCounter, setReloadCounter] = useState(0);
+  const catalogRef = useRef(catalog);
+  catalogRef.current = catalog;
 
   useEffect(() => {
     if (!locationId) return;
@@ -26,7 +30,8 @@ export function usePosCatalogLoader(locationId: string | null, reportRequestOutc
     });
     sendSellerApiRequest<PosCatalogSnapshot>("/seller/pos/catalog", { query: { locationId } })
       .then(async (freshCatalog) => {
-        const snapshot = { ...freshCatalog, locationId };
+        const unsyncedSales = (await listQueuedOfflineSales()).map((queuedSale) => queuedSale.localSale);
+        const snapshot = subtractUnsyncedSalesFromCatalogStock({ ...freshCatalog, locationId }, unsyncedSales);
         if (isCancelled) return;
         setCatalog(snapshot);
         setIsCatalogFromCache(false);
@@ -81,5 +86,14 @@ export function usePosCatalogLoader(locationId: string | null, reportRequestOutc
     [locationId],
   );
 
-  return { catalog, registers, isCatalogFromCache, isCatalogLoading, reloadCatalog, rememberRegisterShift };
+  const applySaleToLocalStock = useCallback(async (sale: PosSale) => {
+    const currentCatalog = catalogRef.current;
+    if (!currentCatalog || currentCatalog.locationId !== sale.locationId) return;
+    const updatedCatalog = subtractUnsyncedSalesFromCatalogStock(currentCatalog, [sale]);
+    catalogRef.current = updatedCatalog;
+    setCatalog(updatedCatalog);
+    await writeRecordToOfflineStore(posObjectStoreNames.catalogSnapshots, updatedCatalog).catch(() => undefined);
+  }, []);
+
+  return { catalog, registers, isCatalogFromCache, isCatalogLoading, reloadCatalog, rememberRegisterShift, applySaleToLocalStock };
 }
