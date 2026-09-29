@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 import styles from "./siteFooter.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
@@ -43,8 +43,8 @@ export function SiteFooterWithGiantWordmark() {
         <div className={styles.brandColumn}>
           <ZudomartWordmarkHomeLink tone="light" />
           <p className={styles.brandLine}>Social shopping, built in Nigeria. Real sellers, prices in your local currency, and your money held safely until your order arrives.</p>
-          <a href={`mailto:${siteConfig.contactEmails.general}`} className={styles.emailLink}>
-            {siteConfig.contactEmails.general}
+          <a href={contactMailtoHref} className={styles.emailLink}>
+            {contactEmailDisplayText}
           </a>
         </div>
         <nav aria-label="Footer" className={styles.linkGroups}>
