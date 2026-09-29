@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { doesRoleHavePermission, findPermissionRequiredForPage, readAccountIdFromPagePath } from "@/config/rolePermissions.config";
 import { readCachedSessionViewFromCookies, readSessionIdFromCookies } from "@/server/adsSession.service";
 
-const publicPagePaths = new Set(["/login", "/policy"]);
+const publicPagePaths = new Set(["/", "/login", "/policy"]);
 const accountPathsThatAreNotAccountIds = new Set(["new"]);
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {
@@ -24,7 +24,6 @@ export function proxy(request: NextRequest) {
   }
   if (!sessionId) return redirectTo(request, "/login", pathname === "/" ? {} : { next: requestedPathWithQuery });
   if (!cachedView) return redirectTo(request, "/bff/auth/session-refresh", { next: requestedPathWithQuery });
-  if (pathname === "/") return redirectTo(request, "/accounts");
 
   const accountId = readAccountIdFromPagePath(pathname);
   if (!accountId || accountPathsThatAreNotAccountIds.has(accountId)) return NextResponse.next();
@@ -43,5 +42,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!bff|_next/static|_next/image|icons|images|favicon\\.ico|robots\\.txt).*)"],
+  matcher: ["/((?!bff|_next/static|_next/image|icons|images|screenshots|favicon\\.ico|robots\\.txt).*)"],
 };
