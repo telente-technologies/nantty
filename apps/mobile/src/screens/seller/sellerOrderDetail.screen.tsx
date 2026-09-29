@@ -1,31 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { useRef, useState } from "react";
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
-import { OrderStatusPill } from "@/components/seller/orderStatusPill";
+import { escrowQueryKeys, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
+import { EscrowSummaryCard } from "@/components/escrow/escrowSummaryCard";
+import { EscrowTimeline } from "@/components/escrow/escrowTimeline";
+import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
+import { MarkAsShippedSheet } from "@/components/seller/markAsShippedSheet";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { colors, palette } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
+import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 
-export function SellerOrderDetailScreen({ route }: MainScreenProps<"SellerOrderDetail">) {
+export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"SellerOrderDetail">) {
   const { orderId } = route.params;
   const queryClient = useQueryClient();
-  const { data: order } = useQuery({ queryKey: sellerQueryKeys.order(orderId), queryFn: () => sellerService.fetchStoreOrderById(orderId) });
+  const [shipSheetVisible, setShipSheetVisible] = useState(false);
+  const idempotencyKeyForShipment = useRef(generateIdempotencyKey());
+  const orderQuery = useQuery({ queryKey: sellerQueryKeys.order(orderId), queryFn: () => sellerService.fetchStoreOrderById(orderId) });
+  const escrowQuery = useEscrowForOrderQuery(orderId);
+
   const markAsShipped = useMutation({
-    mutationFn: () => sellerService.markStoreOrderAsShipped(orderId),
+    mutationFn: (input: MarkOrderShippedInput) => sellerService.markStoreOrderAsShipped(orderId, input, idempotencyKeyForShipment.current),
     onSuccess: (updated) => {
+      setShipSheetVisible(false);
       queryClient.setQueryData(sellerQueryKeys.order(orderId), updated);
       queryClient.invalidateQueries({ queryKey: ["seller"] });
+      queryClient.invalidateQueries({ queryKey: escrowQueryKeys.forOrder(orderId) });
     },
   });
 
-  if (!order) {
+  const order = orderQuery.data;
+  const escrow = escrowQuery.data;
+  if (!order || !escrow) {
     return (
       <Screen>
         <Header title="Order" />
@@ -34,17 +49,35 @@ export function SellerOrderDetailScreen({ route }: MainScreenProps<"SellerOrderD
     );
   }
 
-  const canShip = order.status === "pending" || order.status === "paid";
+  const needsShipping = order.status === "paid";
+  const fundsHeld = ["paid", "shipped", "delivered", "disputed"].includes(order.status);
+  const muted = { color: colors.textMuted, weight: 400 as const };
 
   return (
     <Screen>
-      <Header title={`Order #${order.reference}`} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.statusRow}>
-          <Text size={14} lineHeight={16.8} color={colors.textMuted}>
-            Status
-          </Text>
-          <OrderStatusPill status={order.status} />
+      <Header title={`Order ${order.reference}`} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => Promise.all([orderQuery.refetch(), escrowQuery.refetch()])} tintColor={colors.primary} />}
+      >
+        <EscrowSummaryCard escrow={escrow} viewerRole="seller" />
+        {fundsHeld ? (
+          <View style={styles.heldNotice}>
+            <Text size={13} weight={500} lineHeight={16.9} color={palette.caution[800]}>Funds held in escrow until the buyer confirms</Text>
+            <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+              {order.status === "disputed"
+                ? "The buyer opened a dispute, so the release is paused. Respond quickly to resolve it."
+                : escrow.expectedReleaseAt
+                  ? `Expected release to your wallet: ${formatFriendlyDate(escrow.expectedReleaseAt)} (or sooner if the buyer confirms).`
+                  : "Ship the order to start the release countdown."}
+            </Text>
+          </View>
+        ) : null}
+        {needsShipping ? <Button title="Mark as shipped" onPress={() => setShipSheetVisible(true)} /> : null}
+        {escrow.disputeId ? <Button variant="subtle" title="View dispute" onPress={() => navigation.navigate("DisputeDetail", { disputeId: escrow.disputeId! })} /> : null}
+        <View style={styles.card}>
+          <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">Progress</Text>
+          <EscrowTimeline escrow={escrow} viewerRole="seller" />
         </View>
         <SettingsGroup>
           {order.items.map((item) => (
@@ -54,23 +87,28 @@ export function SellerOrderDetailScreen({ route }: MainScreenProps<"SellerOrderD
               trailing={{ text: formatMoneyForDisplay(multiplyMoneyByQuantity(item.product.price, item.quantity)), color: colors.text }}
             />
           ))}
-          <SettingsRow label="Total" trailing={{ text: formatMoneyForDisplay(order.total), color: colors.text }} />
+          <SettingsRow label="Order total" trailing={{ text: formatMoneyForDisplay(order.total), color: colors.text }} />
         </SettingsGroup>
         <SettingsGroup>
-          <SettingsRow label="Buyer" trailing={{ text: order.buyer.name, color: colors.textMuted, weight: 400 }} />
-          <SettingsRow label="Placed" trailing={{ text: new Date(order.createdAt).toLocaleDateString("en-NG"), color: colors.textMuted, weight: 400 }} />
+          <SettingsRow label="Buyer" trailing={{ text: order.buyer.name, ...muted }} onPress={() => navigation.navigate("UserProfile", { userId: order.buyer.id })} />
+          <SettingsRow label="Placed" trailing={{ text: formatFriendlyDate(order.createdAt), ...muted }} />
+          <SettingsRow label="Message buyer" onPress={() => navigation.navigate("Chat", { userId: order.buyer.id, name: order.buyer.name })} />
         </SettingsGroup>
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
-          Payment is held in escrow and released to your wallet after the buyer confirms delivery.
-        </Text>
-        {canShip ? <Button title="Mark as shipped" loading={markAsShipped.isPending} onPress={() => markAsShipped.mutate()} /> : null}
       </ScrollView>
+      <MarkAsShippedSheet
+        visible={shipSheetVisible}
+        submitting={markAsShipped.isPending}
+        errorMessage={markAsShipped.isError ? markAsShipped.error.message : null}
+        onClose={() => setShipSheetVisible(false)}
+        onSubmit={(input) => markAsShipped.mutate(input)}
+      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   loading: { marginTop: 80 },
-  content: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24 },
-  statusRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
+  heldNotice: { backgroundColor: palette.caution[50], borderRadius: 12, padding: 12, gap: 4 },
+  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 16 },
 });
