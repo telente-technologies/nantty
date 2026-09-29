@@ -25,12 +25,12 @@ export function findObjectiveOption(objective: CampaignObjective): ObjectiveOpti
 }
 
 export const placementOptions: readonly { readonly placement: AdPlacement; readonly label: string; readonly description: string }[] = [
-  { placement: "feed", label: "Home feed", description: "Between posts in the home feed." },
-  { placement: "clips", label: "Clips", description: "Full-screen between clips." },
-  { placement: "mart", label: "Mart", description: "Sponsored product tiles in Mart." },
-  { placement: "search", label: "Search results", description: "Top of search results for matching terms." },
-  { placement: "stories", label: "Stories", description: "Between stories from people they follow." },
-  { placement: "live", label: "Live shopping", description: "Pinned banner during live shopping sessions." },
+  { placement: "feed", label: "Home feed", description: "Sponsored post cards between posts. Only long or landscape videos play as video here." },
+  { placement: "clips", label: "Reels", description: "Full-screen vertical clips inside the reels pager. Landscape videos get a View full screen button." },
+  { placement: "stories", label: "Stories", description: "Full-screen between stories from people they follow." },
+  { placement: "mart", label: "Marketplace grid & categories", description: "Product tiles marked Ad at fixed slots in Mart and category grids." },
+  { placement: "search", label: "Marketplace search", description: "Product tiles marked Ad at fixed slots in search results." },
+  { placement: "live", label: "Live discovery", description: "Promoted live streams in live discovery and as live cards in feed and reels." },
 ];
 
 export const placementLabels: Record<AdPlacement, string> = Object.fromEntries(placementOptions.map((option) => [option.placement, option.label])) as Record<AdPlacement, string>;
@@ -64,10 +64,11 @@ export const callToActionLabels: Record<CallToAction, string> = {
 
 export const creativeFormatLabels: Record<CreativeFormat, string> = {
   feed_post: "Feed post",
-  clip: "Clip",
-  product: "Product tile",
+  clip: "Reel",
+  product: "Marketplace product tile",
   store: "Store card",
   story: "Story",
+  live: "Live card",
 };
 
 export const campaignNameMaximumLength = 120;
