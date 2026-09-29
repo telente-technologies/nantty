@@ -1,0 +1,100 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pickerResults {
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.pickerOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--divider-soft);
+  background: var(--surface-card);
+  text-align: left;
+}
+
+.pickerOption:hover,
+.pickerOption:focus-visible {
+  background: var(--blue-tint);
+}
+
+.pickerOption small {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.pickerEmpty {
+  padding: 10px;
+  color: var(--ink-muted);
+}
+
+.lineTable {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lineTable th {
+  text-align: left;
+  padding: 6px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  background: var(--surface-sunken);
+}
+
+.lineTable td {
+  padding: 6px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.quantityInput {
+  width: 90px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  text-align: right;
+}
+
+.quantityInput[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.negative {
+  color: var(--error-ink);
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--success-ink);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+}
