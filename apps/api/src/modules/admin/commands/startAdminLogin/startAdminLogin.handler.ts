@@ -1,17 +1,17 @@
 import { CommandHandler } from "@zudojs/cqrs";
 
-import type { AdminLoginChallenge } from "../../services/adminSession.service.js";
-import type { AdminModuleServices } from "../../services/adminModule.service.js";
+import type { AdminLoginStarted } from "../../services/adminSignIn.service.js";
+import type { AdminServices } from "../../services/adminServices.service.js";
 import type { StartAdminLoginCommand } from "./startAdminLogin.command.js";
 
-export class StartAdminLoginHandler extends CommandHandler<StartAdminLoginCommand, AdminLoginChallenge> {
+export class StartAdminLoginHandler extends CommandHandler<StartAdminLoginCommand, AdminLoginStarted> {
   public readonly commandType = "admin.startAdminLogin" as const;
 
-  public constructor(private readonly service: AdminModuleServices) {
+  public constructor(private readonly service: AdminServices) {
     super();
   }
 
-  public async execute(command: StartAdminLoginCommand): Promise<AdminLoginChallenge> {
-    return this.service.sessions.startLogin(command.identifier, command.password);
+  public execute(command: StartAdminLoginCommand): Promise<AdminLoginStarted> {
+    return this.service.signIn.startLogin(command.email, command.password, command.client);
   }
 }
