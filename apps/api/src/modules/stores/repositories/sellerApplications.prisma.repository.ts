@@ -1,19 +1,20 @@
-import type { SellerApplication } from "../../../generated/prisma/client.js";
+import { Prisma, type SellerApplication } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
-import type { NewSellerApplicationInput, SellerApplicationRecord, SellerApplicationStatus } from "../models/stores.model.js";
+import type { NewSellerApplicationInput, SellerApplicationRecord, SellerApplicationStatus, SellerOnboardingDetails } from "../models/stores.model.js";
 import type { SellerApplicationReview, SellerApplicationsRepository } from "./sellerApplications.repository.js";
 
 function convertApplicationRowToRecord(row: SellerApplication): SellerApplicationRecord {
-  const { phoneEnc, status, ...rest } = row;
-  return { ...rest, phoneEncrypted: phoneEnc, status: status as SellerApplicationStatus };
+  const { phoneEnc, status, onboarding, ...rest } = row;
+  return { ...rest, phoneEncrypted: phoneEnc, status: status as SellerApplicationStatus, onboarding: onboarding as unknown as SellerOnboardingDetails | null };
 }
 
 export class PrismaSellerApplicationsRepository implements SellerApplicationsRepository {
   public async create(input: NewSellerApplicationInput): Promise<SellerApplicationRecord> {
-    const { phoneEncrypted, ...rest } = input;
-    return convertApplicationRowToRecord(await prisma().sellerApplication.create({ data: { ...rest, phoneEnc: phoneEncrypted } }));
+    const { phoneEncrypted, onboarding, ...rest } = input;
+    const onboardingJson = onboarding === null ? Prisma.JsonNull : (onboarding as unknown as Prisma.InputJsonValue);
+    return convertApplicationRowToRecord(await prisma().sellerApplication.create({ data: { ...rest, phoneEnc: phoneEncrypted, onboarding: onboardingJson } }));
   }
 
   public async findById(id: string): Promise<SellerApplicationRecord | undefined> {
