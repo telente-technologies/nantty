@@ -4,15 +4,21 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Chat37AltAltIcon, Flips34AltAltIcon, Home33AltIcon, Home33Icon, Plus28Icon } from "@/components/icons";
+import { ProfileSwitcherSheet } from "@/components/profile/profileSwitcher";
 import { Avatar } from "@/components/ui/avatar";
 import { colors } from "@/constants/colors.constant";
+import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useAuthStore } from "@/store/auth.store";
+import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
 const LABELS: Record<string, string> = { Home: "Home", Clips: "Clips", Create: "Create", Chats: "Chats", Me: "Profile" };
 
 export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const avatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const signedInUserAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const actingProfileAvatarUrl = useActingProfileStore((s) => s.actingProfile?.avatarUrl ?? null);
+  const avatarUrl = actingProfileAvatarUrl ?? signedInUserAvatarUrl;
+  const openProfileSwitcherSheet = useProfileSwitcherSheetStore((s) => s.openProfileSwitcherSheet);
   const focusedRouteKey = state.routes[state.index]?.key;
   const focusedTabBarStyle = focusedRouteKey ? descriptors[focusedRouteKey]?.options.tabBarStyle : undefined;
   const isTabBarHiddenOnFocusedScreen =
@@ -64,6 +70,8 @@ export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
               accessibilityLabel={LABELS[route.name] ?? route.name}
               accessibilityState={{ selected: focused }}
               onPress={openTabOrCreateScreen}
+              onLongPress={route.name === "Me" ? openProfileSwitcherSheet : undefined}
+              accessibilityHint={route.name === "Me" ? "Long press to switch profile" : undefined}
               hitSlop={8}
               style={styles.item}
             >
@@ -72,6 +80,7 @@ export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
           );
         })}
       </View>
+      <ProfileSwitcherSheet />
     </View>
   );
 }
