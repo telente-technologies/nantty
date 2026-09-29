@@ -41,6 +41,9 @@ const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
   avatar: 0,
   banner: 0,
   voice: 0,
+  dispute_evidence: 100 * MEGABYTE,
+  identity_document: 0,
+  verification_document: 0,
 };
 const MAXIMUM_VIDEO_SECONDS_BY_PURPOSE: Partial<Record<MediaUploadPurpose, number>> = { story: 60, clip: 600, post: 600 };
 const MAXIMUM_IMAGE_LONG_EDGE_PIXELS = 2048;
