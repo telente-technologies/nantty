@@ -1,0 +1,39 @@
+.parentName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.childName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
+}
+
+.branch {
+  width: 10px;
+  height: 10px;
+  border-left: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+  margin-top: -8px;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.search {
+  width: 280px;
+}
+
+.orderButtons {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.upArrow span:first-child {
+  transform: rotate(180deg);
+}

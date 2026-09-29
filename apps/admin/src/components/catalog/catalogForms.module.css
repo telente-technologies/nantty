@@ -1,0 +1,84 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.countryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.countryList legend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.imagePicker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.imagePicker legend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.imageOption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.imageOption input {
+  position: absolute;
+  opacity: 0;
+}
+
+.imageOption img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-small);
+  border: 2px solid transparent;
+}
+
+.imageOption input:checked + img {
+  border-color: var(--blue-500);
+}
+
+.imageOption input:focus-visible + img {
+  box-shadow: var(--focus-ring);
+}
+
+@media (max-width: 640px) {
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+}
