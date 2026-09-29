@@ -5,6 +5,7 @@ model SellerApplication {
   description String    @default("")
   categoryId  String?
   phoneEnc    String
+  onboarding  Json?
   status      String    @default("pending")
   reviewerId  String?
   reviewNote  String?
