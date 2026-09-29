@@ -12,7 +12,9 @@ import { EscrowsController } from "../modules/escrows/controllers/escrows.contro
 import { registerEscrowsCommandAndQueryHandlers } from "../modules/escrows/escrows.module.js";
 import { createEscrowAutoReleaseJob } from "../modules/escrows/jobs/escrowAutoRelease.job.js";
 import { PrismaDisputesRepository, PrismaEscrowsRepository } from "../modules/escrows/repositories/escrows.prisma.repository.js";
+import { InMemoryDisputeMessagesRepository, PrismaDisputeMessagesRepository } from "../modules/escrows/repositories/disputeMessages.repository.js";
 import { InMemoryDisputesRepository, InMemoryEscrowsRepository } from "../modules/escrows/repositories/escrows.repository.js";
+import { DisputeConversationService } from "../modules/escrows/services/disputeConversation.service.js";
 import { DisputesService } from "../modules/escrows/services/disputes.service.js";
 import { EscrowsService } from "../modules/escrows/services/escrows.service.js";
 import { OrdersController } from "../modules/orders/controllers/orders.controller.js";
@@ -30,15 +32,22 @@ import { PaystackGateway } from "../modules/payments/gateways/paystack.gateway.j
 import { registerPaymentsCommandAndQueryHandlers } from "../modules/payments/payments.module.js";
 import { PrismaPaymentsRepository, PrismaWebhookEventsRepository } from "../modules/payments/repositories/payments.prisma.repository.js";
 import { InMemoryPaymentsRepository, InMemoryWebhookEventsRepository } from "../modules/payments/repositories/payments.repository.js";
+import { PaymentReturnUrls } from "../modules/payments/services/paymentReturnUrl.service.js";
+import { PaymentWebhookRegistry } from "../modules/payments/services/paymentWebhookRegistry.service.js";
 import { PaymentsService } from "../modules/payments/services/payments.service.js";
 import { WalletsController } from "../modules/wallets/controllers/wallets.controller.js";
 import { PrismaLedgerRepository } from "../modules/wallets/repositories/ledger.prisma.repository.js";
 import { InMemoryLedgerRepository } from "../modules/wallets/repositories/ledger.repository.js";
 import { PrismaPayoutAccountsRepository, PrismaWithdrawalsRepository } from "../modules/wallets/repositories/wallets.prisma.repository.js";
+import { InMemoryWalletTopUpsRepository, PrismaWalletTopUpsRepository } from "../modules/wallets/repositories/walletTopUps.repository.js";
 import { InMemoryPayoutAccountsRepository, InMemoryWithdrawalsRepository } from "../modules/wallets/repositories/wallets.repository.js";
+import { LedgerCreatorWallets } from "../modules/wallets/services/creatorWallets.service.js";
 import { LedgerService } from "../modules/wallets/services/ledger.service.js";
 import { PaystackBankDirectory, type BankDirectory } from "../modules/wallets/services/bankDirectory.service.js";
+import { WalletOwnerResolver } from "../modules/wallets/services/walletOwnerResolver.service.js";
+import { WALLET_TOP_UP_REFERENCE_PREFIX, WalletTopUpsService } from "../modules/wallets/services/walletTopUps.service.js";
 import { WalletsService } from "../modules/wallets/services/wallets.service.js";
+import { WithdrawalsService } from "../modules/wallets/services/withdrawals.service.js";
 import { registerWalletsCommandAndQueryHandlers } from "../modules/wallets/wallets.module.js";
 import type { Core } from "./core.loader.js";
 
@@ -66,6 +75,8 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   const ordersRepository = usePrisma ? new PrismaOrdersRepository() : new InMemoryOrdersRepository();
   const escrowsRepository = usePrisma ? new PrismaEscrowsRepository() : new InMemoryEscrowsRepository();
   const ledger = new LedgerService(usePrisma ? new PrismaLedgerRepository() : new InMemoryLedgerRepository(), clock);
+  const webhookRegistry = new PaymentWebhookRegistry();
+  const returnUrls = new PaymentReturnUrls(settings.payments.returnUrlAllowList);
 
   const cartsService = new CartsService({ carts: usePrisma ? new PrismaCartsRepository() : new InMemoryCartsRepository(), productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, currencyConverter: shared.currencyConverter });
   const ordersService = new OrdersService({ orders: ordersRepository, addressBook: shared.addressBook, carts: cartsService, productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, cipher, clock, events, currencyConverter: shared.currencyConverter });
@@ -93,32 +104,39 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     audit: shared.audit,
     events,
     clock,
-    callbackUrl: settings.payments.callbackUrl,
+    returnUrls,
+    webhookRegistry,
   });
   const disputesService = new DisputesService(usePrisma ? new PrismaDisputesRepository() : new InMemoryDisputesRepository(), escrowsService, ordersService);
+  const disputeMessages = usePrisma ? new PrismaDisputeMessagesRepository() : new InMemoryDisputeMessagesRepository();
+  const conversationService = new DisputeConversationService(disputesService.disputes, disputeMessages, escrowsService);
   const bankDirectory = external.bankDirectory ?? new PaystackBankDirectory(settings.payments.paystackSecretKey);
+  const owners = new WalletOwnerResolver(shared.storeAccess, bankDirectory);
+  const payoutAccounts = usePrisma ? new PrismaPayoutAccountsRepository() : new InMemoryPayoutAccountsRepository();
   const walletsService = new WalletsService({
-    ledger,
-    bankDirectory,
-    payoutAccounts: usePrisma ? new PrismaPayoutAccountsRepository() : new InMemoryPayoutAccountsRepository(),
-    withdrawals: usePrisma ? new PrismaWithdrawalsRepository() : new InMemoryWithdrawalsRepository(),
-    storeAccess: shared.storeAccess,
-    cipher,
-    audit: shared.audit,
-    clock,
-    paymentGateways: gateways,
-    sumEscrowHeldForStore: (storeId) => escrowsRepository.sumOutstandingForStore(storeId),
+    ledger, payoutAccounts, owners, cipher, audit: shared.audit, sumEscrowHeldForStore: (storeId) => escrowsRepository.sumOutstandingForStore(storeId),
   });
+  const withdrawalsService = new WithdrawalsService({
+    ledger, payoutAccounts, owners, cipher, audit: shared.audit, clock, paymentGateways: gateways,
+    withdrawals: usePrisma ? new PrismaWithdrawalsRepository() : new InMemoryWithdrawalsRepository(),
+  });
+  const topUpsService = new WalletTopUpsService({
+    topUps: usePrisma ? new PrismaWalletTopUpsRepository() : new InMemoryWalletTopUpsRepository(),
+    ledger, gateways, userDirectory: shared.userDirectory, returnUrls, audit: shared.audit, clock,
+  });
+  webhookRegistry.registerReferencePrefix("wallet-top-ups", WALLET_TOP_UP_REFERENCE_PREFIX, (delivery) => topUpsService.handleTopUpWebhook(delivery));
   const dashboardService = new StoreDashboardService(ordersRepository, shared.storeAccess, shared.productCatalog, clock);
 
   registerCartsCommandAndQueryHandlers(commands, queries, cartsService);
   registerOrdersCommandAndQueryHandlers(commands, queries, { orders: ordersService, dashboard: dashboardService, escrows: escrowsService });
   registerPaymentsCommandAndQueryHandlers(commands, queries, paymentsService, escrowsService);
-  registerEscrowsCommandAndQueryHandlers(commands, queries, { escrows: escrowsService, disputes: disputesService, orders: ordersService });
-  registerWalletsCommandAndQueryHandlers(commands, queries, walletsService);
+  registerEscrowsCommandAndQueryHandlers(commands, queries, { escrows: escrowsService, disputes: disputesService, orders: ordersService, conversation: conversationService });
+  registerWalletsCommandAndQueryHandlers(commands, queries, { wallets: walletsService, withdrawals: withdrawalsService, topUps: topUpsService });
 
   return {
     orderLookup: new RepositoryOrderLookup(ordersRepository),
+    creatorWallets: new LedgerCreatorWallets(ledger, shared.storeAccess),
+    payments: { gateways, ledger, webhookRegistry, returnUrls, walletsService },
     scheduledJobs: [createEscrowAutoReleaseJob(escrowsService)],
     controllers: {
       cartsController: new CartsController(commands, queries),
