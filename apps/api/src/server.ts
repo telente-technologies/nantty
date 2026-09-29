@@ -23,7 +23,7 @@ import { schedules } from "./integrations/scheduler.integration.js";
 import { registerScheduledJobs } from "./jobs/scheduledJobs.job.js";
 import { addRequestIdResponseHeader } from "./middlewares/requestId.middleware.js";
 import { registerRoutes } from "./routes/index.js";
-import { errorDetails, errorResponse, json, securityHeaders } from "./utils/http.util.js";
+import { createApplicationRouterOptions, errorDetails, errorResponse, json, securityHeaders } from "./utils/http.util.js";
 
 const config = await loadConfig();
 const httpServer = createServer();
@@ -44,7 +44,7 @@ const dependencies = createDependencies({
 // context.application.container.resolve(APP_DEPENDENCIES).
 runtime.context.container.registerValue(APP_DEPENDENCIES, dependencies);
 
-const router = createRouter();
+const router = createRouter(createApplicationRouterOptions());
 registerRoutes(router, dependencies);
 // zudojs:server-mounts:start
 mountOpenAPI(router, { info: { title: "zudomart", version: "0.1.0" }, docsPath: config.nodeEnv === "production" ? false : "/docs" });

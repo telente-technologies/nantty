@@ -31,9 +31,10 @@ COPY --from=prod-deps /repo/node_modules ./node_modules
 COPY --from=prod-deps /repo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build /repo/packages ./packages
 COPY --from=build /repo/apps/api/dist ./apps/api/dist
-COPY apps/api/package.json ./apps/api/
+COPY apps/api/package.json apps/api/prisma.config.ts ./apps/api/
+COPY apps/api/prisma ./apps/api/prisma
 WORKDIR /repo/apps/api
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s CMD ["node", "-e", "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/server.js"]

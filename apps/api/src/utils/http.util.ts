@@ -4,6 +4,7 @@ import {
   type HttpMiddleware,
   type HttpResponseContext,
   type HttpRouterContext,
+  type RouterOptions,
 } from "@zudojs/http";
 import type { SchemaIssue } from "@zudojs/schema";
 import { generateSecurityHeaders } from "@zudojs/security";
@@ -83,5 +84,16 @@ export function securityHeaders(): HttpMiddleware {
       if (!present.has(name.toLowerCase())) response.setHeader(name, value);
     }
     return response;
+  };
+}
+
+export function createApplicationRouterOptions(): RouterOptions {
+  return {
+    notFoundHandler: () => json(404, { message: "Not found", code: "NOT_FOUND" }),
+    methodNotAllowedHandler: (_context, allowedMethods) => {
+      const response = json(405, { message: "Method not allowed", code: "METHOD_NOT_ALLOWED", allowed: allowedMethods });
+      response.setHeader("allow", allowedMethods.join(", "));
+      return response;
+    },
   };
 }
