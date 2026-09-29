@@ -25,6 +25,7 @@ RUN pnpm install --frozen-lockfile --prod --filter @zudomart/api...
 
 FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
+RUN apk add --no-cache ffmpeg
 WORKDIR /repo
 # Files stay owned by root: the app user can read them but not rewrite its own code.
 COPY --from=prod-deps /repo/node_modules ./node_modules
