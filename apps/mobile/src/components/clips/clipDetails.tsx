@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { SponsoredCallToAction, SponsoredLabel } from "@/components/feed/sponsoredContent";
 import { Group1234Icon } from "@/components/icons";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import type { Clip } from "@/types";
@@ -36,6 +37,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
               <Text size={14} weight={500} lineHeight={16.8} color={foregroundColor} style={readableTextStyle}>
                 {clip.author.name}
               </Text>
+              <VerificationBadge verification={clip.author.verification} legacyVerified={clip.author.verified} size={16} />
               {clip.sponsored ? <SponsoredLabel sponsored={clip.sponsored} /> : null}
             </View>
             <Text size={12} lineHeight={16.8} color={foregroundColor} style={readableTextStyle}>
