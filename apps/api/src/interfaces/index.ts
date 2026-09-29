@@ -12,3 +12,6 @@ export * from "./viewerLocale.interface.js";
 export * from "./addressBook.interface.js";
 export * from "./creatorWallets.interface.js";
 export * from "./sellerAccess.interface.js";
+export * from "./mediaLibrary.interface.js";
+export * from "./verificationBadge.interface.js";
+export * from "./entitlements.interface.js";
