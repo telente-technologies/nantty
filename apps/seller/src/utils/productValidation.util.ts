@@ -1,0 +1,106 @@
+import type { ProductStatus } from "@/types/catalog.type";
+import type { ProductUpsertRequest } from "@/types/productRequests.type";
+import type { ValidationIssue } from "@/utils/formValidation.util";
+import { isValidEan13 } from "@/utils/ean13.util";
+
+export const productStatuses: readonly ProductStatus[] = ["draft", "active", "archived"];
+export const skuPattern = /^[A-Za-z0-9._-]{1,64}$/;
+export const maximumMoneyMinor = 1_000_000_000_000;
+export const maximumVariantsPerProduct = 100;
+
+export interface ProductValidationContext {
+  readonly categoryIds: readonly string[] | null;
+  readonly locationIds: readonly string[] | null;
+  readonly skusUsedByOtherProducts: ReadonlySet<string>;
+  readonly barcodesUsedByOtherProducts: ReadonlySet<string>;
+}
+
+function isWholeMinorAmount(value: unknown, allowNull: boolean): boolean {
+  if (value === null) return allowNull;
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= maximumMoneyMinor;
+}
+
+export function isBarcodeFormatAcceptable(barcode: string): boolean {
+  if (!/^\d{8,14}$/.test(barcode)) return false;
+  return barcode.length !== 13 || isValidEan13(barcode);
+}
+
+function buildOptionCombinationKey(optionValues: Record<string, string>, optionNames: readonly string[]): string {
+  return optionNames.map((optionName) => optionValues[optionName] ?? "").join("\u0000");
+}
+
+export function validateProductUpsertRequest(request: ProductUpsertRequest, context: ProductValidationContext): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const addIssue = (path: string, message: string) => issues.push({ path, message });
+  const trimmedName = typeof request.name === "string" ? request.name.trim() : "";
+  if (trimmedName.length < 2 || trimmedName.length > 120) addIssue("name", "Product name needs 2 to 120 characters.");
+  if (typeof request.description !== "string" || request.description.length > 5000) addIssue("description", "Description must be 5,000 characters or fewer.");
+  if (request.categoryId !== null && (typeof request.categoryId !== "string" || (context.categoryIds && !context.categoryIds.includes(request.categoryId)))) addIssue("categoryId", "Choose one of your categories.");
+  if (!productStatuses.includes(request.status)) addIssue("status", "Choose a valid status.");
+  for (const flagName of ["taxable", "trackInventory", "publishedOnline"] as const) {
+    if (typeof request[flagName] !== "boolean") addIssue(flagName, `${flagName} must be on or off.`);
+  }
+  if (!Array.isArray(request.tags) || request.tags.length > 20 || request.tags.some((tag) => typeof tag !== "string" || tag.trim().length === 0 || tag.length > 30)) addIssue("tags", "Use up to 20 tags of 30 characters or fewer.");
+  if (!Array.isArray(request.imageMediaIds) || request.imageMediaIds.length > 10) addIssue("imageMediaIds", "A product can have up to 10 images.");
+
+  const options = Array.isArray(request.options) ? request.options : [];
+  if (options.length > 3) addIssue("options", "Use up to 3 options, such as Size and Colour.");
+  const optionNames = options.map((option) => option.name?.trim() ?? "");
+  options.forEach((option, optionIndex) => {
+    const optionName = optionNames[optionIndex] ?? "";
+    if (optionName.length < 1 || optionName.length > 30) addIssue(`options.${optionIndex}.name`, "Option names need 1 to 30 characters.");
+    const values = Array.isArray(option.values) ? option.values : [];
+    if (values.length < 1 || values.length > 30) addIssue(`options.${optionIndex}.values`, `Give ${optionName || "this option"} between 1 and 30 values.`);
+    if (new Set(values.map((value) => value.trim().toLowerCase())).size !== values.length) addIssue(`options.${optionIndex}.values`, `${optionName || "This option"} has repeated values.`);
+    if (values.some((value) => value.trim().length === 0 || value.length > 40)) addIssue(`options.${optionIndex}.values`, "Option values need 1 to 40 characters.");
+  });
+  if (new Set(optionNames.map((name) => name.toLowerCase())).size !== optionNames.length) addIssue("options", "Option names must be different from each other.");
+
+  const variants = Array.isArray(request.variants) ? request.variants : [];
+  if (variants.length < 1 || variants.length > maximumVariantsPerProduct) addIssue("variants", `A product needs between 1 and ${maximumVariantsPerProduct} variants.`);
+  const seenSkus = new Set<string>();
+  const seenBarcodes = new Set<string>();
+  const seenCombinations = new Set<string>();
+  variants.forEach((variant, variantIndex) => {
+    const label = `Variant ${variantIndex + 1}`;
+    const path = `variants.${variantIndex}`;
+    const sku = typeof variant.sku === "string" ? variant.sku.trim() : "";
+    if (!skuPattern.test(sku)) addIssue(`${path}.sku`, `${label}: SKU needs 1 to 64 letters, numbers, dots, dashes or underscores.`);
+    else if (seenSkus.has(sku.toLowerCase())) addIssue(`${path}.sku`, `${label}: SKU ${sku} is used twice in this product.`);
+    else if (context.skusUsedByOtherProducts.has(sku.toLowerCase())) addIssue(`${path}.sku`, `${label}: SKU ${sku} already belongs to another product.`);
+    seenSkus.add(sku.toLowerCase());
+    if (variant.barcode !== null) {
+      if (typeof variant.barcode !== "string" || !isBarcodeFormatAcceptable(variant.barcode)) addIssue(`${path}.barcode`, `${label}: barcode must be 8 to 14 digits (EAN-13 check digit must be right).`);
+      else if (seenBarcodes.has(variant.barcode)) addIssue(`${path}.barcode`, `${label}: barcode is used twice in this product.`);
+      else if (context.barcodesUsedByOtherProducts.has(variant.barcode)) addIssue(`${path}.barcode`, `${label}: barcode already belongs to another product.`);
+      seenBarcodes.add(String(variant.barcode));
+    }
+    if (!isWholeMinorAmount(variant.priceMinor, false)) addIssue(`${path}.priceMinor`, `${label}: enter a price of zero or more.`);
+    if (!isWholeMinorAmount(variant.compareAtPriceMinor, true)) addIssue(`${path}.compareAtPriceMinor`, `${label}: compare-at price must be zero or more.`);
+    else if (variant.compareAtPriceMinor !== null && variant.compareAtPriceMinor <= variant.priceMinor) addIssue(`${path}.compareAtPriceMinor`, `${label}: compare-at price must be higher than the price.`);
+    if (!isWholeMinorAmount(variant.costPriceMinor, true)) addIssue(`${path}.costPriceMinor`, `${label}: cost price must be zero or more.`);
+    if (!Number.isSafeInteger(variant.lowStockThreshold) || variant.lowStockThreshold < 0 || variant.lowStockThreshold > 100_000) addIssue(`${path}.lowStockThreshold`, `${label}: low-stock alert must be a whole number from 0 to 100,000.`);
+    const optionValues = variant.optionValues ?? {};
+    const hasEveryOptionValue = options.every((option, optionIndex) => option.values.includes(optionValues[optionNames[optionIndex] ?? ""] ?? ""));
+    if (!hasEveryOptionValue || Object.keys(optionValues).length !== options.length) addIssue(`${path}.optionValues`, `${label}: pick one value for each option.`);
+    const combinationKey = buildOptionCombinationKey(optionValues, optionNames);
+    if (seenCombinations.has(combinationKey)) addIssue(`${path}.optionValues`, `${label}: this option combination is listed twice.`);
+    seenCombinations.add(combinationKey);
+    const openingStock = Array.isArray(variant.openingStock) ? variant.openingStock : [];
+    openingStock.forEach((entry) => {
+      if (context.locationIds && !context.locationIds.includes(entry.locationId)) addIssue(`${path}.openingStock`, `${label}: opening stock uses an unknown location.`);
+      if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0 || entry.quantity > 1_000_000) addIssue(`${path}.openingStock`, `${label}: opening stock must be a whole number from 0 to 1,000,000.`);
+    });
+  });
+  return issues;
+}
+
+export function calculateMarginBasisPoints(priceMinor: number | null, costMinor: number | null): number | null {
+  if (priceMinor === null || costMinor === null || priceMinor <= 0) return null;
+  return Math.round(((priceMinor - costMinor) * 10_000) / priceMinor);
+}
+
+export function buildVariantTitleFromOptionValues(optionValues: Record<string, string>, optionNames: readonly string[]): string {
+  const orderedValues = optionNames.map((optionName) => optionValues[optionName]).filter((value): value is string => Boolean(value));
+  return orderedValues.join(" / ") || "Default";
+}
