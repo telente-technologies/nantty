@@ -74,7 +74,7 @@ export function AdminAccessDialog({ existingAdmin, onClose, onSaved }: AdminAcce
       {!isEditing ? (
         <div className={styles.identityRow}>
           <TextField label="Full name" value={name} onChange={(event) => setName(event.target.value)} maxLength={80} error={readIssueMessageForField(saveMutation.validationIssues, "name")} />
-          <TextField label="Work email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@zudomart.com" error={readIssueMessageForField(saveMutation.validationIssues, "email")} />
+          <TextField label="Work email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" error={readIssueMessageForField(saveMutation.validationIssues, "email")} />
         </div>
       ) : null}
       <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as ManageableRole)} options={roleOptions} />
