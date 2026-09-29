@@ -12,8 +12,9 @@ export class StartLiveSessionHandler extends CommandHandler<StartLiveSessionComm
   }
 
   public async execute(command: StartLiveSessionCommand): Promise<LiveSessionDto> {
-    const { liveSessions, storeAccess, clock } = this.postsService.dependencies;
+    const { liveSessions, storeAccess, clock, creatorAccess } = this.postsService.dependencies;
     const hostId = command.principal.userId;
+    await creatorAccess.assertApprovedCreator(hostId);
     if (command.input.storeId !== undefined) await storeAccess.assertStoreMember(hostId, command.input.storeId);
     await this.postsService.findPublishedProductsOrThrow(command.input.productIds ?? []);
     const session = await liveSessions.create({
