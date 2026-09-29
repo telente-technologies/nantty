@@ -1,38 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
+import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
+import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
+import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow/escrowStage.util";
+import { StatusPill } from "@/components/escrow/statusPill";
+import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
-import { OrderStatusBadge } from "@/components/order/orderStatusBadge";
-import { OrderTimeline } from "@/components/order/orderTimeline";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { ordersService } from "@/services/orders.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
   const { orderId } = route.params;
-  const queryClient = useQueryClient();
-  const confirmKey = useRef(generateIdempotencyKey());
+  const [confirmSheetVisible, setConfirmSheetVisible] = useState(false);
   const order = useQuery({ queryKey: ["orders", "detail", orderId], queryFn: () => ordersService.fetchOrderById(orderId) });
-
-  const confirmReceipt = useMutation({
-    mutationFn: () => ordersService.confirmOrderReceipt(orderId, confirmKey.current),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(["orders", "detail", orderId], updated);
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
-  });
+  const escrow = useEscrowForOrderQuery(orderId);
+  const confirmReceipt = useConfirmReceiptMutation(orderId);
 
   if (!order.data) {
     return (
       <Screen>
-        <Header title="Order" paddingHorizontal={12} />
+        <Header title="Order" />
         {order.isError ? (
           <Text align="center" color={colors.textSubtle} style={styles.state}>Couldn't load this order.</Text>
         ) : (
@@ -43,57 +38,88 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   }
 
   const detail = order.data;
+  const stage = escrow.data?.stage;
   const canConfirm = detail.status === "shipped" || detail.status === "delivered";
-  const canDispute = detail.status === "paid" || detail.status === "shipped" || detail.status === "delivered";
+  const canDispute = (detail.status === "paid" || canConfirm) && !escrow.data?.disputeId;
+  const releaseLine = escrow.data?.releasedAt
+    ? `Released to ${detail.store.name} on ${formatFriendlyDate(escrow.data.releasedAt)}`
+    : escrow.data?.autoReleaseAt
+      ? `Auto-releases ${formatFriendlyDate(escrow.data.autoReleaseAt)} unless you report a problem`
+      : "Released only after you confirm the order arrived as described";
+
   return (
     <Screen>
-      <Header title={`Order ${detail.reference}`} paddingHorizontal={12} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.row}>
-          <Text size={14} weight={500} lineHeight={16.8}>{detail.store.name}</Text>
-          <OrderStatusBadge status={detail.status} />
-        </View>
-        <OrderTimeline status={detail.status} />
-        <View style={styles.escrow}>
-          <Text size={13} weight={500} lineHeight={16.9} color={palette.primary[700]}>
-            {detail.status === "completed" ? "Payment released to the seller" : "Payment held in escrow"}
-          </Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-            {detail.status === "completed"
-              ? "Thanks for confirming. The seller has been paid."
-              : detail.escrowReleaseAt
-                ? `If you don't confirm or open a dispute, payment is released on ${new Date(detail.escrowReleaseAt).toDateString()}.`
-                : "The seller is paid only after you confirm the order arrived as described."}
-          </Text>
-        </View>
-        <View style={styles.items}>
+      <Header title={`Order ${detail.reference}`} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => Promise.all([order.refetch(), escrow.refetch()])} tintColor={colors.primary} />}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="View payment protection status"
+          onPress={() => navigation.navigate("EscrowStatus", { orderId })}
+          style={styles.escrowCard}
+        >
+          <Shield24Icon color={colors.primary} />
+          <View style={styles.flex}>
+            <View style={styles.row}>
+              <Text size={14} weight={600} lineHeight={16.8}>Payment protection</Text>
+              {stage ? <StatusPill label={ESCROW_STAGE_APPEARANCE[stage].label} tone={ESCROW_STAGE_APPEARANCE[stage].tone} /> : null}
+            </View>
+            <Text size={12} lineHeight={16.8} color={colors.textMuted}>{releaseLine}</Text>
+          </View>
+          <CaretRight24Icon />
+        </Pressable>
+
+        <View style={styles.card}>
+          <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Store", { storeId: detail.store.id })} style={styles.row}>
+            <Text size={14} weight={600} lineHeight={16.8}>{detail.store.name}</Text>
+            <Text size={12} lineHeight={16.8} color={colors.primary}>Visit store</Text>
+          </Pressable>
           {detail.items.map((item) => (
             <CartItemSummary key={item.id} item={item} onPress={() => navigation.navigate("ProductDetail", { productId: item.product.id })} />
           ))}
-        </View>
-        <View style={styles.row}>
-          <Text size={14} weight={600} lineHeight={16.8}>Total</Text>
-          <Text size={14} weight={600} lineHeight={16.8}>{formatMoneyForDisplay(detail.total)}</Text>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <Text size={14} weight={600} lineHeight={16.8}>Total paid</Text>
+            <Text size={14} weight={600} lineHeight={16.8}>{formatMoneyForDisplay(detail.total)}</Text>
+          </View>
+          <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Placed {formatFriendlyDate(detail.createdAt)} · includes delivery</Text>
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        {confirmReceipt.isError ? (
-          <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-            Couldn't confirm receipt. Try again.
-          </Text>
+        {canConfirm ? <Button title="Confirm receipt" onPress={() => setConfirmSheetVisible(true)} /> : null}
+        {escrow.data?.disputeId ? (
+          <Button variant="subtle" title="View dispute" onPress={() => navigation.navigate("DisputeDetail", { disputeId: escrow.data!.disputeId! })} />
         ) : null}
-        {canConfirm ? <Button title="Confirm receipt" loading={confirmReceipt.isPending} onPress={() => confirmReceipt.mutate()} /> : null}
-        {canDispute ? <Button variant="danger" title="Report a problem" onPress={() => navigation.navigate("OpenDispute", { orderId })} /> : null}
+        <View style={styles.footerRow}>
+          <Button variant="subtle" title="Contact seller" style={styles.flex} onPress={() => escrow.data && navigation.navigate("Chat", { userId: escrow.data.sellerUserId, name: detail.store.name })} />
+          {canDispute ? <Button variant="subtle" title="Open a dispute" style={styles.flex} onPress={() => navigation.navigate("OpenDispute", { orderId })} /> : null}
+        </View>
       </View>
+      <ConfirmActionSheet
+        visible={confirmSheetVisible}
+        title="Confirm you received it?"
+        message={`Only confirm if everything arrived as described. ${detail.store.name} will be paid right away and this can't be undone.`}
+        confirmTitle="Yes, release payment"
+        confirming={confirmReceipt.isPending}
+        errorMessage={confirmReceipt.isError ? confirmReceipt.error.message : null}
+        onConfirm={() => confirmReceipt.mutate(undefined, { onSuccess: () => { setConfirmSheetVisible(false); order.refetch(); } })}
+        onClose={() => setConfirmSheetVisible(false)}
+      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   state: { marginTop: 64 },
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 24 },
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  escrow: { padding: 12, borderRadius: 8, backgroundColor: palette.primary[50], gap: 4 },
-  items: { gap: 8 },
-  footer: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  escrowCard: { backgroundColor: colors.white, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  divider: { height: 1, backgroundColor: colors.background },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
+  footerRow: { flexDirection: "row", gap: 12 },
 });
