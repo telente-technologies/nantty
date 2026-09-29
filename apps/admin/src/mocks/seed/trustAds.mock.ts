@@ -1,5 +1,5 @@
 import { buildUnsplashImageUrl, unsplashPhotoIds } from "@/mocks/seed/unsplashPhotoIds.mock";
-import { isoMinutesAgo, isoMinutesFromNow } from "@/mocks/seed/trustTime.mock";
+import { isoMinutesAgo, isoMinutesFromNow, type WritableRecord } from "@/mocks/seed/trustTime.mock";
 import type { AdForReview, AdPolicyCategory, AdvertiserAccount } from "@/types/adsReview.type";
 
 export interface MockAdRecord extends Omit<AdForReview, "advertiser" | "status" | "decision"> {
@@ -8,14 +8,11 @@ export interface MockAdRecord extends Omit<AdForReview, "advertiser" | "status" 
   decision: AdForReview["decision"];
 }
 
-export interface MockAdvertiserRecord extends Omit<AdvertiserAccount, "owner" | "status" | "violationCount" | "lastViolationAt"> {
+export type MockAdvertiserRecord = WritableRecord<Omit<AdvertiserAccount, "owner">> & {
   ownerUserId: string;
-  status: AdvertiserAccount["status"];
-  violationCount: number;
-  lastViolationAt: string | null;
-}
+};
 
-export type MockAdPolicyRecord = { -readonly [Key in keyof AdPolicyCategory]: AdPolicyCategory[Key] };
+export type MockAdPolicyRecord = WritableRecord<AdPolicyCategory>;
 
 const image = (photoId: string) => buildUnsplashImageUrl(photoId, 640);
 const money = (amountMinor: number, currency: string) => ({ amountMinor, currency });
