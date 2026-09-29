@@ -76,7 +76,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
       current.some((selected) => selected.id === person.id) ? current.filter((selected) => selected.id !== person.id) : [...current, person],
     );
 
-  const canEditGroup = !!display?.isGroup && display.isAdmin;
+  const canEditGroup = !!(display?.isGroup || display?.isChannel) && !!display?.isAdmin;
   const canChangeDisappearing = !!display && !display.isChannel && (!display.isGroup || display.isAdmin);
   const errorMessage = (updateSettings.error ?? runMemberAction.error ?? leaveConversation.error)?.message ?? null;
 
@@ -112,7 +112,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
               value={renamedTitle ?? display?.displayName ?? ""}
               onChangeText={setRenamedTitle}
               maxLength={60}
-              accessibilityLabel="Group name"
+              accessibilityLabel={display?.isChannel ? "Channel name" : "Group name"}
               selectionColor={colors.primary}
               style={styles.nameInput}
             />
