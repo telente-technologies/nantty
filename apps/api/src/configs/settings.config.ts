@@ -52,6 +52,14 @@ function readCommaSeparatedList(config: ConfigManager, key: string): readonly st
     .filter((entry) => entry.length > 0);
 }
 
+function readExchangeRateProvider(config: ConfigManager): "static" | "open-exchange-rates-api" {
+  const provider = readTrimmedSetting(config, "exchange_rate_provider") || "static";
+  if (provider !== "static" && provider !== "open-exchange-rates-api") {
+    throw new ConfigurationError(`EXCHANGE_RATE_PROVIDER must be "static" or "open-exchange-rates-api", got "${provider}".`);
+  }
+  return provider;
+}
+
 export function loadApplicationSettings(config: ConfigManager) {
   const accessSecret = readRequiredSecret(config, "jwt_access_secret");
   const refreshSecret = readRequiredSecret(config, "jwt_refresh_secret");
@@ -75,9 +83,15 @@ export function loadApplicationSettings(config: ConfigManager) {
     }),
     dataEncryptionKey: readDataEncryptionKey(config),
     money: Object.freeze({
-      currency: readTrimmedSetting(config, "default_currency") || "NGN",
       commissionBps: readNonNegativeInteger(config, "platform_commission_bps", 500),
       escrowInspectionDays: readNonNegativeInteger(config, "escrow_inspection_days", 3),
+    }),
+    locale: Object.freeze({
+      trustedCountryHeader: readTrimmedSetting(config, "trusted_country_header").toLowerCase(),
+    }),
+    exchangeRates: Object.freeze({
+      provider: readExchangeRateProvider(config),
+      refreshIntervalMinutes: readNonNegativeInteger(config, "exchange_rate_refresh_minutes", 60),
     }),
     payments: Object.freeze({
       paystackSecretKey: readTrimmedSetting(config, "paystack_secret_key"),
