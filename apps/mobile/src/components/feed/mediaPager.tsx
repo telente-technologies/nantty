@@ -1,11 +1,13 @@
 import { Image } from "expo-image";
-import { useState } from "react";
-import { FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { useRef, useState } from "react";
+import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { ViewProducts24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPlayer";
 import { colors } from "@/constants/colors.constant";
 import type { Media } from "@/types";
+
+import { AnimatedPageIndicator } from "./pageIndicator";
 
 export interface MediaPagerProps {
   readonly media: readonly Media[];
@@ -20,9 +22,11 @@ export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPr
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, MAXIMUM_PAGER_WIDTH);
   const [activePageIndex, setActivePageIndex] = useState(0);
+  const scrollOffsetX = useRef(new Animated.Value(0)).current;
   const pages: readonly Media[] = media.length > 0 ? media : [{ type: "image", url: null }];
 
   const updateActivePageFromScrollOffset = (offsetX: number) => {
+    scrollOffsetX.setValue(offsetX);
     const nextIndex = Math.round(offsetX / pageWidth);
     if (nextIndex !== activePageIndex) setActivePageIndex(nextIndex);
   };
@@ -39,7 +43,7 @@ export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPr
         keyExtractor={(item, index) => item.id ?? `${item.url ?? "empty"}-${index}`}
         getItemLayout={(_, index) => ({ length: pageWidth, offset: pageWidth * index, index })}
         onScroll={(event) => updateActivePageFromScrollOffset(event.nativeEvent.contentOffset.x)}
-        scrollEventThrottle={32}
+        scrollEventThrottle={16}
         initialNumToRender={2}
         windowSize={3}
         renderItem={({ item, index }) => (
@@ -49,7 +53,11 @@ export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPr
         )}
       />
       <View style={styles.overlay} pointerEvents="box-none">
-        {pages.length > 1 ? <PageIndicator count={pages.length} active={activePageIndex} /> : <View />}
+        {pages.length > 1 ? (
+          <AnimatedPageIndicator count={pages.length} activeIndex={activePageIndex} scrollOffsetX={scrollOffsetX} pageWidth={pageWidth} />
+        ) : (
+          <View />
+        )}
         {onPressViewProducts ? (
           <Pressable accessibilityRole="button" accessibilityLabel="View products in this post" hitSlop={10} onPress={onPressViewProducts}>
             <ViewProducts24Icon />
@@ -85,16 +93,6 @@ function MediaPagerPage({ media, isActive, isNearActive }: { media: Media; isAct
 
 const isActiveOrPreloadable = (media: Media) => !!(media.url || media.hlsUrl) && media.status !== "processing" && media.status !== "failed";
 
-export function PageIndicator({ count, active }: { count: number; active: number }) {
-  return (
-    <View style={styles.indicator} accessibilityLabel={`Item ${active + 1} of ${count}`}>
-      {Array.from({ length: count }, (_, i) =>
-        i === active ? <View key={i} style={styles.activeDot} /> : <View key={i} style={styles.dot} />,
-      )}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { backgroundColor: colors.media, overflow: "hidden" },
   overlay: {
@@ -106,15 +104,4 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
-  indicator: {
-    height: 8,
-    paddingHorizontal: 4,
-    borderRadius: 99,
-    backgroundColor: colors.avatar,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.placeholder },
-  activeDot: { width: 24, height: 4, borderRadius: 21, backgroundColor: "#0D0D0D" },
 });
