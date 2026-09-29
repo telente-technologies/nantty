@@ -37,6 +37,7 @@ async def simulate_ad_session(
             "spentToday": {"amountMinor": 0, "currency": "NGN"},
             "spentTotal": {"amountMinor": 0, "currency": "NGN"},
             "placements": ["feed"],
+            "creative": {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 15000},
             "creativeTopics": [topic],
             "frequencyCapPerDay": 50,
         }
