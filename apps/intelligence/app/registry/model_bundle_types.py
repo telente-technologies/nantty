@@ -43,3 +43,13 @@ class LoadedModel:
     version: str
     metadata: dict[str, Any]
     bundle: Any
+
+
+@dataclass(frozen=True)
+class ConstantProbabilityClassifier:
+    positive_probability: float
+
+    def predict_proba(self, feature_matrix: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        row_count = feature_matrix.shape[0]
+        positive = np.full(row_count, self.positive_probability, dtype=np.float64)
+        return np.column_stack([1.0 - positive, positive])
