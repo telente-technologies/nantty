@@ -1,5 +1,5 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 export const termsOfServiceSections: readonly LegalDocumentSection[] = [
   {
@@ -57,6 +57,6 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
   {
     id: "contact",
     heading: "Contact",
-    paragraphs: [`Questions about these terms can be sent to ${siteConfig.contactEmails.general}.`],
+    paragraphs: [`Questions about these terms can be sent to ${contactEmailDisplayText}.`],
   },
 ];
