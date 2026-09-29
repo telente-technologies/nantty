@@ -24,11 +24,12 @@ ENV PATH="/app/.venv/bin:${PATH}" \
     INTELLIGENCE_PORT=8090 \
     INTELLIGENCE_ENVIRONMENT=production \
     INTELLIGENCE_EVENT_STORAGE_URI=/app/data \
-    INTELLIGENCE_MODEL_REGISTRY_PATH=/app/model_registry
+    INTELLIGENCE_MODEL_REGISTRY_PATH=/app/model_registry \
+    OMP_NUM_THREADS=2
 RUN groupadd --system --gid 10001 intelligence \
     && useradd --system --uid 10001 --gid intelligence --home-dir /app --shell /usr/sbin/nologin intelligence
 WORKDIR /app
-COPY --from=builder --chown=10001:10001 /app /app
+COPY --from=builder /app /app
 RUN mkdir -p /app/data /app/model_registry && chown -R 10001:10001 /app/data /app/model_registry
 USER 10001
 EXPOSE 8090
