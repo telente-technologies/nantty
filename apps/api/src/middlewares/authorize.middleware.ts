@@ -13,7 +13,7 @@ export interface RouteGuard {
   allowAnyone(...extra: readonly HttpMiddleware[]): RouteOptions;
 }
 
-export function createRouteGuard(verifier: AccessTokenVerifier): RouteGuard {
+export function createRouteGuard(verifier: AccessTokenVerifier, resolveViewerLocale: HttpMiddleware): RouteGuard {
   const createPermissionCheckMiddleware = (permission: Permission | undefined): HttpMiddleware =>
     async (context, next) => {
       const principal = await authenticateBearerToken(context, verifier);
@@ -35,13 +35,13 @@ export function createRouteGuard(verifier: AccessTokenVerifier): RouteGuard {
 
   return {
     requirePermission: (permission, ...extra) => ({
-      middleware: [createPermissionCheckMiddleware(permission), ...extra],
+      middleware: [createPermissionCheckMiddleware(permission), resolveViewerLocale, ...extra],
       metadata: { permission },
     }),
     requireSignedInUser: (...extra) => ({
-      middleware: [createPermissionCheckMiddleware(undefined), ...extra],
+      middleware: [createPermissionCheckMiddleware(undefined), resolveViewerLocale, ...extra],
       metadata: { permission: "authenticated" },
     }),
-    allowAnyone: (...extra) => ({ middleware: [attachPrincipalWhenPresent, ...extra], metadata: { permission: PUBLIC_ROUTE } }),
+    allowAnyone: (...extra) => ({ middleware: [attachPrincipalWhenPresent, resolveViewerLocale, ...extra], metadata: { permission: PUBLIC_ROUTE } }),
   };
 }
