@@ -1,0 +1,49 @@
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  flex: none;
+}
+
+.offline {
+  background: var(--yellow-500);
+  color: var(--blue-900);
+}
+
+.syncing {
+  background: var(--blue-tint);
+  color: var(--blue-900);
+}
+
+.actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.failedList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.failedItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.failedTitle {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.failedError {
+  color: var(--error-ink);
+  font-size: 13px;
+}

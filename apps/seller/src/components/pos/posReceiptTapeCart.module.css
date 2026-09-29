@@ -1,0 +1,189 @@
+.cartColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
+  padding: 12px 12px 12px 0;
+}
+
+.tape {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(11 23 82 / 0.06), 0 8px 24px -16px rgb(11 23 82 / 0.35);
+  padding-bottom: 14px;
+  --zigzag: conic-gradient(from -45deg at bottom, #0000, #000 1deg 90deg, #0000 91deg) bottom / 14px 100%;
+  -webkit-mask: var(--zigzag);
+  mask: var(--zigzag);
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+}
+
+.tapeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px dashed var(--divider);
+}
+
+.tapeTitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.customerChip {
+  max-width: 60%;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--blue-100);
+  border-radius: var(--radius-pill);
+  background: var(--blue-tint);
+  color: var(--blue-800);
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lines {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 2px 8px;
+  padding: 8px 14px;
+  border-bottom: 1px dotted var(--divider-soft);
+}
+
+.selectedLine {
+  background: var(--blue-tint);
+}
+
+.lineMain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+}
+
+.lineName {
+  font-weight: 600;
+}
+
+.lineDetail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.lineAmount {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lineActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.quantityField input {
+  width: 64px;
+  height: 30px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyTape {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.totals {
+  padding: 10px 14px 0;
+  border-top: 1px dashed var(--divider);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.totals dt {
+  color: var(--ink-muted);
+}
+
+.totals dd {
+  font-variant-numeric: tabular-nums;
+}
+
+.grandTotal {
+  margin-top: 6px;
+  padding-top: 8px !important;
+  border-top: 2px solid var(--ink-strong);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.grandTotal dt {
+  color: var(--ink-strong) !important;
+}
+
+.inlineRemove {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ink-muted);
+  font: inherit;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.payButton {
+  height: 60px;
+  font-size: 18px;
+}
+
+@media (max-width: 760px) {
+  .cartColumn {
+    padding: 0 12px 12px;
+  }
+}

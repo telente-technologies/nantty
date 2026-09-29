@@ -1,0 +1,63 @@
+.pinPad {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: min(300px, 100%);
+}
+
+.dots {
+  display: flex;
+  gap: 12px;
+  height: 18px;
+}
+
+.dot,
+.filledDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--blue-300);
+}
+
+.filledDot {
+  background: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.key {
+  height: 60px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  font-size: 22px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.key:active {
+  background: var(--blue-tint);
+}
+
+.submit {
+  width: 100%;
+  height: 52px;
+  border: 0;
+  border-radius: var(--radius-large);
+  background: var(--blue-500);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
