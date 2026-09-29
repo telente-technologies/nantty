@@ -6,7 +6,7 @@ import { SettingsFormFrame, StoreSettingsLoadedGate } from "@/components/setting
 import { MoneyField, TextField, ToggleSwitch } from "@/components/ui/formFields";
 import { useSettingsPatch } from "@/hooks/useSettingsPatch.hook";
 import type { StoreSettings } from "@/types/store.type";
-import { convertMajorInputToMinorUnits, convertMinorUnitsToMajorInputText, formatMoneyForDisplay, readMinorUnitsPerMajorUnit } from "@/utils/money.util";
+import { convertMajorInputToMinorUnits, convertMinorUnitsToMajorInputText } from "@/utils/money.util";
 import { convertBasisPointsToPercentText, convertPercentTextToBasisPoints } from "@/utils/settingsPercent.util";
 
 import styles from "./settings.module.css";
@@ -19,21 +19,20 @@ function readWholeNumber(text: string, maximum: number): number | null {
 
 function LoyaltyAndDiscountForm({ settings }: { readonly settings: StoreSettings }) {
   const [isLoyaltyEnabled, setIsLoyaltyEnabled] = useState(settings.loyalty.enabled);
-  const [pointsPerUnitText, setPointsPerUnitText] = useState(String(settings.loyalty.pointsEarnedPerMajorUnit));
+  const [pointsPerUnitText, setPointsPerUnitText] = useState(convertMinorUnitsToMajorInputText(settings.loyalty.spendRequiredPerPoint.amountMinor, settings.currency));
   const [pointValueText, setPointValueText] = useState(convertMinorUnitsToMajorInputText(settings.loyalty.redeemValuePerPoint.amountMinor, settings.currency));
   const [minimumPointsText, setMinimumPointsText] = useState(String(settings.loyalty.minimumPointsToRedeem));
   const [thresholdText, setThresholdText] = useState(convertBasisPointsToPercentText(settings.discountApprovalThresholdBasisPoints));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { isSaving, serverFieldErrors, saveStoreSettingsPatch } = useSettingsPatch();
-  const oneMajorUnit = formatMoneyForDisplay({ amountMinor: readMinorUnitsPerMajorUnit(settings.currency), currency: settings.currency }, settings.locale);
 
   async function saveLoyaltyAndDiscountRules() {
-    const pointsEarnedPerMajorUnit = readWholeNumber(pointsPerUnitText, 1000);
+    const spendRequiredMinor = convertMajorInputToMinorUnits(pointsPerUnitText, settings.currency);
     const redeemValueMinor = convertMajorInputToMinorUnits(pointValueText, settings.currency);
     const minimumPointsToRedeem = readWholeNumber(minimumPointsText, 1_000_000);
     const thresholdBasisPoints = convertPercentTextToBasisPoints(thresholdText);
     const errors: Record<string, string> = {};
-    if (pointsEarnedPerMajorUnit === null) errors.points = "Points earned must be a whole number from 0 to 1000.";
+    if (spendRequiredMinor === null || spendRequiredMinor < 1 || spendRequiredMinor > 100_000_000) errors.points = "Enter how much a customer spends to earn one point.";
     if (redeemValueMinor === null || redeemValueMinor > 10_000_000) errors.pointValue = "Enter what one point is worth.";
     if (minimumPointsToRedeem === null) errors.minimum = "Minimum points must be a whole number.";
     if (thresholdBasisPoints === null) errors.threshold = "Enter a percentage between 0 and 100.";
@@ -41,7 +40,7 @@ function LoyaltyAndDiscountForm({ settings }: { readonly settings: StoreSettings
     if (Object.keys(errors).length > 0) return;
     await saveStoreSettingsPatch(
       {
-        loyalty: { enabled: isLoyaltyEnabled, pointsEarnedPerMajorUnit: pointsEarnedPerMajorUnit ?? 0, redeemValuePerPoint: { amountMinor: redeemValueMinor ?? 0, currency: settings.currency }, minimumPointsToRedeem: minimumPointsToRedeem ?? 0 },
+        loyalty: { enabled: isLoyaltyEnabled, spendRequiredPerPoint: { amountMinor: spendRequiredMinor ?? 1, currency: settings.currency }, redeemValuePerPoint: { amountMinor: redeemValueMinor ?? 0, currency: settings.currency }, minimumPointsToRedeem: minimumPointsToRedeem ?? 0 },
         discountApprovalThresholdBasisPoints: thresholdBasisPoints ?? 0,
       },
       "Loyalty and discount rules saved.",
@@ -52,7 +51,7 @@ function LoyaltyAndDiscountForm({ settings }: { readonly settings: StoreSettings
     <SettingsFormFrame title="Loyalty & discounts" description="How customers earn and spend points, and when cashiers need a manager for a discount." errorMessages={[...Object.values(fieldErrors), ...Object.values(serverFieldErrors)]} isSaving={isSaving} onSubmit={() => void saveLoyaltyAndDiscountRules()}>
       <ToggleSwitch label="Loyalty points" description="Customers linked to a sale earn points they can spend at the register." checked={isLoyaltyEnabled} onCheckedChange={setIsLoyaltyEnabled} />
       <div className={styles.twoColumns}>
-        <TextField label={`Points earned per ${oneMajorUnit} spent`} inputMode="numeric" value={pointsPerUnitText} onChange={(event) => setPointsPerUnitText(event.target.value)} errorMessage={fieldErrors.points} disabled={!isLoyaltyEnabled} />
+        <MoneyField label="Spend needed to earn 1 point" currency={settings.currency} valueText={pointsPerUnitText} onValueTextChange={setPointsPerUnitText} errorMessage={fieldErrors.points} disabled={!isLoyaltyEnabled} />
         <MoneyField label="Value of one point" currency={settings.currency} valueText={pointValueText} onValueTextChange={setPointValueText} errorMessage={fieldErrors.pointValue} disabled={!isLoyaltyEnabled} />
         <TextField label="Points needed before redeeming" inputMode="numeric" value={minimumPointsText} onChange={(event) => setMinimumPointsText(event.target.value)} errorMessage={fieldErrors.minimum} disabled={!isLoyaltyEnabled} />
       </div>
