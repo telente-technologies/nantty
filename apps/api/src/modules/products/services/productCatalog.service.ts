@@ -86,6 +86,7 @@ export class RepositoryProductCatalog implements ProductCatalog {
       ratingCount: product.ratingCount,
       currency: product.currency,
       published: product.status === "published",
+      categoryId: product.categoryId ?? null,
     }));
   }
 

@@ -7,6 +7,7 @@ import type { SponsorableProduct } from "../../dtos/products.dto.js";
 import type { PriceRange } from "../../models/products.model.js";
 import { attachSponsoredProducts, rankProductsForViewer } from "../../services/productDiscovery.service.js";
 import type { ProductsService } from "../../services/products.service.js";
+import { listProductCollectionPage } from "./productCollections.query.js";
 import type { ListProductsQuery } from "./listProducts.query.js";
 
 export class ListProductsHandler extends QueryHandler<ListProductsQuery, Page<SponsorableProduct>> {
@@ -18,7 +19,13 @@ export class ListProductsHandler extends QueryHandler<ListProductsQuery, Page<Sp
 
   public async execute(query: ListProductsQuery): Promise<Page<SponsorableProduct>> {
     const { products, categories, discovery } = this.productsService.dependencies;
-    const { categorySlug, categoryId, storeId, q, minPrice, maxPrice, sort } = query.filter;
+    const { categorySlug, categoryId, storeId, q, minPrice, maxPrice, sort, collection } = query.filter;
+    if (collection !== undefined) {
+      const hidden = await this.productsService.listHiddenStoreIds();
+      const collectionPage = await listProductCollectionPage(this.productsService.dependencies, collection, hidden, query.page);
+      const withAds = query.page.cursor === undefined ? await attachSponsoredProducts(discovery, products, collectionPage.data, "mart", query.viewer, hidden) : collectionPage.data;
+      return { data: withAds, nextCursor: collectionPage.nextCursor };
+    }
     let resolvedCategoryId = categoryId;
     if (resolvedCategoryId === undefined && categorySlug !== undefined) {
       const category = await categories.findBySlug(categorySlug);

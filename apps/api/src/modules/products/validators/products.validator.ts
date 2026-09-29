@@ -65,6 +65,7 @@ export const ListProductsQuerySchema = schema.object({
   sort: schema.enum(["newest", "price_asc", "price_desc", "popular"]).optional(),
   minPrice: schema.coerce.number().int().min(0).optional(),
   maxPrice: schema.coerce.number().int().min(0).optional(),
+  collection: schema.enum(["sales_of_the_day", "featured_brands", "new_arrivals"]).optional(),
 });
 
 export const SellerProductParamsSchema = schema.object({ id: schema.string().uuid() });
