@@ -89,7 +89,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
 }
 
 const styles = StyleSheet.create({
-  filtersBar: { flexGrow: 0 },
+  filtersBar: { flexGrow: 0, flexShrink: 0 },
   filters: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
   list: { paddingHorizontal: 16, paddingBottom: 32 },
   sectionTitle: { marginTop: 16, marginBottom: 8 },
