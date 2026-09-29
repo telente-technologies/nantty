@@ -1,0 +1,83 @@
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  min-width: min(100%, 260px);
+  flex: 1 1 260px;
+  max-width: 420px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  color: var(--ink-faint);
+}
+
+.search:focus-within {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgb(32 67 245 / 0.15);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink-strong);
+}
+
+.searchInput:focus-visible {
+  box-shadow: none;
+}
+
+.dateRange {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.presets {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-small);
+}
+
+.preset {
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.preset[aria-pressed="true"] {
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  box-shadow: 0 1px 2px rgb(11 23 82 / 0.12);
+}
+
+.dateInputLabel {
+  display: inline-flex;
+}
+
+.dateInput {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
