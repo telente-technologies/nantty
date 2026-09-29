@@ -22,7 +22,7 @@ async function startLive(): Promise<{ hostToken: string; hostId: string; liveId:
 
 describe("live gifts", () => {
   it("lists the gift catalog with prices per currency", async () => {
-    const catalog = (await app.client.get("/api/v1/gifts").set("x-currency", "NGN").expect(200)).json<{ data: { id: string; price: MoneyBody; prices: MoneyBody[] }[] }>();
+    const catalog = (await app.client.get("/api/v1/gifts").expect(200)).json<{ data: { id: string; price: MoneyBody; prices: MoneyBody[] }[] }>();
     const rose = catalog.data.find((gift) => gift.id === "rose");
     expect(rose?.prices.map((price) => price.currency)).toEqual(expect.arrayContaining(["NGN", "USD", "GHS"]));
     expect(rose?.price.amountMinor).toBeGreaterThan(0);
