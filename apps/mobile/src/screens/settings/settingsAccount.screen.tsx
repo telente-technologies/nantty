@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Alert } from "react-native";
 
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import { PhoneNumberSheet } from "@/components/settings/phoneNumberSheet";
@@ -10,6 +9,7 @@ import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 import { useAuthStore } from "@/store/auth.store";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsAccount">) {
   const { data: profile } = useMyProfileQuery();
@@ -22,7 +22,7 @@ export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsA
     updateSettings.mutate({ phone }, { onSuccess: () => setPhoneSheetVisible(false) });
 
   const confirmAndDeactivateAccount = () =>
-    Alert.alert("Deactivate account?", "Your profile and store will be hidden until you log in again.", [
+    showAlertWithButtons("Deactivate account?", "Your profile and store will be hidden until you log in again.", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Deactivate",
