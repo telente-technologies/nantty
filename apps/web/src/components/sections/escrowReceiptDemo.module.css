@@ -1,0 +1,211 @@
+.receipt {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 26px 26px;
+  border-radius: var(--radius-medium);
+  background: #fff;
+  color: var(--ink-strong);
+  box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.55);
+  transform: rotate(1.5deg);
+}
+
+.receipt::before,
+.receipt::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: radial-gradient(circle at 8px 0, transparent 6px, #fff 6.5px) repeat-x;
+  background-size: 16px 10px;
+}
+
+.receipt::before {
+  top: -9px;
+  transform: scaleY(-1);
+}
+
+.receipt::after {
+  bottom: -9px;
+}
+
+.receiptHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.receiptLabel {
+  color: var(--ink-faint);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.statusHeld {
+  background: var(--blue-50);
+  color: var(--blue-700);
+}
+
+.statusReleased {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.amountRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.currencyCoin {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--yellow-500);
+  box-shadow: inset 0 -3px 0 rgb(82 76 11 / 0.25);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.amount {
+  font-size: clamp(1.9rem, 5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.orderSummary {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 0.925rem;
+}
+
+.perforation {
+  margin: 22px -26px;
+  border-top: 2px dashed var(--divider);
+}
+
+.stageList {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.stageMarker {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 2px solid var(--divider);
+  color: #fff;
+  transition: background-color 300ms ease, border-color 300ms ease;
+}
+
+.done .stageMarker {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.current .stageMarker {
+  border-color: var(--blue-500);
+  box-shadow: inset 0 0 0 4px #fff;
+  background: var(--blue-500);
+}
+
+.stageText {
+  display: grid;
+  gap: 2px;
+}
+
+.stageLabel {
+  font-weight: 600;
+}
+
+.upcoming .stageLabel {
+  color: var(--ink-faint);
+}
+
+.stageDetail {
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  animation: reveal-stage-detail 400ms ease both;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  margin-top: 24px;
+}
+
+.confirmButton,
+.replayButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirmButton {
+  background: var(--blue-500);
+  color: #fff;
+  animation: reveal-stage-detail 400ms ease both;
+}
+
+.confirmButton:hover {
+  background: var(--blue-600);
+}
+
+.replayButton {
+  background: var(--surface-app);
+  color: var(--ink-strong);
+}
+
+.replayButton:hover {
+  background: var(--blue-50);
+}
+
+.waitingNote {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+@keyframes reveal-stage-detail {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

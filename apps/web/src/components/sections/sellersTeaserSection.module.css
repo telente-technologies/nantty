@@ -1,0 +1,92 @@
+.section {
+  padding-block: var(--section-space);
+  background: var(--yellow-500);
+  overflow: hidden;
+}
+
+.layout {
+  display: grid;
+  gap: 56px;
+  align-items: center;
+}
+
+.visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 40px;
+}
+
+.phone {
+  width: min(300px, 66vw);
+  transform: rotate(-4deg);
+}
+
+.walletCard {
+  position: absolute;
+  right: max(0px, calc(50% - 280px));
+  bottom: 0;
+  width: min(260px, 62vw);
+  transform: rotate(3deg);
+}
+
+.copyColumn {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--yellow-900);
+}
+
+.heading {
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+}
+
+.description {
+  max-width: 50ch;
+  font-size: 1.1rem;
+  color: #2b2806;
+}
+
+.benefitList {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+  font-weight: 500;
+}
+
+.benefitList li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.benefitList li > span {
+  margin-top: 3px;
+  padding: 3px;
+  box-sizing: content-box;
+  border-radius: 50%;
+  background: var(--ink-strong);
+  color: var(--yellow-500);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 72px;
+  }
+}

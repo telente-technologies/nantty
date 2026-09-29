@@ -1,0 +1,202 @@
+.hero {
+  padding-block: clamp(40px, 7vw, 88px) 0;
+  overflow: hidden;
+}
+
+.layout {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+}
+
+.copyColumn {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+}
+
+.heading {
+  font-size: clamp(2.75rem, 7.6vw, 5.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+  max-width: 12ch;
+}
+
+.priceTag {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.16em 0.04em 0.34em;
+  margin-left: 0.02em;
+  border-radius: 0.14em 0.3em 0.3em 0.14em;
+  background: var(--yellow-500);
+  transform: rotate(-3deg) translateY(0.04em);
+  transform-origin: left center;
+}
+
+.priceTag::before {
+  content: "";
+  position: absolute;
+  left: 0.12em;
+  top: 50%;
+  width: 0.11em;
+  height: 0.11em;
+  border-radius: 50%;
+  background: var(--surface-app);
+  transform: translateY(-50%);
+}
+
+.lede {
+  max-width: 44ch;
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  color: var(--ink-muted);
+}
+
+.proofList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.proofList li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proofList li > span {
+  color: var(--blue-500);
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  align-items: end;
+  min-height: 420px;
+  padding-top: 24px;
+}
+
+.stagePanel {
+  position: absolute;
+  inset: 12% -4% 0;
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--blue-400), transparent 70%),
+    var(--blue-500);
+}
+
+.phone {
+  position: relative;
+  max-width: none;
+}
+
+.phoneLeft,
+.phoneRight {
+  z-index: 1;
+  margin-bottom: -18%;
+}
+
+.phoneLeft {
+  transform: translateX(14%) rotate(-7deg);
+}
+
+.phoneRight {
+  transform: translateX(-14%) rotate(7deg);
+}
+
+.phoneCenter {
+  z-index: 2;
+  margin-bottom: -26%;
+  animation: rise-into-stage 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.floatingChip {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  box-shadow: var(--shadow-float);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.liveChip {
+  top: 18px;
+  left: 0;
+}
+
+.escrowChip {
+  right: 0;
+  bottom: 20%;
+  max-width: 250px;
+  border-radius: var(--radius-medium);
+}
+
+.currencyCoin {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--yellow-500);
+  font-weight: 800;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--error);
+  box-shadow: 0 0 0 0 rgb(239 68 68 / 0.6);
+  animation: pulse-live-dot 1.8s ease-out infinite;
+}
+
+@keyframes rise-into-stage {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+
+@keyframes pulse-live-dot {
+  70% {
+    box-shadow: 0 0 0 8px rgb(239 68 68 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(239 68 68 / 0);
+  }
+}
+
+@media (max-width: 540px) {
+  .escrowChip {
+    max-width: 200px;
+    bottom: 4%;
+    font-size: 0.78rem;
+  }
+
+  .stage {
+    min-height: 340px;
+  }
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 32px;
+  }
+
+  .stage {
+    min-height: 600px;
+    padding-top: 40px;
+  }
+}

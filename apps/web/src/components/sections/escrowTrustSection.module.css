@@ -1,0 +1,66 @@
+.section {
+  padding-block: var(--section-space);
+  background:
+    radial-gradient(60% 50% at 85% 30%, rgb(32 67 245 / 0.45), transparent 70%),
+    var(--blue-900);
+  color: #fff;
+}
+
+.layout {
+  display: grid;
+  gap: 56px;
+  align-items: center;
+}
+
+.copyColumn {
+  display: grid;
+  gap: 40px;
+}
+
+.promiseList {
+  display: grid;
+  gap: 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.promise {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+}
+
+.promiseIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--yellow-500);
+}
+
+.promiseTitle {
+  display: block;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.promiseDescription {
+  display: block;
+  margin-top: 4px;
+  color: var(--blue-100);
+}
+
+.demoColumn {
+  display: flex;
+  justify-content: center;
+  padding-block: 12px;
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 80px;
+  }
+}
