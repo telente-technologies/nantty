@@ -1,6 +1,7 @@
 import { schema, type Infer } from "@zudojs/schema";
 
 import { SUPPORTED_CURRENCY_CODES } from "../../../enums/currency.enum.js";
+import { IDENTITY_DOCUMENT_TYPES } from "../../verifications/models/verifications.model.js";
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 
 const kobo = schema.number().int().min(0).max(100_000_000_000);
@@ -11,6 +12,23 @@ export const SubmitSellerApplicationBodySchema = schema.object({
   description: schema.string().max(1000).optional(),
   categoryId: schema.string().uuid().optional(),
   phone: schema.string().min(7).max(20),
+  business: schema.object({
+    legalName: schema.string().min(2).max(160),
+    businessName: schema.string().min(2).max(160).optional(),
+    businessAddress: schema.string().min(5).max(300),
+    registrationNumber: schema.string().min(4).max(40).regex(/^[A-Za-z0-9-]+$/).optional(),
+    contactPhone: schema.string().min(7).max(20).optional(),
+  }).optional(),
+  identity: schema.object({
+    idType: schema.enum(IDENTITY_DOCUMENT_TYPES),
+    idNumber: schema.string().min(5).max(40).regex(/^[A-Za-z0-9-]+$/),
+    documentMediaIds: schema.array(schema.string().uuid()).min(1).max(10),
+  }).optional(),
+  payoutAccount: schema.object({
+    bankCode: schema.string().min(2).max(10).regex(/^[0-9A-Za-z]+$/),
+    accountNumber: schema.string().regex(/^\d{10}$/),
+    accountName: schema.string().min(2).max(120),
+  }).optional(),
 });
 
 export const ReviewSellerApplicationBodySchema = schema.object({
