@@ -7,7 +7,7 @@ export class CommentOnPostCommand extends Command<"posts.commentOnPost"> {
     public readonly principal: Principal,
     public readonly postId: string,
     public readonly text: string,
-    public readonly parentId: string | null,
+    public readonly parentCommentId: string | null,
   ) {
     super("posts.commentOnPost");
   }
