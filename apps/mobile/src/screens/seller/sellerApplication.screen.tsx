@@ -1,79 +1,112 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
+import { ApplicationIdentityStep } from "@/components/seller/applicationIdentityStep";
+import { ApplicationPayoutStep } from "@/components/seller/applicationPayoutStep";
+import { ApplicationReviewStep } from "@/components/seller/applicationReviewStep";
+import { ApplicationStepHeader } from "@/components/seller/applicationStepHeader";
+import { ApplicationContactStep, ApplicationStoreStep } from "@/components/seller/applicationStoreAndContactSteps";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
-import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
-import type { SellerApplicationInput } from "@/types/account.type";
+import type { SellerApplicationDraft, SellerApplicationInput } from "@/types/account.type";
 
-const EMPTY_APPLICATION: SellerApplicationInput = { storeName: "", category: "", phone: "", address: "", description: "" };
+const EMPTY_DRAFT: SellerApplicationDraft = {
+  storeName: "", categoryId: "", description: "", phone: "", addressLine: "", city: "", state: "",
+  identityDocumentType: null, identityDocumentNumber: "", identityDocumentPhotoUrl: null,
+  payoutBankCode: "", payoutBankName: "", payoutAccountNumber: "", payoutAccountName: "",
+};
+
+const STEPS = [
+  { title: "Tell us about your store", subtitle: "This is what buyers see first.", isComplete: (d: SellerApplicationDraft) => d.storeName.trim().length >= 3 && !!d.categoryId && d.description.trim().length >= 20 },
+  { title: "How can buyers and couriers reach you?", subtitle: "We use this for pickups and order updates.", isComplete: (d: SellerApplicationDraft) => d.phone.replace(/\D/g, "").length >= 10 && !!d.addressLine.trim() && !!d.city.trim() && !!d.state },
+  { title: "Verify your identity", subtitle: "Required by law so buyers can trust every seller. Your ID number is never shown in full.", isComplete: (d: SellerApplicationDraft) => !!d.identityDocumentType && d.identityDocumentNumber.length >= 6 && !!d.identityDocumentPhotoUrl },
+  { title: "Where should we pay you?", subtitle: "Money released from escrow is sent here.", isComplete: (d: SellerApplicationDraft) => !!d.payoutBankCode && d.payoutAccountNumber.length === 10 && !!d.payoutAccountName },
+  { title: "Review and submit", subtitle: "Tap any row to change it.", isComplete: () => true },
+] as const;
+
+const convertDraftToSubmission = (draft: SellerApplicationDraft): SellerApplicationInput => ({
+  storeName: draft.storeName.trim(),
+  categoryId: draft.categoryId,
+  description: draft.description.trim(),
+  phone: draft.phone.replace(/\s/g, ""),
+  addressLine: draft.addressLine.trim(),
+  city: draft.city.trim(),
+  state: draft.state,
+  identityDocument: { documentType: draft.identityDocumentType!, documentNumber: draft.identityDocumentNumber, documentPhotoUrl: draft.identityDocumentPhotoUrl! },
+  payoutAccount: { bankCode: draft.payoutBankCode, accountNumber: draft.payoutAccountNumber },
+});
 
 export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerApplication">) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<SellerApplicationInput>(EMPTY_APPLICATION);
-  const { data: application, isLoading } = useQuery({ queryKey: sellerQueryKeys.application, queryFn: sellerService.fetchMySellerApplication });
-  const submitApplication = useMutation({
-    mutationFn: () => sellerService.submitSellerApplication(form),
-    onSuccess: (submitted) => queryClient.setQueryData(sellerQueryKeys.application, submitted),
-  });
-  const updateField = (field: keyof SellerApplicationInput) => (value: string) => setForm((f) => ({ ...f, [field]: value }));
-  const formIsComplete = Object.values(form).every((v) => v.trim().length > 0);
+  const [draft, setDraft] = useState<SellerApplicationDraft>(EMPTY_DRAFT);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const idempotencyKeyForThisApplication = useRef(generateIdempotencyKey());
+  const existingApplication = useQuery({ queryKey: sellerQueryKeys.application, queryFn: sellerService.fetchMySellerApplication });
 
-  if (application) {
+  useEffect(() => {
+    if (existingApplication.data?.status === "pending") navigation.replace("SellerApplicationStatus");
+  }, [existingApplication.data, navigation]);
+
+  const submitApplication = useMutation({
+    mutationFn: () => sellerService.submitSellerApplication(convertDraftToSubmission(draft), idempotencyKeyForThisApplication.current),
+    onSuccess: (application) => {
+      setDraft(EMPTY_DRAFT);
+      queryClient.setQueryData(sellerQueryKeys.application, application);
+      navigation.replace("SellerApplicationStatus");
+    },
+  });
+
+  const updateDraft = (patch: Partial<SellerApplicationDraft>) => setDraft((current) => ({ ...current, ...patch }));
+  const step = STEPS[stepIndex]!;
+  const isLastStep = stepIndex === STEPS.length - 1;
+  const goBackOneStep = () => (stepIndex === 0 ? navigation.goBack() : setStepIndex(stepIndex - 1));
+
+  if (existingApplication.isLoading) {
     return (
       <Screen>
-        <Header title="Become a seller" />
-        <View style={styles.status}>
-          <Text size={18} weight={600} lineHeight={21.6} align="center">
-            {application.status === "approved" ? "You're approved!" : application.status === "rejected" ? "Application not approved" : "Application received"}
-          </Text>
-          <Text size={14} lineHeight={19.6} color={colors.textMuted} align="center">
-            {application.status === "pending"
-              ? `We're reviewing ${application.storeName}. You'll get a notification once it's approved, usually within 2 working days.`
-              : application.status === "approved"
-                ? "Your store is live. Start listing products from your dashboard."
-                : "Contact support to learn more or to apply again."}
-          </Text>
-          {application.status === "approved" ? <Button title="Go to dashboard" onPress={() => navigation.replace("SellerDashboard")} /> : null}
-        </View>
+        <Header title="Start selling" />
+        <ActivityIndicator style={styles.loading} color={colors.primary} />
       </Screen>
     );
   }
 
   return (
     <Screen>
-      <Header title="Become a seller" />
-      {isLoading ? null : (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text size={14} lineHeight={19.6} color={colors.textMuted}>
-            Tell us about your store. Buyers pay into escrow, and you're paid once they confirm delivery.
-          </Text>
-          <TextField label="Store name" placeholder="Usershop Name" value={form.storeName} onChangeText={updateField("storeName")} />
-          <TextField label="What do you sell?" placeholder="e.g. Fashion, Gadgets" value={form.category} onChangeText={updateField("category")} />
-          <TextField label="Business phone number" placeholder="0907 750 5722" keyboardType="phone-pad" value={form.phone} onChangeText={updateField("phone")} />
-          <TextField label="Pickup address" placeholder="Where orders are collected from" value={form.address} onChangeText={updateField("address")} />
-          <TextField label="About your store" placeholder="A short description buyers will see" value={form.description} onChangeText={updateField("description")} multiline boxStyle={styles.multiline} />
-          {submitApplication.isError ? (
-            <Text size={12} lineHeight={14.4} color={colors.error}>
-              {submitApplication.error.message}
-            </Text>
-          ) : null}
-          <Button title="Submit application" disabled={!formIsComplete} loading={submitApplication.isPending} onPress={() => submitApplication.mutate()} />
-        </ScrollView>
-      )}
+      <Header title="Start selling" onBack={goBackOneStep} />
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ApplicationStepHeader stepNumber={stepIndex + 1} totalSteps={STEPS.length} title={step.title} subtitle={step.subtitle} />
+        {stepIndex === 0 ? <ApplicationStoreStep draft={draft} onChange={updateDraft} /> : null}
+        {stepIndex === 1 ? <ApplicationContactStep draft={draft} onChange={updateDraft} /> : null}
+        {stepIndex === 2 ? <ApplicationIdentityStep draft={draft} onChange={updateDraft} onUploadingChange={setUploadingDocument} /> : null}
+        {stepIndex === 3 ? <ApplicationPayoutStep draft={draft} onChange={updateDraft} /> : null}
+        {stepIndex === 4 ? <ApplicationReviewStep draft={draft} onEditStep={setStepIndex} /> : null}
+      </ScrollView>
+      <View style={styles.footer}>
+        {submitApplication.isError ? (
+          <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{submitApplication.error.message}</Text>
+        ) : null}
+        <Button
+          title={isLastStep ? "Submit application" : "Continue"}
+          disabled={!step.isComplete(draft) || uploadingDocument || (isLastStep && !STEPS.every((s) => s.isComplete(draft)))}
+          loading={submitApplication.isPending}
+          onPress={() => (isLastStep ? submitApplication.mutate() : setStepIndex(stepIndex + 1))}
+        />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40, gap: 20 },
-  multiline: { height: 96, alignItems: "flex-start", paddingVertical: 12 },
-  status: { flex: 1, paddingHorizontal: 32, justifyContent: "center", gap: 16 },
+  loading: { marginTop: 80 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 24 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
 });
