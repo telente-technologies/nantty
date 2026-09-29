@@ -79,9 +79,9 @@ export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"
             ))}
             <TextField label="Document number" password autoCapitalize="characters" autoComplete="off" value={documentNumber} onChangeText={(value) => setDocumentNumber(value.replace(/[^A-Za-z0-9]/g, "").slice(0, 20))} />
             <Text size={14} lineHeight={16.8}>Photo of your ID</Text>
-            <PhotoEvidencePicker photoUrls={documentPhotoUrls} onChangePhotoUrls={setDocumentPhotoUrls} maximumPhotos={1} addLabel="Add ID photo" onUploadingChange={setUploading} />
+            <PhotoEvidencePicker photoUrls={documentPhotoUrls} onChangePhotoUrls={setDocumentPhotoUrls} maximumPhotos={1} addLabel="Add ID photo" onUploadingChange={setUploading} privateUploadPurpose="identity_document" />
             <Text size={14} lineHeight={16.8}>A selfie holding your ID</Text>
-            <PhotoEvidencePicker photoUrls={selfieUrls} onChangePhotoUrls={setSelfieUrls} maximumPhotos={1} addLabel="Add selfie" onUploadingChange={setUploading} />
+            <PhotoEvidencePicker photoUrls={selfieUrls} onChangePhotoUrls={setSelfieUrls} maximumPhotos={1} addLabel="Add selfie" onUploadingChange={setUploading} privateUploadPurpose="identity_document" />
           </View>
         ) : (
           <View style={styles.section}>
@@ -90,7 +90,7 @@ export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"
             <TextField label="CAC registration number" placeholder="e.g. RC 1234567 or BN 3456789" autoCapitalize="characters" value={registrationNumber} onChangeText={setRegistrationNumber} />
             <TextField label="Business address" value={businessAddress} onChangeText={setBusinessAddress} />
             <Text size={14} lineHeight={16.8}>CAC certificate and a utility bill</Text>
-            <PhotoEvidencePicker photoUrls={businessDocumentUrls} onChangePhotoUrls={setBusinessDocumentUrls} maximumPhotos={3} addLabel="Add document" onUploadingChange={setUploading} />
+            <PhotoEvidencePicker photoUrls={businessDocumentUrls} onChangePhotoUrls={setBusinessDocumentUrls} maximumPhotos={3} addLabel="Add document" onUploadingChange={setUploading} privateUploadPurpose="verification_document" />
           </View>
         )}
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
