@@ -1,0 +1,66 @@
+{
+  "license": "Unsplash License (https://unsplash.com/license) — free to use, no watermark",
+  "verifiedWith": "curl -sI returned 200 image/webp on 2026-09-29",
+  "photos": [
+    {
+      "photoKey": "adireShirt",
+      "unsplashPhotoId": "1602810318383-e386cc2a3ccf",
+      "url": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800&q=80&fm=webp",
+      "usedIn": "Landing hero feed card; Marketplace grid sponsored tile (landing formats, login panel, final CTA)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "streetSneakers",
+      "unsplashPhotoId": "1560769629-975ec94e6a86",
+      "url": "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80&fm=webp",
+      "usedIn": "Marketplace grid organic tile (landing formats, login panel, final CTA)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "earbuds",
+      "unsplashPhotoId": "1606220588913-b3aacb4d2f46",
+      "url": "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800&q=80&fm=webp",
+      "usedIn": "Marketplace grid organic tile (landing formats, login panel, final CTA)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "pearlNecklace",
+      "unsplashPhotoId": "1515562141207-7a88fb7ce338",
+      "url": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80&fm=webp",
+      "usedIn": "Marketplace grid organic tile (landing formats, login panel, final CTA)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "topHandleBag",
+      "unsplashPhotoId": "1584917865442-de89df76afd3",
+      "url": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&q=80&fm=webp",
+      "usedIn": "Feed format sponsored post (landing formats, login panel)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "faceSerum",
+      "unsplashPhotoId": "1608571423902-eed4a5ad8108",
+      "url": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80&fm=webp",
+      "usedIn": "Reels format promoted clip (landing formats)",
+      "license": "Unsplash License"
+    },
+    {
+      "photoKey": "crossbodyBag",
+      "unsplashPhotoId": "1600857062241-98e5dba7f214",
+      "url": "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=800&q=80&fm=webp",
+      "usedIn": "Live format promoted live card (landing formats)",
+      "license": "Unsplash License"
+    }
+  ],
+  "screenshots": {
+    "note": "public/screenshots/*.webp are captures of this app (Ads Manager) with its own demo mock data, taken with headless Chromium at deviceScaleFactor 2.",
+    "files": [
+      "overview.webp",
+      "reportsPlacement.webp",
+      "campaignsList.webp",
+      "billing.webp",
+      "wizardObjective.webp",
+      "wizardAudience.webp"
+    ]
+  }
+}
