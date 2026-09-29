@@ -1,0 +1,145 @@
+.cover {
+  position: relative;
+  height: 180px;
+  border-radius: var(--radius-large);
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+  overflow: hidden;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logo {
+  position: absolute;
+  left: 20px;
+  bottom: -28px;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  border: 3px solid var(--surface-card);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-size: 26px;
+  font-weight: 800;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverStage {
+  position: relative;
+  margin-bottom: 36px;
+}
+
+.imageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.checkItem:last-child {
+  border-bottom: 0;
+}
+
+.checkMark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+
+.checkMarkMet {
+  background: var(--success);
+  color: #fff;
+}
+
+.checkLabel {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.listingCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.listingThumb {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-sunken);
+}
+
+.riskReasons {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.lockedState {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 1000px) {
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+}
