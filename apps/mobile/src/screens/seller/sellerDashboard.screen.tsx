@@ -1,0 +1,109 @@
+import { useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+
+import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { InventoryCard } from "@/components/seller/inventoryCard";
+import { PeriodChips } from "@/components/seller/periodChips";
+import { SalesChart } from "@/components/seller/salesChart";
+import { splitMoneyIntoSymbolAndAmount } from "@/components/seller/splitMoney.util";
+import { useSellerDashboardQuery } from "@/components/seller/sellerQueries.hook";
+import { StoreOrderRow } from "@/components/seller/storeOrderRow";
+import { Header, HeaderAction } from "@/components/ui/header";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { MainScreenProps } from "@/navigation/navigation.types";
+import type { SellerDashboardPeriod } from "@/types/account.type";
+
+
+export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDashboard">) {
+  const [period, setPeriod] = useState<SellerDashboardPeriod>("today");
+  const [ordersExpanded, setOrdersExpanded] = useState(true);
+  const [inventoryExpanded, setInventoryExpanded] = useState(true);
+  const { data: dashboard, isLoading } = useSellerDashboardQuery(period);
+  const totalSales = dashboard ? splitMoneyIntoSymbolAndAmount(dashboard.totalSales) : null;
+
+  return (
+    <Screen>
+      <Header
+        title="Dashboard"
+        right={
+          <HeaderAction label="Search your orders and products" onPress={() => navigation.navigate("SellerProducts")}>
+            <MagnifyingGlass24Icon />
+          </HeaderAction>
+        }
+      />
+      <PeriodChips value={period} onChange={setPeriod} />
+      {isLoading || !dashboard || !totalSales ? (
+        <ActivityIndicator style={styles.loading} color={colors.primary} />
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.total} accessibilityLabel={`Total sales ${totalSales.symbol}${totalSales.amount}, ${dashboard.orders} orders`}>
+            <Text size={14} weight={500} lineHeight={16.8} color={colors.textMuted}>
+              Total sales
+            </Text>
+            <View style={styles.amount}>
+              <Text size={18} weight={600} lineHeight={21.6}>{totalSales.symbol}</Text>
+              <Text size={28} weight={600} lineHeight={33.6}>
+                {totalSales.amount}
+              </Text>
+            </View>
+            <Text size={14} weight={500} lineHeight={16.8}>
+              {dashboard.orders} {dashboard.orders === 1 ? "order" : "orders"}
+            </Text>
+          </View>
+
+          <SalesChart values={dashboard.series.map((point) => point.value)} />
+
+          <View style={styles.ordersCard}>
+            <SectionTitle title="Recent orders" expanded={ordersExpanded} onToggle={() => setOrdersExpanded((v) => !v)} />
+            {ordersExpanded ? (
+              <View style={styles.orders}>
+                {dashboard.recentOrders.map((order) => (
+                  <StoreOrderRow key={order.id} order={order} onPress={() => navigation.navigate("SellerOrderDetail", { orderId: order.id })} />
+                ))}
+                <Text size={13} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="link" onPress={() => navigation.navigate("SellerOrders")}>
+                  See all orders
+                </Text>
+              </View>
+            ) : null}
+          </View>
+
+          <SectionTitle title="Inventory" expanded={inventoryExpanded} onToggle={() => setInventoryExpanded((v) => !v)} />
+          {inventoryExpanded ? (
+            <View style={styles.inventory}>
+              {dashboard.inventory.map((product) => (
+                <InventoryCard key={product.id} product={product} onPress={() => navigation.navigate("ProductForm", { productId: product.id })} />
+              ))}
+            </View>
+          ) : null}
+        </ScrollView>
+      )}
+    </Screen>
+  );
+}
+
+function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: boolean; onToggle: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityState={{ expanded }} onPress={onToggle} style={styles.sectionTitle}>
+      <Text size={16} weight={500} lineHeight={19.2}>
+        {title}
+      </Text>
+      <View style={!expanded && styles.collapsed}>
+        <CaretDown24Icon />
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  loading: { marginTop: 80 },
+  content: { paddingHorizontal: 12, paddingBottom: 40, gap: 16 },
+  total: { alignItems: "center", gap: 8, marginTop: 12, marginBottom: 9 },
+  amount: { flexDirection: "row", alignItems: "center" },
+  ordersCard: { borderWidth: 2, borderColor: colors.skeleton, borderRadius: 24, padding: 12, gap: 24 },
+  orders: { gap: 12 },
+  sectionTitle: { height: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  collapsed: { transform: [{ rotate: "-90deg" }] },
+  inventory: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 16 },
+});
