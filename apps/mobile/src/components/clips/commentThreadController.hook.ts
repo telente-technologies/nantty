@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
 
 import { postCommentsService } from "@/services/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment, UserSummary } from "@/types";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export const TOP_LEVEL_PARENT_KEY = "root";
 export type ReplyThreadVisibility = "expanded" | "collapsed";
@@ -99,7 +99,7 @@ export function useCommentThreadController(postId: string | null) {
       .then((savedComment) => replaceLocallyPostedComment(parentKey, pendingComment.id, savedComment))
       .catch(() => {
         replaceLocallyPostedComment(parentKey, pendingComment.id, null);
-        Alert.alert("Comment not posted", "Please check your connection and try again.");
+        showAlertWithButtons("Comment not posted", "Please check your connection and try again.");
       });
   };
 
@@ -116,7 +116,7 @@ export function useCommentThreadController(postId: string | null) {
     setDeletedFlag(comment.id, true);
     postCommentsService.deleteComment(comment.id).catch(() => {
       setDeletedFlag(comment.id, false);
-      Alert.alert("Could not delete comment", "Please try again.");
+      showAlertWithButtons("Could not delete comment", "Please try again.");
     });
   };
 
