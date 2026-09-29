@@ -10,3 +10,5 @@ export * from "./userDirectory.interface.js";
 export * from "./currencyConverter.interface.js";
 export * from "./viewerLocale.interface.js";
 export * from "./addressBook.interface.js";
+export * from "./creatorWallets.interface.js";
+export * from "./sellerAccess.interface.js";

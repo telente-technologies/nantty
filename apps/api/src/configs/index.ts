@@ -39,6 +39,11 @@ export function int(config: ConfigManager, key: string, fallback: number): numbe
   return value;
 }
 
+function combineAllowedBrowserOrigins(config: ConfigManager): readonly string[] {
+  const origins = [...list(config, "cors_origins"), text(config, "dashboard_origin", ""), text(config, "marketing_site_origin", "")];
+  return [...new Set(origins.map((origin) => origin.trim().replace(/\/+$/, "")).filter((origin) => origin.length > 0))];
+}
+
 function port(config: ConfigManager): number {
   const raw = config.string("port");
   if (raw === undefined || raw.trim() === "") return DEFAULT_PORT;
@@ -63,7 +68,7 @@ export async function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     nodeEnv: resolveEnvironment({ NODE_ENV: text(config, "node_env", "development") }),
     host: text(config, "host", "0.0.0.0"),
     port: port(config),
-    corsOrigins: list(config, "cors_origins"),
+    corsOrigins: combineAllowedBrowserOrigins(config),
     rateLimit: Object.freeze({
       windowMs: int(config, "rate_limit_window_ms", 60_000),
       max: int(config, "rate_limit_max", 300),

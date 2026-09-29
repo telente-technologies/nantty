@@ -1,9 +1,11 @@
 model CartItem {
-  id        String   @id @default(uuid())
-  userId    String
-  variantId String
-  quantity  Int
-  createdAt DateTime @default(now())
+  id                String   @id @default(uuid())
+  userId            String
+  variantId         String
+  quantity          Int
+  attributionSource String?
+  attributionId     String?
+  createdAt         DateTime @default(now())
 
   @@unique([userId, variantId])
   @@map("cart_items")
