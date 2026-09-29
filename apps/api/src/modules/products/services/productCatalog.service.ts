@@ -46,6 +46,11 @@ export class RepositoryProductCatalog implements ProductCatalog {
     });
   }
 
+  public async listPurchasableVariantsForProduct(productId: string): Promise<readonly PurchasableVariant[]> {
+    const variants = await this.productsService.dependencies.variants.listForProducts([productId]);
+    return this.findPurchasableVariants(variants.map((variant) => variant.id));
+  }
+
   public async reserveStock(lines: readonly StockLine[]): Promise<void> {
     const { variants } = this.productsService.dependencies;
     const reserved: StockLine[] = [];

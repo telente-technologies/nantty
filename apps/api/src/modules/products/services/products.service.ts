@@ -8,12 +8,14 @@ import type { CategoriesRepository } from "../../categories/repositories/categor
 import type { StoresRepository } from "../../stores/repositories/stores.repository.js";
 import type { StoreAccessService } from "../../stores/services/storeAccess.service.js";
 import type { ProductRecord, ProductVariantRecord, ProductWithVariants } from "../models/products.model.js";
+import type { ProductEngagementRepository } from "../repositories/productEngagement.repository.js";
 import type { ProductVariantsRepository } from "../repositories/productVariants.repository.js";
 import type { ProductsRepository } from "../repositories/products.repository.js";
 
 export interface ProductsDependencies {
   readonly products: ProductsRepository;
   readonly variants: ProductVariantsRepository;
+  readonly engagement: ProductEngagementRepository;
   readonly stores: StoresRepository;
   readonly categories: CategoriesRepository;
   readonly storeAccess: StoreAccessService;

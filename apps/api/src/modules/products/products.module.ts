@@ -4,6 +4,7 @@ import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
 import { AddProductVariantHandler } from "./commands/addProductVariant/addProductVariant.handler.js";
 import { AdjustInventoryHandler } from "./commands/adjustInventory/adjustInventory.handler.js";
+import { ChangeProductEngagementHandler } from "./commands/changeProductEngagement/changeProductEngagement.handler.js";
 import { CreateProductHandler } from "./commands/createProduct/createProduct.handler.js";
 import { DeleteProductHandler } from "./commands/deleteProduct/deleteProduct.handler.js";
 import { PublishProductHandler } from "./commands/publishProduct/publishProduct.handler.js";
@@ -11,10 +12,13 @@ import { UnpublishProductHandler } from "./commands/unpublishProduct/unpublishPr
 import { UpdateProductHandler } from "./commands/updateProduct/updateProduct.handler.js";
 import { UpdateProductVariantHandler } from "./commands/updateProductVariant/updateProductVariant.handler.js";
 import { GetMartHomeHandler } from "./queries/getMartHome/getMartHome.handler.js";
+import { GetStoreProductHandler } from "./queries/getStoreProduct/getStoreProduct.handler.js";
 import { GetProductHandler } from "./queries/getProduct/getProduct.handler.js";
 import { ListProductsHandler } from "./queries/listProducts/listProducts.handler.js";
+import { GetViewerProductEngagementHandler } from "./queries/getViewerProductEngagement/getViewerProductEngagement.handler.js";
 import { ListStoreInventoryHandler } from "./queries/listStoreInventory/listStoreInventory.handler.js";
 import { ListStoreProductsHandler } from "./queries/listStoreProducts/listStoreProducts.handler.js";
+import { ResolveSellerStoreHandler } from "./queries/resolveSellerStore/resolveSellerStore.handler.js";
 import type { ProductsService } from "./services/products.service.js";
 
 export class ProductsModule extends BaseModule {
@@ -44,6 +48,7 @@ export function registerProductsCommandAndQueryHandlers(commands: CommandBus, qu
     new AddProductVariantHandler(productsService),
     new UpdateProductVariantHandler(productsService),
     new AdjustInventoryHandler(productsService),
+    new ChangeProductEngagementHandler(productsService),
   ]);
   registerQueryHandlers(queries, [
     new GetProductHandler(productsService),
@@ -51,5 +56,8 @@ export function registerProductsCommandAndQueryHandlers(commands: CommandBus, qu
     new ListStoreProductsHandler(productsService),
     new ListStoreInventoryHandler(productsService),
     new GetMartHomeHandler(productsService),
+    new GetViewerProductEngagementHandler(productsService),
+    new ResolveSellerStoreHandler(productsService),
+    new GetStoreProductHandler(productsService),
   ]);
 }

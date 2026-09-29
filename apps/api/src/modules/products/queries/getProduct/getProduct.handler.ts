@@ -29,8 +29,8 @@ export class GetProductHandler extends QueryHandler<GetProductQuery, PublicProdu
     const related = await products.listRelatedPublished(product, await this.productsService.listHiddenStoreIds(), FEATURED_WITH_LIMIT);
     return {
       ...convertProductToDetailDto(product, await variants.listForProducts([product.id]), convert),
-      shop: convertStoreSummaryToShopDto(convertStoreToSummary(store), convert),
-      featuredWith: related.map((item) => convertProductToCardDto(item, convert)),
+      store: { ...convertStoreSummaryToShopDto(convertStoreToSummary(store), convert), rating: store.ratingAverage, reviewCount: store.ratingCount },
+      related: related.map((item) => convertProductToCardDto(item, convert)),
     };
   }
 }

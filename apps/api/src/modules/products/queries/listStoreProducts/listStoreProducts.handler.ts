@@ -17,9 +17,9 @@ export class ListStoreProductsHandler extends QueryHandler<ListStoreProductsQuer
     const { products, variants, storeAccess } = this.productsService.dependencies;
     await storeAccess.assertStoreMember(query.principal.userId, query.storeId);
     const page = await products.listForStore(query.storeId, query.page);
-    const allVariants = await variants.listForProducts(page.items.map((product) => product.id));
+    const allVariants = await variants.listForProducts(page.data.map((product) => product.id));
     return {
-      items: page.items.map((product) => convertProductToDetailDto(product, allVariants.filter((variant) => variant.productId === product.id), keepNativeCurrency)),
+      data: page.data.map((product) => convertProductToDetailDto(product, allVariants.filter((variant) => variant.productId === product.id), keepNativeCurrency)),
       nextCursor: page.nextCursor,
     };
   }

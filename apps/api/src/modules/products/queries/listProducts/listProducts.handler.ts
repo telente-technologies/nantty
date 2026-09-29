@@ -20,7 +20,7 @@ export class ListProductsHandler extends QueryHandler<ListProductsQuery, Page<Pr
     let resolvedCategoryId = categoryId;
     if (resolvedCategoryId === undefined && categorySlug !== undefined) {
       const category = await categories.findBySlug(categorySlug);
-      if (category === undefined) return { items: [], nextCursor: null };
+      if (category === undefined) return { data: [], nextCursor: null };
       resolvedCategoryId = category.id;
     }
     return products.listPublished(

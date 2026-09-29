@@ -1,5 +1,6 @@
 export * from "./addProductVariant/index.js";
 export * from "./adjustInventory/index.js";
+export * from "./changeProductEngagement/index.js";
 export * from "./createProduct/index.js";
 export * from "./deleteProduct/index.js";
 export * from "./publishProduct/index.js";

@@ -7,6 +7,6 @@ import { registerProductsRoutes } from "./products.routes.js";
 
 export function registerProductsModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
   // zudojs:routes:start
-  registerProductsRoutes(router, deps.productsController, deps.web);
+  registerProductsRoutes(router, deps.productsController, deps.sellerProductsController, deps.web);
   // zudojs:routes:end
 }
