@@ -19,6 +19,9 @@ import { PaymentFailedEvent, PaymentSucceededEvent } from "../events/paymentSucc
 import type { PaymentGateway } from "../gateways/paymentGateway.interface.js";
 import type { PaymentRecord } from "../models/payments.model.js";
 import type { PaymentsRepository, WebhookEventsRepository } from "../repositories/payments.repository.js";
+import { MonetizationLedgerAccounts } from "../../wallets/constants/monetizationLedgerAccounts.constant.js";
+import { LedgerAccounts, type LedgerService } from "../../wallets/services/ledger.service.js";
+import type { CheckoutDiscountSource } from "./checkoutDiscounts.service.js";
 import type { PaymentReturnUrls } from "./paymentReturnUrl.service.js";
 import type { PaymentWebhookRegistry } from "./paymentWebhookRegistry.service.js";
 
@@ -35,6 +38,8 @@ export interface PaymentsDependencies {
   readonly clock: Clock;
   readonly returnUrls: PaymentReturnUrls;
   readonly webhookRegistry: PaymentWebhookRegistry;
+  readonly checkoutDiscounts?: CheckoutDiscountSource;
+  readonly ledger?: LedgerService;
 }
 
 export interface InitializedCheckoutPayment {
@@ -71,7 +76,10 @@ export class PaymentsService implements EscrowPaymentRefunder {
     if (!providerSupportsCurrency(provider, checkout.currency)) throw unprocessable(`${provider} cannot charge in ${checkout.currency}. Choose another payment provider.`);
     const reference = `zm_${randomUUID().replaceAll("-", "")}`;
     const callbackUrl = returnUrls.buildReturnUrlForReference(reference, returnTo);
-    const payment = await payments.create({ checkoutId, buyerId, provider, reference, amount: checkout.total, currency: checkout.currency });
+    const discount = await this.dependencies.checkoutDiscounts?.findCheckoutDiscount(checkoutId);
+    const amount = checkout.total - (discount !== undefined && discount.currency === checkout.currency ? discount.amountMinor : 0);
+    if (amount <= 0) throw unprocessable("Nothing is left to pay on this checkout.");
+    const payment = await payments.create({ checkoutId, buyerId, provider, reference, amount, currency: checkout.currency });
     const contact = await userDirectory.findUserContact(buyerId);
     const initialized = await gateway.initializePayment({
       reference: payment.reference,
@@ -146,6 +154,7 @@ export class PaymentsService implements EscrowPaymentRefunder {
     }
     const payableOrders = (await orders.listByCheckout(payment.checkoutId)).filter((order) => order.status === "pending_payment" || order.status === "paid");
     await this.dependencies.escrowsService().holdEscrowsForPaidOrders(payment.id, payment.provider, payableOrders);
+    await this.recordLoyaltyDiscountFunding(payment);
     const marked = await payments.changeStatus(payment.id, "pending", "succeeded", { providerTransactionId: verified.providerTransactionId, paidAt: clock.now() });
     if (marked) {
       await ordersService.markCheckoutOrdersPaid(payment.checkoutId);
@@ -154,6 +163,24 @@ export class PaymentsService implements EscrowPaymentRefunder {
       await publishEvent(events, PaymentSucceededEvent, { paymentId: payment.id, checkoutId: payment.checkoutId, buyerId: payment.buyerId, amount: payment.amount });
     }
     return (await payments.findById(payment.id)) ?? payment;
+  }
+
+  private async recordLoyaltyDiscountFunding(payment: PaymentRecord): Promise<void> {
+    const { orders, ledger, checkoutDiscounts } = this.dependencies;
+    const checkout = await orders.findCheckoutById(payment.checkoutId);
+    if (checkout === undefined || ledger === undefined || checkout.currency !== payment.currency) return;
+    const discount = checkout.total - payment.amount;
+    if (discount <= 0) return;
+    await ledger.postLedgerTransaction({
+      reference: `loyalty-discount:${payment.checkoutId}`,
+      kind: "loyalty_discount_funding",
+      description: "Platform-funded loyalty points discount at checkout",
+      lines: [
+        { account: MonetizationLedgerAccounts.loyaltyRedemptionExpense(payment.currency), direction: "debit", amount: discount, currency: payment.currency },
+        { account: LedgerAccounts.providerClearing(payment.provider, payment.currency), direction: "credit", amount: discount, currency: payment.currency },
+      ],
+    });
+    await checkoutDiscounts?.markCheckoutDiscountConsumed(payment.checkoutId);
   }
 
   public async refundEscrowPayment(escrow: EscrowRecord, chargedAmount: Money): Promise<{ readonly provider: string }> {
