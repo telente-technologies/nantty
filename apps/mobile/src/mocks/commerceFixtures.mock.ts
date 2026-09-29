@@ -1,73 +1,68 @@
-import type { Cart, CartItem, Order, OrderStatus, Product, ProductSummary, StoreSummary } from "@/types";
+import type { Cart, CartItem, Product, ProductSummary } from "@/types";
 import { multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
+import {
+  buildCatalogProductDetail,
+  buildCatalogProductSummary,
+  catalogProductSeeds,
+  findCatalogSeedByProductId,
+  productIdForKey,
+} from "./productCatalog.mock";
+import { storeSummaryById } from "./storeDirectory.mock";
 
-import { buildMockUserSummary, isoDateHoursAgo } from "./fixtures.mock";
+export const SHIPPING_FEE_PER_STORE_IN_USD_CENTS = 250;
 
-export const mockStore: StoreSummary = { id: "s_1", name: "Usershop Name", logoUrl: null, rating: 3.4, ratingCount: 200, reviewCount: 103 };
-
-export const buildMockProductSummary = (index: number, name = "Product Name", usdCents = 20_000): ProductSummary => ({
-  id: `p_${index}`,
-  name,
-  get price() {
-    return convertUsdCentsToViewerCurrency(usdCents);
-  },
-  imageUrl: null,
-  liked: false,
-  stock: index % 4 === 1 ? 3 : 12,
-});
-
-export const mockProductCatalogue: ProductSummary[] = Array.from({ length: 40 }, (_, i) => buildMockProductSummary(i + 1));
-
-export const buildMockProductDetail = (productId: string): Product => {
-  const summary = mockProductCatalogue.find((p) => p.id === productId) ?? buildMockProductSummary(1);
-  return {
-    ...summary,
-    images: [],
-    title: "A product card title for a product that will  be here. A product card title for a product",
-    rating: 2.4,
-    promo: "New customer deal * Free Shipping",
-    sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
-    colors: ["Black", "White", "Blue"],
-    shippingInfo:
-      "Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer.",
-    description:
-      "Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer. Group export vector mask Figma ipsum component variant main layer.",
-    store: mockStore,
-    related: mockProductCatalogue.slice(0, 8),
-  };
+export const buildMockProductSummary = (index: number, name?: string, _legacyUsdCents?: number): ProductSummary => {
+  const seedWithSameName = name ? catalogProductSeeds.find((seed) => seed.name.toLowerCase().includes(name.toLowerCase().split(" ")[0]!)) : undefined;
+  const seed = seedWithSameName ?? catalogProductSeeds[Math.abs(index) % catalogProductSeeds.length]!;
+  return buildCatalogProductSummary(seed);
 };
 
-const keyboard = (index: number): ProductSummary => buildMockProductSummary(100 + index, "Custom Mechanical Keyboard", 20_000);
+export const mockStore = storeSummaryById("s_ada");
 
-export const mockCartState: { items: CartItem[] } = {
-  items: [0, 1, 2].map((i) => ({ id: `ci_${i}`, product: keyboard(i), quantity: 2, variant: null })),
+export const buildMockProductDetail = (productId: string): Product =>
+  buildCatalogProductDetail(productId) ?? buildCatalogProductDetail(productIdForKey("f1"))!;
+
+interface MockCartLine {
+  readonly id: string;
+  readonly productId: string;
+  readonly quantity: number;
+  readonly variant: string | null;
+}
+
+export const mockCartState: { lines: MockCartLine[] } = {
+  lines: [
+    { id: "ci_1", productId: productIdForKey("g1"), quantity: 1, variant: "Black" },
+    { id: "ci_2", productId: productIdForKey("b3"), quantity: 2, variant: "30ml" },
+    { id: "ci_3", productId: productIdForKey("fd2"), quantity: 3, variant: "200g" },
+  ],
 };
+
+export const describeVariant = (size?: string | null, color?: string | null) => [size, color].filter(Boolean).join(" • ") || null;
+
+export const buildCartItemFromLine = (line: MockCartLine): CartItem => {
+  const seed = findCatalogSeedByProductId(line.productId);
+  const product = seed ? buildCatalogProductSummary(seed) : buildMockProductSummary(0);
+  return { id: line.id, product, quantity: line.quantity, variant: line.variant };
+};
+
+export const storeIdForProduct = (productId: string) => findCatalogSeedByProductId(productId)?.storeId ?? "s_ada";
 
 export const summariseMockCart = (): Cart => {
+  const items = mockCartState.lines.map(buildCartItemFromLine);
   const zero = convertUsdCentsToViewerCurrency(0);
-  const itemsTotal = mockCartState.items.reduce(
+  const itemsTotal = items.reduce(
     (sum, item) => ({ ...sum, amountMinor: sum.amountMinor + multiplyMoneyByQuantity(item.product.price, item.quantity).amountMinor }),
     zero,
   );
-  return { items: mockCartState.items, itemsTotal, shopDiscount: zero, shipping: zero, total: itemsTotal };
-};
-
-const buildMockOrder = (index: number, status: OrderStatus, hours: number): Order => ({
-  id: `o_${index}`,
-  reference: `ZM-${String(1040 + index)}`,
-  status,
-  items: [{ id: `oi_${index}`, product: keyboard(index), quantity: 1, variant: null }],
-  get total() {
-    return convertUsdCentsToViewerCurrency(20_000);
-  },
-  buyer: buildMockUserSummary(2, "Enyo Dev"),
-  store: mockStore,
-  createdAt: isoDateHoursAgo(hours),
-  escrowReleaseAt: status === "delivered" ? isoDateHoursAgo(-24 * 7) : null,
-});
-
-export const mockOrdersState: { orders: Order[] } = {
-  orders: [buildMockOrder(1, "pending", 2), buildMockOrder(2, "shipped", 30), buildMockOrder(3, "delivered", 80)],
+  const distinctStoreCount = new Set(mockCartState.lines.map((line) => storeIdForProduct(line.productId))).size;
+  const shipping = convertUsdCentsToViewerCurrency(distinctStoreCount * SHIPPING_FEE_PER_STORE_IN_USD_CENTS);
+  return {
+    items,
+    itemsTotal,
+    shopDiscount: zero,
+    shipping,
+    total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor + shipping.amountMinor },
+  };
 };

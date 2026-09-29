@@ -1,3 +1,4 @@
+import { isMessageAfterSyncCursor } from "@/cache/messageHistory.type";
 import type { Conversation, Message } from "@/types";
 
 import { buildMockUserSummary, isoDateHoursAgo, me } from "./fixtures.mock";
@@ -15,7 +16,7 @@ const messagesByConversation = new Map<string, Message[]>([
   [
     "c_enyo",
     [
-      { id: "m_1", conversationId: "c_enyo", senderId: me.id, text: "Hi, how are you!", createdAt: isoDateHoursAgo(1) },
+      { id: "m_1", conversationId: "c_enyo", senderId: me.id, text: "Hi, how are you!", createdAt: isoDateHoursAgo(1.1) },
       {
         id: "m_2",
         conversationId: "c_enyo",
@@ -53,10 +54,14 @@ export const chatsMocks: MockRoute[] = [
     };
   }),
   createMockRoute("GET", "/api/v1/conversations/:conversationId", ({ params }) => findConversation(params.conversationId!)),
-  createMockRoute("GET", "/api/v1/conversations/:conversationId/messages", ({ params }) => ({
-    data: messagesByConversation.get(params.conversationId!) ?? [],
-    nextCursor: null,
-  })),
+  createMockRoute("GET", "/api/v1/conversations/:conversationId/messages", ({ params, query }) => {
+    const allMessages = messagesByConversation.get(params.conversationId!) ?? [];
+    const afterCursor = query.get("after");
+    return {
+      data: afterCursor ? allMessages.filter((message) => isMessageAfterSyncCursor(message, afterCursor)) : allMessages,
+      nextCursor: null,
+    };
+  }),
   createMockRoute("POST", "/api/v1/conversations", ({ body }) => {
     const { userId } = body as { userId: string };
     const peer = people.find((p) => p.id === userId) ?? enyo;

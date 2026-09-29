@@ -1,12 +1,17 @@
 import { ApiError } from "@/errors/api.error";
 
+import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { cartMocks } from "./cart.mock";
 import { chatsMocks } from "./chats.mock";
 import { clipsMocks } from "./clips.mock";
+import { commentsMocks } from "./comments.mock";
+import { creatorsMocks } from "./creators.mock";
 import { feedMocks } from "./feed.mock";
+import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
 import { localeMocks } from "./locale.mock";
+import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
@@ -29,7 +34,12 @@ const routes: MockRoute[] = [
   ...ordersMocks,
   ...chatsMocks,
   ...clipsMocks,
+  ...commentsMocks,
+  ...mediaMocks,
+  ...adEventsMocks,
   ...notificationsMocks,
+  ...creatorsMocks,
+  ...giftsMocks,
   ...liveMocks,
   ...storiesMocks,
   ...settingsMocks,

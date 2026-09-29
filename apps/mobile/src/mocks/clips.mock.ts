@@ -1,87 +1,64 @@
-import type { Clip, CommentWithReplies, Post } from "@/types";
+import type { Clip, Page } from "@/types";
 
-import { buildMockUserSummary, isoDateHoursAgo, me } from "./fixtures.mock";
+import { clipVideoSeeds, type ClipVideoSeed } from "./clipsVideoCatalog.mock";
+import { isoDateHoursAgo } from "./fixtures.mock";
+import { productSummaryByKey } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
+import { userSummaryById } from "./userDirectory.mock";
 
-const caption = "Figma ipsum component variant main layer. Group export vector mask ";
+const CLIPS_PAGE_SIZE = 6;
 
-const buildMockClip = (index: number): Clip => ({
-  id: `clip_${index}`,
-  kind: "clip",
-  author: { ...buildMockUserSummary(40 + index), username: "username20" },
-  createdAt: isoDateHoursAgo(48),
-  text: caption,
-  media: [{ type: "video", url: null }],
-  likes: 11200,
-  comments: 11200,
-  reposts: 0,
-  views: 11200,
-  liked: false,
-  bookmarked: false,
-  isFollowingAuthor: index % 3 === 1,
-  friendsLiked: index % 2 === 0 ? { count: 12, avatars: [null, null, null] } : null,
-  products: [],
-  durationSeconds: 642,
-  sound: "Original sound . username",
-});
-
-const commentsByPost = new Map<string, CommentWithReplies[]>();
-const seedComments = (postId: string): CommentWithReplies[] =>
-  Array.from({ length: 6 }, (_, i) => ({
-    id: `cm_${postId}_${i}`,
-    author: { ...buildMockUserSummary(60 + i, "testUsername"), username: "testUsername" },
-    text: "Lorem ipsum dolor sit amet consectetur. Dictum posuere sit egestas odio convallis arcu rutrum ad nom.",
-    createdAt: isoDateHoursAgo(8),
-    likes: 11200,
+const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
+  const author = userSummaryById(seed.authorId);
+  return {
+    id: seed.id,
+    kind: "clip",
+    author,
+    createdAt: isoDateHoursAgo(seed.hoursAgo),
+    text: seed.caption,
+    media: [
+      {
+        type: "video",
+        url: seed.videoUrl,
+        posterUrl: seed.posterUrl,
+        hlsUrl: seed.hlsUrl ?? null,
+        width: seed.width,
+        height: seed.height,
+        durationSeconds: seed.durationSeconds,
+        status: "ready",
+      },
+    ],
+    likes: seed.likes,
+    comments: seed.comments,
+    reposts: Math.round(seed.likes / 40),
+    views: seed.views,
     liked: false,
-    replies: 0,
-  }));
+    bookmarked: false,
+    isFollowingAuthor: isFollowingUser(seed.authorId),
+    friendsLiked: seed.friendIdsWhoLiked
+      ? buildFriendsLikedFromFollowedUsers(seed.friendIdsWhoLiked, seed.friendIdsWhoLiked.length + 9)
+      : null,
+    products: (seed.taggedProductKeys ?? []).map(productSummaryByKey),
+    sponsored: seed.sponsoredCampaign ? { ...seed.sponsoredCampaign, label: "Sponsored" } : null,
+    durationSeconds: seed.durationSeconds,
+    sound: `Original sound · ${author.username}`,
+  };
+};
 
-const commentsFor = (postId: string) => {
-  if (!commentsByPost.has(postId)) commentsByPost.set(postId, seedComments(postId));
-  return commentsByPost.get(postId)!;
+const allClips: readonly Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed);
+
+const listClipsForFeedTab = (tab: string | null): readonly Clip[] =>
+  tab === "following"
+    ? [...allClips].filter((clip) => clip.isFollowingAuthor && !clip.sponsored).reverse()
+    : allClips;
+
+const pageOfClips = (clips: readonly Clip[], cursor: string | null): Page<Clip> => {
+  const start = Number(cursor ?? 0) || 0;
+  const end = start + CLIPS_PAGE_SIZE;
+  return { data: clips.slice(start, end), nextCursor: end < clips.length ? String(end) : null };
 };
 
 export const clipsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/clips", ({ query }) => {
-    const offset = query.get("tab") === "following" ? 100 : 0;
-    return { data: Array.from({ length: 8 }, (_, i) => buildMockClip(offset + i)), nextCursor: null };
-  }),
-  createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params }) => ({ data: commentsFor(params.postId!), nextCursor: null })),
-  createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
-    const comment: CommentWithReplies = {
-      id: `cm_${Date.now()}`,
-      author: me,
-      text: (body as { text: string }).text,
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      liked: false,
-      replies: 0,
-    };
-    commentsByPost.set(params.postId!, [comment, ...commentsFor(params.postId!)]);
-    return comment;
-  }),
-  createMockRoute("POST", "/api/v1/comments/:commentId/like", () => undefined),
-  createMockRoute("DELETE", "/api/v1/comments/:commentId/like", () => undefined),
-  createMockRoute("POST", "/api/v1/posts", ({ body }) => {
-    const input = body as { text: string; media: Post["media"] };
-    const post: Post = {
-      id: `p_${Date.now()}`,
-      kind: "post",
-      author: me,
-      createdAt: new Date().toISOString(),
-      text: input.text,
-      media: input.media,
-      likes: 0,
-      comments: 0,
-      reposts: 0,
-      views: 0,
-      liked: false,
-      bookmarked: false,
-      isFollowingAuthor: true,
-      friendsLiked: null,
-      products: [],
-    };
-    return post;
-  }),
+  createMockRoute("GET", "/api/v1/clips", ({ query }) => pageOfClips(listClipsForFeedTab(query.get("tab")), query.get("cursor"))),
 ];
