@@ -90,6 +90,7 @@ export function createDependencies(options: DependencyOptions) {
       mediaProcessingQueue: catalog.mediaProcessingQueue,
       orderLookup: commerce.orderLookup,
       creatorWallets: commerce.creatorWallets,
+      advertiserBilling: commerce.advertiserBilling,
       sellerAccess: sellerProgram.sellerAccess,
       entitlements: sellerProgram.entitlements,
       requireSellerEntitlement: sellerProgram.requireSellerEntitlement,
