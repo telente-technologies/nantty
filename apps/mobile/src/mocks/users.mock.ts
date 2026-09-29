@@ -12,7 +12,12 @@ import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser }
 
 const profileEditsByUserId = new Map<string, Partial<User>>();
 
-const signedInProfile = (): User => {
+export const applyProfileEditForSignedInUser = (patch: Partial<User>) => {
+  const userId = getSignedInMockUser().id;
+  profileEditsByUserId.set(userId, { ...profileEditsByUserId.get(userId), ...patch });
+};
+
+export const signedInProfile = (): User => {
   const base = getSignedInMockUser();
   return { ...base, ...profileEditsByUserId.get(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
 };
