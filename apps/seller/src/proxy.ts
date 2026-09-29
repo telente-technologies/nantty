@@ -4,7 +4,7 @@ import { doesRoleHavePermission, findFirstPageAllowedForRole, findPermissionRequ
 import { readCachedSellerAccessFromCookies, readPosOperatorFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
 import { decideSellerAccessDestination, gatePagePathByDestination } from "@/utils/sellerAccessDestination.util";
 
-const publicPagePaths = new Set(["/login", "/offline"]);
+const publicPagePaths = new Set(["/login", "/offline", "/forgot-password"]);
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {
   const targetUrl = new URL(pathname, request.nextUrl.origin);
@@ -18,10 +18,10 @@ export function proxy(request: NextRequest) {
   const sessionId = readSessionIdFromCookies(request.cookies);
 
   if (publicPagePaths.has(pathname)) {
-    if (pathname === "/login" && sessionId && readCachedSellerAccessFromCookies(request.cookies)) return redirectTo(request, "/");
+    if ((pathname === "/login" || pathname === "/forgot-password") && sessionId && readCachedSellerAccessFromCookies(request.cookies)) return redirectTo(request, "/");
     return NextResponse.next();
   }
-  if (!sessionId) return redirectTo(request, "/login", pathname === "/" ? {} : { next: requestedPathWithQuery });
+  if (!sessionId) return pathname === "/" ? NextResponse.next() : redirectTo(request, "/login", { next: requestedPathWithQuery });
 
   const cachedAccess = readCachedSellerAccessFromCookies(request.cookies);
   if (!cachedAccess) return redirectTo(request, "/bff/auth/access-refresh", { next: requestedPathWithQuery });
@@ -47,5 +47,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!bff|_next/static|_next/image|icons|images|serviceWorker\\.js|manifest\\.webmanifest|favicon\\.ico|robots\\.txt).*)"],
+  matcher: ["/((?!bff|_next/static|_next/image|icons|images|photos|screenshots|serviceWorker\\.js|manifest\\.webmanifest|favicon\\.ico|robots\\.txt).*)"],
 };
