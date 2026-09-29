@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { Coin24Icon, Gift24Icon, PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 
 export interface LiveCommentBarProps {
@@ -47,16 +47,12 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
       )}
       {onPressGift ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Send a gift" hitSlop={8} onPress={onPressGift}>
-          <Text size={22} lineHeight={26}>
-            🎁
-          </Text>
+          <Gift24Icon />
         </Pressable>
       ) : null}
       {onPressTip ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Tip the host with coins" hitSlop={8} onPress={onPressTip}>
-          <Text size={22} lineHeight={26}>
-            🪙
-          </Text>
+          <Coin24Icon />
         </Pressable>
       ) : null}
       {onPressProducts ? (
