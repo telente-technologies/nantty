@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const tokens = readApiTokensFromCookies(request.cookies);
   const renewed = sessionId ? await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null }) : null;
   if (!renewed) {
-    const loginUrl = new URL("/login", request.nextUrl.origin);
+    const loginUrl = new URL(requestedPath === "/" ? "/" : "/login", request.nextUrl.origin);
     if (requestedPath !== "/") loginUrl.searchParams.set("next", requestedPath);
     const response = NextResponse.redirect(loginUrl, 303);
     clearEverySessionCookie(response);
