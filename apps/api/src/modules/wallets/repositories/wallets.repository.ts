@@ -2,33 +2,46 @@ import { randomUUID } from "node:crypto";
 
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
-import type { NewPayoutAccount, NewWithdrawal, PayoutAccountRecord, WithdrawalRecord, WithdrawalStatus } from "../models/wallets.model.js";
+import {
+  describeWalletOwner,
+  type NewPayoutAccount,
+  type NewWithdrawal,
+  type PayoutAccountRecord,
+  type WalletOwner,
+  type WithdrawalRecord,
+  type WithdrawalStatus,
+} from "../models/wallets.model.js";
 
 export interface PayoutAccountsRepository {
-  listForStore(storeId: string): Promise<readonly PayoutAccountRecord[]>;
-  findForStore(storeId: string, payoutAccountId: string): Promise<PayoutAccountRecord | undefined>;
+  listForOwner(owner: WalletOwner): Promise<readonly PayoutAccountRecord[]>;
+  findForOwner(owner: WalletOwner, payoutAccountId: string): Promise<PayoutAccountRecord | undefined>;
   create(input: NewPayoutAccount): Promise<PayoutAccountRecord>;
-  delete(storeId: string, payoutAccountId: string): Promise<boolean>;
+  delete(owner: WalletOwner, payoutAccountId: string): Promise<boolean>;
   saveRecipientCode(payoutAccountId: string, recipientCode: string): Promise<void>;
 }
 
 export interface WithdrawalsRepository {
   create(input: NewWithdrawal): Promise<WithdrawalRecord>;
   findById(id: string): Promise<WithdrawalRecord | undefined>;
-  listForStore(storeId: string, page: PageRequest): Promise<Page<WithdrawalRecord>>;
+  listForOwner(owner: WalletOwner, page: PageRequest): Promise<Page<WithdrawalRecord>>;
   changeStatus(id: string, from: WithdrawalStatus, to: WithdrawalStatus, processedAt: Date, failureReason: string | null): Promise<boolean>;
+}
+
+export function isOwnedBy(record: { readonly storeId: string | null; readonly userId: string | null }, owner: WalletOwner): boolean {
+  const expected = describeWalletOwner(owner);
+  return record.storeId === expected.storeId && record.userId === expected.userId;
 }
 
 export class InMemoryPayoutAccountsRepository implements PayoutAccountsRepository {
   private readonly accounts = new Map<string, PayoutAccountRecord>();
 
-  public async listForStore(storeId: string): Promise<readonly PayoutAccountRecord[]> {
-    return [...this.accounts.values()].filter((account) => account.storeId === storeId);
+  public async listForOwner(owner: WalletOwner): Promise<readonly PayoutAccountRecord[]> {
+    return [...this.accounts.values()].filter((account) => isOwnedBy(account, owner));
   }
 
-  public async findForStore(storeId: string, payoutAccountId: string): Promise<PayoutAccountRecord | undefined> {
+  public async findForOwner(owner: WalletOwner, payoutAccountId: string): Promise<PayoutAccountRecord | undefined> {
     const account = this.accounts.get(payoutAccountId);
-    return account?.storeId === storeId ? account : undefined;
+    return account !== undefined && isOwnedBy(account, owner) ? account : undefined;
   }
 
   public async create(input: NewPayoutAccount): Promise<PayoutAccountRecord> {
@@ -37,8 +50,8 @@ export class InMemoryPayoutAccountsRepository implements PayoutAccountsRepositor
     return account;
   }
 
-  public async delete(storeId: string, payoutAccountId: string): Promise<boolean> {
-    if ((await this.findForStore(storeId, payoutAccountId)) === undefined) return false;
+  public async delete(owner: WalletOwner, payoutAccountId: string): Promise<boolean> {
+    if ((await this.findForOwner(owner, payoutAccountId)) === undefined) return false;
     return this.accounts.delete(payoutAccountId);
   }
 
@@ -61,8 +74,8 @@ export class InMemoryWithdrawalsRepository implements WithdrawalsRepository {
     return this.withdrawals.get(id);
   }
 
-  public async listForStore(storeId: string, page: PageRequest): Promise<Page<WithdrawalRecord>> {
-    const items = [...this.withdrawals.values()].filter((withdrawal) => withdrawal.storeId === storeId).sort(compareByNewestFirst);
+  public async listForOwner(owner: WalletOwner, page: PageRequest): Promise<Page<WithdrawalRecord>> {
+    const items = [...this.withdrawals.values()].filter((withdrawal) => isOwnedBy(withdrawal, owner)).sort(compareByNewestFirst);
     return paginateSortedItems(items, page);
   }
 
