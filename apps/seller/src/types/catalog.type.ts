@@ -1,3 +1,4 @@
+import type { ProductBrandTag } from "@/types/brand.type";
 import type { Money } from "@/types/money.type";
 
 export type ProductStatus = "draft" | "active" | "archived";
@@ -46,6 +47,7 @@ export interface Product {
   readonly taxable: boolean;
   readonly trackInventory: boolean;
   readonly tags: string[];
+  readonly brand?: ProductBrandTag | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
