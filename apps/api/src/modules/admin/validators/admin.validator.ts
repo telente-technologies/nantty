@@ -1,38 +1,72 @@
 import { schema, type Infer } from "@zudojs/schema";
 
-const challengeToken = schema.string().min(20).max(200);
+import { AdminPageQuerySchema, AdminReasonSchema } from "../../../utils/adminHttp.util.js";
+
+const mfaToken = schema.string().min(20).max(200);
 const totpCode = schema.string().regex(/^\d{6}$/);
-const recoveryCode = schema.string().min(8).max(20);
-const permissionList = schema.array(schema.string().min(3).max(60)).max(100);
-const ipAllowList = schema.array(schema.string().min(2).max(64)).max(50);
+const webAuthnCredential = schema.record(schema.unknown());
+const permissionKeys = schema.array(schema.string().min(3).max(60)).max(100);
 
-export const AdminLoginBodySchema = schema.object({ identifier: schema.string().min(3).max(254), password: schema.string().min(1).max(128) });
+export const AdminLoginBodySchema = schema.object({ email: schema.string().email().max(254), password: schema.string().min(1).max(128) });
 
-export const AdminChallengeBodySchema = schema.object({ challengeToken });
+export const AdminMfaTokenBodySchema = schema.object({ mfaToken });
 
-export const AdminCompleteLoginBodySchema = schema.object({ challengeToken, code: totpCode.optional(), recoveryCode: recoveryCode.optional() });
+export const AdminTotpConfirmBodySchema = schema.object({ mfaToken, code: totpCode });
 
-export const AdminStepUpBodySchema = schema.object({ code: totpCode.optional(), recoveryCode: recoveryCode.optional() });
-
-export const CreateStaffAccountBodySchema = schema.object({
-  userId: schema.string().uuid().optional(),
-  email: schema.string().email().max(254).optional(),
-  role: schema.enum(["admin", "support", "superadmin"]),
-  permissions: permissionList.optional(),
-  ipAllowList: ipAllowList.optional(),
+export const AdminMfaVerifyBodySchema = schema.object({
+  mfaToken,
+  method: schema.enum(["totp", "recovery", "webauthn"]),
+  code: schema.string().min(6).max(20).optional(),
+  credential: webAuthnCredential.optional(),
 });
 
-export const UpdateStaffAccountBodySchema = schema.object({
-  role: schema.enum(["admin", "support", "superadmin"]).optional(),
-  permissions: permissionList.optional(),
-  ipAllowList: ipAllowList.optional(),
+export const AdminRefreshBodySchema = schema.object({ refreshToken: schema.string().min(20).max(8192) });
+
+export const AdminStepUpBodySchema = schema.object({
+  method: schema.enum(["totp", "webauthn"]),
+  code: totpCode.optional(),
+  credential: webAuthnCredential.optional(),
 });
 
-export const StaffAccountParamsSchema = schema.object({ userId: schema.string().uuid() });
+export const AdminSessionParamsSchema = schema.object({ sessionId: schema.string().uuid() });
 
-export const WebAuthnCredentialParamsSchema = schema.object({ id: schema.string().uuid() });
+export const AdminPasskeyParamsSchema = schema.object({ passkeyId: schema.string().uuid() });
 
-export type AdminCompleteLoginBody = Infer<typeof AdminCompleteLoginBodySchema>;
-export type AdminStepUpBody = Infer<typeof AdminStepUpBodySchema>;
-export type CreateStaffAccountBody = Infer<typeof CreateStaffAccountBodySchema>;
-export type UpdateStaffAccountBody = Infer<typeof UpdateStaffAccountBodySchema>;
+export const AddPasskeyBodySchema = schema.object({ label: schema.string().min(1).max(60), credential: webAuthnCredential });
+
+export const AdminIdParamsSchema = schema.object({ adminId: schema.string().uuid() });
+
+export const ListAdminsQuerySchema = AdminPageQuerySchema.extend(schema.object({
+  search: schema.string().max(120).optional(),
+  status: schema.enum(["ACTIVE", "INVITED", "DISABLED", "LOCKED"]).optional(),
+  role: schema.enum(["SUPERADMIN", "ADMIN", "SUPPORT"]).optional(),
+}));
+
+export const InviteAdminBodySchema = schema.object({
+  email: schema.string().email().max(254),
+  name: schema.string().min(2).max(80),
+  role: schema.enum(["ADMIN", "SUPPORT"]),
+  permissions: permissionKeys,
+  reason: AdminReasonSchema,
+});
+
+export const ChangeAdminPermissionsBodySchema = schema.object({ role: schema.enum(["ADMIN", "SUPPORT"]), permissions: permissionKeys, reason: AdminReasonSchema });
+
+export const InvitationParamsSchema = schema.object({ token: schema.string().min(20).max(200) });
+
+export const AcceptInvitationBodySchema = schema.object({ password: schema.string().min(1).max(128) });
+
+export const AuditLogQuerySchema = AdminPageQuerySchema.extend(schema.object({
+  search: schema.string().max(200).optional(),
+  area: schema.string().max(60).optional(),
+  actorId: schema.string().max(80).optional(),
+  targetType: schema.string().max(60).optional(),
+  targetId: schema.string().max(120).optional(),
+  from: schema.string().datetime().optional(),
+  to: schema.string().datetime().optional(),
+  format: schema.enum(["csv"]).optional(),
+}));
+
+export const AuditEntryParamsSchema = schema.object({ entryId: schema.string().uuid() });
+
+export type AuditLogQuery = Infer<typeof AuditLogQuerySchema>;
