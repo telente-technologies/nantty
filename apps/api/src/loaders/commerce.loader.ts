@@ -46,6 +46,7 @@ import { LedgerAdvertiserBilling } from "../modules/wallets/services/advertiserB
 import { LedgerCreatorWallets } from "../modules/wallets/services/creatorWallets.service.js";
 import { LedgerService } from "../modules/wallets/services/ledger.service.js";
 import { PaystackBankDirectory, type BankDirectory } from "../modules/wallets/services/bankDirectory.service.js";
+import { PayoutTransferFeeSchedule } from "../modules/wallets/services/payoutTransferFees.service.js";
 import { WalletOwnerResolver } from "../modules/wallets/services/walletOwnerResolver.service.js";
 import { WALLET_TOP_UP_REFERENCE_PREFIX, WalletTopUpsService } from "../modules/wallets/services/walletTopUps.service.js";
 import { WalletsService } from "../modules/wallets/services/wallets.service.js";
@@ -121,6 +122,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   });
   const withdrawalsService = new WithdrawalsService({
     ledger, payoutAccounts, owners, cipher, audit: shared.audit, clock, paymentGateways: gateways,
+    transferFees: new PayoutTransferFeeSchedule(settings.monetization.payouts.transferFeeOverrides),
     withdrawals: usePrisma ? new PrismaWithdrawalsRepository() : new InMemoryWithdrawalsRepository(),
   });
   const topUpsService = new WalletTopUpsService({
