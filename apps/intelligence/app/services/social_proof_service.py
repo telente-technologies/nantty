@@ -1,7 +1,24 @@
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from app.models.feed_ranking_model import FriendAction, FriendEngagement
+from app.features.feed_feature_vector_builder import AFFINITY_HALF_SATURATION_POINT
+from app.models.common_model import RankingResponseMetadata, ViewerContext
+from app.models.feed_ranking_model import (
+    FeedRankingOptions,
+    FriendAction,
+    FriendEngagement,
+    SocialProofBanner,
+    SocialProofRequest,
+    SocialProofResponse,
+    SocialProofSelectionItem,
+)
+from app.services.ranking_context_service import (
+    read_viewer_online_features_safely,
+    resolve_request_identifier,
+    resolve_request_time,
+)
+from app.stores.online_feature_store import OnlineFeatureStore
+from app.utils.decay_math_util import squash_non_negative_value_into_unit_interval
 
 ACTION_VALUE_MULTIPLIER: dict[FriendAction, float] = {
     "liked": 1.0,
@@ -122,3 +139,74 @@ def select_posts_eligible_for_friend_social_proof(
         chosen_positions.append(option.position)
         selections[option.item_id] = option
     return selections
+
+
+def build_social_proof_banners_for_viewer(
+    ordered_candidates: Sequence[SocialProofCandidate],
+    viewer: ViewerContext,
+    options: FeedRankingOptions,
+    raw_account_affinity: Mapping[str, float],
+) -> dict[str, SocialProofSelection]:
+    closeness_by_friend = {
+        account_id: squash_non_negative_value_into_unit_interval(raw_affinity, AFFINITY_HALF_SATURATION_POINT)
+        for account_id, raw_affinity in raw_account_affinity.items()
+    }
+    return select_posts_eligible_for_friend_social_proof(
+        ordered_candidates,
+        viewer.user_id,
+        frozenset(viewer.followed_account_ids),
+        frozenset(viewer.blocked_account_ids) | frozenset(viewer.muted_account_ids),
+        closeness_by_friend,
+        SocialProofRules(
+            minimum_close_friends=options.social_proof_minimum_close_friends,
+            minimum_gap_between_banners=options.social_proof_minimum_gap,
+            minimum_closeness=options.social_proof_minimum_closeness,
+        ),
+    )
+
+
+def convert_selection_to_banner(selection: SocialProofSelection) -> SocialProofBanner:
+    return SocialProofBanner(
+        friend_ids=selection.friend_ids,
+        total_friend_count=selection.total_friend_count,
+        primary_action=selection.primary_action,
+    )
+
+
+class SocialProofService:
+    def __init__(self, feature_store: OnlineFeatureStore | None) -> None:
+        self.feature_store = feature_store
+
+    async def select_social_proof(self, request: SocialProofRequest) -> SocialProofResponse:
+        now = resolve_request_time(request.now)
+        friend_ids = sorted(
+            {engagement.friend_id for item in request.ordered_items for engagement in item.friend_engagements}
+        )
+        online_features, degraded = await read_viewer_online_features_safely(
+            self.feature_store, request.viewer.user_id, friend_ids, [], [], now, False
+        )
+        selections = build_social_proof_banners_for_viewer(
+            [
+                SocialProofCandidate(item.item_id, position, item.author_id, item.store_id, item.friend_engagements)
+                for position, item in enumerate(request.ordered_items)
+            ],
+            request.viewer,
+            request.options,
+            online_features.account_affinity_by_account,
+        )
+        return SocialProofResponse(
+            selections=[
+                SocialProofSelectionItem(
+                    item_id=selection.item_id,
+                    position=selection.position,
+                    banner=convert_selection_to_banner(selection),
+                )
+                for selection in sorted(selections.values(), key=lambda chosen: chosen.position)
+            ],
+            metadata=RankingResponseMetadata(
+                request_id=resolve_request_identifier(None),
+                ranking_source="social_proof:rules",
+                degraded=degraded,
+                generated_at=now,
+            ),
+        )
