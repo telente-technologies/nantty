@@ -1,0 +1,58 @@
+.backLink {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cardStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.inlineControls {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.inlineControls > div {
+  flex: 1;
+}
+
+.replyBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+}
+
+.noteMode {
+  background: var(--caution-tint);
+  border-color: #f7d49a;
+}
+
+.replyToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.replyToolbar > div:first-child {
+  margin-bottom: 0;
+}
+
+.replyActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}

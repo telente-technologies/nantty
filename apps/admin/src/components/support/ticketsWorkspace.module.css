@@ -1,0 +1,21 @@
+.subjectCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 420px;
+}
+
+.subjectCell > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.search {
+  width: 300px;
+}
