@@ -56,15 +56,29 @@ export interface PostDto {
   readonly expiresAt: string | null;
 }
 
+export interface CommentReplyTargetDto {
+  readonly userId: string;
+  readonly username: string;
+}
+
 export interface CommentDto {
   readonly id: string;
   readonly postId: string;
+  readonly parentCommentId: string | null;
+  readonly rootCommentId: string | null;
   readonly replyToCommentId: string | null;
   readonly text: string;
   readonly author: AuthorDto | null;
   readonly likes: number;
   readonly liked: boolean;
+  readonly replyCount: number;
+  readonly replyingTo?: CommentReplyTargetDto;
+  readonly deleted?: true;
   readonly createdAt: string;
+}
+
+export interface TopLevelCommentDto extends CommentDto {
+  readonly previewReplies: readonly CommentDto[];
 }
 
 export interface LiveSessionDto {
