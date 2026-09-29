@@ -4,6 +4,7 @@ from collections.abc import Callable, Sequence
 from app.stores.feature_backend_protocol import (
     DistinctMemberAdd,
     FeatureWriteOperation,
+    HashFieldAssign,
     HashFieldIncrement,
     KeyExpiry,
     SortedSetAssignScore,
@@ -64,6 +65,8 @@ class InMemoryFeatureBackend:
                 case HashFieldIncrement(key=key, field=field, amount=amount):
                     fields = self._hashes.setdefault(key, {})
                     fields[field] = fields.get(field, 0.0) + amount
+                case HashFieldAssign(key=key, field=field, value=value):
+                    self._hashes.setdefault(key, {})[field] = value
                 case DistinctMemberAdd(key=key, member=member):
                     self._distinct_sets.setdefault(key, set()).add(member)
                 case KeyExpiry(key=key, ttl_seconds=ttl_seconds):
