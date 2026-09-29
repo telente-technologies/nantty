@@ -4,6 +4,8 @@ import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } 
 
 import { ViewProducts24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPlayer";
+import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
+import { calculateFeedVideoAspectRatio } from "@/components/media/videoOrientation.util";
 import { colors } from "@/constants/colors.constant";
 import type { Media } from "@/types";
 
@@ -17,10 +19,15 @@ export interface MediaPagerProps {
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
+const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPressViewProducts }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts }: MediaPagerProps) {
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, MAXIMUM_PAGER_WIDTH);
+  const firstMedia = media[0];
+  const height =
+    requestedHeight ?? (firstMedia?.type === "video" ? Math.round(pageWidth / calculateFeedVideoAspectRatio(firstMedia)) : DEFAULT_PHOTO_PAGER_HEIGHT);
+  const [fullScreenVideo, setFullScreenVideo] = useState<Media | null>(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const scrollOffsetX = useRef(new Animated.Value(0)).current;
   const pages: readonly Media[] = media.length > 0 ? media : [{ type: "image", url: null }];
@@ -48,7 +55,19 @@ export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPr
         windowSize={3}
         renderItem={({ item, index }) => (
           <View style={{ width: pageWidth, height }}>
-            <MediaPagerPage media={item} isActive={isVisibleOnScreen && index === activePageIndex} isNearActive={Math.abs(index - activePageIndex) <= 1} />
+            <MediaPagerPage
+              media={item}
+              isActive={isVisibleOnScreen && fullScreenVideo === null && index === activePageIndex}
+              isNearActive={Math.abs(index - activePageIndex) <= 1}
+            />
+            {item.type === "video" ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Play video full screen"
+                onPress={() => setFullScreenVideo(item)}
+                style={StyleSheet.absoluteFill}
+              />
+            ) : null}
           </View>
         )}
       />
@@ -64,6 +83,7 @@ export function MediaPager({ media, height = 335, isVisibleOnScreen = true, onPr
           </Pressable>
         ) : null}
       </View>
+      <LandscapeVideoFullScreenModal media={fullScreenVideo} isMuted={false} onClose={() => setFullScreenVideo(null)} />
     </View>
   );
 }
