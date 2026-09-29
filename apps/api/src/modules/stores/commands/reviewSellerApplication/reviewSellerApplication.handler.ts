@@ -41,7 +41,7 @@ export class ReviewSellerApplicationHandler extends CommandHandler<ReviewSellerA
       entityId: application.id,
       metadata: { applicantId: application.userId, storeId, roleGranted: approved ? Role.SELLER : null },
     });
-    await publishEvent(events, SellerApplicationReviewedEvent, { applicationId: application.id, userId: application.userId, decision: command.input.decision, storeId });
+    await publishEvent(events, SellerApplicationReviewedEvent, { applicationId: application.id, userId: application.userId, decision: command.input.decision, storeId, onboarding: application.onboarding });
     await publishEvent(events, NotificationRequestedEvent, {
       userId: application.userId,
       category: "promotions",
