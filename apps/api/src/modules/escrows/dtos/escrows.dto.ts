@@ -1,3 +1,4 @@
+import { Money } from "../../../utils/money.util.js";
 import type { DisputeRecord, EscrowRecord } from "../models/escrows.model.js";
 
 function convertDateToText(value: Date | null): string | null {
@@ -9,8 +10,7 @@ export function convertEscrowToDto(escrow: EscrowRecord) {
     id: escrow.id,
     orderId: escrow.orderId,
     storeId: escrow.storeId,
-    amount: escrow.amount,
-    currency: escrow.currency,
+    amount: Money.of(escrow.amount, escrow.currency).toDto(),
     status: escrow.status,
     releaseAfter: convertDateToText(escrow.releaseAfter),
     heldAt: escrow.heldAt.toISOString(),

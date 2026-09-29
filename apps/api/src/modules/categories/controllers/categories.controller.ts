@@ -17,7 +17,7 @@ export class CategoriesController {
 
   public readonly list = async (): Promise<HttpResponseContext> => {
     const categories = await this.queries.execute<ListCategoriesQuery, readonly CategoryRecord[]>(new ListCategoriesQuery());
-    return json(200, { items: categories.map(convertCategoryToDto) });
+    return json(200, categories.map(convertCategoryToDto));
   };
 
   public readonly get = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

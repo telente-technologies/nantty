@@ -3,7 +3,7 @@ import { schema } from "@zudojs/schema";
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 
 export const OpenDisputeBodySchema = schema.object({
-  reason: schema.enum(["not_received", "not_as_described", "damaged", "wrong_item", "other"]),
+  reason: schema.string().min(2).max(200),
   details: schema.string().max(2000).optional(),
 });
 

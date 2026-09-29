@@ -12,8 +12,8 @@ export function registerEscrowsRoutes(router: HttpRouter, controller: EscrowsCon
   const { guard, requireIdempotencyKey } = web;
   router.get("/api/v1/orders/:id/escrow", controller.getForOrder, { ...guard.requirePermission("orders:read-own"), ...describeRoute(TAG, "Get the escrow holding an order's payment", { params: OrderParamsSchema }) });
   router.post("/api/v1/orders/:id/disputes", controller.openDispute, {
-    ...guard.requirePermission("disputes:open"),
-    ...describeRoute(TAG, "Open a dispute and freeze the escrow", { params: OrderParamsSchema, body: OpenDisputeBodySchema }),
+    ...guard.requirePermission("disputes:open", requireIdempotencyKey),
+    ...describeRoute(TAG, "Open a dispute and freeze the escrow (Idempotency-Key required)", { params: OrderParamsSchema, body: OpenDisputeBodySchema }),
   });
   router.get("/api/v1/admin/disputes", controller.listDisputes, { ...guard.requirePermission("disputes:resolve"), ...describeRoute(TAG, "List disputes", { query: ListDisputesQuerySchema }) });
   router.post("/api/v1/admin/disputes/:id/resolve", controller.resolveDispute, {

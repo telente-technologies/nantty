@@ -1,16 +1,17 @@
 import { isUniqueConstraintViolation } from "../../../databases/prisma.database.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { EscrowStatus } from "../../../enums/escrowStatus.enum.js";
 import type { Dispute, Escrow } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
-import type { Kobo } from "../../../types/money.type.js";
+import type { MinorUnits } from "../../../types/money.type.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
-import { convertDatabaseAmountToKobo } from "../../../utils/money.util.js";
+import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
 import type { DisputeRecord, DisputeStatus, EscrowRecord, EscrowStatusChange, NewDispute, NewEscrow } from "../models/escrows.model.js";
 import type { DisputesRepository, EscrowsRepository } from "./escrows.repository.js";
 
 function convertEscrowRowToRecord(row: Escrow): EscrowRecord {
-  return { ...row, amount: convertDatabaseAmountToKobo(row.amount), status: row.status as EscrowStatus };
+  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), currency: row.currency as CurrencyCode, status: row.status as EscrowStatus };
 }
 
 function convertDisputeRowToRecord(row: Dispute): DisputeRecord {
@@ -57,9 +58,9 @@ export class PrismaEscrowsRepository implements EscrowsRepository {
     return rows.map(convertEscrowRowToRecord);
   }
 
-  public async sumOutstandingForStore(storeId: string): Promise<Kobo> {
+  public async sumOutstandingForStore(storeId: string): Promise<MinorUnits> {
     const result = await prisma().escrow.aggregate({ where: { storeId, status: { in: ["held", "disputed"] } }, _sum: { amount: true } });
-    return convertDatabaseAmountToKobo(result._sum.amount ?? 0n);
+    return convertDatabaseAmountToMinorUnits(result._sum.amount ?? 0n);
   }
 }
 

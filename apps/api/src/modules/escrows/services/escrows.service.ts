@@ -7,10 +7,10 @@ import type { AuditRecorder } from "../../../interfaces/audit.interface.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { StoreAccess } from "../../../interfaces/storeAccess.interface.js";
 import { publishEvent } from "../../../loaders/events.loader.js";
-import { calculateBasisPointsShare } from "../../../utils/money.util.js";
+import { Money } from "../../../utils/money.util.js";
 import type { OrderRecord } from "../../orders/models/orders.model.js";
 import type { OrdersRepository } from "../../orders/repositories/orders.repository.js";
-import { LedgerAccounts, type LedgerService } from "../../wallets/services/ledger.service.js";
+import { buildLinesMovingMoneyBetweenCurrencies, LedgerAccounts, type LedgerService } from "../../wallets/services/ledger.service.js";
 import { EscrowHeldEvent, EscrowRefundedEvent, EscrowReleasedEvent } from "../events/escrowReleased.event.js";
 import type { EscrowRecord } from "../models/escrows.model.js";
 import type { EscrowsRepository } from "../repositories/escrows.repository.js";
@@ -18,7 +18,7 @@ import type { EscrowsRepository } from "../repositories/escrows.repository.js";
 export type EscrowReleaseTrigger = "buyer_confirmed" | "auto_release" | "dispute_resolved";
 
 export interface EscrowPaymentRefunder {
-  refundEscrowPayment(escrow: EscrowRecord): Promise<{ readonly provider: string }>;
+  refundEscrowPayment(escrow: EscrowRecord, chargedAmount: Money): Promise<{ readonly provider: string }>;
 }
 
 export interface EscrowsDependencies {
@@ -54,11 +54,12 @@ export class EscrowsService {
         reference: `escrow-hold:${order.id}`,
         kind: "escrow_hold",
         description: `Buyer payment for order ${order.number} held in escrow`,
-        currency: order.currency,
-        lines: [
-          { account: LedgerAccounts.providerClearing(provider), direction: "debit", amount: order.total },
-          { account: LedgerAccounts.orderEscrow(order.id), direction: "credit", amount: order.total },
-        ],
+        lines: buildLinesMovingMoneyBetweenCurrencies(
+          LedgerAccounts.providerClearing(provider, order.chargeCurrency),
+          Money.of(order.chargeTotal, order.chargeCurrency),
+          LedgerAccounts.orderEscrow(order.id),
+          Money.of(order.total, order.currency),
+        ),
       });
       if (created) await publishEvent(events, EscrowHeldEvent, describeEscrow(escrow));
     }
@@ -79,18 +80,22 @@ export class EscrowsService {
     const from: readonly EscrowStatus[] = trigger === "dispute_resolved" ? ["disputed"] : ["held"];
     const released = await escrows.transitionStatus(escrow.id, from, "released", { releasedAt: clock.now() });
     if (released === undefined) throw invalidState("This escrow can no longer be released.");
-    const commission = calculateBasisPointsShare(escrow.amount, commissionBps);
-    const sellerShare = escrow.amount - commission;
+    const escrowAmount = Money.of(escrow.amount, escrow.currency);
+    const commission = escrowAmount.calculateBasisPointsShareRoundingDown(commissionBps);
+    const sellerShare = escrowAmount.subtract(commission);
     try {
       await ledger.postLedgerTransaction({
         reference: `escrow-release:${escrow.id}`,
         kind: "escrow_release",
         description: `Escrow for order ${escrow.orderId} released (${trigger})`,
-        currency: escrow.currency,
         lines: [
-          { account: LedgerAccounts.orderEscrow(escrow.orderId), direction: "debit", amount: escrow.amount },
-          ...(sellerShare > 0 ? [{ account: LedgerAccounts.storeWallet(escrow.storeId), direction: "credit" as const, amount: sellerShare }] : []),
-          ...(commission > 0 ? [{ account: LedgerAccounts.platformCommission(), direction: "credit" as const, amount: commission }] : []),
+          { account: LedgerAccounts.orderEscrow(escrow.orderId), direction: "debit", amount: escrow.amount, currency: escrow.currency },
+          ...(sellerShare.amountMinor > 0
+            ? [{ account: LedgerAccounts.storeWallet(escrow.storeId, escrow.currency), direction: "credit" as const, amount: sellerShare.amountMinor, currency: escrow.currency }]
+            : []),
+          ...(commission.amountMinor > 0
+            ? [{ account: LedgerAccounts.platformCommission(escrow.currency), direction: "credit" as const, amount: commission.amountMinor, currency: escrow.currency }]
+            : []),
         ],
       });
     } catch (error) {
@@ -98,7 +103,7 @@ export class EscrowsService {
       throw error;
     }
     await orders.transitionStatus(escrow.orderId, ["paid", "shipped", "delivered", "disputed"], "completed", { completedAt: clock.now() });
-    await audit.record({ actorId, action: "escrows.released", entityType: "escrow", entityId: escrow.id, metadata: { orderId: escrow.orderId, trigger, amount: escrow.amount, commission } });
+    await audit.record({ actorId, action: "escrows.released", entityType: "escrow", entityId: escrow.id, metadata: { orderId: escrow.orderId, trigger, amount: escrow.amount, commission: commission.amountMinor, currency: escrow.currency } });
     await this.notifyStoreOwner(escrow.storeId, "Funds released", `Your earnings for an order are now in your wallet.`, escrow.orderId);
     await publishEvent(events, EscrowReleasedEvent, describeEscrow(released));
     return released;
@@ -106,11 +111,14 @@ export class EscrowsService {
 
   public async refundEscrowToBuyer(escrow: EscrowRecord, actorId: string, from: readonly EscrowStatus[]): Promise<EscrowRecord> {
     const { escrows, ledger, orders, audit, clock, events, paymentRefunder } = this.dependencies;
+    const order = await orders.findById(escrow.orderId);
+    if (order === undefined) throw notFound("Order");
+    const chargedAmount = Money.of(order.chargeTotal, order.chargeCurrency);
     const refunded = await escrows.transitionStatus(escrow.id, from, "refunded", { refundedAt: clock.now() });
     if (refunded === undefined) throw invalidState("This escrow can no longer be refunded.");
     let provider: string;
     try {
-      provider = (await paymentRefunder.refundEscrowPayment(escrow)).provider;
+      provider = (await paymentRefunder.refundEscrowPayment(escrow, chargedAmount)).provider;
     } catch (error) {
       await escrows.transitionStatus(escrow.id, ["refunded"], escrow.status, {});
       throw error;
@@ -119,14 +127,15 @@ export class EscrowsService {
       reference: `escrow-refund:${escrow.id}`,
       kind: "escrow_refund",
       description: `Escrow for order ${escrow.orderId} refunded to the buyer`,
-      currency: escrow.currency,
-      lines: [
-        { account: LedgerAccounts.orderEscrow(escrow.orderId), direction: "debit", amount: escrow.amount },
-        { account: LedgerAccounts.providerClearing(provider), direction: "credit", amount: escrow.amount },
-      ],
+      lines: buildLinesMovingMoneyBetweenCurrencies(
+        LedgerAccounts.orderEscrow(escrow.orderId),
+        Money.of(escrow.amount, escrow.currency),
+        LedgerAccounts.providerClearing(provider, chargedAmount.currency),
+        chargedAmount,
+      ),
     });
     await orders.transitionStatus(escrow.orderId, ["paid", "shipped", "delivered", "disputed"], "refunded", {});
-    await audit.record({ actorId, action: "escrows.refunded", entityType: "escrow", entityId: escrow.id, metadata: { orderId: escrow.orderId, amount: escrow.amount } });
+    await audit.record({ actorId, action: "escrows.refunded", entityType: "escrow", entityId: escrow.id, metadata: { orderId: escrow.orderId, amount: escrow.amount, currency: escrow.currency, chargedAmount: chargedAmount.amountMinor, chargedCurrency: chargedAmount.currency } });
     await publishEvent(events, NotificationRequestedEvent, {
       userId: escrow.buyerId, category: "payments", title: "Refund issued", body: "Your payment for an order has been refunded.", data: { orderId: escrow.orderId },
     });

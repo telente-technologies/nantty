@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import type { EscrowStatus } from "../../../enums/escrowStatus.enum.js";
-import type { Kobo } from "../../../types/money.type.js";
+import type { MinorUnits } from "../../../types/money.type.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
 import type { DisputeRecord, DisputeStatus, EscrowRecord, EscrowStatusChange, NewDispute, NewEscrow } from "../models/escrows.model.js";
@@ -13,7 +13,7 @@ export interface EscrowsRepository {
   transitionStatus(escrowId: string, from: readonly EscrowStatus[], to: EscrowStatus, change: EscrowStatusChange): Promise<EscrowRecord | undefined>;
   scheduleRelease(orderId: string, releaseAfter: Date): Promise<void>;
   listDueForRelease(now: Date, limit: number): Promise<readonly EscrowRecord[]>;
-  sumOutstandingForStore(storeId: string): Promise<Kobo>;
+  sumOutstandingForStore(storeId: string): Promise<MinorUnits>;
 }
 
 export interface DisputesRepository {
@@ -62,7 +62,7 @@ export class InMemoryEscrowsRepository implements EscrowsRepository {
       .slice(0, limit);
   }
 
-  public async sumOutstandingForStore(storeId: string): Promise<Kobo> {
+  public async sumOutstandingForStore(storeId: string): Promise<MinorUnits> {
     return [...this.escrows.values()]
       .filter((escrow) => escrow.storeId === storeId && (escrow.status === "held" || escrow.status === "disputed"))
       .reduce((total, escrow) => total + escrow.amount, 0);

@@ -1,5 +1,6 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { EscrowStatus } from "../../../enums/escrowStatus.enum.js";
-import type { Kobo } from "../../../types/money.type.js";
+import type { MinorUnits } from "../../../types/money.type.js";
 
 export interface EscrowRecord {
   readonly id: string;
@@ -7,8 +8,8 @@ export interface EscrowRecord {
   readonly paymentId: string;
   readonly storeId: string;
   readonly buyerId: string;
-  readonly amount: Kobo;
-  readonly currency: string;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
   readonly status: EscrowStatus;
   readonly releaseAfter: Date | null;
   readonly heldAt: Date;
