@@ -9,6 +9,7 @@ import { createCommunicationModules, type CommunicationExternalServices } from "
 import { createCore } from "./loaders/core.loader.js";
 import { createCurrencyModule, type CurrencyExternalServices } from "./loaders/currency.loader.js";
 import { createIdentityModules, type IdentityExternalServices } from "./loaders/identity.loader.js";
+import { createSellerProgramModules, createVerificationBadgeSource } from "./loaders/sellerProgram.loader.js";
 import { createSocialModules, type SocialExternalServices } from "./loaders/social.loader.js";
 import { createWebKit } from "./loaders/web.loader.js";
 import type { AppLogger } from "./loggers/app.logger.js";
@@ -49,22 +50,27 @@ export function createDependencies(options: DependencyOptions) {
 
   const audit = new AuditService(core.persistence === "prisma" ? new PrismaAuditRepository() : new InMemoryAuditRepository(), core.clock);
   registerAuditCommandAndQueryHandlers(core.commands, core.queries, audit);
-  const identity = createIdentityModules(core, audit, external);
+  const badgeSource = createVerificationBadgeSource(core);
+  const identity = createIdentityModules(core, audit, external, badgeSource.lookup);
   const currency = createCurrencyModule(core, identity.userDirectory, external);
   const web = createWebKit(core.settings, core.persistence, core.clock, identity.accessTokenVerifier, currency.resolveViewerLocale);
   const { currencyConverter } = currency;
-  const catalog = createCatalogModules(core, { audit, userDirectory: identity.userDirectory, currencyConverter }, external);
+  const catalog = createCatalogModules(core, { audit, userDirectory: identity.userDirectory, currencyConverter, verificationBadges: badgeSource.lookup }, external);
   const commerce = createCommerceModules(
     core,
     { audit, userDirectory: identity.userDirectory, addressBook: identity.addressBook, currencyConverter, ...catalog },
     external,
   );
+  const sellerProgram = createSellerProgramModules(core, {
+    audit, userDirectory: identity.userDirectory, storeAccess: catalog.storeAccess, badgeSource, payments: commerce.payments,
+  });
   const social = createSocialModules(core, {
     audit,
     userDirectory: identity.userDirectory,
     currencyConverter,
     ...catalog,
     orderLookup: commerce.orderLookup,
+    creatorWallets: commerce.creatorWallets,
   }, external);
   const communication = createCommunicationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph }, external);
 
@@ -72,7 +78,7 @@ export function createDependencies(options: DependencyOptions) {
     health,
     core,
     web,
-    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs, ...catalog.scheduledJobs],
+    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs, ...catalog.scheduledJobs, ...sellerProgram.scheduledJobs],
     ports: {
       audit,
       currencyConverter,
@@ -82,6 +88,11 @@ export function createDependencies(options: DependencyOptions) {
       mediaLibrary: catalog.mediaLibrary,
       mediaProcessingQueue: catalog.mediaProcessingQueue,
       orderLookup: commerce.orderLookup,
+      creatorWallets: commerce.creatorWallets,
+      sellerAccess: sellerProgram.sellerAccess,
+      entitlements: sellerProgram.entitlements,
+      requireSellerEntitlement: sellerProgram.requireSellerEntitlement,
+      verificationBadges: badgeSource.lookup,
       socialGraph: social.socialGraph,
     },
     // zudojs:container:start
@@ -91,6 +102,7 @@ export function createDependencies(options: DependencyOptions) {
     currencyController: currency.currencyController,
     ...catalog.controllers,
     ...commerce.controllers,
+    ...sellerProgram.controllers,
     ...social.controllers,
     ...communication.controllers,
     // zudojs:container:end
