@@ -1,4 +1,5 @@
-import type { Kobo } from "../types/money.type.js";
+import type { CurrencyCode } from "../enums/currency.enum.js";
+import type { MinorUnits } from "../types/money.type.js";
 
 export interface PurchasableVariant {
   readonly variantId: string;
@@ -8,8 +9,8 @@ export interface PurchasableVariant {
   readonly size: string | null;
   readonly color: string | null;
   readonly imageUrl: string | null;
-  readonly unitPrice: Kobo;
-  readonly currency: string;
+  readonly unitPrice: MinorUnits;
+  readonly currency: CurrencyCode;
   readonly stock: number;
   readonly purchasable: boolean;
 }
@@ -18,8 +19,9 @@ export interface ProductSummary {
   readonly id: string;
   readonly storeId: string;
   readonly title: string;
-  readonly price: Kobo;
-  readonly compareAtPrice: Kobo | null;
+  readonly price: MinorUnits;
+  readonly compareAtPrice: MinorUnits | null;
+  readonly currency: CurrencyCode;
   readonly imageUrl: string | null;
   readonly ratingAverage: number;
   readonly ratingCount: number;
@@ -42,6 +44,7 @@ export interface StockLine {
 
 export interface ProductCatalog {
   findPurchasableVariants(variantIds: readonly string[]): Promise<readonly PurchasableVariant[]>;
+  listPurchasableVariantsForProduct(productId: string): Promise<readonly PurchasableVariant[]>;
   reserveStock(lines: readonly StockLine[]): Promise<void>;
   releaseStock(lines: readonly StockLine[]): Promise<void>;
   recordSales(lines: readonly { readonly productId: string; readonly quantity: number }[]): Promise<void>;

@@ -7,3 +7,6 @@ export * from "./productCatalog.interface.js";
 export * from "./socialGraph.interface.js";
 export * from "./storeAccess.interface.js";
 export * from "./userDirectory.interface.js";
+export * from "./currencyConverter.interface.js";
+export * from "./viewerLocale.interface.js";
+export * from "./addressBook.interface.js";

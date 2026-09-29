@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "../enums/currency.enum.js";
+
 export interface UserSummary {
   readonly id: string;
   readonly username: string;
@@ -13,7 +15,13 @@ export interface UserContact {
   readonly notificationPreferences: Readonly<Record<string, boolean>>;
 }
 
+export interface UserLocalePreference {
+  readonly countryCode: string | null;
+  readonly currency: CurrencyCode | null;
+}
+
 export interface UserDirectory {
+  findUserLocalePreference(userId: string): Promise<UserLocalePreference | undefined>;
   findUserSummaries(userIds: readonly string[]): Promise<readonly UserSummary[]>;
   findUserContact(userId: string): Promise<UserContact | undefined>;
   searchUsers(term: string, limit: number): Promise<readonly UserSummary[]>;
