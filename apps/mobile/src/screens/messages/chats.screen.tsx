@@ -2,9 +2,13 @@ import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { fetchConversationListAndSaveLocally, readSavedConversationsForInstantDisplay } from "@/cache/messageSync.util";
 import { ChatSearchPanel } from "@/components/chat/chatSearchPanel";
+import { ChatsOptionsMenu } from "@/components/chat/chatsOptionsMenu";
+import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
+import { useRealtimeMessagingConnection } from "@/components/chat/realtimeMessaging.hook";
 import { ChatsEmptyState } from "@/components/chat/chatsEmptyState";
 import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
 import { ConversationRow } from "@/components/chat/conversationRow";
@@ -22,6 +26,9 @@ export function ChatsScreen() {
   const navigation = useNavigation();
   const [filter, setFilter] = useState<ConversationFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
+  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
+  const insets = useSafeAreaInsets();
+  useRealtimeMessagingConnection();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const conversations = useQuery({
     queryKey: ["conversations", filter],
@@ -55,7 +62,7 @@ export function ChatsScreen() {
               <MagnifyingGlass24Icon />
             </Pressable>
           )}
-          <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10}>
+          <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10} onPress={() => setIsOptionsMenuVisible(true)}>
             <DotsThreeVertical24Icon />
           </Pressable>
         </View>
@@ -99,7 +106,7 @@ export function ChatsScreen() {
             <View style={styles.rowWrap}>
               <ConversationRow
                 conversation={item}
-                onPress={() => navigation.navigate("Chat", { conversationId: item.id, name: item.peer.name })}
+                onPress={() => navigation.navigate("Chat", { conversationId: item.id, name: describeConversationForDisplay(item).displayName })}
               />
             </View>
           )}
@@ -116,6 +123,13 @@ export function ChatsScreen() {
           <WechatLogo48Icon />
         </Pressable>
       )}
+      <ChatsOptionsMenu
+        visible={isOptionsMenuVisible}
+        topOffset={insets.top + 44}
+        onClose={() => setIsOptionsMenuVisible(false)}
+        onCreateGroup={() => navigation.navigate("NewGroup", { kind: "group" })}
+        onCreateChannel={() => navigation.navigate("NewGroup", { kind: "channel" })}
+      />
     </Screen>
   );
 }
