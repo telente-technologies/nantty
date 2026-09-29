@@ -31,17 +31,17 @@ describe("seller applications", () => {
 
     await app.client.get("/api/v1/admin/seller-applications").auth(applicant.accessToken).expect(403);
     const pending = await app.client.get("/api/v1/admin/seller-applications").query({ status: "pending" }).auth(admin.accessToken).expect(200);
-    expect(pending.json<{ items: { id: string }[] }>().items.map((item) => item.id)).toContain(applicationId);
+    expect(pending.json<{ data: { id: string }[] }>().data.map((item) => item.id)).toContain(applicationId);
 
     await app.client.post(`/api/v1/admin/seller-applications/${applicationId}/review`).auth(admin.accessToken).send({ decision: "approve" }).expect(200).expectJson({ status: "approved" });
     await app.client.post(`/api/v1/admin/seller-applications/${applicationId}/review`).auth(admin.accessToken).send({ decision: "reject" }).expect(409);
 
     const sellerToken = await signInAgain(applicant);
     const mine = await app.client.get("/api/v1/stores/mine").auth(sellerToken).expect(200);
-    expect(mine.json<{ items: { name: string; currency: string }[] }>().items).toMatchObject([{ name: "Lagos Kicks", currency: "GBP" }]);
+    expect(mine.json<{ data: { name: string; currency: string }[] }>().data).toMatchObject([{ name: "Lagos Kicks", currency: "GBP" }]);
 
     const audit = await app.client.get("/api/v1/admin/audit-events").query({ entityId: applicationId }).auth(admin.accessToken).expect(200);
-    expect(audit.json<{ items: { action: string }[] }>().items[0]?.action).toBe("stores.seller_application_approved");
+    expect(audit.json<{ data: { action: string }[] }>().data[0]?.action).toBe("stores.seller_application_approved");
   });
 });
 
@@ -53,11 +53,11 @@ describe("stores", () => {
     const storeId = await createStoreFor(seller);
     const detail = await app.client.get(`/api/v1/stores/${storeId}`).set("x-client-region", "NG").expect(200);
     expect(detail.json()).toMatchObject({
-      name: "Ada Fabrics", currency: "NGN", shippingFee: { amountMinor: 150_000, currency: "NGN" }, discountBps: 1_000, productCount: 0,
+      name: "Ada Fabrics", currency: "NGN", shippingFee: { amountMinor: 150_000, currency: "NGN" }, followers: 0, isFollowing: false, verified: false, posts: [],
     });
     const british = await app.client.get(`/api/v1/stores/${storeId}`).set("x-client-region", "GB").expect(200);
     expect(british.json()).toMatchObject({ currency: "NGN", shippingFee: { amountMinor: 75, currency: "GBP" } });
-    const slug = detail.json<{ slug: string }>().slug;
+    const slug = detail.json<{ handle: string }>().handle;
     await app.client.get(`/api/v1/stores/slug/${slug}`).expect(200).expectJson({ id: storeId });
   });
 
@@ -74,7 +74,7 @@ describe("stores", () => {
     await app.client.post(`/api/v1/stores/${storeId}/members`).auth(owner.accessToken).send({ userId: helper.userId, role: "staff" }).expect(201);
     await app.client.post(`/api/v1/stores/${storeId}/members`).auth(owner.accessToken).send({ userId: helper.userId, role: "staff" }).expect(409);
     const members = await app.client.get(`/api/v1/stores/${storeId}/members`).auth(owner.accessToken).expect(200);
-    expect(members.json<{ items: unknown[] }>().items).toHaveLength(2);
+    expect(members.json<{ data: unknown[] }>().data).toHaveLength(2);
 
     await app.client.patch(`/api/v1/stores/${storeId}`).auth(owner.accessToken).send({ name: "Renamed Store" }).expect(200).expectJson({ name: "Renamed Store" });
     await app.client.delete(`/api/v1/stores/${storeId}/members/${owner.userId}`).auth(owner.accessToken).expect(422);
@@ -95,7 +95,7 @@ describe("stores", () => {
     await app.client.post(`/api/v1/admin/stores/${storeId}/status`).auth(admin.accessToken).send({ status: "suspended", reason: "fraud" }).expect(200);
     await app.client.get(`/api/v1/stores/${storeId}`).expect(404);
     const audit = await app.client.get("/api/v1/admin/audit-events").query({ entityId: storeId }).auth(admin.accessToken).expect(200);
-    expect(audit.json<{ items: { action: string }[] }>().items.map((event) => event.action)).toContain("stores.suspended");
+    expect(audit.json<{ data: { action: string }[] }>().data.map((event) => event.action)).toContain("stores.suspended");
     await app.client.post(`/api/v1/admin/stores/${storeId}/status`).auth(admin.accessToken).send({ status: "active" }).expect(200);
     await app.client.get(`/api/v1/stores/${storeId}`).expect(200);
   });
@@ -106,7 +106,7 @@ describe("stores", () => {
     const storeId = await createStoreFor(seller, "Featured Brand");
     await app.client.post(`/api/v1/admin/stores/${storeId}/featured`).auth(admin.accessToken).send({ featured: true }).expect(200);
     const featured = await app.client.get("/api/v1/stores").query({ featured: "true" }).expect(200);
-    expect(featured.json<{ items: { id: string }[] }>().items.map((store) => store.id)).toEqual([storeId]);
+    expect(featured.json<{ data: { id: string }[] }>().data.map((store) => store.id)).toEqual([storeId]);
   });
 
   it("picks the store currency from the body or the creator's region and locks it once products exist", async () => {

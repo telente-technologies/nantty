@@ -26,8 +26,8 @@ describe("product reviews over HTTP", () => {
     const storeId = await createStoreForSeller(app, seller, "Quiet Store");
     const productId = await createProductInStore(app, seller, storeId);
     await app.client.get(`/api/v1/products/${productId}/rating-summary`).expect(200).expectJson({ average: 0, count: 0 });
-    await app.client.get(`/api/v1/products/${productId}/reviews`).expect(200).expectJson({ items: [], nextCursor: null });
-    await app.client.get(`/api/v1/stores/${storeId}/reviews`).expect(200).expectJson({ items: [], nextCursor: null });
+    await app.client.get(`/api/v1/products/${productId}/reviews`).expect(200).expectJson({ average: 0, count: 0, reviews: [], nextCursor: null });
+    await app.client.get(`/api/v1/stores/${storeId}/reviews`).expect(200).expectJson({ data: [], nextCursor: null });
   });
 
   it("lets only sellers reply to reviews", async () => {
