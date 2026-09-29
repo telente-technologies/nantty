@@ -11,6 +11,7 @@ import { publishEvent } from "../../../loaders/events.loader.js";
 import type { RepositorySocialGraph } from "../../follows/services/socialGraph.service.js";
 import type { LiveSessionRecord, PostRecord } from "../models/posts.model.js";
 import type { LiveSessionsRepository } from "../repositories/live.repository.js";
+import type { SocialEngagementRepository } from "../repositories/socialEngagement.repository.js";
 import type { PostInteractionsRepository } from "../repositories/postInteractions.repository.js";
 import { isPostVisibleAt, type PostsRepository } from "../repositories/posts.repository.js";
 import { PostPresenter } from "./postPresenter.service.js";
@@ -18,6 +19,7 @@ import { PostPresenter } from "./postPresenter.service.js";
 export interface PostsDependencies {
   readonly posts: PostsRepository;
   readonly interactions: PostInteractionsRepository;
+  readonly engagement: SocialEngagementRepository;
   readonly liveSessions: LiveSessionsRepository;
   readonly userDirectory: UserDirectory;
   readonly productCatalog: ProductCatalog;

@@ -2,6 +2,11 @@ import { BaseModule, type ModuleContext } from "@zudojs/core";
 import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 
 import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
+import { ChangeCommentLikeHandler } from "./commands/changeCommentLike/changeCommentLike.handler.js";
+import { MarkStorySeenHandler } from "./commands/markStorySeen/markStorySeen.handler.js";
+import { ReactToLiveSessionHandler } from "./commands/reactToLiveSession/reactToLiveSession.handler.js";
+import { ShareLiveSessionHandler } from "./commands/shareLiveSession/shareLiveSession.handler.js";
+import { ReplyToStoryHandler } from "./commands/replyToStory/replyToStory.handler.js";
 import { AddLiveProductHandler } from "./commands/addLiveProduct/addLiveProduct.handler.js";
 import { CommentOnLiveSessionHandler } from "./commands/commentOnLiveSession/commentOnLiveSession.handler.js";
 import { CommentOnPostHandler } from "./commands/commentOnPost/commentOnPost.handler.js";
@@ -18,6 +23,7 @@ import { StartLiveSessionHandler } from "./commands/startLiveSession/startLiveSe
 import { TagProductsHandler } from "./commands/tagProducts/tagProducts.handler.js";
 import { UnlikePostHandler } from "./commands/unlikePost/unlikePost.handler.js";
 import { GetLiveSessionHandler } from "./queries/getLiveSession/getLiveSession.handler.js";
+import { GetStoreDetailHandler } from "./queries/getStoreDetail/getStoreDetail.handler.js";
 import { GetPostHandler } from "./queries/getPost/getPost.handler.js";
 import { ListActiveStoriesHandler } from "./queries/listActiveStories/listActiveStories.handler.js";
 import { ListLiveCommentsHandler } from "./queries/listLiveComments/listLiveComments.handler.js";
@@ -47,6 +53,11 @@ export class PostsModule extends BaseModule {
 export function registerPostsCommandAndQueryHandlers(commands: CommandBus, queries: QueryBus, postsService: PostsService): void {
   registerCommandHandlers(commands, [
     new AddLiveProductHandler(postsService),
+    new MarkStorySeenHandler(postsService),
+    new ReactToLiveSessionHandler(postsService),
+    new ShareLiveSessionHandler(postsService),
+    new ReplyToStoryHandler(postsService, commands),
+    new ChangeCommentLikeHandler(postsService),
     new CommentOnLiveSessionHandler(postsService),
     new CommentOnPostHandler(postsService),
     new CreatePostHandler(postsService),
@@ -65,6 +76,7 @@ export function registerPostsCommandAndQueryHandlers(commands: CommandBus, queri
   registerQueryHandlers(queries, [
     new GetLiveSessionHandler(postsService),
     new GetPostHandler(postsService),
+    new GetStoreDetailHandler(postsService),
     new ListActiveStoriesHandler(postsService),
     new ListLiveCommentsHandler(postsService),
     new ListLiveSessionsHandler(postsService),

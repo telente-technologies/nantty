@@ -54,7 +54,7 @@ export class InMemoryPostInteractionsRepository implements PostInteractionsRepos
   }
 
   public async createComment(input: NewCommentInput): Promise<CommentRecord> {
-    const comment: CommentRecord = { ...input, id: randomUUID(), deletedAt: null };
+    const comment: CommentRecord = { ...input, id: randomUUID(), likeCount: 0, deletedAt: null };
     this.comments.set(comment.id, comment);
     return comment;
   }

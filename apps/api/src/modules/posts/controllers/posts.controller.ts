@@ -6,6 +6,7 @@ import { findViewerLocale } from "../../../middlewares/viewerLocale.middleware.j
 import type { Page } from "../../../types/pagination.type.js";
 import { empty, json, readJsonBody, validationFailed } from "../../../utils/http.util.js";
 import { buildPageRequest } from "../../../utils/pagination.util.js";
+import { ChangeCommentLikeCommand } from "../commands/changeCommentLike/changeCommentLike.command.js";
 import { CommentOnPostCommand } from "../commands/commentOnPost/commentOnPost.command.js";
 import { CreatePostCommand } from "../commands/createPost/createPost.command.js";
 import { DeleteCommentCommand } from "../commands/deleteComment/deleteComment.command.js";
@@ -15,14 +16,16 @@ import { RepostPostCommand } from "../commands/repostPost/repostPost.command.js"
 import { SharePostCommand } from "../commands/sharePost/sharePost.command.js";
 import { TagProductsCommand } from "../commands/tagProducts/tagProducts.command.js";
 import { UnlikePostCommand } from "../commands/unlikePost/unlikePost.command.js";
-import type { CommentDto, PostDto, StoryGroupDto } from "../dtos/posts.dto.js";
+import type { CommentDto, PostDto } from "../dtos/posts.dto.js";
+import type { StoreDetailDto } from "../queries/getStoreDetail/getStoreDetail.handler.js";
+import { GetStoreDetailQuery } from "../queries/getStoreDetail/getStoreDetail.query.js";
 import { GetPostQuery } from "../queries/getPost/getPost.query.js";
-import { ListActiveStoriesQuery } from "../queries/listActiveStories/listActiveStories.query.js";
 import { ListPostCommentsQuery } from "../queries/listPostComments/listPostComments.query.js";
 import { ListStorePostsQuery } from "../queries/listStorePosts/listStorePosts.query.js";
 import { ListUserPostsQuery } from "../queries/listUserPosts/listUserPosts.query.js";
 import {
   CommentBodySchema,
+  CommentLikeParamsSchema,
   CommentParamsSchema,
   CreatePostBodySchema,
   PageQuerySchemaForLists,
@@ -108,9 +111,20 @@ export class PostsController {
     if (!params.success) return validationFailed(params.issues);
     const body = CommentBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new CommentOnPostCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.text, body.data.parentId ?? null);
+    const command = new CommentOnPostCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.text, body.data.replyToCommentId ?? body.data.parentId ?? null);
     return json(201, await this.commands.execute<CommentOnPostCommand, CommentDto>(command));
   };
+
+  public readonly likeComment = (ctx: HttpRouterContext) => this.changeCommentLike(ctx, true);
+
+  public readonly unlikeComment = (ctx: HttpRouterContext) => this.changeCommentLike(ctx, false);
+
+  private async changeCommentLike(ctx: HttpRouterContext, liked: boolean): Promise<HttpResponseContext> {
+    const params = CommentLikeParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const command = new ChangeCommentLikeCommand(requireAuthenticatedPrincipal(ctx), params.data.id, liked);
+    return json(200, await this.commands.execute<ChangeCommentLikeCommand, { liked: boolean; likes: number }>(command));
+  }
 
   public readonly deleteComment = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const params = CommentParamsSchema.safeParse(ctx.params);
@@ -130,6 +144,13 @@ export class PostsController {
     return json(200, await this.queries.execute<ListUserPostsQuery, Page<PostDto>>(listQuery));
   };
 
+  public readonly getStoreDetail = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = PostParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const query = new GetStoreDetailQuery(findAuthenticatedPrincipal(ctx)?.userId, params.data.id, findViewerLocale(ctx).currency);
+    return json(200, await this.queries.execute<GetStoreDetailQuery, StoreDetailDto>(query));
+  };
+
   public readonly listStorePosts = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const params = PostParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
@@ -139,8 +160,4 @@ export class PostsController {
     return json(200, await this.queries.execute<ListStorePostsQuery, Page<PostDto>>(listQuery));
   };
 
-  public readonly listStories = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const groups = await this.queries.execute<ListActiveStoriesQuery, readonly StoryGroupDto[]>(new ListActiveStoriesQuery(requireAuthenticatedPrincipal(ctx), findViewerLocale(ctx).currency));
-    return json(200, { items: groups });
-  };
 }

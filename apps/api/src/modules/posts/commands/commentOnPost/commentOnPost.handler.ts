@@ -49,7 +49,7 @@ export class CommentOnPostHandler extends CommandHandler<CommentOnPostCommand, C
         data: { type: "reply", postId: post.id, commentId: comment.id },
       });
     }
-    const [dto] = await this.postsService.presenter.presentComments([comment]);
+    const [dto] = await this.postsService.presenter.presentComments([comment], userId);
     return dto as CommentDto;
   }
 }

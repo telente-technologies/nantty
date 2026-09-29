@@ -4,22 +4,29 @@ import type { WebKit } from "../../../loaders/web.loader.js";
 import { describeRoute } from "../../../utils/openapi.util.js";
 import type { LiveController } from "../controllers/live.controller.js";
 import type { PostsController } from "../controllers/posts.controller.js";
+import type { StoriesController } from "../controllers/stories.controller.js";
 import {
   CommentBodySchema,
+  CommentLikeParamsSchema,
+  CreateStoryBodySchema,
   CommentParamsSchema,
   CreatePostBodySchema,
   LiveCommentBodySchema,
   LiveProductBodySchema,
+  LiveReactionBodySchema,
+  LiveShareBodySchema,
   PageQuerySchemaForLists,
   PostListQuerySchema,
   PostParamsSchema,
   RepostBodySchema,
   StartLiveBodySchema,
+  StoryReplyBodySchema,
   TagProductsBodySchema,
 } from "../validators/posts.validator.js";
 
 const POSTS = "/api/v1/posts";
-const LIVE = "/api/v1/live";
+const LIVE = "/api/v1/lives";
+const STORIES = "/api/v1/stories";
 
 export function registerPostsRoutes(router: HttpRouter, controller: PostsController, web: WebKit): void {
   const { guard } = web;
@@ -39,8 +46,22 @@ export function registerPostsRoutes(router: HttpRouter, controller: PostsControl
   router.post(`${POSTS}/:id/comments`, controller.addComment, { ...write, ...describeRoute("posts", "Comment or reply", { ...params, body: CommentBodySchema }) });
   router.delete(`${POSTS}/:id/comments/:commentId`, controller.deleteComment, { ...write, ...describeRoute("posts", "Delete a comment", { params: CommentParamsSchema }) });
   router.get("/api/v1/users/:id/posts", controller.listUserPosts, { ...anyone, ...describeRoute("posts", "List a user's posts", { ...params, query: PostListQuerySchema }) });
+  router.get("/api/v1/stores/:id", controller.getStoreDetail, { ...anyone, ...describeRoute("stores", "Store profile with followers and recent posts", params) });
   router.get("/api/v1/stores/:id/posts", controller.listStorePosts, { ...anyone, ...describeRoute("posts", "List a store's posts", { ...params, query: PageQuerySchemaForLists }) });
-  router.get("/api/v1/stories", controller.listStories, { ...guard.requirePermission("feed:read"), ...describeRoute("posts", "Active stories from people I follow") });
+  router.post("/api/v1/comments/:id/like", controller.likeComment, { ...write, ...describeRoute("posts", "Like a comment", { params: CommentLikeParamsSchema }) });
+  router.delete("/api/v1/comments/:id/like", controller.unlikeComment, { ...write, ...describeRoute("posts", "Unlike a comment", { params: CommentLikeParamsSchema }) });
+}
+
+export function registerStoriesRoutes(router: HttpRouter, controller: StoriesController, web: WebKit): void {
+  const { guard } = web;
+  const reader = guard.requirePermission("feed:read");
+  const write = guard.requirePermission("social:write");
+  const params = { params: PostParamsSchema };
+  router.get(`${STORIES}/tray`, controller.tray, { ...reader, ...describeRoute("stories", "Stories tray: me first, then people I follow") });
+  router.get("/api/v1/users/:id/stories", controller.listForUser, { ...reader, ...describeRoute("stories", "A user's active stories", params) });
+  router.post(STORIES, controller.create, { ...write, ...describeRoute("stories", "Post a story", { body: CreateStoryBodySchema }) });
+  router.post(`${STORIES}/:id/seen`, controller.markSeen, { ...reader, ...describeRoute("stories", "Mark a story as seen", params) });
+  router.post(`${STORIES}/:id/replies`, controller.reply, { ...write, ...describeRoute("stories", "Reply to a story by direct message", { ...params, body: StoryReplyBodySchema }) });
 }
 
 export function registerLiveRoutes(router: HttpRouter, controller: LiveController, web: WebKit): void {
@@ -50,6 +71,7 @@ export function registerLiveRoutes(router: HttpRouter, controller: LiveControlle
   const params = { params: PostParamsSchema };
 
   router.post(LIVE, controller.start, { ...write, ...describeRoute("live", "Start a live session", { body: StartLiveBodySchema }) });
+  router.get(`${LIVE}/suggested`, controller.listSuggested, { ...anyone, ...describeRoute("live", "Suggested live sessions") });
   router.get(LIVE, controller.list, { ...anyone, ...describeRoute("live", "List live sessions", { query: PageQuerySchemaForLists }) });
   router.get(`${LIVE}/:id`, controller.get, { ...anyone, ...describeRoute("live", "Get a live session", params) });
   router.post(`${LIVE}/:id/join`, controller.join, { ...write, ...describeRoute("live", "Join a live session", params) });
@@ -57,5 +79,7 @@ export function registerLiveRoutes(router: HttpRouter, controller: LiveControlle
   router.post(`${LIVE}/:id/end`, controller.end, { ...write, ...describeRoute("live", "End my live session", params) });
   router.get(`${LIVE}/:id/comments`, controller.listComments, { ...anyone, ...describeRoute("live", "List live comments", { ...params, query: PageQuerySchemaForLists }) });
   router.post(`${LIVE}/:id/comments`, controller.addComment, { ...write, ...describeRoute("live", "Comment in a live session", { ...params, body: LiveCommentBodySchema }) });
+  router.post(`${LIVE}/:id/reactions`, controller.react, { ...write, ...describeRoute("live", "React in a live session", { ...params, body: LiveReactionBodySchema }) });
+  router.post(`${LIVE}/:id/share`, controller.share, { ...write, ...describeRoute("live", "Share a live session with people", { ...params, body: LiveShareBodySchema }) });
   router.post(`${LIVE}/:id/products`, controller.addProduct, { ...write, ...describeRoute("live", "Show or pin a product in my live session", { ...params, body: LiveProductBodySchema }) });
 }

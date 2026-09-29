@@ -20,6 +20,6 @@ export class ListUserPostsHandler extends QueryHandler<ListUserPostsQuery, Page<
     }
     const kinds = query.kind === undefined ? (["post", "clip"] as const) : [query.kind];
     const page = await posts.listVisible({ authorIds: [query.authorId], kinds }, clock.now(), query.page);
-    return { items: await this.postsService.presenter.presentPosts(page.items, query.viewerId, query.displayCurrency), nextCursor: page.nextCursor };
+    return { data: await this.postsService.presenter.presentPosts(page.data, query.viewerId, query.displayCurrency), nextCursor: page.nextCursor };
   }
 }

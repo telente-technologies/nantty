@@ -31,8 +31,8 @@ export class ListStorePostsHandler extends QueryHandler<
       query.page,
     );
     return {
-      items: await this.postsService.presenter.presentPosts(
-        page.items,
+      data: await this.postsService.presenter.presentPosts(
+        page.data,
         query.viewerId,
         query.displayCurrency,
       ),

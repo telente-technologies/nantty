@@ -14,6 +14,6 @@ export class ListLiveSessionsHandler extends QueryHandler<ListLiveSessionsQuery,
 
   public async execute(query: ListLiveSessionsQuery): Promise<Page<LiveSessionDto>> {
     const page = await this.postsService.dependencies.liveSessions.listActive(query.page);
-    return { items: await this.postsService.presenter.presentLiveSessions(page.items, query.displayCurrency), nextCursor: page.nextCursor };
+    return { data: await this.postsService.presenter.presentLiveSessions(page.data, query.displayCurrency), nextCursor: page.nextCursor };
   }
 }

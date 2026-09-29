@@ -56,6 +56,7 @@ export interface CommentRecord {
   readonly authorId: string;
   readonly parentId: string | null;
   readonly text: string;
+  readonly likeCount: number;
   readonly deletedAt: Date | null;
   readonly createdAt: Date;
 }
@@ -69,6 +70,7 @@ export interface LiveSessionRecord {
   readonly title: string;
   readonly status: LiveStatus;
   readonly viewerCount: number;
+  readonly reactionCount: number;
   readonly productIds: readonly string[];
   readonly pinnedProductId: string | null;
   readonly startedAt: Date;

@@ -18,12 +18,23 @@ export const CreatePostBodySchema = schema.object({
   topics: schema.array(schema.string().min(2).max(40).regex(/^[a-z0-9-]+$/)).max(5).optional(),
   storeId: schema.string().uuid().optional(),
   repostOfId: schema.string().uuid().optional(),
+  audience: schema.enum(["everyone"]).optional(),
 });
+
+export const CreateStoryBodySchema = schema.object({
+  media: schema.array(PostMediaSchema).min(1).max(10),
+  text: schema.string().max(500).optional(),
+});
+
+export const StoryReplyBodySchema = schema.object({ text: schema.string().min(1).max(1000) });
+
+export const CommentLikeParamsSchema = schema.object({ id: schema.string().uuid() });
 
 export const TagProductsBodySchema = schema.object({ productIds: productIds.min(1) });
 
 export const CommentBodySchema = schema.object({
   text: schema.string().min(1).max(1000),
+  replyToCommentId: schema.string().uuid().optional(),
   parentId: schema.string().uuid().optional(),
 });
 
@@ -56,3 +67,7 @@ export const PageQuerySchemaForLists = schema.object({
   limit: schema.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   cursor: schema.string().uuid().optional(),
 });
+
+export const LiveReactionBodySchema = schema.object({ emoji: schema.string().min(1).max(16) });
+
+export const LiveShareBodySchema = schema.object({ userIds: schema.array(schema.string().uuid()).min(1).max(50) });

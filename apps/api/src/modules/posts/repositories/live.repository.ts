@@ -22,6 +22,7 @@ export interface LiveSessionsRepository {
   addProduct(sessionId: string, productId: string, pin: boolean): Promise<LiveSessionRecord | undefined>;
   createComment(sessionId: string, userId: string, text: string, createdAt: Date): Promise<LiveCommentRecord>;
   listComments(sessionId: string, page: PageRequest): Promise<Page<LiveCommentRecord>>;
+  addReaction(sessionId: string): Promise<LiveSessionRecord | undefined>;
 }
 
 export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
@@ -30,7 +31,7 @@ export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
   private readonly comments: LiveCommentRecord[] = [];
 
   public async create(input: NewLiveSessionInput): Promise<LiveSessionRecord> {
-    const session = { ...input, id: randomUUID(), status: "live" as const, viewerCount: 0, pinnedProductId: null, endedAt: null, createdAt: input.startedAt };
+    const session = { ...input, id: randomUUID(), status: "live" as const, viewerCount: 0, reactionCount: 0, pinnedProductId: null, endedAt: null, createdAt: input.startedAt };
     this.sessions.set(session.id, session);
     this.viewers.set(session.id, new Set());
     return session;
@@ -89,6 +90,14 @@ export class InMemoryLiveSessionsRepository implements LiveSessionsRepository {
     const session = this.sessions.get(sessionId);
     if (session === undefined) return undefined;
     const updated = { ...session, viewerCount: this.viewers.get(sessionId)?.size ?? 0 };
+    this.sessions.set(sessionId, updated);
+    return updated;
+  }
+
+  public async addReaction(sessionId: string): Promise<LiveSessionRecord | undefined> {
+    const session = this.sessions.get(sessionId);
+    if (session === undefined || session.status !== "live") return undefined;
+    const updated = { ...session, reactionCount: session.reactionCount + 1 };
     this.sessions.set(sessionId, updated);
     return updated;
   }

@@ -15,6 +15,6 @@ export class ListPostCommentsHandler extends QueryHandler<ListPostCommentsQuery,
   public async execute(query: ListPostCommentsQuery): Promise<Page<CommentDto>> {
     const post = await this.postsService.findVisiblePostOrThrow(query.postId, query.viewerId);
     const page = await this.postsService.dependencies.interactions.listComments(post.id, query.page);
-    return { items: await this.postsService.presenter.presentComments(page.items), nextCursor: page.nextCursor };
+    return { data: await this.postsService.presenter.presentComments(page.data, query.viewerId), nextCursor: page.nextCursor };
   }
 }

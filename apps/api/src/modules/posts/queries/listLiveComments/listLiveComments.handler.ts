@@ -15,6 +15,6 @@ export class ListLiveCommentsHandler extends QueryHandler<ListLiveCommentsQuery,
   public async execute(query: ListLiveCommentsQuery): Promise<Page<LiveCommentDto>> {
     const session = await this.postsService.findLiveSessionOrThrow(query.sessionId);
     const page = await this.postsService.dependencies.liveSessions.listComments(session.id, query.page);
-    return { items: await this.postsService.presenter.presentLiveComments(page.items), nextCursor: page.nextCursor };
+    return { data: await this.postsService.presenter.presentLiveComments(page.data), nextCursor: page.nextCursor };
   }
 }

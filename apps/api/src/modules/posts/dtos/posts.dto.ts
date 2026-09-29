@@ -1,15 +1,14 @@
-import type { UserSummary } from "../../../interfaces/userDirectory.interface.js";
 import type { MoneyDto } from "../../../utils/money.util.js";
 import type { PostKind, PostMedia } from "../models/posts.model.js";
 
 export interface ProductCardDto {
   readonly id: string;
+  readonly name: string;
   readonly storeId: string;
-  readonly title: string;
   readonly price: MoneyDto;
   readonly compareAtPrice: MoneyDto | null;
   readonly imageUrl: string | null;
-  readonly ratingAverage: number;
+  readonly rating: number;
   readonly ratingCount: number;
 }
 
@@ -20,35 +19,51 @@ export interface StoreBadgeDto {
   readonly logoUrl: string | null;
 }
 
+export interface AuthorDto {
+  readonly id: string;
+  readonly name: string;
+  readonly username: string;
+  readonly avatarUrl: string | null;
+  readonly verified: boolean;
+}
+
+export interface FriendsLikedDto {
+  readonly count: number;
+  readonly avatars: readonly (string | null)[];
+}
+
 export interface PostDto {
   readonly id: string;
   readonly kind: PostKind;
+  readonly author: AuthorDto | null;
+  readonly createdAt: string;
   readonly text: string;
   readonly media: readonly PostMedia[];
-  readonly audience: "everyone";
-  readonly topics: readonly string[];
-  readonly author: UserSummary | null;
+  readonly likes: number;
+  readonly comments: number;
+  readonly reposts: number;
+  readonly shares: number;
+  readonly views: number;
+  readonly liked: boolean;
+  readonly bookmarked: boolean;
+  readonly isFollowingAuthor: boolean;
+  readonly friendsLiked: FriendsLikedDto | null;
+  readonly products: readonly ProductCardDto[];
   readonly store: StoreBadgeDto | null;
-  readonly taggedProducts: readonly ProductCardDto[];
+  readonly topics: readonly string[];
+  readonly audience: "everyone";
   readonly repostOf: PostDto | null;
-  readonly counts: {
-    readonly likes: number;
-    readonly comments: number;
-    readonly reposts: number;
-    readonly shares: number;
-    readonly views: number;
-  };
-  readonly likedByMe: boolean;
   readonly expiresAt: string | null;
-  readonly createdAt: string;
 }
 
 export interface CommentDto {
   readonly id: string;
   readonly postId: string;
-  readonly parentId: string | null;
+  readonly replyToCommentId: string | null;
   readonly text: string;
-  readonly author: UserSummary | null;
+  readonly author: AuthorDto | null;
+  readonly likes: number;
+  readonly liked: boolean;
   readonly createdAt: string;
 }
 
@@ -56,9 +71,10 @@ export interface LiveSessionDto {
   readonly id: string;
   readonly title: string;
   readonly status: "live" | "ended";
-  readonly host: UserSummary | null;
+  readonly host: AuthorDto | null;
   readonly store: StoreBadgeDto | null;
   readonly viewerCount: number;
+  readonly reactionCount: number;
   readonly products: readonly ProductCardDto[];
   readonly pinnedProduct: ProductCardDto | null;
   readonly startedAt: string;
@@ -68,11 +84,22 @@ export interface LiveSessionDto {
 export interface LiveCommentDto {
   readonly id: string;
   readonly text: string;
-  readonly author: UserSummary | null;
+  readonly author: AuthorDto | null;
   readonly createdAt: string;
 }
 
-export interface StoryGroupDto {
-  readonly author: UserSummary | null;
-  readonly stories: readonly PostDto[];
+export interface StoryDto {
+  readonly id: string;
+  readonly media: readonly PostMedia[];
+  readonly text: string;
+  readonly seen: boolean;
+  readonly createdAt: string;
+  readonly expiresAt: string | null;
+}
+
+export interface StoryTrayEntryDto {
+  readonly author: AuthorDto | null;
+  readonly hasUnseen: boolean;
+  readonly latestStoryAt: string;
+  readonly stories: readonly StoryDto[];
 }

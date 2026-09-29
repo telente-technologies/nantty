@@ -1,5 +1,6 @@
 export * from "./getLiveSession/index.js";
 export * from "./getPost/index.js";
+export * from "./getStoreDetail/index.js";
 export * from "./listActiveStories/index.js";
 export * from "./listLiveComments/index.js";
 export * from "./listLiveSessions/index.js";

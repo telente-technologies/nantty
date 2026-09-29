@@ -13,6 +13,7 @@ function convertLiveRowToRecord(row: LiveSession): LiveSessionRecord {
     title: row.title,
     status: row.status === "ended" ? "ended" : "live",
     viewerCount: row.viewerCount,
+    reactionCount: row.reactionCount,
     productIds: row.productIds,
     pinnedProductId: row.pinnedId,
     startedAt: row.startedAt,
@@ -89,5 +90,10 @@ export class PrismaLiveSessionsRepository implements LiveSessionsRepository {
     const viewerCount = await prisma().liveViewer.count({ where: { sessionId, leftAt: null } });
     await prisma().liveSession.updateMany({ where: { id: sessionId, status: "live" }, data: { viewerCount } });
     return this.findById(sessionId);
+  }
+
+  public async addReaction(sessionId: string): Promise<LiveSessionRecord | undefined> {
+    const result = await prisma().liveSession.updateMany({ where: { id: sessionId, status: "live" }, data: { reactionCount: { increment: 1 } } });
+    return result.count === 0 ? undefined : this.findById(sessionId);
   }
 }

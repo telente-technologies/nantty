@@ -86,6 +86,6 @@ export class InMemoryPostsRepository implements PostsRepository {
   }
 
   public async listRecentCandidates(filter: PostListFilter, now: Date, limit: number): Promise<readonly PostRecord[]> {
-    return (await this.listVisible(filter, now, { limit })).items;
+    return (await this.listVisible(filter, now, { limit })).data;
   }
 }
