@@ -26,6 +26,7 @@ export interface ProductSummary {
   readonly ratingAverage: number;
   readonly ratingCount: number;
   readonly published: boolean;
+  readonly categoryId?: string | null;
 }
 
 export interface InventoryLine {
