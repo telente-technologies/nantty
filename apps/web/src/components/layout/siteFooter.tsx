@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
+import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import styles from "./siteFooter.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
@@ -12,14 +12,16 @@ const footerLinkGroups = [
       { label: "How it works", href: "/#how-it-works" },
       { label: "Escrow protection", href: "/#escrow" },
       { label: "Posts, clips and live", href: "/#social-shopping" },
+      { label: "Creators and badges", href: "/#creators" },
       { label: "Questions", href: "/#questions" },
     ],
   },
   {
-    heading: "Sell",
+    heading: "Business",
     links: [
       { label: "Sell on Zudomart", href: "/sellers" },
-      { label: "Seller dashboard", href: "/sellers#dashboard" },
+      { label: businessAppLinks.sellerDashboard.label, href: businessAppLinks.sellerDashboard.href },
+      { label: businessAppLinks.adsManager.label, href: businessAppLinks.adsManager.href },
       { label: "Payouts", href: "/sellers#payouts" },
       { label: "Fees", href: "/sellers#fees" },
     ],
@@ -34,6 +36,10 @@ const footerLinkGroups = [
     ],
   },
 ] as const;
+
+function isExternalFooterHref(footerHref: string): boolean {
+  return /^https?:\/\//.test(footerHref);
+}
 
 export function SiteFooterWithGiantWordmark() {
   const currentYear = new Date().getFullYear();
@@ -54,9 +60,15 @@ export function SiteFooterWithGiantWordmark() {
               <ul className={styles.linkList}>
                 {linkGroup.links.map((footerLink) => (
                   <li key={footerLink.href}>
-                    <Link href={footerLink.href} className={styles.footerLink}>
-                      {footerLink.label}
-                    </Link>
+                    {isExternalFooterHref(footerLink.href) ? (
+                      <a href={footerLink.href} className={styles.footerLink} target="_blank" rel="noopener noreferrer">
+                        {footerLink.label} ↗<span className="visuallyHidden"> (opens in a new tab)</span>
+                      </a>
+                    ) : (
+                      <Link href={footerLink.href} className={styles.footerLink}>
+                        {footerLink.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
