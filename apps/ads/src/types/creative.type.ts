@@ -1,7 +1,7 @@
 import type { Money } from "@/types/money.type";
 
-export type CreativeFormat = "feed_post" | "clip" | "product" | "store" | "story";
-export type CreativeSourceType = "post" | "clip" | "product" | "store" | "upload";
+export type CreativeFormat = "feed_post" | "clip" | "product" | "store" | "story" | "live";
+export type CreativeSourceType = "post" | "clip" | "product" | "store" | "live" | "upload";
 export type CallToAction = "shop_now" | "learn_more" | "visit_store" | "send_message" | "follow" | "watch_more" | "order_now" | "sign_up";
 export type DestinationType = "post" | "profile" | "store" | "product" | "messages" | "url";
 
@@ -30,6 +30,13 @@ export interface CreativeProduct {
   readonly rating: number | null;
 }
 
+export interface CreativeLiveStream {
+  readonly liveSessionId: string;
+  readonly status: "scheduled" | "live";
+  readonly startsAt: string;
+  readonly viewerCount: number;
+}
+
 export interface CreativeDestination {
   readonly type: DestinationType;
   readonly targetId: string | null;
@@ -46,6 +53,7 @@ export interface Creative {
   readonly destination: CreativeDestination;
   readonly identity: CreativeIdentity;
   readonly product: CreativeProduct | null;
+  readonly live?: CreativeLiveStream | null;
 }
 
 export interface CreativeInput {
@@ -67,6 +75,7 @@ export interface ContentSource {
   readonly createdAt: string;
   readonly engagement: { readonly likes: number; readonly comments: number; readonly views: number };
   readonly product: CreativeProduct | null;
+  readonly live?: CreativeLiveStream | null;
   readonly eligible: boolean;
   readonly ineligibleReason: string | null;
 }
