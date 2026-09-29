@@ -43,6 +43,7 @@ function createReviewsHarness() {
         return match === undefined ? undefined : { orderId: match.split(":")[1] ?? "", storeId: "store-1" };
       },
       listStoreIdsBuyerHasPurchasedFrom: async () => [],
+      listAttributedOrderItems: async () => [],
     },
     productCatalog,
     storeAccess,
