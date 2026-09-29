@@ -20,6 +20,7 @@ import { PrismaProductEngagementRepository } from "../modules/products/repositor
 import { InMemoryProductEngagementRepository } from "../modules/products/repositories/productEngagement.repository.js";
 import { SellerProductsController } from "../modules/products/controllers/sellerProducts.controller.js";
 import { ProductsService } from "../modules/products/services/products.service.js";
+import { createProductModerationTarget } from "../modules/products/services/productModerationTarget.service.js";
 import { SearchController } from "../modules/search/controllers/search.controller.js";
 import { registerSearchQueryHandlers } from "../modules/search/search.module.js";
 import { SearchService } from "../modules/search/services/search.service.js";
@@ -82,6 +83,7 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
   const productCatalogPort: ProductCatalog = new RepositoryProductCatalog(productsService);
   return {
     storeAccess: storeAccessPort,
+    moderationTargets: [createProductModerationTarget(productsService)],
     productCatalog: productCatalogPort,
     mediaLibrary: media.mediaLibrary,
     mediaProcessingQueue: media.mediaProcessingQueue,
