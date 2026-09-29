@@ -2,8 +2,10 @@ import type { SellerApplication, SellerApplicationInput, StoreProduct, StoreProd
 import type { Order, OrderStatus, SellerDashboard } from "@/types";
 
 import { buildMockUserSummary, isoDateHoursAgo } from "./fixtures.mock";
+import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
+const KEYBOARD_PRICE_IN_USD_CENTS = 1_300;
 const store = { id: "s_1", name: "Usershop Name", logoUrl: null, rating: 3.4, ratingCount: 200, reviewCount: 103 };
 
 const buildStoreOrder = (index: number, status: OrderStatus): Order => ({
@@ -11,35 +13,49 @@ const buildStoreOrder = (index: number, status: OrderStatus): Order => ({
   reference: `ZM10${40 + index}`,
   status,
   items: [
-    { id: `ci_${index}`, product: { id: "pr_kb", name: "Custom Mechanical Keyboard", price: 20_000, imageUrl: null }, quantity: 1, variant: null },
+    {
+      id: `ci_${index}`,
+      product: { id: "pr_kb", name: "Custom Mechanical Keyboard", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null },
+      quantity: 1,
+      variant: null,
+    },
   ],
-  total: 20_000,
-  buyer: { ...buildMockUserSummary(index, "Enyo Dev") },
+  total: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS),
+  buyer: buildMockUserSummary(index, "Enyo Dev"),
   store,
   createdAt: isoDateHoursAgo(index * 5 + 1),
   escrowReleaseAt: null,
 });
 
-let orders: Order[] = [buildStoreOrder(1, "pending"), buildStoreOrder(2, "shipped"), buildStoreOrder(3, "delivered")];
+const orderStatuses = new Map<string, OrderStatus>([
+  ["o_1", "pending"],
+  ["o_2", "shipped"],
+  ["o_3", "delivered"],
+]);
+
+const listStoreOrders = () => [...orderStatuses].map(([id, status]) => buildStoreOrder(Number(id.slice(2)), status));
 
 let products: StoreProduct[] = [
-  { id: "sp_1", name: "Product Name", price: 20_000, imageUrl: null, stock: 12, description: "", sizes: [], colors: [], imageUrls: [], published: true },
-  { id: "sp_2", name: "Product Name", price: 20_000, imageUrl: null, stock: 3, description: "", sizes: [], colors: [], imageUrls: [], published: true },
+  { id: "sp_1", name: "Product Name", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null, stock: 12, description: "", sizes: [], colors: [], imageUrls: [], published: true },
+  { id: "sp_2", name: "Product Name", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null, stock: 3, description: "", sizes: [], colors: [], imageUrls: [], published: true },
 ];
+
+const productsInViewerCurrency = () =>
+  products.map((p) => (p.id.startsWith("sp_") && p.id.length === 4 ? { ...p, price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS) } : p));
 
 let application: SellerApplication | null = null;
 
 const HOURS = ["12 AM", "3 PM", "6 PM", "9 PM", "12 PM", "3 AM"];
 
-const dashboard = (): SellerDashboard => ({
-  totalSales: 20_000,
+const buildSellerDashboard = (): SellerDashboard => ({
+  totalSales: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS),
   orders: 1,
   series: HOURS.flatMap((label, i) => [
     { label, value: 0 },
     { label: `${label}+`, value: i === 0 ? 1 : 0 },
   ]),
-  recentOrders: orders.slice(0, 3),
-  inventory: products,
+  recentOrders: listStoreOrders(),
+  inventory: productsInViewerCurrency(),
 });
 
 const toStoreProduct = (id: string, input: StoreProductInput, published = true): StoreProduct => ({
@@ -50,16 +66,16 @@ const toStoreProduct = (id: string, input: StoreProductInput, published = true):
 });
 
 export const sellerMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/seller/dashboard", () => dashboard()),
+  createMockRoute("GET", "/api/v1/seller/dashboard", () => buildSellerDashboard()),
   createMockRoute("GET", "/api/v1/seller/applications/me", () => application),
   createMockRoute("POST", "/api/v1/seller/applications", ({ body }) => {
     application = { ...(body as SellerApplicationInput), id: "sa_1", status: "pending", submittedAt: new Date().toISOString() };
     return application;
   }),
-  createMockRoute("GET", "/api/v1/seller/products", () => products),
-  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => products.find((p) => p.id === params.productId)),
+  createMockRoute("GET", "/api/v1/seller/products", () => productsInViewerCurrency()),
+  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => productsInViewerCurrency().find((p) => p.id === params.productId)),
   createMockRoute("POST", "/api/v1/seller/products", ({ body }) => {
-    const product = toStoreProduct(`sp_${Date.now()}`, body as StoreProductInput);
+    const product = toStoreProduct(`sp_new_${Date.now()}`, body as StoreProductInput);
     products = [product, ...products];
     return product;
   }),
@@ -70,10 +86,10 @@ export const sellerMocks: MockRoute[] = [
   createMockRoute("DELETE", "/api/v1/seller/products/:productId", ({ params }) => {
     products = products.filter((p) => p.id !== params.productId);
   }),
-  createMockRoute("GET", "/api/v1/seller/orders", () => orders),
-  createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => orders.find((o) => o.id === params.orderId)),
+  createMockRoute("GET", "/api/v1/seller/orders", () => listStoreOrders()),
+  createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => listStoreOrders().find((o) => o.id === params.orderId)),
   createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params }) => {
-    orders = orders.map((o) => (o.id === params.orderId ? { ...o, status: "shipped" } : o));
-    return orders.find((o) => o.id === params.orderId);
+    if (orderStatuses.has(params.orderId!)) orderStatuses.set(params.orderId!, "shipped");
+    return listStoreOrders().find((o) => o.id === params.orderId);
   }),
 ];
