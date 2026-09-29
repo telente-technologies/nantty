@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -10,6 +11,9 @@ from app.stores.online_feature_keyspace import (
     OnlineFeatureKeyspace,
     append_generation_suffix,
     format_utc_day_bucket,
+)
+from app.stores.online_feature_keyspace import (
+    SEEN_ITEMS_RETENTION_COUNT as SEEN_ITEMS_READ_LIMIT,
 )
 from app.utils.decay_math_util import (
     HALF_LIVES_PER_FORWARD_DECAY_GENERATION,
@@ -87,28 +91,27 @@ class OnlineFeatureStore:
         include_recently_seen_items: bool = True,
     ) -> ViewerOnlineFeatures:
         read_unix_time_seconds = now.timestamp()
-        topic_affinity = await self.read_decayed_member_scores(
-            self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
-            topic_ids,
-            AFFINITY_HALF_LIFE_SECONDS,
-            read_unix_time_seconds,
-        )
-        account_affinity = await self.read_decayed_member_scores(
-            self.keyspace.affinity_base_key(ACCOUNT_AFFINITY_KIND, viewer_user_id),
-            account_ids,
-            AFFINITY_HALF_LIFE_SECONDS,
-            read_unix_time_seconds,
-        )
         unique_item_ids = list(dict.fromkeys(item_ids))
-        item_rows = await self.feature_backend.read_hash_fields(
-            [self.keyspace.item_statistics_key(item_id) for item_id in unique_item_ids]
+        seen_keys = [self.keyspace.recently_seen_items_key(viewer_user_id)] if include_recently_seen_items else []
+        topic_affinity, account_affinity, item_rows, seen_rows = await asyncio.gather(
+            self.read_decayed_member_scores(
+                self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
+                topic_ids,
+                AFFINITY_HALF_LIFE_SECONDS,
+                read_unix_time_seconds,
+            ),
+            self.read_decayed_member_scores(
+                self.keyspace.affinity_base_key(ACCOUNT_AFFINITY_KIND, viewer_user_id),
+                account_ids,
+                AFFINITY_HALF_LIFE_SECONDS,
+                read_unix_time_seconds,
+            ),
+            self.feature_backend.read_hash_fields(
+                [self.keyspace.item_statistics_key(item_id) for item_id in unique_item_ids]
+            ),
+            self.feature_backend.read_sorted_set_highest_members(seen_keys, SEEN_ITEMS_READ_LIMIT),
         )
-        seen_item_ids: frozenset[str] = frozenset()
-        if include_recently_seen_items:
-            seen_rows = await self.feature_backend.read_sorted_set_highest_members(
-                [self.keyspace.recently_seen_items_key(viewer_user_id)], 1000
-            )
-            seen_item_ids = frozenset(member for member, _score in seen_rows[0])
+        seen_item_ids = frozenset(member for rows in seen_rows for member, _score in rows)
         return ViewerOnlineFeatures(
             topic_affinity_by_topic=topic_affinity,
             account_affinity_by_account=account_affinity,
