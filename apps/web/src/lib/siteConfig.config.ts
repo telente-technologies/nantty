@@ -15,6 +15,31 @@ function readPublicSiteUrl(): string {
   }
 }
 
+const isDevelopmentEnvironment = process.env.NODE_ENV === "development";
+
+function readBusinessAppUrl(configuredUrl: string | undefined, productionUrl: string, developmentUrl: string): string {
+  const fallbackUrl = isDevelopmentEnvironment ? developmentUrl : productionUrl;
+  if (!configuredUrl) return fallbackUrl;
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return fallbackUrl;
+  }
+}
+
+export const businessAppLinks = {
+  sellerDashboard: {
+    label: "Zudomart Dashboard",
+    description: "Point of sale, inventory, staff and reports for verified Gold businesses.",
+    href: readBusinessAppUrl(process.env.NEXT_PUBLIC_DASHBOARD_URL, "https://dashboard.zudomart.com", "http://localhost:3200"),
+  },
+  adsManager: {
+    label: "Zudomart Ads",
+    description: "Promote your posts, clips, lives and products to buyers on Zudomart.",
+    href: readBusinessAppUrl(process.env.NEXT_PUBLIC_ADS_MANAGER_URL, "https://ads.zudomart.com", "http://localhost:3300"),
+  },
+} as const;
+
 const contactEmailRecipients = ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"] as const;
 
 export const contactMailtoHref = `mailto:${contactEmailRecipients.join(",")}`;
@@ -32,7 +57,7 @@ export const siteConfig = {
   primaryNavigation: [
     { label: "How it works", href: "/#how-it-works" },
     { label: "Escrow", href: "/#escrow" },
-    { label: "Sell", href: "/sellers" },
+    { label: "Creators", href: "/#creators" },
     { label: "About", href: "/about" },
   ] satisfies readonly SiteNavigationLink[],
 } as const;
