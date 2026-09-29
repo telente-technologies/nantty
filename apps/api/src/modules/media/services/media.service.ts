@@ -1,55 +1,76 @@
 import type { EventBus } from "@zudojs/events";
 
 import type { AppSettings } from "../../../configs/settings.config.js";
-import { forbidden, notFound } from "../../../errors/domain.error.js";
+import { rolesGrantPermission } from "../../../constants/permissions.constant.js";
+import { notFound } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
-import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hashToken.util.js";
-import { isImageContentType, type MediaContentType, type MediaRecord } from "../models/media.model.js";
-import type { MediaRepository } from "../repositories/media.repository.js";
+import type { Principal } from "../../../interfaces/principal.interface.js";
+import type { AppLogger } from "../../../loggers/app.logger.js";
+import type { MediaAssetRecord } from "../models/mediaAsset.model.js";
+import { adminsMayReadPurpose, isPrivatePurpose, mediaTypeForMimeType, type MediaMimeType, type MediaPurpose, type UploadSessionRecord } from "../models/mediaUpload.model.js";
+import type { MediaAssetsRepository } from "../repositories/mediaAssets.repository.js";
+import type { MediaUploadsRepository } from "../repositories/mediaUploads.repository.js";
 import type { MediaBlobStore } from "./mediaBlobStore.service.js";
 
+export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+export const PRIVATE_CACHE_CONTROL = "private, no-store";
+
 export interface MediaDependencies {
-  readonly media: MediaRepository;
+  readonly uploads: MediaUploadsRepository;
+  readonly assets: MediaAssetsRepository;
   readonly blobs: MediaBlobStore;
   readonly settings: AppSettings["media"];
   readonly clock: Clock;
   readonly events: EventBus;
+  readonly logger: AppLogger;
 }
 
 export class MediaService {
-  private readonly signingKey: Uint8Array;
+  public constructor(public readonly dependencies: MediaDependencies) {}
 
-  public constructor(public readonly dependencies: MediaDependencies) {
-    this.signingKey = new TextEncoder().encode(`media-upload:${dependencies.settings.signingSecret}`);
+  public maximumBytesFor(purpose: MediaPurpose, mimeType: MediaMimeType): number {
+    const { maxImageBytes, maxProfileImageBytes, maxVideoBytes, maxKycBytes, maxVoiceBytes } = this.dependencies.settings;
+    if (purpose === "kyc") return maxKycBytes;
+    if (purpose === "voice") return maxVoiceBytes;
+    if (purpose === "avatar" || purpose === "banner") return maxProfileImageBytes;
+    return mediaTypeForMimeType(mimeType) === "video" ? maxVideoBytes : maxImageBytes;
   }
 
-  public maximumBytesFor(contentType: MediaContentType): number {
-    const { maxImageBytes, maxVideoBytes } = this.dependencies.settings;
-    return isImageContentType(contentType) ? maxImageBytes : maxVideoBytes;
+  public maximumVideoSecondsFor(purpose: MediaPurpose): number {
+    const { maxClipSeconds, maxStorySeconds, maxVideoSeconds } = this.dependencies.settings;
+    if (purpose === "clip") return maxClipSeconds;
+    if (purpose === "story") return maxStorySeconds;
+    return maxVideoSeconds;
   }
 
-  public buildMediaUrl(mediaId: string): string {
-    return `${this.dependencies.settings.publicBaseUrl}/api/v1/media/${mediaId}`;
+  public buildPublicFileUrl(storageKey: string): string {
+    return `${this.dependencies.settings.publicBaseUrl}/api/v1/media/files/${storageKey}`;
   }
 
-  public async buildSignedUploadUrl(media: MediaRecord, expiresAtSeconds: number): Promise<string> {
-    const signature = await this.signUpload(media, expiresAtSeconds);
-    return `${this.dependencies.settings.publicBaseUrl}/api/v1/media/uploads/${media.id}?expires=${expiresAtSeconds}&signature=${signature}`;
+  public buildOriginalFileUrl(mediaId: string): string {
+    return `${this.dependencies.settings.publicBaseUrl}/api/v1/media/${mediaId}/original`;
   }
 
-  public async assertUploadSignatureIsValid(media: MediaRecord, expiresAtSeconds: number, signature: string): Promise<void> {
-    const expected = await this.signUpload(media, expiresAtSeconds);
-    if (!hashesAreEqual(expected, signature)) throw forbidden("The upload link is invalid.");
-    if (expiresAtSeconds * 1000 <= this.dependencies.clock.now().getTime()) throw forbidden("The upload link has expired.");
+  public async findOwnedUploadOrThrow(uploadId: string, ownerId: string): Promise<UploadSessionRecord> {
+    const upload = await this.dependencies.uploads.findById(uploadId);
+    if (upload === undefined || upload.ownerId !== ownerId) throw notFound("Upload");
+    return upload;
   }
 
-  public async findMediaOrThrow(mediaId: string): Promise<MediaRecord> {
-    const media = await this.dependencies.media.findById(mediaId);
-    if (media === undefined) throw notFound("Media");
-    return media;
+  public async findViewableAssetOrThrow(mediaId: string, viewer: Principal | undefined): Promise<MediaAssetRecord> {
+    const asset = await this.dependencies.assets.findById(mediaId);
+    if (asset === undefined || !this.viewerCanSeeAsset(asset, viewer)) throw notFound("Media");
+    return asset;
   }
 
-  private signUpload(media: MediaRecord, expiresAtSeconds: number): Promise<string> {
-    return hashSecretWithKey(`${media.id}.${expiresAtSeconds}.${media.contentType}.${media.maxBytes}`, this.signingKey);
+  public viewerCanSeeAsset(asset: MediaAssetRecord, viewer: Principal | undefined): boolean {
+    if (viewer?.userId === asset.ownerId) return true;
+    if (isPrivatePurpose(asset.purpose)) return viewer !== undefined && this.viewerMayReadPrivateAsset(asset, viewer);
+    return asset.status === "ready";
+  }
+
+  public viewerMayReadPrivateAsset(asset: MediaAssetRecord, viewer: Principal): boolean {
+    if (viewer.userId === asset.ownerId) return true;
+    return adminsMayReadPurpose(asset.purpose) && rolesGrantPermission(viewer.roles, "media:read-private");
   }
 }
