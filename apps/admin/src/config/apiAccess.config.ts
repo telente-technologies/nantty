@@ -62,6 +62,7 @@ const stepUpProtectedCalls: readonly { readonly method: string; readonly pattern
   { method: "POST", pattern: /^\/admin\/automation(\/.+)?$/ },
   { method: "DELETE", pattern: /^\/admin\/automation\/.+$/ },
   { method: "PUT", pattern: /^\/admin\/notification-templates\/.+$/ },
+  { method: "POST", pattern: /^\/admin\/notification-templates\/.+$/ },
 ];
 
 export function findApiAccessRequirement(apiPath: string): ApiAccessRequirement | null {
