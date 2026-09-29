@@ -1,0 +1,108 @@
+.section {
+  padding-block: var(--section-space);
+}
+
+.layout {
+  display: grid;
+  gap: 56px;
+  align-items: center;
+}
+
+.visual {
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+  border-radius: var(--radius-large);
+  background:
+    radial-gradient(circle at 50% 42%, var(--blue-500) 0 30%, transparent 30.5%),
+    var(--blue-900);
+}
+
+.phone {
+  width: min(280px, 60vw);
+  transform: rotate(-3deg);
+}
+
+.copyColumn {
+  display: grid;
+  gap: 32px;
+}
+
+.badgeList {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.badgeCard {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding: 20px;
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.blueBadge {
+  margin-bottom: 8px;
+  color: var(--blue-500);
+}
+
+.goldBadge {
+  margin-bottom: 8px;
+  color: var(--yellow-600);
+}
+
+.blackBadge {
+  margin-bottom: 8px;
+  color: var(--ink-strong);
+}
+
+.badgeAudience {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badgeTitle {
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.badgeDescription {
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+}
+
+.officialStoreNote {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-radius: var(--radius-medium);
+  background: var(--yellow-100);
+  color: var(--ink-strong);
+}
+
+.officialStoreNote > span:first-child {
+  flex: none;
+  margin-top: 2px;
+  color: var(--yellow-900);
+}
+
+@media (min-width: 720px) {
+  .badgeList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 72px;
+  }
+}
