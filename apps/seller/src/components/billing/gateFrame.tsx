@@ -1,0 +1,47 @@
+"use client";
+
+import type { ReactNode } from "react";
+
+import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
+import { Button } from "@/components/ui/button";
+import { sendRequestToDashboardServer } from "@/services/clientApi.service";
+
+import styles from "./gateFrame.module.css";
+
+export function GateFrame({ children }: { readonly children: ReactNode }) {
+  async function signOutOfDashboard() {
+    await sendRequestToDashboardServer("/bff/auth/logout", { method: "POST" }).catch(() => undefined);
+    window.location.assign("/login");
+  }
+  return (
+    <div className={styles.frame}>
+      <header className={styles.header}>
+        <div className={styles.brand}>
+          <DashboardWordmark />
+        </div>
+        <Button variant="ghost" size="small" onClick={() => void signOutOfDashboard()}>
+          Sign out
+        </Button>
+      </header>
+      <main id="main-content" className={styles.main}>
+        {children}
+      </main>
+    </div>
+  );
+}
+
+export function GateStep({ state, title, children }: { readonly state: "done" | "current" | "todo"; readonly title: string; readonly children?: ReactNode }) {
+  return (
+    <li className={`${styles.step} ${styles[state]}`}>
+      <span className={styles.stepMarker} aria-hidden="true">
+        {state === "done" ? "✓" : ""}
+      </span>
+      <div>
+        <p className={styles.stepTitle}>
+          {title} <span className="visuallyHidden">({state === "done" ? "done" : state === "current" ? "in progress" : "not started"})</span>
+        </p>
+        {children ? <div className={styles.stepBody}>{children}</div> : null}
+      </div>
+    </li>
+  );
+}

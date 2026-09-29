@@ -1,0 +1,69 @@
+.frame {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px clamp(16px, 4vw, 40px);
+  background: var(--blue-900);
+}
+
+.brand {
+  color: #fff;
+}
+
+.header button {
+  color: #c9d1f7;
+}
+
+.main {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.stepMarker {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--divider);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.done .stepMarker {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.current .stepMarker {
+  border-color: var(--blue-500);
+  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 12px var(--blue-500);
+}
+
+.stepTitle {
+  font-weight: 650;
+}
+
+.stepBody {
+  margin-top: 4px;
+  color: var(--ink-muted);
+}

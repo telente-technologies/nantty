@@ -1,0 +1,103 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+}
+
+.premium {
+  border-color: #e8d84a;
+  box-shadow: 0 0 0 3px var(--yellow-50);
+}
+
+.planHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.goldMark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--yellow-500);
+  color: var(--blue-900);
+}
+
+.planName {
+  font-size: 18px;
+  font-weight: 750;
+  flex: 1;
+}
+
+.price {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.interval {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.entitlements {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entitlements li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.entitlements li span {
+  color: var(--success);
+}
+
+.perks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--divider);
+  flex: 1;
+}
+
+.perks li {
+  display: flex;
+  flex-direction: column;
+}
+
+.perks span {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.footnote {
+  color: var(--ink-faint);
+  font-size: 13px;
+}
