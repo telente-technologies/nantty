@@ -1,6 +1,7 @@
 import type { CurrencyCode } from "../enums/currency.enum.js";
 import type { StoreRole } from "../constants/roles.constant.js";
 import type { MinorUnits } from "../types/money.type.js";
+import type { VerificationBadge } from "./verificationBadge.interface.js";
 
 export interface StoreSummary {
   readonly id: string;
@@ -18,6 +19,7 @@ export interface StoreSummary {
   readonly discountBps: number;
   readonly ratingAverage: number;
   readonly ratingCount: number;
+  readonly verification?: VerificationBadge;
 }
 
 export interface StoreAccess {
