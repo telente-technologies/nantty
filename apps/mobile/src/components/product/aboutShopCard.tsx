@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { Star16Icon } from "@/components/icons";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -25,9 +26,12 @@ export function AboutShopCard({ store, following, onToggleFollow, onViewShop }: 
           {store.logoUrl ? <Image source={{ uri: store.logoUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
         </View>
         <View style={styles.shopText}>
-          <Text size={14} weight={500} lineHeight={16.8}>
-            {store.name}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text size={14} weight={500} lineHeight={16.8}>
+              {store.name}
+            </Text>
+            <VerificationBadge verification={store.verification} size={16} />
+          </View>
           <View style={styles.statsRow}>
             <View style={styles.rating}>
               <Text size={14} weight={700} lineHeight={16.8}>
@@ -60,6 +64,7 @@ const styles = StyleSheet.create({
   shopRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   logo: { width: 60, height: 60, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
   shopText: { gap: 8 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   statsRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   rating: { flexDirection: "row", alignItems: "center", gap: 2 },
   counts: { flexDirection: "row", alignItems: "center", gap: 4 },
