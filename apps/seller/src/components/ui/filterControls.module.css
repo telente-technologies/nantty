@@ -6,6 +6,7 @@
   padding: 0 12px;
   min-width: min(100%, 260px);
   flex: 1 1 260px;
+  max-height: 38px;
   max-width: 420px;
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
