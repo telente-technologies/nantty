@@ -22,10 +22,10 @@ type OrdersPage = CursorPage<OnlineOrder> & { readonly countsByStatus?: Partial<
 
 const statusFilterOrder: (OnlineOrderStatus | "all")[] = ["all", "paid", "processing", "shipped", "delivered", "completed", "disputed", "cancelled", "refunded"];
 
-export function OrdersListView() {
+export function OrdersListView({ initialStatusFilter = "all" }: { readonly initialStatusFilter?: OnlineOrderStatus | "all" }) {
   const router = useRouter();
   const { formatMoney } = useMoneyFormatter();
-  const [statusFilter, setStatusFilter] = useState<OnlineOrderStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<OnlineOrderStatus | "all">(initialStatusFilter);
   const [searchText, setSearchText] = useState("");
   const [dateRange, setDateRange] = useState<DateRangeValue>(() => buildDateRangeEndingToday(90));
   const ordersList = useCommerceCursorList<OnlineOrder, OrdersPage>("/seller/orders", { status: statusFilter, q: searchText, from: dateRange.from, to: dateRange.to, limit: 25 });
