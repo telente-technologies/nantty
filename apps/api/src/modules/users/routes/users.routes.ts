@@ -8,6 +8,7 @@ import {
   IdParamsSchema,
   SaveTopicsBodySchema,
   UpdateAddressBodySchema,
+  UpdateLocalePreferencesBodySchema,
   UpdateProfileBodySchema,
   UpdateSettingsBodySchema,
   UsernameParamsSchema,
@@ -24,6 +25,7 @@ export function registerUsersRoutes(router: HttpRouter, controller: UsersControl
   router.patch(ME, controller.updateMe, { ...profile, ...describeRoute(TAG, "Update my profile", { body: UpdateProfileBodySchema }) });
   router.get(`${ME}/settings`, controller.getSettings, { ...profile, ...describeRoute(TAG, "Get my settings") });
   router.patch(`${ME}/settings`, controller.updateSettings, { ...profile, ...describeRoute(TAG, "Update my settings", { body: UpdateSettingsBodySchema }) });
+  router.patch(`${ME}/preferences`, controller.updateLocalePreferences, { ...profile, ...describeRoute(TAG, "Change my country and display currency", { body: UpdateLocalePreferencesBodySchema }) });
   router.post(`${ME}/deactivate`, controller.deactivate, { ...profile, ...describeRoute(TAG, "Deactivate my account") });
   router.get(`${ME}/topics`, controller.listMyTopics, { ...profile, ...describeRoute(TAG, "List my selected topics") });
   router.put(`${ME}/topics`, controller.saveMyTopics, { ...profile, ...describeRoute(TAG, "Save my topics (at least 3)", { body: SaveTopicsBodySchema }) });
