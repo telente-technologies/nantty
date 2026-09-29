@@ -27,7 +27,9 @@ def calculate_personalization_signal(
     followed_account_ids: frozenset[str],
     viewer_country: str | None,
 ) -> float:
-    creator_affinity = max(read_normalized_affinity(online_features.account_affinity_by_account, candidate.author_id), 0)
+    creator_affinity = max(
+        read_normalized_affinity(online_features.account_affinity_by_account, candidate.author_id), 0
+    )
     topic_affinity_max, _mean = summarize_topic_affinities(online_features.topic_affinity_by_topic, candidate.topics)
     chosen_topic_match = 1.0 if any(topic in chosen_topics for topic in candidate.topics) else 0.0
     follows = 1.0 if candidate.author_id is not None and candidate.author_id in followed_account_ids else 0.0
@@ -55,7 +57,9 @@ def rerank_search_results(
     excluded_accounts = frozenset(request.viewer.blocked_account_ids) | frozenset(request.viewer.muted_account_ids)
     scored: dict[str, float] = {}
     for candidate in request.candidates:
-        if candidate.item_id in scored or (candidate.author_id is not None and candidate.author_id in excluded_accounts):
+        if candidate.item_id in scored or (
+            candidate.author_id is not None and candidate.author_id in excluded_accounts
+        ):
             continue
         freshness = 0.0
         if candidate.created_at is not None:
