@@ -36,10 +36,20 @@ export function buildSellerAccessForUser(userId: string): SellerAccess {
   const membership = database.memberships.find((candidate) => candidate.userId === userId);
   const gateStore = membership ? database.gateStores.find((store) => store.storeId === membership.storeId) : undefined;
   if (!membership || !gateStore) {
-    return { storeId: null, storeName: null, verificationStatus: "none", subscription: { status: "none", plan: null, currentPeriodEnd: null }, role: null };
+    return { storeId: null, storeName: null, verification: { status: "unverified", color: "GOLD", tier: null, badgeVisible: false }, subscription: null, entitlements: null, role: null };
   }
-  const { status, plan, currentPeriodEnd } = gateStore.subscription;
-  return { storeId: gateStore.storeId, storeName: gateStore.storeName, verificationStatus: gateStore.verificationStatus, subscription: { status, plan, currentPeriodEnd }, role: membership.role };
+  const subscription = gateStore.subscription.subscription;
+  const isSubscriptionActive = subscription?.status === "active" || subscription?.status === "trialing";
+  const plan = database.subscriptionPlans.find((candidate) => candidate.id === gateStore.subscription.planId);
+  const isGoldVerified = gateStore.verificationStatus === "verified" && isSubscriptionActive;
+  return {
+    storeId: gateStore.storeId,
+    storeName: gateStore.storeName,
+    verification: { status: gateStore.verificationStatus, color: "GOLD", tier: isGoldVerified ? subscription?.plan ?? null : null, badgeVisible: isGoldVerified },
+    subscription,
+    entitlements: isSubscriptionActive && plan ? plan.entitlements : null,
+    role: membership.role,
+  };
 }
 
 function readGateStoreForRequest(request: MockRequest) {
@@ -116,7 +126,7 @@ export function registerAccessAndAuthMockHandlers(): void {
 
   registerMockRoute("GET", "/seller/verification", (request) => {
     const { gateStore } = readGateStoreForRequest(request);
-    const documentStatus = gateStore.verificationStatus === "verified" ? "approved" : gateStore.verificationStatus === "rejected" ? "rejected" : "in_review";
+    const documentStatus = gateStore.verificationStatus === "verified" ? "approved" : gateStore.verificationStatus === "revoked" || gateStore.verificationStatus === "suspended" ? "rejected" : "in_review";
     return respondWithJson(200, {
       status: gateStore.verificationStatus,
       note: gateStore.verificationNote,
@@ -153,15 +163,15 @@ export function registerAccessAndAuthMockHandlers(): void {
     const plan = database.subscriptionPlans.find((candidate) => candidate.id === pending.planId);
     database.pendingSubscriptionCheckouts.delete(reference);
     const periodEnd = new Date(Date.now() + (plan?.interval === "year" ? 365 : 30) * 86_400_000).toISOString();
+    if (!plan) throw new MockHttpError(404, "PLAN_NOT_FOUND", "That plan is no longer available.");
     gateStore.subscription = {
       ...gateStore.subscription,
-      status: "active",
-      plan: plan ? { id: plan.id, name: plan.name } : null,
-      currentPeriodEnd: periodEnd,
+      subscription: { status: "active", plan: plan.tier, currentPeriodEnd: periodEnd },
+      planId: plan.id,
       cancelAtPeriodEnd: false,
       provider: "paystack",
       paymentMethodSummary: "Mastercard •••• 5199",
-      invoices: plan ? [{ id: `inv_${reference}`, number: `ZD-INV-${reference.slice(4, 10)}`, amount: plan.price, status: "paid", periodStart: new Date().toISOString(), periodEnd, paidAt: new Date().toISOString() }, ...gateStore.subscription.invoices] : gateStore.subscription.invoices,
+      invoices: [{ id: `inv_${reference}`, number: `ZD-INV-${reference.slice(4, 10)}`, amount: plan.price, status: "paid", periodStart: new Date().toISOString(), periodEnd, paidAt: new Date().toISOString() }, ...gateStore.subscription.invoices],
     };
     return respondWithJson(200, gateStore.subscription);
   });
