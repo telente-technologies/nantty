@@ -3,7 +3,11 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Play24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
+import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
+import { TipSheet } from "@/components/coins/tipSheet";
+import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
+import { useAuthStore } from "@/store/auth.store";
 import type { Clip } from "@/types";
 
 import { ClipActionRail } from "./clipActionRail";
@@ -49,9 +53,19 @@ function ClipPageComponent(props: ClipPageProps) {
   const [burstKey, setBurstKey] = useState(0);
   const [playbackProgress, setPlaybackProgress] = useState<VideoPlaybackProgress>({ currentSeconds: 0, durationSeconds: clip.durationSeconds });
   const [playbackSpeedStepIndex, setPlaybackSpeedStepIndex] = useState(0);
+  const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
+  const [hasOpenedOptionsSheet, setHasOpenedOptionsSheet] = useState(false);
+  const openClipOptions = () => {
+    setHasOpenedOptionsSheet(true);
+    setIsOptionsSheetOpen(true);
+  };
   const lastTapAt = useRef(0);
   const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const video = clip.media.find((item) => item.type === "video") ?? clip.media[0];
+  const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
+  const [isTipSheetOpen, setIsTipSheetOpen] = useState(false);
+  const canTipAuthor = clip.author.isCreator === true && clip.author.id !== signedInUserId;
+  const isClipLockedForViewer = isContentLockedForViewer(clip);
 
   const handleTapOnClipMedia = () => {
     const now = Date.now();
@@ -77,7 +91,9 @@ function ClipPageComponent(props: ClipPageProps) {
         onPress={handleTapOnClipMedia}
         style={StyleSheet.absoluteFill}
       >
-        {video && props.shouldMountVideoPlayer ? (
+        {isClipLockedForViewer ? (
+          <SubscriberOnlyLock creatorId={clip.author.id} creatorName={clip.author.name} blurredPreviewUrl={video?.posterUrl ?? null} />
+        ) : video && props.shouldMountVideoPlayer ? (
           <ClipVideoPlayer
             media={video}
             isActive={isActive}
@@ -115,7 +131,8 @@ function ClipPageComponent(props: ClipPageProps) {
           onToggleLike={props.onToggleLike}
           onOpenComments={props.onOpenComments}
           onShare={props.onShare}
-          onMore={() => undefined}
+          onMore={openClipOptions}
+          onTip={canTipAuthor ? () => setIsTipSheetOpen(true) : undefined}
           foregroundColor={FOREGROUND_ON_VIDEO}
         />
       </View>
@@ -135,6 +152,19 @@ function ClipPageComponent(props: ClipPageProps) {
           <ClipCommentBar myAvatarUrl={props.myAvatarUrl} onPress={props.onOpenComments} />
         )}
       </View>
+      {hasOpenedOptionsSheet ? (
+        <ContentOptionsSheet
+          target={
+            isOptionsSheetOpen
+              ? { targetType: "clip", targetId: clip.id, authorId: clip.author.id, shareUrl: `https://zudomart.com/clips/${clip.id}` }
+              : null
+          }
+          onClose={() => setIsOptionsSheetOpen(false)}
+        />
+      ) : null}
+      {isTipSheetOpen ? (
+        <TipSheet target={{ targetType: "clip", targetId: clip.id, creatorName: clip.author.name }} onClose={() => setIsTipSheetOpen(false)} />
+      ) : null}
     </View>
   );
 }
