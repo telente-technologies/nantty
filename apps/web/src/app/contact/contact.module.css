@@ -1,0 +1,69 @@
+.channelList {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.channel {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 28px;
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.channelIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background: var(--blue-50);
+  color: var(--blue-700);
+}
+
+.channelTitle {
+  font-size: 1.4rem;
+  letter-spacing: -0.035em;
+}
+
+.channelDescription {
+  color: var(--ink-muted);
+}
+
+.channelEmail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  margin-top: 12px;
+  color: var(--blue-600);
+  font-weight: 600;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.channelEmail:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.generalNote {
+  padding-block: 40px var(--section-space);
+  color: var(--ink-muted);
+}
+
+.generalNote a {
+  color: var(--blue-600);
+  font-weight: 600;
+}
+
+@media (min-width: 720px) {
+  .channelList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
