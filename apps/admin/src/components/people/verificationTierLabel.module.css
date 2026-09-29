@@ -1,0 +1,19 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.blue {
+  color: var(--blue-600);
+}
+
+.gold {
+  color: #a57c00;
+}
+
+.black {
+  color: #000;
+}

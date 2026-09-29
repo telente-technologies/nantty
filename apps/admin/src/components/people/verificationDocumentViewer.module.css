@@ -1,0 +1,37 @@
+.viewer {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-medium);
+  background: #d9dbe4;
+  padding: 24px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.viewer svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  pointer-events: none;
+}
+
+.watermark {
+  position: absolute;
+  inset: -40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  transform: rotate(-24deg);
+  pointer-events: none;
+}
+
+.watermark span {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(185 28 28 / 0.28);
+  letter-spacing: 0.04em;
+}

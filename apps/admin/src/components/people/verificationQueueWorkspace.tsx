@@ -1,0 +1,75 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
+import { ErrorBlock } from "@/components/ui/feedback";
+import { SelectField, TextField } from "@/components/ui/formFields";
+import { PageHeader } from "@/components/ui/pageHeader";
+import { Pagination } from "@/components/ui/pagination";
+import { StatusBadge } from "@/components/ui/statusBadge";
+import { Toolbar } from "@/components/ui/surfaces";
+import { SegmentedTabs } from "@/components/ui/tabs";
+import { UserIdentity } from "@/components/ui/userIdentity";
+import { verificationColorOptions, verificationStatusTabs } from "@/constants/peopleFilterOptions.constant";
+import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
+import { fetchVerificationApplications } from "@/services/peopleReviewsApi.service";
+import type { VerificationApplication } from "@/types/verification.type";
+import { formatMoneyForDisplay, formatRelativeTimeFromNow, humanizeConstantName } from "@/utils/formatting.util";
+
+import { VerificationTierLabel } from "./verificationTierLabel";
+import styles from "./peopleWorkspace.module.css";
+
+type StatusTabKey = (typeof verificationStatusTabs)[number]["key"];
+
+const verificationColumns: readonly DataTableColumn<VerificationApplication>[] = [
+  { key: "applicant", header: "Applicant", render: (application) => <UserIdentity user={application.user} /> },
+  { key: "requested", header: "Requested", render: (application) => <VerificationTierLabel color={application.color} tier={application.tier} /> },
+  { key: "subject", header: "Subject", render: (application) => application.applicant.businessName ?? application.applicant.agencyName ?? humanizeConstantName(application.subjectKind) },
+  { key: "plan", header: "Plan", render: (application) => (application.subscription ? formatMoneyForDisplay(application.subscription.price) : <span className={styles.faint}>Not purchasable</span>), isMono: true },
+  {
+    key: "checks",
+    header: "Checks",
+    render: (application) => {
+      const failed = application.checks.filter((check) => check.result === "FAIL").length;
+      const review = application.checks.filter((check) => check.result === "REVIEW").length;
+      return failed > 0 ? <StatusBadge tone="danger" label={`${failed} failed`} /> : review > 0 ? <StatusBadge tone="caution" label={`${review} to review`} /> : <StatusBadge tone="success" label="All passed" />;
+    },
+  },
+  { key: "submitted", header: "Submitted", render: (application) => <span className={styles.muted}>{formatRelativeTimeFromNow(application.submittedAt)}</span> },
+  { key: "status", header: "Status", render: (application) => <StatusBadge status={application.status} /> },
+];
+
+export function VerificationQueueWorkspace() {
+  const router = useRouter();
+  const [statusTab, setStatusTab] = useState<StatusTabKey>("PENDING");
+  const [color, setColor] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const filters = { status: statusTab === "ALL" ? undefined : statusTab, color: color || undefined, search: search.trim() || undefined, page };
+  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchVerificationApplications(filters, signal), JSON.stringify(filters));
+
+  return (
+    <>
+      <PageHeader area="People" title="Verification reviews" description="Blue is personal, Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
+      <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setPage(1); }} />
+      <Toolbar>
+        <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, legal or business name" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
+        <SelectField label="Badge" isLabelHidden options={verificationColorOptions} value={color} onChange={(event) => { setColor(event.target.value); setPage(1); }} />
+      </Toolbar>
+      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      <DataTable
+        caption="Verification requests"
+        columns={verificationColumns}
+        rows={data?.items ?? []}
+        readRowKey={(application) => application.id}
+        onRowOpen={(application) => router.push(`/verification/${application.id}`)}
+        isLoading={isLoading}
+        emptyMessage="No verification requests here."
+        readRowTone={(application) => (application.status === "PENDING" && application.checks.some((check) => check.result === "FAIL") ? "caution" : null)}
+      />
+      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+    </>
+  );
+}
