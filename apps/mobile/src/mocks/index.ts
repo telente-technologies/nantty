@@ -3,8 +3,10 @@ import { ApiError } from "@/errors/api.error";
 import { authMocks } from "./auth.mock";
 import { cartMocks } from "./cart.mock";
 import { chatsMocks } from "./chats.mock";
+import { clipsMocks } from "./clips.mock";
 import { feedMocks } from "./feed.mock";
 import { liveMocks } from "./live.mock";
+import { localeMocks } from "./locale.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
@@ -17,6 +19,7 @@ import { usersMocks } from "./users.mock";
 import { walletMocks } from "./wallet.mock";
 
 const routes: MockRoute[] = [
+  ...localeMocks,
   ...authMocks,
   ...usersMocks,
   ...feedMocks,
@@ -25,6 +28,7 @@ const routes: MockRoute[] = [
   ...cartMocks,
   ...ordersMocks,
   ...chatsMocks,
+  ...clipsMocks,
   ...notificationsMocks,
   ...liveMocks,
   ...storiesMocks,
