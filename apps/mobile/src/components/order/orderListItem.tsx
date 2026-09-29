@@ -37,7 +37,7 @@ export function OrderListItem({ order, subtitle, onPress }: { order: Order; subt
 
 const styles = StyleSheet.create({
   row: { paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 8 },
-  image: { width: 30, height: 30, borderRadius: 4, backgroundColor: colors.placeholder, overflow: "hidden" },
+  image: { width: 44, height: 44, borderRadius: 6, backgroundColor: colors.placeholder, overflow: "hidden" },
   middle: { flex: 1, gap: 4 },
   right: { alignItems: "flex-end", gap: 4 },
 });
