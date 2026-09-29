@@ -97,7 +97,7 @@ function ClipPageComponent(props: ClipPageProps) {
           <ClipVideoPlayer
             media={video}
             isActive={isActive}
-            isMuted={props.isMuted}
+            isMuted={props.isMuted || clip.sound?.status === "under_copyright_review"}
             isPausedByUser={isPausedByUser}
             playbackRate={PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
             onPlaybackProgress={isActive ? setPlaybackProgress : undefined}
@@ -117,6 +117,7 @@ function ClipPageComponent(props: ClipPageProps) {
       </Pressable>
       <View style={[styles.overlay, { bottom: bottomChromeHeight + 16 }]} pointerEvents="box-none">
         <ClipDetails
+          isActive={isActive}
           clip={clip}
           isFollowing={engagement.isFollowing}
           onToggleFollow={props.onToggleFollow}
