@@ -3,8 +3,9 @@ import { readMockDatabase, type MockAdAccountRecord } from "@/mocks/mockDatabase
 import { MockHttpError } from "@/mocks/mockResponses.mock";
 import type { AudienceSpec, LocationTarget } from "@/types/audience.type";
 import type { AdInput, AdPlacement, AdSetInput, BidStrategy, Budget, CampaignInput, CampaignObjective, FrequencyCap, Schedule } from "@/types/campaign.type";
-import type { CallToAction, CreativeFormat, CreativeInput } from "@/types/creative.type";
+import type { CallToAction, Creative, CreativeFormat, CreativeInput } from "@/types/creative.type";
 import type { Money } from "@/types/money.type";
+import { describeWhyCreativeCannotRunAnywhere } from "@/utils/adPlacementRules.util";
 import { isSafeHttpsUrl } from "@/utils/formValidation.util";
 
 type Issues = { path: string; message: string }[];
@@ -12,7 +13,7 @@ type Issues = { path: string; message: string }[];
 const objectives: readonly CampaignObjective[] = ["awareness", "traffic", "engagement", "messages", "sales", "followers", "store_promotion"];
 const placements: readonly AdPlacement[] = ["feed", "clips", "mart", "search", "stories", "live"];
 const callsToAction: readonly CallToAction[] = ["shop_now", "learn_more", "visit_store", "send_message", "follow", "watch_more", "order_now", "sign_up"];
-const formats: readonly CreativeFormat[] = ["feed_post", "clip", "product", "store", "story"];
+const formats: readonly CreativeFormat[] = ["feed_post", "clip", "product", "store", "story", "live"];
 const minimumDailyBudgetMinorByCurrency: Record<string, number> = { NGN: 100_000, GHS: 1_000, KES: 10_000, ZAR: 2_000, GBP: 100, EUR: 100, USD: 100 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -128,11 +129,11 @@ export function validateCreativeInput(value: unknown, path: string, accountId: s
   const input = isRecord(value) ? value : {};
   const format = formats.includes(input.format as CreativeFormat) ? (input.format as CreativeFormat) : "feed_post";
   const source = isRecord(input.source) ? input.source : {};
-  const sourceType = ["post", "clip", "product", "store", "upload"].includes(String(source.type)) ? (source.type as CreativeInput["source"]["type"]) : "upload";
+  const sourceType = ["post", "clip", "product", "store", "live", "upload"].includes(String(source.type)) ? (source.type as CreativeInput["source"]["type"]) : "upload";
   const sourceId = typeof source.id === "string" ? source.id : "";
   const database = readMockDatabase();
   const mediaIds = readIdList(input.mediaIds, 10);
-  if (sourceType !== "upload" && !database.contentSources.some((candidate) => candidate.id === sourceId && candidate.accountId === accountId && candidate.eligible)) issues.push({ path: `${path}.source`, message: "Choose an eligible post, clip, product or store from this account." });
+  if (sourceType !== "upload" && !database.contentSources.some((candidate) => candidate.id === sourceId && candidate.accountId === accountId && candidate.eligible)) issues.push({ path: `${path}.source`, message: "Choose an eligible post, reel, product, live session or store from this account." });
   if (sourceType === "upload" && (mediaIds.length === 0 || mediaIds.some((mediaId) => !database.media.has(mediaId)))) issues.push({ path: `${path}.mediaIds`, message: "Upload at least one image or video." });
   const headline = typeof input.headline === "string" ? input.headline.trim() : "";
   const primaryText = typeof input.primaryText === "string" ? input.primaryText.trim() : "";
@@ -158,4 +159,12 @@ export function validateAdInputs(value: unknown, accountId: string, issues: Issu
 
 export function throwIfValidationIssues(issues: Issues): void {
   if (issues.length > 0) throw new MockHttpError(400, "VALIDATION_FAILED", issues[0]?.message ?? "Validation failed", issues);
+}
+
+export function collectPlacementIssuesForAds(ads: readonly { readonly creative: Creative }[], placements: readonly AdPlacement[], issues: Issues): void {
+  ads.forEach((ad, index) => {
+    const shape = { sourceType: ad.creative.source.type, media: ad.creative.media, hasProduct: Boolean(ad.creative.product), hasLiveStream: Boolean(ad.creative.live) };
+    const problem = describeWhyCreativeCannotRunAnywhere(shape, placements);
+    if (problem) issues.push({ path: `ads.${index}.creative.placements`, message: problem });
+  });
 }
