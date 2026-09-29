@@ -1,0 +1,86 @@
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+
+import { EligibilityChecklist } from "@/components/creator/eligibilityChecklist";
+import { useCreatorApplicationQuery, useCreatorEligibilityQuery, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
+import { RevenueRulesCard } from "@/components/creator/revenueRulesCard";
+import { StatusPill } from "@/components/escrow/statusPill";
+import { Button } from "@/components/ui/button";
+import { Header } from "@/components/ui/header";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors, palette } from "@/constants/colors.constant";
+import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import type { MainScreenProps } from "@/navigation/navigation.types";
+
+const BENEFITS = [
+  { title: "Go live", body: "Host live shows, pin products and chat with your audience in real time." },
+  { title: "Receive gifts", body: "Fans send gifts during your lives — they turn into real earnings." },
+  { title: "Earn affiliate commissions", body: "Promote sellers' products and earn a commission on every confirmed sale." },
+  { title: "Fan subscriptions", body: "Offer monthly plans with perks for your most loyal followers." },
+];
+
+export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorProgram">) {
+  const { isApprovedCreator } = useCreatorStatus();
+  const eligibility = useCreatorEligibilityQuery();
+  const application = useCreatorApplicationQuery();
+  const revenueRules = useCreatorRevenueRulesQuery();
+  const applicationStatus = application.data?.status;
+  const approved = isApprovedCreator || applicationStatus === "approved";
+
+  const primaryAction = approved
+    ? { title: "Open creator dashboard", onPress: () => navigation.navigate("CreatorDashboard"), disabled: false }
+    : applicationStatus === "pending" || applicationStatus === "rejected"
+      ? { title: "View application status", onPress: () => navigation.navigate("CreatorApplicationStatus"), disabled: false }
+      : { title: eligibility.data?.eligible ? "Apply now" : "Apply when you're eligible", onPress: () => navigation.navigate("CreatorApplication"), disabled: !eligibility.data?.eligible };
+
+  return (
+    <Screen>
+      <Header title="Creator Program" />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={eligibility.isRefetching} onRefresh={() => Promise.all([eligibility.refetch(), application.refetch()])} tintColor={colors.primary} />}
+      >
+        <View style={styles.hero}>
+          {approved ? <StatusPill label="You're a Zudomart Creator" tone="success" /> : null}
+          <Text size={21} weight={600} lineHeight={25.2} color={colors.white}>Turn your audience into income</Text>
+          <Text size={14} lineHeight={19.6} color={palette.primary[50]}>
+            Accepted creators can go live, receive gifts, earn commissions on sellers' products and offer paid subscriptions.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text size={16} weight={600} lineHeight={19.2}>What you get</Text>
+          {BENEFITS.map((benefit) => (
+            <View key={benefit.title} style={styles.benefit}>
+              <Text size={14} weight={500} lineHeight={16.8}>{benefit.title}</Text>
+              <Text size={13} lineHeight={17.5} color={colors.textMuted}>{benefit.body}</Text>
+            </View>
+          ))}
+        </View>
+
+        {!approved ? (
+          <View style={styles.card}>
+            <Text size={16} weight={600} lineHeight={19.2}>Eligibility</Text>
+            {eligibility.data ? <EligibilityChecklist requirements={eligibility.data.requirements} /> : <ActivityIndicator color={colors.primary} />}
+            {eligibility.data && !eligibility.data.eligible ? (
+              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Keep posting and growing — this list updates automatically.</Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {revenueRules.data ? <RevenueRulesCard rules={revenueRules.data} /> : null}
+      </ScrollView>
+      <View style={styles.footer}>
+        <Button title={primaryAction.title} disabled={primaryAction.disabled} onPress={primaryAction.onPress} />
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  hero: { backgroundColor: colors.primary, borderRadius: 12, padding: 20, gap: 8 },
+  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  benefit: { gap: 2 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
+});
