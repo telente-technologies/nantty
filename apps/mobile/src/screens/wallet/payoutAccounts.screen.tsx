@@ -8,6 +8,7 @@ import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
+import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { usePayoutAccountsQuery, walletQueryKeys } from "@/components/wallet/walletQueries.hook";
 import { colors } from "@/constants/colors.constant";
 import { walletsService } from "@/services/wallets.service";
@@ -16,6 +17,7 @@ export function PayoutAccountsScreen() {
   const queryClient = useQueryClient();
   const { data: accounts = [] } = usePayoutAccountsQuery();
   const [bankCode, setBankCode] = useState("");
+  const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const refreshPayoutAccounts = () => queryClient.invalidateQueries({ queryKey: walletQueryKeys.payoutAccounts });
 
@@ -23,6 +25,7 @@ export function PayoutAccountsScreen() {
     mutationFn: () => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber }),
     onSuccess: () => {
       setBankCode("");
+      setBankName("");
       setAccountNumber("");
       refreshPayoutAccounts();
     },
@@ -54,7 +57,14 @@ export function PayoutAccountsScreen() {
         <Text size={16} weight={500} lineHeight={19.2}>
           Add a bank account
         </Text>
-        <TextField label="Bank code" placeholder="e.g. 058" keyboardType="number-pad" value={bankCode} onChangeText={setBankCode} />
+        <BankPickerField
+          selectedBankCode={bankCode}
+          selectedBankName={bankName}
+          onSelectBank={(bank) => {
+            setBankCode(bank.code);
+            setBankName(bank.name);
+          }}
+        />
         <TextField
           label="Account number"
           placeholder="10-digit account number"
