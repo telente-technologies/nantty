@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 
+import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import { PhoneNumberSheet } from "@/components/settings/phoneNumberSheet";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
 import { colors } from "@/constants/colors.constant";
+import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 import { useAuthStore } from "@/store/auth.store";
 
-export function SettingsAccountScreen() {
+export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsAccount">) {
+  const { data: profile } = useMyProfileQuery();
   const { data: settings } = useAccountSettingsQuery();
   const updateSettings = useUpdateAccountSettingsMutation();
   const clearSessionAndSignOut = useAuthStore((s) => s.clearSessionAndSignOut);
@@ -34,6 +37,7 @@ export function SettingsAccountScreen() {
   return (
     <SettingsPage title="Account">
       <SettingsGroup>
+        <SettingsRow label="Username" trailing={{ text: profile ? `@${profile.username}` : "", color: colors.textMuted, weight: 400 }} onPress={() => navigation.navigate("SettingsUsername")} />
         <SettingsRow label="Email" trailing={{ text: settings?.email ?? "", color: colors.textMuted, weight: 400 }} />
         <SettingsRow
           label="Phone number"
