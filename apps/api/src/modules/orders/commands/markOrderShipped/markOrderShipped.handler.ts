@@ -12,6 +12,6 @@ export class MarkOrderShippedHandler extends CommandHandler<MarkOrderShippedComm
   }
 
   public execute(command: MarkOrderShippedCommand): Promise<OrderRecord> {
-    return this.service.markOrderShipped(command.principal.userId, command.orderId, command.trackingNumber);
+    return this.service.markOrderShipped(command.principal.userId, command.orderId, command.trackingNumber, command.courier);
   }
 }
