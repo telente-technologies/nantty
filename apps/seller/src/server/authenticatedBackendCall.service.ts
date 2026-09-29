@@ -12,7 +12,7 @@ export interface AuthenticatedBackendOutcome {
 export async function callBackendAsSignedInSeller(request: NextRequest, call: Omit<BackendCall, "accessToken">): Promise<AuthenticatedBackendOutcome> {
   const tokens = readApiTokensFromCookies(request.cookies);
   const locationId = call.locationId ?? readSelectedLocationIdFromCookies(request.cookies);
-  const storeId = readSelectedStoreIdFromCookies(request.cookies);
+  const storeId = call.storeId !== undefined ? call.storeId : readSelectedStoreIdFromCookies(request.cookies);
   let result = await callSellerBackend({ ...call, locationId, storeId, accessToken: tokens.accessToken });
   if (result.status !== 401 || !tokens.refreshToken) return { result, rotatedTokens: null };
   const rotatedTokens = await exchangeRefreshTokenForNewTokenPair(tokens.refreshToken);
