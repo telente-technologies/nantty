@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
+import { fetchConversationListAndSaveLocally, readSavedConversationsForInstantDisplay } from "@/cache/messageSync.util";
 import { ChatSearchPanel } from "@/components/chat/chatSearchPanel";
 import { ChatsEmptyState } from "@/components/chat/chatsEmptyState";
 import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
@@ -13,7 +14,6 @@ import { ArrowLeft24Icon, DotsThreeVertical24Icon, MagnifyingGlass24Icon, Wechat
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import { messagesService } from "@/services/messages.service";
 import { storiesService } from "@/services/stories.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConversationFilter } from "@/types";
@@ -25,7 +25,11 @@ export function ChatsScreen() {
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const conversations = useQuery({
     queryKey: ["conversations", filter],
-    queryFn: () => messagesService.fetchConversationList(filter),
+    queryFn: () => fetchConversationListAndSaveLocally(filter),
+    placeholderData: () => {
+      const savedConversations = readSavedConversationsForInstantDisplay(filter);
+      return savedConversations.length > 0 ? savedConversations : undefined;
+    },
   });
   const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray });
 

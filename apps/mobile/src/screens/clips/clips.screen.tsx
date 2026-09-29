@@ -1,9 +1,9 @@
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import type { CompositeScreenProps } from "@react-navigation/native";
+import { useIsFocused, type CompositeScreenProps } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { FlatList, Share, StyleSheet, View } from "react-native";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppState, FlatList, Platform, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
@@ -12,9 +12,12 @@ import { ClipsHeader } from "@/components/clips/clipsHeader";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
+import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/adEvents.service";
 import { clipsService } from "@/services/clips.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Clip, ClipsFeedTab } from "@/types";
+
+import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
 
 type ClipsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, "Clips">,
@@ -22,20 +25,62 @@ type ClipsScreenProps = CompositeScreenProps<
 >;
 
 let hasShownClipGestureTips = false;
+const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
+const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
 
 export function ClipsScreen({ navigation }: ClipsScreenProps) {
   const insets = useSafeAreaInsets();
+  const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const [tab, setTab] = useState<ClipsFeedTab>("forYou");
   const [pageHeight, setPageHeight] = useState(0);
+  const [activeClipIndex, setActiveClipIndex] = useState(0);
+  const [isAppInForeground, setIsAppInForeground] = useState(AppState.currentState === "active");
+  const [isMuted, setIsMuted] = useState(Platform.OS === "web");
   const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
   const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
   const [showGestureTips, setShowGestureTips] = useState(!hasShownClipGestureTips);
-  const clips = useQuery({ queryKey: ["clips", tab], queryFn: () => clipsService.fetchClipsFeed(tab) });
+  const clipsListRef = useRef<FlatList<Clip>>(null);
+
+  const clipsFeed = useInfiniteQuery({
+    queryKey: ["clips", tab],
+    queryFn: ({ pageParam }) => clipsService.fetchClipsFeed(tab, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  });
+  const clips = useMemo(() => clipsFeed.data?.pages.flatMap((page) => page.data) ?? [], [clipsFeed.data]);
 
   useEffect(() => {
     navigation.setOptions({ tabBarStyle: { display: "none" } });
   }, [navigation]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => setIsAppInForeground(state === "active"));
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    prefetchUpcomingClipPosters(clips, activeClipIndex, NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD + 2);
+  }, [clips, activeClipIndex]);
+
+  const switchFeedTabAndScrollToTop = (nextTab: ClipsFeedTab) => {
+    setTab(nextTab);
+    setActiveClipIndex(0);
+    clipsListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  };
+
+  const updateActiveClipFromViewableItems = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    const mostVisible = viewableItems.find((token) => token.isViewable && token.index !== null);
+    if (mostVisible?.index !== undefined && mostVisible.index !== null) setActiveClipIndex(mostVisible.index);
+  }, []);
+
+  const viewabilityConfigCallbackPairs = useRef<ViewabilityConfigCallbackPairs>([
+    { viewabilityConfig: { itemVisiblePercentThreshold: ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT }, onViewableItemsChanged: updateActiveClipFromViewableItems },
+    {
+      viewabilityConfig: sponsoredImpressionViewabilityConfig,
+      onViewableItemsChanged: ({ viewableItems }) => recordImpressionsForViewableSponsoredItems(viewableItems, "clips"),
+    },
+  ]).current;
 
   const engagementFor = (clip: Clip): ClipEngagement =>
     engagementByClipId[clip.id] ?? { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
@@ -71,48 +116,70 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
     setShowGestureTips(false);
   };
 
+  const isPlaybackAllowed = isScreenFocused && isAppInForeground && commentsForClipId === null;
+
   return (
-    <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ClipsHeader
-        tab={tab}
-        onChangeTab={setTab}
-        onBack={() => navigation.navigate("Home")}
-        onSearch={() => navigation.navigate("Search", { scope: "all" })}
-      />
-      <View style={styles.pager} onLayout={(e) => setPageHeight(e.nativeEvent.layout.height)}>
-        {pageHeight > 0 ? (
-          <FlatList
-            data={clips.data?.data ?? []}
-            keyExtractor={(c) => c.id}
-            pagingEnabled
-            showsVerticalScrollIndicator={false}
-            snapToInterval={pageHeight}
-            decelerationRate="fast"
-            getItemLayout={(_, index) => ({ length: pageHeight, offset: pageHeight * index, index })}
-            renderItem={({ item }) => (
-              <ClipPage
-                clip={item}
-                height={pageHeight}
-                engagement={engagementFor(item)}
-                myAvatarUrl={myAvatarUrl}
-                onToggleLike={() => toggleLikeOnClip(item)}
-                onLikeByDoubleTap={() => likeClipWithDoubleTap(item)}
-                onToggleFollow={() => toggleFollowOnClipAuthor(item)}
-                onOpenComments={() => setCommentsForClipId(item.id)}
-                onShare={() => shareClipLink(item)}
-                onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.author.id })}
-              />
-            )}
-          />
-        ) : null}
+    <View style={styles.root} onLayout={(e) => setPageHeight(Math.round(e.nativeEvent.layout.height))}>
+      {pageHeight > 0 ? (
+        <FlatList
+          ref={clipsListRef}
+          data={clips}
+          keyExtractor={(c) => c.id}
+          pagingEnabled
+          snapToInterval={pageHeight}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          disableIntervalMomentum
+          showsVerticalScrollIndicator={false}
+          getItemLayout={(_, index) => ({ length: pageHeight, offset: pageHeight * index, index })}
+          initialNumToRender={2}
+          maxToRenderPerBatch={2}
+          windowSize={3}
+          removeClippedSubviews
+          viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
+          onEndReachedThreshold={2}
+          onEndReached={() => {
+            if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);
+          }}
+          extraData={{ activeClipIndex, isMuted, isPlaybackAllowed, engagementByClipId }}
+          renderItem={({ item, index }) => (
+            <ClipPage
+              clip={item}
+              height={pageHeight}
+              isActive={isPlaybackAllowed && index === activeClipIndex}
+              shouldMountVideoPlayer={index >= activeClipIndex - 1 && index <= activeClipIndex + NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD}
+              isMuted={isMuted}
+              topInset={insets.top}
+              bottomInset={insets.bottom}
+              engagement={engagementFor(item)}
+              myAvatarUrl={myAvatarUrl}
+              onToggleMute={() => setIsMuted((muted) => !muted)}
+              onToggleLike={() => toggleLikeOnClip(item)}
+              onLikeByDoubleTap={() => likeClipWithDoubleTap(item)}
+              onToggleFollow={() => toggleFollowOnClipAuthor(item)}
+              onOpenComments={() => setCommentsForClipId(item.id)}
+              onShare={() => shareClipLink(item)}
+              onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.author.id })}
+            />
+          )}
+        />
+      ) : null}
+      <View style={[styles.header, { paddingTop: insets.top }]} pointerEvents="box-none">
+        <ClipsHeader
+          tab={tab}
+          onChangeTab={switchFeedTabAndScrollToTop}
+          onBack={() => navigation.navigate("Home")}
+          onSearch={() => navigation.navigate("Search", { scope: "all" })}
+          foregroundColor={colors.white}
+        />
       </View>
-      {showGestureTips && clips.isSuccess ? <GestureTipsOverlay onDismiss={dismissGestureTips} /> : null}
+      {showGestureTips && clipsFeed.isSuccess ? <GestureTipsOverlay onDismiss={dismissGestureTips} /> : null}
       <ClipCommentsSheet postId={commentsForClipId} myAvatarUrl={myAvatarUrl} onClose={() => setCommentsForClipId(null)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white },
-  pager: { flex: 1 },
+  root: { flex: 1, backgroundColor: colors.black },
+  header: { position: "absolute", top: 0, left: 0, right: 0 },
 });

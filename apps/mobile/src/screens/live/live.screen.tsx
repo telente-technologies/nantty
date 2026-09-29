@@ -4,14 +4,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
+import { LiveGiftBurst } from "@/components/live/liveGiftBurst";
+import { LiveGiftPickerSheet } from "@/components/live/liveGiftPickerSheet";
+import { useLiveGifting } from "@/components/live/liveGifting.hook";
 import { LiveCommentBar } from "@/components/live/liveCommentBar";
 import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
 import { LiveHeader } from "@/components/live/liveHeader";
 import { LiveProductsSheet } from "@/components/live/liveProductsSheet";
+import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
 import { colors } from "@/constants/colors.constant";
+import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 
@@ -22,8 +27,21 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [reactionsExpanded, setReactionsExpanded] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
+  const [showGiftPicker, setShowGiftPicker] = useState(false);
+  const [showPinProducts, setShowPinProducts] = useState(false);
   const live = useLiveSessionWithActions(liveId, hasJoined);
+  const gifting = useLiveGifting(liveId, showGiftPicker);
+  const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
   const session = live.session.data;
+  const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
+  const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
+  const hostCanPinAffiliatedProducts = isHost && isApprovedCreator;
+
+  useEffect(() => {
+    if (!isHostBlockedFromGoingLive) return;
+    navigation.goBack();
+    openCreatorProgramOrSettings(navigation);
+  }, [isHostBlockedFromGoingLive, navigation]);
 
   useEffect(() => {
     if (session?.status === "ended") navigation.replace("LiveEnded", { liveId });
@@ -88,14 +106,41 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       />
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
-        <LiveCommentsFeed comments={live.comments.data?.data ?? []} />
+        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...gifting.sentGiftComments]} />
         <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} />
       </View>
       <LiveCommentBar
         onSend={(text) => live.sendComment.mutate(text)}
         onToggleReactions={() => setReactionsExpanded((e) => !e)}
-        onPressProducts={session.products.length > 0 ? () => setShowProducts(true) : undefined}
+        onPressProducts={
+          hostCanPinAffiliatedProducts ? () => setShowPinProducts(true) : session.products.length > 0 ? () => setShowProducts(true) : undefined
+        }
+        onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
       />
+      <LiveGiftBurst burst={gifting.latestGiftBurst} />
+      {viewerCanSendGifts ? (
+        <LiveGiftPickerSheet
+          visible={showGiftPicker}
+          gifts={gifting.giftCatalog.data ?? []}
+          isLoadingGifts={gifting.giftCatalog.isPending && showGiftPicker}
+          isSendingGift={gifting.sendGift.isPending}
+          errorMessage={gifting.giftSendingErrorMessage}
+          walletAvailable={gifting.walletAvailableAfterLastGift}
+          onChangeSelection={gifting.forgetPendingGiftAttempt}
+          onSendGift={(gift, quantity) =>
+            gifting.sendGift.mutate({ gift, quantity }, { onSuccess: () => setShowGiftPicker(false) })
+          }
+          onClose={() => setShowGiftPicker(false)}
+        />
+      ) : null}
+      {hostCanPinAffiliatedProducts ? (
+        <LivePinProductsSheet
+          visible={showPinProducts}
+          liveId={liveId}
+          pinnedProductId={session.pinnedProductId ?? null}
+          onClose={() => setShowPinProducts(false)}
+        />
+      ) : null}
       <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
       <LiveProductsSheet
         visible={showProducts}
