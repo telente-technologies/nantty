@@ -6,6 +6,7 @@ model Post {
   text         String    @default("")
   media        Json      @default("[]")
   audience     String    @default("everyone")
+  visibility   String    @default("public")
   topics       String[]
   productIds   String[]
   repostOfId   String?
