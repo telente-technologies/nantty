@@ -29,6 +29,7 @@ model Order {
   shippingAddress Json
   customerName    String      @default("")
   trackingNumber  String?
+  courier         String?
   paidAt          DateTime?
   shippedAt       DateTime?
   deliveredAt     DateTime?
