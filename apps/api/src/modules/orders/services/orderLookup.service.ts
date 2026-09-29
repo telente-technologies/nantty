@@ -1,4 +1,4 @@
-import type { OrderLookup } from "../../../interfaces/orderLookup.interface.js";
+import type { AttributedOrderItem, OrderLookup } from "../../../interfaces/orderLookup.interface.js";
 import type { OrderStatus } from "../../../enums/orderStatus.enum.js";
 import { SALE_STATUSES } from "../models/orders.model.js";
 import type { OrdersRepository } from "../repositories/orders.repository.js";
@@ -23,5 +23,20 @@ export class RepositoryOrderLookup implements OrderLookup {
   public async listStoreIdsBuyerHasPurchasedFrom(buyerId: string): Promise<readonly string[]> {
     const purchases = await this.orders.listAllForBuyer(buyerId, SALE_STATUSES);
     return [...new Set(purchases.map((order) => order.storeId))];
+  }
+
+  public async listAttributedOrderItems(orderId: string): Promise<readonly AttributedOrderItem[]> {
+    const order = await this.orders.findById(orderId);
+    if (order === undefined) return [];
+    return order.items.map((item) => ({
+      orderId: order.id,
+      storeId: order.storeId,
+      productId: item.productId,
+      quantity: item.quantity,
+      lineTotal: item.lineTotal,
+      currency: order.currency,
+      attributionSource: item.attributionSource,
+      attributionId: item.attributionId,
+    }));
   }
 }

@@ -1,6 +1,7 @@
 import type { Checkout, Order, OrderItem, Prisma } from "../../../generated/prisma/client.js";
 import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { OrderStatus } from "../../../enums/orderStatus.enum.js";
+import type { SaleAttributionSource } from "../../../interfaces/orderLookup.interface.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
@@ -24,7 +25,12 @@ function convertOrderRowToRecord(row: Order & { items: OrderItem[] }): OrderReco
     shippingTotal: convertDatabaseAmountToMinorUnits(row.shippingTotal),
     total: convertDatabaseAmountToMinorUnits(row.total),
     shippingAddress: row.shippingAddress as unknown as ShippingAddressSnapshot,
-    items: row.items.map((item) => ({ ...item, unitPrice: convertDatabaseAmountToMinorUnits(item.unitPrice), lineTotal: convertDatabaseAmountToMinorUnits(item.lineTotal) })),
+    items: row.items.map((item) => ({
+      ...item,
+      unitPrice: convertDatabaseAmountToMinorUnits(item.unitPrice),
+      lineTotal: convertDatabaseAmountToMinorUnits(item.lineTotal),
+      attributionSource: item.attributionSource as SaleAttributionSource | null,
+    })),
   };
 }
 

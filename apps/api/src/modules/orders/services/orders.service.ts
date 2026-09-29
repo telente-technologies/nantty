@@ -101,6 +101,8 @@ export class OrdersService {
           unitPrice: line.unitPrice.amountMinor,
           quantity: line.quantity,
           lineTotal: line.lineTotal.amountMinor,
+          attributionSource: line.attribution?.source ?? null,
+          attributionId: line.attribution?.id ?? null,
         })),
       });
     }

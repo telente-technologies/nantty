@@ -1,5 +1,6 @@
 import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { OrderStatus } from "../../../enums/orderStatus.enum.js";
+import type { SaleAttributionSource } from "../../../interfaces/orderLookup.interface.js";
 import type { MinorUnits } from "../../../types/money.type.js";
 
 export interface ShippingAddressSnapshot {
@@ -24,6 +25,8 @@ export interface OrderItemRecord {
   readonly unitPrice: MinorUnits;
   readonly quantity: number;
   readonly lineTotal: MinorUnits;
+  readonly attributionSource: SaleAttributionSource | null;
+  readonly attributionId: string | null;
 }
 
 export interface OrderRecord {
