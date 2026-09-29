@@ -32,6 +32,7 @@ export const ADMIN_PERMISSIONS = [
   "withdrawals:process",
   "audit:read",
   "waitlist:read",
+  "exchange-rates:manage",
 ] as const;
 
 export type Permission =
