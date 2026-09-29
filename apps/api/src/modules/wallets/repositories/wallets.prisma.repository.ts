@@ -4,7 +4,15 @@ import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
-import type { NewPayoutAccount, NewWithdrawal, PayoutAccountRecord, WithdrawalRecord, WithdrawalStatus } from "../models/wallets.model.js";
+import {
+  describeWalletOwner,
+  type NewPayoutAccount,
+  type NewWithdrawal,
+  type PayoutAccountRecord,
+  type WalletOwner,
+  type WithdrawalRecord,
+  type WithdrawalStatus,
+} from "../models/wallets.model.js";
 import type { PayoutAccountsRepository, WithdrawalsRepository } from "./wallets.repository.js";
 
 function convertPayoutAccountRowToRecord(row: PayoutAccount): PayoutAccountRecord {
@@ -17,13 +25,13 @@ function convertWithdrawalRowToRecord(row: Withdrawal): WithdrawalRecord {
 }
 
 export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository {
-  public async listForStore(storeId: string): Promise<readonly PayoutAccountRecord[]> {
-    const rows = await prisma().payoutAccount.findMany({ where: { storeId }, orderBy: { createdAt: "asc" } });
+  public async listForOwner(owner: WalletOwner): Promise<readonly PayoutAccountRecord[]> {
+    const rows = await prisma().payoutAccount.findMany({ where: describeWalletOwner(owner), orderBy: { createdAt: "asc" } });
     return rows.map(convertPayoutAccountRowToRecord);
   }
 
-  public async findForStore(storeId: string, payoutAccountId: string): Promise<PayoutAccountRecord | undefined> {
-    const row = await prisma().payoutAccount.findFirst({ where: { id: payoutAccountId, storeId } });
+  public async findForOwner(owner: WalletOwner, payoutAccountId: string): Promise<PayoutAccountRecord | undefined> {
+    const row = await prisma().payoutAccount.findFirst({ where: { id: payoutAccountId, ...describeWalletOwner(owner) } });
     return row === null ? undefined : convertPayoutAccountRowToRecord(row);
   }
 
@@ -32,8 +40,8 @@ export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository 
     return convertPayoutAccountRowToRecord(await prisma().payoutAccount.create({ data: { ...rest, accountNumberEnc: accountNumberEncrypted } }));
   }
 
-  public async delete(storeId: string, payoutAccountId: string): Promise<boolean> {
-    return (await prisma().payoutAccount.deleteMany({ where: { id: payoutAccountId, storeId } })).count > 0;
+  public async delete(owner: WalletOwner, payoutAccountId: string): Promise<boolean> {
+    return (await prisma().payoutAccount.deleteMany({ where: { id: payoutAccountId, ...describeWalletOwner(owner) } })).count > 0;
   }
 
   public async saveRecipientCode(payoutAccountId: string, recipientCode: string): Promise<void> {
@@ -51,8 +59,8 @@ export class PrismaWithdrawalsRepository implements WithdrawalsRepository {
     return row === null ? undefined : convertWithdrawalRowToRecord(row);
   }
 
-  public async listForStore(storeId: string, page: PageRequest): Promise<Page<WithdrawalRecord>> {
-    const rows = await prisma().withdrawal.findMany({ where: { storeId }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], ...buildPrismaPageArguments(page) });
+  public async listForOwner(owner: WalletOwner, page: PageRequest): Promise<Page<WithdrawalRecord>> {
+    const rows = await prisma().withdrawal.findMany({ where: describeWalletOwner(owner), orderBy: [{ createdAt: "desc" }, { id: "desc" }], ...buildPrismaPageArguments(page) });
     return mapPageItems(buildPageFromFetchedRows(rows, page), convertWithdrawalRowToRecord);
   }
 
