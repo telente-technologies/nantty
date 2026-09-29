@@ -1,5 +1,7 @@
+import { useIsFocused } from "@react-navigation/native";
+import { useCameraPermissions } from "expo-camera";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
@@ -16,15 +18,19 @@ import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
+import { doesLiveStageShowVideo, LiveVideoStage } from "@/components/live/liveVideoStage";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
 import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const { liveId, host: isHost = false } = route.params;
   const insets = useSafeAreaInsets();
+  const isScreenFocused = useIsFocused();
+  const [cameraPermission] = useCameraPermissions();
   const [hasJoined, setHasJoined] = useState(isHost);
   const [reactionsExpanded, setReactionsExpanded] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -67,7 +73,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
 
   const openLiveOptions = () => {
     if (isHost) {
-      Alert.alert("End live?", "Viewers will be told the live has ended.", [
+      showAlertWithButtons("End live?", "Viewers will be told the live has ended.", [
         { text: "Cancel", style: "cancel" },
         { text: "End live", style: "destructive", onPress: endLiveAsHost },
       ]);
@@ -110,9 +116,13 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   }
 
   const showsTitle = isHost || live.isFollowingHost;
+  const isHostCameraAllowed = !!cameraPermission?.granted;
+  const isShownOverVideo = doesLiveStageShowVideo(session, isHost, isHostCameraAllowed);
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 8, paddingBottom: insets.bottom }]}>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
       <LiveHeader
+        isShownOverVideo={isShownOverVideo}
         session={session}
         showTitle={showsTitle}
         isHost={isHost}
@@ -123,18 +133,20 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       />
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
-        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...gifting.sentGiftComments]} />
+        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...gifting.sentGiftComments]} isShownOverVideo={isShownOverVideo} />
         <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} />
       </View>
-      <LiveCommentBar
-        onSend={(text) => live.sendComment.mutate(text)}
-        onToggleReactions={() => setReactionsExpanded((e) => !e)}
-        onPressProducts={
-          hostCanPinAffiliatedProducts ? () => setShowPinProducts(true) : session.products.length > 0 ? () => setShowProducts(true) : undefined
-        }
-        onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
-        onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
-      />
+      <View style={[styles.commentBarArea, { paddingBottom: insets.bottom }]}>
+        <LiveCommentBar
+          onSend={(text) => live.sendComment.mutate(text)}
+          onToggleReactions={() => setReactionsExpanded((e) => !e)}
+          onPressProducts={
+            hostCanPinAffiliatedProducts ? () => setShowPinProducts(true) : session.products.length > 0 ? () => setShowProducts(true) : undefined
+          }
+          onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
+          onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
+        />
+      </View>
       {showTipSheet ? (
         <TipSheet target={{ targetType: "live", targetId: liveId, creatorName: session.host.name }} onClose={() => setShowTipSheet(false)} />
       ) : null}
@@ -181,5 +193,6 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   flex: { flex: 1 },
   joinTop: { height: 40, paddingHorizontal: 16, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 12 },
+  commentBarArea: { backgroundColor: colors.white },
   bottomRow: { paddingHorizontal: 16, paddingBottom: 12, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
 });
