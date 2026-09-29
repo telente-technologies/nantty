@@ -1,5 +1,6 @@
 import type { StoreRole } from "../../../constants/roles.constant.js";
 import type { CurrencyCode } from "../../../enums/currency.enum.js";
+import type { VerificationDetails } from "../../verifications/models/verifications.model.js";
 
 export type StoreStatus = "active" | "suspended";
 export type SellerApplicationStatus = "pending" | "approved" | "rejected";
@@ -62,6 +63,7 @@ export interface SellerApplicationRecord {
   readonly description: string;
   readonly categoryId: string | null;
   readonly phoneEncrypted: string;
+  readonly onboarding: SellerOnboardingDetails | null;
   readonly status: SellerApplicationStatus;
   readonly reviewerId: string | null;
   readonly reviewNote: string | null;
@@ -69,6 +71,19 @@ export interface SellerApplicationRecord {
   readonly createdAt: Date;
 }
 
-export type NewSellerApplicationInput = Pick<SellerApplicationRecord, "userId" | "storeName" | "description" | "categoryId" | "phoneEncrypted">;
+export interface SellerOnboardingPayoutAccount {
+  readonly bankCode: string;
+  readonly bankName: string;
+  readonly accountNumberEncrypted: string;
+  readonly accountLast4: string;
+  readonly accountName: string;
+}
+
+export interface SellerOnboardingDetails {
+  readonly verification: VerificationDetails | null;
+  readonly payoutAccount: SellerOnboardingPayoutAccount | null;
+}
+
+export type NewSellerApplicationInput = Pick<SellerApplicationRecord, "userId" | "storeName" | "description" | "categoryId" | "phoneEncrypted" | "onboarding">;
 
 export const MAXIMUM_STORES_PER_OWNER = 5;
