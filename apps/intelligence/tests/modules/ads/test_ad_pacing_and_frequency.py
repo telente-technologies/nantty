@@ -29,6 +29,7 @@ def build_campaign(bid_type: str, bid_minor: int, daily_budget_minor: int, **ove
             "spentToday": {"amountMinor": 0, "currency": "USD"},
             "spentTotal": {"amountMinor": 0, "currency": "USD"},
             "placements": ["feed"],
+            "creative": {"mediaType": "video", "aspectRatio": "9:16", "durationMs": 15000},
             "dayStartUtcOffsetMinutes": 0,
             "frequencyCapPerDay": 50,
             **overrides,
