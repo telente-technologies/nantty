@@ -9,6 +9,7 @@ import { staffRoleLabels } from "@/constants/roles.constant";
 import { usePosRegisterContext } from "@/hooks/usePosRegisterContext.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendRequestToDashboardServer } from "@/services/clientApi.service";
+import { rememberOfflineOperatorPass } from "@/services/posDeviceMemory.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { PinRosterEntry } from "@/types/posExtra.type";
 
@@ -29,7 +30,8 @@ export function PosPinLockScreen() {
     setIsUnlocking(true);
     setErrorMessage(null);
     try {
-      await sendRequestToDashboardServer("/bff/session/operator", { method: "POST", body: { staffId: chosenStaffId, pin, registerId: selectedRegister?.id ?? null } });
+      const unlocked = await sendRequestToDashboardServer<{ storeId: string | null; offlineOperatorPass: string | null }>("/bff/session/operator", { method: "POST", body: { staffId: chosenStaffId, pin, registerId: selectedRegister?.id ?? null } });
+      if (unlocked.storeId && unlocked.offlineOperatorPass) await rememberOfflineOperatorPass(unlocked.storeId, chosenStaffId, unlocked.offlineOperatorPass);
       await refreshSessionView();
       setPin("");
       markRegisterUnlocked();
