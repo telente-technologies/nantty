@@ -32,9 +32,9 @@ export class PaymentsController {
   public readonly initialize = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = InitializePaymentBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new InitializePaymentCommand(requireAuthenticatedPrincipal(ctx), body.data.orderId, body.data.provider);
+    const command = new InitializePaymentCommand(requireAuthenticatedPrincipal(ctx), body.data.orderId, body.data.provider, body.data.returnTo);
     const result = await this.commands.execute<InitializePaymentCommand, InitializedOrderPayment>(command);
-    return json(201, { orderId: result.orderId, reference: result.reference, authorizationUrl: result.authorizationUrl, payment: convertPaymentToDto(result.payment) });
+    return json(201, { orderId: result.orderId, reference: result.reference, authorizationUrl: result.authorizationUrl, callbackUrl: result.callbackUrl, payment: convertPaymentToDto(result.payment) });
   };
 
   public readonly verify = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
