@@ -38,7 +38,7 @@ export function PeriodChips({ value, onChange }: { value: SellerDashboardPeriod;
 }
 
 const styles = StyleSheet.create({
-  bar: { flexGrow: 0 },
+  bar: { flexGrow: 0, flexShrink: 0 },
   row: { paddingLeft: 16, paddingRight: 16, paddingVertical: 12, gap: 17 },
   chip: { height: 25, paddingHorizontal: 4, borderRadius: 4, flexDirection: "row", alignItems: "center", gap: 4 },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.error },
