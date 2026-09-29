@@ -24,20 +24,20 @@ export class SearchController {
     const query = SearchQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const term = query.data.q.trim();
-    const type = query.data.type ?? "all";
+    const scope = query.data.scope ?? "all";
     const limit = query.data.limit ?? DEFAULT_RESULTS_PER_TYPE;
-    const includes = (wanted: "products" | "stores" | "users") => type === "all" || type === wanted;
+    const includes = (wanted: "products" | "stores" | "people") => scope === "all" || scope === wanted;
     const [products, stores, users] = await Promise.all([
       includes("products") ? this.queries.execute<SearchProductsQuery, readonly ProductRecord[]>(new SearchProductsQuery(term, limit)) : undefined,
       includes("stores") ? this.queries.execute<SearchStoresQuery, readonly StoreRecord[]>(new SearchStoresQuery(term, limit)) : undefined,
-      includes("users") ? this.queries.execute<SearchUsersQuery, readonly UserSummary[]>(new SearchUsersQuery(term, limit)) : undefined,
+      includes("people") ? this.queries.execute<SearchUsersQuery, readonly UserSummary[]>(new SearchUsersQuery(term, limit)) : undefined,
     ]);
     const convert = await this.currencyConverter.prepareConversionInto(findViewerLocale(ctx).currency);
     const results: SearchResultsDto = {
       query: term,
-      ...(products === undefined ? {} : { products: products.map((product) => convertProductToCardDto(product, convert)) }),
-      ...(stores === undefined ? {} : { stores: stores.map((store) => convertStoreToDto(store, convert)) }),
-      ...(users === undefined ? {} : { users }),
+      products: (products ?? []).map((product) => convertProductToCardDto(product, convert)),
+      stores: (stores ?? []).map((store) => convertStoreToDto(store, convert)),
+      people: users ?? [],
     };
     return json(200, results);
   };

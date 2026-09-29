@@ -49,7 +49,11 @@ export class ReviewsController {
     const query = ReviewListQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const listQuery = new ListProductReviewsQuery(params.data.id, buildPageRequest(query.data));
-    return json(200, await this.queries.execute<ListProductReviewsQuery, Page<ReviewDto>>(listQuery));
+    const [page, summary] = await Promise.all([
+      this.queries.execute<ListProductReviewsQuery, Page<ReviewDto>>(listQuery),
+      this.queries.execute<GetRatingSummaryQuery, RatingSummary>(new GetRatingSummaryQuery(params.data.id)),
+    ]);
+    return json(200, { average: summary.average, count: summary.count, distribution: summary.distribution, reviews: page.data, nextCursor: page.nextCursor });
   };
 
   public readonly listForStore = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

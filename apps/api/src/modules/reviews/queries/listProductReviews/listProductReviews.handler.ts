@@ -14,6 +14,6 @@ export class ListProductReviewsHandler extends QueryHandler<ListProductReviewsQu
 
   public async execute(query: ListProductReviewsQuery): Promise<Page<ReviewDto>> {
     const page = await this.reviewsService.dependencies.reviews.list({ productId: query.productId }, query.page);
-    return { items: await this.reviewsService.presentReviews(page.items), nextCursor: page.nextCursor };
+    return { data: await this.reviewsService.presentReviews(page.data), nextCursor: page.nextCursor };
   }
 }

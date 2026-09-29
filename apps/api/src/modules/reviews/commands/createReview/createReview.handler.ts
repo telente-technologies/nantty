@@ -18,12 +18,15 @@ export class CreateReviewHandler extends CommandHandler<CreateReviewCommand, Rev
   public async execute(command: CreateReviewCommand): Promise<ReviewDto> {
     const { reviews, orderLookup, storeAccess, events, clock } = this.reviewsService.dependencies;
     const userId = command.principal.userId;
-    const purchase = await orderLookup.hasReceivedProductInOrder(userId, command.input.orderId, command.productId);
+    const purchase =
+      command.input.orderId === undefined
+        ? await orderLookup.findReceivedOrderForProduct(userId, command.productId)
+        : await this.findPurchaseInOrder(userId, command.input.orderId, command.productId);
     if (purchase === undefined) throw forbidden("Only buyers who received this product can review it.");
     const review = await reviews.create({
       productId: command.productId,
       storeId: purchase.storeId,
-      orderId: command.input.orderId,
+      orderId: purchase.orderId,
       userId,
       rating: command.input.rating,
       text: command.input.text?.trim() ?? "",
@@ -43,5 +46,10 @@ export class CreateReviewHandler extends CommandHandler<CreateReviewCommand, Rev
     }
     const [dto] = await this.reviewsService.presentReviews([review]);
     return dto as ReviewDto;
+  }
+
+  private async findPurchaseInOrder(userId: string, orderId: string, productId: string): Promise<{ readonly orderId: string; readonly storeId: string } | undefined> {
+    const purchase = await this.reviewsService.dependencies.orderLookup.hasReceivedProductInOrder(userId, orderId, productId);
+    return purchase === undefined ? undefined : { orderId, storeId: purchase.storeId };
   }
 }

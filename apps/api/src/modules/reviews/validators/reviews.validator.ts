@@ -3,7 +3,7 @@ import { schema, type Infer } from "@zudojs/schema";
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
 
 export const CreateReviewBodySchema = schema.object({
-  orderId: schema.string().uuid(),
+  orderId: schema.string().uuid().optional(),
   rating: schema.number().int().min(1).max(5),
   text: schema.string().max(2000).optional(),
 });
