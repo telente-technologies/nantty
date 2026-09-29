@@ -1,0 +1,50 @@
+import Link from "next/link";
+
+import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
+import { contactEmailDisplayText, contactMailtoHref } from "@/config/siteMetadata.config";
+
+import styles from "./landingFooter.module.css";
+
+export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly marketingSiteUrl: string; readonly adsManagerUrl: string }) {
+  const linkGroups = [
+    { heading: "Dashboard", links: [{ label: "Sign in", href: "/login" }, { label: "Features", href: "/#features" }, { label: "Pricing", href: "/#pricing" }, { label: "Reset password", href: "/forgot-password" }] },
+    { heading: "Zudomart", links: [{ label: "Zudomart.com", href: marketingSiteUrl }, { label: "Sell on Zudomart", href: `${marketingSiteUrl}/sellers` }, { label: "Ads Manager", href: adsManagerUrl }] },
+    { heading: "Legal", links: [{ label: "Privacy policy", href: `${marketingSiteUrl}/privacy` }, { label: "Terms of service", href: `${marketingSiteUrl}/terms` }] },
+  ];
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.topRow}>
+        <div className={styles.brandColumn}>
+          <span className={styles.wordmark}>
+            <DashboardWordmark />
+          </span>
+          <p>The point of sale and back office for Gold-verified Zudomart businesses. Nigeria first.</p>
+          <a href={contactMailtoHref} className={styles.emailLink}>
+            {contactEmailDisplayText}
+          </a>
+        </div>
+        <nav aria-label="Footer" className={styles.linkGroups}>
+          {linkGroups.map((group) => (
+            <div key={group.heading}>
+              <h2 className={styles.groupHeading}>{group.heading}</h2>
+              <ul className={styles.linkList}>
+                {group.links.map((link) => (
+                  <li key={link.label}>
+                    {link.href.startsWith("/") ? <Link href={link.href}>{link.label}</Link> : <a href={link.href}>{link.label}</a>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </div>
+      <div className={styles.bottomRow}>
+        <p>© {new Date().getFullYear()} Zudomart. Made in Nigeria.</p>
+        <p>Online orders are paid into escrow and released after delivery.</p>
+      </div>
+      <p className={styles.giantWordmark} aria-hidden="true">
+        dashboard
+      </p>
+    </footer>
+  );
+}

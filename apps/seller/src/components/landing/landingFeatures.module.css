@@ -1,0 +1,130 @@
+.section {
+  padding: var(--landing-section-space) var(--landing-gutter);
+}
+
+.inner {
+  max-width: var(--landing-width);
+  margin: 0 auto;
+}
+
+.intro {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-600);
+}
+
+.heading {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.lede {
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  margin-top: clamp(36px, 5vw, 56px);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.cardText {
+  display: grid;
+  gap: 8px;
+  padding: 24px 24px 18px;
+}
+
+.cardTitle {
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.cardDescription {
+  color: var(--ink-muted);
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+
+.screenWindow {
+  margin-top: auto;
+  height: 250px;
+  padding: 16px 0 0 24px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--surface-card), var(--blue-50));
+}
+
+.wide .screenWindow {
+  height: 320px;
+  background: linear-gradient(to bottom, var(--surface-card), var(--yellow-100));
+}
+
+.screenshot {
+  width: 760px;
+  max-width: none;
+  height: auto;
+  border-radius: 12px 0 0 0;
+  box-shadow: 0 20px 50px -20px rgb(11 23 82 / 0.45);
+  transition: transform 300ms ease;
+}
+
+.card:hover .screenshot {
+  transform: translateY(-8px);
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide {
+    grid-column: span 2;
+    flex-direction: row;
+  }
+
+  .wide .cardText {
+    flex: 0 0 38%;
+    align-content: center;
+    padding: 36px;
+  }
+
+  .wide .screenWindow {
+    flex: 1;
+    height: 360px;
+    margin-top: 0;
+    padding-top: 36px;
+  }
+
+  .wide .screenshot {
+    width: 900px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .wide {
+    grid-column: span 3;
+  }
+}

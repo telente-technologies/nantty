@@ -1,0 +1,173 @@
+.section {
+  padding: var(--landing-section-space) var(--landing-gutter);
+  background: var(--blue-900);
+  color: #fff;
+}
+
+.inner {
+  max-width: var(--landing-width);
+  margin: 0 auto;
+}
+
+.intro {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--yellow-500);
+}
+
+.heading {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.goldWord {
+  color: var(--yellow-500);
+}
+
+.lede {
+  color: var(--blue-100);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.unavailable {
+  margin-top: 32px;
+  color: var(--blue-100);
+}
+
+.planGrid {
+  display: grid;
+  gap: 16px;
+  margin-top: clamp(36px, 5vw, 56px);
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+
+.premium {
+  background: #fff;
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 4px var(--yellow-500);
+}
+
+.planHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 800;
+}
+
+.planName {
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+
+.price {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.price span {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.yearly {
+  margin-top: -8px;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.entitlements {
+  display: grid;
+  gap: 8px;
+}
+
+.entitlements li::before {
+  content: "✓";
+  margin-right: 8px;
+  color: var(--yellow-500);
+  font-weight: 800;
+}
+
+.premium .entitlements li::before {
+  color: var(--blue-500);
+}
+
+.perks {
+  display: grid;
+  gap: 10px;
+  flex: 1;
+  align-content: start;
+  padding-top: 14px;
+  border-top: 1px dashed rgb(255 255 255 / 0.25);
+}
+
+.premium .perks {
+  border-top-color: var(--divider);
+}
+
+.perks li {
+  display: grid;
+}
+
+.perks span {
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.planButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 700;
+}
+
+.premium .planButton {
+  background: var(--blue-500);
+  color: #fff;
+}
+
+.planButton:hover {
+  text-decoration: none;
+  filter: brightness(1.05);
+}
+
+@media (min-width: 860px) {
+  .planGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
