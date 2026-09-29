@@ -16,10 +16,11 @@ import { RepostPostCommand } from "../commands/repostPost/repostPost.command.js"
 import { SharePostCommand } from "../commands/sharePost/sharePost.command.js";
 import { TagProductsCommand } from "../commands/tagProducts/tagProducts.command.js";
 import { UnlikePostCommand } from "../commands/unlikePost/unlikePost.command.js";
-import type { CommentDto, PostDto } from "../dtos/posts.dto.js";
+import type { CommentDto, PostDto, TopLevelCommentDto } from "../dtos/posts.dto.js";
 import type { StoreDetailDto } from "../queries/getStoreDetail/getStoreDetail.handler.js";
 import { GetStoreDetailQuery } from "../queries/getStoreDetail/getStoreDetail.query.js";
 import { GetPostQuery } from "../queries/getPost/getPost.query.js";
+import { ListCommentRepliesQuery } from "../queries/listCommentReplies/listCommentReplies.query.js";
 import { ListPostCommentsQuery } from "../queries/listPostComments/listPostComments.query.js";
 import { ListStorePostsQuery } from "../queries/listStorePosts/listStorePosts.query.js";
 import { ListUserPostsQuery } from "../queries/listUserPosts/listUserPosts.query.js";
@@ -103,7 +104,7 @@ export class PostsController {
     const query = PageQuerySchemaForLists.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const listQuery = new ListPostCommentsQuery(findAuthenticatedPrincipal(ctx)?.userId, params.data.id, buildPageRequest(query.data));
-    return json(200, await this.queries.execute<ListPostCommentsQuery, Page<CommentDto>>(listQuery));
+    return json(200, await this.queries.execute<ListPostCommentsQuery, Page<TopLevelCommentDto>>(listQuery));
   };
 
   public readonly addComment = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -111,7 +112,7 @@ export class PostsController {
     if (!params.success) return validationFailed(params.issues);
     const body = CommentBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new CommentOnPostCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.text, body.data.replyToCommentId ?? body.data.parentId ?? null);
+    const command = new CommentOnPostCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.text, body.data.parentCommentId ?? body.data.replyToCommentId ?? body.data.parentId ?? null);
     return json(201, await this.commands.execute<CommentOnPostCommand, CommentDto>(command));
   };
 
@@ -129,9 +130,25 @@ export class PostsController {
   public readonly deleteComment = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const params = CommentParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
-    const command = new DeleteCommentCommand(requireAuthenticatedPrincipal(ctx), params.data.id, params.data.commentId);
+    const command = new DeleteCommentCommand(requireAuthenticatedPrincipal(ctx), params.data.commentId, params.data.id);
     await this.commands.execute<DeleteCommentCommand, void>(command);
     return empty(204);
+  };
+
+  public readonly deleteCommentById = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = CommentLikeParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    await this.commands.execute<DeleteCommentCommand, void>(new DeleteCommentCommand(requireAuthenticatedPrincipal(ctx), params.data.id));
+    return empty(204);
+  };
+
+  public readonly listReplies = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = CommentLikeParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const query = PageQuerySchemaForLists.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const listQuery = new ListCommentRepliesQuery(findAuthenticatedPrincipal(ctx)?.userId, params.data.id, buildPageRequest(query.data));
+    return json(200, await this.queries.execute<ListCommentRepliesQuery, Page<CommentDto>>(listQuery));
   };
 
   public readonly listUserPosts = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
