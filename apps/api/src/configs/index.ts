@@ -40,7 +40,7 @@ export function int(config: ConfigManager, key: string, fallback: number): numbe
 }
 
 function combineAllowedBrowserOrigins(config: ConfigManager): readonly string[] {
-  const origins = [...list(config, "cors_origins"), text(config, "dashboard_origin", ""), text(config, "ads_manager_origin", ""), text(config, "marketing_site_origin", "")];
+  const origins = [...list(config, "cors_origins"), text(config, "dashboard_origin", ""), text(config, "ads_manager_origin", ""), text(config, "admin_origin", ""), text(config, "marketing_site_origin", "")];
   return [...new Set(origins.map((origin) => origin.trim().replace(/\/+$/, "")).filter((origin) => origin.length > 0))];
 }
 
