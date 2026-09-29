@@ -5,6 +5,11 @@ export type CounterField = "likeCount" | "commentCount" | "repostCount" | "share
 export interface PostMedia {
   readonly url: string;
   readonly type: MediaType;
+  readonly mediaId?: string;
+  readonly posterUrl?: string;
+  readonly width?: number;
+  readonly height?: number;
+  readonly blurhash?: string;
 }
 
 export interface PostRecord {
