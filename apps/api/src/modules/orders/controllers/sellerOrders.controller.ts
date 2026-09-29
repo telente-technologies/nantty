@@ -45,7 +45,7 @@ export class SellerOrdersController {
     if (!params.success) return validationFailed(params.issues);
     const body = ShipOrderBodySchema.safeParse(readJsonBody(ctx) ?? {});
     if (!body.success) return validationFailed(body.issues);
-    const command = new MarkOrderShippedCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.trackingNumber ?? null);
+    const command = new MarkOrderShippedCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.trackingNumber ?? null, body.data.courier ?? null);
     return json(200, (await this.convertOrdersInStoreCurrency([await this.commands.execute<MarkOrderShippedCommand, OrderRecord>(command)]))[0]);
   };
 
