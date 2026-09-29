@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "../enums/currency.enum.js";
+import type { VerificationBadge } from "./verificationBadge.interface.js";
 
 export interface UserSummary {
   readonly id: string;
@@ -6,6 +7,7 @@ export interface UserSummary {
   readonly name: string;
   readonly avatarUrl: string | null;
   readonly isSeller: boolean;
+  readonly verification?: VerificationBadge;
 }
 
 export interface UserContact {
@@ -28,4 +30,16 @@ export interface UserDirectory {
   grantRole(userId: string, role: string): Promise<void>;
   listSelectedTopicSlugs(userId: string): Promise<readonly string[]>;
   findTopicSlugById(topicId: string): Promise<string | undefined>;
+}
+
+export interface UserAccountStanding {
+  readonly userId: string;
+  readonly createdAt: Date;
+  readonly emailVerified: boolean;
+  readonly phoneVerified: boolean;
+  readonly active: boolean;
+}
+
+export interface UserAccountStandingLookup {
+  findUserAccountStanding(userId: string): Promise<UserAccountStanding | undefined>;
 }
