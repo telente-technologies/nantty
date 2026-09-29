@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 
 import { OrderListItem } from "@/components/order/orderListItem";
 import { Chip } from "@/components/ui/chip";
@@ -10,45 +10,76 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ordersService } from "@/services/orders.service";
-import type { OrderStatus } from "@/types";
+import type { Order, OrderStatus } from "@/types";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
-const FILTERS: { label: string; status: OrderStatus | null }[] = [
-  { label: "All", status: null },
-  { label: "Pending", status: "pending" },
-  { label: "Shipped", status: "shipped" },
-  { label: "Delivered", status: "delivered" },
+type OrderFilterKey = "all" | "to_ship" | "on_the_way" | "to_confirm" | "completed" | "disputed" | "cancelled";
+
+const ORDER_GROUPS: readonly { readonly title: string; readonly statuses: readonly OrderStatus[]; readonly filter: OrderFilterKey }[] = [
+  { title: "Delivered — please confirm", statuses: ["delivered"], filter: "to_confirm" },
+  { title: "On the way", statuses: ["shipped"], filter: "on_the_way" },
+  { title: "Seller preparing", statuses: ["paid"], filter: "to_ship" },
+  { title: "Awaiting payment", statuses: ["pending"], filter: "to_ship" },
+  { title: "In dispute", statuses: ["disputed"], filter: "disputed" },
+  { title: "Completed", statuses: ["completed"], filter: "completed" },
+  { title: "Cancelled & refunded", statuses: ["cancelled"], filter: "cancelled" },
 ];
 
+const FILTERS: readonly { readonly key: OrderFilterKey; readonly label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "to_ship", label: "To ship" },
+  { key: "on_the_way", label: "On the way" },
+  { key: "to_confirm", label: "To confirm" },
+  { key: "completed", label: "Completed" },
+  { key: "disputed", label: "Disputes" },
+  { key: "cancelled", label: "Cancelled" },
+];
+
+const describeOrderForList = (order: Order) =>
+  `${order.store.name} • ${order.reference} • ${formatTimeSincePosted(order.createdAt)} ago`;
+
 export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
-  const [status, setStatus] = useState<OrderStatus | null>(null);
-  const orders = useQuery({ queryKey: ["orders", status], queryFn: () => ordersService.fetchMyOrders(status) });
+  const [filter, setFilter] = useState<OrderFilterKey>("all");
+  const orders = useQuery({ queryKey: ["orders", "all"], queryFn: () => ordersService.fetchMyOrders(null) });
+
+  const sections = useMemo(
+    () =>
+      ORDER_GROUPS.filter((group) => filter === "all" || group.filter === filter)
+        .map((group) => ({ title: group.title, data: (orders.data ?? []).filter((order) => group.statuses.includes(order.status)) }))
+        .filter((section) => section.data.length > 0),
+    [orders.data, filter],
+  );
+
   return (
     <Screen>
-      <Header title="My orders" paddingHorizontal={12} />
-      <View style={styles.filters}>
-        {FILTERS.map((filter) => (
-          <Chip key={filter.label} kind="filter" label={filter.label} selected={status === filter.status} onPress={() => setStatus(filter.status)} />
+      <Header title="My orders" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar} contentContainerStyle={styles.filters}>
+        {FILTERS.map((option) => (
+          <Chip key={option.key} kind="filter" label={option.label} selected={filter === option.key} onPress={() => setFilter(option.key)} />
         ))}
-      </View>
-      <FlatList
-        data={orders.data ?? []}
+      </ScrollView>
+      <SectionList
+        sections={sections}
         keyExtractor={(order) => order.id}
+        stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => orders.refetch()} tintColor={colors.primary} />}
-        renderItem={({ item }) => (
-          <OrderListItem
-            order={item}
-            subtitle={`${item.store.name} • ${formatTimeSincePosted(item.createdAt)} ago`}
-            onPress={() => navigation.navigate("OrderDetail", { orderId: item.id })}
-          />
+        renderSectionHeader={({ section }) => (
+          <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted} style={styles.sectionTitle} accessibilityRole="header">
+            {section.title} · {section.data.length}
+          </Text>
+        )}
+        renderItem={({ item, index, section }) => (
+          <View style={[styles.row, index === 0 && styles.firstRow, index === section.data.length - 1 && styles.lastRow]}>
+            <OrderListItem order={item} subtitle={describeOrderForList(item)} onPress={() => navigation.navigate("OrderDetail", { orderId: item.id })} />
+          </View>
         )}
         ListEmptyComponent={
           orders.isLoading ? (
             <ActivityIndicator style={styles.state} color={colors.primary} />
           ) : (
             <Text align="center" color={colors.textSubtle} style={styles.state}>
-              {orders.isError ? "Couldn't load your orders." : "No orders here yet."}
+              {orders.isError ? "Couldn't load your orders. Pull down to try again." : "No orders here yet."}
             </Text>
           )
         }
@@ -58,7 +89,12 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
 }
 
 const styles = StyleSheet.create({
-  filters: { paddingHorizontal: 12, paddingVertical: 8, flexDirection: "row", gap: 8 },
-  list: { paddingHorizontal: 12, paddingBottom: 24 },
+  filtersBar: { flexGrow: 0 },
+  filters: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
+  list: { paddingHorizontal: 16, paddingBottom: 32 },
+  sectionTitle: { marginTop: 16, marginBottom: 8 },
+  row: { backgroundColor: colors.white, paddingHorizontal: 12 },
+  firstRow: { borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingTop: 4 },
+  lastRow: { borderBottomLeftRadius: 12, borderBottomRightRadius: 12, paddingBottom: 4 },
   state: { marginTop: 64 },
 });
