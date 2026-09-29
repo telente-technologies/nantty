@@ -1,13 +1,18 @@
 import type { Cart, CartItem, Order, OrderStatus, Product, ProductSummary, StoreSummary } from "@/types";
+import { multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
+
+import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 
 import { buildMockUserSummary, isoDateHoursAgo } from "./fixtures.mock";
 
 export const mockStore: StoreSummary = { id: "s_1", name: "Usershop Name", logoUrl: null, rating: 3.4, ratingCount: 200, reviewCount: 103 };
 
-export const buildMockProductSummary = (index: number, name = "Product Name", price = 20_000): ProductSummary => ({
+export const buildMockProductSummary = (index: number, name = "Product Name", usdCents = 20_000): ProductSummary => ({
   id: `p_${index}`,
   name,
-  price,
+  get price() {
+    return convertUsdCentsToViewerCurrency(usdCents);
+  },
   imageUrl: null,
   liked: false,
   stock: index % 4 === 1 ? 3 : 12,
@@ -41,8 +46,12 @@ export const mockCartState: { items: CartItem[] } = {
 };
 
 export const summariseMockCart = (): Cart => {
-  const itemsTotal = mockCartState.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  return { items: mockCartState.items, itemsTotal, shopDiscount: 0, shipping: 0, total: itemsTotal };
+  const zero = convertUsdCentsToViewerCurrency(0);
+  const itemsTotal = mockCartState.items.reduce(
+    (sum, item) => ({ ...sum, amountMinor: sum.amountMinor + multiplyMoneyByQuantity(item.product.price, item.quantity).amountMinor }),
+    zero,
+  );
+  return { items: mockCartState.items, itemsTotal, shopDiscount: zero, shipping: zero, total: itemsTotal };
 };
 
 const buildMockOrder = (index: number, status: OrderStatus, hours: number): Order => ({
@@ -50,7 +59,9 @@ const buildMockOrder = (index: number, status: OrderStatus, hours: number): Orde
   reference: `ZM-${String(1040 + index)}`,
   status,
   items: [{ id: `oi_${index}`, product: keyboard(index), quantity: 1, variant: null }],
-  total: 20_000,
+  get total() {
+    return convertUsdCentsToViewerCurrency(20_000);
+  },
   buyer: buildMockUserSummary(2, "Enyo Dev"),
   store: mockStore,
   createdAt: isoDateHoursAgo(hours),
