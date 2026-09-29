@@ -3,21 +3,23 @@ import { randomUUID } from "node:crypto";
 import { ConflictError } from "@zudojs/errors";
 
 import type { StoreRole } from "../../../constants/roles.constant.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import { isUniqueConstraintViolation } from "../../../databases/prisma.database.js";
 import type { Store, StoreMember } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
-import { convertDatabaseAmountToKobo } from "../../../utils/money.util.js";
+import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
 import type { NewStoreInput, StoreChanges, StoreFilter, StoreMemberRecord, StoreRecord, StoreStatus } from "../models/stores.model.js";
 import type { StoresRepository } from "./stores.repository.js";
 
 function convertStoreRowToRecord(row: Store): StoreRecord {
-  const { ratingAvg, ratingCount, shippingFee, status, ...rest } = row;
+  const { ratingAvg, ratingCount, shippingFee, status, currency, ...rest } = row;
   return {
     ...rest,
     status: status === "suspended" ? "suspended" : "active",
-    shippingFee: convertDatabaseAmountToKobo(shippingFee),
+    currency: currency as CurrencyCode,
+    shippingFee: convertDatabaseAmountToMinorUnits(shippingFee),
     ratingAverage: ratingAvg,
     ratingCount,
   };
@@ -127,6 +129,6 @@ export class PrismaStoresRepository implements StoresRepository {
   }
 
   public async listStoreIdsForMember(userId: string): Promise<readonly string[]> {
-    return (await prisma().storeMember.findMany({ where: { userId }, select: { storeId: true } })).map((row) => row.storeId);
+    return (await prisma().storeMember.findMany({ where: { userId }, select: { storeId: true }, orderBy: { createdAt: "asc" } })).map((row) => row.storeId);
   }
 }
