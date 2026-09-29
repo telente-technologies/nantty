@@ -55,7 +55,7 @@ export function buildDemoDisputes(): MockDisputeRecord[] {
       sellerResponse: "Agreed to refund part for alteration.",
       evidence: [],
       messages: [],
-      resolution: { outcome: "REFUND_PARTIAL", buyerRefundMinor: 12_000_00, sellerPayoutMinor: 20_600_00, commissionMinor: 1_400_00, reason: "Both parties accepted ₦12,000 for alteration.", resolvedAt: isoHoursFromNow(-410), resolvedByName: "Chidi Okafor" },
+      resolution: { outcome: "REFUND_PARTIAL", buyerRefundMinor: 12_000_00, sellerPayoutMinor: 20_460_00, commissionMinor: 1_540_00, reason: "Both parties accepted ₦12,000 for alteration.", resolvedAt: isoHoursFromNow(-410), resolvedByName: "Chidi Okafor" },
     },
   ];
 }
