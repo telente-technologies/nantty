@@ -24,8 +24,9 @@ model Dispute {
   orderId      String
   openedById   String
   reason       String
-  details      String    @default("")
-  status       String    @default("open")
+  details          String    @default("")
+  evidenceMediaIds String[]  @default([])
+  status           String    @default("open")
   resolution   String?
   resolvedById String?
   resolvedAt   DateTime?
@@ -34,4 +35,17 @@ model Dispute {
   @@index([status])
   @@index([escrowId])
   @@map("disputes")
+}
+
+model DisputeMessage {
+  id                 String   @id @default(uuid())
+  disputeId          String
+  authorId           String
+  authorRole         String
+  text               String
+  attachmentMediaIds String[] @default([])
+  createdAt          DateTime @default(now())
+
+  @@index([disputeId, createdAt])
+  @@map("dispute_messages")
 }
