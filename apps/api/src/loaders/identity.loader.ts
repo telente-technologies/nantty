@@ -14,6 +14,7 @@ import { InMemoryAddressesRepository, PrismaAddressesRepository } from "../modul
 import { InMemoryTopicsRepository, PrismaTopicsRepository } from "../modules/users/repositories/topics.repository.js";
 import { PrismaUsersRepository } from "../modules/users/repositories/users.prisma.repository.js";
 import { InMemoryUsersRepository } from "../modules/users/repositories/users.repository.js";
+import { RepositoryAddressBook } from "../modules/users/services/addressBook.service.js";
 import { RepositoryUserDirectory } from "../modules/users/services/userDirectory.service.js";
 import { UsersService } from "../modules/users/services/users.service.js";
 import { registerUsersCommandAndQueryHandlers } from "../modules/users/users.module.js";
@@ -59,6 +60,7 @@ export function createIdentityModules(core: Core, audit: AuditRecorder, external
   return {
     accessTokenVerifier: tokens,
     userDirectory: new RepositoryUserDirectory(users, topics),
+    addressBook: new RepositoryAddressBook(addresses, core.cipher),
     authController: new AuthController(core.commands, core.queries),
     usersController: new UsersController(core.commands, core.queries),
   };

@@ -1,3 +1,4 @@
+import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { OrderLookup } from "../interfaces/orderLookup.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
@@ -32,6 +33,7 @@ import { ReviewsService } from "../modules/reviews/services/reviews.service.js";
 import type { Core } from "./core.loader.js";
 
 export interface SocialSharedServices {
+  readonly currencyConverter: CurrencyConverter;
   readonly audit: AuditRecorder;
   readonly userDirectory: UserDirectory;
   readonly storeAccess: StoreAccess;
@@ -58,6 +60,7 @@ export function createSocialModules(core: Core, shared: SocialSharedServices) {
     socialGraph,
     events,
     clock,
+    currencyConverter: shared.currencyConverter,
   });
   registerPostsCommandAndQueryHandlers(commands, queries, postsService);
 

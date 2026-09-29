@@ -1,3 +1,4 @@
+import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
@@ -20,6 +21,9 @@ import { InMemoryProductVariantsRepository } from "../modules/products/repositor
 import { PrismaProductsRepository } from "../modules/products/repositories/products.prisma.repository.js";
 import { InMemoryProductsRepository } from "../modules/products/repositories/products.repository.js";
 import { RepositoryProductCatalog } from "../modules/products/services/productCatalog.service.js";
+import { PrismaProductEngagementRepository } from "../modules/products/repositories/productEngagement.prisma.repository.js";
+import { InMemoryProductEngagementRepository } from "../modules/products/repositories/productEngagement.repository.js";
+import { SellerProductsController } from "../modules/products/controllers/sellerProducts.controller.js";
 import { ProductsService } from "../modules/products/services/products.service.js";
 import { SearchController } from "../modules/search/controllers/search.controller.js";
 import { registerSearchQueryHandlers } from "../modules/search/search.module.js";
@@ -40,6 +44,7 @@ export interface CatalogExternalServices {
 }
 
 export interface CatalogSharedServices {
+  readonly currencyConverter: CurrencyConverter;
   readonly audit: AuditRecorder;
   readonly userDirectory: UserDirectory;
 }
@@ -47,7 +52,6 @@ export interface CatalogSharedServices {
 export function createCatalogModules(core: Core, shared: CatalogSharedServices, external: CatalogExternalServices) {
   const usePrisma = core.persistence === "prisma";
   const { commands, queries, events } = core;
-  const currency = core.settings.money.currency;
   const stores = usePrisma ? new PrismaStoresRepository() : new InMemoryStoresRepository();
   const applications = usePrisma ? new PrismaSellerApplicationsRepository() : new InMemorySellerApplicationsRepository();
   const categories = usePrisma ? new PrismaCategoriesRepository() : new InMemoryCategoriesRepository();
@@ -58,17 +62,19 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
 
   const storeAccess = new StoreAccessService(stores);
   const storesService = new StoresService({
-    stores, applications, storeAccess, events, currency,
+    stores, applications, storeAccess, events,
     cipher: core.cipher,
     audit: shared.audit,
     userDirectory: shared.userDirectory,
     countPublishedProductsForStore: (storeId) => products.countPublishedForStore(storeId),
+    countAllProductsForStore: (storeId) => products.countAllForStore(storeId),
   });
   registerStoresCommandAndQueryHandlers(commands, queries, storesService);
 
   registerCategoriesCommandAndQueryHandlers(commands, queries, new CategoriesService(categories, shared.audit));
 
-  const productsService = new ProductsService({ products, variants, stores, categories, storeAccess, events, currency, audit: shared.audit });
+  const engagement = usePrisma ? new PrismaProductEngagementRepository() : new InMemoryProductEngagementRepository();
+  const productsService = new ProductsService({ products, variants, engagement, stores, categories, storeAccess, events, currencyConverter: shared.currencyConverter, audit: shared.audit });
   registerProductsCommandAndQueryHandlers(commands, queries, productsService);
 
   registerSearchQueryHandlers(queries, new SearchService(productsService, shared.userDirectory));
@@ -82,11 +88,12 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
     storeAccess: storeAccessPort,
     productCatalog: productCatalogPort,
     controllers: {
-      storesController: new StoresController(commands, queries, currency),
+      storesController: new StoresController(commands, queries, shared.currencyConverter),
       sellerApplicationsController: new SellerApplicationsController(commands, queries),
       categoriesController: new CategoriesController(commands, queries),
-      productsController: new ProductsController(commands, queries),
-      searchController: new SearchController(queries, currency),
+      productsController: new ProductsController(commands, queries, shared.currencyConverter),
+      sellerProductsController: new SellerProductsController(commands, queries),
+      searchController: new SearchController(queries, shared.currencyConverter),
       mediaController: new MediaController(commands, queries),
     },
   };

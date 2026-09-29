@@ -20,10 +20,11 @@ export function createWebKit(
   persistence: Persistence,
   clock: Clock,
   accessTokens: AccessTokenVerifier,
+  resolveViewerLocale: HttpMiddleware,
 ): WebKit {
   const idempotencyStore = persistence === "prisma" ? new PrismaIdempotencyStore() : new InMemoryIdempotencyStore();
   return {
-    guard: createRouteGuard(accessTokens),
+    guard: createRouteGuard(accessTokens, resolveViewerLocale),
     requireIdempotencyKey: createIdempotencyKeyMiddleware(idempotencyStore, clock),
     limitSensitiveRequests: createSensitiveEndpointRateLimit(settings.auth.sensitiveRateLimit),
   };

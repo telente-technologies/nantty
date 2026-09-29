@@ -1,3 +1,5 @@
+import type { AddressBook } from "../interfaces/addressBook.interface.js";
+import type { CurrencyConverter } from "../interfaces/currencyConverter.interface.js";
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
@@ -19,6 +21,7 @@ import { PrismaOrdersRepository } from "../modules/orders/repositories/orders.pr
 import { InMemoryOrdersRepository } from "../modules/orders/repositories/orders.repository.js";
 import { RepositoryOrderLookup } from "../modules/orders/services/orderLookup.service.js";
 import { OrdersService } from "../modules/orders/services/orders.service.js";
+import { SellerOrdersController } from "../modules/orders/controllers/sellerOrders.controller.js";
 import { StoreDashboardService } from "../modules/orders/services/storeDashboard.service.js";
 import { PaymentsController } from "../modules/payments/controllers/payments.controller.js";
 import { FlutterwaveGateway } from "../modules/payments/gateways/flutterwave.gateway.js";
@@ -34,15 +37,19 @@ import { InMemoryLedgerRepository } from "../modules/wallets/repositories/ledger
 import { PrismaPayoutAccountsRepository, PrismaWithdrawalsRepository } from "../modules/wallets/repositories/wallets.prisma.repository.js";
 import { InMemoryPayoutAccountsRepository, InMemoryWithdrawalsRepository } from "../modules/wallets/repositories/wallets.repository.js";
 import { LedgerService } from "../modules/wallets/services/ledger.service.js";
+import { PaystackBankDirectory, type BankDirectory } from "../modules/wallets/services/bankDirectory.service.js";
 import { WalletsService } from "../modules/wallets/services/wallets.service.js";
 import { registerWalletsCommandAndQueryHandlers } from "../modules/wallets/wallets.module.js";
 import type { Core } from "./core.loader.js";
 
 export interface CommerceExternalServices {
   readonly paymentGateways?: Readonly<Record<"paystack" | "flutterwave", PaymentGateway>>;
+  readonly bankDirectory?: BankDirectory;
 }
 
 export interface CommerceSharedServices {
+  readonly addressBook: AddressBook;
+  readonly currencyConverter: CurrencyConverter;
   readonly audit: AuditRecorder;
   readonly userDirectory: UserDirectory;
   readonly storeAccess: StoreAccess;
@@ -52,7 +59,6 @@ export interface CommerceSharedServices {
 export function createCommerceModules(core: Core, shared: CommerceSharedServices, external: CommerceExternalServices) {
   const usePrisma = core.persistence === "prisma";
   const { settings, clock, events, commands, queries, cipher } = core;
-  const currency = settings.money.currency;
   const gateways = external.paymentGateways ?? {
     paystack: new PaystackGateway(settings.payments.paystackSecretKey),
     flutterwave: new FlutterwaveGateway(settings.payments.flutterwaveSecretKey, settings.payments.flutterwaveWebhookHash),
@@ -61,8 +67,8 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
   const escrowsRepository = usePrisma ? new PrismaEscrowsRepository() : new InMemoryEscrowsRepository();
   const ledger = new LedgerService(usePrisma ? new PrismaLedgerRepository() : new InMemoryLedgerRepository(), clock);
 
-  const cartsService = new CartsService({ carts: usePrisma ? new PrismaCartsRepository() : new InMemoryCartsRepository(), productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, currency });
-  const ordersService = new OrdersService({ orders: ordersRepository, carts: cartsService, productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, cipher, clock, events, currency });
+  const cartsService = new CartsService({ carts: usePrisma ? new PrismaCartsRepository() : new InMemoryCartsRepository(), productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, currencyConverter: shared.currencyConverter });
+  const ordersService = new OrdersService({ orders: ordersRepository, addressBook: shared.addressBook, carts: cartsService, productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, cipher, clock, events, currencyConverter: shared.currencyConverter });
   let paymentsService: PaymentsService | undefined;
   const escrowsService = new EscrowsService({
     escrows: escrowsRepository,
@@ -74,7 +80,7 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     clock,
     commissionBps: settings.money.commissionBps,
     inspectionDays: settings.money.escrowInspectionDays,
-    paymentRefunder: { refundEscrowPayment: (escrow) => (paymentsService as PaymentsService).refundEscrowPayment(escrow) },
+    paymentRefunder: { refundEscrowPayment: (escrow, chargedAmount) => (paymentsService as PaymentsService).refundEscrowPayment(escrow, chargedAmount) },
   });
   paymentsService = new PaymentsService({
     payments: usePrisma ? new PrismaPaymentsRepository() : new InMemoryPaymentsRepository(),
@@ -90,19 +96,20 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     callbackUrl: settings.payments.callbackUrl,
   });
   const disputesService = new DisputesService(usePrisma ? new PrismaDisputesRepository() : new InMemoryDisputesRepository(), escrowsService, ordersService);
+  const bankDirectory = external.bankDirectory ?? new PaystackBankDirectory(settings.payments.paystackSecretKey);
   const walletsService = new WalletsService({
     ledger,
+    bankDirectory,
     payoutAccounts: usePrisma ? new PrismaPayoutAccountsRepository() : new InMemoryPayoutAccountsRepository(),
     withdrawals: usePrisma ? new PrismaWithdrawalsRepository() : new InMemoryWithdrawalsRepository(),
     storeAccess: shared.storeAccess,
     cipher,
     audit: shared.audit,
     clock,
-    currency,
     paymentGateways: gateways,
     sumEscrowHeldForStore: (storeId) => escrowsRepository.sumOutstandingForStore(storeId),
   });
-  const dashboardService = new StoreDashboardService(ordersRepository, shared.storeAccess, shared.productCatalog, clock, currency);
+  const dashboardService = new StoreDashboardService(ordersRepository, shared.storeAccess, shared.productCatalog, clock);
 
   registerCartsCommandAndQueryHandlers(commands, queries, cartsService);
   registerOrdersCommandAndQueryHandlers(commands, queries, { orders: ordersService, dashboard: dashboardService, escrows: escrowsService });
@@ -115,10 +122,11 @@ export function createCommerceModules(core: Core, shared: CommerceSharedServices
     scheduledJobs: [createEscrowAutoReleaseJob(escrowsService)],
     controllers: {
       cartsController: new CartsController(commands, queries),
-      ordersController: new OrdersController(commands, queries, ordersService),
+      ordersController: new OrdersController(commands, queries, ordersService, shared.currencyConverter),
+      sellerOrdersController: new SellerOrdersController(commands, queries, ordersService),
       paymentsController: new PaymentsController(commands, queries, gateways),
       escrowsController: new EscrowsController(commands, queries),
-      walletsController: new WalletsController(commands, queries),
+      walletsController: new WalletsController(commands, queries, bankDirectory),
     },
   };
 }
