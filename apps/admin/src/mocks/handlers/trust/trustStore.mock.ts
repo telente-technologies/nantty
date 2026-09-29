@@ -16,7 +16,6 @@ export interface TrustMockStore {
   readonly ads: MockAdRecord[];
   readonly advertisers: MockAdvertiserRecord[];
   readonly adPolicies: MockAdPolicyRecord[];
-  readonly strikeAdjustmentsByUserId: Map<string, number>;
   readonly authorActionsByUserId: Map<string, PriorAuthorAction[]>;
 }
 
@@ -28,7 +27,6 @@ export function readTrustStore(): TrustMockStore {
     ads: buildDemoAdsForReview(),
     advertisers: buildDemoAdvertisers(),
     adPolicies: buildDemoAdPolicies(),
-    strikeAdjustmentsByUserId: new Map([["usr_0016", 1]]),
     authorActionsByUserId: new Map([
       ["usr_0005", [{ action: "WARN_AUTHOR", reason: "Listing without a clear return policy.", occurredAt: isoMinutesAgo(40_000) }, { action: "WARN_AUTHOR", reason: "Used a brand logo without permission.", occurredAt: isoMinutesAgo(12_000) }]],
       ["usr_0012", [{ action: "REMOVE", reason: "Replica luxury watches.", occurredAt: isoMinutesAgo(7600) }, { action: "SUSPEND_AUTHOR", reason: "Repeated counterfeit listings after two warnings.", occurredAt: isoMinutesAgo(2900) }]],
@@ -44,8 +42,7 @@ export function findPlatformUserRecordOrFail(userId: string): MockPlatformUserRe
 }
 
 export function readEffectiveStrikeCount(userId: string): number {
-  const user = findMockPlatformUser(userId);
-  return (user?.strikeCount ?? 0) + (readTrustStore().strikeAdjustmentsByUserId.get(userId) ?? 0);
+  return findMockPlatformUser(userId)?.strikeCount ?? 0;
 }
 
 export function presentModeratedUser(userId: string): PlatformUserSummary {
@@ -54,9 +51,9 @@ export function presentModeratedUser(userId: string): PlatformUserSummary {
 }
 
 export function changeUserStrikeCount(userId: string, delta: number): number {
-  const adjustments = readTrustStore().strikeAdjustmentsByUserId;
-  adjustments.set(userId, (adjustments.get(userId) ?? 0) + delta);
-  return readEffectiveStrikeCount(userId);
+  const user = findPlatformUserRecordOrFail(userId) as { strikeCount: number };
+  user.strikeCount = Math.max(0, user.strikeCount + delta);
+  return user.strikeCount;
 }
 
 export function applyModerationStateToPlatformUser(userId: string, patch: Partial<Pick<MockPlatformUserRecord, "status" | "verification">>): void {
