@@ -21,12 +21,13 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
   const isMart = variant === "mart";
   const height = imageHeight ?? (isMart ? 227 : 170);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={product.name} onPress={onPress} style={[styles.card, { width }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={product.sponsored ? `Sponsored, ${product.name}` : product.name} onPress={onPress} style={[styles.card, { width }]}>
       <View style={[styles.image, { height, borderRadius: isMart ? 4 : 0 }]}>
         {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
       </View>
       {isMart ? (
         <View style={styles.martInfo}>
+          {product.sponsored ? <SponsoredLabel /> : null}
           <Text size={12} lineHeight={16.8} numberOfLines={1}>
             {product.name}
           </Text>
@@ -42,6 +43,7 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
       ) : (
         <View style={styles.gridInfo}>
           <View style={styles.gridText}>
+            {product.sponsored ? <SponsoredLabel /> : null}
             <Text size={13} lineHeight={16.9} numberOfLines={1}>
               {product.name}
             </Text>
@@ -60,6 +62,14 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
         </View>
       )}
     </Pressable>
+  );
+}
+
+export function SponsoredLabel() {
+  return (
+    <Text size={12} weight={400} lineHeight={14.4} color={colors.textSubtle} accessibilityLabel="Sponsored">
+      Sponsored
+    </Text>
   );
 }
 
