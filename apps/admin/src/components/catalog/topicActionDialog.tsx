@@ -37,7 +37,9 @@ export function TopicActionDialog({ action, onClose, onDone }: { readonly action
 
   async function confirmAction(reason: string) {
     const result = await mutation.run(reason);
-    if (result) onDone(result.item, `${description.confirmLabel.replace(/ topic$/, "")} · ${result.item.name}`);
+    if (!result) return;
+    const doneMessages: Record<TopicAction["kind"], string> = { create: "added", rename: "renamed", toggleStatus: result.item.status === "HIDDEN" ? "hidden" : "shown again", toggleTrending: result.item.isTrending ? "marked trending" : "removed from trending" };
+    onDone(result.item, `${result.item.name} ${doneMessages[action.kind]}`);
   }
 
   return (
