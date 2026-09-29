@@ -1,10 +1,12 @@
 import { Image } from "expo-image";
+import { useEffect } from "react";
 import { Pressable, StyleSheet, View, type DimensionValue } from "react-native";
 
 import { Like16Icon, Plus16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import type { ProductSummary } from "@/types";
+import { adEventsService } from "@/services/adEvents.service";
+import type { AdPlacement, ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export interface ProductCardProps {
@@ -15,19 +17,28 @@ export interface ProductCardProps {
   readonly onPress?: () => void;
   readonly onAddToCart?: () => void;
   readonly onToggleLike?: () => void;
+  readonly adPlacement?: AdPlacement;
 }
 
-export function ProductCard({ product, variant = "grid", imageHeight, width = 175, onPress, onAddToCart, onToggleLike }: ProductCardProps) {
+export function ProductCard({ product, variant = "grid", imageHeight, width = 175, onPress, onAddToCart, onToggleLike, adPlacement = "mart" }: ProductCardProps) {
   const isMart = variant === "mart";
+  const sponsored = product.sponsored;
+  useEffect(() => {
+    if (sponsored) adEventsService.recordSponsoredImpressionOncePerSession(sponsored, adPlacement, product.id);
+  }, [sponsored, adPlacement, product.id]);
+  const openProduct = () => {
+    if (sponsored) adEventsService.recordSponsoredClick(sponsored, adPlacement, product.id);
+    onPress?.();
+  };
   const height = imageHeight ?? (isMart ? 227 : 170);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={product.sponsored ? `Sponsored, ${product.name}` : product.name} onPress={onPress} style={[styles.card, { width }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={sponsored ? `Ad, ${product.name}` : product.name} onPress={openProduct} style={[styles.card, { width }]}>
       <View style={[styles.image, { height, borderRadius: isMart ? 4 : 0 }]}>
         {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+        {sponsored ? <AdPill /> : null}
       </View>
       {isMart ? (
         <View style={styles.martInfo}>
-          {product.sponsored ? <SponsoredLabel /> : null}
           <Text size={12} lineHeight={16.8} numberOfLines={1}>
             {product.name}
           </Text>
@@ -43,8 +54,7 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
       ) : (
         <View style={styles.gridInfo}>
           <View style={styles.gridText}>
-            {product.sponsored ? <SponsoredLabel /> : null}
-            <Text size={13} lineHeight={16.9} numberOfLines={1}>
+              <Text size={13} lineHeight={16.9} numberOfLines={1}>
               {product.name}
             </Text>
             <Text size={13} weight={500} lineHeight={16.9}>
@@ -65,6 +75,16 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
   );
 }
 
+export function AdPill() {
+  return (
+    <View style={styles.adPill} accessible accessibilityLabel="Advertisement">
+      <Text size={11} weight={500} lineHeight={13.2} letterSpacing={0} color={colors.textMuted}>
+        Ad
+      </Text>
+    </View>
+  );
+}
+
 export function SponsoredLabel() {
   return (
     <Text size={12} weight={400} lineHeight={14.4} color={colors.textSubtle} accessibilityLabel="Sponsored">
@@ -80,4 +100,5 @@ const styles = StyleSheet.create({
   priceRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   gridInfo: { flexDirection: "row", justifyContent: "space-between", gap: 19 },
   gridText: { flex: 1, gap: 2 },
+  adPill: { position: "absolute", top: 8, left: 8, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99, backgroundColor: colors.skeleton },
 });
