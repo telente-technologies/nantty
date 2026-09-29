@@ -9,6 +9,7 @@ import { usePosConnectivity } from "@/hooks/usePosConnectivity.hook";
 import { PosRegisterContext, type PosRegisterContextValue } from "@/hooks/usePosRegisterContext.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { sendRequestToDashboardServer } from "@/services/clientApi.service";
+import { forgetOfflineOperatorPass, readPosDeviceMemoryForStore, rememberPosDeviceLocation, rememberPosDeviceRegister, type PosDeviceMemory } from "@/services/posDeviceMemory.service";
 
 export const posInactivityLockDelayInMilliseconds = 5 * 60_000;
 const lockedFlagStorageKey = "zudomartPosLocked";
@@ -34,17 +35,40 @@ export function PosRegisterProvider({ children }: { readonly children: ReactNode
   const { showToast } = useToast();
   const { sessionView, refreshSessionView } = useSellerSession();
   const { selectedLocationId } = useStoreContext();
-  const locationId = selectedLocationId ?? sessionView?.selectedLocationId ?? null;
-  const connectivity = usePosConnectivity((syncedCount) => showToast(`${syncedCount} offline ${syncedCount === 1 ? "sale" : "sales"} synced.`));
+  const storeId = sessionView?.access.storeId ?? null;
+  const [deviceMemory, setDeviceMemory] = useState<PosDeviceMemory | null>(null);
+  const locationId = selectedLocationId ?? sessionView?.selectedLocationId ?? deviceMemory?.locationId ?? null;
+  const reloadCatalogAfterSyncRef = useRef<() => void>(() => undefined);
+  const connectivity = usePosConnectivity((syncedCount) => {
+    showToast(`${syncedCount} offline ${syncedCount === 1 ? "sale" : "sales"} synced.`);
+    reloadCatalogAfterSyncRef.current();
+  });
   const catalogLoader = usePosCatalogLoader(locationId, connectivity.reportRequestOutcome);
+  reloadCatalogAfterSyncRef.current = catalogLoader.reloadCatalog;
   const [selectedRegisterId, setSelectedRegisterId] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const inactivityTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!storeId) return;
+    let isCancelled = false;
+    void readPosDeviceMemoryForStore(storeId).then((memory) => {
+      if (!isCancelled) setDeviceMemory(memory);
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId || !locationId || !deviceMemory || deviceMemory.locationId === locationId) return;
+    void rememberPosDeviceLocation(storeId, locationId).then(setDeviceMemory);
+  }, [storeId, locationId, deviceMemory]);
+
+  useEffect(() => {
     if (!locationId) return;
-    setSelectedRegisterId(readStoredValue(`zudomartPosRegister:${locationId}`));
-  }, [locationId]);
+    setSelectedRegisterId(deviceMemory?.registerIdByLocationId[locationId] ?? readStoredValue(`zudomartPosRegister:${locationId}`));
+  }, [locationId, deviceMemory]);
 
   useEffect(() => {
     setIsLocked(readStoredValue(lockedFlagStorageKey) === "true");
@@ -53,17 +77,18 @@ export function PosRegisterProvider({ children }: { readonly children: ReactNode
   const selectRegister = useCallback(
     (registerId: string) => {
       setSelectedRegisterId(registerId);
-      if (locationId) writeStoredValue(`zudomartPosRegister:${locationId}`, registerId);
+      if (storeId && locationId) void rememberPosDeviceRegister(storeId, locationId, registerId).then(setDeviceMemory);
     },
-    [locationId],
+    [storeId, locationId],
   );
 
   const lockRegister = useCallback(async () => {
     writeStoredValue(lockedFlagStorageKey, "true");
     setIsLocked(true);
+    if (storeId) await forgetOfflineOperatorPass(storeId);
     await sendRequestToDashboardServer("/bff/session/operator", { method: "DELETE" }).catch(() => undefined);
     await refreshSessionView();
-  }, [refreshSessionView]);
+  }, [refreshSessionView, storeId]);
 
   const markRegisterUnlocked = useCallback(() => {
     writeStoredValue(lockedFlagStorageKey, null);
@@ -99,6 +124,7 @@ export function PosRegisterProvider({ children }: { readonly children: ReactNode
       isCatalogFromCache: catalogLoader.isCatalogFromCache,
       isCatalogLoading: catalogLoader.isCatalogLoading,
       reloadCatalog: catalogLoader.reloadCatalog,
+      applySaleToLocalStock: catalogLoader.applySaleToLocalStock,
       isOnline: connectivity.isOnline,
       reportRequestOutcome: connectivity.reportRequestOutcome,
       queuedSales: connectivity.queuedSales,
