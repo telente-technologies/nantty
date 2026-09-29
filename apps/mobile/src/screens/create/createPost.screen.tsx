@@ -6,6 +6,7 @@ import { CreateHeader } from "@/components/create/createHeader";
 import { LiveSetupPanel } from "@/components/create/liveSetupPanel";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
+import { SoundPickerRow } from "@/components/create/soundPickerRow";
 import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
@@ -26,13 +27,16 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
   const [postDraft, setPostDraft] = useState<PostComposerDraft>(EMPTY_POST_DRAFT);
   const postDraftUploads = usePostDraftMediaUploads("post");
+  const [selectedSoundId, setSelectedSoundId] = useState<string | null>(route.params?.soundId ?? null);
+  const draftContainsVideo = postDraftUploads.draftMediaItems.some((item) => item.mediaType === "video");
   const [liveTitle, setLiveTitle] = useState("");
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
 
   const publishPost = useMutation({
     mutationFn: async () => {
       const mediaIds = await postDraftUploads.waitForAllDraftMediaIds();
-      return storiesService.publishPost({ text: postDraft.text.trim(), audience: postDraft.audience, mediaIds });
+      const soundIdForVideoPost = draftContainsVideo && selectedSoundId ? { soundId: selectedSoundId } : {};
+      return storiesService.publishPost({ text: postDraft.text.trim(), audience: postDraft.audience, mediaIds, ...soundIdForVideoPost });
     },
     onSuccess: (post) => {
       queryClient.setQueryData(["post", post.id], fillProcessingPostMediaWithLocalPreviews(post, postDraftUploads.draftMediaItems));
@@ -124,6 +128,11 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             publishButtonTitle={publishButtonTitle}
             publishErrorMessage={publishPost.error ? publishPost.error.message : null}
             onPublish={() => publishPost.mutate()}
+            soundPicker={
+              draftContainsVideo || selectedSoundId ? (
+                <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} />
+              ) : null
+            }
           />
         ) : mode === "story" ? (
           <StoryCapturePanel publishing={publishStory.isPending} onChangeMode={switchCreateMode} onCaptured={(m) => publishStory.mutate(m)} />
