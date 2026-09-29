@@ -3,7 +3,7 @@ import type { User, UserSummary, Verification } from "@/types";
 import { avatarImageUrlForUser, buildUnsplashImageUrl, coverImageUrlForUser, type DirectoryUserKey } from "./mockImages.mock";
 import { unsplashPhotoIds } from "./unsplashPhotoIds.mock";
 
-type DirectoryUserId = DirectoryUserKey | "u_gov";
+export type DirectoryUserId = DirectoryUserKey | "u_gov";
 
 const verification = (color: Verification["color"], tier: Verification["tier"]): Verification => ({
   status: "active",
