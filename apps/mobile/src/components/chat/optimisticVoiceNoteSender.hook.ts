@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { Alert } from "react-native";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { markPendingMessageAsFailedLocally, replacePendingMessageWithDeliveredMessageLocally } from "@/cache/messageSync.util";
@@ -9,6 +8,7 @@ import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
 import { messagesService } from "@/services/messages.service";
 import type { Message } from "@/types";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function useOptimisticVoiceNoteSender(conversationId: string | undefined, myUserId: string) {
   const queryClient = useQueryClient();
@@ -26,7 +26,7 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
       try {
         uploadJobId = await enqueueLocalMediaForUpload(recordedVoiceNote, "voice");
       } catch (error) {
-        Alert.alert("Voice note not sent", error instanceof Error ? error.message : "Please try again.");
+        showAlertWithButtons("Voice note not sent", error instanceof Error ? error.message : "Please try again.");
         return;
       }
       const durationSeconds = Math.round(recordedVoiceNote.durationSeconds ?? 0);
@@ -57,7 +57,8 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
         replacePendingMessageWithDeliveredMessageLocally(pendingMessage.id, deliveredWithPlayableUrl);
         replacePendingMessage({ ...deliveredWithPlayableUrl, deliveryStatus: "sent" });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      } catch {
+      } catch (debugError) {
+        console.warn("DBGVOICE", debugError instanceof Error ? debugError.message + " " + debugError.stack : String(debugError));
         markPendingMessageAsFailedLocally(pendingMessage.id);
         replacePendingMessage({ ...pendingMessage, deliveryStatus: "failed" });
       }
