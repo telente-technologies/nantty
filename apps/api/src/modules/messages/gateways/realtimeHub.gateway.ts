@@ -3,7 +3,7 @@ import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { Principal } from "../../../interfaces/principal.interface.js";
 import type { RealtimeEvent, RealtimePublisher } from "../../../interfaces/realtimePublisher.interface.js";
 import type { AppLogger } from "../../../loggers/app.logger.js";
-import { CLOSE_CODES, RealtimeConnection, type RealtimeSocket } from "./realtimeConnection.gateway.js";
+import { CLOSE_CODES, RealtimeConnection, type ConnectionState, type RealtimeSocket } from "./realtimeConnection.gateway.js";
 
 export interface RealtimeAuthenticator {
   authenticateWithAccessToken(accessToken: string): Promise<Principal | undefined>;
@@ -132,7 +132,7 @@ export class RealtimeHub implements RealtimePublisher {
     }
     connection.state = "authenticating";
     const principal = await this.resolvePrincipal(message);
-    if (connection.state === "closed") return;
+    if ((connection.state as ConnectionState) === "closed") return;
     if (principal === undefined) return this.closeConnection(connection, CLOSE_CODES.unauthenticated, "Invalid credentials");
     if (!rolesGrantPermission(principal.roles, "messages:use")) return this.closeConnection(connection, CLOSE_CODES.forbidden, "Not allowed");
     connection.principal = principal;
