@@ -4,14 +4,13 @@ import type { ReactNode } from "react";
 
 import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
 import { Button } from "@/components/ui/button";
-import { sendRequestToDashboardServer } from "@/services/clientApi.service";
+import { signOutOfDashboardAndClearCachedPages } from "@/services/signOut.service";
 
 import styles from "./gateFrame.module.css";
 
 export function GateFrame({ children }: { readonly children: ReactNode }) {
   async function signOutOfDashboard() {
-    await sendRequestToDashboardServer("/bff/auth/logout", { method: "POST" }).catch(() => undefined);
-    window.location.assign("/login");
+    await signOutOfDashboardAndClearCachedPages();
   }
   return (
     <div className={styles.frame}>
