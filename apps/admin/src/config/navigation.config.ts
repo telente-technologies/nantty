@@ -34,6 +34,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
       { label: "Verification", href: "/verification", icon: "sealCheck20", requirement: "verification:review", goShortcutKey: "v" },
       { label: "Seller applications", href: "/applications/sellers", icon: "buildingStore20", requirement: "applications:sellers" },
       { label: "Creator applications", href: "/applications/creators", icon: "videoCamera24", requirement: "applications:creators" },
+      { label: "Brands", href: "/brands", icon: "buildingStore20", requirement: "brands:review", goShortcutKey: "b" },
     ],
   },
   {
@@ -42,6 +43,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
       { label: "Reports", href: "/moderation/reports", icon: "warning20", requirement: "moderation:reports", goShortcutKey: "r" },
       { label: "Appeals", href: "/moderation/appeals", icon: "refresh20", requirement: "moderation:appeals" },
       { label: "Copyright", href: "/moderation/copyright", icon: "speakerHigh24", requirement: "copyright:review", goShortcutKey: "c" },
+      { label: "Trademark claims", href: "/ip-claims", icon: "tag24", requirement: "ip-claims:review", goShortcutKey: "t" },
       { label: "Ads review", href: "/ads/review", icon: "play24", requirement: "ads:review" },
       { label: "Advertisers", href: "/ads/advertisers", icon: "arrowUpRight24", requirement: "advertisers:manage" },
     ],
