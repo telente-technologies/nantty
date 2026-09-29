@@ -11,6 +11,6 @@ export class RemoveCartItemHandler extends CommandHandler<RemoveCartItemCommand,
   }
 
   public execute(command: RemoveCartItemCommand): Promise<void> {
-    return this.service.removeItemFromCart(command.principal.userId, command.variantId);
+    return this.service.removeItemFromCart(command.principal.userId, command.cartItemId);
   }
 }

@@ -11,6 +11,6 @@ export class AddCartItemHandler extends CommandHandler<AddCartItemCommand, void>
   }
 
   public execute(command: AddCartItemCommand): Promise<void> {
-    return this.service.addItemToCart(command.principal.userId, command.variantId, command.quantity);
+    return this.service.addProductToCart(command.principal.userId, command.choice);
   }
 }

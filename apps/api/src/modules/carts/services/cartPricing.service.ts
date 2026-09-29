@@ -1,48 +1,61 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
+import type { MoneyConversion } from "../../../interfaces/currencyConverter.interface.js";
 import type { PurchasableVariant } from "../../../interfaces/productCatalog.interface.js";
 import type { StoreSummary } from "../../../interfaces/storeAccess.interface.js";
-import type { Kobo } from "../../../types/money.type.js";
-import { calculateBasisPointsShare, multiplyKoboByQuantity, sumKoboAmounts } from "../../../utils/money.util.js";
+import { Money } from "../../../utils/money.util.js";
 
 export interface PricedCartLine {
+  readonly cartItemId: string;
   readonly variant: PurchasableVariant;
   readonly quantity: number;
-  readonly lineTotal: Kobo;
+  readonly unitPrice: Money;
+  readonly lineTotal: Money;
 }
 
 export interface PricedStoreGroup {
   readonly store: StoreSummary;
   readonly lines: readonly PricedCartLine[];
-  readonly itemsTotal: Kobo;
-  readonly shopDiscount: Kobo;
-  readonly shipping: Kobo;
-  readonly total: Kobo;
+  readonly itemsTotal: Money;
+  readonly shopDiscount: Money;
+  readonly shipping: Money;
+  readonly total: Money;
 }
 
 export interface CartTotals {
-  readonly itemsTotal: Kobo;
-  readonly shopDiscount: Kobo;
-  readonly shipping: Kobo;
-  readonly estimatedTotal: Kobo;
-  readonly currency: string;
+  readonly itemsTotal: Money;
+  readonly shopDiscount: Money;
+  readonly shipping: Money;
+  readonly estimatedTotal: Money;
+}
+
+export function priceCartLine(cartItemId: string, variant: PurchasableVariant, quantity: number): PricedCartLine {
+  const unitPrice = Money.of(variant.unitPrice, variant.currency);
+  return { cartItemId, variant, quantity, unitPrice, lineTotal: unitPrice.multiplyByQuantity(quantity) };
 }
 
 export function priceStoreGroup(store: StoreSummary, lines: readonly PricedCartLine[]): PricedStoreGroup {
-  const itemsTotal = sumKoboAmounts(lines.map((line) => line.lineTotal));
-  const shopDiscount = calculateBasisPointsShare(itemsTotal, Math.min(Math.max(store.discountBps, 0), 10_000));
-  const shipping = lines.length === 0 ? 0 : store.shippingFee;
-  return { store, lines, itemsTotal, shopDiscount, shipping, total: itemsTotal - shopDiscount + shipping };
+  const itemsTotal = Money.sum(lines.map((line) => line.lineTotal), store.currency);
+  const shopDiscount = itemsTotal.calculateBasisPointsShareRoundingDown(Math.min(Math.max(store.discountBps, 0), 10_000));
+  const shipping = lines.length === 0 ? Money.zero(store.currency) : Money.of(store.shippingFee, store.currency);
+  return { store, lines, itemsTotal, shopDiscount, shipping, total: itemsTotal.subtract(shopDiscount).add(shipping) };
 }
 
-export function priceCartLine(variant: PurchasableVariant, quantity: number): PricedCartLine {
-  return { variant, quantity, lineTotal: multiplyKoboByQuantity(variant.unitPrice, quantity) };
-}
-
-export function calculateCartTotalsInKobo(groups: readonly PricedStoreGroup[], currency: string): CartTotals {
+export function convertPricedStoreGroupInto(group: PricedStoreGroup, convert: MoneyConversion): PricedStoreGroup {
   return {
-    itemsTotal: sumKoboAmounts(groups.map((group) => group.itemsTotal)),
-    shopDiscount: sumKoboAmounts(groups.map((group) => group.shopDiscount)),
-    shipping: sumKoboAmounts(groups.map((group) => group.shipping)),
-    estimatedTotal: sumKoboAmounts(groups.map((group) => group.total)),
-    currency,
+    store: group.store,
+    lines: group.lines.map((line) => ({ ...line, unitPrice: convert(line.unitPrice), lineTotal: convert(line.lineTotal) })),
+    itemsTotal: convert(group.itemsTotal),
+    shopDiscount: convert(group.shopDiscount),
+    shipping: convert(group.shipping),
+    total: convert(group.total),
+  };
+}
+
+export function calculateCartTotalsInDisplayCurrency(groups: readonly PricedStoreGroup[], displayCurrency: CurrencyCode): CartTotals {
+  return {
+    itemsTotal: Money.sum(groups.map((group) => group.itemsTotal), displayCurrency),
+    shopDiscount: Money.sum(groups.map((group) => group.shopDiscount), displayCurrency),
+    shipping: Money.sum(groups.map((group) => group.shipping), displayCurrency),
+    estimatedTotal: Money.sum(groups.map((group) => group.total), displayCurrency),
   };
 }

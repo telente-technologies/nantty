@@ -12,7 +12,7 @@ export function registerCartsRoutes(router: HttpRouter, controller: CartsControl
   const cart = web.guard.requirePermission("cart:manage");
   router.get(BASE_PATH, controller.getCart, { ...cart, ...describeRoute(TAG, "Get my cart with server-computed totals") });
   router.delete(BASE_PATH, controller.clear, { ...cart, ...describeRoute(TAG, "Empty my cart") });
-  router.post(`${BASE_PATH}/items`, controller.addItem, { ...cart, ...describeRoute(TAG, "Add a product variant to my cart", { body: AddCartItemBodySchema }) });
-  router.patch(`${BASE_PATH}/items/:variantId`, controller.updateItem, { ...cart, ...describeRoute(TAG, "Change a cart item quantity", { params: CartItemParamsSchema, body: UpdateCartItemBodySchema }) });
-  router.delete(`${BASE_PATH}/items/:variantId`, controller.removeItem, { ...cart, ...describeRoute(TAG, "Remove a cart item", { params: CartItemParamsSchema }) });
+  router.post(`${BASE_PATH}/items`, controller.addItem, { ...cart, ...describeRoute(TAG, "Add a product (with optional size and colour) to my cart", { body: AddCartItemBodySchema }) });
+  router.patch(`${BASE_PATH}/items/:id`, controller.updateItem, { ...cart, ...describeRoute(TAG, "Change a cart item quantity", { params: CartItemParamsSchema, body: UpdateCartItemBodySchema }) });
+  router.delete(`${BASE_PATH}/items/:id`, controller.removeItem, { ...cart, ...describeRoute(TAG, "Remove a cart item", { params: CartItemParamsSchema }) });
 }

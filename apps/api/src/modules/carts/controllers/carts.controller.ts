@@ -2,14 +2,15 @@ import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
 
 import { requireAuthenticatedPrincipal } from "../../../middlewares/authenticate.middleware.js";
+import { findViewerLocale } from "../../../middlewares/viewerLocale.middleware.js";
 import { json, readJsonBody, validationFailed } from "../../../utils/http.util.js";
 import { AddCartItemCommand } from "../commands/addCartItem/addCartItem.command.js";
 import { ClearCartCommand } from "../commands/clearCart/clearCart.command.js";
 import { RemoveCartItemCommand } from "../commands/removeCartItem/removeCartItem.command.js";
 import { UpdateCartItemCommand } from "../commands/updateCartItem/updateCartItem.command.js";
-import { convertPricedCartToDto } from "../dtos/carts.dto.js";
+import { convertDisplayCartToDto } from "../dtos/carts.dto.js";
 import { GetCartQuery } from "../queries/getCart/getCart.query.js";
-import type { PricedCart } from "../services/carts.service.js";
+import type { DisplayCart } from "../services/carts.service.js";
 import { AddCartItemBodySchema, CartItemParamsSchema, UpdateCartItemBodySchema } from "../validators/carts.validator.js";
 
 export class CartsController {
@@ -22,7 +23,7 @@ export class CartsController {
   public readonly addItem = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = AddCartItemBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    await this.commands.execute<AddCartItemCommand, void>(new AddCartItemCommand(requireAuthenticatedPrincipal(ctx), body.data.variantId, body.data.quantity));
+    await this.commands.execute<AddCartItemCommand, void>(new AddCartItemCommand(requireAuthenticatedPrincipal(ctx), { productId: body.data.productId, size: body.data.size, color: body.data.color, quantity: body.data.quantity }));
     return this.respondWithCart(ctx, 201);
   };
 
@@ -31,14 +32,14 @@ export class CartsController {
     if (!params.success) return validationFailed(params.issues);
     const body = UpdateCartItemBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    await this.commands.execute<UpdateCartItemCommand, void>(new UpdateCartItemCommand(requireAuthenticatedPrincipal(ctx), params.data.variantId, body.data.quantity));
+    await this.commands.execute<UpdateCartItemCommand, void>(new UpdateCartItemCommand(requireAuthenticatedPrincipal(ctx), params.data.id, body.data.quantity));
     return this.respondWithCart(ctx, 200);
   };
 
   public readonly removeItem = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const params = CartItemParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
-    await this.commands.execute<RemoveCartItemCommand, void>(new RemoveCartItemCommand(requireAuthenticatedPrincipal(ctx), params.data.variantId));
+    await this.commands.execute<RemoveCartItemCommand, void>(new RemoveCartItemCommand(requireAuthenticatedPrincipal(ctx), params.data.id));
     return this.respondWithCart(ctx, 200);
   };
 
@@ -48,7 +49,8 @@ export class CartsController {
   };
 
   private async respondWithCart(ctx: HttpRouterContext, status: number): Promise<HttpResponseContext> {
-    const cart = await this.queries.execute<GetCartQuery, PricedCart>(new GetCartQuery(requireAuthenticatedPrincipal(ctx)));
-    return json(status, convertPricedCartToDto(cart));
+    const query = new GetCartQuery(requireAuthenticatedPrincipal(ctx), findViewerLocale(ctx).currency);
+    const cart = await this.queries.execute<GetCartQuery, DisplayCart>(query);
+    return json(status, convertDisplayCartToDto(cart));
   }
 }

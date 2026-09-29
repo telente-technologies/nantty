@@ -11,6 +11,6 @@ export class UpdateCartItemHandler extends CommandHandler<UpdateCartItemCommand,
   }
 
   public execute(command: UpdateCartItemCommand): Promise<void> {
-    return this.service.changeCartItemQuantity(command.principal.userId, command.variantId, command.quantity);
+    return this.service.changeCartItemQuantity(command.principal.userId, command.cartItemId, command.quantity);
   }
 }
