@@ -89,3 +89,28 @@ class FeedRankingResponse(ContractModel):
     items: list[RankedFeedItem]
     excluded: list[ExcludedItem]
     metadata: RankingResponseMetadata
+
+
+class SocialProofItem(ContractModel):
+    item_id: OpaqueIdentifier
+    author_id: OpaqueIdentifier
+    store_id: OpaqueIdentifier | None = None
+    friend_engagements: list[FriendEngagement] = Field(default_factory=list, max_length=50)
+
+
+class SocialProofRequest(ContractModel):
+    viewer: ViewerContext
+    ordered_items: list[SocialProofItem] = Field(max_length=MAXIMUM_RANKING_CANDIDATES)
+    options: FeedRankingOptions = Field(default_factory=FeedRankingOptions)
+    now: AwareDatetime | None = None
+
+
+class SocialProofSelectionItem(ContractModel):
+    item_id: OpaqueIdentifier
+    position: int
+    banner: SocialProofBanner
+
+
+class SocialProofResponse(ContractModel):
+    selections: list[SocialProofSelectionItem]
+    metadata: RankingResponseMetadata
