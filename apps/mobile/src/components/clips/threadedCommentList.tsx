@@ -1,0 +1,64 @@
+import type { ReactElement } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { CommentWithReplies } from "@/types";
+
+import { CommentThread } from "./commentThread";
+import { TOP_LEVEL_PARENT_KEY, mergeServerAndLocalComments, useCommentThreadContext } from "./commentThreadController.hook";
+import { useTopLevelCommentsForPost } from "./postComments.hook";
+
+export interface ThreadedCommentListProps {
+  readonly listHeader?: ReactElement | null;
+  readonly contentContainerStyle?: StyleProp<ViewStyle>;
+  readonly commentHorizontalPadding?: number;
+}
+
+export function ThreadedCommentList({ listHeader, contentContainerStyle, commentHorizontalPadding = 0 }: ThreadedCommentListProps) {
+  const thread = useCommentThreadContext();
+  const { query, topLevelComments, loadNextPageOfTopLevelComments } = useTopLevelCommentsForPost(thread.postId);
+  const locallyPostedTopLevel = thread
+    .locallyPostedCommentsFor(TOP_LEVEL_PARENT_KEY)
+    .map((comment): CommentWithReplies => ({ ...comment, previewReplies: [] }));
+  const visibleTopLevelComments = mergeServerAndLocalComments(topLevelComments, locallyPostedTopLevel, true).filter(
+    (comment) => !thread.isCommentDeleted(comment.id),
+  );
+
+  return (
+    <FlatList
+      style={styles.flex}
+      data={visibleTopLevelComments}
+      keyExtractor={(comment) => comment.id}
+      ListHeaderComponent={listHeader}
+      contentContainerStyle={contentContainerStyle}
+      keyboardShouldPersistTaps="handled"
+      onEndReachedThreshold={0.4}
+      onEndReached={loadNextPageOfTopLevelComments}
+      ItemSeparatorComponent={() => <View style={styles.gap} />}
+      ListEmptyComponent={
+        query.isLoading ? (
+          <ActivityIndicator color={colors.primary} style={styles.status} />
+        ) : (
+          <Text size={13} color={colors.textMuted} align="center" style={styles.status}>
+            {query.isError ? "Couldn’t load comments. Pull to try again." : "No comments yet. Start the conversation."}
+          </Text>
+        )
+      }
+      ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.primary} style={styles.status} /> : null}
+      refreshing={query.isRefetching && !query.isFetchingNextPage}
+      onRefresh={() => query.refetch()}
+      renderItem={({ item }) => (
+        <View style={{ paddingHorizontal: commentHorizontalPadding }}>
+          <CommentThread comment={item} nestingDepth={0} previewReplies={item.previewReplies} />
+        </View>
+      )}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  gap: { height: 20 },
+  status: { paddingVertical: 24 },
+});

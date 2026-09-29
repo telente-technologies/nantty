@@ -17,12 +17,7 @@ export function FollowPill({ isFollowing, onPress, outlined = false, large = fal
       accessibilityRole="button"
       accessibilityState={{ selected: isFollowing }}
       onPress={onPress}
-      style={[
-        styles.pill,
-        large ? styles.large : styles.small,
-        filled ? styles.filled : styles.outline,
-        isFollowing && styles.following,
-      ]}
+      style={[styles.pill, large ? styles.large : styles.small, filled ? styles.filled : styles.outline, isFollowing && styles.following]}
     >
       <Text size={12} lineHeight={large ? 16.8 : 14.5} letterSpacing={large ? -0.24 : 0} color={filled ? colors.white : colors.text}>
         {isFollowing ? "Following" : "Follow"}

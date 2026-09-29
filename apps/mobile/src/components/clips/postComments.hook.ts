@@ -1,39 +1,34 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { postCommentsService } from "@/services/postComments.service";
-import type { CommentWithReplies, Page } from "@/types";
+import type { Comment, CommentWithReplies } from "@/types";
 
-export function usePostCommentsWithActions(postId: string | null) {
-  const queryClient = useQueryClient();
-  const queryKey = ["post-comments", postId];
+export const topLevelCommentsQueryKey = (postId: string | null) => ["post-comments", postId] as const;
+export const commentRepliesQueryKey = (commentId: string) => ["comment-replies", commentId] as const;
 
-  const comments = useQuery({
-    queryKey,
-    queryFn: () => postCommentsService.fetchCommentsForPost(postId!),
+export function useTopLevelCommentsForPost(postId: string | null) {
+  const query = useInfiniteQuery({
+    queryKey: topLevelCommentsQueryKey(postId),
+    queryFn: ({ pageParam }) => postCommentsService.fetchTopLevelCommentsForPost(postId!, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!postId,
   });
+  const topLevelComments: readonly CommentWithReplies[] = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const loadNextPageOfTopLevelComments = () => {
+    if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage().catch(() => undefined);
+  };
+  return { query, topLevelComments, loadNextPageOfTopLevelComments };
+}
 
-  const addComment = useMutation({
-    mutationFn: (text: string) => postCommentsService.addCommentToPost(postId!, text),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+export function useRepliesForComment(commentId: string, shouldLoadReplies: boolean) {
+  const query = useInfiniteQuery({
+    queryKey: commentRepliesQueryKey(commentId),
+    queryFn: ({ pageParam }) => postCommentsService.fetchRepliesForComment(commentId, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: shouldLoadReplies && !commentId.startsWith("pending_"),
   });
-
-  const toggleCommentLike = useMutation({
-    mutationFn: (comment: CommentWithReplies) =>
-      comment.liked ? postCommentsService.unlikeComment(comment.id) : postCommentsService.likeComment(comment.id),
-    onMutate: (comment) => {
-      queryClient.setQueryData<Page<CommentWithReplies>>(queryKey, (page) =>
-        page
-          ? {
-              ...page,
-              data: page.data.map((c) =>
-                c.id === comment.id ? { ...c, liked: !c.liked, likes: c.likes + (c.liked ? -1 : 1) } : c,
-              ),
-            }
-          : page,
-      );
-    },
-  });
-
-  return { comments, addComment, toggleCommentLike };
+  const loadedReplies: readonly Comment[] = query.data?.pages.flatMap((page) => page.data) ?? [];
+  return { query, loadedReplies };
 }

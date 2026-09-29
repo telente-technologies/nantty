@@ -7,14 +7,15 @@ import { colors } from "@/constants/colors.constant";
 export interface ClipPlaybackControlsProps {
   readonly remainingSeconds: number;
   readonly progress: number;
+  readonly isMuted?: boolean;
+  readonly playbackSpeed?: number;
   readonly onPressPlay: () => void;
   readonly onPressSpeed: () => void;
   readonly onPressVolume: () => void;
   readonly onPressFullscreen: () => void;
 }
 
-const formatRemainingPlaybackTime = (seconds: number) =>
-  `-${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+const formatRemainingPlaybackTime = (seconds: number) => `-${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 export function ClipPlaybackControls(props: ClipPlaybackControlsProps) {
   const played = Math.min(Math.max(props.progress, 0), 1);
@@ -34,10 +35,28 @@ export function ClipPlaybackControls(props: ClipPlaybackControlsProps) {
           </Text>
         </View>
         <View style={styles.right}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Playback speed" hitSlop={8} onPress={props.onPressSpeed}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Playback speed ${props.playbackSpeed ?? 1}x`}
+            hitSlop={8}
+            onPress={props.onPressSpeed}
+            style={styles.speed}
+          >
             <Speedometer24Icon />
+            {props.playbackSpeed && props.playbackSpeed !== 1 ? (
+              <Text size={11} weight={600} lineHeight={13.2} letterSpacing={0}>
+                {props.playbackSpeed}x
+              </Text>
+            ) : null}
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Volume" hitSlop={8} onPress={props.onPressVolume}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={props.isMuted ? "Unmute" : "Mute"}
+            accessibilityState={{ selected: !!props.isMuted }}
+            hitSlop={8}
+            onPress={props.onPressVolume}
+            style={props.isMuted ? styles.mutedSpeaker : undefined}
+          >
             <SpeakerHigh24Icon />
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Full screen" hitSlop={8} onPress={props.onPressFullscreen}>
@@ -56,4 +75,6 @@ const styles = StyleSheet.create({
   row: { height: 50, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   left: { flexDirection: "row", alignItems: "center", gap: 14 },
   right: { flexDirection: "row", alignItems: "center", gap: 22 },
+  speed: { flexDirection: "row", alignItems: "center", gap: 2 },
+  mutedSpeaker: { opacity: 0.35 },
 });

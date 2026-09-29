@@ -10,13 +10,14 @@ export interface ClipsHeaderProps {
   readonly onBack: () => void;
   readonly onSearch: () => void;
   readonly showTabs?: boolean;
+  readonly foregroundColor?: string;
 }
 
-export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = true }: ClipsHeaderProps) {
+export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = true, foregroundColor }: ClipsHeaderProps) {
   return (
     <View style={styles.bar}>
       <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={onBack}>
-        <ArrowLeft24Icon />
+        <ArrowLeft24Icon color={foregroundColor} />
       </Pressable>
       {showTabs ? (
         <View style={styles.tabs} accessibilityRole="tablist">
@@ -26,6 +27,7 @@ export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = tru
               size={14}
               weight={tab === value ? 600 : 400}
               lineHeight={16.8}
+              color={foregroundColor}
               accessibilityRole="tab"
               accessibilityState={{ selected: tab === value }}
               onPress={() => onChangeTab(value)}
@@ -36,7 +38,7 @@ export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = tru
         </View>
       ) : null}
       <Pressable accessibilityRole="button" accessibilityLabel="Search clips" hitSlop={12} onPress={onSearch}>
-        <MagnifyingGlass24Icon />
+        <MagnifyingGlass24Icon color={foregroundColor} />
       </Pressable>
     </View>
   );

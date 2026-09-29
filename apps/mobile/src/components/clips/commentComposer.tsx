@@ -1,11 +1,12 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { Gif24Icon } from "@/components/icons";
+import { Cancel20Icon, Gif24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
+import type { Comment } from "@/types";
 
 export const QUICK_REACTION_EMOJI = ["😂", "😍", "💕", "😊", "🥰", "😆", "😎", "🤔"] as const;
 
@@ -13,20 +14,44 @@ export interface CommentComposerProps {
   readonly myAvatarUrl: string | null;
   readonly onSubmit: (text: string) => void;
   readonly placeholder?: string;
+  readonly replyTarget?: Comment | null;
+  readonly onCancelReply?: () => void;
 }
 
 export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(function CommentComposer(
-  { myAvatarUrl, onSubmit, placeholder = "Add comment..." },
+  { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply },
   ref,
 ) {
   const [text, setText] = useState("");
+  const inputRef = useRef<TextInput>(null);
+  useImperativeHandle(ref, () => inputRef.current as TextInput);
+
+  useEffect(() => {
+    if (replyTarget) inputRef.current?.focus();
+  }, [replyTarget]);
+
   const submitTypedComment = () => {
     if (!text.trim()) return;
     onSubmit(text.trim());
     setText("");
   };
+  const effectivePlaceholder = replyTarget ? `Reply to @${replyTarget.author.username}...` : placeholder;
+
   return (
     <View style={styles.root}>
+      {replyTarget ? (
+        <View style={styles.replyingTo}>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted} numberOfLines={1} style={styles.flex}>
+            Replying to{" "}
+            <Text size={12} weight={600} lineHeight={16.8}>
+              @{replyTarget.author.username}
+            </Text>
+          </Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Cancel reply" hitSlop={10} onPress={onCancelReply}>
+            <Cancel20Icon />
+          </Pressable>
+        </View>
+      ) : null}
       <View style={styles.emojiRow}>
         {QUICK_REACTION_EMOJI.map((emoji) => (
           <Pressable key={emoji} accessibilityRole="button" accessibilityLabel={`Add ${emoji}`} onPress={() => setText((t) => t + emoji)}>
@@ -40,15 +65,16 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
         <Avatar uri={myAvatarUrl} size={40} placeholderColor={colors.placeholder} />
         <View style={styles.field}>
           <TextInput
-            ref={ref}
+            ref={inputRef}
             value={text}
             onChangeText={setText}
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             placeholderTextColor={colors.placeholder}
             selectionColor={colors.primary}
             returnKeyType="send"
+            maxLength={1000}
             onSubmitEditing={submitTypedComment}
-            accessibilityLabel={placeholder}
+            accessibilityLabel={effectivePlaceholder}
             style={styles.input}
           />
           <Gif24Icon />
@@ -59,7 +85,9 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
 });
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { padding: 16, gap: 16, borderTopWidth: 1, borderTopColor: colors.divider, backgroundColor: colors.white },
+  replyingTo: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: -4 },
   emojiRow: { flexDirection: "row", justifyContent: "space-between" },
   inputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   field: {
@@ -83,4 +111,3 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 });
-
