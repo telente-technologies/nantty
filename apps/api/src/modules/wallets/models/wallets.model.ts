@@ -1,4 +1,5 @@
-import type { Kobo } from "../../../types/money.type.js";
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
+import type { MinorUnits } from "../../../types/money.type.js";
 
 export type LedgerAccountKind = "asset" | "liability" | "revenue";
 export type LedgerDirection = "debit" | "credit";
@@ -13,22 +14,22 @@ export interface LedgerAccountSpecification {
 
 export interface LedgerAccountRecord extends LedgerAccountSpecification {
   readonly id: string;
-  readonly currency: string;
-  readonly balance: Kobo;
+  readonly currency: CurrencyCode;
+  readonly balance: MinorUnits;
   readonly version: number;
 }
 
 export interface LedgerLineInput {
   readonly account: LedgerAccountSpecification;
   readonly direction: LedgerDirection;
-  readonly amount: Kobo;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
 }
 
 export interface LedgerTransactionInput {
   readonly reference: string;
   readonly kind: string;
   readonly description: string;
-  readonly currency: string;
   readonly lines: readonly LedgerLineInput[];
 }
 
@@ -37,8 +38,9 @@ export interface LedgerEntryRecord {
   readonly transactionId: string;
   readonly accountId: string;
   readonly direction: LedgerDirection;
-  readonly amount: Kobo;
-  readonly balanceAfter: Kobo;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
+  readonly balanceAfter: MinorUnits;
   readonly createdAt: Date;
 }
 
@@ -56,7 +58,7 @@ export interface LedgerPostingResult {
   readonly created: boolean;
 }
 
-export type WithdrawalStatus = "pending" | "paid" | "failed";
+export type WithdrawalStatus = "pending" | "processing" | "paid" | "failed";
 
 export interface PayoutAccountRecord {
   readonly id: string;
@@ -77,8 +79,8 @@ export interface WithdrawalRecord {
   readonly id: string;
   readonly storeId: string;
   readonly payoutAccountId: string;
-  readonly amount: Kobo;
-  readonly currency: string;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
   readonly status: WithdrawalStatus;
   readonly reference: string;
   readonly requestedById: string;
@@ -89,7 +91,7 @@ export interface WithdrawalRecord {
 
 export type NewWithdrawal = Omit<WithdrawalRecord, "id" | "createdAt" | "status" | "failureReason" | "processedAt">;
 
-export function calculateBalanceChange(kind: LedgerAccountKind, direction: LedgerDirection, amount: Kobo): Kobo {
+export function calculateBalanceChange(kind: LedgerAccountKind, direction: LedgerDirection, amount: MinorUnits): MinorUnits {
   const increasesOnDebit = kind === "asset";
   return (direction === "debit") === increasesOnDebit ? amount : -amount;
 }
