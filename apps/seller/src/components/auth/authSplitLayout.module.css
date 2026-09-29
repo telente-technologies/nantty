@@ -1,0 +1,132 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.brandPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 40px clamp(32px, 5vw, 64px) 0;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(90% 60% at 100% 0%, rgb(245 227 32 / 0.18), transparent 60%),
+    radial-gradient(120% 80% at 0% 100%, var(--blue-400), transparent 65%),
+    linear-gradient(160deg, var(--blue-600), var(--blue-900));
+}
+
+.brandLink {
+  color: #fff;
+  align-self: flex-start;
+}
+
+.brandLink:hover {
+  text-decoration: none;
+}
+
+.brandCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 460px;
+}
+
+.statement {
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-weight: 750;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.syncList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.syncList li {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.syncList li::before {
+  content: "✓ ";
+  color: var(--yellow-500);
+}
+
+.showcase {
+  position: relative;
+  margin-top: auto;
+}
+
+.screenshot {
+  width: 112%;
+  max-width: none;
+  height: auto;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -2px 0 rgb(255 255 255 / 0.2), 0 30px 80px -20px rgb(0 0 0 / 0.6);
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-float);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.captionPhoto {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.formPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--surface-app);
+}
+
+.formInner {
+  width: min(420px, 100%);
+}
+
+@media (max-width: 1024px) and (orientation: portrait), (max-width: 860px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .brandPanel {
+    gap: 20px;
+    padding: 24px 20px 0;
+  }
+
+  .showcase {
+    max-height: 260px;
+  }
+
+  .caption {
+    display: none;
+  }
+}
