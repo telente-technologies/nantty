@@ -1,7 +1,7 @@
 import type { CheckoutResult, DisputeReason } from "@/types/commerce.type";
 import type { Address, Order, OrderStatus } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const ordersService = {
   fetchMyShippingAddresses: () => api.get<Address[]>("/api/v1/users/me/addresses"),

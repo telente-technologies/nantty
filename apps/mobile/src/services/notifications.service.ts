@@ -1,6 +1,6 @@
 import type { CategorizedNotification } from "@/types/commerce.type";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const notificationsService = {
   fetchMyNotifications: () => api.get<CategorizedNotification[]>("/api/v1/notifications"),
