@@ -2,11 +2,12 @@ import type { HttpRouter } from "@zudojs/http";
 
 import type { AppDependencies } from "../../../container.js";
 // zudojs:route-imports:start
+import { registerSellerApplicationRoutes, registerStoresRoutes } from "./stores.routes.js";
 // zudojs:route-imports:end
 
-/** Registers this module's routes; called from the app's routes/index.ts. */
 export function registerStoresModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
-  void deps;
   // zudojs:routes:start
+  registerStoresRoutes(router, deps.storesController, deps.web);
+  registerSellerApplicationRoutes(router, deps.sellerApplicationsController, deps.web);
   // zudojs:routes:end
 }
