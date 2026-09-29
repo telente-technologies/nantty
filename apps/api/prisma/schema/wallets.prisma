@@ -10,6 +10,7 @@ model LedgerAccount {
   version       Int      @default(0)
   createdAt     DateTime @default(now())
 
+  @@index([ownerType, ownerId])
   @@map("ledger_accounts")
 }
 
@@ -40,7 +41,8 @@ model LedgerEntry {
 
 model PayoutAccount {
   id               String   @id @default(uuid())
-  storeId          String
+  storeId          String?
+  userId           String?
   bankCode         String
   bankName         String
   accountNumberEnc String
@@ -51,12 +53,14 @@ model PayoutAccount {
   createdAt        DateTime @default(now())
 
   @@index([storeId])
+  @@index([userId])
   @@map("payout_accounts")
 }
 
 model Withdrawal {
   id              String    @id @default(uuid())
-  storeId         String
+  storeId         String?
+  userId          String?
   payoutAccountId String
   amount          BigInt
   currency        String
@@ -68,5 +72,24 @@ model Withdrawal {
   createdAt       DateTime  @default(now())
 
   @@index([storeId, createdAt])
+  @@index([userId, createdAt])
   @@map("withdrawals")
+}
+
+model WalletTopUp {
+  id                    String    @id @default(uuid())
+  userId                String
+  provider              String
+  reference             String    @unique
+  amount                BigInt
+  currency              String
+  status                String    @default("pending")
+  authorizationUrl      String?
+  providerTransactionId String?
+  creditedAt            DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("wallet_top_ups")
 }
