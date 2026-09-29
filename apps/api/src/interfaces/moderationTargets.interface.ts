@@ -12,4 +12,5 @@ export interface ModerationTargetGateway {
   readonly targetType: ModerationTargetType;
   describeTarget(targetId: string): Promise<ModerationTargetDescription | undefined>;
   applyContentAction(targetId: string, action: ContentEnforcementAction, decidedAt: Date): Promise<boolean>;
+  isReportableBy?(targetId: string, userId: string): Promise<boolean>;
 }
