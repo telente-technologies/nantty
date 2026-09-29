@@ -7,6 +7,8 @@ import { TipSheet, type TipTarget } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { useAuthStore } from "@/store/auth.store";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useAuthStore } from "@/store/auth.store";
@@ -33,6 +35,10 @@ export interface PostCardProps {
 
 export function PostCard(props: PostCardProps) {
   const { post } = props;
+  const openUserProfile = useOpenUserProfile();
+  const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
+  const openPostAuthorProfile = () =>
+    post.author.id === signedInUserId || !props.onPressAuthor ? openUserProfile(post.author.id) : props.onPressAuthor();
   const hasMedia = post.media.length > 0;
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -59,7 +65,7 @@ export function PostCard(props: PostCardProps) {
           </View>
         ) : null}
         <View style={styles.authorRow}>
-          <Pressable accessibilityRole="button" onPress={props.onPressAuthor} style={styles.author}>
+          <Pressable accessibilityRole="button" onPress={openPostAuthorProfile} style={styles.author}>
             <Avatar uri={post.author.avatarUrl} size={32} />
             <View style={styles.nameRow}>
               <Text size={14} weight={500} lineHeight={16.8}>
