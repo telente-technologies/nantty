@@ -1,0 +1,83 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.group {
+  margin: 0;
+  padding: 8px 10px 6px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  min-width: 0;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.toggleAll {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue-500);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.option {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.option input {
+  margin-top: 2px;
+  accent-color: var(--blue-500);
+}
+
+.optionLabel {
+  display: block;
+}
+
+.optionKey {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+}
+
+.summary {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary dt {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
+
+.summary dd {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

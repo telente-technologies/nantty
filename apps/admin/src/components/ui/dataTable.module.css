@@ -1,0 +1,106 @@
+.frame {
+  overflow-x: auto;
+  background: var(--surface-card);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--divider);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  border-top-left-radius: var(--radius-large);
+}
+
+.table th:last-child {
+  border-top-right-radius: var(--radius-large);
+}
+
+.table td {
+  height: 42px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--divider-soft);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.monoCell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.interactiveRow {
+  cursor: pointer;
+}
+
+.interactiveRow:hover td {
+  background: var(--surface-hover);
+}
+
+.interactiveRow:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--blue-500);
+  outline-offset: -2px;
+}
+
+.selectedRow td {
+  background: var(--blue-50);
+}
+
+.selectedRow td:first-child {
+  box-shadow: inset 3px 0 0 var(--blue-500);
+}
+
+.dangerRow td:first-child {
+  box-shadow: inset 3px 0 0 var(--error);
+}
+
+.cautionRow td:first-child {
+  box-shadow: inset 3px 0 0 var(--caution);
+}
+
+.empty {
+  padding: 36px 12px !important;
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+.skeletonBar {
+  display: block;
+  height: 10px;
+  width: 70%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--surface-sunken), var(--divider-soft), var(--surface-sunken));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

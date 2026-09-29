@@ -1,0 +1,72 @@
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 14px;
+  border-left: 2px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.entry {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.entry::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  border: 2px solid var(--blue-500);
+}
+
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.action {
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.who {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.reason {
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+}
+
+.toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue-500);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.empty {
+  color: var(--ink-muted);
+}

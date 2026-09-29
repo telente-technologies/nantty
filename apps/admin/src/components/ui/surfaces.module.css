@@ -1,0 +1,135 @@
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cardActions {
+  display: flex;
+  gap: 6px;
+}
+
+.cardBody {
+  padding: 14px 16px;
+}
+
+.keyValueList {
+  display: grid;
+  gap: 10px 20px;
+  margin: 0;
+}
+
+.columns1 {
+  grid-template-columns: 1fr;
+}
+
+.columns2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.columns3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.keyValueRow {
+  min-width: 0;
+}
+
+.keyValueRow dt {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.keyValueRow dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.sectionHeading h3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.keyboardKey {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--divider);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
+}
+
+.mainColumn,
+.asideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .columns2,
+  .columns3 {
+    grid-template-columns: 1fr;
+  }
+}

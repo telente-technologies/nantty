@@ -1,0 +1,95 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.input {
+  height: 32px;
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  font-size: 13px;
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
+}
+
+.input:focus-visible {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgb(32 67 245 / 0.16);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.input:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+.textArea {
+  height: auto;
+  min-height: 84px;
+  padding: 8px 10px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.select {
+  padding-right: 28px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%), linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 14px, calc(100% - 9px) 14px;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.error {
+  font-size: 12px;
+  color: var(--error-ink);
+  font-weight: 500;
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  margin: 2px 0 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--blue-500);
+  flex: none;
+}
+
+.checkboxLabel {
+  display: block;
+  font-weight: 500;
+}
+
+.checkboxDescription {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
