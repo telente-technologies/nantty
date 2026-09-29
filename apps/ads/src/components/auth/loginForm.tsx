@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
+import { readZudomartMainSiteUrl } from "@/constants/contact.constant";
 import { accountsApi } from "@/services/accountsApi.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 
@@ -38,7 +39,7 @@ export function LoginForm() {
   return (
     <form className={styles.form} onSubmit={signInAndContinue} noValidate>
       <h1 className={styles.title}>Sign in to Ads Manager</h1>
-      <p className={styles.lead}>Use the same email or phone and password as your Zudomart app.</p>
+      <p className={styles.lead}>Use the email or phone and password from your Zudomart app. Your store, posts, clips and followers are already here.</p>
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
       <TextField label="Email or phone number" value={identifier} onValueChange={setIdentifier} autoComplete="username" inputMode="email" autoFocus required />
       <TextField label="Password" type="password" value={password} onValueChange={setPassword} autoComplete="current-password" required />
@@ -46,6 +47,9 @@ export function LoginForm() {
         Sign in
       </Button>
       <p className={styles.footnote}>Forgot your password? Reset it in the Zudomart app under Settings → Security.</p>
+      <p className={styles.getTheApp}>
+        New to Zudomart? <a href={readZudomartMainSiteUrl()}>Get the app</a>
+      </p>
     </form>
   );
 }
