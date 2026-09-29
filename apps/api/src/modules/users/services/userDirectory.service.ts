@@ -39,4 +39,9 @@ export class RepositoryUserDirectory implements UserDirectory {
   public async listSelectedTopicSlugs(userId: string): Promise<readonly string[]> {
     return (await this.topics.listSelectedTopicsForUser(userId)).map((topic) => topic.slug);
   }
+
+  public async findTopicSlugById(topicId: string): Promise<string | undefined> {
+    const [topic] = await this.topics.findManyByIds([topicId]);
+    return topic?.slug;
+  }
 }
