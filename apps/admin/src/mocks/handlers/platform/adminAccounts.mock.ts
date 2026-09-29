@@ -70,7 +70,7 @@ export function registerAdminAccountMockHandlers(): void {
     requireMockStepUp(request);
     const body = readJsonObjectBody(request);
     const email = readRequiredTrimmedString(body, "email", 254).toLowerCase();
-    if (!/^[^\s@]+@zudomart\.com$/.test(email)) failValidation("email", "Admins must use a @zudomart.com work email.");
+    if (!/^[^\s@]+@example\.com$/.test(email)) failValidation("email", "Admins must use an email on an approved work domain (demo: @example.com).");
     const name = readRequiredTrimmedString(body, "name", 80, 2);
     const role = readEnumValue(body, "role", ["ADMIN", "SUPPORT"] as const);
     const permissions = readPermissionList(body);
