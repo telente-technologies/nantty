@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { LegalText } from "@/components/auth/legalText";
@@ -9,7 +9,10 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
+import { SocialSignInCancelledError, type SocialSignInProvider } from "@/errors/socialSignIn.error";
+import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/appleSignIn.service";
 import { authService } from "@/services/auth.service";
+import { useAuthStore } from "@/store/auth.store";
 
 const photo = require("../../../assets/images/onboardingMarketPhoto.jpg");
 const ROWS = [-43, -96, -43];
@@ -17,13 +20,30 @@ const ROWS = [-43, -96, -43];
 export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboarding">) {
   const mode = route.params?.mode ?? "signup";
   const [notice, setNotice] = useState<string | null>(null);
+  const [isAppleSignInAvailable, setIsAppleSignInAvailable] = useState(false);
+  const [providerSigningIn, setProviderSigningIn] = useState<SocialSignInProvider | null>(null);
+  const saveSignedInSession = useAuthStore((s) => s.saveSignedInSession);
 
-  const handleSocialSignIn = async (provider: "apple" | "google") => {
+  useEffect(() => {
+    let isMounted = true;
+    checkIfAppleSignInIsAvailableOnThisDevice().then((isAvailable) => {
+      if (isMounted) setIsAppleSignInAvailable(isAvailable);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleSocialSignIn = async (provider: SocialSignInProvider) => {
+    if (providerSigningIn) return;
     setNotice(null);
+    setProviderSigningIn(provider);
     try {
-      await authService.signInWithSocialProvider(provider);
+      await saveSignedInSession(await authService.signInWithSocialProvider(provider));
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Sign-in failed");
+      if (!(error instanceof SocialSignInCancelledError)) setNotice(error instanceof Error ? error.message : "Sign-in failed");
+    } finally {
+      setProviderSigningIn(null);
     }
   };
 
@@ -50,8 +70,22 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
         </View>
 
         <View style={styles.buttons}>
-          <Button variant="outline" title="Continue with Apple" icon={<Apple24Icon />} onPress={() => handleSocialSignIn("apple")} />
-          <Button variant="outline" title="Continue with Google" icon={<Google24Icon />} onPress={() => handleSocialSignIn("google")} />
+          {isAppleSignInAvailable ? (
+            <Button
+              variant="outline"
+              title="Continue with Apple"
+              icon={<Apple24Icon />}
+              loading={providerSigningIn === "apple"}
+              onPress={() => handleSocialSignIn("apple")}
+            />
+          ) : null}
+          <Button
+            variant="outline"
+            title="Continue with Google"
+            icon={<Google24Icon />}
+            loading={providerSigningIn === "google"}
+            onPress={() => handleSocialSignIn("google")}
+          />
           <Button
             variant="brand"
             title="Use username"
