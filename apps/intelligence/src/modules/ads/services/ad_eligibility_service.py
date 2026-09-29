@@ -10,6 +10,7 @@ from src.modules.ads.services.ad_pacing_service import (
     has_budget_for_one_more_charge,
     should_campaign_participate_in_auction,
 )
+from src.modules.ads.validators.ad_creative_validator import find_creative_format_violation
 from src.services.currency_conversion_service import (
     CurrencyMismatchError,
     convert_money_to_usd_micros,
@@ -89,6 +90,9 @@ def evaluate_ad_eligibility(candidate: AdCandidate, context: AdEligibilityContex
     status_failure = check_schedule_and_status(candidate, context)
     if status_failure is not None:
         return status_failure
+    format_failure = find_creative_format_violation(candidate.creative, context.placement)
+    if format_failure is not None:
+        return format_failure
     try:
         ensure_same_currency(
             candidate.bid, candidate.daily_budget, candidate.total_budget, candidate.spent_today, candidate.spent_total
