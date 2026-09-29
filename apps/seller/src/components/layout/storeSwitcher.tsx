@@ -26,7 +26,8 @@ export function StoreSwitcher() {
   const stores = storesQuery.data?.data ?? [];
   const brands = brandsQuery.data?.data ?? [];
   const brandNameById = new Map(brands.map((brand) => [brand.id, brand.name]));
-  const currentBrandName = stores.find((store) => store.storeId === access?.storeId)?.brandId;
+  const currentBrandId = stores.find((store) => store.storeId === access?.storeId)?.brandId;
+  const currentBrandName = currentBrandId ? brandNameById.get(currentBrandId) ?? null : null;
   const canSwitch = stores.length > 1 || brands.length > 1;
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export function StoreSwitcher() {
       <button type="button" className={styles.trigger} aria-haspopup="menu" aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen((wasOpen) => !wasOpen)}>
         <span className={styles.triggerText}>
           <span className={styles.storeName}>{access?.storeName ?? "Your store"}</span>
-          {currentBrandName ? <span className={styles.brandName}>{brandNameById.get(currentBrandName) ?? ""}</span> : null}
+          {currentBrandName && currentBrandName !== access?.storeName ? <span className={styles.brandName}>{currentBrandName}</span> : null}
         </span>
         <ZudoIcon name="caretDown24" size={14} />
       </button>

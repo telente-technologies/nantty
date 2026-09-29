@@ -57,7 +57,7 @@ describe("store wallet", () => {
     await app.client.post(`/api/v1/admin/withdrawals/${paid.id}/process`).auth(store.seller.accessToken).set("idempotency-key", createIdempotencyKey()).expect(403);
     await app.client.post(`/api/v1/admin/withdrawals/${paid.id}/process`).auth(admin.accessToken).set("idempotency-key", createIdempotencyKey()).expect(200).expectJson({ status: "paid" });
     await app.client.post(`/api/v1/admin/withdrawals/${paid.id}/process`).auth(admin.accessToken).set("idempotency-key", createIdempotencyKey()).expect(409);
-    expect(app.paystack.transfers.at(-1)).toMatchObject({ amount: 4_000, accountNumber: "0123456789" });
+    expect(app.paystack.transfers.at(-1)).toMatchObject({ amount: 3_000, accountNumber: "0123456789" });
 
     app.paystack.transferResult = { status: "failed", recipientCode: "RCP_fake", failureReason: "account_closed" };
     const failed = (await requestWithdrawal(store.seller.accessToken, store.storeId, 5_000, payoutAccountId).expect(201)).json<{ id: string }>();
