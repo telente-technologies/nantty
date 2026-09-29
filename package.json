@@ -15,6 +15,6 @@
     "audit": "pnpm audit --audit-level=high"
   },
   "devDependencies": {
-    "typescript": "~6.0.3"
+    "typescript": "~7.0.2"
   }
 }

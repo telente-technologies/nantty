@@ -4,7 +4,7 @@
 # The committed pnpm-lock.yaml is required: installs are frozen so the image
 # contains exactly the reviewed dependency versions.
 
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 WORKDIR /repo
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
@@ -23,7 +23,7 @@ RUN pnpm --filter @zudomart/api run build
 FROM base AS prod-deps
 RUN pnpm install --frozen-lockfile --prod --filter @zudomart/api...
 
-FROM node:24-alpine AS runtime
+FROM node:26-alpine AS runtime
 ENV NODE_ENV=production
 RUN apk add --no-cache ffmpeg
 WORKDIR /repo
