@@ -1,94 +1,150 @@
 import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
 
-import { ADMIN_PERMISSIONS } from "../../../constants/permissions.constant.js";
-import { PLATFORM_ROLES, listDefaultPermissionsForPlatformRole } from "../../../constants/platformRoles.constant.js";
-import { requireAuthenticatedPrincipal } from "../../../middlewares/authenticate.middleware.js";
+import { AdminReasonBodySchema, readNumberedPageRequest } from "../../../utils/adminHttp.util.js";
+import { createResponseContext } from "@zudojs/http";
 import { empty, json, readJsonBody, validationFailed } from "../../../utils/http.util.js";
-import { ChangeStaffAccountStatusCommand } from "../commands/changeStaffAccountStatus/changeStaffAccountStatus.command.js";
-import { CreateStaffAccountCommand } from "../commands/createStaffAccount/createStaffAccount.command.js";
+import type { AuditEventFilter } from "../../audit/models/audit.model.js";
+import { AddAdminPasskeyCommand } from "../commands/addAdminPasskey/addAdminPasskey.command.js";
+import { ChangeAdminPermissionsCommand } from "../commands/changeAdminPermissions/changeAdminPermissions.command.js";
+import { CreateAdminPasskeyOptionsCommand } from "../commands/createAdminPasskeyOptions/createAdminPasskeyOptions.command.js";
+import { DisableAdminCommand } from "../commands/disableAdmin/disableAdmin.command.js";
+import { EnableAdminCommand } from "../commands/enableAdmin/enableAdmin.command.js";
+import { ExportAdminAuditLogCommand } from "../commands/exportAdminAuditLog/exportAdminAuditLog.command.js";
+import { InviteAdminCommand } from "../commands/inviteAdmin/inviteAdmin.command.js";
 import { RegenerateAdminRecoveryCodesCommand } from "../commands/regenerateAdminRecoveryCodes/regenerateAdminRecoveryCodes.command.js";
-import { RemoveWebAuthnCredentialCommand } from "../commands/removeWebAuthnCredential/removeWebAuthnCredential.command.js";
-import { ResetStaffMfaCommand } from "../commands/resetStaffMfa/resetStaffMfa.command.js";
-import { UpdateStaffAccountCommand } from "../commands/updateStaffAccount/updateStaffAccount.command.js";
-import type { AdminMeDto, StaffAccountDto } from "../dtos/admin.dto.js";
-import { GetAdminMeQuery } from "../queries/getAdminMe/getAdminMe.query.js";
-import { GetStaffAccountQuery } from "../queries/getStaffAccount/getStaffAccount.query.js";
-import { ListStaffAccountsQuery } from "../queries/listStaffAccounts/listStaffAccounts.query.js";
-import { ListWebAuthnCredentialsQuery } from "../queries/listWebAuthnCredentials/listWebAuthnCredentials.query.js";
-import type { WebAuthnVerifier } from "../services/webAuthn.service.js";
-import { CreateStaffAccountBodySchema, StaffAccountParamsSchema, UpdateStaffAccountBodySchema, WebAuthnCredentialParamsSchema } from "../validators/admin.validator.js";
+import { RemoveAdminPasskeyCommand } from "../commands/removeAdminPasskey/removeAdminPasskey.command.js";
+import { ResetAdminMfaCommand } from "../commands/resetAdminMfa/resetAdminMfa.command.js";
+import { RevokeAdminSessionCommand } from "../commands/revokeAdminSession/revokeAdminSession.command.js";
+import { GetAdminQuery } from "../queries/getAdmin/getAdmin.query.js";
+import { GetAdminAccountQuery } from "../queries/getAdminAccount/getAdminAccount.query.js";
+import { GetAdminAuditEntryQuery } from "../queries/getAdminAuditEntry/getAdminAuditEntry.query.js";
+import { GetAdminAuditFacetsQuery } from "../queries/getAdminAuditFacets/getAdminAuditFacets.query.js";
+import { ListAdminAuditLogQuery } from "../queries/listAdminAuditLog/listAdminAuditLog.query.js";
+import { ListAdminSessionsQuery } from "../queries/listAdminSessions/listAdminSessions.query.js";
+import { ListAdminsQuery } from "../queries/listAdmins/listAdmins.query.js";
+import { requireStaffRequestState } from "../services/staffRequestGuard.service.js";
+import {
+  AddPasskeyBodySchema,
+  AdminIdParamsSchema,
+  AdminPasskeyParamsSchema,
+  AdminSessionParamsSchema,
+  AuditEntryParamsSchema,
+  AuditLogQuerySchema,
+  ChangeAdminPermissionsBodySchema,
+  InviteAdminBodySchema,
+  ListAdminsQuerySchema,
+  type AuditLogQuery,
+} from "../validators/admin.validator.js";
+
+function buildAuditFilter(query: AuditLogQuery): AuditEventFilter {
+  return {
+    ...(query.search === undefined ? {} : { search: query.search }),
+    ...(query.area === undefined ? {} : { area: query.area }),
+    ...(query.actorId === undefined ? {} : { actorId: query.actorId }),
+    ...(query.targetType === undefined ? {} : { entityType: query.targetType }),
+    ...(query.targetId === undefined ? {} : { entityId: query.targetId }),
+    ...(query.from === undefined ? {} : { from: new Date(query.from) }),
+    ...(query.to === undefined ? {} : { to: new Date(query.to) }),
+  };
+}
 
 export class AdminStaffController {
-  public constructor(private readonly commands: CommandBus, private readonly queries: QueryBus, private readonly webAuthn: WebAuthnVerifier) {}
+  public constructor(private readonly commands: CommandBus, private readonly queries: QueryBus) {}
 
-  public readonly getMe = async (ctx: HttpRouterContext): Promise<HttpResponseContext> =>
-    json(200, await this.queries.execute<GetAdminMeQuery, AdminMeDto>(new GetAdminMeQuery(requireAuthenticatedPrincipal(ctx))));
+  public readonly getAccount = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => json(200, await this.queries.execute(new GetAdminAccountQuery(requireStaffRequestState(ctx))));
 
-  public readonly listPermissions = async (): Promise<HttpResponseContext> =>
-    json(200, {
-      permissions: [...ADMIN_PERMISSIONS],
-      roles: PLATFORM_ROLES.map((role) => ({ role, defaultPermissions: listDefaultPermissionsForPlatformRole(role) })),
-    });
+  public readonly listSessions = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => json(200, await this.queries.execute(new ListAdminSessionsQuery(requireStaffRequestState(ctx))));
 
-  public readonly listAccounts = async (): Promise<HttpResponseContext> =>
-    json(200, await this.queries.execute<ListStaffAccountsQuery, readonly StaffAccountDto[]>(new ListStaffAccountsQuery()));
-
-  public readonly getAccount = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const params = StaffAccountParamsSchema.safeParse(ctx.params);
+  public readonly revokeSession = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = AdminSessionParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
-    return json(200, await this.queries.execute<GetStaffAccountQuery, StaffAccountDto>(new GetStaffAccountQuery(params.data.userId)));
-  };
-
-  public readonly createAccount = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const body = CreateStaffAccountBodySchema.safeParse(readJsonBody(ctx));
-    if (!body.success) return validationFailed(body.issues);
-    const command = new CreateStaffAccountCommand(requireAuthenticatedPrincipal(ctx), body.data);
-    return json(201, await this.commands.execute<CreateStaffAccountCommand, StaffAccountDto>(command));
-  };
-
-  public readonly updateAccount = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const params = StaffAccountParamsSchema.safeParse(ctx.params);
-    if (!params.success) return validationFailed(params.issues);
-    const body = UpdateStaffAccountBodySchema.safeParse(readJsonBody(ctx));
-    if (!body.success) return validationFailed(body.issues);
-    const command = new UpdateStaffAccountCommand(requireAuthenticatedPrincipal(ctx), params.data.userId, body.data);
-    return json(200, await this.commands.execute<UpdateStaffAccountCommand, StaffAccountDto>(command));
-  };
-
-  public readonly disableAccount = (ctx: HttpRouterContext) => this.changeStatus(ctx, "disabled");
-
-  public readonly enableAccount = (ctx: HttpRouterContext) => this.changeStatus(ctx, "active");
-
-  public readonly resetMfa = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const params = StaffAccountParamsSchema.safeParse(ctx.params);
-    if (!params.success) return validationFailed(params.issues);
-    const command = new ResetStaffMfaCommand(requireAuthenticatedPrincipal(ctx), params.data.userId);
-    return json(200, await this.commands.execute<ResetStaffMfaCommand, StaffAccountDto>(command));
-  };
-
-  public readonly regenerateRecoveryCodes = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const command = new RegenerateAdminRecoveryCodesCommand(requireAuthenticatedPrincipal(ctx));
-    return json(200, await this.commands.execute<RegenerateAdminRecoveryCodesCommand, { recoveryCodes: readonly string[] }>(command));
-  };
-
-  public readonly listWebAuthnCredentials = async (ctx: HttpRouterContext): Promise<HttpResponseContext> =>
-    json(200, await this.queries.execute<ListWebAuthnCredentialsQuery, unknown>(new ListWebAuthnCredentialsQuery(requireAuthenticatedPrincipal(ctx))));
-
-  public readonly createWebAuthnRegistrationOptions = async (ctx: HttpRouterContext): Promise<HttpResponseContext> =>
-    json(200, await this.webAuthn.createRegistrationOptions(requireAuthenticatedPrincipal(ctx).userId, []));
-
-  public readonly removeWebAuthnCredential = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const params = WebAuthnCredentialParamsSchema.safeParse(ctx.params);
-    if (!params.success) return validationFailed(params.issues);
-    await this.commands.execute<RemoveWebAuthnCredentialCommand, void>(new RemoveWebAuthnCredentialCommand(requireAuthenticatedPrincipal(ctx), params.data.id));
+    await this.commands.execute(new RevokeAdminSessionCommand(requireStaffRequestState(ctx), params.data.sessionId));
     return empty(204);
   };
 
-  private async changeStatus(ctx: HttpRouterContext, status: "active" | "disabled"): Promise<HttpResponseContext> {
-    const params = StaffAccountParamsSchema.safeParse(ctx.params);
+  public readonly regenerateRecoveryCodes = async (ctx: HttpRouterContext): Promise<HttpResponseContext> =>
+    json(200, await this.commands.execute(new RegenerateAdminRecoveryCodesCommand(requireStaffRequestState(ctx))));
+
+  public readonly passkeyOptions = async (ctx: HttpRouterContext): Promise<HttpResponseContext> =>
+    json(200, await this.commands.execute(new CreateAdminPasskeyOptionsCommand(requireStaffRequestState(ctx))));
+
+  public readonly addPasskey = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const body = AddPasskeyBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    return json(201, await this.commands.execute(new AddAdminPasskeyCommand(requireStaffRequestState(ctx), body.data.label, body.data.credential)));
+  };
+
+  public readonly removePasskey = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = AdminPasskeyParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
-    const command = new ChangeStaffAccountStatusCommand(requireAuthenticatedPrincipal(ctx), params.data.userId, status);
-    return json(200, await this.commands.execute<ChangeStaffAccountStatusCommand, StaffAccountDto>(command));
+    await this.commands.execute(new RemoveAdminPasskeyCommand(requireStaffRequestState(ctx), params.data.passkeyId));
+    return empty(204);
+  };
+
+  public readonly listAdmins = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const query = ListAdminsQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const { search, status, role } = query.data;
+    return json(200, await this.queries.execute(new ListAdminsQuery({ search, status, role }, readNumberedPageRequest(query.data))));
+  };
+
+  public readonly getAdmin = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = AdminIdParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    return json(200, await this.queries.execute(new GetAdminQuery(params.data.adminId)));
+  };
+
+  public readonly inviteAdmin = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const body = InviteAdminBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    return json(201, await this.commands.execute(new InviteAdminCommand(requireStaffRequestState(ctx), body.data)));
+  };
+
+  public readonly changePermissions = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = AdminIdParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const body = ChangeAdminPermissionsBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    const command = new ChangeAdminPermissionsCommand(requireStaffRequestState(ctx), params.data.adminId, body.data.role, body.data.permissions, body.data.reason);
+    return json(200, await this.commands.execute(command));
+  };
+
+  public readonly disableAdmin = (ctx: HttpRouterContext) => this.runAdminAction(ctx, (staffId, reason) => new DisableAdminCommand(requireStaffRequestState(ctx), staffId, reason));
+
+  public readonly enableAdmin = (ctx: HttpRouterContext) => this.runAdminAction(ctx, (staffId, reason) => new EnableAdminCommand(requireStaffRequestState(ctx), staffId, reason));
+
+  public readonly resetMfa = (ctx: HttpRouterContext) => this.runAdminAction(ctx, (staffId, reason) => new ResetAdminMfaCommand(requireStaffRequestState(ctx), staffId, reason));
+
+  public readonly listAudit = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const query = AuditLogQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    return json(200, await this.queries.execute(new ListAdminAuditLogQuery(buildAuditFilter(query.data), readNumberedPageRequest(query.data))));
+  };
+
+  public readonly auditFacets = async (): Promise<HttpResponseContext> => json(200, await this.queries.execute(new GetAdminAuditFacetsQuery()));
+
+  public readonly getAuditEntry = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = AuditEntryParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    return json(200, await this.queries.execute(new GetAdminAuditEntryQuery(params.data.entryId)));
+  };
+
+  public readonly exportAudit = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const query = AuditLogQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const csv = await this.commands.execute<ExportAdminAuditLogCommand, string>(new ExportAdminAuditLogCommand(requireStaffRequestState(ctx), buildAuditFilter(query.data)));
+    const response = createResponseContext({ status: 200 }).text(csv);
+    response.setHeader("content-type", "text/csv; charset=utf-8");
+    response.setHeader("content-disposition", 'attachment; filename="audit-log.csv"');
+    return response;
+  };
+
+  private async runAdminAction(ctx: HttpRouterContext, build: (staffId: string, reason: string) => DisableAdminCommand | EnableAdminCommand | ResetAdminMfaCommand): Promise<HttpResponseContext> {
+    const params = AdminIdParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const body = AdminReasonBodySchema.safeParse(readJsonBody(ctx));
+    if (!body.success) return validationFailed(body.issues);
+    return json(200, await this.commands.execute(build(params.data.adminId, body.data.reason)));
   }
 }
