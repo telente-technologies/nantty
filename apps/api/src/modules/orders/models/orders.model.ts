@@ -48,6 +48,7 @@ export interface OrderRecord {
   readonly shippingAddress: ShippingAddressSnapshot;
   readonly customerName: string;
   readonly trackingNumber: string | null;
+  readonly courier: string | null;
   readonly paidAt: Date | null;
   readonly shippedAt: Date | null;
   readonly deliveredAt: Date | null;
@@ -70,12 +71,13 @@ export interface CheckoutRecord {
 
 export type NewOrderItem = Omit<OrderItemRecord, "id" | "orderId">;
 
-export interface NewOrder extends Omit<OrderRecord, "id" | "checkoutId" | "items" | "createdAt" | "trackingNumber" | "paidAt" | "shippedAt" | "deliveredAt" | "completedAt" | "cancelledAt"> {
+export interface NewOrder extends Omit<OrderRecord, "id" | "checkoutId" | "items" | "createdAt" | "trackingNumber" | "courier" | "paidAt" | "shippedAt" | "deliveredAt" | "completedAt" | "cancelledAt"> {
   readonly items: readonly NewOrderItem[];
 }
 
 export interface OrderStatusChange {
   readonly trackingNumber?: string | null;
+  readonly courier?: string | null;
   readonly paidAt?: Date;
   readonly shippedAt?: Date;
   readonly deliveredAt?: Date;
