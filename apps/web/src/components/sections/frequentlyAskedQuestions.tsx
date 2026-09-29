@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import styles from "./frequentlyAskedQuestions.module.css";
@@ -28,7 +28,7 @@ export function FrequentlyAskedQuestionsAccordion({ questions, headingId = "ques
           </h2>
           <p className={styles.contactNote}>
             Still unsure? <Link href="/contact">Talk to the team</Link> or email{" "}
-            <a href={`mailto:${siteConfig.contactEmails.support}`}>{siteConfig.contactEmails.support}</a>.
+            <a href={contactMailtoHref}>{contactEmailDisplayText}</a>.
           </p>
         </div>
         <div className={styles.list}>
