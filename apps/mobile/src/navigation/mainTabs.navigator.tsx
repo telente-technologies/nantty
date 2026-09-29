@@ -2,12 +2,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { HomeScreen } from "@/screens/home/home.screen";
 import { ClipsScreen } from "@/screens/clips/clips.screen";
-import { CreateScreen } from "@/screens/create/create-placeholder.screen";
+import { CreateScreen } from "@/screens/create/createPlaceholder.screen";
 import { ChatsScreen } from "@/screens/messages/chats.screen";
-import { MeScreen } from "@/screens/profile/my-profile.screen";
+import { MeScreen } from "@/screens/profile/myProfile.screen";
 
 import type { MainTabParamList } from "./navigation.types";
-import { TabBar } from "./tab-bar";
+import { TabBar } from "./tabBar";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
