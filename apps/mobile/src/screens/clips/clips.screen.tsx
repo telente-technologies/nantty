@@ -29,7 +29,8 @@ let hasShownClipGestureTips = false;
 const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
 const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
 
-export function ClipsScreen({ navigation }: ClipsScreenProps) {
+export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
+  const requestedStartClipId = route.params?.startId;
   const insets = useSafeAreaInsets();
   const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
@@ -43,6 +44,7 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
   const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
   const [showGestureTips, setShowGestureTips] = useState(!hasShownClipGestureTips);
   const clipsListRef = useRef<FlatList<Clip>>(null);
+  const [clipIndexToOpenListAt, setClipIndexToOpenListAt] = useState(0);
 
   const clipsFeed = useInfiniteQuery({
     queryKey: ["clips", tab],
@@ -57,6 +59,23 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
   }, [navigation]);
 
   useEffect(() => {
+    if (!requestedStartClipId || pageHeight === 0 || !clipsFeed.isSuccess) return;
+    if (tab !== "forYou") {
+      setTab("forYou");
+      return;
+    }
+    const requestedClipIndex = clips.findIndex((clip) => clip.id === requestedStartClipId);
+    if (requestedClipIndex === -1) {
+      if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);
+      if (!clipsFeed.hasNextPage) navigation.setParams({ startId: undefined });
+      return;
+    }
+    setActiveClipIndex(requestedClipIndex);
+    setClipIndexToOpenListAt(requestedClipIndex);
+    navigation.setParams({ startId: undefined });
+  }, [requestedStartClipId, pageHeight, clips, tab, clipsFeed, navigation]);
+
+  useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => setIsAppInForeground(state === "active"));
     return () => subscription.remove();
   }, []);
@@ -68,6 +87,7 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
   const switchFeedTabAndScrollToTop = (nextTab: ClipsFeedTab) => {
     setTab(nextTab);
     setActiveClipIndex(0);
+    setClipIndexToOpenListAt(0);
     clipsListRef.current?.scrollToOffset({ offset: 0, animated: false });
   };
 
@@ -124,7 +144,9 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
     <View style={styles.root} onLayout={(e) => setPageHeight(Math.round(e.nativeEvent.layout.height))}>
       {pageHeight > 0 ? (
         <FlatList
+          key={`clips-list-opened-at-${clipIndexToOpenListAt}`}
           ref={clipsListRef}
+          initialScrollIndex={clipIndexToOpenListAt}
           data={clips}
           keyExtractor={(c) => c.id}
           pagingEnabled
