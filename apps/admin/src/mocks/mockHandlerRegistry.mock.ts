@@ -1,3 +1,4 @@
+import { registerBrandsMockHandlers } from "@/mocks/handlers/brands/brandsHandlers.mock";
 import { registerConfigurationMockHandlers } from "@/mocks/handlers/configuration/configurationHandlers.mock";
 import { registerContentAndSupportMockHandlers } from "@/mocks/handlers/content/contentHandlers.mock";
 import { registerMoneyMockHandlers } from "@/mocks/handlers/money/moneyHandlers.mock";
@@ -12,4 +13,5 @@ export function registerEveryMockHandler(): void {
   registerMoneyMockHandlers();
   registerConfigurationMockHandlers();
   registerContentAndSupportMockHandlers();
+  registerBrandsMockHandlers();
 }
