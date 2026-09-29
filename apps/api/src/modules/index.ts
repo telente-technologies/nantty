@@ -18,3 +18,4 @@ export * from "./search/index.js";
 export * from "./media/index.js";
 export * from "./waitlist/index.js";
 export { AuditModule } from "./audit/index.js";
+export * from "./currency/index.js";
