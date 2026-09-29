@@ -97,6 +97,7 @@ describe("seller dashboard", () => {
   it("reports sales for a period, a chart series, recent orders and inventory for my store", async () => {
     const buyer = await app.registerBuyer();
     const store = await app.createStoreWithProduct({ price: 4_000, stock: 12 });
+    await app.grantSellerToolsAccess(store);
     await app.buyAndPay(buyer, store, 2);
     type Dashboard = {
       totalSales: { amountMinor: number; currency: string };
