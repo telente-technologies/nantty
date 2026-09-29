@@ -15,6 +15,11 @@ function readPublicSiteUrl(): string {
   }
 }
 
+const contactEmailRecipients = ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"] as const;
+
+export const contactMailtoHref = `mailto:${contactEmailRecipients.join(",")}`;
+export const contactEmailDisplayText = contactEmailRecipients.join(" and ");
+
 export const siteConfig = {
   name: "Zudomart",
   wordmark: "zudomart",
@@ -23,13 +28,7 @@ export const siteConfig = {
     "Zudomart is a Nigerian social marketplace. Discover real sellers through posts, clips, stories and live shopping, and pay in your local currency with your money held in escrow until you confirm delivery.",
   siteUrl: readPublicSiteUrl(),
   launchCountry: "Nigeria",
-  contactEmails: {
-    general: "hello@zudomart.com",
-    support: "support@zudomart.com",
-    sellers: "sellers@zudomart.com",
-    press: "press@zudomart.com",
-    privacy: "privacy@zudomart.com",
-  },
+  contactEmailRecipients,
   primaryNavigation: [
     { label: "How it works", href: "/#how-it-works" },
     { label: "Escrow", href: "/#escrow" },
