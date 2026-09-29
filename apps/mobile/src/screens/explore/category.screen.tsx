@@ -10,10 +10,11 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { productsService } from "@/services/products.service";
 
 export function CategoryScreen({ route }: MainScreenProps<"Category">) {
-  const { categoryId, name } = route.params;
+  const { categoryId, name, collection } = route.params;
   const products = useInfiniteQuery({
-    queryKey: ["products", "page", categoryId],
-    queryFn: ({ pageParam }) => productsService.fetchProductsPage(categoryId, pageParam),
+    queryKey: ["products", "page", collection ?? categoryId],
+    queryFn: ({ pageParam }) =>
+      collection ? productsService.fetchProductCollectionPage(collection, pageParam) : productsService.fetchProductsPage(categoryId, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
