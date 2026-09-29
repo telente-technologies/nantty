@@ -168,9 +168,9 @@ export class OrdersService {
     return cancelled;
   }
 
-  public async markOrderShipped(userId: string, orderId: string, trackingNumber: string | null): Promise<OrderRecord> {
+  public async markOrderShipped(userId: string, orderId: string, trackingNumber: string | null, courier: string | null = null): Promise<OrderRecord> {
     const { storeId } = await this.findOrderForStoreMember(userId, orderId);
-    const shipped = await this.dependencies.orders.transitionStatus(orderId, ["paid"], "shipped", { shippedAt: this.dependencies.clock.now(), trackingNumber });
+    const shipped = await this.dependencies.orders.transitionStatus(orderId, ["paid"], "shipped", { shippedAt: this.dependencies.clock.now(), trackingNumber, courier });
     if (shipped === undefined) throw invalidState("Only paid orders can be marked as shipped.");
     await this.notifyBuyer(shipped, "Your order is on its way", `Order ${shipped.number} has been shipped.`);
     await publishEvent(this.dependencies.events, OrderShippedEvent, { orderId, buyerId: shipped.buyerId, storeId });
