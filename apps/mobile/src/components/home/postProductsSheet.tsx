@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { ProductSummary } from "@/types";
-import { formatKoboAsNaira } from "@/utils/format-money.util";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export interface PostProductsSheetProps {
   readonly products: readonly ProductSummary[] | null;
@@ -24,7 +24,7 @@ export function PostProductsSheet({ products, onClose, onPressProduct, onAddAllT
           <Pressable
             key={product.id}
             accessibilityRole="button"
-            accessibilityLabel={`${product.name}, ${formatKoboAsNaira(product.price, { decimals: false })}`}
+            accessibilityLabel={`${product.name}, ${formatMoneyForDisplay(product.price, { showDecimals: false })}`}
             onPress={() => onPressProduct(product.id)}
             style={styles.item}
           >
@@ -36,7 +36,7 @@ export function PostProductsSheet({ products, onClose, onPressProduct, onAddAllT
                 {product.name}
               </Text>
               <Text size={14} weight={600} lineHeight={16.8}>
-                {formatKoboAsNaira(product.price, { decimals: false })}
+                {formatMoneyForDisplay(product.price, { showDecimals: false })}
               </Text>
             </View>
             <View style={styles.divider} />

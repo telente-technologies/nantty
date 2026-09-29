@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { ProductCard } from "@/components/product/product-card";
+import { ProductCard } from "@/components/product/productCard";
 import { useCartActions } from "@/hooks/useCart.hook";
 import type { ProductSummary } from "@/types";
 
@@ -23,7 +23,7 @@ export function ProductMasonry({ products }: { products: readonly ProductSummary
               key={product.id}
               product={product}
               variant="mart"
-              width={192.5}
+              width="100%"
               imageHeight={(rowIndex + columnIndex) % 2 === 0 ? TALL_IMAGE : SHORT_IMAGE}
               onPress={() => navigation.navigate("ProductDetail", { productId: product.id })}
               onAddToCart={() => addProductToCart.mutate({ productId: product.id, quantity: 1 })}
