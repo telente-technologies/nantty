@@ -1,3 +1,5 @@
+import { isSupportedCurrencyCode, type CurrencyCode } from "../../../enums/currency.enum.js";
+
 export type UserStatus = "active" | "deactivated";
 export type ThemePreference = "system" | "light" | "dark";
 
@@ -8,12 +10,16 @@ export interface UserSettings {
   readonly theme: ThemePreference;
   readonly language: string;
   readonly notifications: Readonly<Record<NotificationCategory, boolean>>;
+  readonly countryCode: string | null;
+  readonly currency: CurrencyCode | null;
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   theme: "system",
   language: "en",
   notifications: { orders: true, payments: true, social: true, messages: true, promotions: false, live: true },
+  countryCode: null,
+  currency: null,
 };
 
 export interface UserRecord {
@@ -86,5 +92,7 @@ export function parseUserSettings(value: unknown): UserSettings {
     theme: input.theme ?? DEFAULT_USER_SETTINGS.theme,
     language: input.language ?? DEFAULT_USER_SETTINGS.language,
     notifications: { ...DEFAULT_USER_SETTINGS.notifications, ...(input.notifications ?? {}) },
+    countryCode: typeof input.countryCode === "string" && /^[A-Z]{2}$/.test(input.countryCode) ? input.countryCode : null,
+    currency: isSupportedCurrencyCode(input.currency) ? input.currency : null,
   };
 }
