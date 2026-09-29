@@ -1,3 +1,5 @@
+import { businessAppLinks } from "@/lib/siteConfig.config";
+
 import { ActionLinkStyledAsButton } from "../ui/actionLink";
 import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./sellersHeroSection.module.css";
@@ -20,10 +22,18 @@ export function SellersPageHeroSection() {
               How selling works
             </ActionLinkStyledAsButton>
           </div>
+          <p className={styles.dashboardNote}>
+            Verified Gold business?{" "}
+            <a href={businessAppLinks.sellerDashboard.href} target="_blank" rel="noopener noreferrer">
+              Open {businessAppLinks.sellerDashboard.label}
+              <span className="visuallyHidden"> (opens in a new tab)</span>
+            </a>{" "}
+            and sign in with your Zudomart app account.
+          </p>
         </div>
         <div className={styles.visual}>
-          <PhoneFrameWithAppScreen screen="liveShoppingScreen" alt="Zudomart live stream where a seller shows products to viewers" className={`${styles.phone} ${styles.phoneBack}`} sizes="(min-width: 960px) 240px, 40vw" />
-          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="Zudomart seller profile with posts and a store tab" className={`${styles.phone} ${styles.phoneFront}`} priority sizes="(min-width: 960px) 280px, 50vw" />
+          <PhoneFrameWithAppScreen screen="liveShoppingScreen" alt="A seller's live session promoted in Clips with a Watch live button" className={`${styles.phone} ${styles.phoneBack}`} sizes="(min-width: 960px) 240px, 40vw" />
+          <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="TundeTech seller profile with a gold business badge and a View Shop button" className={`${styles.phone} ${styles.phoneFront}`} priority sizes="(min-width: 960px) 280px, 50vw" />
         </div>
       </div>
     </section>

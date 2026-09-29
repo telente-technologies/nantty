@@ -39,6 +39,18 @@
   color: #2b2806;
 }
 
+.dashboardNote {
+  max-width: 46ch;
+  color: #2b2806;
+  font-size: 0.95rem;
+}
+
+.dashboardNote a {
+  color: var(--ink-strong);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
