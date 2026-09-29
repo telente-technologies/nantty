@@ -1,6 +1,6 @@
 import type { Cart } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export interface AddProductToCartInput {
   readonly productId: string;

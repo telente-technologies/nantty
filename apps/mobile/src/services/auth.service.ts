@@ -1,6 +1,6 @@
 import type { AuthSession, Topic } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export interface RegisterInput {
   readonly email?: string;
