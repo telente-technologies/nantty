@@ -1,4 +1,5 @@
-import type { ID, ISODate, Kobo, ProductSummary, UserSummary } from "./models.type";
+import type { ID, ISODate, ProductSummary, UserSummary } from "./models.type";
+import type { CurrencyCode, Money } from "./money.type";
 
 export type ConnectionTab = "followers" | "following" | "shopped" | "suggested" | "blocked";
 
@@ -11,6 +12,7 @@ export interface AccountSettings {
   readonly phone: string | null;
   readonly theme: "light" | "dark" | "system";
   readonly language: "en";
+  readonly countryCode: string | null;
   readonly pushNotificationsEnabled: boolean;
   readonly twoFactorEnabled: boolean;
 }
@@ -43,7 +45,7 @@ export interface SellerApplication extends SellerApplicationInput {
 export interface StoreProductInput {
   readonly name: string;
   readonly description: string;
-  readonly price: Kobo;
+  readonly price: Money;
   readonly stock: number;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
@@ -57,10 +59,17 @@ export interface StoreProduct extends Omit<ProductSummary, "stock">, Omit<StoreP
 
 export interface WithdrawalRequest {
   readonly payoutAccountId: ID;
-  readonly amount: Kobo;
+  readonly amount: Money;
 }
 
 export interface PayoutAccountInput {
   readonly bankCode: string;
   readonly accountNumber: string;
+}
+
+export interface CountryOption {
+  readonly countryCode: string;
+  readonly countryName: string;
+  readonly currency: CurrencyCode;
+  readonly currencyName: string;
 }

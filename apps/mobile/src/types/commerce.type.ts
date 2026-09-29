@@ -1,4 +1,5 @@
-import type { AppNotification, Category, ID, ISODate, Kobo, Order, Post, ProductSummary, StoreSummary, UserSummary } from "./models.type";
+import type { AppNotification, Category, ID, ISODate, Order, Post, ProductSummary, StoreSummary, UserSummary } from "./models.type";
+import type { Money } from "./money.type";
 
 export interface MartHome {
   readonly banners: readonly { readonly id: ID; readonly imageUrl: string | null }[];
@@ -56,7 +57,7 @@ export interface PaymentInitialization {
 export interface CheckoutResult {
   readonly orders: readonly Order[];
   readonly payableOrderId: ID;
-  readonly total: Kobo;
+  readonly total: Money;
 }
 
 export type DisputeReason = "not_received" | "not_as_described" | "damaged" | "wrong_item" | "other";

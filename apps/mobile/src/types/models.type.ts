@@ -1,6 +1,7 @@
+import type { Money } from "./money.type";
+
 export type ID = string;
 export type ISODate = string;
-export type Kobo = number;
 
 export interface UserSummary {
   readonly id: ID;
@@ -46,7 +47,7 @@ export interface StoreSummary {
 export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
-  readonly price: Kobo;
+  readonly price: Money;
   readonly imageUrl: string | null;
   readonly liked?: boolean;
   readonly stock?: number;
@@ -106,10 +107,10 @@ export interface CartItem {
 
 export interface Cart {
   readonly items: readonly CartItem[];
-  readonly itemsTotal: Kobo;
-  readonly shopDiscount: Kobo;
-  readonly shipping: Kobo;
-  readonly total: Kobo;
+  readonly itemsTotal: Money;
+  readonly shopDiscount: Money;
+  readonly shipping: Money;
+  readonly total: Money;
 }
 
 export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
@@ -119,7 +120,7 @@ export interface Order {
   readonly reference: string;
   readonly status: OrderStatus;
   readonly items: readonly CartItem[];
-  readonly total: Kobo;
+  readonly total: Money;
   readonly buyer: UserSummary;
   readonly store: StoreSummary;
   readonly createdAt: ISODate;
@@ -187,15 +188,14 @@ export interface AppNotification {
 }
 
 export interface WalletSummary {
-  readonly available: Kobo;
-  readonly pending: Kobo;
-  readonly currency: "NGN";
+  readonly available: Money;
+  readonly pending: Money;
 }
 
 export interface WalletTransaction {
   readonly id: ID;
   readonly kind: "credit" | "debit";
-  readonly amount: Kobo;
+  readonly amount: Money;
   readonly description: string;
   readonly createdAt: ISODate;
   readonly status: "pending" | "completed" | "failed";
@@ -209,7 +209,7 @@ export interface PayoutAccount {
 }
 
 export interface SellerDashboard {
-  readonly totalSales: Kobo;
+  readonly totalSales: Money;
   readonly orders: number;
   readonly series: readonly { readonly label: string; readonly value: number }[];
   readonly recentOrders: readonly Order[];
