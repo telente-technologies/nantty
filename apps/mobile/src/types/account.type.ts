@@ -89,6 +89,7 @@ export interface StoreProductInput {
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
   readonly imageUrls: readonly string[];
+  readonly brandId?: string | null;
 }
 
 export interface StoreProduct extends Omit<ProductSummary, "stock">, Omit<StoreProductInput, "price" | "stock"> {
