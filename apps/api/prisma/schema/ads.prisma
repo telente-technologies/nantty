@@ -10,6 +10,8 @@ model AdAccount {
   status                 String   @default("active")
   disabledReason         String?
   monthlySpendLimitMinor BigInt?
+  violationCount         Int       @default(0)
+  lastViolationAt        DateTime?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -122,6 +124,8 @@ model Ad {
   reviewedAt            DateTime?
   reviewedById          String?
   appeal                Json?
+  autoCheckFlags        Json      @default("[]")
+  submittedAt           DateTime?
   creativeInput         Json
   creative              Json
   deliverablePlacements String[]
@@ -138,7 +142,7 @@ model Ad {
 model AdSpendCounter {
   scopeId     String
   period      String
-  spentMicros BigInt @default(0)
+  spentMilliMinor BigInt @default(0)
 
   @@id([scopeId, period])
   @@map("ad_spend_counters")
@@ -178,7 +182,7 @@ model AdEvent {
   viewerId        String
   surface         String
   billed          Boolean  @default(false)
-  chargeMicros    BigInt   @default(0)
+  chargeMilliMinor    BigInt   @default(0)
   currency        String
   rejectionReason String?
   orderId         String?
@@ -230,4 +234,17 @@ model AdBoost {
   @@index([userId])
   @@index([status])
   @@map("ad_boosts")
+}
+
+model AdPolicyCategory {
+  id             String   @id
+  name           String   @unique
+  description    String
+  severity       String
+  isActive       Boolean  @default(true)
+  rejectionCount Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("ad_policy_categories")
 }
