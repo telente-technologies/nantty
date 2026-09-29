@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { usePayoutAccountsQuery, walletQueryKeys } from "@/components/wallet/walletQueries.hook";
 import { colors } from "@/constants/colors.constant";
 import { walletsService } from "@/services/wallets.service";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function PayoutAccountsScreen() {
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export function PayoutAccountsScreen() {
   const removeAccount = useMutation({ mutationFn: walletsService.removePayoutAccount, onSuccess: refreshPayoutAccounts });
 
   const confirmAndRemovePayoutAccount = (accountId: string, label: string) =>
-    Alert.alert("Remove account?", `${label} will no longer receive withdrawals.`, [
+    showAlertWithButtons("Remove account?", `${label} will no longer receive withdrawals.`, [
       { text: "Cancel", style: "cancel" },
       { text: "Remove", style: "destructive", onPress: () => removeAccount.mutate(accountId) },
     ]);
