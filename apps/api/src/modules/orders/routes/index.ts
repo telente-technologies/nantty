@@ -7,6 +7,6 @@ import { registerOrdersRoutes } from "./orders.routes.js";
 
 export function registerOrdersModuleRoutes(router: HttpRouter, deps: AppDependencies): void {
   // zudojs:routes:start
-  registerOrdersRoutes(router, deps.ordersController, deps.sellerOrdersController, deps.web);
+  registerOrdersRoutes(router, deps.ordersController, deps.sellerOrdersController, deps.web, deps.ports.requireSellerEntitlement("seller.dashboard"));
   // zudojs:routes:end
 }
