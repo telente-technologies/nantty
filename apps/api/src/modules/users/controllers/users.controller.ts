@@ -1,6 +1,7 @@
 import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
 
+import { UNVERIFIED_PERSONAL_BADGE, type VerificationBadge, type VerificationBadgeLookup } from "../../../interfaces/verificationBadge.interface.js";
 import { requireAuthenticatedPrincipal } from "../../../middlewares/authenticate.middleware.js";
 import { empty, json, readJsonBody, validationFailed } from "../../../utils/http.util.js";
 import { AddAddressCommand } from "../commands/addAddress/addAddress.command.js";
@@ -29,18 +30,19 @@ import {
 } from "../validators/users.validator.js";
 
 export class UsersController {
-  public constructor(private readonly commands: CommandBus, private readonly queries: QueryBus) {}
+  public constructor(private readonly commands: CommandBus, private readonly queries: QueryBus, private readonly verificationBadges?: VerificationBadgeLookup) {}
 
   public readonly getMe = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const user = await this.queries.execute<GetMeQuery, UserRecord>(new GetMeQuery(requireAuthenticatedPrincipal(ctx)));
-    return json(200, convertUserToCurrentUserDto(user));
+    return json(200, { ...convertUserToCurrentUserDto(user), verification: await this.findVerification(user.id) });
   };
 
   public readonly updateMe = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = UpdateProfileBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
     const command = new UpdateProfileCommand(requireAuthenticatedPrincipal(ctx), body.data);
-    return json(200, convertUserToCurrentUserDto(await this.commands.execute<UpdateProfileCommand, UserRecord>(command)));
+    const user = await this.commands.execute<UpdateProfileCommand, UserRecord>(command);
+    return json(200, { ...convertUserToCurrentUserDto(user), verification: await this.findVerification(user.id) });
   };
 
   public readonly getSettings = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -118,13 +120,17 @@ export class UsersController {
     const params = IdParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
     const user = await this.queries.execute<GetUserQuery, UserRecord>(new GetUserQuery({ id: params.data.id }));
-    return json(200, convertUserToPublicUserDto(user));
+    return json(200, { ...convertUserToPublicUserDto(user), verification: await this.findVerification(user.id) });
   };
 
   public readonly getUserByUsername = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const params = UsernameParamsSchema.safeParse(ctx.params);
     if (!params.success) return validationFailed(params.issues);
     const user = await this.queries.execute<GetUserQuery, UserRecord>(new GetUserQuery({ username: params.data.username }));
-    return json(200, convertUserToPublicUserDto(user));
+    return json(200, { ...convertUserToPublicUserDto(user), verification: await this.findVerification(user.id) });
   };
+
+  private async findVerification(userId: string): Promise<VerificationBadge> {
+    return (await this.verificationBadges?.findVerificationBadges([userId]))?.get(userId) ?? UNVERIFIED_PERSONAL_BADGE;
+  }
 }
