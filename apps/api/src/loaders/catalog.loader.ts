@@ -8,12 +8,6 @@ import { CategoriesController } from "../modules/categories/controllers/categori
 import { PrismaCategoriesRepository } from "../modules/categories/repositories/categories.prisma.repository.js";
 import { InMemoryCategoriesRepository } from "../modules/categories/repositories/categories.repository.js";
 import { CategoriesService } from "../modules/categories/services/categories.service.js";
-import { MediaController } from "../modules/media/controllers/media.controller.js";
-import { registerMediaCommandAndQueryHandlers } from "../modules/media/media.module.js";
-import { PrismaMediaRepository } from "../modules/media/repositories/media.prisma.repository.js";
-import { InMemoryMediaRepository } from "../modules/media/repositories/media.repository.js";
-import { MediaService } from "../modules/media/services/media.service.js";
-import { InMemoryMediaBlobStore, ObjectStorageMediaBlobStore, type MediaBlobStore } from "../modules/media/services/mediaBlobStore.service.js";
 import { ProductsController } from "../modules/products/controllers/products.controller.js";
 import { registerProductsCommandAndQueryHandlers } from "../modules/products/products.module.js";
 import { PrismaProductVariantsRepository } from "../modules/products/repositories/productVariants.prisma.repository.js";
@@ -38,10 +32,9 @@ import { StoreAccessService } from "../modules/stores/services/storeAccess.servi
 import { StoresService } from "../modules/stores/services/stores.service.js";
 import { registerStoresCommandAndQueryHandlers } from "../modules/stores/stores.module.js";
 import type { Core } from "./core.loader.js";
+import { createMediaModule, type MediaExternalServices } from "./media.loader.js";
 
-export interface CatalogExternalServices {
-  readonly mediaBlobStore?: MediaBlobStore;
-}
+export interface CatalogExternalServices extends MediaExternalServices {}
 
 export interface CatalogSharedServices {
   readonly currencyConverter: CurrencyConverter;
@@ -57,8 +50,6 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
   const categories = usePrisma ? new PrismaCategoriesRepository() : new InMemoryCategoriesRepository();
   const products = usePrisma ? new PrismaProductsRepository() : new InMemoryProductsRepository();
   const variants = usePrisma ? new PrismaProductVariantsRepository() : new InMemoryProductVariantsRepository();
-  const mediaRepository = usePrisma ? new PrismaMediaRepository() : new InMemoryMediaRepository();
-  const blobs = external.mediaBlobStore ?? (usePrisma ? new ObjectStorageMediaBlobStore() : new InMemoryMediaBlobStore());
 
   const storeAccess = new StoreAccessService(stores);
   const storesService = new StoresService({
@@ -79,14 +70,16 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
 
   registerSearchQueryHandlers(queries, new SearchService(productsService, shared.userDirectory));
 
-  const mediaService = new MediaService({ media: mediaRepository, blobs, settings: core.settings.media, clock: core.clock, events });
-  registerMediaCommandAndQueryHandlers(commands, queries, mediaService);
+  const media = createMediaModule(core, external);
 
   const storeAccessPort: StoreAccess = storeAccess;
   const productCatalogPort: ProductCatalog = new RepositoryProductCatalog(productsService);
   return {
     storeAccess: storeAccessPort,
     productCatalog: productCatalogPort,
+    mediaLibrary: media.mediaLibrary,
+    mediaProcessingQueue: media.mediaProcessingQueue,
+    scheduledJobs: media.scheduledJobs,
     controllers: {
       storesController: new StoresController(commands, queries, shared.currencyConverter),
       sellerApplicationsController: new SellerApplicationsController(commands, queries),
@@ -94,7 +87,7 @@ export function createCatalogModules(core: Core, shared: CatalogSharedServices, 
       productsController: new ProductsController(commands, queries, shared.currencyConverter),
       sellerProductsController: new SellerProductsController(commands, queries),
       searchController: new SearchController(queries, shared.currencyConverter),
-      mediaController: new MediaController(commands, queries),
+      ...media.controllers,
     },
   };
 }
