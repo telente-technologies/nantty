@@ -1,7 +1,7 @@
 import type { PayoutAccountInput, WithdrawalRequest } from "@/types/account.type";
 import type { PayoutAccount, WalletSummary, WalletTransaction } from "@/types";
 
-import { api, generateIdempotencyKey } from "./api-client.service";
+import { api, generateIdempotencyKey } from "./apiClient.service";
 
 export const walletsService = {
   fetchMyWalletBalance: () => api.get<WalletSummary>("/api/v1/wallets/me"),

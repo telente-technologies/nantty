@@ -1,7 +1,7 @@
 import type { StoreDetail } from "@/types/commerce.type";
 import type { ProductSummary } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const storesService = {
   fetchStoreById: (storeId: string) => api.get<StoreDetail>(`/api/v1/stores/${storeId}`),

@@ -1,6 +1,6 @@
 import type { NewPostInput, NewStoryInput, Post, Story, StoryTrayItem } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const storiesService = {
   fetchStoryTray: () => api.get<StoryTrayItem[]>("/api/v1/stories/tray"),

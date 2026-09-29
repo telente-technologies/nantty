@@ -7,7 +7,7 @@ import type {
 } from "@/types/account.type";
 import type { Order, SellerDashboard } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const sellerService = {
   fetchSellerDashboard: (period: SellerDashboardPeriod) => api.get<SellerDashboard>("/api/v1/seller/dashboard", { period }),
