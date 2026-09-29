@@ -6,7 +6,6 @@ import { assertPrincipalMayUseShift, buildPrincipalActor, buildStoreMoney, findS
 import type { DiscountInput, PosSale, SalePayment } from "@/types/pos.type";
 import type { ProductVariant, Product } from "@/types/catalog.type";
 import { calculateCartTotalsInMinorUnits, calculateDiscountAmountMinor, doesDiscountNeedManagerApproval } from "@/utils/posCartPricing.util";
-import { readMinorUnitsPerMajorUnit } from "@/utils/money.util";
 
 interface ParsedSaleLine {
   readonly product: Product;
@@ -139,8 +138,7 @@ export function createPosSaleFromRequest(request: MockRequest): MockResponse {
   if (paidMinor !== priced.totalMinor && !offlineCreatedAt) throw new MockHttpError(422, "PAYMENT_TOTAL_MISMATCH", "Payments do not add up to the sale total. Prices may have changed; refresh the register.");
 
   const lastReceiptNumber = database.sales.reduce((highest, sale) => Math.max(highest, Number(sale.receiptNumber.replace(/\D/g, "")) || 0), 1000);
-  const minorPerMajor = readMinorUnitsPerMajorUnit(settings.currency);
-  const loyaltyPointsEarned = customer && settings.loyalty.enabled ? Math.floor((priced.totalMinor / minorPerMajor) * settings.loyalty.pointsEarnedPerMajorUnit) : 0;
+  const loyaltyPointsEarned = customer && settings.loyalty.enabled ? Math.floor(priced.totalMinor / Math.max(1, settings.loyalty.spendRequiredPerPoint.amountMinor)) : 0;
   const sale: PosSale = {
     id: createMockIdentifier("sale"),
     receiptNumber: `IFE-${lastReceiptNumber + 1}`,
