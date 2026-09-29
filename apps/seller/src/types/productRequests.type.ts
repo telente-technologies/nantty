@@ -1,3 +1,4 @@
+import type { ProductBrandRelationship } from "@/types/brand.type";
 import type { Money } from "@/types/money.type";
 import type { ProductOption, ProductStatus, StockAdjustmentReason } from "@/types/catalog.type";
 
@@ -25,6 +26,7 @@ export interface ProductUpsertRequest {
   readonly options: ProductOption[];
   readonly imageMediaIds: string[];
   readonly variants: ProductVariantUpsertRequest[];
+  readonly brand?: { readonly brandId: string; readonly relationship: ProductBrandRelationship } | null;
 }
 
 export type ProductBulkAction = "publish" | "unpublish" | "archive";
