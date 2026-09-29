@@ -88,7 +88,7 @@ export function registerPosExtrasMockHandlers(): void {
     if (issues.length > 0 || !staffId || !discountMinor || !grossMinor) return respondWithValidationFailure(issues);
     let approver;
     try {
-      approver = checkStaffPinWithLockout(staffId, pin, principal.storeId);
+      approver = checkStaffPinWithLockout(staffId, pin);
     } catch (error) {
       if (error instanceof MockHttpError && error.status === 401) throw new MockHttpError(403, error.code, error.message);
       throw error;
