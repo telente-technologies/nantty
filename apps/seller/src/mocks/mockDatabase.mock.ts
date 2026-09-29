@@ -1,17 +1,9 @@
+import { MockHttpError } from "@/mocks/mockResponses.mock";
 import type { MockResponse } from "@/mocks/mockRouter.mock";
-import { buildDemoCustomers } from "@/mocks/seed/demoCustomers.mock";
-import { buildDemoAuditLog, buildDemoGateStores, buildDemoPromotions, buildDemoSubscriptionPlans, buildDemoWalletState, type DemoWalletState, type MockGateStore } from "@/mocks/seed/demoFinance.mock";
-import { buildDemoDisputes, buildDemoOnlineOrders, buildDemoReturnRequests } from "@/mocks/seed/demoOrders.mock";
-import { buildDemoMemberships, buildDemoStaffRecords, buildDemoUserAccounts, type MockStaffRecord, type MockStoreMembership, type MockUserAccount } from "@/mocks/seed/demoPeople.mock";
-import { buildDemoProducts } from "@/mocks/seed/demoProducts.mock";
-import { buildDemoSalesHistory } from "@/mocks/seed/demoSales.mock";
-import { buildDemoCategories, buildDemoLocations, buildDemoRegisters, buildDemoStoreSettings } from "@/mocks/seed/demoStore.mock";
-import type { Product, ProductCategory, StockAdjustment, StockTransfer } from "@/types/catalog.type";
-import type { Customer } from "@/types/customer.type";
-import type { OnlineOrder, OrderDispute, ReturnRequest } from "@/types/order.type";
-import type { ParkedSale, PosSale, PosShift, SaleRefund } from "@/types/pos.type";
-import type { Promotion } from "@/types/promotion.type";
-import type { PosRegister, StoreLocation, StoreSettings } from "@/types/store.type";
+import { readStoreIdOfCurrentMockScope } from "@/mocks/mockStoreScope.mock";
+import { buildDemoGateStores, buildDemoSubscriptionPlans, type MockGateStore } from "@/mocks/seed/demoFinance.mock";
+import { buildDemoMemberships, buildDemoUserAccounts, type MockStoreMembership, type MockUserAccount } from "@/mocks/seed/demoPeople.mock";
+import { buildDemoStoreDataset, mockStoreDatasetFieldNames, type MockStoreDataset } from "@/mocks/seed/demoStoreDatasets.mock";
 import type { AuditLogEntry } from "@/types/staff.type";
 import type { SubscriptionPlan } from "@/types/subscription.type";
 
@@ -46,7 +38,7 @@ export interface MockMedia {
   readonly status: "processing" | "ready" | "failed";
 }
 
-export interface MockDatabase {
+export interface MockPlatformState {
   users: MockUserAccount[];
   memberships: MockStoreMembership[];
   gateStores: MockGateStore[];
@@ -56,40 +48,15 @@ export interface MockDatabase {
   operatorSessions: Map<string, MockOperatorSession>;
   pendingSubscriptionCheckouts: Map<string, { readonly storeId: string; readonly planId: string }>;
   subscriptionPlans: SubscriptionPlan[];
-  settings: StoreSettings;
-  locations: StoreLocation[];
-  registers: PosRegister[];
-  categories: ProductCategory[];
-  products: Product[];
-  customers: Customer[];
-  staff: MockStaffRecord[];
-  auditLog: AuditLogEntry[];
-  shifts: PosShift[];
-  sales: PosSale[];
-  refunds: SaleRefund[];
-  parkedSales: ParkedSale[];
-  stockAdjustments: StockAdjustment[];
-  stockTransfers: StockTransfer[];
-  onlineOrders: OnlineOrder[];
-  returnRequests: ReturnRequest[];
-  disputes: OrderDispute[];
-  promotions: Promotion[];
-  wallet: DemoWalletState;
   idempotentResponses: Map<string, MockResponse>;
   uploads: Map<string, MockUpload>;
   media: Map<string, MockMedia>;
+  storeDatasets: Map<string, MockStoreDataset>;
 }
 
-function seedMockDatabase(): MockDatabase {
-  const settings = buildDemoStoreSettings();
-  const products = buildDemoProducts();
-  const customers = buildDemoCustomers();
-  const { shifts, sales } = buildDemoSalesHistory(products, customers, settings);
-  const registers = buildDemoRegisters().map((register) => ({
-    ...register,
-    openShiftId: shifts.find((shift) => shift.registerId === register.id && shift.status === "open")?.id ?? null,
-  }));
-  const onlineOrders = buildDemoOnlineOrders(products);
+export type MockDatabase = Omit<MockPlatformState, "storeDatasets"> & MockStoreDataset;
+
+function seedMockPlatformState(): MockPlatformState {
   return {
     users: buildDemoUserAccounts(),
     memberships: buildDemoMemberships(),
@@ -100,36 +67,66 @@ function seedMockDatabase(): MockDatabase {
     operatorSessions: new Map(),
     pendingSubscriptionCheckouts: new Map(),
     subscriptionPlans: buildDemoSubscriptionPlans(),
-    settings,
-    locations: buildDemoLocations(),
-    registers,
-    categories: buildDemoCategories(),
-    products,
-    customers,
-    staff: buildDemoStaffRecords(),
-    auditLog: buildDemoAuditLog(),
-    shifts,
-    sales,
-    refunds: [],
-    parkedSales: [],
-    stockAdjustments: [],
-    stockTransfers: [],
-    onlineOrders,
-    returnRequests: buildDemoReturnRequests(onlineOrders),
-    disputes: buildDemoDisputes(onlineOrders),
-    promotions: buildDemoPromotions(),
-    wallet: buildDemoWalletState(onlineOrders),
     idempotentResponses: new Map(),
     uploads: new Map(),
     media: new Map(),
+    storeDatasets: new Map(),
   };
 }
 
-const globalMockDatabaseHolder = globalThis as typeof globalThis & { __zudomartDashboardMockDatabase?: MockDatabase };
+const globalMockStateHolder = globalThis as typeof globalThis & {
+  __zudomartDashboardMockPlatform?: MockPlatformState;
+  __zudomartDashboardMockViews?: Map<string | null, MockDatabase>;
+};
+
+function readMockPlatformState(): MockPlatformState {
+  globalMockStateHolder.__zudomartDashboardMockPlatform ??= seedMockPlatformState();
+  return globalMockStateHolder.__zudomartDashboardMockPlatform;
+}
+
+export function readMockStoreDataset(storeId: string): MockStoreDataset {
+  const platform = readMockPlatformState();
+  const existing = platform.storeDatasets.get(storeId);
+  if (existing) return existing;
+  const seeded = buildDemoStoreDataset(storeId);
+  if (!seeded) throw new MockHttpError(404, "STORE_NOT_FOUND", "Store not found.");
+  platform.storeDatasets.set(storeId, seeded);
+  return seeded;
+}
+
+function requireStoreDatasetForScope(storeId: string | null): MockStoreDataset {
+  if (!storeId) throw new MockHttpError(403, "NOT_A_SELLER", "This account does not manage a store.");
+  return readMockStoreDataset(storeId);
+}
+
+function buildMockDatabaseViewForStore(storeId: string | null): MockDatabase {
+  const platform = readMockPlatformState();
+  const view = {} as MockDatabase;
+  for (const fieldName of Object.keys(platform) as (keyof MockPlatformState)[]) {
+    if (fieldName === "storeDatasets") continue;
+    Object.defineProperty(view, fieldName, { enumerable: true, get: () => platform[fieldName], set: (value: never) => { platform[fieldName] = value; } });
+  }
+  for (const fieldName of [...mockStoreDatasetFieldNames, "storeId", "receiptPrefix"] as const) {
+    Object.defineProperty(view, fieldName, {
+      enumerable: true,
+      get: () => requireStoreDatasetForScope(storeId)[fieldName],
+      set: (value: never) => {
+        (requireStoreDatasetForScope(storeId) as unknown as Record<string, unknown>)[fieldName] = value;
+      },
+    });
+  }
+  return view;
+}
 
 export function readMockDatabase(): MockDatabase {
-  globalMockDatabaseHolder.__zudomartDashboardMockDatabase ??= seedMockDatabase();
-  return globalMockDatabaseHolder.__zudomartDashboardMockDatabase;
+  const storeId = readStoreIdOfCurrentMockScope();
+  globalMockStateHolder.__zudomartDashboardMockViews ??= new Map();
+  const views = globalMockStateHolder.__zudomartDashboardMockViews;
+  const existingView = views.get(storeId);
+  if (existingView) return existingView;
+  const view = buildMockDatabaseViewForStore(storeId);
+  views.set(storeId, view);
+  return view;
 }
 
 export function readGlobalMockSlice<Slice>(sliceKey: string, seedSlice: () => Slice): Slice {
@@ -137,6 +134,12 @@ export function readGlobalMockSlice<Slice>(sliceKey: string, seedSlice: () => Sl
   const globalKey = `__zudomartDashboardMockSlice_${sliceKey}`;
   holder[globalKey] ??= seedSlice();
   return holder[globalKey] as Slice;
+}
+
+export function readStoreScopedMockSlice<Slice>(sliceKey: string, seedSlice: (storeId: string) => Slice): Slice {
+  const storeId = readStoreIdOfCurrentMockScope();
+  if (!storeId) throw new MockHttpError(403, "NOT_A_SELLER", "This account does not manage a store.");
+  return readGlobalMockSlice(`${sliceKey}_${storeId}`, () => seedSlice(storeId));
 }
 
 export function appendMockAuditLogEntry(entry: Omit<AuditLogEntry, "id" | "createdAt" | "ipAddress">): void {
