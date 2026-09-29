@@ -11,7 +11,7 @@ import { colors } from "@/constants/colors.constant";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
 
-const photo = require("../../../assets/images/onboarding-photo.png");
+const photo = require("../../../assets/images/onboardingMarketPhoto.jpg");
 const ROWS = [-43, -96, -43];
 
 export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboarding">) {
