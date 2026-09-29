@@ -25,25 +25,25 @@ export interface MockBrandRecord {
 export const mockBrandRecords: MockBrandRecord[] = [
   {
     id: "br_adire", name: "Adire House", handle: "adirehouse", ownerUserKey: "u_1", officialStoreId: "s_ada", categoryId: "cat_fashion",
-    description: "Fictional demo brand. Hand-dyed Adire and Ankara ready-to-wear, designed in Lagos and made with artisans in Abeokuta.",
+    description: "Hand-dyed Adire and Ankara ready-to-wear, designed in Lagos and made with artisans in Abeokuta.",
     website: "https://adirehouse.example", verification: goldVerification("PREMIUM"), followers: 21_400,
     logoUrl: avatarImageUrlForUser("u_1"), coverUrl: coverImageUrlForUser("u_1"),
   },
   {
     id: "br_kofo", name: "Kofo Skincare", handle: "kofoskincare", ownerUserKey: "u_3", officialStoreId: "s_glow", categoryId: "cat_beauty",
-    description: "Fictional demo brand. Shea, black soap and vitamin C formulas made for melanin-rich skin.",
+    description: "Shea, black soap and vitamin C formulas made for melanin-rich skin.",
     website: "https://kofoskincare.example", verification: goldVerification("PRO"), followers: 16_900,
     logoUrl: productImageUrlsForProduct("b3")[0] ?? null, coverUrl: coverImageUrlForUser("u_3"),
   },
   {
     id: "br_aba", name: "Aba Leatherworks", handle: "abaleatherworks", ownerUserKey: "u_6", officialStoreId: "s_kicks", categoryId: "cat_shoes",
-    description: "Fictional demo brand. Full-grain leather shoes and slides hand-stitched in Aba.",
+    description: "Full-grain leather shoes and slides hand-stitched in Aba.",
     website: null, verification: goldVerification("PRO"), followers: 9_700,
     logoUrl: productImageUrlsForProduct("s1")[0] ?? null, coverUrl: coverImageUrlForUser("u_6"),
   },
   {
     id: "br_lekki", name: "Lekki Gadgets", handle: "lekkigadgets", ownerUserKey: null, officialStoreId: null, categoryId: "cat_gadgets",
-    description: "Fictional demo brand. Everyday tech accessories. This brand hasn't opened an official store on Zudomart yet.",
+    description: "Everyday tech accessories. This brand hasn't opened an official store on Zudomart yet.",
     website: null, verification: null, followers: 2_300,
     logoUrl: productImageUrlsForProduct("g4")[0] ?? null, coverUrl: productImageUrlsForProduct("g5")[0] ?? null,
   },

@@ -45,7 +45,7 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
             Discover real sellers around you
           </Text>
           <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center">
-            Some tagline about the service being provided.
+            Shop real sellers, pay safely with escrow.
           </Text>
         </View>
 
