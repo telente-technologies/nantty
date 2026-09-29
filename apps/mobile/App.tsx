@@ -6,21 +6,34 @@ import {
   Inter_900Black,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { deleteAllLocallySavedMessageHistory } from "@/cache/messageSync.util";
+import { OfflineIndicator } from "@/cache/offlineIndicator";
+import {
+  connectReactQueryToNetworkAndAppState,
+  createZudomartQueryClient,
+  reactQueryAsyncStoragePersister,
+  reactQueryPersistOptions,
+} from "@/cache/queryClient.config";
+import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offlineReplayInvalidation.util";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/locale.service";
+import { cancelAndRemoveUpload } from "@/services/mediaUploadQueue.service";
+import { startAutomaticUploadResume } from "@/services/uploadBackgroundTask.service";
 import { useAuthStore } from "@/store/auth.store";
+import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
+import { useUploadQueueStore } from "@/store/uploadQueue.store";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function App() {
-  const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } }));
+  const [queryClient] = useState(createZudomartQueryClient);
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -35,6 +48,32 @@ export default function App() {
   useEffect(() => {
     useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
   }, []);
+
+  useEffect(() => {
+    const stopReactQueryNetworkListeners = connectReactQueryToNetworkAndAppState();
+    const stopOfflineConnectivityMonitoring = startOfflineConnectivityMonitoring();
+    const stopListeningForReplayedMutations = addOfflineMutationReplayedListener((mutation) =>
+      invalidateQueriesAffectedByReplayedOfflineMutation(queryClient, mutation),
+    );
+    return () => {
+      stopReactQueryNetworkListeners();
+      stopOfflineConnectivityMonitoring();
+      stopListeningForReplayedMutations();
+    };
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (authStatus === "signedIn") startAutomaticUploadResume();
+  }, [authStatus]);
+
+  useEffect(() => {
+    if (authStatus !== "signedOut") return;
+    Object.keys(useUploadQueueStore.getState().jobsById).forEach(cancelAndRemoveUpload);
+    queryClient.clear();
+    Promise.resolve(reactQueryAsyncStoragePersister.removeClient()).catch(() => undefined);
+    deleteAllLocallySavedMessageHistory();
+    useOfflineStore.getState().clearQueuedMutations();
+  }, [authStatus, queryClient]);
 
   useEffect(() => {
     if (authStatus === "loading") return;
@@ -53,10 +92,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <DeviceFrame>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
           <StatusBar style="dark" />
           <RootNavigator />
-        </QueryClientProvider>
+          <OfflineIndicator />
+        </PersistQueryClientProvider>
       </DeviceFrame>
     </SafeAreaProvider>
   );
