@@ -1,0 +1,41 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.neutral {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+.info {
+  background: var(--blue-tint);
+  color: var(--blue-700);
+}
+
+.success {
+  background: var(--success-tint);
+  color: var(--success-ink);
+}
+
+.caution {
+  background: var(--caution-tint);
+  color: var(--caution-ink);
+}
+
+.error {
+  background: var(--error-tint);
+  color: var(--error-ink);
+}
+
+.highlight {
+  background: var(--yellow-100);
+  color: var(--yellow-900);
+}

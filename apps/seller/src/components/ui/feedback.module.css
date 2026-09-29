@@ -1,0 +1,145 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--blue-tint);
+  color: var(--blue-500);
+}
+
+.emptyTitle {
+  font-weight: 650;
+  font-size: 15px;
+}
+
+.emptyDescription {
+  max-width: 420px;
+  color: var(--ink-muted);
+}
+
+.emptyAction {
+  margin-top: 10px;
+}
+
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-medium);
+  border: 1px solid transparent;
+}
+
+.calloutBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.calloutTitle {
+  font-weight: 650;
+}
+
+.calloutAction {
+  flex: none;
+}
+
+.info {
+  background: var(--blue-tint);
+  border-color: var(--blue-50);
+  color: var(--blue-900);
+}
+
+.caution {
+  background: var(--caution-tint);
+  border-color: #fbd899;
+  color: var(--caution-ink);
+}
+
+.error {
+  background: var(--error-tint);
+  border-color: #f9c1c1;
+  color: var(--error-ink);
+}
+
+.success {
+  background: var(--success-tint);
+  border-color: #b3ead4;
+  color: var(--success-ink);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  color: var(--ink-muted);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--blue-500);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.statTile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.statDetail {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.detail_positive {
+  color: var(--success-ink);
+}
+
+.detail_negative {
+  color: var(--error-ink);
+}
+
+.detail_caution {
+  color: var(--caution-ink);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
