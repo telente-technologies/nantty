@@ -1,0 +1,211 @@
+{
+  "go": {
+    "auth": {
+      "registration": { "commands": ["registerAccount", "generateUsernameForNewAccount"], "queries": ["checkUsernameAvailability"], "events": ["accountRegistered"] },
+      "sessions": { "commands": ["logInWithPassword", "refreshSessionTokens", "logOutSession", "revokeAllSessions"], "queries": ["listActiveSessions"], "events": ["userLoggedIn", "refreshTokenReuseDetected"] },
+      "oneTimeCodes": { "commands": ["sendOneTimeCode", "verifyOneTimeCode"], "queries": [], "events": ["oneTimeCodeSent"] },
+      "passwords": { "commands": ["resetPasswordWithVerifiedCode", "changePassword"], "queries": [], "events": ["passwordChanged"] },
+      "socialSignIn": { "commands": ["signInWithGoogle", "signInWithApple"], "queries": [], "events": [] },
+      "multiFactor": { "commands": ["enrollTotpFactor", "verifyTotpChallenge", "registerPasskey"], "queries": ["listMultiFactorMethods"], "events": [] },
+      "signingKeys": { "commands": ["rotateSigningKey"], "queries": ["getJsonWebKeySet"], "events": [] }
+    },
+    "users": {
+      "profiles": { "commands": ["updateProfileDetails", "updateAvatarAndCover", "deactivateAccount"], "queries": ["getUserProfile", "getMyProfile"], "events": ["profileUpdated", "accountDeactivated"] },
+      "usernames": { "commands": ["changeUsername", "withholdUsername", "reserveUsernamePattern"], "queries": ["getUsernamePolicy", "suggestUsername"], "events": ["usernameChanged", "usernameWithheld"] },
+      "brands": { "commands": ["createBrandProfile", "updateBrandProfile", "addBrandMember", "removeBrandMember"], "queries": ["getBrandProfile", "searchBrands"], "events": ["brandCreated", "brandMemberAdded"] },
+      "actingProfiles": { "commands": ["switchActingProfile"], "queries": ["listMyProfiles", "getActingProfile"], "events": [] },
+      "verification": { "commands": ["applyForVerification", "approveVerification", "rejectVerification", "suspendVerification", "revokeVerification", "syncVerificationTier"], "queries": ["getVerificationStatus", "listPendingVerifications"], "events": ["verificationApproved", "verificationRevoked", "verificationBadgeChanged"] },
+      "addresses": { "commands": ["addShippingAddress", "updateShippingAddress", "removeShippingAddress"], "queries": ["listShippingAddresses"], "events": [] },
+      "blocks": { "commands": ["blockUser", "unblockUser"], "queries": ["listBlockedUsers"], "events": ["userBlocked"] },
+      "preferences": { "commands": ["updateUserSettings", "updateCountryPreference", "savePersonalizationTopics"], "queries": ["getUserSettings"], "events": ["countryPreferenceChanged"] }
+    },
+    "catalog": {
+      "stores": { "commands": ["createStore", "updateStore", "suspendStore", "linkStoreToBrand"], "queries": ["getStore", "listStores"], "events": ["storeCreated", "storeSuspended", "officialStoreStatusChanged"] },
+      "storeMembers": { "commands": ["inviteStoreMember", "changeStoreMemberRole", "removeStoreMember"], "queries": ["listStoreMembers"], "events": [] },
+      "sellerApplications": { "commands": ["submitSellerApplication", "reviewSellerApplication"], "queries": ["getMySellerApplication", "listSellerApplications"], "events": ["sellerApplicationSubmitted", "sellerApplicationReviewed"] },
+      "products": { "commands": ["createProduct", "updateProduct", "publishProduct", "unpublishProduct", "deleteProduct", "tagProductWithBrand"], "queries": ["getProductDetail", "listProducts", "listStoreProducts", "listBrandProducts"], "events": ["productPublished", "productUpdated", "productUnpublished"] },
+      "productVariants": { "commands": ["addProductVariant", "updateProductVariant"], "queries": [], "events": [] },
+      "categories": { "commands": ["createCategory", "updateCategory", "deleteCategory"], "queries": ["listCategories", "getCategory"], "events": [] },
+      "martHome": { "commands": ["updateMartHomeSections"], "queries": ["getMartHome"], "events": [] },
+      "productEngagement": { "commands": ["likeProduct", "unlikeProduct", "bookmarkProduct"], "queries": [], "events": ["productLiked"] }
+    },
+    "inventory": {
+      "stock": { "commands": ["adjustStockLevel", "reserveStockForCheckout", "releaseStockReservation", "commitStockReservation"], "queries": ["getStockLevels", "listLowStockItems"], "events": ["stockAdjusted", "stockReserved", "lowStockDetected", "oversellFlagged"] },
+      "locations": { "commands": ["createStockLocation", "updateStockLocation"], "queries": ["listStockLocations"], "events": [] },
+      "transfers": { "commands": ["createStockTransfer", "receiveStockTransfer"], "queries": ["listStockTransfers"], "events": ["stockTransferred"] }
+    },
+    "orders": {
+      "carts": { "commands": ["addItemToCart", "changeCartItemQuantity", "removeCartItem", "clearCart", "mergeGuestCart"], "queries": ["getMyCart"], "events": [] },
+      "checkout": { "commands": ["checkOutCart", "lockOrderExchangeRate"], "queries": ["previewCheckoutTotals"], "events": ["orderPlaced"] },
+      "orders": { "commands": ["cancelOrder", "confirmOrderReceipt"], "queries": ["getOrder", "listMyOrders", "listStoreOrders"], "events": ["orderCancelled", "orderCompleted"] },
+      "fulfilment": { "commands": ["markOrderShipped", "markOrderDelivered", "updateTrackingDetails"], "queries": ["getShipmentTracking"], "events": ["orderShipped", "orderDelivered"] },
+      "returns": { "commands": ["requestReturn", "approveReturn", "receiveReturnedItems"], "queries": ["listReturns"], "events": ["returnApproved"] }
+    },
+    "payments": {
+      "paymentIntents": { "commands": ["initializePayment", "verifyPaymentWithProvider"], "queries": ["getPayment", "listOrderPayments"], "events": ["paymentSucceeded", "paymentFailed"] },
+      "providerWebhooks": { "commands": ["handlePaystackWebhook", "handleFlutterwaveWebhook"], "queries": [], "events": [] },
+      "refunds": { "commands": ["refundPayment"], "queries": ["listRefunds"], "events": ["paymentRefunded"] },
+      "banks": { "commands": ["resolveBankAccountName"], "queries": ["listBanksForCountry"], "events": [] },
+      "storePurchases": { "commands": ["verifyAppStoreReceipt", "verifyPlayStoreReceipt"], "queries": [], "events": ["inAppPurchaseVerified"] }
+    },
+    "wallet": {
+      "wallets": { "commands": ["openWallet", "freezeWallet"], "queries": ["getMyWallet", "listWalletTransactions", "listEscrowHolds"], "events": ["walletOpened"] },
+      "coins": { "commands": ["purchaseCoins", "transferCoinsToUser", "convertEarnedCoinsToCash"], "queries": ["listCoinPackages", "getCoinBalance"], "events": ["coinsPurchased", "coinsTransferred"] },
+      "payoutAccounts": { "commands": ["addPayoutAccount", "removePayoutAccount"], "queries": ["listPayoutAccounts"], "events": [] },
+      "withdrawals": { "commands": ["requestWithdrawal", "approveWithdrawal", "processWithdrawal"], "queries": ["listWithdrawals", "quoteWithdrawalProviderFee"], "events": ["withdrawalRequested", "withdrawalProcessed"] }
+    },
+    "ledger": {
+      "accounts": { "commands": ["openLedgerAccount"], "queries": ["getLedgerAccountBalance"], "events": [] },
+      "journalEntries": { "commands": ["postBalancedJournalEntry", "reverseJournalEntry"], "queries": ["listJournalEntries"], "events": ["journalEntryPosted"] },
+      "reconciliation": { "commands": ["reconcileProviderSettlements"], "queries": ["getReconciliationReport"], "events": ["reconciliationMismatchFound"] }
+    },
+    "escrow": {
+      "escrows": { "commands": ["holdFundsInEscrow", "releaseEscrowToSeller", "refundEscrowToBuyer", "autoReleaseDueEscrows"], "queries": ["getEscrowForOrder", "listEscrows"], "events": ["escrowHeld", "escrowReleased", "escrowRefunded"] },
+      "disputes": { "commands": ["openDispute", "addDisputeMessage", "resolveDispute"], "queries": ["getDispute", "listDisputes"], "events": ["disputeOpened", "disputeResolved"] }
+    },
+    "subscriptions": {
+      "plans": { "commands": ["createPlan", "updatePlanPerks", "updatePlanPrices"], "queries": ["listVerificationPlans", "listGoldPlans", "getPlanEntitlements"], "events": ["planUpdated"] },
+      "profileSubscriptions": { "commands": ["startSubscription", "cancelSubscription", "resumeSubscription", "markSubscriptionPastDue", "expireSubscription"], "queries": ["getMySubscription", "getSellerAccess"], "events": ["subscriptionStarted", "subscriptionCancelled", "subscriptionPastDue", "subscriptionExpired"] },
+      "creatorSubscriptions": { "commands": ["createCreatorPlan", "subscribeToCreator", "cancelCreatorSubscription"], "queries": ["listCreatorPlans", "listCreatorSubscribers"], "events": ["creatorSubscriptionStarted"] },
+      "billing": { "commands": ["chargeRenewal", "handleBillingWebhook"], "queries": [], "events": ["renewalCharged", "renewalFailed"] }
+    },
+    "ads": {
+      "adAccounts": { "commands": ["createAdAccount", "inviteAdAccountMember"], "queries": ["listMyAdAccounts"], "events": [] },
+      "campaigns": { "commands": ["createCampaign", "updateCampaign", "pauseCampaign", "submitCampaignForReview"], "queries": ["listCampaigns", "getCampaign"], "events": ["campaignSubmitted", "campaignActivated"] },
+      "adSets": { "commands": ["createAdSet", "updateAdSet"], "queries": ["listAdSets"], "events": [] },
+      "ads": { "commands": ["createAd", "updateAd"], "queries": ["listAds", "previewAdPlacements"], "events": [] },
+      "audiences": { "commands": ["createCustomAudience", "uploadHashedCustomerList"], "queries": ["estimateAudienceReach"], "events": [] },
+      "boosts": { "commands": ["boostPost"], "queries": ["getBoost", "getBoostOptions", "estimateBoost"], "events": ["postBoosted"] },
+      "delivery": { "commands": ["recordAdEvents", "chargeAdAuctionPrice", "shareAdRevenueWithCreator"], "queries": ["selectAdsForPlacement"], "events": ["adImpressionRecorded", "adClicked"] },
+      "review": { "commands": ["approveAd", "rejectAd", "appealAdRejection"], "queries": ["listAdsPendingReview"], "events": ["adRejected"] },
+      "billing": { "commands": ["topUpAdBalance", "applyMonthlyAdCredits"], "queries": ["getAdAccountBalance", "listInvoices"], "events": [] },
+      "reporting": { "commands": ["scheduleEmailReport"], "queries": ["getCampaignReport"], "events": [] }
+    },
+    "creators": {
+      "creatorProgram": { "commands": ["applyToCreatorProgram", "reviewCreatorApplication", "suspendCreator"], "queries": ["getMyCreatorStatus", "checkCreatorEligibility"], "events": ["creatorApproved"] },
+      "earnings": { "commands": ["creditGiftEarnings", "creditAffiliateCommission", "creditAdRevenueShare"], "queries": ["getCreatorDashboard", "listCreatorEarnings", "getRevenueRules"], "events": ["creatorEarningsCredited"] },
+      "affiliations": { "commands": ["requestAffiliation", "approveAffiliation", "setAffiliateCommissionRate"], "queries": ["listAffiliations"], "events": [] },
+      "gifts": { "commands": ["sendGiftDuringLive", "sendTip"], "queries": ["listGiftCatalog"], "events": ["giftSent", "tipSent"] }
+    },
+    "rewards": {
+      "loyalty": { "commands": ["awardLoyaltyPoints", "redeemLoyaltyPoints"], "queries": ["getLoyaltySummary"], "events": ["loyaltyPointsAwarded"] },
+      "cashback": { "commands": ["creditCashbackOnEscrowRelease"], "queries": ["listCashbackCredits"], "events": [] },
+      "referralRewards": { "commands": ["rewardSuccessfulReferral"], "queries": ["getReferralRewards"], "events": ["referralRewarded"] }
+    },
+    "pos": {
+      "registers": { "commands": ["createRegister", "updateRegister"], "queries": ["listRegisters"], "events": [] },
+      "shifts": { "commands": ["openShift", "recordCashPayInOrOut", "closeShiftWithCountedCash"], "queries": ["getShiftReport"], "events": ["shiftClosed"] },
+      "sales": { "commands": ["recordPointOfSaleSale", "syncOfflineSales", "parkSale"], "queries": ["getSaleReceipt", "listSales"], "events": ["posSaleRecorded"] },
+      "refunds": { "commands": ["refundPointOfSaleSale", "exchangeSaleItems"], "queries": [], "events": [] },
+      "staffPins": { "commands": ["setStaffPin", "verifyStaffPin"], "queries": [], "events": [] }
+    },
+    "moderation": {
+      "reports": { "commands": ["submitReport", "actOnReport"], "queries": ["listReportQueue", "listMyReports"], "events": ["contentReported", "moderationActionTaken"] },
+      "appeals": { "commands": ["submitAppeal", "decideAppeal"], "queries": ["listAppeals"], "events": [] },
+      "copyrightClaims": { "commands": ["fileCopyrightClaim", "fileCounterNotice", "decideCopyrightClaim"], "queries": ["getCopyrightClaim"], "events": ["copyrightClaimFiled", "contentFlaggedForCopyright"] },
+      "trademarkClaims": { "commands": ["fileTrademarkClaim", "decideTrademarkClaim"], "queries": ["listTrademarkClaims"], "events": ["listingDelistedForCounterfeit"] },
+      "strikes": { "commands": ["addStrike", "expireStrike"], "queries": ["getStrikeHistory"], "events": ["repeatInfringerSuspended"] },
+      "automationRules": { "commands": ["createAutomationRule", "evaluateAutomationRules"], "queries": ["listAutomationRules"], "events": [] }
+    },
+    "live": {
+      "liveSessions": { "commands": ["startLiveSession", "endLiveSession", "joinLiveSession", "leaveLiveSession"], "queries": ["getLiveSession", "listSuggestedLives"], "events": ["liveStarted", "liveEnded"] },
+      "liveKitAccess": { "commands": ["issueLiveKitHostToken", "issueLiveKitViewerToken"], "queries": [], "events": [] },
+      "liveProducts": { "commands": ["pinProductToLive", "unpinProductFromLive"], "queries": ["listLiveProducts"], "events": [] }
+    },
+    "currency": {
+      "exchangeRates": { "commands": ["refreshExchangeRates"], "queries": ["getExchangeRate", "convertMoney"], "events": ["exchangeRatesRefreshed"] },
+      "locale": { "commands": [], "queries": ["resolveViewerLocale", "listSupportedCountries"], "events": [] }
+    },
+    "admin": {
+      "adminAccounts": { "commands": ["inviteAdmin", "disableAdmin", "changeAdminPermissions", "acceptAdminInvitation"], "queries": ["listAdmins"], "events": ["adminInvited"] },
+      "stepUpAuth": { "commands": ["grantStepUpAuthorization"], "queries": [], "events": [] },
+      "auditLog": { "commands": ["recordAuditEvent"], "queries": ["searchAuditLog", "exportAuditLog"], "events": [] },
+      "platformConfig": { "commands": ["updateRevenueRules", "updateFeatureFlags", "updateUsernameRules", "updateCreatorEligibilityRules"], "queries": ["getPlatformConfig"], "events": ["revenueRulesChanged"] },
+      "platformMetrics": { "commands": [], "queries": ["getPlatformOverview"], "events": [] }
+    }
+  },
+  "typescript": {
+    "gateway": {
+      "routing": { "commands": [], "queries": ["resolveUpstreamServiceForRoute"], "events": [] },
+      "authentication": { "commands": ["verifyAccessTokenWithJwks"], "queries": [], "events": [] },
+      "aggregation": { "commands": [], "queries": ["composeHomeScreenResponse", "composeProductDetailResponse"], "events": [] }
+    },
+    "social": {
+      "posts": { "commands": ["createPost", "deletePost", "repostPost", "sharePost", "tagProductsInPost"], "queries": ["getPost", "listUserPosts", "listStorePosts"], "events": ["postCreated", "postDeleted"] },
+      "comments": { "commands": ["commentOnPost", "replyToComment", "deleteComment", "likeComment"], "queries": ["listTopLevelComments", "listCommentReplies"], "events": ["commentCreated"] },
+      "reactions": { "commands": ["likePost", "unlikePost", "bookmarkPost"], "queries": [], "events": ["postLiked"] },
+      "follows": { "commands": ["followProfile", "unfollowProfile"], "queries": ["listFollowers", "listFollowing", "listConnections"], "events": ["profileFollowed"] },
+      "clips": { "commands": ["publishClip"], "queries": ["listClips"], "events": ["clipPublished"] },
+      "stories": { "commands": ["publishStory", "markStorySeen", "replyToStory"], "queries": ["getStoryTray", "listUserStories"], "events": ["storyPublished"] },
+      "sounds": { "commands": ["createOriginalSound", "updateSoundReusePermission", "saveSound"], "queries": ["getSound", "listTrendingSounds", "listClipsUsingSound"], "events": ["soundCreated"] }
+    },
+    "feed": {
+      "forYouFeed": { "commands": [], "queries": ["getForYouFeedPage"], "events": [] },
+      "followingFeed": { "commands": [], "queries": ["getFollowingFeedPage"], "events": [] },
+      "clipsFeed": { "commands": [], "queries": ["getClipsFeedPage", "getSuggestedClips"], "events": [] },
+      "fanout": { "commands": ["fanOutPostToFollowerTimelines"], "queries": [], "events": [] },
+      "feedFeedback": { "commands": ["recordFeedFeedback", "recordViewDwellTime"], "queries": [], "events": ["feedFeedbackRecorded"] }
+    },
+    "notifications": {
+      "notifications": { "commands": ["createNotification", "markNotificationRead", "markAllNotificationsRead"], "queries": ["listNotifications", "getUnreadCount"], "events": [] },
+      "deviceTokens": { "commands": ["registerDeviceToken", "removeDeviceToken"], "queries": [], "events": [] },
+      "delivery": { "commands": ["sendPushNotification", "sendEmail", "sendSms"], "queries": [], "events": ["notificationDelivered"] },
+      "preferences": { "commands": ["updateNotificationPreferences"], "queries": ["getNotificationPreferences"], "events": [] },
+      "templates": { "commands": ["updateNotificationTemplate"], "queries": ["renderNotificationTemplate"], "events": [] }
+    },
+    "media": {
+      "uploads": { "commands": ["createUploadSession", "storeUploadChunk", "completeUpload", "cleanUpAbandonedUploads"], "queries": ["getUploadStatus"], "events": ["uploadCompleted"] },
+      "assets": { "commands": ["deleteMediaAsset"], "queries": ["getMediaAsset"], "events": ["mediaAssetReady", "mediaProcessingFailed"] },
+      "imageProcessing": { "commands": ["processImageIntoVariants"], "queries": [], "events": [] },
+      "videoProcessing": { "commands": ["transcodeVideoToHls", "extractPosterFrame", "stripVideoMetadata"], "queries": [], "events": [] },
+      "audioProcessing": { "commands": ["extractAudioTrack", "extractAudioFingerprintExcerpt"], "queries": [], "events": [] }
+    },
+    "search": {
+      "productSearch": { "commands": [], "queries": ["searchProducts"], "events": [] },
+      "profileSearch": { "commands": [], "queries": ["searchPeople", "searchStores", "searchBrands"], "events": [] },
+      "contentSearch": { "commands": [], "queries": ["searchPosts", "searchSounds", "searchConversations"], "events": [] },
+      "indexing": { "commands": ["indexProduct", "indexProfile", "indexPost", "removeFromIndex"], "queries": [], "events": [] }
+    },
+    "support": {
+      "tickets": { "commands": ["createSupportTicket", "replyToTicket", "assignTicket", "closeTicket"], "queries": ["listMyTickets", "getTicket", "listTicketQueue"], "events": ["ticketCreated"] },
+      "macros": { "commands": ["createMacro"], "queries": ["listMacros"], "events": [] }
+    },
+    "integrations": {
+      "webhooks": { "commands": ["deliverOutboundWebhook", "retryFailedWebhook"], "queries": ["listWebhookDeliveries"], "events": [] },
+      "couriers": { "commands": ["createCourierShipment", "syncCourierTracking"], "queries": ["listCouriers"], "events": ["trackingUpdated"] },
+      "partnerApis": { "commands": ["issuePartnerApiKey", "revokePartnerApiKey"], "queries": [], "events": [] }
+    },
+    "campaigns": {
+      "marketingCampaigns": { "commands": ["createMarketingCampaign", "sendMarketingCampaign"], "queries": ["listMarketingCampaigns"], "events": [] },
+      "referrals": { "commands": ["createReferralCode", "attributeReferralSignup"], "queries": ["getMyReferrals"], "events": ["referralSignupAttributed"] },
+      "waitlist": { "commands": ["joinWaitlist"], "queries": ["listWaitlistEntries", "countWaitlistEntries"], "events": [] }
+    }
+  },
+  "elixir": {
+    "realtime": {
+      "chat": { "commands": ["sendChatMessage", "startConversation", "markConversationRead", "reactToMessage", "setDisappearingMessages"], "queries": ["listConversations", "listMessages"], "events": ["messageSent"] },
+      "groups": { "commands": ["createGroupChat", "addGroupMember", "removeGroupMember", "changeGroupAdmin"], "queries": ["getGroupChat"], "events": [] },
+      "channels": { "commands": ["createBroadcastChannel", "postToChannel", "subscribeToChannel"], "queries": ["listChannelPosts"], "events": [] },
+      "presence": { "commands": ["trackUserPresence"], "queries": ["listOnlineContacts"], "events": [] },
+      "typing": { "commands": ["broadcastTypingIndicator"], "queries": [], "events": [] },
+      "liveActivity": { "commands": ["postLiveComment", "broadcastLiveReaction", "broadcastGiftAnimation", "updateViewerCount"], "queries": ["listRecentLiveComments"], "events": [] },
+      "feedEvents": { "commands": ["broadcastCounterUpdate", "broadcastNewPostAvailable"], "queries": [], "events": [] },
+      "notificationStream": { "commands": ["pushInAppNotification"], "queries": [], "events": [] },
+      "encryptionKeys": { "commands": ["publishDeviceKeyBundle"], "queries": ["fetchRecipientKeyBundles"], "events": [] }
+    }
+  },
+  "python": {
+    "dataPipelines": {
+      "eventIngestion": { "commands": ["loadEventsIntoClickhouse"], "queries": [], "events": [] },
+      "featureBuilding": { "commands": ["buildUserFeatures", "buildItemFeatures"], "queries": [], "events": [] },
+      "businessReports": { "commands": ["buildDailyMarketplaceReport", "buildCreatorEarningsReport"], "queries": [], "events": [] },
+      "demandForecasting": { "commands": ["forecastProductDemand"], "queries": ["getDemandForecast"], "events": [] }
+    },
+    "ai": {
+      "contentModeration": { "commands": ["classifyImageSafety", "classifyTextToxicity", "classifyVideoSafety"], "queries": [], "events": ["unsafeContentDetected"] },
+      "languageUnderstanding": { "commands": [], "queries": ["detectIntent", "analyzeSentiment", "extractProductAttributes"], "events": [] },
+      "shoppingAssistant": { "commands": ["answerShopperQuestion"], "queries": [], "events": [] },
+      "visionTagging": { "commands": ["tagProductsInImage", "describeLiveScene"], "queries": [], "events": [] }
+    }
+  }
+}
