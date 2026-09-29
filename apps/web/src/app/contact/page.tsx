@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { FigmaIconTintedWithCurrentColor, type FigmaIconName } from "@/components/ui/figmaIcon";
 import { PageHeaderWithTitleAndLede } from "@/components/ui/pageHeader";
-import { siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
 
 import styles from "./contact.module.css";
 
@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 };
 
 const contactChannels: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string; readonly email: string }> = [
-  { icon: "headset24", title: "Help with an order", description: "Questions about payments, escrow, delivery or a dispute.", email: siteConfig.contactEmails.support },
-  { icon: "buildingStore20", title: "Selling on Zudomart", description: "Store applications, listings, payouts and seller fees.", email: siteConfig.contactEmails.sellers },
-  { icon: "paperPlaneTilt24", title: "Press and partnerships", description: "Interviews, media assets and working together.", email: siteConfig.contactEmails.press },
-  { icon: "shield24", title: "Privacy and data", description: "Requests about your personal data and how we use it.", email: siteConfig.contactEmails.privacy },
+  { icon: "headset24", title: "Help with an order", description: "Questions about payments, escrow, delivery or a dispute.", email: contactEmailDisplayText },
+  { icon: "buildingStore20", title: "Selling on Zudomart", description: "Store applications, listings, payouts and seller fees.", email: contactEmailDisplayText },
+  { icon: "paperPlaneTilt24", title: "Press and partnerships", description: "Interviews, media assets and working together.", email: contactEmailDisplayText },
+  { icon: "shield24", title: "Privacy and data", description: "Requests about your personal data and how we use it.", email: contactEmailDisplayText },
 ];
 
 export default function ContactPage() {
@@ -31,13 +31,13 @@ export default function ContactPage() {
       <section className="pageContainer" aria-label="Ways to contact us">
         <ul className={styles.channelList}>
           {contactChannels.map((contactChannel) => (
-            <li key={contactChannel.email} className={styles.channel}>
+            <li key={contactChannel.title} className={styles.channel}>
               <span className={styles.channelIcon}>
                 <FigmaIconTintedWithCurrentColor name={contactChannel.icon} size={22} />
               </span>
               <h2 className={styles.channelTitle}>{contactChannel.title}</h2>
               <p className={styles.channelDescription}>{contactChannel.description}</p>
-              <a href={`mailto:${contactChannel.email}`} className={styles.channelEmail}>
+              <a href={contactMailtoHref} className={styles.channelEmail}>
                 {contactChannel.email}
                 <FigmaIconTintedWithCurrentColor name="arrowUpRight24" size={18} />
               </a>
@@ -45,7 +45,7 @@ export default function ContactPage() {
           ))}
         </ul>
         <p className={styles.generalNote}>
-          For anything else, write to <a href={`mailto:${siteConfig.contactEmails.general}`}>{siteConfig.contactEmails.general}</a>. We are based in {siteConfig.launchCountry}.
+          For anything else, write to <a href={contactMailtoHref}>{contactEmailDisplayText}</a>. We are based in {siteConfig.launchCountry}.
         </p>
       </section>
     </>
