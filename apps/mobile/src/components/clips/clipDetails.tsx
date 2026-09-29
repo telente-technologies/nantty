@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { SponsoredCallToAction, SponsoredLabel } from "@/components/feed/sponsoredContent";
 import { Group1234Icon } from "@/components/icons";
+import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarStack";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { ClipSoundRow } from "@/components/sounds/clipSoundRow";
 import { openSoundScreen } from "@/components/sounds/soundNavigation.util";
@@ -29,7 +30,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
     <View style={styles.root}>
       {clip.friendsLiked ? (
         <View style={styles.likedBy}>
-          <Group1234Icon />
+          <FriendsLikedAvatarStack avatarUrls={clip.friendsLiked.avatars} avatarSize={14} overlapOffset={10} fallbackIcon={<Group1234Icon />} />
           <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={foregroundColor} style={readableTextStyle}>
             {clip.friendsLiked.count} friends liked this
           </Text>
