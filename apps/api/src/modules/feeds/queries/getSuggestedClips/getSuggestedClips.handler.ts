@@ -13,6 +13,6 @@ export class GetSuggestedClipsHandler extends QueryHandler<GetSuggestedClipsQuer
   }
 
   public execute(query: GetSuggestedClipsQuery): Promise<Page<FeedItemDto>> {
-    return this.feedsService.buildRankedFeed(query.principal.userId, ["clip"], query.topic, query.page);
+    return this.feedsService.buildRankedFeed(query.principal.userId, ["clip"], query.topic, query.page, query.displayCurrency);
   }
 }

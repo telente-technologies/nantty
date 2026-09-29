@@ -1,3 +1,4 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { UserDirectory, UserSummary } from "../../../interfaces/userDirectory.interface.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
@@ -30,9 +31,16 @@ interface ViewerRelationships {
 export class FeedsService {
   public constructor(public readonly dependencies: FeedsDependencies) {}
 
-  public async buildRankedFeed(viewerId: string, kinds: readonly PostKind[], topic: string | undefined, page: PageRequest): Promise<Page<FeedItemDto>> {
+  public async buildRankedFeed(
+    viewerId: string,
+    kinds: readonly PostKind[],
+    topicId: string | undefined,
+    page: PageRequest,
+    displayCurrency: CurrencyCode,
+  ): Promise<Page<FeedItemDto>> {
     const { postsService, userDirectory, clock } = this.dependencies;
     const now = clock.now();
+    const topic = topicId === undefined ? undefined : ((await userDirectory.findTopicSlugById(topicId)) ?? topicId);
     const relationships = await this.loadViewerRelationships(viewerId);
     const candidates = await postsService.dependencies.posts.listRecentCandidates(
       {
@@ -56,10 +64,10 @@ export class FeedsService {
       friendLikeCounts: new Map([...friendLikes].map(([postId, likers]) => [postId, likers.length])),
     };
     const rankedPage = paginateSortedItems(rankFeedPosts(candidates, context), page);
-    return { items: await this.presentFeedItems(rankedPage.items, viewerId, friendLikes), nextCursor: rankedPage.nextCursor };
+    return { data: await this.presentFeedItems(rankedPage.data, viewerId, friendLikes, displayCurrency), nextCursor: rankedPage.nextCursor };
   }
 
-  public async buildFollowingFeed(viewerId: string, page: PageRequest): Promise<Page<FeedItemDto>> {
+  public async buildFollowingFeed(viewerId: string, page: PageRequest, displayCurrency: CurrencyCode): Promise<Page<FeedItemDto>> {
     const { postsService, clock } = this.dependencies;
     const relationships = await this.loadViewerRelationships(viewerId);
     const result = await postsService.dependencies.posts.listVisible(
@@ -73,10 +81,10 @@ export class FeedsService {
       page,
     );
     const friendLikes = await postsService.dependencies.interactions.listLikersAmongUsers(
-      result.items.map((post) => post.id),
+      result.data.map((post) => post.id),
       relationships.followedUserIds,
     );
-    return { items: await this.presentFeedItems(result.items, viewerId, friendLikes), nextCursor: result.nextCursor };
+    return { data: await this.presentFeedItems(result.data, viewerId, friendLikes, displayCurrency), nextCursor: result.nextCursor };
   }
 
   private async loadViewerRelationships(viewerId: string): Promise<ViewerRelationships> {
@@ -93,8 +101,9 @@ export class FeedsService {
     posts: readonly PostRecord[],
     viewerId: string,
     friendLikes: ReadonlyMap<string, readonly string[]>,
+    displayCurrency: CurrencyCode,
   ): Promise<FeedItemDto[]> {
-    const presented = await this.dependencies.postsService.presenter.presentPosts(posts, viewerId);
+    const presented = await this.dependencies.postsService.presenter.presentPosts(posts, viewerId, displayCurrency);
     const sampleIds = [...new Set(posts.flatMap((post) => (friendLikes.get(post.id) ?? []).slice(0, SAMPLE_FRIENDS)))];
     const friends = new Map<string, UserSummary>(
       (sampleIds.length === 0 ? [] : await this.dependencies.userDirectory.findUserSummaries(sampleIds)).map((user) => [user.id, user]),

@@ -13,6 +13,6 @@ export class GetForYouFeedHandler extends QueryHandler<GetForYouFeedQuery, Page<
   }
 
   public execute(query: GetForYouFeedQuery): Promise<Page<FeedItemDto>> {
-    return this.feedsService.buildRankedFeed(query.principal.userId, ["post", "clip"], query.topic, query.page);
+    return this.feedsService.buildRankedFeed(query.principal.userId, ["post", "clip"], query.topic, query.page, query.displayCurrency);
   }
 }

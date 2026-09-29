@@ -13,6 +13,6 @@ export class GetFollowingFeedHandler extends QueryHandler<GetFollowingFeedQuery,
   }
 
   public execute(query: GetFollowingFeedQuery): Promise<Page<FeedItemDto>> {
-    return this.feedsService.buildFollowingFeed(query.principal.userId, query.page);
+    return this.feedsService.buildFollowingFeed(query.principal.userId, query.page, query.displayCurrency);
   }
 }
