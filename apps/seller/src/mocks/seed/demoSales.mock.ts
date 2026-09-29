@@ -1,24 +1,11 @@
-import type { Customer, } from "@/types/customer.type";
+import type { Customer } from "@/types/customer.type";
 import type { Product } from "@/types/catalog.type";
 import type { PaymentMethod, StoreSettings } from "@/types/store.type";
 import type { PosSale, PosShift, SalePayment } from "@/types/pos.type";
 import type { Money } from "@/types/money.type";
 import { calculateCartTotalsInMinorUnits } from "@/utils/posCartPricing.util";
+import type { DemoPosHistoryPlan } from "@/mocks/seed/demoStoreProfile.mock";
 import { createSeededRandomNumberGenerator, pickRandomIntegerInclusive, pickRandomItem } from "@/mocks/seed/seededRandom.mock";
-
-const registerCashiers = [
-  { registerId: "reg_lekki_1", locationId: "loc_lekki", cashier: { id: "stf_blessing", name: "Blessing Eze" } },
-  { registerId: "reg_lekki_2", locationId: "loc_lekki", cashier: { id: "stf_tunde", name: "Tunde Bakare" } },
-  { registerId: "reg_ikeja_1", locationId: "loc_ikeja", cashier: { id: "stf_chidi", name: "Chidi Amadi" } },
-  { registerId: "reg_wuse_1", locationId: "loc_wuse", cashier: { id: "stf_amina", name: "Amina Bello" } },
-];
-
-const registersWithOpenShiftToday = new Set(["reg_ikeja_1", "reg_wuse_1"]);
-const historyLengthInDays = 45;
-
-function naira(amountMinor: number): Money {
-  return { amountMinor, currency: "NGN" };
-}
 
 function pickPaymentPlan(random: () => number): PaymentMethod[] {
   const roll = random();
@@ -29,7 +16,7 @@ function pickPaymentPlan(random: () => number): PaymentMethod[] {
   return ["cash", "card"];
 }
 
-function buildPaymentsForTotal(totalMinor: number, methods: PaymentMethod[], random: () => number, idPrefix: string): { payments: SalePayment[]; changeMinor: number } {
+function buildPaymentsForTotal(totalMinor: number, methods: PaymentMethod[], random: () => number, idPrefix: string, toStoreMoney: (amountMinor: number) => Money): { payments: SalePayment[]; changeMinor: number } {
   const payments: SalePayment[] = [];
   let remainingMinor = totalMinor;
   let changeMinor = 0;
@@ -42,9 +29,9 @@ function buildPaymentsForTotal(totalMinor: number, methods: PaymentMethod[], ran
     payments.push({
       id: `${idPrefix}_pay_${index + 1}`,
       method,
-      amount: naira(amountMinor),
-      tendered: tenderedMinor === null ? null : naira(tenderedMinor),
-      change: tenderedMinor === null ? null : naira(tenderedMinor - amountMinor),
+      amount: toStoreMoney(amountMinor),
+      tendered: tenderedMinor === null ? null : toStoreMoney(tenderedMinor),
+      change: tenderedMinor === null ? null : toStoreMoney(tenderedMinor - amountMinor),
       reference: method === "card" ? `APPR${pickRandomIntegerInclusive(100000, 999999, random)}` : method === "bank_transfer" ? `TRF${pickRandomIntegerInclusive(1000000, 9999999, random)}` : null,
       status: "captured",
     });
@@ -57,22 +44,32 @@ export interface DemoSalesHistory {
   readonly sales: PosSale[];
 }
 
-export function buildDemoSalesHistory(products: readonly Product[], customers: Customer[], settings: StoreSettings): DemoSalesHistory {
-  const random = createSeededRandomNumberGenerator(4242);
+export interface DemoSalesHistoryOptions {
+  readonly plan: DemoPosHistoryPlan;
+  readonly randomSeed: number;
+  readonly receiptPrefix: string;
+  readonly highVolumeCategoryIds: readonly string[];
+}
+
+export function buildDemoSalesHistory(products: readonly Product[], customers: Customer[], settings: StoreSettings, options: DemoSalesHistoryOptions): DemoSalesHistory {
+  const { plan, receiptPrefix, highVolumeCategoryIds } = options;
+  const random = createSeededRandomNumberGenerator(options.randomSeed);
+  const toStoreMoney = (amountMinor: number): Money => ({ amountMinor, currency: settings.currency });
   const shifts: PosShift[] = [];
   const sales: PosSale[] = [];
-  let receiptSequence = 1000;
+  let receiptSequence = plan.firstReceiptSequence;
 
-  for (let daysAgo = historyLengthInDays; daysAgo >= 0; daysAgo -= 1) {
-    for (const { registerId, locationId, cashier } of registerCashiers) {
-      if (daysAgo === 0 && !registersWithOpenShiftToday.has(registerId)) continue;
+  for (let daysAgo = plan.historyLengthInDays; daysAgo >= 0; daysAgo -= 1) {
+    for (const { registerId, locationId, cashier } of plan.registerCashiers) {
+      if (daysAgo === 0 && !plan.registersWithOpenShiftToday.includes(registerId)) continue;
       if (daysAgo > 0 && random() < 0.12) continue;
       const shiftId = `shf_${registerId}_${daysAgo}`;
       const openedAt = new Date();
       openedAt.setUTCDate(openedAt.getUTCDate() - daysAgo);
       openedAt.setUTCHours(7, pickRandomIntegerInclusive(0, 40, random), 0, 0);
       const isOpenShift = daysAgo === 0;
-      const salesCountForShift = isOpenShift ? pickRandomIntegerInclusive(3, 7, random) : pickRandomIntegerInclusive(5, 16, random);
+      const [minimumSales, maximumSales] = isOpenShift ? plan.salesPerOpenShift : plan.salesPerClosedShift;
+      const salesCountForShift = pickRandomIntegerInclusive(minimumSales, maximumSales, random);
       const byMethod = new Map<PaymentMethod, number>();
       let grossMinor = 0;
       let cashTakenMinor = 0;
@@ -82,7 +79,7 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
         const chosenLines = Array.from({ length: lineCount }, () => {
           const product = pickRandomItem(products, random);
           const variant = pickRandomItem(product.variants, random);
-          return { product, variant, quantity: product.categoryId === "cat_food" ? pickRandomIntegerInclusive(1, 4, random) : 1 };
+          return { product, variant, quantity: product.categoryId !== null && highVolumeCategoryIds.includes(product.categoryId) ? pickRandomIntegerInclusive(1, 4, random) : 1 };
         });
         const priced = calculateCartTotalsInMinorUnits({
           currency: settings.currency,
@@ -94,8 +91,8 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
           pricesIncludeTax: settings.pricesIncludeTax,
         });
         const saleId = `sale_${registerId}_${daysAgo}_${saleIndex}`;
-        const { payments, changeMinor } = buildPaymentsForTotal(priced.totalMinor, pickPaymentPlan(random), random, saleId);
-        const customer = random() < 0.35 ? pickRandomItem(customers, random) : null;
+        const { payments, changeMinor } = buildPaymentsForTotal(priced.totalMinor, pickPaymentPlan(random), random, saleId, toStoreMoney);
+        const customer = customers.length > 0 && random() < plan.customerShare ? pickRandomItem(customers, random) : null;
         const createdAt = new Date(openedAt.getTime() + (saleIndex + 1) * pickRandomIntegerInclusive(15, 40, random) * 60_000);
         receiptSequence += 1;
         grossMinor += priced.totalMinor;
@@ -105,7 +102,7 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
         }
         sales.push({
           id: saleId,
-          receiptNumber: `IFE-${receiptSequence}`,
+          receiptNumber: `${receiptPrefix}-${receiptSequence}`,
           locationId,
           registerId,
           shiftId,
@@ -123,20 +120,20 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
               quantity,
               unitPrice: variant.price,
               discount: null,
-              discountAmount: naira((pricedLine?.lineDiscountMinor ?? 0) + (pricedLine?.cartDiscountShareMinor ?? 0)),
-              taxAmount: naira(pricedLine?.taxMinor ?? 0),
-              lineTotal: naira(pricedLine?.totalMinor ?? 0),
+              discountAmount: toStoreMoney((pricedLine?.lineDiscountMinor ?? 0) + (pricedLine?.cartDiscountShareMinor ?? 0)),
+              taxAmount: toStoreMoney(pricedLine?.taxMinor ?? 0),
+              lineTotal: toStoreMoney(pricedLine?.totalMinor ?? 0),
               refundedQuantity: 0,
             };
           }),
           cartDiscount: priced.cartDiscountMinor > 0 ? { kind: "percent", value: 1000, reason: "Loyal customer", approvedByStaffId: null } : null,
           couponCode: null,
-          subtotal: naira(priced.subtotalMinor),
-          discountTotal: naira(priced.discountTotalMinor),
-          taxTotal: naira(priced.taxTotalMinor),
-          total: naira(priced.totalMinor),
+          subtotal: toStoreMoney(priced.subtotalMinor),
+          discountTotal: toStoreMoney(priced.discountTotalMinor),
+          taxTotal: toStoreMoney(priced.taxTotalMinor),
+          total: toStoreMoney(priced.totalMinor),
           payments,
-          changeDue: naira(changeMinor),
+          changeDue: toStoreMoney(changeMinor),
           loyaltyPointsEarned: customer ? Math.floor(priced.totalMinor / 100 / 1000) : 0,
           loyaltyPointsRedeemed: 0,
           status: "completed",
@@ -147,14 +144,14 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
         });
         if (customer) {
           Object.assign(customer, {
-            totalSpent: naira(customer.totalSpent.amountMinor + priced.totalMinor),
+            totalSpent: toStoreMoney(customer.totalSpent.amountMinor + priced.totalMinor),
             purchasesCount: customer.purchasesCount + 1,
             lastPurchaseAt: createdAt.toISOString(),
           });
         }
       }
 
-      const openingFloatMinor = 2_000_000;
+      const openingFloatMinor = plan.openingFloatMinor;
       const expectedCashMinor = openingFloatMinor + cashTakenMinor;
       const varianceMinor = isOpenShift ? 0 : pickRandomItem([0, 0, 0, -50_000, 20_000, -100_000], random);
       const closedAt = new Date(openedAt.getTime() + 11 * 3_600_000);
@@ -165,20 +162,20 @@ export function buildDemoSalesHistory(products: readonly Product[], customers: C
         status: isOpenShift ? "open" : "closed",
         openedBy: cashier,
         openedAt: openedAt.toISOString(),
-        openingFloat: naira(openingFloatMinor),
+        openingFloat: toStoreMoney(openingFloatMinor),
         cashMovements: [],
         totals: {
           salesCount: salesCountForShift,
-          grossSales: naira(grossMinor),
-          refunds: naira(0),
-          netSales: naira(grossMinor),
-          byPaymentMethod: [...byMethod.entries()].map(([method, amountMinor]) => ({ method, amount: naira(amountMinor) })),
+          grossSales: toStoreMoney(grossMinor),
+          refunds: toStoreMoney(0),
+          netSales: toStoreMoney(grossMinor),
+          byPaymentMethod: [...byMethod.entries()].map(([method, amountMinor]) => ({ method, amount: toStoreMoney(amountMinor) })),
         },
-        expectedCash: naira(expectedCashMinor),
+        expectedCash: toStoreMoney(expectedCashMinor),
         closedBy: isOpenShift ? null : cashier,
         closedAt: isOpenShift ? null : closedAt.toISOString(),
-        countedCash: isOpenShift ? null : naira(expectedCashMinor + varianceMinor),
-        cashVariance: isOpenShift ? null : naira(varianceMinor),
+        countedCash: isOpenShift ? null : toStoreMoney(expectedCashMinor + varianceMinor),
+        cashVariance: isOpenShift ? null : toStoreMoney(varianceMinor),
         closingNote: varianceMinor < 0 ? "Short — checked twice." : null,
       });
     }
