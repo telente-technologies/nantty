@@ -4,6 +4,7 @@ import { UnauthorizedError } from "@zudojs/errors";
 import { createRouter } from "@zudojs/http";
 import { createHttpTestClient } from "@zudojs/testing";
 
+import { createDefaultMonetizationSettings } from "../../src/configs/monetization.config.js";
 import type { AppSettings } from "../../src/configs/settings.config.js";
 import { createDependencies, type AppDependencies, type ExternalServices } from "../../src/container.js";
 import { Role } from "../../src/constants/roles.constant.js";
@@ -102,6 +103,28 @@ export function createTestSettings(overrides: Partial<AppSettings> = {}): AppSet
       liveGiftPlatformCutBps: 3_000,
       maximumAffiliateCommissionBps: 5_000,
     },
+    communication: {
+      supportNotificationEmails: ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"],
+      realtimeTicketTtlSeconds: 30,
+      realtimeMaxConnectionsPerUser: 3,
+      realtimeMaxBufferedBytes: 64 * 1024,
+      realtimeHeartbeatSeconds: 30,
+      maximumGroupMembers: 8,
+      automationDefaultExecutionsPerHour: 60,
+    },
+    monetization: createDefaultMonetizationSettings(),
+    intelligence: {
+      baseUrl: "",
+      sharedSecret: "",
+      identifierHashSecret: "test-identifier-hash-secret-000000000000",
+      timeouts: { rankingMs: 100, socialProofMs: 80, adsMs: 120, recommendationsMs: 150, eventsMs: 2_000 },
+      breaker: { consecutiveFailuresToOpen: 5, errorRatePercentToOpen: 50, errorRateWindowMs: 10_000, minimumRequestsForErrorRate: 10, halfOpenAfterMs: 5_000 },
+      events: { batchSize: 200, flushIntervalSeconds: 5, maxAttempts: 3, retryBackoffMs: 5 },
+    },
+    ads: { creatorRevenueShareBps: 4_000, clickAttributionWindowDays: 7, maximumClicksPerViewerPerHour: 20, servedAdLifetimeHours: 24 },
+    platformAdmin: { accessTtlSeconds: 300, sessionTtlSeconds: 8 * 3_600, stepUpWindowSeconds: 600, loginChallengeTtlSeconds: 300, maxMfaAttempts: 5, totpIssuer: "Zudomart Admin Test" },
+    usernames: { changeCooldownDays: 30, maxChangesPerYear: 3, quarantineDays: 30 },
+    copyright: { strikeSuspensionThreshold: 3, strikeLifetimeDays: 365, counterNoticeWindowDays: 14 },
     ...overrides,
   };
 }
