@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Image } from "expo-image";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
@@ -48,7 +49,9 @@ export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose
               onPress={() => pinProduct.mutate(product.id)}
               style={styles.row}
             >
-              <View style={styles.thumb} />
+              <View style={styles.thumb}>
+                {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+              </View>
               <Text size={14} lineHeight={16.8} numberOfLines={1} style={styles.name}>
                 {product.name}
               </Text>
@@ -74,6 +77,6 @@ export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose
 const styles = StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
   row: { height: 48, flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 1, borderBottomColor: colors.divider },
-  thumb: { width: 40, height: 40, borderRadius: 4, backgroundColor: colors.avatar },
+  thumb: { width: 40, height: 40, borderRadius: 4, overflow: "hidden", backgroundColor: colors.placeholder },
   name: { flex: 1 },
 });
