@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Heart20Icon, HeartFill72Icon } from "@/components/icons";
 import { ReportSheet } from "@/components/moderation/reportSheet";
@@ -10,6 +10,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Comment } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export interface CommentRowProps {
   readonly comment: Comment;
@@ -39,13 +40,13 @@ export function CommentRow({
   const [isReportSheetOpen, setIsReportSheetOpen] = useState(false);
   const openUserProfile = useOpenUserProfile();
   const offerToReportComment = () =>
-    Alert.alert("Comment options", undefined, [
+    showAlertWithButtons("Comment options", undefined, [
       { text: "Cancel", style: "cancel" },
       { text: "Report comment", style: "destructive", onPress: () => setIsReportSheetOpen(true) },
     ]);
   const confirmDeletingOwnComment = () => {
     if (!canDelete || !onDelete) return;
-    Alert.alert("Delete comment?", "This also removes the replies under it.", [
+    showAlertWithButtons("Delete comment?", "This also removes the replies under it.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: onDelete },
     ]);
