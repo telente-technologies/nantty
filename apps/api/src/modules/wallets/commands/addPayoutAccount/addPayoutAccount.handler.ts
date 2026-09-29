@@ -12,6 +12,6 @@ export class AddPayoutAccountHandler extends CommandHandler<AddPayoutAccountComm
   }
 
   public execute(command: AddPayoutAccountCommand): Promise<PayoutAccountRecord> {
-    return this.service.addPayoutAccount(command.principal.userId, command.storeId, command.input);
+    return this.service.addPayoutAccount(command.principal, command.scope, command.input);
   }
 }
