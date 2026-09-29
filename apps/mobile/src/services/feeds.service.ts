@@ -1,7 +1,7 @@
 import type { SuggestedClip } from "@/types/commerce.type";
 import type { Page, Post, Topic } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const feedsService = {
   fetchForYouFeedPage: (topicId: string | null, cursor: string | null) =>
