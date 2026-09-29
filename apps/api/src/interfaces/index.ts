@@ -24,3 +24,6 @@ export * from "./supportInbox.interface.js";
 export * from "./realtimePublisher.interface.js";
 export * from "./intelligence.interface.js";
 export * from "./discovery.interface.js";
+export * from "./creatorSubscriberLookup.interface.js";
+export * from "./referralFraudScreen.interface.js";
+export * from "./transactionalMailer.interface.js";
