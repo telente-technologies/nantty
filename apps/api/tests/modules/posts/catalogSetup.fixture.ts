@@ -12,13 +12,13 @@ export async function createProductInStore(
   options: { readonly publish?: boolean; readonly title?: string } = {},
 ): Promise<string> {
   const created = await app.client
-    .post(`/api/v1/stores/${storeId}/products`)
+    .post(`/api/v1/seller/products?storeId=${storeId}`)
     .auth(seller.accessToken)
     .send({ title: options.title ?? "Ankara Dress", price: 1_500_000, stock: 5 })
     .expect(201);
   const productId = created.json<{ id: string }>().id;
   if (options.publish ?? true) {
-    await app.client.post(`/api/v1/stores/${storeId}/products/${productId}/publish`).auth(seller.accessToken).expect(200);
+    await app.client.post(`/api/v1/seller/products/${productId}/publish`).auth(seller.accessToken).expect(200);
   }
   return productId;
 }

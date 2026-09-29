@@ -38,6 +38,11 @@ function createReviewsHarness() {
     orderLookup: {
       hasReceivedProductInOrder: async (buyerId, orderId, productId) =>
         receivedOrders.has(`${buyerId}:${orderId}:${productId}`) ? { storeId: "store-1" } : undefined,
+      findReceivedOrderForProduct: async (buyerId, productId) => {
+        const match = [...receivedOrders].find((key) => key.startsWith(`${buyerId}:`) && key.endsWith(`:${productId}`));
+        return match === undefined ? undefined : { orderId: match.split(":")[1] ?? "", storeId: "store-1" };
+      },
+      listStoreIdsBuyerHasPurchasedFrom: async () => [],
     },
     productCatalog,
     storeAccess,
