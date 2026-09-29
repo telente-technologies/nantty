@@ -65,6 +65,7 @@ function resolveCouponDiscount(couponCode: string | null, subtotalMinor: number)
 
 export function createPosSaleFromRequest(request: MockRequest): MockResponse {
   const principal = requireMockStorePrincipal(request);
+  if (!doesRoleHavePermission(principal.role, "pos:sell")) throw new MockHttpError(403, "FORBIDDEN", "Your role does not allow selling on the register.");
   const database = readMockDatabase();
   const settings = database.settings;
   const body = readJsonObjectBody(request);
@@ -141,7 +142,7 @@ export function createPosSaleFromRequest(request: MockRequest): MockResponse {
   const loyaltyPointsEarned = customer && settings.loyalty.enabled ? Math.floor(priced.totalMinor / Math.max(1, settings.loyalty.spendRequiredPerPoint.amountMinor)) : 0;
   const sale: PosSale = {
     id: createMockIdentifier("sale"),
-    receiptNumber: `IFE-${lastReceiptNumber + 1}`,
+    receiptNumber: `${database.receiptPrefix}-${lastReceiptNumber + 1}`,
     locationId: shift.locationId,
     registerId: shift.registerId,
     shiftId: shift.id,
