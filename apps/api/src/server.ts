@@ -97,6 +97,7 @@ const server = createHttpServer({
     host: config.host,
     port: config.port,
     maxBodySize: chunkUploadBodyLimitBytes,
+    trustProxy: config.trustedProxies,
   }),
   handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
 });
