@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 
 import { useCoinBalance } from "./coinWallet.hook";
+import { CoinAmountWithIcon } from "./coinAmount";
 
 export function CoinBalanceChip({ onPress }: { onPress?: () => void }) {
   const balance = useCoinBalance();
@@ -16,9 +17,7 @@ export function CoinBalanceChip({ onPress }: { onPress?: () => void }) {
       onPress={onPress}
       style={styles.chip}
     >
-      <Text size={12} weight={600} lineHeight={14.4}>
-        🪙 {coins === undefined ? "…" : coins.toLocaleString("en-US")}
-      </Text>
+      <CoinAmountWithIcon size={12} label={coins === undefined ? "…" : coins.toLocaleString("en-US")} />
       {onPress ? (
         <Text size={12} weight={600} lineHeight={14.4} color={colors.primary}>
           + Buy
