@@ -1,6 +1,6 @@
-import { SellerApiRequestError, sendSellerApiRequest } from "@/services/clientApi.service";
+import { SellerApiRequestError, sendRequestToDashboardServer, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CreateSaleRequest, PosSale } from "@/types/pos.type";
-import type { QueuedOfflineSale } from "@/types/posExtra.type";
+import type { OfflineSaleOrigin, QueuedOfflineSale } from "@/types/posExtra.type";
 import { deleteRecordFromOfflineStore, posObjectStoreNames, readEveryRecordFromOfflineStore, writeRecordToOfflineStore } from "@/utils/posOfflineDatabase.util";
 
 export type SaleSubmissionOutcome =
@@ -11,14 +11,14 @@ export function isOfflineRequestError(error: unknown): boolean {
   return error instanceof SellerApiRequestError && (error.isNetworkFailure || error.status === 503 || error.status === 502 || error.status === 504);
 }
 
-export async function submitPosSaleOrQueueWhenOffline(request: CreateSaleRequest, localSale: PosSale): Promise<SaleSubmissionOutcome> {
+export async function submitPosSaleOrQueueWhenOffline(request: CreateSaleRequest, localSale: PosSale, origin: OfflineSaleOrigin): Promise<SaleSubmissionOutcome> {
   try {
     const sale = await sendSellerApiRequest<PosSale>("/seller/pos/sales", { method: "POST", body: request, idempotencyKey: request.clientSaleId });
     return { kind: "synced", sale };
   } catch (error) {
     if (!isOfflineRequestError(error)) throw error;
     const offlineRequest: CreateSaleRequest = { ...request, offlineCreatedAt: request.offlineCreatedAt ?? new Date().toISOString() };
-    const queuedSale: QueuedOfflineSale = { clientSaleId: request.clientSaleId, request: offlineRequest, localSale, queuedAt: new Date().toISOString(), status: "queued", attempts: 0, lastError: null };
+    const queuedSale: QueuedOfflineSale = { ...origin, clientSaleId: request.clientSaleId, request: offlineRequest, localSale, queuedAt: new Date().toISOString(), status: "queued", attempts: 0, lastError: null };
     await writeRecordToOfflineStore(posObjectStoreNames.offlineSales, queuedSale);
     return { kind: "queued", sale: localSale };
   }
@@ -39,8 +39,18 @@ export interface OfflineSyncResult {
   readonly stillOffline: boolean;
 }
 
+function sendQueuedSaleToItsOwnStore(queuedSale: QueuedOfflineSale): Promise<PosSale> {
+  if (!queuedSale.storeId) return sendSellerApiRequest<PosSale>("/seller/pos/sales", { method: "POST", body: queuedSale.request, idempotencyKey: queuedSale.clientSaleId });
+  return sendRequestToDashboardServer<PosSale>("/bff/pos/offline-sales", { method: "POST", body: { storeId: queuedSale.storeId, operatorPass: queuedSale.operatorPass ?? null, sale: queuedSale.request } });
+}
+
+function groupQueuedSalesByStoreKeepingOrder(queuedSales: readonly QueuedOfflineSale[]): QueuedOfflineSale[] {
+  const storeOrder = [...new Set(queuedSales.map((queuedSale) => queuedSale.storeId ?? ""))];
+  return storeOrder.flatMap((storeKey) => queuedSales.filter((queuedSale) => (queuedSale.storeId ?? "") === storeKey));
+}
+
 export async function syncQueuedOfflineSalesInOrder(): Promise<OfflineSyncResult> {
-  const queuedSales = await listQueuedOfflineSales();
+  const queuedSales = groupQueuedSalesByStoreKeepingOrder(await listQueuedOfflineSales());
   let syncedCount = 0;
   let failedCount = 0;
   for (const queuedSale of queuedSales) {
@@ -49,7 +59,7 @@ export async function syncQueuedOfflineSalesInOrder(): Promise<OfflineSyncResult
       continue;
     }
     try {
-      await sendSellerApiRequest<PosSale>("/seller/pos/sales", { method: "POST", body: queuedSale.request, idempotencyKey: queuedSale.clientSaleId });
+      await sendQueuedSaleToItsOwnStore(queuedSale);
       await deleteRecordFromOfflineStore(posObjectStoreNames.offlineSales, queuedSale.clientSaleId);
       syncedCount += 1;
     } catch (error) {
