@@ -12,6 +12,6 @@ export class OpenDisputeHandler extends CommandHandler<OpenDisputeCommand, Dispu
   }
 
   public execute(command: OpenDisputeCommand): Promise<DisputeRecord> {
-    return this.service.openDisputeForOrder(command.principal.userId, command.orderId, command.reason, command.details);
+    return this.service.openDisputeForOrder(command.principal.userId, command.orderId, command.reason, command.details, command.evidenceMediaIds);
   }
 }
