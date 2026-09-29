@@ -4,6 +4,7 @@ import { ArrowLeft24Icon, DotsThreeVertical24Icon } from "@/components/icons";
 import { FollowPill } from "@/components/clips/followPill";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { LiveSessionDetails } from "@/types";
@@ -36,6 +37,7 @@ function HostCounts({ followers, following }: { followers: number; following: nu
 }
 
 export function LiveHeader(props: LiveHeaderProps) {
+  const openUserProfile = useOpenUserProfile();
   const { session } = props;
   return (
     <View style={styles.bar}>
@@ -43,7 +45,7 @@ export function LiveHeader(props: LiveHeaderProps) {
         <Pressable accessibilityRole="button" accessibilityLabel="Leave live" hitSlop={12} onPress={props.onBack}>
           <ArrowLeft24Icon />
         </Pressable>
-        <View style={styles.host}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${session.host.name}'s profile`} onPress={() => openUserProfile(session.host.id)} style={styles.host}>
           <Avatar uri={session.host.avatarUrl} size={32} />
           <View style={styles.hostText}>
             <View style={styles.hostNameRow}>
@@ -60,7 +62,7 @@ export function LiveHeader(props: LiveHeaderProps) {
               <HostCounts followers={session.host.followers} following={session.host.following} />
             )}
           </View>
-        </View>
+        </Pressable>
       </View>
       <View style={styles.right}>
         {props.showTitle ? <LiveBadge viewers={session.viewers} /> : null}
