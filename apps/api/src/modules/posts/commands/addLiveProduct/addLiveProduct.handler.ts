@@ -14,7 +14,7 @@ export class AddLiveProductHandler extends CommandHandler<AddLiveProductCommand,
 
   public async execute(command: AddLiveProductCommand): Promise<LiveSessionDto> {
     const session = await this.postsService.findLiveSessionOrThrow(command.sessionId);
-    this.postsService.assertIsLiveHost(session, command.principal.userId);
+    await this.postsService.assertIsApprovedLiveHost(session, command.principal.userId);
     if (session.status !== "live") throw unprocessable("This live session has ended.");
     await this.postsService.findPublishedProductsOrThrow([command.productId]);
     const updated = await this.postsService.dependencies.liveSessions.addProduct(session.id, command.productId, command.pin);
