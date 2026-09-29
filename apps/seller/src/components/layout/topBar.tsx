@@ -1,0 +1,69 @@
+"use client";
+
+import { useState } from "react";
+
+import { useSellerSession } from "@/components/session/sellerSessionProvider";
+import { IconButton } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/statusBadge";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { staffRoleLabels } from "@/constants/roles.constant";
+import { useStoreContext } from "@/hooks/useStoreSettings.hook";
+import { sendRequestToDashboardServer } from "@/services/clientApi.service";
+
+import styles from "./topBar.module.css";
+
+export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly onOpenNavigation: () => void; readonly onOpenCommandPalette: () => void }) {
+  const { sessionView } = useSellerSession();
+  const { locations, selectedLocationId, selectLocation } = useStoreContext();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const access = sessionView?.access;
+  const displayName = sessionView?.operator?.name ?? sessionView?.user.name ?? sessionView?.user.username ?? "You";
+
+  async function signOutOfDashboard() {
+    setIsSigningOut(true);
+    await sendRequestToDashboardServer("/bff/auth/logout", { method: "POST" }).catch(() => undefined);
+    window.location.assign("/login");
+  }
+
+  return (
+    <header className={`${styles.topBar} noPrint`}>
+      <IconButton iconName="textIndent24" label="Open navigation" className={styles.menuButton} onClick={onOpenNavigation} />
+      <div className={styles.storeIdentity}>
+        <span className={styles.storeName}>{access?.storeName ?? "Your store"}</span>
+        {access?.verification.badgeVisible ? (
+          <StatusBadge tone="highlight">
+            <ZudoIcon name="sealCheck20" size={14} /> Gold {access.verification.tier === "PREMIUM" ? "Premium" : "Pro"}
+          </StatusBadge>
+        ) : null}
+      </div>
+      {locations.length > 0 ? (
+        <label className={styles.locationSwitcher}>
+          <ZudoIcon name="mapPin24" size={16} />
+          <span className="visuallyHidden">Current location</span>
+          <select value={selectedLocationId ?? ""} onChange={(event) => void selectLocation(event.target.value)} className={styles.locationSelect}>
+            {locations.filter((location) => location.active).map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <button type="button" className={styles.commandButton} onClick={onOpenCommandPalette}>
+        <ZudoIcon name="magnifyingGlass20" size={16} />
+        <span className={styles.commandLabel}>Search or jump to…</span>
+        <kbd className={styles.shortcut}>Ctrl K</kbd>
+      </button>
+      <div className={styles.account}>
+        <span className={styles.avatar} aria-hidden="true">
+          {displayName.slice(0, 1).toUpperCase()}
+        </span>
+        <span className={styles.accountText}>
+          <span className={styles.accountName}>{displayName}</span>
+          <span className={styles.accountRole}>{sessionView?.effectiveRole ? staffRoleLabels[sessionView.effectiveRole] : ""}</span>
+        </span>
+        <IconButton iconName="arrowLeft24" label="Sign out" size="small" onClick={() => void signOutOfDashboard()} disabled={isSigningOut} />
+      </div>
+    </header>
+  );
+}
