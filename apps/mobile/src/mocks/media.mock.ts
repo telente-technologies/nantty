@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
+import { findMutableSoundState } from "./soundCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 interface MockUploadSession {
@@ -105,6 +106,11 @@ export const mediaMocks: MockRoute[] = [
       if (!asset) throw new ApiError(422, "One of the uploads could not be found", "MEDIA_NOT_FOUND");
       return convertMediaAssetToPostMedia(asset);
     });
+    if (input.soundId) {
+      const sound = findMutableSoundState(input.soundId);
+      if (!sound) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
+      if (!sound.allowReuse || sound.status !== "available") throw new ApiError(422, "That sound can't be reused", "SOUND_REUSE_NOT_ALLOWED");
+    }
     const post: Post = {
       id: nextMockId("p"),
       kind: "post",
