@@ -66,7 +66,7 @@ export class PrismaEscrowsRepository implements EscrowsRepository {
 
 export class PrismaDisputesRepository implements DisputesRepository {
   public async create(input: NewDispute): Promise<DisputeRecord> {
-    return convertDisputeRowToRecord(await prisma().dispute.create({ data: { ...input } }));
+    return convertDisputeRowToRecord(await prisma().dispute.create({ data: { ...input, evidenceMediaIds: [...input.evidenceMediaIds] } }));
   }
 
   public async findById(disputeId: string): Promise<DisputeRecord | undefined> {
@@ -77,6 +77,11 @@ export class PrismaDisputesRepository implements DisputesRepository {
   public async findOpenForEscrow(escrowId: string): Promise<DisputeRecord | undefined> {
     const row = await prisma().dispute.findFirst({ where: { escrowId, status: "open" } });
     return row === null ? undefined : convertDisputeRowToRecord(row);
+  }
+
+  public async listForEscrow(escrowId: string): Promise<readonly DisputeRecord[]> {
+    const rows = await prisma().dispute.findMany({ where: { escrowId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+    return rows.map(convertDisputeRowToRecord);
   }
 
   public async list(status: DisputeStatus | undefined, page: PageRequest): Promise<Page<DisputeRecord>> {
