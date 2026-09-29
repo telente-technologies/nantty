@@ -20,3 +20,5 @@ coverage/
 *.mobileprovision
 google-services.json
 GoogleService-Info.plist
+AGENTS.md
+CLAUDE.md
