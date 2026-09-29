@@ -36,12 +36,12 @@ export class InMemoryBlocksRepository implements BlocksRepository {
     let start = 0;
     if (page.cursor !== undefined) {
       const at = records.findIndex((record) => record.blockedId === page.cursor);
-      if (at === -1) return { items: [], nextCursor: null };
+      if (at === -1) return { data: [], nextCursor: null };
       start = at + 1;
     }
     const items = records.slice(start, start + page.limit);
     const last = items.at(-1);
-    return { items, nextCursor: last !== undefined && start + page.limit < records.length ? last.blockedId : null };
+    return { data: items, nextCursor: last !== undefined && start + page.limit < records.length ? last.blockedId : null };
   }
 
   public async listUserIdsBlockedEitherWay(userId: string): Promise<readonly string[]> {
@@ -82,7 +82,7 @@ export class PrismaBlocksRepository implements BlocksRepository {
     });
     const items = rows.slice(0, page.limit);
     const last = items.at(-1);
-    return { items, nextCursor: rows.length > page.limit && last !== undefined ? last.blockedId : null };
+    return { data: items, nextCursor: rows.length > page.limit && last !== undefined ? last.blockedId : null };
   }
 
   public async listUserIdsBlockedEitherWay(userId: string): Promise<readonly string[]> {

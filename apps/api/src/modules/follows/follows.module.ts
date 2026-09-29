@@ -10,6 +10,9 @@ import { GetFollowStatusHandler } from "./queries/getFollowStatus/getFollowStatu
 import { ListBlockedUsersHandler } from "./queries/listBlockedUsers/listBlockedUsers.handler.js";
 import { ListFollowersHandler } from "./queries/listFollowers/listFollowers.handler.js";
 import { ListFollowingHandler } from "./queries/listFollowing/listFollowing.handler.js";
+import { ListConnectionsHandler } from "./queries/listConnections/listConnections.handler.js";
+import { SearchPeopleHandler } from "./queries/searchPeople/searchPeople.handler.js";
+import { ConnectionsService } from "./services/connections.service.js";
 import type { FollowsService } from "./services/follows.service.js";
 
 export class FollowsModule extends BaseModule {
@@ -30,6 +33,7 @@ export class FollowsModule extends BaseModule {
 }
 
 export function registerFollowsCommandAndQueryHandlers(commands: CommandBus, queries: QueryBus, followsService: FollowsService): void {
+  const connections = new ConnectionsService(followsService);
   registerCommandHandlers(commands, [
     new FollowHandler(followsService),
     new UnfollowHandler(followsService),
@@ -37,6 +41,8 @@ export function registerFollowsCommandAndQueryHandlers(commands: CommandBus, que
     new UnblockUserHandler(followsService),
   ]);
   registerQueryHandlers(queries, [
+    new ListConnectionsHandler(connections),
+    new SearchPeopleHandler(connections),
     new GetFollowStatusHandler(followsService),
     new ListFollowersHandler(followsService),
     new ListFollowingHandler(followsService),

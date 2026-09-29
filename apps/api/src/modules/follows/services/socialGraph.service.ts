@@ -13,6 +13,10 @@ export class RepositorySocialGraph implements SocialGraph {
     return this.follows.isFollowing(followerId, "user", followedUserId);
   }
 
+  public isFollowingStore(followerId: string, storeId: string): Promise<boolean> {
+    return this.follows.isFollowing(followerId, "store", storeId);
+  }
+
   public listFollowedUserIds(userId: string): Promise<readonly string[]> {
     return this.follows.listFollowedTargetIds(userId, "user");
   }

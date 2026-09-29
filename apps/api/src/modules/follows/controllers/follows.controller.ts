@@ -12,11 +12,14 @@ import { FollowCommand } from "../commands/follow/follow.command.js";
 import { UnblockUserCommand } from "../commands/unblockUser/unblockUser.command.js";
 import { UnfollowCommand } from "../commands/unfollow/unfollow.command.js";
 import type { FollowStatus, FollowTargetType } from "../models/follows.model.js";
+import { ListConnectionsQuery } from "../queries/listConnections/listConnections.query.js";
+import { SearchPeopleQuery } from "../queries/searchPeople/searchPeople.query.js";
+import type { ConnectionDto } from "../services/connections.service.js";
 import { GetFollowStatusQuery } from "../queries/getFollowStatus/getFollowStatus.query.js";
 import { ListBlockedUsersQuery } from "../queries/listBlockedUsers/listBlockedUsers.query.js";
 import { ListFollowersQuery } from "../queries/listFollowers/listFollowers.query.js";
 import { ListFollowingQuery } from "../queries/listFollowing/listFollowing.query.js";
-import { FollowListQuerySchema, TargetParamsSchema } from "../validators/follows.validator.js";
+import { ConnectionsQuerySchema, FollowListQuerySchema, SearchPeopleQuerySchema, TargetParamsSchema } from "../validators/follows.validator.js";
 
 export class FollowsController {
   public constructor(private readonly commands: CommandBus, private readonly queries: QueryBus) {}
@@ -40,6 +43,23 @@ export class FollowsController {
       new ListFollowingQuery(params.data.id, type ?? "user", buildPageRequest(pageQuery)),
     );
     return json(200, page);
+  };
+
+  public readonly listConnections = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const params = TargetParamsSchema.safeParse(ctx.params);
+    if (!params.success) return validationFailed(params.issues);
+    const query = ConnectionsQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const { tab, ...pageQuery } = query.data;
+    const listQuery = new ListConnectionsQuery(requireAuthenticatedPrincipal(ctx), params.data.id, tab ?? "followers", buildPageRequest(pageQuery));
+    return json(200, await this.queries.execute<ListConnectionsQuery, Page<ConnectionDto>>(listQuery));
+  };
+
+  public readonly searchPeople = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const query = SearchPeopleQuerySchema.safeParse(ctx.query);
+    if (!query.success) return validationFailed(query.issues);
+    const searchQuery = new SearchPeopleQuery(findAuthenticatedPrincipal(ctx)?.userId, query.data.q);
+    return json(200, await this.queries.execute<SearchPeopleQuery, readonly ConnectionDto[]>(searchQuery));
   };
 
   public readonly blockUser = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {

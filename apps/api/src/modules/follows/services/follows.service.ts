@@ -2,6 +2,7 @@ import type { EventBus } from "@zudojs/events";
 
 import { forbidden, notFound, unprocessable } from "../../../errors/domain.error.js";
 import type { Clock } from "../../../interfaces/clock.interface.js";
+import type { OrderLookup } from "../../../interfaces/orderLookup.interface.js";
 import type { StoreAccess, StoreSummary } from "../../../interfaces/storeAccess.interface.js";
 import type { UserDirectory, UserSummary } from "../../../interfaces/userDirectory.interface.js";
 import type { FollowTargetType } from "../models/follows.model.js";
@@ -13,6 +14,7 @@ export interface FollowsDependencies {
   readonly blocks: BlocksRepository;
   readonly userDirectory: UserDirectory;
   readonly storeAccess: StoreAccess;
+  readonly orderLookup: OrderLookup;
   readonly events: EventBus;
   readonly clock: Clock;
 }

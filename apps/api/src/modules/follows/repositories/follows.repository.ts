@@ -17,12 +17,12 @@ function paginateByCursorField(records: readonly FollowRecord[], field: "followe
   let start = 0;
   if (page.cursor !== undefined) {
     const at = records.findIndex((record) => record[field] === page.cursor);
-    if (at === -1) return { items: [], nextCursor: null };
+    if (at === -1) return { data: [], nextCursor: null };
     start = at + 1;
   }
   const items = records.slice(start, start + page.limit);
   const last = items.at(-1);
-  return { items, nextCursor: last !== undefined && start + page.limit < records.length ? last[field] : null };
+  return { data: items, nextCursor: last !== undefined && start + page.limit < records.length ? last[field] : null };
 }
 
 function sortNewestFirst(records: FollowRecord[]): FollowRecord[] {

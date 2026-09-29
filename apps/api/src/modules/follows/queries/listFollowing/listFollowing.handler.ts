@@ -17,9 +17,9 @@ export class ListFollowingHandler extends QueryHandler<ListFollowingQuery, Page<
   public async execute(query: ListFollowingQuery): Promise<Page<UserSummary | StoreSummary>> {
     const { follows, userDirectory, storeAccess } = this.followsService.dependencies;
     const page = await follows.listFollowing(query.userId, query.targetType, query.page);
-    const targetIds = page.items.map((record) => record.targetId);
+    const targetIds = page.data.map((record) => record.targetId);
     const summaries =
       query.targetType === "store" ? await storeAccess.findStoreSummaries(targetIds) : await userDirectory.findUserSummaries(targetIds);
-    return { items: orderSummariesByIds<UserSummary | StoreSummary>(targetIds, summaries), nextCursor: page.nextCursor };
+    return { data: orderSummariesByIds<UserSummary | StoreSummary>(targetIds, summaries), nextCursor: page.nextCursor };
   }
 }

@@ -3,7 +3,7 @@ import type { HttpRouter } from "@zudojs/http";
 import type { WebKit } from "../../../loaders/web.loader.js";
 import { describeRoute } from "../../../utils/openapi.util.js";
 import type { FollowsController } from "../controllers/follows.controller.js";
-import { FollowListQuerySchema, TargetParamsSchema } from "../validators/follows.validator.js";
+import { ConnectionsQuerySchema, FollowListQuerySchema, SearchPeopleQuerySchema, TargetParamsSchema } from "../validators/follows.validator.js";
 
 const TAG = "follows";
 const USERS = "/api/v1/users/:id";
@@ -27,5 +27,7 @@ export function registerFollowsRoutes(router: HttpRouter, controller: FollowsCon
   router.get(`${STORES}/follow-status`, controller.getStoreFollowStatus, { ...anyone, ...describeRoute(TAG, "Follow status and counts for a store", params) });
   router.post(`${USERS}/block`, controller.blockUser, { ...socialWrite, ...describeRoute(TAG, "Block a user", params) });
   router.delete(`${USERS}/block`, controller.unblockUser, { ...socialWrite, ...describeRoute(TAG, "Unblock a user", params) });
+  router.get(`${USERS}/connections`, controller.listConnections, { ...guard.requirePermission("social:write"), ...describeRoute("follows", "Followers, following, shopped, suggested or blocked", { params: TargetParamsSchema, query: ConnectionsQuerySchema }) });
+  router.get("/api/v1/search/people", controller.searchPeople, { ...guard.allowAnyone(), ...describeRoute("follows", "Search people to follow", { query: SearchPeopleQuerySchema }) });
   router.get("/api/v1/users/me/blocked", controller.listBlockedUsers, { ...guard.requirePermission("profile:manage"), ...describeRoute(TAG, "List users I have blocked", { query: FollowListQuerySchema }) });
 }

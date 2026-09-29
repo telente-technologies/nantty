@@ -16,7 +16,7 @@ export class ListBlockedUsersHandler extends QueryHandler<ListBlockedUsersQuery,
   public async execute(query: ListBlockedUsersQuery): Promise<Page<UserSummary>> {
     const { blocks, userDirectory } = this.followsService.dependencies;
     const page = await blocks.listBlockedByUser(query.principal.userId, query.page);
-    const blockedIds = page.items.map((record) => record.blockedId);
-    return { items: orderSummariesByIds(blockedIds, await userDirectory.findUserSummaries(blockedIds)), nextCursor: page.nextCursor };
+    const blockedIds = page.data.map((record) => record.blockedId);
+    return { data: orderSummariesByIds(blockedIds, await userDirectory.findUserSummaries(blockedIds)), nextCursor: page.nextCursor };
   }
 }

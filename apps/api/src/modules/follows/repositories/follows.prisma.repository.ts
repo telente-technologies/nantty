@@ -12,7 +12,7 @@ function convertFollowRowToRecord(row: Follow): FollowRecord {
 function buildFollowPage(rows: readonly Follow[], page: PageRequest, field: "followerId" | "followeeId"): Page<FollowRecord> {
   const items = rows.slice(0, page.limit);
   const last = items.at(-1);
-  return { items: items.map(convertFollowRowToRecord), nextCursor: rows.length > page.limit && last !== undefined ? last[field] : null };
+  return { data: items.map(convertFollowRowToRecord), nextCursor: rows.length > page.limit && last !== undefined ? last[field] : null };
 }
 
 export class PrismaFollowsRepository implements FollowsRepository {
