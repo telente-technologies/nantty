@@ -3,7 +3,7 @@ import { ConfigurationError } from "@zudojs/errors";
 
 import { loadCommunicationSettings } from "./communication.config.js";
 import { loadCreatorProgramSettings } from "./creators.config.js";
-import { loadCopyrightSettings, loadPlatformAdminSettings, loadUsernamePolicySettings } from "./platformAdmin.config.js";
+import { loadCopyrightSettings, loadPlatformAdminSettings, loadTrustedProxySettings, loadUsernamePolicySettings } from "./platformAdmin.config.js";
 import { loadMonetizationSettings } from "./monetization.config.js";
 import { loadAdsSettings, loadIntelligenceSettings } from "./intelligence.config.js";
 
@@ -137,6 +137,7 @@ export function loadApplicationSettings(config: ConfigManager) {
     platformAdmin: loadPlatformAdminSettings(config),
     usernames: loadUsernamePolicySettings(config),
     copyright: loadCopyrightSettings(config),
+    trustedProxies: loadTrustedProxySettings(config),
     monetization: loadMonetizationSettings(config),
     intelligence: loadIntelligenceSettings(config),
     ads: loadAdsSettings(config),
