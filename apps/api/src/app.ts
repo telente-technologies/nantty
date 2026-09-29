@@ -24,6 +24,9 @@ import { FollowsModule } from "./modules/follows/index.js";
 import { ReviewsModule } from "./modules/reviews/index.js";
 import { NotificationsModule } from "./modules/notifications/index.js";
 import { MessagesModule } from "./modules/messages/index.js";
+import { ModerationModule } from "./modules/moderation/index.js";
+import { SupportModule } from "./modules/support/index.js";
+import { AutomationModule } from "./modules/automation/index.js";
 import { SearchModule } from "./modules/search/index.js";
 import { MediaModule } from "./modules/media/index.js";
 import { WaitlistModule } from "./modules/waitlist/index.js";
@@ -64,6 +67,9 @@ export function createApp(options: AppOptions): Runtime {
     new ReviewsModule(),
     new NotificationsModule(),
     new MessagesModule(),
+    new ModerationModule(),
+    new SupportModule(),
+    new AutomationModule(),
     new SearchModule(),
     new MediaModule(),
     new WaitlistModule(),
