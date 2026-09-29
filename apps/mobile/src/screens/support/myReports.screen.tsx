@@ -1,0 +1,46 @@
+import { useQuery } from "@tanstack/react-query";
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+
+import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
+import { StatusPill } from "@/components/escrow/statusPill";
+import { REPORT_STATUS_APPEARANCE } from "@/components/settings/supportAppearance.util";
+import { Header } from "@/components/ui/header";
+import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import { supportService } from "@/services/support.service";
+
+export function MyReportsScreen() {
+  const reports = useQuery({ queryKey: ["reports", "mine"], queryFn: supportService.listMyContentReports });
+  return (
+    <Screen>
+      <Header title="My reports" />
+      <FlatList
+        data={reports.data ?? []}
+        keyExtractor={(report) => report.id}
+        contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={reports.isRefetching} onRefresh={() => reports.refetch()} tintColor={colors.primary} />}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        renderItem={({ item }) => (
+          <View style={styles.row}>
+            <View style={styles.top}>
+              <Text size={14} weight={500} lineHeight={16.8} numberOfLines={1} style={styles.flex}>{item.targetLabel}</Text>
+              <StatusPill label={REPORT_STATUS_APPEARANCE[item.status].label} tone={REPORT_STATUS_APPEARANCE[item.status].tone} />
+            </View>
+            <Text size={13} lineHeight={16.9} color={colors.textMuted}>{item.reason} · reported {formatFriendlyDate(item.createdAt)}</Text>
+            {item.outcomeNote ? <Text size={13} lineHeight={17.5}>{item.outcomeNote}</Text> : null}
+          </View>
+        )}
+        ListEmptyComponent={reports.isLoading ? <ActivityIndicator color={colors.primary} /> : <Text align="center" color={colors.textSubtle}>You haven't reported anything.</Text>}
+      />
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
+  separator: { height: 8 },
+  row: { backgroundColor: colors.white, borderRadius: 12, padding: 14, gap: 6 },
+  top: { flexDirection: "row", alignItems: "center", gap: 8 },
+});
