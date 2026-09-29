@@ -54,6 +54,7 @@ export function registerCatalogTopicMockHandlers(): void {
     ensureTopicSlugIsFree(slug, before.id);
     const status = body.status === undefined ? before.status : readEnumValue(body, "status", ["ACTIVE", "HIDDEN"] as const);
     if (body.isTrending !== undefined && typeof body.isTrending !== "boolean") failValidation("isTrending", "isTrending must be true or false.");
+    if (status === "HIDDEN" && body.isTrending === true) failConflict("TOPIC_HIDDEN", "Show the topic again before marking it trending.");
     const isTrending = status === "HIDDEN" ? false : body.isTrending === undefined ? before.isTrending : (body.isTrending as boolean);
     const reason = readRequiredReason(body);
     const updated: ContentTopic = { ...before, name, slug, status, isTrending, updatedAt: readIsoNow() };
