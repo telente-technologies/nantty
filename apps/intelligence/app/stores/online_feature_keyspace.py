@@ -14,6 +14,7 @@ TRENDING_ACTOR_DEDUPLICATION_TTL_SECONDS = 3600
 EXPERIMENT_COUNTER_TTL_SECONDS = 120 * SECONDS_PER_DAY
 TOPIC_AFFINITY_KIND = "topic"
 ACCOUNT_AFFINITY_KIND = "account"
+VALUE_FLOW_HALF_LIFE_SECONDS = 7 * SECONDS_PER_DAY
 
 
 def format_utc_day_bucket(moment: datetime) -> str:
@@ -63,6 +64,18 @@ class OnlineFeatureKeyspace:
 
     def clip_topic_popularity_base_key(self, topic: str) -> str:
         return f"{self.prefix}:pop:clip:topic:{topic}"
+
+    def value_flow_base_key(self, flow_direction: str, account_id: str) -> str:
+        return f"{self.prefix}:flow:{flow_direction}:{account_id}"
+
+    def audio_landmark_key(self, landmark_hash: int) -> str:
+        return f"{self.prefix}:audio:landmark:{landmark_hash}"
+
+    def audio_excerpt_claim_key(self, sound_id: str, excerpt_start_second: int) -> str:
+        return f"{self.prefix}:audio:excerpt:{sound_id}:{excerpt_start_second}"
+
+    def audio_sound_metadata_key(self, sound_id: str) -> str:
+        return f"{self.prefix}:audio:sound:{sound_id}"
 
     def experiment_counter_key(self, experiment_key: str, variant_name: str) -> str:
         return f"{self.prefix}:exp:{experiment_key}:{variant_name}"
