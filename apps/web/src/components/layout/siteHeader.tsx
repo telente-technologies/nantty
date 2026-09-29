@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { siteConfig } from "@/lib/siteConfig.config";
+import { businessAppLinks, siteConfig } from "@/lib/siteConfig.config";
 
+import { ForBusinessDisclosureMenu } from "./forBusinessMenu";
 import styles from "./siteHeader.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
 
@@ -63,6 +64,9 @@ export function SiteHeaderWithFloatingNavigation() {
                 </Link>
               </li>
             ))}
+            <li>
+              <ForBusinessDisclosureMenu />
+            </li>
           </ul>
         </nav>
         <Link href="/#waitlist" className={styles.waitlistButton}>
@@ -100,6 +104,21 @@ export function SiteHeaderWithFloatingNavigation() {
                 Contact
               </Link>
             </li>
+          </ul>
+          <p className={styles.mobileBusinessHeading}>For business</p>
+          <ul className={styles.mobileBusinessList}>
+            <li>
+              <Link href="/sellers" className={styles.mobileBusinessLink} onClick={() => setIsMobileMenuOpen(false)}>
+                Sell on Zudomart
+              </Link>
+            </li>
+            {[businessAppLinks.sellerDashboard, businessAppLinks.adsManager].map((businessAppLink) => (
+              <li key={businessAppLink.href}>
+                <a href={businessAppLink.href} className={styles.mobileBusinessLink} target="_blank" rel="noopener noreferrer">
+                  {businessAppLink.label} ↗<span className="visuallyHidden"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
         <Link href="/#waitlist" className={styles.mobileWaitlistButton} onClick={() => setIsMobileMenuOpen(false)}>
