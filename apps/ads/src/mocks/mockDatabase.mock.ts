@@ -87,6 +87,7 @@ export interface MockUploadRecord {
   readonly chunkSizeBytes: number;
   readonly totalChunks: number;
   readonly uploadedChunks: Set<number>;
+  readonly clientMetadata: { readonly width: number; readonly height: number; readonly durationSeconds: number | null } | null;
   mediaId: string | null;
 }
 
@@ -148,11 +149,11 @@ function buildFreshMockDatabase(): MockAdsDatabase {
   };
 }
 
-const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockDatabase?: MockAdsDatabase };
+const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockDatabaseWithFormats?: MockAdsDatabase };
 
 export function readMockDatabase(): MockAdsDatabase {
-  globalHolder.zudomartAdsMockDatabase ??= buildFreshMockDatabase();
-  return globalHolder.zudomartAdsMockDatabase;
+  globalHolder.zudomartAdsMockDatabaseWithFormats ??= buildFreshMockDatabase();
+  return globalHolder.zudomartAdsMockDatabaseWithFormats;
 }
 
 export function appendMockActivity(accountId: string, entry: Omit<ActivityEntry, "id" | "createdAt">): void {
