@@ -53,13 +53,14 @@ describe("notifications", () => {
   });
 
   it("emails order notifications only to verified email addresses", async () => {
-    const user = await app.registerUser();
+    app.identityTokens.identities.set("google:unverified-email-token-padded", {
+      provider: "google", subject: "google-unverified", email: "unverified@example.com", emailVerified: false, name: "Unverified",
+    });
+    const socialUser = (await app.client.post("/api/v1/auth/google").send({ idToken: "unverified-email-token-padded" }).expect(201)).json<{ user: { id: string } }>();
     emailSender.sent.length = 0;
-    await requestNotification(user.userId, "orders", "Order placed");
+    await requestNotification(socialUser.user.id, "orders", "Order placed");
     expect(emailSender.sent).toHaveLength(0);
-    await app.client.post("/api/v1/auth/otp/send").send({ destination: user.email, purpose: "login" }).expect((response) => expect(response.status).toBeLessThan(300));
-    const code = app.oneTimeCodes.latestCodeFor(user.email, "login");
-    await app.client.post("/api/v1/auth/otp/verify").send({ destination: user.email, purpose: "login", code }).expect(200);
+    const user = await app.registerUser();
     await requestNotification(user.userId, "orders", "Order delivered");
     expect(emailSender.sent).toEqual([{ to: user.email, subject: "Order delivered" }]);
   });
