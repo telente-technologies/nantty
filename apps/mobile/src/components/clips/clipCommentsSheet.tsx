@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
-import { Modal, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
@@ -10,6 +10,7 @@ import { colors } from "@/constants/colors.constant";
 import { CommentComposer } from "./commentComposer";
 import { CommentThreadContext, useCommentThreadController } from "./commentThreadController.hook";
 import { ThreadedCommentList } from "./threadedCommentList";
+import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export interface ClipCommentsSheetProps {
   readonly postId: string | null;
@@ -25,7 +26,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, onClose }: ClipComments
   useEffect(() => navigation.addListener("blur", onClose), [navigation, onClose]);
 
   return (
-    <Modal visible={!!postId} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <FrameAwareModal visible={!!postId} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <CommentThreadContext.Provider value={commentThread}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <Pressable accessibilityLabel="Close comments" style={styles.backdrop} onPress={onClose} />
@@ -48,7 +49,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, onClose }: ClipComments
           </View>
         </KeyboardAvoidingView>
       </CommentThreadContext.Provider>
-    </Modal>
+    </FrameAwareModal>
   );
 }
 
