@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
 import { OrdersListView } from "@/components/orders/ordersListView";
+import type { OnlineOrderStatus } from "@/types/order.type";
 
 export const metadata: Metadata = { title: "Orders" };
 
-export default function OrdersPage() {
-  return <OrdersListView />;
+const onlineOrderStatuses: OnlineOrderStatus[] = ["paid", "processing", "shipped", "delivered", "completed", "cancelled", "refunded", "disputed"];
+
+export default async function OrdersPage({ searchParams }: { readonly searchParams: Promise<{ status?: string }> }) {
+  const { status } = await searchParams;
+  const initialStatusFilter = onlineOrderStatuses.find((candidate) => candidate === status) ?? "all";
+  return <OrdersListView initialStatusFilter={initialStatusFilter} />;
 }
