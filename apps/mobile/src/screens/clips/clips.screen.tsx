@@ -162,6 +162,7 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
               onOpenComments={() => setCommentsForClipId(item.id)}
               onShare={() => shareClipLink(item)}
               onPressAuthor={() => openUserProfile(item.author.id)}
+              onOpenPromotedLive={(liveSessionId) => navigation.navigate("Live", { liveId: liveSessionId })}
             />
           )}
         />
