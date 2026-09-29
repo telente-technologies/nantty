@@ -35,8 +35,8 @@ describe("direct messages", () => {
 
     const search = await app.client.get("/api/v1/conversations/search").query({ q: "dress" }).auth(bola.accessToken).expect(200);
     expect(search.json<{ messages: unknown[] }>().messages).toHaveLength(1);
-    const notifications = await app.client.get("/api/v1/notifications").query({ category: "messages" }).auth(bola.accessToken).expect(200);
-    expect(notifications.json<{ data: unknown[] }>().data).toHaveLength(1);
+    const notifications = await app.client.get("/api/v1/notifications").query({ category: "social" }).auth(bola.accessToken).expect(200);
+    expect(notifications.json<{ data: { type: string }[] }>().data.filter((item) => item.type === "messages")).toHaveLength(1);
   });
 
   it("marks followed people as direct conversations", async () => {

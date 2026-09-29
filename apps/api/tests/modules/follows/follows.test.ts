@@ -24,9 +24,9 @@ describe("following users", () => {
     expect(status.json<FollowStatusBody>()).toMatchObject({ following: false, followedBy: true, followingCount: 1 });
 
     const followers = await app.client.get(`/api/v1/users/${bola.userId}/followers`).expect(200);
-    expect(followers.json<{ items: { id: string }[] }>().items.map((user) => user.id)).toEqual([ada.userId]);
+    expect(followers.json<{ data: { id: string }[] }>().data.map((user) => user.id)).toEqual([ada.userId]);
     const following = await app.client.get(`/api/v1/users/${ada.userId}/following`).expect(200);
-    expect(following.json<{ items: { id: string }[] }>().items.map((user) => user.id)).toEqual([bola.userId]);
+    expect(following.json<{ data: { id: string }[] }>().data.map((user) => user.id)).toEqual([bola.userId]);
 
     await app.client.delete(`/api/v1/users/${bola.userId}/follow`).auth(ada.accessToken).expect(200).expectJson({ following: false, followersCount: 0 });
   });
@@ -52,7 +52,7 @@ describe("blocking users", () => {
     await app.client.post(`/api/v1/users/${bola.userId}/follow`).auth(ada.accessToken).expect(403);
 
     const blocked = await app.client.get("/api/v1/users/me/blocked").auth(ada.accessToken).expect(200);
-    expect(blocked.json<{ items: { id: string }[] }>().items.map((user) => user.id)).toEqual([bola.userId]);
+    expect(blocked.json<{ data: { id: string }[] }>().data.map((user) => user.id)).toEqual([bola.userId]);
 
     await app.client.delete(`/api/v1/users/${bola.userId}/block`).auth(ada.accessToken).expect(204);
     await app.client.post(`/api/v1/users/${bola.userId}/follow`).auth(ada.accessToken).expect(200);
@@ -66,7 +66,7 @@ describe("following stores", () => {
     const buyer = await app.registerUser();
     await app.client.post(`/api/v1/stores/${storeId}/follow`).auth(buyer.accessToken).expect(200).expectJson({ following: true, followersCount: 1 });
     const following = await app.client.get(`/api/v1/users/${buyer.userId}/following`).query({ type: "store" }).expect(200);
-    expect(following.json<{ items: { id: string }[] }>().items.map((store) => store.id)).toEqual([storeId]);
+    expect(following.json<{ data: { id: string }[] }>().data.map((store) => store.id)).toEqual([storeId]);
     expect(await app.dependencies.ports.socialGraph.listFollowedStoreIds(buyer.userId)).toEqual([storeId]);
   });
 });
