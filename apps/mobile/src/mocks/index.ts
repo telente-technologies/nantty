@@ -10,6 +10,7 @@ import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
 import { coinsMocks } from "./coins.mock";
 import { commentsMocks } from "./comments.mock";
+import { soundsMocks } from "./sounds.mock";
 import { creatorProgramMocks } from "./creatorProgram.mock";
 import { creatorsMocks } from "./creators.mock";
 import { creatorSubscriptionsMocks } from "./creatorSubscriptions.mock";
@@ -57,6 +58,7 @@ const routes: MockRoute[] = [
   ...chatsMocks,
   ...clipsMocks,
   ...commentsMocks,
+  ...soundsMocks,
   ...mediaMocks,
   ...adEventsMocks,
   ...reportsMocks,
