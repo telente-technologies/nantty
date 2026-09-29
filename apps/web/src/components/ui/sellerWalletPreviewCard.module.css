@@ -1,0 +1,79 @@
+.card {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+  padding: 20px;
+  border-radius: var(--radius-medium);
+  background: #fff;
+  box-shadow: 0 30px 60px -24px rgb(11 23 82 / 0.4), inset 0 0 0 1px rgb(11 23 82 / 0.06);
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.caption > span {
+  color: var(--blue-500);
+}
+
+.rows {
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  gap: 2px;
+}
+
+.row + .row {
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
+}
+
+.rowLabel {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.rowAmount {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.rowNote {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+
+.payoutButton {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 12px;
+  background: var(--blue-500);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.hiddenBalanceNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.caption > .hiddenBalanceNote > span {
+  color: var(--ink-faint);
+}

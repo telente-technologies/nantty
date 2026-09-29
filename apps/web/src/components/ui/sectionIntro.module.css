@@ -1,0 +1,47 @@
+.intro {
+  display: grid;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.center {
+  margin-inline: auto;
+  text-align: center;
+  justify-items: center;
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.heading {
+  font-size: clamp(2.1rem, 5.2vw, 3.75rem);
+}
+
+.description {
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  max-width: 58ch;
+}
+
+.light .eyebrow {
+  color: var(--blue-600);
+}
+
+.light .description {
+  color: var(--ink-muted);
+}
+
+.dark .eyebrow {
+  color: var(--yellow-500);
+}
+
+.dark .heading {
+  color: #fff;
+}
+
+.dark .description {
+  color: var(--blue-100);
+}

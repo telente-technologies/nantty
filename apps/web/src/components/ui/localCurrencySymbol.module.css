@@ -1,0 +1,10 @@
+.symbol {
+  display: inline-block;
+  min-width: 0.6em;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.ready {
+  opacity: 1;
+}
