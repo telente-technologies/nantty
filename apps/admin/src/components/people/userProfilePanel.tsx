@@ -87,6 +87,7 @@ export function UserProfilePanel({ detail, canRevealPersonalData }: { readonly d
         description={`Show @${user.username}'s email, phone, legal name and date of birth for 60 seconds.`}
         confirmLabel="Reveal for 60 seconds"
         reasonLabel="Purpose (saved to the audit log)"
+        reasonHint="At least 5 characters. Say why you need this person's personal data."
         reasonPlaceholder="e.g. Ticket #48213: confirming account ownership"
         isBusy={revealMutation.isRunning}
         errorMessage={revealMutation.errorMessage}
