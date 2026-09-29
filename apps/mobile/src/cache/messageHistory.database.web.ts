@@ -11,8 +11,12 @@ const compareMessagesOldestFirst = (first: Message, second: Message) =>
 const keepMessageInMemory = (message: Message, deliveryStatus: LocalMessageDeliveryStatus) =>
   messagesKeptInMemory.set(message.id, { ...message, deliveryStatus });
 
+const hasMessageExpired = (message: Message) => !!message.expiresAt && message.expiresAt <= new Date().toISOString();
+
 const readMessagesInConversationOldestFirst = (conversationId: string) =>
-  [...messagesKeptInMemory.values()].filter((message) => message.conversationId === conversationId).sort(compareMessagesOldestFirst);
+  [...messagesKeptInMemory.values()]
+    .filter((message) => message.conversationId === conversationId && !hasMessageExpired(message))
+    .sort(compareMessagesOldestFirst);
 
 export const messageHistoryStore: MessageHistoryStore = {
   isPersistentStorageAvailable: false,
@@ -36,6 +40,9 @@ export const messageHistoryStore: MessageHistoryStore = {
   markPendingMessageAsFailed: (localMessageId) => {
     const pendingMessage = messagesKeptInMemory.get(localMessageId);
     if (pendingMessage) messagesKeptInMemory.set(localMessageId, { ...pendingMessage, deliveryStatus: "failed" });
+  },
+  deleteExpiredMessages: () => {
+    for (const [messageId, message] of messagesKeptInMemory) if (hasMessageExpired(message)) messagesKeptInMemory.delete(messageId);
   },
   deleteAllSavedMessageHistory: () => {
     conversationsKeptInMemory.clear();
