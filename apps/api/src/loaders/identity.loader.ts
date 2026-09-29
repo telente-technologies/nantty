@@ -1,4 +1,5 @@
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
+import type { VerificationBadgeLookup } from "../interfaces/verificationBadge.interface.js";
 import { registerAuthCommandAndQueryHandlers } from "../modules/auth/auth.module.js";
 import { AuthController } from "../modules/auth/controllers/auth.controller.js";
 import { PrismaOneTimeCodesRepository, PrismaSessionsRepository, PrismaSocialIdentitiesRepository } from "../modules/auth/repositories/auth.prisma.repository.js";
@@ -25,7 +26,7 @@ export interface IdentityExternalServices {
   readonly oneTimeCodeDelivery?: OneTimeCodeDelivery;
 }
 
-export function createIdentityModules(core: Core, audit: AuditRecorder, external: IdentityExternalServices) {
+export function createIdentityModules(core: Core, audit: AuditRecorder, external: IdentityExternalServices, verificationBadges?: VerificationBadgeLookup) {
   const usePrisma = core.persistence === "prisma";
   const users = usePrisma ? new PrismaUsersRepository() : new InMemoryUsersRepository();
   const sessions = usePrisma ? new PrismaSessionsRepository() : new InMemorySessionsRepository();
@@ -59,9 +60,9 @@ export function createIdentityModules(core: Core, audit: AuditRecorder, external
 
   return {
     accessTokenVerifier: tokens,
-    userDirectory: new RepositoryUserDirectory(users, topics),
+    userDirectory: new RepositoryUserDirectory(users, topics, verificationBadges),
     addressBook: new RepositoryAddressBook(addresses, core.cipher),
     authController: new AuthController(core.commands, core.queries),
-    usersController: new UsersController(core.commands, core.queries),
+    usersController: new UsersController(core.commands, core.queries, verificationBadges),
   };
 }
