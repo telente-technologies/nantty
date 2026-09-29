@@ -1,11 +1,13 @@
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { CalendarDots16Icon, SealCheck20Icon } from "@/components/icons";
+import { CalendarDots16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { User } from "@/types";
-import { formatJoinedDate } from "@/utils/formatDate.util";
+import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
+
+import { VerificationBadge } from "./verificationBadge";
 
 export interface ProfileAction {
   readonly label: string;
@@ -40,9 +42,9 @@ export function ProfileSummary({ profile, variant, actions, onPressFollowers, on
             <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header" numberOfLines={1}>
               {profile.name}
             </Text>
-            {profile.verified ? <SealCheck20Icon /> : null}
+            <VerificationBadge verification={profile.verification} legacyVerified={profile.verified} size={20} />
           </View>
-          <Text size={14} lineHeight={16.8}>
+          <Text size={14} weight={400} lineHeight={16.8} color={colors.textSubtle} numberOfLines={1}>
             @{profile.username}
           </Text>
           <View style={styles.stats}>
@@ -91,7 +93,7 @@ export function ProfileSummary({ profile, variant, actions, onPressFollowers, on
 function Stat({ count, label, onPress }: { count: number; label: string; onPress: () => void }) {
   return (
     <Text size={14} weight={500} lineHeight={16.8} onPress={onPress} accessibilityRole="link">
-      {count}{" "}
+      {formatCountWithThousandsSuffix(count)}{" "}
       <Text size={14} weight={400} lineHeight={16.8}>
         {label}
       </Text>
