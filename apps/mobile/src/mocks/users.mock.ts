@@ -2,6 +2,7 @@ import type { ConnectionEntry } from "@/types/account.type";
 import type { Post, User } from "@/types";
 
 import { buildMockUserSummary, isoDateHoursAgo, me } from "./fixtures.mock";
+import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const LONG_POST_TEXT =
@@ -34,7 +35,7 @@ const buildProfilePost = (index: number, authorId: string): Post => ({
   bookmarked: false,
   isFollowingAuthor: true,
   friendsLiked: null,
-  products: [{ id: "pr_1", name: "Product Name", price: 2_000_000, imageUrl: null }],
+  products: [{ id: "pr_1", name: "Product Name", price: convertUsdCentsToViewerCurrency(1_300), imageUrl: null }],
 });
 
 const connections: ConnectionEntry[] = [
