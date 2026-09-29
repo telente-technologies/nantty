@@ -3,6 +3,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, readJsonObjectBody, respondWithError, respondWithJson, respondWithNoContent, requireMockStorePrincipal } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
+import { findMockMembershipForUserAndStore } from "@/mocks/mockStoreMembership.mock";
 import { doesPasswordMatchOverrideForUser, registerPasswordResetMockHandlers } from "@/mocks/handlers/passwordReset.mock";
 import { demoAccountPassword, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
 import type { SellerAccess } from "@/types/sellerAccess.type";
@@ -32,9 +33,9 @@ function isDemoPasswordCorrect(candidatePassword: string): boolean {
   return expected.length === received.length && timingSafeEqual(expected, received);
 }
 
-export function buildSellerAccessForUser(userId: string): SellerAccess {
+export function buildSellerAccessForUser(userId: string, storeId: string | null = null): SellerAccess {
   const database = readMockDatabase();
-  const membership = database.memberships.find((candidate) => candidate.userId === userId);
+  const membership = findMockMembershipForUserAndStore(userId, storeId);
   const gateStore = membership ? database.gateStores.find((store) => store.storeId === membership.storeId) : undefined;
   if (!membership || !gateStore) {
     return { storeId: null, storeName: null, verification: { status: "unverified", color: "GOLD", tier: null, badgeVisible: false }, subscription: null, entitlements: null, role: null };
@@ -125,7 +126,7 @@ export function registerAccessAndAuthMockHandlers(): void {
 
   registerMockRoute("GET", "/users/me", (request) => respondWithJson(200, convertMockUserToCurrentUser(request.principal?.userId ?? "")));
 
-  registerMockRoute("GET", "/seller/access", (request) => respondWithJson(200, buildSellerAccessForUser(request.principal?.userId ?? "")));
+  registerMockRoute("GET", "/seller/access", (request) => respondWithJson(200, buildSellerAccessForUser(request.principal?.userId ?? "", request.principal?.storeId ?? null)));
 
   registerMockRoute("GET", "/seller/verification", (request) => {
     const { gateStore } = readGateStoreForRequest(request);
