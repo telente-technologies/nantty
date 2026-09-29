@@ -11,6 +11,9 @@ export const describeDisappearingMessagesDuration = (seconds: number | null | un
 
 const formatCount = (count: number) => count.toLocaleString("en-US");
 
+const formatCountWithSingularOrPluralNoun = (count: number, singularNoun: string, pluralNoun: string) =>
+  `${formatCount(count)} ${count === 1 ? singularNoun : pluralNoun}`;
+
 export function describeConversationForDisplay(conversation: Conversation) {
   const kind = conversation.kind ?? "direct";
   const isGroup = kind === "group";
@@ -18,9 +21,9 @@ export function describeConversationForDisplay(conversation: Conversation) {
   const isBusiness = kind === "business" || !!conversation.store;
   const displayName = isGroup || isChannel ? conversation.title ?? conversation.peer.name : conversation.peer.name;
   const subtitle = isGroup
-    ? `${formatCount(conversation.memberCount ?? 0)} members`
+    ? formatCountWithSingularOrPluralNoun(conversation.memberCount ?? 0, "member", "members")
     : isChannel
-      ? `${formatCount(conversation.subscriberCount ?? 0)} subscribers`
+      ? formatCountWithSingularOrPluralNoun(conversation.subscriberCount ?? 0, "subscriber", "subscribers")
       : isBusiness && conversation.store
         ? conversation.store.name
         : null;
