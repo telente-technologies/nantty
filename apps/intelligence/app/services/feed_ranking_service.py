@@ -7,7 +7,6 @@ from app.configs.ranking_heuristics_config import (
     FOLLOWING_FEED_MAXIMUM_BOOST_MINUTES,
 )
 from app.features.feed_feature_vector_builder import (
-    AFFINITY_HALF_SATURATION_POINT,
     FEED_FEATURE_NAMES,
     FEED_FEATURE_SCHEMA_VERSION,
     build_feed_feature_values,
@@ -36,8 +35,8 @@ from app.services.ranking_context_service import (
 )
 from app.services.social_proof_service import (
     SocialProofCandidate,
-    SocialProofRules,
-    select_posts_eligible_for_friend_social_proof,
+    build_social_proof_banners_for_viewer,
+    convert_selection_to_banner,
 )
 from app.stores.feature_log_sink import FeatureLogParquetSink
 from app.stores.online_feature_store import OnlineFeatureStore, ViewerOnlineFeatures
@@ -232,12 +231,7 @@ class FeedRankingService:
         if not request.options.include_social_proof:
             return {}
         candidate_by_id = {candidate.item_id: candidate for candidate in candidates}
-        viewer = request.viewer
-        closeness_by_friend = {
-            account_id: squash_non_negative_value_into_unit_interval(raw_affinity, AFFINITY_HALF_SATURATION_POINT)
-            for account_id, raw_affinity in online_features.account_affinity_by_account.items()
-        }
-        selections = select_posts_eligible_for_friend_social_proof(
+        selections = build_social_proof_banners_for_viewer(
             [
                 SocialProofCandidate(
                     item_id=item.item_id,
@@ -248,21 +242,8 @@ class FeedRankingService:
                 )
                 for position, item in enumerate(ordered)
             ],
-            viewer.user_id,
-            frozenset(viewer.followed_account_ids),
-            frozenset(viewer.blocked_account_ids) | frozenset(viewer.muted_account_ids),
-            closeness_by_friend,
-            SocialProofRules(
-                minimum_close_friends=request.options.social_proof_minimum_close_friends,
-                minimum_gap_between_banners=request.options.social_proof_minimum_gap,
-                minimum_closeness=request.options.social_proof_minimum_closeness,
-            ),
+            request.viewer,
+            request.options,
+            online_features.account_affinity_by_account,
         )
-        return {
-            item_id: SocialProofBanner(
-                friend_ids=selection.friend_ids,
-                total_friend_count=selection.total_friend_count,
-                primary_action=selection.primary_action,
-            )
-            for item_id, selection in selections.items()
-        }
+        return {item_id: convert_selection_to_banner(selection) for item_id, selection in selections.items()}
