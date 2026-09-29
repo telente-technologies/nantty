@@ -1,0 +1,73 @@
+.primaryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.primaryCell strong {
+  font-weight: 650;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loyaltyPoints {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.noteList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.note {
+  padding: 10px 12px;
+  border-radius: var(--radius-medium);
+  background: var(--yellow-50);
+  border: 1px solid var(--yellow-100);
+}
+
+.noteMeta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 1000px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
