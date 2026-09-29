@@ -52,7 +52,7 @@ class ClassifierTrainingSpecification:
 
 def build_gradient_boosted_trees() -> HistGradientBoostingClassifier:
     return HistGradientBoostingClassifier(
-        max_iter=120, learning_rate=0.08, max_leaf_nodes=15, min_samples_leaf=20, l2_regularization=1.0, random_state=0
+        max_iter=60, learning_rate=0.12, max_leaf_nodes=15, min_samples_leaf=20, l2_regularization=1.0, random_state=0
     )
 
 
