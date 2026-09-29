@@ -71,6 +71,7 @@ export function createDependencies(options: DependencyOptions) {
     ...catalog,
     orderLookup: commerce.orderLookup,
     creatorWallets: commerce.creatorWallets,
+    verificationBadges: badgeSource.lookup,
   }, external);
   const communication = createCommunicationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph }, external);
 
