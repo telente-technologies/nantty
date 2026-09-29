@@ -54,7 +54,6 @@ function validatePaymentMethods(value: unknown): ValidationIssue[] {
 function validateLoyaltyRules(value: unknown, storeCurrency: string): ValidationIssue[] {
   const issues = validateNestedObject(value, "loyalty", {
     enabled: fieldChecks.boolean("Loyalty"),
-    pointsEarnedPerMajorUnit: fieldChecks.integer({ label: "Points earned", min: 0, max: 1000 }),
     minimumPointsToRedeem: fieldChecks.integer({ label: "Minimum points", min: 0, max: 1_000_000 }),
   });
   const redeemValue = (value as { redeemValuePerPoint?: { amountMinor?: unknown; currency?: unknown } } | null)?.redeemValuePerPoint;
@@ -62,6 +61,12 @@ function validateLoyaltyRules(value: unknown, storeCurrency: string): Validation
     issues.push({ path: "loyalty.redeemValuePerPoint", message: "Enter a valid value for each point." });
   } else if (redeemValue.currency !== storeCurrency) {
     issues.push({ path: "loyalty.redeemValuePerPoint", message: `Point value must be in your store currency (${storeCurrency}).` });
+  }
+  const spendRequired = (value as { spendRequiredPerPoint?: { amountMinor?: unknown; currency?: unknown } } | null)?.spendRequiredPerPoint;
+  if (!spendRequired || typeof spendRequired.amountMinor !== "number" || !Number.isSafeInteger(spendRequired.amountMinor) || spendRequired.amountMinor < 1 || spendRequired.amountMinor > 100_000_000) {
+    issues.push({ path: "loyalty.spendRequiredPerPoint", message: "Enter how much a customer spends to earn one point." });
+  } else if (spendRequired.currency !== storeCurrency) {
+    issues.push({ path: "loyalty.spendRequiredPerPoint", message: `Spend per point must be in your store currency (${storeCurrency}).` });
   }
   return issues;
 }
