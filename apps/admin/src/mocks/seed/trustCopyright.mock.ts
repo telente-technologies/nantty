@@ -12,7 +12,7 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
   return [
     {
       id: "cpc_0001", infringerUserId: "usr_0016", status: "PENDING", targetFlag: "LIMITED", filedAt: isoMinutesAgo(380), workType: "SOUND",
-      claimant: { name: "Folake Adisa", organization: "Eko Sound Records Ltd", email: "rights@ekosound.ng", representativeOf: "Ayo Kolade" },
+      claimant: { name: "Folake Adisa", organization: "Eko Sound Records Ltd", email: "rights.ekosound@example.com", representativeOf: "Ayo Kolade" },
       workTitle: "Ayo Kolade — Lagos Nights (Official Audio)",
       target: { type: "CLIP", id: "clp_41220", title: "Friday night in VI 🌃", text: "Vibes only", mediaUrls: [image(unsplashPhotoIds.posts.lagosSkyline[1])], soundTitle: "Lagos Nights (sped up) — bolu.films", visibility: "VISIBLE", createdAt: isoMinutesAgo(1900) },
       rightsBasis: "Exclusive master recording and publishing rights, registered with COSON (ref. COSON/2025/44712).",
@@ -26,7 +26,7 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
     },
     {
       id: "cpc_0002", infringerUserId: "usr_0001", status: "PENDING", targetFlag: "VISIBLE", filedAt: isoMinutesAgo(1300), workType: "IMAGE",
-      claimant: { name: "Tobi Adewale", organization: null, email: "tobi@tobiadewale.photo", representativeOf: null },
+      claimant: { name: "Tobi Adewale", organization: null, email: "tobi.adewale@example.com", representativeOf: null },
       workTitle: "Editorial photo 'Aso-ebi Saturday' (2025)",
       target: { type: "POST", id: "pst_20511", title: null, text: "New aso-ebi collection dropping Friday! Order now.", mediaUrls: [image(unsplashPhotoIds.posts.weddingAsoEbi[0])], soundTitle: null, visibility: "VISIBLE", createdAt: isoMinutesAgo(4000) },
       rightsBasis: "I am the photographer and sole owner. Original RAW files and EXIF available.",
@@ -36,7 +36,7 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
     },
     {
       id: "cpc_0003", infringerUserId: "usr_0025", status: "COUNTER_NOTICE", targetFlag: "TAKEN_DOWN", filedAt: isoMinutesAgo(9000), workType: "SOUND",
-      claimant: { name: "Kunle Bamidele", organization: "Highlife Heritage Publishing", email: "claims@highlifeheritage.com", representativeOf: null },
+      claimant: { name: "Kunle Bamidele", organization: "Highlife Heritage Publishing", email: "claims.highlife@example.com", representativeOf: null },
       workTitle: "Sweet Mother (1976 recording)",
       target: { type: "SOUND", id: "snd_7710", title: "Sweet Mother (yemi.sound edit)", text: "Remix used in 1,240 clips", mediaUrls: [image(unsplashPhotoIds.posts.familyDinner[0])], soundTitle: "Sweet Mother (yemi.sound edit)", visibility: "REMOVED", createdAt: isoMinutesAgo(20000) },
       rightsBasis: "Publishing administrator for the composition.",
@@ -48,7 +48,7 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
     },
     {
       id: "cpc_0004", infringerUserId: "usr_0018", status: "UPHELD", targetFlag: "TAKEN_DOWN", filedAt: isoMinutesAgo(30000), workType: "VIDEO",
-      claimant: { name: "Nollywood Premiere Ltd", organization: "Nollywood Premiere Ltd", email: "legal@nollypremiere.ng", representativeOf: null },
+      claimant: { name: "Nollywood Premiere Ltd", organization: "Nollywood Premiere Ltd", email: "legal.nollypremiere@example.com", representativeOf: null },
       workTitle: "Feature film 'Ile Ayo' (2026)",
       target: { type: "CLIP", id: "clp_36001", title: "Ile Ayo full movie part 1", text: null, mediaUrls: [image(unsplashPhotoIds.posts.cameraGear[0])], soundTitle: null, visibility: "REMOVED", createdAt: isoMinutesAgo(31000) },
       rightsBasis: "Producer and distributor.", swornStatement: "Sworn by legal counsel.", claimedUrls: ["https://zudomart.com/c/clp_36001"],
@@ -57,7 +57,7 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
     },
     {
       id: "cpc_0005", infringerUserId: "usr_0002", status: "REJECTED", targetFlag: "VISIBLE", filedAt: isoMinutesAgo(15000), workType: "IMAGE",
-      claimant: { name: "Jollof Kings", organization: "Jollof Kings Restaurant", email: "hello@jollofkings.ng", representativeOf: null },
+      claimant: { name: "Jollof Kings", organization: "Jollof Kings Restaurant", email: "hello.jollofkings@example.com", representativeOf: null },
       workTitle: "Menu photography",
       target: { type: "POST", id: "pst_18820", title: null, text: "Honest review of Jollof Kings. 6/10.", mediaUrls: [image(unsplashPhotoIds.posts.jollofRice[0])], soundTitle: null, visibility: "VISIBLE", createdAt: isoMinutesAgo(16000) },
       rightsBasis: "We own our menu photos.", swornStatement: "Sworn.", claimedUrls: ["https://zudomart.com/p/pst_18820"],
