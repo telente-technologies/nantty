@@ -56,6 +56,7 @@ export function ApplicationIdentityStep({ draft, onChange, onUploadingChange }: 
           Take a clear photo in good light with all four corners visible. It's encrypted and only seen by our verification team.
         </Text>
         <PhotoEvidencePicker
+          privateUploadPurpose="identity_document"
           photoUrls={draft.identityDocumentPhotoUrl ? [draft.identityDocumentPhotoUrl] : []}
           onChangePhotoUrls={(urls) => onChange({ identityDocumentPhotoUrl: urls[0] ?? null })}
           maximumPhotos={1}
