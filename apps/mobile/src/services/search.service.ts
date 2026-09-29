@@ -1,6 +1,6 @@
 import type { SearchResults } from "@/types/commerce.type";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export type SearchScope = "all" | "products" | "stores" | "people";
 

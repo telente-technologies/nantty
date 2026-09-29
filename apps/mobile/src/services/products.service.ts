@@ -1,7 +1,7 @@
 import type { MartHome } from "@/types/commerce.type";
 import type { Page, Product, ProductSummary } from "@/types";
 
-import { api } from "./api-client.service";
+import { api } from "./apiClient.service";
 
 export const productsService = {
   fetchMartHome: () => api.get<MartHome>("/api/v1/mart/home"),
