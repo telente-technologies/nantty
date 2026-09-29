@@ -1,12 +1,46 @@
 import type { AuditRecorder } from "../interfaces/audit.interface.js";
-import type { OrderLookup } from "../interfaces/orderLookup.interface.js";
 import type { ProductCatalog } from "../interfaces/productCatalog.interface.js";
 import type { StoreAccess } from "../interfaces/storeAccess.interface.js";
 import type { UserDirectory } from "../interfaces/userDirectory.interface.js";
+import { registerCartsCommandAndQueryHandlers } from "../modules/carts/carts.module.js";
+import { CartsController } from "../modules/carts/controllers/carts.controller.js";
+import { InMemoryCartsRepository, PrismaCartsRepository } from "../modules/carts/repositories/carts.repository.js";
+import { CartsService } from "../modules/carts/services/carts.service.js";
+import { EscrowsController } from "../modules/escrows/controllers/escrows.controller.js";
+import { registerEscrowsCommandAndQueryHandlers } from "../modules/escrows/escrows.module.js";
+import { createEscrowAutoReleaseJob } from "../modules/escrows/jobs/escrowAutoRelease.job.js";
+import { PrismaDisputesRepository, PrismaEscrowsRepository } from "../modules/escrows/repositories/escrows.prisma.repository.js";
+import { InMemoryDisputesRepository, InMemoryEscrowsRepository } from "../modules/escrows/repositories/escrows.repository.js";
+import { DisputesService } from "../modules/escrows/services/disputes.service.js";
+import { EscrowsService } from "../modules/escrows/services/escrows.service.js";
+import { OrdersController } from "../modules/orders/controllers/orders.controller.js";
+import { registerOrdersCommandAndQueryHandlers } from "../modules/orders/orders.module.js";
+import { PrismaOrdersRepository } from "../modules/orders/repositories/orders.prisma.repository.js";
+import { InMemoryOrdersRepository } from "../modules/orders/repositories/orders.repository.js";
+import { RepositoryOrderLookup } from "../modules/orders/services/orderLookup.service.js";
+import { OrdersService } from "../modules/orders/services/orders.service.js";
+import { StoreDashboardService } from "../modules/orders/services/storeDashboard.service.js";
+import { PaymentsController } from "../modules/payments/controllers/payments.controller.js";
+import { FlutterwaveGateway } from "../modules/payments/gateways/flutterwave.gateway.js";
+import type { PaymentGateway } from "../modules/payments/gateways/paymentGateway.interface.js";
+import { PaystackGateway } from "../modules/payments/gateways/paystack.gateway.js";
+import { registerPaymentsCommandAndQueryHandlers } from "../modules/payments/payments.module.js";
+import { PrismaPaymentsRepository, PrismaWebhookEventsRepository } from "../modules/payments/repositories/payments.prisma.repository.js";
+import { InMemoryPaymentsRepository, InMemoryWebhookEventsRepository } from "../modules/payments/repositories/payments.repository.js";
+import { PaymentsService } from "../modules/payments/services/payments.service.js";
+import { WalletsController } from "../modules/wallets/controllers/wallets.controller.js";
+import { PrismaLedgerRepository } from "../modules/wallets/repositories/ledger.prisma.repository.js";
+import { InMemoryLedgerRepository } from "../modules/wallets/repositories/ledger.repository.js";
+import { PrismaPayoutAccountsRepository, PrismaWithdrawalsRepository } from "../modules/wallets/repositories/wallets.prisma.repository.js";
+import { InMemoryPayoutAccountsRepository, InMemoryWithdrawalsRepository } from "../modules/wallets/repositories/wallets.repository.js";
+import { LedgerService } from "../modules/wallets/services/ledger.service.js";
+import { WalletsService } from "../modules/wallets/services/wallets.service.js";
+import { registerWalletsCommandAndQueryHandlers } from "../modules/wallets/wallets.module.js";
 import type { Core } from "./core.loader.js";
-import { createPlaceholderPort } from "./placeholder.loader.js";
 
-export interface CommerceExternalServices {}
+export interface CommerceExternalServices {
+  readonly paymentGateways?: Readonly<Record<"paystack" | "flutterwave", PaymentGateway>>;
+}
 
 export interface CommerceSharedServices {
   readonly audit: AuditRecorder;
@@ -16,12 +50,75 @@ export interface CommerceSharedServices {
 }
 
 export function createCommerceModules(core: Core, shared: CommerceSharedServices, external: CommerceExternalServices) {
-  void core;
-  void shared;
-  void external;
+  const usePrisma = core.persistence === "prisma";
+  const { settings, clock, events, commands, queries, cipher } = core;
+  const currency = settings.money.currency;
+  const gateways = external.paymentGateways ?? {
+    paystack: new PaystackGateway(settings.payments.paystackSecretKey),
+    flutterwave: new FlutterwaveGateway(settings.payments.flutterwaveSecretKey, settings.payments.flutterwaveWebhookHash),
+  };
+  const ordersRepository = usePrisma ? new PrismaOrdersRepository() : new InMemoryOrdersRepository();
+  const escrowsRepository = usePrisma ? new PrismaEscrowsRepository() : new InMemoryEscrowsRepository();
+  const ledger = new LedgerService(usePrisma ? new PrismaLedgerRepository() : new InMemoryLedgerRepository(), clock);
+
+  const cartsService = new CartsService({ carts: usePrisma ? new PrismaCartsRepository() : new InMemoryCartsRepository(), productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, currency });
+  const ordersService = new OrdersService({ orders: ordersRepository, carts: cartsService, productCatalog: shared.productCatalog, storeAccess: shared.storeAccess, cipher, clock, events, currency });
+  let paymentsService: PaymentsService | undefined;
+  const escrowsService = new EscrowsService({
+    escrows: escrowsRepository,
+    orders: ordersRepository,
+    ledger,
+    storeAccess: shared.storeAccess,
+    audit: shared.audit,
+    events,
+    clock,
+    commissionBps: settings.money.commissionBps,
+    inspectionDays: settings.money.escrowInspectionDays,
+    paymentRefunder: { refundEscrowPayment: (escrow) => (paymentsService as PaymentsService).refundEscrowPayment(escrow) },
+  });
+  paymentsService = new PaymentsService({
+    payments: usePrisma ? new PrismaPaymentsRepository() : new InMemoryPaymentsRepository(),
+    webhookEvents: usePrisma ? new PrismaWebhookEventsRepository() : new InMemoryWebhookEventsRepository(),
+    orders: ordersRepository,
+    ordersService,
+    escrowsService: () => escrowsService,
+    gateways,
+    userDirectory: shared.userDirectory,
+    audit: shared.audit,
+    events,
+    clock,
+    callbackUrl: settings.payments.callbackUrl,
+  });
+  const disputesService = new DisputesService(usePrisma ? new PrismaDisputesRepository() : new InMemoryDisputesRepository(), escrowsService, ordersService);
+  const walletsService = new WalletsService({
+    ledger,
+    payoutAccounts: usePrisma ? new PrismaPayoutAccountsRepository() : new InMemoryPayoutAccountsRepository(),
+    withdrawals: usePrisma ? new PrismaWithdrawalsRepository() : new InMemoryWithdrawalsRepository(),
+    storeAccess: shared.storeAccess,
+    cipher,
+    audit: shared.audit,
+    clock,
+    currency,
+    paymentGateways: gateways,
+    sumEscrowHeldForStore: (storeId) => escrowsRepository.sumOutstandingForStore(storeId),
+  });
+  const dashboardService = new StoreDashboardService(ordersRepository, shared.storeAccess, shared.productCatalog, clock, currency);
+
+  registerCartsCommandAndQueryHandlers(commands, queries, cartsService);
+  registerOrdersCommandAndQueryHandlers(commands, queries, { orders: ordersService, dashboard: dashboardService, escrows: escrowsService });
+  registerPaymentsCommandAndQueryHandlers(commands, queries, paymentsService, escrowsService);
+  registerEscrowsCommandAndQueryHandlers(commands, queries, { escrows: escrowsService, disputes: disputesService, orders: ordersService });
+  registerWalletsCommandAndQueryHandlers(commands, queries, walletsService);
+
   return {
-    orderLookup: createPlaceholderPort<OrderLookup>("orderLookup"),
-    scheduledJobs: [] as readonly { readonly id: string; readonly every: string; readonly run: () => Promise<void> }[],
-    controllers: {},
+    orderLookup: new RepositoryOrderLookup(ordersRepository),
+    scheduledJobs: [createEscrowAutoReleaseJob(escrowsService)],
+    controllers: {
+      cartsController: new CartsController(commands, queries),
+      ordersController: new OrdersController(commands, queries, ordersService),
+      paymentsController: new PaymentsController(commands, queries, gateways),
+      escrowsController: new EscrowsController(commands, queries),
+      walletsController: new WalletsController(commands, queries),
+    },
   };
 }
