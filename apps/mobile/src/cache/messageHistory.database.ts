@@ -5,6 +5,7 @@ import type { Conversation, ConversationFilter, Message, UserSummary } from "@/t
 import { buildMessageSyncCursor, type LocalMessageDeliveryStatus, type LocallyStoredMessage, type MessageHistoryStore } from "./messageHistory.type";
 
 const MAXIMUM_SAVED_MESSAGES_PER_CONVERSATION = 500;
+const MESSAGE_HISTORY_SCHEMA_VERSION = 2;
 
 interface SavedConversationRow {
   readonly id: string;
@@ -13,6 +14,7 @@ interface SavedConversationRow {
   readonly last_message_at: string;
   readonly unread: number;
   readonly is_friend: number;
+  readonly extra_json: string | null;
 }
 
 interface SavedMessageRow {
@@ -22,7 +24,12 @@ interface SavedMessageRow {
   readonly text: string;
   readonly created_at: string;
   readonly delivery_status: LocalMessageDeliveryStatus;
+  readonly kind: string | null;
+  readonly extra_json: string | null;
 }
+
+type ConversationExtras = Omit<Conversation, "id" | "peer" | "lastMessage" | "lastMessageAt" | "unread" | "isFriend">;
+type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt">;
 
 let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
@@ -49,11 +56,48 @@ function openMessageHistoryDatabaseAndCreateTables(): SQLiteDatabase {
     );
     CREATE INDEX IF NOT EXISTS messages_by_conversation_and_time ON messages (conversation_id, created_at, id);
   `);
+  migrateMessageHistorySchemaToLatestVersion(database);
   openedMessageHistoryDatabase = database;
   return database;
 }
 
+function migrateMessageHistorySchemaToLatestVersion(database: SQLiteDatabase) {
+  const currentVersion = database.getFirstSync<{ user_version: number }>("PRAGMA user_version")?.user_version ?? 0;
+  if (currentVersion >= MESSAGE_HISTORY_SCHEMA_VERSION) return;
+  database.withTransactionSync(() => {
+    if (currentVersion < 2) {
+      database.execSync(`
+        ALTER TABLE messages ADD COLUMN kind TEXT NOT NULL DEFAULT 'text';
+        ALTER TABLE messages ADD COLUMN extra_json TEXT;
+        ALTER TABLE conversations ADD COLUMN extra_json TEXT;
+      `);
+    }
+    database.execSync(`PRAGMA user_version = ${MESSAGE_HISTORY_SCHEMA_VERSION}`);
+  });
+}
+
+const parseJsonOrEmptyObject = <T extends object>(json: string | null): Partial<T> => {
+  if (!json) return {};
+  try {
+    return JSON.parse(json) as Partial<T>;
+  } catch {
+    return {};
+  }
+};
+
+const extractConversationExtras = ({ id: _id, peer: _peer, lastMessage: _last, lastMessageAt: _at, unread: _unread, isFriend: _friend, ...extras }: Conversation): ConversationExtras => extras;
+
+const extractMessageExtras = (message: Message): MessageExtras => ({
+  sender: message.sender,
+  media: message.media,
+  reactions: message.reactions,
+  expiresAt: message.expiresAt,
+});
+
+const hasMessageExpired = (message: Pick<Message, "expiresAt">) => !!message.expiresAt && message.expiresAt <= new Date().toISOString();
+
 const convertRowToConversation = (row: SavedConversationRow): Conversation => ({
+  ...parseJsonOrEmptyObject<ConversationExtras>(row.extra_json),
   id: row.id,
   peer: JSON.parse(row.peer_json) as UserSummary,
   lastMessage: row.last_message,
@@ -69,17 +113,21 @@ const convertRowToMessage = (row: SavedMessageRow): LocallyStoredMessage => ({
   text: row.text,
   createdAt: row.created_at,
   deliveryStatus: row.delivery_status,
+  kind: (row.kind ?? "text") as Message["kind"],
+  ...parseJsonOrEmptyObject<MessageExtras>(row.extra_json),
 });
 
 function insertOrReplaceMessageRow(database: SQLiteDatabase, message: Message, deliveryStatus: LocalMessageDeliveryStatus) {
   database.runSync(
-    "INSERT OR REPLACE INTO messages (id, conversation_id, sender_id, text, created_at, delivery_status) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT OR REPLACE INTO messages (id, conversation_id, sender_id, text, created_at, delivery_status, kind, extra_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     message.id,
     message.conversationId,
     message.senderId,
     message.text,
     message.createdAt,
     deliveryStatus,
+    message.kind ?? "text",
+    JSON.stringify(extractMessageExtras(message)),
   );
 }
 
@@ -119,13 +167,14 @@ export const messageHistoryStore: MessageHistoryStore = {
       database.withTransactionSync(() => {
         for (const conversation of conversations) {
           database.runSync(
-            "INSERT OR REPLACE INTO conversations (id, peer_json, last_message, last_message_at, unread, is_friend) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO conversations (id, peer_json, last_message, last_message_at, unread, is_friend, extra_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
             conversation.id,
             JSON.stringify(conversation.peer),
             conversation.lastMessage,
             conversation.lastMessageAt,
             conversation.unread,
             conversation.isFriend ? 1 : 0,
+            JSON.stringify(extractConversationExtras(conversation)),
           );
         }
       });
@@ -135,7 +184,8 @@ export const messageHistoryStore: MessageHistoryStore = {
       (database) =>
         database
           .getAllSync<SavedMessageRow>("SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC", conversationId)
-          .map(convertRowToMessage),
+          .map(convertRowToMessage)
+          .filter((message) => !hasMessageExpired(message)),
       [],
     ),
   readLatestSyncCursorForConversation: (conversationId) =>
@@ -167,6 +217,15 @@ export const messageHistoryStore: MessageHistoryStore = {
   markPendingMessageAsFailed: (localMessageId) =>
     runSafelyOrReturnFallback(
       (database) => database.runSync("UPDATE messages SET delivery_status = 'failed' WHERE id = ?", localMessageId),
+      undefined,
+    ),
+  deleteExpiredMessages: () =>
+    runSafelyOrReturnFallback(
+      (database) =>
+        database.runSync(
+          "DELETE FROM messages WHERE json_extract(extra_json, '$.expiresAt') IS NOT NULL AND json_extract(extra_json, '$.expiresAt') <= ?",
+          new Date().toISOString(),
+        ),
       undefined,
     ),
   deleteAllSavedMessageHistory: () =>
