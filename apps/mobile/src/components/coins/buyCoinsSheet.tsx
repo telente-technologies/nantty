@@ -7,6 +7,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { CoinBalanceChip } from "./coinBalanceChip";
 import { describeCoinError, formatCoinAmount, useBuyCoinsWithInAppBrowser, type CoinPurchaseOutcome } from "./coinWallet.hook";
+import { CoinAmountWithIcon } from "./coinAmount";
 
 const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
   if (outcome.kind === "credited") return `${formatCoinAmount(outcome.coins)} added to your balance.`;
@@ -32,9 +33,7 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
             style={styles.packageRow}
           >
             <View>
-              <Text size={14} weight={600} lineHeight={16.8}>
-                🪙 {formatCoinAmount(coinPackage.coins)}
-              </Text>
+              <CoinAmountWithIcon label={formatCoinAmount(coinPackage.coins)} />
               {coinPackage.bonusCoins ? (
                 <Text size={12} lineHeight={14.4} color={colors.success}>
                   +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
