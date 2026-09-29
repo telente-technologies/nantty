@@ -3,9 +3,9 @@ import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.
 import { assertStaffSeatAvailable, describeMockActor } from "@/mocks/handlers/settingsEntitlements.mock";
 import { createMockIdentifier, matchesSearchText, MockHttpError, paginateMockList, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithNoContent, respondWithValidationFailure } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
-import { hashPosPinForStorage, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
+import { buildDemoUserAccounts, hashPosPinForStorage, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
 import type { StaffRole } from "@/types/sellerAccess.type";
-import type { StaffMember } from "@/types/staff.type";
+import type { StaffMember, ZudomartUserCandidate } from "@/types/staff.type";
 import { fieldChecks, validateObjectAgainstChecks, type ValidationIssue } from "@/utils/formValidation.util";
 
 const invitableRoles = staffRoles.filter((role) => role !== "owner");
@@ -50,37 +50,54 @@ export function registerStaffTeamMockHandlers(): void {
   registerMockRoute("GET", "/seller/staff", (request) => {
     requireMockStorePrincipal(request);
     const searchText = request.query.get("q");
-    const members = readMockDatabase().staff.filter((staff) => matchesSearchText(searchText, staff.name, staff.email, staff.phone)).map(convertStaffRecordToPublicMember);
+    const members = readMockDatabase().staff.filter((staff) => matchesSearchText(searchText, staff.name, staff.username)).map(convertStaffRecordToPublicMember);
     return respondWithJson(200, paginateMockList(members, request.query, 100));
+  });
+
+  registerMockRoute("GET", "/seller/staff/candidates", (request) => {
+    requireMockStorePrincipal(request);
+    const searchText = (request.query.get("q") ?? "").trim().replace(/^@/, "");
+    if (searchText.length < 2) return respondWithJson(200, { data: [] });
+    const existingStaffUserIds = new Set(readMockDatabase().staff.map((staff) => staff.userId));
+    const candidates = buildDemoUserAccounts()
+      .filter((account) => !existingStaffUserIds.has(account.id) && matchesSearchText(searchText, account.name, account.username))
+      .slice(0, 10)
+      .map((account): ZudomartUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
+    return respondWithJson(200, { data: candidates });
+  });
+
+  registerMockRoute("GET", "/seller/zudomart-users", (request) => {
+    requireMockStorePrincipal(request);
+    const searchText = (request.query.get("q") ?? "").trim().replace(/^@/, "");
+    if (searchText.length < 2) return respondWithJson(200, { data: [] });
+    const matchingUsers = buildDemoUserAccounts()
+      .filter((account) => matchesSearchText(searchText, account.name, account.username))
+      .slice(0, 10)
+      .map((account): ZudomartUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
+    return respondWithJson(200, { data: matchingUsers });
   });
 
   registerMockRoute("POST", "/seller/staff", (request) => {
     const principal = requireMockStorePrincipal(request);
     const body = readJsonObjectBody(request);
-    const issues = validateObjectAgainstChecks(body, {
-      name: fieldChecks.text({ label: "Name", min: 2, max: 80 }),
-      email: fieldChecks.optional(fieldChecks.email()),
-      phone: fieldChecks.optional(fieldChecks.phone()),
-      role: fieldChecks.oneOf("Role", invitableRoles),
-    });
-    if (!body.email && !body.phone) issues.push({ path: "email", message: "Add an email or a phone number to send the invite to." });
+    const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", invitableRoles) });
+    const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
+    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Zudomart account." });
     const locationIds = validateLocationIds(body.locationIds, issues);
-    if (issues.length > 0) return respondWithValidationFailure(issues);
+    if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
     const role = body.role as StaffRole;
     assertActorMayAssignRole(request, role);
-    const email = typeof body.email === "string" && body.email.trim() ? body.email.trim().toLowerCase() : null;
-    const phone = typeof body.phone === "string" && body.phone.trim() ? body.phone.replace(/[\s-]/g, "") : null;
     const database = readMockDatabase();
-    if (database.staff.some((staff) => (email && staff.email === email) || (phone && staff.phone === phone))) {
-      throw new MockHttpError(409, "STAFF_EXISTS", "Someone on your team already uses that email or phone number.");
+    if (database.staff.some((staff) => staff.userId === zudomartAccount.id)) {
+      throw new MockHttpError(409, "STAFF_EXISTS", `@${zudomartAccount.username} is already on your team.`);
     }
     assertStaffSeatAvailable(principal.storeId);
     const record: MockStaffRecord = {
       id: createMockIdentifier("stf"),
-      userId: null,
-      name: String(body.name).trim(),
-      email,
-      phone,
+      userId: zudomartAccount.id,
+      name: zudomartAccount.name,
+      username: zudomartAccount.username,
+      avatarUrl: zudomartAccount.avatarUrl,
       role,
       status: "invited",
       hasPosPin: false,
@@ -92,7 +109,7 @@ export function registerStaffTeamMockHandlers(): void {
       invitedAt: new Date().toISOString(),
     };
     database.staff.push(record);
-    recordStaffAudit(request, "staff.invited", record, `Invited ${record.name} as ${role}`);
+    recordStaffAudit(request, "staff.invited", record, `Sent a team request to @${record.username} as ${role}`);
     return respondWithJson(201, convertStaffRecordToPublicMember(record));
   });
 

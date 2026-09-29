@@ -1,7 +1,7 @@
 import { findManagedBrandOrThrow, recordBrandAuditEntry, requireBrandRole } from "@/mocks/brandsMockStore.mock";
-import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, createMockIdentifier, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithNoContent, respondWithValidationFailure } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
+import { buildDemoUserAccounts } from "@/mocks/seed/demoPeople.mock";
 import type { BrandMember, BrandMemberRole } from "@/types/brand.type";
 import { fieldChecks, validateObjectAgainstChecks } from "@/utils/formValidation.util";
 
@@ -20,20 +20,16 @@ export function registerBrandMembersMockRoutes(): void {
     const { brand, member } = findManagedBrandOrThrow(request.params.brandId ?? "", principal.userId);
     requireBrandRole(member, ["owner", "admin"], "add team members");
     const body = readJsonObjectBody(request);
-    const issues = validateObjectAgainstChecks(body, {
-      name: fieldChecks.text({ label: "Name", min: 2, max: 80 }),
-      email: fieldChecks.email(),
-      role: fieldChecks.oneOf("Role", assignableBrandRoles),
-    });
-    if (issues.length > 0) return respondWithValidationFailure(issues);
-    const email = String(body.email).trim().toLowerCase();
-    if (brand.members.some((candidate) => candidate.email.toLowerCase() === email)) throw new MockHttpError(409, "MEMBER_EXISTS", "That person is already on the brand team.");
+    const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", assignableBrandRoles) });
+    const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
+    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Zudomart account." });
+    if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
+    if (brand.members.some((candidate) => candidate.userId === zudomartAccount.id)) throw new MockHttpError(409, "MEMBER_EXISTS", `@${zudomartAccount.username} is already on the brand team.`);
     if (brand.members.length >= maximumBrandMembers) throw new MockHttpError(409, "MEMBER_LIMIT_REACHED", `A brand team can have up to ${maximumBrandMembers} people.`);
     if (body.role === "admin" && member.role !== "owner") throw new MockHttpError(403, "BRAND_ROLE_FORBIDDEN", "Only the brand owner can add admins.");
-    const existingUser = readMockDatabase().users.find((user) => user.email === email);
-    const newMember: BrandMember = { id: createMockIdentifier("bmem"), userId: existingUser?.id ?? null, name: String(body.name).trim(), email, role: body.role as BrandMemberRole, status: "invited" };
+    const newMember: BrandMember = { id: createMockIdentifier("bmem"), userId: zudomartAccount.id, name: zudomartAccount.name, username: zudomartAccount.username, role: body.role as BrandMemberRole, status: "invited" };
     brand.members.push(newMember);
-    recordBrandAuditEntry(principal, "brand.member_invited", brand.id, `Invited ${newMember.name} to ${brand.name} as ${newMember.role}`);
+    recordBrandAuditEntry(principal, "brand.member_invited", brand.id, `Sent a brand team request to @${newMember.username} for ${brand.name} as ${newMember.role}`);
     return respondWithJson(201, newMember);
   });
 
