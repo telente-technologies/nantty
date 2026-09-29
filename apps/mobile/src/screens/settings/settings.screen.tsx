@@ -73,7 +73,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
       </Pressable>
 
       <SettingsGroup>
-        <SettingsRow label="Account" icon={<UserCircle24Icon />} onPress={() => navigation.navigate("SettingsAccount")} />
+        <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.black} />} onPress={() => navigation.navigate("SettingsAccount")} />
         <SettingsRow label="Security & Password" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
         <SettingsRow label="Notification" icon={<BellRinging24Icon />} onPress={() => navigation.navigate("SettingsNotifications")} />
       </SettingsGroup>
