@@ -46,6 +46,7 @@ export function convertOrderToDto(order: OrderRecord, shippingPhone: string, con
     customerName: order.customerName,
     shippingAddress: { ...address, phone: shippingPhone },
     trackingNumber: order.trackingNumber,
+    courier: order.courier,
     items: order.items.map(({ orderId: _orderId, unitPrice, lineTotal, ...item }) => ({ ...item, unitPrice: inViewCurrency(unitPrice), lineTotal: inViewCurrency(lineTotal) })),
     paidAt: convertDateToText(order.paidAt),
     shippedAt: convertDateToText(order.shippedAt),
