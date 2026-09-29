@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { MediaPager } from "@/components/feed/mediaPager";
@@ -31,6 +31,7 @@ export interface PostComposerPanelProps {
   readonly publishButtonTitle: string;
   readonly publishErrorMessage: string | null;
   readonly onPublish: () => void;
+  readonly soundPicker?: ReactNode;
 }
 
 export function PostComposerPanel({
@@ -45,6 +46,7 @@ export function PostComposerPanel({
   publishButtonTitle,
   publishErrorMessage,
   onPublish,
+  soundPicker,
 }: PostComposerPanelProps) {
   const [focused, setFocused] = useState(false);
   const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
@@ -91,6 +93,7 @@ export function PostComposerPanel({
           style={styles.input}
         />
         <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={onRemoveDraftMedia} />
+        {soundPicker}
       </ScrollView>
       {focused ? null : (
         <View style={styles.pill}>
