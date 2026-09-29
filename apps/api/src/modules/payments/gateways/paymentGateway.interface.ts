@@ -20,6 +20,20 @@ export interface VerifiedPayment {
   readonly amount: MinorUnits;
   readonly currency: string;
   readonly providerTransactionId: string | null;
+  readonly reusableAuthorization?: string | null;
+}
+
+export interface SavedAuthorizationChargeRequest {
+  readonly reference: string;
+  readonly authorization: string;
+  readonly email: string;
+  readonly amount: MinorUnits;
+  readonly currency: CurrencyCode;
+}
+
+export interface SavedAuthorizationChargeResult {
+  readonly status: "succeeded" | "failed" | "pending";
+  readonly providerTransactionId: string | null;
 }
 
 export interface RefundPaymentRequest {
@@ -49,6 +63,7 @@ export interface BankTransferResult {
 export interface WebhookNotice {
   readonly eventKey: string;
   readonly reference: string | null;
+  readonly eventType?: string;
 }
 
 export type HeaderReader = (name: string) => string | undefined;
@@ -61,4 +76,5 @@ export interface PaymentGateway {
   verifyWebhookSignature(rawBody: Uint8Array, readHeader: HeaderReader): boolean;
   readWebhookNotice(rawBody: Uint8Array): WebhookNotice;
   transferToBank(request: BankTransferRequest): Promise<BankTransferResult>;
+  chargeSavedAuthorization(request: SavedAuthorizationChargeRequest): Promise<SavedAuthorizationChargeResult>;
 }
