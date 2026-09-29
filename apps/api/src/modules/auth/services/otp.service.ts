@@ -1,4 +1,4 @@
-import { randomNumericCode } from "@zudojs/crypto";
+import { randomBase64Url, randomNumericCode } from "@zudojs/crypto";
 import { TooManyRequestsError } from "@zudojs/errors";
 
 import type { AppSettings } from "../../../configs/settings.config.js";
@@ -7,7 +7,9 @@ import type { Clock } from "../../../interfaces/clock.interface.js";
 import { hashesAreEqual, hashSecretWithKey } from "../../../utils/hashToken.util.js";
 import type { OtpPurpose } from "../models/auth.model.js";
 import type { OneTimeCodesRepository } from "../repositories/auth.repository.js";
-import type { ContactAddress } from "./contact.service.js";
+import { parseContactAddress, type ContactAddress } from "./contact.service.js";
+
+export const VERIFIED_DESTINATION_TOKEN_TTL_SECONDS = 15 * 60;
 
 export interface OneTimeCodeDelivery {
   deliverOneTimeCode(contact: ContactAddress, code: string, purpose: OtpPurpose): Promise<void>;
@@ -24,6 +26,10 @@ export class OtpService {
     dataEncryptionKey: Uint8Array,
   ) {
     this.codeHashKey = new Uint8Array([...dataEncryptionKey, ...new TextEncoder().encode("otp")]);
+  }
+
+  public get codeLifetimeSeconds(): number {
+    return this.settings.otpTtlSeconds;
   }
 
   public async sendOneTimeCode(contact: ContactAddress, purpose: OtpPurpose): Promise<void> {
@@ -52,7 +58,32 @@ export class OtpService {
     return this.codes.consumeCode(record.id, now);
   }
 
+  public async issueVerifiedDestinationToken(contact: ContactAddress, purpose: OtpPurpose): Promise<string> {
+    const now = this.clock.now();
+    const token = await randomBase64Url(32);
+    const expiresAt = new Date(now.getTime() + VERIFIED_DESTINATION_TOKEN_TTL_SECONDS * 1000);
+    await this.codes.replaceActiveCode(contact.value, `${purpose}_verified`, await this.hashVerifiedDestinationToken(token), expiresAt, now);
+    return token;
+  }
+
+  public async consumeVerifiedDestinationToken(
+    purpose: OtpPurpose,
+    token: string,
+    isAcceptableDestination: (contact: ContactAddress) => boolean = () => true,
+  ): Promise<ContactAddress | undefined> {
+    const now = this.clock.now();
+    const record = await this.codes.findActiveCodeByHash(`${purpose}_verified`, await this.hashVerifiedDestinationToken(token), now);
+    if (record === undefined) return undefined;
+    const contact = parseContactAddress(record.target);
+    if (!isAcceptableDestination(contact) || !(await this.codes.consumeCode(record.id, now))) return undefined;
+    return contact;
+  }
+
   private hashOneTimeCode(target: string, purpose: OtpPurpose, code: string): Promise<string> {
     return hashSecretWithKey(`${purpose}:${target}:${code}`, this.codeHashKey);
+  }
+
+  private hashVerifiedDestinationToken(token: string): Promise<string> {
+    return hashSecretWithKey(`verified-destination:${token}`, this.codeHashKey);
   }
 }

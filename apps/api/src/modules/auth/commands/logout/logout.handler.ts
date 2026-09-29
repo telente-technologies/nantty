@@ -11,7 +11,10 @@ export class LogoutHandler extends CommandHandler<LogoutCommand, void> {
   }
 
   public async execute(command: LogoutCommand): Promise<void> {
-    const { sessions, clock } = this.auth.dependencies;
-    await sessions.revoke(command.principal.sessionId, "logout", clock.now());
+    const { sessions, tokens, clock } = this.auth.dependencies;
+    const sessionFromRefreshToken = command.refreshToken === undefined ? undefined : tokens.findSessionIdInRefreshToken(command.refreshToken);
+    for (const sessionId of new Set([command.principal?.sessionId, sessionFromRefreshToken])) {
+      if (sessionId !== undefined) await sessions.revoke(sessionId, "logout", clock.now());
+    }
   }
 }

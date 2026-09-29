@@ -1,20 +1,22 @@
 import { schema, type Infer } from "@zudojs/schema";
 
 const password = schema.string().min(1).max(128);
-const contact = schema.string().min(3).max(254);
+const destination = schema.string().min(3).max(254);
 const oneTimeCode = schema.string().regex(/^\d{6}$/);
+const verifiedDestinationToken = schema.string().min(20).max(200);
 const username = schema.string().min(3).max(30).regex(/^[A-Za-z0-9_.]+$/);
 
 export const RegisterBodySchema = schema.object({
   email: schema.string().email().max(254).optional(),
   phone: schema.string().min(7).max(20).optional(),
-  username,
+  username: username.optional(),
   password,
   birthday: schema.string().date(),
   name: schema.string().max(80).optional(),
+  otpToken: verifiedDestinationToken,
 });
 
-export const LoginBodySchema = schema.object({ identifier: contact, password });
+export const LoginBodySchema = schema.object({ identifier: destination, password });
 
 export const SocialSignInBodySchema = schema.object({
   idToken: schema.string().min(20).max(8192),
@@ -22,22 +24,19 @@ export const SocialSignInBodySchema = schema.object({
   username: username.optional(),
 });
 
-export const SendOneTimeCodeBodySchema = schema.object({
-  target: contact,
-  purpose: schema.enum(["verify_contact", "login"]),
-});
+export const OneTimeCodePurposeSchema = schema.enum(["signup", "reset", "login"]);
 
-export const VerifyOneTimeCodeBodySchema = schema.object({
-  target: contact,
-  purpose: schema.enum(["verify_contact", "login"]),
-  code: oneTimeCode,
-});
+export const SendOneTimeCodeBodySchema = schema.object({ destination, purpose: OneTimeCodePurposeSchema });
 
-export const ForgotPasswordBodySchema = schema.object({ target: contact });
+export const VerifyOneTimeCodeBodySchema = schema.object({ destination, code: oneTimeCode, purpose: OneTimeCodePurposeSchema });
 
-export const ResetPasswordBodySchema = schema.object({ target: contact, code: oneTimeCode, newPassword: password });
+export const ResetPasswordBodySchema = schema.object({ otpToken: verifiedDestinationToken, password });
+
+export const ChangePasswordBodySchema = schema.object({ currentPassword: password.optional(), newPassword: password });
 
 export const RefreshTokenBodySchema = schema.object({ refreshToken: schema.string().min(20).max(8192) });
+
+export const LogoutBodySchema = schema.object({ refreshToken: schema.string().min(20).max(8192).optional() });
 
 export const SessionParamsSchema = schema.object({ id: schema.string().uuid() });
 
@@ -48,3 +47,5 @@ export type SocialSignInBody = Infer<typeof SocialSignInBodySchema>;
 export type SendOneTimeCodeBody = Infer<typeof SendOneTimeCodeBodySchema>;
 export type VerifyOneTimeCodeBody = Infer<typeof VerifyOneTimeCodeBodySchema>;
 export type ResetPasswordBody = Infer<typeof ResetPasswordBodySchema>;
+export type ChangePasswordBody = Infer<typeof ChangePasswordBodySchema>;
+export type OneTimeCodePurposeInput = Infer<typeof OneTimeCodePurposeSchema>;

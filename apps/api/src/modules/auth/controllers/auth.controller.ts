@@ -8,7 +8,7 @@ import { LoginCommand } from "../commands/login/login.command.js";
 import { LogoutCommand } from "../commands/logout/logout.command.js";
 import { RefreshTokenCommand } from "../commands/refreshToken/refreshToken.command.js";
 import { RegisterCommand } from "../commands/register/register.command.js";
-import { RequestPasswordResetCommand } from "../commands/requestPasswordReset/requestPasswordReset.command.js";
+import { ChangePasswordCommand } from "../commands/changePassword/changePassword.command.js";
 import { ResetPasswordCommand } from "../commands/resetPassword/resetPassword.command.js";
 import { RevokeSessionCommand } from "../commands/revokeSession/revokeSession.command.js";
 import { SendOtpCommand } from "../commands/sendOtp/sendOtp.command.js";
@@ -21,8 +21,9 @@ import { CheckUsernameAvailabilityQuery } from "../queries/checkUsernameAvailabi
 import { GetSessionQuery } from "../queries/getSession/getSession.query.js";
 import { ListSessionsQuery } from "../queries/listSessions/listSessions.query.js";
 import {
-  ForgotPasswordBodySchema,
+  ChangePasswordBodySchema,
   LoginBodySchema,
+  LogoutBodySchema,
   RefreshTokenBodySchema,
   RegisterBodySchema,
   ResetPasswordBodySchema,
@@ -40,12 +41,12 @@ function readClientDetails(ctx: HttpRouterContext): ClientDetails {
   };
 }
 
+function convertAuthenticationResultToSession(result: AuthenticationResult) {
+  return { ...convertIssuedTokensToDto(result.tokens), user: convertUserToCurrentUserDto(result.user), isNewUser: result.isNewUser };
+}
+
 function convertAuthenticationResultToResponse(status: number, result: AuthenticationResult): HttpResponseContext {
-  return json(status, {
-    user: convertUserToCurrentUserDto(result.user),
-    tokens: convertIssuedTokensToDto(result.tokens),
-    isNewUser: result.isNewUser,
-  });
+  return json(status, convertAuthenticationResultToSession(result));
 }
 
 export class AuthController {
@@ -72,23 +73,21 @@ export class AuthController {
   public readonly sendOneTimeCode = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = SendOneTimeCodeBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    await this.commands.execute<SendOtpCommand, void>(new SendOtpCommand(body.data, findAuthenticatedPrincipal(ctx)));
-    return json(202, { message: "If the details are correct, a code is on its way." });
+    return json(200, await this.commands.execute<SendOtpCommand, { expiresIn: number }>(new SendOtpCommand(body.data)));
   };
 
   public readonly verifyOneTimeCode = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const body = VerifyOneTimeCodeBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    const command = new VerifyOtpCommand(body.data, findAuthenticatedPrincipal(ctx), readClientDetails(ctx));
-    const result = await this.commands.execute<VerifyOtpCommand, VerifyOtpResult>(command);
-    return "tokens" in result ? convertAuthenticationResultToResponse(200, result) : json(200, result);
+    const result = await this.commands.execute<VerifyOtpCommand, VerifyOtpResult>(new VerifyOtpCommand(body.data, readClientDetails(ctx)));
+    return json(200, { otpToken: result.otpToken, ...(result.session === undefined ? {} : convertAuthenticationResultToSession(result.session)) });
   };
 
-  public readonly forgotPassword = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    const body = ForgotPasswordBodySchema.safeParse(readJsonBody(ctx));
+  public readonly changePassword = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
+    const body = ChangePasswordBodySchema.safeParse(readJsonBody(ctx));
     if (!body.success) return validationFailed(body.issues);
-    await this.commands.execute<RequestPasswordResetCommand, void>(new RequestPasswordResetCommand(body.data.target));
-    return json(202, { message: "If an account matches, a reset code is on its way." });
+    await this.commands.execute<ChangePasswordCommand, void>(new ChangePasswordCommand(requireAuthenticatedPrincipal(ctx), body.data));
+    return empty(204);
   };
 
   public readonly resetPassword = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -106,14 +105,16 @@ export class AuthController {
   };
 
   public readonly logout = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
-    await this.commands.execute<LogoutCommand, void>(new LogoutCommand(requireAuthenticatedPrincipal(ctx)));
+    const body = LogoutBodySchema.safeParse(readJsonBody(ctx) ?? {});
+    if (!body.success) return validationFailed(body.issues);
+    await this.commands.execute<LogoutCommand, void>(new LogoutCommand(findAuthenticatedPrincipal(ctx), body.data.refreshToken));
     return empty(204);
   };
 
   public readonly listSessions = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
     const principal = requireAuthenticatedPrincipal(ctx);
     const sessions = await this.queries.execute<ListSessionsQuery, readonly SessionRecord[]>(new ListSessionsQuery(principal));
-    return json(200, { items: sessions.map((session) => convertSessionToDto(session, principal.sessionId)) });
+    return json(200, sessions.map((session) => convertSessionToDto(session, principal.sessionId)));
   };
 
   public readonly getSession = async (ctx: HttpRouterContext): Promise<HttpResponseContext> => {
@@ -135,7 +136,7 @@ export class AuthController {
     const query = UsernameAvailabilityQuerySchema.safeParse(ctx.query);
     if (!query.success) return validationFailed(query.issues);
     const available = await this.queries.execute<CheckUsernameAvailabilityQuery, boolean>(new CheckUsernameAvailabilityQuery(query.data.username));
-    return json(200, { username: query.data.username.toLowerCase(), available });
+    return json(200, { available });
   };
 
   private async signInWithProvider(ctx: HttpRouterContext, provider: SocialProvider): Promise<HttpResponseContext> {

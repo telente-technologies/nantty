@@ -5,7 +5,7 @@ import type { ContactAddress } from "./contact.service.js";
 import type { OneTimeCodeDelivery } from "./otp.service.js";
 
 const SUBJECTS: Readonly<Record<OtpPurpose, string>> = {
-  verify_contact: "Verify your Zudomart account",
+  signup: "Verify your email for Zudomart",
   login: "Your Zudomart sign-in code",
   reset_password: "Reset your Zudomart password",
 };

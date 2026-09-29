@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { NewSessionInput, OtpPurpose, OtpRecord, SessionRecord, SocialProvider } from "../models/auth.model.js";
+import type { NewSessionInput, OtpRecord, StoredCodePurpose, SessionRecord, SocialProvider } from "../models/auth.model.js";
 
 export interface SessionsRepository {
   create(input: NewSessionInput): Promise<SessionRecord>;
@@ -12,9 +12,10 @@ export interface SessionsRepository {
 }
 
 export interface OneTimeCodesRepository {
-  replaceActiveCode(target: string, purpose: OtpPurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord>;
-  findLatestActiveCode(target: string, purpose: OtpPurpose, now: Date): Promise<OtpRecord | undefined>;
-  findLatestCode(target: string, purpose: OtpPurpose): Promise<OtpRecord | undefined>;
+  replaceActiveCode(target: string, purpose: StoredCodePurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord>;
+  findLatestActiveCode(target: string, purpose: StoredCodePurpose, now: Date): Promise<OtpRecord | undefined>;
+  findLatestCode(target: string, purpose: StoredCodePurpose): Promise<OtpRecord | undefined>;
+  findActiveCodeByHash(purpose: StoredCodePurpose, codeHash: string, now: Date): Promise<OtpRecord | undefined>;
   incrementFailedAttempts(id: string): Promise<number>;
   consumeCode(id: string, consumedAt: Date): Promise<boolean>;
 }
@@ -68,7 +69,7 @@ export class InMemorySessionsRepository implements SessionsRepository {
 export class InMemoryOneTimeCodesRepository implements OneTimeCodesRepository {
   private readonly codes = new Map<string, OtpRecord>();
 
-  public async replaceActiveCode(target: string, purpose: OtpPurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord> {
+  public async replaceActiveCode(target: string, purpose: StoredCodePurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord> {
     for (const code of this.codes.values()) {
       if (code.target === target && code.purpose === purpose && code.consumedAt === null) {
         this.codes.set(code.id, { ...code, consumedAt: now });
@@ -79,15 +80,21 @@ export class InMemoryOneTimeCodesRepository implements OneTimeCodesRepository {
     return record;
   }
 
-  public async findLatestActiveCode(target: string, purpose: OtpPurpose, now: Date): Promise<OtpRecord | undefined> {
+  public async findLatestActiveCode(target: string, purpose: StoredCodePurpose, now: Date): Promise<OtpRecord | undefined> {
     const latest = await this.findLatestCode(target, purpose);
     return latest !== undefined && latest.consumedAt === null && latest.expiresAt > now ? latest : undefined;
   }
 
-  public async findLatestCode(target: string, purpose: OtpPurpose): Promise<OtpRecord | undefined> {
+  public async findLatestCode(target: string, purpose: StoredCodePurpose): Promise<OtpRecord | undefined> {
     return [...this.codes.values()]
       .filter((code) => code.target === target && code.purpose === purpose)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
+  }
+
+  public async findActiveCodeByHash(purpose: StoredCodePurpose, codeHash: string, now: Date): Promise<OtpRecord | undefined> {
+    return [...this.codes.values()].find(
+      (code) => code.purpose === purpose && code.codeHash === codeHash && code.consumedAt === null && code.expiresAt > now,
+    );
   }
 
   public async incrementFailedAttempts(id: string): Promise<number> {

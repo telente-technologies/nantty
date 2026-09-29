@@ -73,6 +73,11 @@ export class TokenService implements AccessTokenVerifier {
     return { accessToken: pair.accessToken, refreshToken: pair.refreshToken, expiresIn: pair.expiresIn, tokenType: "Bearer", sessionId: session.id };
   }
 
+  public findSessionIdInRefreshToken(refreshToken: string): string | undefined {
+    const verification = verifyRefreshToken(refreshToken, this.tokenConfig);
+    return verification.valid ? verification.payload?.sid : undefined;
+  }
+
   public async verify(accessToken: string): Promise<Principal> {
     const verification = verifyAccessToken(accessToken, this.tokenConfig);
     const payload = verification.valid ? verification.payload : undefined;

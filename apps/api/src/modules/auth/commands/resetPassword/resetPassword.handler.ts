@@ -4,7 +4,6 @@ import { BadRequestError } from "@zudojs/errors";
 import { publishEvent } from "../../../../loaders/events.loader.js";
 import { PasswordResetCompletedEvent } from "../../events/passwordResetCompleted.event.js";
 import type { AuthService } from "../../services/auth.service.js";
-import { parseContactAddress } from "../../services/contact.service.js";
 import type { ResetPasswordCommand } from "./resetPassword.command.js";
 
 export class ResetPasswordHandler extends CommandHandler<ResetPasswordCommand, void> {
@@ -16,12 +15,11 @@ export class ResetPasswordHandler extends CommandHandler<ResetPasswordCommand, v
 
   public async execute(command: ResetPasswordCommand): Promise<void> {
     const { passwords, otp, users, sessions, clock, events, audit } = this.auth.dependencies;
-    const contact = parseContactAddress(command.input.target);
-    passwords.assertPasswordMeetsPolicy(command.input.newPassword);
-    const codeIsValid = await otp.verifyAndConsumeOneTimeCode(contact, "reset_password", command.input.code);
-    const user = codeIsValid ? await this.auth.findUserByContact(contact) : undefined;
-    if (user === undefined) throw new BadRequestError("The code is invalid or has expired.");
-    await users.updatePasswordHash(user.id, await passwords.hashNewPassword(command.input.newPassword));
+    passwords.assertPasswordMeetsPolicy(command.input.password);
+    const contact = await otp.consumeVerifiedDestinationToken("reset_password", command.input.otpToken);
+    const user = contact === undefined ? undefined : await this.auth.findUserByContact(contact);
+    if (user === undefined || user.status !== "active") throw new BadRequestError("This reset link is invalid or has expired.");
+    await users.updatePasswordHash(user.id, await passwords.hashNewPassword(command.input.password));
     await sessions.revokeAllForUser(user.id, "password_reset", clock.now());
     await audit.record({ actorId: user.id, action: "auth.password_reset", entityType: "user", entityId: user.id });
     await publishEvent(events, PasswordResetCompletedEvent, { userId: user.id });

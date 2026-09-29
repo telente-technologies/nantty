@@ -4,8 +4,9 @@ import type { WebKit } from "../../../loaders/web.loader.js";
 import { describeRoute } from "../../../utils/openapi.util.js";
 import type { AuthController } from "../controllers/auth.controller.js";
 import {
-  ForgotPasswordBodySchema,
+  ChangePasswordBodySchema,
   LoginBodySchema,
+  LogoutBodySchema,
   RefreshTokenBodySchema,
   RegisterBodySchema,
   ResetPasswordBodySchema,
@@ -29,11 +30,11 @@ export function registerAuthRoutes(router: HttpRouter, controller: AuthControlle
   router.post(`${BASE_PATH}/apple`, controller.signInWithApple, { ...sensitive, ...describeRoute(TAG, "Sign in with an Apple ID token", { body: SocialSignInBodySchema }) });
   router.post(`${BASE_PATH}/otp/send`, controller.sendOneTimeCode, { ...sensitive, ...describeRoute(TAG, "Send a 6-digit code", { body: SendOneTimeCodeBodySchema }) });
   router.post(`${BASE_PATH}/otp/verify`, controller.verifyOneTimeCode, { ...sensitive, ...describeRoute(TAG, "Verify a 6-digit code", { body: VerifyOneTimeCodeBodySchema }) });
-  router.post(`${BASE_PATH}/password/forgot`, controller.forgotPassword, { ...sensitive, ...describeRoute(TAG, "Request a password reset code", { body: ForgotPasswordBodySchema }) });
-  router.post(`${BASE_PATH}/password/reset`, controller.resetPassword, { ...sensitive, ...describeRoute(TAG, "Reset a password with a code", { body: ResetPasswordBodySchema }) });
+  router.post(`${BASE_PATH}/password/change`, controller.changePassword, { ...guard.requireSignedInUser(limitSensitiveRequests), ...describeRoute(TAG, "Change my password", { body: ChangePasswordBodySchema }) });
+  router.post(`${BASE_PATH}/password/reset`, controller.resetPassword, { ...sensitive, ...describeRoute(TAG, "Reset a password with a verified otpToken", { body: ResetPasswordBodySchema }) });
   router.post(`${BASE_PATH}/refresh`, controller.refresh, { ...sensitive, ...describeRoute(TAG, "Rotate the refresh token", { body: RefreshTokenBodySchema }) });
-  router.get(`${BASE_PATH}/username-availability`, controller.checkUsernameAvailability, { ...guard.allowAnyone(), ...describeRoute(TAG, "Check whether a username is free", { query: UsernameAvailabilityQuerySchema }) });
-  router.post(`${BASE_PATH}/logout`, controller.logout, { ...guard.requireSignedInUser(), ...describeRoute(TAG, "Sign out of this session") });
+  router.get(`${BASE_PATH}/username-available`, controller.checkUsernameAvailability, { ...guard.allowAnyone(), ...describeRoute(TAG, "Check whether a username is free", { query: UsernameAvailabilityQuerySchema }) });
+  router.post(`${BASE_PATH}/logout`, controller.logout, { ...guard.allowAnyone(), ...describeRoute(TAG, "Sign out the session of a refresh token", { body: LogoutBodySchema }) });
   router.get(`${BASE_PATH}/sessions`, controller.listSessions, { ...guard.requirePermission("profile:manage"), ...describeRoute(TAG, "List active sessions") });
   router.get(`${BASE_PATH}/sessions/:id`, controller.getSession, { ...guard.requirePermission("profile:manage"), ...describeRoute(TAG, "Get a session", { params: SessionParamsSchema }) });
   router.delete(`${BASE_PATH}/sessions/:id`, controller.revokeSession, { ...guard.requirePermission("profile:manage"), ...describeRoute(TAG, "Sign out a session", { params: SessionParamsSchema }) });

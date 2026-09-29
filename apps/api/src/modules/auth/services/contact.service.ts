@@ -34,3 +34,7 @@ export function parseContactAddress(input: string): ContactAddress {
 export function normalizeUsername(username: string): string {
   return username.normalize("NFKC").trim().toLowerCase();
 }
+
+export function convertRequestedPurposeToOtpPurpose(purpose: "signup" | "reset" | "login"): "signup" | "reset_password" | "login" {
+  return purpose === "reset" ? "reset_password" : purpose;
+}

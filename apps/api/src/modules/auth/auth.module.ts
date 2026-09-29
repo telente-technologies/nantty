@@ -2,12 +2,11 @@ import { BaseModule, type ModuleContext } from "@zudojs/core";
 import type { CommandBus, QueryBus } from "@zudojs/cqrs";
 
 import { registerCommandHandlers, registerQueryHandlers } from "../../utils/cqrs.util.js";
-
+import { ChangePasswordHandler } from "./commands/changePassword/changePassword.handler.js";
 import { LoginHandler } from "./commands/login/login.handler.js";
 import { LogoutHandler } from "./commands/logout/logout.handler.js";
 import { RefreshTokenHandler } from "./commands/refreshToken/refreshToken.handler.js";
 import { RegisterHandler } from "./commands/register/register.handler.js";
-import { RequestPasswordResetHandler } from "./commands/requestPasswordReset/requestPasswordReset.handler.js";
 import { ResetPasswordHandler } from "./commands/resetPassword/resetPassword.handler.js";
 import { RevokeSessionHandler } from "./commands/revokeSession/revokeSession.handler.js";
 import { SendOtpHandler } from "./commands/sendOtp/sendOtp.handler.js";
@@ -42,7 +41,7 @@ export function registerAuthCommandAndQueryHandlers(commands: CommandBus, querie
     new SocialSignInHandler(auth),
     new LogoutHandler(auth),
     new RefreshTokenHandler(auth),
-    new RequestPasswordResetHandler(auth),
+    new ChangePasswordHandler(auth),
     new ResetPasswordHandler(auth),
     new RevokeSessionHandler(auth),
     new SendOtpHandler(auth),

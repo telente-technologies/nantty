@@ -1,9 +1,9 @@
 import { prisma } from "../../../integrations/database.integration.js";
-import type { NewSessionInput, OtpPurpose, OtpRecord, SessionRecord, SocialProvider } from "../models/auth.model.js";
+import type { NewSessionInput, OtpRecord, StoredCodePurpose, SessionRecord, SocialProvider } from "../models/auth.model.js";
 import type { OneTimeCodesRepository, SessionsRepository, SocialIdentitiesRepository } from "./auth.repository.js";
 
 function convertOtpRowToRecord(row: Omit<OtpRecord, "purpose"> & { purpose: string }): OtpRecord {
-  return { ...row, purpose: row.purpose as OtpPurpose };
+  return { ...row, purpose: row.purpose as StoredCodePurpose };
 }
 
 export class PrismaSessionsRepository implements SessionsRepository {
@@ -40,7 +40,7 @@ export class PrismaSessionsRepository implements SessionsRepository {
 }
 
 export class PrismaOneTimeCodesRepository implements OneTimeCodesRepository {
-  public async replaceActiveCode(target: string, purpose: OtpPurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord> {
+  public async replaceActiveCode(target: string, purpose: StoredCodePurpose, codeHash: string, expiresAt: Date, now: Date): Promise<OtpRecord> {
     const [, row] = await prisma().$transaction([
       prisma().otpCode.updateMany({ where: { target, purpose, consumedAt: null }, data: { consumedAt: now } }),
       prisma().otpCode.create({ data: { target, purpose, codeHash, expiresAt } }),
@@ -48,7 +48,7 @@ export class PrismaOneTimeCodesRepository implements OneTimeCodesRepository {
     return convertOtpRowToRecord(row);
   }
 
-  public async findLatestActiveCode(target: string, purpose: OtpPurpose, now: Date): Promise<OtpRecord | undefined> {
+  public async findLatestActiveCode(target: string, purpose: StoredCodePurpose, now: Date): Promise<OtpRecord | undefined> {
     const row = await prisma().otpCode.findFirst({
       where: { target, purpose, consumedAt: null, expiresAt: { gt: now } },
       orderBy: { createdAt: "desc" },
@@ -56,8 +56,13 @@ export class PrismaOneTimeCodesRepository implements OneTimeCodesRepository {
     return row === null ? undefined : convertOtpRowToRecord(row);
   }
 
-  public async findLatestCode(target: string, purpose: OtpPurpose): Promise<OtpRecord | undefined> {
+  public async findLatestCode(target: string, purpose: StoredCodePurpose): Promise<OtpRecord | undefined> {
     const row = await prisma().otpCode.findFirst({ where: { target, purpose }, orderBy: { createdAt: "desc" } });
+    return row === null ? undefined : convertOtpRowToRecord(row);
+  }
+
+  public async findActiveCodeByHash(purpose: StoredCodePurpose, codeHash: string, now: Date): Promise<OtpRecord | undefined> {
+    const row = await prisma().otpCode.findFirst({ where: { purpose, codeHash, consumedAt: null, expiresAt: { gt: now } } });
     return row === null ? undefined : convertOtpRowToRecord(row);
   }
 

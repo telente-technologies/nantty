@@ -1,6 +1,8 @@
 import type { UserRecord } from "../../users/models/users.model.js";
 
-export type OtpPurpose = "verify_contact" | "login" | "reset_password";
+export type OtpPurpose = "signup" | "login" | "reset_password";
+export type VerifiedDestinationPurpose = `${OtpPurpose}_verified`;
+export type StoredCodePurpose = OtpPurpose | VerifiedDestinationPurpose;
 export type SocialProvider = "google" | "apple";
 
 export interface SessionRecord {
@@ -28,7 +30,7 @@ export interface NewSessionInput {
 export interface OtpRecord {
   readonly id: string;
   readonly target: string;
-  readonly purpose: OtpPurpose;
+  readonly purpose: StoredCodePurpose;
   readonly codeHash: string;
   readonly attempts: number;
   readonly expiresAt: Date;
