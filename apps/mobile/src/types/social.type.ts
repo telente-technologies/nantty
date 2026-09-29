@@ -65,7 +65,18 @@ export interface NewPostInput {
   readonly soundId?: ID;
 }
 
-export type MediaUploadPurpose = "post" | "clip" | "story" | "avatar" | "banner" | "product" | "chat" | "voice";
+export type MediaUploadPurpose =
+  | "post"
+  | "clip"
+  | "story"
+  | "avatar"
+  | "banner"
+  | "product"
+  | "chat"
+  | "voice"
+  | "dispute_evidence"
+  | "identity_document"
+  | "verification_document";
 export type MediaUploadStatus = "uploading" | "processing" | "ready" | "failed";
 export type MediaVariantFormat = "avif" | "webp" | "jpeg" | "mp4" | "hls";
 
@@ -116,7 +127,7 @@ export interface CompletedUpload {
   readonly status: "processing";
 }
 
-export type AdPlacement = "feed" | "clips" | "mart" | "search";
+export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live";
 export type AdEventType = "impression" | "click";
 
 export interface AdEvent {
