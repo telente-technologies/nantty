@@ -1,95 +1,144 @@
-import type { SellerApplication, SellerApplicationInput, StoreProduct, StoreProductInput } from "@/types/account.type";
-import type { Order, OrderStatus, SellerDashboard } from "@/types";
+import { ApiError } from "@/errors/api.error";
+import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct, StoreProductInput } from "@/types/account.type";
+import type { MarkOrderShippedInput } from "@/types/commerce.type";
+import type { SellerDashboard } from "@/types";
 
-import { buildMockUserSummary, isoDateHoursAgo } from "./fixtures.mock";
+import { bankNameForCode } from "./banks.mock";
+import { buildEscrowDetailFromRecord, buildOrderFromRecord } from "./escrowBuilders.mock";
+import { getSignedInMockUser } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
+import { buildShipment, mockOrderRecords, usdCentsForOrderRecord, type MockOrderRecord } from "./orderFixtures.mock";
+import { catalogProductSeeds, buildCatalogProductSummary } from "./productCatalog.mock";
+import { productImageUrlsForProduct } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { productCategories } from "./storeDirectory.mock";
 
-const KEYBOARD_PRICE_IN_USD_CENTS = 1_300;
-const store = { id: "s_1", name: "Usershop Name", logoUrl: null, rating: 3.4, ratingCount: 200, reviewCount: 103 };
+const HOUR = 3_600_000;
+const PERIOD_WINDOW_HOURS: Record<SellerDashboardPeriod, number> = { live: 1, today: 24, yesterday: 48, week: 168, month: 720, all: 24 * 3650 };
+const CHART_BUCKET_COUNT = 12;
 
-const buildStoreOrder = (index: number, status: OrderStatus): Order => ({
-  id: `o_${index}`,
-  reference: `ZM10${40 + index}`,
-  status,
-  items: [
-    {
-      id: `ci_${index}`,
-      product: { id: "pr_kb", name: "Custom Mechanical Keyboard", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null },
-      quantity: 1,
-      variant: null,
-    },
-  ],
-  total: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS),
-  buyer: buildMockUserSummary(index, "Enyo Dev"),
-  store,
-  createdAt: isoDateHoursAgo(index * 5 + 1),
-  escrowReleaseAt: null,
-});
+const signedInStoreId = () => getSignedInMockUser().storeId ?? null;
+const listSignedInStoreOrderRecords = () =>
+  mockOrderRecords.filter((record) => record.storeId === signedInStoreId()).sort((a, b) => b.placedAt.localeCompare(a.placedAt));
 
-const orderStatuses = new Map<string, OrderStatus>([
-  ["o_1", "pending"],
-  ["o_2", "shipped"],
-  ["o_3", "delivered"],
-]);
+const findStoreOrderRecordOrThrow = (orderId: string): MockOrderRecord => {
+  const record = listSignedInStoreOrderRecords().find((candidate) => candidate.id === orderId);
+  if (!record) throw new ApiError(404, "Order not found");
+  return record;
+};
 
-const listStoreOrders = () => [...orderStatuses].map(([id, status]) => buildStoreOrder(Number(id.slice(2)), status));
+const catalogStoreProducts = (): StoreProduct[] =>
+  catalogProductSeeds
+    .filter((seed) => seed.storeId === signedInStoreId())
+    .map((seed) => ({
+      ...buildCatalogProductSummary(seed),
+      stock: buildCatalogProductSummary(seed).stock ?? seed.stock,
+      description: seed.description,
+      sizes: seed.sizes,
+      colors: seed.colors,
+      imageUrls: productImageUrlsForProduct(seed.key),
+      published: true,
+    }));
 
-let products: StoreProduct[] = [
-  { id: "sp_1", name: "Product Name", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null, stock: 12, description: "", sizes: [], colors: [], imageUrls: [], published: true },
-  { id: "sp_2", name: "Product Name", price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS), imageUrl: null, stock: 3, description: "", sizes: [], colors: [], imageUrls: [], published: true },
-];
+let sellerEditedProducts = new Map<string, StoreProduct>();
+let deletedProductIds = new Set<string>();
 
-const productsInViewerCurrency = () =>
-  products.map((p) => (p.id.startsWith("sp_") && p.id.length === 4 ? { ...p, price: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS) } : p));
+const listStoreProducts = (): StoreProduct[] => {
+  const fromCatalog = catalogStoreProducts().map((product) => sellerEditedProducts.get(product.id) ?? product);
+  const createdBySeller = [...sellerEditedProducts.values()].filter((product) => product.id.startsWith("sp_new_"));
+  return [...createdBySeller, ...fromCatalog].filter((product) => !deletedProductIds.has(product.id));
+};
 
-let application: SellerApplication | null = null;
+const toStoreProduct = (id: string, input: StoreProductInput): StoreProduct => ({ ...input, id, imageUrl: input.imageUrls[0] ?? null, published: true });
 
-const HOURS = ["12 AM", "3 PM", "6 PM", "9 PM", "12 PM", "3 AM"];
+const isCountedAsSale = (record: MockOrderRecord) => record.status !== "pending" && record.status !== "cancelled";
 
-const buildSellerDashboard = (): SellerDashboard => ({
-  totalSales: convertUsdCentsToViewerCurrency(KEYBOARD_PRICE_IN_USD_CENTS),
-  orders: 1,
-  series: HOURS.flatMap((label, i) => [
-    { label, value: 0 },
-    { label: `${label}+`, value: i === 0 ? 1 : 0 },
-  ]),
-  recentOrders: listStoreOrders(),
-  inventory: productsInViewerCurrency(),
-});
+function buildSellerDashboard(period: SellerDashboardPeriod): SellerDashboard {
+  const windowStart = Date.now() - PERIOD_WINDOW_HOURS[period] * HOUR;
+  const windowEnd = period === "yesterday" ? Date.now() - 24 * HOUR : Date.now();
+  const sales = listSignedInStoreOrderRecords().filter((record) => {
+    const placed = new Date(record.placedAt).getTime();
+    return isCountedAsSale(record) && placed >= windowStart && placed <= windowEnd;
+  });
+  const bucketSpan = (windowEnd - windowStart) / CHART_BUCKET_COUNT;
+  const bucketCounts = Array.from({ length: CHART_BUCKET_COUNT }, () => 0);
+  sales.forEach((record) => {
+    const bucket = Math.min(CHART_BUCKET_COUNT - 1, Math.floor((new Date(record.placedAt).getTime() - windowStart) / bucketSpan));
+    bucketCounts[bucket] = (bucketCounts[bucket] ?? 0) + 1;
+  });
+  return {
+    totalSales: convertUsdCentsToViewerCurrency(sales.reduce((sum, record) => sum + usdCentsForOrderRecord(record), 0)),
+    orders: sales.length,
+    series: bucketCounts.map((value, index) => ({ label: String(index), value })),
+    recentOrders: listSignedInStoreOrderRecords().slice(0, 4).map(buildOrderFromRecord),
+    inventory: listStoreProducts().slice(0, 6),
+  };
+}
 
-const toStoreProduct = (id: string, input: StoreProductInput, published = true): StoreProduct => ({
-  ...input,
-  id,
-  imageUrl: input.imageUrls[0] ?? null,
-  published,
-});
+const applicationsByUserId = new Map<string, SellerApplication>();
+
+const maskAllButLastFour = (value: string) => `•••• ${value.replace(/\s/g, "").slice(-4)}`;
+
+function validateSellerApplication(input: SellerApplicationInput) {
+  const requiredText = [input.storeName, input.categoryId, input.description, input.phone, input.addressLine, input.city, input.state];
+  if (requiredText.some((value) => !value?.trim())) throw new ApiError(422, "Please complete every step before submitting");
+  if (!input.identityDocument?.documentPhotoUrl) throw new ApiError(422, "Add a photo of your ID document");
+  if ((input.identityDocument.documentNumber ?? "").replace(/\s/g, "").length < 6) throw new ApiError(422, "Check your ID number");
+  if (!/^\d{10}$/.test(input.payoutAccount?.accountNumber ?? "")) throw new ApiError(422, "Enter a valid 10-digit account number");
+}
 
 export const sellerMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/seller/dashboard", () => buildSellerDashboard()),
-  createMockRoute("GET", "/api/v1/seller/applications/me", () => application),
+  createMockRoute("GET", "/api/v1/seller/dashboard", ({ query }) => buildSellerDashboard((query.get("period") as SellerDashboardPeriod) ?? "today")),
+  createMockRoute("GET", "/api/v1/seller/applications/me", () => applicationsByUserId.get(getSignedInMockUser().id) ?? null),
   createMockRoute("POST", "/api/v1/seller/applications", ({ body }) => {
-    application = { ...(body as SellerApplicationInput), id: "sa_1", status: "pending", submittedAt: new Date().toISOString() };
+    const existing = applicationsByUserId.get(getSignedInMockUser().id);
+    if (existing?.status === "pending") return existing;
+    const input = body as SellerApplicationInput;
+    validateSellerApplication(input);
+    const application: SellerApplication = {
+      id: `sa_${Date.now()}`,
+      status: "pending",
+      storeName: input.storeName.trim(),
+      categoryName: productCategories.find((category) => category.id === input.categoryId)?.name ?? input.categoryId,
+      city: input.city.trim(),
+      state: input.state.trim(),
+      identityDocumentType: input.identityDocument.documentType,
+      identityDocumentNumberMasked: maskAllButLastFour(input.identityDocument.documentNumber),
+      payoutBankName: bankNameForCode(input.payoutAccount.bankCode),
+      payoutAccountNumberMasked: maskAllButLastFour(input.payoutAccount.accountNumber),
+      submittedAt: new Date().toISOString(),
+      reviewedAt: null,
+      rejectionReason: null,
+    };
+    applicationsByUserId.set(getSignedInMockUser().id, application);
     return application;
   }),
-  createMockRoute("GET", "/api/v1/seller/products", () => productsInViewerCurrency()),
-  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => productsInViewerCurrency().find((p) => p.id === params.productId)),
+  createMockRoute("GET", "/api/v1/seller/products", () => listStoreProducts()),
+  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => listStoreProducts().find((p) => p.id === params.productId)),
   createMockRoute("POST", "/api/v1/seller/products", ({ body }) => {
     const product = toStoreProduct(`sp_new_${Date.now()}`, body as StoreProductInput);
-    products = [product, ...products];
+    sellerEditedProducts = new Map([[product.id, product], ...sellerEditedProducts]);
     return product;
   }),
   createMockRoute("PATCH", "/api/v1/seller/products/:productId", ({ params, body }) => {
-    products = products.map((p) => (p.id === params.productId ? toStoreProduct(p.id, body as StoreProductInput, p.published) : p));
-    return products.find((p) => p.id === params.productId);
+    const product = toStoreProduct(params.productId!, body as StoreProductInput);
+    sellerEditedProducts.set(product.id, product);
+    return product;
   }),
   createMockRoute("DELETE", "/api/v1/seller/products/:productId", ({ params }) => {
-    products = products.filter((p) => p.id !== params.productId);
+    deletedProductIds = new Set([...deletedProductIds, params.productId!]);
   }),
-  createMockRoute("GET", "/api/v1/seller/orders", () => listStoreOrders()),
-  createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => listStoreOrders().find((o) => o.id === params.orderId)),
-  createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params }) => {
-    if (orderStatuses.has(params.orderId!)) orderStatuses.set(params.orderId!, "shipped");
-    return listStoreOrders().find((o) => o.id === params.orderId);
+  createMockRoute("GET", "/api/v1/seller/orders", () => listSignedInStoreOrderRecords().map(buildOrderFromRecord)),
+  createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => buildOrderFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
+  createMockRoute("GET", "/api/v1/seller/orders/:orderId/escrow", ({ params }) => buildEscrowDetailFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
+  createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params, body }) => {
+    const record = findStoreOrderRecordOrThrow(params.orderId!);
+    if (record.status === "shipped") return buildOrderFromRecord(record);
+    if (record.status !== "paid") throw new ApiError(409, "Only paid orders can be marked as shipped");
+    const { courierName, trackingNumber } = body as MarkOrderShippedInput;
+    if (!courierName?.trim() || !trackingNumber?.trim()) throw new ApiError(422, "Add the courier and tracking number");
+    record.shipment = buildShipment(courierName.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
+    record.status = "shipped";
+    return buildOrderFromRecord(record);
   }),
 ];
