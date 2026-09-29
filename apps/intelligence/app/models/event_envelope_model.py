@@ -14,13 +14,16 @@ from app.models.event_payload_model import (
     AddedToCartPayload,
     AdImpressionPayload,
     ClipWatchedPayload,
+    CoinTransferredPayload,
     CommentedPayload,
     FollowedPayload,
+    GiftSentPayload,
     HiddenPayload,
     PostLikedPayload,
     PostViewedPayload,
     ProductViewedPayload,
     PurchasedPayload,
+    ReferralRewardedPayload,
     ReportedPayload,
     RiskOutcomeLabeledPayload,
     SearchedPayload,
@@ -128,6 +131,21 @@ class RiskOutcomeLabeledEvent(EventEnvelopeBase):
     payload: RiskOutcomeLabeledPayload
 
 
+class CoinTransferredEvent(EventEnvelopeBase):
+    event_type: Literal["coin_transferred"]
+    payload: CoinTransferredPayload
+
+
+class GiftSentEvent(EventEnvelopeBase):
+    event_type: Literal["gift_sent"]
+    payload: GiftSentPayload
+
+
+class ReferralRewardedEvent(EventEnvelopeBase):
+    event_type: Literal["referral_rewarded"]
+    payload: ReferralRewardedPayload
+
+
 type IntelligenceEvent = Annotated[
     PostViewedEvent
     | PostLikedEvent
@@ -144,7 +162,10 @@ type IntelligenceEvent = Annotated[
     | AdConversionEvent
     | ReportedEvent
     | HiddenEvent
-    | RiskOutcomeLabeledEvent,
+    | RiskOutcomeLabeledEvent
+    | CoinTransferredEvent
+    | GiftSentEvent
+    | ReferralRewardedEvent,
     Field(discriminator="event_type"),
 ]
 
@@ -167,6 +188,9 @@ SUPPORTED_EVENT_TYPES: tuple[str, ...] = (
     "reported",
     "hidden",
     "risk_outcome_labeled",
+    "coin_transferred",
+    "gift_sent",
+    "referral_rewarded",
 )
 
 
