@@ -1,8 +1,9 @@
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from "expo-audio";
 import { useCallback, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 const MINIMUM_VOICE_NOTE_SECONDS = 1;
 const MAXIMUM_VOICE_NOTE_SECONDS = 300;
@@ -17,14 +18,14 @@ export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMedia
     try {
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert("Microphone needed", "Allow microphone access in Settings to send voice notes.");
+        showAlertWithButtons("Microphone needed", "Allow microphone access in Settings to send voice notes.");
         return;
       }
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record({ forDuration: MAXIMUM_VOICE_NOTE_SECONDS });
     } catch {
-      Alert.alert("Couldn't start recording", "Please try again.");
+      showAlertWithButtons("Couldn't start recording", "Please try again.");
     } finally {
       setIsPreparing(false);
     }
