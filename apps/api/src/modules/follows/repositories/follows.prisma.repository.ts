@@ -68,6 +68,10 @@ export class PrismaFollowsRepository implements FollowsRepository {
     return prisma().follow.count({ where: { followeeType: targetType, followeeId: targetId } });
   }
 
+  public async countFollowersSince(targetType: FollowTargetType, targetId: string, since: Date): Promise<number> {
+    return prisma().follow.count({ where: { followeeType: targetType, followeeId: targetId, createdAt: { gte: since } } });
+  }
+
   public async countFollowing(followerId: string): Promise<number> {
     return prisma().follow.count({ where: { followerId } });
   }
