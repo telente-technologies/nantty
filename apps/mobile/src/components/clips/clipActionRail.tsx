@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { ChatCircle24Icon, DotsThreeVertical24Icon, Heart24Icon, PaperPlaneTilt24Icon, HeartFill72Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
+import { ChatCircle24Icon, Coin24Icon, DotsThreeVertical24Icon, Heart24Icon, HeartFill72Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 export interface ClipActionRailProps {
@@ -56,9 +56,7 @@ export function ClipActionRail(props: ClipActionRailProps) {
       </RailButton>
       {props.onTip ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={8} onPress={props.onTip} style={styles.button}>
-          <Text size={20} lineHeight={24}>
-            🪙
-          </Text>
+          <Coin24Icon color={color} />
           <Text size={13} lineHeight={16.9} color={color} style={color ? styles.readableOnVideo : undefined}>
             Tip
           </Text>
