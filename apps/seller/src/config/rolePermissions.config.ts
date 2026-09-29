@@ -22,7 +22,6 @@ export type SellerPermission =
   | "settings:view"
   | "settings:manage"
   | "billing:manage"
-  | "ads:manage"
   | "affiliates:manage"
   | "media:upload";
 
@@ -34,13 +33,13 @@ export const permissionsByStaffRole: Record<StaffRole, ReadonlySet<SellerPermiss
     "dashboard:view", "pos:sell", "pos:refund", "pos:approve_discount", "pos:manage_all_shifts", "products:manage",
     "inventory:manage", "orders:view", "orders:manage", "customers:view", "customers:manage", "promotions:manage",
     "staff:manage", "audit:view", "reports:view", "wallet:view", "wallet:withdraw", "settings:manage", "billing:manage",
-    "ads:manage", "affiliates:manage", "media:upload",
+    "affiliates:manage", "media:upload",
   ]),
   admin: new Set<SellerPermission>([
     ...permissionsGrantedToEveryRole,
     "dashboard:view", "pos:sell", "pos:refund", "pos:approve_discount", "pos:manage_all_shifts", "products:manage",
     "inventory:manage", "orders:view", "orders:manage", "customers:view", "customers:manage", "promotions:manage",
-    "staff:manage", "audit:view", "reports:view", "wallet:view", "settings:manage", "ads:manage", "affiliates:manage", "media:upload",
+    "staff:manage", "audit:view", "reports:view", "wallet:view", "settings:manage", "affiliates:manage", "media:upload",
   ]),
   manager: new Set<SellerPermission>([
     ...permissionsGrantedToEveryRole,
@@ -70,7 +69,6 @@ const pagePermissionRules: { readonly pathPrefix: string; readonly permission: S
   { pathPrefix: "/staff", permission: "staff:manage" },
   { pathPrefix: "/reports", permission: "reports:view" },
   { pathPrefix: "/wallet", permission: "wallet:view" },
-  { pathPrefix: "/ads", permission: "ads:manage" },
   { pathPrefix: "/affiliates", permission: "affiliates:manage" },
   { pathPrefix: "/settings/billing", permission: "billing:manage" },
   { pathPrefix: "/settings", permission: "settings:view" },
@@ -127,7 +125,6 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/wallet\//, permission: "wallet:view" },
   { method: "GET", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:view" },
   { method: "ANY", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:manage" },
-  { method: "ANY", pathPattern: /^\/seller\/ads\//, permission: "ads:manage" },
   { method: "ANY", pathPattern: /^\/seller\/affiliates\//, permission: "affiliates:manage" },
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },
 ];
