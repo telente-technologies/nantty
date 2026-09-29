@@ -67,7 +67,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
         <StoreProfileHeader
           store={detail}
           onToggleFollow={() => toggleStoreFollow.mutate(!detail.isFollowing)}
-          onMessage={() => navigation.navigate("Chat", { userId: detail.id, name: detail.name })}
+          onMessage={() => navigation.navigate("Chat", { userId: detail.ownerUserId, name: detail.name })}
         />
         <StoreTabs active={activeTab} onChange={setActiveTab} />
         <View style={styles.tabBody}>
