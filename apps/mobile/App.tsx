@@ -9,6 +9,7 @@ import {
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -32,6 +33,7 @@ import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring,
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
+WebBrowser.maybeCompleteAuthSession();
 
 export default function App() {
   const [queryClient] = useState(createZudomartQueryClient);
