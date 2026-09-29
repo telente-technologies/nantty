@@ -1,0 +1,104 @@
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: var(--ink-muted);
+}
+
+.rowBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+}
+
+.syncNote {
+  padding: 12px 14px;
+  border-radius: var(--radius-medium);
+  background: var(--blue-tint);
+  color: var(--blue-900);
+  font-size: 13px;
+}
+
+.footnote {
+  color: var(--ink-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.footnote a,
+.textButton {
+  font-weight: 650;
+}
+
+.textButton {
+  align-self: center;
+  border: 0;
+  background: none;
+  color: var(--blue-600);
+}
+
+.primaryLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  border-radius: var(--radius-small);
+  background: var(--blue-500);
+  color: #fff;
+  font-weight: 650;
+}
+
+.primaryLink:hover {
+  background: var(--blue-600);
+  text-decoration: none;
+}
+
+.demoAccounts {
+  padding: 12px 14px;
+  border: 1px dashed var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  font-size: 13px;
+}
+
+.demoAccounts summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.demoAccounts ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.demoAccounts li {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.demoAccounts span {
+  color: var(--ink-faint);
+}
