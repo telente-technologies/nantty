@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpMiddleware, HttpRouter } from "@zudojs/http";
 
 import type { WebKit } from "../../../loaders/web.loader.js";
 import { describeRoute } from "../../../utils/openapi.util.js";
@@ -15,7 +15,7 @@ import {
 
 const TAG = "orders";
 
-export function registerOrdersRoutes(router: HttpRouter, controller: OrdersController, sellerController: SellerOrdersController, web: WebKit): void {
+export function registerOrdersRoutes(router: HttpRouter, controller: OrdersController, sellerController: SellerOrdersController, web: WebKit, requireSellerTools: HttpMiddleware): void {
   const { guard, requireIdempotencyKey } = web;
   const buyer = guard.requirePermission("orders:read-own");
   const seller = guard.requirePermission("orders:fulfil");
@@ -33,7 +33,7 @@ export function registerOrdersRoutes(router: HttpRouter, controller: OrdersContr
   });
   router.get("/api/v1/seller/orders", sellerController.list, { ...seller, ...describeRoute(TAG, "List my store's orders", { query: ListSellerOrdersQuerySchema }) });
   router.get("/api/v1/seller/orders/:id", sellerController.get, { ...seller, ...describeRoute(TAG, "Get one of my store's orders", { params: OrderParamsSchema }) });
-  router.post("/api/v1/seller/orders/:id/ship", sellerController.ship, { ...seller, ...describeRoute(TAG, "Mark an order shipped", { params: OrderParamsSchema, body: ShipOrderBodySchema }) });
+  router.post("/api/v1/seller/orders/:id/ship", sellerController.ship, { ...seller, ...describeRoute(TAG, "Mark an order shipped with courier and tracking number", { params: OrderParamsSchema, body: ShipOrderBodySchema }) });
   router.post("/api/v1/seller/orders/:id/deliver", sellerController.deliver, { ...seller, ...describeRoute(TAG, "Mark an order delivered", { params: OrderParamsSchema }) });
-  router.get("/api/v1/seller/dashboard", sellerController.dashboard, { ...seller, ...describeRoute(TAG, "Seller dashboard for a period", { query: SellerDashboardQuerySchema }) });
+  router.get("/api/v1/seller/dashboard", sellerController.dashboard, { ...guard.requirePermission("orders:fulfil", requireSellerTools), ...describeRoute(TAG, "Seller dashboard for a period (Gold verified store with an active Gold plan)", { query: SellerDashboardQuerySchema }) });
 }
