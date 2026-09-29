@@ -8,12 +8,22 @@ from app.stores.feature_backend_protocol import (
     DistinctMemberAdd,
     FeatureBackendUnavailableError,
     FeatureWriteOperation,
+    HashFieldAssign,
     HashFieldIncrement,
     KeyExpiry,
     SortedSetAssignScore,
     SortedSetIncrement,
     SortedSetKeepHighestScores,
 )
+
+SCRIPT_KEY_CHUNK_SIZE = 1000
+READ_MANY_HASHES_LUA_SCRIPT = """
+local rows = {}
+for index, key in ipairs(KEYS) do
+    rows[index] = redis.call('HGETALL', key)
+end
+return rows
+"""
 
 
 def convert_optional_redis_number(raw_value: Any) -> float | None:
@@ -31,6 +41,7 @@ class RedisFeatureBackend:
             decode_responses=True,
             health_check_interval=30,
         )
+        self._read_many_hashes_script = self._redis_client.register_script(READ_MANY_HASHES_LUA_SCRIPT)
 
     async def claim_keys_if_absent(self, keys: Sequence[str], ttl_seconds: int) -> list[bool]:
         if not keys:
@@ -67,6 +78,8 @@ class RedisFeatureBackend:
                             pipeline.zremrangebyrank(key, 0, -(keep_count + 1))
                         case HashFieldIncrement(key=key, field=field, amount=amount):
                             pipeline.hincrbyfloat(key, field, amount)
+                        case HashFieldAssign(key=key, field=field, value=value):
+                            pipeline.hset(key, field, value)
                         case DistinctMemberAdd(key=key, member=member):
                             pipeline.pfadd(key, member)
                         case KeyExpiry(key=key, ttl_seconds=ttl_seconds):
@@ -111,16 +124,18 @@ class RedisFeatureBackend:
         return [[(str(member), float(score)) for member, score in rows] for rows in raw_results]
 
     async def read_hash_fields(self, keys: Sequence[str]) -> list[dict[str, float]]:
-        if not keys:
-            return []
+        results: list[dict[str, float]] = []
         try:
-            async with self._redis_client.pipeline(transaction=False) as pipeline:
-                for key in keys:
-                    pipeline.hgetall(key)
-                raw_results = await pipeline.execute()
+            for chunk_start in range(0, len(keys), SCRIPT_KEY_CHUNK_SIZE):
+                chunk_keys = list(keys[chunk_start : chunk_start + SCRIPT_KEY_CHUNK_SIZE])
+                flat_rows = await self._read_many_hashes_script(keys=chunk_keys)
+                for flat_row in flat_rows:
+                    results.append(
+                        {str(flat_row[index]): float(flat_row[index + 1]) for index in range(0, len(flat_row), 2)}
+                    )
         except RedisError as redis_error:
             raise FeatureBackendUnavailableError("redis read failed") from redis_error
-        return [{str(field): float(value) for field, value in row.items()} for row in raw_results]
+        return results
 
     async def count_distinct_members(self, keys: Sequence[str]) -> list[int]:
         if not keys:
