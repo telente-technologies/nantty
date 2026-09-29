@@ -67,9 +67,11 @@
     "@zudojs/storage": "^1.3.0",
     "@zudojs/types": "^1.3.0",
     "@zudojs/validation": "^1.2.0",
+    "blurhash": "^2.0.5",
     "nodemailer": "^10.0.10",
     "prisma": "^7.10.0",
     "redis": "^6.2.1",
+    "sharp": "^0.35.5",
     "ws": "^8.21.3"
   },
   "devDependencies": {

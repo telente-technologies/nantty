@@ -45,19 +45,22 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  productId String
-  variantId String
-  title     String
-  size      String?
-  color     String?
-  imageUrl  String?
-  unitPrice BigInt
-  quantity  Int
-  lineTotal BigInt
-  order     Order   @relation(fields: [orderId], references: [id])
+  id                String  @id @default(uuid())
+  orderId           String
+  productId         String
+  variantId         String
+  title             String
+  size              String?
+  color             String?
+  imageUrl          String?
+  unitPrice         BigInt
+  quantity          Int
+  lineTotal         BigInt
+  attributionSource String?
+  attributionId     String?
+  order             Order   @relation(fields: [orderId], references: [id])
 
   @@index([orderId])
+  @@index([attributionSource, attributionId])
   @@map("order_items")
 }

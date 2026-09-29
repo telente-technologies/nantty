@@ -34,16 +34,24 @@ model PostLike {
 }
 
 model Comment {
-  id        String    @id @default(uuid())
-  postId    String
-  authorId  String
-  parentId  String?
-  text      String
-  likeCount Int       @default(0)
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
+  id              String    @id @default(uuid())
+  postId          String
+  authorId        String
+  parentCommentId String?   @map("parentId")
+  rootCommentId   String?
+  text            String
+  likeCount       Int       @default(0)
+  replyCount      Int       @default(0)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  parentComment   Comment?  @relation("CommentParent", fields: [parentCommentId], references: [id])
+  directReplies   Comment[] @relation("CommentParent")
+  rootComment     Comment?  @relation("CommentRoot", fields: [rootCommentId], references: [id])
+  threadReplies   Comment[] @relation("CommentRoot")
 
   @@index([postId, createdAt])
+  @@index([postId, parentCommentId, createdAt])
+  @@index([rootCommentId, createdAt])
   @@map("comments")
 }
 
