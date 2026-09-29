@@ -8,6 +8,7 @@ model LiveSession {
   reactionCount Int       @default(0)
   productIds    String[]
   pinnedId      String?
+  visibility    String    @default("public")
   startedAt     DateTime  @default(now())
   endedAt       DateTime?
 
