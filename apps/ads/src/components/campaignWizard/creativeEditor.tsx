@@ -1,13 +1,13 @@
 "use client";
 
 import { ContentSourcePicker } from "@/components/campaignWizard/contentSourcePicker";
+import { PlacementFitList } from "@/components/campaignWizard/placementFitList";
 import { CreativeUploadField } from "@/components/campaignWizard/creativeUploadField";
 import type { WizardAdDraft } from "@/components/campaignWizard/campaignWizardState.store";
 import { buildPreviewCreativeFromAdDraft } from "@/components/campaignWizard/campaignWizardSubmission.util";
 import type { WizardFieldErrors } from "@/components/campaignWizard/campaignWizardValidation.util";
 import { AdPreviewWithSurfaceSwitcher } from "@/components/creative/adPreview";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/formFields";
-import { TabList } from "@/components/ui/tabs";
 import { callToActionLabels, creativeFormatLabels, headlineMaximumLength, primaryTextMaximumLength } from "@/constants/campaignOptions.constant";
 import type { AdAccount } from "@/types/adAccount.type";
 import type { AdPlacement } from "@/types/campaign.type";
@@ -17,15 +17,25 @@ import styles from "./creativeEditor.module.css";
 
 const sourceTabs: readonly { readonly value: CreativeSourceType; readonly label: string }[] = [
   { value: "post", label: "Post" },
-  { value: "clip", label: "Clip" },
+  { value: "clip", label: "Reel" },
   { value: "product", label: "Product" },
+  { value: "live", label: "Live" },
   { value: "store", label: "Store" },
   { value: "upload", label: "Upload new" },
 ];
 
 const destinationLabels: Record<DestinationType, string> = { post: "The post or clip", profile: "Your profile", store: "Your store", product: "The product page", messages: "Zudomart messages", url: "A website" };
 
-const formatBySourceType: Record<Exclude<CreativeSourceType, "upload">, CreativeFormat> = { post: "feed_post", clip: "clip", product: "product", store: "store" };
+const formatBySourceType: Record<Exclude<CreativeSourceType, "upload">, CreativeFormat> = { post: "feed_post", clip: "clip", product: "product", store: "store", live: "live" };
+
+const formatsAllowedBySourceType: Record<CreativeSourceType, readonly CreativeFormat[]> = {
+  post: ["feed_post", "story"],
+  clip: ["clip", "feed_post", "story"],
+  product: ["product", "feed_post", "story"],
+  store: ["store", "feed_post"],
+  live: ["live"],
+  upload: ["feed_post", "clip", "story"],
+};
 
 interface CreativeEditorProps {
   readonly accountId: string;
@@ -46,7 +56,8 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
       format: formatBySourceType[source.type],
       headline: ad.headline || (source.product?.title ?? source.title).slice(0, headlineMaximumLength),
       primaryText: ad.primaryText || source.text.slice(0, primaryTextMaximumLength),
-      destinationType: source.type === "product" ? "product" : source.type === "store" ? "store" : ad.destinationType,
+      destinationType: source.type === "product" ? "product" : source.type === "store" ? "store" : source.type === "live" ? "post" : ad.destinationType,
+      callToAction: source.type === "live" ? "watch_more" : ad.callToAction,
     });
   }
 
@@ -56,7 +67,13 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
         <TextField label="Ad name" value={ad.name} onValueChange={(name) => onAdChange({ name })} maxLength={120} />
         <div>
           <p className={styles.fieldLabel}>What to promote</p>
-          <TabList label="Creative source" tabs={sourceTabs} selected={ad.sourceType} onSelect={(sourceType) => onAdChange({ sourceType, selectedSource: sourceType === ad.sourceType ? ad.selectedSource : null, format: sourceType === "upload" ? "feed_post" : formatBySourceType[sourceType] })} />
+          <div role="radiogroup" aria-label="Creative source" className={styles.sourceChips}>
+            {sourceTabs.map((tab) => (
+              <button key={tab.value} type="button" role="radio" aria-checked={ad.sourceType === tab.value} className={ad.sourceType === tab.value ? `${styles.sourceChip} ${styles.sourceChipOn}` : styles.sourceChip} onClick={() => onAdChange({ sourceType: tab.value, selectedSource: tab.value === ad.sourceType ? ad.selectedSource : null, format: tab.value === "upload" ? "feed_post" : formatBySourceType[tab.value] })}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
           {ad.sourceType === "upload" ? (
             <CreativeUploadField accountId={accountId} uploadedMedia={ad.uploadedMedia} onUploadedMediaChange={(uploadedMedia) => onAdChange({ uploadedMedia })} error={errorFor("media")} />
           ) : (
@@ -70,7 +87,8 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
             </>
           )}
         </div>
-        <SelectField label="Format" value={ad.format} options={(Object.keys(creativeFormatLabels) as CreativeFormat[]).map((format) => ({ value: format, label: creativeFormatLabels[format] }))} onValueChange={(format) => onAdChange({ format })} />
+        <SelectField label="Format" value={ad.format} options={formatsAllowedBySourceType[ad.sourceType].map((format) => ({ value: format, label: creativeFormatLabels[format] }))} onValueChange={(format) => onAdChange({ format })} hint="The format is how the ad looks where the content has its own shape, like a reel or a product tile." />
+        <PlacementFitList ad={ad} account={account} placements={placements} error={errorFor("placements")} />
         <TextField label="Headline" value={ad.headline} onValueChange={(headline) => onAdChange({ headline })} error={errorFor("headline")} hint={`${ad.headline.length}/${headlineMaximumLength}`} />
         <TextAreaField label="Primary text" value={ad.primaryText} onValueChange={(primaryText) => onAdChange({ primaryText })} maximumLength={primaryTextMaximumLength} error={errorFor("primaryText")} rows={4} />
         <div className={styles.twoColumns}>
