@@ -143,6 +143,26 @@ export interface AdAppeal {
   readonly resolutionNote: string | null;
 }
 
+export type PolicySeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export interface AutoCheckFlag {
+  readonly policyCategoryId: string;
+  readonly label: string;
+  readonly severity: PolicySeverity;
+  readonly detail: string;
+}
+
+export interface AdPolicyCategoryRecord {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly severity: PolicySeverity;
+  readonly isActive: boolean;
+  readonly rejectionCount: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
 export interface AdRecord {
   readonly id: string;
   readonly accountId: string;
@@ -156,6 +176,8 @@ export interface AdRecord {
   readonly reviewedAt: Date | null;
   readonly reviewedById: string | null;
   readonly appeal: AdAppeal | null;
+  readonly autoCheckFlags: readonly AutoCheckFlag[];
+  readonly submittedAt: Date | null;
   readonly creativeInput: CreativeInput;
   readonly creative: ResolvedCreative;
   readonly deliverablePlacements: readonly AdPlacement[];

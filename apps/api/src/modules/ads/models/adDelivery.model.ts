@@ -2,7 +2,7 @@ import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { IntelligenceAdPlacement, IntelligenceBidType } from "../../intelligence/models/intelligenceAds.model.js";
 import type { SponsoredSurface } from "../../../interfaces/discovery.interface.js";
 
-export const MICROS_PER_MINOR_UNIT = 1_000_000;
+export const MILLI_MINOR_UNITS_PER_MINOR_UNIT = 1_000;
 
 export type AdEventType = "impression" | "click" | "conversion";
 
@@ -39,7 +39,7 @@ export interface AdEventRecord {
   readonly viewerId: string;
   readonly surface: string;
   readonly billed: boolean;
-  readonly chargeMicros: number;
+  readonly chargeMilliMinor: number;
   readonly currency: CurrencyCode;
   readonly rejectionReason: string | null;
   readonly orderId: string | null;
@@ -76,8 +76,8 @@ export type NewAdBillingTransactionInput = Omit<AdBillingTransactionRecord, "id"
 export interface SpendReservation {
   readonly scopeId: string;
   readonly period: string;
-  readonly amountMicros: number;
-  readonly limitMicros: number | null;
+  readonly amountMilliMinor: number;
+  readonly limitMilliMinor: number | null;
 }
 
 export interface SpendCounterKey {

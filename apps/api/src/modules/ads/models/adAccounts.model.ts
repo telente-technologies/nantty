@@ -38,12 +38,14 @@ export interface AdAccountRecord {
   readonly status: AdAccountStatus;
   readonly disabledReason: string | null;
   readonly monthlySpendLimitMinor: number | null;
+  readonly violationCount: number;
+  readonly lastViolationAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
 
 export type NewAdAccountInput = Pick<AdAccountRecord, "name" | "kind" | "ownerId" | "storeId" | "countryCode" | "currency" | "timezone">;
-export type AdAccountChanges = Partial<Pick<AdAccountRecord, "name" | "timezone" | "status" | "disabledReason" | "monthlySpendLimitMinor">>;
+export type AdAccountChanges = Partial<Pick<AdAccountRecord, "name" | "timezone" | "status" | "disabledReason" | "monthlySpendLimitMinor" | "violationCount" | "lastViolationAt">>;
 
 export interface AdAccountMemberRecord {
   readonly accountId: string;
