@@ -41,7 +41,7 @@ export default function AboutPage() {
             Zudomart puts those sellers, their content and a proper multi-vendor checkout in one app. Payments sit in escrow until the buyer confirms delivery, so trust no longer depends on how many followers a store has.
           </p>
         </div>
-        <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed" className={styles.phone} sizes="(min-width: 960px) 280px, 60vw" />
+        <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed with a post from a Lagos fashion seller" className={styles.phone} sizes="(min-width: 960px) 280px, 60vw" />
       </section>
       <section className={styles.principles} aria-labelledby="principles-heading">
         <div className="pageContainer">
