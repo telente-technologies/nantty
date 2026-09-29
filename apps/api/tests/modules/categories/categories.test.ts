@@ -5,14 +5,12 @@ import { createTestApplication } from "../../fixtures/testApplication.fixture.js
 const app = createTestApplication();
 afterAll(() => app.close());
 
-interface CategoryList {
-  readonly items: readonly { readonly id: string; readonly slug: string; readonly name: string }[];
-}
+type CategoryList = readonly { readonly id: string; readonly slug: string; readonly name: string }[];
 
 describe("categories", () => {
   it("lists the default categories to anyone", async () => {
     const response = await app.client.get("/api/v1/categories").expect(200);
-    const slugs = response.json<CategoryList>().items.map((category) => category.slug);
+    const slugs = response.json<CategoryList>().map((category) => category.slug);
     expect(slugs).toEqual(expect.arrayContaining(["fashion", "kids", "beauty-personal-care", "appliances"]));
   });
 

@@ -13,6 +13,7 @@ import type { OtpPurpose, SocialProvider, VerifiedSocialIdentity } from "../../s
 import type { ContactAddress } from "../../src/modules/auth/services/contact.service.js";
 import { StaticBankDirectory } from "../../src/modules/wallets/services/bankDirectory.service.js";
 import { registerRoutes } from "../../src/routes/index.js";
+import { createApplicationRouterOptions } from "../../src/utils/http.util.js";
 
 export class AdjustableClock implements Clock {
   private current = new Date("2026-09-01T09:00:00.000Z");
@@ -107,7 +108,7 @@ export function createTestApplication(options: TestApplicationOptions = {}) {
     logger: createAppLogger("test"),
     external: { oneTimeCodeDelivery: oneTimeCodes, identityTokenVerifier: identityTokens, bankDirectory: new StaticBankDirectory(), ...options.external },
   });
-  const router = createRouter();
+  const router = createRouter(createApplicationRouterOptions());
   registerRoutes(router, dependencies);
   const client = createHttpTestClient(router);
   let userCounter = 0;
