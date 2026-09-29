@@ -1,7 +1,8 @@
+import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import type { PayoutAccount, Withdrawal } from "../../../generated/prisma/client.js";
 import { prisma } from "../../../integrations/database.integration.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
-import { convertDatabaseAmountToKobo } from "../../../utils/money.util.js";
+import { convertDatabaseAmountToMinorUnits } from "../../../utils/money.util.js";
 import { buildPageFromFetchedRows, buildPrismaPageArguments, mapPageItems } from "../../../utils/pagination.util.js";
 import type { NewPayoutAccount, NewWithdrawal, PayoutAccountRecord, WithdrawalRecord, WithdrawalStatus } from "../models/wallets.model.js";
 import type { PayoutAccountsRepository, WithdrawalsRepository } from "./wallets.repository.js";
@@ -12,7 +13,7 @@ function convertPayoutAccountRowToRecord(row: PayoutAccount): PayoutAccountRecor
 }
 
 function convertWithdrawalRowToRecord(row: Withdrawal): WithdrawalRecord {
-  return { ...row, amount: convertDatabaseAmountToKobo(row.amount), status: row.status as WithdrawalStatus };
+  return { ...row, amount: convertDatabaseAmountToMinorUnits(row.amount), currency: row.currency as CurrencyCode, status: row.status as WithdrawalStatus };
 }
 
 export class PrismaPayoutAccountsRepository implements PayoutAccountsRepository {
