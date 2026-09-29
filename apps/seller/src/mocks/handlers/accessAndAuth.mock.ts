@@ -69,11 +69,11 @@ function verifyPinAgainstStaffRecord(staff: MockStaffRecord, pin: string): boole
   return storedHash.length === candidateHash.length && timingSafeEqual(storedHash, candidateHash);
 }
 
-export function checkStaffPinWithLockout(staffId: string, pin: string, storeId: string): MockStaffRecord {
+export function checkStaffPinWithLockout(staffId: string, pin: string): MockStaffRecord {
   const database = readMockDatabase();
   const staffIndex = database.staff.findIndex((candidate) => candidate.id === staffId && candidate.status === "active");
   const staff = database.staff[staffIndex];
-  if (!staff || storeId !== "store_ife_lifestyle") throw new MockHttpError(401, "PIN_INCORRECT", "That PIN is not right.");
+  if (!staff) throw new MockHttpError(401, "PIN_INCORRECT", "That PIN is not right.");
   if (staff.pinLockedUntil && new Date(staff.pinLockedUntil).getTime() > Date.now()) {
     throw new MockHttpError(423, "PIN_LOCKED", `Too many wrong PINs. Try again after ${new Date(staff.pinLockedUntil).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })} or ask a manager to unlock.`);
   }
@@ -205,7 +205,7 @@ export function registerAccessAndAuthMockHandlers(): void {
   registerMockRoute("POST", "/seller/staff/pin-sessions", (request) => {
     const principal = requireMockStorePrincipal(request);
     const body = readJsonObjectBody(request);
-    const staff = checkStaffPinWithLockout(String(body.staffId ?? ""), String(body.pin ?? ""), principal.storeId);
+    const staff = checkStaffPinWithLockout(String(body.staffId ?? ""), String(body.pin ?? ""));
     const operatorToken = `mock_op_${randomBytes(24).toString("base64url")}`;
     const expiresAtEpochMs = Date.now() + 12 * 3_600_000;
     readMockDatabase().operatorSessions.set(operatorToken, { staffId: staff.id, storeId: principal.storeId, expiresAtEpochMs });
