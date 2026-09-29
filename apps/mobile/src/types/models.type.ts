@@ -3,12 +3,27 @@ import type { Money } from "./money.type";
 export type ID = string;
 export type ISODate = string;
 
+export type VerificationColor = "blue" | "gold" | "black";
+export type VerificationProfileType = "personal" | "business" | "government";
+export type VerificationTier = "ESSENTIAL" | "VERIFIED" | "PREMIUM" | "PRO" | "OFFICIAL";
+export type VerificationStatus = "none" | "pending" | "active" | "expired" | "revoked";
+
+export interface Verification {
+  readonly status: VerificationStatus;
+  readonly type: VerificationProfileType;
+  readonly color: VerificationColor;
+  readonly tier: VerificationTier;
+  readonly badgeVisible: boolean;
+}
+
 export interface UserSummary {
   readonly id: ID;
   readonly name: string;
   readonly username: string;
   readonly avatarUrl: string | null;
   readonly verified: boolean;
+  readonly isCreator?: boolean;
+  readonly verification?: Verification | null;
 }
 
 export interface User extends UserSummary {
@@ -42,6 +57,7 @@ export interface StoreSummary {
   readonly rating: number;
   readonly ratingCount: number;
   readonly reviewCount: number;
+  readonly verification?: Verification | null;
 }
 
 export interface ProductSummary {
@@ -107,6 +123,8 @@ export interface Post {
   readonly friendsLiked: { readonly count: number; readonly avatars: readonly (string | null)[] } | null;
   readonly products: readonly ProductSummary[];
   readonly sponsored?: SponsoredPlacement | null;
+  readonly subscriberOnly?: boolean;
+  readonly viewerHasAccess?: boolean;
 }
 
 export interface Comment {
@@ -169,6 +187,27 @@ export interface Conversation {
   readonly lastMessageAt: ISODate;
   readonly unread: number;
   readonly isFriend: boolean;
+  readonly kind?: "direct" | "group" | "channel" | "business";
+  readonly title?: string | null;
+  readonly photoUrl?: string | null;
+  readonly memberCount?: number;
+  readonly subscriberCount?: number;
+  readonly myRole?: "owner" | "admin" | "member" | "subscriber";
+  readonly disappearingMessagesSeconds?: number | null;
+  readonly store?: { readonly id: ID; readonly name: string } | null;
+}
+
+export interface MessageReactionSummary {
+  readonly emoji: string;
+  readonly count: number;
+  readonly reactedByMe: boolean;
+}
+
+export interface MessageAttachedMedia {
+  readonly id: ID;
+  readonly type: "voice" | "image" | "video";
+  readonly url: string | null;
+  readonly durationSeconds?: number;
 }
 
 export interface Message {
@@ -177,6 +216,11 @@ export interface Message {
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
+  readonly kind?: "text" | "voice" | "image" | "system";
+  readonly sender?: UserSummary;
+  readonly media?: MessageAttachedMedia | null;
+  readonly reactions?: readonly MessageReactionSummary[];
+  readonly expiresAt?: ISODate | null;
 }
 
 export interface Story {
