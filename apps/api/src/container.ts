@@ -7,6 +7,7 @@ import { createCatalogModules, type CatalogExternalServices } from "./loaders/ca
 import { createCommerceModules, type CommerceExternalServices } from "./loaders/commerce.loader.js";
 import { createCommunicationModules, type CommunicationExternalServices } from "./loaders/communication.loader.js";
 import { createCore } from "./loaders/core.loader.js";
+import { createCurrencyModule, type CurrencyExternalServices } from "./loaders/currency.loader.js";
 import { createIdentityModules, type IdentityExternalServices } from "./loaders/identity.loader.js";
 import { createSocialModules } from "./loaders/social.loader.js";
 import { createWebKit } from "./loaders/web.loader.js";
@@ -23,7 +24,9 @@ import type { HealthCheck } from "./routes/health.routes.js";
 export const APP_DEPENDENCIES = createToken<AppDependencies>("app.dependencies");
 
 export interface ExternalServices
-  extends IdentityExternalServices, CatalogExternalServices, CommerceExternalServices, CommunicationExternalServices {}
+  extends IdentityExternalServices,
+    CurrencyExternalServices,
+    CatalogExternalServices, CommerceExternalServices, CommunicationExternalServices {}
 
 export interface DependencyOptions {
   readonly settings: AppSettings;
@@ -47,19 +50,32 @@ export function createDependencies(options: DependencyOptions) {
   const audit = new AuditService(core.persistence === "prisma" ? new PrismaAuditRepository() : new InMemoryAuditRepository(), core.clock);
   registerAuditCommandAndQueryHandlers(core.commands, core.queries, audit);
   const identity = createIdentityModules(core, audit, external);
-  const web = createWebKit(core.settings, core.persistence, core.clock, identity.accessTokenVerifier);
-  const catalog = createCatalogModules(core, { audit, userDirectory: identity.userDirectory }, external);
-  const commerce = createCommerceModules(core, { audit, userDirectory: identity.userDirectory, ...catalog }, external);
-  const social = createSocialModules(core, { audit, userDirectory: identity.userDirectory, ...catalog, orderLookup: commerce.orderLookup });
+  const currency = createCurrencyModule(core, identity.userDirectory, external);
+  const web = createWebKit(core.settings, core.persistence, core.clock, identity.accessTokenVerifier, currency.resolveViewerLocale);
+  const { currencyConverter } = currency;
+  const catalog = createCatalogModules(core, { audit, userDirectory: identity.userDirectory, currencyConverter }, external);
+  const commerce = createCommerceModules(
+    core,
+    { audit, userDirectory: identity.userDirectory, addressBook: identity.addressBook, currencyConverter, ...catalog },
+    external,
+  );
+  const social = createSocialModules(core, {
+    audit,
+    userDirectory: identity.userDirectory,
+    currencyConverter,
+    ...catalog,
+    orderLookup: commerce.orderLookup,
+  });
   const communication = createCommunicationModules(core, { audit, userDirectory: identity.userDirectory, socialGraph: social.socialGraph }, external);
 
   return {
     health,
     core,
     web,
-    scheduledJobs: commerce.scheduledJobs,
+    scheduledJobs: [...commerce.scheduledJobs, ...currency.scheduledJobs],
     ports: {
       audit,
+      currencyConverter,
       userDirectory: identity.userDirectory,
       storeAccess: catalog.storeAccess,
       productCatalog: catalog.productCatalog,
@@ -70,6 +86,7 @@ export function createDependencies(options: DependencyOptions) {
     auditController: new AuditController(core.queries),
     authController: identity.authController,
     usersController: identity.usersController,
+    currencyController: currency.currencyController,
     ...catalog.controllers,
     ...commerce.controllers,
     ...social.controllers,
