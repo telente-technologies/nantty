@@ -14,6 +14,7 @@ import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
 import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/adEvents.service";
 import { clipsService } from "@/services/clips.service";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useAuthStore } from "@/store/auth.store";
 import type { Clip, ClipsFeedTab } from "@/types";
 
@@ -32,6 +33,7 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
   const insets = useSafeAreaInsets();
   const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const openUserProfile = useOpenUserProfile();
   const [tab, setTab] = useState<ClipsFeedTab>("forYou");
   const [pageHeight, setPageHeight] = useState(0);
   const [activeClipIndex, setActiveClipIndex] = useState(0);
@@ -159,7 +161,7 @@ export function ClipsScreen({ navigation }: ClipsScreenProps) {
               onToggleFollow={() => toggleFollowOnClipAuthor(item)}
               onOpenComments={() => setCommentsForClipId(item.id)}
               onShare={() => shareClipLink(item)}
-              onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.author.id })}
+              onPressAuthor={() => openUserProfile(item.author.id)}
             />
           )}
         />
