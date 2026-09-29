@@ -41,11 +41,31 @@ import { SellerOrdersScreen } from "@/screens/seller/sellerOrders.screen";
 import { SellerOrderDetailScreen } from "@/screens/seller/sellerOrderDetail.screen";
 import { ChatScreen } from "@/screens/messages/chat.screen";
 import { NewMessageScreen } from "@/screens/messages/newMessage.screen";
+import { NewGroupScreen } from "@/screens/messages/newGroup.screen";
+import { ConversationInfoScreen } from "@/screens/messages/conversationInfo.screen";
 import { CreatePostScreen } from "@/screens/create/createPost.screen";
 import { PostDetailScreen } from "@/screens/posts/postDetail.screen";
 import { LiveScreen } from "@/screens/live/live.screen";
 import { LiveEndedScreen } from "@/screens/live/liveEnded.screen";
 import { StoryScreen } from "@/screens/story/story.screen";
+import { EscrowStatusScreen } from "@/screens/escrow/escrowStatus.screen";
+import { DisputeDetailScreen } from "@/screens/disputes/disputeDetail.screen";
+import { SellerApplicationStatusScreen } from "@/screens/seller/sellerApplicationStatus.screen";
+import { CreatorProgramScreen } from "@/screens/creator/creatorProgram.screen";
+import { CreatorApplicationScreen } from "@/screens/creator/creatorApplication.screen";
+import { CreatorApplicationStatusScreen } from "@/screens/creator/creatorApplicationStatus.screen";
+import { CreatorDashboardScreen } from "@/screens/creator/creatorDashboard.screen";
+import { ReferralScreen } from "@/screens/wallet/referral.screen";
+import { CreatorSubscribeScreen } from "@/screens/creator/creatorSubscribe.screen";
+import { VerificationScreen } from "@/screens/verification/verification.screen";
+import { VerificationApplyScreen } from "@/screens/verification/verificationApply.screen";
+import { PromotePostScreen } from "@/screens/boost/promotePost.screen";
+import { BoostStatusScreen } from "@/screens/boost/boostStatus.screen";
+import { SupportTicketsScreen } from "@/screens/support/supportTickets.screen";
+import { NewSupportTicketScreen } from "@/screens/support/newSupportTicket.screen";
+import { SupportTicketDetailScreen } from "@/screens/support/supportTicketDetail.screen";
+import { MyReportsScreen } from "@/screens/support/myReports.screen";
+import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.screen";
 
 import { MainTabsNavigator } from "./mainTabs.navigator";
 import type { MainStackParamList } from "./navigation.types";
@@ -98,11 +118,31 @@ export function MainNavigator() {
       <Stack.Screen name="SellerOrderDetail" component={SellerOrderDetailScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="NewMessage" component={NewMessageScreen} options={modal} />
+      <Stack.Screen name="NewGroup" component={NewGroupScreen} options={modal} />
+      <Stack.Screen name="ConversationInfo" component={ConversationInfoScreen} />
       <Stack.Screen name="CreatePost" component={CreatePostScreen} options={modal} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
       <Stack.Screen name="Live" component={LiveScreen} options={dark} />
       <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} />
       <Stack.Screen name="Story" component={StoryScreen} options={dark} />
+      <Stack.Screen name="EscrowStatus" component={EscrowStatusScreen} />
+      <Stack.Screen name="DisputeDetail" component={DisputeDetailScreen} />
+      <Stack.Screen name="SellerApplicationStatus" component={SellerApplicationStatusScreen} />
+      <Stack.Screen name="CreatorProgram" component={CreatorProgramScreen} />
+      <Stack.Screen name="CreatorApplication" component={CreatorApplicationScreen} />
+      <Stack.Screen name="CreatorApplicationStatus" component={CreatorApplicationStatusScreen} />
+      <Stack.Screen name="CreatorDashboard" component={CreatorDashboardScreen} />
+      <Stack.Screen name="Referral" component={ReferralScreen} />
+      <Stack.Screen name="CreatorSubscribe" component={CreatorSubscribeScreen} />
+      <Stack.Screen name="Verification" component={VerificationScreen} />
+      <Stack.Screen name="VerificationApply" component={VerificationApplyScreen} />
+      <Stack.Screen name="PromotePost" component={PromotePostScreen} />
+      <Stack.Screen name="BoostStatus" component={BoostStatusScreen} />
+      <Stack.Screen name="SupportTickets" component={SupportTicketsScreen} />
+      <Stack.Screen name="NewSupportTicket" component={NewSupportTicketScreen} />
+      <Stack.Screen name="SupportTicketDetail" component={SupportTicketDetailScreen} />
+      <Stack.Screen name="MyReports" component={MyReportsScreen} />
+      <Stack.Screen name="SettingsUsername" component={SettingsUsernameScreen} />
     </Stack.Navigator>
   );
 }
