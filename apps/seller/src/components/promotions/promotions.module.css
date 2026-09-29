@@ -1,0 +1,100 @@
+.primaryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.primaryCell strong {
+  font-weight: 650;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.code {
+  padding: 2px 8px;
+  border: 1px dashed var(--blue-300);
+  border-radius: 6px;
+  background: var(--blue-tint);
+  color: var(--blue-800);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.pickerResults {
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-small);
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.pickerRow:last-child {
+  border-bottom: 0;
+}
+
+.chosenList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chosenChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-tint);
+  color: var(--blue-800);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.summaryLine {
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--divider-soft);
+}
+
+.fieldError {
+  color: var(--error-ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 1000px) {
+  .editorGrid {
+    grid-template-columns: 1fr;
+  }
+}
