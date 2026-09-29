@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 
-import type { CurrencyCode } from "../../../enums/currency.enum.js";
 import { insufficientFunds } from "../../../errors/domain.error.js";
 import { CurrencyMismatchError } from "../../../utils/money.util.js";
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
@@ -13,6 +12,7 @@ import {
   type LedgerPostingResult,
   type LedgerTransactionInput,
   type LedgerTransactionRecord,
+  type LedgerUnit,
 } from "../models/wallets.model.js";
 
 export interface LedgerRepository {
@@ -90,7 +90,7 @@ export class InMemoryLedgerRepository implements LedgerRepository {
     return { transaction, created: true };
   }
 
-  private findOrOpenAccount(specification: LedgerAccountSpecification, currency: CurrencyCode): LedgerAccountRecord {
+  private findOrOpenAccount(specification: LedgerAccountSpecification, currency: LedgerUnit): LedgerAccountRecord {
     return this.accounts.get(specification.key) ?? { ...specification, id: randomUUID(), currency, balance: 0, version: 0 };
   }
 }
