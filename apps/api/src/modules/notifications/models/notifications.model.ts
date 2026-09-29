@@ -17,8 +17,28 @@ export interface NotificationRecord {
 
 export type NewNotification = Omit<NotificationRecord, "id" | "readAt" | "createdAt">;
 
+export const DISPLAY_NOTIFICATION_CATEGORIES = ["orders", "social", "system"] as const;
+export type DisplayNotificationCategory = (typeof DISPLAY_NOTIFICATION_CATEGORIES)[number];
+
+const DISPLAY_CATEGORY_BY_CATEGORY: Readonly<Record<NotificationCategory, DisplayNotificationCategory>> = {
+  orders: "orders",
+  payments: "orders",
+  social: "social",
+  messages: "social",
+  live: "social",
+  promotions: "system",
+};
+
+export function convertCategoryToDisplayCategory(category: NotificationCategory): DisplayNotificationCategory {
+  return DISPLAY_CATEGORY_BY_CATEGORY[category] ?? "system";
+}
+
+export function listCategoriesForDisplayCategory(displayCategory: DisplayNotificationCategory): readonly NotificationCategory[] {
+  return NOTIFICATION_CATEGORY_VALUES.filter((category) => DISPLAY_CATEGORY_BY_CATEGORY[category] === displayCategory);
+}
+
 export interface NotificationFilter {
-  readonly category?: NotificationCategory;
+  readonly categories?: readonly NotificationCategory[];
   readonly unreadOnly?: boolean;
 }
 

@@ -13,7 +13,7 @@ import { MarkNotificationReadCommand } from "../commands/markNotificationRead/ma
 import { RegisterDeviceTokenCommand } from "../commands/registerDeviceToken/registerDeviceToken.command.js";
 import { RemoveDeviceTokenCommand } from "../commands/removeDeviceToken/removeDeviceToken.command.js";
 import { convertNotificationToDto } from "../dtos/notifications.dto.js";
-import type { NotificationRecord, UnreadNotificationCounts } from "../models/notifications.model.js";
+import { listCategoriesForDisplayCategory, type NotificationRecord, type UnreadNotificationCounts } from "../models/notifications.model.js";
 import { GetUnreadCountQuery } from "../queries/getUnreadCount/getUnreadCount.query.js";
 import { ListNotificationsQuery } from "../queries/listNotifications/listNotifications.query.js";
 import {
@@ -34,7 +34,10 @@ export class NotificationsController {
     const page = await this.queries.execute<ListNotificationsQuery, Page<NotificationRecord>>(
       new ListNotificationsQuery(
         requireAuthenticatedPrincipal(ctx),
-        { ...(category === undefined ? {} : { category }), ...(unreadOnly === undefined ? {} : { unreadOnly }) },
+        {
+          ...(category === undefined ? {} : { categories: listCategoriesForDisplayCategory(category) }),
+          ...(unreadOnly === undefined ? {} : { unreadOnly }),
+        },
         buildPageRequest({ ...(limit === undefined ? {} : { limit }), ...(cursor === undefined ? {} : { cursor }) }),
       ),
     );

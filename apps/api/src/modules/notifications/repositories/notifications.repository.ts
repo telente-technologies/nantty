@@ -2,7 +2,14 @@ import { randomUUID } from "node:crypto";
 
 import type { Page, PageRequest } from "../../../types/pagination.type.js";
 import { compareByNewestFirst, paginateSortedItems } from "../../../utils/pagination.util.js";
-import type { NewNotification, NotificationFilter, NotificationRecord, UnreadNotificationCounts } from "../models/notifications.model.js";
+import type { NotificationCategory } from "../../../events/notificationRequested.event.js";
+import {
+  convertCategoryToDisplayCategory,
+  type NewNotification,
+  type NotificationFilter,
+  type NotificationRecord,
+  type UnreadNotificationCounts,
+} from "../models/notifications.model.js";
 
 export interface NotificationsRepository {
   create(notification: NewNotification, createdAt: Date): Promise<NotificationRecord>;
@@ -12,9 +19,12 @@ export interface NotificationsRepository {
   markAllOwnNotificationsRead(userId: string, readAt: Date): Promise<number>;
 }
 
-export function summarizeUnreadCategories(categories: readonly string[]): UnreadNotificationCounts {
-  const byCategory: Record<string, number> = {};
-  for (const category of categories) byCategory[category] = (byCategory[category] ?? 0) + 1;
+export function summarizeUnreadCategories(categories: readonly NotificationCategory[]): UnreadNotificationCounts {
+  const byCategory: Record<string, number> = { orders: 0, social: 0, system: 0 };
+  for (const category of categories) {
+    const displayCategory = convertCategoryToDisplayCategory(category);
+    byCategory[displayCategory] = (byCategory[displayCategory] ?? 0) + 1;
+  }
   return { total: categories.length, byCategory };
 }
 
@@ -30,7 +40,7 @@ export class InMemoryNotificationsRepository implements NotificationsRepository 
   public async listForUser(userId: string, filter: NotificationFilter, page: PageRequest): Promise<Page<NotificationRecord>> {
     const matches = [...this.notifications.values()]
       .filter((notification) => notification.userId === userId)
-      .filter((notification) => filter.category === undefined || notification.category === filter.category)
+      .filter((notification) => filter.categories === undefined || filter.categories.includes(notification.category))
       .filter((notification) => filter.unreadOnly !== true || notification.readAt === null)
       .sort(compareByNewestFirst);
     return paginateSortedItems(matches, page);

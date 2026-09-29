@@ -29,7 +29,7 @@ export class PrismaNotificationsRepository implements NotificationsRepository {
     const rows = await prisma().notification.findMany({
       where: {
         userId,
-        ...(filter.category === undefined ? {} : { category: filter.category }),
+        ...(filter.categories === undefined ? {} : { category: { in: [...filter.categories] } }),
         ...(filter.unreadOnly === true ? { readAt: null } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -40,7 +40,7 @@ export class PrismaNotificationsRepository implements NotificationsRepository {
 
   public async countUnreadForUser(userId: string): Promise<UnreadNotificationCounts> {
     const groups = await prisma().notification.groupBy({ by: ["category"], where: { userId, readAt: null }, _count: { _all: true } });
-    return summarizeUnreadCategories(groups.flatMap((group) => Array<string>(group._count._all).fill(group.category)));
+    return summarizeUnreadCategories(groups.flatMap((group) => Array<NotificationCategory>(group._count._all).fill(group.category as NotificationCategory)));
   }
 
   public async markOwnNotificationRead(userId: string, notificationId: string, readAt: Date): Promise<boolean> {

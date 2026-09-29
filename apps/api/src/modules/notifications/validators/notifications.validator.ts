@@ -1,12 +1,12 @@
 import { schema, type Infer } from "@zudojs/schema";
 
 import { MAX_PAGE_SIZE } from "../../../utils/pagination.util.js";
-import { NOTIFICATION_CATEGORY_VALUES } from "../models/notifications.model.js";
+import { DISPLAY_NOTIFICATION_CATEGORIES, NOTIFICATION_CATEGORY_VALUES } from "../models/notifications.model.js";
 
 export const ListNotificationsQuerySchema = schema.object({
   limit: schema.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   cursor: schema.string().uuid().optional(),
-  category: schema.enum([...NOTIFICATION_CATEGORY_VALUES]).optional(),
+  category: schema.enum([...DISPLAY_NOTIFICATION_CATEGORIES]).optional(),
   unreadOnly: schema.coerce.boolean().optional(),
 });
 
