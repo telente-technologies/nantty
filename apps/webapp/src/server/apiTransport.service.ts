@@ -32,9 +32,13 @@ function buildOutgoingHeaders(call: BackendCall): Headers {
 }
 
 function buildJsonResult(status: number, payload: unknown): BackendResult {
-  const headers = new Headers({ "Content-Type": "application/json; charset=utf-8" });
   if (payload === undefined) return { status: status === 200 ? 204 : status, headers: new Headers(), body: new Uint8Array() };
-  return { status, headers, body: textEncoder.encode(JSON.stringify({ data: payload })) };
+  return { status, headers: new Headers({ "Content-Type": "application/json; charset=utf-8" }), body: textEncoder.encode(JSON.stringify(payload)) };
+}
+
+function buildErrorResult(status: number, message: string, code: string): BackendResult {
+  const body: ApiErrorBody = { message, code };
+  return { status, headers: new Headers({ "Content-Type": "application/json; charset=utf-8" }), body: textEncoder.encode(JSON.stringify(body)) };
 }
 
 async function callMockBackend(call: BackendCall): Promise<BackendResult> {
@@ -42,9 +46,8 @@ async function callMockBackend(call: BackendCall): Promise<BackendResult> {
     const value = await dispatchMockApiRequest(call.method, call.path, call.query ?? new URLSearchParams(), call.body);
     return buildJsonResult(200, value);
   } catch (error) {
-    if (error instanceof ApiError) return buildJsonResult(error.status, { message: error.message, code: error.code ?? "MOCK_ERROR" });
-    const message = error instanceof Error ? error.message : "Something went wrong";
-    return buildJsonResult(500, { message, code: "MOCK_FAILURE" });
+    if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR");
+    return buildErrorResult(500, error instanceof Error ? error.message : "Something went wrong", "MOCK_FAILURE");
   }
 }
 
@@ -79,9 +82,7 @@ export async function callWebappBackend(call: BackendCall): Promise<BackendResul
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {
   if (result.body.byteLength === 0 || !(result.headers.get("content-type") ?? "").includes("json")) return null;
   try {
-    const parsed = JSON.parse(new TextDecoder().decode(result.body)) as { data?: Payload } | Payload;
-    if (parsed && typeof parsed === "object" && "data" in parsed) return parsed.data ?? null;
-    return parsed as Payload;
+    return JSON.parse(new TextDecoder().decode(result.body)) as Payload;
   } catch {
     return null;
   }

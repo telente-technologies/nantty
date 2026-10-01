@@ -1,5 +1,3 @@
-import { ApiError } from "@/errors/api.error";
-
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
@@ -37,7 +35,7 @@ import { verificationMocks } from "./verification.mock";
 import { walletMocks } from "./wallet.mock";
 import { reportsMocks } from "./reports.mock";
 
-const routes: MockRoute[] = [
+export const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...authMocks,
@@ -74,26 +72,3 @@ const routes: MockRoute[] = [
   ...walletMocks,
   ...sellerMocks,
 ];
-
-const matchMockPathAndExtractParams = (pattern: string, path: string): Record<string, string> | null => {
-  const a = pattern.split("/");
-  const b = path.split("/");
-  if (a.length !== b.length) return null;
-  const params: Record<string, string> = {};
-  for (let i = 0; i < a.length; i++) {
-    if (a[i]!.startsWith(":")) params[a[i]!.slice(1)] = decodeURIComponent(b[i]!);
-    else if (a[i] !== b[i]) return null;
-  }
-  return params;
-};
-
-export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown): Promise<T> {
-  const [path = "", search = ""] = url.split("?");
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  for (const r of routes) {
-    if (r.method !== method) continue;
-    const params = matchMockPathAndExtractParams(r.path, path);
-    if (params) return r.handler({ params, query: new URLSearchParams(search), body }) as T;
-  }
-  throw new ApiError(404, `No mock for ${method} ${path}`);
-}
