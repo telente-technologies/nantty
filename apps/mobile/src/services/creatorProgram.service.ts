@@ -38,5 +38,10 @@ export const creatorProgramService = {
     api.get<CreatorSubscriptionPlan[]>(`/api/v1/creators/${encodeURIComponent(creatorId)}/subscription-plans`),
   startSubscriptionCheckout: (creatorId: string, planId: string, idempotencyKey: string) =>
     api.post<CreatorSubscriptionCheckout>(`/api/v1/creators/${encodeURIComponent(creatorId)}/subscriptions`, { planId }, { idempotencyKey }),
-  fetchSubscriptionState: (subscriptionId: string) => api.get<CreatorSubscriptionState>(`/api/v1/subscriptions/${encodeURIComponent(subscriptionId)}`),
+  verifySubscriptionCheckout: (reference: string) =>
+    api.post<CreatorSubscriptionState>("/api/v1/creator-subscriptions/verify", { reference }),
+  fetchSubscriptionState: (subscriptionId: string) => api.get<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}`),
+  listMySubscriptions: () => api.get<CreatorSubscriptionState[]>("/api/v1/creator-subscriptions"),
+  cancelSubscription: (subscriptionId: string) => api.post<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}/cancel`),
+  resumeSubscription: (subscriptionId: string) => api.post<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}/resume`),
 };
