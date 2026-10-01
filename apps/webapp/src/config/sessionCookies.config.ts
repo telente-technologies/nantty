@@ -28,12 +28,12 @@ export const sessionLifetimesInSeconds = {
 
 export interface HardenedCookieOptions {
   readonly httpOnly: true;
-  readonly secure: true;
+  readonly secure: boolean;
   readonly sameSite: "lax";
   readonly path: "/";
   readonly maxAge: number;
 }
 
 export function buildHardenedCookieOptions(maxAgeInSeconds: number): HardenedCookieOptions {
-  return { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: maxAgeInSeconds };
+  return { httpOnly: true, secure: shouldUseSecureHostPrefixedCookies(), sameSite: "lax", path: "/", maxAge: maxAgeInSeconds };
 }
