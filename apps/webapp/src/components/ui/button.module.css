@@ -1,0 +1,123 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 90ms ease, opacity 140ms ease;
+  text-decoration: none;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.sm {
+  min-height: 34px;
+  padding-inline: 14px;
+  font-size: var(--text-sm);
+}
+
+.md {
+  min-height: 42px;
+  padding-inline: 20px;
+  font-size: var(--text-base);
+}
+
+.lg {
+  min-height: 50px;
+  padding-inline: 26px;
+  font-size: var(--text-md);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.primary {
+  background: var(--blue-500);
+  color: var(--ink-inverse);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--blue-600);
+}
+
+.secondary {
+  background: var(--surface-card);
+  border-color: var(--divider-strong);
+  color: var(--ink-strong);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--blue-400);
+  color: var(--blue-600);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--blue-600);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--surface-brand-tint);
+}
+
+.quiet {
+  background: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.quiet:hover:not(:disabled) {
+  background: var(--divider);
+}
+
+.danger {
+  background: var(--error);
+  color: var(--ink-inverse);
+}
+
+.danger:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.icon {
+  display: inline-flex;
+  font-size: 1.05em;
+}
+
+.label {
+  display: inline-block;
+}
+
+.busy .label,
+.busy .icon {
+  opacity: 0.7;
+}
+
+.spinner {
+  position: absolute;
+  right: 14px;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: buttonSpin 640ms linear infinite;
+}
+
+@keyframes buttonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
