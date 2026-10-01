@@ -6,11 +6,12 @@ interface FieldShellProps {
   readonly label: string;
   readonly hint?: ReactNode;
   readonly error?: string | null;
+  readonly hideLabel?: boolean;
   readonly children: (id: string, describedBy: string | undefined) => ReactNode;
   readonly className?: string;
 }
 
-function FieldShell({ label, hint, error, children, className }: FieldShellProps) {
+function FieldShell({ label, hint, error, hideLabel = false, children, className }: FieldShellProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -18,7 +19,7 @@ function FieldShell({ label, hint, error, children, className }: FieldShellProps
 
   return (
     <div className={[styles.field, className ?? ""].filter(Boolean).join(" ")}>
-      <label className={styles.label} htmlFor={id}>
+      <label className={hideLabel ? "visuallyHidden" : styles.label} htmlFor={id}>
         {label}
       </label>
       {children(id, describedBy)}
@@ -40,12 +41,13 @@ type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "id"> & {
   readonly label: string;
   readonly hint?: ReactNode;
   readonly error?: string | null;
+  readonly hideLabel?: boolean;
   readonly className?: string;
 };
 
-export function TextField({ label, hint, error, className, ...rest }: TextFieldProps) {
+export function TextField({ label, hint, error, hideLabel, className, ...rest }: TextFieldProps) {
   return (
-    <FieldShell label={label} hint={hint} error={error} className={className}>
+    <FieldShell label={label} hint={hint} error={error} hideLabel={hideLabel} className={className}>
       {(id, describedBy) => (
         <input id={id} className={styles.input} aria-invalid={error ? true : undefined} aria-describedby={describedBy} {...rest} />
       )}

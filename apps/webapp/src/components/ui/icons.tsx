@@ -74,11 +74,8 @@ export const SearchIcon = createIcon(() => (
   </>
 ));
 
-export const HeartIcon = createIcon(({ ...props }) => (
-  <path
-    d="M12 20s-7.3-4.4-7.3-9.4A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.3 3c0 5-7.3 9.4-7.3 9.4Z"
-    fill={props.stroke === "currentColor" && props.fill ? props.fill : undefined}
-  />
+export const HeartIcon = createIcon(() => (
+  <path d="M12 20.2s-7.6-4.6-7.6-9.8A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 7.6 3c0 5.2-7.6 9.8-7.6 9.8Z" />
 ));
 
 export const StarIcon = createIcon(() => <path d="m12 3.6 2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 16.9l-5.2 2.7 1-5.75-4.2-4.1 5.8-.85L12 3.6Z" />);

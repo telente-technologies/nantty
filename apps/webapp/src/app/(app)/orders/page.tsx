@@ -1,0 +1,93 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+import { Badge, EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { RetryButton } from "@/components/ui/controls";
+import { ordersService } from "@/services/orders.service";
+import { useQuery } from "@tanstack/react-query";
+import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import type { OrderStatus } from "@/types";
+
+import styles from "./page.module.css";
+
+const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning" | "error"> = {
+  pending: "warning",
+  paid: "brand",
+  shipped: "brand",
+  delivered: "success",
+  completed: "success",
+  cancelled: "error",
+  disputed: "error",
+};
+
+const statusFilters: readonly { readonly value: OrderStatus | null; readonly label: string }[] = [
+  { value: null, label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "paid", label: "Paid" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+export default function OrdersPage() {
+  const [status, setStatus] = useState<OrderStatus | null>(null);
+  const ordersQuery = useQuery({ queryKey: ["orders", status], queryFn: () => ordersService.fetchMyOrders(status), retry: false });
+
+  return (
+    <div className={styles.page}>
+      <h1 className={styles.title}>Your orders</h1>
+
+      <div className={styles.filters} role="group" aria-label="Filter orders by status">
+        {statusFilters.map((filter) => (
+          <button
+            key={filter.label}
+            type="button"
+            className={[styles.filter, status === filter.value ? styles.filterActive : ""].filter(Boolean).join(" ")}
+            aria-pressed={status === filter.value}
+            onClick={() => setStatus(filter.value)}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      {ordersQuery.isLoading ? (
+        <Spinner label="Loading orders" />
+      ) : ordersQuery.isError ? (
+        <ErrorState description="We couldn't load your orders." action={<RetryButton onRetry={() => ordersQuery.refetch()} />} />
+      ) : (ordersQuery.data ?? []).length === 0 ? (
+        <EmptyState icon="📦" title="No orders yet" description="When you place an order it will show up here with live escrow status." action={<Link href="/" className={styles.cta}>Start shopping</Link>} />
+      ) : (
+        <ul className={styles.list}>
+          {ordersQuery.data?.map((order) => (
+            <li key={order.id}>
+              <Link href={`/orders/${order.id}`} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <span className={styles.reference}>{order.reference}</span>
+                  <Badge tone={statusTone[order.status]}>{order.status}</Badge>
+                </div>
+                <div className={styles.cardStore}>{order.store.name}</div>
+                <div className={styles.cardItems}>
+                  {order.items.slice(0, 3).map((item) => (
+                    <span key={item.id} className={styles.cardItem}>
+                      {item.product.name} × {item.quantity}
+                    </span>
+                  ))}
+                  {order.items.length > 3 ? <span className={styles.cardMore}>+{order.items.length - 3} more</span> : null}
+                </div>
+                <div className={styles.cardBottom}>
+                  <span className={styles.total}>{formatMoneyForDisplay(order.total)}</span>
+                  <span className={styles.time}>{formatTimeSincePosted(order.createdAt)}</span>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
