@@ -82,6 +82,7 @@ export type MainStackParamList = {
   CreatorDashboard: undefined;
   Referral: undefined;
   CreatorSubscribe: { creatorId: string };
+  MySubscriptions: undefined;
   Verification: undefined;
   VerificationApply: { color: "blue" | "gold" };
   PromotePost: { postId: string };

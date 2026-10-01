@@ -36,7 +36,21 @@ const plans: MockPlan[] = [
 ];
 
 const subscriptionStates = new Map<string, CreatorSubscriptionState>();
+const subscriptionIdByReference = new Map<string, string>();
 const subscribedCreatorIdsByViewerId = new Map<string, Set<string>>();
+
+const renewsAtFor = (plan: MockPlan) => isoDateHoursAgo(plan.interval === "month" ? -720 : -8760);
+
+const presentState = (subscriptionId: string, plan: MockPlan, status: CreatorSubscriptionState["status"]): CreatorSubscriptionState => ({
+  subscriptionId,
+  creatorId: plan.creatorId,
+  planId: plan.id,
+  status,
+  price: convertUsdCentsToViewerCurrency(plan.usdCents),
+  interval: plan.interval,
+  currentPeriodEnd: renewsAtFor(plan),
+  renewsAt: status === "active" ? renewsAtFor(plan) : null,
+});
 
 export const hasSignedInViewerSubscribedToCreator = (creatorId: string) =>
   subscribedCreatorIdsByViewerId.get(getSignedInMockUser().id)?.has(creatorId) ?? false;
@@ -96,15 +110,40 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const plan = plans.find((candidate) => candidate.id === planId && candidate.creatorId === params.creatorId);
     if (!plan) throw new ApiError(404, "Plan not found");
     const subscriptionId = `subs_${Date.now()}`;
-    subscriptionStates.set(subscriptionId, { subscriptionId, status: "active", planId, renewsAt: isoDateHoursAgo(plan.interval === "month" ? -720 : -8760) });
+    const reference = `creator-sub_${Date.now()}`;
+    const state = presentState(subscriptionId, plan, "active");
+    subscriptionStates.set(subscriptionId, state);
+    subscriptionIdByReference.set(reference, subscriptionId);
     plan.subscriberCount += 1;
     const viewerId = getSignedInMockUser().id;
     subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
-    return { subscriptionId, checkoutUrl: `https://checkout.paystack.com/mock-subscription/${subscriptionId}` };
+    return { subscriptionId, checkoutUrl: `https://checkout.paystack.com/mock-subscription/${subscriptionId}`, reference, subscription: state };
   }),
-  createMockRoute("GET", "/api/v1/subscriptions/:subscriptionId", ({ params }) => {
-    const state = subscriptionStates.get(params.subscriptionId!);
+  createMockRoute("GET", "/api/v1/creator-subscriptions", () => [...subscriptionStates.values()]),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/verify", ({ body }) => {
+    const { reference } = body as { reference: string };
+    const subscriptionId = subscriptionIdByReference.get(reference);
+    const state = subscriptionId ? subscriptionStates.get(subscriptionId) : undefined;
+    if (!state) throw new ApiError(404, "Subscription payment not found");
+    return state;
+  }),
+  createMockRoute("GET", "/api/v1/creator-subscriptions/:id", ({ params }) => {
+    const state = subscriptionStates.get(params.id!);
     if (!state) throw new ApiError(404, "Subscription not found");
     return state;
+  }),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/:id/cancel", ({ params }) => {
+    const state = subscriptionStates.get(params.id!);
+    if (!state) throw new ApiError(404, "Subscription not found");
+    const updated: CreatorSubscriptionState = { ...state, status: "cancelled", renewsAt: null };
+    subscriptionStates.set(state.subscriptionId, updated);
+    return updated;
+  }),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/:id/resume", ({ params }) => {
+    const state = subscriptionStates.get(params.id!);
+    if (!state) throw new ApiError(404, "Subscription not found");
+    const updated: CreatorSubscriptionState = { ...state, status: "active", renewsAt: state.currentPeriodEnd };
+    subscriptionStates.set(state.subscriptionId, updated);
+    return updated;
   }),
 ];

@@ -139,11 +139,17 @@ export interface CreatorSubscriber {
 export interface CreatorSubscriptionCheckout {
   readonly subscriptionId: ID;
   readonly checkoutUrl: string;
+  readonly reference: string;
+  readonly subscription: CreatorSubscriptionState;
 }
 
 export interface CreatorSubscriptionState {
   readonly subscriptionId: ID;
-  readonly status: "pending" | "active" | "cancelled" | "failed";
+  readonly creatorId: ID;
   readonly planId: ID;
+  readonly status: "pending" | "active" | "past_due" | "cancelled" | "expired" | "failed";
+  readonly price: Money;
+  readonly interval: "month" | "year";
+  readonly currentPeriodEnd: ISODate | null;
   readonly renewsAt: ISODate | null;
 }

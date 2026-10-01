@@ -16,6 +16,10 @@ export function formatJoinedDate(date: ISODate): string {
   return `Joined ${new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
 }
 
+export function formatClockTime(date: ISODate): string {
+  return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 export function formatCountWithThousandsSuffix(n: number): string {
   if (n < 1000) return String(n);
   if (n < 1_000_000) return `${Math.round(n / 100) / 10}k`.replace(".0k", "k");
