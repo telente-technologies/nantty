@@ -12,7 +12,7 @@ export interface CookieReader {
 export interface ApiTokenPair {
   readonly accessToken: string;
   readonly refreshToken: string;
-  readonly expiresIn: number;
+  readonly expiresIn?: number;
 }
 
 const viewerPurpose = "viewer";
@@ -47,7 +47,7 @@ export function writeSessionIdCookie(response: NextResponse, sessionId: string):
 }
 
 export function writeApiTokenCookies(response: NextResponse, tokens: ApiTokenPair): void {
-  response.cookies.set(sessionCookieNames.accessToken, tokens.accessToken, buildHardenedCookieOptions(Math.min(tokens.expiresIn, sessionLifetimesInSeconds.accessToken)));
+  response.cookies.set(sessionCookieNames.accessToken, tokens.accessToken, buildHardenedCookieOptions(tokens.expiresIn ?? sessionLifetimesInSeconds.accessToken));
   response.cookies.set(sessionCookieNames.refreshToken, tokens.refreshToken, buildHardenedCookieOptions(sessionLifetimesInSeconds.refreshToken));
 }
 

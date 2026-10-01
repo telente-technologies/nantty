@@ -43,7 +43,7 @@ function buildErrorResult(status: number, message: string, code: string): Backen
 
 async function callMockBackend(call: BackendCall): Promise<BackendResult> {
   try {
-    const value = await dispatchMockApiRequest(call.method, call.path, call.query ?? new URLSearchParams(), call.body);
+    const value = await dispatchMockApiRequest(call.method, call.path, call.query ?? new URLSearchParams(), call.body ?? null);
     return buildJsonResult(200, value);
   } catch (error) {
     if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR");
