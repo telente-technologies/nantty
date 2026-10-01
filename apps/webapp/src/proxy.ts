@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
-const publicPagePaths = new Set(["/login", "/signup", "/forgot-password", "/reset-password"]);
+const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
+const staticAssetPattern = /\.(?:webp|png|jpe?g|gif|svg|ico|woff2?|txt|map|json|xml|webmanifest)$/i;
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {
   const targetUrl = new URL(pathname, request.nextUrl.origin);
@@ -15,14 +16,19 @@ export function proxy(request: NextRequest) {
   const requestedPathWithQuery = `${pathname}${search}`;
   const sessionId = readSessionIdFromCookies(request.cookies);
 
+  if (staticAssetPattern.test(pathname)) return NextResponse.next();
+
   if (publicPagePaths.has(pathname)) {
-    if ((pathname === "/login" || pathname === "/signup") && sessionId && readCachedViewerFromCookies(request.cookies)) {
+    if (pathname !== "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
       return redirectTo(request, "/bff/auth/access-refresh", { next: requestedPathWithQuery });
+    }
+    if (pathname === "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
+      return redirectTo(request, "/", undefined);
     }
     return NextResponse.next();
   }
 
-  if (!sessionId) return redirectTo(request, "/login", pathname === "/" ? undefined : { next: requestedPathWithQuery });
+  if (!sessionId) return redirectTo(request, "/welcome", pathname === "/" ? undefined : { next: requestedPathWithQuery });
   if (!readCachedViewerFromCookies(request.cookies) || !readApiTokensFromCookies(request.cookies).accessToken) {
     return redirectTo(request, "/bff/auth/access-refresh", { next: requestedPathWithQuery });
   }
@@ -30,5 +36,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!bff|_next/static|_next/image|icons|images|favicon\\.ico|robots\\.txt).*)"],
+  matcher: ["/((?!bff|_next/static|_next/image|favicon\\.ico|robots\\.txt).*)"],
 };
