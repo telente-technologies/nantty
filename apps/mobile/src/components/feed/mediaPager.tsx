@@ -1,14 +1,17 @@
 import { Image } from "expo-image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
-import { ViewProducts24Icon } from "@/components/icons";
+import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { calculateFeedVideoAspectRatio } from "@/components/media/videoOrientation.util";
 import { colors } from "@/constants/colors.constant";
+import { claimAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
+import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Media } from "@/types";
 
+import { MediaLightbox } from "./mediaLightbox";
 import { AnimatedPageIndicator } from "./pageIndicator";
 
 export interface MediaPagerProps {
@@ -22,15 +25,35 @@ const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
 export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts }: MediaPagerProps) {
-  const { width } = useWindowDimensions();
-  const pageWidth = Math.min(width, MAXIMUM_PAGER_WIDTH);
+  const { width: windowWidth } = useWindowDimensions();
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+  const pageWidth = containerWidth ?? windowWidth;
   const firstMedia = media[0];
   const height =
-    requestedHeight ?? (firstMedia?.type === "video" ? Math.round(pageWidth / calculateFeedVideoAspectRatio(firstMedia)) : DEFAULT_PHOTO_PAGER_HEIGHT);
+    requestedHeight ??
+    (firstMedia?.type === "video"
+      ? Math.round(Math.min(pageWidth, MAXIMUM_PAGER_WIDTH) / calculateFeedVideoAspectRatio(firstMedia))
+      : DEFAULT_PHOTO_PAGER_HEIGHT);
   const [fullScreenVideo, setFullScreenVideo] = useState<Media | null>(null);
+  const [openedImageIndex, setOpenedImageIndex] = useState<number | null>(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const scrollOffsetX = useRef(new Animated.Value(0)).current;
   const pages: readonly Media[] = media.length > 0 ? media : [{ type: "image", url: null }];
+  const imagePages = pages.filter((item) => item.type === "image");
+  const isMuted = useVideoAudioStore((state) => state.isMuted);
+  const toggleMute = useVideoAudioStore((state) => state.toggleMute);
+  const activePageMedia = pages[activePageIndex];
+  const isActivePageVideo = activePageMedia?.type === "video";
+
+  useEffect(() => {
+    if (!isActivePageVideo || isMuted || !isVisibleOnScreen) return;
+    claimAudioFocusForVideoPlayback();
+  }, [isActivePageVideo, isMuted, isVisibleOnScreen]);
+
+  const openImageAtPagerIndex = (pagerIndex: number) => {
+    const position = pages.slice(0, pagerIndex).filter((item) => item.type === "image").length;
+    setOpenedImageIndex(position);
+  };
 
   const updateActivePageFromScrollOffset = (offsetX: number) => {
     scrollOffsetX.setValue(offsetX);
@@ -39,7 +62,13 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   };
 
   return (
-    <View style={[styles.root, { height }]}>
+    <View
+      style={[styles.root, { height }]}
+      onLayout={(event) => {
+        const nextWidth = event.nativeEvent.layout.width;
+        if (nextWidth > 0) setContainerWidth((previous) => (previous === nextWidth ? previous : nextWidth));
+      }}
+    >
       <FlatList
         data={pages}
         horizontal
@@ -57,6 +86,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
           <View style={{ width: pageWidth, height }}>
             <MediaPagerPage
               media={item}
+              isMuted={isMuted}
               isActive={isVisibleOnScreen && fullScreenVideo === null && index === activePageIndex}
               isNearActive={Math.abs(index - activePageIndex) <= 1}
             />
@@ -65,6 +95,13 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
                 accessibilityRole="button"
                 accessibilityLabel="Play video full screen"
                 onPress={() => setFullScreenVideo(item)}
+                style={StyleSheet.absoluteFill}
+              />
+            ) : item.type === "image" && item.url ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Open image ${index + 1} full screen`}
+                onPress={() => openImageAtPagerIndex(index)}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -77,21 +114,48 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         ) : (
           <View />
         )}
-        {onPressViewProducts ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="View products in this post" hitSlop={10} onPress={onPressViewProducts}>
-            <ViewProducts24Icon />
-          </Pressable>
-        ) : null}
+        <View style={styles.overlayActions}>
+          {isActivePageVideo ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={isMuted ? "Unmute video" : "Mute video"}
+              accessibilityState={{ selected: isMuted }}
+              hitSlop={10}
+              onPress={toggleMute}
+              style={isMuted ? styles.mutedSpeaker : undefined}
+            >
+              <SpeakerHigh24Icon />
+            </Pressable>
+          ) : null}
+          {onPressViewProducts ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="View products in this post" hitSlop={10} onPress={onPressViewProducts}>
+              <ViewProducts24Icon />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
-      <LandscapeVideoFullScreenModal media={fullScreenVideo} isMuted={false} onClose={() => setFullScreenVideo(null)} />
+      <LandscapeVideoFullScreenModal media={fullScreenVideo} isMuted={isMuted} onClose={() => setFullScreenVideo(null)} />
+      {openedImageIndex !== null ? (
+        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} />
+      ) : null}
     </View>
   );
 }
 
-function MediaPagerPage({ media, isActive, isNearActive }: { media: Media; isActive: boolean; isNearActive: boolean }) {
+function MediaPagerPage({
+  media,
+  isMuted,
+  isActive,
+  isNearActive,
+}: {
+  media: Media;
+  isMuted: boolean;
+  isActive: boolean;
+  isNearActive: boolean;
+}) {
   if (media.type === "video") {
     return isNearActive && isActiveOrPreloadable(media) ? (
-      <ClipVideoPlayer media={media} isActive={isActive} isMuted style={StyleSheet.absoluteFill} />
+      <ClipVideoPlayer media={media} isActive={isActive} isMuted={isMuted} style={StyleSheet.absoluteFill} />
     ) : (
       <VideoPosterOnly media={media} style={StyleSheet.absoluteFill} />
     );
@@ -103,7 +167,7 @@ function MediaPagerPage({ media, isActive, isNearActive }: { media: Media; isAct
       source={{ uri: imageUrl }}
       placeholder={media.blurhash ? { blurhash: media.blurhash } : undefined}
       style={StyleSheet.absoluteFill}
-      contentFit="cover"
+      contentFit="contain"
       cachePolicy="memory-disk"
       recyclingKey={imageUrl}
       transition={120}
@@ -124,4 +188,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
+  overlayActions: { flexDirection: "row", alignItems: "center", gap: 16 },
+  mutedSpeaker: { opacity: 0.35 },
 });

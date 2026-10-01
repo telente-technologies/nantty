@@ -3,7 +3,7 @@ import { useIsFocused, type CompositeScreenProps } from "@react-navigation/nativ
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AppState, FlatList, Platform, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
+import { AppState, FlatList, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
@@ -14,8 +14,10 @@ import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
 import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/adEvents.service";
 import { clipsService } from "@/services/clips.service";
+import { claimAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useAuthStore } from "@/store/auth.store";
+import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Clip, ClipsFeedTab } from "@/types";
 
 import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
@@ -39,7 +41,8 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const [pageHeight, setPageHeight] = useState(0);
   const [activeClipIndex, setActiveClipIndex] = useState(0);
   const [isAppInForeground, setIsAppInForeground] = useState(AppState.currentState === "active");
-  const [isMuted, setIsMuted] = useState(Platform.OS === "web");
+  const isMuted = useVideoAudioStore((state) => state.isMuted);
+  const toggleMute = useVideoAudioStore((state) => state.toggleMute);
   const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
   const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
   const [showGestureTips, setShowGestureTips] = useState(!hasShownClipGestureTips);
@@ -140,6 +143,11 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
 
   const isPlaybackAllowed = isScreenFocused && isAppInForeground && commentsForClipId === null;
 
+  useEffect(() => {
+    if (!isPlaybackAllowed || isMuted) return;
+    claimAudioFocusForVideoPlayback();
+  }, [isPlaybackAllowed, isMuted]);
+
   return (
     <View style={styles.root} onLayout={(e) => setPageHeight(Math.round(e.nativeEvent.layout.height))}>
       {pageHeight > 0 ? (
@@ -177,7 +185,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
               bottomInset={insets.bottom}
               engagement={engagementFor(item)}
               myAvatarUrl={myAvatarUrl}
-              onToggleMute={() => setIsMuted((muted) => !muted)}
+              onToggleMute={toggleMute}
               onToggleLike={() => toggleLikeOnClip(item)}
               onLikeByDoubleTap={() => likeClipWithDoubleTap(item)}
               onToggleFollow={() => toggleFollowOnClipAuthor(item)}

@@ -10,6 +10,7 @@ import type { Conversation, UserSummary } from "@/types";
 
 import { BusinessLabel } from "./businessLabel";
 import { describeConversationForDisplay } from "./conversationDisplay.util";
+import { TypingDots } from "./typingDots";
 
 export interface ChatHeaderProps {
   readonly conversation: Conversation | undefined;
@@ -28,8 +29,11 @@ const describeWhoIsTyping = (usersTyping: readonly UserSummary[], isGroupLike: b
 
 export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, onOpenConversationInfo }: ChatHeaderProps) {
   const display = conversation ? describeConversationForDisplay(conversation) : null;
-  const typingText = describeWhoIsTyping(usersTyping, !!display && (display.isGroup || display.isChannel));
+  const isGroupLike = !!display && (display.isGroup || display.isChannel);
+  const typingText = describeWhoIsTyping(usersTyping, isGroupLike);
   const secondLine = typingText ?? display?.subtitle ?? null;
+  const showTypingDots = usersTyping.length > 0;
+  const subtitle = showTypingDots && !isGroupLike ? null : secondLine;
   const openUserProfile = useOpenUserProfile();
   const isDirectConversationWithPerson = !!conversation && !!display && !display.isGroup && !display.isChannel && conversation.kind !== "business";
   const openPeerProfileOrConversationInfo = () =>
@@ -52,10 +56,15 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
               ) : null}
               {display?.isBusiness ? <BusinessLabel /> : null}
             </View>
-            {secondLine ? (
-              <Text size={11} lineHeight={14} letterSpacing={0} color={typingText ? colors.primary : colors.textMuted} numberOfLines={1}>
-                {secondLine}
-              </Text>
+            {showTypingDots || subtitle ? (
+              <View style={styles.subtitleRow}>
+                {showTypingDots ? <TypingDots /> : null}
+                {subtitle ? (
+                  <Text size={11} lineHeight={14} letterSpacing={0} color={typingText ? colors.primary : colors.textMuted} numberOfLines={1}>
+                    {subtitle}
+                  </Text>
+                ) : null}
+              </View>
             ) : null}
           </View>
         </Pressable>
@@ -72,6 +81,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 18, flexShrink: 1 },
   peer: { flexDirection: "row", alignItems: "center", gap: 13, flexShrink: 1 },
   titleColumn: { flexShrink: 1 },
+  subtitleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   name: { flexShrink: 1 },
 });

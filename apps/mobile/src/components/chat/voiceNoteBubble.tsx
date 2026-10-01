@@ -2,7 +2,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Play24Icon } from "@/components/icons";
+import { PauseFill24Icon, Play24Icon } from "@/components/icons";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -39,9 +39,13 @@ export function VoiceNoteBubble({ media, isMine, deliveryStatus }: VoiceNoteBubb
         disabled={!media.url}
         hitSlop={8}
         onPress={togglePlayback}
-        style={[styles.playButton, status.playing && styles.playingButton]}
+        style={styles.playButton}
       >
-        <Play24Icon size={18} color={foregroundColor} />
+        {status.playing ? (
+          <PauseFill24Icon size={18} color={foregroundColor} />
+        ) : (
+          <Play24Icon size={18} color={foregroundColor} />
+        )}
       </Pressable>
       <View style={styles.track}>
         <View style={[styles.trackBackground, { backgroundColor: isMine ? "rgba(255,255,255,0.35)" : colors.placeholder }]}>

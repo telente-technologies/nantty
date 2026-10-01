@@ -16,6 +16,7 @@ export interface ProfileViewProps {
   readonly variant: "own" | "other";
   readonly tabs: readonly ProfileTabKey[];
   readonly actions: readonly ProfileAction[];
+  readonly identityAction?: ProfileAction;
   readonly loading: boolean;
   readonly refreshing: boolean;
   readonly onRefresh: () => void;
@@ -66,6 +67,7 @@ export function ProfileView(props: ProfileViewProps) {
             profile={props.profile}
             variant={props.variant}
             actions={props.actions}
+            identityAction={props.identityAction}
             onPressFollowers={props.onPressFollowers}
             onPressFollowing={props.onPressFollowing}
           />

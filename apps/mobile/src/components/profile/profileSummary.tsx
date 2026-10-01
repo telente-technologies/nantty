@@ -19,13 +19,14 @@ export interface ProfileSummaryProps {
   readonly profile: User;
   readonly variant: "own" | "other";
   readonly actions: readonly ProfileAction[];
+  readonly identityAction?: ProfileAction;
   readonly onPressFollowers: () => void;
   readonly onPressFollowing: () => void;
 }
 
 const formatJoinedMonthAndYear = (isoDate: string) => formatJoinedDate(isoDate).replace(/ (\d{4})$/, ", $1");
 
-export function ProfileSummary({ profile, variant, actions, onPressFollowers, onPressFollowing }: ProfileSummaryProps) {
+export function ProfileSummary({ profile, variant, actions, identityAction, onPressFollowers, onPressFollowing }: ProfileSummaryProps) {
   const isOwn = variant === "own";
   return (
     <View style={styles.root}>
@@ -52,6 +53,22 @@ export function ProfileSummary({ profile, variant, actions, onPressFollowers, on
             <Stat count={profile.following} label="following" onPress={onPressFollowing} />
           </View>
         </View>
+        {identityAction ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={identityAction.label}
+            onPress={identityAction.onPress}
+            style={({ pressed }) => [
+              styles.identityAction,
+              identityAction.highlighted && styles.highlightedAction,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text size={14} weight={500} lineHeight={16.8} color={identityAction.highlighted ? colors.white : colors.primary}>
+              {identityAction.label}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {profile.bio ? (
@@ -105,6 +122,15 @@ const styles = StyleSheet.create({
   root: { paddingHorizontal: 12 },
   banner: { height: 100, borderRadius: 8, marginTop: 4, overflow: "hidden" },
   identity: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  identityAction: {
+    height: 34,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+  },
   avatar: { width: 64, height: 64, backgroundColor: colors.placeholder, overflow: "hidden" },
   names: { flex: 1, gap: 4 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },

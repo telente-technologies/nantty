@@ -6,6 +6,7 @@ import { colors } from "@/constants/colors.constant";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
 import type { Message } from "@/types";
 
+import { formatClockTime } from "@/utils/formatDate.util";
 import { MessageReactionsRow } from "./messageReactionsRow";
 import { VoiceNoteBubble } from "./voiceNoteBubble";
 
@@ -73,11 +74,16 @@ export function ChatBubble({
         {onToggleReaction && message.reactions ? (
           <MessageReactionsRow reactions={message.reactions} onToggleReaction={onToggleReaction} alignEnd={isMine} />
         ) : null}
-        {deliveryStatus === "failed" ? (
-          <Text size={11} lineHeight={15.4} color={colors.error} align="right">
-            Not sent
+        <View style={styles.metaRow}>
+          <Text size={11} lineHeight={15.4} letterSpacing={0} color={colors.textMuted}>
+            {formatClockTime(message.createdAt)}
           </Text>
-        ) : null}
+          {deliveryStatus === "failed" ? (
+            <Text size={11} lineHeight={15.4} letterSpacing={0} color={colors.error}>
+              · Not sent
+            </Text>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -89,6 +95,7 @@ const styles = StyleSheet.create({
   theirs: { justifyContent: "flex-start" },
   mineColumn: { alignItems: "flex-end", gap: 2 },
   theirsColumn: { alignItems: "flex-start", gap: 2, flexShrink: 1 },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   systemRow: { paddingHorizontal: 32, paddingVertical: 6 },
   bubble: { maxWidth: 260, padding: 12 },
   pendingBubble: { opacity: 0.6 },

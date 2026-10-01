@@ -57,6 +57,7 @@ import { CreatorApplicationStatusScreen } from "@/screens/creator/creatorApplica
 import { CreatorDashboardScreen } from "@/screens/creator/creatorDashboard.screen";
 import { ReferralScreen } from "@/screens/wallet/referral.screen";
 import { CreatorSubscribeScreen } from "@/screens/creator/creatorSubscribe.screen";
+import { MySubscriptionsScreen } from "@/screens/creator/mySubscriptions.screen";
 import { VerificationScreen } from "@/screens/verification/verification.screen";
 import { VerificationApplyScreen } from "@/screens/verification/verificationApply.screen";
 import { PromotePostScreen } from "@/screens/boost/promotePost.screen";
@@ -137,6 +138,7 @@ export function MainNavigator() {
       <Stack.Screen name="CreatorDashboard" component={CreatorDashboardScreen} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
       <Stack.Screen name="CreatorSubscribe" component={CreatorSubscribeScreen} />
+      <Stack.Screen name="MySubscriptions" component={MySubscriptionsScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />
       <Stack.Screen name="VerificationApply" component={VerificationApplyScreen} />
       <Stack.Screen name="PromotePost" component={PromotePostScreen} />

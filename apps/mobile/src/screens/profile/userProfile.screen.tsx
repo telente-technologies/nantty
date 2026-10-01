@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { creatorQueryKeys } from "@/components/creator/creatorQueries.hook";
+import { creatorQueryKeys, useMySubscriptionsQuery } from "@/components/creator/creatorQueries.hook";
 import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
 import { TransferCoinsSheet } from "@/components/coins/transferCoinsSheet";
 import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
@@ -26,6 +26,9 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     queryFn: () => creatorProgramService.listSubscriptionPlansOfCreator(userId),
     enabled: !viewingOwnProfile,
   });
+  const mySubscriptions = useMySubscriptionsQuery(!viewingOwnProfile);
+  const hasActivePlans = (subscriptionPlans.data?.length ?? 0) > 0;
+  const alreadySubscribed = (mySubscriptions.data ?? []).some((item) => item.creatorId === userId && item.status === "active");
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
   const [isTransferCoinsSheetOpen, setIsTransferCoinsSheetOpen] = useState(false);
   const profile = profileQuery.data;
@@ -40,9 +43,15 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         { label: isFollowing ? "Following" : "Follow", onPress: () => toggleFollow.mutate(isFollowing), highlighted: !isFollowing },
         { label: "Message", onPress: () => navigation.navigate("Chat", { userId, name: profile.name }) },
         ...(profile.isSeller && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
-        ...((subscriptionPlans.data?.length ?? 0) > 0 ? [{ label: "Subscribe", onPress: () => navigation.navigate("CreatorSubscribe", { creatorId: userId }) }] : []),
       ]
     : [];
+
+  const identityAction: ProfileAction | undefined =
+    !viewingOwnProfile && hasActivePlans
+      ? alreadySubscribed
+        ? { label: "Subscribed", onPress: () => navigation.navigate("MySubscriptions") }
+        : { label: "Subscribe", onPress: () => navigation.navigate("CreatorSubscribe", { creatorId: userId }), highlighted: true }
+      : undefined;
 
   return (
     <Screen background={colors.white}>
@@ -64,6 +73,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           ...(profile?.isSeller ? (["store"] as const) : []),
         ]}
         actions={actions}
+        identityAction={identityAction}
         loading={postsQuery.isLoading}
         refreshing={profileQuery.isRefetching || postsQuery.isRefetching}
         onRefresh={() => {

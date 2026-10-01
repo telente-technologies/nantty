@@ -12,6 +12,7 @@ export function SettingsPaymentMethodsScreen({ navigation }: MainScreenProps<"Se
       <SettingsGroup>
         <SettingsRow label="Card" onPress={() => setCardInfoVisible(true)} />
         <SettingsRow label="Wallets" onPress={() => navigation.navigate("Wallet")} />
+        <SettingsRow label="Subscriptions" onPress={() => navigation.navigate("MySubscriptions")} />
         <SettingsRow label="Payout for Sellers" onPress={() => navigation.navigate("PayoutAccounts")} />
       </SettingsGroup>
       <InfoSheet

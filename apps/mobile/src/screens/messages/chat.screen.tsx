@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { removeExpiredMessagesFromCaches } from "@/cache/messageRealtimeCache.util";
@@ -11,10 +11,12 @@ import { ChatHeader } from "@/components/chat/chatHeader";
 import { describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
 import { ConversationIntro } from "@/components/chat/conversationIntro";
 import { MessageReactionPicker } from "@/components/chat/messageReactionPicker";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset.hook";
 import { useMessageReactionToggle } from "@/components/chat/messageReactions.hook";
 import { useOptimisticChatMessageSender } from "@/components/chat/optimisticChatMessageSender.hook";
 import { useOptimisticVoiceNoteSender } from "@/components/chat/optimisticVoiceNoteSender.hook";
 import { useUsersTypingInConversation } from "@/components/chat/typingIndicators.store";
+import { TypingDots } from "@/components/chat/typingDots";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -24,6 +26,14 @@ import { realtimeService } from "@/services/realtime.service";
 import { useAuthStore } from "@/store/auth.store";
 
 const EXPIRED_MESSAGE_SWEEP_INTERVAL_MS = 30_000;
+
+function TypingRow() {
+  return (
+    <View style={styles.typingRow}>
+      <TypingDots />
+    </View>
+  );
+}
 
 const formatConversationDayLabel = (iso: string) => {
   const date = new Date(iso);
@@ -38,6 +48,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const myUserId = useAuthStore((s) => s.user?.id ?? "u_me");
   const listRef = useRef<FlatList<LocallyStoredMessage>>(null);
   const [messageBeingReactedTo, setMessageBeingReactedTo] = useState<LocallyStoredMessage | null>(null);
+  const { inset: keyboardInset, handleLayout } = useKeyboardInset();
 
   const conversation = useQuery({
     queryKey: ["conversation", route.params.conversationId ?? `user:${userId}`],
@@ -60,6 +71,10 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   }, [conversationId]);
 
   useEffect(() => {
+    if (keyboardInset > 0) listRef.current?.scrollToEnd({ animated: false });
+  }, [keyboardInset]);
+
+  useEffect(() => {
     if (!conversationId) return;
     const sweepTimer = setInterval(() => removeExpiredMessagesFromCaches(queryClient, conversationId), EXPIRED_MESSAGE_SWEEP_INTERVAL_MS);
     return () => clearInterval(sweepTimer);
@@ -80,8 +95,8 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   };
 
   return (
-    <Screen background={colors.white}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Screen background={colors.white} edges={["top", "bottom"]}>
+      <View style={[styles.flex, { paddingBottom: keyboardInset }]} onLayout={handleLayout}>
         <ChatHeader
           conversation={conversation.data}
           fallbackName={name}
@@ -102,6 +117,8 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           style={styles.flex}
           data={items}
           keyExtractor={(m) => m.id}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
           ListHeaderComponent={
             <View>
@@ -124,6 +141,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           }
           ItemSeparatorComponent={() => <View style={styles.bubbleGap} />}
           contentContainerStyle={styles.listContent}
+          ListFooterComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
           renderItem={({ item }) => (
             <ChatBubble
               message={item}
@@ -151,7 +169,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
             }}
           />
         )}
-      </KeyboardAvoidingView>
+      </View>
       <MessageReactionPicker
         visible={!!messageBeingReactedTo}
         onClose={() => setMessageBeingReactedTo(null)}
@@ -170,6 +188,7 @@ const styles = StyleSheet.create({
   dayDivider: { gap: 12, marginBottom: 10, marginTop: 8 },
   line: { height: 0.5, backgroundColor: colors.divider },
   bubbleGap: { height: 4 },
+  typingRow: { paddingHorizontal: 20, paddingTop: 4, flexDirection: "row", justifyContent: "flex-start" },
   listContent: { paddingBottom: 12 },
   readOnlyNotice: { paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.divider },
 });

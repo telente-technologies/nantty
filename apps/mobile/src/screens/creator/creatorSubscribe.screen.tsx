@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
@@ -17,11 +17,31 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import { paymentsService } from "@/services/payments.service";
-import type { CreatorSubscriptionState } from "@/types/creator.type";
+import type { CreatorSubscriptionCheckout, CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+
+const VERIFY_MAX_ATTEMPTS = 6;
+const VERIFY_RETRY_DELAY_MS = 1_500;
+
+const waitForMilliseconds = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function verifySubscriptionCheckoutUntilSettled(checkout: CreatorSubscriptionCheckout): Promise<CreatorSubscriptionState> {
+  let latest = checkout.subscription;
+  for (let attempt = 0; attempt < VERIFY_MAX_ATTEMPTS; attempt++) {
+    try {
+      latest = await creatorProgramService.verifySubscriptionCheckout(checkout.reference);
+    } catch {
+      return latest;
+    }
+    if (latest.status !== "pending") return latest;
+    await waitForMilliseconds(VERIFY_RETRY_DELAY_MS * (attempt + 1));
+  }
+  return latest;
+}
 
 export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"CreatorSubscribe">) {
   const { creatorId } = route.params;
+  const queryClient = useQueryClient();
   const creator = useUserProfileQuery(creatorId);
   const plans = useQuery({ queryKey: creatorQueryKeys.plansOfCreator(creatorId), queryFn: () => creatorProgramService.listSubscriptionPlansOfCreator(creatorId) });
   const [chosenPlanId, setChosenPlanId] = useState<string | null>(null);
@@ -33,10 +53,18 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
   const subscribe = useMutation({
     mutationFn: async () => {
       const checkout = await creatorProgramService.startSubscriptionCheckout(creatorId, planId!, idempotencyKeyForCheckout.current);
-      await paymentsService.openHostedCheckoutInAppBrowser(checkout.checkoutUrl);
-      return creatorProgramService.fetchSubscriptionState(checkout.subscriptionId);
+      idempotencyKeyForCheckout.current = generateIdempotencyKey();
+      await paymentsService.openHostedCheckoutInAppBrowser(checkout.checkoutUrl).catch(() => "dismissed");
+      return verifySubscriptionCheckoutUntilSettled(checkout);
     },
-    onSuccess: setSubscription,
+    onSuccess: (state) => {
+      setSubscription(state);
+      if (state.status === "active") {
+        idempotencyKeyForCheckout.current = generateIdempotencyKey();
+        queryClient.invalidateQueries({ queryKey: creatorQueryKeys.plansOfCreator(creatorId) });
+        queryClient.invalidateQueries({ queryKey: creatorQueryKeys.mySubscriptions });
+      }
+    },
   });
 
   if (subscription?.status === "active") {
