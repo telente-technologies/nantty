@@ -1,0 +1,10 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--divider);
+}
