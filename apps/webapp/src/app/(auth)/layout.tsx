@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { readonly children: ReactNode 
     <div className={styles.page}>
       <aside className={styles.aside} aria-hidden="true">
         <div className={styles.asideInner}>
-          <p className={styles.eyebrow}>Social shopping, made for Nigeria</p>
+          <p className={styles.eyebrow}>Social Commerce, made for Nigeria</p>
           <p className={styles.headline}>
             Shop the sellers you already <span className={styles.priceTag}>watch.</span>
           </p>

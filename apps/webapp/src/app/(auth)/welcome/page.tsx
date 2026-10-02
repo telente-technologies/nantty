@@ -69,7 +69,7 @@ export default function WelcomePage() {
             window.location.assign(mode === "login" ? "/login" : "/signup");
           }}
         >
-          {mode === "login" ? "Use email/username" : "Email"}
+          {mode === "login" ? "Use email" : "Email"}
         </Button>
       </div>
 

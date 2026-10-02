@@ -226,6 +226,7 @@ function MartSection() {
 
 export default function HomePage() {
   const [section, setSection] = useState<HomeSection>("feed");
+  const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
 
   return (
     <div className={styles.page}>
@@ -242,8 +243,8 @@ export default function HomePage() {
       </div>
       {section === "feed" ? (
         <>
-          <TopicFilterRow />
-          <FeedSection />
+          <TopicFilterRow feedMode={feedMode} onSelectMode={setFeedMode} />
+          <FeedSection feedMode={feedMode} />
         </>
       ) : (
         <MartSection />

@@ -1,8 +1,11 @@
+"use client";
+
 import { ProfileView, SignOutButton } from "@/components/profile/profileView";
 import { ErrorState, Spinner } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { usersService } from "@/services/users.service";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 import styles from "./page.module.css";
 
@@ -18,6 +21,9 @@ export default function MePage() {
     <div className={styles.page}>
       <ProfileView user={profileQuery.data} isSelf />
       <div className={styles.footer}>
+        <Link href="/creator" className={styles.creatorLink}>
+          Creator dashboard
+        </Link>
         <SignOutButton />
       </div>
     </div>
