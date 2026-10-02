@@ -111,7 +111,37 @@ Real screen capture (ReplayKit / MediaProjection) is still plans §8.3.7 **[LATE
 | `src/components/home/feedTab.tsx`, `src/screens/posts/postDetail.screen.tsx` | Wire the counter to the screen (owner only). |
 | `src/types/models.type.ts`, `src/services/posts.service.ts`, `src/mocks/posts.mock.ts` | `PostAnalytics` / `PostAnalyticsDaily`, `fetchPostAnalytics()`, and an owner-only mock route returning `403 NOT_POST_OWNER` for anyone but the author. |
 
----
+### Feed / like / reels / live batch
+
+| File | Change |
+| --- | --- |
+| `src/components/feed/postCard.tsx` | **Impressions counter is now last** (Like → Comments → Repost → Share → Impressions). **Tip counter removed** — tipping lives in reels (and lives), not the feed. Liked state renders the **solid** `HeartFill72Icon` instead of the outline. Double-tap on the card body likes the post, pops the centre `LikeBurst` red-heart animation, and defers the single-tap navigation by `DOUBLE_TAP_WINDOW_MS` (280ms) so nav and like never race. New `onPressOriginalPost` prop. |
+| `src/components/home/topicFilterRow.tsx` | The `For You` chip is a **dropdown**: `FrameAwareModal` menu with `For you` / `Following` + `Check16Icon`, label tracks the active mode; picking a topic returns the mode to For You. |
+| `src/components/home/feedTab.tsx` | `feedMode` state → `[...feedQueryKeyPrefix, feedMode, selectedTopicId]`; following queries `fetchFollowingFeedPage`. **Dedupe by post id across pages** — fixes the `Encountered two children with the same key, .$ad_post_1` warning (the sponsored slot repeats `ad_post_1` every 4 pages). Wires `onPressOriginalPost`. |
+| `src/components/feed/resharedPostBlock.tsx` | The **whole reshared block is pressable** → opens the original post's `PostDetail` (nested author pressable still opens the profile). |
+| `src/components/feed/sponsoredContent.tsx` | CTA buttons actually work: `ctaUrl` is matched for `/products/:id` → `ProductDetail`, `/stores/:id` → `Store`, other `https://` links via `Linking.openURL`; the ad click is still recorded. |
+| `src/mocks/productCatalog.mock.ts` | Sponsored placements now carry a `ctaUrl` (`https://zudomart.com/products/<id>`) so `Shop now` has a destination. |
+| `src/components/clips/clipPage.tsx` | **Hold the clip for 300ms → temporary 2× playback** with a `2×` badge; release restores the selected speed. (Double-tap like + centre burst already existed on reels.) |
+| `src/screens/live/live.screen.tsx` | **Double-tap the live stage likes it** — viewers only: `sendReaction("❤️")` + `LikeBurst` overlay. |
+
+### Chat — emoji panel, plus menu, image messages
+
+| File | Change |
+| --- | --- |
+| `src/components/chat/messageComposerBar.tsx` | Smiley toggles an in-bar **emoji panel** (a plain `CHAT_EMOJI` unicode `const` — **no emoji library added**; typing emoji from the keyboard keeps working). The right-side image icon is replaced by `Plus24Icon`. |
+| `src/components/chat/chatAttachmentMenu.tsx` | **New.** `FrameAwareModal` bottom sheet: Photos, Camera, Location, Documents, Poll (custom `Document24Icon` / `Poll24Icon` — no file/poll glyph existed in the icon set). |
+| `src/components/chat/chatComposerWithVoiceNotes.tsx` | `onPressPlus` opens the sheet; **Photos & Camera fully work** via the system picker (`pickPhotosAndVideosFromLibrary` / `takePhotoWithSystemCamera`); Location / Documents / Poll show a *coming soon* alert (deliberately no new native deps). |
+| `src/components/chat/optimisticImageMessageSender.hook.ts` | **New.** `enqueueLocalMediaForUpload(…, "chat")` → optimistic image bubble with the local url → `waitForUploadedMediaId` → `sendImageToConversation`; local-url fallback, failure marks the message *Not sent*. |
+| `src/services/messages.service.ts`, `src/mocks/chats.mock.ts` | `sendImageToConversation()` (`POST …/messages`, `{kind:"image", mediaId}`) + mock POST handler support for image messages (`media.type:"image"`). |
+| `src/components/chat/chatBubble.tsx` | Renders image messages (`expo-image`, 200×260 bubble, padding override so the photo isn't cramped). |
+| `src/screens/messages/chat.screen.tsx` | Wires `useOptimisticImageMessageSender` → `onSendImage`. |
+| `src/components/icons/custom/document24.tsx`, `poll24.tsx` | **New** custom stroke icons, exported through `icons/custom/index.ts`. |
+
+### Creator dashboard — analytics glyph + post drill-down
+
+| File | Change |
+| --- | --- |
+| `src/screens/creator/creatorDashboard.screen.tsx` | Top-content rows are now `Pressable`: **posts open the owner-only `PostAnalytics` screen** (`{ postId }`); live rows stay non-interactive (no live-analytics screen yet). Each row's meta line now leads with the `Analytics24Icon` bar-chart glyph (never an eye) beside `Post · 9.8k views`, matching the feed's impressions counter. New `metrics` style row (icon + text, gap 4). |
 
 ---
 
@@ -137,7 +167,7 @@ Auth was rebuilt to mirror `apps/mobile` exactly — no invented forms, copy, ic
 
 | File | Change |
 | --- | --- |
-| `src/app/(auth)/layout.tsx` + `authLayout.module.css` | **Rebuilt.** Removed the invented "Z" mark, "Watch it. Want it. Buy it." headline and invented bullet points. Desktop (≥900px) is now a real split screen: the left half is the landing-page hero — eyebrow *"Social shopping, made for Nigeria"*, the `Shop the sellers you already watch.` heading with its yellow price tag, the landing lede, the landing proof list (`shield24` / `sealCheck20` / `truck24`), and a three-phone stage built from real screenshots — over the landing gradient. Right half is the wordmark + form. Below 900px the aside collapses and only the form shows. |
+| `src/app/(auth)/layout.tsx` + `authLayout.module.css` | **Rebuilt.** Removed the invented "Z" mark, "Watch it. Want it. Buy it." headline and invented bullet points. Desktop (≥900px) is now a real split screen: the left half is the landing-page hero — eyebrow *"Social Commerce, made for Nigeria"*, the `Shop the sellers you already watch.` heading with its yellow price tag, the landing lede, the landing proof list (`shield24` / `sealCheck20` / `truck24`), and a three-phone stage built from real screenshots — over the landing gradient. Right half is the wordmark + form. Below 900px the aside collapses and only the form shows. |
 | `src/app/(auth)/welcome/page.tsx` + `welcome.module.css` | **New.** Splash (`#f7f8fe`, lowercase `zudomart` wordmark, 1200ms — matching `apps/mobile/app.json`'s splash config) then the mobile `Onboarding` screen: three staggered rows of the market photo, *"Discover real sellers around you"* / *"Shop real sellers, pay safely with escrow."*, `Continue with Apple`, `Continue with Google`, `Email`, `LegalText`, and the `Already have an account? / Log in` switch. The splash is CSS-hidden on desktop viewports. |
 | `src/app/(auth)/login/page.tsx` | **Rebuilt.** Dropped the invented `Welcome back` / `Sign in to keep shopping and chatting.` Now exactly `LoginScreen`: back arrow to `/welcome`, fields labelled **`Email`** (placeholder **`Enter your email`**, `autoComplete="username"` so a username still works) and `Password` (placeholder `Enter password`), `Forgot password?`, the `Log in` button (disabled until both fields are non-empty, as mobile does), `SocialSignInButtons` (Apple + Google) and mobile's `Don't have an account? / Sign up` switch copy. Non-API failures use mobile's own fallback: `Couldn't log in. Check your connection and try again.` **No phone number anywhere in login.** |
 | `src/app/(auth)/signup/page.tsx` | **Rebuilt, then simplified to email-only.** Replaced the invented `StepDots` wizard with mobile's exact step order and copy: **Contact** (**`What's your email?`**, `Enter your email`, `Save login info…` checkbox, `Send Code` — **the `Phone number`/`Email` tabs, `NG +234` prefix and phone-privacy line are gone**) → **Verify** (`Enter 6-digit code`, 6-box OTP that auto-verifies, `Resend code` + 60s timer, `Didn't get a code? Request a call`) → **Birthday** (`When's your birthday?`, `dd/mm/yyyy`, the ≥13 and real-date errors) → **Password** (`Create password`, live requirements list + strength bar with `Weak`/`Medium`/`Strong`) → **Username** (`Create username`, debounced availability with mobile's exact `@x is available` / `That username is already taken.` messages, `Confirm` + `Skip`) → **Personalization** (`Personalize your feed`, `Add or edit topics you follow. Chose three or more.`, minimum 3 topics, `Continue` / `Skip`, `Customizing your feed…` for 1.5s). Back arrow walks one step at a time and returns to `/welcome`. The invented "Your name (optional)" field is gone — mobile has no name field at signup. Validators are ported verbatim from `apps/mobile/src/utils/validators.util.ts`. |
@@ -175,6 +205,30 @@ Auth was rebuilt to mirror `apps/mobile` exactly — no invented forms, copy, ic
 | File | Change |
 | --- | --- |
 | `src/proxy.ts` | **Fixed an infinite redirect loop.** A signed-in visit to `/login` (or `/signup`, `/forgot-password`, `/reset-password`) redirected to `/bff/auth/access-refresh?next=/login`, which 303'd straight back to `/login` — and the loop repeated forever. Signed-in users hitting any auth page now go to `/` (same rule `/welcome` already had). |
+
+### Feed UX batch — order, dropdown, dedupe
+
+| File | Change |
+| --- | --- |
+| `src/components/feed/postCard.tsx` | Footer order fixed: engagement actions → sponsored label → **impressions last** (`.actionViews` keeps `margin-left:auto`, so the analytics glyph + count pin to the right edge). Owner counter still links to `/analytics/post/:id`. |
+| `src/app/(app)/page.tsx` | `feedMode` state (`for-you` \| `following`). `TopicFilterRow` gains the **For you ▾ dropdown**: fixed-position menu (`For you ✓` / `Following`) with a click-away backdrop; selecting a topic switches back to For You. `FeedSection` queries `fetchFollowingFeedPage` when `following` (own query key). **Feed dedupe by post id** across pages — same `ad_post_1` duplicate-key fix as mobile. |
+| `src/app/(app)/home.module.css` | `.feedModeWrap`, `.modeMenu`, `.modeMenuItem`, `.modeMenuBackdrop` (fixed positioning so `.topicRow`'s `overflow-x` can't clip the menu). |
+
+Verified headless (Chrome CDP, mock login): chip `For you ▾` → menu → `Following ▾` re-queries the feed, and the footer ends with `6.3k impressions` (screenshots `/tmp/shots/webapp-{feed,dropdown,following}.png`).
+
+### Auth wording + creator dashboard batch
+
+| File | Change |
+| --- | --- |
+| `src/app/(auth)/welcome/page.tsx` | The last "email/username" copy in the system: the login-mode button now reads **"Use email"** (signup mode stays **"Email"** — same label as mobile onboarding). Flow unchanged: default signup mode, footer "Log in" toggles in place, the button then navigates to `/login` for the form; social sign-in stays for direct login. |
+| `src/app/(app)/me/page.tsx` | **Fixed a server/client crash** — the page calls `useQuery` but never declared `"use client"`, so any visit to `/me` threw *"Attempted to call useQuery() from the server"*. Directive added. Footer now links to **Creator dashboard** (`/creator`) above Sign out. |
+| `src/app/(app)/me/page.module.css` | `.creatorLink` (pill button matching the Sign out control) + footer becomes a column. |
+| `src/services/creatorProgram.service.ts` | **New.** `fetchCreatorDashboard(period)` → `GET /api/v1/creators/dashboard` (mock route already existed in `src/mocks/creatorProgram.mock.ts`, previously unused). |
+| `src/app/(app)/creator/page.tsx` + `page.module.css` | **New.** Creator dashboard: period chips (This week / This month / All time), earnings summary grid (total / available / pending / followers gained), **Top lives & posts** — every row shows the `AnalyticsIcon` glyph + `Post · 9.8k views`; **post rows link to the owner-only `/analytics/post/:id`**, live rows are plain; owner note at the bottom. No decorative accent bars. |
+
+Social sign-in coverage confirmed headless: `Continue with Apple` + `Continue with Google` render on `/welcome` (both modes), `/login`, and the `/signup` contact step (below the "or" divider) — same order as mobile onboarding.
+
+Verified headless (Chrome CDP): `/welcome` label `Use email` in login mode → `/login` (`Enter your email` + social) → `/signup` (social + divider) → mock login → `/me` (Creator dashboard link) → `/creator` (chips, summary, views rows) → `/analytics/post/post_9` ("Only you can see these numbers.") → `/orders` (7 status filters) → `/orders/o_4108` (escrow step timeline, `pending` badge). Screenshots `/tmp/shots/v2-*.png`.
 
 ---
 
@@ -242,5 +296,5 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 
 | File | Change |
 | --- | --- |
-| `docs/plans.md` | The working plan: feed media, feed video audio, chat keyboard/voice/timestamps/typing, creator subscriptions, Creator Studio requirements, webapp auth parity + desktop split, **reshare (§7)**, **Studio subdomain + live broadcasting (§8)** — with the new **in-app go-live source picker table (§8.4: Camera / Screen / External for gamers)** and phase markers updated to what is now built, **mock mode (§9)**, and **post impressions & owner-only analytics (§11)**. |
+| `docs/plans.md` | The working plan: feed media, feed video audio, chat keyboard/voice/timestamps/typing, creator subscriptions, Creator Studio requirements, webapp auth parity + desktop split, **reshare (§7)**, **Studio subdomain + live broadcasting (§8)** — with the in-app go-live source picker table (§8.4: Camera / Screen / External for gamers), the mock contract renumbered to **§8.5**, phase markers updated to what is now built, **mock mode (§9)**, **post impressions & owner-only analytics (§11)**, **the feed & chat UX batch (§12)**, plus three new sections: **§13 verification checkmarks proposal** (gold = business/store, blue = personal, two independent subscriptions that never conflict), **§14 orders tracking** (history/details/status — already built on both apps), and **§15 auth wording, social sign-in & creator analytics batch**. |
 | `docs/CHANGELOG.md` | **New.** This file. |

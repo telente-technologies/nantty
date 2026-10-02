@@ -363,7 +363,7 @@ Requirement: *"on both there and inside the app, they can go live, gamers too �
 
 Mock rule (§9): all three sources must be **selectable and complete end-to-end in mock mode** — picking Screen/External issues a mock stream key and flips the session to `connecting`, exactly like the API would.
 
-### 8.4 Mock contract (Studio)
+### 8.5 Mock contract (Studio)
 
 Frontend is mock-first, so the Studio mock server **defines** the contract until the backend is built. Routes to implement in `apps/studio/src/mocks/`:
 
@@ -429,9 +429,109 @@ Requirement: *"on both mobile and webapp there should be an icon under all posts
 | Webapp counter | `src/components/feed/postCard.tsx` — owner renders a `<Link href={/analytics/post/:id}>`, everyone else a plain `<span>`; both show the glyph + "impressions". |
 | Webapp screen | `src/app/(app)/analytics/post/[postId]/page.tsx` + `page.module.css` — `useSession()` owner guard, metric grid, 7-day chart, engagement rows. |
 | Contract | `PostAnalytics` / `PostAnalyticsDaily` in both `types/models.type.ts`; `fetchPostAnalytics` in both `services/posts.service.ts`; owner-only mock route in both `mocks/posts.mock.ts`. |
-| Creator dashboard | mobile `creatorDashboard.screen.tsx` already shows per-post/live views; a webapp creator dashboard does not exist yet (**[LATER]**). |
+| Creator dashboard | mobile `creatorDashboard.screen.tsx` — per-post/live views with the `Analytics24Icon` glyph, post rows open `PostAnalytics`; webapp `/creator` (`(app)/creator/page.tsx`) — period chips, earnings summary, top lives & posts with views + `AnalyticsIcon`, post rows → owner-only `/analytics/post/:id`, entry from `/me`. **[DONE — §15]** |
 
 ### 11.3 Next
 
-- Webapp creator dashboard with views per post (**[LATER]** — no such screen exists in the webapp yet).
+- ~~Webapp creator dashboard with views per post~~ — shipped as `/creator` this batch (§15.1).
 - Real analytics numbers from the API once the backend lands (**[LATER]**).
+
+---
+
+## 12. Feed & chat UX batch (mobile + webapp)
+
+Requirement (2 Oct): impressions counter last everywhere + owner-only analytics tap; `For You` as a dropdown with `Following`; ad CTA buttons that open the actual product; filled-red like icon + double-tap like with centre burst (feed, reels, live); hold-to-2× on reels; chat emoji panel + a plus menu (Photos/Camera real, Location/Documents/Poll soon) with **no emoji library**; tapping a reshared block opens the original post; **tipping only in reels, not the feed**; and the duplicate `.$ad_post_1` React key warning.
+
+### 12.1 Shipped **[DONE]**
+
+- **Mobile:** `postCard.tsx` (impressions last, solid `HeartFill72Icon`, double-tap + `LikeBurst`, tip removed), `topicFilterRow.tsx` (`For You ▾` → For you/Following menu), `feedTab.tsx` (feedMode + following query + **id dedupe**), `resharedPostBlock.tsx` (whole block → original post), `sponsoredContent.tsx` (CTA → `ProductDetail`/`Store`), `clipPage.tsx` (hold → 2× + badge), `live.screen.tsx` (double-tap → ❤️ + burst), chat composer/attachment/image-message stack (`messageComposerBar`, `chatAttachmentMenu`, `chatComposerWithVoiceNotes`, `optimisticImageMessageSender`, `messages.service`, `chats.mock`, `chatBubble`, `chat.screen`, custom `document24`/`poll24` icons).
+- **Webapp:** footer order (impressions last), For you/Following dropdown + following query, feed id dedupe — verified with headless Chrome (mock login) via screenshots.
+- Gates: `npx tsc --noEmit` clean in `apps/mobile` and `apps/webapp`.
+
+### 12.2 Decisions
+
+- Emoji = the panel's plain unicode `const` **plus** the user's own keyboard; no emoji dependency.
+- Location / Documents / Poll deliberately show a *coming soon* alert — no `expo-location` / document-picker installed.
+- Tipping removed from `PostCard` only; reels (`clipPage`) and live (`live.screen`) keep their tip sheets.
+- Sponsored slots rotate `ad_post_1..4` every 4 pages (stateless cursor mocks) — duplicates are prevented client-side, not by changing the mock contract.
+
+### 12.3 Later / watch
+
+- The `Text strings must be rendered within a <Text>` console warning: static + type-aware scans of `apps/mobile/src` find **no** offenders in current code (the pasted bundle predated these fixes) — if it survives a reload, capture the DevTools component stack and chase it.
+- Webapp `postCard` doesn't render reshared posts yet, so "tap original repost" has no surface there.
+- Real following-feed content once the backend lands (mock filter is `isFollowingAuthor`).
+
+---
+
+## 13. Verification checkmarks — business (gold) vs personal (blue) **[PROPOSAL]**
+
+Requirement (2 Oct): *"businesses and brands use gold checkmarks, while users use only blue. If a user pays for a business checkmark for their store — which appears beside the store or brand name — they must purchase their personal one separately. They can pay for only the business, or only the personal, or both; the two must never conflict."*
+
+### 13.1 The two tiers
+
+| Tier | Colour | Attached to | Shown beside | Purchased how |
+| --- | --- | --- | --- | --- |
+| **Business / brand** | **Gold** checkmark | a store / brand record | store name — store page, product cards, seller messages, brand mentions | its own subscription, one per store |
+| **Personal** | **Blue** checkmark | the user account | display name / `@username` — posts, comments, profile header, creator surfaces | its own subscription, one per account |
+
+### 13.2 Rules
+
+- **Two independent purchases.** Backed by two separate subscription records (`subjectType: "user" | "store"`). Buying one never grants or upgrades the other — no bundle, no auto-inheritance.
+- **Either or both.** A seller can hold: personal only, business only, or both at the same time. Checkout for the second tier is a normal, separate payment.
+- **No conflict, ever.** Rendering is keyed by subject, not by user: a store name always gets the gold badge, a person's name always gets the blue badge. One person with both sees blue beside their name and gold beside their store **on the same screen** — two badges, no overwrite.
+- **Business tier requires a business.** Only purchasable against an approved store/brand. Personal tier is per account. Cancelling either tier removes only that badge; the other keeps working.
+- **Single shared badge component** (`VerifiedBadge`, variant `gold | blue`) across mobile, webapp and Studio — the checkmark glyph appears nowhere else in the UI.
+- Pricing, billing period and eligibility per tier: **TBD** (open question before build).
+
+### 13.3 API sketch (for when the backend starts)
+
+- `GET /api/v1/verifications/me` → `{ personal: {...} | null, business: { storeId, ... } | null }`.
+- `POST /api/v1/verifications/checkout { subjectType, storeId? }` → payment session (Paystack/Flutterwave).
+- Webhook `subscription.updated` → set/clear `verified` flag on the `users` row (personal) or `stores` row (business).
+- Badge payloads are returned on user/store responses; the client never decides verification.
+
+### 13.4 Status
+
+**Proposal only — no code yet.** Approved in principle (2 Oct); pricing + billing shape still open.
+
+---
+
+## 14. Orders tracking (history, details, status) **[DONE]**
+
+Requirement: *"a dedicated page for orders tracking, where they will see history of the orders, check details of the orders and status too."*
+
+| Surface | Where | What |
+| --- | --- | --- |
+| Webapp list | `(app)/orders/page.tsx` — `/orders` | full history, status filter chips (All / Pending / Paid / Shipped / Delivered / Completed / Cancelled), status badges, link to detail |
+| Webapp detail | `(app)/orders/[orderId]/page.tsx` | escrow **status timeline** (Order placed → Paid into escrow → Shipped → Delivered → Completed), items, totals, pay / confirm / dispute actions |
+| Mobile list | `screens/orders/orders.screen.tsx` | grouped sections + horizontal filter chips, `OrderListItem` → detail |
+| Mobile detail | `screens/orders/orderDetail.screen.tsx` | `StatusPill`, escrow status screen, confirm-receipt / dispute actions |
+| Entries | webapp `/me` profile icon → `/orders`; mobile profile shortcuts → **My orders**; payment success → **View my orders**; order notifications → Orders |
+
+Status: **[DONE]** — both apps have history + detail + status end-to-end in mock mode.
+
+---
+
+## 15. Auth wording, social sign-in & creator analytics batch (2 Oct)
+
+Requirement: *social sign-in everywhere on the webapp without deviating from the mobile plan; no "username" wording or phone registration in auth; `/welcome` defaults to signup with the login mode staying on the page and the button heading to `/login`; creator dashboard shows views per post with an analytics-style icon (never an eye); owner-only analytics stays owner-only.*
+
+### 15.1 Shipped **[DONE]**
+
+- **Webapp social sign-in** — `SocialSignInButtons` (Apple + Google) rendered on `/welcome` (above the Email button), `/login` (below the form) and `/signup` contact step (below the "or" divider) — same order/format as mobile onboarding.
+- **Auth wording** — the only "email/username" offender (`welcome/page.tsx` login-mode label) now reads **"Use email"**; every login placeholder is "Enter your email"; no phone input exists in any register flow (only the decorative device mockup in the auth design half); no eye icon anywhere near views/impressions.
+- **`/welcome` flow** — defaults to `signup` mode; the footer "Log in" toggles in place (stays on `/welcome`); in login mode the Email button becomes "Use email" and navigates to `/login` for the form; social buttons remain for direct sign-in.
+- **Mobile creator dashboard** — every top-content row now shows views with the `Analytics24Icon` bar-chart glyph and posts open the owner-only `PostAnalytics` screen.
+- **Webapp creator dashboard** — new `/creator` screen (period chips, earnings summary, top lives & posts with views + `AnalyticsIcon`), entry from `/me`; post rows link to the owner-only `/analytics/post/:id` screen. Data from the already-shipped `GET /api/v1/creators/dashboard` mock.
+
+### 15.2 Decisions
+
+- Welcome login-mode button says **"Use email"** (never "…/username") — the backend still accepts username-or-email identifiers, but no UI says so (§6.4 rule).
+- Dashboard rows for **lives** show views but are not pressable (no live-analytics screen yet); only **posts** open the analytics screen.
+- The business/personal checkmark split is documented as a proposal only (§13) — no badge code until pricing lands.
+
+### 15.3 Later / watch
+
+- Live analytics screen (retention, top moments) for dashboard rows of kind `live` (extends §8.3.10).
+- Creator Program join flow on the webapp (dashboard shows the API's 403 message until then).
+- Real dashboard numbers once the backend lands (§9 mock contract).
