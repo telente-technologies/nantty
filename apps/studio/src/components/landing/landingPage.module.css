@@ -1,0 +1,73 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+}
+
+.eyebrow {
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--blue-500);
+}
+
+.section {
+  padding: clamp(56px, 8vw, 96px) 0;
+}
+
+.sectionMuted {
+  background: var(--surface-app);
+  border-block: 1px solid var(--divider);
+}
+
+.sectionInner {
+  width: 100%;
+  max-width: calc(var(--content-width) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.sectionHead {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 640px;
+  margin-bottom: var(--space-7);
+}
+
+.sectionTitle {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.primaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-500);
+  color: var(--ink-inverse);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.primaryAction:hover {
+  background: var(--blue-600);
+}
+
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.secondaryAction:hover {
+  background: var(--surface-sunken);
+}

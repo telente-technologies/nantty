@@ -1,0 +1,24 @@
+.footer {
+  background: var(--surface-inverse);
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-5);
+}
+
+.brand {
+  font-weight: 800;
+  letter-spacing: var(--tracking-display);
+}
+
+.note {
+  font-size: var(--text-xs);
+  color: rgb(255 255 255 / 0.6);
+  overflow-wrap: anywhere;
+}

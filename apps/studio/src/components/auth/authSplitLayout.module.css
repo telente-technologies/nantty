@@ -1,0 +1,232 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  min-height: 100dvh;
+}
+
+.aside {
+  display: flex;
+  padding: clamp(32px, 5vw, 72px);
+  background:
+    radial-gradient(90% 70% at 85% 10%, rgb(69 99 247 / 0.35) 0%, transparent 60%),
+    linear-gradient(165deg, #0b1752 0%, #10227a 58%, #152da3 100%);
+  color: var(--ink-inverse);
+}
+
+.asideInner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 540px;
+  margin-inline: auto;
+}
+
+.asideCopy {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.eyebrow {
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--yellow-500);
+}
+
+.headline {
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+.lede {
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.76);
+}
+
+.proofList {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.proofRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.92);
+}
+
+.proofIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.14);
+  border: 1px solid rgb(255 255 255 / 0.28);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin-top: var(--space-4);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: var(--radius-medium);
+  background: repeating-conic-gradient(#20222e 0% 25%, #171824 0% 50%) 50% / 34px 34px;
+  box-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.7);
+}
+
+.stageBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--error);
+  color: #fff;
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.stageDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.stageSource {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.2);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.8);
+}
+
+.stageLogo {
+  position: absolute;
+  top: 44px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-small);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 800;
+  letter-spacing: var(--tracking-display);
+}
+
+.stageLowerThird {
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  width: min(62%, 340px);
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  background: rgb(11 23 82 / 0.94);
+}
+
+.stageName {
+  font-size: var(--text-base);
+  font-weight: 800;
+  color: #fff;
+}
+
+.stageHandle {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  color: var(--blue-200);
+}
+
+.stageTicker {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
+.main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 5vw, 64px);
+  background: var(--surface-app);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 430px;
+}
+
+.wordmark {
+  width: fit-content;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: var(--tracking-display);
+}
+
+.wordmarkStudio {
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-500);
+  color: var(--ink-inverse);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aside {
+    padding: var(--space-6) var(--gutter);
+  }
+
+  .asideInner {
+    gap: var(--space-4);
+  }
+
+  .stage {
+    display: none;
+  }
+}
