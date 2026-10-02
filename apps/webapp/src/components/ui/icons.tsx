@@ -196,6 +196,15 @@ export const ImageIcon = createIcon(() => (
   </>
 ));
 
+export const AnalyticsIcon = createIcon(() => (
+  <>
+    <path d="M3.5 20.5h17" />
+    <path d="M7 20.5v-6" />
+    <path d="M12 20.5v-11" />
+    <path d="M17 20.5v-16" />
+  </>
+));
+
 export const EyeIcon = createIcon(() => (
   <>
     <path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z" />

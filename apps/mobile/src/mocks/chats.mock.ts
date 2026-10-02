@@ -151,8 +151,14 @@ export const chatsMocks: MockRoute[] = [
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text: string; kind?: "voice"; mediaId?: string; durationSeconds?: number };
+    const input = body as { text: string; kind?: "voice" | "image"; mediaId?: string; durationSeconds?: number };
     const createdAt = new Date().toISOString();
+    const media =
+      input.kind === "voice" && input.mediaId
+        ? { id: input.mediaId, type: "voice" as const, url: null, durationSeconds: input.durationSeconds }
+        : input.kind === "image" && input.mediaId
+          ? { id: input.mediaId, type: "image" as const, url: null }
+          : null;
     return appendMockMessageAndUpdateConversation({
       id: `m_${Date.now()}`,
       conversationId: params.conversationId!,
@@ -160,7 +166,7 @@ export const chatsMocks: MockRoute[] = [
       text: input.text,
       createdAt,
       kind: input.kind ?? "text",
-      media: input.kind === "voice" && input.mediaId ? { id: input.mediaId, type: "voice", url: null, durationSeconds: input.durationSeconds } : null,
+      media,
       expiresAt: withExpiryForConversation(params.conversationId!, createdAt),
     });
   }),

@@ -20,8 +20,8 @@ export default function ForgotPasswordPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = destination.trim();
-    if (trimmed.length < 3) {
-      setError("Enter the email or phone number linked to your account.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) {
+      setError("Enter the email linked to your account.");
       return;
     }
     setError(null);
@@ -49,10 +49,12 @@ export default function ForgotPasswordPage() {
       ) : null}
 
       <TextField
-        label="Email or phone number"
+        label="Email"
         name="destination"
-        autoComplete="username"
-        placeholder="you@example.com"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        placeholder="Enter your email"
         value={destination}
         onChange={(event) => setDestination(event.target.value)}
       />

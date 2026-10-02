@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, Refresh24Icon, Share24Icon } from "@/components/icons";
+import { Analytics24Icon, BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, HeartFill72Icon, Refresh24Icon, Share24Icon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { TipSheet, type TipTarget } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
@@ -17,8 +17,12 @@ import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/f
 
 import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { MediaPager } from "./mediaPager";
+import { ResharedPostBlock } from "./resharedPostBlock";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
+import { LikeBurst } from "@/components/clips/likeBurst";
 import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
+
+const DOUBLE_TAP_WINDOW_MS = 280;
 
 export interface PostCardProps {
   readonly post: Post;
@@ -30,7 +34,9 @@ export interface PostCardProps {
   readonly onShare?: () => void;
   readonly onPressMore?: () => void;
   readonly onPressViewProducts?: () => void;
+  readonly onPressAnalytics?: () => void;
   readonly onPress?: () => void;
+  readonly onPressOriginalPost?: () => void;
   readonly adPlacement?: AdPlacement;
 }
 
@@ -44,6 +50,7 @@ export function PostCard(props: PostCardProps) {
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
   const [tipTarget, setTipTarget] = useState<TipTarget | null>(null);
   const canTipAuthor = post.author.isCreator === true && post.author.id !== signedInUserId;
+  const isOwnPost = post.author.id === signedInUserId;
   const isMediaLockedForViewer = isContentLockedForViewer(post);
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const [hasOpenedOptionsSheet, setHasOpenedOptionsSheet] = useState(false);
@@ -53,6 +60,36 @@ export function PostCard(props: PostCardProps) {
       setHasOpenedOptionsSheet(true);
       setIsOptionsSheetOpen(true);
     });
+  const [likeBurstKey, setLikeBurstKey] = useState(0);
+  const lastBodyTapAt = useRef(0);
+  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (singleTapTimer.current) clearTimeout(singleTapTimer.current);
+    },
+    [],
+  );
+  const likeFromDoubleTap = () => {
+    setLikeBurstKey((key) => key + 1);
+    if (!post.liked) props.onToggleLike?.();
+  };
+  const handleBodyPress = () => {
+    const now = Date.now();
+    if (now - lastBodyTapAt.current < DOUBLE_TAP_WINDOW_MS) {
+      if (singleTapTimer.current) clearTimeout(singleTapTimer.current);
+      singleTapTimer.current = null;
+      lastBodyTapAt.current = 0;
+      likeFromDoubleTap();
+      return;
+    }
+    lastBodyTapAt.current = now;
+    if (props.onPress) {
+      singleTapTimer.current = setTimeout(() => {
+        singleTapTimer.current = null;
+        props.onPress?.();
+      }, DOUBLE_TAP_WINDOW_MS);
+    }
+  };
   return (
     <View style={styles.card}>
       <View style={styles.combo}>
@@ -94,13 +131,26 @@ export function PostCard(props: PostCardProps) {
         </View>
       </View>
 
-      <Pressable onPress={props.onPress} disabled={!props.onPress}>
+      <Pressable
+        onPress={handleBodyPress}
+        disabled={!props.onPress && !props.onToggleLike}
+        accessibilityRole="button"
+        accessibilityLabel={props.onPress ? "Open post" : "Like post by double tap"}
+        accessibilityHint="Double tap to like"
+      >
         {post.text ? (
           <View style={styles.body}>
             <Text size={14} lineHeight={16.8}>
               {post.text}
             </Text>
           </View>
+        ) : null}
+        {post.resharedFrom ? (
+          <ResharedPostBlock
+            original={post.resharedFrom}
+            onPressAuthor={() => openUserProfile(post.resharedFrom!.author.id)}
+            onPress={props.onPressOriginalPost}
+          />
         ) : null}
         {isMediaLockedForViewer ? (
           <View style={styles.lockedMedia}>
@@ -127,7 +177,7 @@ export function PostCard(props: PostCardProps) {
       <View style={styles.interactions}>
         <View style={styles.counters}>
           <Counter label="Like" count={post.likes} onPress={props.onToggleLike}>
-            <Heart24AltIcon color={post.liked ? colors.error : undefined} />
+            {post.liked ? <HeartFill72Icon size={24} /> : <Heart24AltIcon />}
           </Counter>
           <Counter label="Comments" count={post.comments} onPress={props.onPressComments}>
             <BrandLine24Icon />
@@ -148,9 +198,13 @@ export function PostCard(props: PostCardProps) {
               <CoinAmountWithIcon weight={500} label="Tip" />
             </Pressable>
           ) : null}
+          <Counter label="Impressions" count={post.views} onPress={isOwnPost ? props.onPressAnalytics : undefined}>
+            <Analytics24Icon />
+          </Counter>
         </View>
         {tipTarget ? <TipSheet target={tipTarget} onClose={() => setTipTarget(null)} /> : null}
       </View>
+      <LikeBurst burstKey={likeBurstKey} />
       {hasOpenedOptionsSheet ? (
         <ContentOptionsSheet
           target={

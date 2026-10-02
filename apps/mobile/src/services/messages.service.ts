@@ -46,6 +46,8 @@ export const messagesService = {
   },
   sendVoiceNoteToConversation: (conversationId: string, voiceNote: OutgoingVoiceNote, idempotencyKey: string) =>
     api.post<Message>(`/api/v1/conversations/${conversationId}/messages`, { ...voiceNote, text: "" }, { idempotencyKey }),
+  sendImageToConversation: (conversationId: string, image: { readonly mediaId: string }, idempotencyKey: string) =>
+    api.post<Message>(`/api/v1/conversations/${conversationId}/messages`, { kind: "image", mediaId: image.mediaId, text: "" }, { idempotencyKey }),
   updateConversationSettings: (conversationId: string, update: ConversationSettingsUpdate) =>
     api.patch<Conversation>(`/api/v1/conversations/${conversationId}`, update),
   addReactionToMessage: (messageId: string, emoji: string) =>

@@ -2,10 +2,7 @@ import { create } from "zustand";
 
 import type { AuthSession } from "@/types";
 
-export type SignUpContactChannel = "phone" | "email";
-
 interface SignUpDraftValues {
-  readonly channel: SignUpContactChannel;
   readonly destination: string;
   readonly otpToken: string | null;
   readonly birthday: string;
@@ -21,7 +18,6 @@ interface SignUpDraft extends SignUpDraftValues {
 }
 
 const emptySignUpDraft: SignUpDraftValues = {
-  channel: "phone",
   destination: "",
   otpToken: null,
   birthday: "",

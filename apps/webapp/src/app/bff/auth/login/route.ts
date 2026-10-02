@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   const identifier = typeof body?.identifier === "string" ? body.identifier.trim() : "";
   const password = typeof body?.password === "string" ? body.password : "";
   if (identifier.length < 3 || identifier.length > 254 || password.length < 1 || password.length > 128) {
-    return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email, phone or username and your password.");
+    return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email or username and your password.");
   }
   const result = await callAuthEndpoint("/api/v1/auth/login", { identifier, password });
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "INVALID_CREDENTIALS", result.error?.message ?? "That sign-in details are not right.");

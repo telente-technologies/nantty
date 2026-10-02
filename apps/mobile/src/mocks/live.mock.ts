@@ -59,6 +59,18 @@ const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOr
 });
 
 const hostedLives = new Map<string, LiveSessionDetails>();
+const issuedStreamKeys = new Map<string, { readonly ingestUrl: string; readonly streamKey: string }>();
+
+const buildStreamCredentials = (liveId: string) => {
+  const existing = issuedStreamKeys.get(liveId);
+  if (existing) return existing;
+  const issued = {
+    ingestUrl: "rtmp://studio.zudomart.com/live",
+    streamKey: `sk_live_${liveId.replace(/[^a-z0-9]/gi, "")}_${Math.random().toString(36).slice(2, 10)}`,
+  };
+  issuedStreamKeys.set(liveId, issued);
+  return issued;
+};
 
 export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/suggested", () =>
@@ -80,6 +92,13 @@ export const liveMocks: MockRoute[] = [
     };
     hostedLives.set(session.id, session);
     return session;
+  }),
+  createMockRoute("POST", "/api/v1/lives/:liveId/stream-key", ({ params }) => {
+    const liveId = params.liveId!;
+    const issued = buildStreamCredentials(liveId);
+    const session = hostedLives.get(liveId);
+    if (session) hostedLives.set(liveId, { ...session, ...issued });
+    return issued;
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/join", () => undefined),
   createMockRoute("POST", "/api/v1/lives/:liveId/leave", () => undefined),

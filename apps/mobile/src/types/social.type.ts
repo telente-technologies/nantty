@@ -46,9 +46,13 @@ export interface NewCommentInput {
   readonly parentCommentId?: ID;
 }
 
+export type LiveSource = "camera" | "screen" | "external";
+
 export interface LiveSessionDetails extends LiveSession {
   readonly isFollowingHost: boolean;
   readonly startedAt: string;
+  readonly ingestUrl?: string | null;
+  readonly streamKey?: string | null;
 }
 
 export interface SuggestedLive {

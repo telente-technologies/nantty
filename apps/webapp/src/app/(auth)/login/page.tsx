@@ -10,6 +10,7 @@ import { TextField } from "@/components/ui/field";
 import { WebappRequestError, sendRequestToWebappServer } from "@/services/clientApi.service";
 import type { User } from "@/types";
 
+import { SocialSignInButtons } from "../socialSignIn";
 import styles from "../authForm.module.css";
 
 function readSafeNextPath(raw: string | null): string {
@@ -34,7 +35,7 @@ function LoginForm() {
     if (!canSubmit) return;
     setBusy(true);
     try {
-      await sendRequestToWebappServer<{ user: User }>("/bff/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
+      await sendRequestToWebappServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
       router.push(readSafeNextPath(searchParams.get("next")));
       router.refresh();
     } catch (error) {
@@ -59,7 +60,7 @@ function LoginForm() {
 
       <div className={styles.fieldGroup}>
         <TextField
-          label="Email or username"
+          label="Email"
           name="identifier"
           autoComplete="username"
           inputMode="email"
@@ -88,6 +89,10 @@ function LoginForm() {
       <Button type="submit" fullWidth size="lg" busy={busy} disabled={!canSubmit}>
         Log in
       </Button>
+
+      <div className={styles.socialStack}>
+        <SocialSignInButtons />
+      </div>
 
       <p className={styles.switchPrompt}>
         Don’t have an account?{" "}

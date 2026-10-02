@@ -70,6 +70,7 @@ export type MainStackParamList = {
   ConversationInfo: { conversationId: string };
   CreatePost: { mode?: "story" | "post" | "product" | "live"; soundId?: string } | undefined;
   PostDetail: { postId: string };
+  PostAnalytics: { postId: string };
   Live: { liveId: string; host?: boolean };
   LiveEnded: { liveId: string };
   Story: { userId: string };

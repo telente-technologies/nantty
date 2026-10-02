@@ -60,7 +60,7 @@ export const authMocks: MockRoute[] = [
     const { code } = body as { code: string };
     if (code.length !== 6) throw new ApiError(400, "Enter the 6-digit code");
     if (code === "000000") throw new ApiError(400, "That code is incorrect. Check it and try again.", "INVALID_CODE");
-    return { otpToken: "mock-otp-token" };
+    return { otpToken: "mock-otp-token-zudomart" };
   }),
   createMockRoute("POST", "/api/v1/auth/password/reset", () => undefined),
   createMockRoute("POST", "/api/v1/auth/logout", () => undefined),

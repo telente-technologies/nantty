@@ -1,5 +1,5 @@
 import { runNowOrQueueWhenOffline } from "@/store/offline.store";
-import type { Post } from "@/types";
+import type { Post, PostAnalytics } from "@/types";
 
 import { api } from "./apiClient.service";
 
@@ -15,7 +15,8 @@ export const postsService = {
       api.delete<void>(`/api/v1/posts/${postId}/like`, { idempotencyKey }),
     );
   },
-  repostPost: (postId: string) => api.post<void>(`/api/v1/posts/${postId}/repost`),
+  repostPost: (postId: string, text?: string) => api.post<Post>(`/api/v1/posts/${postId}/repost`, text ? { text } : {}),
+  fetchPostAnalytics: (postId: string) => api.get<PostAnalytics>(`/api/v1/posts/${postId}/analytics`),
   recordPostShare: (postId: string) => api.post<void>(`/api/v1/posts/${postId}/share`),
   followPostAuthor: async (userId: string) => {
     await runNowOrQueueWhenOffline({ kind: "followUser", payload: { userId } }, (idempotencyKey) =>

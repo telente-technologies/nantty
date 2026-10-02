@@ -138,7 +138,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 }
 
 export async function signOut(): Promise<void> {
-  await sendRequestToWebappServer<void>("/bff/auth/logout", { method: "POST" });
+  await sendRequestToWebappServer<void>("/auth/logout", { method: "POST" });
 }
 
 export function SignOutButton() {

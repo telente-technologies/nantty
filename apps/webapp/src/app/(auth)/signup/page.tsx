@@ -13,10 +13,10 @@ import { authService } from "@/services/auth.service";
 import { WebappRequestError, readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
 import type { User } from "@/types";
 
+import { SocialSignInButtons } from "../socialSignIn";
 import styles from "../authForm.module.css";
 
 type SignUpStep = "contact" | "verify" | "birthday" | "password" | "username" | "topics";
-type ContactChannel = "phone" | "email";
 
 const STEP_ORDER: readonly SignUpStep[] = ["contact", "verify", "birthday", "password", "username", "topics"];
 
@@ -39,20 +39,6 @@ function isValidEmailAddress(value: string): boolean {
 
 function removeNonDigitCharacters(value: string): string {
   return value.replace(/\D/g, "");
-}
-
-function isValidNigerianPhoneNumber(value: string): boolean {
-  const digits = removeNonDigitCharacters(value).replace(/^0/, "");
-  return /^[789][01]\d{8}$/.test(digits);
-}
-
-function convertNigerianPhoneNumberToInternationalFormat(value: string): string {
-  return `+234${removeNonDigitCharacters(value).replace(/^0/, "")}`;
-}
-
-function formatNigerianPhoneNumberForDisplay(value: string): string {
-  const digits = removeNonDigitCharacters(value).replace(/^0/, "").slice(0, 10);
-  return [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7)].filter(Boolean).join(" ");
 }
 
 function insertSlashesIntoBirthdayInput(value: string): string {
@@ -160,9 +146,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const otpInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<SignUpStep>("contact");
-  const [channel, setChannel] = useState<ContactChannel>("phone");
   const [destination, setDestination] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [saveLoginInfo, setSaveLoginInfo] = useState(true);
   const [code, setCode] = useState("");
@@ -224,13 +208,13 @@ export default function SignUpPage() {
   const isUsernameUsable = usernameSettled && isValidUsername(username.trim()) && usernameAvailable === true;
 
   const canContinue = useMemo(() => {
-    if (step === "contact") return channel === "phone" ? isValidNigerianPhoneNumber(phoneNumber) : isValidEmailAddress(email);
+    if (step === "contact") return isValidEmailAddress(email);
     if (step === "verify") return code.length === 6;
     if (step === "birthday") return isBirthdayValidForNewAccount(birthdayText);
     if (step === "password") return isPasswordStrongEnoughForAccount(password);
     if (step === "username") return isUsernameUsable;
     return selectedTopics.length >= MINIMUM_TOPICS_TO_CONTINUE;
-  }, [step, channel, phoneNumber, email, code, birthdayText, password, usernameSettled, username, usernameAvailable, selectedTopics]);
+  }, [step, email, code, birthdayText, password, usernameSettled, username, usernameAvailable, selectedTopics]);
 
   function goBack() {
     setError(null);
@@ -248,7 +232,7 @@ export default function SignUpPage() {
     event.preventDefault();
     setError(null);
     if (!canContinue) return;
-    const nextDestination = channel === "phone" ? convertNigerianPhoneNumberToInternationalFormat(phoneNumber) : email.trim().toLowerCase();
+    const nextDestination = email.trim().toLowerCase();
     setBusy(true);
     try {
       await authService.sendOneTimeCode(nextDestination, "signup");
@@ -310,10 +294,10 @@ export default function SignUpPage() {
     setError(null);
     setBusy(true);
     try {
-      await sendRequestToWebappServer<{ user: User }>("/bff/auth/register", {
+      await sendRequestToWebappServer<{ user: User }>("/auth/register", {
         method: "POST",
         body: {
-          ...(channel === "phone" ? { phone: destination } : { email: destination }),
+          email: destination,
           ...(chosenUsername ? { username: chosenUsername } : {}),
           password,
           birthday: parseBirthdayFromDayMonthYear(birthdayText)?.toISOString().slice(0, 10) ?? "",
@@ -375,7 +359,7 @@ export default function SignUpPage() {
   const heading =
     step === "contact"
       ? {
-          title: channel === "phone" ? "What’s your phone number?" : "What’s your email?",
+          title: "What’s your email?",
           subtitle: "We’ll send you a 6-digit code to confirm it’s you.",
         }
       : step === "verify"
@@ -483,73 +467,22 @@ export default function SignUpPage() {
       <form className={styles.form} onSubmit={handleCreateAccount} noValidate>
         {step === "contact" ? (
           <>
-            <div className={styles.tabs} role="tablist" aria-label="Contact method">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={channel === "phone"}
-                className={channel === "phone" ? `${styles.tab} ${styles.tabActive}` : styles.tab}
-                onClick={() => {
-                  setChannel("phone");
-                  setError(null);
-                }}
-              >
-                Phone number
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={channel === "email"}
-                className={channel === "email" ? `${styles.tab} ${styles.tabActive}` : styles.tab}
-                onClick={() => {
-                  setChannel("email");
-                  setError(null);
-                }}
-              >
-                Email
-              </button>
-            </div>
-
-            {channel === "phone" ? (
-              <div className={styles.phoneField}>
-                <span className={styles.prefix}>
-                  NG +234
-                  <span className={styles.prefixDivider} />
-                </span>
-                <input
-                  aria-label="Phone number"
-                  placeholder="Phone number"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={formatNigerianPhoneNumberForDisplay(phoneNumber)}
-                  onChange={(event) => setPhoneNumber(event.target.value)}
-                />
-              </div>
-            ) : (
-              <TextField
-                label="Email"
-                name="destination"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                hideLabel
-              />
-            )}
+            <TextField
+              label="Email"
+              name="destination"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              hideLabel
+            />
 
             <label className={styles.checkRow}>
               <input type="checkbox" checked={saveLoginInfo} onChange={(event) => setSaveLoginInfo(event.target.checked)} />
               <span className={styles.checkLabel}>Save login info on your device to log in automatically next time.</span>
             </label>
-
-            {channel === "phone" ? (
-              <p className={styles.helperNote}>
-                Your phone number may be used to connect you to people you may know, improve ads, and more, depending on your settings.{" "}
-                <Link href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com"}/privacy`}>Learn more</Link>
-              </p>
-            ) : null}
 
             <Button type="submit" fullWidth size="lg" busy={busy} disabled={!canContinue}>
               Send Code
@@ -680,12 +613,20 @@ export default function SignUpPage() {
       </form>
 
       {step === "contact" ? (
-        <p className={styles.switchPrompt}>
-          Already have an account?{" "}
-          <Link href="/login" className={styles.linkStrong}>
-            Log in
-          </Link>
-        </p>
+        <>
+          <p className={styles.switchPrompt}>
+            Already have an account?{" "}
+            <Link href="/login" className={styles.linkStrong}>
+              Log in
+            </Link>
+          </p>
+          <div className={styles.divider} role="presentation">
+            <span className={styles.dividerText}>or</span>
+          </div>
+          <div className={styles.socialStack}>
+            <SocialSignInButtons />
+          </div>
+        </>
       ) : null}
     </div>
   );

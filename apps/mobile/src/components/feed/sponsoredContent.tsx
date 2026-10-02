@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { Linking, Pressable, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
@@ -21,10 +22,23 @@ export interface SponsoredCallToActionProps {
 }
 
 export function SponsoredCallToAction({ sponsored, placement, itemId, horizontalMargin = 0 }: SponsoredCallToActionProps) {
+  const navigation = useNavigation();
   if (!sponsored.ctaLabel) return null;
   const openAdvertiserLinkAndRecordClick = () => {
     adEventsService.recordSponsoredClick(sponsored, placement, itemId);
-    if (sponsored.ctaUrl && /^https:\/\//.test(sponsored.ctaUrl)) Linking.openURL(sponsored.ctaUrl).catch(() => undefined);
+    const ctaUrl = sponsored.ctaUrl;
+    if (!ctaUrl) return;
+    const productRouteMatch = ctaUrl.match(/\/products\/([^/?#]+)/);
+    if (productRouteMatch) {
+      navigation.navigate("ProductDetail", { productId: decodeURIComponent(productRouteMatch[1]) });
+      return;
+    }
+    const storeRouteMatch = ctaUrl.match(/\/stores\/([^/?#]+)/);
+    if (storeRouteMatch) {
+      navigation.navigate("Store", { storeId: decodeURIComponent(storeRouteMatch[1]) });
+      return;
+    }
+    if (/^https:\/\//.test(ctaUrl)) Linking.openURL(ctaUrl).catch(() => undefined);
   };
   return (
     <Pressable

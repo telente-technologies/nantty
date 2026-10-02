@@ -127,6 +127,24 @@ export interface Post {
   readonly viewerHasAccess?: boolean;
 }
 
+export interface PostAnalyticsDaily {
+  readonly day: ISODate;
+  readonly impressions: number;
+}
+
+export interface PostAnalytics {
+  readonly postId: ID;
+  readonly author: UserSummary;
+  readonly postedAt: ISODate;
+  readonly impressions: number;
+  readonly uniqueViewers: number;
+  readonly likes: number;
+  readonly comments: number;
+  readonly reposts: number;
+  readonly profileVisits: number;
+  readonly daily: readonly PostAnalyticsDaily[];
+}
+
 export interface Comment {
   readonly id: ID;
   readonly postId: ID;

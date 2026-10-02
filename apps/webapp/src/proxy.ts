@@ -20,7 +20,7 @@ export function proxy(request: NextRequest) {
 
   if (publicPagePaths.has(pathname)) {
     if (pathname !== "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
-      return redirectTo(request, "/bff/auth/access-refresh", { next: requestedPathWithQuery });
+      return redirectTo(request, "/", undefined);
     }
     if (pathname === "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
       return redirectTo(request, "/", undefined);

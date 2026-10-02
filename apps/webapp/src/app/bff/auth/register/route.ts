@@ -6,7 +6,6 @@ import { isRequestFromWebappOrigin } from "@/server/requestOriginGuard.service";
 
 interface RegisterBody {
   readonly email?: unknown;
-  readonly phone?: unknown;
   readonly username?: unknown;
   readonly password?: unknown;
   readonly birthday?: unknown;
@@ -29,18 +28,16 @@ export async function POST(request: NextRequest) {
   const birthday = typeof body.birthday === "string" ? body.birthday : "";
   const otpToken = typeof body.otpToken === "string" ? body.otpToken : "";
   const email = readOptionalString(body.email, 254);
-  const phone = readOptionalString(body.phone, 20);
   const username = readOptionalString(body.username, 30);
   const name = readOptionalString(body.name, 80);
 
-  if (!email && !phone) return respondWithBffError(400, "VALIDATION_FAILED", "Enter the email or phone number you signed up with.");
+  if (!email) return respondWithBffError(400, "VALIDATION_FAILED", "Enter the email you signed up with.");
   if (password.length < 1 || !/^\d{4}-\d{2}-\d{2}$/.test(birthday) || otpToken.length < 20) {
     return respondWithBffError(400, "VALIDATION_FAILED", "Check your birthday, password and verification code.");
   }
 
   const result = await callAuthEndpoint("/api/v1/auth/register", {
-    ...(email ? { email } : {}),
-    ...(phone ? { phone } : {}),
+    email,
     ...(username ? { username } : {}),
     ...(name ? { name } : {}),
     password,

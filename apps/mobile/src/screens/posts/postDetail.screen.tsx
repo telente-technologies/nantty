@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Share, StyleSheet, View, type TextInput } from "react-native";
 
 import { CommentComposer } from "@/components/clips/commentComposer";
 import { CommentThreadContext, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
 import { ThreadedCommentList } from "@/components/clips/threadedCommentList";
 import { PostCard } from "@/components/feed/postCard";
+import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -23,6 +24,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const composerRef = useRef<TextInput>(null);
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
+  const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const commentThread = useCommentThreadController(postId);
 
   const updateCachedPost = (change: (p: Post) => Post) => queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
@@ -57,8 +59,12 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                     }}
                     onToggleLike={() => toggleLikeOnPost.mutate(post.data!.liked)}
                     onPressComments={() => composerRef.current?.focus()}
-                    onRepost={() => postsService.repostPost(postId).catch(() => undefined)}
+                    onRepost={() => setReshareTarget(post.data ?? null)}
                     onShare={sharePostLink}
+                    onPressOriginalPost={
+                      post.data.resharedFrom ? () => navigation.navigate("PostDetail", { postId: post.data.resharedFrom!.id }) : undefined
+                    }
+                    onPressAnalytics={() => navigation.navigate("PostAnalytics", { postId: route.params.postId })}
                   />
                   <Text size={16} weight={600} lineHeight={19.2} style={styles.commentsTitle}>
                     Comments
@@ -75,6 +81,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             onCancelReply={commentThread.cancelReplyingToComment}
             onSubmit={commentThread.submitCommentOrReplyText}
           />
+          <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
         </KeyboardAvoidingView>
       </CommentThreadContext.Provider>
     </Screen>

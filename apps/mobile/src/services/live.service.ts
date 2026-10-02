@@ -10,6 +10,7 @@ export const liveService = {
   sendCommentToLive: (liveId: string, text: string) => api.post<LiveComment>(`/api/v1/lives/${liveId}/comments`, { text }),
   sendReactionToLive: (liveId: string, emoji: string) => api.post<void>(`/api/v1/lives/${liveId}/reactions`, { emoji }),
   startLiveSessionWithTitle: (title: string) => api.post<LiveSessionDetails>("/api/v1/lives", { title }),
+  issueStreamKey: (liveId: string) => api.post<{ ingestUrl: string; streamKey: string }>(`/api/v1/lives/${liveId}/stream-key`),
   endLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/end`),
   fetchSuggestedLives: () => api.get<SuggestedLive[]>("/api/v1/lives/suggested"),
   fetchPeopleToShareLiveWith: (query: string) => api.get<UserSummary[]>("/api/v1/search/people", { q: query }),

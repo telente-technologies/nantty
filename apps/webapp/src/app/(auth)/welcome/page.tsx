@@ -1,17 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { AppIcon } from "@/components/ui/appIcon";
 import { Button } from "@/components/ui/button";
 
+import { SocialSignInButtons } from "../socialSignIn";
 import formStyles from "../authForm.module.css";
 import styles from "./welcome.module.css";
 
 type SignUpMode = "signup" | "login";
-type SocialProvider = "apple" | "google";
 
 const PHOTO_ROWS: readonly { readonly offset: number; readonly key: string }[] = [
   { offset: -43, key: "a" },
@@ -19,24 +18,14 @@ const PHOTO_ROWS: readonly { readonly offset: number; readonly key: string }[] =
   { offset: -43, key: "c" },
 ];
 
-const socialProviderNotice: Record<SocialProvider, string> = {
-  apple: "Apple sign-in isn't configured yet.",
-  google: "Google sign-in isn't configured yet.",
-};
-
 export default function WelcomePage() {
   const [showSplash, setShowSplash] = useState(true);
   const [mode, setMode] = useState<SignUpMode>("signup");
-  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 1200);
     return () => clearTimeout(timer);
   }, []);
-
-  const handleSocialSignIn = (provider: SocialProvider) => {
-    setNotice(socialProviderNotice[provider]);
-  };
 
   return (
     <div>
@@ -70,29 +59,18 @@ export default function WelcomePage() {
       </div>
 
       <div className={styles.buttons}>
-        <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="apple24" size={24} />} onClick={() => handleSocialSignIn("apple")}>
-          Continue with Apple
-        </Button>
-        <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="google24" size={24} />} onClick={() => handleSocialSignIn("google")}>
-          Continue with Google
-        </Button>
+        <SocialSignInButtons />
         <Button
           variant="primary"
           fullWidth
           size="lg"
           leadingIcon={<AppIcon name="userCircle24" size={24} />}
           onClick={() => {
-            setNotice(null);
             window.location.assign(mode === "login" ? "/login" : "/signup");
           }}
         >
-          Use username
+          {mode === "login" ? "Use email/username" : "Email"}
         </Button>
-        {notice ? (
-          <p className={formStyles.formError} role="alert">
-            {notice}
-          </p>
-        ) : null}
       </div>
 
       <div className={styles.footer}>
@@ -103,9 +81,13 @@ export default function WelcomePage() {
         </p>
         <p className={formStyles.switchPrompt}>
           {mode === "login" ? "Don’t have an account?" : "Already have an account?"}{" "}
-          <Link href={mode === "login" ? "/signup" : "/login"} className={formStyles.linkStrong} onClick={() => setMode(mode === "login" ? "signup" : "login")}>
+          <button
+            type="button"
+            className={`${formStyles.linkStrong} ${formStyles.linkButton}`}
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+          >
             {mode === "login" ? "Sign up" : "Log in"}
-          </Link>
+          </button>
         </p>
       </div>
     </div>

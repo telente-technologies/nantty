@@ -2,6 +2,7 @@ import { memo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { Play24Icon } from "@/components/icons";
+import { Text } from "@/components/ui/text";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { isLandscapeMedia } from "@/components/media/videoOrientation.util";
@@ -58,6 +59,7 @@ function ClipPageComponent(props: ClipPageProps) {
   const [burstKey, setBurstKey] = useState(0);
   const [playbackProgress, setPlaybackProgress] = useState<VideoPlaybackProgress>({ currentSeconds: 0, durationSeconds: clip.durationSeconds });
   const [playbackSpeedStepIndex, setPlaybackSpeedStepIndex] = useState(0);
+  const [isHeldForFastForward, setIsHeldForFastForward] = useState(false);
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const [hasOpenedOptionsSheet, setHasOpenedOptionsSheet] = useState(false);
   const openClipOptions = () => {
@@ -99,8 +101,11 @@ function ClipPageComponent(props: ClipPageProps) {
   return (
     <View style={[styles.page, { height: props.height }]}>
       <Pressable
-        accessibilityLabel={isPausedByUser ? "Clip paused. Tap to play, double tap to like" : "Clip. Tap to pause, double tap to like"}
+        accessibilityLabel={isPausedByUser ? "Clip paused. Tap to play, double tap to like, hold to play at 2x" : "Clip. Tap to pause, double tap to like, hold to play at 2x"}
         onPress={handleTapOnClipMedia}
+        onLongPress={() => setIsHeldForFastForward(true)}
+        onPressOut={() => setIsHeldForFastForward(false)}
+        delayLongPress={300}
         style={StyleSheet.absoluteFill}
       >
         {isClipLockedForViewer ? (
@@ -112,7 +117,7 @@ function ClipPageComponent(props: ClipPageProps) {
             contentFit={isLandscapeVideo ? "contain" : "cover"}
             isMuted={props.isMuted || clip.sound?.status === "under_copyright_review"}
             isPausedByUser={isPausedByUser}
-            playbackRate={PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
+            playbackRate={isHeldForFastForward ? 2 : PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
             onPlaybackProgress={isActive ? setPlaybackProgress : undefined}
             style={StyleSheet.absoluteFill}
           />
@@ -124,6 +129,13 @@ function ClipPageComponent(props: ClipPageProps) {
         {showPlaybackControls ? (
           <View pointerEvents="none" style={styles.centerPlayIcon}>
             <Play24Icon size={48} color={FOREGROUND_ON_VIDEO} />
+          </View>
+        ) : null}
+        {isHeldForFastForward ? (
+          <View pointerEvents="none" style={[styles.fastForwardBadge, { top: props.topInset + 64 }]}>
+            <Text size={13} weight={600} lineHeight={16.9} color={FOREGROUND_ON_VIDEO}>
+              2×
+            </Text>
           </View>
         ) : null}
         <LikeBurst burstKey={burstKey} />
@@ -205,6 +217,15 @@ export const ClipPage = memo(ClipPageComponent);
 const styles = StyleSheet.create({
   page: { backgroundColor: colors.black, overflow: "hidden" },
   centerPlayIcon: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
+  fastForwardBadge: {
+    position: "absolute",
+    top: 96,
+    alignSelf: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
   overlay: {
     position: "absolute",
     left: 12,

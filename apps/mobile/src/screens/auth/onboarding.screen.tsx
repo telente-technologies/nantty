@@ -88,7 +88,7 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
           />
           <Button
             variant="brand"
-            title="Use username"
+            title="Email"
             icon={<UserCircle24Icon />}
             onPress={() => (mode === "login" ? navigation.navigate("Login") : navigation.navigate("SignUpContact"))}
           />

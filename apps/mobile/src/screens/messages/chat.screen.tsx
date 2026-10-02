@@ -14,6 +14,7 @@ import { MessageReactionPicker } from "@/components/chat/messageReactionPicker";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset.hook";
 import { useMessageReactionToggle } from "@/components/chat/messageReactions.hook";
 import { useOptimisticChatMessageSender } from "@/components/chat/optimisticChatMessageSender.hook";
+import { useOptimisticImageMessageSender } from "@/components/chat/optimisticImageMessageSender.hook";
 import { useOptimisticVoiceNoteSender } from "@/components/chat/optimisticVoiceNoteSender.hook";
 import { useUsersTypingInConversation } from "@/components/chat/typingIndicators.store";
 import { TypingDots } from "@/components/chat/typingDots";
@@ -82,6 +83,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
 
   const sendMessageOptimistically = useOptimisticChatMessageSender(conversationId, myUserId);
   const sendVoiceNoteOptimistically = useOptimisticVoiceNoteSender(conversationId, myUserId);
+  const sendImageOptimistically = useOptimisticImageMessageSender(conversationId, myUserId);
   const toggleReactionOnMessage = useMessageReactionToggle(conversationId);
 
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
@@ -164,6 +166,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           <ChatComposerWithVoiceNotes
             onSendText={(text) => sendMessageOptimistically(text).catch(() => undefined)}
             onSendVoiceNote={(voiceNote) => sendVoiceNoteOptimistically(voiceNote).catch(() => undefined)}
+            onSendImage={(image) => sendImageOptimistically(image).catch(() => undefined)}
             onTypingChange={(isTyping) => {
               if (conversationId) realtimeService.sendTypingSignal(conversationId, isTyping);
             }}

@@ -34,7 +34,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
     <AuthStep actionTitle="Log in" actionDisabled={!identifier.trim() || !password} loading={loading} onAction={submitLoginForm}>
       <View style={styles.fields}>
         <TextField
-          label="Email or username"
+          label="Email"
           placeholder="Enter your email"
           value={identifier}
           onChangeText={setIdentifier}

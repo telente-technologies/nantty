@@ -1,12 +1,13 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useCameraPermissions } from "expo-camera";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
 import { TipSheet } from "@/components/coins/tipSheet";
+import { LikeBurst } from "@/components/clips/likeBurst";
 import { LiveGiftBurst } from "@/components/live/liveGiftBurst";
 import { LiveGiftPickerSheet } from "@/components/live/liveGiftPickerSheet";
 import { useLiveGifting } from "@/components/live/liveGifting.hook";
@@ -25,6 +26,8 @@ import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreat
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+
+const DOUBLE_TAP_WINDOW_MS = 280;
 
 export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const { liveId, host: isHost = false } = route.params;
@@ -46,6 +49,18 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
   const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
   const hostCanPinAffiliatedProducts = isHost && isApprovedCreator;
+  const [likeBurstKey, setLikeBurstKey] = useState(0);
+  const lastStageTapAt = useRef(0);
+  const likeLiveByDoubleTap = () => {
+    const now = Date.now();
+    if (now - lastStageTapAt.current < DOUBLE_TAP_WINDOW_MS) {
+      lastStageTapAt.current = 0;
+      setLikeBurstKey((key) => key + 1);
+      live.sendReaction("❤️");
+      return;
+    }
+    lastStageTapAt.current = now;
+  };
 
   useEffect(() => {
     if (!isHostBlockedFromGoingLive) return;
@@ -121,6 +136,15 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
+      {isHost ? null : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Double tap to like this live"
+          onPress={likeLiveByDoubleTap}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      {isHost ? null : <LikeBurst burstKey={likeBurstKey} />}
       <LiveHeader
         isShownOverVideo={isShownOverVideo}
         session={session}

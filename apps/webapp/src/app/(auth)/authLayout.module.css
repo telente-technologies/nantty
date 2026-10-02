@@ -1,6 +1,6 @@
 .page {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 100dvh;
   background: var(--surface-app);
 }
@@ -15,6 +15,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-5);
+  min-width: 0;
   padding: var(--space-6) var(--gutter) var(--space-7);
 }
 
@@ -24,11 +25,12 @@
 
 .panel {
   width: 100%;
+  min-width: 0;
   max-width: 440px;
 }
 
 .wordmark {
-  display: inline-block;
+  display: none;
   margin-bottom: var(--space-6);
   font-size: 1.5rem;
   font-weight: 700;
@@ -41,6 +43,10 @@
 @media (min-width: 900px) {
   .page {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  }
+
+  .wordmark {
+    display: inline-block;
   }
 
   .aside {

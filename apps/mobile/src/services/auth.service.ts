@@ -8,7 +8,6 @@ import { requestGoogleIdTokenWithNonce } from "./googleSignIn.service";
 
 export interface RegisterInput {
   readonly email?: string;
-  readonly phone?: string;
   readonly birthday: string;
   readonly password: string;
   readonly username?: string;

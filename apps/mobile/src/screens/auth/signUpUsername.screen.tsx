@@ -26,7 +26,7 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
   useEffect(() => {
     if (draft.username) return;
     usersService
-      .fetchSuggestedUsername(draft.channel === "email" ? draft.destination : "zudo")
+      .fetchSuggestedUsername(draft.destination || "zudo")
       .then(({ username: suggestion }) => {
         setSuggestedUsername(suggestion);
         setUsername((current) => current || suggestion);
@@ -50,7 +50,7 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
         }
       }
       const session = await authService.registerNewAccount({
-        ...(draft.channel === "phone" ? { phone: draft.destination } : { email: draft.destination }),
+        email: draft.destination,
         birthday: draft.birthday,
         password: draft.password,
         username: chosenUsername,

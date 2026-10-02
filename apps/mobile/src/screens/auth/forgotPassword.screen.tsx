@@ -7,24 +7,13 @@ import { colors } from "@/constants/colors.constant";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
-import {
-  convertNigerianPhoneNumberToInternationalFormat,
-  isValidEmailAddress,
-  isValidNigerianPhoneNumber,
-} from "@/utils/validators.util";
-
-function convertEmailOrPhoneToCodeDestination(value: string): string | null {
-  const trimmed = value.trim();
-  if (isValidEmailAddress(trimmed)) return trimmed.toLowerCase();
-  if (isValidNigerianPhoneNumber(trimmed)) return convertNigerianPhoneNumberToInternationalFormat(trimmed);
-  return null;
-}
+import { isValidEmailAddress } from "@/utils/validators.util";
 
 export function ForgotPasswordScreen({ navigation }: AuthScreenProps<"ForgotPassword">) {
-  const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const destination = convertEmailOrPhoneToCodeDestination(emailOrPhone);
+  const destination = isValidEmailAddress(email) ? email.trim().toLowerCase() : null;
 
   const sendPasswordResetCodeAndContinue = async () => {
     if (!destination) return;
@@ -43,17 +32,17 @@ export function ForgotPasswordScreen({ navigation }: AuthScreenProps<"ForgotPass
   return (
     <AuthStep
       title="Forgot password?"
-      subtitle="Enter the email or phone number on your account and we’ll send you a code to reset your password."
+      subtitle="Enter the email on your account and we’ll send you a code to reset your password."
       actionTitle="Send Code"
       actionDisabled={!destination}
       loading={sending}
       onAction={sendPasswordResetCodeAndContinue}
     >
       <TextField
-        label="Email or phone number"
-        placeholder="Enter your email or phone number"
-        value={emailOrPhone}
-        onChangeText={setEmailOrPhone}
+        label="Email"
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"

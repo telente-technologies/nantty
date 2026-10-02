@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { HeartIcon, MoreIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { AnalyticsIcon, HeartIcon, MoreIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { useSession } from "@/components/providers/sessionProvider";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -51,6 +52,7 @@ function PostMedia({ media, priority }: { readonly media: readonly Media[]; read
 
 export function PostCard({ post, priority = false }: { readonly post: Post; readonly priority?: boolean }) {
   const queryClient = useQueryClient();
+  const { viewer } = useSession();
   const [optimisticLikes, setOptimisticLikes] = useState(post.likes);
   const [optimisticLiked, setOptimisticLiked] = useState(post.liked);
 
@@ -125,10 +127,18 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
           <ShareIcon size={18} />
           {formatCountWithThousandsSuffix(post.reposts)}
         </span>
-        <span className={styles.actionViews}>
-          {formatCountWithThousandsSuffix(post.views)} views
-        </span>
         {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
+        {viewer?.id === post.author.id ? (
+          <Link className={styles.actionViews} href={`/analytics/post/${post.id}`} aria-label="Open post analytics">
+            <AnalyticsIcon size={16} />
+            {formatCountWithThousandsSuffix(post.views)} impressions
+          </Link>
+        ) : (
+          <span className={styles.actionViews}>
+            <AnalyticsIcon size={16} />
+            {formatCountWithThousandsSuffix(post.views)} impressions
+          </span>
+        )}
       </footer>
     </article>
   );

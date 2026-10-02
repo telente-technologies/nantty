@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -39,7 +40,8 @@ export function ChatBubble({
 }: ChatBubbleProps) {
   if (message.kind === "system") return <SystemNoticeRow text={message.text} />;
   const isVoiceNote = message.kind === "voice" && !!message.media;
-  const isShort = !isVoiceNote && message.text.length <= 24 && !message.text.includes("\n");
+  const isPhoto = message.kind === "image" && !!message.media?.url;
+  const isShort = !isVoiceNote && !isPhoto && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
   return (
     <View style={[styles.row, isMine ? styles.mine : styles.theirs]}>
@@ -60,11 +62,14 @@ export function ChatBubble({
             styles.bubble,
             deliveryStatus === "pending" && styles.pendingBubble,
             isMine ? styles.bubbleMine : styles.bubbleTheirs,
+            isPhoto && styles.photoBubble,
             isShort ? styles.pill : isMine ? styles.cornerMine : styles.cornerTheirs,
           ]}
         >
           {isVoiceNote ? (
             <VoiceNoteBubble media={message.media!} isMine={isMine} deliveryStatus={deliveryStatus} />
+          ) : isPhoto ? (
+            <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo" />
           ) : (
             <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.text}>
               {message.text}
@@ -98,6 +103,8 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   systemRow: { paddingHorizontal: 32, paddingVertical: 6 },
   bubble: { maxWidth: 260, padding: 12 },
+  photoBubble: { padding: 4 },
+  photo: { width: 200, height: 260, borderRadius: 8 },
   pendingBubble: { opacity: 0.6 },
   bubbleMine: { backgroundColor: colors.primary },
   bubbleTheirs: { backgroundColor: colors.skeleton },

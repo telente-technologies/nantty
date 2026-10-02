@@ -14,27 +14,79 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import styles from "./home.module.css";
 
 type HomeSection = "feed" | "mart";
+type FeedMode = "for-you" | "following";
 
-function TopicFilterRow() {
+function TopicFilterRow({ feedMode, onSelectMode }: { readonly feedMode: FeedMode; readonly onSelectMode: (mode: FeedMode) => void }) {
   const followedQuery = useQuery({ queryKey: ["feed", "topics"], queryFn: feedsService.fetchMyFollowedTopics, retry: false });
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [modeMenu, setModeMenu] = useState<{ top: number; left: number } | null>(null);
+
+  const chooseMode = (mode: FeedMode) => {
+    setModeMenu(null);
+    onSelectMode(mode);
+    if (mode === "for-you") setActiveTopic(null);
+  };
+  const chooseTopic = (topicId: string | null) => {
+    onSelectMode("for-you");
+    setActiveTopic((previous) => (previous === topicId ? null : topicId));
+  };
 
   if (followedQuery.isLoading) return <div className={styles.topicRowLoading} />;
   const topics = followedQuery.data ?? [];
-  if (topics.length === 0) return null;
+  const isModeChipActive = feedMode === "following" || activeTopic === null;
 
   return (
     <div className={styles.topicRow} role="group" aria-label="Filter your feed by topic">
-      <button type="button" className={[styles.topicChip, activeTopic === null ? styles.topicChipActive : ""].filter(Boolean).join(" ")} onClick={() => setActiveTopic(null)}>
-        For you
-      </button>
+      <div className={styles.feedModeWrap}>
+        <button
+          type="button"
+          className={[styles.topicChip, isModeChipActive ? styles.topicChipActive : ""].filter(Boolean).join(" ")}
+          aria-haspopup="menu"
+          aria-expanded={modeMenu !== null}
+          onClick={(event) => {
+            if (modeMenu) {
+              setModeMenu(null);
+              return;
+            }
+            const rect = event.currentTarget.getBoundingClientRect();
+            setModeMenu({ top: rect.bottom + 6, left: rect.left });
+          }}
+        >
+          {feedMode === "following" ? "Following" : "For you"} ▾
+        </button>
+        {modeMenu ? (
+          <>
+            <div className={styles.modeMenuBackdrop} onClick={() => setModeMenu(null)} />
+            <div className={styles.modeMenu} style={{ top: modeMenu.top, left: modeMenu.left }} role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                aria-checked={feedMode === "for-you"}
+                className={styles.modeMenuItem}
+                onClick={() => chooseMode("for-you")}
+              >
+                For you {feedMode === "for-you" ? "✓" : ""}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                aria-checked={feedMode === "following"}
+                className={styles.modeMenuItem}
+                onClick={() => chooseMode("following")}
+              >
+                Following {feedMode === "following" ? "✓" : ""}
+              </button>
+            </div>
+          </>
+        ) : null}
+      </div>
       {topics.map((topic) => (
         <button
           key={topic.id}
           type="button"
           className={[styles.topicChip, activeTopic === topic.id ? styles.topicChipActive : ""].filter(Boolean).join(" ")}
           aria-pressed={activeTopic === topic.id}
-          onClick={() => setActiveTopic((previous) => (previous === topic.id ? null : topic.id))}
+          onClick={() => chooseTopic(topic.id)}
         >
           {topic.name}
         </button>
@@ -43,15 +95,22 @@ function TopicFilterRow() {
   );
 }
 
-function FeedSection() {
+function FeedSection({ feedMode }: { readonly feedMode: FeedMode }) {
   const feedQuery = useInfiniteQuery({
-    queryKey: ["feed", "for-you"],
-    queryFn: ({ pageParam }) => feedsService.fetchForYouFeedPage(null, pageParam),
+    queryKey: ["feed", feedMode],
+    queryFn: ({ pageParam }) => (feedMode === "following" ? feedsService.fetchFollowingFeedPage(pageParam) : feedsService.fetchForYouFeedPage(null, pageParam)),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const posts = (feedQuery.data?.pages ?? []).flatMap((page) => page.data);
+  const posts = (() => {
+    const seenPostIds = new Set<string>();
+    return (feedQuery.data?.pages ?? []).flatMap((page) => page.data).filter((post) => {
+      if (seenPostIds.has(post.id)) return false;
+      seenPostIds.add(post.id);
+      return true;
+    });
+  })();
 
   if (feedQuery.isLoading) return <Spinner label="Loading your feed" />;
   if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." action={<RetryButton onRetry={() => feedQuery.refetch()} />} />;

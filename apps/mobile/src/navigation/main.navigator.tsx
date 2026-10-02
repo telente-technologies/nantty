@@ -45,6 +45,7 @@ import { NewGroupScreen } from "@/screens/messages/newGroup.screen";
 import { ConversationInfoScreen } from "@/screens/messages/conversationInfo.screen";
 import { CreatePostScreen } from "@/screens/create/createPost.screen";
 import { PostDetailScreen } from "@/screens/posts/postDetail.screen";
+import { PostAnalyticsScreen } from "@/screens/posts/postAnalytics.screen";
 import { LiveScreen } from "@/screens/live/live.screen";
 import { LiveEndedScreen } from "@/screens/live/liveEnded.screen";
 import { StoryScreen } from "@/screens/story/story.screen";
@@ -126,6 +127,7 @@ export function MainNavigator() {
       <Stack.Screen name="ConversationInfo" component={ConversationInfoScreen} />
       <Stack.Screen name="CreatePost" component={CreatePostScreen} options={modal} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+      <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} />
       <Stack.Screen name="Live" component={LiveScreen} options={dark} />
       <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} />
       <Stack.Screen name="Story" component={StoryScreen} options={dark} />

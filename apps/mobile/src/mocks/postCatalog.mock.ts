@@ -101,6 +101,45 @@ function buildPostFromSeed(seed: PostSeed, sponsored = false): Post {
 
 export const mockPostsState = new Map<string, Post>(POST_SEEDS.map((seed) => [seed.id, buildPostFromSeed(seed)]));
 
+interface ReshareSeed {
+  readonly id: string;
+  readonly authorKey: DirectoryUserKey;
+  readonly hoursAgo: number;
+  readonly text: string;
+  readonly originalId: string;
+  readonly engagement: EngagementNumbers;
+}
+
+const RESHARE_SEEDS: readonly ReshareSeed[] = [
+  { id: "reshare_seed_1", authorKey: "u_7", hoursAgo: 2, text: "", originalId: "post_3", engagement: [64, 5, 3, 2_400] },
+  { id: "reshare_seed_2", authorKey: "u_10", hoursAgo: 4, text: "This is exactly what I was telling everybody about 🔥", originalId: "post_1", engagement: [118, 12, 6, 4_100] },
+];
+
+for (const seed of RESHARE_SEEDS) {
+  const original = mockPostsState.get(seed.originalId);
+  if (!original) continue;
+  const [likes, comments, reposts, views] = seed.engagement;
+  mockPostsState.set(seed.id, {
+    id: seed.id,
+    kind: "post",
+    author: userSummaryById(seed.authorKey),
+    createdAt: isoDateHoursAgo(seed.hoursAgo),
+    text: seed.text,
+    media: [],
+    likes,
+    comments,
+    reposts,
+    views,
+    liked: false,
+    bookmarked: false,
+    isFollowingAuthor: isFollowingUser(seed.authorKey),
+    friendsLiked: null,
+    products: [],
+    sponsored: null,
+    resharedFrom: original,
+  });
+}
+
 export const sponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
 
 export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values()].filter((post) => post.author.id === authorId);

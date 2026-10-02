@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
-import { LiveSetupPanel } from "@/components/create/liveSetupPanel";
+import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { SoundPickerRow } from "@/components/create/soundPickerRow";
@@ -17,7 +17,7 @@ import { liveService } from "@/services/live.service";
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
 import { storiesService } from "@/services/stories.service";
-import type { CreateMode } from "@/types";
+import type { CreateMode, LiveSource } from "@/types";
 
 const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone" };
 
@@ -31,6 +31,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const draftContainsVideo = postDraftUploads.draftMediaItems.some((item) => item.mediaType === "video");
   const [liveTitle, setLiveTitle] = useState("");
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
+  const [liveSource, setLiveSource] = useState<LiveSource>("camera");
+  const [liveCredentials, setLiveCredentials] = useState<LiveStreamCredentials | null>(null);
 
   const publishPost = useMutation({
     mutationFn: async () => {
@@ -65,10 +67,20 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const goLive = useMutation({
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
-      return liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart");
+      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart");
+      if (liveSource !== "external") return { session, credentials: null as LiveStreamCredentials | null };
+      const issued = await liveService.issueStreamKey(session.id);
+      return { session, credentials: { liveId: session.id, ...issued } satisfies LiveStreamCredentials };
     },
-    onSuccess: (session) => navigation.replace("Live", { liveId: session.id, host: true }),
+    onSuccess: ({ session, credentials }) => {
+      if (credentials) {
+        setLiveCredentials(credentials);
+        return;
+      }
+      navigation.replace("Live", { liveId: session.id, host: true });
+    },
   });
+  const openLiveRoom = (liveId: string) => navigation.replace("Live", { liveId, host: true });
 
   const switchCreateMode = (next: CreateMode) => {
     if (next === "product") {
@@ -144,6 +156,13 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onStartEditingTitle={() => setIsEditingLiveTitle(true)}
             onFinishEditingTitle={() => setIsEditingLiveTitle(false)}
             onChangeMode={switchCreateMode}
+            source={liveSource}
+            onChangeSource={(next) => {
+              setLiveSource(next);
+              if (next !== "external") setLiveCredentials(null);
+            }}
+            credentials={liveCredentials}
+            onOpenLiveRoom={openLiveRoom}
             starting={goLive.isPending}
             onGoLive={() => goLive.mutate()}
           />
