@@ -48,7 +48,7 @@ export function SiteFooterWithGiantWordmark() {
       <div className={`pageContainer ${styles.topRow}`}>
         <div className={styles.brandColumn}>
           <ZudomartWordmarkHomeLink tone="light" />
-          <p className={styles.brandLine}>Social shopping, built in Nigeria. Real sellers, prices in your local currency, and your money held safely until your order arrives.</p>
+          <p className={styles.brandLine}>Social Commerce, built in Nigeria. Real sellers, prices in your local currency, and your money held safely until your order arrives.</p>
           <a href={contactMailtoHref} className={styles.emailLink}>
             {contactEmailDisplayText}
           </a>

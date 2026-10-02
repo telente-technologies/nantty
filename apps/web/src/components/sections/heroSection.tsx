@@ -9,7 +9,7 @@ export function HomeHeroSectionWithPhoneStage() {
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
-          <p className="eyebrowLabel">Social shopping, made for Nigeria</p>
+          <p className="eyebrowLabel">Social Commerce, made for Nigeria</p>
           <h1 id="hero-heading" className={styles.heading}>
             Shop the sellers you already <span className={styles.priceTag}>watch.</span>
           </h1>

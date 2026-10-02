@@ -31,7 +31,7 @@ export function SocialShoppingFeatureTabsSection() {
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
           <SectionIntroWithEyebrowAndHeading
-            eyebrow="Social shopping"
+            eyebrow="Social Commerce"
             headingId="social-shopping-heading"
             heading="Watch it, ask about it, buy it. Same app."
             description="Zudomart puts the way Nigerians already shop online, through posts, videos and DMs, next to a proper cart and checkout."

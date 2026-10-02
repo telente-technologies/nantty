@@ -9,7 +9,7 @@ import styles from "./about.module.css";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why we are building Zudomart: social shopping in Nigeria with real sellers and escrow-protected payments.",
+  description: "Why we are building Zudomart: Social Commerce in Nigeria with real sellers and escrow-protected payments.",
   alternates: { canonical: "/about" },
   openGraph: { title: "About Zudomart", url: "/about" },
 };
