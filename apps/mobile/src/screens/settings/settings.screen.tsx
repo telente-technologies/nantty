@@ -27,14 +27,14 @@ import { HeaderAction } from "@/components/ui/header";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { data: profile } = useMyProfileQuery();
-  const { isApprovedCreator } = useCreatorStatus();
+  const creatorEntry = useCreatorEntry();
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const clearSessionAndSignOut = useAuthStore((s) => s.clearSessionAndSignOut);
 
@@ -101,11 +101,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         ) : (
           <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
-        <SettingsRow
-          label={isApprovedCreator ? "Creator dashboard" : "Creator Program"}
-          icon={<VideoCamera24Icon />}
-          onPress={() => navigation.navigate(isApprovedCreator ? "CreatorDashboard" : "CreatorProgram")}
-        />
+        <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => navigation.navigate(creatorEntry.route)} />
         <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.black} />} onPress={() => navigation.navigate("Verification")} />
         <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
         <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />

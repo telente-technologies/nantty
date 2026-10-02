@@ -1,5 +1,6 @@
 import { ApiError } from "@/errors/api.error";
-import type { CoinPackage, SendTipInput } from "@/types";
+import { useLocaleStore } from "@/store/locale.store";
+import type { CoinActivityEntry, CoinConversionReceipt, CoinPackage, CurrencyCode, SendTipInput } from "@/types";
 
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -7,7 +8,18 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 const COIN_TRANSFER_FEE_PERCENT = 25;
 const MOCK_CHECKOUT_PAGE_URL = "https://zudomart.com/pay/mock";
 
-const mockCoinWallet = { balance: 250 };
+const COIN_CASH_VALUE_MINOR: Record<CurrencyCode, number> = { NGN: 1_000, GHS: 10, KES: 100, ZAR: 15, GBP: 1, EUR: 1, USD: 1 };
+const MINIMUM_PAYOUT_MINOR = 1_000;
+
+const mockCoinWallet = { balance: 250, earned: 180 };
+
+const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+const mockCoinActivity: CoinActivityEntry[] = [
+  { id: "le_1", transactionId: "lt_1", type: "credit", coins: 120, balanceAfter: 250, createdAt: daysAgo(2) },
+  { id: "le_2", transactionId: "lt_2", type: "credit", coins: 60, balanceAfter: 130, createdAt: daysAgo(5) },
+  { id: "le_3", transactionId: "lt_3", type: "debit", coins: 40, balanceAfter: 70, createdAt: daysAgo(9) },
+  { id: "le_4", transactionId: "lt_4", type: "credit", coins: 110, balanceAfter: 110, createdAt: daysAgo(14) },
+];
 
 export const readMockCoinBalance = () => mockCoinWallet.balance;
 
@@ -40,7 +52,35 @@ const requirePositiveWholeCoins = (coins: unknown) => {
 };
 
 export const coinsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/coins/balance", () => ({ coins: mockCoinWallet.balance })),
+  createMockRoute("GET", "/api/v1/coins/balance", () => ({ coins: mockCoinWallet.balance, earnedCoins: mockCoinWallet.earned })),
+  createMockRoute("GET", "/api/v1/coins/transactions", () => ({ data: mockCoinActivity, nextCursor: null })),
+  createMockRoute("POST", "/api/v1/creators/earnings/convert", ({ body }) => {
+    const { coins } = body as { coins?: unknown };
+    const amount = requirePositiveWholeCoins(coins);
+    const currency = useLocaleStore.getState().currency;
+    const cashMinor = amount * (COIN_CASH_VALUE_MINOR[currency] ?? 1);
+    if (cashMinor < MINIMUM_PAYOUT_MINOR) {
+      throw new ApiError(422, `Convert at least ${MINIMUM_PAYOUT_MINOR} minor units of ${currency}; ${amount} coins are worth ${cashMinor}.`);
+    }
+    if (mockCoinWallet.earned < amount) throw new ApiError(422, "You do not have enough earned coins to convert.");
+    mockCoinWallet.earned -= amount;
+    mockCoinWallet.balance -= amount;
+    mockCoinActivity.unshift({
+      id: `le_${Date.now().toString(36)}`,
+      transactionId: `lt_${Date.now().toString(36)}`,
+      type: "debit",
+      coins: amount,
+      balanceAfter: mockCoinWallet.balance,
+      createdAt: new Date().toISOString(),
+    });
+    const receipt: CoinConversionReceipt = {
+      coins: amount,
+      cash: { amountMinor: cashMinor, currency },
+      earnedCoinsRemaining: mockCoinWallet.earned,
+      minimumPayout: { amountMinor: MINIMUM_PAYOUT_MINOR, currency },
+    };
+    return receipt;
+  }),
   createMockRoute("GET", "/api/v1/coins/packages", () => buildCoinPackages()),
   createMockRoute("POST", "/api/v1/coins/purchases", ({ body }) => {
     const { packageId } = body as { packageId: string };

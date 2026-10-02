@@ -2,7 +2,8 @@ import { ApiError } from "@/errors/api.error";
 import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
-import { findMutableSoundState } from "./soundCatalog.mock";
+import { appendMockClip } from "./clips.mock";
+import { currentSoundForClip, findMutableSoundState } from "./soundCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 interface MockUploadSession {
@@ -108,6 +109,9 @@ export const mediaMocks: MockRoute[] = [
       if (asset.type === "audio") throw new ApiError(422, "Audio can't be posted on its own", "UNSUPPORTED_POST_MEDIA");
       return convertMediaAssetToPostMedia({ ...asset, type: asset.type });
     });
+    if (input.kind === "clip" && (media.length !== 1 || media[0]?.type !== "video")) {
+      throw new ApiError(422, "A clip needs exactly one video.", "CLIP_NEEDS_ONE_VIDEO");
+    }
     if (input.soundId) {
       const sound = findMutableSoundState(input.soundId);
       if (!sound) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
@@ -115,7 +119,7 @@ export const mediaMocks: MockRoute[] = [
     }
     const post: Post = {
       id: nextMockId("p"),
-      kind: "post",
+      kind: input.kind === "clip" ? "clip" : "post",
       author: getSignedInMockUser(),
       createdAt: new Date().toISOString(),
       text: input.text,
@@ -131,6 +135,9 @@ export const mediaMocks: MockRoute[] = [
       products: [],
       sponsored: null,
     };
+    if (post.kind === "clip") {
+      appendMockClip({ ...post, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
+    }
     return post;
   }),
 ];

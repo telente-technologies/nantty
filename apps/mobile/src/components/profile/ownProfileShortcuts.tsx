@@ -3,20 +3,20 @@ import { Pressable, ScrollView, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
-type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings";
+type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings";
 
 export function OwnProfileShortcuts({ profile }: { profile: User }) {
   const navigation = useNavigation();
-  const { isApprovedCreator } = useCreatorStatus();
+  const creatorEntry = useCreatorEntry();
   const shortcuts: { label: string; route: ShortcutRoute }[] = [
     ...(profile.isSeller ? [{ label: "Seller dashboard", route: "SellerDashboard" as const }] : []),
-    isApprovedCreator ? { label: "Creator dashboard", route: "CreatorDashboard" } : { label: "Join Creator Program", route: "CreatorProgram" },
+    { label: creatorEntry.label, route: creatorEntry.route },
     { label: "My orders", route: "Orders" },
     { label: "Wallet", route: "Wallet" },
     { label: profile.verification?.badgeVisible ? "Verification" : "Get verified", route: "Verification" },

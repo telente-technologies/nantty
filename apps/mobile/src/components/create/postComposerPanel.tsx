@@ -17,10 +17,12 @@ import { PostToolbar } from "./postToolbar";
 export interface PostComposerDraft {
   readonly text: string;
   readonly audience: PostAudience;
+  readonly kind: "clip" | "video" | "photo";
 }
 
 export interface PostComposerPanelProps {
   readonly stage: "compose" | "preview";
+  readonly mode: CreateMode;
   readonly draft: PostComposerDraft;
   readonly onChangeDraft: (draft: PostComposerDraft) => void;
   readonly draftMediaItems: readonly PostDraftMediaItem[];
@@ -30,12 +32,14 @@ export interface PostComposerPanelProps {
   readonly publishing: boolean;
   readonly publishButtonTitle: string;
   readonly publishErrorMessage: string | null;
+  readonly validationHint: string | null;
   readonly onPublish: () => void;
   readonly soundPicker?: ReactNode;
 }
 
 export function PostComposerPanel({
   stage,
+  mode,
   draft,
   onChangeDraft,
   draftMediaItems,
@@ -45,6 +49,7 @@ export function PostComposerPanel({
   publishing,
   publishButtonTitle,
   publishErrorMessage,
+  validationHint,
   onPublish,
   soundPicker,
 }: PostComposerPanelProps) {
@@ -93,11 +98,16 @@ export function PostComposerPanel({
           style={styles.input}
         />
         <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={onRemoveDraftMedia} />
+        {validationHint ? (
+          <Text size={12} lineHeight={16.8} color={colors.error} accessibilityLiveRegion="polite">
+            {validationHint}
+          </Text>
+        ) : null}
         {soundPicker}
       </ScrollView>
       {focused ? null : (
         <View style={styles.pill}>
-          <CreateModePill mode="post" onChangeMode={onChangeMode} />
+          <CreateModePill mode={mode} onChangeMode={onChangeMode} />
         </View>
       )}
       <PostToolbar

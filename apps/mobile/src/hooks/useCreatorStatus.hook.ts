@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useCreatorApplicationQuery } from "@/components/creator/creatorQueries.hook";
 import { creatorsService } from "@/services/creators.service";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -22,6 +23,22 @@ export function useCreatorStatus() {
   };
 }
 
+export type CreatorEntryRoute = "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram";
+
+export function useCreatorEntry() {
+  const { isApprovedCreator } = useCreatorStatus();
+  const application = useCreatorApplicationQuery();
+  const applicationStatus = application.data?.status ?? null;
+  const route: CreatorEntryRoute =
+    isApprovedCreator || applicationStatus === "approved"
+      ? "CreatorDashboard"
+      : applicationStatus === "pending" || applicationStatus === "rejected"
+        ? "CreatorApplicationStatus"
+        : "CreatorProgram";
+  const label = route === "CreatorDashboard" ? "Creator Studio" : route === "CreatorApplicationStatus" ? "Application status" : "Join Creator Program";
+  return { route, label };
+}
+
 interface NavigationThatCanOpenCreatorProgram {
   readonly getState: () => { readonly routeNames: readonly string[] } | undefined;
   readonly navigate: (...args: never[]) => void;
@@ -29,8 +46,12 @@ interface NavigationThatCanOpenCreatorProgram {
 
 export const CREATOR_PROGRAM_ROUTE_NAME = "CreatorProgram";
 
-export function openCreatorProgramOrSettings(navigation: NavigationThatCanOpenCreatorProgram) {
+export function openCreatorProgramOrSettings(navigation: NavigationThatCanOpenCreatorProgram, destination: CreatorEntryRoute = CREATOR_PROGRAM_ROUTE_NAME) {
   const availableRouteNames = navigation.getState()?.routeNames ?? [];
-  const destinationRouteName = availableRouteNames.includes(CREATOR_PROGRAM_ROUTE_NAME) ? CREATOR_PROGRAM_ROUTE_NAME : "Settings";
+  const destinationRouteName = availableRouteNames.includes(destination)
+    ? destination
+    : availableRouteNames.includes(CREATOR_PROGRAM_ROUTE_NAME)
+      ? CREATOR_PROGRAM_ROUTE_NAME
+      : "Settings";
   (navigation.navigate as unknown as (routeName: string) => void)(destinationRouteName);
 }

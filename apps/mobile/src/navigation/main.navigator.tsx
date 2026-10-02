@@ -31,6 +31,7 @@ import { ChangePasswordScreen } from "@/screens/settings/changePassword.screen";
 import { BlockedUsersScreen } from "@/screens/settings/blockedUsers.screen";
 import { WalletScreen } from "@/screens/wallet/wallet.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
+import { CoinActivityScreen } from "@/screens/wallet/coinActivity.screen";
 import { WithdrawScreen } from "@/screens/wallet/withdraw.screen";
 import { PayoutAccountsScreen } from "@/screens/wallet/payoutAccounts.screen";
 import { SellerApplicationScreen } from "@/screens/seller/sellerApplication.screen";
@@ -113,6 +114,7 @@ export function MainNavigator() {
       <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
       <Stack.Screen name="Wallet" component={WalletScreen} />
       <Stack.Screen name="Transactions" component={TransactionsScreen} />
+      <Stack.Screen name="CoinActivity" component={CoinActivityScreen} />
       <Stack.Screen name="Withdraw" component={WithdrawScreen} />
       <Stack.Screen name="PayoutAccounts" component={PayoutAccountsScreen} />
       <Stack.Screen name="SellerApplication" component={SellerApplicationScreen} />

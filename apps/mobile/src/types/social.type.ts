@@ -2,7 +2,7 @@ import type { Comment, Conversation, ID, LiveSession, Media, Message, MessageRea
 
 export type ConversationFilter = "all" | "direct";
 export type ClipsFeedTab = "forYou" | "following";
-export type CreateMode = "story" | "post" | "product" | "live";
+export type CreateMode = "story" | "post" | "clip" | "product" | "live";
 export type PostAudience = "everyone" | "followers";
 
 export interface StoryTrayItem {
@@ -66,6 +66,7 @@ export interface NewPostInput {
   readonly text: string;
   readonly mediaIds: readonly ID[];
   readonly audience: PostAudience;
+  readonly kind?: "post" | "clip";
   readonly soundId?: ID;
 }
 
@@ -183,6 +184,23 @@ export interface LiveSessionDetails {
 
 export interface CoinBalance {
   readonly coins: number;
+  readonly earnedCoins?: number;
+}
+
+export interface CoinConversionReceipt {
+  readonly coins: number;
+  readonly cash: import("./money.type").Money;
+  readonly earnedCoinsRemaining: number;
+  readonly minimumPayout: import("./money.type").Money;
+}
+
+export interface CoinActivityEntry {
+  readonly id: ID;
+  readonly transactionId: ID;
+  readonly type: "credit" | "debit";
+  readonly coins: number;
+  readonly balanceAfter: number;
+  readonly createdAt: string;
 }
 
 export interface CoinPackage {

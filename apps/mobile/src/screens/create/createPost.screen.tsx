@@ -10,7 +10,7 @@ import { SoundPickerRow } from "@/components/create/soundPickerRow";
 import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
-import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
@@ -19,16 +19,24 @@ import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/m
 import { storiesService } from "@/services/stories.service";
 import type { CreateMode, LiveSource } from "@/types";
 
-const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone" };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone", kind: "photo" };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<CreateMode>(route.params?.mode ?? "post");
   const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
   const [postDraft, setPostDraft] = useState<PostComposerDraft>(EMPTY_POST_DRAFT);
-  const postDraftUploads = usePostDraftMediaUploads("post");
+  const postDraftUploads = usePostDraftMediaUploads(mode === "clip" ? "clip" : "post");
   const [selectedSoundId, setSelectedSoundId] = useState<string | null>(route.params?.soundId ?? null);
   const draftContainsVideo = postDraftUploads.draftMediaItems.some((item) => item.mediaType === "video");
+  const hasExactlyOneClipVideo = postDraftUploads.draftMediaItems.length === 1 && postDraftUploads.draftMediaItems[0]?.mediaType === "video";
+  const clipValidationHint = mode === "clip" && !hasExactlyOneClipVideo ? "A clip needs exactly one video." : null;
+  useEffect(() => {
+    setPostDraft((current) => {
+      const kind = mode === "clip" ? "clip" : draftContainsVideo ? "video" : "photo";
+      return current.kind === kind ? current : { ...current, kind };
+    });
+  }, [mode, draftContainsVideo]);
   const [liveTitle, setLiveTitle] = useState("");
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
   const [liveSource, setLiveSource] = useState<LiveSource>("camera");
@@ -38,11 +46,18 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     mutationFn: async () => {
       const mediaIds = await postDraftUploads.waitForAllDraftMediaIds();
       const soundIdForVideoPost = draftContainsVideo && selectedSoundId ? { soundId: selectedSoundId } : {};
-      return storiesService.publishPost({ text: postDraft.text.trim(), audience: postDraft.audience, mediaIds, ...soundIdForVideoPost });
+      return storiesService.publishPost({
+        text: postDraft.text.trim(),
+        audience: postDraft.audience,
+        mediaIds,
+        kind: postDraft.kind === "clip" ? "clip" : "post",
+        ...soundIdForVideoPost,
+      });
     },
     onSuccess: (post) => {
       queryClient.setQueryData(["post", post.id], fillProcessingPostMediaWithLocalPreviews(post, postDraftUploads.draftMediaItems));
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      if (post.kind === "clip") queryClient.invalidateQueries({ queryKey: ["clips"] });
       navigation.replace("PostDetail", { postId: post.id });
     },
   });
@@ -58,12 +73,13 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     },
   });
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
+  const creatorEntry = useCreatorEntry();
   const isLiveModeLockedForViewer = !canGoLive && !isCreatorStatusLoading;
   useEffect(() => {
     if (mode !== "live" || !isLiveModeLockedForViewer) return;
     setMode("post");
-    openCreatorProgramOrSettings(navigation);
-  }, [mode, isLiveModeLockedForViewer, navigation]);
+    openCreatorProgramOrSettings(navigation, creatorEntry.route);
+  }, [mode, isLiveModeLockedForViewer, navigation, creatorEntry.route]);
   const goLive = useMutation({
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
@@ -88,19 +104,20 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       return;
     }
     if (next === "live" && isLiveModeLockedForViewer) {
-      openCreatorProgramOrSettings(navigation);
+      openCreatorProgramOrSettings(navigation, creatorEntry.route);
       return;
     }
     setMode(next);
   };
 
   const closeOrStepBack = () => {
-    if (mode === "post" && postStage === "preview") setPostStage("compose");
+    if ((mode === "post" || mode === "clip") && postStage === "preview") setPostStage("compose");
     else if (mode === "live" && isEditingLiveTitle) setIsEditingLiveTitle(false);
     else navigation.goBack();
   };
 
-  const canContinuePost = postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0;
+  const canContinuePost =
+    mode === "clip" ? hasExactlyOneClipVideo : postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0;
   const isWaitingForUploads = publishPost.isPending && postDraftUploads.combinedUploadedFraction < 1;
   const publishButtonTitle = isWaitingForUploads
     ? `Uploading ${Math.round(postDraftUploads.combinedUploadedFraction * 100)}%…`
@@ -120,16 +137,17 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           />
         ) : (
           <CreateHeader
-            title={mode === "story" ? "Story" : "Post"}
+            title={mode === "story" ? "Story" : mode === "clip" ? "Clip" : "Post"}
             onClose={closeOrStepBack}
-            actionLabel={mode === "post" && postStage === "compose" ? "Next" : undefined}
+            actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
             actionDisabled={!canContinuePost}
             onAction={() => setPostStage("preview")}
           />
         )}
-        {mode === "post" ? (
+        {mode === "post" || mode === "clip" ? (
           <PostComposerPanel
             stage={postStage}
+            mode={mode}
             draft={postDraft}
             onChangeDraft={setPostDraft}
             draftMediaItems={postDraftUploads.draftMediaItems}
@@ -139,6 +157,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             publishing={publishPost.isPending}
             publishButtonTitle={publishButtonTitle}
             publishErrorMessage={publishPost.error ? publishPost.error.message : null}
+            validationHint={clipValidationHint}
             onPublish={() => publishPost.mutate()}
             soundPicker={
               draftContainsVideo || selectedSoundId ? (

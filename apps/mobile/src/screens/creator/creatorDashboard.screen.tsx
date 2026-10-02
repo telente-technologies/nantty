@@ -7,6 +7,7 @@ import { AffiliationsSection } from "@/components/creator/affiliationsSection";
 import { CreatorEarningsCard } from "@/components/creator/creatorEarningsCard";
 import { creatorQueryKeys, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
 import { RevenueRulesCard } from "@/components/creator/revenueRulesCard";
+import { StudioCoinsSection } from "@/components/creator/studioCoinsSection";
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
 import { Analytics24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
 
   return (
     <Screen>
-      <Header title="Creator dashboard" />
+      <Header title="Creator Studio" />
       <View style={styles.periods}>
         {PERIODS.map((option) => (
           <Chip key={option.key} kind="filter" label={option.label} selected={period === option.key} onPress={() => setPeriod(option.key)} />
@@ -52,8 +53,14 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
           contentContainerStyle={styles.content}
           refreshControl={<RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} tintColor={colors.primary} />}
         >
+          <StudioCoinsSection onOpenActivity={() => navigation.navigate("CoinActivity")} />
+          <Text size={16} weight={600} lineHeight={19.2}>Wallet &amp; earnings</Text>
           <CreatorEarningsCard dashboard={dashboard.data} />
           <Button title="Withdraw earnings" onPress={() => navigation.navigate("Wallet")} />
+          <View style={styles.card}>
+            <Text size={16} weight={600} lineHeight={19.2}>Content</Text>
+            <Button title="Create post or clip" onPress={() => navigation.navigate("CreatePost", { mode: "post" })} />
+          </View>
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>Top lives & posts</Text>
             {dashboard.data.topContent.map((content) => (

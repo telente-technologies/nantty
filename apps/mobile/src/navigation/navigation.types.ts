@@ -56,6 +56,7 @@ export type MainStackParamList = {
   BlockedUsers: undefined;
   Wallet: undefined;
   Transactions: undefined;
+  CoinActivity: undefined;
   Withdraw: undefined;
   PayoutAccounts: undefined;
   SellerApplication: undefined;
@@ -68,7 +69,7 @@ export type MainStackParamList = {
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
-  CreatePost: { mode?: "story" | "post" | "product" | "live"; soundId?: string } | undefined;
+  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string } | undefined;
   PostDetail: { postId: string };
   PostAnalytics: { postId: string };
   Live: { liveId: string; host?: boolean };

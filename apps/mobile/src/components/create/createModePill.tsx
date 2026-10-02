@@ -5,7 +5,7 @@ import { colors } from "@/constants/colors.constant";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { CreateMode } from "@/types";
 
-const MODES: readonly CreateMode[] = ["story", "post", "product", "live"];
+const MODES: readonly CreateMode[] = ["story", "post", "clip", "product", "live"];
 
 export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onChangeMode: (mode: CreateMode) => void }) {
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();

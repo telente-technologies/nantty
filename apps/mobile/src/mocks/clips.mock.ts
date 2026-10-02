@@ -65,7 +65,11 @@ const turnIntoPromotedLiveStream = (clip: Clip): Clip =>
         promotedLive: { liveSessionId: "live_olumide_cuts", title: "Friday fade specials", viewers: 1284 },
       };
 
-const allClips: readonly Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream);
+const allClips: Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream);
+
+export const appendMockClip = (clip: Clip) => {
+  allClips.unshift(clip);
+};
 
 const withCurrentSound = (clip: Clip): Clip => ({
   ...clip,

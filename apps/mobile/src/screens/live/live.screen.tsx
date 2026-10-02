@@ -22,7 +22,7 @@ import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
 import { doesLiveStageShowVideo, LiveVideoStage } from "@/components/live/liveVideoStage";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
-import { openCreatorProgramOrSettings, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
@@ -45,6 +45,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const live = useLiveSessionWithActions(liveId, hasJoined);
   const gifting = useLiveGifting(liveId, showGiftPicker);
   const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
+  const creatorEntry = useCreatorEntry();
   const session = live.session.data;
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
   const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
@@ -65,8 +66,8 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   useEffect(() => {
     if (!isHostBlockedFromGoingLive) return;
     navigation.goBack();
-    openCreatorProgramOrSettings(navigation);
-  }, [isHostBlockedFromGoingLive, navigation]);
+    openCreatorProgramOrSettings(navigation, creatorEntry.route);
+  }, [isHostBlockedFromGoingLive, navigation, creatorEntry.route]);
 
   useEffect(() => {
     if (session?.status === "ended") navigation.replace("LiveEnded", { liveId });
