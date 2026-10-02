@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Analytics24Icon, BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, HeartFill72Icon, Refresh24Icon, Share24Icon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
-import { TipSheet, type TipTarget } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarStack";
@@ -20,7 +19,6 @@ import { MediaPager } from "./mediaPager";
 import { ResharedPostBlock } from "./resharedPostBlock";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
 import { LikeBurst } from "@/components/clips/likeBurst";
-import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -48,8 +46,6 @@ export function PostCard(props: PostCardProps) {
     post.author.id === signedInUserId || !props.onPressAuthor ? openUserProfile(post.author.id) : props.onPressAuthor();
   const hasMedia = post.media.length > 0;
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
-  const [tipTarget, setTipTarget] = useState<TipTarget | null>(null);
-  const canTipAuthor = post.author.isCreator === true && post.author.id !== signedInUserId;
   const isOwnPost = post.author.id === signedInUserId;
   const isMediaLockedForViewer = isContentLockedForViewer(post);
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
@@ -188,21 +184,10 @@ export function PostCard(props: PostCardProps) {
           <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={8} onPress={props.onShare}>
             <Share24Icon />
           </Pressable>
-          {canTipAuthor ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Tip ${post.author.name} with coins`}
-              hitSlop={8}
-              onPress={() => setTipTarget({ targetType: "post", targetId: post.id, creatorName: post.author.name })}
-            >
-              <CoinAmountWithIcon weight={500} label="Tip" />
-            </Pressable>
-          ) : null}
           <Counter label="Impressions" count={post.views} onPress={isOwnPost ? props.onPressAnalytics : undefined}>
             <Analytics24Icon />
           </Counter>
         </View>
-        {tipTarget ? <TipSheet target={tipTarget} onClose={() => setTipTarget(null)} /> : null}
       </View>
       <LikeBurst burstKey={likeBurstKey} />
       {hasOpenedOptionsSheet ? (

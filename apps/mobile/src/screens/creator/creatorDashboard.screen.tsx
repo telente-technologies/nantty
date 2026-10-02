@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { AffiliationsSection } from "@/components/creator/affiliationsSection";
 import { CreatorEarningsCard } from "@/components/creator/creatorEarningsCard";
 import { creatorQueryKeys, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
 import { RevenueRulesCard } from "@/components/creator/revenueRulesCard";
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
+import { Analytics24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
@@ -56,16 +57,24 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>Top lives & posts</Text>
             {dashboard.data.topContent.map((content) => (
-              <View key={content.id} style={styles.row}>
+              <Pressable
+                key={content.id}
+                style={styles.row}
+                accessibilityRole={content.kind === "post" ? "button" : undefined}
+                onPress={content.kind === "post" ? () => navigation.navigate("PostAnalytics", { postId: content.id }) : undefined}
+              >
                 <Image source={{ uri: content.thumbnailUrl ?? undefined }} style={styles.thumb} contentFit="cover" />
                 <View style={styles.flex}>
                   <Text size={14} lineHeight={16.8} numberOfLines={1}>{content.title}</Text>
-                  <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
-                    {content.kind === "live" ? "Live" : "Post"} · {formatCountWithThousandsSuffix(content.views)} views
-                  </Text>
+                  <View style={styles.metrics}>
+                    <Analytics24Icon size={12} color={colors.textSubtle} />
+                    <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
+                      {content.kind === "live" ? "Live" : "Post"} · {formatCountWithThousandsSuffix(content.views)} views
+                    </Text>
+                  </View>
                 </View>
                 <Text size={13} weight={500} lineHeight={16.9}>{formatMoneyForDisplay(content.earnings)}</Text>
-              </View>
+              </Pressable>
             ))}
           </View>
           <AffiliationsSection />
@@ -85,5 +94,6 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
+  metrics: { flexDirection: "row", alignItems: "center", gap: 4 },
   thumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: colors.placeholder },
 });
