@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { AddPayoutAccountDialog } from "@/components/wallet/addPayoutAccountDialog";
 import { WalletTabs } from "@/components/wallet/walletTabs";
@@ -18,7 +18,7 @@ import type { PayoutAccount } from "@/types/wallet.type";
 
 import styles from "./wallet.module.css";
 
-export function PayoutAccountsView() {
+export function PayoutAccountsView({ embedded = false }: { readonly embedded?: boolean }) {
   const { can } = useSellerSession();
   const { showToast } = useToast();
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
@@ -55,12 +55,14 @@ export function PayoutAccountsView() {
     }
   }
 
+  const addAccountButton = canManageAccounts ? <Button variant="primary" iconName="plus16" onClick={() => setIsAddDialogOpen(true)}>Add account</Button> : null;
+  const Wrapper = embedded ? EmbeddedFragment : PageStack;
   return (
-    <PageStack>
-      <PageHeader title="Payout accounts" description="Account numbers are always partly hidden. Zudomart stores them encrypted." actions={canManageAccounts ? <Button variant="primary" iconName="plus16" onClick={() => setIsAddDialogOpen(true)}>Add account</Button> : null} />
-      <WalletTabs />
+    <Wrapper>
+      {embedded ? null : <PageHeader title="Payout accounts" description="Account numbers are always partly hidden. Zudomart stores them encrypted." actions={addAccountButton} />}
+      {embedded ? null : <WalletTabs />}
       {!canManageAccounts ? <Callout tone="info">Only the store owner can add or remove payout accounts.</Callout> : null}
-      <Panel>
+      <Panel title={embedded ? "Payout accounts" : undefined} description={embedded ? "Where withdrawals are sent. Account numbers are always partly hidden." : undefined} actions={embedded ? addAccountButton : undefined}>
         {accountsQuery.errorMessage ? <Callout tone="error">{accountsQuery.errorMessage}</Callout> : null}
         {!accounts && accountsQuery.isLoading ? <LoadingBlock /> : null}
         {accounts && accounts.length === 0 ? <EmptyState iconName="creditCard24" title="No payout accounts yet" description="Add the bank account you want withdrawals sent to." /> : null}
@@ -120,6 +122,10 @@ export function PayoutAccountsView() {
           {accountPendingRemoval?.bankName} {accountPendingRemoval?.accountNumberMasked} will no longer receive payouts. You can add it again later.
         </p>
       </ModalDialog>
-    </PageStack>
+    </Wrapper>
   );
+}
+
+function EmbeddedFragment({ children }: { readonly children: ReactNode }) {
+  return <>{children}</>;
 }
