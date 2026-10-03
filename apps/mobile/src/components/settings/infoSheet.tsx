@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface InfoSheetProps {
   readonly visible: boolean;
@@ -16,6 +16,7 @@ export interface InfoSheetProps {
 }
 
 export function InfoSheet({ visible, title, message, actionTitle, actionLoading, onAction, onClose }: InfoSheetProps) {
+  const { colors } = useTheme();
   return (
     <BottomSheet visible={visible} onClose={onClose} title={title}>
       <View style={styles.body}>

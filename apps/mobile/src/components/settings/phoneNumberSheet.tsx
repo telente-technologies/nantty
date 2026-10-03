@@ -5,7 +5,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface PhoneNumberSheetProps {
   readonly visible: boolean;
@@ -18,6 +18,7 @@ export interface PhoneNumberSheetProps {
 const isValidNigerianPhoneNumber = (value: string) => /^(\+?234|0)[789][01]\d{8}$/.test(value.replace(/\s+/g, ""));
 
 export function PhoneNumberSheet({ visible, initialPhone, saving, onClose, onSave }: PhoneNumberSheetProps) {
+  const { colors } = useTheme();
   const [phone, setPhone] = useState(initialPhone ?? "");
   const valid = isValidNigerianPhoneNumber(phone);
   return (

@@ -4,9 +4,10 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "rea
 
 import { ArrowUpRight24Icon, CaretRight24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function SettingsGroup({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  const styles = useStyles();
   const rows = Children.toArray(children).filter(Boolean);
   return (
     <View style={[styles.group, style]}>
@@ -28,7 +29,9 @@ export interface SettingsRowProps {
   readonly accessibilityHint?: string;
 }
 
-export function SettingsRow({ label, icon, trailing = "chevron", labelColor = colors.text, onPress, accessibilityHint }: SettingsRowProps) {
+export function SettingsRow({ label, icon, trailing = "chevron", labelColor, onPress, accessibilityHint }: SettingsRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const trailingValue = typeof trailing === "object" ? trailing : null;
   return (
     <Pressable
@@ -41,7 +44,7 @@ export function SettingsRow({ label, icon, trailing = "chevron", labelColor = co
     >
       <View style={styles.leading}>
         {icon}
-        <Text size={14} lineHeight={16.8} color={labelColor}>
+        <Text size={14} lineHeight={16.8} color={labelColor ?? colors.text}>
           {label}
         </Text>
       </View>
@@ -56,22 +59,24 @@ export function SettingsRow({ label, icon, trailing = "chevron", labelColor = co
   );
 }
 
-export function SettingsCenteredAction({ label, color = colors.error, onPress }: { label: string; color?: string; onPress: () => void }) {
+export function SettingsCenteredAction({ label, color, onPress }: { label: string; color?: string; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.group, styles.centered, pressed && styles.pressed]}>
-      <Text size={13} weight={500} lineHeight={16.9} color={color}>
+      <Text size={13} weight={500} lineHeight={16.9} color={color ?? colors.error}>
         {label}
       </Text>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  group: { backgroundColor: colors.white, borderRadius: 12, overflow: "hidden" },
-  row: { backgroundColor: colors.white, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  group: { backgroundColor: colors.surface, borderRadius: 12, overflow: "hidden" },
+  row: { backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   iconRow: { height: 48, paddingHorizontal: 12 },
   plainRow: { height: 44, paddingHorizontal: 12 },
   leading: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
   centered: { height: 44, alignItems: "center", justifyContent: "center" },
   pressed: { opacity: 0.7 },
-});
+}));
