@@ -2,15 +2,53 @@ name: Backend
 
 on:
   pull_request:
-    paths: ["services/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
+    paths: ["services/**", "apps/api/**", "apps/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
   push:
     branches: [main]
-    paths: ["services/**", "infra/local/**"]
+    paths: ["services/**", "apps/api/**", "apps/intelligence/**", "infra/local/**"]
 
 permissions:
   contents: read
 
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      typescript: ${{ steps.filter.outputs.typescript }}
+      elixir: ${{ steps.filter.outputs.elixir }}
+      python: ${{ steps.filter.outputs.python }}
+      migrations: ${{ steps.filter.outputs.migrations }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            go:
+              - "services/go/**"
+              - "services/contracts/**"
+              - "services/scripts/**"
+              - "infra/local/**"
+            typescript:
+              - "services/typescript/**"
+              - "apps/api/**"
+              - "packages/**"
+              - "pnpm-lock.yaml"
+            elixir:
+              - "services/elixir/**"
+            python:
+              - "apps/intelligence/**"
+            migrations:
+              - "services/go/modules/*/src/migrations/**"
+
   conventions:
     runs-on: ubuntu-latest
     steps:
@@ -19,6 +57,8 @@ jobs:
       - run: bash services/scripts/check-no-raw-sql-in-typescript.sh
 
   go:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -26,12 +66,190 @@ jobs:
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum
-      - run: docker compose -f infra/local/docker-compose.yml up -d --wait postgres
-      - run: bash services/scripts/test-go-workspace.sh
+      - name: Format check
+        working-directory: services/go
+        run: test -z "$(gofmt -l $(go list -m -f '{{.Dir}}'))"
+      - name: Build, vet and unit tests with the race detector
+        working-directory: services/go
+        run: |
+          packages=$(go list -m -f '{{.Dir}}/...')
+          go build $packages
+          go vet $packages
+          go test -short -race $packages
       - run: go run golang.org/x/vuln/cmd/govulncheck@latest $(go list -m -f '{{.Dir}}/...')
         working-directory: services/go
 
+  integration:
+    needs: changes
+    if: needs.changes.outputs.go == 'true' || needs.changes.outputs.typescript == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: zudomart
+          POSTGRES_PASSWORD: zudomart
+          POSTGRES_DB: zudomart
+        ports: ["15432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U zudomart" --health-interval 5s --health-timeout 5s --health-retries 20
+      valkey:
+        image: valkey/valkey:9-alpine
+        ports: ["16379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s --health-timeout 3s --health-retries 20
+      rabbitmq:
+        image: rabbitmq:4-management
+        ports: ["5672:5672", "15672:15672"]
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping" --health-interval 10s --health-timeout 10s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: "15432"
+      PGPASSWORD: zudomart
+      POSTGRES_USER: zudomart
+      POSTGRES_DB: zudomart
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: services/go/platform/go.mod
+          cache-dependency-path: services/go/**/go.sum
+      - name: Create databases, roles and schemas like the local stack
+        run: bash infra/local/postgres/create-databases.sh
+      - name: Import RabbitMQ topology
+        run: |
+          curl -fsS -u guest:guest -H "content-type: application/json" -X POST http://localhost:15672/api/definitions --data-binary @infra/local/rabbitmq/definitions.json
+      - name: Go integration tests against real Postgres, Valkey and RabbitMQ
+        working-directory: services/go
+        env:
+          REDIS_URL: redis://localhost:16379
+          RABBITMQ_URL: amqp://guest:guest@localhost:5672/zudomart
+        run: bash ../scripts/test-go-workspace.sh
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @zudomart/social... --filter @zudomart/notifications... --filter @zudomart/media...
+      - name: TypeScript service tests that use the database
+        env:
+          DATABASE_URL: postgres://zudomart:zudomart@localhost:15432/zudomart_test
+          VALKEY_URL: redis://localhost:16379
+          RABBITMQ_URL: amqp://guest:guest@localhost:5672/zudomart
+        run: |
+          pnpm --filter @zudomart/social test
+          pnpm --filter @zudomart/notifications test
+          pnpm --filter @zudomart/media test
+
+  atlas-lint:
+    needs: changes
+    if: needs.changes.outputs.migrations == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: zudomart
+          POSTGRES_PASSWORD: zudomart
+          POSTGRES_DB: zudomart
+        ports: ["15432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U zudomart" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: "15432"
+      PGUSER: zudomart
+      PGPASSWORD: zudomart
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ariga/setup-atlas@v0
+      - name: Lint every module migration directory against a clean dev database
+        run: |
+          status=0
+          for dir in services/go/modules/*/src/migrations; do
+            [ -f "$dir/atlas.sum" ] || continue
+            psql -d postgres -c "DROP DATABASE IF EXISTS atlas_dev" -c "CREATE DATABASE atlas_dev"
+            psql -d atlas_dev -c "CREATE EXTENSION IF NOT EXISTS postgis"
+            echo "::group::$dir"
+            atlas migrate validate --dir "file://$dir?format=golang-migrate" || status=1
+            atlas migrate lint --dir "file://$dir?format=golang-migrate" \
+              --dev-url "postgres://zudomart:zudomart@localhost:15432/atlas_dev?sslmode=disable&search_path=public" \
+              --git-base "origin/${{ github.base_ref || 'main' }}" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+  typescript:
+    needs: changes
+    if: needs.changes.outputs.typescript == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ["@zudomart/gateway", "@zudomart/social", "@zudomart/notifications", "@zudomart/media", "@zudomart/search", "@zudomart/api"]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter "${{ matrix.package }}..."
+      - run: pnpm --filter "${{ matrix.package }}" run --if-present typecheck
+      - run: pnpm --filter "${{ matrix.package }}" run --if-present test
+
+  elixir:
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/elixir/realtime
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.19"
+          otp-version: "28"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            services/elixir/realtime/deps
+            services/elixir/realtime/_build
+          key: mix-${{ hashFiles('services/elixir/realtime/mix.lock') }}
+      - run: mix deps.get
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: mix test
+        env:
+          MIX_ENV: test
+
+  python:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/intelligence
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: apps/intelligence/uv.lock
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src
+      - run: uv run pytest
+
   images:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,6 +259,8 @@ jobs:
       - run: docker build -f services/go/deployables/${{ matrix.deployable }}/Dockerfile -t zudomart/ci-${{ matrix.deployable }} services
 
   gateway:
+    needs: changes
+    if: needs.changes.outputs.typescript == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -54,6 +274,8 @@ jobs:
       - run: pnpm --filter @zudomart/gateway test
 
   realtime:
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

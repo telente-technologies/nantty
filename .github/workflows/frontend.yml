@@ -1,0 +1,122 @@
+name: Frontend
+
+on:
+  pull_request:
+    paths: ["apps/**", "packages/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "stylelint.config.mjs", ".github/workflows/frontend.yml"]
+  push:
+    branches: [main]
+    paths: ["apps/**", "packages/**", "pnpm-lock.yaml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      shared: ${{ steps.filter.outputs.shared }}
+      web: ${{ steps.filter.outputs.web }}
+      webapp: ${{ steps.filter.outputs.webapp }}
+      seller: ${{ steps.filter.outputs.seller }}
+      studio: ${{ steps.filter.outputs.studio }}
+      admin: ${{ steps.filter.outputs.admin }}
+      ads: ${{ steps.filter.outputs.ads }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared:
+              - "packages/**"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - "stylelint.config.mjs"
+            web: ["apps/web/**"]
+            webapp: ["apps/webapp/**"]
+            seller: ["apps/seller/**"]
+            studio: ["apps/studio/**"]
+            admin: ["apps/admin/**"]
+            ads: ["apps/ads/**"]
+            mobile: ["apps/mobile/**"]
+
+  plan:
+    needs: changes
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.pick.outputs.apps }}
+    steps:
+      - id: pick
+        env:
+          SHARED: ${{ needs.changes.outputs.shared }}
+          WEB: ${{ needs.changes.outputs.web }}
+          WEBAPP: ${{ needs.changes.outputs.webapp }}
+          SELLER: ${{ needs.changes.outputs.seller }}
+          STUDIO: ${{ needs.changes.outputs.studio }}
+          ADMIN: ${{ needs.changes.outputs.admin }}
+          ADS: ${{ needs.changes.outputs.ads }}
+        run: |
+          apps=()
+          for pair in web:$WEB webapp:$WEBAPP seller:$SELLER studio:$STUDIO admin:$ADMIN ads:$ADS; do
+            name=${pair%%:*}; changed=${pair##*:}
+            if [ "$SHARED" = "true" ] || [ "$changed" = "true" ]; then apps+=("\"$name\""); fi
+          done
+          echo "apps=[$(IFS=,; echo "${apps[*]}")]" >> "$GITHUB_OUTPUT"
+
+  web:
+    needs: plan
+    if: needs.plan.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.plan.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/cache@v4
+        with:
+          path: apps/${{ matrix.app }}/.next/cache
+          key: next-${{ matrix.app }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: next-${{ matrix.app }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm install --frozen-lockfile --filter "./apps/${{ matrix.app }}..."
+      - name: Typecheck
+        run: pnpm --filter "./apps/${{ matrix.app }}" exec tsc --noEmit
+      - name: Lint
+        run: pnpm --filter "./apps/${{ matrix.app }}" run --if-present lint
+      - name: Styles
+        run: pnpm exec stylelint "apps/${{ matrix.app }}/src/**/*.module.css" --allow-empty-input
+      - name: Contract tests
+        run: pnpm --filter "./apps/${{ matrix.app }}" run --if-present test:contracts
+      - name: Next build
+        run: pnpm --filter "./apps/${{ matrix.app }}" run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  mobile:
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter "./apps/mobile..."
+      - run: pnpm --filter ./apps/mobile exec tsc --noEmit
+      - run: pnpm --filter ./apps/mobile run --if-present lint
+      - run: pnpm --filter ./apps/mobile test -- --ci
