@@ -63,7 +63,7 @@
 
 .interactiveRow:focus-visible {
   box-shadow: none;
-  outline: 2px solid var(--blue-500);
+  outline: 2px solid var(--color-brand);
   outline-offset: -2px;
 }
 
@@ -72,7 +72,7 @@
 }
 
 .selectedRow td:first-child {
-  box-shadow: inset 3px 0 0 var(--blue-500);
+  box-shadow: inset 3px 0 0 var(--color-brand);
 }
 
 .dangerRow td:first-child {

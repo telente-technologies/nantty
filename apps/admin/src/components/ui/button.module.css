@@ -34,12 +34,12 @@
 }
 
 .primary {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 .secondary {
@@ -50,7 +50,7 @@
 
 .secondary:hover:not(:disabled) {
   background: var(--surface-hover);
-  border-color: var(--blue-100);
+  border-color: var(--brand-line);
 }
 
 .ghost {
@@ -64,17 +64,17 @@
 }
 
 .danger {
-  background: var(--error);
-  color: #fff;
+  background: var(--danger-solid);
+  color: var(--color-on-brand);
 }
 
 .danger:hover:not(:disabled) {
-  background: var(--error-ink);
+  background: var(--danger-solid-hover);
 }
 
 .quietDanger {
   background: var(--surface-card);
-  border-color: #f5c2c2;
+  border-color: var(--error-line);
   color: var(--error-ink);
 }
 
