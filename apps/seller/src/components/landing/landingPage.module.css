@@ -2,7 +2,7 @@
   --landing-gutter: clamp(16px, 4vw, 40px);
   --landing-width: 1200px;
   --landing-section-space: clamp(72px, 10vw, 128px);
-  font-size: 16px;
+  font-size: var(--fs-16);
   line-height: 1.5;
 }
 
@@ -13,9 +13,9 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   padding: 10px var(--landing-gutter);
-  background: #000;
-  color: #fff;
-  font-size: 14px;
+  background: var(--night-surface);
+  color: var(--night-ink);
+  font-size: var(--fs-14);
   text-align: center;
 }
 
@@ -23,13 +23,13 @@
   padding: 2px 10px;
   border-radius: var(--radius-pill);
   background: var(--yellow-500);
-  color: #000;
-  font-size: 12px;
+  color: var(--blue-900);
+  font-size: var(--fs-12);
   font-weight: 700;
 }
 
 .announcement a {
-  color: #fff;
+  color: var(--night-ink);
   font-weight: 650;
   text-decoration: underline;
   text-underline-offset: 3px;

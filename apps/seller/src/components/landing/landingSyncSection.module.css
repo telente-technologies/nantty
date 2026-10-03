@@ -29,7 +29,7 @@
   bottom: 16px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-elevated);
   box-shadow: var(--shadow-float);
   font-weight: 600;
 }
@@ -40,11 +40,11 @@
 }
 
 .eyebrow {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .heading {

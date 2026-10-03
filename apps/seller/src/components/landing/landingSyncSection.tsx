@@ -1,10 +1,10 @@
 import styles from "./landingSyncSection.module.css";
 
 const sharedRecords = [
-  { title: "Products and stock", description: "Add a product here and it is in your app store. Sell one at the counter and the app shows one fewer." },
-  { title: "Orders", description: "Marketplace orders from the app land here to pack and ship; counter sales show in the app's seller area." },
+  { title: "Products and stock", description: "Add a product here and it is in your app store. Change stock here and the app shows it straight away." },
+  { title: "Orders", description: "Orders customers place in the app land here to accept, pack and ship." },
   { title: "Wallet", description: "Escrow, pending and available balances are the same numbers you see on your phone." },
-  { title: "Customers", description: "Buyers who follow you in the app and walk-in customers live in one list with their loyalty points." },
+  { title: "Customers", description: "Everyone who buys from you in the app is in one list, with their history and loyalty points." },
 ];
 
 export function LandingSyncSection() {
@@ -13,7 +13,7 @@ export function LandingSyncSection() {
       <div className={styles.inner}>
         <figure className={styles.photoFrame}>
           <img src="/photos/fruitStandSeller.webp" alt="A trader at her market stall checking orders on her phone" width={1400} height={1000} loading="lazy" className={styles.photo} />
-          <figcaption className={styles.photoCaption}>Your phone and your counter, one account.</figcaption>
+          <figcaption className={styles.photoCaption}>Your phone and your dashboard, one account.</figcaption>
         </figure>
         <div className={styles.copy}>
           <p className={styles.eyebrow}>Same account as the app</p>

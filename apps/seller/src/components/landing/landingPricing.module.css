@@ -1,7 +1,7 @@
 .section {
   padding: var(--landing-section-space) var(--landing-gutter);
-  background: var(--blue-900);
-  color: #fff;
+  background: var(--deep-surface);
+  color: var(--deep-ink);
 }
 
 .inner {
@@ -16,7 +16,7 @@
 }
 
 .eyebrow {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -56,12 +56,12 @@
   gap: 14px;
   padding: 28px;
   border-radius: 20px;
-  background: rgb(255 255 255 / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  background: var(--deep-hover);
+  box-shadow: inset 0 0 0 1px var(--deep-hairline);
 }
 
 .premium {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--ink-strong);
   box-shadow: 0 0 0 4px var(--yellow-500);
 }
@@ -103,7 +103,7 @@
 
 .yearly {
   margin-top: -8px;
-  font-size: 14px;
+  font-size: var(--fs-14);
   opacity: 0.75;
 }
 
@@ -120,7 +120,7 @@
 }
 
 .premium .entitlements li::before {
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .perks {
@@ -129,7 +129,7 @@
   flex: 1;
   align-content: start;
   padding-top: 14px;
-  border-top: 1px dashed rgb(255 255 255 / 0.25);
+  border-top: 1px dashed var(--deep-hairline-strong);
 }
 
 .premium .perks {
@@ -141,7 +141,7 @@
 }
 
 .perks span {
-  font-size: 14px;
+  font-size: var(--fs-14);
   opacity: 0.75;
 }
 
@@ -157,8 +157,8 @@
 }
 
 .premium .planButton {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
 }
 
 .planButton:hover {
@@ -169,5 +169,11 @@
 @media (min-width: 860px) {
   .planGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .planGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
