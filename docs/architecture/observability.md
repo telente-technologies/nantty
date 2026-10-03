@@ -30,9 +30,10 @@ flowchart LR
   end
   FE --> GW --> GO
   GO --> PY
-  GO --> SQS[(SQS / SNS)]
-  SQS --> WK
-  SQS --> PH
+  GO --> MQ[(RabbitMQ / Amazon MQ)]
+  MQ --> WK
+  MQ --> PH
+  MQ -->|metrics| COL
   GO --> DB[(Aurora)]
   GO --> EXT[Providers]
   GW & GO & PH & PY & WK -->|OTLP| COL[OTel collector sidecar]
@@ -41,7 +42,7 @@ flowchart LR
   GW & GO & PH & PY & WK -->|JSON stdout| CWL[CloudWatch Logs]
   CWM --> AL[Alarms]
   CWL --> AL
-  AL --> SNS2[SNS] --> PD[PagerDuty / Slack]
+  AL --> SNS2[SNS alarm topic] --> PD[PagerDuty / Slack]
   CWM --> DASH[Dashboards]
 ```
 
@@ -57,8 +58,8 @@ All PROPOSED except local OTLP from Go. Collector runs as a sidecar per task (`i
 | Go to Python | HTTP headers plus HMAC (EXISTING signing); Python reads `traceparent` and `x-request-id`, logs them, includes `model_version` in the response | PROPOSED |
 | Go to Phoenix | Phoenix does not get synchronous calls; it receives events | n/a |
 | Outbox | store `trace_id`, `request_id`, `correlation_id` in the envelope (`event.envelope.go` adds `meta` object) | PROPOSED |
-| SNS / SQS | envelope fields copied to SQS message attributes (`traceparent`, `x-request-id`, `x-correlation-id`, `eventType`); with raw delivery these attributes must be set explicitly by the publisher | PROPOSED |
-| Workers / Phoenix consumer | start a new span with a **link** to the producer span (async, not parent-child), carry correlation id into logs; Phoenix `sqs_consumer.ex` reads message attributes | PROPOSED |
+| RabbitMQ | AMQP properties `message_id` = event/job id, `correlation_id`, `type` = event type; headers `traceparent`/`tracestate` (W3C, injected by the Go publisher from the context), `x-zudomart-subject`, `x-zudomart-schema`, `x-zudomart-attempt`, `x-zudomart-last-error` on retries | EXISTING (Go publisher injects `traceparent`; TS/Python/Elixir carry ids and attempts) |
+| Workers / Phoenix consumer | start a new span with a **link** to the producer span (async, not parent-child), carry correlation id into logs; Go consumer extracts `traceparent` into the handler context | Go EXISTING; others PROPOSED |
 | Phoenix to client | server events carry `seq` per topic (plan 5.6) and an optional `correlationId` for acks | PROPOSED |
 | DB | `application_name` = service; optional SQL comment with `trace_id` via `sqlcommenter`; slow-query log in Aurora with `log_min_duration_statement` | PROPOSED |
 | External providers | provider idempotency key = our idempotency key; log provider request id, not payloads; span attributes for provider name and status | PROPOSED |
@@ -82,13 +83,28 @@ Status: slog JSON with key-based redaction EXISTING in Go (`services/go/platform
 | --- | --- | --- |
 | RED per route | request rate, error rate, duration histogram (p50/p95/p99) | OTel HTTP middleware |
 | Saturation | ECS CPU/memory, DB connections, Aurora CPU/replica lag, Valkey memory/evictions, Go goroutines | CloudWatch, runtime metrics |
-| Queues | SQS `ApproximateAgeOfOldestMessage`, depth, DLQ depth, outbox unpublished count and oldest age | CloudWatch, custom gauge |
+| Queues (RabbitMQ adopted, owner, 2026-10-03) | per queue: ready + unacked depth (`rabbitmq_queue_messages_ready`, `rabbitmq_queue_messages_unacked`), consumer count (`rabbitmq_queue_consumers`), publish/deliver/ack/redeliver rates, consumer lag = ready depth ÷ ack rate (seconds to drain) and oldest-message age (`head_message_timestamp` via `/api/queues`); DLQ depth (`*.dlq` ready); `unrouted-events` depth; broker: memory/disk alarms, connections, channels, file descriptors, quorum leader/member health; outbox unpublished count and oldest age | RabbitMQ Prometheus plugin `rabbitmq_prometheus` (`:15692/metrics`, `/metrics/per-object` locally; `/metrics/detailed?family=queue_coarse_metrics&family=queue_consumer_count` in prod) scraped locally by the OTel collector; Amazon MQ manages plugins itself and does not expose port 15692 to us, so in AWS the same signals come from Amazon MQ CloudWatch metrics (`MessageCount`, `MessageReadyCount`, `ConsumerCount`, `RabbitMQMemUsed`, `RabbitMQDiskFree`, `RabbitMQFdUsed`) per queue/broker; custom outbox gauge |
 | Realtime | sockets per node, join/leave rate, event fan-out latency, dropped frames | Phoenix telemetry (definitions EXISTING) |
 | Python | inference latency by endpoint, fallback count, feature store misses, model version | FastAPI middleware |
 | Business | ledger imbalance (must be 0), webhook failure rate, payout failures, settlement holds, gift send count, checkout success rate, signup to first session | go-money jobs, event consumers |
 | Providers | per-provider success/latency, timeout count, circuit-breaker state | client wrappers |
 
-Cardinality rule: no user id, order id or product id as a metric label.
+Cardinality rule: no user id, order id or product id as a metric label. Queue name is an allowed label (bounded by `topology.json`).
+
+### 5.1 RabbitMQ queue alerts (Prometheus plugin rules; mirrored as CloudWatch alarms on Amazon MQ)
+
+| Alert | PromQL (local, `rabbitmq_prometheus` per-object metrics) | Amazon MQ CloudWatch equivalent | Severity |
+| --- | --- | --- | --- |
+| DLQ not empty (money) | `rabbitmq_queue_messages_ready{queue=~"(commerce-domain-events\|jobs-payouts\|money-domain-events)\.dlq"} > 0` | `MessageReadyCount` per DLQ queue > 0 for 1 period | SEV2 |
+| DLQ not empty (other) | `rabbitmq_queue_messages_ready{queue=~".*\.dlq"} > 0` | same, other DLQs | Ticket |
+| Queue depth | `sum by (queue) (rabbitmq_queue_messages_ready{queue!~".*\.(dlq\|retry\..*)"}) > 1000` for 10 m | `MessageReadyCount` > 1000, 2 of 2 periods | Ticket, SEV2 for money queues |
+| Consumer lag | `rabbitmq_queue_messages_ready / clamp_min(rate(rabbitmq_global_messages_acknowledged_total[5m]), 0.1) > 60` (per queue with per-object metrics) | `MessageReadyCount` ÷ ack rate math expression > 60 s | SEV2 |
+| No consumer | `rabbitmq_queue_consumers{queue!~".*\.(dlq\|retry\..*)\|unrouted-events"} == 0` for 5 m | `ConsumerCount` = 0 | SEV2 |
+| Retry storm | `sum by (queue) (rabbitmq_queue_messages{queue=~".*\.retry\..*"}) > 1000` | `MessageCount` on retry queues | Ticket |
+| Unrouted events | `increase(rabbitmq_queue_messages_published_total{queue="unrouted-events"}[1h]) > 0` | `MessageCount` on `unrouted-events` rising | Ticket |
+| Broker resource alarm | `rabbitmq_alarms_memory_used_watermark == 1 or rabbitmq_alarms_free_disk_space_watermark == 1` | `RabbitMQMemUsed` / `RabbitMQMemLimit` > 0.8, `RabbitMQDiskFree` < 2x limit | SEV2 |
+| Connections / channels | `rabbitmq_connections > 0.8 * <limit>` | `ConnectionCount`, `ChannelCount` | Ticket |
+| Publisher confirm failures | app counter `events_publish_failures_total` (Go relay warning log metric filter) | log metric filter on `outbox relay batch failed` | SEV2 if > 0 for 5 m |
 
 ## 6. SLOs
 
@@ -100,7 +116,7 @@ Window 28 days, burn-rate alerts (fast 14.4x over 1 h and 5 min, slow 6x over 6 
 | Feed | feed response p95 | < 400 ms; availability 99.9%; ranking fallback rate < 2% | plan |
 | Gift send | request p99 | < 300 ms; fan-out to live viewers p95 < 500 ms; success 99.9% | plan |
 | Checkout | availability of checkout create/confirm | 99.95% | plan |
-| Event delivery (internal) | oldest message age, consumer queues | p99 < 30 s; DLQ depth 0 | PROPOSED |
+| Event delivery (internal) | consumer lag (ready depth ÷ ack rate) and oldest message age, consumer queues | p99 < 30 s; DLQ depth 0 | PROPOSED |
 | Payout | scheduled payouts completed on time | 99.5% | PROPOSED |
 
 Targets are starting points to be confirmed after load tests.
@@ -110,8 +126,8 @@ Targets are starting points to be confirmed after load tests.
 | Severity | Examples | Route | Response |
 | --- | --- | --- | --- |
 | Page (SEV1) | ledger imbalance > 0; checkout availability burn fast; DB failover or writer down; payment webhook failure > 5% for 5 min; auth 5xx > 2%; refresh-token reuse spike (security) | PagerDuty primary on-call | ack 5 min |
-| Page (SEV2) | gift p99 > 300 ms for 10 min; DLQ depth > 0 on money queues; outbox oldest age > 60 s; payout failures; Aurora CPU > 85% 15 min | PagerDuty, business hours escalation to Slack | ack 15 min |
-| Ticket | disk/memory trends, cert expiry < 21 d, dependency CVE, cost anomaly, DLQ on non-money queues | Slack + issue tracker | next business day |
+| Page (SEV2) | gift p99 > 300 ms for 10 min; DLQ depth > 0 on money queues (`commerce-domain-events.dlq`, `jobs-payouts.dlq`, future `money-domain-events.dlq`); consumer count = 0 on any work queue for 5 min; consumer lag > 60 s for 10 min; RabbitMQ memory or disk alarm (publishers blocked); quorum queue without leader / broker down; outbox oldest age > 60 s; payout failures; Aurora CPU > 85% 15 min | PagerDuty, business hours escalation to Slack | ack 15 min |
+| Ticket | disk/memory trends, cert expiry < 21 d, dependency CVE, cost anomaly, DLQ depth > 0 on non-money queues, `unrouted-events` growing (event published that no queue binds), retry queue depth > 1,000, connections or channels > 80% of the broker limit | Slack + issue tracker | next business day |
 | Security | GuardDuty high, root login, CloudTrail disabled, secret read anomalies | security channel + page for high | per runbook |
 
 Each alert links to a runbook in `docs/runbooks/` (PROPOSED; none exist). Alarm actions on go-money deploy also trigger CodeDeploy rollback (`devops.md`).
@@ -124,17 +140,17 @@ Each alert links to a runbook in `docs/runbooks/` (PROPOSED; none exist). Alarm 
 | Auth | logins, failures, lockouts, refresh reuse, OTP sends, p99 |
 | Money | ledger balance check, top-ups, gifts/s, payouts, webhook lag, provider latency |
 | Live | concurrent lives, viewers, sockets/node, fan-out latency, LiveKit health |
-| Events | outbox lag, SQS age, DLQ depth per queue, consumer errors |
+| Events | outbox lag; per queue ready/unacked depth, consumer lag, consumers, publish vs ack rate, redelivery rate; retry tier depths; DLQ depth per queue; unrouted events; broker memory/disk/fd; publisher confirm failures |
 | Intelligence | latency, fallbacks, model versions, feature freshness |
 | Data tier | Aurora load, slow queries, connections, Valkey hit rate |
 | Cost | per-service cost, NAT bytes, log volume |
 
 ## 9. Recommendations
 
-### O1. Put trace and request ids into the event envelope and SQS attributes
+### O1. Put trace and request ids into the event envelope and message headers
 - **Problem:** async hops lose correlation.
-- **Current:** `event.envelope.go` builds `{id,type,source,subject,version,occurredAt,data}`; raw SNS to SQS delivery drops attributes.
-- **Why it matters:** a gift or order spanning API, outbox, SQS, Phoenix, and Python cannot be traced end to end during an incident.
+- **Current:** `event.envelope.go` builds `{id,type,source,subject,version,occurredAt,data}`; the Go RabbitMQ publisher injects `traceparent` from the context, but the outbox relay runs on a background context, so relayed events carry no producer trace yet.
+- **Why it matters:** a gift or order spanning API, outbox, RabbitMQ, Phoenix, and Python cannot be traced end to end during an incident.
 - **Recommendation:** add optional `meta{traceId,requestId,correlationId}` to `envelope.v1.json`; publisher sets message attributes; consumers link spans.
 - **Complexity:** S. **Risk:** low (additive schema). **Priority: P1**, the envelope is cheap to change now and breaking later.
 - **Tag:** MVP.

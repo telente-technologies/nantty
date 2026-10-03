@@ -9,7 +9,7 @@ As of 2026-10-03. Sources: `inventory.md` (compose profile `search`, `jobs-searc
 | Legacy `GET /search?q&scope` (1 route, reference only, "never deployed") returning `{products,stores,people,brands?}` | EXISTING (reference) | `apps/api/src/modules/search` |
 | Frontend search services and mocks | MOCK-ONLY | `apps/webapp/src/services/search.service.ts`, `apps/mobile/src/services` |
 | OpenSearch 3 in local compose (profile `search`) | EXISTING (local) | `infra/local/docker-compose.yml` |
-| SQS queue `jobs-search-indexing` (+DLQ, maxReceive 5) | EXISTING (local topology) | `infra/local/localstack/create-topics-and-queues.sh` |
+| RabbitMQ job queue `jobs-search-indexing` (+retry tiers and `.dlq`, 5 attempts) | EXISTING (local topology) | `infra/local/rabbitmq/topology.json` |
 | Indexing worker, mappings, search API, reindex job, Terraform `opensearch` module | **ABSENT / PROPOSED** (`infra/aws/README.md` lists `opensearch`) | |
 | Python `/v1/search/rerank` | EXISTING (stateless) | `apps/intelligence` |
 

@@ -90,7 +90,7 @@ Notes: 401 triggers a single in-flight refresh (`refreshing` promise) then retry
 
 ## 5. Mock to real switch
 
-Problem: the brief expects per-domain switches named `*_REAL_API_PREFIXES`. **No such mechanism exists** (grep over `apps/*/src`). The switch is one boolean per app (`USE_MOCKS`).
+Status (3 Oct): per-domain `*_REAL_API_PREFIXES` switches now exist in every app, see [frontendWiring.md](../integrations/frontendWiring.md). The text below is the original problem statement.
 
 | Item | Detail |
 | --- | --- |
