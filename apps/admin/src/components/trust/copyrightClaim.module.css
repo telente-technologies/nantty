@@ -67,7 +67,7 @@
   white-space: pre-wrap;
   padding: 8px 10px;
   border-left: 3px solid var(--blue-500);
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
 }
 
 .urlList {
