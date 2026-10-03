@@ -76,6 +76,11 @@ func IPAddress(v string) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldIPAddress, v))
 }
 
+// DeviceHash applies equality check predicate on the "device_hash" field. It's identical to DeviceHashEQ.
+func DeviceHash(v string) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldDeviceHash, v))
+}
+
 // LastUsedAt applies equality check predicate on the "last_used_at" field. It's identical to LastUsedAtEQ.
 func LastUsedAt(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldLastUsedAt, v))
@@ -279,6 +284,81 @@ func IPAddressEqualFold(v string) predicate.Session {
 // IPAddressContainsFold applies the ContainsFold predicate on the "ip_address" field.
 func IPAddressContainsFold(v string) predicate.Session {
 	return predicate.Session(sql.FieldContainsFold(FieldIPAddress, v))
+}
+
+// DeviceHashEQ applies the EQ predicate on the "device_hash" field.
+func DeviceHashEQ(v string) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldDeviceHash, v))
+}
+
+// DeviceHashNEQ applies the NEQ predicate on the "device_hash" field.
+func DeviceHashNEQ(v string) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldDeviceHash, v))
+}
+
+// DeviceHashIn applies the In predicate on the "device_hash" field.
+func DeviceHashIn(vs ...string) predicate.Session {
+	return predicate.Session(sql.FieldIn(FieldDeviceHash, vs...))
+}
+
+// DeviceHashNotIn applies the NotIn predicate on the "device_hash" field.
+func DeviceHashNotIn(vs ...string) predicate.Session {
+	return predicate.Session(sql.FieldNotIn(FieldDeviceHash, vs...))
+}
+
+// DeviceHashGT applies the GT predicate on the "device_hash" field.
+func DeviceHashGT(v string) predicate.Session {
+	return predicate.Session(sql.FieldGT(FieldDeviceHash, v))
+}
+
+// DeviceHashGTE applies the GTE predicate on the "device_hash" field.
+func DeviceHashGTE(v string) predicate.Session {
+	return predicate.Session(sql.FieldGTE(FieldDeviceHash, v))
+}
+
+// DeviceHashLT applies the LT predicate on the "device_hash" field.
+func DeviceHashLT(v string) predicate.Session {
+	return predicate.Session(sql.FieldLT(FieldDeviceHash, v))
+}
+
+// DeviceHashLTE applies the LTE predicate on the "device_hash" field.
+func DeviceHashLTE(v string) predicate.Session {
+	return predicate.Session(sql.FieldLTE(FieldDeviceHash, v))
+}
+
+// DeviceHashContains applies the Contains predicate on the "device_hash" field.
+func DeviceHashContains(v string) predicate.Session {
+	return predicate.Session(sql.FieldContains(FieldDeviceHash, v))
+}
+
+// DeviceHashHasPrefix applies the HasPrefix predicate on the "device_hash" field.
+func DeviceHashHasPrefix(v string) predicate.Session {
+	return predicate.Session(sql.FieldHasPrefix(FieldDeviceHash, v))
+}
+
+// DeviceHashHasSuffix applies the HasSuffix predicate on the "device_hash" field.
+func DeviceHashHasSuffix(v string) predicate.Session {
+	return predicate.Session(sql.FieldHasSuffix(FieldDeviceHash, v))
+}
+
+// DeviceHashIsNil applies the IsNil predicate on the "device_hash" field.
+func DeviceHashIsNil() predicate.Session {
+	return predicate.Session(sql.FieldIsNull(FieldDeviceHash))
+}
+
+// DeviceHashNotNil applies the NotNil predicate on the "device_hash" field.
+func DeviceHashNotNil() predicate.Session {
+	return predicate.Session(sql.FieldNotNull(FieldDeviceHash))
+}
+
+// DeviceHashEqualFold applies the EqualFold predicate on the "device_hash" field.
+func DeviceHashEqualFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldEqualFold(FieldDeviceHash, v))
+}
+
+// DeviceHashContainsFold applies the ContainsFold predicate on the "device_hash" field.
+func DeviceHashContainsFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldContainsFold(FieldDeviceHash, v))
 }
 
 // LastUsedAtEQ applies the EQ predicate on the "last_used_at" field.
