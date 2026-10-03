@@ -23,6 +23,7 @@ var ErrEscrowFrozenByDispute = httpserver.NewApiError(http.StatusConflict, "ESCR
 var allowedEscrowTransitions = map[EscrowStatus][]EscrowStatus{
 	EscrowHeld:     {EscrowReleased, EscrowRefunded, EscrowDisputed, EscrowPartiallyRefunded},
 	EscrowDisputed: {EscrowReleased, EscrowRefunded, EscrowPartiallyRefunded, EscrowHeld},
+	EscrowReleased: {EscrowRefunded},
 }
 
 func EscrowTransitionIsAllowed(from, to EscrowStatus) bool {
