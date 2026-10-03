@@ -101,8 +101,10 @@ func (service *FakeTokenService) SignStaffTokensForTest(t testing.TB, role strin
 }
 
 type FakeAccountDirectory struct {
-	mutex    sync.Mutex
-	accounts map[uuid.UUID]identityports.AccountSummary
+	mutex           sync.Mutex
+	accounts        map[uuid.UUID]identityports.AccountSummary
+	Bans            []identityports.BanDetails
+	RevokedSessions int
 }
 
 func NewFakeAccountDirectory() *FakeAccountDirectory {
@@ -113,7 +115,7 @@ func (directory *FakeAccountDirectory) AddAccount(username, name string) identit
 	directory.mutex.Lock()
 	defer directory.mutex.Unlock()
 	email := username + "@example.com"
-	summary := identityports.AccountSummary{ID: uuid.New(), Username: username, Name: name, Email: &email, Roles: []string{"buyer"}, EmailVerified: true, Active: true, CreatedAt: time.Now().Add(-90 * 24 * time.Hour)}
+	summary := identityports.AccountSummary{ID: uuid.New(), Username: username, Name: name, Email: &email, Roles: []string{"buyer"}, EmailVerified: true, Active: true, Status: "active", CreatedAt: time.Now().Add(-90 * 24 * time.Hour)}
 	directory.accounts[summary.ID] = summary
 	return summary
 }
@@ -165,7 +167,7 @@ func (directory *FakeAccountDirectory) DeactivateAccountAndRevokeSessions(_ cont
 	directory.mutex.Lock()
 	defer directory.mutex.Unlock()
 	summary := directory.accounts[accountId]
-	summary.Active = false
+	summary.Active, summary.Status = false, "deactivated"
 	directory.accounts[accountId] = summary
 	return nil
 }
