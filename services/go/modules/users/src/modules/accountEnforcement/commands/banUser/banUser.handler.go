@@ -8,6 +8,7 @@ import (
 	usersErrors "zudomart/modules/users/src/errors"
 	usersevents "zudomart/modules/users/src/events"
 	"zudomart/modules/users/src/generated/ent"
+	accountevents "zudomart/modules/users/src/modules/accountEnforcement/events"
 	"zudomart/modules/users/src/modules/accountEnforcement/services"
 	usersservices "zudomart/modules/users/src/services"
 	"zudomart/platform/identityports"
@@ -52,10 +53,18 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.U
 			create.SetEndsAt(ends)
 			endsAt = &ends
 		}
-		if err := create.Exec(ctx); err != nil {
+		ban, err := create.Save(ctx)
+		if err != nil {
 			return err
 		}
-		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, "user.banned", target.Account.ID.String(), now, map[string]any{"accountId": target.Account.ID.String(), "reason": reason, "endsAt": endsAt, "permanent": permanent}); err != nil {
+		var until *string
+		if endsAt != nil {
+			text := endsAt.UTC().Format(time.RFC3339)
+			until = &text
+		}
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.AccountBannedType, target.Account.ID.String(), now, accountevents.AccountBannedData{
+			AccountId: target.Account.ID.String(), CaseId: ban.ID.String(), Reason: reason, Policy: "Community Guidelines", PolicyUrl: accountevents.CommunityGuidelinesUrl, AppealUrl: accountevents.AppealUrl, Until: until, Permanent: permanent,
+		}); err != nil {
 			return err
 		}
 		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{
