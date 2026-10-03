@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"io/fs"
 	"net/url"
+	"strings"
 	"sync"
 
 	"zudomart/platform/postgres"
@@ -87,6 +88,6 @@ func appendStartupRoleOption(databaseUrl, role string) (string, error) {
 	}
 	query := parsed.Query()
 	query.Set("options", "-c role="+role)
-	parsed.RawQuery = query.Encode()
+	parsed.RawQuery = strings.ReplaceAll(query.Encode(), "+", "%20")
 	return parsed.String(), nil
 }
