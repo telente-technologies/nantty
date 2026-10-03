@@ -1,0 +1,107 @@
+package controllers
+
+import (
+	"net/http"
+
+	"zudomart/modules/users/src/container"
+	banuser "zudomart/modules/users/src/modules/accountEnforcement/commands/banUser"
+	deleteuser "zudomart/modules/users/src/modules/accountEnforcement/commands/deleteUser"
+	reinstateuser "zudomart/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
+	restrictuser "zudomart/modules/users/src/modules/accountEnforcement/commands/restrictUser"
+	suspenduser "zudomart/modules/users/src/modules/accountEnforcement/commands/suspendUser"
+	unbanuser "zudomart/modules/users/src/modules/accountEnforcement/commands/unbanUser"
+	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
+	getuserdetail "zudomart/modules/users/src/modules/accountEnforcement/queries/getUserDetail"
+	listusers "zudomart/modules/users/src/modules/accountEnforcement/queries/listUsers"
+	"zudomart/modules/users/src/utils"
+	"zudomart/platform/httpserver"
+)
+
+type AccountEnforcementController struct {
+	Container *container.Container
+}
+
+func acceptAny[Request any](Request) error { return nil }
+
+func (controller AccountEnforcementController) respond(writer http.ResponseWriter, request *http.Request, status int, result any, err error) {
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, status, result)
+}
+
+func (controller AccountEnforcementController) ListUsers(writer http.ResponseWriter, request *http.Request) {
+	query := request.URL.Query()
+	result, err := listusers.Handler{Container: controller.Container}.Execute(request.Context(), listusers.Query{Search: query.Get("search"), Cursor: query.Get("cursor")})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) GetUser(writer http.ResponseWriter, request *http.Request) {
+	result, err := getuserdetail.Handler{Container: controller.Container}.Execute(request.Context(), request.PathValue("userId"))
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Restrict(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.RestrictRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := restrictuser.Handler{Container: controller.Container}.Execute(request.Context(), restrictuser.Command{
+		Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), Features: body.Features, DurationDays: body.DurationDays, Reason: body.Reason,
+	})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Suspend(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.SuspendRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := suspenduser.Handler{Container: controller.Container}.Execute(request.Context(), suspenduser.Command{
+		Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), DurationDays: body.DurationDays, ReasonCode: body.ReasonCode, Reason: body.Reason,
+	})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Reinstate(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.ReasonRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := reinstateuser.Handler{Container: controller.Container}.Execute(request.Context(), reinstateuser.Command{Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), Reason: body.Reason})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Ban(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.BanRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := banuser.Handler{Container: controller.Container}.Execute(request.Context(), banuser.Command{Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), DurationDays: body.DurationDays, Reason: body.Reason})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Unban(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.ReasonRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := unbanuser.Handler{Container: controller.Container}.Execute(request.Context(), unbanuser.Command{Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), Reason: body.Reason})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountEnforcementController) Delete(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.DeleteRequest])
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	result, err := deleteuser.Handler{Container: controller.Container}.Execute(request.Context(), deleteuser.Command{Actor: utils.StaffActorFromRequest(request), TargetId: request.PathValue("userId"), ConfirmUsername: body.ConfirmUsername, Reason: body.Reason})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
