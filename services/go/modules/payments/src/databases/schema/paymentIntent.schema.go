@@ -31,7 +31,7 @@ func (PaymentIntent) Mixin() []ent.Mixin {
 func (PaymentIntent) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("reference").NotEmpty().MaxLen(80).Immutable(),
-		field.Enum("purpose").Values("order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription").Immutable(),
+		field.Enum("purpose").Values("order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription", "ad_balance_top_up", "card_verification").Immutable(),
 		field.String("owner_user_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("subject_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
