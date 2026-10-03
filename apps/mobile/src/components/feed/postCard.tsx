@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import { Analytics24Icon, BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, HeartFill72Icon, Refresh24Icon, Share24Icon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
@@ -146,9 +147,7 @@ export function PostCard(props: PostCardProps) {
         ) : null}
         {post.text ? (
           <View style={styles.body}>
-            <Text size={14} lineHeight={16.8}>
-              {post.text}
-            </Text>
+            <MentionText text={post.text} mentions={post.mentions} size={14} lineHeight={16.8} />
           </View>
         ) : null}
         {post.resharedFrom ? (
@@ -185,22 +184,22 @@ export function PostCard(props: PostCardProps) {
       <View style={styles.interactions}>
         <View style={styles.counters}>
           <Counter label="Like" count={post.likes} onPress={props.onToggleLike}>
-            {post.liked ? <HeartFill72Icon size={24} /> : <Heart24AltIcon />}
+            {post.liked ? <HeartFill72Icon size={22} /> : <Heart24AltIcon size={22} />}
           </Counter>
           <Counter label="Comments" count={post.comments} onPress={props.onPressComments}>
-            <BrandLine24Icon />
+            <BrandLine24Icon size={22} />
           </Counter>
           <Counter label="Repost" count={post.reposts} onPress={props.onRepost}>
-            <Refresh24Icon />
+            <Refresh24Icon size={22} />
           </Counter>
           <Counter label="Impressions" count={post.views} onPress={isOwnPost ? props.onPressAnalytics : undefined}>
-            <Analytics24Icon />
+            <Analytics24Icon size={22} />
           </Counter>
         </View>
         <View style={styles.trailingActions}>
           <SaveToggleButton target={saveTargetForPost(post)} savedAccordingToServer={post.bookmarked} />
-          <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={8} onPress={props.onShare}>
-            <Share24Icon />
+          <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={{ top: 11, bottom: 11, left: 4, right: 4 }} onPress={props.onShare}>
+            <Share24Icon size={22} />
           </Pressable>
         </View>
       </View>
@@ -222,7 +221,7 @@ export function PostCard(props: PostCardProps) {
 function Counter({ label, count, onPress, children }: { label: string; count: number; onPress?: () => void; children: React.ReactNode }) {
   const styles = useStyles();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={6} onPress={onPress} style={styles.counter}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={{ top: 11, bottom: 11, left: 4, right: 4 }} onPress={onPress} style={styles.counter}>
       {children}
       <Text size={14} weight={500} lineHeight={16.8}>
         {formatCountWithThousandsSuffix(count)}
@@ -251,8 +250,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingVertical: 8 },
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
   interactions: { paddingHorizontal: 16, marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
-  counters: { flexDirection: "row", alignItems: "center", gap: 20, flexShrink: 1 },
+  counters: { flexDirection: "row", alignItems: "center", gap: 16, flexShrink: 1 },
   trailingActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   lockedMedia: { height: 335, overflow: "hidden" },
-  counter: { flexDirection: "row", alignItems: "center", gap: 8 },
+  counter: { flexDirection: "row", alignItems: "center", gap: 4 },
 }));
