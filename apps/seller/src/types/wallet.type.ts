@@ -7,7 +7,7 @@ export interface WalletBalances {
   readonly nextEscrowReleaseAt: string | null;
 }
 
-export type WalletTransactionKind = "escrow_hold" | "escrow_release" | "pos_settlement" | "payout" | "refund" | "fee" | "affiliate_commission" | "ads_charge" | "subscription_charge" | "adjustment";
+export type WalletTransactionKind = "escrow_hold" | "escrow_release" | "payout" | "refund" | "fee" | "affiliate_commission" | "ads_charge" | "subscription_charge" | "adjustment";
 
 export interface WalletTransaction {
   readonly id: string;

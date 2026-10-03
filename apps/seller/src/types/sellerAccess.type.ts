@@ -1,8 +1,10 @@
+import type { SellerPermission } from "@/config/rolePermissions.config";
 import type { staffRoles } from "@/constants/roles.constant";
 
 export type StaffRole = (typeof staffRoles)[number];
 export type VerificationStatus = "unverified" | "pending" | "verified" | "suspended" | "revoked";
 export type GoldTier = "PRO" | "PREMIUM";
+export type SubscriptionPlanTier = "PRO" | "BUSINESS";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "cancelled" | "expired" | "suspended";
 
 export interface StoreVerification {
@@ -14,11 +16,11 @@ export interface StoreVerification {
 
 export interface SubscriptionSummary {
   readonly status: SubscriptionStatus;
-  readonly plan: GoldTier;
+  readonly plan: SubscriptionPlanTier;
   readonly currentPeriodEnd: string | null;
 }
 
-export interface GoldEntitlements {
+export interface PlanEntitlements {
   readonly maxStaffSeats: number | null;
   readonly maxLocations: number | null;
   readonly reducedCommission: boolean;
@@ -32,8 +34,9 @@ export interface SellerAccess {
   readonly storeName: string | null;
   readonly verification: StoreVerification;
   readonly subscription: SubscriptionSummary | null;
-  readonly entitlements: GoldEntitlements | null;
+  readonly entitlements: PlanEntitlements | null;
   readonly role: StaffRole | null;
+  readonly permissions: SellerPermission[] | null;
 }
 
 export interface SignedInUser {
@@ -44,18 +47,11 @@ export interface SignedInUser {
   readonly avatarUrl: string | null;
 }
 
-export interface PosOperator {
-  readonly staffId: string;
-  readonly name: string;
-  readonly role: StaffRole;
-}
-
 export interface SellerSessionView {
   readonly user: SignedInUser;
   readonly access: SellerAccess;
-  readonly operator: PosOperator | null;
   readonly effectiveRole: StaffRole | null;
   readonly selectedLocationId: string | null;
 }
 
-export type SellerAccessDestination = "not-seller" | "verification" | "billing" | "app";
+export type SellerAccessDestination = "not-seller" | "restricted" | "app";

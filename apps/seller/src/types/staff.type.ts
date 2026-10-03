@@ -1,3 +1,4 @@
+import type { SellerPermission } from "@/config/rolePermissions.config";
 import type { StaffRole } from "@/types/sellerAccess.type";
 
 export interface StaffMember {
@@ -8,8 +9,7 @@ export interface StaffMember {
   readonly avatarUrl: string | null;
   readonly role: StaffRole;
   readonly status: "invited" | "active" | "suspended";
-  readonly hasPosPin: boolean;
-  readonly pinLockedUntil: string | null;
+  readonly permissions: SellerPermission[] | null;
   readonly locationIds: string[];
   readonly lastActiveAt: string | null;
   readonly invitedAt: string;

@@ -1,7 +1,5 @@
 import type { CurrencyCode, Money } from "@/types/money.type";
 
-export type PaymentMethod = "cash" | "card" | "bank_transfer" | "zudomart_wallet" | "pay_link";
-export type ReceiptPaperWidth = "58mm" | "80mm";
 
 export interface TaxRate {
   readonly id: string;
@@ -9,22 +7,6 @@ export interface TaxRate {
   readonly rateBasisPoints: number;
   readonly isDefault: boolean;
   readonly appliesToCategoryIds: string[] | null;
-}
-
-export interface ReceiptTemplate {
-  readonly showLogo: boolean;
-  readonly headerText: string;
-  readonly footerText: string;
-  readonly returnPolicy: string;
-  readonly paperWidth: ReceiptPaperWidth;
-  readonly showCashierName: boolean;
-}
-
-export interface PaymentMethodSetting {
-  readonly method: PaymentMethod;
-  readonly enabled: boolean;
-  readonly label: string;
-  readonly instructions: string | null;
 }
 
 export interface LoyaltyRules {
@@ -41,6 +23,16 @@ export interface NotificationPreferences {
   readonly payoutEmail: boolean;
   readonly disputeEmail: boolean;
   readonly dailySummaryEmail: boolean;
+  readonly lowStockSms: boolean;
+  readonly reviewEmail: boolean;
+  readonly messageDigestEmail: boolean;
+  readonly weeklyPerformanceEmail: boolean;
+}
+
+export interface StorePolicies {
+  readonly returns: string;
+  readonly shipping: string;
+  readonly privacy: string;
 }
 
 export interface StoreSettings {
@@ -58,9 +50,7 @@ export interface StoreSettings {
   readonly address: string;
   readonly taxes: TaxRate[];
   readonly pricesIncludeTax: boolean;
-  readonly receipt: ReceiptTemplate;
-  readonly paymentMethods: PaymentMethodSetting[];
-  readonly discountApprovalThresholdBasisPoints: number;
+  readonly policies: StorePolicies;
   readonly loyalty: LoyaltyRules;
   readonly notifications: NotificationPreferences;
 }
@@ -75,13 +65,5 @@ export interface StoreLocation {
   readonly country: string;
   readonly phone: string | null;
   readonly isDefault: boolean;
-  readonly active: boolean;
-}
-
-export interface PosRegister {
-  readonly id: string;
-  readonly locationId: string;
-  readonly name: string;
-  readonly openShiftId: string | null;
   readonly active: boolean;
 }

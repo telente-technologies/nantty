@@ -1,5 +1,5 @@
 import type { Money } from "@/types/money.type";
-import type { GoldEntitlements, GoldTier, SubscriptionSummary } from "@/types/sellerAccess.type";
+import type { PlanEntitlements, SubscriptionPlanTier, SubscriptionSummary } from "@/types/sellerAccess.type";
 
 export interface SubscriptionPlanPerk {
   readonly title: string;
@@ -8,10 +8,10 @@ export interface SubscriptionPlanPerk {
 
 export interface SubscriptionPlan {
   readonly id: string;
-  readonly tier: GoldTier;
+  readonly tier: SubscriptionPlanTier;
   readonly price: Money;
   readonly interval: "month" | "year";
-  readonly entitlements: GoldEntitlements;
+  readonly entitlements: PlanEntitlements;
   readonly perks: SubscriptionPlanPerk[];
 }
 
