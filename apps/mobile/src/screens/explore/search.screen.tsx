@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { PersonRow } from "@/components/search/personRow";
@@ -12,7 +12,9 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { trackProductInteraction } from "@/services/productInteractions.service";
 import { searchService, type SearchScope } from "@/services/search.service";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const SCOPES: { label: string; scope: SearchScope }[] = [
   { label: "All", scope: "all" },
@@ -40,6 +42,9 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
     queryFn: () => searchService.searchProductsStoresAndPeople(debouncedQuery, scope),
     enabled: debouncedQuery.length > 0,
   });
+  useEffect(() => {
+    if (debouncedQuery.length > 0) void trackProductInteraction("search.performed", { query: debouncedQuery, scope });
+  }, [debouncedQuery, scope]);
   const data = results.data;
 
   return (
@@ -57,7 +62,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
         {debouncedQuery.length === 0 ? (
           <Text align="center" color={colors.textSubtle} style={styles.state}>Search products, stores and people.</Text>
         ) : results.isLoading ? (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         ) : !data || (data.products.length + data.stores.length + data.people.length + (data.brands?.length ?? 0) === 0) ? (
           <Text align="center" color={colors.textSubtle} style={styles.state}>No results for “{debouncedQuery}”.</Text>
         ) : (

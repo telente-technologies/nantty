@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { ActivityIndicator, FlatList, StyleSheet } from "react-native";
 
 import { ProductMasonry } from "@/components/home/productMasonry";
@@ -8,9 +9,14 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { productsService } from "@/services/products.service";
+import { trackProductInteraction } from "@/services/productInteractions.service";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function CategoryScreen({ route }: MainScreenProps<"Category">) {
   const { categoryId, name, collection } = route.params;
+  useEffect(() => {
+    void trackProductInteraction("category.viewed", { categoryId: collection ?? categoryId });
+  }, [categoryId, collection]);
   const products = useInfiniteQuery({
     queryKey: ["products", "page", collection ?? categoryId],
     queryFn: ({ pageParam }) =>
@@ -27,7 +33,7 @@ export function CategoryScreen({ route }: MainScreenProps<"Category">) {
         keyExtractor={() => "grid"}
         renderItem={() =>
           products.isLoading ? (
-            <ActivityIndicator style={styles.state} color={colors.primary} />
+            <ListSkeleton />
           ) : allProducts.length === 0 ? (
             <Text align="center" color={colors.textSubtle} style={styles.state}>No products here yet.</Text>
           ) : (
