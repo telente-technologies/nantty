@@ -5,7 +5,7 @@ import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
 
 import styles from "./authSplitLayout.module.css";
 
-const syncedThings = ["Products and stock", "Online and in-store orders", "Wallet and payouts", "Customers and loyalty"];
+const syncedThings = ["Products and stock", "Orders from the app", "Wallet and payouts", "Customers and messages"];
 
 export function AuthSplitLayout({ children }: { readonly children: ReactNode }) {
   return (
@@ -15,7 +15,7 @@ export function AuthSplitLayout({ children }: { readonly children: ReactNode }) 
           <DashboardWordmark />
         </Link>
         <div className={styles.brandCopy}>
-          <p className={styles.statement}>One account. The app in your pocket, the dashboard at your counter.</p>
+          <p className={styles.statement}>One account. Sell from anywhere with the app, run your business here.</p>
           <ul className={styles.syncList} aria-label="Shared with the Zudomart app">
             {syncedThings.map((thing) => (
               <li key={thing}>{thing}</li>
@@ -23,10 +23,10 @@ export function AuthSplitLayout({ children }: { readonly children: ReactNode }) 
           </ul>
         </div>
         <figure className={styles.showcase}>
-          <img src="/screenshots/posRegister.webp" alt="The Zudomart Dashboard register with a sale in progress: product grid on the left, a receipt-style cart on the right" width={1180} height={820} className={styles.screenshot} />
+          <img src="/screenshots/dashboardOverview.webp" alt="The Zudomart Dashboard overview with sales, orders by status and wallet balances" width={1440} height={900} className={styles.screenshot} />
           <figcaption className={styles.caption}>
             <img src="/photos/shopCounterOwner.webp" alt="" width={56} height={56} className={styles.captionPhoto} />
-            <span>The register keeps selling offline and syncs every sale to your Zudomart wallet when you reconnect.</span>
+            <span>Free for every Zudomart seller — upgrade to Pro or Business when you grow.</span>
           </figcaption>
         </figure>
       </section>

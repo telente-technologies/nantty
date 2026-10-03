@@ -130,3 +130,14 @@
     display: none;
   }
 }
+
+@media (max-width: 767px) {
+  .brandPanel {
+    display: none;
+  }
+
+  .formPanel {
+    align-items: flex-start;
+    padding: 24px 16px;
+  }
+}
