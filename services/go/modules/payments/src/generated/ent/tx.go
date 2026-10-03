@@ -18,6 +18,8 @@ type Tx struct {
 	BillingSubscription *BillingSubscriptionClient
 	// ConnectedAccount is the client for interacting with the ConnectedAccount builders.
 	ConnectedAccount *ConnectedAccountClient
+	// ConnectedAccountJob is the client for interacting with the ConnectedAccountJob builders.
+	ConnectedAccountJob *ConnectedAccountJobClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderPayable is the client for interacting with the OrderPayable builders.
@@ -28,12 +30,18 @@ type Tx struct {
 	PaymentIntent *PaymentIntentClient
 	// PaymentRefund is the client for interacting with the PaymentRefund builders.
 	PaymentRefund *PaymentRefundClient
+	// PayoutOnboarding is the client for interacting with the PayoutOnboarding builders.
+	PayoutOnboarding *PayoutOnboardingClient
 	// PayoutTransfer is the client for interacting with the PayoutTransfer builders.
 	PayoutTransfer *PayoutTransferClient
+	// ProviderCustomer is the client for interacting with the ProviderCustomer builders.
+	ProviderCustomer *ProviderCustomerClient
 	// ProviderDispute is the client for interacting with the ProviderDispute builders.
 	ProviderDispute *ProviderDisputeClient
 	// ProviderPayoutDestination is the client for interacting with the ProviderPayoutDestination builders.
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
+	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
+	SavedCardSetup *SavedCardSetupClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
@@ -171,14 +179,18 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.BillingSubscription = NewBillingSubscriptionClient(tx.config)
 	tx.ConnectedAccount = NewConnectedAccountClient(tx.config)
+	tx.ConnectedAccountJob = NewConnectedAccountJobClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OrderPayable = NewOrderPayableClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PaymentIntent = NewPaymentIntentClient(tx.config)
 	tx.PaymentRefund = NewPaymentRefundClient(tx.config)
+	tx.PayoutOnboarding = NewPayoutOnboardingClient(tx.config)
 	tx.PayoutTransfer = NewPayoutTransferClient(tx.config)
+	tx.ProviderCustomer = NewProviderCustomerClient(tx.config)
 	tx.ProviderDispute = NewProviderDisputeClient(tx.config)
 	tx.ProviderPayoutDestination = NewProviderPayoutDestinationClient(tx.config)
+	tx.SavedCardSetup = NewSavedCardSetupClient(tx.config)
 	tx.StorePurchase = NewStorePurchaseClient(tx.config)
 	tx.WebhookEvent = NewWebhookEventClient(tx.config)
 }
