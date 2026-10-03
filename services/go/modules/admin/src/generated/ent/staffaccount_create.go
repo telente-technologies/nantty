@@ -64,6 +64,12 @@ func (_c *StaffAccountCreate) SetRole(v staffaccount.Role) *StaffAccountCreate {
 	return _c
 }
 
+// SetRoleIds sets the "role_ids" field.
+func (_c *StaffAccountCreate) SetRoleIds(v []string) *StaffAccountCreate {
+	_c.mutation.SetRoleIds(v)
+	return _c
+}
+
 // SetPermissions sets the "permissions" field.
 func (_c *StaffAccountCreate) SetPermissions(v []string) *StaffAccountCreate {
 	_c.mutation.SetPermissions(v)
@@ -170,6 +176,34 @@ func (_c *StaffAccountCreate) SetCreatedBy(v uuid.UUID) *StaffAccountCreate {
 func (_c *StaffAccountCreate) SetNillableCreatedBy(v *uuid.UUID) *StaffAccountCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetApprovedBy sets the "approved_by" field.
+func (_c *StaffAccountCreate) SetApprovedBy(v uuid.UUID) *StaffAccountCreate {
+	_c.mutation.SetApprovedBy(v)
+	return _c
+}
+
+// SetNillableApprovedBy sets the "approved_by" field if the given value is not nil.
+func (_c *StaffAccountCreate) SetNillableApprovedBy(v *uuid.UUID) *StaffAccountCreate {
+	if v != nil {
+		_c.SetApprovedBy(*v)
+	}
+	return _c
+}
+
+// SetApprovedAt sets the "approved_at" field.
+func (_c *StaffAccountCreate) SetApprovedAt(v time.Time) *StaffAccountCreate {
+	_c.mutation.SetApprovedAt(v)
+	return _c
+}
+
+// SetNillableApprovedAt sets the "approved_at" field if the given value is not nil.
+func (_c *StaffAccountCreate) SetNillableApprovedAt(v *time.Time) *StaffAccountCreate {
+	if v != nil {
+		_c.SetApprovedAt(*v)
 	}
 	return _c
 }
@@ -290,6 +324,10 @@ func (_c *StaffAccountCreate) defaults() {
 		v := staffaccount.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
 	}
+	if _, ok := _c.mutation.RoleIds(); !ok {
+		v := staffaccount.DefaultRoleIds
+		_c.mutation.SetRoleIds(v)
+	}
 	if _, ok := _c.mutation.Permissions(); !ok {
 		v := staffaccount.DefaultPermissions
 		_c.mutation.SetPermissions(v)
@@ -344,6 +382,9 @@ func (_c *StaffAccountCreate) check() error {
 		if err := staffaccount.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.role": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.RoleIds(); !ok {
+		return &ValidationError{Name: "role_ids", err: errors.New(`ent: missing required field "StaffAccount.role_ids"`)}
 	}
 	if _, ok := _c.mutation.Permissions(); !ok {
 		return &ValidationError{Name: "permissions", err: errors.New(`ent: missing required field "StaffAccount.permissions"`)}
@@ -421,6 +462,10 @@ func (_c *StaffAccountCreate) createSpec() (*StaffAccount, *sqlgraph.CreateSpec)
 		_spec.SetField(staffaccount.FieldRole, field.TypeEnum, value)
 		_node.Role = value
 	}
+	if value, ok := _c.mutation.RoleIds(); ok {
+		_spec.SetField(staffaccount.FieldRoleIds, field.TypeJSON, value)
+		_node.RoleIds = value
+	}
 	if value, ok := _c.mutation.Permissions(); ok {
 		_spec.SetField(staffaccount.FieldPermissions, field.TypeJSON, value)
 		_node.Permissions = value
@@ -456,6 +501,14 @@ func (_c *StaffAccountCreate) createSpec() (*StaffAccount, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(staffaccount.FieldCreatedBy, field.TypeUUID, value)
 		_node.CreatedBy = &value
+	}
+	if value, ok := _c.mutation.ApprovedBy(); ok {
+		_spec.SetField(staffaccount.FieldApprovedBy, field.TypeUUID, value)
+		_node.ApprovedBy = &value
+	}
+	if value, ok := _c.mutation.ApprovedAt(); ok {
+		_spec.SetField(staffaccount.FieldApprovedAt, field.TypeTime, value)
+		_node.ApprovedAt = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(staffaccount.FieldUpdatedAt, field.TypeTime, value)

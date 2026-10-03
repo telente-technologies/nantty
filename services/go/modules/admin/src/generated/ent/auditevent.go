@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -24,6 +25,14 @@ type AuditEvent struct {
 	ActorID string `json:"actor_id,omitempty"`
 	// ActorRole holds the value of the "actor_role" field.
 	ActorRole string `json:"actor_role,omitempty"`
+	// ActorName holds the value of the "actor_name" field.
+	ActorName string `json:"actor_name,omitempty"`
+	// ActorDepartments holds the value of the "actor_departments" field.
+	ActorDepartments []string `json:"actor_departments,omitempty"`
+	// StepUpVerified holds the value of the "step_up_verified" field.
+	StepUpVerified bool `json:"step_up_verified,omitempty"`
+	// SubjectLabel holds the value of the "subject_label" field.
+	SubjectLabel string `json:"subject_label,omitempty"`
 	// Action holds the value of the "action" field.
 	Action string `json:"action,omitempty"`
 	// SubjectType holds the value of the "subject_type" field.
@@ -50,9 +59,11 @@ func (*AuditEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case auditevent.FieldBefore, auditevent.FieldAfter:
+		case auditevent.FieldActorDepartments, auditevent.FieldBefore, auditevent.FieldAfter:
 			values[i] = new([]byte)
-		case auditevent.FieldActorID, auditevent.FieldActorRole, auditevent.FieldAction, auditevent.FieldSubjectType, auditevent.FieldSubjectID, auditevent.FieldReason, auditevent.FieldIPAddress, auditevent.FieldUserAgent, auditevent.FieldRequestID:
+		case auditevent.FieldStepUpVerified:
+			values[i] = new(sql.NullBool)
+		case auditevent.FieldActorID, auditevent.FieldActorRole, auditevent.FieldActorName, auditevent.FieldSubjectLabel, auditevent.FieldAction, auditevent.FieldSubjectType, auditevent.FieldSubjectID, auditevent.FieldReason, auditevent.FieldIPAddress, auditevent.FieldUserAgent, auditevent.FieldRequestID:
 			values[i] = new(sql.NullString)
 		case auditevent.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -96,6 +107,32 @@ func (_m *AuditEvent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field actor_role", values[i])
 			} else if value.Valid {
 				_m.ActorRole = value.String
+			}
+		case auditevent.FieldActorName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field actor_name", values[i])
+			} else if value.Valid {
+				_m.ActorName = value.String
+			}
+		case auditevent.FieldActorDepartments:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field actor_departments", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ActorDepartments); err != nil {
+					return fmt.Errorf("unmarshal field actor_departments: %w", err)
+				}
+			}
+		case auditevent.FieldStepUpVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field step_up_verified", values[i])
+			} else if value.Valid {
+				_m.StepUpVerified = value.Bool
+			}
+		case auditevent.FieldSubjectLabel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field subject_label", values[i])
+			} else if value.Valid {
+				_m.SubjectLabel = value.String
 			}
 		case auditevent.FieldAction:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -195,6 +232,18 @@ func (_m *AuditEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("actor_role=")
 	builder.WriteString(_m.ActorRole)
+	builder.WriteString(", ")
+	builder.WriteString("actor_name=")
+	builder.WriteString(_m.ActorName)
+	builder.WriteString(", ")
+	builder.WriteString("actor_departments=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ActorDepartments))
+	builder.WriteString(", ")
+	builder.WriteString("step_up_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StepUpVerified))
+	builder.WriteString(", ")
+	builder.WriteString("subject_label=")
+	builder.WriteString(_m.SubjectLabel)
 	builder.WriteString(", ")
 	builder.WriteString("action=")
 	builder.WriteString(_m.Action)

@@ -27,6 +27,8 @@ type StaffAccount struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// Role holds the value of the "role" field.
 	Role staffaccount.Role `json:"role,omitempty"`
+	// RoleIds holds the value of the "role_ids" field.
+	RoleIds []string `json:"role_ids,omitempty"`
 	// Permissions holds the value of the "permissions" field.
 	Permissions []string `json:"permissions,omitempty"`
 	// PasswordHash holds the value of the "password_hash" field.
@@ -45,6 +47,10 @@ type StaffAccount struct {
 	LockedUntil *time.Time `json:"locked_until,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy *uuid.UUID `json:"created_by,omitempty"`
+	// ApprovedBy holds the value of the "approved_by" field.
+	ApprovedBy *uuid.UUID `json:"approved_by,omitempty"`
+	// ApprovedAt holds the value of the "approved_at" field.
+	ApprovedAt *time.Time `json:"approved_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -98,15 +104,15 @@ func (*StaffAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case staffaccount.FieldCreatedBy:
+		case staffaccount.FieldCreatedBy, staffaccount.FieldApprovedBy:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case staffaccount.FieldPermissions, staffaccount.FieldTotpSecretEncrypted:
+		case staffaccount.FieldRoleIds, staffaccount.FieldPermissions, staffaccount.FieldTotpSecretEncrypted:
 			values[i] = new([]byte)
 		case staffaccount.FieldTotpLastUsedStep, staffaccount.FieldFailedAttempts:
 			values[i] = new(sql.NullInt64)
 		case staffaccount.FieldEmail, staffaccount.FieldDisplayName, staffaccount.FieldRole, staffaccount.FieldPasswordHash, staffaccount.FieldStatus:
 			values[i] = new(sql.NullString)
-		case staffaccount.FieldCreatedAt, staffaccount.FieldTotpConfirmedAt, staffaccount.FieldLockedUntil, staffaccount.FieldUpdatedAt:
+		case staffaccount.FieldCreatedAt, staffaccount.FieldTotpConfirmedAt, staffaccount.FieldLockedUntil, staffaccount.FieldApprovedAt, staffaccount.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case staffaccount.FieldID:
 			values[i] = new(uuid.UUID)
@@ -154,6 +160,14 @@ func (_m *StaffAccount) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
 			} else if value.Valid {
 				_m.Role = staffaccount.Role(value.String)
+			}
+		case staffaccount.FieldRoleIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field role_ids", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.RoleIds); err != nil {
+					return fmt.Errorf("unmarshal field role_ids: %w", err)
+				}
 			}
 		case staffaccount.FieldPermissions:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -214,6 +228,20 @@ func (_m *StaffAccount) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedBy = new(uuid.UUID)
 				*_m.CreatedBy = *value.S.(*uuid.UUID)
+			}
+		case staffaccount.FieldApprovedBy:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field approved_by", values[i])
+			} else if value.Valid {
+				_m.ApprovedBy = new(uuid.UUID)
+				*_m.ApprovedBy = *value.S.(*uuid.UUID)
+			}
+		case staffaccount.FieldApprovedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field approved_at", values[i])
+			} else if value.Valid {
+				_m.ApprovedAt = new(time.Time)
+				*_m.ApprovedAt = value.Time
 			}
 		case staffaccount.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -284,6 +312,9 @@ func (_m *StaffAccount) String() string {
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))
 	builder.WriteString(", ")
+	builder.WriteString("role_ids=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RoleIds))
+	builder.WriteString(", ")
 	builder.WriteString("permissions=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Permissions))
 	builder.WriteString(", ")
@@ -313,6 +344,16 @@ func (_m *StaffAccount) String() string {
 	if v := _m.CreatedBy; v != nil {
 		builder.WriteString("created_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.ApprovedBy; v != nil {
+		builder.WriteString("approved_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.ApprovedAt; v != nil {
+		builder.WriteString("approved_at=")
+		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")

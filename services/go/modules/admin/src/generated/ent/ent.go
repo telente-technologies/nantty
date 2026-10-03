@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
+	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
 
 	"entgo.io/ent"
@@ -87,6 +88,7 @@ func checkColumn(t, c string) error {
 			staffaccount.Table:            staffaccount.ValidColumn,
 			staffinvitation.Table:         staffinvitation.ValidColumn,
 			staffloginchallenge.Table:     staffloginchallenge.ValidColumn,
+			staffrole.Table:               staffrole.ValidColumn,
 			staffsession.Table:            staffsession.ValidColumn,
 		})
 	})

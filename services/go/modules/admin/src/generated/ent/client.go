@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
+	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
 
 	"entgo.io/ent"
@@ -48,6 +49,8 @@ type Client struct {
 	StaffInvitation *StaffInvitationClient
 	// StaffLoginChallenge is the client for interacting with the StaffLoginChallenge builders.
 	StaffLoginChallenge *StaffLoginChallengeClient
+	// StaffRole is the client for interacting with the StaffRole builders.
+	StaffRole *StaffRoleClient
 	// StaffSession is the client for interacting with the StaffSession builders.
 	StaffSession *StaffSessionClient
 }
@@ -68,6 +71,7 @@ func (c *Client) init() {
 	c.StaffAccount = NewStaffAccountClient(c.config)
 	c.StaffInvitation = NewStaffInvitationClient(c.config)
 	c.StaffLoginChallenge = NewStaffLoginChallengeClient(c.config)
+	c.StaffRole = NewStaffRoleClient(c.config)
 	c.StaffSession = NewStaffSessionClient(c.config)
 }
 
@@ -168,6 +172,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		StaffAccount:            NewStaffAccountClient(cfg),
 		StaffInvitation:         NewStaffInvitationClient(cfg),
 		StaffLoginChallenge:     NewStaffLoginChallengeClient(cfg),
+		StaffRole:               NewStaffRoleClient(cfg),
 		StaffSession:            NewStaffSessionClient(cfg),
 	}, nil
 }
@@ -195,6 +200,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		StaffAccount:            NewStaffAccountClient(cfg),
 		StaffInvitation:         NewStaffInvitationClient(cfg),
 		StaffLoginChallenge:     NewStaffLoginChallengeClient(cfg),
+		StaffRole:               NewStaffRoleClient(cfg),
 		StaffSession:            NewStaffSessionClient(cfg),
 	}, nil
 }
@@ -226,7 +232,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuditEvent, c.OutboxEvent, c.PlatformSetting, c.PlatformSettingRevision,
-		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffSession,
+		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffRole,
+		c.StaffSession,
 	} {
 		n.Use(hooks...)
 	}
@@ -237,7 +244,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuditEvent, c.OutboxEvent, c.PlatformSetting, c.PlatformSettingRevision,
-		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffSession,
+		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffRole,
+		c.StaffSession,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -260,6 +268,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StaffInvitation.mutate(ctx, m)
 	case *StaffLoginChallengeMutation:
 		return c.StaffLoginChallenge.mutate(ctx, m)
+	case *StaffRoleMutation:
+		return c.StaffRole.mutate(ctx, m)
 	case *StaffSessionMutation:
 		return c.StaffSession.mutate(ctx, m)
 	default:
@@ -1278,6 +1288,139 @@ func (c *StaffLoginChallengeClient) mutate(ctx context.Context, m *StaffLoginCha
 	}
 }
 
+// StaffRoleClient is a client for the StaffRole schema.
+type StaffRoleClient struct {
+	config
+}
+
+// NewStaffRoleClient returns a client for the StaffRole from the given config.
+func NewStaffRoleClient(c config) *StaffRoleClient {
+	return &StaffRoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `staffrole.Hooks(f(g(h())))`.
+func (c *StaffRoleClient) Use(hooks ...Hook) {
+	c.hooks.StaffRole = append(c.hooks.StaffRole, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `staffrole.Intercept(f(g(h())))`.
+func (c *StaffRoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StaffRole = append(c.inters.StaffRole, interceptors...)
+}
+
+// Create returns a builder for creating a StaffRole entity.
+func (c *StaffRoleClient) Create() *StaffRoleCreate {
+	mutation := newStaffRoleMutation(c.config, OpCreate)
+	return &StaffRoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StaffRole entities.
+func (c *StaffRoleClient) CreateBulk(builders ...*StaffRoleCreate) *StaffRoleCreateBulk {
+	return &StaffRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StaffRoleClient) MapCreateBulk(slice any, setFunc func(*StaffRoleCreate, int)) *StaffRoleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StaffRoleCreateBulk{err: fmt.Errorf("calling to StaffRoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StaffRoleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StaffRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StaffRole.
+func (c *StaffRoleClient) Update() *StaffRoleUpdate {
+	mutation := newStaffRoleMutation(c.config, OpUpdate)
+	return &StaffRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StaffRoleClient) UpdateOne(_m *StaffRole) *StaffRoleUpdateOne {
+	mutation := newStaffRoleMutation(c.config, OpUpdateOne, withStaffRole(_m))
+	return &StaffRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StaffRoleClient) UpdateOneID(id uuid.UUID) *StaffRoleUpdateOne {
+	mutation := newStaffRoleMutation(c.config, OpUpdateOne, withStaffRoleID(id))
+	return &StaffRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StaffRole.
+func (c *StaffRoleClient) Delete() *StaffRoleDelete {
+	mutation := newStaffRoleMutation(c.config, OpDelete)
+	return &StaffRoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StaffRoleClient) DeleteOne(_m *StaffRole) *StaffRoleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StaffRoleClient) DeleteOneID(id uuid.UUID) *StaffRoleDeleteOne {
+	builder := c.Delete().Where(staffrole.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StaffRoleDeleteOne{builder}
+}
+
+// Query returns a query builder for StaffRole.
+func (c *StaffRoleClient) Query() *StaffRoleQuery {
+	return &StaffRoleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStaffRole},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StaffRole entity by its id.
+func (c *StaffRoleClient) Get(ctx context.Context, id uuid.UUID) (*StaffRole, error) {
+	return c.Query().Where(staffrole.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StaffRoleClient) GetX(ctx context.Context, id uuid.UUID) *StaffRole {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StaffRoleClient) Hooks() []Hook {
+	return c.hooks.StaffRole
+}
+
+// Interceptors returns the client interceptors.
+func (c *StaffRoleClient) Interceptors() []Interceptor {
+	return c.inters.StaffRole
+}
+
+func (c *StaffRoleClient) mutate(ctx context.Context, m *StaffRoleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StaffRoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StaffRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StaffRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StaffRoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StaffRole mutation op: %q", m.Op())
+	}
+}
+
 // StaffSessionClient is a client for the StaffSession schema.
 type StaffSessionClient struct {
 	config
@@ -1431,11 +1574,11 @@ func (c *StaffSessionClient) mutate(ctx context.Context, m *StaffSessionMutation
 type (
 	hooks struct {
 		AuditEvent, OutboxEvent, PlatformSetting, PlatformSettingRevision, StaffAccount,
-		StaffInvitation, StaffLoginChallenge, StaffSession []ent.Hook
+		StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession []ent.Hook
 	}
 	inters struct {
 		AuditEvent, OutboxEvent, PlatformSetting, PlatformSettingRevision, StaffAccount,
-		StaffInvitation, StaffLoginChallenge, StaffSession []ent.Interceptor
+		StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession []ent.Interceptor
 	}
 )
 

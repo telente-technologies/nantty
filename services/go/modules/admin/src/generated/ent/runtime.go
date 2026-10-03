@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
+	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
 
 	"github.com/google/uuid"
@@ -54,8 +55,28 @@ func init() {
 	auditevent.DefaultActorRole = auditeventDescActorRole.Default.(string)
 	// auditevent.ActorRoleValidator is a validator for the "actor_role" field. It is called by the builders before save.
 	auditevent.ActorRoleValidator = auditeventDescActorRole.Validators[0].(func(string) error)
+	// auditeventDescActorName is the schema descriptor for actor_name field.
+	auditeventDescActorName := auditeventFields[2].Descriptor()
+	// auditevent.DefaultActorName holds the default value on creation for the actor_name field.
+	auditevent.DefaultActorName = auditeventDescActorName.Default.(string)
+	// auditevent.ActorNameValidator is a validator for the "actor_name" field. It is called by the builders before save.
+	auditevent.ActorNameValidator = auditeventDescActorName.Validators[0].(func(string) error)
+	// auditeventDescActorDepartments is the schema descriptor for actor_departments field.
+	auditeventDescActorDepartments := auditeventFields[3].Descriptor()
+	// auditevent.DefaultActorDepartments holds the default value on creation for the actor_departments field.
+	auditevent.DefaultActorDepartments = auditeventDescActorDepartments.Default.([]string)
+	// auditeventDescStepUpVerified is the schema descriptor for step_up_verified field.
+	auditeventDescStepUpVerified := auditeventFields[4].Descriptor()
+	// auditevent.DefaultStepUpVerified holds the default value on creation for the step_up_verified field.
+	auditevent.DefaultStepUpVerified = auditeventDescStepUpVerified.Default.(bool)
+	// auditeventDescSubjectLabel is the schema descriptor for subject_label field.
+	auditeventDescSubjectLabel := auditeventFields[5].Descriptor()
+	// auditevent.DefaultSubjectLabel holds the default value on creation for the subject_label field.
+	auditevent.DefaultSubjectLabel = auditeventDescSubjectLabel.Default.(string)
+	// auditevent.SubjectLabelValidator is a validator for the "subject_label" field. It is called by the builders before save.
+	auditevent.SubjectLabelValidator = auditeventDescSubjectLabel.Validators[0].(func(string) error)
 	// auditeventDescAction is the schema descriptor for action field.
-	auditeventDescAction := auditeventFields[2].Descriptor()
+	auditeventDescAction := auditeventFields[6].Descriptor()
 	// auditevent.ActionValidator is a validator for the "action" field. It is called by the builders before save.
 	auditevent.ActionValidator = func() func(string) error {
 		validators := auditeventDescAction.Validators
@@ -73,37 +94,37 @@ func init() {
 		}
 	}()
 	// auditeventDescSubjectType is the schema descriptor for subject_type field.
-	auditeventDescSubjectType := auditeventFields[3].Descriptor()
+	auditeventDescSubjectType := auditeventFields[7].Descriptor()
 	// auditevent.DefaultSubjectType holds the default value on creation for the subject_type field.
 	auditevent.DefaultSubjectType = auditeventDescSubjectType.Default.(string)
 	// auditevent.SubjectTypeValidator is a validator for the "subject_type" field. It is called by the builders before save.
 	auditevent.SubjectTypeValidator = auditeventDescSubjectType.Validators[0].(func(string) error)
 	// auditeventDescSubjectID is the schema descriptor for subject_id field.
-	auditeventDescSubjectID := auditeventFields[4].Descriptor()
+	auditeventDescSubjectID := auditeventFields[8].Descriptor()
 	// auditevent.DefaultSubjectID holds the default value on creation for the subject_id field.
 	auditevent.DefaultSubjectID = auditeventDescSubjectID.Default.(string)
 	// auditevent.SubjectIDValidator is a validator for the "subject_id" field. It is called by the builders before save.
 	auditevent.SubjectIDValidator = auditeventDescSubjectID.Validators[0].(func(string) error)
 	// auditeventDescReason is the schema descriptor for reason field.
-	auditeventDescReason := auditeventFields[7].Descriptor()
+	auditeventDescReason := auditeventFields[11].Descriptor()
 	// auditevent.DefaultReason holds the default value on creation for the reason field.
 	auditevent.DefaultReason = auditeventDescReason.Default.(string)
 	// auditevent.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
 	auditevent.ReasonValidator = auditeventDescReason.Validators[0].(func(string) error)
 	// auditeventDescIPAddress is the schema descriptor for ip_address field.
-	auditeventDescIPAddress := auditeventFields[8].Descriptor()
+	auditeventDescIPAddress := auditeventFields[12].Descriptor()
 	// auditevent.DefaultIPAddress holds the default value on creation for the ip_address field.
 	auditevent.DefaultIPAddress = auditeventDescIPAddress.Default.(string)
 	// auditevent.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
 	auditevent.IPAddressValidator = auditeventDescIPAddress.Validators[0].(func(string) error)
 	// auditeventDescUserAgent is the schema descriptor for user_agent field.
-	auditeventDescUserAgent := auditeventFields[9].Descriptor()
+	auditeventDescUserAgent := auditeventFields[13].Descriptor()
 	// auditevent.DefaultUserAgent holds the default value on creation for the user_agent field.
 	auditevent.DefaultUserAgent = auditeventDescUserAgent.Default.(string)
 	// auditevent.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
 	auditevent.UserAgentValidator = auditeventDescUserAgent.Validators[0].(func(string) error)
 	// auditeventDescRequestID is the schema descriptor for request_id field.
-	auditeventDescRequestID := auditeventFields[10].Descriptor()
+	auditeventDescRequestID := auditeventFields[14].Descriptor()
 	// auditevent.DefaultRequestID holds the default value on creation for the request_id field.
 	auditevent.DefaultRequestID = auditeventDescRequestID.Default.(string)
 	// auditevent.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
@@ -276,22 +297,26 @@ func init() {
 	staffaccount.DefaultDisplayName = staffaccountDescDisplayName.Default.(string)
 	// staffaccount.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	staffaccount.DisplayNameValidator = staffaccountDescDisplayName.Validators[0].(func(string) error)
+	// staffaccountDescRoleIds is the schema descriptor for role_ids field.
+	staffaccountDescRoleIds := staffaccountFields[3].Descriptor()
+	// staffaccount.DefaultRoleIds holds the default value on creation for the role_ids field.
+	staffaccount.DefaultRoleIds = staffaccountDescRoleIds.Default.([]string)
 	// staffaccountDescPermissions is the schema descriptor for permissions field.
-	staffaccountDescPermissions := staffaccountFields[3].Descriptor()
+	staffaccountDescPermissions := staffaccountFields[4].Descriptor()
 	// staffaccount.DefaultPermissions holds the default value on creation for the permissions field.
 	staffaccount.DefaultPermissions = staffaccountDescPermissions.Default.([]string)
 	// staffaccountDescTotpLastUsedStep is the schema descriptor for totp_last_used_step field.
-	staffaccountDescTotpLastUsedStep := staffaccountFields[8].Descriptor()
+	staffaccountDescTotpLastUsedStep := staffaccountFields[9].Descriptor()
 	// staffaccount.DefaultTotpLastUsedStep holds the default value on creation for the totp_last_used_step field.
 	staffaccount.DefaultTotpLastUsedStep = staffaccountDescTotpLastUsedStep.Default.(int64)
 	// staffaccountDescFailedAttempts is the schema descriptor for failed_attempts field.
-	staffaccountDescFailedAttempts := staffaccountFields[9].Descriptor()
+	staffaccountDescFailedAttempts := staffaccountFields[10].Descriptor()
 	// staffaccount.DefaultFailedAttempts holds the default value on creation for the failed_attempts field.
 	staffaccount.DefaultFailedAttempts = staffaccountDescFailedAttempts.Default.(int)
 	// staffaccount.FailedAttemptsValidator is a validator for the "failed_attempts" field. It is called by the builders before save.
 	staffaccount.FailedAttemptsValidator = staffaccountDescFailedAttempts.Validators[0].(func(int) error)
 	// staffaccountDescUpdatedAt is the schema descriptor for updated_at field.
-	staffaccountDescUpdatedAt := staffaccountFields[12].Descriptor()
+	staffaccountDescUpdatedAt := staffaccountFields[15].Descriptor()
 	// staffaccount.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	staffaccount.DefaultUpdatedAt = staffaccountDescUpdatedAt.Default.(func() time.Time)
 	// staffaccount.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -340,6 +365,57 @@ func init() {
 	staffloginchallengeDescID := staffloginchallengeMixinFields0[0].Descriptor()
 	// staffloginchallenge.DefaultID holds the default value on creation for the id field.
 	staffloginchallenge.DefaultID = staffloginchallengeDescID.Default.(func() uuid.UUID)
+	staffroleMixin := schema.StaffRole{}.Mixin()
+	staffroleMixinFields0 := staffroleMixin[0].Fields()
+	_ = staffroleMixinFields0
+	staffroleFields := schema.StaffRole{}.Fields()
+	_ = staffroleFields
+	// staffroleDescCreatedAt is the schema descriptor for created_at field.
+	staffroleDescCreatedAt := staffroleMixinFields0[1].Descriptor()
+	// staffrole.DefaultCreatedAt holds the default value on creation for the created_at field.
+	staffrole.DefaultCreatedAt = staffroleDescCreatedAt.Default.(func() time.Time)
+	// staffroleDescName is the schema descriptor for name field.
+	staffroleDescName := staffroleFields[0].Descriptor()
+	// staffrole.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	staffrole.NameValidator = func() func(string) error {
+		validators := staffroleDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// staffroleDescDepartment is the schema descriptor for department field.
+	staffroleDescDepartment := staffroleFields[1].Descriptor()
+	// staffrole.DefaultDepartment holds the default value on creation for the department field.
+	staffrole.DefaultDepartment = staffroleDescDepartment.Default.(string)
+	// staffrole.DepartmentValidator is a validator for the "department" field. It is called by the builders before save.
+	staffrole.DepartmentValidator = staffroleDescDepartment.Validators[0].(func(string) error)
+	// staffroleDescPermissions is the schema descriptor for permissions field.
+	staffroleDescPermissions := staffroleFields[2].Descriptor()
+	// staffrole.DefaultPermissions holds the default value on creation for the permissions field.
+	staffrole.DefaultPermissions = staffroleDescPermissions.Default.([]string)
+	// staffroleDescIsTemplate is the schema descriptor for is_template field.
+	staffroleDescIsTemplate := staffroleFields[3].Descriptor()
+	// staffrole.DefaultIsTemplate holds the default value on creation for the is_template field.
+	staffrole.DefaultIsTemplate = staffroleDescIsTemplate.Default.(bool)
+	// staffroleDescUpdatedAt is the schema descriptor for updated_at field.
+	staffroleDescUpdatedAt := staffroleFields[5].Descriptor()
+	// staffrole.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	staffrole.DefaultUpdatedAt = staffroleDescUpdatedAt.Default.(func() time.Time)
+	// staffrole.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	staffrole.UpdateDefaultUpdatedAt = staffroleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// staffroleDescID is the schema descriptor for id field.
+	staffroleDescID := staffroleMixinFields0[0].Descriptor()
+	// staffrole.DefaultID holds the default value on creation for the id field.
+	staffrole.DefaultID = staffroleDescID.Default.(func() uuid.UUID)
 	staffsessionMixin := schema.StaffSession{}.Mixin()
 	staffsessionMixinFields0 := staffsessionMixin[0].Fields()
 	_ = staffsessionMixinFields0

@@ -55,6 +55,54 @@ func (_c *AuditEventCreate) SetNillableActorRole(v *string) *AuditEventCreate {
 	return _c
 }
 
+// SetActorName sets the "actor_name" field.
+func (_c *AuditEventCreate) SetActorName(v string) *AuditEventCreate {
+	_c.mutation.SetActorName(v)
+	return _c
+}
+
+// SetNillableActorName sets the "actor_name" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableActorName(v *string) *AuditEventCreate {
+	if v != nil {
+		_c.SetActorName(*v)
+	}
+	return _c
+}
+
+// SetActorDepartments sets the "actor_departments" field.
+func (_c *AuditEventCreate) SetActorDepartments(v []string) *AuditEventCreate {
+	_c.mutation.SetActorDepartments(v)
+	return _c
+}
+
+// SetStepUpVerified sets the "step_up_verified" field.
+func (_c *AuditEventCreate) SetStepUpVerified(v bool) *AuditEventCreate {
+	_c.mutation.SetStepUpVerified(v)
+	return _c
+}
+
+// SetNillableStepUpVerified sets the "step_up_verified" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableStepUpVerified(v *bool) *AuditEventCreate {
+	if v != nil {
+		_c.SetStepUpVerified(*v)
+	}
+	return _c
+}
+
+// SetSubjectLabel sets the "subject_label" field.
+func (_c *AuditEventCreate) SetSubjectLabel(v string) *AuditEventCreate {
+	_c.mutation.SetSubjectLabel(v)
+	return _c
+}
+
+// SetNillableSubjectLabel sets the "subject_label" field if the given value is not nil.
+func (_c *AuditEventCreate) SetNillableSubjectLabel(v *string) *AuditEventCreate {
+	if v != nil {
+		_c.SetSubjectLabel(*v)
+	}
+	return _c
+}
+
 // SetAction sets the "action" field.
 func (_c *AuditEventCreate) SetAction(v string) *AuditEventCreate {
 	_c.mutation.SetAction(v)
@@ -214,6 +262,22 @@ func (_c *AuditEventCreate) defaults() {
 		v := auditevent.DefaultActorRole
 		_c.mutation.SetActorRole(v)
 	}
+	if _, ok := _c.mutation.ActorName(); !ok {
+		v := auditevent.DefaultActorName
+		_c.mutation.SetActorName(v)
+	}
+	if _, ok := _c.mutation.ActorDepartments(); !ok {
+		v := auditevent.DefaultActorDepartments
+		_c.mutation.SetActorDepartments(v)
+	}
+	if _, ok := _c.mutation.StepUpVerified(); !ok {
+		v := auditevent.DefaultStepUpVerified
+		_c.mutation.SetStepUpVerified(v)
+	}
+	if _, ok := _c.mutation.SubjectLabel(); !ok {
+		v := auditevent.DefaultSubjectLabel
+		_c.mutation.SetSubjectLabel(v)
+	}
 	if _, ok := _c.mutation.SubjectType(); !ok {
 		v := auditevent.DefaultSubjectType
 		_c.mutation.SetSubjectType(v)
@@ -263,6 +327,28 @@ func (_c *AuditEventCreate) check() error {
 	if v, ok := _c.mutation.ActorRole(); ok {
 		if err := auditevent.ActorRoleValidator(v); err != nil {
 			return &ValidationError{Name: "actor_role", err: fmt.Errorf(`ent: validator failed for field "AuditEvent.actor_role": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ActorName(); !ok {
+		return &ValidationError{Name: "actor_name", err: errors.New(`ent: missing required field "AuditEvent.actor_name"`)}
+	}
+	if v, ok := _c.mutation.ActorName(); ok {
+		if err := auditevent.ActorNameValidator(v); err != nil {
+			return &ValidationError{Name: "actor_name", err: fmt.Errorf(`ent: validator failed for field "AuditEvent.actor_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ActorDepartments(); !ok {
+		return &ValidationError{Name: "actor_departments", err: errors.New(`ent: missing required field "AuditEvent.actor_departments"`)}
+	}
+	if _, ok := _c.mutation.StepUpVerified(); !ok {
+		return &ValidationError{Name: "step_up_verified", err: errors.New(`ent: missing required field "AuditEvent.step_up_verified"`)}
+	}
+	if _, ok := _c.mutation.SubjectLabel(); !ok {
+		return &ValidationError{Name: "subject_label", err: errors.New(`ent: missing required field "AuditEvent.subject_label"`)}
+	}
+	if v, ok := _c.mutation.SubjectLabel(); ok {
+		if err := auditevent.SubjectLabelValidator(v); err != nil {
+			return &ValidationError{Name: "subject_label", err: fmt.Errorf(`ent: validator failed for field "AuditEvent.subject_label": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Action(); !ok {
@@ -367,6 +453,22 @@ func (_c *AuditEventCreate) createSpec() (*AuditEvent, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ActorRole(); ok {
 		_spec.SetField(auditevent.FieldActorRole, field.TypeString, value)
 		_node.ActorRole = value
+	}
+	if value, ok := _c.mutation.ActorName(); ok {
+		_spec.SetField(auditevent.FieldActorName, field.TypeString, value)
+		_node.ActorName = value
+	}
+	if value, ok := _c.mutation.ActorDepartments(); ok {
+		_spec.SetField(auditevent.FieldActorDepartments, field.TypeJSON, value)
+		_node.ActorDepartments = value
+	}
+	if value, ok := _c.mutation.StepUpVerified(); ok {
+		_spec.SetField(auditevent.FieldStepUpVerified, field.TypeBool, value)
+		_node.StepUpVerified = value
+	}
+	if value, ok := _c.mutation.SubjectLabel(); ok {
+		_spec.SetField(auditevent.FieldSubjectLabel, field.TypeString, value)
+		_node.SubjectLabel = value
 	}
 	if value, ok := _c.mutation.Action(); ok {
 		_spec.SetField(auditevent.FieldAction, field.TypeString, value)
