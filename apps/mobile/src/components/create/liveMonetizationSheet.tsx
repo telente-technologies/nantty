@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Switch, View } from "react-native";
+import { StyleSheet, Switch, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Chip } from "@/components/ui/chip";
@@ -15,6 +15,7 @@ import {
   LIVE_AD_TERMS_VERSION,
   type LiveMonetizationDraft,
 } from "./liveMonetization.constant";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 export interface LiveMonetizationSheetProps {
   readonly visible: boolean;
@@ -49,8 +50,8 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
     onChangeDraft({ ...draft, maxInterruptions: Math.min(LIVE_AD_MAX_INTERRUPTIONS, Math.max(0, draft.maxInterruptions + delta)) });
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Live monetization" floating>
-      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+    <BottomSheet visible={visible} onClose={onClose} title="Live monetization" subtitle="Ads stay off unless you opt in" scrollable footerActions={[{ label: "Done", style: "primary", onPress: onClose }]}>
+      <View style={styles.body}>
         <SwitchRow
           label="Allow ZudoMart ads"
           hint="Off by default. Ads only run if you opt in and agree to the live-ad terms."
@@ -62,7 +63,7 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
             <View style={styles.terms}>
               <Text size={13} weight={600} lineHeight={17}>Live-ad terms</Text>
               {LIVE_AD_TERMS_SUMMARY.map((line) => (
-                <Text key={line} size={12} lineHeight={16.8}>{`• ${line}`}</Text>
+                <BulletLine key={line} size={12} lineHeight={16.8} color={colors.text}>{line}</BulletLine>
               ))}
               <SwitchRow
                 label={`I agree to the live-ad terms (${LIVE_AD_TERMS_VERSION})`}
@@ -100,17 +101,17 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
           onChangeText={(sponsorshipLine) => onChangeDraft({ ...draft, sponsorshipLine })}
           maxLength={80}
         />
-        <Text size={11} lineHeight={15} color={colors.textMuted}>Your own sponsors are your business. ZudoMart does not sell or take a share of them.</Text>
-      </ScrollView>
+        <Text size={12} lineHeight={16} color={colors.textMuted}>Your own sponsors are your business. ZudoMart does not sell or take a share of them.</Text>
+      </View>
     </BottomSheet>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
-  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 14 },
+  body: { paddingTop: 4, gap: 14 },
   switchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  terms: { gap: 8, padding: 12, borderRadius: 8, backgroundColor: colors.background },
+  terms: { gap: 8, padding: 14, borderRadius: 14, backgroundColor: colors.background },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 8 },
 }));

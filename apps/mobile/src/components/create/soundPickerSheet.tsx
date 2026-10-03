@@ -44,7 +44,7 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
   });
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Add sound">
+    <BottomSheet visible={visible} onClose={onClose} title="Add sound" subtitle="Pick a sound for your clip">
       <View style={styles.body}>
         <View style={styles.searchField}>
           <MagnifyingGlass16Icon />
@@ -52,7 +52,7 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
             value={typedSearch}
             onChangeText={setTypedSearch}
             placeholder="Search sounds"
-            placeholderTextColor={colors.textSubtle}
+            placeholderTextColor={colors.inputPlaceholderText}
             selectionColor={colors.primary}
             accessibilityLabel="Search sounds"
             style={styles.searchInput}
@@ -139,11 +139,12 @@ function SoundOptionRow(props: { title: string; subtitle: string; isSelected: bo
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
   searchField: {
-    height: 40,
-    paddingHorizontal: 12,
+    height: 44,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: colors.divider,
-    borderRadius: 8,
+    borderRadius: 22,
+    backgroundColor: colors.background,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
