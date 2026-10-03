@@ -2,12 +2,12 @@
   margin: 0;
   width: 100%;
   max-width: 300px;
-  border: 7px solid var(--blue-900);
+  border: 7px solid var(--surface-rail);
   border-radius: 26px;
-  background: #fff;
+  background: var(--color-surface);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgb(11 23 82 / 0.08), 0 24px 48px -20px rgb(11 23 82 / 0.45);
-  color: #000;
+  box-shadow: 0 0 0 1px var(--color-border), var(--landing-lift);
+  color: var(--color-text);
   font-size: var(--fs-13);
   line-height: 1.3;
   letter-spacing: -0.01em;
@@ -20,8 +20,8 @@
   margin: 10px 10px 4px;
   padding: 7px 10px;
   border-radius: var(--radius-pill);
-  background: #f0f2fa;
-  color: #909090;
+  background: var(--color-sunken);
+  color: var(--color-text-subtle);
 }
 
 .productGrid {
@@ -87,7 +87,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  color: #909090;
+  color: var(--color-text-subtle);
   font-size: var(--fs-12);
   white-space: nowrap;
   overflow: hidden;
@@ -125,24 +125,24 @@
 }
 
 .identitySeal {
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .identityLabel {
-  color: #909090;
+  color: var(--color-text-subtle);
   font-size: var(--fs-12);
 }
 
 .identityRowInverted {
-  color: #fff;
+  color: var(--on-media);
 }
 
 .identityRowInverted .identityLabel {
-  color: rgb(255 255 255 / 0.75);
+  color: var(--on-media-muted);
 }
 
 .identityRowInverted .identitySeal {
-  color: #fff;
+  color: var(--on-media);
 }
 
 .callToActionBar {
@@ -151,8 +151,8 @@
   justify-content: center;
   height: 32px;
   border-radius: var(--radius-sm);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 600;
 }
 
@@ -194,7 +194,7 @@
 .reelsScreen {
   position: relative;
   aspect-ratio: 9 / 16;
-  background: #000;
+  background: var(--media-backdrop);
 }
 
 .reelsImage {
@@ -214,8 +214,8 @@
   gap: 3px;
   padding: 2px 7px;
   border-radius: var(--radius-pill);
-  background: rgb(0 0 0 / 0.55);
-  color: #fff;
+  background: var(--media-scrim);
+  color: var(--on-media);
   font-size: var(--fs-12);
   font-weight: 600;
 }
@@ -227,7 +227,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  color: #fff;
+  color: var(--on-media);
 }
 
 .reelsOverlay {
@@ -241,7 +241,7 @@
 }
 
 .reelsCaption {
-  color: #fff;
+  color: var(--on-media);
   max-width: 85%;
 }
 

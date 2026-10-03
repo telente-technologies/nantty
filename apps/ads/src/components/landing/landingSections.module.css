@@ -27,7 +27,7 @@
   font-weight: 650;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .heroHeading {
@@ -93,7 +93,7 @@
 }
 
 .proofList li > span {
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .heroStage {
@@ -106,7 +106,7 @@
   position: absolute;
   inset: 0 -30% 0 12%;
   border-radius: 28px 0 0 28px;
-  background: radial-gradient(120% 90% at 30% 0%, var(--blue-400), transparent 70%), var(--blue-500);
+  background: radial-gradient(120% 90% at 30% 0%, var(--landing-stage-glow), transparent 70%), var(--landing-stage);
 }
 
 .heroScreenshot {
@@ -137,8 +137,8 @@
   gap: 8px;
   padding: 9px 14px;
   border-radius: var(--radius-pill);
-  background: #fff;
-  box-shadow: 0 12px 32px -12px rgb(11 23 82 / 0.35);
+  background: var(--color-elevated);
+  box-shadow: 0 0 0 1px var(--color-border), var(--landing-lift-soft);
   font-size: var(--fs-14);
   font-weight: 600;
 }
@@ -172,8 +172,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 24px;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.07);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   overflow: hidden;
 }
 
@@ -183,7 +183,7 @@
   height: 380px;
   padding: 24px 20px 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--blue-tint), #fff);
+  background: linear-gradient(180deg, var(--color-brand-tint), var(--color-surface));
 }
 
 .formatStage figure {
@@ -194,7 +194,7 @@
   display: grid;
   gap: 6px;
   padding: 20px 22px 24px;
-  border-top: 1px solid rgb(11 23 82 / 0.06);
+  border-top: 1px solid var(--color-border);
 }
 
 .formatName {
@@ -206,7 +206,7 @@
 .formatWhere {
   font-size: var(--fs-14);
   font-weight: 650;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .formatDetail {

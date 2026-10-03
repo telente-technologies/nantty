@@ -7,7 +7,7 @@
 
 .stepsSection {
   padding-block: var(--section-space);
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .stepsLayout {
@@ -36,7 +36,7 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-lg);
-  background: var(--blue-900);
+  background: var(--landing-badge);
   color: var(--yellow-500);
   font-weight: 800;
 }
