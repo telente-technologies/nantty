@@ -10,6 +10,8 @@ import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { planHighlightsByPlan, sellerPlanLabels, type SellerPlan } from "@/config/planFeatures.config";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
+import { computeDisplayedPrice } from "@/components/billing/billingPricing.util";
+import type { BillingOffer } from "@/types/billingOffer.type";
 import type { CursorPage } from "@/types/pagination.type";
 import type { SubscriptionPlan } from "@/types/subscription.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
@@ -32,7 +34,7 @@ function PlanHighlightsList({ plan }: { readonly plan: SellerPlan }) {
   );
 }
 
-export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonly currentPlanId: string | null; readonly currentPlan: SellerPlan }) {
+export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { readonly currentPlanId: string | null; readonly currentPlan: SellerPlan; readonly offer: BillingOffer | null }) {
   const plansQuery = useSellerQuery<CursorPage<SubscriptionPlan>>("/seller/subscription/plans");
   const [billingInterval, setBillingInterval] = useState<"month" | "year">("month");
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
@@ -42,7 +44,8 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonl
     setPendingPlanId(planId);
     setErrorMessage(null);
     try {
-      const checkout = await sendSellerApiRequest<{ authorizationUrl: string }>("/seller/subscription/checkout", { method: "POST", body: { planId } });
+      const isTrialStart = planId.startsWith("gold_only") || (offer?.isEligible ?? false);
+      const checkout = await sendSellerApiRequest<{ authorizationUrl: string }>(isTrialStart ? "/seller/subscription/trial/checkout" : "/seller/subscription/checkout", { method: "POST", body: { planId } });
       const checkoutUrl = new URL(checkout.authorizationUrl, window.location.origin);
       if (checkoutUrl.protocol !== "https:" && checkoutUrl.origin !== window.location.origin) throw new Error("Unexpected payment page.");
       window.location.assign(checkoutUrl.toString());
@@ -60,7 +63,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonl
   return (
     <div className={styles.picker}>
       {hasYearlyPlans ? (
-        <SegmentedControl label="Billing period" value={billingInterval} onValueChange={setBillingInterval} options={[{ value: "month", label: "Monthly" }, { value: "year", label: "Yearly" }]} />
+        <SegmentedControl label="Billing period" value={billingInterval} onValueChange={setBillingInterval} options={[{ value: "month", label: "Monthly" }, { value: "year", label: offer ? `Yearly (save ${offer.yearlyDiscountPercent}%)` : "Yearly" }]} />
       ) : null}
       {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
       <div className={styles.planGrid}>
@@ -77,6 +80,9 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonl
           const sellerPlan = convertTierToSellerPlan(plan.tier);
           const isCurrentPlan = plan.id === currentPlanId;
           const planName = sellerPlanLabels[sellerPlan];
+          const monthlyPlan = (plansQuery.data?.data ?? []).find((candidate) => candidate.tier === plan.tier && candidate.interval === "month") ?? plan;
+          const displayed = computeDisplayedPrice(monthlyPlan.price, plan.interval, offer);
+          const startsTrial = offer?.isEligible === true && !isCurrentPlan;
           return (
             <article key={plan.id} className={`${styles.planCard} ${sellerPlan === "business" ? styles.premium : ""}`}>
               <header className={styles.planHeader}>
@@ -87,9 +93,10 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonl
                 {isCurrentPlan ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
               </header>
               <p className={styles.price}>
-                {formatMoneyForDisplay(plan.price)}
+                {formatMoneyForDisplay(displayed.price)}
                 <span className={styles.interval}>/{plan.interval === "year" ? "year" : "month"}</span>
               </p>
+              {displayed.listPrice ? <p className={styles.footnote}><s>{formatMoneyForDisplay(displayed.listPrice)}</s> · {displayed.note}</p> : displayed.note ? <p className={styles.footnote}>{displayed.note}</p> : null}
               <PlanHighlightsList plan={sellerPlan} />
               {plan.perks.length > 0 ? (
                 <ul className={styles.perks}>
@@ -102,11 +109,31 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonl
                 </ul>
               ) : null}
               <Button variant={sellerPlan === "business" ? "tender" : "primary"} size="large" fullWidth disabled={isCurrentPlan || pendingPlanId !== null} isBusy={pendingPlanId === plan.id} onClick={() => void startHostedCheckoutForPlan(plan.id)}>
-                {isCurrentPlan ? "Your plan" : currentPlanId ? `Switch to ${planName}` : `Upgrade to ${planName}`}
+                {isCurrentPlan ? "Your plan" : startsTrial ? `Start ${offer?.trialDays === 7 ? "7-day" : "1-month"} free trial` : currentPlanId ? `Switch to ${planName}` : `Upgrade to ${planName}`}
               </Button>
             </article>
           );
         })}
+        {offer && currentPlan === "free" && plansQuery.data ? (
+          <article className={styles.planCard}>
+            <header className={styles.planHeader}>
+              <span className={styles.goldMark}><ZudoIcon name="sealCheck20" size={16} /></span>
+              <h3 className={styles.planName}>Gold only</h3>
+              {offer.goldOnlyPlan.isActive ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
+            </header>
+            <p className={styles.footnote}>For brands and businesses that do not sell on Zudomart.</p>
+            {(() => {
+              const gold = computeDisplayedPrice(offer.goldOnlyPlan.monthly, billingInterval, offer);
+              return <p className={styles.price}>{formatMoneyForDisplay(gold.price)}<span className={styles.interval}>/{billingInterval}</span></p>;
+            })()}
+            <ul className={styles.entitlements}>
+              <li><ZudoIcon name="check16" size={14} /> Gold checkmark and brand page features</li>
+              <li><ZudoIcon name="check16" size={14} /> No seller dashboard tools</li>
+              <li><ZudoIcon name="check16" size={14} /> Gold shows only after your business is verified</li>
+            </ul>
+            <Button size="large" fullWidth disabled={offer.goldOnlyPlan.isActive || pendingPlanId !== null} isBusy={pendingPlanId === "gold_only"} onClick={() => void startHostedCheckoutForPlan(billingInterval === "year" ? "gold_only_yearly" : "gold_only_monthly")}>{offer.goldOnlyPlan.isActive ? "Your plan" : "Choose Gold only"}</Button>
+          </article>
+        ) : null}
       </div>
       <p className={styles.footnote}>You pay on our payment partner&apos;s secure page and come straight back here. Prices are in your store&apos;s currency.</p>
     </div>

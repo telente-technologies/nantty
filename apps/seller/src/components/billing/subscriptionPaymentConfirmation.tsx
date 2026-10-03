@@ -14,7 +14,7 @@ export function SubscriptionPaymentConfirmation({ reference }: { readonly refere
   useEffect(() => {
     if (!reference || hasStartedVerification.current) return;
     hasStartedVerification.current = true;
-    sendSellerApiRequest("/seller/subscription/verify", { method: "POST", body: { reference } })
+    sendSellerApiRequest(/^(TRL|GLD)_/.test(reference) ? "/seller/subscription/trial/verify" : "/seller/subscription/verify", { method: "POST", body: { reference } })
       .then(() => window.location.assign("/bff/auth/access-refresh?next=/dashboard"))
       .catch((error: unknown) => setErrorMessage(readErrorMessageForDisplay(error)));
   }, [reference]);
