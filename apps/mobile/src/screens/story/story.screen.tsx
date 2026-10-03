@@ -79,9 +79,24 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
             </Text>
           </View>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Story options" hitSlop={10}>
-          <DotsThreeVertical24Icon />
-        </Pressable>
+        <View style={styles.headerActions}>
+          {story?.author.live ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${story.author.name} is live, open livestream`}
+              onPress={() => navigation.replace("Live", { liveId: story.author.live!.liveId })}
+              style={styles.livePill}
+            >
+              <View style={styles.liveDot} />
+              <Text size={12} weight={700} lineHeight={14} color={colors.white}>
+                LIVE · Watch
+              </Text>
+            </Pressable>
+          ) : null}
+          <Pressable accessibilityRole="button" accessibilityLabel="Story options" hitSlop={10}>
+            <DotsThreeVertical24Icon />
+          </Pressable>
+        </View>
       </View>
       <View style={styles.media} {...dragDownToClose.panHandlers}>
         {story?.media.type === "video" ? (
@@ -131,6 +146,9 @@ const styles = StyleSheet.create({
   header: { marginTop: 4, height: 32, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   author: { flexDirection: "row", alignItems: "center", gap: 9 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
+  livePill: { flexDirection: "row", alignItems: "center", gap: 5, minHeight: 28, paddingHorizontal: 10, borderRadius: 14, backgroundColor: colors.live },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.white },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.avatar },
   media: { flex: 1, marginTop: 12 },
   tapZone: { position: "absolute", top: 0, bottom: 0 },
