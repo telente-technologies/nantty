@@ -21,13 +21,13 @@
   background: var(--yellow-50);
   border: 1px solid var(--yellow-100);
   color: var(--yellow-900);
-  font-size: 12.5px;
+  font-size: var(--fs-13);
 }
 
 .contact {
   max-width: 380px;
   width: 100%;
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   color: var(--ink-faint);
   overflow-wrap: anywhere;
 }
