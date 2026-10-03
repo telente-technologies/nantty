@@ -27,7 +27,7 @@
 }
 
 .light .eyebrow {
-  color: var(--blue-600);
+  color: var(--ink-accent);
 }
 
 .light .description {
@@ -35,13 +35,13 @@
 }
 
 .dark .eyebrow {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .dark .heading {
-  color: #fff;
+  color: var(--ink-on-night);
 }
 
 .dark .description {
-  color: var(--blue-100);
+  color: var(--ink-on-night-muted);
 }

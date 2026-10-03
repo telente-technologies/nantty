@@ -17,12 +17,12 @@
 }
 
 .primary {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
 }
 
 .primary:hover {
-  background: var(--blue-600);
+  background: var(--fill-brand-hover);
 }
 
 .secondary {
@@ -36,17 +36,17 @@
 }
 
 .onDark {
-  background: var(--yellow-500);
-  color: var(--ink-strong);
+  background: var(--surface-sunshine);
+  color: var(--ink-on-sunshine);
 }
 
 .onDark:hover {
-  background: #fff;
+  background: var(--ink-on-night);
 }
 
 .ghost {
   padding-inline: 4px;
-  color: var(--blue-600);
+  color: var(--ink-accent);
   text-decoration: underline;
   text-underline-offset: 4px;
   text-decoration-thickness: 1.5px;
