@@ -1,55 +1,53 @@
-import type { StaffRole } from "@/types/sellerAccess.type";
+import type { SellerAccess, StaffRole } from "@/types/sellerAccess.type";
 
-export type SellerPermission =
-  | "dashboard:view"
-  | "pos:sell"
-  | "pos:refund"
-  | "pos:approve_discount"
-  | "pos:manage_all_shifts"
-  | "catalog:view"
-  | "products:manage"
-  | "inventory:manage"
-  | "orders:view"
-  | "orders:manage"
-  | "customers:view"
-  | "customers:manage"
-  | "promotions:manage"
-  | "staff:manage"
-  | "audit:view"
-  | "reports:view"
-  | "wallet:view"
-  | "wallet:withdraw"
-  | "settings:view"
-  | "settings:manage"
-  | "billing:manage"
-  | "affiliates:manage"
-  | "media:upload";
+export const sellerPermissions = [
+  "dashboard:view", "catalog:view", "products:manage", "inventory:manage", "orders:view", "orders:manage",
+  "delivery:manage", "customers:view", "customers:manage", "messages:manage", "reviews:manage", "analytics:view",
+  "promotions:manage", "ads:view", "affiliates:manage", "storefront:manage", "wallet:view", "wallet:withdraw",
+  "reports:view", "staff:manage", "audit:view", "settings:view", "settings:manage", "billing:manage",
+  "developer:manage", "media:upload",
+] as const;
 
-const permissionsGrantedToEveryRole: SellerPermission[] = ["catalog:view", "settings:view"];
+export type SellerPermission = (typeof sellerPermissions)[number];
+
+export const sellerPermissionLabels: Record<SellerPermission, string> = {
+  "dashboard:view": "See the overview",
+  "catalog:view": "Browse products",
+  "products:manage": "Add and edit products",
+  "inventory:manage": "Manage stock",
+  "orders:view": "See orders",
+  "orders:manage": "Accept, update and refund orders",
+  "delivery:manage": "Manage delivery",
+  "customers:view": "See customers",
+  "customers:manage": "Edit customers and notes",
+  "messages:manage": "Reply to customer messages",
+  "reviews:manage": "Respond to reviews",
+  "analytics:view": "See sales analytics",
+  "promotions:manage": "Run marketing and discounts",
+  "ads:view": "See ad results",
+  "affiliates:manage": "Manage affiliates and creators",
+  "storefront:manage": "Edit the storefront",
+  "wallet:view": "See balances and transactions",
+  "wallet:withdraw": "Withdraw money",
+  "reports:view": "Download reports",
+  "staff:manage": "Manage the team",
+  "audit:view": "See the activity log",
+  "settings:view": "See settings",
+  "settings:manage": "Change settings",
+  "billing:manage": "Change the plan",
+  "developer:manage": "API keys and webhooks",
+  "media:upload": "Upload photos and videos",
+};
+
+const permissionsGrantedToEveryRole: SellerPermission[] = ["dashboard:view", "catalog:view", "settings:view"];
+const ownerOnlyPermissions: SellerPermission[] = ["billing:manage", "wallet:withdraw", "developer:manage"];
 
 export const permissionsByStaffRole: Record<StaffRole, ReadonlySet<SellerPermission>> = {
-  owner: new Set<SellerPermission>([
-    ...permissionsGrantedToEveryRole,
-    "dashboard:view", "pos:sell", "pos:refund", "pos:approve_discount", "pos:manage_all_shifts", "products:manage",
-    "inventory:manage", "orders:view", "orders:manage", "customers:view", "customers:manage", "promotions:manage",
-    "staff:manage", "audit:view", "reports:view", "wallet:view", "wallet:withdraw", "settings:manage", "billing:manage",
-    "affiliates:manage", "media:upload",
-  ]),
-  admin: new Set<SellerPermission>([
-    ...permissionsGrantedToEveryRole,
-    "dashboard:view", "pos:sell", "pos:refund", "pos:approve_discount", "pos:manage_all_shifts", "products:manage",
-    "inventory:manage", "orders:view", "orders:manage", "customers:view", "customers:manage", "promotions:manage",
-    "staff:manage", "audit:view", "reports:view", "wallet:view", "settings:manage", "affiliates:manage", "media:upload",
-  ]),
-  manager: new Set<SellerPermission>([
-    ...permissionsGrantedToEveryRole,
-    "dashboard:view", "pos:sell", "pos:refund", "pos:approve_discount", "pos:manage_all_shifts", "products:manage",
-    "inventory:manage", "orders:view", "orders:manage", "customers:view", "customers:manage", "promotions:manage",
-    "reports:view", "affiliates:manage", "media:upload",
-  ]),
-  cashier: new Set<SellerPermission>([...permissionsGrantedToEveryRole, "pos:sell", "customers:view"]),
+  owner: new Set<SellerPermission>(sellerPermissions),
+  manager: new Set<SellerPermission>(sellerPermissions.filter((permission) => !ownerOnlyPermissions.includes(permission))),
   inventory: new Set<SellerPermission>([...permissionsGrantedToEveryRole, "products:manage", "inventory:manage", "media:upload"]),
-  support: new Set<SellerPermission>([...permissionsGrantedToEveryRole, "orders:view", "orders:manage", "customers:view", "customers:manage"]),
+  sales: new Set<SellerPermission>([...permissionsGrantedToEveryRole, "orders:view", "orders:manage", "delivery:manage", "customers:view", "customers:manage", "messages:manage", "reviews:manage"]),
+  accountant: new Set<SellerPermission>([...permissionsGrantedToEveryRole, "orders:view", "wallet:view", "reports:view", "analytics:view", "ads:view", "audit:view"]),
 };
 
 export function doesRoleHavePermission(role: StaffRole | null, permission: SellerPermission): boolean {
@@ -57,21 +55,34 @@ export function doesRoleHavePermission(role: StaffRole | null, permission: Selle
   return permissionsByStaffRole[role].has(permission);
 }
 
+export function doesAccessGrantPermission(access: Pick<SellerAccess, "role" | "permissions"> | null | undefined, permission: SellerPermission): boolean {
+  if (!access?.role) return false;
+  if (access.role === "owner") return true;
+  if (access.permissions) return access.permissions.includes(permission);
+  return doesRoleHavePermission(access.role, permission);
+}
+
 const pagePermissionRules: { readonly pathPrefix: string; readonly permission: SellerPermission }[] = [
   { pathPrefix: "/dashboard", permission: "dashboard:view" },
-  { pathPrefix: "/pos", permission: "pos:sell" },
-  { pathPrefix: "/sales", permission: "pos:sell" },
   { pathPrefix: "/products", permission: "products:manage" },
   { pathPrefix: "/inventory", permission: "inventory:manage" },
   { pathPrefix: "/orders", permission: "orders:view" },
-  { pathPrefix: "/customers", permission: "customers:manage" },
+  { pathPrefix: "/delivery", permission: "delivery:manage" },
+  { pathPrefix: "/customers", permission: "customers:view" },
+  { pathPrefix: "/messages", permission: "messages:manage" },
+  { pathPrefix: "/reviews", permission: "reviews:manage" },
+  { pathPrefix: "/analytics", permission: "analytics:view" },
+  { pathPrefix: "/marketing", permission: "promotions:manage" },
   { pathPrefix: "/promotions", permission: "promotions:manage" },
-  { pathPrefix: "/staff", permission: "staff:manage" },
-  { pathPrefix: "/reports", permission: "reports:view" },
-  { pathPrefix: "/wallet", permission: "wallet:view" },
+  { pathPrefix: "/ads", permission: "ads:view" },
   { pathPrefix: "/affiliates", permission: "affiliates:manage" },
+  { pathPrefix: "/storefront", permission: "storefront:manage" },
+  { pathPrefix: "/wallet", permission: "wallet:view" },
+  { pathPrefix: "/reports", permission: "reports:view" },
+  { pathPrefix: "/staff", permission: "staff:manage" },
   { pathPrefix: "/brand", permission: "settings:view" },
   { pathPrefix: "/settings/billing", permission: "billing:manage" },
+  { pathPrefix: "/settings/developers", permission: "developer:manage" },
   { pathPrefix: "/settings", permission: "settings:view" },
 ];
 
@@ -80,11 +91,10 @@ export function findPermissionRequiredForPage(pathname: string): SellerPermissio
   return matchingRule?.permission ?? null;
 }
 
-export function findFirstPageAllowedForRole(role: StaffRole | null): string {
-  if (doesRoleHavePermission(role, "dashboard:view")) return "/dashboard";
-  if (doesRoleHavePermission(role, "pos:sell")) return "/pos";
-  if (doesRoleHavePermission(role, "inventory:manage")) return "/products";
-  if (doesRoleHavePermission(role, "orders:view")) return "/orders";
+export function findFirstPageAllowedForAccess(access: Pick<SellerAccess, "role" | "permissions"> | null): string {
+  if (doesAccessGrantPermission(access, "dashboard:view")) return "/dashboard";
+  if (doesAccessGrantPermission(access, "orders:view")) return "/orders";
+  if (doesAccessGrantPermission(access, "products:manage")) return "/products";
   return "/settings";
 }
 
@@ -102,31 +112,34 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "WRITE", pathPattern: /^\/seller\/subscription\//, permission: "billing:manage" },
   { method: "GET", pathPattern: /^\/seller\/verification$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/zudomart-users$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/notifications/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/dashboard/, permission: "dashboard:view" },
-  { method: "ANY", pathPattern: /^\/seller\/staff\/pin-sessions/, permission: "signed_in" },
-  { method: "GET", pathPattern: /^\/seller\/staff\/pin-roster$/, permission: "signed_in" },
-  { method: "POST", pathPattern: /^\/seller\/pos\/discount-approvals$/, permission: "pos:sell" },
-  { method: "POST", pathPattern: /^\/seller\/pos\/sales\/[^/]+\/refunds$/, permission: "pos:refund" },
-  { method: "GET", pathPattern: /^\/seller\/pos\/registers/, permission: "catalog:view" },
-  { method: "WRITE", pathPattern: /^\/seller\/pos\/registers/, permission: "settings:manage" },
-  { method: "ANY", pathPattern: /^\/seller\/pos\//, permission: "pos:sell" },
-  { method: "GET", pathPattern: /^\/seller\/(products|categories)/, permission: "catalog:view" },
-  { method: "ANY", pathPattern: /^\/seller\/(products|categories)/, permission: "products:manage" },
-  { method: "ANY", pathPattern: /^\/seller\/inventory\//, permission: "inventory:manage" },
+  { method: "GET", pathPattern: /^\/seller\/(products|categories|brands-catalog|attributes)/, permission: "catalog:view" },
+  { method: "ANY", pathPattern: /^\/seller\/(products|categories|brands-catalog|attributes)/, permission: "products:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/(inventory|suppliers)\//, permission: "inventory:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/suppliers$/, permission: "inventory:manage" },
   { method: "GET", pathPattern: /^\/seller\/(orders|returns|disputes)/, permission: "orders:view" },
   { method: "ANY", pathPattern: /^\/seller\/(orders|returns|disputes)/, permission: "orders:manage" },
-  { method: "GET", pathPattern: /^\/seller\/customers$/, permission: "customers:view" },
-  { method: "POST", pathPattern: /^\/seller\/customers$/, permission: "customers:view" },
+  { method: "ANY", pathPattern: /^\/seller\/delivery/, permission: "delivery:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/shipping/, permission: "delivery:manage" },
+  { method: "POST", pathPattern: /^\/seller\/consents$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/customers/, permission: "customers:view" },
   { method: "ANY", pathPattern: /^\/seller\/customers/, permission: "customers:manage" },
-  { method: "POST", pathPattern: /^\/seller\/promotions\/validate-code$/, permission: "pos:sell" },
-  { method: "ANY", pathPattern: /^\/seller\/promotions/, permission: "promotions:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/conversations/, permission: "messages:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/reviews/, permission: "reviews:manage" },
+  { method: "GET", pathPattern: /^\/seller\/analytics/, permission: "analytics:view" },
+  { method: "ANY", pathPattern: /^\/seller\/(promotions|marketing)/, permission: "promotions:manage" },
+  { method: "GET", pathPattern: /^\/seller\/ads/, permission: "ads:view" },
+  { method: "ANY", pathPattern: /^\/seller\/storefront/, permission: "storefront:manage" },
   { method: "GET", pathPattern: /^\/seller\/audit-log/, permission: "audit:view" },
   { method: "ANY", pathPattern: /^\/seller\/staff/, permission: "staff:manage" },
   { method: "ANY", pathPattern: /^\/seller\/reports\//, permission: "reports:view" },
   { method: "WRITE", pathPattern: /^\/seller\/wallet\/(payouts|payout-accounts)/, permission: "wallet:withdraw" },
-  { method: "ANY", pathPattern: /^\/seller\/wallet\//, permission: "wallet:view" },
-  { method: "GET", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:view" },
-  { method: "ANY", pathPattern: /^\/seller\/(settings|locations)/, permission: "settings:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/(wallet|finance)\//, permission: "wallet:view" },
+  { method: "ANY", pathPattern: /^\/seller\/developers/, permission: "developer:manage" },
+  { method: "ANY", pathPattern: /^\/seller\/security/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/(settings|locations|integrations)/, permission: "settings:view" },
+  { method: "ANY", pathPattern: /^\/seller\/(settings|locations|integrations)/, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/seller\/affiliates\//, permission: "affiliates:manage" },
   { method: "GET", pathPattern: /^\/seller\/stores\/mine$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/brands(\/|$)/, permission: "settings:view" },

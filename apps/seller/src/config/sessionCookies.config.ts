@@ -17,9 +17,6 @@ export const sessionCookieNames = {
   get sellerAccess() {
     return prefixCookieNameForHost("zd_access");
   },
-  get posOperator() {
-    return prefixCookieNameForHost("zd_operator");
-  },
   get selectedStore() {
     return prefixCookieNameForHost("zd_store");
   },
@@ -33,7 +30,6 @@ export const sessionLifetimesInSeconds = {
   refreshToken: 30 * 24 * 60 * 60,
   session: 30 * 24 * 60 * 60,
   sellerAccessCache: 5 * 60,
-  posOperator: 12 * 60 * 60,
 };
 
 export interface HardenedCookieOptions {

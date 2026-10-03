@@ -1,3 +1,4 @@
+import type { PlanFeature } from "@/config/planFeatures.config";
 import type { SellerPermission } from "@/config/rolePermissions.config";
 import type { ZudoIconName } from "@/components/ui/zudoIcon";
 
@@ -6,6 +7,7 @@ export interface NavigationItem {
   readonly href: string;
   readonly iconName: ZudoIconName;
   readonly permission: SellerPermission;
+  readonly feature?: PlanFeature;
   readonly external?: boolean;
   readonly keywords?: string;
 }
@@ -15,51 +17,49 @@ export interface NavigationGroup {
   readonly items: NavigationItem[];
 }
 
-export function buildNavigationGroups(adsManagerUrl: string): NavigationGroup[] {
+export function buildNavigationGroups(): NavigationGroup[] {
   return [
-    { label: null, items: [{ label: "Dashboard", href: "/dashboard", iconName: "speedometer24", permission: "dashboard:view", keywords: "home overview" }] },
+    { label: null, items: [{ label: "Overview", href: "/dashboard", iconName: "speedometer24", permission: "dashboard:view", keywords: "home dashboard summary" }] },
     {
       label: "Sell",
       items: [
-        { label: "Point of sale", href: "/pos", iconName: "shoppingCart24", permission: "pos:sell", keywords: "register till checkout cashier" },
-        { label: "Sales history", href: "/sales", iconName: "textIndent24", permission: "pos:sell", keywords: "receipts refunds returns in-store" },
+        { label: "Orders", href: "/orders", iconName: "shoppingCart24", permission: "orders:view", keywords: "marketplace app escrow returns disputes refunds invoice" },
+        { label: "Delivery", href: "/delivery", iconName: "truck24", permission: "delivery:manage", keywords: "shipping courier pickup dispatch areas fees" },
+        { label: "Messages", href: "/messages", iconName: "chatCircle24", permission: "messages:manage", keywords: "chat inbox conversations customers" },
+        { label: "Customers", href: "/customers", iconName: "userCircle24", permission: "customers:view", keywords: "crm segments buyers loyalty" },
+        { label: "Reviews", href: "/reviews", iconName: "star16", permission: "reviews:manage", keywords: "ratings reputation feedback" },
       ],
     },
     {
       label: "Catalog",
       items: [
-        { label: "Products", href: "/products", iconName: "tag24", permission: "products:manage", keywords: "items variants barcodes" },
-        { label: "Inventory", href: "/inventory", iconName: "boxArrowDown24", permission: "inventory:manage", keywords: "stock adjustments transfers" },
-      ],
-    },
-    {
-      label: "Online",
-      items: [
-        { label: "Orders", href: "/orders", iconName: "truck24", permission: "orders:view", keywords: "marketplace escrow shipping returns disputes" },
-        { label: "Customers", href: "/customers", iconName: "userCircle24", permission: "customers:manage", keywords: "crm loyalty" },
+        { label: "Products", href: "/products", iconName: "tag24", permission: "products:manage", keywords: "items variants sku categories brands import export" },
+        { label: "Inventory", href: "/inventory", iconName: "boxArrowDown24", permission: "inventory:manage", keywords: "stock adjustments transfers warehouses suppliers reorder" },
+        { label: "Storefront", href: "/storefront", iconName: "buildingStore20", permission: "storefront:manage", keywords: "store page logo cover policies hours" },
       ],
     },
     {
       label: "Grow",
       items: [
-        { label: "Promotions", href: "/promotions", iconName: "star16", permission: "promotions:manage", keywords: "coupons discounts sales" },
+        { label: "Analytics", href: "/analytics", iconName: "squaresFour24", permission: "analytics:view", keywords: "sales revenue conversion insights" },
+        { label: "Marketing", href: "/marketing", iconName: "paperPlaneTilt24", permission: "promotions:manage", keywords: "discount codes coupons flash sales bundles featured campaigns" },
+        { label: "Ad results", href: "/ads", iconName: "speakerHigh24", permission: "ads:view", feature: "ads_tools", keywords: "ads manager campaigns roas spend advertise create campaign" },
         { label: "Affiliates & creators", href: "/affiliates", iconName: "videoCamera24", permission: "affiliates:manage", keywords: "commission creator live" },
-        { label: "Advertise", href: adsManagerUrl, iconName: "speakerHigh24", permission: "settings:manage", external: true, keywords: "ads campaigns" },
       ],
     },
     {
       label: "Money",
       items: [
-        { label: "Wallet & payouts", href: "/wallet", iconName: "creditCard24", permission: "wallet:view", keywords: "balance withdraw bank" },
-        { label: "Reports", href: "/reports", iconName: "squaresFour24", permission: "reports:view", keywords: "analytics tax export" },
+        { label: "Payments & finance", href: "/wallet", iconName: "creditCard24", permission: "wallet:view", keywords: "balance escrow withdraw payouts settlements fees statements" },
+        { label: "Reports", href: "/reports", iconName: "textIndent24", permission: "reports:view", keywords: "export csv excel pdf tax" },
       ],
     },
     {
-      label: "Team",
+      label: "Manage",
       items: [
-        { label: "Staff", href: "/staff", iconName: "shield24", permission: "staff:manage", keywords: "roles pin audit" },
+        { label: "Team", href: "/staff", iconName: "shield24", permission: "staff:manage", feature: "team", keywords: "staff roles permissions activity" },
         { label: "Brand", href: "/brand", iconName: "sealCheck20", permission: "settings:view", keywords: "official store trademark counterfeit protection" },
-        { label: "Settings", href: "/settings", iconName: "slidersHorizontal24", permission: "settings:view", keywords: "store locations taxes receipt billing" },
+        { label: "Settings", href: "/settings", iconName: "slidersHorizontal24", permission: "settings:view", keywords: "store account security notifications api webhooks integrations billing" },
       ],
     },
   ];
