@@ -1,0 +1,9 @@
+output "service_name" { value = aws_ecs_service.this.name }
+output "task_role_arn" { value = aws_iam_role.task.arn }
+output "task_role_name" { value = aws_iam_role.task.name }
+output "execution_role_arn" { value = aws_iam_role.execution.arn }
+output "task_definition_family" { value = aws_ecs_task_definition.this.family }
+output "target_group_arn_suffix" { value = try(aws_lb_target_group.this["blue"].arn_suffix, null) }
+output "log_group_name" { value = aws_cloudwatch_log_group.this.name }
+output "codedeploy_app_name" { value = try(aws_codedeploy_app.this[0].name, null) }
+output "codedeploy_deployment_group_name" { value = try(aws_codedeploy_deployment_group.this[0].deployment_group_name, null) }
