@@ -12,4 +12,4 @@ config :realtime, :access_token,
 
 config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
-config :realtime, :sqs, enabled: false
+config :realtime, :amqp, enabled: false

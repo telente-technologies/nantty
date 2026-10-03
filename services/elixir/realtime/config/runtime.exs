@@ -13,20 +13,13 @@ if config_env() != :test do
 end
 
 if config_env() != :test do
-  aws_region = System.get_env("AWS_REGION", "eu-west-1")
+  local_rabbitmq_url = "amqp://realtime:realtime-local-only@localhost:5672/zudomart"
 
-  default_sqs_endpoint =
-    if config_env() == :prod,
-      do: "https://sqs.#{aws_region}.amazonaws.com",
-      else: "http://localhost:14566"
-
-  config :realtime, :sqs,
-    enabled: System.get_env("REALTIME_SQS_ENABLED", "true") != "false",
-    queue_name: System.get_env("REALTIME_SQS_QUEUE_NAME", "realtime-domain-events"),
-    endpoint: System.get_env("AWS_ENDPOINT_URL", default_sqs_endpoint),
-    region: aws_region,
-    access_key_id: System.get_env("AWS_ACCESS_KEY_ID", "test"),
-    secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY", "test")
+  config :realtime, :amqp,
+    enabled: System.get_env("REALTIME_AMQP_ENABLED", "true") != "false",
+    url: System.get_env("RABBITMQ_URL", local_rabbitmq_url),
+    queue_name: System.get_env("REALTIME_QUEUE_NAME", "realtime-domain-events"),
+    prefetch: String.to_integer(System.get_env("RABBITMQ_PREFETCH", "50"))
 end
 
 if config_env() == :prod do

@@ -13,18 +13,21 @@ defmodule Realtime.Application do
         {Realtime.Auth.JwksKeyCache, Application.fetch_env!(:realtime, :access_token)},
         Realtime.Events.Throttle,
         RealtimeWeb.Endpoint
-      ] ++ sqs_consumer_children()
+      ] ++ domain_event_consumer_children()
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Realtime.Supervisor)
   end
 
-  defp sqs_consumer_children do
-    settings = Application.get_env(:realtime, :sqs, [])
+  defp domain_event_consumer_children do
+    settings = Application.get_env(:realtime, :amqp, [])
 
     if settings[:enabled] do
       [
-        {Realtime.Events.SqsConsumer,
-         client: Realtime.Events.SqsQueueClient, queue_name: settings[:queue_name]}
+        {Realtime.Events.AmqpConsumer,
+         client: Realtime.Events.AmqpBrokerClient,
+         settings: [url: settings[:url]],
+         queue_name: settings[:queue_name],
+         prefetch: settings[:prefetch]}
       ]
     else
       []
