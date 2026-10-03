@@ -8,6 +8,8 @@ export interface ProxiedRequest {
   readonly requestId: string;
   readonly clientIp: string | undefined;
   readonly principal: VerifiedPrincipal | undefined;
+  readonly traceparent?: string;
+  readonly forwardWebhookSignatureHeaders?: boolean;
 }
 
 export interface ProxiedResponse {
@@ -17,6 +19,7 @@ export interface ProxiedResponse {
 }
 
 const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-none-match", "user-agent", "x-client-region", "x-device-id", "x-step-up-token"];
+const webhookSignatureHeaders = ["x-paystack-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-webhook-id", "x-webhook-timestamp"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
 export function buildUpstreamRequestHeaders(request: ProxiedRequest): Record<string, string> {
@@ -25,7 +28,14 @@ export function buildUpstreamRequestHeaders(request: ProxiedRequest): Record<str
     const value = request.headers[name];
     if (value !== undefined) headers[name] = value;
   }
+  if (request.forwardWebhookSignatureHeaders === true) {
+    for (const name of webhookSignatureHeaders) {
+      const value = request.headers[name];
+      if (value !== undefined) headers[name] = value;
+    }
+  }
   headers["x-request-id"] = request.requestId;
+  if (request.traceparent !== undefined) headers["traceparent"] = request.traceparent;
   if (request.clientIp !== undefined) {
     headers["x-real-ip"] = request.clientIp;
     headers["x-forwarded-for"] = request.clientIp;
