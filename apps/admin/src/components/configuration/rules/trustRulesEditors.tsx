@@ -91,7 +91,7 @@ export function TrialRulesEditor({ rules, canWrite, onChange }: EditorProps<Tria
       <div className={styles.checks}>
         {toggles.map((toggle) => <CheckboxField key={toggle.key} label={toggle.label} checked={rules[toggle.key]} disabled={disabled} onChange={(event) => set(toggle.key, event.target.checked)} />)}
       </div>
-      <p className={styles.summary}>Trials need a card saved on the web through Bachs. A small verification charge is made and refunded automatically. Risk scores come from the intelligence service.</p>
+      <p className={styles.summary}>Trials need a card saved on the web through Paystack. A small verification charge is made and refunded automatically. Risk scores come from the intelligence service.</p>
     </div>
   );
 }
@@ -103,6 +103,7 @@ export function CheckmarkPricingEditor({ rules, canWrite, onChange }: EditorProp
       <div className={styles.grid}>
         <WholeNumberField label="Blue + Gold bundle discount (%)" value={rules.bundleDiscountPercent} maximum={50} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, bundleDiscountPercent: value }))} />
         <WholeNumberField label="Bundle cap (businesses per person)" value={rules.bundleMaximumBusinesses} minimum={1} maximum={20} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, bundleMaximumBusinesses: value }))} />
+        <MoneyAmountField label="Blue checkmark (per month)" money={rules.blueMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, blueMonthlyPrice: money }))} />
         <MoneyAmountField label="Gold-only plan (per month)" money={rules.goldOnlyMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, goldOnlyMonthlyPrice: money }))} />
         <MoneyAmountField label="Black (per month)" money={rules.blackMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, blackMonthlyPrice: money }))} />
         <WholeNumberField label="Black grace period (days)" value={rules.blackGraceDays} maximum={90} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, blackGraceDays: value }))} />
