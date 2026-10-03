@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { CustomerStoreCreditPanel } from "@/components/customers/customerStoreCreditPanel";
 import { useState } from "react";
 
 import { CustomerFormDialog } from "@/components/customers/customerFormDialog";
-import { CustomerLoyaltyPanel } from "@/components/customers/customerLoyaltyPanel";
 import { CustomerNotesPanel } from "@/components/customers/customerNotesPanel";
 import { CustomerPurchasesPanel } from "@/components/customers/customerPurchasesPanel";
 import { customerTypeLabels, customerTypeTones } from "@/components/customers/customerPresentation.util";
@@ -73,7 +73,7 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
               </div>
             ) : null}
           </Panel>
-          <CustomerLoyaltyPanel customer={customer} onCustomerChanged={replaceCustomer} />
+          <CustomerStoreCreditPanel customer={customer} />
         </div>
       </div>
       {isEditDialogOpen ? <CustomerFormDialog isOpen customer={customer} onClose={() => setIsEditDialogOpen(false)} onSaved={replaceCustomer} /> : null}
