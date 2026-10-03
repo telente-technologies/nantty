@@ -15,6 +15,7 @@ import type { DeliveryShipment } from "@/types/delivery.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./delivery.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function DeliveryShipmentDialog({ shipment, onClose, onShipmentChanged }: { readonly shipment: DeliveryShipment; readonly onClose: () => void; readonly onShipmentChanged: () => void }) {
   const { showToast } = useToast();
@@ -82,7 +83,7 @@ export function DeliveryShipmentDialog({ shipment, onClose, onShipmentChanged }:
             </div>
           </>
         ) : null}
-        <Link href={`/orders/${shipment.orderId}`}>Open the order →</Link>
+        <Link href={`/orders/${shipment.orderId}`}><IconLabel name="arrowRight24" size={16}>Open the order</IconLabel></Link>
       </div>
     </ModalDialog>
   );
