@@ -2,27 +2,49 @@ package events
 
 const (
 	AccountRestrictedType         = "account.restricted"
-	SuspensionStartedType         = "suspension.started"
+	AccountSuspendedType          = "account.suspended"
+	AccountBannedType             = "account.banned"
 	SuspensionEndedType           = "suspension.ended"
 	SuspensionAppealSubmittedType = "suspension.appealSubmitted"
-	SuspensionAppealDecidedType   = "suspension.appealDecided"
+	AppealDecidedType             = "appeal.decided"
 	UsernameReassignedType        = "username.reassigned"
+	CommunityGuidelinesUrl        = "https://zudomart.com/community-guidelines"
+	AppealUrl                     = "https://zudomart.com/settings/account/appeal"
 )
 
 type AccountRestrictedData struct {
-	AccountId string   `json:"accountId"`
-	Features  []string `json:"features"`
-	EndsAt    string   `json:"endsAt"`
-	Reason    string   `json:"reason"`
+	AccountId    string   `json:"accountId"`
+	CaseId       string   `json:"caseId"`
+	Reason       string   `json:"reason"`
+	Policy       string   `json:"policy"`
+	PolicyUrl    string   `json:"policyUrl"`
+	AppealUrl    string   `json:"appealUrl"`
+	Restrictions []string `json:"restrictions"`
+	Until        string   `json:"until"`
 }
 
-type SuspensionStartedData struct {
-	AccountId     string  `json:"accountId"`
-	SuspensionId  string  `json:"suspensionId"`
-	ReasonCode    string  `json:"reasonCode"`
-	Reason        string  `json:"reason"`
-	EndsAt        *string `json:"endsAt"`
-	DeletionDueAt string  `json:"deletionDueAt"`
+type AccountSuspendedData struct {
+	AccountId  string  `json:"accountId"`
+	CaseId     string  `json:"caseId"`
+	Reason     string  `json:"reason"`
+	ReasonCode string  `json:"reasonCode"`
+	Policy     string  `json:"policy"`
+	PolicyUrl  string  `json:"policyUrl"`
+	AppealUrl  string  `json:"appealUrl"`
+	AppealBy   string  `json:"appealBy"`
+	DeletionAt string  `json:"deletionAt"`
+	Until      *string `json:"until"`
+}
+
+type AccountBannedData struct {
+	AccountId string  `json:"accountId"`
+	CaseId    string  `json:"caseId"`
+	Reason    string  `json:"reason"`
+	Policy    string  `json:"policy"`
+	PolicyUrl string  `json:"policyUrl"`
+	AppealUrl string  `json:"appealUrl"`
+	Until     *string `json:"until"`
+	Permanent bool    `json:"permanent"`
 }
 
 type SuspensionEndedData struct {
@@ -34,8 +56,13 @@ type SuspensionEndedData struct {
 type SuspensionAppealData struct {
 	AccountId    string `json:"accountId"`
 	SuspensionId string `json:"suspensionId"`
-	Outcome      string `json:"outcome,omitempty"`
-	Reason       string `json:"reason,omitempty"`
+}
+
+type AppealDecidedData struct {
+	AccountId   string `json:"accountId"`
+	CaseId      string `json:"caseId"`
+	Outcome     string `json:"outcome"`
+	Explanation string `json:"explanation"`
 }
 
 type UsernameReassignedData struct {
