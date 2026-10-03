@@ -40,6 +40,15 @@ export interface Address {
   readonly city: string;
   readonly state: string;
   readonly isDefault: boolean;
+  readonly countryId: string;
+  readonly countryCode: string;
+  readonly country: string;
+  readonly stateId: string | null;
+  readonly lgaId: string | null;
+  readonly lga: string | null;
+  readonly cityId: string | null;
+  readonly postalCode: string;
+  readonly details: string;
 }
 
 export interface WalletSummary {

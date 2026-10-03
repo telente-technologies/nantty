@@ -1,4 +1,5 @@
 export * from "./account.type";
+export * from "./geo.type";
 export * from "./privacy.type";
 export * from "./commerce.type";
 export * from "./models.type";

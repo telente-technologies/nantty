@@ -21,8 +21,12 @@ export interface ShippingAddressInput {
   readonly fullName: string;
   readonly phone: string;
   readonly line1: string;
-  readonly city: string;
-  readonly state: string;
+  readonly postalCode: string;
+  readonly details: string;
+  readonly countryId: string;
+  readonly stateId: string | null;
+  readonly lgaId: string | null;
+  readonly cityId: string | null;
   readonly isDefault: boolean;
 }
 
@@ -121,8 +125,20 @@ export interface UsernameAvailability {
   readonly reason?: UsernameUnavailableReason;
 }
 
+export interface UsernameChangeRecord {
+  readonly from: string;
+  readonly to: string;
+  readonly changedAt: string;
+  readonly reason: string;
+}
+
 export interface UsernamePolicy {
+  readonly username: string;
   readonly canChangeNow: boolean;
+  readonly cooldownDays: number;
+  readonly maxChangesPerYear: number;
+  readonly quarantineDays: number;
+  readonly history: readonly UsernameChangeRecord[];
   readonly nextChangeAvailableAt: string | null;
   readonly changesRemainingThisYear: number;
   readonly rules: readonly string[];

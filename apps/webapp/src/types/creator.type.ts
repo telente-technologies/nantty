@@ -138,7 +138,9 @@ export interface CreatorSubscriber {
 
 export interface CreatorSubscriptionCheckout {
   readonly subscriptionId: ID;
-  readonly checkoutUrl: string;
+  readonly reference: string;
+  readonly accessCode: string;
+  readonly authorizationUrl: string;
 }
 
 export interface CreatorSubscriptionState {

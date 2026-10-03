@@ -49,12 +49,15 @@ export interface StoreDetail extends StoreSummary {
   readonly posts: readonly Post[];
 }
 
-export type PaymentProvider = "paystack" | "flutterwave";
+export type PaymentProvider = "paystack";
+
+export type PaymentChannel = "card" | "bank_transfer" | "ussd";
 
 export interface PaymentInitialization {
   readonly orderId: ID;
   readonly reference: string;
   readonly authorizationUrl: string;
+  readonly accessCode: string;
 }
 
 export interface CheckoutResult {
