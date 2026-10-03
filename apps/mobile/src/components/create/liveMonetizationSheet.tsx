@@ -1,0 +1,112 @@
+import { ScrollView, StyleSheet, Switch, View } from "react-native";
+
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Chip } from "@/components/ui/chip";
+import { TextField } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import type { LiveAdPlacement } from "@/types/socialGraph.type";
+
+import {
+  LIVE_AD_MAX_INTERRUPTIONS,
+  LIVE_AD_MIN_INTERVAL_OPTIONS_MINUTES,
+  LIVE_AD_PLACEMENT_OPTIONS,
+  LIVE_AD_TERMS_SUMMARY,
+  LIVE_AD_TERMS_VERSION,
+  type LiveMonetizationDraft,
+} from "./liveMonetization.constant";
+
+export interface LiveMonetizationSheetProps {
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly draft: LiveMonetizationDraft;
+  readonly onChangeDraft: (draft: LiveMonetizationDraft) => void;
+}
+
+function SwitchRow({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (value: boolean) => void }) {
+  return (
+    <View style={styles.switchRow}>
+      <View style={styles.flex}>
+        <Text size={14} weight={500} lineHeight={16.8}>{label}</Text>
+        {hint ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>{hint}</Text> : null}
+      </View>
+      <Switch value={value} onValueChange={onChange} accessibilityLabel={label} trackColor={{ true: colors.primary, false: colors.divider }} />
+    </View>
+  );
+}
+
+export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }: LiveMonetizationSheetProps) {
+  const togglePlacement = (placement: LiveAdPlacement) =>
+    onChangeDraft({
+      ...draft,
+      placements: draft.placements.includes(placement) ? draft.placements.filter((item) => item !== placement) : [...draft.placements, placement],
+    });
+  const changeMaxInterruptions = (delta: number) =>
+    onChangeDraft({ ...draft, maxInterruptions: Math.min(LIVE_AD_MAX_INTERRUPTIONS, Math.max(0, draft.maxInterruptions + delta)) });
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title="Live monetization" floating>
+      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <SwitchRow
+          label="Allow ZudoMart ads"
+          hint="Off by default. Ads only run if you opt in and agree to the live-ad terms."
+          value={draft.allowAds}
+          onChange={(allowAds) => onChangeDraft({ ...draft, allowAds })}
+        />
+        {draft.allowAds ? (
+          <>
+            <View style={styles.terms}>
+              <Text size={13} weight={600} lineHeight={17}>Live-ad terms</Text>
+              {LIVE_AD_TERMS_SUMMARY.map((line) => (
+                <Text key={line} size={12} lineHeight={16.8}>{`• ${line}`}</Text>
+              ))}
+              <SwitchRow
+                label={`I agree to the live-ad terms (${LIVE_AD_TERMS_VERSION})`}
+                value={draft.agreedToTerms}
+                onChange={(agreedToTerms) => onChangeDraft({ ...draft, agreedToTerms })}
+              />
+              {draft.agreedToTerms ? null : (
+                <Text size={12} lineHeight={16.8} color={colors.error} accessibilityLiveRegion="polite">Ads stay off until you agree.</Text>
+              )}
+            </View>
+            <Text size={14} weight={500} lineHeight={16.8}>Placements</Text>
+            <View style={styles.chips}>
+              {LIVE_AD_PLACEMENT_OPTIONS.map((option) => (
+                <Chip key={option.key} kind="filter" label={option.label} selected={draft.placements.includes(option.key)} onPress={() => togglePlacement(option.key)} />
+              ))}
+            </View>
+            <View style={styles.stepper}>
+              <Text size={14} weight={500} lineHeight={16.8} style={styles.flex}>Max interruptions: {draft.maxInterruptions}</Text>
+              <Chip kind="filter" label="-" onPress={() => changeMaxInterruptions(-1)} />
+              <Chip kind="filter" label="+" onPress={() => changeMaxInterruptions(1)} />
+            </View>
+            <Text size={14} weight={500} lineHeight={16.8}>Minimum interval</Text>
+            <View style={styles.chips}>
+              {LIVE_AD_MIN_INTERVAL_OPTIONS_MINUTES.map((minutes) => (
+                <Chip key={minutes} kind="filter" label={`${minutes} min`} selected={draft.minIntervalMinutes === minutes} onPress={() => onChangeDraft({ ...draft, minIntervalMinutes: minutes })} />
+              ))}
+            </View>
+            <SwitchRow label="Show ad indicator" value={draft.showAdIndicator} onChange={(showAdIndicator) => onChangeDraft({ ...draft, showAdIndicator })} />
+          </>
+        ) : null}
+        <TextField
+          label="Your own sponsorship (optional)"
+          placeholder="Sponsored by..."
+          value={draft.sponsorshipLine}
+          onChangeText={(sponsorshipLine) => onChangeDraft({ ...draft, sponsorshipLine })}
+          maxLength={80}
+        />
+        <Text size={11} lineHeight={15} color={colors.textMuted}>Your own sponsors are your business. ZudoMart does not sell or take a share of them.</Text>
+      </ScrollView>
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 14 },
+  switchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  terms: { gap: 8, padding: 12, borderRadius: 8, backgroundColor: colors.background },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  stepper: { flexDirection: "row", alignItems: "center", gap: 8 },
+});

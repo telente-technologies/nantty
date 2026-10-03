@@ -1,15 +1,18 @@
 import type { CameraView } from "expo-camera";
-import { useRef, useState, type ComponentType } from "react";
-import { Pressable, Share, StyleSheet, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, ScrollView, Share, StyleSheet, TextInput, View } from "react-native";
 
-import { ArrowsOutSimple24Icon, Camera24Icon, TextIndent24Icon, VideoCamera24Icon } from "@/components/icons";
+import { ArrowsOutSimple24Icon, TextIndent24Icon, VideoCamera24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import type { CreateMode, LiveSource } from "@/types";
+import type { CreateMode, LiveCategory, LiveSource } from "@/types";
 
+import { LiveMonetizationSheet } from "./liveMonetizationSheet";
+import { isLiveAdAcceptanceInEffect, type LiveMonetizationDraft } from "./liveMonetization.constant";
+import { LIVE_CATEGORIES, LIVE_SOURCE_ICON, LIVE_SOURCES } from "./liveSetupOptions.constant";
 import { CameraBackdrop } from "./cameraBackdrop";
 import { CreateModePill } from "./createModePill";
 import { RecordButton } from "./recordButton";
@@ -27,29 +30,23 @@ export interface LiveSetupPanelProps {
   readonly onStartEditingTitle: () => void;
   readonly onFinishEditingTitle: () => void;
   readonly onChangeMode: (mode: CreateMode) => void;
+  readonly category: LiveCategory;
+  readonly onChangeCategory: (category: LiveCategory) => void;
+  readonly canSell: boolean;
   readonly source: LiveSource;
   readonly onChangeSource: (source: LiveSource) => void;
   readonly credentials: LiveStreamCredentials | null;
   readonly onOpenLiveRoom: (liveId: string) => void;
   readonly starting: boolean;
   readonly onGoLive: () => void;
+  readonly monetization: LiveMonetizationDraft;
+  readonly onChangeMonetization: (draft: LiveMonetizationDraft) => void;
 }
-
-const SOURCES: readonly { readonly source: LiveSource; readonly label: string }[] = [
-  { source: "camera", label: "Camera" },
-  { source: "screen", label: "Screen" },
-  { source: "external", label: "External" },
-];
-
-const SOURCE_ICON: Record<LiveSource, ComponentType<{ size?: number; color?: string }>> = {
-  camera: Camera24Icon,
-  screen: ArrowsOutSimple24Icon,
-  external: VideoCamera24Icon,
-};
 
 export function LiveSetupPanel(props: LiveSetupPanelProps) {
   const cameraRef = useRef<CameraView>(null);
   const [draftTitle, setDraftTitle] = useState(props.title);
+  const [isMonetizationOpen, setIsMonetizationOpen] = useState(false);
   const { canGoLive } = useCreatorStatus();
   const credentials = props.credentials;
 
@@ -160,9 +157,28 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
             </Text>
           </Pressable>
           <View style={styles.bottom} pointerEvents="box-none">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow} accessibilityRole="radiogroup">
+              {LIVE_CATEGORIES.filter((item) => item.category !== "shopping" || props.canSell).map((item) => {
+                const selected = props.category === item.category;
+                return (
+                  <Pressable
+                    key={item.category}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    accessibilityLabel={`${item.label} category`}
+                    onPress={() => props.onChangeCategory(item.category)}
+                    style={[styles.categoryChip, selected ? styles.sourceItemSelected : null]}
+                  >
+                    <Text size={12} weight={selected ? 600 : 500} lineHeight={15.6} color={selected ? colors.black : colors.white}>
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
             <View style={styles.sourcePicker} accessibilityRole="tablist">
-              {SOURCES.map((item) => {
-                const Icon = SOURCE_ICON[item.source];
+              {LIVE_SOURCES.map((item) => {
+                const Icon = LIVE_SOURCE_ICON[item.source];
                 const selected = props.source === item.source;
                 return (
                   <Pressable
@@ -181,6 +197,16 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
                 );
               })}
             </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Live monetization settings"
+              onPress={() => setIsMonetizationOpen(true)}
+              style={styles.categoryChip}
+            >
+              <Text size={12} weight={500} lineHeight={15.6} color={colors.white}>
+                Live monetization · {isLiveAdAcceptanceInEffect(props.monetization) ? "Ads on" : "Ads off"}
+              </Text>
+            </Pressable>
             {props.title ? null : <CreateModePill mode="live" onChangeMode={props.onChangeMode} />}
             {credentials ? (
               <Button title="Open live room" onPress={() => credentials && props.onOpenLiveRoom(credentials.liveId)} style={styles.openRoomButton} />
@@ -190,6 +216,12 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
           </View>
         </>
       )}
+      <LiveMonetizationSheet
+        visible={isMonetizationOpen}
+        onClose={() => setIsMonetizationOpen(false)}
+        draft={props.monetization}
+        onChangeDraft={props.onChangeMonetization}
+      />
     </View>
   );
 }
@@ -239,5 +271,14 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   sourceItemSelected: { backgroundColor: colors.white },
+  categoryRow: { gap: 8, paddingHorizontal: 16 },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: "rgba(16,16,24,0.72)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.24)",
+  },
   openRoomButton: { width: 200 },
 });

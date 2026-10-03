@@ -8,6 +8,7 @@ import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode, ID, PostAudience } from "@/types";
 
+import { AiGeneratedToggleRow } from "./aiGeneratedToggleRow";
 import { CreateModePill } from "./createModePill";
 import { DraftMediaStrip } from "./draftMediaStrip";
 import { MAXIMUM_MEDIA_PER_POST, pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
@@ -18,6 +19,7 @@ export interface PostComposerDraft {
   readonly text: string;
   readonly audience: PostAudience;
   readonly kind: "clip" | "video" | "photo";
+  readonly isAiGenerated: boolean;
 }
 
 export interface PostComposerPanelProps {
@@ -104,6 +106,7 @@ export function PostComposerPanel({
           </Text>
         ) : null}
         {soundPicker}
+        <AiGeneratedToggleRow value={draft.isAiGenerated} onChange={(isAiGenerated) => onChangeDraft({ ...draft, isAiGenerated })} />
       </ScrollView>
       {focused ? null : (
         <View style={styles.pill}>
