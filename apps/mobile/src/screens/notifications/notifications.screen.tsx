@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { BellRinging24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { Chip } from "@/components/ui/chip";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -14,12 +16,14 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const notificationsQueryKey = ["notifications"] as const;
+const NOTIFICATION_FILTERS = [{ value: "all", label: "All" }, { value: "mentions", label: "Mentions" }] as const;
 
 export function NotificationsScreen({ navigation }: MainScreenProps<"Notifications">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
-  const notifications = useQuery({ queryKey: notificationsQueryKey, queryFn: notificationsService.fetchMyNotifications });
+  const [filter, setFilter] = useState<(typeof NOTIFICATION_FILTERS)[number]["value"]>("all");
+  const notifications = useQuery({ queryKey: [...notificationsQueryKey, filter], queryFn: () => notificationsService.fetchMyNotifications(filter) });
   const refreshNotifications = () => queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
   const markAllRead = useMutation({ mutationFn: notificationsService.markAllNotificationsAsRead, onSuccess: refreshNotifications });
   const markOneRead = useMutation({ mutationFn: notificationsService.markNotificationAsRead, onSuccess: refreshNotifications });
@@ -43,6 +47,11 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
           ) : null
         }
       />
+      <View style={styles.tabs} accessibilityRole="tablist">
+        {NOTIFICATION_FILTERS.map((option) => (
+          <Chip key={option.value} kind="filter" label={option.label} selected={filter === option.value} onPress={() => setFilter(option.value)} />
+        ))}
+      </View>
       <FlatList
         data={notifications.data ?? []}
         keyExtractor={(n) => n.id}
@@ -76,7 +85,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
           notifications.isLoading ? (
             <ListSkeleton />
           ) : (
-            <Text align="center" color={colors.textSubtle} style={styles.state}>You're all caught up.</Text>
+            <Text align="center" color={colors.textSubtle} style={styles.state}>{filter === "mentions" ? "No mentions yet." : "You're all caught up."}</Text>
           )
         }
       />
@@ -85,6 +94,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  tabs: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   list: { paddingVertical: 8 },
   row: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   unreadRow: { backgroundColor: colors.surface },
