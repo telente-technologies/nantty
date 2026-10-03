@@ -38,14 +38,14 @@
 
 .muted {
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-13);
 }
 
 .conditionList {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .conditionList li::before {
