@@ -28,7 +28,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--blue-500);
+  color: var(--color-brand);
   font-size: 11px;
   font-weight: 600;
   text-transform: none;
@@ -45,7 +45,7 @@
 
 .option input {
   margin-top: 2px;
-  accent-color: var(--blue-500);
+  accent-color: var(--color-brand);
 }
 
 .optionLabel {
