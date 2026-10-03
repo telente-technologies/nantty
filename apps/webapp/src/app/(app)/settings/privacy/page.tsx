@@ -7,6 +7,7 @@ import { DeleteAccountSection } from "@/components/settings/deleteAccountSection
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
+import { IconLabel } from "@/components/ui/appIcon";
 
 export const metadata: Metadata = { title: "Privacy & Data" };
 
@@ -14,7 +15,7 @@ export default function PrivacyAndDataPage() {
   return (
     <div className={styles.page}>
       <div>
-        <Link href="/settings">← Settings</Link>
+        <Link href="/settings"><IconLabel name="arrowLeft24" size={16}>Settings</IconLabel></Link>
         <h1 className={styles.title}>Privacy &amp; Data</h1>
       </div>
       <ConsentChoicesSection />

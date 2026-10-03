@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { MyReportsList } from "@/components/settings/myReportsList";
 import styles from "@/components/settings/settings.module.css";
-import { AppIcon, IconLabel } from "@/components/ui/appIcon";
+import { IconLabel } from "@/components/ui/appIcon";
 
 export const metadata: Metadata = { title: "Your reports" };
 

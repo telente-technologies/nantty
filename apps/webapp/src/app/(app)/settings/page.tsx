@@ -3,12 +3,13 @@ import Link from "next/link";
 
 import { AppearanceSection } from "@/components/settings/appearanceSection";
 import styles from "@/components/settings/settingsHome.module.css";
-import { BookmarkIcon, ChevronRightIcon, LockIcon, MailIcon, OrdersIcon, UserIcon } from "@/components/ui/icons";
+import { BookmarkIcon, ChevronRightIcon, LockIcon, MailIcon, MapPinIcon, OrdersIcon, UserIcon } from "@/components/ui/icons";
 
 export const metadata: Metadata = { title: "Settings" };
 
 const settingsLinks = [
   { href: "/settings/privacy", label: "Privacy & data", description: "Cookie choices, download your data, delete your account", icon: <LockIcon size={20} /> },
+  { href: "/settings/addresses", label: "Addresses", description: "Delivery addresses used at checkout", icon: <MapPinIcon size={20} /> },
   { href: "/verify-email", label: "Email", description: "Verify the email used for receipts and payments", icon: <MailIcon size={20} /> },
   { href: "/me", label: "Profile", description: "Your public profile, posts and followers", icon: <UserIcon size={20} /> },
   { href: "/saved", label: "Saved items", description: "Posts, videos, clips and products you bookmarked", icon: <BookmarkIcon size={20} /> },
