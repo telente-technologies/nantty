@@ -6,6 +6,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BillingSubscription is the predicate function for billingsubscription builders.
+type BillingSubscription func(*sql.Selector)
+
+// ConnectedAccount is the predicate function for connectedaccount builders.
+type ConnectedAccount func(*sql.Selector)
+
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
@@ -23,6 +29,12 @@ type PaymentRefund func(*sql.Selector)
 
 // PayoutTransfer is the predicate function for payouttransfer builders.
 type PayoutTransfer func(*sql.Selector)
+
+// ProviderDispute is the predicate function for providerdispute builders.
+type ProviderDispute func(*sql.Selector)
+
+// ProviderPayoutDestination is the predicate function for providerpayoutdestination builders.
+type ProviderPayoutDestination func(*sql.Selector)
 
 // StorePurchase is the predicate function for storepurchase builders.
 type StorePurchase func(*sql.Selector)
