@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/strike.issued.v1.json",
+  "title": "StrikeIssued",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "strikeId",
+    "accountId",
+    "kind",
+    "policy",
+    "source",
+    "expiresAt",
+    "activeStrikeCount",
+    "isRepeatInfringer"
+  ],
+  "properties": {
+    "strikeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "warning",
+        "strike"
+      ]
+    },
+    "policy": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "expiresAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "activeStrikeCount": {
+      "type": "integer"
+    },
+    "isRepeatInfringer": {
+      "type": "boolean"
+    }
+  }
+}
