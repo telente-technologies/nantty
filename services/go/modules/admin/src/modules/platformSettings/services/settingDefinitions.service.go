@@ -1,0 +1,65 @@
+package services
+
+import (
+	"encoding/json"
+	"regexp"
+)
+
+const (
+	CreatorRequirementsKey = "creator.requirements"
+	MonetizationPolicyKey  = "monetization.policy"
+	GiftShareTiersKey      = "gift.shareTiers"
+	maximumCreatorShareBps = 7000
+)
+
+type SettingDefinition struct {
+	Validate     func(raw json.RawMessage) (json.RawMessage, error)
+	DefaultValue any
+	Public       bool
+}
+
+var PlatformSettingDefinitions = map[string]SettingDefinition{
+	CreatorRequirementsKey: {Validate: validateCreatorRequirements, Public: true, DefaultValue: CreatorRequirements{
+		MinimumFollowers: 1000, MinimumAccountAgeDays: 30, MinimumOriginalPosts: 10, MaximumRecentStrikes: 0, StrikeLookbackDays: 90, RequireVerifiedEmail: true,
+	}},
+	MonetizationPolicyKey: {Validate: validateMonetizationPolicy, DefaultValue: MonetizationPolicy{Rows: []MonetizationRow{
+		{Id: "original", Label: "Original content", MultiplierBps: 10000, Active: true},
+		{Id: "ai_generated", Label: "AI-generated content", MultiplierBps: 5000, Active: true},
+	}}},
+	GiftShareTiersKey: {Validate: validateGiftShareTiers, DefaultValue: GiftShareTiers{Tiers: []GiftShareTier{
+		{MinimumMonthlyGiftCoins: 0, CreatorShareBps: 5000},
+		{MinimumMonthlyGiftCoins: 500000, CreatorShareBps: 6000},
+		{MinimumMonthlyGiftCoins: 5000000, CreatorShareBps: maximumCreatorShareBps},
+	}}},
+}
+
+type CreatorRequirements struct {
+	MinimumFollowers      int  `json:"minimumFollowers"`
+	MinimumAccountAgeDays int  `json:"minimumAccountAgeDays"`
+	MinimumOriginalPosts  int  `json:"minimumOriginalPosts"`
+	MaximumRecentStrikes  int  `json:"maximumRecentStrikes"`
+	StrikeLookbackDays    int  `json:"strikeLookbackDays"`
+	RequireVerifiedEmail  bool `json:"requireVerifiedEmail"`
+}
+
+type MonetizationRow struct {
+	Id            string `json:"id"`
+	Label         string `json:"label"`
+	MultiplierBps int    `json:"multiplierBps"`
+	Active        bool   `json:"active"`
+}
+
+type MonetizationPolicy struct {
+	Rows []MonetizationRow `json:"rows"`
+}
+
+type GiftShareTier struct {
+	MinimumMonthlyGiftCoins int64 `json:"minimumMonthlyGiftCoins"`
+	CreatorShareBps         int   `json:"creatorShareBps"`
+}
+
+type GiftShareTiers struct {
+	Tiers []GiftShareTier `json:"tiers"`
+}
+
+var monetizationRowIdPattern = regexp.MustCompile(`^[a-z0-9_]{2,40}$`)
