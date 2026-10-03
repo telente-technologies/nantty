@@ -66,6 +66,7 @@ export interface ProductSummary {
   readonly price: Money;
   readonly imageUrl: string | null;
   readonly liked?: boolean;
+  readonly bookmarked?: boolean;
   readonly stock?: number;
   readonly sponsored?: SponsoredPlacement | null;
 }
@@ -164,6 +165,7 @@ export interface CartItem {
   readonly product: ProductSummary;
   readonly quantity: number;
   readonly variant: string | null;
+  readonly store?: StoreSummary | null;
 }
 
 export interface Cart {
