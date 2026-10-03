@@ -48,3 +48,43 @@ describe("live routes", () => {
     expect(route?.authentication).toBe("required");
   });
 });
+
+describe("money routes", () => {
+  it.each([
+    ["GET", "/api/v1/orders/ord_1/escrow"],
+    ["POST", "/api/v1/orders/ord_1/disputes"],
+  ])("%s %s goes to go-money and requires a token", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("money");
+    expect(route?.authentication).toBe("required");
+  });
+
+  it.each([
+    ["POST", "/api/v1/orders/ord_1/escrow"],
+    ["GET", "/api/v1/orders//escrow"],
+    ["GET", "/api/v1/orders/ord_1/escrow/extra"],
+    ["GET", "/api/v1/orders/ord_1/disputes"],
+  ])("%s %s is not routed", (method, path) => {
+    expect(resolveUpstreamRouteForRequest(method, path)).toBeUndefined();
+  });
+
+  it.each([
+    ["POST", "/webhooks/paystack"],
+    ["POST", "/webhooks/store-notifications/apple_iap"],
+    ["POST", "/api/v1/payments/webhooks/paystack"],
+  ])("provider webhooks never pass through the gateway: %s %s", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route === undefined || route.authentication === "required").toBe(true);
+  });
+});
+
+describe("admin escrow routes", () => {
+  it.each([
+    ["GET", "/api/v1/admin/orders/ord_1/escrow"],
+    ["POST", "/api/v1/admin/orders/ord_1/escrow/refund"],
+  ])("%s %s goes to go-money with optional authentication", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("money");
+    expect(route?.authentication).toBe("optional");
+  });
+});
