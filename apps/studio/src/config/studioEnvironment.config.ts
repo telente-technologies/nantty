@@ -1,3 +1,5 @@
+const productionSessionSecretPattern = /^[0-9a-f]{64}$/i;
+const sessionSecretPlaceholder = "replace-with-64-random-hex-characters";
 const isProductionRuntime = process.env.NODE_ENV === "production";
 const developmentOnlySessionSecret = "zudomart-studio-development-only-secret-never-use-in-production";
 
@@ -15,8 +17,13 @@ export function isMockBackendEnabled(): boolean {
 
 export function readSessionSigningSecret(): string {
   const configuredSecret = process.env.STUDIO_SESSION_SECRET ?? "";
-  if (configuredSecret.length >= 32) return configuredSecret;
-  if (isProductionRuntime) throw new Error("STUDIO_SESSION_SECRET must be at least 32 characters in production.");
+  if (isProductionRuntime) {
+    if (configuredSecret === sessionSecretPlaceholder || !productionSessionSecretPattern.test(configuredSecret)) {
+      throw new Error("STUDIO_SESSION_SECRET must be exactly 64 hex characters in production.");
+    }
+    return configuredSecret;
+  }
+  if (configuredSecret.length >= 32 && configuredSecret !== sessionSecretPlaceholder) return configuredSecret;
   return developmentOnlySessionSecret;
 }
 

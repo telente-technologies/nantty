@@ -1,7 +1,9 @@
 import { shouldUseSecureHostPrefixedCookies } from "@/config/studioEnvironment.config";
 
+const developmentCookieNamePrefix = "zd_studio_";
+
 function prefixCookieNameForHost(baseName: string): string {
-  return shouldUseSecureHostPrefixedCookies() ? `__Host-${baseName}` : baseName;
+  return shouldUseSecureHostPrefixedCookies() ? `__Host-${baseName}` : baseName.replace("zd_", developmentCookieNamePrefix);
 }
 
 export const sessionCookieNames = {
