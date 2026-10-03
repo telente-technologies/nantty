@@ -15,6 +15,7 @@ import type { BillingOffer } from "@/types/billingOffer.type";
 import type { CursorPage } from "@/types/pagination.type";
 import type { SubscriptionPlan } from "@/types/subscription.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
+import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
 import styles from "./subscriptionPlanPicker.module.css";
 
@@ -45,10 +46,12 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
     setErrorMessage(null);
     try {
       const isTrialStart = planId.startsWith("gold_only") || (offer?.isEligible ?? false);
-      const checkout = await sendSellerApiRequest<{ authorizationUrl: string }>(isTrialStart ? "/seller/subscription/trial/checkout" : "/seller/subscription/checkout", { method: "POST", body: { planId } });
+      const checkout = await sendSellerApiRequest<{ authorizationUrl: string; accessCode?: string; reference: string }>(isTrialStart ? "/seller/subscription/trial/checkout" : "/seller/subscription/checkout", { method: "POST", body: { planId } });
       const checkoutUrl = new URL(checkout.authorizationUrl, window.location.origin);
       if (checkoutUrl.protocol !== "https:" && checkoutUrl.origin !== window.location.origin) throw new Error("Unexpected payment page.");
-      window.location.assign(checkoutUrl.toString());
+      const outcome = await openPaystackCheckout({ accessCode: checkout.accessCode ?? "", authorizationUrl: checkoutUrl.toString(), reference: checkout.reference });
+      if (outcome === "completed") window.location.assign(`/billing-checkout/callback?reference=${encodeURIComponent(checkout.reference)}`);
+      else if (outcome === "closed") setPendingPlanId(null);
     } catch (error) {
       setErrorMessage(readErrorMessageForDisplay(error));
       setPendingPlanId(null);

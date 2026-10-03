@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { signOutOfDashboardAndClearCachedPages } from "@/services/signOut.service";
 
 import styles from "./gateFrame.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
 
 export function GateFrame({ children }: { readonly children: ReactNode }) {
   async function signOutOfDashboard() {
@@ -33,7 +34,7 @@ export function GateStep({ state, title, children }: { readonly state: "done" | 
   return (
     <li className={`${styles.step} ${styles[state]}`}>
       <span className={styles.stepMarker} aria-hidden="true">
-        {state === "done" ? "✓" : ""}
+        {state === "done" ? <ZudoIcon name="check16" size={14} /> : null}
       </span>
       <div>
         <p className={styles.stepTitle}>
