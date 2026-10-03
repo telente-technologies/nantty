@@ -122,6 +122,12 @@
   gap: 10px;
 }
 
+.accountBadges {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+}
+
 .balancePill {
   display: inline-flex;
   flex-direction: column;
@@ -196,5 +202,17 @@
 
   .balanceLabel {
     display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .accountBadges,
+  .balancePill,
+  .topBarEnd .topBarCreateButton {
+    display: none;
+  }
+
+  .topBarContent {
+    gap: 6px;
   }
 }

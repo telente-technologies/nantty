@@ -64,8 +64,10 @@ function AccountTopBar() {
   return (
     <div className={styles.topBarContent}>
       <AccountSwitcher currentAccount={account} />
-      {account.verifiedBusiness ? <StatusBadge tone="accent">Verified business</StatusBadge> : null}
-      {account.status !== "active" ? <StatusBadge tone="error">{account.status === "disabled" ? "Disabled" : "Pending review"}</StatusBadge> : null}
+      <span className={styles.accountBadges}>
+        {account.verifiedBusiness ? <StatusBadge tone="accent">Verified business</StatusBadge> : null}
+        {account.status !== "active" ? <StatusBadge tone="error">{account.status === "disabled" ? "Disabled" : "Pending review"}</StatusBadge> : null}
+      </span>
       <div className={styles.topBarEnd}>
         {canPerform("billing:view") ? (
           <Link href={buildAccountPagePath("/billing")} className={styles.balancePill}>
@@ -74,7 +76,7 @@ function AccountTopBar() {
           </Link>
         ) : null}
         {canPerform("campaigns:manage") ? (
-          <ButtonLink href={buildAccountPagePath("/campaigns/new")} variant="primary" iconName="plus16">
+          <ButtonLink href={buildAccountPagePath("/campaigns/new")} variant="primary" iconName="plus16" className={styles.topBarCreateButton}>
             Create campaign
           </ButtonLink>
         ) : null}
