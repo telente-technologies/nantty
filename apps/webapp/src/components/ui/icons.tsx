@@ -104,3 +104,38 @@ export const AnalyticsIcon = createFigmaIcon("speedometer24");
 export const EyeIcon = createFigmaIcon("eye24");
 export const LockIcon = createFigmaIcon("lockSimple24");
 export const TagIcon = createFigmaIcon("tag24");
+export const BookmarkIcon = createFigmaIcon("bookmarkSimple24");
+export const BookmarkFilledIcon = createFigmaIcon("bookmarkSimpleFill24");
+export const CoinIcon = createFigmaIcon("coin24");
+export const ClipsIcon = createFigmaIcon("flips34");
+export const GiftIcon = createFigmaIcon("gift24");
+export const LiveIcon = createFigmaIcon("videoCamera24");
+export const PlayIcon = createFigmaIcon("play24");
+export const OrdersIcon = createFigmaIcon("truck24");
+export const CreatorIcon = createFigmaIcon("cameraBolt24");
+export const SidebarToggleIcon = createFigmaIcon("textIndent24");
+export const GridIcon = createFigmaIcon("squaresFour24");
+export const SendIcon = createFigmaIcon("paperPlaneTilt24");
+
+export const SunIcon = createIcon(() => (
+  <>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" />
+  </>
+));
+
+export const MoonIcon = createIcon(() => <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />);
+
+export const MonitorIcon = createIcon(() => (
+  <>
+    <rect x="3" y="4" width="18" height="12.5" rx="2" />
+    <path d="M8.5 20h7M12 16.5V20" />
+  </>
+));
+
+export const TrendingIcon = createIcon(() => (
+  <>
+    <path d="m3.5 16.5 6-6 4 4 7-7" />
+    <path d="M15 7.5h5.5V13" />
+  </>
+));

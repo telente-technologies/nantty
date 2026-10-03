@@ -48,12 +48,12 @@
 }
 
 .retry:hover {
-  border-color: var(--blue-400);
-  color: var(--blue-600);
+  border-color: var(--color-brand);
+  color: var(--color-brand);
 }
 
 .inlineLink {
-  color: var(--blue-600);
+  color: var(--color-brand);
   font-weight: 700;
 }
 

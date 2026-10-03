@@ -27,11 +27,11 @@
 }
 
 .input:hover:not(:disabled) {
-  border-color: var(--blue-300);
+  border-color: var(--color-border-strong);
 }
 
 .input:focus-visible {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
 }
 
 .input[aria-invalid="true"] {
