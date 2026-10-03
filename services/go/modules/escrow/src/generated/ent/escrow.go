@@ -52,6 +52,8 @@ type Escrow struct {
 	CommissionMinor int64 `json:"commission_minor,omitempty"`
 	// SellerAmountMinor holds the value of the "seller_amount_minor" field.
 	SellerAmountMinor int64 `json:"seller_amount_minor,omitempty"`
+	// ProcessingFeeMinor holds the value of the "processing_fee_minor" field.
+	ProcessingFeeMinor int64 `json:"processing_fee_minor,omitempty"`
 	// RefundedMinor holds the value of the "refunded_minor" field.
 	RefundedMinor int64 `json:"refunded_minor,omitempty"`
 	// ReleasedToSellerMinor holds the value of the "released_to_seller_minor" field.
@@ -115,7 +117,7 @@ func (*Escrow) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldPausedReleaseRemainingSeconds, escrow.FieldVersion:
+		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldProcessingFeeMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldPausedReleaseRemainingSeconds, escrow.FieldVersion:
 			values[i] = new(sql.NullInt64)
 		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldPaymentMode, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger:
 			values[i] = new(sql.NullString)
@@ -245,6 +247,12 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field seller_amount_minor", values[i])
 			} else if value.Valid {
 				_m.SellerAmountMinor = value.Int64
+			}
+		case escrow.FieldProcessingFeeMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field processing_fee_minor", values[i])
+			} else if value.Valid {
+				_m.ProcessingFeeMinor = value.Int64
 			}
 		case escrow.FieldRefundedMinor:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -447,6 +455,9 @@ func (_m *Escrow) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("seller_amount_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SellerAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("processing_fee_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProcessingFeeMinor))
 	builder.WriteString(", ")
 	builder.WriteString("refunded_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RefundedMinor))

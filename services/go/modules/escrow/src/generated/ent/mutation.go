@@ -2415,6 +2415,8 @@ type EscrowMutation struct {
 	addcommission_minor                 *int64
 	seller_amount_minor                 *int64
 	addseller_amount_minor              *int64
+	processing_fee_minor                *int64
+	addprocessing_fee_minor             *int64
 	refunded_minor                      *int64
 	addrefunded_minor                   *int64
 	released_to_seller_minor            *int64
@@ -3239,6 +3241,62 @@ func (m *EscrowMutation) AddedSellerAmountMinor() (r int64, exists bool) {
 func (m *EscrowMutation) ResetSellerAmountMinor() {
 	m.seller_amount_minor = nil
 	m.addseller_amount_minor = nil
+}
+
+// SetProcessingFeeMinor sets the "processing_fee_minor" field.
+func (m *EscrowMutation) SetProcessingFeeMinor(i int64) {
+	m.processing_fee_minor = &i
+	m.addprocessing_fee_minor = nil
+}
+
+// ProcessingFeeMinor returns the value of the "processing_fee_minor" field in the mutation.
+func (m *EscrowMutation) ProcessingFeeMinor() (r int64, exists bool) {
+	v := m.processing_fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProcessingFeeMinor returns the old "processing_fee_minor" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldProcessingFeeMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProcessingFeeMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProcessingFeeMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProcessingFeeMinor: %w", err)
+	}
+	return oldValue.ProcessingFeeMinor, nil
+}
+
+// AddProcessingFeeMinor adds i to the "processing_fee_minor" field.
+func (m *EscrowMutation) AddProcessingFeeMinor(i int64) {
+	if m.addprocessing_fee_minor != nil {
+		*m.addprocessing_fee_minor += i
+	} else {
+		m.addprocessing_fee_minor = &i
+	}
+}
+
+// AddedProcessingFeeMinor returns the value that was added to the "processing_fee_minor" field in this mutation.
+func (m *EscrowMutation) AddedProcessingFeeMinor() (r int64, exists bool) {
+	v := m.addprocessing_fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProcessingFeeMinor resets all changes to the "processing_fee_minor" field.
+func (m *EscrowMutation) ResetProcessingFeeMinor() {
+	m.processing_fee_minor = nil
+	m.addprocessing_fee_minor = nil
 }
 
 // SetRefundedMinor sets the "refunded_minor" field.
@@ -4126,7 +4184,7 @@ func (m *EscrowMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EscrowMutation) Fields() []string {
-	fields := make([]string, 0, 34)
+	fields := make([]string, 0, 35)
 	if m.created_at != nil {
 		fields = append(fields, escrow.FieldCreatedAt)
 	}
@@ -4177,6 +4235,9 @@ func (m *EscrowMutation) Fields() []string {
 	}
 	if m.seller_amount_minor != nil {
 		fields = append(fields, escrow.FieldSellerAmountMinor)
+	}
+	if m.processing_fee_minor != nil {
+		fields = append(fields, escrow.FieldProcessingFeeMinor)
 	}
 	if m.refunded_minor != nil {
 		fields = append(fields, escrow.FieldRefundedMinor)
@@ -4271,6 +4332,8 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.CommissionMinor()
 	case escrow.FieldSellerAmountMinor:
 		return m.SellerAmountMinor()
+	case escrow.FieldProcessingFeeMinor:
+		return m.ProcessingFeeMinor()
 	case escrow.FieldRefundedMinor:
 		return m.RefundedMinor()
 	case escrow.FieldReleasedToSellerMinor:
@@ -4348,6 +4411,8 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCommissionMinor(ctx)
 	case escrow.FieldSellerAmountMinor:
 		return m.OldSellerAmountMinor(ctx)
+	case escrow.FieldProcessingFeeMinor:
+		return m.OldProcessingFeeMinor(ctx)
 	case escrow.FieldRefundedMinor:
 		return m.OldRefundedMinor(ctx)
 	case escrow.FieldReleasedToSellerMinor:
@@ -4510,6 +4575,13 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSellerAmountMinor(v)
 		return nil
+	case escrow.FieldProcessingFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProcessingFeeMinor(v)
+		return nil
 	case escrow.FieldRefundedMinor:
 		v, ok := value.(int64)
 		if !ok {
@@ -4649,6 +4721,9 @@ func (m *EscrowMutation) AddedFields() []string {
 	if m.addseller_amount_minor != nil {
 		fields = append(fields, escrow.FieldSellerAmountMinor)
 	}
+	if m.addprocessing_fee_minor != nil {
+		fields = append(fields, escrow.FieldProcessingFeeMinor)
+	}
 	if m.addrefunded_minor != nil {
 		fields = append(fields, escrow.FieldRefundedMinor)
 	}
@@ -4677,6 +4752,8 @@ func (m *EscrowMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCommissionMinor()
 	case escrow.FieldSellerAmountMinor:
 		return m.AddedSellerAmountMinor()
+	case escrow.FieldProcessingFeeMinor:
+		return m.AddedProcessingFeeMinor()
 	case escrow.FieldRefundedMinor:
 		return m.AddedRefundedMinor()
 	case escrow.FieldReleasedToSellerMinor:
@@ -4721,6 +4798,13 @@ func (m *EscrowMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSellerAmountMinor(v)
+		return nil
+	case escrow.FieldProcessingFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProcessingFeeMinor(v)
 		return nil
 	case escrow.FieldRefundedMinor:
 		v, ok := value.(int64)
@@ -4878,6 +4962,9 @@ func (m *EscrowMutation) ResetField(name string) error {
 		return nil
 	case escrow.FieldSellerAmountMinor:
 		m.ResetSellerAmountMinor()
+		return nil
+	case escrow.FieldProcessingFeeMinor:
+		m.ResetProcessingFeeMinor()
 		return nil
 	case escrow.FieldRefundedMinor:
 		m.ResetRefundedMinor()

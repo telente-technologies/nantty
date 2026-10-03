@@ -151,6 +151,20 @@ func (_c *EscrowCreate) SetSellerAmountMinor(v int64) *EscrowCreate {
 	return _c
 }
 
+// SetProcessingFeeMinor sets the "processing_fee_minor" field.
+func (_c *EscrowCreate) SetProcessingFeeMinor(v int64) *EscrowCreate {
+	_c.mutation.SetProcessingFeeMinor(v)
+	return _c
+}
+
+// SetNillableProcessingFeeMinor sets the "processing_fee_minor" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableProcessingFeeMinor(v *int64) *EscrowCreate {
+	if v != nil {
+		_c.SetProcessingFeeMinor(*v)
+	}
+	return _c
+}
+
 // SetRefundedMinor sets the "refunded_minor" field.
 func (_c *EscrowCreate) SetRefundedMinor(v int64) *EscrowCreate {
 	_c.mutation.SetRefundedMinor(v)
@@ -465,6 +479,10 @@ func (_c *EscrowCreate) defaults() {
 		v := escrow.DefaultPaymentMode
 		_c.mutation.SetPaymentMode(v)
 	}
+	if _, ok := _c.mutation.ProcessingFeeMinor(); !ok {
+		v := escrow.DefaultProcessingFeeMinor
+		_c.mutation.SetProcessingFeeMinor(v)
+	}
 	if _, ok := _c.mutation.RefundedMinor(); !ok {
 		v := escrow.DefaultRefundedMinor
 		_c.mutation.SetRefundedMinor(v)
@@ -614,6 +632,9 @@ func (_c *EscrowCreate) check() error {
 	}
 	if _, ok := _c.mutation.SellerAmountMinor(); !ok {
 		return &ValidationError{Name: "seller_amount_minor", err: errors.New(`ent: missing required field "Escrow.seller_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.ProcessingFeeMinor(); !ok {
+		return &ValidationError{Name: "processing_fee_minor", err: errors.New(`ent: missing required field "Escrow.processing_fee_minor"`)}
 	}
 	if _, ok := _c.mutation.RefundedMinor(); !ok {
 		return &ValidationError{Name: "refunded_minor", err: errors.New(`ent: missing required field "Escrow.refunded_minor"`)}
@@ -771,6 +792,10 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SellerAmountMinor(); ok {
 		_spec.SetField(escrow.FieldSellerAmountMinor, field.TypeInt64, value)
 		_node.SellerAmountMinor = value
+	}
+	if value, ok := _c.mutation.ProcessingFeeMinor(); ok {
+		_spec.SetField(escrow.FieldProcessingFeeMinor, field.TypeInt64, value)
+		_node.ProcessingFeeMinor = value
 	}
 	if value, ok := _c.mutation.RefundedMinor(); ok {
 		_spec.SetField(escrow.FieldRefundedMinor, field.TypeInt64, value)
@@ -1252,6 +1277,9 @@ func (u *EscrowUpsertOne) UpdateNewValues() *EscrowUpsertOne {
 		}
 		if _, exists := u.create.mutation.SellerAmountMinor(); exists {
 			s.SetIgnore(escrow.FieldSellerAmountMinor)
+		}
+		if _, exists := u.create.mutation.ProcessingFeeMinor(); exists {
+			s.SetIgnore(escrow.FieldProcessingFeeMinor)
 		}
 	}))
 	return u
@@ -1839,6 +1867,9 @@ func (u *EscrowUpsertBulk) UpdateNewValues() *EscrowUpsertBulk {
 			}
 			if _, exists := b.mutation.SellerAmountMinor(); exists {
 				s.SetIgnore(escrow.FieldSellerAmountMinor)
+			}
+			if _, exists := b.mutation.ProcessingFeeMinor(); exists {
+				s.SetIgnore(escrow.FieldProcessingFeeMinor)
 			}
 		}
 	}))
