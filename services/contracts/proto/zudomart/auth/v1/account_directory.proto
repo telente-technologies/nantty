@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package zudomart.auth.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service AccountDirectoryService {
+  rpc GetAccountSummaries(GetAccountSummariesRequest) returns (GetAccountSummariesResponse);
+  rpc RevokeAllSessionsForAccount(RevokeAllSessionsForAccountRequest) returns (RevokeAllSessionsForAccountResponse);
+}
+
+message AccountSummary {
+  string account_id = 1;
+  string username = 2;
+  string name = 3;
+  string status = 4;
+  repeated string roles = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message GetAccountSummariesRequest {
+  repeated string account_ids = 1;
+}
+
+message GetAccountSummariesResponse {
+  repeated AccountSummary accounts = 1;
+}
+
+message RevokeAllSessionsForAccountRequest {
+  string account_id = 1;
+  string reason = 2;
+}
+
+message RevokeAllSessionsForAccountResponse {
+  int32 revoked_session_count = 1;
+}
