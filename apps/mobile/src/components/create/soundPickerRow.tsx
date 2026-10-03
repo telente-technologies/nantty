@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { CaretRight24Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { describeClipSoundForDisplay, soundsService } from "@/services/sounds.service";
 import type { ID } from "@/types";
 
@@ -16,6 +16,8 @@ export interface SoundPickerRowProps {
 }
 
 export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId }: SoundPickerRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const selectedSound = useQuery({
     queryKey: ["sound", selectedSoundId],
@@ -62,7 +64,7 @@ export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId }: Sou
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: {
     minHeight: 48,
     paddingHorizontal: 12,
@@ -74,4 +76,4 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   text: { flex: 1, gap: 2 },
-});
+}));

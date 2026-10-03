@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export function RecordButton({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -17,8 +18,8 @@ export function RecordButton({ label, onPress, disabled }: { label: string; onPr
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   outer: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: colors.primary, alignItems: "center", justifyContent: "center" },
-  inner: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primary },
+  inner: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primarySolid },
   pressed: { opacity: 0.7 },
-});
+}));

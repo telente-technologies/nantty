@@ -3,7 +3,7 @@ import Svg, { Path } from "react-native-svg";
 
 import { Camera24Icon, ImageSquare24Icon, MapPin24Icon, SlidersHorizontal24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { PostAudience } from "@/types";
 
 export interface PostToolbarProps {
@@ -16,6 +16,8 @@ export interface PostToolbarProps {
 }
 
 export function PostToolbar(props: PostToolbarProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const tools = [
     { label: "Take a photo", icon: <Camera24Icon />, onPress: props.onTakePhoto },
     { label: "Add photos or videos", icon: <ImageSquare24Icon />, onPress: props.onPickFromLibrary },
@@ -43,7 +45,7 @@ export function PostToolbar(props: PostToolbarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: {
     height: 42,
     paddingHorizontal: 16,
@@ -55,4 +57,4 @@ const styles = StyleSheet.create({
   },
   tools: { flexDirection: "row", alignItems: "center", gap: 24 },
   audience: { height: 25, paddingHorizontal: 4, borderRadius: 4, backgroundColor: colors.chip, flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));

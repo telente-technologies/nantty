@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } f
 import { Check16Icon, MagnifyingGlass16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { describeClipSoundForDisplay, explainWhySoundCannotBeReused, soundsService } from "@/services/sounds.service";
 import type { ClipSound } from "@/types";
@@ -22,6 +22,8 @@ export interface SoundPickerSheetProps {
 const SEARCH_DEBOUNCE_MS = 300;
 
 export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onClose }: SoundPickerSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [tab, setTab] = useState<SoundListTab>("trending");
   const [typedSearch, setTypedSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -110,6 +112,8 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
 }
 
 function SoundOptionRow(props: { title: string; subtitle: string; isSelected: boolean; disabledReason: string | null; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isDisabled = !!props.disabledReason;
   return (
     <Pressable
@@ -132,7 +136,7 @@ function SoundOptionRow(props: { title: string; subtitle: string; isSelected: bo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
   searchField: {
     height: 40,
@@ -166,4 +170,4 @@ const styles = StyleSheet.create({
   },
   optionText: { flex: 1, gap: 2 },
   disabledRow: { opacity: 0.5 },
-});
+}));

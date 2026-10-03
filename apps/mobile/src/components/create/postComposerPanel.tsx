@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { MediaPager } from "@/components/feed/mediaPager";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode, ID, PostAudience } from "@/types";
 
@@ -55,6 +55,8 @@ export function PostComposerPanel({
   onPublish,
   soundPicker,
 }: PostComposerPanelProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [focused, setFocused] = useState(false);
   const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
   const toggleAudience = () => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" });
@@ -127,7 +129,7 @@ export function PostComposerPanel({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   compose: { paddingHorizontal: 16, paddingTop: 32, gap: 16 },
   input: {
@@ -143,4 +145,4 @@ const styles = StyleSheet.create({
   pill: { paddingBottom: 29 },
   preview: { paddingHorizontal: 16, paddingTop: 20, gap: 24, paddingBottom: 40 },
   previewMedia: { marginHorizontal: -16, overflow: "hidden" },
-});
+}));
