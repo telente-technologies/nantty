@@ -10,3 +10,6 @@ export * from "./shipping.type";
 export * from "./privacy.type";
 export * from "./chatSafety.type";
 export * from "./saves.type";
+export * from "./mention.type";
+export * from "./policyUpdate.type";
+export * from "./storeRewards.type";

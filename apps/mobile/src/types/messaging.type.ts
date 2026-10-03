@@ -1,4 +1,5 @@
 import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentCard } from "./chatSafety.type";
+import type { MentionEntity } from "./mention.type";
 import type { ID, ISODate, UserSummary } from "./models.type";
 
 export interface Conversation {
@@ -15,6 +16,7 @@ export interface Conversation {
   readonly subscriberCount?: number;
   readonly myRole?: "owner" | "admin" | "member" | "subscriber";
   readonly disappearingMessagesSeconds?: number | null;
+  readonly onlyAdminsCanMentionAll?: boolean;
   readonly store?: { readonly id: ID; readonly name: string } | null;
   readonly inboxFolder?: InboxFolder;
   readonly spamReason?: string | null;
@@ -35,13 +37,42 @@ export interface MessageAttachedMedia {
   readonly durationSeconds?: number;
 }
 
+export interface SharedLocation {
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly address: string | null;
+  readonly liveUntil?: ISODate | null;
+  readonly updatedAt?: ISODate;
+}
+
+export interface MessageDocument {
+  readonly fileName: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+  readonly pageCount?: number | null;
+  readonly url: string | null;
+}
+
+export interface MessagePollOption {
+  readonly id: ID;
+  readonly text: string;
+  readonly voteCount: number;
+  readonly votedByMe: boolean;
+}
+
+export interface MessagePoll {
+  readonly question: string;
+  readonly allowMultipleAnswers: boolean;
+  readonly options: readonly MessagePollOption[];
+}
+
 export interface Message {
   readonly id: ID;
   readonly conversationId: ID;
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "system" | "shared";
+  readonly kind?: "text" | "voice" | "image" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll";
   readonly sender?: UserSummary;
   readonly media?: MessageAttachedMedia | null;
   readonly reactions?: readonly MessageReactionSummary[];
@@ -49,6 +80,10 @@ export interface Message {
   readonly mediaExpiresAt?: ISODate | null;
   readonly linkPreview?: LinkPreview | null;
   readonly sharedContent?: SharedContentCard | null;
+  readonly location?: SharedLocation | null;
+  readonly document?: MessageDocument | null;
+  readonly poll?: MessagePoll | null;
   readonly readAt?: ISODate | null;
   readonly encryption?: MessageEncryptionEnvelope | null;
+  readonly mentions?: readonly MentionEntity[];
 }

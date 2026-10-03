@@ -13,6 +13,7 @@ export interface Cart {
   readonly items: readonly CartItem[];
   readonly itemsTotal: Money;
   readonly shopDiscount: Money;
+  readonly storeCredit: Money;
   readonly shipping: Money;
   readonly total: Money;
   readonly groups: readonly CartSellerGroup[];
