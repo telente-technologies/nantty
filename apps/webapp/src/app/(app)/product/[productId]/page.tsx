@@ -7,12 +7,14 @@ import { use, useState } from "react";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGallery } from "@/components/commerce/productGallery";
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Badge } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
-import { ShareIcon, StarIcon, StoreIcon } from "@/components/ui/icons";
+import { StarIcon, StoreIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
 import { productsService } from "@/services/products.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -198,9 +200,8 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
 
             <div className={styles.secondaryActions}>
               <SaveToggleButton targetType="product" targetId={product.id} initiallySaved={product.bookmarked ?? false} appearance="pill" showLabel iconSize={18} />
-              <button type="button" className={styles.ghostAction}>
-                <ShareIcon size={18} /> Share
-              </button>
+              <ShareToChatButton kind="product" referenceId={product.id} className={styles.ghostAction} />
+              <ContentActionsMenu shareKind={null} reportTargetType="product" targetId={product.id} canonicalPath={`/product/${product.id}`} />
             </div>
           </div>
 
@@ -213,6 +214,7 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
               <span className={styles.storeMeta}>
                 ★ {product.store.rating > 0 ? product.store.rating.toFixed(1) : "New"} · {formatCountWithThousandsSuffix(product.store.reviewCount)} reviews
               </span>
+              {product.store.earnBackBasisPoints ? <span className={styles.storeMeta}>Earn {product.store.earnBackBasisPoints / 100}% back at this store</span> : null}
             </span>
             <span className={styles.storeCta}>View store</span>
           </Link>
