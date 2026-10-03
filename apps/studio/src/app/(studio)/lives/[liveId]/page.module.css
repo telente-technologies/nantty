@@ -59,12 +59,12 @@
 
 .state_live {
   background: var(--error-soft);
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 .state_ended {
   background: var(--success-soft);
-  color: var(--success);
+  color: var(--color-success-text);
 }
 
 .title {

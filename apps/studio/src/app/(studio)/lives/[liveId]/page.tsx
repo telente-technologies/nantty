@@ -5,11 +5,15 @@ import { use, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
+import { useSession } from "@/components/providers/sessionProvider";
+import { LIVE_CATEGORY_LABELS } from "@/constants/liveCategories.constant";
 import { RetryButton } from "@/components/ui/controls";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
 import { livesService } from "@/services/lives.service";
 import type { LiveState } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
@@ -50,11 +54,13 @@ function CopyField({ label, value, masked = false }: { readonly label: string; r
 
 export default function ControlRoomPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
+  const { viewer } = useSession();
+  const canPinProducts = Boolean(viewer?.hasStore);
   const queryClient = useQueryClient();
   const live = useQuery({ queryKey: ["live", liveId], queryFn: () => livesService.fetchLiveById(liveId), refetchInterval: 5000 });
   const comments = useQuery({ queryKey: ["live-comments", liveId], queryFn: () => livesService.listComments(liveId), refetchInterval: 5000 });
-  const products = useQuery({ queryKey: ["live-products", liveId], queryFn: () => livesService.listPinnedProducts(liveId) });
-  const catalogue = useQuery({ queryKey: ["live-catalogue"], queryFn: () => livesService.listPinneableProducts() });
+  const products = useQuery({ queryKey: ["live-products", liveId], queryFn: () => livesService.listPinnedProducts(liveId), enabled: canPinProducts });
+  const catalogue = useQuery({ queryKey: ["live-catalogue"], queryFn: () => livesService.listPinneableProducts(), enabled: canPinProducts });
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["live", liveId] });
@@ -106,6 +112,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
             {formatCountWithThousandsSuffix(session.viewers)} watching
             {" · "}
             {formatCountWithThousandsSuffix(session.peakViewers)} peak
+            {" · "}
+            {LIVE_CATEGORY_LABELS[session.category]}
           </p>
         </div>
         <div className={styles.headerActions}>
@@ -135,7 +143,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
           <li>Open OBS → Settings → Stream, then choose <strong>Custom…</strong> as the service.</li>
           <li>Paste the server URL below into <strong>Server</strong>.</li>
           <li>Paste the stream key into <strong>Stream Key</strong>.</li>
-          <li>Add the overlay as a <strong>Browser</strong> source at 1920 × 1080, then hit Start Streaming.</li>
+          <li>Add the overlay as a <strong>Browser</strong> source at 1920 × 1080 (use it for alerts, gift goals or your logo), then hit Start Streaming.</li>
         </ol>
         <div className={styles.copyGrid}>
           <CopyField label="Server URL" value={session.ingestUrl} />
@@ -145,14 +153,17 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
         </div>
       </section>
 
+      <LiveEarningsPanel earnings={session.earnings} viewers={session.viewers} peakViewers={session.peakViewers} />
+
       <div className={styles.columns}>
+        {canPinProducts ? (
         <section className={styles.card}>
-          <h2 className={styles.cardTitle}>Pinned products</h2>
+          <h2 className={styles.cardTitle}>Pinned products (optional)</h2>
           <ul className={styles.list}>
             {products.data?.map((product) => (
               <li key={product.id} className={styles.listItem}>
                 <span className={styles.listItemMain}>{product.title}</span>
-                <span className={styles.listItemMeta}>{product.priceLabel}</span>
+                <span className={styles.listItemMeta}>{formatMoneyForDisplay(product.price)}</span>
               </li>
             ))}
           </ul>
@@ -173,6 +184,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
               ))}
           </div>
         </section>
+        ) : null}
 
         <section className={styles.card}>
           <h2 className={styles.cardTitle}>Live chat</h2>
