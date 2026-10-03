@@ -48,7 +48,7 @@ export interface NewBrandInput {
 }
 
 export interface ActingProfile {
-  readonly kind: "person" | "brand" | "store";
+  readonly kind: "person" | "creator" | "business" | "brand" | "store";
   readonly id: ID;
   readonly name: string;
   readonly handle: string;

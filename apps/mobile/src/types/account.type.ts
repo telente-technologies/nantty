@@ -1,10 +1,12 @@
 import type { ID, ISODate, ProductSummary, UserSummary } from "./models.type";
+import type { FollowState } from "./socialGraph.type";
 import type { CurrencyCode, Money } from "./money.type";
 
 export type ConnectionTab = "followers" | "following" | "shopped" | "suggested" | "blocked";
 
 export interface ConnectionEntry extends UserSummary {
   readonly isFollowing: boolean;
+  readonly followState?: FollowState;
 }
 
 export interface AccountSettings {
@@ -21,9 +23,13 @@ export interface ShippingAddressInput {
   readonly fullName: string;
   readonly phone: string;
   readonly line1: string;
-  readonly city: string;
-  readonly state: string;
+  readonly postalCode: string;
+  readonly details: string;
   readonly isDefault: boolean;
+  readonly countryId: string;
+  readonly stateId: string | null;
+  readonly lgaId: string | null;
+  readonly cityId: string | null;
 }
 
 export type SellerDashboardPeriod = "live" | "yesterday" | "today" | "week" | "month" | "all";
