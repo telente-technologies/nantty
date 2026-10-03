@@ -28,6 +28,7 @@
     "backend:dev:media": "cd services/typescript/media && set -a && . ./.env.example && set +a && pnpm dev",
     "backend:dev:gateway": "cd services/typescript/gateway && set -a && . ./.env.example && set +a && pnpm dev",
     "backend:dev:notifications": "cd services/typescript/notifications && set -a && . ./.env.example && set +a && pnpm dev",
+    "backend:dev:search": "cd services/typescript/search && set -a && . ./.env.example && set +a && pnpm dev",
     "backend:test:go": "bash services/scripts/test-go-workspace.sh",
     "backend:test:gateway": "pnpm --filter @zudomart/gateway test",
     "backend:test:social": "pnpm --filter @zudomart/social test",
