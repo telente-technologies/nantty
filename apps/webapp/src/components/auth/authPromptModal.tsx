@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
-import { CloseIcon } from "@/components/ui/icons";
+import { Dialog } from "@/components/ui/dialog";
 import { WebappRequestError, rememberCsrfTokenForRequests, sendRequestToWebappServer } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { User } from "@/types";
@@ -31,19 +31,11 @@ export function AuthPromptModal() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isOpen, reason, closeAuthPrompt, markSignedInAndWaitToReplay } = useAuthPromptStore();
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   useReplayPendingActionAfterSignIn();
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (isOpen && !dialog.open) dialog.showModal();
-    if (!isOpen && dialog.open) dialog.close();
-  }, [isOpen]);
 
   const query = searchParams.toString();
   const nextPath = encodeURIComponent(`${pathname}${query ? `?${query}` : ""}`);
@@ -66,16 +58,7 @@ export function AuthPromptModal() {
   }
 
   return (
-    <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="auth-prompt-title" onClose={closeAuthPrompt}>
-      <div className={styles.header}>
-        <h2 id="auth-prompt-title" className={styles.title}>
-          Sign in to Zudomart
-        </h2>
-        <button type="button" className={styles.close} onClick={closeAuthPrompt} aria-label="Close">
-          <CloseIcon size={18} />
-        </button>
-      </div>
-      <p className={styles.reason}>{reason}</p>
+    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Zudomart" description={reason ?? undefined} layout="sheet" showCloseButton>
       <form className={styles.form} onSubmit={signInWithoutLeavingThePage} noValidate>
         {formError ? (
           <p className={styles.error} role="alert">
@@ -98,6 +81,6 @@ export function AuthPromptModal() {
           More sign-in options
         </Link>
       </p>
-    </dialog>
+    </Dialog>
   );
 }
