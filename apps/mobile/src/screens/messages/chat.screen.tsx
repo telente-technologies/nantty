@@ -184,6 +184,12 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           <View style={styles.readOnlyNotice}>
             <InboxRequestActions conversation={conversation.data} showExplanation onRemoved={() => navigation.goBack()} />
           </View>
+        ) : !isGroupLike && peer?.account?.status === "suspended" ? (
+          <View style={styles.readOnlyNotice}>
+            <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
+              You can't message this account
+            </Text>
+          </View>
         ) : display && !display.canPostMessages ? (
           <View style={styles.readOnlyNotice}>
             <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
