@@ -36,7 +36,7 @@
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
-  color: var(--blue-600);
+  color: var(--color-brand);
   text-decoration: none;
 }
 
@@ -57,7 +57,7 @@
     padding: var(--space-8) var(--gutter);
     background:
       radial-gradient(120% 80% at 15% 10%, rgb(69 99 247 / 0.55) 0%, transparent 55%),
-      linear-gradient(155deg, var(--blue-800) 0%, var(--blue-900) 45%, #060d33 100%);
+      linear-gradient(155deg, var(--blue-800) 0%, var(--blue-900) 45%, color-mix(in srgb, var(--blue-900), black 40%) 100%);
   }
 
   .main {
@@ -80,7 +80,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--blue-100);
+  color: color-mix(in srgb, var(--color-on-brand) 78%, var(--color-brand-solid));
 }
 
 .headline {
@@ -96,7 +96,7 @@
   padding: 0 0.16em 0.04em 0.34em;
   margin-left: 0.02em;
   border-radius: 0.14em 0.3em 0.3em 0.14em;
-  background: var(--yellow-500);
+  background: var(--color-accent);
   color: var(--ink-strong);
   transform: rotate(-3deg) translateY(0.04em);
   transform-origin: left center;
@@ -110,7 +110,7 @@
   width: 0.11em;
   height: 0.11em;
   border-radius: 50%;
-  background: var(--blue-900);
+  background: var(--color-inverse);
   transform: translateY(-50%);
 }
 
@@ -140,7 +140,7 @@
 
 .proofList li > :global(span),
 .proofList li > img {
-  color: var(--yellow-500);
+  color: var(--color-accent);
   filter: brightness(0) saturate(100%) invert(89%) sepia(72%) saturate(668%) hue-rotate(359deg) brightness(103%) contrast(96%);
 }
 
