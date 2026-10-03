@@ -8,6 +8,30 @@ import (
 	"zudomart/modules/payments/src/generated/ent"
 )
 
+// The BillingSubscriptionFunc type is an adapter to allow the use of ordinary
+// function as BillingSubscription mutator.
+type BillingSubscriptionFunc func(context.Context, *ent.BillingSubscriptionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BillingSubscriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BillingSubscriptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BillingSubscriptionMutation", m)
+}
+
+// The ConnectedAccountFunc type is an adapter to allow the use of ordinary
+// function as ConnectedAccount mutator.
+type ConnectedAccountFunc func(context.Context, *ent.ConnectedAccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConnectedAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ConnectedAccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectedAccountMutation", m)
+}
+
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
 // function as IdempotentRequest mutator.
 type IdempotentRequestFunc func(context.Context, *ent.IdempotentRequestMutation) (ent.Value, error)
@@ -78,6 +102,30 @@ func (f PayoutTransferFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutTransferMutation", m)
+}
+
+// The ProviderDisputeFunc type is an adapter to allow the use of ordinary
+// function as ProviderDispute mutator.
+type ProviderDisputeFunc func(context.Context, *ent.ProviderDisputeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderDisputeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderDisputeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderDisputeMutation", m)
+}
+
+// The ProviderPayoutDestinationFunc type is an adapter to allow the use of ordinary
+// function as ProviderPayoutDestination mutator.
+type ProviderPayoutDestinationFunc func(context.Context, *ent.ProviderPayoutDestinationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderPayoutDestinationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderPayoutDestinationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderPayoutDestinationMutation", m)
 }
 
 // The StorePurchaseFunc type is an adapter to allow the use of ordinary
