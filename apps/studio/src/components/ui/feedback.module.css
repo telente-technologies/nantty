@@ -10,7 +10,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid var(--divider);
-  border-top-color: var(--blue-500);
+  border-top-color: var(--color-brand);
   border-radius: 50%;
   animation: feedbackSpin 700ms linear infinite;
 }
@@ -19,7 +19,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid var(--divider);
-  border-top-color: var(--blue-500);
+  border-top-color: var(--color-brand);
   border-radius: 50%;
   animation: feedbackSpin 700ms linear infinite;
 }

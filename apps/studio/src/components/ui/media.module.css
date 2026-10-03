@@ -15,11 +15,11 @@
   overflow: hidden;
   border-radius: var(--radius-pill);
   background: var(--surface-sunken);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .ring {
-  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--blue-400);
+  box-shadow: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--color-focus);
 }
 
 .xs {
