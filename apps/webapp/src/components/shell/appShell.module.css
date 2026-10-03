@@ -64,27 +64,6 @@
   flex: none;
 }
 
-.brandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: var(--blue-500);
-  color: var(--ink-inverse);
-  font-weight: 900;
-  font-size: var(--text-md);
-  letter-spacing: -0.04em;
-}
-
-.brandWord {
-  display: none;
-  font-weight: 800;
-  font-size: var(--text-lg);
-  letter-spacing: var(--tracking-display);
-}
-
 .topBarActions {
   display: flex;
   align-items: center;
@@ -324,10 +303,6 @@
 }
 
 @media (min-width: 768px) {
-  .brandWord {
-    display: inline;
-  }
-
   .topBarSearch {
     display: block;
     max-width: 520px;

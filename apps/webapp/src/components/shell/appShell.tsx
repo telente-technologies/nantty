@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "re
 
 import { BellIcon, CartIcon, ChatIcon, CloseIcon, CompassIcon, HomeIcon, SearchIcon, UserIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { useSession } from "@/components/providers/sessionProvider";
 import { cartsService } from "@/services/carts.service";
 import { messagesService } from "@/services/messages.service";
@@ -85,10 +86,7 @@ function SearchBar() {
 function BrandMark() {
   return (
     <Link href="/" className={styles.brand} aria-label="Zudomart home">
-      <span className={styles.brandMark} aria-hidden="true">
-        Z
-      </span>
-      <span className={styles.brandWord}>Zudomart</span>
+      <ZudomartWordmark />
     </Link>
   );
 }
