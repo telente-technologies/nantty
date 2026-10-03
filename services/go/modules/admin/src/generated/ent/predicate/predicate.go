@@ -27,5 +27,8 @@ type StaffInvitation func(*sql.Selector)
 // StaffLoginChallenge is the predicate function for staffloginchallenge builders.
 type StaffLoginChallenge func(*sql.Selector)
 
+// StaffRole is the predicate function for staffrole builders.
+type StaffRole func(*sql.Selector)
+
 // StaffSession is the predicate function for staffsession builders.
 type StaffSession func(*sql.Selector)
