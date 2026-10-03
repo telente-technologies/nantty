@@ -19,10 +19,11 @@ import {
   useWalletBalanceQuery,
   useWalletTransactionsQuery,
 } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const { data: wallet, isRefetching } = useWalletBalanceQuery();
   const { data: transactions = [] } = useWalletTransactionsQuery();

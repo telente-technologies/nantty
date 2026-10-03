@@ -8,7 +8,7 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useReferralSummaryQuery } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { ReferralStatus } from "@/types/rewards.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -22,6 +22,8 @@ const REFERRAL_STATUS_APPEARANCE: Record<ReferralStatus, { label: string; tone: 
 };
 
 export function ReferralScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { data: referral, isLoading, refetch } = useReferralSummaryQuery();
 
   if (!referral) {
@@ -81,11 +83,11 @@ export function ReferralScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  hero: { backgroundColor: colors.white, borderRadius: 12, padding: 20, gap: 12 },
+  hero: { backgroundColor: colors.surface, borderRadius: 12, padding: 20, gap: 12 },
   codeBox: { alignSelf: "center", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", borderColor: colors.primary, backgroundColor: colors.primaryTint },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 10 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 10 },
   referralRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-});
+}));

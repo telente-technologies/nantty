@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { coinsService } from "@/services/coins.service";
 import type { CoinActivityEntry } from "@/types";
 
 export function CoinActivityScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const activity = useInfiniteQuery({
     queryKey: ["coin-activity"],
     queryFn: ({ pageParam }) => coinsService.listCoinActivity(pageParam),
@@ -61,12 +63,12 @@ export function CoinActivityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { marginHorizontal: 16, marginTop: 24, borderRadius: 12, overflow: "hidden", paddingBottom: 40 },
   separator: { height: 1, backgroundColor: colors.background },
   errorState: { marginTop: 60, gap: 12, alignItems: "center" },
   empty: { marginTop: 60 },
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, backgroundColor: colors.white, paddingHorizontal: 16, paddingVertical: 14 },
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 14 },
   flex: { flex: 1 },
   loadMore: { marginTop: 12, marginHorizontal: 16 },
-});
+}));

@@ -10,11 +10,12 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { usePayoutAccountsQuery, walletQueryKeys } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { walletsService } from "@/services/wallets.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function PayoutAccountsScreen() {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const { data: accounts = [] } = usePayoutAccountsQuery();
   const [bankCode, setBankCode] = useState("");

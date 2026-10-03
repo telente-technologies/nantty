@@ -9,7 +9,7 @@ import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { usePayoutAccountsQuery, useWalletBalanceQuery } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { walletsService } from "@/services/wallets.service";
@@ -18,6 +18,8 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
 export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const { data: wallet } = useWalletBalanceQuery();
   const { data: payoutAccounts = [] } = usePayoutAccountsQuery();
@@ -112,11 +114,11 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 16 },
-  accounts: { backgroundColor: colors.white, borderRadius: 12, overflow: "hidden" },
+  accounts: { backgroundColor: colors.surface, borderRadius: 12, overflow: "hidden" },
   account: { minHeight: 56, paddingHorizontal: 12, paddingVertical: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
   accountSelected: { backgroundColor: colors.primaryTint },
   radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.textSubtle },
   radioSelected: { borderColor: colors.primary, borderWidth: 5 },
-});
+}));

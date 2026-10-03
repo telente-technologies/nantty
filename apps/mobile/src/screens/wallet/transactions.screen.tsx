@@ -5,9 +5,11 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { TransactionRow } from "@/components/wallet/transactionRow";
 import { useWalletTransactionsQuery } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function TransactionsScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { data: transactions = [], isLoading, refetch, isRefetching } = useWalletTransactionsQuery();
   return (
     <Screen>
@@ -32,8 +34,8 @@ export function TransactionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { marginHorizontal: 16, marginTop: 24, borderRadius: 12, overflow: "hidden", paddingBottom: 40 },
   separator: { height: 1, backgroundColor: colors.background },
   empty: { marginTop: 60 },
-});
+}));
