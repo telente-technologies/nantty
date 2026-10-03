@@ -9,6 +9,9 @@ import (
 
 func MountAuditLogRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.AuditLogController{Container: container}
-	mux.Handle("GET /api/v1/admin/audit", container.Guard.RequireStaff("admin.audit.read", false)(http.HandlerFunc(controller.Search)))
-	mux.Handle("GET /api/v1/admin/audit/export", container.Guard.RequireStaff("admin.audit.read", true)(http.HandlerFunc(controller.Export)))
+	read := container.Guard.RequireStaff("audit:read", false)
+	mux.Handle("GET /api/v1/admin/audit", read(http.HandlerFunc(controller.Search)))
+	mux.Handle("GET /api/v1/admin/audit/facets", read(http.HandlerFunc(controller.Facets)))
+	mux.Handle("GET /api/v1/admin/audit/export", container.Guard.RequireStaff("audit:export", false)(http.HandlerFunc(controller.Export)))
+	mux.Handle("GET /api/v1/admin/audit/{entryId}", read(http.HandlerFunc(controller.Get)))
 }
