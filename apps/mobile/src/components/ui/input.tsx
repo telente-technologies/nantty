@@ -2,7 +2,7 @@ import { forwardRef, useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from "react-native";
 
 import { EyeClosed20Icon, Eye20Icon } from "@/components/icons";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily, calculateDefaultLetterSpacing } from "@/constants/typography.constant";
 
 import { Text } from "./text";
@@ -21,6 +21,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   { label, password, right, left, invalid, style, boxStyle, onFocus, onBlur, ...props },
   ref,
 ) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(true);
   const borderColor = invalid ? colors.error : focused ? colors.primary : colors.textSubtle;
@@ -60,7 +62,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
             hitSlop={10}
             onPress={() => setHidden((h) => !h)}
           >
-            {!props.value ? <Eye20Icon /> : hidden ? <EyeClosed20Icon /> : <Eye20Icon color={colors.black} />}
+            {!props.value ? <Eye20Icon /> : hidden ? <EyeClosed20Icon /> : <Eye20Icon color={colors.text} />}
           </Pressable>
         ) : null}
         {right}
@@ -69,7 +71,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   );
 });
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
   box: {
     height: 42,
@@ -89,4 +91,4 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(14),
     color: colors.text,
   },
-});
+}));

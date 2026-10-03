@@ -1,6 +1,6 @@
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { fontFamily, calculateDefaultLetterSpacing, calculateDefaultLineHeight, type FontWeight } from "@/constants/typography.constant";
 
 export interface TextProps extends RNTextProps {
@@ -16,7 +16,7 @@ export interface TextProps extends RNTextProps {
 export function Text({
   size = 14,
   weight = 400,
-  color = colors.text,
+  color,
   lineHeight,
   letterSpacing,
   align,
@@ -24,6 +24,7 @@ export function Text({
   style,
   ...props
 }: TextProps) {
+  const { colors } = useTheme();
   return (
     <RNText
       allowFontScaling
@@ -35,7 +36,7 @@ export function Text({
           fontSize: size,
           lineHeight: lineHeight ?? calculateDefaultLineHeight(size),
           letterSpacing: letterSpacing ?? calculateDefaultLetterSpacing(size),
-          color,
+          color: color ?? colors.text,
           ...(align ? { textAlign: align } : null),
           ...(underline ? { textDecorationLine: "underline" as const } : null),
         },

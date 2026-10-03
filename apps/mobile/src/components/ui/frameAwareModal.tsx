@@ -1,6 +1,8 @@
 import { useEffect, type ReactNode } from "react";
 import { Modal, Platform, StyleSheet, View, type ModalProps } from "react-native";
 
+import { useTheme } from "@/theme";
+
 import { useDeviceFrameOverlayRootElement } from "./deviceFrameOverlayRoot";
 import { renderIntoDeviceFrameOverlay } from "./renderIntoDeviceFrameOverlay";
 
@@ -23,6 +25,7 @@ function CloseOnEscapeKey({ onRequestClose }: { onRequestClose: () => void }) {
 
 export function FrameAwareModal({ visible, onRequestClose, children, transparent, ...modalProps }: FrameAwareModalProps) {
   const overlayRootElement = useDeviceFrameOverlayRootElement();
+  const { colors } = useTheme();
   if (Platform.OS !== "web" || !overlayRootElement) {
     return (
       <Modal visible={visible} transparent={transparent} onRequestClose={onRequestClose} {...modalProps}>
@@ -32,7 +35,7 @@ export function FrameAwareModal({ visible, onRequestClose, children, transparent
   }
   if (!visible) return null;
   return renderIntoDeviceFrameOverlay(
-    <View style={[styles.overlay, transparent ? null : styles.opaque]} accessibilityViewIsModal>
+    <View style={[styles.overlay, transparent ? null : { backgroundColor: colors.surface }]} accessibilityViewIsModal>
       <CloseOnEscapeKey onRequestClose={onRequestClose} />
       {children}
     </View>,
@@ -42,5 +45,4 @@ export function FrameAwareModal({ visible, onRequestClose, children, transparent
 
 const styles = StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFill },
-  opaque: { backgroundColor: "#FFFFFF" },
 });

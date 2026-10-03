@@ -1,12 +1,13 @@
 import { StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 import { Header } from "./header";
 import { Screen } from "./screen";
 import { Text } from "./text";
 
 export function PlaceholderScreen({ name }: { name: string }) {
+  const { colors } = useTheme();
   return (
     <Screen>
       <Header title={name} />
