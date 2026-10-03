@@ -4,6 +4,8 @@ Owner direction, 2026-10-03 (fixed): **Zudomart does not hold anyone's money.** 
 
 Every Bachs claim cites its doc page. Anything the docs do not confirm is marked **UNCONFIRMED — ask Bachs**. This plan is not legal advice. See section 9.
 
+Full Bachs documentation review (control model, fees, go-live checklist, saved cards, open questions): [`docs/integrations/bachs.md`](integrations/bachs.md).
+
 ## 1. Rules
 
 | Rule | Detail |
@@ -270,23 +272,23 @@ Everything here uses **Zudomart's own Bachs account**, with no `X-Account-Id` (c
 
 ## 11. Changes needed in services/go money modules
 
-Checklist for the implementing agent. Files are the current Paystack-era code.
+Status 2026-10-03 (implemented in `services/go`, tests against compose Postgres with Bachs faked at the HTTP layer).
 
-- [ ] Add `services/go/modules/payments/src/integrations/bachsConnect.integration.go` implementing the provider interface: create account, account link, create checkout session (with `X-Account-Id`, `platform_fee`, `reference`, `metadata`), get checkout, refunds, transfers, payouts, balances, bank resolve, disputes (list, evidence, submit).
-- [ ] Add a fake Bachs API next to `paymentsTesting/fakePaystack.util.go` for integration tests. Delete `paystack.integration.go`, `flutterwave.integration.go`, `fakePaystack.util.go` and the Paystack references in `payments.config.go`, `payments.constant.go`, `payments.container.go`, `webhookSignatures.integration_test.go`, `checkoutPayments.validator.go`.
-- [ ] Replace `modules/wallet/src/integrations/paystackTransferSettlement.integration.go` with a Bachs payout and transfer settlement adapter. Update `wallet.config.go`, `wallet.container.go`, `coins.validator.go`.
-- [ ] Webhook endpoint `POST /webhooks/bachs`: raw-body HMAC-SHA256 verification of `{timestamp}.{raw_body}` with `X-Bachs-Signature-V2`, 300 second tolerance, `WebhookEvent` unique on the event id, re-fetch before ledger posting, handle all events in section 8.
-- [ ] Seller account lifecycle in go-money (or go-identity, owner to decide): `connected_account` table (`seller/store id`, Bachs account id, capability statuses, requirements summary, payout schedule = manual), create at store creation, `account-links` endpoint, `capability.updated` and `account.updated` handlers gating checkout.
-- [ ] Checkout: one Bachs checkout per seller group, `reference` = order group id, commission as `platform_fee` computed at charge time, expiry matched to the stock reservation, success and cancel universal links. Update `CheckoutMoneyService` and go-commerce flow for N payment steps.
-- [ ] Ledger: rework seller accounts to the mirror states in section 3 and add `awaiting_settlement`, `debt`. Ledger postings come from webhooks only. Add per-seller mirror reconciliation against `GET /v1/balances` with `X-Account-Id`; freeze payouts on mismatch. Drop `platform:clearing:*` accounts and keep `platform:fees`, `platform:refunds`, `platform:sellerReserve`.
-- [ ] Escrow: release becomes a ledger transition only, no money movement. Keep auto-release 3 days after delivery with dispute pause, and the 24h lock job, with the withdrawable cap `min(ledger available, Bachs available)`.
-- [ ] Payout run: replace the batch Transfers with per-seller `POST /v1/payouts` (`X-Account-Id`, `Idempotency-Key` = `payout:{id}`), fee-on-top handling, resolve on `payout.paid` / `payout.failed`, never on the `201`. Add the first-payout delay copy and the debt block.
-- [ ] Refunds: pre-refund fee top-up transfer (platform to seller account) with its own key, then `POST /v1/refunds`. NGN bank-transfer refunds go through the payout-to-buyer path. Handle `INSUFFICIENT_BALANCE` and the unfunded-refund ledger debt.
-- [ ] Disputes: poll List Disputes, handle `dispute.created|updated`, freeze escrow, evidence submission with `X-Account-Id`.
-- [ ] Creator payouts: per-creator `POST /v1/transfers` with one `transfer_group` per run, balance pre-check, then payout. Add a recipient-only creator account flow.
-- [ ] Platform revenue: web coin packs, seller plans, ads top-ups use platform-account checkouts (no `X-Account-Id`). Add `CoinPack.channel`, per-channel price and coins, and IAP verifiers (Apple StoreKit 2 JWS plus Notifications v2, Google Play Developer API plus RTDN) before any mobile coin sale.
-- [ ] Config: Bachs API base URL (`https://api.bachs.io`, `https://sandbox-api.bachs.io`), `sk_sandbox_` keys, separate sandbox and production signing secrets, scoped production keys, secrets in the secret store.
-- [ ] Update `.github/workflows/backend.yml` and `services/go/.env.example` for the Bachs variables. Update the `paystack.integration.go` mention in `architecture/backend.md`, the webhook route in `architecture/devops.md` and `architecture/security.md`, `architecture/system.md`, `architecture/privacy.md` and `architecture/disaster-recovery.md` (one-provider failure mode: hide the pay button, keep browse and cart).
+- [x] `services/go/modules/payments/src/integrations/bachsConnect*.integration.go` implements the provider interfaces (`PaymentProvider`, `ConnectedAccountProvider`, `MoneyMovementProvider`, `DisputeProvider`, `SubscriptionProvider`): create account, account link, persons/BVN, manual payout schedule, virtual account, checkout session (`X-Account-Id`, `platform_fee`, `reference`, `metadata`, verified customer email), get checkout, refunds, transfers, payout destinations, payouts, balances, bank resolve, banks, disputes (list, evidence, submit), recurring plans and subscription checkouts. HTTP client: 15 s timeout, `Idempotency-Key` required on every mutation, retries only on GETs and keyed mutations.
+- [x] Fake Bachs API (`paymentsTesting/fakeBachs*.util.go`) and recorded fixtures (`integrations/testdata/bachs`). Paystack and Flutterwave adapters, the fake and their config, constants and validators are deleted.
+- [x] `wallet/src/integrations/bachsManualPayoutSettlement.integration.go` replaces the transfer settlement; it is the only code path that triggers a Bachs payout.
+- [x] `POST /webhooks/bachs`: raw-body HMAC-SHA256 of `{timestamp}.{raw_body}` (`X-Bachs-Signature-V2`, legacy header accepted), 300 s tolerance, unique event id in `webhook_events`, re-fetch before ledger posting; collection, checkout, refund, payout, transfer, dispute, account, capability, subscription and invoice events routed.
+- [x] Seller and creator account lifecycle in go-money: `connected_accounts` (capabilities, requirements, deadline, manual schedule confirmed, payouts frozen, virtual account), `POST /payments/connected-accounts/me`, onboarding link on tap, `capability.updated` / `account.updated` refresh, checkout gated on active merchant capabilities. Creating it automatically at store creation (go-commerce call) is still open.
+- [x] Checkout: one Bachs checkout per seller order, commission as `platform_fee`, expiry from `CHECKOUT_SESSION_EXPIRY_MINUTES` (15), success and cancel return URLs. The intent and outbox row commit first and the Bachs call happens after commit. The go-commerce/client N-payment-step UX is still open.
+- [x] Ledger: seller accounts are provider-held, seller-owned (`sellerProviderHeld` owner type: `providerHeld`, `escrow`, `pending`, `available`, `reservedPayout`, `refundsInFlight`, `debt`); Zudomart's own accounts are `platform`. Postings come from webhooks. Per-seller mirror reconciliation against `GET /v1/balances` runs in the daily integrity job and freezes payouts on mismatch. Clearing accounts are gone (`asset:providerBalance:bachs`, `liability:platformFeesUnearned`, `revenue:commission`, `expense:refundedProcessingFees`).
+- [x] Escrow: release is a ledger transition only; auto-release 3 days after delivery (`escrow.policy`), paused by buyer disputes and chargebacks; 24h lock job; withdrawable cap `min(ledger available, Bachs available − unsent withdrawals)`.
+- [x] Payout run: per-seller `POST /v1/payouts` (`X-Account-Id`, key `payout:<reference>`), fee on top (NGN 50 quote), resolved only on `payout.paid` / `payout.failed`. Debt blocks payouts through Bachs (`ORGANIZATION_IN_DEBT`) and the mirror freeze. First-payout delay copy is a client task.
+- [ ] Refunds: fee top-up transfer (platform to seller account, key `fee-topup:<refundId>`) then `POST /v1/refunds` (key `refund:<refundId>`), unfunded refunds stay pending and are retried every 5 minutes. **Open:** the NGN bank-transfer payout-to-buyer path (bank transfers cannot be refunded).
+- [x] Disputes: `dispute.created|updated` and a daily List Disputes poll, escrow frozen, lost chargebacks taken from escrow or seller balance (shortfall to debt), evidence submission with `X-Account-Id` (`POST /admin/payments/disputes/{id}/evidence`).
+- [x] Creator payouts: coin conversion credits `creator:{id}:earningsPayable`; the daily run transfers it (`POST /v1/transfers`, one `transfer_group` per run) to the creator's recipient-only account, then normal payouts.
+- [ ] Platform revenue: web coin packs and web subscriptions/trials use platform-account checkouts; `CoinPackage.client_platform` with per-channel coins and an admin price table (`/admin/coins/price-table`). **Open:** ads top-ups, IAP verifiers (StoreKit 2, Play Developer API + RTDN).
+- [x] Config: `BACHS_API_BASE_URL` (sandbox default), `sk_sandbox_` / `sk_live_` checked against the environment, `BACHS_WEBHOOK_SIGNING_SECRETS` (rotation), payout fee overrides, plan products.
+- [ ] `services/go/.env.example` and the architecture docs updated. **Open:** `.github/workflows/backend.yml` (outside this change).
 
 ## Customer email (owner, 2026-10-03)
 

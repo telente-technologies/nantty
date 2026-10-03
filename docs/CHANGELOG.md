@@ -8,6 +8,26 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ## apps/mobile
 
+### Modal & dialog system, policy update redesign, live polish (§36, 3 Oct) — not tested on a device
+
+| File | Change |
+| --- | --- |
+| `components/ui/dialog.tsx`, `dialogHost.tsx`, `store/dialog.store.ts`, `modalActions.tsx`, `modalChrome.constant.ts`, `fullScreenModal.tsx` | **New.** Themed `Dialog` (icon slot, up to 3 actions, haptic on destructive), queued `showDialog()`, `FullScreenModal`, shared modal palette, tones and motion. |
+| `components/ui/bottomSheet.tsx` | Handle, subtitle, close chip, `scrollable`, sticky `footer`/`footerActions`, fade and slide, dark border, tuned scrim. Same props as before. |
+| `components/ui/toastHost.tsx`, `store/toast.store.ts` | Toast tones, icon and animation. `showToast(text, { tone })` works with existing calls. |
+| `utils/crossPlatformAlert.util.ts` | `showAlertWithButtons` now opens the themed Dialog (no native alert or `window.confirm`). |
+| `navigation/root.navigator.tsx` | Mounts `DialogHost`, also over the suspended and re-accept screens. |
+| `components/legal/*`, `hooks/usePolicyUpdates.hook.ts`, `types/policyUpdate.type.ts`, `mocks/legal.mock.ts` | Policy banner card, "What changed" sheet, `PolicyDocumentCard`, re-accept screen with checkbox gate and data and delete choices, `whatChanged[]`, `acceptAllPending`. |
+| `components/escrow/confirmActionSheet.tsx`, `components/settings/deleteAccountSheet.tsx`, `themePreferenceSheet.tsx`, `components/auth/guestAuthSheet.tsx` | Confirmations moved to Dialog; delete account, theme and guest sign-in sheets redesigned. |
+| `screens/messages/conversationInfo.screen.tsx`, `components/profile/profileMoreSheet.tsx`, `components/live/guests/liveGuestsSheet.tsx` | New confirmations: leave group or channel, remove member, block, remove guest. |
+| `components/live/**`, `screens/live/*`, `types/models.type.ts` | Live theme pass, glass tokens (`liveSurface.constant.ts`), redesigned header, comment bar, comments feed (`kind: "follow"`), join card, invite prompt, battle and gift sheets, live-ended screen. |
+| `components/ui/actionSheet.tsx`, `clips/commentRow.tsx`, `clips/clipCommentsSheet.tsx`, `moderation/contentOptionsSheet.tsx`, `chatReport/*`, `chat/chatAttachmentMenu.tsx`, `chat/chatsOptionsMenu.tsx`, `chat/messageReactionPicker.tsx`, `chatSafety/inboxFolderMenu.tsx`, `home/topicFilterRow.tsx`, `profile/profileSwitcher.tsx`, `create/liveMonetizationSheet.tsx`, `create/soundPickerSheet.tsx`, `feed/mediaLightbox.tsx`, `media/landscapeVideoFullScreenModal.tsx` | Second pass: shared ActionSheet, popover surface and media glass. Every remaining sheet, menu and viewer is restyled; behaviour unchanged. |
+
+### Chat reporting (§37, 3 Oct) — not tested on a device
+
+- `components/chatReport/*`: report sheet (reason, evidence picker, confirmation), header options menu, block dialog, launcher hook. Entry points: chat header menu, long-press "Report message", group info (group and member), Requests and Spam rows. Evidence is built on the device with a SHA-256 integrity hash (`utils/chatReportEvidence.util.ts`).
+- `types/chatReport.type.ts`, `services/chatReports.service.ts`, mocks `chatReports.mock.ts` (validation, rate limit 5 per hour, report and block, restrict, entries in `GET /reports/me`).
+
 ### Creator = personal account upgrade (owner, 2026-10-03)
 
 - `ActingProfile.kind` no longer has `creator`; the Personal profile carries `creatorStatus` (`none|pending|approved|rejected|suspended`). Profile switcher lists Personal, Business, Brand, Store only. `useCreatorEntry` reads the personal account's creator status; Settings row reads "Switch to creator account" / "Creator application status" / "Creator tools". Blue stays on the Personal profile, creator-enabled or not.
@@ -463,6 +483,25 @@ Plan: [plans.md §29](./plans.md). Mock mode only. Verified with `tsc --noEmit`.
 
 ## apps/webapp
 
+### Modal & dialog system and policy update redesign (§36, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `components/ui/dialog.tsx` + `.module.css`, `confirmDialog.tsx` | **New.** Accessible `Dialog` (focus trap, scroll lock, Esc and overlay close when dismissible, `aria-modal`, reduced-motion enter and exit, sheet layout under 640px) and `requestConfirmation()`. |
+| `components/ui/modalDialog.tsx` | Now wraps `Dialog`; old CSS removed. |
+| `components/ui/button.module.css`, `app/globals.css` | Danger buttons use `--danger-solid` (AA with white text in both themes). |
+| `components/legal/*`, `types/policyUpdate.type.ts`, `mocks/legal.mock.ts` | Policy banner card, "What changed" dialog, re-accept screen with checkbox gate, `DeleteAccountDialog` reuse. |
+| `components/auth/authPromptModal.*`, `components/shell/userMenu.tsx`, `components/profile/profileView.tsx`, `components/settings/deleteAccount*` | Sign-in prompt moved to Dialog; sign out asks to confirm; delete account moved into a danger dialog. |
+| `components/ui/icons.tsx` | Shield, document, alert, external link and download icons. |
+| `packages/webKit/src/consent/cookieConsent.module.css` | Cookie banner in the dialog language: card on desktop, bottom sheet on phones, dark surface and border, grouped categories. |
+| `components/feed/postCard.module.css` | Post action row wraps so sponsored posts no longer widen the page to 405px at 360/390. |
+
+Screenshots checked: banner, What changed, re-accept, report, delete account and sign out, at 390 and 1440 px in light and dark.
+
+### Chat reporting (§37, 3 Oct)
+
+- `components/chatReport/*`: report dialog (reason, evidence, confirmation), chat header menu, per-message "Report"; Settings, Your reports page (`/settings/reports`). Mock handlers shared in shape with mobile.
+
 ### Creator = personal account upgrade (owner, 2026-10-03)
 
 - `ActingProfile.creatorStatus` on the personal profile mock; "Creator dashboard" links read "Creator tools".
@@ -812,6 +851,10 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/admin
 
+### Chat reports moderation (§37, 3 Oct)
+
+- `/moderation/chat-reports`: queue (child safety first, filters), detail with read-only "Submitted by reporter" transcript, hash check, spam score, actions (dismiss, warn, restrict, suspend, ban, remove group, escalate to legal) with reason, step-up and audit, evidence retention card tagged LEGAL REVIEW. New permissions `chat-reports:review` and `chat-reports:legal`; Trust & Safety template and demo admins updated. Contract in `apiContract.md` ("Chat reports").
+
 ### Creator = personal account upgrade (owner, 2026-10-03)
 
 - Admin `ProfileType` is `PERSONAL|BUSINESS|BRAND|GOVERNMENT`; lifetime checkmark grants and verification copy say "Personal (incl. creators) = Blue". `apiContract.md` updated.
@@ -1039,3 +1082,17 @@ Plan: [docs/plans.md §30](../../docs/plans.md). Verified with `tsc --noEmit` an
 | Plan picker | `components/billing/subscriptionPlanPicker.tsx`, `components/settings/billingSettingsView.tsx`, `mocks/seed/demoFinance.mock.ts` | Monthly/yearly toggle with the yearly discount, "Blue + Gold bundle -15%" when an active Blue exists (yearly wins when bigger), Gold-only plan card, per-business billing note. Yearly prices now carry a 20% discount. |
 | Business documents | `components/documents/*`, `components/dashboard/businessDocumentsBanner.tsx`, `app/(workspace)/settings/business-documents`, `mocks/handlers/businessDocuments.mock.ts` | Upload/re-upload CAC, ID and proof of address with statuses and rejection reasons, dashboard banner until approved, Gold checkmark preview. Never blocks selling. |
 | Layout fix | `components/layout/compactWorkspaceSwitcher.module.css`, `topBar.module.css` | Store switcher text ellipsizes at 390px instead of clipping. |
+
+### Image preview controls (3 Oct)
+
+| File | Change |
+| --- | --- |
+| `src/components/feed/mediaLightbox.tsx` | The close button and `n / total` counter now sit below the status bar, notch or Dynamic Island (`safe-area top + 16`, not a fixed 24), with safe-area side padding in landscape. The close button grew from 36 to 40px for easier tapping. Applies everywhere images are previewed (feed, profile and cover photos, store and brand, product gallery, chat, disputes). |
+
+### Tappable @username tags (3 Oct)
+
+| File | Change |
+| --- | --- |
+| `mobile: utils/usernameTags.util.ts`, `utils/__tests__/usernameTags.util.test.ts`, `components/mentions/mentionText.tsx`, `hooks/useOpenUserByUsername.hook.ts`, `services/users.service.ts` | `MentionText` now also parses plain `@username` tokens (not emails, URLs or `@all`), memoised; entities win. Tag is brand-coloured, weight 600, link role; tap resolves `GET /users/by-username/:username` then opens the profile ("User not found" toast on 404). Wired into bios, store and brand descriptions, product info, reviews, notifications, live comments and video-reply stickers. First jest test file (excluded from tsc as `@types/jest` is not installed). |
+| `mobile: mocks/users.mock.ts`, `guestAccess.mock.ts`, `username.mock.ts`, `mentions.mock.ts`, `types/mention.type.ts`; `components/mentions/mentionComposer.hook.ts`, `mentionSuggestionList.tsx` | By-username mock route (guest-readable); `all` reserved exactly; "@" shows following, then followers, then recent, then everyone else under a "More people on Zudomart" divider; exact match first; 150 ms debounce (none for the empty query). |
+| `webapp: utils/usernameTags.util.ts`, `components/mentions/mentionText.tsx`, `app/(app)/u/[username]/page.tsx`, `services/users.service.ts`, `mocks/users.mock.ts`, `username.mock.ts`, `mentions.mock.ts`, `mentionAutocompleteInput.tsx`, `mentions.module.css` | Same behaviour with `<Link href="/u/username">` (client navigation); `/u/[username]` resolves and redirects to `/user/:id`. Autocomplete gets the same ranking, divider, verified tick and debounce. No vitest in webapp, so no web test file. |

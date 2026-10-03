@@ -1274,6 +1274,12 @@ Notifications: each tagged user gets "X mentioned you in a post / comment / grou
 - **[LATER]** in-input highlighting while typing, one-to-one autocomplete, mentions in story replies and live chat, a Mentions notification filter.
 
 
+### 31.5 Plain `@username` tags (3 Oct, mock)
+
+- Any `@username` in user text is a link even with no entity (regex: boundary before `@`, 1-30 of letters, digits, `.`, `_`, trailing dots trimmed, not followed by more name characters; emails and URLs excluded). Entities still win. `@all` is never a link; outside groups it is plain text.
+- Backend: add `GET /users/by-username/:username` returning `{ id }` (404 if missing; suspended users still return their id so the suspended-profile state opens). Reserve the exact username `all` at signup and rename. Mention suggestions: ranked following, followers, recent chats, then platform search, exact match first.
+- Web route `/u/:username` redirects to `/user/:id`. Not yet covered: story reply bubbles, group chat web, webapp live chat and messages (no such surfaces or no MentionText yet).
+
 ## 32. Legal admin & policy versioning **[DONE (admin + web + webapp + mobile, mock)]**
 
 Spec: owner rules. Superadmins create Legal admins; Legal admins manage the privacy policy, terms and other legal documents; all users get an email when privacy or terms change. Mock mode; endpoints are in `apps/admin/apiContract.md` ("Legal documents and policy versioning").
@@ -1451,3 +1457,100 @@ Owner rule: only the author of a clip can reply to comments on it with a video (
 - **Edge cases:** deleted comment (GET 404) shows "Comment deleted" in the sticker and "Replying to a deleted comment" in the link. If the original clip is subscriber-only the reply defaults to Followers, with a warning when the author picks Everyone. Theme-aware styles; the sticker has no animation, so reduced motion is respected.
 - **Demo and links:** mock clips `clip_me_demo_1` and `clip_me_demo_2` are owned by the demo user. The overlay also renders in `PostCard` (PostDetail, feeds). The "Replying to" link opens the Clips tab at the original clip with the comments sheet open, scrolled to and highlighting the comment (top-level or preview reply only).
 - **Open items:** real server enforcement of audience, block and author rules; deeper nested replies are not scrolled to. Not tested on a device.
+
+---
+
+## 36. Modal & dialog system **[DONE (mobile + webapp, mock)]**
+
+Owner complaint: the Terms/Privacy update notice was not designed, and modals looked rough in dark mode. One modal language for both apps, light and dark.
+
+### 36.1 Shared rules
+
+- **Surfaces:** light uses the elevated white surface with a soft navy shadow; dark uses the surface step (`#2C2C2C` mobile, `--color-surface` web) plus a hairline border, no heavy shadow.
+- **Scrim:** light `rgba(10,10,20,0.45)`, dark `rgba(0,0,0,0.68)`.
+- **Shape and rhythm:** dialog radius 20, sheet top radius 24, action radius 12 (web buttons stay pills), 20px edge padding, 48px action height, icon badge 52px tinted by tone (neutral, brand, destructive, success, caution).
+- **Actions:** up to 3, stacked on phones (primary first), side by side on desktop. Destructive solid is `#D32F2F` light / `#C8333B` dark so white text passes AA; cancel is always a visible secondary button. Mobile plays a warning haptic on destructive confirms.
+- **Motion:** about 240ms in and 180ms out (fade and scale for dialogs, slide for sheets). Reduced motion turns it off (`useReducedMotionPreference` on mobile, `prefers-reduced-motion` on web).
+
+### 36.2 Mobile (`components/ui`)
+
+- `Dialog`: centred card with an icon or illustration slot, title, body, children and up to 3 actions. `dismissible` controls backdrop and back-button close. Long text scrolls inside.
+- `DialogHost` plus `showDialog()` (`store/dialog.store.ts`), queued. `showAlertWithButtons` now opens the themed Dialog everywhere (it used to be the native alert, or `window.confirm` on web): cancel buttons become secondary, destructive buttons get the destructive tone and icon, and "Couldn't…" titles get the caution tone.
+- `BottomSheet`: drag handle, title and subtitle, close button, `scrollable` body, sticky `footer` / `footerActions`, safe-area and keyboard aware through `KeyboardSpacer`. Backdrop fades and the sheet slides. Same props as before, so all 51 existing sheets picked up the new look.
+- `FullScreenModal`: header with close, scrollable content, sticky footer, keyboard aware. Ready to adopt; nothing uses it yet.
+- `ModalActionStack` / `ModalActionButton`, `modalChrome.constant.ts` (palette, tones, radii, motion), and the toast now has tones (`showToast(text, { tone })`), an icon and enter and exit animation.
+
+### 36.3 Webapp (`components/ui`)
+
+- `Dialog` on native `<dialog>` + `showModal()`: `aria-modal`, `aria-labelledby` / `aria-describedby`, `alertdialog` role for confirms, Tab focus trap, first focus on the first control (on Cancel for destructive confirms), focus returns to the trigger, page scroll lock, Esc and overlay close only when `dismissible`, exit animation before close. `layout="sheet"` turns it into a bottom sheet under 640px.
+- `requestConfirmation()` + `ConfirmDialogHost` (promise based). `ModalDialog` now wraps `Dialog`, so report, share to chat, subscribe and coin purchase picked it up.
+- Migrated: sign-in prompt, sign out (user menu and Me page now confirm first), delete account (new `DeleteAccountDialog`).
+
+### 36.4 Policy update experience (from §32)
+
+- **Banner:** card with a shield icon, "We've updated our {documents}", effective date, "Review changes" and dismiss.
+- **"What changed" sheet/dialog:** one card per document with name, version, effective date, an "Important change" chip, the highlighted list from Legal (`whatChanged[]`, falling back to the summary split into lines) and "Read full policy" (in-app browser on mobile, new tab on web). Non-material: "Got it" records the acknowledgement. Material, before the date: "Accept the update" or "Remind me later", with a note saying when acceptance becomes required.
+- **Blocking re-accept screen** (material change after the effective date): wordmark, shield badge, a calm title, the same document cards for every pending Terms/Privacy version, "Not ready to agree?" with Download my data and Delete my account, and a sticky footer with the checkbox "I have read and agree to the updated Terms and Privacy Policy" and Accept, which stays disabled until the box is ticked. Accept records every pending version. Copy allows up to 2× text scaling on mobile, and the layout has been checked at 150% root font size on the web.
+- `PolicyVersionSummary.whatChanged?: string[]` added (mobile + webapp types and mocks). Backend: return the admin "what changed" list from `legal_notice_drafts.what_changed` in `GET /legal/policy-versions/current`.
+
+### 36.5 Live polish (owner request)
+
+- Live follows the theme off video. Over video, every overlay uses one glass treatment (`components/live/liveSurface.constant.ts`: `rgba(12,12,18,0.5)` plus a hairline white border, white text, readable text shadow). The LIVE red is now `#E0201B` (white text 4.8:1).
+- Header: chips for back and more, host pill with avatar, name, badge and follower count, category chip, viewer badge.
+- Comment bar: input pill with an emoji shortcut, round send button with a sending state, a gold gift button, tip and products buttons, and the keyboard theme matches.
+- Comments feed: rows with avatar, name and verification badge, @mentions highlighted, glass or themed bubbles. Joined, follow (new optional `kind: "follow"`) and gift rows are styled differently. Entry animation respects reduced motion. Max height 232, and the oldest rows fade at the top.
+- Join card: cover preview with the LIVE badge, host avatar with the live ring, title, category chip, viewer count, "Join live" and "Not now". Guest invite prompt, battle setup (sticky Start), battle proposal, guests sheet (with a confirmation before removing a guest), gift pickers, leaderboards, share, products and the live-ended screen all use theme tokens.
+
+### 36.6 Counts and open items
+
+- Mobile: all 35 `showAlertWithButtons` calls now open the themed Dialog. 4 new confirmations: leave group or channel, remove a member, block from a profile, remove a stage guest. `ConfirmActionSheet` is now a Dialog (3 screens). 51 sheets got the new look. Delete account and theme sheets were redesigned.
+- **Second pass (3 Oct):** new `ActionSheet` / `ActionSheetOptionList` (`components/ui/actionSheet.tsx`, grouped option rows, destructive tone with haptic, Cancel footer). Comment options and delete (clips), content options, chat options and report-a-member, and the chat attachment menu now use it. Chat report sheet: sticky footer actions, and "report and block" uses the destructive style. Profile switcher: selectable cards with a radio. Live monetization: scrollable with Done; sound picker: pill search. Popover menus (topic filter, chats options, inbox folder) share `buildPopoverMenuSurface`. The reaction picker uses the modal scrim and surface. The media lightbox and landscape video use `mediaGlass` controls. The clip comments sheet has the sheet handle, radius, scrim and close chip. Web cookie banner (`packages/webKit`): dialog card on desktop, bottom sheet on phones, dark surface step and border, grouped category list, Accept on top on mobile.
+- **Remaining: 0.** Custom `FrameAwareModal` is kept only where a popover or media viewer needs it (7 files), and all of them use the shared tokens.
+- Webapp home feed overflow at 360/390 is fixed: on sponsored posts the post action row (Sponsored pill plus impressions) now wraps instead of pushing the layout to 405px. Checked: no horizontal scroll on home, explore, mart, me, settings and chats.
+- Mobile not checked visually (no Expo); type checks are clean.
+
+---
+
+## 37. Chat reporting **[DONE (mobile + webapp + admin, mock)]**
+
+Owner requirement: in chats a user can report a user, report and block, report a conversation or message, or report a group, and it reaches an admin for review. Chats are end-to-end encrypted (§25), so Zudomart cannot read them: the reporter's device attaches the messages it chooses.
+
+### 37.1 Entry points
+
+| Surface | Mobile | Webapp |
+| --- | --- | --- |
+| Chat header menu | Report user, Report and block, Report conversation, Block (groups: Report group, Report a member, Conversation info) | Same (header menu; groups: Report group) |
+| Message | Long-press picker adds "Report message" (other people's messages only) | "Report" button beside each incoming message |
+| Group info | "Report group", "Report member" per member row | Not built (no group UI on web) |
+| Requests and Spam lists | "Report" and "Report and block" under Accept/Delete/Block | Not built (web has no Requests or Spam folders) |
+
+Guests cannot report: every entry goes through `requireAuthThen`.
+
+### 37.2 Report flow
+
+- Reasons: child safety (urgent, priority path), self-harm (shows support resources), violence or threats, harassment or bullying, hate, sexual content, spam or scam, fraud or payment scam, impersonation, selling prohibited items, other (text required). Optional details, 500 characters.
+- Conversation, message and group reports add an evidence step: last N messages (10, 20 default, 50) or pick messages (up to 100 newest). Consent notice: "These messages will be sent to Zudomart for review. The other person won't be told who reported them."
+- The device sends per message: `messageId`, `senderId`, `senderName`, `sentAt`, `text`, `attachments[]` (type, mime, file name, size, duration; file bytes are never sent), plus `evidenceHash` (SHA-256 of the JSON evidence array) for integrity.
+- Report and block is one request (`blockReportedUser: true`).
+- Confirmation "Thanks, we'll review this" with Block, Mute (mobile) and Restrict buttons and a link to "My reports" (mobile) / Settings, Your reports (webapp).
+- The reported user is never told who reported them. Reporter outcome is "We took action" or "No violation found", nothing about the other person.
+- Rate limit: 5 reports per rolling hour per account (429 `REPORT_RATE_LIMITED`).
+
+### 37.3 Mock contract (mobile and webapp)
+
+| Method + path | Request | Response |
+| --- | --- | --- |
+| `POST /api/v1/reports` | `{ targetType: user\|message\|conversation\|group, targetId, conversationId, reportedUserId, reason, details, blockReportedUser, evidence[], evidenceSelection: last_messages\|picked_messages\|null, evidenceHash }` | `{ id, status: "received", priority: normal\|urgent }`. 422 `EVIDENCE_REQUIRED` for message, conversation and group without evidence, `DETAILS_REQUIRED` for `other`; 429 when rate limited. Idempotency key header |
+| `GET /api/v1/reports/me` | | `ContentReport[]` including chat reports (`targetType` gains `conversation`, `group`) |
+| `POST /api/v1/conversations/:id/restrict` | | void (their messages move to Requests) |
+| `POST /api/v1/conversations/:id/block` | | void (existing) |
+
+### 37.4 Admin
+
+`/moderation/chat-reports` queue (permission `chat-reports:review`): filters for status, report type, reason and priority; child-safety reports sort first and are always URGENT. Detail shows reporter, reported user or group, reason, details, the submitted transcript as a read-only chat labelled "Submitted by reporter", the hash check, the retention date and the Python spam score. Actions (each needs a reason, is audited, and the reporter gets the outcome notification): dismiss, warn, restrict messaging (`users:restrict`), suspend (`users:suspend`), ban (`users:ban`, step-up), remove group (step-up, group reports only), escalate to legal (`chat-reports:legal`, step-up). Evidence retention is configurable (default 180 days, legal hold 730 days, 30 to 730) and every evidence block carries the **LEGAL REVIEW** tag. Endpoints are in `apps/admin/apiContract.md`.
+
+### 37.5 Open items
+
+- **[LATER]** real server-side evidence storage with encryption at rest and a purge job; counsel to confirm the retention defaults and the lawful basis for reading user-submitted messages; NCMEC-style child-safety reporting hand-off.
+- Webapp Mute, Requests and Spam report entries and group member reporting wait for those surfaces on the web.
+- Not tested on a device or in a browser; types checked only.
