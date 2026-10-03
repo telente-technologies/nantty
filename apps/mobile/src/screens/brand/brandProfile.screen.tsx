@@ -7,6 +7,7 @@ import { ProductMasonry } from "@/components/home/productMasonry";
 import { useUserPostsQuery } from "@/components/profile/profileQueries.hook";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { OfficialStoreBadge } from "@/components/store/officialStoreBadge";
+import { webHandoffService } from "@/services/webHandoff.service";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -79,7 +80,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
         <View style={[styles.actions, styles.padded]}>
           <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => requireAuthThen(() => toggleFollow.mutate(!details.isFollowing), undefined, "follow brands")} />
           {ownsBrand && !details.verification?.badgeVisible ? (
-            <Button variant="subtle" title="Verify brand" style={styles.flex} onPress={() => navigation.navigate("VerificationApply", { color: "gold" })} />
+            <Button variant="subtle" title="Manage on the web" style={styles.flex} onPress={() => webHandoffService.openManageBilling(details.id)} />
           ) : null}
         </View>
 
