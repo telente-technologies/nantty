@@ -117,10 +117,16 @@ func (module *Module) completeCollaborators(collaborators *Collaborators, settin
 	}
 	if collaborators.Money == nil {
 		if settings.MoneyGrpcAddress == "" {
+			if !settings.AllowInMemoryMoneyFake {
+				return errors.New("LIVE_MONEY_GRPC_ADDRESS is required: the in-memory money fake is not allowed in production")
+			}
 			logger.Warn("LIVE_MONEY_GRPC_ADDRESS is not set: gifts use an in-memory money fake that moves no real coins")
 			collaborators.Money = integrations.NewInMemoryMoneyGateway()
 		} else {
-			client, err := integrations.DialMoneyService(settings.MoneyGrpcAddress)
+			client, err := integrations.DialMoneyService(integrations.InternalGrpcOptions{
+				Address: settings.MoneyGrpcAddress, Token: settings.MoneyGrpcToken, Timeout: settings.MoneyCallTimeout,
+				RetryAttempts: settings.GrpcRetryAttempts, RetryBackoff: settings.GrpcRetryBackoff,
+			})
 			if err != nil {
 				return err
 			}
@@ -136,7 +142,10 @@ func (module *Module) completeCollaborators(collaborators *Collaborators, settin
 		collaborators.Directory = integrations.AuthSchemaDirectory{Database: database, Schema: "auth"}
 		return nil
 	}
-	client, err := integrations.DialAccountDirectory(settings.AccountDirectoryGrpcAddress)
+	client, err := integrations.DialAccountDirectory(integrations.InternalGrpcOptions{
+		Address: settings.AccountDirectoryGrpcAddress, Token: settings.AccountDirectoryGrpcToken, Timeout: settings.AccountDirectoryCallTimeout,
+		RetryAttempts: settings.GrpcRetryAttempts, RetryBackoff: settings.GrpcRetryBackoff,
+	})
 	if err != nil {
 		return err
 	}
