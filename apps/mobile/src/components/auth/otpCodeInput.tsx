@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { removeNonDigitCharacters } from "@/utils/validators.util";
 
 export const OTP_CODE_LENGTH = 6;
@@ -15,6 +15,8 @@ export interface OtpCodeInputProps {
 }
 
 export function OtpCodeInput({ value, onChangeValue, onCodeComplete, invalid = false }: OtpCodeInputProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const hiddenInputRef = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
 
@@ -62,9 +64,9 @@ export function OtpCodeInput({ value, onChangeValue, onCodeComplete, invalid = f
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", gap: 8 },
   box: { flex: 1, height: 42, borderWidth: 1, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  caret: { width: 2, height: 20, backgroundColor: colors.primary },
+  caret: { width: 2, height: 20, backgroundColor: colors.primarySolid },
   hiddenInput: { position: "absolute", width: 1, height: 1, opacity: 0 },
-});
+}));

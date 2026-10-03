@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface ResendCodeTimerProps {
   readonly secondsUntilResendAllowed: number;
@@ -12,6 +12,7 @@ export interface ResendCodeTimerProps {
 }
 
 export function ResendCodeTimer({ secondsUntilResendAllowed, restartKey, onPressResendCode, onPressRequestCall }: ResendCodeTimerProps) {
+  const { colors } = useTheme();
   const [secondsRemaining, setSecondsRemaining] = useState(secondsUntilResendAllowed);
 
   useEffect(() => {
