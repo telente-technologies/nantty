@@ -9,6 +9,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { StoreDetail } from "@/types/commerce.type";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
+import { PreviewableImage } from "@/components/ui/previewableImage";
 
 export interface StoreProfileHeaderProps {
   readonly store: StoreDetail;
@@ -28,11 +29,19 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
   return (
     <View>
       <View style={styles.banner}>
-        {store.bannerUrl ? <Image source={{ uri: store.bannerUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+        {store.bannerUrl ? (
+          <PreviewableImage imageUrl={store.bannerUrl} accessibilityLabel={`View ${store.name} cover photo`} style={StyleSheet.absoluteFill}>
+            <Image source={{ uri: store.bannerUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          </PreviewableImage>
+        ) : null}
       </View>
       <View style={styles.identity}>
         <View style={styles.logo}>
-          {store.logoUrl ? <Image source={{ uri: store.logoUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+          {store.logoUrl ? (
+            <PreviewableImage imageUrl={store.logoUrl} accessibilityLabel={`View ${store.name} logo`} style={StyleSheet.absoluteFill}>
+              <Image source={{ uri: store.logoUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            </PreviewableImage>
+          ) : null}
         </View>
         <View style={styles.names}>
           <View style={styles.nameRow}>
