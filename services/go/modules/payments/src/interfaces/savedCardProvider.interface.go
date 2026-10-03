@@ -11,6 +11,7 @@ type AuthorizationChargeRequest struct {
 	SettlementAccount  string
 	SubaccountBearsFee bool
 	Metadata           map[string]string
+	SplitShares        []SplitShare
 }
 
 type AuthorizationChargeResult struct {

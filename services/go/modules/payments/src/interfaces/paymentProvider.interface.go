@@ -29,6 +29,12 @@ type ChargeRequest struct {
 	PlanCode           string
 	ExpiresInMinutes   int
 	Metadata           map[string]string
+	SplitShares        []SplitShare
+}
+
+type SplitShare struct {
+	Subaccount string
+	ShareMinor int64
 }
 
 type ChargeSession struct {
