@@ -13,14 +13,26 @@ import (
 	"zudomart/platform/httpserver"
 )
 
-var ErrCheckoutPayablesConflict = httpserver.NewApiError(http.StatusConflict, "CHECKOUT_PAYABLES_CONFLICT", "These orders were already registered with different amounts.")
+var (
+	ErrCheckoutPayablesConflict = httpserver.NewApiError(http.StatusConflict, "CHECKOUT_PAYABLES_CONFLICT", "These orders were already registered with different amounts.")
+	ErrDirectPaymentNotAllowed  = httpserver.NewApiError(http.StatusUnprocessableEntity, "DIRECT_PAYMENT_NOT_ALLOWED", "This store is not verified yet, so its orders can only be paid through escrow.")
+)
 
 func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, payables []models.OrderPayable) error {
 	if len(payables) == 0 {
 		return fmt.Errorf("a checkout needs at least one order")
 	}
 	checkoutId, buyerId, currency := payables[0].CheckoutId, payables[0].BuyerUserId, payables[0].Currency
-	for _, payable := range payables {
+	for index, payable := range payables {
+		if payable.PaymentMode == "" {
+			payables[index].PaymentMode, payable.PaymentMode = "escrow", "escrow"
+		}
+		if payable.PaymentMode != "escrow" && payable.PaymentMode != "direct" {
+			return fmt.Errorf("payment mode must be escrow or direct")
+		}
+		if payable.PaymentMode == "direct" && !payable.StoreVerified {
+			return ErrDirectPaymentNotAllowed
+		}
 		if payable.CheckoutId != checkoutId || payable.BuyerUserId != buyerId || payable.Currency != currency || payable.AmountMinor <= 0 {
 			return fmt.Errorf("every order in a checkout must share checkout, buyer and currency and have a positive amount")
 		}
@@ -42,6 +54,7 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 				SetCheckoutID(payable.CheckoutId).SetOrderID(payable.OrderId).SetOrderReference(payable.OrderReference).
 				SetBuyerUserID(payable.BuyerUserId).SetStoreID(payable.StoreId).SetSellerUserID(payable.SellerUserId).
 				SetAmountMinor(payable.AmountMinor).SetCurrency(payable.Currency).SetProductSummary(truncate(payable.ProductSummary, 300)).
+				SetPaymentMode(orderpayable.PaymentMode(payable.PaymentMode)).SetStoreVerified(payable.StoreVerified).
 				SetCreatedAt(gateway.Container.Now()).Exec(ctx)
 			if err != nil {
 				return err

@@ -25,7 +25,7 @@ func (gateway *PaymentGateway) VerifyAndSettlePaymentIntentByReference(ctx conte
 	if err != nil {
 		return models.PaymentIntentView{}, err
 	}
-	if intent.Status != paymentintent.StatusPending {
+	if !isSettleable(intent.Status) {
 		return ConvertPaymentIntentToView(intent), nil
 	}
 	provider, err := gateway.Container.Provider(intent.Provider)
@@ -41,12 +41,17 @@ func (gateway *PaymentGateway) VerifyAndSettlePaymentIntentByReference(ctx conte
 	}
 	var settled *ent.PaymentIntent
 	var mismatch bool
+	var duplicateRefund *RequestedRefund
 	err = databases.RunInMoneyTransaction(ctx, database, func(ctx context.Context, transaction *sql.Tx) error {
-		settled, mismatch, err = gateway.applyVerificationInTransaction(ctx, transaction, intent.ID.String(), verification)
+		duplicateRefund = nil
+		settled, mismatch, duplicateRefund, err = gateway.applyVerificationInTransaction(ctx, transaction, intent.ID.String(), verification)
 		return err
 	})
 	if err != nil {
 		return models.PaymentIntentView{}, err
+	}
+	if duplicateRefund != nil {
+		_ = gateway.SendPendingRefundToProvider(ctx, duplicateRefund.RefundId)
 	}
 	if mismatch {
 		return ConvertPaymentIntentToView(settled), ErrPaymentAmountMismatch
@@ -54,7 +59,22 @@ func (gateway *PaymentGateway) VerifyAndSettlePaymentIntentByReference(ctx conte
 	return ConvertPaymentIntentToView(settled), nil
 }
 
-func (gateway *PaymentGateway) applyVerificationInTransaction(ctx context.Context, transaction *sql.Tx, intentId string, verification interfaces.ChargeVerification) (*ent.PaymentIntent, bool, error) {
+func isSettleable(status paymentintent.Status) bool {
+	return status == paymentintent.StatusPending || status == paymentintent.StatusCancelled
+}
+
+func (gateway *PaymentGateway) applyVerificationInTransaction(ctx context.Context, transaction *sql.Tx, intentId string, verification interfaces.ChargeVerification) (*ent.PaymentIntent, bool, *RequestedRefund, error) {
+	intent, mismatch, err := gateway.applyVerificationToIntent(ctx, transaction, intentId, verification)
+	if err != nil || intent == nil || intent.Status != paymentintent.StatusSucceeded || intent.FailureReason != duplicatePaymentReason {
+		return intent, mismatch, nil, err
+	}
+	refund, err := gateway.refundDuplicatePaymentInTransaction(ctx, transaction, intent)
+	return intent, false, &refund, err
+}
+
+const duplicatePaymentReason = "duplicatePaymentRefunded"
+
+func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, transaction *sql.Tx, intentId string, verification interfaces.ChargeVerification) (*ent.PaymentIntent, bool, error) {
 	client := gateway.Container.Client(transaction)
 	intent, err := client.PaymentIntent.Query().Where(paymentintent.Reference(verification.Reference)).ForUpdate().Only(ctx)
 	if err != nil {
@@ -63,10 +83,16 @@ func (gateway *PaymentGateway) applyVerificationInTransaction(ctx context.Contex
 	if intent.ID.String() != intentId {
 		return nil, false, fmt.Errorf("provider returned reference %q for another payment", verification.Reference)
 	}
-	if intent.Status != paymentintent.StatusPending {
+	if !isSettleable(intent.Status) || (intent.Status == paymentintent.StatusCancelled && verification.Outcome == interfaces.OutcomeFailed) {
 		return intent, false, nil
 	}
 	now := gateway.Container.Now().UTC()
+	paidElsewhere, err := client.PaymentIntent.Query().Where(
+		paymentintent.PurposeEQ(intent.Purpose), paymentintent.SubjectID(intent.SubjectID), paymentintent.StatusEQ(paymentintent.StatusSucceeded), paymentintent.IDNEQ(intent.ID),
+	).Exist(ctx)
+	if err != nil {
+		return nil, false, err
+	}
 	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency
 	if verification.Outcome == interfaces.OutcomeFailed || !amountMatches {
 		reason := verification.FailureReason
@@ -88,14 +114,21 @@ func (gateway *PaymentGateway) applyVerificationInTransaction(ctx context.Contex
 		}
 		return failed, !amountMatches, gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, eventType, failed.ID.String(), now, paymentEventData(failed))
 	}
-	succeeded, err := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).
+	update := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).
 		SetStatus(paymentintent.StatusSucceeded).SetPaidAt(now).SetProviderTransactionID(verification.ProviderTransactionId).
-		SetProviderFeeMinor(max(verification.ProviderFeeMinor, 0)).Save(ctx)
+		SetProviderFeeMinor(max(verification.ProviderFeeMinor, 0)).SetFailureReason("")
+	if paidElsewhere {
+		update.SetFailureReason(duplicatePaymentReason)
+	}
+	succeeded, err := update.Save(ctx)
 	if err != nil {
 		return nil, false, err
 	}
 	if err := gateway.postCollectionJournalEntries(ctx, transaction, succeeded); err != nil {
 		return nil, false, err
+	}
+	if paidElsewhere {
+		return succeeded, false, nil
 	}
 	handler, err := gateway.purposeHandler(string(succeeded.Purpose))
 	if err != nil {
@@ -174,6 +207,7 @@ func ConvertOrderPayable(payable *ent.OrderPayable) models.OrderPayable {
 	return models.OrderPayable{
 		CheckoutId: payable.CheckoutID, OrderId: payable.OrderID, OrderReference: payable.OrderReference, BuyerUserId: payable.BuyerUserID,
 		StoreId: payable.StoreID, SellerUserId: payable.SellerUserID, AmountMinor: payable.AmountMinor, Currency: payable.Currency, ProductSummary: payable.ProductSummary,
+		PaymentMode: string(payable.PaymentMode), StoreVerified: payable.StoreVerified,
 	}
 }
 
@@ -190,4 +224,25 @@ func truncateReason(reason string) string {
 		return reason[:300]
 	}
 	return reason
+}
+
+func (gateway *PaymentGateway) refundDuplicatePaymentInTransaction(ctx context.Context, transaction *sql.Tx, intent *ent.PaymentIntent) (RequestedRefund, error) {
+	reference := "duplicate-refund:" + intent.Reference
+	if _, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+		Reference: reference, Kind: "payment.duplicateRefunded", Description: "Duplicate payment returned to the payer",
+		Metadata: map[string]any{"paymentIntentId": intent.ID.String()},
+		Lines: []ledgermodels.JournalLineRequest{
+			{Account: ledgermodels.PaymentsAwaitingApplicationAccount(intent.Currency), Direction: ledgermodels.Debit, AmountMinor: intent.AmountMinor},
+			{Account: ledgermodels.RefundsPayableAccount(intent.Provider, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: intent.AmountMinor},
+		},
+	}); err != nil {
+		return RequestedRefund{}, err
+	}
+	refund, err := gateway.RequestRefundInTransaction(ctx, transaction, models.RefundRequest{
+		PaymentIntentId: intent.ID, AmountMinor: intent.AmountMinor, Currency: intent.Currency, Reference: reference, Reason: "duplicate payment",
+	})
+	if err != nil {
+		return RequestedRefund{}, err
+	}
+	return refund, gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "payment.duplicateRefunded", intent.ID.String(), gateway.Container.Now().UTC(), paymentEventData(intent))
 }

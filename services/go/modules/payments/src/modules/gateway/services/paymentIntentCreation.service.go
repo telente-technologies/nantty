@@ -45,6 +45,11 @@ func (gateway *PaymentGateway) CreatePaymentIntentAndInitializeChargeInTransacti
 	if alreadyPaid {
 		return models.PaymentIntentView{}, ErrAlreadyPaid
 	}
+	if err := client.PaymentIntent.Update().Where(
+		paymentintent.PurposeEQ(paymentintent.Purpose(request.Purpose)), paymentintent.SubjectID(request.SubjectId), paymentintent.StatusEQ(paymentintent.StatusPending),
+	).SetStatus(paymentintent.StatusCancelled).SetFailureReason("supersededByNewAttempt").AddVersion(1).Exec(ctx); err != nil {
+		return models.PaymentIntentView{}, err
+	}
 	reference := prefix + strings.ReplaceAll(uuid.NewString(), "-", "")
 	callbackUrl := gateway.buildCallbackUrl(request.ReturnTo, reference)
 	metadata, _ := json.Marshal(request.Metadata)
@@ -69,6 +74,7 @@ func (gateway *PaymentGateway) CreatePaymentIntentAndInitializeChargeInTransacti
 	}
 	view := ConvertPaymentIntentToView(intent)
 	view.CallbackUrl = callbackUrl
+	view.AccessCode = session.AccessCode
 	return view, nil
 }
 
