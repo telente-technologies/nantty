@@ -1,6 +1,9 @@
 package services
 
 import (
+	"strings"
+
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
 	adminerrors "zudomart/modules/admin/src/errors"
@@ -8,6 +11,8 @@ import (
 	"zudomart/modules/admin/src/generated/ent/predicate"
 	"zudomart/modules/admin/src/modules/auditLog/models"
 )
+
+var searchableAuditColumns = []string{auditevent.FieldAction, auditevent.FieldActorName, auditevent.FieldSubjectLabel, auditevent.FieldSubjectID, auditevent.FieldReason}
 
 func PredicatesForAuditFilter(filter models.AuditFilter) ([]predicate.AuditEvent, error) {
 	var predicates []predicate.AuditEvent
@@ -19,6 +24,15 @@ func PredicatesForAuditFilter(filter models.AuditFilter) ([]predicate.AuditEvent
 	}
 	if filter.SubjectType != "" {
 		predicates = append(predicates, auditevent.SubjectType(filter.SubjectType))
+	}
+	if filter.SubjectId != "" {
+		predicates = append(predicates, auditevent.SubjectID(filter.SubjectId))
+	}
+	if filter.Area != "" {
+		predicates = append(predicates, auditevent.ActionHasPrefix(strings.ToLower(filter.Area)))
+	}
+	if filter.Search != "" {
+		predicates = append(predicates, searchPredicate(filter.Search))
 	}
 	if filter.From != nil {
 		predicates = append(predicates, auditevent.CreatedAtGTE(*filter.From))
@@ -34,4 +48,17 @@ func PredicatesForAuditFilter(filter models.AuditFilter) ([]predicate.AuditEvent
 		predicates = append(predicates, auditevent.IDLT(cursorId))
 	}
 	return predicates, nil
+}
+
+func searchPredicate(search string) predicate.AuditEvent {
+	pattern := "%" + strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(strings.ToLower(search)) + "%"
+	return predicate.AuditEvent(func(selector *sql.Selector) {
+		matches := make([]*sql.Predicate, 0, len(searchableAuditColumns))
+		for _, column := range searchableAuditColumns {
+			matches = append(matches, sql.P(func(builder *sql.Builder) {
+				builder.WriteString("lower(" + selector.C(column) + ") LIKE ").Arg(pattern)
+			}))
+		}
+		selector.Where(sql.Or(matches...))
+	})
 }
