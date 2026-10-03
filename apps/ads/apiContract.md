@@ -133,7 +133,7 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
 | GET | /ads/accounts/:accountId/billing | billing:view | — | `BillingOverview` | 404 |
-| POST | /ads/accounts/:accountId/billing/top-ups | billing:manage | `{ amount: Money, provider: "paystack"\|"flutterwave", returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` — `authorizationUrl` is the provider's hosted checkout; its callback returns to `https://ads.<domain><returnPath>?reference=<ref>` | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
+| POST | /ads/accounts/:accountId/billing/top-ups | billing:manage | `{ amount: Money, provider: "paystack", returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` `{ topUpId, reference, provider: "paystack", authorizationUrl, accessCode }` — the app opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`; the callback returns to `https://ads.<domain><returnPath>?reference=<ref>` | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
 | GET | /ads/accounts/:accountId/billing/top-ups/:reference | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
 | GET | /ads/accounts/:accountId/billing/transactions | billing:view | `?cursor=&limit=` | `Page<BillingTransaction>` (signed amounts) | 404 |
 | GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
@@ -141,7 +141,7 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | GET | /ads/accounts/:accountId/billing/invoices/:invoiceId/download | billing:view | — | PDF attachment | 404 |
 | PUT | /ads/accounts/:accountId/billing/spend-limit | billing:manage | `{ amount: Money \| null }` (monthly account spending limit; null removes) | `BillingOverview` | 400 |
 | PUT | /ads/accounts/:accountId/billing/funding-mode | billing:manage | `{ fundingMode }` | `BillingOverview` | 400 (card modes need a card) |
-| POST | /ads/accounts/:accountId/billing/payment-methods | billing:manage | `{ provider, returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` (card authorization via hosted checkout; returns with `?cardReference=`) | 400 |
+| POST | /ads/accounts/:accountId/billing/payment-methods | billing:manage | `{ provider, returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` (card authorization through the Paystack Popup; returns with `?cardReference=`) | 400 |
 | POST | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default | billing:manage | — | `BillingOverview` | 404 |
 | DELETE | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId | billing:manage | — | 204 | 409 CARD_REQUIRED |
 
