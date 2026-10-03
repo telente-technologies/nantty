@@ -6,11 +6,21 @@ const (
 	PurposeWalletTopUp         = "wallet_top_up"
 	PurposeCreatorSubscription = "creator_subscription"
 	PurposeWithdrawal          = "withdrawal"
+	PurposeCreatorEarnings     = "creator_earnings"
 
-	ProviderPaystack    = "paystack"
-	ProviderFlutterwave = "flutterwave"
-	StoreAppleIap       = "apple_iap"
-	StoreGooglePlay     = "google_play"
+	ProviderBachs   = "bachs"
+	StoreAppleIap   = "apple_iap"
+	StoreGooglePlay = "google_play"
+
+	ConnectedAccountRoleSeller  = "seller"
+	ConnectedAccountRoleCreator = "creator"
+
+	CapabilityPayouts          = "payouts"
+	CapabilityTransfers        = "transfers"
+	CapabilityNairaCardCharges = "ngn_card_collection"
+	CapabilityBankTransfers    = "bank_transfer"
+	CapabilityVirtualAccounts  = "virtual_accounts"
+	CapabilityStatusActive     = "active"
 )
 
 var ReferencePrefixByPurpose = map[string]string{
