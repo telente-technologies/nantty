@@ -37,6 +37,7 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
               <StatusPill label={TICKET_STATUS_APPEARANCE[item.status].label} tone={TICKET_STATUS_APPEARANCE[item.status].tone} />
             </View>
             <Text size={13} lineHeight={16.9} color={colors.textMuted} numberOfLines={1}>{item.lastMessagePreview}</Text>
+            {item.linkedReference ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>{item.linkedReference.label}</Text> : null}
             <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Updated {formatFriendlyDate(item.updatedAt)}</Text>
           </Pressable>
         )}

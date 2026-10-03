@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { PaperPlaneTilt24Icon } from "@/components/icons";
+import { SupportRecordingNotice } from "@/components/support/supportRecordingNotice";
 import { TICKET_STATUS_APPEARANCE } from "@/components/settings/supportAppearance.util";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -16,11 +17,13 @@ import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { supportService } from "@/services/support.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
+const LIVE_CHAT_POLL_MS = 3000;
+
 export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTicketDetail">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { ticketId } = route.params;
-  const ticket = useQuery({ queryKey: ["support", "tickets", ticketId], queryFn: () => supportService.fetchSupportTicket(ticketId) });
+  const ticket = useQuery({ queryKey: ["support", "tickets", ticketId], queryFn: () => supportService.fetchSupportTicket(ticketId), refetchInterval: LIVE_CHAT_POLL_MS });
   const [draft, setDraft] = useState("");
   const reply = useMutation({
     mutationFn: (text: string) => supportService.replyToSupportTicket(ticketId, text, generateIdempotencyKey()),
@@ -48,7 +51,9 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>{details.subject}</Text>
             <StatusPill label={TICKET_STATUS_APPEARANCE[details.status].label} tone={TICKET_STATUS_APPEARANCE[details.status].tone} />
+            {details.linkedReference ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Linked to {details.linkedReference.label}</Text> : null}
           </View>
+          <SupportRecordingNotice />
           {details.messages.map((message) => (
             <View key={message.id} style={[styles.bubbleWrap, !message.fromSupport && styles.mine]}>
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{message.authorName}</Text>
@@ -58,10 +63,11 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{formatFriendlyDateTime(message.createdAt)}</Text>
             </View>
           ))}
+          {details.agentTyping ? <Text size={12} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
         </ScrollView>
         {closed ? null : (
           <View style={styles.composer}>
-            <TextInput value={draft} onChangeText={setDraft} placeholder="Reply to support…" placeholderTextColor={colors.textSubtle} multiline accessibilityLabel="Reply" style={styles.input} />
+            <TextInput value={draft} onChangeText={setDraft} placeholder="Message Zudomart Support…" placeholderTextColor={colors.textSubtle} multiline accessibilityLabel="Reply" style={styles.input} />
             <Pressable accessibilityRole="button" accessibilityLabel="Send reply" disabled={!draft.trim() || reply.isPending} onPress={() => reply.mutate(draft.trim())} style={[styles.send, !draft.trim() && styles.sendDisabled]}>
               <PaperPlaneTilt24Icon size={20} color={colors.white} />
             </Pressable>

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
@@ -13,22 +13,25 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
+import { ordersService } from "@/services/orders.service";
 import { supportService } from "@/services/support.service";
-import type { SupportTicketCategory } from "@/types/support.type";
+import type { SupportLinkedReference, SupportTicketCategory } from "@/types/support.type";
 
 import { supportTicketsQueryKey } from "./supportTickets.screen";
 
-export function NewSupportTicketScreen({ navigation }: MainScreenProps<"NewSupportTicket">) {
+export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"NewSupportTicket">) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
-  const [category, setCategory] = useState<SupportTicketCategory>("order");
+  const [category, setCategory] = useState<SupportTicketCategory>(route.params?.category ?? "order");
+  const [linkedReference, setLinkedReference] = useState<SupportLinkedReference | null>(route.params?.linkedReference ?? null);
+  const recentOrders = useQuery({ queryKey: ["orders", "support-link"], queryFn: () => ordersService.fetchMyOrders(null), enabled: !linkedReference && (category === "order" || category === "payment") });
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [attachmentUrls, setAttachmentUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const idempotencyKey = useRef(generateIdempotencyKey());
   const createTicket = useMutation({
-    mutationFn: () => supportService.createSupportTicket({ category, subject: subject.trim(), message: message.trim(), attachmentUrls }, idempotencyKey.current),
+    mutationFn: () => supportService.createSupportTicket({ category, subject: subject.trim(), message: message.trim(), attachmentUrls, linkedReference }, idempotencyKey.current),
     onSuccess: (ticket) => {
       queryClient.invalidateQueries({ queryKey: supportTicketsQueryKey });
       navigation.replace("SupportTicketDetail", { ticketId: ticket.id });
@@ -45,6 +48,18 @@ export function NewSupportTicketScreen({ navigation }: MainScreenProps<"NewSuppo
             <Chip key={option.id} kind="topic" label={option.label} selected={category === option.id} onPress={() => setCategory(option.id)} />
           ))}
         </View>
+        {linkedReference ? (
+          <Chip kind="topic" label={`${linkedReference.label} (tap to remove)`} selected onPress={() => setLinkedReference(null)} />
+        ) : (recentOrders.data ?? []).length > 0 ? (
+          <>
+            <Text size={14} lineHeight={16.8}>Link an order or payment (optional)</Text>
+            <View style={styles.chips}>
+              {(recentOrders.data ?? []).slice(0, 4).map((order) => (
+                <Chip key={order.id} kind="topic" label={`Order ${order.reference}`} onPress={() => setLinkedReference({ kind: category === "payment" ? "payment" : "order", id: order.id, label: `${category === "payment" ? "Payment for order" : "Order"} ${order.reference}` })} />
+              ))}
+            </View>
+          </>
+        ) : null}
         <TextField label="Subject" placeholder="e.g. My order hasn't arrived" value={subject} onChangeText={setSubject} maxLength={80} />
         <TextField label="Tell us more" placeholder="Include order numbers and what you've tried" value={message} onChangeText={setMessage} multiline maxLength={1500} boxStyle={styles.multiline} />
         <Text size={14} lineHeight={16.8}>Screenshots (optional)</Text>
