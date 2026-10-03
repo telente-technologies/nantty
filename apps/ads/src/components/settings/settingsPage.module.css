@@ -51,7 +51,7 @@
   height: 40px;
   border-radius: var(--radius-md);
   background: var(--blue-tint);
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .memberCell {
@@ -66,8 +66,8 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 700;
   flex: none;
 }

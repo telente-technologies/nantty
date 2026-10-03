@@ -3,6 +3,7 @@
 import { PageHeader } from "@/components/ui/surfaces";
 
 import { AccountDetailsCard, BusinessVerificationCard } from "./accountDetailsCard";
+import { AppearanceCard } from "./appearanceCard";
 import { MembersCard } from "./membersCard";
 import styles from "./settingsPage.module.css";
 
@@ -13,6 +14,7 @@ export function SettingsPage() {
       <div className={styles.layout}>
         <AccountDetailsCard />
         <BusinessVerificationCard />
+        <AppearanceCard />
         <div className={`${styles.fullWidth} ${styles.stack}`} style={{ gap: 16 }}>
           <MembersCard />
         </div>
