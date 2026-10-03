@@ -2,12 +2,14 @@ package services
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
 
 	"zudomart/modules/auth/src/container"
 	"zudomart/modules/auth/src/generated/ent"
+	entaccount "zudomart/modules/auth/src/generated/ent/account"
 	signingkeys "zudomart/modules/auth/src/modules/signingKeys/services"
 	"zudomart/modules/auth/src/types"
 	"zudomart/modules/auth/src/utils"
@@ -20,13 +22,16 @@ type StartedSession struct {
 
 func StartSessionWithFirstRefreshTokenInTransaction(ctx context.Context, application *container.Container, tx *ent.Tx, accountId uuid.UUID, client types.ClientDetails) (StartedSession, error) {
 	now := application.Now()
-	session, err := tx.Session.Create().
+	create := tx.Session.Create().
 		SetAccountID(accountId).
 		SetUserAgent(utils.TruncateToLength(client.UserAgent, 255)).
 		SetIPAddress(utils.TruncateToLength(client.IpAddress, 64)).
 		SetLastUsedAt(now).
-		SetExpiresAt(now.Add(application.Settings.RefreshTokenTimeToLive)).
-		Save(ctx)
+		SetExpiresAt(now.Add(application.Settings.RefreshTokenTimeToLive))
+	if client.DeviceId != "" {
+		create.SetDeviceHash(HashBlockedIdentifier(application.Settings.OneTimeCodePepper, "device", client.DeviceId))
+	}
+	session, err := create.Save(ctx)
 	if err != nil {
 		return StartedSession{}, err
 	}
@@ -57,10 +62,17 @@ func SignAccessTokenAndBuildIssuedTokens(application *container.Container, accou
 	accessToken, err := application.TokenIssuer.SignAccessTokenWithActiveKey(signingkeys.AccessTokenClaims{
 		AccountId: account.ID.String(),
 		SessionId: sessionId.String(),
-		Roles:     account.Roles,
+		Roles:     rolesForAccessToken(account),
 	})
 	if err != nil {
 		return types.IssuedTokens{}, err
 	}
 	return types.IssuedTokens{AccessToken: accessToken, RefreshToken: refreshToken, ExpiresIn: application.TokenIssuer.TimeToLiveInSeconds(), TokenType: "Bearer"}, nil
+}
+
+func rolesForAccessToken(account *ent.Account) []string {
+	if account.Status != entaccount.StatusSuspended {
+		return account.Roles
+	}
+	return append(slices.Clone(account.Roles), "suspended")
 }

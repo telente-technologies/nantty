@@ -25,7 +25,7 @@ func StoreNewPasswordAndRevokeSessionsInTransaction(ctx context.Context, applica
 		return err
 	}
 	now := application.Now()
-	if err := tx.Account.UpdateOneID(existing.ID).SetPasswordHash(passwordHash).Exec(ctx); err != nil {
+	if err := tx.Account.UpdateOneID(existing.ID).SetPasswordHash(passwordHash).SetMustChangePassword(false).Exec(ctx); err != nil {
 		return err
 	}
 	revoked, err := RevokeActiveSessionsExceptInTransaction(ctx, tx, existing.ID, keepSessionId, session.RevokedReasonPasswordChanged, now)
