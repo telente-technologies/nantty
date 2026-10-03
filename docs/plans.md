@@ -905,3 +905,147 @@ Mock mode only; `services/**` and the web apps untouched. Real Signal-protocol e
 - The passcode is salted SHA-256 in `expo-secure-store` and never leaves the device. Auto-lock fires when the app returns from background after the chosen delay.
 - Seeds: `c_1` is at 99 days (send once to hit 100 and see the celebration), `c_3` is broken with a restore available, `c_req_*` are requests, `c_spam_*` are spam, `c_1` has expired and fresh media plus every link type.
 - **[LATER]** libsignal sessions and per-device keys, server-side 30-day media purge, push delivery honouring mute and preview settings, group streaks (open), timezone change rate-limit.
+
+---
+
+## 26. Webapp tablet/desktop, dark mode & saved **[DONE (webapp, mock)]**
+
+Scope: `apps/webapp` only. Theme plumbing comes from `@zudomart/web-kit` (`ThemeProvider`, `ThemeSwitcher`, `ThemeInitScript`, `theme` cookie) and dark values from `@zudomart/design-tokens`. Files are listed in [apps/webapp/CHANGELOG.md](../apps/webapp/CHANGELOG.md).
+
+### 26.1 Layouts
+
+| Width | Navigation | Content | Right rail |
+| --- | --- | --- | --- |
+| < 768 | top bar with search, bottom bar (Home, Mart, Clips, Chats, Me) | single column | none |
+| 768–1023 | 76px icon rail; the toggle opens a labelled overlay drawer (Esc or scrim closes it) | single column; two panes on Messages and Orders | none |
+| ≥ 1024 | 232px labelled sidebar (Home, Explore, Mart, Clips, Live / Messages, Notifications, Orders, Saved / Creator, Profile, Settings) with a collapse toggle remembered in `localStorage` | per-route width (`shellLayout.config.ts`): reading 680px, wide 1240px, full | home, post and notifications from 1024; explore, mart and profile from 1280 |
+
+- Right rail modules: wallet and coins, who to follow, trending in Nigeria, cart summary on mart pages. Guests only see trending and who to follow.
+- Two-pane routes use nested layouts with `useSelectedLayoutSegment`: `/chats` (list + conversation) and `/orders` (list + detail). On phones, the list and the detail stay separate pages.
+- Product detail: the gallery has vertical thumbnails on desktop and the buy box is sticky. Cart and checkout group items by seller and show a sticky seller-grouped summary.
+- Profile: cover, overlapping avatar header, stats, then Posts / Media tabs (3-column media grid) and a Saved shortcut on your own profile.
+- New routes: `/mart`, `/clips` (snap feed, one clip per screen, j/k and arrow keys, desktop action column), `/watch/[videoId]` (16:9 player, Up next rail, comments), `/live` (live grid), `/post/[postId]` (post + read-only comments), `/saved`.
+- Pointer and keyboard: hover states, `:focus-visible` rings from `--focus-ring`, tablists with arrow keys, `--control-*` sizes (32–36px on fine pointers, 44px on coarse). Skeleton, empty and error states use the web-kit kit.
+
+### 26.2 Dark mode
+
+Follows [darkModePlan.md](./darkModePlan.md) step 4. The root layout reads the `theme` cookie, sets `data-theme` on `<html>` server-side and mounts `ThemeInitScript`. `AppProviders` wraps everything in `ThemeProvider` and PATCHes `users/me/preferences { theme }` when signed in. The switcher sits in Settings → Appearance and in the avatar menu.
+
+- Raw `--blue-*` and `--yellow-*` ramps and hex values in webapp CSS modules are mapped to semantic tokens (`--color-brand`, `--color-brand-solid(-hover)`, `--color-brand-tint`, `--color-border-strong`, `--color-inverse`, `--color-warn-text`, `--color-overlay`). `pnpm lint:styles` reports no `color-no-hex` in the webapp. The one exception is `ui/phoneFrame` device artwork, kept with an inline disable. The auth brand panel keeps its navy gradient in both themes.
+- Status colours on text use the `-text` variants. Media is never filtered.
+- Every main route was screenshotted at 768, 1024 and 1440 in light and dark.
+
+### 26.3 Saved (bookmarks)
+
+The contract matches §27.1 (mobile). The webapp extends it in three ways:
+
+| Method + path | Request | Response |
+| --- | --- | --- |
+| `POST /api/v1/saves` | `{ type, targetId, collectionId? }` | `SavedItem` |
+| `DELETE /api/v1/saves?type=&targetId=` | | void, idempotent |
+| `GET /api/v1/saves?type=all\|post\|video\|clip\|product&collectionId=&cursor=` | | `{ data: SavedItem[], nextCursor }`, 12 per page, newest first |
+| `GET /api/v1/saves/collections` | | `SaveCollection[] { id, name, itemCount, coverUrl }` |
+| `POST /api/v1/saves/collections` | `{ name }` (1–40 chars) | `SaveCollection` |
+| `PATCH /api/v1/saves/:saveId` | `{ collectionId \| null }` | `SavedItem` |
+
+- `SavedItem.preview { title, thumbnailUrl, href, author, price, durationSeconds }` lets the grid render without fetching each target. The backend (or the gateway) should compose it.
+- Toggles: post cards (Figma `bookmarkSimple24`, with a filled variant), the watch view, the clips action column and the product buy box. They are optimistic, with a toast ("Post saved · View saved") and rollback plus an error toast on failure.
+- `/saved`: tabs All / Posts / Videos / Clips / Products, collection chips with counts, "New collection", a per-card collection picker, infinite scroll, and empty states that link to the right surface. It is linked from the sidebar, the avatar menu, the profile header and tabs, and Settings.
+- Mock: `mocks/saveState.mock.ts` holds the saved set. Feed, clip, video and product responses read `bookmarked` from it. The legacy `POST products/:id/bookmark` writes to the same list. Landscape video posts (`mocks/videos.mock.ts`, Blender open movies, CC BY) are mixed into the feed.
+- **[LATER]** rename and delete collections; bulk remove; backend module (`go.social` saves keyed by user, type and target).
+
+### 26.4 Guest browsing
+
+Anyone can browse without signing in: home (popular feed fallback, `GET /feeds/popular`), explore and search, mart, product, category, collection, store and brand pages, public profiles, post detail with read-only comments, clips, watch and live.
+
+- `config/guestBrowsing.config.ts` owns two allowlists. Pages: the proxy lets anonymous requests through. Everything else (messages, notifications, orders, checkout, cart, wallet, creator, settings, `/me`, saved) still sends the visitor to `/login?next=`. API reads: the BFF forwards anonymous public GETs without a token, and `server/anonymousViewerFields.service.ts` forces viewer fields (`liked`, `bookmarked`, `isFollowing*`, `savedByViewer`, `reactedByMe`, `isSubscribed`) to `false`.
+- Every action goes through `requireAuthThen(action, reason)` (`components/auth/authPrompt.store.ts`): like, save, follow, message, add to cart and buy are wired today. Signed-in viewers run the action immediately. Guests get `AuthPromptModal`, a native `<dialog>` with an inline sign-in form and links to `/login?next=` and `/signup?next=`. After an inline sign-in the page refreshes and the pending action replays once, held in memory only.
+- A 401 (`UNAUTHENTICATED` or `SESSION_EXPIRED`) on a mutation opens the same prompt instead of a hard redirect. For guests, the shell skips badge, cart, wallet and notification queries, and the sidebar shows only the browse group.
+- **[LATER]** wire comment, share-to-chat, gift, report and subscribe once those actions exist on web; give the guest home a sign-up banner; add SEO metadata to public pages.
+
+---
+
+## 27. Saved items & dark mode (mobile) **[DONE (mobile, mock) / dark mode BETA]**
+
+### 27.1 Saved items
+
+`docs/backendPlan.md` had no saves contract (only `products/:id/bookmark`), so it is defined here. There was no wishlist or collections feature to reuse; the old product bookmark route now writes the same saved list.
+
+| Method + path | Request | Response |
+| --- | --- | --- |
+| `POST /api/v1/saves` | `{ type: "post"\|"video"\|"clip"\|"product", targetId }` | void, idempotent; 422 on an unknown type |
+| `DELETE /api/v1/saves?type=&targetId=` | | void, idempotent |
+| `GET /api/v1/saves?type=&cursor=` | `type` optional (All) | `{ data: SavedItem[], nextCursor }`, newest first, 12 per page |
+
+`SavedItem`: `{ id, type, targetId, savedAt }` plus `post` (post, video), `clip` or `product`. Feed, post, clip and product responses carry the viewer's state (`bookmarked`, `savedByViewer`). A post with any video media saves as `video`. Saves are private.
+
+- Surfaces: post card action row (Figma `bookmark-24`, right of the row next to share, as in Figma "Frame 735"), reels rail, full-screen video viewer, product detail. Optimistic, haptic, reduced-motion aware.
+- Saved screen: own-profile shortcut and Settings row.
+- **[LATER]** backend module (`go.social` saves table keyed by user, type, target), named collections, removing a save from the Saved grid by long press.
+
+### 27.2 Dark mode
+
+Follows Figma (owner decision, 2026-10-03): the mobile dark palette comes from Figma node `874:5002` ("Profile for Normal User (Dark Mode)"), the only dark frame in the specs. `packages/designTokens` keeps its navy dark values for web; mobile no longer uses them for neutrals.
+
+| Token | Light (unchanged) | Dark | Source / check |
+| --- | --- | --- | --- |
+| background / surface | `#F7F8FE` / `#FFFFFF` | `#0E0E10` / `#2C2C2C` | Figma |
+| elevated (sheets, menus) / sunken | `#FFFFFF` / `#F7F8FE` | `#3A3A3D` / `#1A1A1D` | derived greys |
+| divider / placeholder / chip / skeleton / avatar | `#D9D9D9` … | `#3D3D40` / `#3A3A3D` / `#3A3A3D` / `#38383B` / `#48484B` | derived greys |
+| text | `#000000` | `#FFFFFF` | Figma; 14.0:1 on surface |
+| textMuted (Figma `@username` `#5B5B5B`) | `#5B5B5B` | **`#B3B3B3`** | lightened: Figma value is 2.8:1 on canvas; now 6.7:1 on surface, 5.4:1 on elevated |
+| textSubtle (Figma metadata `#909090`) | `#909090` | **`#A6A6A6`** | lightened: Figma value is 4.4:1 on surface; now 5.7:1 on surface, 7.9:1 on canvas, 4.7:1 on elevated |
+| primarySolid (fills) / onPrimary | `#2043F5` / `#FFFFFF` | `#2043F5` / `#FFFFFF` | Figma "Follow" button; 6.6:1 |
+| primary (blue text, links, icons) | `#2043F5` | `#7A8DF9` | Figma has no blue text in dark; `#2043F5` text is 2.1:1 on `#2C2C2C`. **Needs design confirmation** |
+| accent yellow | `#F5E320` | `#F5E320` | unchanged |
+| error / success / caution | palette 500 | `#F87171` / `#34D399` / `#FBBF24` | ≥ 5:1 on surface |
+
+- Switch: Settings → App Preference → Theme: Light (default), Dark **Beta**, System. Stored in SecureStore (`zm.themePreference`), PATCHed to `users/me/preferences.theme`.
+- `app.json` stays `userInterfaceStyle: "light"`: the main flows are migrated in code but dark mode has not been checked on a device. `ThemeProvider` calls `Appearance.setColorScheme` so native chrome follows the in-app choice. Flip to `"automatic"` (and add an `expo-splash-screen` `dark` block) after visual QA and sign-off.
+- Live, Live ended, Story, Clips and the Create composer stay on their current look in both themes (`ForcedColorSchemeScope`).
+- Coverage (`node apps/mobile/scripts/reportThemeCoverage.mjs`): before, 262 non-dark-first files built their styles from static `colors`; now 279 of 290 UI files use the theme, **0** static `colors` references inside `StyleSheet.create`, 14 static references left (light-only maps in three status pills, the dark-screen nav option), 24 raw colour literals left in styles (mostly scrims over media and the camera stage, intentionally fixed). 65 dark-first files are excluded.
+- **[NEXT]** visual QA in both themes with screenshot diffs to prove zero light-mode change; Create composer in dark; dark variants for `toneTextColor` dots and chart series; sync the server preference on sign-in.
+
+---
+
+## 28. Guest browsing (mobile) **[DONE (mobile, mock)]**
+
+Owner rule: anyone who downloads the app can use the public parts without registering or logging in. Trying an action sends them through sign-in and back to exactly where they were, with the action completed when possible. The webapp equivalent is §26.4.
+
+### 28.1 Flow
+
+- Fresh install: splash, then onboarding with **Browse first** under the sign-in options. It sets `useGuestSessionStore.isBrowsingAsGuest` (memory only) and `RootNavigator` mounts the main app with no session. After a sign-out the user sees onboarding again.
+- Auth lives inside the main stack as the `AuthFlow` screen (a full-screen modal wrapping the auth stack, opened at Onboarding with `mode` and a "Not now" button). The main navigator stays mounted underneath, so scroll position and route survive sign-in.
+- `requireAuthThen(action, returnTo?, reason?)` (`utils/requireAuth.util.ts`, hook `useRequireAuth`): signed in runs the action at once. A guest stores `{ action, returnTo }` in `pendingAuthIntent.store.ts` (memory only, never persisted) and opens `GuestAuthSheet` (Continue with Apple / Google, Sign in, Create account). `returnTo` defaults to the focused route and its params.
+- `GuestAuthReplayCoordinator` waits for the status to become signed in, closes `AuthFlow`, invalidates all queries (viewer fields refresh), refreshes tracking consents, navigates to `returnTo` if the user is elsewhere, then replays the action once. Dismissing the sheet or leaving `AuthFlow` without signing in discards the intent.
+- `requireAuthAfterClosingModal` closes a sheet first (a native modal cannot open over another one) and then prompts.
+- Auth-only routes render `SignInRequiredScreen` ("Sign in to see your orders") through the navigators' `screenLayout`, so their queries never run for guests. The Profile tab shows `GuestProfileCard` (sign in, create account, appearance and region, about and legal, usage analytics opt-in). The Create tab asks for sign-in instead of opening the composer. The feed shows a dismissible "Sign in to like, follow and shop" banner.
+
+### 28.2 Routes
+
+| Public (no token) | Auth-only (sign-in screen or prompt) |
+| --- | --- |
+| Home For you feed, Clips, Search, Category, Mart | Chats tab, Chat, NewMessage, NewGroup, ConversationInfo, chat settings |
+| ProductDetail, ProductReviews, Store, BrandProfile | Notifications |
+| UserProfile, Connections, Story | Create tab, CreatePost (posts, clips, go live), PostAnalytics, PromotePost, BoostStatus |
+| PostDetail with read-only comments, Sound, Rankings | Wallet, Transactions, CoinActivity, Withdraw, PayoutAccounts, Referral |
+| Live and LiveEnded (watch, read chat) | Cart, Checkout, Payment, OrderSuccess, Orders, OrderDetail, OpenDispute, EscrowStatus, DisputeDetail |
+| SettingsAppPreference (appearance, region), SettingsAbout (legal) | Me tab content, EditProfile, Saved, Settings and every other settings screen, Verification, Support tickets |
+| | Seller screens, Creator screens, CreatorSubscribe, MySubscriptions, CreateBrand, CreateBusinessProfile, FollowRequests |
+
+Actions wired to `requireAuthThen`: like (post, clip, comment, product, live reaction), comment (post, clip, live), follow (creator, user, shop, brand, live host), save and bookmark, reshare, share to chat, gift (live and battle), join as live guest, add to cart, message, report, block, subscribe, save sound, go live and create (Create tab, route gate), the Following feed tab. The cart is not local for guests: add to cart needs an account.
+
+The source of truth for routes is `config/guestAccess.config.ts`.
+
+### 28.3 Services, mocks and consents
+
+- The client sends no `Authorization` header without a token. A 401 on a **mutation** opens the sign-in sheet; a 401 on a read is returned silently (queries do not retry a 401), so no screen shows an error page for private data. Guests do not fetch the cart.
+- Mock layer (`mocks/guestAccess.mock.ts`): a guest request is allowed only for the public GET list, `auth/*`, and a few anonymous write-only calls (live join and leave, ad events, product interactions, feed feedback, story seen, post share, device preferences). Everything else throws `ApiError(401)`. Responses for guests have `liked`, `isFollowing`, `isFollowingAuthor`, `isFollowingHost`, `savedByViewer`, `bookmarked` and `following` forced to `false`. `feeds/for-you` returns the most popular posts for guests. The topic row uses `GET /topics`.
+- Consents: guests send **essential-only** analytics. `trackProductInteraction` and sponsored impressions and clicks are dropped until the guest turns on "Allow usage analytics" in the guest profile card (memory only today). Personalisation, advertising and marketing stay off. Signing in reloads the account's stored consents.
+
+### 28.4 Backend requirement
+
+- Every endpoint behind a public screen must accept **anonymous requests** (no `Authorization`): the GET list in `mocks/guestAccess.mock.ts`, plus `POST lives/:id/join|leave`, `POST ads/events`, `POST analytics/product-interactions` (honouring consent), `POST feeds/feedback`, `POST stories/:id/seen`, `POST posts/:id/share`, `POST lives/:id/engagement`.
+- Anonymous requests are **rate-limited by IP and device** (`X-Device-Id` or the existing `X-Client-Region` plus IP), with stricter limits on search and feeds, and cached at the edge where the response is viewer-independent. Responses must set viewer fields to `false` and never include blocked-user, private-account or own-state data.
+- `GET /feeds/for-you` without a token returns the popular feed (the webapp calls it `GET /feeds/popular`; pick one). Anonymous 401 is `{ code: "UNAUTHENTICATED" }`; expired sessions keep `SESSION_EXPIRED`.
+- **[LATER]** persist guest analytics consent on the device and send it with anonymous event calls; local guest cart merged on sign-in; guest sessions remembered across launches; deep links open the target and prompt only on action.

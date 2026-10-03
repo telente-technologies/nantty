@@ -311,6 +311,57 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 
 ---
 
+### Saved items (plans §27)
+
+| File | Change |
+| --- | --- |
+| `src/types/saves.type.ts` | **New.** `SavedItemType` (post, video, clip, product), `SaveTarget`, the `SavedItem` union, `saveTargetForPost` (a post with video media saves as `video`). |
+| `src/services/saves.service.ts` | **New.** `POST /api/v1/saves`, `DELETE /api/v1/saves?type=&targetId=`, `GET /api/v1/saves?type=&cursor=` (`{ data, nextCursor }`). |
+| `src/store/savedItems.store.ts`, `src/hooks/useSaveToggle.hook.ts` | **New.** One optimistic saved state per target, shared by every surface. Light haptic on save, selection haptic on unsave, rollback on failure, `["saves"]` invalidated on success. |
+| `src/components/saves/saveToggleButton.tsx` | **New.** Figma `bookmark-24` outline; filled `BookmarkFill24Icon` (new, `icons/custom`) when saved. Spring pop on save, skipped under `useReducedMotionPreference`. Labels "Save post" / "Remove post from saved", `selected` state. |
+| `src/components/feed/postCard.tsx` | Action row now matches Figma "Frame 735": counters on the left (gap 20 so four counters fit), bookmark + share on the right (gap 16). |
+| `src/components/clips/clipActionRail.tsx`, `clipPage.tsx` | Save/Saved button on the reels rail (white on video). |
+| `src/components/media/landscapeVideoFullScreenModal.tsx`, `feed/mediaPager.tsx` | Video viewer gets a save button top right; the pager passes the post's target through. |
+| `src/screens/product/productDetail.screen.tsx`, `services/products.service.ts`, `product/productPriceBlock.tsx` | Product bookmark now uses the same save toggle (it used to POST on every tap, even to unsave). Legacy `/products/:id/bookmark` POST/DELETE write the same saved list. |
+| `src/screens/profile/saved.screen.tsx`, `components/saves/savedFilterTabs.tsx`, `savedItemTile.tsx` | **New.** Saved screen: All / Posts / Videos / Clips / Products, 3-column 130:170 grid, infinite scroll, pull to refresh, empty and error states. |
+| `src/components/profile/ownProfileShortcuts.tsx`, `screens/settings/settings.screen.tsx`, `navigation/*` | "Saved" shortcut on own profile and a Settings row; `Saved` route. |
+| `src/mocks/saves.mock.ts`, `savedEntries.mock.ts`, `feed/posts/clips/products.mock.ts`, `mocks/index.ts` | Mock routes and seeds; feed, post, clip and product responses report the viewer's saved state (`bookmarked`, `savedByViewer`). |
+
+### Dark mode (plans §27, `docs/darkModePlan.md` mobile)
+
+| File | Change |
+| --- | --- |
+| `src/theme/*` | **New.** `ThemeProvider` (stored preference + `useColorScheme`), `useTheme()`, `makeThemedStyles((colors, scheme) => …)`, `ForcedColorSchemeScope`, `useThemedIconInk`. Light colours are the existing `colors.constant` values plus aliases (`primarySolid`, `onPrimary`, `elevated`, `successTint`…) that equal today's light values. Dark values follow Figma (see the palette row below). |
+| `src/store/themePreference.store.ts`, `constants/storageKeys.constant.ts` | Preference `light / dark / system` in SecureStore (localStorage on web) under `zm.themePreference`, read synchronously for first paint. Default **Light**. |
+| `App.tsx`, `navigation/root.navigator.tsx`, `components/ui/screen.tsx` | Status bar, react-navigation theme (`DarkTheme`/`DefaultTheme` with our colours), `Appearance.setColorScheme` (native keyboards and alerts follow) and `SystemUI` root background follow the theme, so transitions never flash white. |
+| `src/screens/settings/settingsAppPreference.screen.tsx`, `components/settings/themePreferenceSheet.tsx`, `services/users.service.ts`, `mocks/settings.mock.ts` | Theme row opens Light / Dark (Beta) / System; also PATCHes `users/me/preferences { theme }`. The mock no longer wipes `countryCode` when only `theme` is sent. |
+| `scripts/migrateStaticColorsToTheme.mjs` | **New codemod** (Babel, text splices so formatting is kept): module `StyleSheet.create` → `makeThemedStyles`, hook calls inserted into the components that use them, `useTheme()` for inline colours, safe semantic renames (`backgroundColor: white→surface`, `primary→primarySolid`, `color: black→text`, placeholder text). 262 files migrated, 0 skipped. Light values are unchanged by construction. |
+| `scripts/reportThemeCoverage.mjs` | **New.** Coverage report (see §27). |
+| `scripts/generateIconComponents.mjs`, `components/icons/**` | Icons default to a themed ink (`#000000` → text etc. in dark only); regenerated. |
+| ui kit (`text`, `button`, `chip`, `avatar`, `bottomSheet`, `frameAwareModal`, `deviceFrame`), `navigation/tabBar.tsx`, status pills, escrow timeline, password meters, verification badge, banners, page dots | Hand fixes: default params, module-level colour maps, raw hex, dark tab-bar blur, sheets on `elevated`, dark status tones. |
+| `navigation/main.navigator.tsx`, `mainTabs.navigator.tsx` | Live, Live ended, Story, Clips and the Create composer render inside `ForcedColorSchemeScope("light")`, so they look exactly as today in both themes. |
+| `src/theme/themeColors.constant.ts`, `darkStatusTones.constant.ts`, `navigation/tabBar.tsx` | **Dark palette re-derived from Figma node 874:5002** (owner decision): canvas `#0E0E10`, surface `#2C2C2C`, elevated `#3A3A3D`, divider `#3D3D40`, white text, brand `#2043F5` fills and yellow as in Figma. Grey text lightened only to reach AA: `@handle` `#5B5B5B` → `#B3B3B3` (6.7:1 on surface), metadata `#909090` → `#A6A6A6` (5.7:1). Blue text `#7A8DF9`, pending design confirmation (`#2043F5` text is 2.1:1). Mobile only; `packages/designTokens` untouched. |
+
+Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean. **Not checked visually** in dark mode; `app.json` stays `userInterfaceStyle: "light"`.
+
+### Guest browsing (plans §28)
+
+| File | Change |
+| --- | --- |
+| `src/store/guestSession.store.ts`, `store/pendingAuthIntent.store.ts` | **New.** Memory-only guest flag, guest analytics opt-in and banner dismissal; pending `{ action, returnTo }` and sign-in prompt state. Nothing is persisted. |
+| `src/utils/requireAuth.util.ts`, `hooks/useRequireAuth.hook.ts`, `navigation/navigationRef.ts` | **New.** `requireAuthThen(action, returnTo?, reason?)`, `requireAuthAfterClosingModal`, `openAuthFlowThenReturn`, and the root navigation ref. |
+| `src/components/auth/guestAuthSheet.tsx`, `guestAuthReplay.tsx`, `guestGate.tsx`, `signInRequiredScreen.tsx`, `guestProfileCard.tsx`, `guestFeedBanner.tsx`, `hooks/useSocialSignIn.hook.ts` | **New.** Compact auth sheet (Apple, Google, Sign in, Create account); coordinator that closes `AuthFlow`, refreshes queries and consents, returns to the route and replays the action; "Sign in to …" screens; guest profile tab; dismissible feed banner. |
+| `src/config/guestAccess.config.ts` | **New.** Auth-only route phrases and the public route list. |
+| `navigation/root.navigator.tsx`, `main.navigator.tsx`, `mainTabs.navigator.tsx`, `auth.navigator.tsx`, `navigation.types.ts`, `screens/auth/authFlow.screen.tsx` | Main app mounts for guests; `AuthFlow` modal inside the main stack; `screenLayout` gates auth-only routes (screen-level `layout` is composed with the gate). |
+| `screens/auth/onboarding.screen.tsx`, `navigation/tabBar.tsx` | "Browse first" (or "Not now" inside `AuthFlow`); Create tab and profile switcher need a session. |
+| `hooks/usePostInteractions`, `useSaveToggle`, `useProductLike`, `useCart`; `components/clips/commentThreadController`, `commentRow`; `feed/reshareSheet`; `chatSafety/shareToChat`; `profile/profileMoreSheet`; `moderation/contentOptionsSheet`; `home/feedTab`, `productMasonry`; `live/liveSession`, `guests/liveStage`, `liveStageLayer`; `coins/subscriberOnlyLock` | Like, comment, follow, save, reshare, share to chat, gift, join guest, add to cart, report, block, subscribe and Following tab go through `requireAuthThen`. Sheets close before the prompt opens. Guests skip the cart query. |
+| `screens/home`, `clips`, `posts/postDetail`, `product/productDetail`, `store/storeDetail`, `brand/brandProfile`, `profile/userProfile`, `connections`, `sounds/sound`, `live/live` | Same wiring at screen level (follow, message, subscribe, report, comment, gift, share). |
+| `services/apiClient.service.ts`, `cache/queryClient.config.ts`, `services/feeds.service.ts` | Mutations 401 for guests open the sign-in sheet; reads fail quietly with no retry; guests get public topics. |
+| `mocks/guestAccess.mock.ts`, `mocks/index.ts`, `registry.mock.ts`, `feed.mock.ts` | Guest requests 401 unless public; viewer fields forced to `false`; popular feed for guests. |
+| `services/productInteractions.service.ts`, `adEvents.service.ts` | Essential-only analytics for guests until they opt in. |
+
+Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean. **Not run** on a device or simulator (Expo was not started), so the modal-over-modal ordering and the post-sign-in replay timing (350 ms) are unchecked.
+
 ## apps/webapp
 
 ### Shipping config & web privacy (§23)

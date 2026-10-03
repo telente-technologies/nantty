@@ -42,7 +42,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 ### 1.1 Role of `apps/api`
 
-`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, Paystack/Flutterwave, coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
+`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy Paystack/Flutterwave gateways (replaced by Bachs in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
 
 | `apps/api` module | Ports to | Reuse |
 | --- | --- | --- |
@@ -200,7 +200,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | POST /orders/checkout `{addressId,redeemLoyaltyPoints}` → `{orderGroups,payableCheckoutId,total}` | M W | ✅ | One `Checkout`, **one order group per seller** (§4.6). Mobile reads `orders`/`payableOrderId` today; rename during wiring |
 | GET /orders?status, /orders/:id, cancel, confirm-receipt | M W | ✅ | Mobile `GET /orders` expects a bare array, which needs a page envelope; `status` filter values must match §4.3.5 |
 | GET /orders/:id/escrow, POST /orders/:id/disputes, GET /disputes, /disputes/:id, messages | M W | ✅ (GET /disputes list ✗) | **✅ built (go-money).** |
-| POST /payments/initialize `{orderId,provider}`, POST /payments/orders/:id/verify, POST /payments/webhooks/:provider | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built (go-money).** |
+| POST /payments/initialize `{orderId}` (Bachs hosted checkout, one per seller group), POST /payments/orders/:id/verify, POST /webhooks/bachs | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built (go-money).** |
 | GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
 | GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
 | GET /loyalty/me, /referrals/me, POST redemptions | M | ✅ | → go.rewards |
@@ -319,14 +319,22 @@ Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`
 
 ### 2.15 Built so far: go-money (ledger, payments, escrow, wallet, creators)
 
-Done and covered by integration tests (real Postgres, fake Paystack API): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
+Done and covered by integration tests (real Postgres, fake provider API; to be re-pointed at a fake Bachs API): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
 
 - Internal gRPC for go-live (`LiveMoneyService`: gift charge with tier split / host fallback / battle holdings, battle settlement, battle gift totals, coin balance) and go-commerce (`CheckoutMoneyService`: register checkout payables with escrow/direct mode, record shipped/delivered, confirm receipt, get escrow). See `services/README.md`.
+- **Superseded by the Bachs direction (3 Oct):** the Paystack/Flutterwave adapters, `platform:clearing:*` accounts, batch Paystack transfers and "Zudomart holds the escrow" settlement below must be reworked per `docs/checkoutPaymentFlowPlan.md` (section 11 checklist). Ledger states become a mirror of Bachs-held seller balances.
 - Seller balances per the checkout plan: in escrow → locked 24h → available → payout requested → paid, with debt recovery instead of negative balances; daily payout run; `GET /wallets/me` adds `locked`, `inEscrow`, `payoutRequested`, `negativeBalance`, `nextAvailableAt`.
 - `POST /disputes/:id/close` (buyer withdraws), `POST /wallets/me/withdrawals/:id/cancel`, `GET /wallets/me/withdrawals`.
 - Admin: ledger integrity and statements, journal reversal (step-up), provider reconciliation, dispute queue and resolution (release / refund / partial, step-up), escrow refunds, withdrawal review, payout run, creator tiers and membership.
 
 Changes the clients must make: lists are `{data,nextCursor}` (`/coins/packages`, `/banks`, `/wallets/me/transactions`, `/wallets/me/payout-accounts`, `/wallets/me/escrow-holds`, `/disputes`); the coin purchase body is `{packageId}` and app clients get `purchaseChannel: "store_iap"` (they must buy through IAP); `POST /wallets/me/withdrawals` returns a `WalletTransaction` plus `fee`, `netAmount`, `withdrawalStatus`; `EscrowDetail.buyer`/`store` carry only `id` until the gateway composes profiles.
+
+### 2.16 Consolidation notes (go-live, go-money, gateway)
+
+- **go-live money**: go-live calls go-money's `LiveMoneyService` over internal gRPC (`LIVE_MONEY_GRPC_ADDRESS`, bearer `LIVE_MONEY_GRPC_TOKEN`, per-attempt timeout `LIVE_MONEY_CALL_TIMEOUT`, retry on `UNAVAILABLE` only for idempotent calls). The in-memory fake exists only outside production; production refuses to start without the addresses and 32+ character tokens. Names and creator-program roles come from go-identity's `AccountDirectoryService` (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`, served by auth on `AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS`).
+- **Mobile change (go-live lists)**: `GET /lives/suggested` and `GET /lives/:id/viewers` now return `{data, nextCursor}` instead of a bare array. `live.service.ts` `fetchSuggestedLives` and `liveGuests.service.ts` `searchLiveViewersToInvite` (and their mocks in `live.mock.ts` / `liveGuests.mock.ts`) must read `.data`; `nextCursor` is always `null` for now.
+- **Gateway**: `GET /orders/{id}/escrow`, `POST /orders/{id}/disputes` and the staff `GET /admin/orders/{id}/escrow`, `POST /admin/orders/{id}/escrow/refund` are routed to go-money (the route table accepts `*` for one path segment). Payment provider webhooks bypass the gateway: the ALB sends `/webhooks/*` straight to go-money (`docs/architecture/devops.md`).
+- **Money settings**: go-money reads `gift.shareTiers` and the new `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from the admin settings store through the read-only grant on `admin.platform_settings`, cached for `MONEY_PLATFORM_SETTINGS_TTL` (30 s). Env (`ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD`) and the creator-tier table remain the fallback when the store is unreachable or the row is missing. The gift share is the higher of the creator's staff-granted tier and the admin tier reached by the creator's gift coins this month, capped at 7000 bps. `sellerReserveBps` is read and editable but nothing applies a reserve yet.
 
 ## 3. Wiring order
 
@@ -387,7 +395,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 - **Endpoints:** §2.8.
 - **Models:** `Store`, `Product`, `ProductVariant` (SKU, options), `StockLevel`, `StockReservation`, `Cart`, `Checkout`, `Order`, `OrderItem`, `OrderEvent` (timeline), `Payment`, `WebhookEvent`, `Escrow`, `Dispute`, `DisputeMessage`, `PayoutAccount` (encrypted, masked), `Withdrawal`, ledger accounts.
-- **Infra:** Paystack + Flutterwave behind one provider interface (collections, transfers, bank resolve, webhooks with signature verification); escrow auto-release scheduler; reconciliation job against provider settlements; py.intelligence `/v1/risk/score` for orders and payouts.
+- **Infra:** Bachs only (https://docs.bachs.io) behind one provider interface: per-seller connected accounts, direct-charge checkout with `platform_fee`, refunds, transfers, payouts, balances, disputes, webhooks with `X-Bachs-Signature-V2` verification. Zudomart holds no one's money; escrow funds stay locked in the seller account and the ledger is a mirror. Details: `docs/checkoutPaymentFlowPlan.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); per-seller mirror reconciliation against Bachs balances; py.intelligence `/v1/risk/score` for orders and payouts.
 - **Checkout transaction (inside `go-commerce` + `go-money`):** recompute prices, seller grouping, shipping (§4.6), discounts and eligibility on the server → reserve stock (TTL 15 min) → create Checkout/Orders with a locked exchange rate → initialise payment → on verified webhook: mark paid, hold in escrow, commit the reservation → seller fulfils → buyer confirms or auto-release after N days → release escrow minus commission → seller wallet.
 - **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`, `/api/v1/loyalty`, `/api/v1/referrals`.
 - **Acceptance:** client-sent prices ignored; double-submitting checkout with the same key returns the same orders; webhook replay is processed once; concurrent withdrawals cannot overdraw (row lock + version); ledger trial balance = 0 per currency after the e2e suite; escrow release, refunds and payouts are written to the audit log.
@@ -791,7 +799,7 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 
 **4.3.15 Settings, API keys, webhooks** — store profile, currency (fixed after first sale), taxes, policies, notifications, locations. API keys (Business): `POST /seller/api-keys {name, scopes[]}` returns the secret once, stored as a hash; `DELETE` revokes. Webhooks: `POST /seller/webhooks {url, events[]}`, HMAC-SHA256 signature header `X-Zudomart-Signature`, retries with exponential backoff for 24 h, delivery log `GET /seller/webhooks/:id/deliveries`. Events: `order.created|paid|cancelled|shipped|delivered|completed|refunded`, `inventory.lowStock`, `product.updated`, `payout.paid`, `review.created`.
 
-**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Paystack/Flutterwave hosted, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
+**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Bachs hosted checkout on Zudomart's own account, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
 
 **4.3.17 Acceptance**
 
@@ -950,7 +958,7 @@ Built to support **GDPR where it applies and Nigeria's NDPA 2023**. The plan **n
 - Integer minor units + ISO currency everywhere (`int64` in Go, `BigInt` in Prisma, `integer` in Ecto). Coins are integer `COIN`. The two units are never mixed in one ledger transaction except in the conversion and purchase postings, which use a stored rate.
 - The server resolves viewer currency: profile country → IP → `X-Client-Region` → USD for unsupported countries (NGN, GHS, KES, ZAR, GBP, EUR, USD supported). Display prices may be converted. **Checkout locks the rate** (`lockOrderExchangeRate`) and charges in a provider-supported currency. Seller stores have one settlement currency.
 - Rounding: banker's rounding is never used. Shares round **down** for the payee, and remainders go to the platform, so a split is always exact.
-- Balances change only through ledger postings in one DB transaction with row locks + version columns. A nightly trial balance job asserts `Σ debits = Σ credits` per currency and per unit, and reconciliation compares against Paystack/Flutterwave settlements.
+- Balances change only through ledger postings in one DB transaction with row locks + version columns. A nightly trial balance job asserts `Σ debits = Σ credits` per currency and per unit, and reconciliation compares each seller's ledger mirror with the balances Bachs holds. Bachs is the source of truth for balances; Zudomart holds no seller money.
 
 ### 5.3 Idempotency
 
@@ -992,7 +1000,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 
 ### 5.8 Webhooks
 
-- **Inbound** (Paystack, Flutterwave, couriers, LiveKit, App Store/Play): signature verified before parsing, stored in `WebhookEvent` with a unique provider event id, processed at most once, and acknowledged quickly with processing async.
+- **Inbound** (Bachs, couriers, LiveKit, App Store/Play): signature verified before parsing, stored in `WebhookEvent` with a unique provider event id, processed at most once, and acknowledged quickly with processing async.
 - **Outbound** (seller webhooks, partner APIs): ts.integrations, HMAC-signed, retry with backoff, dead-letter after 24 h, replay from the dashboard.
 
 ### 5.9 Background jobs
@@ -1014,7 +1022,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 
 - **Unit:** pure domain functions (splits, pricing, state machines) with table tests. Property tests for the ledger: random postings always balance and never go negative.
 - **Contract:** each frontend's mock handlers (`apps/*/src/mocks`) are the consumer fixtures. Generate OpenAPI from each service and run a contract check in CI that every mock route has a matching operation with compatible request/response schemas. That turns the §2.13 list into failing checks until it is fixed.
-- **Integration:** per service against real Postgres/Redis (Testcontainers) and LocalStack SNS/SQS, including Paystack/Flutterwave sandbox webhooks and a LiveKit dev server.
+- **Integration:** per service against real Postgres/Redis (Testcontainers) and LocalStack SNS/SQS, including Bachs sandbox webhooks (`sk_sandbox_` keys) and a LiveKit dev server.
 - **End-to-end:** staging scripts for signup → post → follow → chat → buy coins → gift → battle with WTA → checkout → fulfil → confirm → payout, asserting trial balance = 0 at the end.
 - **Load:** k6 for checkout and gift bursts; LiveKit load tester for 10 publishers + 1,000 subscribers.
 - **Security:** the existing `apps/api/tests/security` cases ported (enumeration, refresh reuse, webhook signature, idempotency conflicts, IDOR on store resources), plus `pnpm audit` / `govulncheck` / `pip-audit` in CI.

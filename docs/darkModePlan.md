@@ -113,3 +113,4 @@ Shared pieces (2026-10-03):
 
 | App | Status | Preference endpoint (BFF) | Notes |
 |---|---|---|---|
+| mobile | Beta (default Light) | `PATCH /api/v1/users/me/preferences { theme }` (mock) | Light unchanged. Dark follows Figma node 874:5002 (owner decision): canvas `#0E0E10`, surface `#2C2C2C`, derived greys, brand `#2043F5` fills and yellow kept. Grey text lightened for AA: `@handle` `#5B5B5B`→`#B3B3B3`, metadata `#909090`→`#A6A6A6`. Blue text `#7A8DF9` pending design confirmation. Mobile-only; `designTokens` untouched. `app.json` stays `"light"` until visual QA. See plans.md §27. |
