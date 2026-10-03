@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { CaretDown24Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
+import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { InboxFolder } from "@/types";
@@ -23,7 +25,7 @@ export function InboxFolderMenu({ folder, topOffset, onSelect, titleSize = 21 }:
     <>
       <Pressable accessibilityRole="button" accessibilityLabel={`${INBOX_FOLDER_LABELS[folder]}, change inbox folder`} accessibilityState={{ expanded: isOpen }} onPress={() => setIsOpen(true)} style={styles.title}>
         <Text size={titleSize} weight={500} lineHeight={titleSize * 1.2} letterSpacing={-0.42} accessibilityRole="header">{INBOX_FOLDER_LABELS[folder]}</Text>
-        <Text size={14} lineHeight={18} color={colors.textMuted}>▾</Text>
+        <CaretDown24Icon size={16} color={colors.textMuted} />
       </Pressable>
       <FrameAwareModal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
         <Pressable accessibilityLabel="Close menu" style={styles.backdrop} onPress={() => setIsOpen(false)}>
@@ -49,9 +51,9 @@ export function InboxFolderMenu({ folder, topOffset, onSelect, titleSize = 21 }:
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   title: { flexDirection: "row", alignItems: "center", gap: 6 },
   backdrop: { flex: 1 },
-  menu: { position: "absolute", left: 52, minWidth: 160, borderRadius: 12, backgroundColor: colors.surface, paddingVertical: 4, shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 12, elevation: 6 },
-  item: { paddingHorizontal: 16, paddingVertical: 12 },
+  menu: { position: "absolute", left: 52, ...buildPopoverMenuSurface(colors, scheme) },
+  item: { minHeight: 48, paddingHorizontal: 16, justifyContent: "center" },
 }));

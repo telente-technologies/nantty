@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { StyleSheet, View } from "react-native";
 
+import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -17,6 +18,7 @@ export interface InboxRequestActionsProps {
 export function InboxRequestActions({ conversation, onRemoved, showExplanation = false }: InboxRequestActionsProps) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
+  const report = useChatReportLauncher(conversation);
   const isSpam = conversation.inboxFolder === "spam";
   const refreshInbox = () => {
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
@@ -61,6 +63,11 @@ export function InboxRequestActions({ conversation, onRemoved, showExplanation =
         <Button title="Delete" variant="outline" height={36} style={styles.button} disabled={isBusy} onPress={() => remove.mutate()} />
         <Button title="Block" variant="danger" height={36} style={styles.button} disabled={isBusy} onPress={confirmBlock} />
       </View>
+      <View style={styles.buttons}>
+        <Button title="Report" variant="outline" height={36} style={styles.button} disabled={isBusy} onPress={() => report.reportUser(false)} />
+        <Button title="Report and block" variant="outline" height={36} style={styles.button} disabled={isBusy} onPress={() => report.reportUser(true)} />
+      </View>
+      {report.reportSheet}
     </View>
   );
 }
