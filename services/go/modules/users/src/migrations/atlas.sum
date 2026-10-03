@@ -1,4 +1,4 @@
-h1:AJvGInJJEcvLvR0gZ42eLU+4EcjdfjloE3V2J3RzztA=
+h1:8KSeHpROIq33GrpIa3BA+3dY0mT22mPaq9M5OKdZ3+A=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:ZvBT+vvQCm5NqTGPiEhOB1osuqSwgQFgMAX7+BBdFH8=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:yqWZ0zBt6NwAbqkN3ptPBIu0qjIFptu66IDacpojKwU=
@@ -11,3 +11,4 @@ h1:AJvGInJJEcvLvR0gZ42eLU+4EcjdfjloE3V2J3RzztA=
 20261003162428_add_legal_effective_date_default_flag.up.sql h1:X4RZLQ61a05CS0O0EFXlBVbunOT3l+iMRoCZCJS+fSg=
 20261003170000_grant_read_access_to_shipping_addresses.up.sql h1:GEF0aByiXhF99OaQtJwSZ6a6E70QzlUmUCX9PAlWnf8=
 20261003205007_add_checkmark_suggested_marker.up.sql h1:yKLkxZjxVeu0n9tuuXG8OxOF3PNQ3Gx6naGbwShlU4s=
+20261003231904_entitlement_plan_state.up.sql h1:xejJSpAjJs3enS3Gl9m70AWbsmGbYjnNg6oK4XDjxLA=
