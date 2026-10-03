@@ -4,6 +4,7 @@ import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
 import { boostsMocks } from "./boosts.mock";
+import { businessProfilesMocks } from "./businessProfiles.mock";
 import { brandsMocks } from "./brands.mock";
 import { cartMocks } from "./cart.mock";
 import { chatsMocks } from "./chats.mock";
@@ -16,9 +17,12 @@ import { creatorProgramMocks } from "./creatorProgram.mock";
 import { creatorsMocks } from "./creators.mock";
 import { creatorSubscriptionsMocks } from "./creatorSubscriptions.mock";
 import { disputesMocks } from "./disputes.mock";
+import { followGraphMocks } from "./followGraph.mock";
 import { feedMocks } from "./feed.mock";
 import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
+import { liveBattleMocks } from "./liveBattle.mock";
+import { liveGuestsMocks } from "./liveGuests.mock";
 import { localeMocks } from "./locale.mock";
 import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
@@ -28,12 +32,15 @@ import { productsMocks } from "./products.mock";
 import { rewardsMocks } from "./rewards.mock";
 import type { MockRoute } from "./registry.mock";
 import { sellerMocks } from "./seller.mock";
+import { geoMocks } from "./geo.mock";
+import { privacyMocks } from "./privacy.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
 import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
+import { zudoPointsMocks } from "./zudoPoints.mock";
 import { walletMocks } from "./wallet.mock";
 import { reportsMocks } from "./reports.mock";
 
@@ -41,6 +48,7 @@ const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...authMocks,
+  ...followGraphMocks,
   ...usersMocks,
   ...feedMocks,
   ...postsMocks,
@@ -55,6 +63,7 @@ const routes: MockRoute[] = [
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
+  ...businessProfilesMocks,
   ...supportMocks,
   ...groupsMocks,
   ...chatsMocks,
@@ -68,9 +77,14 @@ const routes: MockRoute[] = [
   ...notificationsMocks,
   ...creatorsMocks,
   ...giftsMocks,
+  ...zudoPointsMocks,
   ...liveMocks,
+  ...liveGuestsMocks,
+  ...liveBattleMocks,
   ...storiesMocks,
   ...settingsMocks,
+  ...geoMocks,
+  ...privacyMocks,
   ...walletMocks,
   ...sellerMocks,
 ];
@@ -87,13 +101,13 @@ const matchMockPathAndExtractParams = (pattern: string, path: string): Record<st
   return params;
 };
 
-export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown): Promise<T> {
+export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown, idempotencyKey?: string): Promise<T> {
   const [path = "", search = ""] = url.split("?");
   await new Promise((resolve) => setTimeout(resolve, 250));
   for (const r of routes) {
     if (r.method !== method) continue;
     const params = matchMockPathAndExtractParams(r.path, path);
-    if (params) return r.handler({ params, query: new URLSearchParams(search), body }) as T;
+    if (params) return r.handler({ params, query: new URLSearchParams(search), body, idempotencyKey }) as T;
   }
   throw new ApiError(404, `No mock for ${method} ${path}`);
 }

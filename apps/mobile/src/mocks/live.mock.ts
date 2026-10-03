@@ -1,5 +1,7 @@
-import type { LiveComment, LiveSessionDetails } from "@/types";
+import type { LiveCategory, LiveComment, LiveSessionDetails } from "@/types";
+import type { LiveMonetizationInput } from "@/types/socialGraph.type";
 
+import { ApiError } from "@/errors/api.error";
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
 import { productImageUrlsForProduct } from "./mockImages.mock";
@@ -39,6 +41,8 @@ const KNOWN_LIVES_BY_ID: Readonly<Record<string, { hostId: DirectoryUserId; titl
   ...Object.fromEntries(SUGGESTED_LIVE_SEEDS.map(([hostId, title], index) => [`live_s${index}`, { hostId, title }])),
 };
 
+const CONTENT_ONLY_LIVE_IDS: ReadonlySet<string> = new Set(["live_olumide_cuts", "live_s2"]);
+
 const findKnownLiveOrDefault = (liveId: string) => KNOWN_LIVES_BY_ID[liveId] ?? DEFAULT_LIVE;
 
 const findStreamPreviewForHost = (hostId: string) => {
@@ -52,7 +56,7 @@ const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOr
   title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Zudomart",
   viewers: 1268,
   status: liveId.startsWith("ended") ? "ended" : "live",
-  products: (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),
+  products: CONTENT_ONLY_LIVE_IDS.has(liveId) ? [] : (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),
   isFollowingHost: false,
   startedAt: new Date().toISOString(),
   ...findStreamPreviewForHost(host.id),
@@ -83,9 +87,16 @@ export const liveMocks: MockRoute[] = [
   ),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
+    const monetization = body as Partial<LiveMonetizationInput>;
+    if (monetization.liveAdSettings?.allowAds && !monetization.acceptedLiveAdTermsVersion) throw new ApiError(422, "Accept the live-ad terms to allow ads", "LIVE_AD_TERMS_REQUIRED");
     const session = {
       ...buildLiveSession(`live_${Date.now()}`, summariseUser(getSignedInMockUser())),
       title: (body as { title: string }).title,
+      category: (body as { category?: LiveCategory }).category ?? "justChatting",
+      products: (body as { category?: LiveCategory }).category === "shopping" ? buildLiveSession(`live_${Date.now()}`).products : [],
+      liveAdSettings: monetization.liveAdSettings ?? null,
+      acceptedLiveAdTermsVersion: monetization.acceptedLiveAdTermsVersion ?? null,
+      sponsorshipLine: monetization.sponsorshipLine ?? null,
       viewers: 0,
       coverUrl: null,
       playbackUrl: null,
