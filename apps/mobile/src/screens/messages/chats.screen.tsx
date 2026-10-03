@@ -90,6 +90,7 @@ export function ChatsScreen() {
                   myAvatarUrl={myAvatarUrl}
                   onPressAddStory={() => navigation.navigate("CreatePost", { mode: "story" })}
                   onPressStory={(userId) => navigation.navigate("Story", { userId })}
+                  onPressLive={(liveId) => navigation.navigate("Live", { liveId })}
                 />
               </View>
               <View style={styles.tabs} accessibilityRole="tablist">
