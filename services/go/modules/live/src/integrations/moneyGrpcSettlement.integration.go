@@ -15,7 +15,9 @@ func (client *MoneyClient) SettleBattle(ctx context.Context, request interfaces.
 	for _, participant := range request.Participants {
 		message.Participants = append(message.Participants, &moneyv1.BattleParticipant{UserId: participant.UserId, Outcome: describeOutcome(participant.Outcome)})
 	}
-	response, err := client.service.SettleBattle(ctx, message)
+	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.SettleBattleResponse, error) {
+		return client.service.SettleBattle(attempt, message)
+	})
 	if err != nil {
 		return interfaces.BattleSettlement{}, translateMoneyError(err)
 	}

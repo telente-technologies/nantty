@@ -8,7 +8,6 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
@@ -18,14 +17,15 @@ import (
 type MoneyClient struct {
 	connection *grpc.ClientConn
 	service    moneyv1.LiveMoneyServiceClient
+	options    InternalGrpcOptions
 }
 
-func DialMoneyService(address string) (*MoneyClient, error) {
-	connection, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func DialMoneyService(options InternalGrpcOptions) (*MoneyClient, error) {
+	connection, err := dialInternalGrpcService(options)
 	if err != nil {
 		return nil, fmt.Errorf("dial money service: %w", err)
 	}
-	return &MoneyClient{connection: connection, service: moneyv1.NewLiveMoneyServiceClient(connection)}, nil
+	return &MoneyClient{connection: connection, service: moneyv1.NewLiveMoneyServiceClient(connection), options: options}, nil
 }
 
 func (client *MoneyClient) Close() error { return client.connection.Close() }
@@ -41,7 +41,9 @@ func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, reque
 	if request.ComboId != "" {
 		message.ComboId = &request.ComboId
 	}
-	response, err := client.service.ChargeGiftAndCreditCreator(ctx, message)
+	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeGiftAndCreditCreatorResponse, error) {
+		return client.service.ChargeGiftAndCreditCreator(attempt, message)
+	})
 	if err != nil {
 		return interfaces.ChargedGift{}, translateMoneyError(err)
 	}
@@ -55,7 +57,9 @@ func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, reque
 }
 
 func (client *MoneyClient) GetCoinBalance(ctx context.Context, userId string) (int64, error) {
-	response, err := client.service.GetCoinBalance(ctx, &moneyv1.GetCoinBalanceRequest{UserId: userId})
+	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetCoinBalanceResponse, error) {
+		return client.service.GetCoinBalance(attempt, &moneyv1.GetCoinBalanceRequest{UserId: userId})
+	})
 	if err != nil {
 		return 0, translateMoneyError(err)
 	}
@@ -100,7 +104,9 @@ func translateMoneyError(err error) error {
 }
 
 func (client *MoneyClient) GetBattleGiftTotals(ctx context.Context, battleId string) ([]interfaces.BattleGiftTotal, error) {
-	response, err := client.service.GetBattleGiftTotals(ctx, &moneyv1.GetBattleGiftTotalsRequest{BattleId: battleId})
+	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetBattleGiftTotalsResponse, error) {
+		return client.service.GetBattleGiftTotals(attempt, &moneyv1.GetBattleGiftTotalsRequest{BattleId: battleId})
+	})
 	if err != nil {
 		return nil, translateMoneyError(err)
 	}
