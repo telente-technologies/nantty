@@ -10,6 +10,11 @@ const publicRoutes: ReadonlyArray<{ readonly path: string; readonly priority: nu
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/cookies", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/community-guidelines", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/seller-terms", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/creator-terms", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/ads-policy", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/refund-escrow-policy", priority: 0.3, changeFrequency: "yearly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
