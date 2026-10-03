@@ -20,6 +20,7 @@ type UserView struct {
 	Website       *string  `json:"website"`
 	Verified      bool     `json:"verified"`
 	IsCreator     bool     `json:"isCreator"`
+	CreatorStatus string   `json:"creatorStatus"`
 	IsSeller      bool     `json:"isSeller"`
 	IsPrivate     bool     `json:"isPrivate"`
 	StoreId       *string  `json:"storeId"`
@@ -51,12 +52,12 @@ type ActingProfileView struct {
 	Active       bool     `json:"active"`
 }
 
-func BuildUserView(row *ent.Profile, summary identityports.AccountSummary, isCreator, includePrivateFields bool) UserView {
+func BuildUserView(row *ent.Profile, summary identityports.AccountSummary, includePrivateFields bool) UserView {
 	joinedAt := summary.CreatedAt.UTC().Format(time.RFC3339)
 	view := UserView{
 		Id: row.AccountID.String(), ProfileId: row.ID.String(), Name: row.DisplayName, Username: row.Handle,
 		AvatarUrl: row.AvatarURL, BannerUrl: row.BannerURL, Bio: row.Bio, Website: row.Website,
-		Verified: row.Verified, IsCreator: isCreator, IsSeller: containsRole(summary.Roles, "seller"), IsPrivate: row.IsPrivate,
+		Verified: row.Verified, IsCreator: row.CreatorStatus == profile.CreatorStatusApproved, CreatorStatus: string(row.CreatorStatus), IsSeller: containsRole(summary.Roles, "seller"), IsPrivate: row.IsPrivate,
 		CountryCode: row.CountryCode, JoinedAt: joinedAt, CreatedAt: joinedAt,
 	}
 	if includePrivateFields {
