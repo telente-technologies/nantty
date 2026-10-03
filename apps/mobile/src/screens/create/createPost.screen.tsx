@@ -12,7 +12,7 @@ import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
@@ -24,6 +24,7 @@ import type { CreateMode, LiveCategory, LiveSource } from "@/types";
 const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone", kind: "photo", isAiGenerated: false };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<CreateMode>(route.params?.mode ?? "post");
   const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
@@ -134,7 +135,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       : "Post";
 
   return (
-    <Screen background={colors.white} edges={["top", "bottom"]}>
+    <Screen background={colors.surface} edges={["top", "bottom"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         {mode === "live" ? (
           <CreateHeader
