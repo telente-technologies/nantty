@@ -10,6 +10,7 @@ import type { Message } from "@/types";
 import { formatClockTime } from "@/utils/formatDate.util";
 import { MessageReactionsRow } from "./messageReactionsRow";
 import { VoiceNoteBubble } from "./voiceNoteBubble";
+import { useImagePreview } from "@/components/ui/previewableImage";
 
 export interface ChatBubbleProps {
   readonly message: Message;
@@ -38,6 +39,7 @@ export function ChatBubble({
   onLongPress,
   onToggleReaction,
 }: ChatBubbleProps) {
+  const { openImagePreview, imagePreviewElement } = useImagePreview();
   if (message.kind === "system") return <SystemNoticeRow text={message.text} />;
   const isVoiceNote = message.kind === "voice" && !!message.media;
   const isPhoto = message.kind === "image" && !!message.media?.url;
@@ -53,7 +55,8 @@ export function ChatBubble({
           </Text>
         ) : null}
         <Pressable
-          disabled={!onLongPress}
+          disabled={!onLongPress && !isPhoto}
+          onPress={isPhoto ? () => openImagePreview([message.media!.url]) : undefined}
           onLongPress={onLongPress}
           delayLongPress={350}
           accessibilityHint={onLongPress ? "Long press to react" : undefined}
@@ -69,7 +72,7 @@ export function ChatBubble({
           {isVoiceNote ? (
             <VoiceNoteBubble media={message.media!} isMine={isMine} deliveryStatus={deliveryStatus} />
           ) : isPhoto ? (
-            <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo" />
+            <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo, tap to view full screen" />
           ) : (
             <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.text}>
               {message.text}
@@ -90,6 +93,7 @@ export function ChatBubble({
           ) : null}
         </View>
       </View>
+      {imagePreviewElement}
     </View>
   );
 }
