@@ -1,15 +1,17 @@
 .container {
   position: relative;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
 }
 
 .trigger {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
+  justify-content: space-between;
   padding: 4px 8px;
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
@@ -20,11 +22,15 @@
 .triggerText {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
   min-width: 0;
+  overflow: hidden;
   line-height: 1.2;
 }
 
 .storeName {
+  display: block;
+  min-width: 0;
   font-weight: 700;
   font-size: 13px;
   white-space: nowrap;
@@ -33,6 +39,8 @@
 }
 
 .meta {
+  display: block;
+  min-width: 0;
   font-size: 11px;
   color: var(--ink-faint);
   white-space: nowrap;
