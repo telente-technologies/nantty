@@ -1,27 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ZudomartWordmark } from "@zudomart/web-kit";
+
+import { CreatorProgramGate } from "@/components/shell/creatorProgramGate";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Avatar } from "@/components/ui/media";
 import { sendRequestToStudioServer } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
 
 import styles from "./studioShell.module.css";
-
-interface NavItem {
-  readonly href: string;
-  readonly label: string;
-}
-
-const navItems: readonly NavItem[] = [{ href: "/lives", label: "Lives" }];
-
-function isActivePath(pathname: string, href: string): boolean {
-  if (href === "/lives") return pathname === "/lives" || pathname.startsWith("/lives/");
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 function SignOutButton() {
   const router = useRouter();
@@ -46,51 +37,27 @@ function SignOutButton() {
 }
 
 export function StudioShell({ children }: { readonly children: ReactNode }) {
-  const pathname = usePathname();
   const { viewer } = useSession();
+  const isSignedInWithoutCreatorAccess = viewer !== null && !viewer.isCreator;
 
   return (
     <div className={styles.shell}>
-      <aside className={styles.sidebar}>
-        <Link href="/lives" className={styles.brand}>
-          zudomart <span className={styles.brandBadge}>studio</span>
+      <header className={styles.topBar}>
+        <Link href="/lives" className={styles.brand} aria-label="Zudomart Studio home">
+          <ZudomartWordmark productLabel="Studio" />
         </Link>
-
-        <nav className={styles.nav} aria-label="Primary">
-          <ul className={styles.navList}>
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className={isActivePath(pathname, item.href) ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          <div className={styles.account}>
-            <Avatar name={viewer?.name ?? "Creator"} src={viewer?.avatarUrl ?? null} size="sm" />
-            <span className={styles.accountText}>
-              <span className={styles.accountName}>{viewer?.name ?? "Creator"}</span>
-              <span className={styles.accountHandle}>{viewer?.channelHandle ?? ""}</span>
-            </span>
-          </div>
+        <div className={styles.account}>
+          <Avatar name={viewer?.name ?? "Creator"} src={viewer?.avatarUrl ?? null} size="sm" />
+          <span className={styles.accountText}>
+            <span className={styles.accountName}>{viewer?.name ?? "Creator"}</span>
+            <span className={styles.accountHandle}>{viewer?.channelHandle ?? ""}</span>
+          </span>
           <SignOutButton />
         </div>
-      </aside>
-
-      <div className={styles.frame}>
-        <header className={styles.topBar}>
-          <Link href="/lives" className={styles.brandMobile}>
-            zudomart <span className={styles.brandBadge}>studio</span>
-          </Link>
-          <SignOutButton />
-        </header>
-        <main id="main-content" className={styles.main} tabIndex={-1}>
-          {children}
-        </main>
-      </div>
+      </header>
+      <main id="main-content" className={styles.main} tabIndex={-1}>
+        {isSignedInWithoutCreatorAccess ? <CreatorProgramGate /> : children}
+      </main>
     </div>
   );
 }
