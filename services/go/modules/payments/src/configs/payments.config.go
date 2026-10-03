@@ -8,39 +8,54 @@ import (
 	platformconfig "zudomart/platform/config"
 )
 
+const (
+	BachsSandboxBaseUrl    = "https://sandbox-api.bachs.io"
+	BachsProductionBaseUrl = "https://api.bachs.io"
+)
+
 type PaymentsSettings struct {
-	Money                     loaders.MoneyModuleSettings
-	PaystackSecretKey         string
-	PaystackBaseUrl           string
-	FlutterwaveSecretKey      string
-	FlutterwaveWebhookHash    string
-	FlutterwaveBaseUrl        string
-	DefaultProvider           string
-	AllowedReturnUrls         []string
-	CustomerEmailDomain       string
-	TransferFeeOverrides      map[string]int64
-	AppleInAppPurchaseFeeBps  int64
-	GooglePlayBillingFeeBps   int64
-	AppleInAppPurchaseEnabled bool
-	GooglePlayBillingEnabled  bool
+	Money                       loaders.MoneyModuleSettings
+	BachsBaseUrl                string
+	BachsSecretKey              string
+	BachsWebhookSigningSecrets  []string
+	BachsPayoutFeeOverrides     map[string]int64
+	BachsMaximumAttempts        int
+	DefaultProvider             string
+	AllowedReturnUrls           []string
+	OnboardingReturnUrl         string
+	OnboardingRefreshUrl        string
+	ConnectedAccountCountry     string
+	PlatformCommissionBps       int64
+	CheckoutExpiryMinutes       int
+	AccountDirectorySchema      string
+	WebSubscriptionPlanProducts map[string]string
+	AppleInAppPurchaseFeeBps    int64
+	GooglePlayBillingFeeBps     int64
+	AppleInAppPurchaseEnabled   bool
+	GooglePlayBillingEnabled    bool
 }
 
 func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) PaymentsSettings {
 	settings := PaymentsSettings{
-		Money:                     loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "payments"),
-		PaystackSecretKey:         reader.ReadStringOrDefault("PAYSTACK_SECRET_KEY", ""),
-		PaystackBaseUrl:           reader.ReadStringOrDefault("PAYSTACK_BASE_URL", "https://api.paystack.co"),
-		FlutterwaveSecretKey:      reader.ReadStringOrDefault("FLUTTERWAVE_SECRET_KEY", ""),
-		FlutterwaveWebhookHash:    reader.ReadStringOrDefault("FLUTTERWAVE_WEBHOOK_HASH", ""),
-		FlutterwaveBaseUrl:        reader.ReadStringOrDefault("FLUTTERWAVE_BASE_URL", "https://api.flutterwave.com/v3"),
-		DefaultProvider:           reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack"),
-		AllowedReturnUrls:         reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"zudomart://payments/return"}),
-		CustomerEmailDomain:       reader.ReadStringOrDefault("PAYMENT_CUSTOMER_EMAIL_DOMAIN", "customers.zudomart.app"),
-		TransferFeeOverrides:      parseTransferFeeOverrides(reader.ReadStringOrDefault("PAYOUT_TRANSFER_FEE_OVERRIDES", "")),
-		AppleInAppPurchaseFeeBps:  int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
-		GooglePlayBillingFeeBps:   int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),
-		AppleInAppPurchaseEnabled: reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", "") != "",
-		GooglePlayBillingEnabled:  reader.ReadStringOrDefault("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "") != "",
+		Money:                       loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "payments"),
+		BachsBaseUrl:                reader.ReadStringOrDefault("BACHS_API_BASE_URL", BachsSandboxBaseUrl),
+		BachsSecretKey:              reader.ReadStringOrDefault("BACHS_SECRET_KEY", ""),
+		BachsWebhookSigningSecrets:  reader.ReadCommaSeparatedListOrDefault("BACHS_WEBHOOK_SIGNING_SECRETS", nil),
+		BachsPayoutFeeOverrides:     parseCurrencyAmountOverrides(reader.ReadStringOrDefault("BACHS_PAYOUT_FEE_OVERRIDES", "")),
+		BachsMaximumAttempts:        reader.ReadIntegerOrDefault("BACHS_MAXIMUM_ATTEMPTS", 3),
+		DefaultProvider:             reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "bachs"),
+		AllowedReturnUrls:           reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
+		OnboardingReturnUrl:         reader.ReadStringOrDefault("CONNECT_ONBOARDING_RETURN_URL", "https://zudomart.com/seller/verification/return"),
+		OnboardingRefreshUrl:        reader.ReadStringOrDefault("CONNECT_ONBOARDING_REFRESH_URL", "https://zudomart.com/seller/verification/refresh"),
+		ConnectedAccountCountry:     reader.ReadStringOrDefault("CONNECT_ACCOUNT_COUNTRY", "NG"),
+		PlatformCommissionBps:       int64(reader.ReadIntegerOrDefault("ESCROW_PLATFORM_COMMISSION_BPS", 500)),
+		CheckoutExpiryMinutes:       reader.ReadIntegerOrDefault("CHECKOUT_SESSION_EXPIRY_MINUTES", 15),
+		AccountDirectorySchema:      reader.ReadStringOrDefault("PAYMENTS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
+		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("BACHS_SUBSCRIPTION_PLAN_PRODUCTS", "")),
+		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
+		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),
+		AppleInAppPurchaseEnabled:   reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", "") != "",
+		GooglePlayBillingEnabled:    reader.ReadStringOrDefault("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "") != "",
 	}
 	for _, problem := range ProviderKeyEnvironmentMismatches(settings) {
 		reader.ReadRequiredString(problem)
@@ -51,29 +66,49 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 func ProviderKeyEnvironmentMismatches(settings PaymentsSettings) []string {
 	production := settings.Money.IsProduction()
 	var problems []string
-	paystackLive := strings.HasPrefix(settings.PaystackSecretKey, "sk_live_")
-	if settings.PaystackSecretKey != "" && production != paystackLive {
-		problems = append(problems, "PAYSTACK_SECRET_KEY_MUST_MATCH_APP_ENV")
+	if settings.BachsSecretKey != "" {
+		keyIsLive := strings.HasPrefix(settings.BachsSecretKey, "sk_live_")
+		keyIsSandbox := strings.HasPrefix(settings.BachsSecretKey, "sk_sandbox_")
+		if (production && !keyIsLive) || (!production && !keyIsSandbox) {
+			problems = append(problems, "BACHS_SECRET_KEY_MUST_MATCH_APP_ENV")
+		}
 	}
-	flutterwaveTest := strings.Contains(settings.FlutterwaveSecretKey, "_TEST")
-	if settings.FlutterwaveSecretKey != "" && production == flutterwaveTest {
-		problems = append(problems, "FLUTTERWAVE_SECRET_KEY_MUST_MATCH_APP_ENV")
+	expectedBaseUrl := BachsSandboxBaseUrl
+	if production {
+		expectedBaseUrl = BachsProductionBaseUrl
+	}
+	if settings.BachsSecretKey != "" && strings.TrimRight(settings.BachsBaseUrl, "/") != expectedBaseUrl {
+		problems = append(problems, "BACHS_API_BASE_URL_MUST_MATCH_APP_ENV")
+	}
+	if settings.BachsSecretKey != "" && len(settings.BachsWebhookSigningSecrets) == 0 {
+		problems = append(problems, "BACHS_WEBHOOK_SIGNING_SECRETS")
+	}
+	if settings.PlatformCommissionBps < 0 || settings.PlatformCommissionBps >= 10_000 {
+		problems = append(problems, "ESCROW_PLATFORM_COMMISSION_BPS_BETWEEN_0_AND_9999")
 	}
 	return problems
 }
 
-func parseTransferFeeOverrides(raw string) map[string]int64 {
+func parseCurrencyAmountOverrides(raw string) map[string]int64 {
 	overrides := map[string]int64{}
 	for _, entry := range strings.Split(raw, ",") {
-		parts := strings.Split(strings.TrimSpace(entry), ":")
-		if len(parts) != 3 {
+		currency, value, found := strings.Cut(strings.TrimSpace(entry), ":")
+		amount, err := strconv.ParseInt(strings.TrimSpace(value), 10, 64)
+		if !found || err != nil || amount < 0 || len(strings.TrimSpace(currency)) != 3 {
 			continue
 		}
-		fee, err := strconv.ParseInt(parts[2], 10, 64)
-		if err != nil || fee < 0 {
-			continue
-		}
-		overrides[parts[0]+":"+strings.ToUpper(parts[1])] = fee
+		overrides[strings.ToUpper(strings.TrimSpace(currency))] = amount
 	}
 	return overrides
+}
+
+func parsePlanProducts(raw string) map[string]string {
+	products := map[string]string{}
+	for _, entry := range strings.Split(raw, ",") {
+		plan, product, found := strings.Cut(strings.TrimSpace(entry), ":")
+		if found && plan != "" && product != "" {
+			products[plan] = product
+		}
+	}
+	return products
 }
