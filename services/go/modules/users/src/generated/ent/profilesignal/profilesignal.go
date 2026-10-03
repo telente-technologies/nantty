@@ -42,6 +42,12 @@ const (
 	FieldSellerPlan = "seller_plan"
 	// FieldCheckmarkSuggestedAt holds the string denoting the checkmark_suggested_at field in the database.
 	FieldCheckmarkSuggestedAt = "checkmark_suggested_at"
+	// FieldPremiumUntil holds the string denoting the premium_until field in the database.
+	FieldPremiumUntil = "premium_until"
+	// FieldSellerPlanUntil holds the string denoting the seller_plan_until field in the database.
+	FieldSellerPlanUntil = "seller_plan_until"
+	// FieldSellerPlanTrialing holds the string denoting the seller_plan_trialing field in the database.
+	FieldSellerPlanTrialing = "seller_plan_trialing"
 	// FieldSource holds the string denoting the source field in the database.
 	FieldSource = "source"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -67,6 +73,9 @@ var Columns = []string{
 	FieldHasActiveStoreOrBrandPage,
 	FieldSellerPlan,
 	FieldCheckmarkSuggestedAt,
+	FieldPremiumUntil,
+	FieldSellerPlanUntil,
+	FieldSellerPlanTrialing,
 	FieldSource,
 	FieldUpdatedAt,
 }
@@ -116,6 +125,8 @@ var (
 	SuccessRatePercentValidator func(int) error
 	// DefaultHasActiveStoreOrBrandPage holds the default value on creation for the "has_active_store_or_brand_page" field.
 	DefaultHasActiveStoreOrBrandPage bool
+	// DefaultSellerPlanTrialing holds the default value on creation for the "seller_plan_trialing" field.
+	DefaultSellerPlanTrialing bool
 	// DefaultSource holds the default value on creation for the "source" field.
 	DefaultSource string
 	// SourceValidator is a validator for the "source" field. It is called by the builders before save.
@@ -229,6 +240,21 @@ func BySellerPlan(opts ...sql.OrderTermOption) OrderOption {
 // ByCheckmarkSuggestedAt orders the results by the checkmark_suggested_at field.
 func ByCheckmarkSuggestedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCheckmarkSuggestedAt, opts...).ToFunc()
+}
+
+// ByPremiumUntil orders the results by the premium_until field.
+func ByPremiumUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPremiumUntil, opts...).ToFunc()
+}
+
+// BySellerPlanUntil orders the results by the seller_plan_until field.
+func BySellerPlanUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSellerPlanUntil, opts...).ToFunc()
+}
+
+// BySellerPlanTrialing orders the results by the seller_plan_trialing field.
+func BySellerPlanTrialing(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSellerPlanTrialing, opts...).ToFunc()
 }
 
 // BySource orders the results by the source field.

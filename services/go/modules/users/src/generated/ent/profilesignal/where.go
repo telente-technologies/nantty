@@ -120,6 +120,21 @@ func CheckmarkSuggestedAt(v time.Time) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldCheckmarkSuggestedAt, v))
 }
 
+// PremiumUntil applies equality check predicate on the "premium_until" field. It's identical to PremiumUntilEQ.
+func PremiumUntil(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldPremiumUntil, v))
+}
+
+// SellerPlanUntil applies equality check predicate on the "seller_plan_until" field. It's identical to SellerPlanUntilEQ.
+func SellerPlanUntil(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanTrialing applies equality check predicate on the "seller_plan_trialing" field. It's identical to SellerPlanTrialingEQ.
+func SellerPlanTrialing(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldSellerPlanTrialing, v))
+}
+
 // Source applies equality check predicate on the "source" field. It's identical to SourceEQ.
 func Source(v string) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldSource, v))
@@ -588,6 +603,116 @@ func CheckmarkSuggestedAtIsNil() predicate.ProfileSignal {
 // CheckmarkSuggestedAtNotNil applies the NotNil predicate on the "checkmark_suggested_at" field.
 func CheckmarkSuggestedAtNotNil() predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldNotNull(FieldCheckmarkSuggestedAt))
+}
+
+// PremiumUntilEQ applies the EQ predicate on the "premium_until" field.
+func PremiumUntilEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldPremiumUntil, v))
+}
+
+// PremiumUntilNEQ applies the NEQ predicate on the "premium_until" field.
+func PremiumUntilNEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldPremiumUntil, v))
+}
+
+// PremiumUntilIn applies the In predicate on the "premium_until" field.
+func PremiumUntilIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldPremiumUntil, vs...))
+}
+
+// PremiumUntilNotIn applies the NotIn predicate on the "premium_until" field.
+func PremiumUntilNotIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldPremiumUntil, vs...))
+}
+
+// PremiumUntilGT applies the GT predicate on the "premium_until" field.
+func PremiumUntilGT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldPremiumUntil, v))
+}
+
+// PremiumUntilGTE applies the GTE predicate on the "premium_until" field.
+func PremiumUntilGTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldPremiumUntil, v))
+}
+
+// PremiumUntilLT applies the LT predicate on the "premium_until" field.
+func PremiumUntilLT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldPremiumUntil, v))
+}
+
+// PremiumUntilLTE applies the LTE predicate on the "premium_until" field.
+func PremiumUntilLTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldPremiumUntil, v))
+}
+
+// PremiumUntilIsNil applies the IsNil predicate on the "premium_until" field.
+func PremiumUntilIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldPremiumUntil))
+}
+
+// PremiumUntilNotNil applies the NotNil predicate on the "premium_until" field.
+func PremiumUntilNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldPremiumUntil))
+}
+
+// SellerPlanUntilEQ applies the EQ predicate on the "seller_plan_until" field.
+func SellerPlanUntilEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilNEQ applies the NEQ predicate on the "seller_plan_until" field.
+func SellerPlanUntilNEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilIn applies the In predicate on the "seller_plan_until" field.
+func SellerPlanUntilIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldSellerPlanUntil, vs...))
+}
+
+// SellerPlanUntilNotIn applies the NotIn predicate on the "seller_plan_until" field.
+func SellerPlanUntilNotIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldSellerPlanUntil, vs...))
+}
+
+// SellerPlanUntilGT applies the GT predicate on the "seller_plan_until" field.
+func SellerPlanUntilGT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilGTE applies the GTE predicate on the "seller_plan_until" field.
+func SellerPlanUntilGTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilLT applies the LT predicate on the "seller_plan_until" field.
+func SellerPlanUntilLT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilLTE applies the LTE predicate on the "seller_plan_until" field.
+func SellerPlanUntilLTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldSellerPlanUntil, v))
+}
+
+// SellerPlanUntilIsNil applies the IsNil predicate on the "seller_plan_until" field.
+func SellerPlanUntilIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldSellerPlanUntil))
+}
+
+// SellerPlanUntilNotNil applies the NotNil predicate on the "seller_plan_until" field.
+func SellerPlanUntilNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldSellerPlanUntil))
+}
+
+// SellerPlanTrialingEQ applies the EQ predicate on the "seller_plan_trialing" field.
+func SellerPlanTrialingEQ(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldSellerPlanTrialing, v))
+}
+
+// SellerPlanTrialingNEQ applies the NEQ predicate on the "seller_plan_trialing" field.
+func SellerPlanTrialingNEQ(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldSellerPlanTrialing, v))
 }
 
 // SourceEQ applies the EQ predicate on the "source" field.

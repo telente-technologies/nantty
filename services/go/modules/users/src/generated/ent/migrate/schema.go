@@ -777,7 +777,7 @@ var (
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold", "black"}},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"verified", "suspended", "revoked", "grace", "expired"}, Default: "verified"},
-		{Name: "source", Type: field.TypeEnum, Enums: []string{"application", "lifetime_grant", "business_documents", "black_vetting"}},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"application", "lifetime_grant", "business_documents", "black_vetting", "subscription"}},
 		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "current_period_end", Type: field.TypeTime, Nullable: true},
 		{Name: "reverification_due_at", Type: field.TypeTime, Nullable: true},
@@ -825,6 +825,9 @@ var (
 		{Name: "has_active_store_or_brand_page", Type: field.TypeBool, Default: false},
 		{Name: "seller_plan", Type: field.TypeEnum, Enums: []string{"FREE", "PRO", "BUSINESS"}, Default: "FREE"},
 		{Name: "checkmark_suggested_at", Type: field.TypeTime, Nullable: true},
+		{Name: "premium_until", Type: field.TypeTime, Nullable: true},
+		{Name: "seller_plan_until", Type: field.TypeTime, Nullable: true},
+		{Name: "seller_plan_trialing", Type: field.TypeBool, Default: false},
 		{Name: "source", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

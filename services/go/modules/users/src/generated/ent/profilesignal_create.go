@@ -201,6 +201,48 @@ func (_c *ProfileSignalCreate) SetNillableCheckmarkSuggestedAt(v *time.Time) *Pr
 	return _c
 }
 
+// SetPremiumUntil sets the "premium_until" field.
+func (_c *ProfileSignalCreate) SetPremiumUntil(v time.Time) *ProfileSignalCreate {
+	_c.mutation.SetPremiumUntil(v)
+	return _c
+}
+
+// SetNillablePremiumUntil sets the "premium_until" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillablePremiumUntil(v *time.Time) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetPremiumUntil(*v)
+	}
+	return _c
+}
+
+// SetSellerPlanUntil sets the "seller_plan_until" field.
+func (_c *ProfileSignalCreate) SetSellerPlanUntil(v time.Time) *ProfileSignalCreate {
+	_c.mutation.SetSellerPlanUntil(v)
+	return _c
+}
+
+// SetNillableSellerPlanUntil sets the "seller_plan_until" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableSellerPlanUntil(v *time.Time) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetSellerPlanUntil(*v)
+	}
+	return _c
+}
+
+// SetSellerPlanTrialing sets the "seller_plan_trialing" field.
+func (_c *ProfileSignalCreate) SetSellerPlanTrialing(v bool) *ProfileSignalCreate {
+	_c.mutation.SetSellerPlanTrialing(v)
+	return _c
+}
+
+// SetNillableSellerPlanTrialing sets the "seller_plan_trialing" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableSellerPlanTrialing(v *bool) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetSellerPlanTrialing(*v)
+	}
+	return _c
+}
+
 // SetSource sets the "source" field.
 func (_c *ProfileSignalCreate) SetSource(v string) *ProfileSignalCreate {
 	_c.mutation.SetSource(v)
@@ -308,6 +350,10 @@ func (_c *ProfileSignalCreate) defaults() {
 		v := profilesignal.DefaultSellerPlan
 		_c.mutation.SetSellerPlan(v)
 	}
+	if _, ok := _c.mutation.SellerPlanTrialing(); !ok {
+		v := profilesignal.DefaultSellerPlanTrialing
+		_c.mutation.SetSellerPlanTrialing(v)
+	}
 	if _, ok := _c.mutation.Source(); !ok {
 		v := profilesignal.DefaultSource
 		_c.mutation.SetSource(v)
@@ -398,6 +444,9 @@ func (_c *ProfileSignalCreate) check() error {
 		if err := profilesignal.SellerPlanValidator(v); err != nil {
 			return &ValidationError{Name: "seller_plan", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.seller_plan": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.SellerPlanTrialing(); !ok {
+		return &ValidationError{Name: "seller_plan_trialing", err: errors.New(`ent: missing required field "ProfileSignal.seller_plan_trialing"`)}
 	}
 	if _, ok := _c.mutation.Source(); !ok {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required field "ProfileSignal.source"`)}
@@ -491,6 +540,18 @@ func (_c *ProfileSignalCreate) createSpec() (*ProfileSignal, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.CheckmarkSuggestedAt(); ok {
 		_spec.SetField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime, value)
 		_node.CheckmarkSuggestedAt = &value
+	}
+	if value, ok := _c.mutation.PremiumUntil(); ok {
+		_spec.SetField(profilesignal.FieldPremiumUntil, field.TypeTime, value)
+		_node.PremiumUntil = &value
+	}
+	if value, ok := _c.mutation.SellerPlanUntil(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanUntil, field.TypeTime, value)
+		_node.SellerPlanUntil = &value
+	}
+	if value, ok := _c.mutation.SellerPlanTrialing(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanTrialing, field.TypeBool, value)
+		_node.SellerPlanTrialing = value
 	}
 	if value, ok := _c.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)

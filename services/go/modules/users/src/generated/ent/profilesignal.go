@@ -46,6 +46,12 @@ type ProfileSignal struct {
 	SellerPlan profilesignal.SellerPlan `json:"seller_plan,omitempty"`
 	// CheckmarkSuggestedAt holds the value of the "checkmark_suggested_at" field.
 	CheckmarkSuggestedAt *time.Time `json:"checkmark_suggested_at,omitempty"`
+	// PremiumUntil holds the value of the "premium_until" field.
+	PremiumUntil *time.Time `json:"premium_until,omitempty"`
+	// SellerPlanUntil holds the value of the "seller_plan_until" field.
+	SellerPlanUntil *time.Time `json:"seller_plan_until,omitempty"`
+	// SellerPlanTrialing holds the value of the "seller_plan_trialing" field.
+	SellerPlanTrialing bool `json:"seller_plan_trialing,omitempty"`
 	// Source holds the value of the "source" field.
 	Source string `json:"source,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -58,13 +64,13 @@ func (*ProfileSignal) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profilesignal.FieldIDVerified, profilesignal.FieldBorderlineContent, profilesignal.FieldHasActiveStoreOrBrandPage:
+		case profilesignal.FieldIDVerified, profilesignal.FieldBorderlineContent, profilesignal.FieldHasActiveStoreOrBrandPage, profilesignal.FieldSellerPlanTrialing:
 			values[i] = new(sql.NullBool)
 		case profilesignal.FieldID, profilesignal.FieldRealFollowers, profilesignal.FieldOriginalPostsLast60Days, profilesignal.FieldDaysSinceLastViolation, profilesignal.FieldFraudScore, profilesignal.FieldRiskScore, profilesignal.FieldCompletedOrders, profilesignal.FieldSuccessRatePercent:
 			values[i] = new(sql.NullInt64)
 		case profilesignal.FieldSellerPlan, profilesignal.FieldSource:
 			values[i] = new(sql.NullString)
-		case profilesignal.FieldCheckmarkSuggestedAt, profilesignal.FieldUpdatedAt:
+		case profilesignal.FieldCheckmarkSuggestedAt, profilesignal.FieldPremiumUntil, profilesignal.FieldSellerPlanUntil, profilesignal.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case profilesignal.FieldProfileID, profilesignal.FieldAccountID:
 			values[i] = new(uuid.UUID)
@@ -174,6 +180,26 @@ func (_m *ProfileSignal) assignValues(columns []string, values []any) error {
 				_m.CheckmarkSuggestedAt = new(time.Time)
 				*_m.CheckmarkSuggestedAt = value.Time
 			}
+		case profilesignal.FieldPremiumUntil:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field premium_until", values[i])
+			} else if value.Valid {
+				_m.PremiumUntil = new(time.Time)
+				*_m.PremiumUntil = value.Time
+			}
+		case profilesignal.FieldSellerPlanUntil:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field seller_plan_until", values[i])
+			} else if value.Valid {
+				_m.SellerPlanUntil = new(time.Time)
+				*_m.SellerPlanUntil = value.Time
+			}
+		case profilesignal.FieldSellerPlanTrialing:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field seller_plan_trialing", values[i])
+			} else if value.Valid {
+				_m.SellerPlanTrialing = value.Bool
+			}
 		case profilesignal.FieldSource:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field source", values[i])
@@ -265,6 +291,19 @@ func (_m *ProfileSignal) String() string {
 		builder.WriteString("checkmark_suggested_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	if v := _m.PremiumUntil; v != nil {
+		builder.WriteString("premium_until=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.SellerPlanUntil; v != nil {
+		builder.WriteString("seller_plan_until=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("seller_plan_trialing=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SellerPlanTrialing))
 	builder.WriteString(", ")
 	builder.WriteString("source=")
 	builder.WriteString(_m.Source)

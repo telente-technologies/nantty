@@ -145,6 +145,7 @@ const (
 	SourceLifetimeGrant     Source = "lifetime_grant"
 	SourceBusinessDocuments Source = "business_documents"
 	SourceBlackVetting      Source = "black_vetting"
+	SourceSubscription      Source = "subscription"
 )
 
 func (s Source) String() string {
@@ -154,7 +155,7 @@ func (s Source) String() string {
 // SourceValidator is a validator for the "source" field enum values. It is called by the builders before save.
 func SourceValidator(s Source) error {
 	switch s {
-	case SourceApplication, SourceLifetimeGrant, SourceBusinessDocuments, SourceBlackVetting:
+	case SourceApplication, SourceLifetimeGrant, SourceBusinessDocuments, SourceBlackVetting, SourceSubscription:
 		return nil
 	default:
 		return fmt.Errorf("profilecheckmark: invalid enum value for source field: %q", s)

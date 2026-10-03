@@ -22508,6 +22508,9 @@ type ProfileSignalMutation struct {
 	has_active_store_or_brand_page *bool
 	seller_plan                    *profilesignal.SellerPlan
 	checkmark_suggested_at         *time.Time
+	premium_until                  *time.Time
+	seller_plan_until              *time.Time
+	seller_plan_trialing           *bool
 	source                         *string
 	updated_at                     *time.Time
 	clearedFields                  map[string]struct{}
@@ -23271,6 +23274,140 @@ func (m *ProfileSignalMutation) ResetCheckmarkSuggestedAt() {
 	delete(m.clearedFields, profilesignal.FieldCheckmarkSuggestedAt)
 }
 
+// SetPremiumUntil sets the "premium_until" field.
+func (m *ProfileSignalMutation) SetPremiumUntil(t time.Time) {
+	m.premium_until = &t
+}
+
+// PremiumUntil returns the value of the "premium_until" field in the mutation.
+func (m *ProfileSignalMutation) PremiumUntil() (r time.Time, exists bool) {
+	v := m.premium_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPremiumUntil returns the old "premium_until" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldPremiumUntil(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPremiumUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPremiumUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPremiumUntil: %w", err)
+	}
+	return oldValue.PremiumUntil, nil
+}
+
+// ClearPremiumUntil clears the value of the "premium_until" field.
+func (m *ProfileSignalMutation) ClearPremiumUntil() {
+	m.premium_until = nil
+	m.clearedFields[profilesignal.FieldPremiumUntil] = struct{}{}
+}
+
+// PremiumUntilCleared returns if the "premium_until" field was cleared in this mutation.
+func (m *ProfileSignalMutation) PremiumUntilCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldPremiumUntil]
+	return ok
+}
+
+// ResetPremiumUntil resets all changes to the "premium_until" field.
+func (m *ProfileSignalMutation) ResetPremiumUntil() {
+	m.premium_until = nil
+	delete(m.clearedFields, profilesignal.FieldPremiumUntil)
+}
+
+// SetSellerPlanUntil sets the "seller_plan_until" field.
+func (m *ProfileSignalMutation) SetSellerPlanUntil(t time.Time) {
+	m.seller_plan_until = &t
+}
+
+// SellerPlanUntil returns the value of the "seller_plan_until" field in the mutation.
+func (m *ProfileSignalMutation) SellerPlanUntil() (r time.Time, exists bool) {
+	v := m.seller_plan_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellerPlanUntil returns the old "seller_plan_until" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldSellerPlanUntil(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellerPlanUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellerPlanUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellerPlanUntil: %w", err)
+	}
+	return oldValue.SellerPlanUntil, nil
+}
+
+// ClearSellerPlanUntil clears the value of the "seller_plan_until" field.
+func (m *ProfileSignalMutation) ClearSellerPlanUntil() {
+	m.seller_plan_until = nil
+	m.clearedFields[profilesignal.FieldSellerPlanUntil] = struct{}{}
+}
+
+// SellerPlanUntilCleared returns if the "seller_plan_until" field was cleared in this mutation.
+func (m *ProfileSignalMutation) SellerPlanUntilCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldSellerPlanUntil]
+	return ok
+}
+
+// ResetSellerPlanUntil resets all changes to the "seller_plan_until" field.
+func (m *ProfileSignalMutation) ResetSellerPlanUntil() {
+	m.seller_plan_until = nil
+	delete(m.clearedFields, profilesignal.FieldSellerPlanUntil)
+}
+
+// SetSellerPlanTrialing sets the "seller_plan_trialing" field.
+func (m *ProfileSignalMutation) SetSellerPlanTrialing(b bool) {
+	m.seller_plan_trialing = &b
+}
+
+// SellerPlanTrialing returns the value of the "seller_plan_trialing" field in the mutation.
+func (m *ProfileSignalMutation) SellerPlanTrialing() (r bool, exists bool) {
+	v := m.seller_plan_trialing
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellerPlanTrialing returns the old "seller_plan_trialing" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldSellerPlanTrialing(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellerPlanTrialing is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellerPlanTrialing requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellerPlanTrialing: %w", err)
+	}
+	return oldValue.SellerPlanTrialing, nil
+}
+
+// ResetSellerPlanTrialing resets all changes to the "seller_plan_trialing" field.
+func (m *ProfileSignalMutation) ResetSellerPlanTrialing() {
+	m.seller_plan_trialing = nil
+}
+
 // SetSource sets the "source" field.
 func (m *ProfileSignalMutation) SetSource(s string) {
 	m.source = &s
@@ -23377,7 +23514,7 @@ func (m *ProfileSignalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileSignalMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 19)
 	if m.profile_id != nil {
 		fields = append(fields, profilesignal.FieldProfileID)
 	}
@@ -23419,6 +23556,15 @@ func (m *ProfileSignalMutation) Fields() []string {
 	}
 	if m.checkmark_suggested_at != nil {
 		fields = append(fields, profilesignal.FieldCheckmarkSuggestedAt)
+	}
+	if m.premium_until != nil {
+		fields = append(fields, profilesignal.FieldPremiumUntil)
+	}
+	if m.seller_plan_until != nil {
+		fields = append(fields, profilesignal.FieldSellerPlanUntil)
+	}
+	if m.seller_plan_trialing != nil {
+		fields = append(fields, profilesignal.FieldSellerPlanTrialing)
 	}
 	if m.source != nil {
 		fields = append(fields, profilesignal.FieldSource)
@@ -23462,6 +23608,12 @@ func (m *ProfileSignalMutation) Field(name string) (ent.Value, bool) {
 		return m.SellerPlan()
 	case profilesignal.FieldCheckmarkSuggestedAt:
 		return m.CheckmarkSuggestedAt()
+	case profilesignal.FieldPremiumUntil:
+		return m.PremiumUntil()
+	case profilesignal.FieldSellerPlanUntil:
+		return m.SellerPlanUntil()
+	case profilesignal.FieldSellerPlanTrialing:
+		return m.SellerPlanTrialing()
 	case profilesignal.FieldSource:
 		return m.Source()
 	case profilesignal.FieldUpdatedAt:
@@ -23503,6 +23655,12 @@ func (m *ProfileSignalMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldSellerPlan(ctx)
 	case profilesignal.FieldCheckmarkSuggestedAt:
 		return m.OldCheckmarkSuggestedAt(ctx)
+	case profilesignal.FieldPremiumUntil:
+		return m.OldPremiumUntil(ctx)
+	case profilesignal.FieldSellerPlanUntil:
+		return m.OldSellerPlanUntil(ctx)
+	case profilesignal.FieldSellerPlanTrialing:
+		return m.OldSellerPlanTrialing(ctx)
 	case profilesignal.FieldSource:
 		return m.OldSource(ctx)
 	case profilesignal.FieldUpdatedAt:
@@ -23613,6 +23771,27 @@ func (m *ProfileSignalMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCheckmarkSuggestedAt(v)
+		return nil
+	case profilesignal.FieldPremiumUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPremiumUntil(v)
+		return nil
+	case profilesignal.FieldSellerPlanUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellerPlanUntil(v)
+		return nil
+	case profilesignal.FieldSellerPlanTrialing:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellerPlanTrialing(v)
 		return nil
 	case profilesignal.FieldSource:
 		v, ok := value.(string)
@@ -23748,6 +23927,12 @@ func (m *ProfileSignalMutation) ClearedFields() []string {
 	if m.FieldCleared(profilesignal.FieldCheckmarkSuggestedAt) {
 		fields = append(fields, profilesignal.FieldCheckmarkSuggestedAt)
 	}
+	if m.FieldCleared(profilesignal.FieldPremiumUntil) {
+		fields = append(fields, profilesignal.FieldPremiumUntil)
+	}
+	if m.FieldCleared(profilesignal.FieldSellerPlanUntil) {
+		fields = append(fields, profilesignal.FieldSellerPlanUntil)
+	}
 	return fields
 }
 
@@ -23764,6 +23949,12 @@ func (m *ProfileSignalMutation) ClearField(name string) error {
 	switch name {
 	case profilesignal.FieldCheckmarkSuggestedAt:
 		m.ClearCheckmarkSuggestedAt()
+		return nil
+	case profilesignal.FieldPremiumUntil:
+		m.ClearPremiumUntil()
+		return nil
+	case profilesignal.FieldSellerPlanUntil:
+		m.ClearSellerPlanUntil()
 		return nil
 	}
 	return fmt.Errorf("unknown ProfileSignal nullable field %s", name)
@@ -23814,6 +24005,15 @@ func (m *ProfileSignalMutation) ResetField(name string) error {
 		return nil
 	case profilesignal.FieldCheckmarkSuggestedAt:
 		m.ResetCheckmarkSuggestedAt()
+		return nil
+	case profilesignal.FieldPremiumUntil:
+		m.ResetPremiumUntil()
+		return nil
+	case profilesignal.FieldSellerPlanUntil:
+		m.ResetSellerPlanUntil()
+		return nil
+	case profilesignal.FieldSellerPlanTrialing:
+		m.ResetSellerPlanTrialing()
 		return nil
 	case profilesignal.FieldSource:
 		m.ResetSource()

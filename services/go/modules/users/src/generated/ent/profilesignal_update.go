@@ -251,6 +251,60 @@ func (_u *ProfileSignalUpdate) ClearCheckmarkSuggestedAt() *ProfileSignalUpdate 
 	return _u
 }
 
+// SetPremiumUntil sets the "premium_until" field.
+func (_u *ProfileSignalUpdate) SetPremiumUntil(v time.Time) *ProfileSignalUpdate {
+	_u.mutation.SetPremiumUntil(v)
+	return _u
+}
+
+// SetNillablePremiumUntil sets the "premium_until" field if the given value is not nil.
+func (_u *ProfileSignalUpdate) SetNillablePremiumUntil(v *time.Time) *ProfileSignalUpdate {
+	if v != nil {
+		_u.SetPremiumUntil(*v)
+	}
+	return _u
+}
+
+// ClearPremiumUntil clears the value of the "premium_until" field.
+func (_u *ProfileSignalUpdate) ClearPremiumUntil() *ProfileSignalUpdate {
+	_u.mutation.ClearPremiumUntil()
+	return _u
+}
+
+// SetSellerPlanUntil sets the "seller_plan_until" field.
+func (_u *ProfileSignalUpdate) SetSellerPlanUntil(v time.Time) *ProfileSignalUpdate {
+	_u.mutation.SetSellerPlanUntil(v)
+	return _u
+}
+
+// SetNillableSellerPlanUntil sets the "seller_plan_until" field if the given value is not nil.
+func (_u *ProfileSignalUpdate) SetNillableSellerPlanUntil(v *time.Time) *ProfileSignalUpdate {
+	if v != nil {
+		_u.SetSellerPlanUntil(*v)
+	}
+	return _u
+}
+
+// ClearSellerPlanUntil clears the value of the "seller_plan_until" field.
+func (_u *ProfileSignalUpdate) ClearSellerPlanUntil() *ProfileSignalUpdate {
+	_u.mutation.ClearSellerPlanUntil()
+	return _u
+}
+
+// SetSellerPlanTrialing sets the "seller_plan_trialing" field.
+func (_u *ProfileSignalUpdate) SetSellerPlanTrialing(v bool) *ProfileSignalUpdate {
+	_u.mutation.SetSellerPlanTrialing(v)
+	return _u
+}
+
+// SetNillableSellerPlanTrialing sets the "seller_plan_trialing" field if the given value is not nil.
+func (_u *ProfileSignalUpdate) SetNillableSellerPlanTrialing(v *bool) *ProfileSignalUpdate {
+	if v != nil {
+		_u.SetSellerPlanTrialing(*v)
+	}
+	return _u
+}
+
 // SetSource sets the "source" field.
 func (_u *ProfileSignalUpdate) SetSource(v string) *ProfileSignalUpdate {
 	_u.mutation.SetSource(v)
@@ -433,6 +487,21 @@ func (_u *ProfileSignalUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if _u.mutation.CheckmarkSuggestedAtCleared() {
 		_spec.ClearField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PremiumUntil(); ok {
+		_spec.SetField(profilesignal.FieldPremiumUntil, field.TypeTime, value)
+	}
+	if _u.mutation.PremiumUntilCleared() {
+		_spec.ClearField(profilesignal.FieldPremiumUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SellerPlanUntil(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanUntil, field.TypeTime, value)
+	}
+	if _u.mutation.SellerPlanUntilCleared() {
+		_spec.ClearField(profilesignal.FieldSellerPlanUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SellerPlanTrialing(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanTrialing, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)
@@ -683,6 +752,60 @@ func (_u *ProfileSignalUpdateOne) ClearCheckmarkSuggestedAt() *ProfileSignalUpda
 	return _u
 }
 
+// SetPremiumUntil sets the "premium_until" field.
+func (_u *ProfileSignalUpdateOne) SetPremiumUntil(v time.Time) *ProfileSignalUpdateOne {
+	_u.mutation.SetPremiumUntil(v)
+	return _u
+}
+
+// SetNillablePremiumUntil sets the "premium_until" field if the given value is not nil.
+func (_u *ProfileSignalUpdateOne) SetNillablePremiumUntil(v *time.Time) *ProfileSignalUpdateOne {
+	if v != nil {
+		_u.SetPremiumUntil(*v)
+	}
+	return _u
+}
+
+// ClearPremiumUntil clears the value of the "premium_until" field.
+func (_u *ProfileSignalUpdateOne) ClearPremiumUntil() *ProfileSignalUpdateOne {
+	_u.mutation.ClearPremiumUntil()
+	return _u
+}
+
+// SetSellerPlanUntil sets the "seller_plan_until" field.
+func (_u *ProfileSignalUpdateOne) SetSellerPlanUntil(v time.Time) *ProfileSignalUpdateOne {
+	_u.mutation.SetSellerPlanUntil(v)
+	return _u
+}
+
+// SetNillableSellerPlanUntil sets the "seller_plan_until" field if the given value is not nil.
+func (_u *ProfileSignalUpdateOne) SetNillableSellerPlanUntil(v *time.Time) *ProfileSignalUpdateOne {
+	if v != nil {
+		_u.SetSellerPlanUntil(*v)
+	}
+	return _u
+}
+
+// ClearSellerPlanUntil clears the value of the "seller_plan_until" field.
+func (_u *ProfileSignalUpdateOne) ClearSellerPlanUntil() *ProfileSignalUpdateOne {
+	_u.mutation.ClearSellerPlanUntil()
+	return _u
+}
+
+// SetSellerPlanTrialing sets the "seller_plan_trialing" field.
+func (_u *ProfileSignalUpdateOne) SetSellerPlanTrialing(v bool) *ProfileSignalUpdateOne {
+	_u.mutation.SetSellerPlanTrialing(v)
+	return _u
+}
+
+// SetNillableSellerPlanTrialing sets the "seller_plan_trialing" field if the given value is not nil.
+func (_u *ProfileSignalUpdateOne) SetNillableSellerPlanTrialing(v *bool) *ProfileSignalUpdateOne {
+	if v != nil {
+		_u.SetSellerPlanTrialing(*v)
+	}
+	return _u
+}
+
 // SetSource sets the "source" field.
 func (_u *ProfileSignalUpdateOne) SetSource(v string) *ProfileSignalUpdateOne {
 	_u.mutation.SetSource(v)
@@ -895,6 +1018,21 @@ func (_u *ProfileSignalUpdateOne) sqlSave(ctx context.Context) (_node *ProfileSi
 	}
 	if _u.mutation.CheckmarkSuggestedAtCleared() {
 		_spec.ClearField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PremiumUntil(); ok {
+		_spec.SetField(profilesignal.FieldPremiumUntil, field.TypeTime, value)
+	}
+	if _u.mutation.PremiumUntilCleared() {
+		_spec.ClearField(profilesignal.FieldPremiumUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SellerPlanUntil(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanUntil, field.TypeTime, value)
+	}
+	if _u.mutation.SellerPlanUntilCleared() {
+		_spec.ClearField(profilesignal.FieldSellerPlanUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SellerPlanTrialing(); ok {
+		_spec.SetField(profilesignal.FieldSellerPlanTrialing, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)
