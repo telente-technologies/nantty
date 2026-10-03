@@ -3,11 +3,13 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { EscrowHold } from "@/types/commerce.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function EscrowHoldRow({ hold, onPress }: { hold: EscrowHold; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const appearance = ESCROW_STAGE_APPEARANCE[hold.stage];
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${hold.productName}, ${formatMoneyForDisplay(hold.amount)}, ${appearance.label}`} onPress={onPress} style={styles.row}>
@@ -25,8 +27,8 @@ export function EscrowHoldRow({ hold, onPress }: { hold: EscrowHold; onPress: ()
   );
 }
 
-const styles = StyleSheet.create({
-  row: { backgroundColor: colors.white, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  row: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   texts: { flex: 1, gap: 2 },
   trailing: { alignItems: "flex-end", gap: 4 },
-});
+}));

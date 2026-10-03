@@ -2,11 +2,14 @@ import { StyleSheet, View } from "react-native";
 
 import { Star16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { LoyaltySummary } from "@/types/rewards.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function LoyaltyCard({ loyalty }: { loyalty: LoyaltySummary }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.card}>
       <View style={styles.row}>
@@ -33,8 +36,8 @@ export function LoyaltyCard({ loyalty }: { loyalty: LoyaltySummary }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-});
+}));

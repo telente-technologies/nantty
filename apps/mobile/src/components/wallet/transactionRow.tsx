@@ -1,11 +1,13 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { WalletTransaction } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function TransactionRow({ transaction }: { transaction: WalletTransaction }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isCredit = transaction.kind === "credit";
   return (
     <View style={styles.row} accessibilityLabel={`${transaction.description}, ${isCredit ? "received" : "sent"} ${formatMoneyForDisplay(transaction.amount)}, ${transaction.status}`}>
@@ -26,7 +28,7 @@ export function TransactionRow({ transaction }: { transaction: WalletTransaction
   );
 }
 
-const styles = StyleSheet.create({
-  row: { backgroundColor: colors.white, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  row: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   details: { flex: 1, gap: 2 },
-});
+}));

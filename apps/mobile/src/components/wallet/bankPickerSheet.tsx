@@ -6,7 +6,7 @@ import { CaretDown24Icon, Check16Icon, MagnifyingGlass20Icon } from "@/component
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { banksService } from "@/services/banks.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { Bank } from "@/types/commerce.type";
@@ -18,6 +18,8 @@ export interface BankPickerFieldProps {
 }
 
 export function BankPickerField({ selectedBankCode, selectedBankName, onSelectBank }: BankPickerFieldProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const countryCode = useLocaleStore((state) => state.countryCode ?? state.deviceRegionCode ?? "NG");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -64,11 +66,11 @@ export function BankPickerField({ selectedBankCode, selectedBankName, onSelectBa
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
-  box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, backgroundColor: colors.white, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   sheetBody: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
   loading: { marginVertical: 16 },
   list: { maxHeight: 380 },
   option: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
-});
+}));
