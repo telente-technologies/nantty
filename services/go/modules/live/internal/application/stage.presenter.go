@@ -9,7 +9,7 @@ import (
 	"zudomart/modules/live/internal/domain"
 	"zudomart/modules/live/internal/ent"
 	battlerecord "zudomart/modules/live/internal/ent/battle"
-	"zudomart/modules/live/internal/ent/gifttransaction"
+	"zudomart/modules/live/internal/ent/battlegiftevent"
 	"zudomart/modules/live/internal/ent/guestslot"
 	"zudomart/modules/live/internal/ent/joinrequest"
 	"zudomart/modules/live/internal/ports"
@@ -198,7 +198,7 @@ func (application *LiveApplication) attachHistory(ctx context.Context, db *ent.C
 }
 
 func (application *LiveApplication) loadRecentBattleGifts(ctx context.Context, db *ent.Client, battleId uuid.UUID) ([]BattleGiftEventView, error) {
-	rows, err := db.GiftTransaction.Query().Where(gifttransaction.BattleID(battleId)).Order(ent.Desc(gifttransaction.FieldCreatedAt)).Limit(recentBattleGiftsLimit).All(ctx)
+	rows, err := db.BattleGiftEvent.Query().Where(battlegiftevent.BattleID(battleId)).Order(ent.Desc(battlegiftevent.FieldCreatedAt)).Limit(recentBattleGiftsLimit).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (application *LiveApplication) loadRecentBattleGifts(ctx context.Context, d
 	events := make([]BattleGiftEventView, 0, len(rows))
 	for index := len(rows) - 1; index >= 0; index-- {
 		row := rows[index]
-		events = append(events, BattleGiftEventView{Id: row.ID.String(), Sender: summarise(participants[row.SenderID]), RecipientUserId: row.ReceiverID.String(), GiftEmoji: giftGlyph(row.GiftID), Coins: row.TotalCoins})
+		events = append(events, BattleGiftEventView{Id: row.ID.String(), Sender: summarise(participants[row.SenderID]), RecipientUserId: row.ReceiverID.String(), GiftEmoji: giftGlyph(row.GiftID), Coins: row.Coins})
 	}
 	return events, nil
 }
