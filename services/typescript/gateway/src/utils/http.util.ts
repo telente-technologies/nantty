@@ -11,4 +11,4 @@ export function convertRequestBodyToBytes(body: unknown): Uint8Array | undefined
   return new TextEncoder().encode(JSON.stringify(body));
 }
 
-export const unauthorizedResponseBody = { message: "Sign in to continue.", code: "UNAUTHORIZED" } as const;
+export const unauthorizedResponseBody = { message: "Sign in to continue.", code: "UNAUTHENTICATED" } as const;

@@ -1,52 +1,56 @@
 import {
   HttpMiddlewarePipeline,
-  createCorsMiddleware,
   createHttpServer,
   createNodeHttpAdapter,
-  createRateLimitMiddleware,
   createResponseContext,
-  type HttpMiddleware,
   type HttpRequestContext,
 } from "@zudojs/http";
 import { createLogger, type Logger } from "@zudojs/logger";
 
+import { createGlobalRateLimitMiddleware } from "./middlewares/routeRateLimit.middleware.js";
+import { createRequestSizeLimitMiddleware } from "./middlewares/requestSizeLimit.middleware.js";
+import { createSecurityHeadersMiddleware } from "./middlewares/securityHeaders.middleware.js";
+import { createStrictCorsMiddleware } from "./middlewares/strictCors.middleware.js";
+import { InMemoryRateLimitStore, type RateLimitStore } from "./services/rateLimitStore.service.js";
+import { ValkeyConnection } from "./services/valkeyConnection.service.js";
+import { ValkeyRateLimitStore } from "./services/valkeyRateLimitStore.service.js";
 import type { GatewayConfig } from "./configs/gateway.config.js";
 import { createUpstreamDispatchHandler } from "./handlers/upstreamDispatch.handler.js";
+import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/policyAcceptanceGate.service.js";
 import { AccessTokenVerifier } from "./services/accessTokenVerifier.service.js";
-
-const maximumRequestBodyBytes = 1024 * 1024;
-
-function addSecurityAndRequestIdHeaders(): HttpMiddleware {
-  return async (context, next) => {
-    const response = (await next()).clone();
-    response.setHeader("x-request-id", context.request.id);
-    response.setHeader("x-content-type-options", "nosniff");
-    response.setHeader("referrer-policy", "no-referrer");
-    response.setHeader("strict-transport-security", "max-age=63072000; includeSubDomains");
-    return response;
-  };
-}
 
 export interface GatewayServerOptions {
   readonly config: GatewayConfig;
   readonly verifier?: AccessTokenVerifier;
   readonly logger?: Logger;
+  readonly policyGate?: PolicyGateSource;
+  readonly rateLimitStore?: RateLimitStore;
+}
+
+function buildRateLimitStore(config: GatewayConfig, logger: Logger): RateLimitStore {
+  const memory = new InMemoryRateLimitStore();
+  if (config.valkeyUrl === undefined || config.valkeyUrl === null) return memory;
+  const connection = new ValkeyConnection(new URL(config.valkeyUrl));
+  return new ValkeyRateLimitStore(connection, memory, (error) => logger.warn("valkey rate limit unavailable; using in-memory counters", { error: error instanceof Error ? error.message : String(error) }));
 }
 
 export function createGatewayServer(options: GatewayServerOptions) {
   const logger = options.logger ?? createLogger({ name: "gateway" });
+  const policyGate = options.policyGate ?? (options.config.policyGate === null ? undefined : new IdentityPolicyGateSource(options.config.upstreams.identity, options.config.policyGate.internalToken));
   const verifier = options.verifier ?? new AccessTokenVerifier(options.config.accessToken);
+  const rateLimitStore = options.rateLimitStore ?? buildRateLimitStore(options.config, logger);
+  const maximumRequestBodyBytes = options.config.maxRequestBodyBytes ?? 1024 * 1024;
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [
-      addSecurityAndRequestIdHeaders(),
-      createCorsMiddleware({
-        allowOrigin: [...options.config.corsOrigins],
-        allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Region, X-Request-Id, If-None-Match",
-        exposeHeaders: "ETag, X-Request-Id, Retry-After, Idempotent-Replayed",
-        credentials: false,
+      createSecurityHeadersMiddleware(),
+      createStrictCorsMiddleware({
+        allowedOrigins: options.config.corsOrigins,
+        allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Region, X-Device-Id, X-Request-Id, X-Step-Up-Token, Traceparent, If-None-Match",
+        exposeHeaders: "ETag, X-Request-Id, Traceparent, Retry-After, Idempotent-Replayed",
       }),
-      ...(options.config.rateLimitMaxPerMinute > 0 ? [createRateLimitMiddleware({ windowMs: 60_000, max: options.config.rateLimitMaxPerMinute })] : []),
-      createUpstreamDispatchHandler({ config: options.config, verifier, logger }),
+      createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
+      createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute),
+      createUpstreamDispatchHandler({ config: options.config, verifier, logger, rateLimitStore, ...(policyGate === undefined ? {} : { policyGate }) }),
     ],
   });
   return createHttpServer({
