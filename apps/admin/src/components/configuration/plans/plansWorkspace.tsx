@@ -11,7 +11,7 @@ import styles from "./plansEditor.module.css";
 
 const plansEndpoint = configurationDocumentEndpoint<"plans">();
 const colorSections = [
-  { color: "BLUE", title: "Blue — personal verification" },
+  { color: "BLUE", title: "Blue — personal verification (incl. creators)" },
   { color: "GOLD", title: "Gold — business and store verification" },
   { color: "BLACK", title: "Black — government and official" },
 ] as const;
