@@ -38,7 +38,7 @@ function buildConfig(upstreamUrl: string): GatewayConfig {
     rateLimitMaxPerMinute: 0,
     upstreamTimeoutMs: 2_000,
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience },
-    upstreams: { identity: upstreamUrl },
+    upstreams: { identity: upstreamUrl, live: upstreamUrl },
   };
 }
 

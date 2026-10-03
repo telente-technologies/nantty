@@ -28,3 +28,23 @@ describe("identity routes", () => {
     if (authentication !== undefined) expect(route?.upstream).toBe("identity");
   });
 });
+
+describe("live routes", () => {
+  const liveCases: ReadonlyArray<readonly [string, string]> = [
+    ["POST", "/api/v1/lives"],
+    ["GET", "/api/v1/lives/suggested"],
+    ["POST", "/api/v1/lives/abc/guests/invitations"],
+    ["POST", "/api/v1/battles/abc/accept"],
+    ["POST", "/api/v1/live/gifts"],
+    ["GET", "/api/v1/gifts"],
+    ["GET", "/api/v1/rankings"],
+    ["GET", "/api/v1/creators/me/analytics/gifts/streams/abc"],
+    ["DELETE", "/api/v1/admin/gifts/gift_rose"],
+  ];
+
+  it.each(liveCases)("%s %s goes to go-live and requires a token", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("live");
+    expect(route?.authentication).toBe("required");
+  });
+});
