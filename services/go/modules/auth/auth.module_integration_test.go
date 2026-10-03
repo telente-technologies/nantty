@@ -18,7 +18,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/auth/internal/config"
+	"zudomart/modules/auth/src/configs"
 	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/jwtauth"
