@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { useEffect, useState } from "react";
 
 import { AppIcon } from "@/components/ui/appIcon";
@@ -11,6 +12,16 @@ import formStyles from "../authForm.module.css";
 import styles from "./welcome.module.css";
 
 type SignUpMode = "signup" | "login";
+
+const PHOTO_SOURCES: readonly string[] = [
+  "/onboardingMarketPhoto.jpg",
+  "/screens/homeMartScreen.webp",
+  "/screens/storyScreen.webp",
+  "/screens/productDetailScreen.webp",
+  "/screens/liveShoppingScreen.webp",
+  "/screens/shoppableClipsScreen.webp",
+  "/screens/creatorProfileScreen.webp",
+];
 
 const PHOTO_ROWS: readonly { readonly offset: number; readonly key: string }[] = [
   { offset: -43, key: "a" },
@@ -31,17 +42,19 @@ export default function WelcomePage() {
     <div>
       {showSplash ? (
         <div className={styles.splash} role="status" aria-label="Zudomart">
-          <span className={styles.splashWordmark}>zudomart</span>
+          <span>
+            <ZudomartWordmark height={28} />
+          </span>
         </div>
       ) : null}
 
       <div className={styles.photoRows} aria-hidden="true">
-        {PHOTO_ROWS.map((row) => (
+        {PHOTO_ROWS.map((row, rowIndex) => (
           <div key={row.key} className={styles.photoRow} style={{ marginLeft: row.offset }}>
             {Array.from({ length: 5 }, (_, index) => (
               <Image
                 key={index}
-                src="/onboardingMarketPhoto.jpg"
+                src={PHOTO_SOURCES[(rowIndex * 5 + index) % PHOTO_SOURCES.length]!}
                 alt=""
                 width={100}
                 height={56}

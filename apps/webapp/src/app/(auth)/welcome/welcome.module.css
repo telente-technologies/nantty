@@ -8,13 +8,6 @@
   background: var(--surface-app);
 }
 
-.splashWordmark {
-  font-size: 21px;
-  font-weight: 700;
-  line-height: 25.2px;
-  letter-spacing: -0.02em;
-  color: var(--blue-800);
-}
 
 .photoRows {
   display: grid;
