@@ -59,7 +59,7 @@
 }
 
 .accountButtonActive {
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
   box-shadow: inset 3px 0 0 var(--blue-500);
 }
 

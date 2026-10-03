@@ -147,7 +147,7 @@
 
 .messageFromSeller {
   align-self: flex-end;
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
 }
 
 .messageMeta {
@@ -197,7 +197,7 @@
 
 .outcomeOption:has(input:checked) {
   border-color: var(--blue-500);
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
 }
 
 .outcomeOption input {
