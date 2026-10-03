@@ -1,0 +1,27 @@
+.primaryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.primaryCell a {
+  color: inherit;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.teaser {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+}
+
+.teaserList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--ink-muted);
+}
