@@ -50,7 +50,7 @@
 
 .conditionList li::before {
   content: "•";
-  color: var(--blue-500);
+  color: var(--color-brand);
   margin-right: 6px;
 }
 
@@ -91,7 +91,7 @@
 
 .confidenceFill {
   height: 100%;
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
 }
 
 .formGrid {
