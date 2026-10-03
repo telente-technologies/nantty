@@ -1,0 +1,101 @@
+package signinwithsocialprovider
+
+import (
+	"context"
+	"errors"
+	"strings"
+
+	"zudomart/modules/auth/src/container"
+	authErrors "zudomart/modules/auth/src/errors"
+	"zudomart/modules/auth/src/events"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/socialidentity"
+	identity "zudomart/modules/auth/src/integrations"
+	"zudomart/modules/auth/src/services"
+	"zudomart/modules/auth/src/types"
+	"zudomart/modules/auth/src/utils"
+)
+
+type Handler struct {
+	*container.Container
+}
+
+func (application Handler) Execute(ctx context.Context, command Command) (types.AuthenticationResult, error) {
+	verified, err := application.Social.VerifyIdentityToken(ctx, command.Provider, command.Token, command.Nonce, application.Now())
+	if errors.Is(err, identity.ErrProviderNotConfigured) {
+		return types.AuthenticationResult{}, authErrors.ErrSocialSignInNotConfigured
+	}
+	if err != nil {
+		application.Logger.WarnContext(ctx, "social identity token rejected", "provider", string(command.Provider), "reason", err.Error())
+		return types.AuthenticationResult{}, authErrors.ErrInvalidIdentityToken
+	}
+	var owner *ent.Account
+	var session services.StartedSession
+	isNewUser := false
+	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		owner, isNewUser, err = application.findOrCreateAccountForSocialIdentityInTransaction(ctx, tx, verified, command.FullName)
+		if err != nil {
+			return err
+		}
+		if owner.Status != account.StatusActive {
+			return authErrors.ErrInvalidCredentials
+		}
+		if session, err = services.StartSessionWithFirstRefreshTokenInTransaction(ctx, application.Container, tx, owner.ID, command.Client); err != nil {
+			return err
+		}
+		eventType, data := "account.loggedIn", any(events.UserLoggedInEventData{AccountId: owner.ID.String(), SessionId: session.SessionId.String(), Method: string(verified.Provider)})
+		if isNewUser {
+			eventType, data = "account.registered", events.AccountRegisteredEventData{
+				AccountId: owner.ID.String(), Username: owner.Username, Name: owner.Name, Email: verified.Email, Method: string(verified.Provider),
+			}
+		}
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, owner.ID.String(), application.Now(), data)
+	})
+	if err != nil {
+		return types.AuthenticationResult{}, err
+	}
+	tokens, err := services.SignAccessTokenAndBuildIssuedTokens(application.Container, owner, session.SessionId, session.RefreshToken)
+	return types.AuthenticationResult{Tokens: tokens, Account: owner, IsNewUser: isNewUser}, err
+}
+
+func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName string) (*ent.Account, bool, error) {
+	linked, err := tx.SocialIdentity.Query().Where(socialidentity.ProviderEQ(socialidentity.Provider(verified.Provider)), socialidentity.Subject(verified.Subject)).Only(ctx)
+	if err == nil {
+		owner, err := tx.Account.Get(ctx, linked.AccountID)
+		return owner, false, err
+	}
+	if !ent.IsNotFound(err) {
+		return nil, false, err
+	}
+	if verified.Email == "" || !verified.EmailVerified {
+		return nil, false, authErrors.ErrSocialEmailNotVerified
+	}
+	owner, err := tx.Account.Query().Where(account.Email(verified.Email)).Only(ctx)
+	created := ent.IsNotFound(err)
+	if err != nil && !created {
+		return nil, false, err
+	}
+	if created {
+		if owner, err = application.createAccountForSocialIdentityInTransaction(ctx, tx, verified, fullName); err != nil {
+			return nil, false, err
+		}
+	}
+	err = tx.SocialIdentity.Create().SetAccountID(owner.ID).SetProvider(socialidentity.Provider(verified.Provider)).SetSubject(verified.Subject).SetEmail(verified.Email).Exec(ctx)
+	return owner, created, services.MapUniqueViolationToConflict(err)
+}
+
+func (application Handler) createAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName string) (*ent.Account, error) {
+	name := strings.TrimSpace(fullName)
+	if name == "" {
+		name = verified.Name
+	}
+	username, err := services.ChooseAvailableUsername(ctx, tx.Client(), "", verified.Email, verified.Name)
+	if err != nil {
+		return nil, err
+	}
+	created, err := tx.Account.Create().
+		SetEmail(verified.Email).SetUsername(username).SetName(utils.TruncateToLength(name, 80)).SetEmailVerifiedAt(application.Now()).
+		Save(ctx)
+	return created, services.MapUniqueViolationToConflict(err)
+}
