@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { AdsWordmark } from "@/components/shell/adsWordmark";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { UserMenu } from "@/components/shell/userMenu";
 import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
 
@@ -12,7 +12,7 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
     <div className={styles.frame}>
       <header className={styles.bar}>
         <Link href="/accounts" className={styles.wordmarkLink} aria-label="Zudomart Ads Manager home">
-          <AdsWordmark />
+          <ZudomartWordmark productLabel="Ads" tone="onDark" />
         </Link>
         <nav aria-label="Help" className={styles.links}>
           <Link href="/policy">Advertising policies</Link>

@@ -42,7 +42,7 @@
 
 .detail {
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   overflow: hidden;
   text-overflow: ellipsis;
 }
