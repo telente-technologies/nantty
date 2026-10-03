@@ -553,6 +553,16 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 
 ---
 
+### Dark mode
+
+| Area | Change |
+| --- | --- |
+| `app/layout.tsx`, `components/theme/studioThemeProvider.tsx`, `components/providers/appProviders.tsx` | `<html data-theme>` comes from the `theme` cookie, with `ThemeInitScript` and `themeViewport`. `ThemeProvider` PATCHes `/api/v1/users/me/preferences` when a viewer is signed in |
+| `mocks/preferences.mock.ts` | **New.** GET and PATCH `/api/v1/users/me/preferences` |
+| `shell/studioShell`, `landing/landingHeader`, `auth/authSplitLayout` | Light/Dark/System switcher |
+| CSS modules (auth, landing, lives, ui) | Raw hex moved onto tokens. Status words use `-text` tokens. The control room, overlay editor and stream overlays stay dark in both themes |
+| Landing | Token type scale, buttons and radii. Real app screens in `public/screens/`. Responsive from 360 to 1440. Keeps the creator (non-selling) live copy |
+
 ## apps/seller
 
 ### Shipping config & web privacy (§23)
@@ -591,6 +601,17 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 
 Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/seller build` → 97 routes; `next start` smoke test with mocks: 28 section pages return 200 for a Business owner and a Free owner; Free gets 402 on Pro endpoints; Sales staff are redirected away from Payments.
 
+### Dark mode
+
+| Area | Change |
+| --- | --- |
+| `package.json`, `app/globals.css` | Now imports `@zudomart/design-tokens/tokens.css`. The local `:root` became aliases onto semantic tokens. Print forces light paper tokens |
+| `app/layout.tsx`, `components/theme/appThemeProvider.tsx` | Cookie-driven `data-theme`, `ThemeInitScript` and `themeViewport`. PATCH `/seller/users/me/preferences` when signed in |
+| `mocks/handlers/consentsHandlers.mock.ts`, `config/rolePermissions.config.ts` | Mock PATCH route plus a `signed_in` rule |
+| `layout/topBar`, `settings/accountSettingsView`, `landing/landingFooter` | Light/Dark/System switcher |
+| About 70 CSS modules plus charts (`sparkline`, `horizontalBarList`, `reportResultChart`, dashboard and analytics panels) | Raw hex moved onto tokens. SVG series use `--chart-*`, gridlines use `--chart-grid` and labels use `--chart-axis` |
+| Landing | Polished on tokens and checked at 390 and 1440 in both themes. Keeps "free for every seller". In-store "counter" copy was replaced, because the dashboard has no POS: the features heading, the sync section and the login note |
+
 ## apps/web
 
 ### Shipping config & web privacy (§23)
@@ -612,6 +633,16 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ---
 
+### Dark mode
+
+| Area | Change |
+| --- | --- |
+| `app/layout.tsx`, `components/layout/siteThemeProvider.tsx` | `ThemeInitScript` plus `themeViewport`. No `cookies()` read, so every page stays static (`○`) |
+| `layout/siteHeader`, `layout/siteFooter` | Icon-only switcher in the header and labelled switcher in the footer. The dark header glass is near-solid so it reads over the yellow hero |
+| `app/globals.css` and every section module | Raw hex moved onto app aliases with dark values (navy canvas, deeper brand bands, yellow kept with dark text). Phone frames and photography untouched |
+| Landing polish | Token type scale, spacing, wordmark and radii. Checked at 390 and 1440 with no horizontal scroll. Reduced motion stops the marquee |
+| Copy fix | Dropped "point of sale for your physical shop" from the sellers page, the FAQ and the site config, because the dashboard has no POS |
+
 ## apps/admin
 
 ### Shipping config & web privacy (§23)
@@ -627,6 +658,15 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ---
 
+### Dark mode
+
+| Area | Change |
+| --- | --- |
+| `app/layout.tsx`, `components/theme/appThemeProvider.tsx` | Cookie-driven `data-theme`. `ThemeInitScript` gets the CSP nonce from `x-nonce`. Spreads `themeViewport`. PATCH `/admin/users/me/preferences` |
+| `config/apiAccess.config.ts`, `mocks/handlers/platform/userPreferences.mock.ts` | `anyAdmin` rule listed before the `/admin/users` prefix, plus the mock route |
+| `shell/consoleTopBar`, `account/accountSecurityWorkspace` | Light/Dark/System switcher |
+| About 45 CSS modules (shell, auth, ui kit, money, trust, configuration) | Raw hex moved onto tokens. `--surface-hover` now uses `--color-surface-hover`. The `--console-night*` rail stays dark in both themes. Document artwork untouched |
+
 ## apps/ads
 
 ### Shipping config & web privacy (§23)
@@ -638,6 +678,17 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ---
 
+### Dark mode
+
+| Area | Change |
+| --- | --- |
+| `app/layout.tsx`, `components/theme/appThemeProvider.tsx` | Cookie-driven `data-theme`, `ThemeInitScript` and `themeViewport`. PATCH `/ads/users/me/preferences` |
+| `mocks/handlers/userPreferences.mock.ts`, `config/rolePermissions.config.ts` | Mock route plus a signed-in-only path |
+| `shell/userMenu`, `settings/appearanceCard` | Light/Dark/System switcher |
+| Creative previews, landing illustrations, `charts/lineChart` | Driven by tokens and `--chart-*`, `--chart-grid` and `--chart-axis` |
+| `shell/accountShell` | The top bar hid nothing below 720 px and overflowed to 526 px. The badges, balance and duplicate "Create campaign" are now hidden there |
+| `charts/lineChart.tsx`, `app/globals.css`, `ui/surfaces`, `ui/formFields`, `overview/kpiTileGrid` | The screen-reader data table is wrapped so it can't widen the page. Card headers wrap. The segmented metric control scrolls. KPI values scale down instead of truncating at 390 px |
+
 ## packages/webKit
 
 ### Shipping config & web privacy (§23)
@@ -647,6 +698,14 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | `src/consent/*`, `src/index.ts` | **New.** `CookieConsentBanner` (Accept all, Reject optional, Manage with per-category toggles), `useConsent(category)`, `ConsentGuard`, `openCookieSettings`. Choice stored in the first-party `zudomart_consent` cookie with the policy version; optional scripts must be wrapped in `ConsentGuard`. |
 
 ---
+
+### Dark mode (shared)
+
+| Area | Change |
+| --- | --- |
+| `packages/designTokens/tokens.css` | Wired `:root[data-theme="dark"]` plus the `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` fallback, `color-scheme` per theme and `prefers-contrast: more`. New tokens: `--color-border-control`, `--color-surface-hover`, `--color-brand-solid-hover`, `--color-inverse` and `--color-on-inverse`, `--color-skeleton` and `-shine`, `--chart-5`, `--chart-grid`, `--chart-axis`. AA tuning: light `--color-text-subtle` is `#68687b` and dark `--color-brand` is `#7b90f9`. `native.ts` kept in sync |
+| `src/theme/*` | **New.** `ThemeProvider` and `useTheme()`, `ThemeSwitcher`, `ThemeInitScript`, and `parseThemePreference` / `readHtmlThemeAttribute` / `themeViewport` / `themeCookieName` |
+| `feedback.module.css`, `zudomartWordmark.module.css`, `consent/cookieConsent.module.css` | Fully tokenised. The banner sits on `--color-elevated` and has hover states. The hex fallbacks were removed |
 
 ## docs
 
