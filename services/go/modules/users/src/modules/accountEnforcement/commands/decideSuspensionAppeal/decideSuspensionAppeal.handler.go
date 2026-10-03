@@ -2,6 +2,7 @@ package decidesuspensionappeal
 
 import (
 	"context"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -70,8 +71,8 @@ func (handler Handler) uphold(ctx context.Context, suspension *ent.AccountSuspen
 
 func (handler Handler) publishDecision(ctx context.Context, suspension *ent.AccountSuspension, outcome, reason string) error {
 	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.SuspensionAppealDecidedType, suspension.AccountID.String(), handler.Container.Now(), accountevents.SuspensionAppealData{
-			AccountId: suspension.AccountID.String(), SuspensionId: suspension.ID.String(), Outcome: outcome, Reason: reason,
+		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.AppealDecidedType, suspension.AccountID.String(), handler.Container.Now(), accountevents.AppealDecidedData{
+			AccountId: suspension.AccountID.String(), CaseId: suspension.ID.String(), Outcome: strings.ToLower(outcome), Explanation: reason,
 		})
 	})
 }
