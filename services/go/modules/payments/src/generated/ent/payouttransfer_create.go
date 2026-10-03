@@ -74,15 +74,115 @@ func (_c *PayoutTransferCreate) SetCurrency(v string) *PayoutTransferCreate {
 	return _c
 }
 
+// SetKind sets the "kind" field.
+func (_c *PayoutTransferCreate) SetKind(v payouttransfer.Kind) *PayoutTransferCreate {
+	_c.mutation.SetKind(v)
+	return _c
+}
+
+// SetNillableKind sets the "kind" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableKind(v *payouttransfer.Kind) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetKind(*v)
+	}
+	return _c
+}
+
+// SetConnectedAccountID sets the "connected_account_id" field.
+func (_c *PayoutTransferCreate) SetConnectedAccountID(v string) *PayoutTransferCreate {
+	_c.mutation.SetConnectedAccountID(v)
+	return _c
+}
+
+// SetNillableConnectedAccountID sets the "connected_account_id" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableConnectedAccountID(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetConnectedAccountID(*v)
+	}
+	return _c
+}
+
+// SetBeneficiaryUserID sets the "beneficiary_user_id" field.
+func (_c *PayoutTransferCreate) SetBeneficiaryUserID(v string) *PayoutTransferCreate {
+	_c.mutation.SetBeneficiaryUserID(v)
+	return _c
+}
+
+// SetNillableBeneficiaryUserID sets the "beneficiary_user_id" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableBeneficiaryUserID(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetBeneficiaryUserID(*v)
+	}
+	return _c
+}
+
+// SetTransferGroup sets the "transfer_group" field.
+func (_c *PayoutTransferCreate) SetTransferGroup(v string) *PayoutTransferCreate {
+	_c.mutation.SetTransferGroup(v)
+	return _c
+}
+
+// SetNillableTransferGroup sets the "transfer_group" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableTransferGroup(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetTransferGroup(*v)
+	}
+	return _c
+}
+
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (_c *PayoutTransferCreate) SetProviderDestinationID(v string) *PayoutTransferCreate {
+	_c.mutation.SetProviderDestinationID(v)
+	return _c
+}
+
+// SetNillableProviderDestinationID sets the "provider_destination_id" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableProviderDestinationID(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetProviderDestinationID(*v)
+	}
+	return _c
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (_c *PayoutTransferCreate) SetFeeMinor(v int64) *PayoutTransferCreate {
+	_c.mutation.SetFeeMinor(v)
+	return _c
+}
+
+// SetNillableFeeMinor sets the "fee_minor" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableFeeMinor(v *int64) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetFeeMinor(*v)
+	}
+	return _c
+}
+
 // SetBankCode sets the "bank_code" field.
 func (_c *PayoutTransferCreate) SetBankCode(v string) *PayoutTransferCreate {
 	_c.mutation.SetBankCode(v)
 	return _c
 }
 
+// SetNillableBankCode sets the "bank_code" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableBankCode(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetBankCode(*v)
+	}
+	return _c
+}
+
 // SetDestinationLast4 sets the "destination_last4" field.
 func (_c *PayoutTransferCreate) SetDestinationLast4(v string) *PayoutTransferCreate {
 	_c.mutation.SetDestinationLast4(v)
+	return _c
+}
+
+// SetNillableDestinationLast4 sets the "destination_last4" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableDestinationLast4(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetDestinationLast4(*v)
+	}
 	return _c
 }
 
@@ -209,6 +309,38 @@ func (_c *PayoutTransferCreate) defaults() {
 		v := payouttransfer.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Kind(); !ok {
+		v := payouttransfer.DefaultKind
+		_c.mutation.SetKind(v)
+	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		v := payouttransfer.DefaultConnectedAccountID
+		_c.mutation.SetConnectedAccountID(v)
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		v := payouttransfer.DefaultBeneficiaryUserID
+		_c.mutation.SetBeneficiaryUserID(v)
+	}
+	if _, ok := _c.mutation.TransferGroup(); !ok {
+		v := payouttransfer.DefaultTransferGroup
+		_c.mutation.SetTransferGroup(v)
+	}
+	if _, ok := _c.mutation.ProviderDestinationID(); !ok {
+		v := payouttransfer.DefaultProviderDestinationID
+		_c.mutation.SetProviderDestinationID(v)
+	}
+	if _, ok := _c.mutation.FeeMinor(); !ok {
+		v := payouttransfer.DefaultFeeMinor
+		_c.mutation.SetFeeMinor(v)
+	}
+	if _, ok := _c.mutation.BankCode(); !ok {
+		v := payouttransfer.DefaultBankCode
+		_c.mutation.SetBankCode(v)
+	}
+	if _, ok := _c.mutation.DestinationLast4(); !ok {
+		v := payouttransfer.DefaultDestinationLast4
+		_c.mutation.SetDestinationLast4(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := payouttransfer.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -278,6 +410,49 @@ func (_c *PayoutTransferCreate) check() error {
 		if err := payouttransfer.CurrencyValidator(v); err != nil {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.currency": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Kind(); !ok {
+		return &ValidationError{Name: "kind", err: errors.New(`ent: missing required field "PayoutTransfer.kind"`)}
+	}
+	if v, ok := _c.mutation.Kind(); ok {
+		if err := payouttransfer.KindValidator(v); err != nil {
+			return &ValidationError{Name: "kind", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.kind": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		return &ValidationError{Name: "connected_account_id", err: errors.New(`ent: missing required field "PayoutTransfer.connected_account_id"`)}
+	}
+	if v, ok := _c.mutation.ConnectedAccountID(); ok {
+		if err := payouttransfer.ConnectedAccountIDValidator(v); err != nil {
+			return &ValidationError{Name: "connected_account_id", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.connected_account_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		return &ValidationError{Name: "beneficiary_user_id", err: errors.New(`ent: missing required field "PayoutTransfer.beneficiary_user_id"`)}
+	}
+	if v, ok := _c.mutation.BeneficiaryUserID(); ok {
+		if err := payouttransfer.BeneficiaryUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "beneficiary_user_id", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.beneficiary_user_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TransferGroup(); !ok {
+		return &ValidationError{Name: "transfer_group", err: errors.New(`ent: missing required field "PayoutTransfer.transfer_group"`)}
+	}
+	if v, ok := _c.mutation.TransferGroup(); ok {
+		if err := payouttransfer.TransferGroupValidator(v); err != nil {
+			return &ValidationError{Name: "transfer_group", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.transfer_group": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ProviderDestinationID(); !ok {
+		return &ValidationError{Name: "provider_destination_id", err: errors.New(`ent: missing required field "PayoutTransfer.provider_destination_id"`)}
+	}
+	if v, ok := _c.mutation.ProviderDestinationID(); ok {
+		if err := payouttransfer.ProviderDestinationIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_destination_id", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.provider_destination_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.FeeMinor(); !ok {
+		return &ValidationError{Name: "fee_minor", err: errors.New(`ent: missing required field "PayoutTransfer.fee_minor"`)}
 	}
 	if _, ok := _c.mutation.BankCode(); !ok {
 		return &ValidationError{Name: "bank_code", err: errors.New(`ent: missing required field "PayoutTransfer.bank_code"`)}
@@ -387,6 +562,30 @@ func (_c *PayoutTransferCreate) createSpec() (*PayoutTransfer, *sqlgraph.CreateS
 		_spec.SetField(payouttransfer.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
 	}
+	if value, ok := _c.mutation.Kind(); ok {
+		_spec.SetField(payouttransfer.FieldKind, field.TypeEnum, value)
+		_node.Kind = value
+	}
+	if value, ok := _c.mutation.ConnectedAccountID(); ok {
+		_spec.SetField(payouttransfer.FieldConnectedAccountID, field.TypeString, value)
+		_node.ConnectedAccountID = value
+	}
+	if value, ok := _c.mutation.BeneficiaryUserID(); ok {
+		_spec.SetField(payouttransfer.FieldBeneficiaryUserID, field.TypeString, value)
+		_node.BeneficiaryUserID = value
+	}
+	if value, ok := _c.mutation.TransferGroup(); ok {
+		_spec.SetField(payouttransfer.FieldTransferGroup, field.TypeString, value)
+		_node.TransferGroup = value
+	}
+	if value, ok := _c.mutation.ProviderDestinationID(); ok {
+		_spec.SetField(payouttransfer.FieldProviderDestinationID, field.TypeString, value)
+		_node.ProviderDestinationID = value
+	}
+	if value, ok := _c.mutation.FeeMinor(); ok {
+		_spec.SetField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
+		_node.FeeMinor = value
+	}
 	if value, ok := _c.mutation.BankCode(); ok {
 		_spec.SetField(payouttransfer.FieldBankCode, field.TypeString, value)
 		_node.BankCode = value
@@ -466,6 +665,36 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (u *PayoutTransferUpsert) SetProviderDestinationID(v string) *PayoutTransferUpsert {
+	u.Set(payouttransfer.FieldProviderDestinationID, v)
+	return u
+}
+
+// UpdateProviderDestinationID sets the "provider_destination_id" field to the value that was provided on create.
+func (u *PayoutTransferUpsert) UpdateProviderDestinationID() *PayoutTransferUpsert {
+	u.SetExcluded(payouttransfer.FieldProviderDestinationID)
+	return u
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (u *PayoutTransferUpsert) SetFeeMinor(v int64) *PayoutTransferUpsert {
+	u.Set(payouttransfer.FieldFeeMinor, v)
+	return u
+}
+
+// UpdateFeeMinor sets the "fee_minor" field to the value that was provided on create.
+func (u *PayoutTransferUpsert) UpdateFeeMinor() *PayoutTransferUpsert {
+	u.SetExcluded(payouttransfer.FieldFeeMinor)
+	return u
+}
+
+// AddFeeMinor adds v to the "fee_minor" field.
+func (u *PayoutTransferUpsert) AddFeeMinor(v int64) *PayoutTransferUpsert {
+	u.Add(payouttransfer.FieldFeeMinor, v)
+	return u
+}
 
 // SetStatus sets the "status" field.
 func (u *PayoutTransferUpsert) SetStatus(v payouttransfer.Status) *PayoutTransferUpsert {
@@ -571,6 +800,18 @@ func (u *PayoutTransferUpsertOne) UpdateNewValues() *PayoutTransferUpsertOne {
 		if _, exists := u.create.mutation.Currency(); exists {
 			s.SetIgnore(payouttransfer.FieldCurrency)
 		}
+		if _, exists := u.create.mutation.Kind(); exists {
+			s.SetIgnore(payouttransfer.FieldKind)
+		}
+		if _, exists := u.create.mutation.ConnectedAccountID(); exists {
+			s.SetIgnore(payouttransfer.FieldConnectedAccountID)
+		}
+		if _, exists := u.create.mutation.BeneficiaryUserID(); exists {
+			s.SetIgnore(payouttransfer.FieldBeneficiaryUserID)
+		}
+		if _, exists := u.create.mutation.TransferGroup(); exists {
+			s.SetIgnore(payouttransfer.FieldTransferGroup)
+		}
 		if _, exists := u.create.mutation.BankCode(); exists {
 			s.SetIgnore(payouttransfer.FieldBankCode)
 		}
@@ -606,6 +847,41 @@ func (u *PayoutTransferUpsertOne) Update(set func(*PayoutTransferUpsert)) *Payou
 		set(&PayoutTransferUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (u *PayoutTransferUpsertOne) SetProviderDestinationID(v string) *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetProviderDestinationID(v)
+	})
+}
+
+// UpdateProviderDestinationID sets the "provider_destination_id" field to the value that was provided on create.
+func (u *PayoutTransferUpsertOne) UpdateProviderDestinationID() *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateProviderDestinationID()
+	})
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (u *PayoutTransferUpsertOne) SetFeeMinor(v int64) *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetFeeMinor(v)
+	})
+}
+
+// AddFeeMinor adds v to the "fee_minor" field.
+func (u *PayoutTransferUpsertOne) AddFeeMinor(v int64) *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.AddFeeMinor(v)
+	})
+}
+
+// UpdateFeeMinor sets the "fee_minor" field to the value that was provided on create.
+func (u *PayoutTransferUpsertOne) UpdateFeeMinor() *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateFeeMinor()
+	})
 }
 
 // SetStatus sets the "status" field.
@@ -889,6 +1165,18 @@ func (u *PayoutTransferUpsertBulk) UpdateNewValues() *PayoutTransferUpsertBulk {
 			if _, exists := b.mutation.Currency(); exists {
 				s.SetIgnore(payouttransfer.FieldCurrency)
 			}
+			if _, exists := b.mutation.Kind(); exists {
+				s.SetIgnore(payouttransfer.FieldKind)
+			}
+			if _, exists := b.mutation.ConnectedAccountID(); exists {
+				s.SetIgnore(payouttransfer.FieldConnectedAccountID)
+			}
+			if _, exists := b.mutation.BeneficiaryUserID(); exists {
+				s.SetIgnore(payouttransfer.FieldBeneficiaryUserID)
+			}
+			if _, exists := b.mutation.TransferGroup(); exists {
+				s.SetIgnore(payouttransfer.FieldTransferGroup)
+			}
 			if _, exists := b.mutation.BankCode(); exists {
 				s.SetIgnore(payouttransfer.FieldBankCode)
 			}
@@ -925,6 +1213,41 @@ func (u *PayoutTransferUpsertBulk) Update(set func(*PayoutTransferUpsert)) *Payo
 		set(&PayoutTransferUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (u *PayoutTransferUpsertBulk) SetProviderDestinationID(v string) *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetProviderDestinationID(v)
+	})
+}
+
+// UpdateProviderDestinationID sets the "provider_destination_id" field to the value that was provided on create.
+func (u *PayoutTransferUpsertBulk) UpdateProviderDestinationID() *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateProviderDestinationID()
+	})
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (u *PayoutTransferUpsertBulk) SetFeeMinor(v int64) *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetFeeMinor(v)
+	})
+}
+
+// AddFeeMinor adds v to the "fee_minor" field.
+func (u *PayoutTransferUpsertBulk) AddFeeMinor(v int64) *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.AddFeeMinor(v)
+	})
+}
+
+// UpdateFeeMinor sets the "fee_minor" field to the value that was provided on create.
+func (u *PayoutTransferUpsertBulk) UpdateFeeMinor() *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateFeeMinor()
+	})
 }
 
 // SetStatus sets the "status" field.

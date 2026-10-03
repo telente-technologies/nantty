@@ -32,6 +32,18 @@ type PayoutTransfer struct {
 	AmountMinor int64 `json:"amount_minor,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
+	// Kind holds the value of the "kind" field.
+	Kind payouttransfer.Kind `json:"kind,omitempty"`
+	// ConnectedAccountID holds the value of the "connected_account_id" field.
+	ConnectedAccountID string `json:"connected_account_id,omitempty"`
+	// BeneficiaryUserID holds the value of the "beneficiary_user_id" field.
+	BeneficiaryUserID string `json:"beneficiary_user_id,omitempty"`
+	// TransferGroup holds the value of the "transfer_group" field.
+	TransferGroup string `json:"transfer_group,omitempty"`
+	// ProviderDestinationID holds the value of the "provider_destination_id" field.
+	ProviderDestinationID string `json:"provider_destination_id,omitempty"`
+	// FeeMinor holds the value of the "fee_minor" field.
+	FeeMinor int64 `json:"fee_minor,omitempty"`
 	// BankCode holds the value of the "bank_code" field.
 	BankCode string `json:"bank_code,omitempty"`
 	// DestinationLast4 holds the value of the "destination_last4" field.
@@ -54,9 +66,9 @@ func (*PayoutTransfer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case payouttransfer.FieldAmountMinor:
+		case payouttransfer.FieldAmountMinor, payouttransfer.FieldFeeMinor:
 			values[i] = new(sql.NullInt64)
-		case payouttransfer.FieldReference, payouttransfer.FieldPurpose, payouttransfer.FieldSubjectID, payouttransfer.FieldProvider, payouttransfer.FieldCurrency, payouttransfer.FieldBankCode, payouttransfer.FieldDestinationLast4, payouttransfer.FieldStatus, payouttransfer.FieldProviderTransferCode, payouttransfer.FieldFailureReason:
+		case payouttransfer.FieldReference, payouttransfer.FieldPurpose, payouttransfer.FieldSubjectID, payouttransfer.FieldProvider, payouttransfer.FieldCurrency, payouttransfer.FieldKind, payouttransfer.FieldConnectedAccountID, payouttransfer.FieldBeneficiaryUserID, payouttransfer.FieldTransferGroup, payouttransfer.FieldProviderDestinationID, payouttransfer.FieldBankCode, payouttransfer.FieldDestinationLast4, payouttransfer.FieldStatus, payouttransfer.FieldProviderTransferCode, payouttransfer.FieldFailureReason:
 			values[i] = new(sql.NullString)
 		case payouttransfer.FieldCreatedAt, payouttransfer.FieldCompletedAt, payouttransfer.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -124,6 +136,42 @@ func (_m *PayoutTransfer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field currency", values[i])
 			} else if value.Valid {
 				_m.Currency = value.String
+			}
+		case payouttransfer.FieldKind:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field kind", values[i])
+			} else if value.Valid {
+				_m.Kind = payouttransfer.Kind(value.String)
+			}
+		case payouttransfer.FieldConnectedAccountID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field connected_account_id", values[i])
+			} else if value.Valid {
+				_m.ConnectedAccountID = value.String
+			}
+		case payouttransfer.FieldBeneficiaryUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field beneficiary_user_id", values[i])
+			} else if value.Valid {
+				_m.BeneficiaryUserID = value.String
+			}
+		case payouttransfer.FieldTransferGroup:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field transfer_group", values[i])
+			} else if value.Valid {
+				_m.TransferGroup = value.String
+			}
+		case payouttransfer.FieldProviderDestinationID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_destination_id", values[i])
+			} else if value.Valid {
+				_m.ProviderDestinationID = value.String
+			}
+		case payouttransfer.FieldFeeMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field fee_minor", values[i])
+			} else if value.Valid {
+				_m.FeeMinor = value.Int64
 			}
 		case payouttransfer.FieldBankCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -224,6 +272,24 @@ func (_m *PayoutTransfer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("currency=")
 	builder.WriteString(_m.Currency)
+	builder.WriteString(", ")
+	builder.WriteString("kind=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
+	builder.WriteString(", ")
+	builder.WriteString("connected_account_id=")
+	builder.WriteString(_m.ConnectedAccountID)
+	builder.WriteString(", ")
+	builder.WriteString("beneficiary_user_id=")
+	builder.WriteString(_m.BeneficiaryUserID)
+	builder.WriteString(", ")
+	builder.WriteString("transfer_group=")
+	builder.WriteString(_m.TransferGroup)
+	builder.WriteString(", ")
+	builder.WriteString("provider_destination_id=")
+	builder.WriteString(_m.ProviderDestinationID)
+	builder.WriteString(", ")
+	builder.WriteString("fee_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FeeMinor))
 	builder.WriteString(", ")
 	builder.WriteString("bank_code=")
 	builder.WriteString(_m.BankCode)

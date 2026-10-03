@@ -29,6 +29,41 @@ func (_u *PayoutTransferUpdate) Where(ps ...predicate.PayoutTransfer) *PayoutTra
 	return _u
 }
 
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (_u *PayoutTransferUpdate) SetProviderDestinationID(v string) *PayoutTransferUpdate {
+	_u.mutation.SetProviderDestinationID(v)
+	return _u
+}
+
+// SetNillableProviderDestinationID sets the "provider_destination_id" field if the given value is not nil.
+func (_u *PayoutTransferUpdate) SetNillableProviderDestinationID(v *string) *PayoutTransferUpdate {
+	if v != nil {
+		_u.SetProviderDestinationID(*v)
+	}
+	return _u
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (_u *PayoutTransferUpdate) SetFeeMinor(v int64) *PayoutTransferUpdate {
+	_u.mutation.ResetFeeMinor()
+	_u.mutation.SetFeeMinor(v)
+	return _u
+}
+
+// SetNillableFeeMinor sets the "fee_minor" field if the given value is not nil.
+func (_u *PayoutTransferUpdate) SetNillableFeeMinor(v *int64) *PayoutTransferUpdate {
+	if v != nil {
+		_u.SetFeeMinor(*v)
+	}
+	return _u
+}
+
+// AddFeeMinor adds value to the "fee_minor" field.
+func (_u *PayoutTransferUpdate) AddFeeMinor(v int64) *PayoutTransferUpdate {
+	_u.mutation.AddFeeMinor(v)
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *PayoutTransferUpdate) SetStatus(v payouttransfer.Status) *PayoutTransferUpdate {
 	_u.mutation.SetStatus(v)
@@ -140,6 +175,11 @@ func (_u *PayoutTransferUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PayoutTransferUpdate) check() error {
+	if v, ok := _u.mutation.ProviderDestinationID(); ok {
+		if err := payouttransfer.ProviderDestinationIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_destination_id", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.provider_destination_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := payouttransfer.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.status": %w`, err)}
@@ -169,6 +209,15 @@ func (_u *PayoutTransferUpdate) sqlSave(ctx context.Context) (_node int, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ProviderDestinationID(); ok {
+		_spec.SetField(payouttransfer.FieldProviderDestinationID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FeeMinor(); ok {
+		_spec.SetField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedFeeMinor(); ok {
+		_spec.AddField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(payouttransfer.FieldStatus, field.TypeEnum, value)
@@ -208,6 +257,41 @@ type PayoutTransferUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PayoutTransferMutation
+}
+
+// SetProviderDestinationID sets the "provider_destination_id" field.
+func (_u *PayoutTransferUpdateOne) SetProviderDestinationID(v string) *PayoutTransferUpdateOne {
+	_u.mutation.SetProviderDestinationID(v)
+	return _u
+}
+
+// SetNillableProviderDestinationID sets the "provider_destination_id" field if the given value is not nil.
+func (_u *PayoutTransferUpdateOne) SetNillableProviderDestinationID(v *string) *PayoutTransferUpdateOne {
+	if v != nil {
+		_u.SetProviderDestinationID(*v)
+	}
+	return _u
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (_u *PayoutTransferUpdateOne) SetFeeMinor(v int64) *PayoutTransferUpdateOne {
+	_u.mutation.ResetFeeMinor()
+	_u.mutation.SetFeeMinor(v)
+	return _u
+}
+
+// SetNillableFeeMinor sets the "fee_minor" field if the given value is not nil.
+func (_u *PayoutTransferUpdateOne) SetNillableFeeMinor(v *int64) *PayoutTransferUpdateOne {
+	if v != nil {
+		_u.SetFeeMinor(*v)
+	}
+	return _u
+}
+
+// AddFeeMinor adds value to the "fee_minor" field.
+func (_u *PayoutTransferUpdateOne) AddFeeMinor(v int64) *PayoutTransferUpdateOne {
+	_u.mutation.AddFeeMinor(v)
+	return _u
 }
 
 // SetStatus sets the "status" field.
@@ -334,6 +418,11 @@ func (_u *PayoutTransferUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PayoutTransferUpdateOne) check() error {
+	if v, ok := _u.mutation.ProviderDestinationID(); ok {
+		if err := payouttransfer.ProviderDestinationIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_destination_id", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.provider_destination_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := payouttransfer.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.status": %w`, err)}
@@ -380,6 +469,15 @@ func (_u *PayoutTransferUpdateOne) sqlSave(ctx context.Context) (_node *PayoutTr
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ProviderDestinationID(); ok {
+		_spec.SetField(payouttransfer.FieldProviderDestinationID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FeeMinor(); ok {
+		_spec.SetField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedFeeMinor(); ok {
+		_spec.AddField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(payouttransfer.FieldStatus, field.TypeEnum, value)

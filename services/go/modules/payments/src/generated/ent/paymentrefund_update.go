@@ -29,6 +29,20 @@ func (_u *PaymentRefundUpdate) Where(ps ...predicate.PaymentRefund) *PaymentRefu
 	return _u
 }
 
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (_u *PaymentRefundUpdate) SetFeeTopUpTransferID(v string) *PaymentRefundUpdate {
+	_u.mutation.SetFeeTopUpTransferID(v)
+	return _u
+}
+
+// SetNillableFeeTopUpTransferID sets the "fee_top_up_transfer_id" field if the given value is not nil.
+func (_u *PaymentRefundUpdate) SetNillableFeeTopUpTransferID(v *string) *PaymentRefundUpdate {
+	if v != nil {
+		_u.SetFeeTopUpTransferID(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *PaymentRefundUpdate) SetStatus(v paymentrefund.Status) *PaymentRefundUpdate {
 	_u.mutation.SetStatus(v)
@@ -161,6 +175,11 @@ func (_u *PaymentRefundUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PaymentRefundUpdate) check() error {
+	if v, ok := _u.mutation.FeeTopUpTransferID(); ok {
+		if err := paymentrefund.FeeTopUpTransferIDValidator(v); err != nil {
+			return &ValidationError{Name: "fee_top_up_transfer_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.fee_top_up_transfer_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := paymentrefund.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.status": %w`, err)}
@@ -190,6 +209,9 @@ func (_u *PaymentRefundUpdate) sqlSave(ctx context.Context) (_node int, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.FeeTopUpTransferID(); ok {
+		_spec.SetField(paymentrefund.FieldFeeTopUpTransferID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
@@ -235,6 +257,20 @@ type PaymentRefundUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PaymentRefundMutation
+}
+
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (_u *PaymentRefundUpdateOne) SetFeeTopUpTransferID(v string) *PaymentRefundUpdateOne {
+	_u.mutation.SetFeeTopUpTransferID(v)
+	return _u
+}
+
+// SetNillableFeeTopUpTransferID sets the "fee_top_up_transfer_id" field if the given value is not nil.
+func (_u *PaymentRefundUpdateOne) SetNillableFeeTopUpTransferID(v *string) *PaymentRefundUpdateOne {
+	if v != nil {
+		_u.SetFeeTopUpTransferID(*v)
+	}
+	return _u
 }
 
 // SetStatus sets the "status" field.
@@ -382,6 +418,11 @@ func (_u *PaymentRefundUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PaymentRefundUpdateOne) check() error {
+	if v, ok := _u.mutation.FeeTopUpTransferID(); ok {
+		if err := paymentrefund.FeeTopUpTransferIDValidator(v); err != nil {
+			return &ValidationError{Name: "fee_top_up_transfer_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.fee_top_up_transfer_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := paymentrefund.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.status": %w`, err)}
@@ -428,6 +469,9 @@ func (_u *PaymentRefundUpdateOne) sqlSave(ctx context.Context) (_node *PaymentRe
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.FeeTopUpTransferID(); ok {
+		_spec.SetField(paymentrefund.FieldFeeTopUpTransferID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
