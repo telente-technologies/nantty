@@ -13,7 +13,8 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "lint": "eslint -c ../../../packages/eslintConfig/node.config.mjs src"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.1000.0",
@@ -23,6 +24,7 @@
     "@zudojs/http": "^1.5.0",
     "@zudojs/logger": "^1.5.0",
     "@zudomart/email-templates": "workspace:*",
+    "amqplib": "^2.2.0",
     "jose": "^6.2.12",
     "tsx": "^4.23.15",
     "zod": "^4.6.5"
@@ -30,6 +32,8 @@
   "devDependencies": {
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
+    "@zudomart/eslint-config": "workspace:*",
+    "eslint": "^10.12.0",
     "prisma": "^7.10.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3"
