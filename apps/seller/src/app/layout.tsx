@@ -3,8 +3,11 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
+import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { SellerSessionProvider } from "@/components/session/sellerSessionProvider";
+import { AppThemeProvider } from "@/components/theme/appThemeProvider";
 import { ToastProvider } from "@/components/ui/toastProvider";
 import { dashboardProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
 import { buildSellerSessionViewFromCookies, readCsrfTokenForCookies } from "@/server/sellerSessionView.service";
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2043F5",
+  ...themeViewport,
   width: "device-width",
   initialScale: 1,
 };
@@ -36,15 +39,21 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const cookieStore = await cookies();
   const sessionView = buildSellerSessionViewFromCookies(cookieStore);
   const csrfToken = readCsrfTokenForCookies(cookieStore);
+  const themePreference = parseThemePreference(cookieStore.get(themeCookieName)?.value);
   return (
-    <html lang="en-NG" className={`${interFont.variable} ${receiptFont.variable}`}>
+    <html lang="en-NG" className={`${interFont.variable} ${receiptFont.variable}`} data-theme={readHtmlThemeAttribute(themePreference)} suppressHydrationWarning>
+      <head>
+        <ThemeInitScript />
+      </head>
       <body>
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
         <SellerSessionProvider initialSessionView={sessionView} csrfToken={csrfToken}>
-          <ToastProvider>{children}</ToastProvider>
-          <ConsentBannerHost isSignedIn={sessionView !== null} />
+          <AppThemeProvider initialPreference={themePreference}>
+            <ToastProvider>{children}</ToastProvider>
+            <ConsentBannerHost isSignedIn={sessionView !== null} />
+          </AppThemeProvider>
         </SellerSessionProvider>
       </body>
     </html>

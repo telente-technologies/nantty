@@ -1,36 +1,28 @@
+@import "@zudomart/design-tokens/tokens.css";
+
 :root {
-  --blue-50: #d2dafd;
-  --blue-100: #b5c1fc;
-  --blue-200: #8fa1fa;
-  --blue-300: #6a82f8;
-  --blue-400: #4563f7;
-  --blue-500: #2043f5;
-  --blue-600: #1b39cc;
-  --blue-700: #152da3;
-  --blue-800: #10227a;
-  --blue-900: #0b1752;
-  --blue-tint: #eef1fe;
-  --yellow-50: #fdf9d2;
-  --yellow-100: #fbf4b5;
-  --yellow-500: #f5e320;
-  --yellow-900: #524c0b;
-  --success: #10b981;
-  --success-tint: #e7f8f1;
-  --success-ink: #067a55;
-  --caution: #f59e0b;
-  --caution-tint: #fef4e2;
-  --caution-ink: #9a5b00;
-  --error: #ef4444;
-  --error-tint: #fdecec;
-  --error-ink: #b91c1c;
-  --surface-app: #f7f8fe;
-  --surface-card: #ffffff;
-  --surface-sunken: #f0f2fa;
-  --ink-strong: #000000;
-  --ink-muted: #5b5b5b;
-  --ink-faint: #6e6e80;
-  --divider: #d9d9d9;
-  --divider-soft: #ebecf2;
+  --blue-tint: var(--color-brand-tint);
+  --success: var(--color-success);
+  --success-tint: var(--color-success-tint);
+  --success-ink: var(--color-success-text);
+  --caution: var(--color-warn);
+  --caution-tint: var(--color-warn-tint);
+  --caution-ink: var(--color-warn-text);
+  --error: var(--color-danger);
+  --error-tint: var(--color-danger-tint);
+  --error-ink: var(--color-danger-text);
+  --surface-app: var(--color-bg);
+  --surface-card: var(--color-surface);
+  --surface-sunken: var(--color-sunken);
+  --surface-elevated: var(--color-elevated);
+  --surface-hover: var(--color-surface-hover);
+  --ink-strong: var(--color-text);
+  --ink-muted: var(--color-text-muted);
+  --ink-faint: var(--color-text-subtle);
+  --ink-link: var(--color-brand);
+  --divider: var(--color-border-strong);
+  --divider-soft: var(--color-border);
+  --divider-control: var(--color-border-control);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-receipt), ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -38,15 +30,56 @@
   --radius-small: 8px;
   --radius-medium: 10px;
   --radius-large: 12px;
-  --radius-pill: 999px;
 
   --sidebar-width: 244px;
   --topbar-height: 60px;
-  --shadow-card: 0 1px 2px rgb(11 23 82 / 0.05);
-  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 16px 40px -12px rgb(11 23 82 / 0.28);
-  --focus-ring: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--blue-500);
+  --rail-surface: var(--deep-surface);
+  --rail-ink: #c9d1f7;
+  --rail-ink-muted: #9aa8ef;
+  --rail-ink-faint: #8391d6;
+  --rail-ink-strong: #ffffff;
+  --rail-hover: rgb(255 255 255 / 0.07);
+  --accent-hover: #e6d41a;
+  --focus-halo: color-mix(in srgb, var(--color-brand) 22%, transparent);
+  --frosted-surface: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  --switch-thumb: #ffffff;
+  --paper: #ffffff;
+  --paper-ink: #0a0a14;
+  --paper-ink-muted: #444450;
+  --paper-rule: #cccccc;
+  --deep-surface: var(--blue-900);
+  --deep-ink: #ffffff;
+  --deep-ink-muted: #c9d1f7;
+  --deep-hairline: rgb(255 255 255 / 0.12);
+  --deep-hairline-strong: rgb(255 255 255 / 0.24);
+  --deep-hover: rgb(255 255 255 / 0.08);
+  --deep-glass: rgb(11 23 82 / 0.9);
+  --deep-scrim: rgb(0 0 0 / 0.22);
+  --night-surface: #000000;
+  --night-ink: #ffffff;
+  --landing-wash-brand: color-mix(in srgb, var(--color-brand) 13%, var(--color-surface));
+  --landing-wash-accent: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
+  --landing-hairline: inset 0 0 0 1px var(--color-border);
+  --landing-screen-shadow: 0 20px 50px -20px rgb(11 23 82 / 0.45);
+  --landing-stage-shadow: 0 40px 80px -30px rgb(11 23 82 / 0.55);
+  --print-paper: white;
+  --print-ink: black;
+}
 
-  color-scheme: light;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+    --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
+    --landing-stage-shadow: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
+    --deep-surface: #0e1438;
+  }
+}
+
+:root[data-theme="dark"] {
+  --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+  --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
+  --landing-stage-shadow: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
+  --deep-surface: #0e1438;
 }
 
 *,
@@ -65,7 +98,7 @@ body {
   background: var(--surface-app);
   color: var(--ink-strong);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: var(--fs-14);
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "cv11", "ss01";
@@ -109,7 +142,7 @@ button {
 }
 
 a {
-  color: var(--blue-600);
+  color: var(--ink-link);
   text-decoration: none;
 }
 
@@ -147,8 +180,8 @@ table {
   left: 8px;
   z-index: 1000;
   padding: 10px 14px;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   border-radius: var(--radius-small);
   transform: translateY(-160%);
 }
@@ -167,8 +200,24 @@ table {
 }
 
 @media print {
+  :root,
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]) {
+    --color-bg: var(--print-paper);
+    --color-surface: var(--print-paper);
+    --color-elevated: var(--print-paper);
+    --color-sunken: var(--print-paper);
+    --color-text: var(--print-ink);
+    --color-text-muted: var(--print-ink);
+    --color-text-subtle: var(--print-ink);
+    --color-border: var(--print-ink);
+    --color-border-strong: var(--print-ink);
+
+    color-scheme: light;
+  }
+
   body {
-    background: #fff;
+    background: var(--print-paper);
   }
 
   .noPrint {

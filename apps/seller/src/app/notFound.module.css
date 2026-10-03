@@ -9,13 +9,13 @@
 .receipt {
   width: min(360px, 100%);
   padding: 28px 24px 40px;
-  background: #fff;
-  color: var(--blue-900);
+  background: var(--paper);
+  color: var(--paper-ink);
   font-family: var(--font-mono);
   font-size: 13px;
   transform: rotate(-1.5deg);
   box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55);
-  --zigzag: conic-gradient(from -45deg at bottom, #0000, #000 1deg 90deg, #0000 91deg) bottom / 14px 100%;
+  --zigzag: conic-gradient(from -45deg at bottom, transparent, black 1deg 90deg, transparent 91deg) bottom / 14px 100%;
   -webkit-mask: var(--zigzag);
   mask: var(--zigzag);
   animation: print-receipt 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -71,7 +71,7 @@
 
 .primaryAction {
   background: var(--blue-500);
-  color: #fff;
+  color: var(--color-on-brand);
 }
 
 .secondaryAction {
