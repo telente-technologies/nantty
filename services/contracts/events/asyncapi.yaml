@@ -1,0 +1,59 @@
+asyncapi: 3.0.0
+info:
+  title: Zudomart domain events
+  version: 1.0.0
+  description: >
+    Durable domain events. Each owning service writes the event to its Postgres outbox in the same
+    transaction as the business change; a relay publishes it to the SNS topic zudomart-domain-events
+    with the message attribute eventType. Consumers own an SQS queue subscribed with a filter policy
+    on eventType and must be idempotent on the envelope id.
+defaultContentType: application/json
+servers:
+  aws:
+    host: sns.eu-west-1.amazonaws.com
+    protocol: sns
+  local:
+    host: localhost:14566
+    protocol: sns
+channels:
+  domainEvents:
+    address: zudomart-domain-events
+    messages:
+      accountRegistered:
+        $ref: '#/components/messages/accountRegistered'
+      accountLoggedIn:
+        $ref: '#/components/messages/accountLoggedIn'
+      sessionRefreshTokenReuseDetected:
+        $ref: '#/components/messages/sessionRefreshTokenReuseDetected'
+operations:
+  publishAuthEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/accountRegistered'
+      - $ref: '#/channels/domainEvents/messages/accountLoggedIn'
+      - $ref: '#/channels/domainEvents/messages/sessionRefreshTokenReuseDetected'
+components:
+  messages:
+    accountRegistered:
+      name: account.registered
+      headers: { type: object, properties: { eventType: { const: account.registered } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.registered.v1.json' } }
+    accountLoggedIn:
+      name: account.loggedIn
+      headers: { type: object, properties: { eventType: { const: account.loggedIn } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.loggedIn.v1.json' } }
+    sessionRefreshTokenReuseDetected:
+      name: session.refreshTokenReuseDetected
+      headers: { type: object, properties: { eventType: { const: session.refreshTokenReuseDetected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/session.refreshTokenReuseDetected.v1.json' } }
