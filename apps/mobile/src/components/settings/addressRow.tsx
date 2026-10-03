@@ -5,11 +5,14 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { Address } from "@/types";
 
+export const formatAddressLocation = (address: Address) =>
+  [address.line1, address.city, address.lga, address.state, address.country].filter(Boolean).join(", ");
+
 export function AddressRow({ address, onPress }: { address: Address; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${address.fullName}, ${address.line1}, ${address.city}, ${address.state}${address.isDefault ? ", default address" : ""}`}
+      accessibilityLabel={`${address.fullName}, ${formatAddressLocation(address)}${address.isDefault ? ", default address" : ""}`}
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
@@ -27,7 +30,7 @@ export function AddressRow({ address, onPress }: { address: Address; onPress: ()
           ) : null}
         </View>
         <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-          {address.line1}, {address.city}, {address.state}
+          {formatAddressLocation(address)}
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textMuted}>
           {address.phone}
