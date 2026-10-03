@@ -1,10 +1,12 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreatorRevenueRules } from "@/types/creator.type";
 
 export function RevenueRulesCard({ rules }: { rules: CreatorRevenueRules }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const lines = [
     `Gifts from lives: you keep up to ${rules.giftCreatorSharePercentUpTo}%.`,
     `Ads shown on your content: ${rules.adsRevenueCreatorSharePercent}% revenue share to you.`,
@@ -24,4 +26,4 @@ export function RevenueRulesCard({ rules }: { rules: CreatorRevenueRules }) {
   );
 }
 
-const styles = StyleSheet.create({ card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 } });
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 } }));

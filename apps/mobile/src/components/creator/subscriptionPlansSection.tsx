@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import { useLocaleStore } from "@/store/locale.store";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -19,6 +19,8 @@ import { creatorQueryKeys } from "./creatorQueries.hook";
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
 export function SubscriptionPlansSection() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const currency = useLocaleStore((state) => state.currency);
   const plans = useQuery({ queryKey: creatorQueryKeys.myPlans, queryFn: creatorProgramService.listMySubscriptionPlans });
@@ -91,11 +93,11 @@ export function SubscriptionPlansSection() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   plan: { gap: 4, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.background },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   form: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   multiline: { height: 90, alignItems: "flex-start", paddingVertical: 10 },
-});
+}));

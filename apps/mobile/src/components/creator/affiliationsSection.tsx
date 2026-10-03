@@ -7,7 +7,7 @@ import { StatusPill } from "@/components/escrow/statusPill";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import { productsService } from "@/services/products.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -17,6 +17,8 @@ import { creatorQueryKeys } from "./creatorQueries.hook";
 const AFFILIATION_TONE = { active: "success", requested: "caution", declined: "error" } as const;
 
 export function AffiliationsSection() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const [pickerVisible, setPickerVisible] = useState(false);
   const affiliations = useQuery({ queryKey: creatorQueryKeys.affiliations, queryFn: creatorProgramService.listMyAffiliations });
@@ -62,11 +64,11 @@ export function AffiliationsSection() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44 },
   thumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.placeholder },
   sheetList: { maxHeight: 420 },
   sheetContent: { paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
-});
+}));

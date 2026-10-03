@@ -5,9 +5,11 @@ import { ConvertEarnedCoinsSheet } from "@/components/coins/convertEarnedCoinsSh
 import { formatCoinAmount, useCoinBalance } from "@/components/coins/coinWallet.hook";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function StudioCoinsSection({ onOpenActivity }: { onOpenActivity: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const balance = useCoinBalance();
   const [convertVisible, setConvertVisible] = useState(false);
   const earned = balance.data?.earnedCoins ?? 0;
@@ -29,7 +31,7 @@ export function StudioCoinsSection({ onOpenActivity }: { onOpenActivity: () => v
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", justifyContent: "space-between" },
-});
+}));

@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreatorEligibilityRequirement } from "@/types/creator.type";
 
 const describeProgress = (requirement: CreatorEligibilityRequirement) => {
@@ -11,6 +11,8 @@ const describeProgress = (requirement: CreatorEligibilityRequirement) => {
 };
 
 export function EligibilityChecklist({ requirements }: { requirements: readonly CreatorEligibilityRequirement[] }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.list}>
       {requirements.map((requirement) => {
@@ -34,13 +36,13 @@ export function EligibilityChecklist({ requirements }: { requirements: readonly 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { gap: 14 },
   item: { gap: 6 },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   check: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: colors.divider, alignItems: "center", justifyContent: "center" },
   checkMet: { backgroundColor: colors.success, borderColor: colors.success },
   label: { flex: 1 },
-  track: { height: 4, borderRadius: 2, backgroundColor: palette.primary[50], marginLeft: 30, overflow: "hidden" },
+  track: { height: 4, borderRadius: 2, backgroundColor: colors.primaryTint, marginLeft: 30, overflow: "hidden" },
   fill: { height: 4, borderRadius: 2 },
-});
+}));

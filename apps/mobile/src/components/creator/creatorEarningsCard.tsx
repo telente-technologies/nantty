@@ -1,11 +1,14 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreatorDashboard } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 export function CreatorEarningsCard({ dashboard }: { dashboard: CreatorDashboard }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const breakdown = [
     { label: "Gifts", amount: dashboard.earnings.gifts },
     { label: "Affiliate commissions", amount: dashboard.earnings.affiliateCommissions },
@@ -30,7 +33,7 @@ export function CreatorEarningsCard({ dashboard }: { dashboard: CreatorDashboard
           <Text size={16} weight={600} lineHeight={19.2} color={colors.white}>{formatMoneyForDisplay(dashboard.availableBalance)}</Text>
         </View>
         <View style={[styles.balance, styles.pending]}>
-          <Text size={12} lineHeight={14.4} color={palette.caution[800]}>Pending (escrow)</Text>
+          <Text size={12} lineHeight={14.4} color={colors.cautionStrongText}>Pending (escrow)</Text>
           <Text size={16} weight={600} lineHeight={19.2}>{formatMoneyForDisplay(dashboard.pendingBalance)}</Text>
         </View>
       </View>
@@ -38,12 +41,12 @@ export function CreatorEarningsCard({ dashboard }: { dashboard: CreatorDashboard
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 6 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 6 },
   breakdown: { marginTop: 8, gap: 6 },
   row: { flexDirection: "row", justifyContent: "space-between" },
   balances: { flexDirection: "row", gap: 8, marginTop: 10 },
   balance: { flex: 1, borderRadius: 10, padding: 12, gap: 4 },
-  available: { backgroundColor: colors.primary },
-  pending: { backgroundColor: palette.caution[50] },
-});
+  available: { backgroundColor: colors.primarySolid },
+  pending: { backgroundColor: colors.cautionTint },
+}));
