@@ -18,7 +18,7 @@ import {
 } from "@/utils/mentions.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
-const MENTION_SEARCH_DEBOUNCE_MS = 200;
+const MENTION_SEARCH_DEBOUNCE_MS = 150;
 const LIMIT_REACHED_MESSAGE = `You can mention up to ${MAXIMUM_MENTIONS_PER_CONTENT} people`;
 
 export interface UseMentionComposerOptions {
@@ -56,7 +56,9 @@ export function useMentionComposer({ surface, conversationId, text, mentions, on
   const [selectionEnd, setSelectionEnd] = useState(0);
   const [forcedCaret, setForcedCaret] = useState<number | null>(null);
   const activeQuery: ActiveMentionQuery | null = isSignedIn && isEnabled ? findActiveMentionQuery(text, selectionEnd) : null;
-  const debouncedQuery = useDebouncedValue(activeQuery?.query ?? null, MENTION_SEARCH_DEBOUNCE_MS);
+  const typedQuery = activeQuery?.query ?? null;
+  const laggedQuery = useDebouncedValue(typedQuery, MENTION_SEARCH_DEBOUNCE_MS);
+  const debouncedQuery = typedQuery === "" ? "" : laggedQuery;
   const lastActiveQueryRef = useRef(activeQuery);
   lastActiveQueryRef.current = activeQuery;
 

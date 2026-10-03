@@ -71,8 +71,13 @@ export function MentionSuggestionList({ suggestions }: { readonly suggestions: M
             </View>
           </Pressable>
         ) : null}
-        {candidates.map((candidate) => (
-          <CandidateRow key={candidate.user.id} candidate={candidate} onPick={() => onPickCandidate(candidate)} />
+        {candidates.map((candidate, index) => (
+          <View key={candidate.user.id}>
+            {candidate.rank === "other" && index > 0 && candidates[index - 1]!.rank !== "other" ? (
+              <View style={styles.divider}><Text size={12} weight={600} lineHeight={16.8} color={colors.textMuted}>More people on Zudomart</Text></View>
+            ) : null}
+            <CandidateRow candidate={candidate} onPick={() => onPickCandidate(candidate)} />
+          </View>
         ))}
         {isEmpty ? <Text size={13} lineHeight={16.9} color={colors.textMuted} style={styles.empty}>No people found</Text> : null}
       </ScrollView>
@@ -100,5 +105,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   nameLine: { flexDirection: "row", alignItems: "center", gap: 4 },
   name: { flexShrink: 1 },
   everyoneBadge: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
+  divider: { paddingHorizontal: 16, paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.divider },
   empty: { paddingHorizontal: 16, paddingVertical: 12 },
 }));

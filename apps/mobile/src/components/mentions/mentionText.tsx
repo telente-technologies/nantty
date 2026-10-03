@@ -1,11 +1,14 @@
+import { useMemo } from "react";
 import { StyleSheet } from "react-native";
 
 import { Text, type TextProps } from "@/components/ui/text";
+import { useOpenUserByUsername } from "@/hooks/useOpenUserByUsername.hook";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { showToast } from "@/store/toast.store";
 import type { MentionEntity, MentionTargetsByUserId } from "@/types/mention.type";
-import { isAllMention, splitTextByMentions } from "@/utils/mentions.util";
+import { isAllMention } from "@/utils/mentions.util";
+import { splitTextByTags } from "@/utils/usernameTags.util";
 
 import { useMentionTargets } from "./mentionTargets.hook";
 
@@ -29,8 +32,10 @@ export function MentionText({ text, mentions, mentionColor, ...textProps }: Ment
   const { colors } = useTheme();
   const styles = useStyles();
   const openUserProfile = useOpenUserProfile();
+  const openUserByUsername = useOpenUserByUsername();
   const targets = useMentionTargets(mentions);
-  if (!mentions?.length) return <Text {...textProps}>{text}</Text>;
+  const segments = useMemo(() => splitTextByTags(text, mentions), [text, mentions]);
+  if (!text.includes("@")) return <Text {...textProps}>{text}</Text>;
   const highlightColor = mentionColor ?? colors.primary;
 
   const openMention = (mention: MentionEntity) => {
@@ -41,11 +46,19 @@ export function MentionText({ text, mentions, mentionColor, ...textProps }: Ment
 
   return (
     <Text {...textProps}>
-      {splitTextByMentions(text, mentions).map((segment, index) => {
-        if (!segment.mention) return segment.text;
-        const description = describeSegment(segment.text, segment.mention, targets);
+      {segments.map((segment, index) => {
+        if (segment.username) {
+          const username = segment.username;
+          return (
+            <Text key={`tag_${index}`} {...textProps} weight={600} color={highlightColor} accessibilityRole="link" onPress={() => void openUserByUsername(username)}>
+              {segment.text}
+            </Text>
+          );
+        }
+        if (!segment.entity) return segment.text;
+        const description = describeSegment(segment.text, segment.entity, targets);
         if (description.kind === "plain") return segment.text;
-        const mention = segment.mention;
+        const mention = segment.entity;
         return (
           <Text
             key={`${mention.start}_${index}`}
