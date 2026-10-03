@@ -247,3 +247,14 @@ Gateway: `/api/v1/admin/*` is routed with `authentication: "optional"` because s
 5. Infra: if the service consumes events, add its queue in `infra/local/localstack/create-topics-and-queues.sh`.
 6. Gateway: add the route prefix with `authentication: "required"` unless the endpoint is public.
 7. Prove it: unit table tests, an integration test, `pnpm backend:check`, and the frontend mock for that domain switched off.
+
+## go-live: live (`modules/live`)
+
+Zudojs Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
+each command/query is `commands|queries/<name>/<name>.command|query.go` + `<name>.handler.go`; modules: sessions, stage, battles, gifts, points). `pnpm backend:dev:live` runs it on :8102.
+
+- Writes only the `live` schema. Money goes through go-money gRPC (`LIVE_MONEY_GRPC_ADDRESS`; without it a clearly logged in-memory fake is used outside production). Names and creator-program roles come from the auth account directory (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`, otherwise the granted `auth.accounts` columns).
+- Tokens are verified in Go with `platform/jwtauth` against the auth JWKS (`AUTH_JWKS_URL`); the gateway headers are not trusted.
+- LiveKit tokens (host, guest, viewer grants) via `livekit/protocol`; remove/mute use the LiveKit RoomService against `LIVEKIT_URL`.
+- Durable timers: DB deadlines plus a 1 s sweep (`LIVE_TIMER_POLL_INTERVAL`). Domain events (`gift.sent`, `battle.*`, `guest.*`, `goal.*`, `leaderboard.updated`, `stage.updated`, `live.*`) go through the outbox; Phoenix consumes them from `realtime-domain-events` and fans them out to `live:{liveId}` (`guest.invited` to `user:{id}`).
+- Migrations: `cd services/go/modules/live && go run ./cmd/generateMigration <name>`; ent codegen: `cd src/databases && go generate ./...`.
