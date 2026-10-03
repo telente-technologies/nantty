@@ -23,7 +23,13 @@ defmodule Realtime.Events.DomainEventRouterTest do
     {"battle.settled", "battle.settled"},
     {"battle.cancelled", "battle.cancelled"},
     {"battle.scoreUpdated", "battle.score.updated"},
-    {"battle.winnerCelebrated", "battle.winner.celebrated"}
+    {"battle.winnerCelebrated", "battle.winner.celebrated"},
+    {"liveComment.deleted", "live.comment.deleted"},
+    {"liveComment.pinned", "live.comment.pinned"},
+    {"liveComment.unpinned", "live.comment.unpinned"},
+    {"liveRoomSettings.updated", "live.room.settings"},
+    {"overlayScene.published", "overlay.scene.published"},
+    {"overlayScene.unpublished", "overlay.scene.unpublished"}
   ]
 
   for {domain_type, client_type} <- @live_rows do
@@ -113,5 +119,46 @@ defmodule Realtime.Events.DomainEventRouterTest do
 
     assert_receive {:realtime_event, "user:a-1",
                     %{"type" => "notification.created", "title" => "hi"}}
+  end
+
+  test "routes a live comment to the live topic with the comment fields the clients render" do
+    comment = %{"id" => "c-1", "liveId" => "l-1", "author" => %{"id" => "u-1"}, "text" => "hi", "kind" => "comment"}
+
+    assert {:ok, "live:l-1", payload} =
+             DomainEventRouter.route_domain_event_to_topic(%{
+               "type" => "liveComment.created",
+               "data" => %{"liveId" => "l-1", "comment" => comment, "mentionedUserIds" => []}
+             })
+
+    assert payload == Map.put(comment, "type", "live.comment")
+  end
+
+  test "sends mute and ban notices only to the affected viewer" do
+    for {domain, client} <- [
+          {"liveViewer.muted", "live.viewer.muted"},
+          {"liveViewer.unmuted", "live.viewer.unmuted"},
+          {"liveViewer.banned", "live.viewer.banned"},
+          {"liveViewer.unbanned", "live.viewer.unbanned"}
+        ] do
+      assert {:ok, "user:u-9", %{"type" => ^client, "liveId" => "l-1"}} =
+               DomainEventRouter.route_domain_event_to_topic(%{
+                 "type" => domain,
+                 "data" => %{"liveId" => "l-1", "userId" => "u-9", "actorId" => "u-2"}
+               })
+    end
+  end
+
+  test "tells only the host when a recording starts, is ready or fails" do
+    for {domain, client} <- [
+          {"liveRecording.started", "live.recording.started"},
+          {"liveRecording.completed", "live.recording.ready"},
+          {"liveRecording.failed", "live.recording.failed"}
+        ] do
+      assert {:ok, "user:host-1", %{"type" => ^client, "recordingId" => "r-1"}} =
+               DomainEventRouter.route_domain_event_to_topic(%{
+                 "type" => domain,
+                 "data" => %{"liveId" => "l-1", "hostId" => "host-1", "recordingId" => "r-1"}
+               })
+    end
   end
 end
