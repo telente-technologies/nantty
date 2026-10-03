@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useCameraPermissions } from "expo-camera";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
@@ -29,6 +30,7 @@ import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from 
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -40,6 +42,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [hasJoined, setHasJoined] = useState(isHost);
   const [reactionsExpanded, setReactionsExpanded] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const { openSendInChat, sendInChatElement } = useShareToChat();
   const [showProducts, setShowProducts] = useState(false);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
   const [showTipSheet, setShowTipSheet] = useState(false);
@@ -105,6 +108,8 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   };
 
   const viewerLiveOptionsSheet = (
+    <>
+    {sendInChatElement}
     <ContentOptionsSheet
       target={
         showViewerLiveOptions && session
@@ -112,8 +117,12 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           : null
       }
       onClose={() => setShowViewerLiveOptions(false)}
-      additionalActions={[{ label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => setShowShare(true) }]}
+      additionalActions={[
+        { label: "Send in chat", icon: <PaperPlaneTilt24Icon />, onPress: () => openSendInChat({ kind: "live", id: liveId }) },
+        { label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => requireAuthAfterClosingModal(() => undefined, () => setShowShare(true), "share with people") },
+      ]}
     />
+    </>
   );
 
   if (!session) return <View style={[styles.root, { paddingTop: insets.top }]} />;
@@ -184,12 +193,12 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       </View>
       <View style={[styles.commentBarArea, { paddingBottom: insets.bottom }]}>
         <LiveCommentBar
-          onSend={(text) => live.sendComment.mutate(text)}
+          onSend={(text) => requireAuthThen(() => live.sendComment.mutate(text), undefined, "comment on lives")}
           onToggleReactions={() => setReactionsExpanded((e) => !e)}
           onPressProducts={
             hostCanPinProductsToThisLive ? () => setShowPinProducts(true) : liveHasProducts ? () => setShowProducts(true) : undefined
           }
-          onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
+          onPressGift={viewerCanSendGifts ? () => requireAuthThen(() => setShowGiftPicker(true), undefined, "send gifts") : undefined}
           onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
         />
       </View>
