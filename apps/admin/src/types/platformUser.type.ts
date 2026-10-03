@@ -1,4 +1,4 @@
-export type PlatformUserStatus = "ACTIVE" | "WARNED" | "SUSPENDED" | "BANNED" | "DEACTIVATED";
+export type PlatformUserStatus = "ACTIVE" | "WARNED" | "SUSPENDED" | "BANNED" | "DEACTIVATED" | "DELETED";
 export type VerificationColor = "BLUE" | "GOLD" | "BLACK";
 export type VerificationTier = "ESSENTIAL" | "VERIFIED" | "PREMIUM" | "PRO" | "OFFICIAL";
 export type VerificationStatus = "UNVERIFIED" | "PENDING" | "VERIFIED" | "SUSPENDED" | "REVOKED";

@@ -16,7 +16,7 @@ export interface VersionedRecord<Content> {
   readonly content: Content;
 }
 
-export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules";
+export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing";
 
 export interface PlanPrice {
   readonly currency: string;
@@ -62,15 +62,6 @@ export interface RevenueRulesConfiguration {
   readonly coinUnitValues: readonly Money[];
   readonly withdrawalFee: { readonly mode: "PASS_THROUGH"; readonly note: string };
   readonly marketplaceCommission: { readonly defaultBasisPoints: number; readonly categoryOverrides: readonly CategoryCommissionOverride[] };
-  readonly loyalty: { readonly isEnabled: boolean; readonly pointsPerMajorUnitSpent: number; readonly pointExpiryDays: number };
-  readonly cashback: { readonly isEnabled: boolean; readonly rateBasisPoints: number; readonly capsPerOrder: readonly Money[]; readonly expiryDays: number };
-  readonly referral: {
-    readonly isEnabled: boolean;
-    readonly referrerRewards: readonly Money[];
-    readonly refereeRewards: readonly Money[];
-    readonly qualifyingOrderMinimums: readonly Money[];
-    readonly maximumReferralsPerMonth: number;
-  };
 }
 
 export interface CreatorEligibilityRules {
@@ -95,9 +86,63 @@ export interface UsernameRules {
   readonly releasedUsernameCooldownDays: number;
 }
 
+export interface CheckmarkSuggestionRules {
+  readonly blue: { readonly requiresIdVerified: boolean; readonly minimumAccountAgeDays: number; readonly minimumRealFollowers: number; readonly noViolationsInDays: number };
+  readonly gold: { readonly requiresBusinessVerification: boolean; readonly requiresActiveStoreOrBrandPage: boolean; readonly minimumCompletedOrders: number; readonly minimumSuccessRatePercent: number };
+}
+
+export interface CreatorAutoApproveRules {
+  readonly minimumAccountAgeDays: number;
+  readonly requiresVerifiedEmail: boolean;
+  readonly requiresVerifiedPhone: boolean;
+  readonly minimumRealFollowers: number;
+  readonly minimumOriginalPostsInLast60Days: number;
+  readonly noViolationsInDays: number;
+  readonly maximumFraudScore: number;
+}
+
+export interface CreatorManualReviewRules {
+  readonly minimumRealFollowers: number;
+  readonly allowsPastViolation: boolean;
+  readonly allowsBorderlineOrAiHeavyContent: boolean;
+  readonly maximumRiskScore: number;
+}
+
+export interface CreatorProgramThresholds {
+  readonly autoApprove: CreatorAutoApproveRules;
+  readonly manualReview: CreatorManualReviewRules;
+}
+
+export type TrialLength = "DAYS_7" | "MONTH_1";
+
+export interface TrialRules {
+  readonly trialLength: TrialLength;
+  readonly yearlyDiscountPercent: number;
+  readonly minimumAccountAgeDays: number;
+  readonly requiresVerifiedEmail: boolean;
+  readonly onePerPerson: boolean;
+  readonly onePerCard: boolean;
+  readonly onePerDevice: boolean;
+  readonly onePerPhone: boolean;
+  readonly maximumRiskScore: number;
+  readonly minimumCompletedOrders: number;
+}
+
+export interface CheckmarkPricingRules {
+  readonly bundleDiscountPercent: number;
+  readonly bundleMaximumBusinesses: number;
+  readonly goldOnlyMonthlyPrice: Money;
+  readonly blackMonthlyPrice: Money;
+  readonly blackGraceDays: number;
+}
+
 export interface ConfigurationDocumentContentByKey {
   readonly plans: PlansConfiguration;
   readonly revenue: RevenueRulesConfiguration;
   readonly "creator-eligibility": CreatorEligibilityRules;
   readonly "username-rules": UsernameRules;
+  readonly "checkmark-suggestions": CheckmarkSuggestionRules;
+  readonly "creator-thresholds": CreatorProgramThresholds;
+  readonly "trial-rules": TrialRules;
+  readonly "checkmark-pricing": CheckmarkPricingRules;
 }

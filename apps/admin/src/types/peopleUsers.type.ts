@@ -35,7 +35,7 @@ export interface UserWalletSummary {
   readonly pendingWithdrawalCount: number;
 }
 
-export type UsernameChangeKind = "USER_CHANGE" | "WITHHELD" | "RESTORED" | "ASSIGNED_TO_CLAIMANT" | "RECEIVED_FROM_RECLAIM";
+export type UsernameChangeKind = "USER_CHANGE" | "WITHHELD" | "RESTORED" | "ASSIGNED_TO_CLAIMANT" | "RECEIVED_FROM_RECLAIM" | "REASSIGNED_AWAY" | "REASSIGNED_TO";
 
 export interface UsernameHistoryEntry {
   readonly id: string;
@@ -48,7 +48,8 @@ export interface UsernameHistoryEntry {
 }
 
 export interface UserRestriction {
-  readonly kind: "SUSPENSION" | "BAN";
+  readonly kind: "SUSPENSION" | "BAN" | "FEATURE_RESTRICTION";
+  readonly features?: readonly string[];
   readonly reason: string;
   readonly startedAt: string;
   readonly endsAt: string | null;
@@ -100,4 +101,11 @@ export interface UsernameWithholdResult {
   readonly withheldUsername: WithheldUsername;
   readonly assignedUsername: string;
   readonly notification: UsernameNotificationPreview;
+}
+
+export interface HeldUsername {
+  readonly username: string;
+  readonly releasedAt: string;
+  readonly availableAt: string;
+  readonly isHeld: boolean;
 }
