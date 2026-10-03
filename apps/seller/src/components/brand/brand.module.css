@@ -98,7 +98,7 @@
 
 .checkMarkMet {
   background: var(--success);
-  color: #fff;
+  color: var(--color-on-brand);
 }
 
 .checkLabel {
