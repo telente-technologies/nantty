@@ -7,6 +7,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/feedback";
+import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LIVE_CATEGORY_LABELS, LIVE_CATEGORY_OPTIONS } from "@/constants/liveCategories.constant";
 import { useSession } from "@/components/providers/sessionProvider";
@@ -72,6 +73,8 @@ export default function LivesDashboardPage() {
           <p className={styles.subtitle}>Talk, play, perform or teach. Start a stream from here, in OBS, or from your phone.</p>
         </div>
       </header>
+
+      <PayoutSetupBanner />
 
       <form className={styles.createBar} onSubmit={handleCreate}>
         <div className={styles.createWrap}>

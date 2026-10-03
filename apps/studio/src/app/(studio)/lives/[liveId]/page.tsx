@@ -140,7 +140,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
           </Button>
         </div>
         <ol className={styles.steps}>
-          <li>Open OBS → Settings → Stream, then choose <strong>Custom…</strong> as the service.</li>
+          <li>Open OBS › Settings › Stream, then choose <strong>Custom…</strong> as the service.</li>
           <li>Paste the server URL below into <strong>Server</strong>.</li>
           <li>Paste the stream key into <strong>Stream Key</strong>.</li>
           <li>Add the overlay as a <strong>Browser</strong> source at 1920 × 1080 (use it for alerts, gift goals or your logo), then hit Start Streaming.</li>
