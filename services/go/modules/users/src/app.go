@@ -18,7 +18,7 @@ import (
 	"zudomart/modules/users/src/migrations"
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
 	businessprofiles "zudomart/modules/users/src/modules/businessProfiles"
-	creatorprofiles "zudomart/modules/users/src/modules/creatorProfiles"
+	creatorstatus "zudomart/modules/users/src/modules/creatorStatus"
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
 	"zudomart/modules/users/src/modules/usernames"
@@ -82,7 +82,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	usernames.Mount(mux, module.container)
 	actingprofiles.Mount(mux, module.container)
 	businessprofiles.Mount(mux, module.container)
-	creatorprofiles.Mount(mux, module.container)
+	creatorstatus.Mount(mux, module.container)
 	privacy.Mount(mux, module.container)
 }
 
