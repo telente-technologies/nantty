@@ -56,7 +56,11 @@ func (controller CommentsController) ListComments(writer http.ResponseWriter, re
 		if err != nil {
 			return err
 		}
-		views, next, err := (listlivecomments.Handler{Container: controller.Container}).Execute(request.Context(), listlivecomments.Query{Actor: actor, LiveId: liveId, Cursor: cursor, Limit: limit})
+		order := request.URL.Query().Get("order")
+		if order != "" && order != "oldest" && order != "newest" {
+			return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "order", Message: "must be oldest or newest"}})
+		}
+		views, next, err := (listlivecomments.Handler{Container: controller.Container}).Execute(request.Context(), listlivecomments.Query{Actor: actor, LiveId: liveId, Cursor: cursor, Limit: limit, OldestFirst: order != "newest"})
 		if err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(views, next))
 		}

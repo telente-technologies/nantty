@@ -52,6 +52,7 @@ type OverlaySceneEventData struct {
 
 type LiveRecordingEventData struct {
 	LiveId          string `json:"liveId"`
+	HostId          string `json:"hostId"`
 	RecordingId     string `json:"recordingId"`
 	DurationSeconds int64  `json:"durationSeconds,omitempty"`
 	SizeBytes       int64  `json:"sizeBytes,omitempty"`

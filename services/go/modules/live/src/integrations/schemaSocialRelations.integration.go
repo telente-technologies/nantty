@@ -21,6 +21,7 @@ type SchemaSocialRelations struct {
 	NotificationsSchema      string
 	TolerateUnreadableTables bool
 	Logger                   *slog.Logger
+	Subscribers              interfaces.SubscriberDirectory
 }
 
 func (relations SchemaSocialRelations) tolerate(err error) bool {
@@ -74,8 +75,11 @@ func (relations SchemaSocialRelations) IsFollowing(ctx context.Context, follower
 	return exists, err
 }
 
-func (relations SchemaSocialRelations) IsActiveSubscriber(context.Context, uuid.UUID, uuid.UUID) (bool, error) {
-	return false, nil
+func (relations SchemaSocialRelations) IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error) {
+	if relations.Subscribers == nil {
+		return false, nil
+	}
+	return relations.Subscribers.IsActiveSubscriber(ctx, subscriberId, creatorId)
 }
 
 func (relations SchemaSocialRelations) MentionPrivacyOf(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]interfaces.MentionPrivacy, error) {

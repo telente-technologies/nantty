@@ -6,8 +6,9 @@ import (
 )
 
 type Query struct {
-	Actor  types.Actor
-	LiveId uuid.UUID
-	Cursor string
-	Limit  int
+	Actor       types.Actor
+	LiveId      uuid.UUID
+	Cursor      string
+	Limit       int
+	OldestFirst bool
 }
