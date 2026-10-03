@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -25,9 +26,7 @@ export function CommentStickerBubble({ username, avatarUrl, text, isDeleted }: C
           {`@${username}`}
         </Text>
       </View>
-      <Text size={13} lineHeight={17} style={isDeleted ? styles.deleted : undefined}>
-        {isDeleted ? "Comment deleted" : truncateStickerText(text)}
-      </Text>
+      <MentionText text={isDeleted ? "Comment deleted" : truncateStickerText(text)} size={13} lineHeight={17} style={isDeleted ? styles.deleted : undefined} />
     </View>
   );
 }
