@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/profile"
 	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
 	creatorevents "zudomart/modules/users/src/modules/creatorProgram/events"
+	creatorservices "zudomart/modules/users/src/modules/creatorProgram/services"
 	usersservices "zudomart/modules/users/src/services"
 )
 
@@ -53,6 +54,17 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 		if err := tx.Profile.UpdateOneID(application.ProfileID).SetCreatorStatus(creatorStatus).Exec(ctx); err != nil {
+			return err
+		}
+		decided, err := tx.CreatorApplication.Get(ctx, application.ID)
+		if err != nil {
+			return err
+		}
+		owner, err := tx.Profile.Get(ctx, application.ProfileID)
+		if err != nil {
+			return err
+		}
+		if err := creatorservices.EnqueueCreatorNoticeInTransaction(ctx, tx, now, decided, owner, creatorservices.RequirementsOfApplication(application)); err != nil {
 			return err
 		}
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, creatorevents.CreatorApplicationDecidedType, application.AccountID.String(), now, creatorevents.DecidedData{
