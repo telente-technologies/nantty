@@ -1,9 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { OrderSummaryCard } from "@/components/cart/orderSummaryCard";
+import { CartGrandTotalCard } from "@/components/cart/cartGrandTotalCard";
+import { CartSellerGroupCard } from "@/components/cart/cartSellerGroupCard";
 import { PurchaseTermsText } from "@/components/cart/purchaseTermsText";
+import { formatAddressLocation } from "@/components/settings/addressRow";
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -11,13 +13,16 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useLoyaltySummaryQuery } from "@/components/wallet/walletQueries.hook";
-import { useMyCart } from "@/hooks/useCart.hook";
+import { cartQueryKey, useMyCart } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { ordersService } from "@/services/orders.service";
 import { paymentsService } from "@/services/payments.service";
+import { trackProductInteraction } from "@/services/productInteractions.service";
+import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { PaymentProvider } from "@/types/commerce.type";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const PROVIDERS: { id: PaymentProvider; name: string; note: string }[] = [
   { id: "paystack", name: "Paystack", note: "Card, bank transfer or USSD" },
@@ -25,14 +30,15 @@ const PROVIDERS: { id: PaymentProvider; name: string; note: string }[] = [
 ];
 
 export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
-  const cart = useMyCart();
+  const queryClient = useQueryClient();
   const addresses = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses });
-  const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
+  const { chosenAddressId, chooseDeliveryAddress } = useDeliveryAddressStore();
   const [provider, setProvider] = useState<PaymentProvider>("paystack");
   const [redeemLoyaltyPoints, setRedeemLoyaltyPoints] = useState(false);
   const loyalty = useLoyaltySummaryQuery();
   const checkoutKey = useRef(generateIdempotencyKey());
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
+  const cart = useMyCart(addressId);
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
@@ -40,14 +46,21 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, provider, `${checkoutKey.current}-pay`);
       return payment;
     },
-    onSuccess: (payment) => navigation.replace("Payment", { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl }),
+    onSuccess: (payment) => {
+      queryClient.invalidateQueries({ queryKey: cartQueryKey });
+      cart.data?.groups
+        .filter((group) => group.shipping.status === "calculated")
+        .flatMap((group) => group.items)
+        .forEach((item) => void trackProductInteraction("product.purchased", { productId: item.product.id, quantity: item.quantity }));
+      navigation.replace("Payment", { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl });
+    },
   });
 
   if (cart.isLoading || addresses.isLoading) {
     return (
       <Screen>
         <Header title="Checkout" paddingHorizontal={12} />
-        <ActivityIndicator style={styles.state} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -62,12 +75,12 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
             <SelectableRow
               key={address.id}
               selected={address.id === addressId}
-              onPress={() => setChosenAddressId(address.id)}
+              onPress={() => chooseDeliveryAddress(address.id)}
               accessibilityLabel={`${address.fullName}, ${address.line1}, ${address.city}`}
             >
               <Text size={14} weight={500} lineHeight={16.8}>{address.fullName}</Text>
               <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-                {address.line1}, {address.city}, {address.state}
+                {formatAddressLocation(address)}
               </Text>
               <Text size={13} lineHeight={16.9} color={colors.textMuted}>{address.phone}</Text>
             </SelectableRow>
@@ -90,7 +103,13 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           </SelectableRow>
         ) : null}
         {cart.data ? (
-          <OrderSummaryCard itemsTotal={cart.data.itemsTotal} shopDiscount={cart.data.shopDiscount} shipping={cart.data.shipping} total={cart.data.total} />
+          <View style={styles.section}>
+            <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
+            {cart.data.groups.map((group) => (
+              <CartSellerGroupCard key={group.storeId} group={group} showItems={false} />
+            ))}
+            <CartGrandTotalCard cart={cart.data} />
+          </View>
         ) : null}
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>
           Your payment is held safely in escrow and only released to the seller after you confirm delivery.
@@ -105,7 +124,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         ) : null}
         <Button
           title="Place order and pay"
-          disabled={!addressId || !cart.data || cart.data.items.length === 0}
+          disabled={!addressId || !cart.data || cart.data.payableGroupCount === 0}
           loading={placeOrderAndStartPayment.isPending}
           onPress={() => placeOrderAndStartPayment.mutate()}
         />
@@ -115,7 +134,6 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 64 },
   content: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 24, gap: 24 },
   section: { gap: 12 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
