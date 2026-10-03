@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdsWordmark } from "@/components/shell/adsWordmark";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { FeedCardIllustration, MarketplaceGridIllustration } from "@/components/landing/landingAdIllustrations";
 
 import styles from "./loginBrandPanel.module.css";
@@ -9,7 +9,7 @@ export function LoginBrandPanelWithAdComposition() {
   return (
     <section className={styles.panel} aria-labelledby="login-brand-heading">
       <Link href="/" className={styles.wordmarkLink} aria-label="Zudomart Ads home">
-        <AdsWordmark />
+        <ZudomartWordmark productLabel="Ads" tone="onDark" />
       </Link>
       <div className={styles.statement}>
         <h2 id="login-brand-heading" className={styles.heading}>

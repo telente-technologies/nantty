@@ -7,7 +7,7 @@
 }
 
 .title {
-  font-size: 24px;
+  font-size: var(--fs-24);
 }
 
 .lead {
@@ -23,7 +23,7 @@
 }
 
 .footnote {
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   color: var(--ink-faint);
 }
 
