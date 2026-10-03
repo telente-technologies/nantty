@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/container"
 	bankservices "zudomart/modules/payments/src/modules/banks/services"
 	"zudomart/modules/payments/src/modules/gateway/services"
@@ -17,6 +16,6 @@ func NewPaymentsApplication(container *container.Container) *Application {
 	return &Application{
 		Container: container,
 		Gateway:   services.NewPaymentGateway(container),
-		Banks:     &bankservices.BankDirectory{Provider: container.Providers[constants.ProviderPaystack], Now: container.Now},
+		Banks:     &bankservices.BankDirectory{Provider: container.Providers[container.Settings.DefaultProvider], Now: container.Now},
 	}
 }
