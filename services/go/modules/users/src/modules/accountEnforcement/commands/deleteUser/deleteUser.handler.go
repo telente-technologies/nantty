@@ -34,7 +34,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return Result{}, err
 		}
 		if pending {
-			return Result{}, usersErrors.Conflict("PENDING_WITHDRAWALS", "Settle or cancel pending withdrawals before deleting this account.")
+			return Result{}, usersErrors.Conflict("PENDING_WITHDRAWALS", "This account has pending payouts or a non-zero balance. Settle or cancel them before deleting the account.")
 		}
 	}
 	outcome, err := services.RemoveAccountDataAndAnonymize(ctx, handler.Container, target.Account.ID, target.Account.Username, derefEmail(target.Account.Email), "admin_delete", reason, command.Actor.Id)

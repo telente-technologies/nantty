@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/modules/users/src/generated/ent/profilecheckmark"
 	"zudomart/modules/users/src/generated/ent/profilesignal"
+	"zudomart/platform/identityports"
 )
 
 type VerificationSummary struct {
@@ -68,6 +69,13 @@ func BuildPlatformUserSummary(ctx context.Context, application *container.Contai
 	}
 	row := target.Profile
 	summary.DisplayName, summary.AvatarUrl, summary.Country, summary.IsCreator = row.DisplayName, row.AvatarURL, row.CountryCode, row.CreatorStatus == "approved"
+	if row.CountryCode != nil {
+		if resolver, err := identityports.Default.CurrencyResolver(); err == nil {
+			if currency, supported := resolver.CurrencyForCountry(*row.CountryCode); supported {
+				summary.Currency = &currency
+			}
+		}
+	}
 	if summary.DisplayName == "" {
 		summary.DisplayName = target.Account.Name
 	}

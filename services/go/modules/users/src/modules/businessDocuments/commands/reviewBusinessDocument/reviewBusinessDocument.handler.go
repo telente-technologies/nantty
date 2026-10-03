@@ -58,7 +58,20 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.S
 		}); err != nil {
 			return err
 		}
+		label := services.DocumentKindLabels[string(document.Kind)]
+		if !command.Approve {
+			if err := services.EnqueueSellerDocumentsNoticeInTransaction(ctx, tx, now, "sellerDocuments.rejected", owner, services.SellerDocumentsNotice{Documents: []string{label}, Issues: []string{reason}}); err != nil {
+				return err
+			}
+		}
 		if command.Approve {
+			if allApproved, err := services.AllDocumentsApproved(ctx, tx.Client(), owner); err != nil {
+				return err
+			} else if allApproved {
+				if err := services.EnqueueSellerDocumentsNoticeInTransaction(ctx, tx, now, "sellerDocuments.approved", owner, services.SellerDocumentsNotice{Documents: []string{"CAC certificate", "Government ID", "Proof of address"}}); err != nil {
+					return err
+				}
+			}
 			if err := services.EvaluateGoldFromApprovedDocuments(ctx, handler.Container, tx, owner); err != nil {
 				return err
 			}

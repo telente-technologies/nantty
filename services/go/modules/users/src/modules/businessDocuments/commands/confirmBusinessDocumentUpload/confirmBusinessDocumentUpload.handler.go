@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/businessdocument"
 	"zudomart/modules/users/src/integrations"
 	businessevents "zudomart/modules/users/src/modules/businessDocuments/events"
+	"zudomart/modules/users/src/modules/businessDocuments/services"
 )
 
 type Handler struct {
@@ -40,6 +41,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 		if err := intent.Update().SetIsUploaded(true).SetIsCurrent(true).SetStatus(businessdocument.StatusPending).Exec(ctx); err != nil {
+			return err
+		}
+		if err := services.EnqueueSellerDocumentsNoticeInTransaction(ctx, tx, handler.Container.Now(), "sellerDocuments.submitted", owner, services.SellerDocumentsNotice{Documents: []string{services.DocumentKindLabels[string(intent.Kind)]}, ReviewWithinDays: 2}); err != nil {
 			return err
 		}
 		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, businessevents.BusinessDocumentSubmittedType, owner.String(), handler.Container.Now(), businessevents.DocumentEventData{
