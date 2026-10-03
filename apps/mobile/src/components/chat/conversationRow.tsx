@@ -1,9 +1,10 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { StreakBadge } from "@/components/chatSafety/streakBadge";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Conversation } from "@/types";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
@@ -16,6 +17,8 @@ export interface ConversationRowProps {
 }
 
 export function ConversationRow({ conversation, onPress }: ConversationRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { lastMessage, lastMessageAt, unread } = conversation;
   const display = describeConversationForDisplay(conversation);
   return (
@@ -36,6 +39,8 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
               <VerificationBadge verification={conversation.peer.verification} legacyVerified={conversation.peer.verified} size={16} />
             )}
             {display.isBusiness ? <BusinessLabel /> : null}
+            <StreakBadge streak={conversation.streak} />
+            {conversation.mutedUntil ? <Text size={11} lineHeight={14} color={colors.textMuted} accessibilityLabel="Muted">🔕</Text> : null}
           </View>
           <Text size={13} weight={500} lineHeight={16.9} color={colors.textSubtle}>
             {formatTimeSincePosted(lastMessageAt)} ago
@@ -58,7 +63,7 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { height: 56, flexDirection: "row", alignItems: "center", gap: 8 },
   body: { flex: 1, gap: 4 },
   topLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
@@ -67,4 +72,4 @@ const styles = StyleSheet.create({
   bottomLine: { flexDirection: "row", alignItems: "center", gap: 4 },
   message: { flex: 1 },
   badge: { minWidth: 21, height: 21, paddingHorizontal: 4, borderRadius: 999, backgroundColor: colors.chip, alignItems: "center", justifyContent: "center" },
-});
+}));

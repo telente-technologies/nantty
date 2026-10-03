@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { UserSummary } from "@/types";
 
 export interface ConversationIntroProps {
@@ -12,6 +12,8 @@ export interface ConversationIntroProps {
 }
 
 export function ConversationIntro({ peer, isFriend, onPressViewProfile }: ConversationIntroProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const firstName = peer.name.split(" ")[0];
   return (
     <View style={styles.root}>
@@ -35,9 +37,9 @@ export function ConversationIntro({ peer, isFriend, onPressViewProfile }: Conver
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { alignItems: "center", paddingTop: 24, paddingBottom: 16 },
   identity: { alignItems: "center", gap: 12 },
   notFriends: { marginTop: 8 },
   viewProfile: { marginTop: 14, height: 23, paddingHorizontal: 4, borderRadius: 4, backgroundColor: colors.chip, justifyContent: "center" },
-});
+}));

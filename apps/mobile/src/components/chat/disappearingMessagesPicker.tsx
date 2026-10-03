@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 import { DISAPPEARING_MESSAGE_CHOICES } from "./conversationDisplay.util";
 import { SmallTab } from "./smallTab";
@@ -13,6 +13,7 @@ export interface DisappearingMessagesPickerProps {
 }
 
 export function DisappearingMessagesPicker({ selectedSeconds, disabled, onSelectSeconds }: DisappearingMessagesPickerProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.root}>
       <Text size={14} weight={600} lineHeight={16.8}>

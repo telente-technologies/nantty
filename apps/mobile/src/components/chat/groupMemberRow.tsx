@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { ConversationMember } from "@/types";
 
 import { PersonRow } from "./personRow";
@@ -19,6 +19,8 @@ export interface GroupMemberRowProps {
 const ROLE_LABELS: Record<ConversationMember["role"], string> = { owner: "Owner", admin: "Admin", member: "" };
 
 export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmin, onDemoteToMember, onRemoveFromGroup }: GroupMemberRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const canManageThisMember = canManageMembers && !isMe && member.role !== "owner";
   const [isShowingActions, setIsShowingActions] = useState(false);
   const roleLabel = isMe && member.role !== "member" ? `You · ${ROLE_LABELS[member.role]}` : isMe ? "You" : ROLE_LABELS[member.role];
@@ -54,6 +56,8 @@ export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmi
 }
 
 function MemberActionButton({ label, destructive = false, onPress }: { label: string; destructive?: boolean; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.actionButton}>
       <Text size={12} weight={500} lineHeight={16.8} color={destructive ? colors.error : colors.primary}>
@@ -63,8 +67,8 @@ function MemberActionButton({ label, destructive = false, onPress }: { label: st
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   role: { marginLeft: 8 },
   actions: { flexDirection: "row", gap: 8, paddingLeft: 48, paddingTop: 6 },
   actionButton: { height: 30, paddingHorizontal: 12, borderRadius: 6, borderWidth: 1, borderColor: colors.divider, justifyContent: "center" },
-});
+}));

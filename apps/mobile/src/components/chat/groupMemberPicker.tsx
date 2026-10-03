@@ -4,7 +4,7 @@ import { FlatList, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { messagesService } from "@/services/messages.service";
 import type { UserSummary } from "@/types";
@@ -19,6 +19,8 @@ export interface GroupMemberPickerProps {
 }
 
 export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excludedUserIds = [], isInsideScrollView = false }: GroupMemberPickerProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [searchQuery, setSearchQuery] = useState("");
   const people = useQuery({ queryKey: ["people-to-message", searchQuery], queryFn: () => messagesService.fetchPeopleToMessage(searchQuery) });
   const selectablePeople = (people.data ?? []).filter((person) => !excludedUserIds.includes(person.id));
@@ -73,7 +75,7 @@ export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excl
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, gap: 12 },
   rootInsideScrollView: { gap: 12 },
   searchBox: {
@@ -98,5 +100,5 @@ const styles = StyleSheet.create({
   gap: { height: 8 },
   plainList: { gap: 8 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: colors.textSubtle, alignItems: "center", justifyContent: "center" },
-  checkboxSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-});
+  checkboxSelected: { backgroundColor: colors.primarySolid, borderColor: colors.primary },
+}));

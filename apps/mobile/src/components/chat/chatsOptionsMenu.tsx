@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export interface ChatsOptionsMenuProps {
@@ -10,12 +10,15 @@ export interface ChatsOptionsMenuProps {
   readonly onClose: () => void;
   readonly onCreateGroup: () => void;
   readonly onCreateChannel: () => void;
+  readonly onOpenSettings: () => void;
 }
 
-export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, onCreateChannel }: ChatsOptionsMenuProps) {
+export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, onCreateChannel, onOpenSettings }: ChatsOptionsMenuProps) {
+  const styles = useStyles();
   const menuItems = [
     { label: "New group", onPress: onCreateGroup },
     { label: "New channel", onPress: onCreateChannel },
+    { label: "Chat settings", onPress: onOpenSettings },
   ];
   return (
     <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -42,7 +45,7 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   backdrop: { flex: 1 },
   menu: {
     position: "absolute",
@@ -50,7 +53,7 @@ const styles = StyleSheet.create({
     minWidth: 180,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.divider,
     shadowColor: colors.black,
@@ -60,4 +63,4 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   item: { height: 44, paddingHorizontal: 16, justifyContent: "center" },
-});
+}));

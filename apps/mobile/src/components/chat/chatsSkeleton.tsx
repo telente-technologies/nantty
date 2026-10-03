@@ -1,8 +1,9 @@
 import { StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export function ChatsSkeleton() {
+  const styles = useStyles();
   return (
     <View accessibilityLabel="Loading chats" accessibilityRole="progressbar" style={styles.root}>
       <View style={styles.storyRow}>
@@ -38,7 +39,7 @@ export function ChatsSkeleton() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   root: { flex: 1 },
   storyRow: { flexDirection: "row", paddingHorizontal: 16, gap: 12, overflow: "hidden" },
   storyItem: { width: 68, alignItems: "center", gap: 8 },
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.placeholder,
     borderWidth: 1.5,
-    borderColor: "#C4C4C4",
+    borderColor: scheme === "dark" ? colors.avatar : "#C4C4C4",
   },
   storyLabel: { width: 36, height: 8, backgroundColor: colors.placeholder },
   tabs: { flexDirection: "row", gap: 6, paddingHorizontal: 16, marginTop: 21 },
@@ -64,4 +65,4 @@ const styles = StyleSheet.create({
   rowBody: { flex: 1, gap: 11 },
   rowTop: { flexDirection: "row", justifyContent: "space-between" },
   bar: { backgroundColor: colors.placeholder },
-});
+}));

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Plus24Icon, PaperPlaneTilt24Icon, Smiley24Icon, Microphone24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 
 const CHAT_EMOJI = [
@@ -33,6 +33,8 @@ export function MessageComposerBar({
   onPressMicrophone,
   onTypingChange,
 }: MessageComposerBarProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
   const [showEmojiPanel, setShowEmojiPanel] = useState(false);
@@ -108,7 +110,7 @@ export function MessageComposerBar({
             }}
             onBlur={() => setFocused(false)}
             placeholder={placeholder}
-            placeholderTextColor={colors.placeholder}
+            placeholderTextColor={colors.inputPlaceholderText}
             selectionColor={colors.primary}
             cursorColor={colors.primary}
             returnKeyType="send"
@@ -144,14 +146,14 @@ export function MessageComposerBar({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: {
     height: 60,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
   emojiPanel: {
     borderTopWidth: 1,
     borderTopColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 8,
@@ -188,4 +190,4 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   emojiCell: { width: "10%", alignItems: "center", paddingVertical: 6 },
-});
+}));
