@@ -18,7 +18,9 @@ import (
 	"zudomart/modules/auth/internal/httpapi"
 	"zudomart/modules/auth/internal/migrations"
 	"zudomart/modules/auth/internal/signingkeys"
+	"zudomart/modules/auth/internal/socialidentity"
 	"zudomart/platform/events"
+	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
 	"zudomart/platform/servicemodule"
@@ -65,14 +67,25 @@ func StartAuthModuleWithSettings(ctx context.Context, settings config.AuthSettin
 		_ = database.Close()
 		return nil, fmt.Errorf("prepare signing keys: %w", err)
 	}
+	social, err := socialidentity.NewIdentityTokenVerifier(ctx,
+		socialidentity.ProviderConfiguration{ClientIds: settings.GoogleClientIds, JwksUrl: settings.GoogleJwksUrl},
+		socialidentity.ProviderConfiguration{ClientIds: settings.AppleClientIds, JwksUrl: settings.AppleJwksUrl})
+	if err != nil {
+		_ = database.Close()
+		return nil, err
+	}
+	tokenIssuer := signingkeys.NewAccessTokenIssuer(keys, settings.TokenIssuer, settings.TokenAudience, settings.AccessTokenTimeToLive, time.Now)
 	authApplication := application.NewAuthApplication(application.Dependencies{
 		Client:      client,
+		Social:      social,
 		Settings:    settings,
 		Passwords:   credentials.NewPasswordHasher(credentials.RecommendedArgon2idParameters),
-		TokenIssuer: signingkeys.NewAccessTokenIssuer(keys, settings.TokenIssuer, settings.TokenAudience, settings.AccessTokenTimeToLive, time.Now),
+		TokenIssuer: tokenIssuer,
 		Delivery:    application.DevelopmentLogDelivery{Logger: logger},
 		Logger:      logger,
 	})
+	identityports.Default.RegisterAccountDirectory(authApplication)
+	identityports.Default.RegisterStaffTokenService(application.StaffTokenService{Issuer: tokenIssuer, Keys: keys, TimeToLive: settings.StaffAccessTokenTimeToLive})
 	dependencies.Health.AddReadinessCheck("auth-postgres", postgres.ReadinessCheckForDatabase(database))
 	return &Module{
 		client:    client,

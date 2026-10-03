@@ -51,7 +51,7 @@ type authTestHarness struct {
 	settings  config.AuthSettings
 }
 
-func startAuthModuleAgainstFreshSchema(t *testing.T) *authTestHarness {
+func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config.AuthSettings)) *authTestHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("AUTH_TEST_DATABASE_URL")
 	if databaseUrl == "" {
@@ -73,6 +73,10 @@ func startAuthModuleAgainstFreshSchema(t *testing.T) *authTestHarness {
 		AccessTokenTimeToLive: 15 * time.Minute, RefreshTokenTimeToLive: 24 * time.Hour, SessionMaximumLifetime: 48 * time.Hour,
 		SigningKeyRotationInterval: 24 * time.Hour, SigningKeyEncryptionKey: bytes.Repeat([]byte{1}, 32), OneTimeCodePepper: bytes.Repeat([]byte{2}, 32),
 		OneTimeCodeTimeToLive: 5 * time.Minute, OneTimeCodeMaximumAttempts: 5, OneTimeCodeResendCooldown: time.Minute, VerifiedDestinationTokenTtl: 15 * time.Minute,
+		StaffAccessTokenTimeToLive: 10 * time.Minute,
+	}
+	for _, adjust := range adjustments {
+		adjust(&settings)
 	}
 	logs := &lockedBuffer{}
 	publisher := &events.RecordingPublisher{}
