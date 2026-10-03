@@ -67,6 +67,10 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		return types.LiveSessionView{}, err
 	}
 	now := service.Now()
+	var audience liveStartedAudience
+	if input.StartNow {
+		audience = service.resolveLiveStartedAudience(ctx, actor.UserId, input.Visibility)
+	}
 	var created *ent.LiveSession
 	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		running, err := tx.LiveSession.Query().Where(livesession.HostID(actor.UserId), livesession.StateIn(livesession.StateLive, livesession.StateConnecting)).Exist(ctx)
@@ -105,12 +109,13 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		if !input.StartNow {
 			return nil
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveStarted, identifier.String(), now, events.LiveStartedEventData{
-			LiveId: identifier.String(), HostId: actor.UserId.String(), Title: created.Title, Category: string(created.Category),
-		})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveStarted, identifier.String(), now, liveStartedEventData(created, now, audience))
 	})
 	if err != nil {
 		return types.LiveSessionView{}, err
+	}
+	if input.StartNow {
+		service.afterLiveWentLive(ctx, created)
 	}
 	return service.presentLiveSession(ctx, created)
 }

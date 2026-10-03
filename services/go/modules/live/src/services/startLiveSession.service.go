@@ -22,7 +22,15 @@ func (service *LiveService) lockLiveSession(ctx context.Context, tx *ent.Tx, liv
 
 func (service *LiveService) StartLiveSession(ctx context.Context, actor types.Actor, liveId uuid.UUID) (types.LiveSessionView, error) {
 	var started *ent.LiveSession
-	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	preview, err := service.Client.LiveSession.Get(ctx, liveId)
+	if ent.IsNotFound(err) {
+		return types.LiveSessionView{}, liveerrors.LiveNotFound
+	}
+	if err != nil {
+		return types.LiveSessionView{}, err
+	}
+	audience := service.resolveLiveStartedAudience(ctx, preview.HostID, string(preview.Visibility))
+	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
 		if err != nil {
 			return err
@@ -37,16 +45,18 @@ func (service *LiveService) StartLiveSession(ctx context.Context, actor types.Ac
 		if session.State == livesession.StateEnded {
 			return liveerrors.LiveNotActive
 		}
+		if err := service.ensureLiveAdTermsCurrent(session); err != nil {
+			return err
+		}
 		now := service.Now()
 		if started, err = session.Update().SetState(livesession.StateLive).SetStartedAt(now).Save(ctx); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveStarted, liveId.String(), now, events.LiveStartedEventData{
-			LiveId: liveId.String(), HostId: session.HostID.String(), Title: session.Title, Category: string(session.Category),
-		})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveStarted, liveId.String(), now, liveStartedEventData(started, now, audience))
 	})
 	if err != nil {
 		return types.LiveSessionView{}, err
 	}
+	service.afterLiveWentLive(ctx, started)
 	return service.presentLiveSession(ctx, started)
 }

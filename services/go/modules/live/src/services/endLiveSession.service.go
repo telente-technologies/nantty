@@ -20,12 +20,14 @@ const finalLeaderboardSize = 20
 
 func (service *LiveService) EndLiveSession(ctx context.Context, actor types.Actor, liveId uuid.UUID) error {
 	var room string
+	var ended *ent.LiveSession
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
 		if err != nil {
 			return err
 		}
 		room = session.LivekitRoom
+		ended = session
 		if session.HostID != actor.UserId {
 			return liveerrors.NotLiveHost
 		}
@@ -48,6 +50,7 @@ func (service *LiveService) EndLiveSession(ctx context.Context, actor types.Acto
 	if err != nil {
 		return err
 	}
+	service.afterLiveEnded(ctx, ended)
 	service.settleEndedBattlesQuietly(ctx, liveId)
 	service.bestEffortMedia(ctx, "remove host participant", service.Media.RemoveParticipant(ctx, room, actor.UserId.String()))
 	return nil
