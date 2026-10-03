@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/auth/internal/credentials"
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
-	"zudomart/modules/auth/internal/ent/refreshtoken"
-	"zudomart/modules/auth/internal/ent/session"
+	"zudomart/modules/auth/src/utils"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/refreshtoken"
+	"zudomart/modules/auth/src/generated/ent/session"
 )
 
 func (application *AuthApplication) RotateRefreshTokenAndDetectReuse(ctx context.Context, presentedRefreshToken string) (IssuedTokens, error) {

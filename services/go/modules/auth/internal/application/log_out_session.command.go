@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/internal/ent/session"
+	"zudomart/modules/auth/src/generated/ent/session"
 )
 
 func (application *AuthApplication) LogOutSessionOwnedByAccount(ctx context.Context, accountId, sessionId string) error {
