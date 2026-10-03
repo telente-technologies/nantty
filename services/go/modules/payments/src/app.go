@@ -6,12 +6,14 @@ import (
 	"time"
 
 	ledgerevents "zudomart/modules/ledger/src/events"
+	ledgerjobs "zudomart/modules/ledger/src/jobs"
 	"zudomart/modules/ledger/src/loaders"
 	"zudomart/modules/payments/src/configs"
 	"zudomart/modules/payments/src/container"
 	"zudomart/modules/payments/src/migrations"
 	bankroutes "zudomart/modules/payments/src/modules/banks/routes"
 	checkoutroutes "zudomart/modules/payments/src/modules/checkoutPayments/routes"
+	connectedaccountroutes "zudomart/modules/payments/src/modules/connectedAccounts/routes"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/services"
 	reconciliationroutes "zudomart/modules/payments/src/modules/reconciliation/routes"
@@ -34,6 +36,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		return nil, err
 	}
 	services.PublishSharedPaymentGateway(module.Application.Gateway)
+	ledgerjobs.RegisterProviderMirrorReconciler(module.Application.Gateway)
 	return module, nil
 }
 
@@ -50,17 +53,41 @@ func (module *Module) Name() string { return "payments" }
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	checkoutroutes.MountCheckoutPaymentsRoutes(mux, module.Application)
 	webhookroutes.MountWebhooksRoutes(mux, module.Application)
+	connectedaccountroutes.MountConnectedAccountsRoutes(mux, module.Application)
 	bankroutes.MountBanksRoutes(mux, module.Application)
 	reconciliationroutes.MountReconciliationRoutes(mux, module.Application)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	container := module.Application.Container
+	gateway := module.Application.Gateway
+	go runEveryIntervalUntilContextDone(ctx, 5*time.Minute, func(ctx context.Context) {
+		gateway.RetryPendingRefunds(ctx, 100)
+		_, _ = gateway.CancelPendingIntentsThatNeverOpenedACheckout(ctx, 30*time.Minute)
+	})
+	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
+		if _, err := gateway.PollOpenProviderDisputes(ctx); err != nil && ctx.Err() == nil {
+			container.Resources.Logger.WarnContext(ctx, "provider dispute polling failed", "error", err)
+		}
+	})
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     ledgerevents.OutboxRelayStore{Database: container.Resources.Database, Table: container.Outbox, Now: time.Now},
 		Publisher: container.Resources.Publisher,
 		Logger:    container.Resources.Logger,
 	})
+}
+
+func runEveryIntervalUntilContextDone(ctx context.Context, interval time.Duration, work func(context.Context)) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			work(ctx)
+		}
+	}
 }
 
 func (module *Module) Close(context.Context) error {
