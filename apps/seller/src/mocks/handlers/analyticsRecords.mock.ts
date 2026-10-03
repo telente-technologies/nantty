@@ -65,7 +65,7 @@ export function listOrdersPlacedBetweenDateKeys(fromKey: string, toKey: string):
 }
 
 export function calculatePlatformFeeMinorForOrder(order: OnlineOrder): number {
-  return Math.max(0, order.subtotal.amountMinor - order.sellerPayout.amountMinor);
+  return Math.max(0, order.total.amountMinor - order.sellerPayout.amountMinor);
 }
 
 export function calculateBasisPointsRatio(part: number, whole: number): number {
