@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { Badge, EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { Badge, EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { ordersService } from "@/services/orders.service";
 import { useQuery } from "@tanstack/react-query";
@@ -33,6 +33,21 @@ const statusFilters: readonly { readonly value: OrderStatus | null; readonly lab
   { value: "cancelled", label: "Cancelled" },
 ];
 
+function OrderListSkeleton() {
+  return (
+    <ul className={styles.list} role="status" aria-label="Loading orders">
+      {Array.from({ length: 3 }, (_, index) => (
+        <li key={index} className={styles.card} aria-hidden="true">
+          <Skeleton width="45%" height={14} />
+          <Skeleton width="30%" height={14} />
+          <Skeleton width="70%" height={12} />
+          <Skeleton width="25%" height={16} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function OrdersPage() {
   const [status, setStatus] = useState<OrderStatus | null>(null);
   const ordersQuery = useQuery({ queryKey: ["orders", status], queryFn: () => ordersService.fetchMyOrders(status), retry: false });
@@ -56,7 +71,7 @@ export default function OrdersPage() {
       </div>
 
       {ordersQuery.isLoading ? (
-        <Spinner label="Loading orders" />
+        <OrderListSkeleton />
       ) : ordersQuery.isError ? (
         <ErrorState description="We couldn't load your orders." action={<RetryButton onRetry={() => ordersQuery.refetch()} />} />
       ) : (ordersQuery.data ?? []).length === 0 ? (
