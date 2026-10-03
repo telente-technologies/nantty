@@ -12,7 +12,6 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { useLoyaltySummaryQuery } from "@/components/wallet/walletQueries.hook";
 import { cartQueryKey, useMyCart } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
@@ -20,7 +19,6 @@ import { ordersService } from "@/services/orders.service";
 import { paymentsService } from "@/services/payments.service";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
-import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { PaymentProvider } from "@/types/commerce.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
@@ -35,15 +33,13 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   const addresses = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses });
   const { chosenAddressId, chooseDeliveryAddress } = useDeliveryAddressStore();
   const [provider, setProvider] = useState<PaymentProvider>("paystack");
-  const [redeemLoyaltyPoints, setRedeemLoyaltyPoints] = useState(false);
-  const loyalty = useLoyaltySummaryQuery();
   const checkoutKey = useRef(generateIdempotencyKey());
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
   const cart = useMyCart(addressId);
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
-      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, redeemLoyaltyPoints);
+      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current);
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, provider, `${checkoutKey.current}-pay`);
       return payment;
     },
@@ -97,12 +93,6 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
             </SelectableRow>
           ))}
         </View>
-        {loyalty.data?.redeemableAtCheckout ? (
-          <SelectableRow selected={redeemLoyaltyPoints} onPress={() => setRedeemLoyaltyPoints((value) => !value)} accessibilityLabel="Use loyalty points">
-            <Text size={14} weight={500} lineHeight={16.8}>Use {loyalty.data.points.toLocaleString()} loyalty points</Text>
-            <Text size={13} lineHeight={16.9} color={colors.textMuted}>Save up to {formatMoneyForDisplay(loyalty.data.pointsValue)} on this order</Text>
-          </SelectableRow>
-        ) : null}
         {cart.data ? (
           <View style={styles.section}>
             <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
