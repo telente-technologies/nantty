@@ -45,6 +45,9 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		if verifiedEmail != email {
 			return authErrors.ErrDestinationNotProven
 		}
+		if err := services.AssertSignupIsNotBlockedInTransaction(ctx, tx, application.Settings.OneTimeCodePepper, email, command.Client.DeviceId); err != nil {
+			return err
+		}
 		if taken, err := tx.Account.Query().Where(account.Email(email)).Exist(ctx); err != nil || taken {
 			return services.FirstError(err, authErrors.ErrEmailAlreadyInUse)
 		}
