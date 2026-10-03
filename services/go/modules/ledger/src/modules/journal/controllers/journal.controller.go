@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/modules/journal/commands/reverseJournalEntry"
+	reversejournalentry "zudomart/modules/ledger/src/modules/journal/commands/reverseJournalEntry"
 	"zudomart/modules/ledger/src/modules/journal/dtos"
-	"zudomart/modules/ledger/src/modules/journal/queries/getAccountStatement"
-	"zudomart/modules/ledger/src/modules/journal/queries/getLedgerIntegrityReport"
+	getaccountstatement "zudomart/modules/ledger/src/modules/journal/queries/getAccountStatement"
+	getledgerintegrityreport "zudomart/modules/ledger/src/modules/journal/queries/getLedgerIntegrityReport"
 	"zudomart/modules/ledger/src/utils"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/staffauth"
