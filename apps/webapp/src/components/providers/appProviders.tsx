@@ -8,6 +8,7 @@ import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/cli
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AuthPromptModal } from "@/components/auth/authPromptModal";
+import { ConfirmDialogHost } from "@/components/ui/confirmDialog";
 import { ToastViewport } from "@/components/ui/toast";
 
 import { SessionProvider } from "./sessionProvider";
@@ -52,6 +53,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
           {children}
           <ConsentBannerHost />
           <ToastViewport />
+          <ConfirmDialogHost />
           <Suspense fallback={null}>
             <AuthPromptModal />
           </Suspense>
