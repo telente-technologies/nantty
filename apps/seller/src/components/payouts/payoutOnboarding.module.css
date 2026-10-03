@@ -1,0 +1,14 @@
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.bars { display: flex; gap: 6px; }
+.bar { flex: 1; height: 4px; border-radius: 2px; background: var(--divider-soft); }
+.barDone { background: var(--color-brand); }
+.why { background: var(--surface-card); border: 1px solid var(--divider-soft); border-radius: var(--radius-large); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.why strong { font-size: 13px; }
+.muted { color: var(--ink-muted); font-size: 13px; line-height: 1.5; margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.syncRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--divider-soft); }
+.resolved { display: flex; flex-direction: column; gap: 4px; }
+.resolvedName { font-size: 16px; font-weight: 650; }
+.reason { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; }
+.center { text-align: center; padding: 24px 12px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
