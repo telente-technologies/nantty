@@ -12,6 +12,7 @@ import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import type { Clip } from "@/types";
 
 import styles from "./page.module.css";
+import { IconLabel } from "@/components/ui/appIcon";
 
 function canPlayInBrowser(url: string | null): url is string {
   return !!url && !url.endsWith(".m3u8");
@@ -63,7 +64,7 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
             <span>{clip.author.name}</span>
           </Link>
           <p className={styles.clipCaption}>{clip.text}</p>
-          <p className={styles.clipSound}>♪ {clip.sound.title}</p>
+          <p className={styles.clipSound}><IconLabel name="musicNotes24" size={14}>{clip.sound.title}</IconLabel></p>
           {clip.products[0] ? (
             <Link href={`/product/${clip.products[0].id}`} className={styles.productChip}>
               Shop: {clip.products[0].name}

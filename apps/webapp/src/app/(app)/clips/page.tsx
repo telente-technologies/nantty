@@ -12,6 +12,7 @@ import { discoveryService } from "@/services/discovery.service";
 
 import { ClipPlayerCard } from "./clipPlayerCard";
 import styles from "./page.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 type ClipsTab = "forYou" | "following";
 
@@ -81,10 +82,10 @@ export default function ClipsPage() {
         />
         <div className={styles.stepButtons}>
           <button type="button" className={styles.stepButton} onClick={() => scrollByOneClip(-1)} aria-label="Previous clip">
-            ↑
+            <AppIcon name="arrowUp24" size={20} />
           </button>
           <button type="button" className={styles.stepButton} onClick={() => scrollByOneClip(1)} aria-label="Next clip">
-            ↓
+            <AppIcon name="arrowDown24" size={20} />
           </button>
         </div>
       </div>

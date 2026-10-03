@@ -23,6 +23,8 @@
 }
 
 .stepButton {
+  display: grid;
+  place-items: center;
   width: var(--control-md);
   height: var(--control-md);
   border: 1px solid var(--divider);
