@@ -24,9 +24,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.UserView
 	if err != nil {
 		return types.UserView{}, err
 	}
-	isCreator, err := services.HasActiveCreatorProfile(ctx, handler.Container, owner)
-	if err != nil {
-		return types.UserView{}, err
-	}
-	return types.BuildUserView(row, summary, isCreator, true), nil
+	return types.BuildUserView(row, summary, true), nil
 }
