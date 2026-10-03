@@ -131,7 +131,7 @@ func TestWebSubscriptionTrialIsWebOnlyAndDowngradesWhenPaymentRecoveryRunsOut(t 
 		t.Fatal(err)
 	}
 	var downgradeEvents int
-	_ = harness.Database.QueryRow(`SELECT count(*) FROM "`+schema+`".outbox_events WHERE event_type = 'billingSubscription.downgraded'`).Scan(&downgradeEvents)
+	_ = harness.Database.QueryRow(`SELECT count(*) FROM "` + schema + `".outbox_events WHERE event_type = 'billingSubscription.downgraded'`).Scan(&downgradeEvents)
 	if status != "canceled" || !downgraded || downgradeEvents != 1 {
 		t.Fatalf("status %s downgraded %v events %d", status, downgraded, downgradeEvents)
 	}
