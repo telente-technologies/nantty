@@ -5,6 +5,7 @@ import "zudomart/modules/auth/src/generated/ent"
 type ClientDetails struct {
 	UserAgent string
 	IpAddress string
+	DeviceId  string
 }
 
 type IssuedTokens struct {

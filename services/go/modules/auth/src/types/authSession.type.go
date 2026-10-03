@@ -8,27 +8,29 @@ import (
 )
 
 type CurrentUserResponse struct {
-	Id            string   `json:"id"`
-	Name          string   `json:"name"`
-	Username      string   `json:"username"`
-	AvatarUrl     *string  `json:"avatarUrl"`
-	BannerUrl     *string  `json:"bannerUrl"`
-	Bio           string   `json:"bio"`
-	Verified      bool     `json:"verified"`
-	IsCreator     bool     `json:"isCreator"`
-	IsSeller      bool     `json:"isSeller"`
-	StoreId       *string  `json:"storeId"`
-	Email         *string  `json:"email"`
-	Phone         *string  `json:"phone"`
-	Birthday      *string  `json:"birthday"`
-	Roles         []string `json:"roles"`
-	EmailVerified bool     `json:"emailVerified"`
-	HasPassword   bool     `json:"hasPassword"`
-	Followers     int      `json:"followers"`
-	Following     int      `json:"following"`
-	Posts         int      `json:"posts"`
-	JoinedAt      string   `json:"joinedAt"`
-	CreatedAt     string   `json:"createdAt"`
+	Id                 string   `json:"id"`
+	Name               string   `json:"name"`
+	Username           string   `json:"username"`
+	AvatarUrl          *string  `json:"avatarUrl"`
+	BannerUrl          *string  `json:"bannerUrl"`
+	Bio                string   `json:"bio"`
+	Verified           bool     `json:"verified"`
+	IsCreator          bool     `json:"isCreator"`
+	IsSeller           bool     `json:"isSeller"`
+	StoreId            *string  `json:"storeId"`
+	Email              *string  `json:"email"`
+	Phone              *string  `json:"phone"`
+	Birthday           *string  `json:"birthday"`
+	Roles              []string `json:"roles"`
+	EmailVerified      bool     `json:"emailVerified"`
+	HasPassword        bool     `json:"hasPassword"`
+	Followers          int      `json:"followers"`
+	Following          int      `json:"following"`
+	Posts              int      `json:"posts"`
+	JoinedAt           string   `json:"joinedAt"`
+	CreatedAt          string   `json:"createdAt"`
+	AccountStatus      string   `json:"accountStatus"`
+	MustChangePassword bool     `json:"mustChangePassword"`
 }
 
 type AuthSessionResponse struct {
@@ -51,6 +53,6 @@ func ConvertAccountToCurrentUserResponse(account *ent.Account) CurrentUserRespon
 	return CurrentUserResponse{
 		Id: account.ID.String(), Name: account.Name, Username: account.Username, Email: account.Email, Birthday: birthday, Roles: account.Roles,
 		IsSeller: slices.Contains(account.Roles, "seller"), EmailVerified: account.EmailVerifiedAt != nil, HasPassword: account.PasswordHash != nil,
-		JoinedAt: joinedAt, CreatedAt: joinedAt,
+		JoinedAt: joinedAt, CreatedAt: joinedAt, AccountStatus: string(account.Status), MustChangePassword: account.MustChangePassword,
 	}
 }
