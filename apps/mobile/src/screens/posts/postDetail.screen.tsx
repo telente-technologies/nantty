@@ -6,6 +6,7 @@ import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { CommentComposer } from "@/components/clips/commentComposer";
 import { CommentThreadContext, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
 import { ThreadedCommentList } from "@/components/clips/threadedCommentList";
+import { ReplyingToCommentLink } from "@/components/clips/videoReply/commentStickerOverlay";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { Header } from "@/components/ui/header";
@@ -54,6 +55,11 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             listHeader={
               post.data ? (
                 <View style={styles.postBlock}>
+                  {post.data.replyToComment ? (
+                    <View style={styles.replyLink}>
+                      <ReplyingToCommentLink clip={post.data} />
+                    </View>
+                  ) : null}
                   <PostCard
                     post={post.data}
                     onPressAuthor={() => openUserProfile(post.data!.author.id)}
@@ -98,6 +104,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   postBlock: { gap: 16 },
+  replyLink: { paddingHorizontal: 16 },
   commentsTitle: { paddingHorizontal: 16, marginBottom: 8 },
   list: { paddingBottom: 16 },
 });
