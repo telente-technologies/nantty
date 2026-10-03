@@ -64,3 +64,22 @@
   justify-content: flex-end;
   gap: 6px;
 }
+
+.muted {
+  color: var(--ink-faint);
+}
+
+.toolbarStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
