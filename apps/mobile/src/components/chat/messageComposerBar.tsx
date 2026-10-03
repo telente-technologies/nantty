@@ -1,10 +1,19 @@
 import { useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
 
 import { Plus24Icon, PaperPlaneTilt24Icon, Smiley24Icon, Microphone24Icon } from "@/components/icons";
+import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
+import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
+import { useLastKeyboardHeight } from "@/hooks/useLastKeyboardHeight.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
+import type { MentionEntity } from "@/types/mention.type";
+import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
 const CHAT_EMOJI = [
   "😀", "😂", "🥰", "😍", "🤩", "😎", "🤔", "😅",
@@ -15,7 +24,8 @@ const CHAT_EMOJI = [
 ] as const;
 
 export interface MessageComposerBarProps {
-  readonly onSend: (text: string) => void;
+  readonly onSend: (text: string, mentions?: readonly MentionEntity[]) => void;
+  readonly mentionConversation?: { readonly id: string; readonly surface: "group" | "direct" };
   readonly placeholder?: string;
   readonly plusOnRight?: boolean;
   readonly onPressPlus?: () => void;
@@ -26,6 +36,7 @@ export interface MessageComposerBarProps {
 
 export function MessageComposerBar({
   onSend,
+  mentionConversation,
   placeholder = "Send a message...",
   plusOnRight = false,
   onPressPlus,
@@ -38,14 +49,43 @@ export function MessageComposerBar({
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
   const [showEmojiPanel, setShowEmojiPanel] = useState(false);
+  const [emojiPanelReserve, setEmojiPanelReserve] = useState(0);
+  const lastKeyboardHeight = useLastKeyboardHeight();
+  const insets = useSafeAreaInsets();
+  useKeyboardHandler(
+    {
+      onEnd: (event) => {
+        "worklet";
+        if (event.height > 0) scheduleOnRN(setEmojiPanelReserve, 0);
+      },
+    },
+    [],
+  );
+  const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
   const inputRef = useRef<TextInput>(null);
+  const mentionComposer = useMentionComposer({
+    surface: mentionConversation?.surface ?? "group",
+    conversationId: mentionConversation?.id,
+    isEnabled: mentionConversation !== undefined,
+    text,
+    mentions,
+    inputRef,
+    signInReason: "send a message",
+    onChange: (nextText, nextMentions) => {
+      updateTypedText(nextText);
+      setMentions(nextMentions);
+    },
+  });
   const canSend = text.trim().length > 0 && !sending;
 
   const sendTypedMessage = () => {
     if (!canSend) return;
-    onSend(text.trim());
+    const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
+    onSend(trimmed.text, trimmed.mentions.length ? trimmed.mentions : undefined);
     setText("");
+    setMentions([]);
     setShowEmojiPanel(false);
+    if (!focused) setEmojiPanelReserve(0);
     onTypingChange?.(false);
   };
 
@@ -57,11 +97,12 @@ export function MessageComposerBar({
   const toggleEmojiPanel = () => {
     const next = !showEmojiPanel;
     setShowEmojiPanel(next);
+    if (next) setEmojiPanelReserve(lastKeyboardHeight);
     if (next) inputRef.current?.blur();
     else inputRef.current?.focus();
   };
 
-  const insertEmoji = (emoji: string) => updateTypedText(text + emoji);
+  const insertEmoji = (emoji: string) => mentionComposer.inputProps.onChangeText(text + emoji);
 
   const microphoneButton = onPressMicrophone ? (
     <Pressable accessibilityRole="button" accessibilityLabel="Record a voice note" hitSlop={10} onPress={onPressMicrophone}>
@@ -79,22 +120,10 @@ export function MessageComposerBar({
 
   return (
     <View>
-      {showEmojiPanel ? (
-        <View style={styles.emojiPanel} accessibilityLabel="Emoji picker">
-          {CHAT_EMOJI.map((emoji) => (
-            <Pressable
-              key={emoji}
-              accessibilityRole="button"
-              accessibilityLabel={`Insert ${emoji}`}
-              hitSlop={4}
-              onPress={() => insertEmoji(emoji)}
-              style={styles.emojiCell}
-            >
-              <Text size={26} lineHeight={32} letterSpacing={0}>
-                {emoji}
-              </Text>
-            </Pressable>
-          ))}
+      {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
+      {mentionComposer.mentionCount > 0 ? (
+        <View style={styles.mentionCount}>
+          <MentionCountLabel mentionCount={mentionComposer.mentionCount} />
         </View>
       ) : null}
       <View style={styles.bar}>
@@ -102,9 +131,9 @@ export function MessageComposerBar({
         <View style={styles.field}>
           <TextInput
             ref={inputRef}
-            value={text}
-            onChangeText={updateTypedText}
+            {...mentionComposer.inputProps}
             onFocus={() => {
+              mentionComposer.inputProps.onFocus();
               setFocused(true);
               setShowEmojiPanel(false);
             }}
@@ -142,6 +171,26 @@ export function MessageComposerBar({
         </View>
         {plusOnRight ? plusButton : null}
       </View>
+      <KeyboardSpacer reservedHeight={emojiPanelReserve} style={styles.keyboardArea}>
+        {showEmojiPanel ? (
+          <ScrollView style={[styles.emojiPanel, { bottom: insets.bottom }]} contentContainerStyle={styles.emojiGrid} accessibilityLabel="Emoji picker">
+            {CHAT_EMOJI.map((emoji) => (
+              <Pressable
+                key={emoji}
+                accessibilityRole="button"
+                accessibilityLabel={`Insert ${emoji}`}
+                hitSlop={4}
+                onPress={() => insertEmoji(emoji)}
+                style={styles.emojiCell}
+              >
+                <Text size={26} lineHeight={32} letterSpacing={0}>
+                  {emoji}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        ) : null}
+      </KeyboardSpacer>
     </View>
   );
 }
@@ -178,16 +227,10 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(13),
     color: colors.text,
   },
+  mentionCount: { paddingHorizontal: 16, paddingTop: 4, backgroundColor: colors.surface },
   actions: { flexDirection: "row", alignItems: "center", gap: 8 },
-  emojiPanel: {
-    borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    backgroundColor: colors.surface,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 8,
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
+  keyboardArea: { backgroundColor: colors.surface },
+  emojiPanel: { position: "absolute", top: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: colors.divider },
+  emojiGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 8, paddingTop: 8, paddingBottom: 4 },
   emojiCell: { width: "10%", alignItems: "center", paddingVertical: 6 },
 }));

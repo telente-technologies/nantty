@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -9,6 +10,7 @@ import type { Message } from "@/types";
 
 import { formatClockTime } from "@/utils/formatDate.util";
 import { MessageReactionsRow } from "./messageReactionsRow";
+import { isRichMessage, RichMessageContent } from "./richMessageContent";
 import { VoiceNoteBubble } from "./voiceNoteBubble";
 import { useImagePreview } from "@/components/ui/previewableImage";
 import { LinkPreviewCard } from "@/components/chatSafety/linkPreviewCard";
@@ -23,6 +25,8 @@ export interface ChatBubbleProps {
   readonly showReadReceipt?: boolean;
   readonly onLongPress?: () => void;
   readonly onToggleReaction?: (emoji: string, shouldReact: boolean) => void;
+  readonly onRetryDocument?: () => void;
+  readonly onDiscardDocument?: () => void;
 }
 
 export function SystemNoticeRow({ text }: { text: string }) {
@@ -45,19 +49,23 @@ export function ChatBubble({
   showReadReceipt = false,
   onLongPress,
   onToggleReaction,
+  onRetryDocument,
+  onDiscardDocument,
 }: ChatBubbleProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { openImagePreview, imagePreviewElement } = useImagePreview();
   if (message.kind === "system") return <SystemNoticeRow text={message.text} />;
   const isMediaExpired = !!message.media && !!message.mediaExpiresAt && message.mediaExpiresAt <= new Date().toISOString();
+  const isRich = isRichMessage(message);
+  const isDocumentExpired = message.kind === "document" && !!message.mediaExpiresAt && message.mediaExpiresAt <= new Date().toISOString();
   const isVoiceNote = message.kind === "voice" && !!message.media && !isMediaExpired;
   const isPhoto = message.kind === "image" && !!message.media?.url && !isMediaExpired;
   const isShared = message.kind === "shared" && !!message.sharedContent;
   const externalUrl = message.kind === "text" || !message.kind ? findFirstExternalUrl(message.text) : null;
   const internalReference = isShared ? message.sharedContent!.reference : message.kind === "text" || !message.kind ? findFirstInternalReference(message.text) : null;
   const hasBubble = !isShared || message.text.length > 0;
-  const isShort = !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
+  const isShort = !isRich && !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
   return (
     <View style={[styles.row, isMine ? styles.mine : styles.theirs]}>
@@ -75,16 +83,26 @@ export function ChatBubble({
           onLongPress={onLongPress}
           delayLongPress={350}
           accessibilityHint={onLongPress ? "Long press to react" : undefined}
-          accessibilityLabel={deliveryStatus === "pending" ? `${isVoiceNote ? "Voice note" : message.text}, sending` : undefined}
+          accessibilityLabel={deliveryStatus === "pending" && !isRich ? `${isVoiceNote ? "Voice note" : message.text}, sending` : undefined}
           style={[
             styles.bubble,
-            deliveryStatus === "pending" && styles.pendingBubble,
-            isMine ? styles.bubbleMine : styles.bubbleTheirs,
+            deliveryStatus === "pending" && !isRich && styles.pendingBubble,
+            isMine && !isRich ? styles.bubbleMine : styles.bubbleTheirs,
             isPhoto && styles.photoBubble,
+            isRich && styles.richBubble,
             isShort ? styles.pill : isMine ? styles.cornerMine : styles.cornerTheirs,
           ]}
         >
-          {isVoiceNote ? (
+          {isRich ? (
+            <RichMessageContent
+              message={message}
+              isMine={isMine}
+              deliveryStatus={deliveryStatus}
+              isMediaExpired={isDocumentExpired}
+              onRetryDocument={onRetryDocument}
+              onDiscardDocument={onDiscardDocument}
+            />
+          ) : isVoiceNote ? (
             <VoiceNoteBubble media={message.media!} isMine={isMine} deliveryStatus={deliveryStatus} />
           ) : isPhoto ? (
             <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo, tap to view full screen" />
@@ -93,9 +111,14 @@ export function ChatBubble({
               Media expired
             </Text>
           ) : (
-            <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.text}>
-              {message.text}
-            </Text>
+            <MentionText
+              text={message.text}
+              mentions={message.mentions}
+              size={13}
+              lineHeight={16.9}
+              color={isMine ? colors.white : colors.text}
+              mentionColor={isMine ? colors.white : undefined}
+            />
           )}
         </Pressable>
         ) : null}
@@ -135,6 +158,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   systemRow: { paddingHorizontal: 32, paddingVertical: 6 },
   bubble: { maxWidth: 260, padding: 12 },
   photoBubble: { padding: 4 },
+  richBubble: { maxWidth: 260, padding: 10, backgroundColor: colors.skeleton },
   photo: { width: 200, height: 260, borderRadius: 8 },
   pendingBubble: { opacity: 0.6 },
   bubbleMine: { backgroundColor: colors.primarySolid },
