@@ -14,10 +14,28 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AccountBan is the client for interacting with the AccountBan builders.
+	AccountBan *AccountBanClient
+	// AccountRemoval is the client for interacting with the AccountRemoval builders.
+	AccountRemoval *AccountRemovalClient
+	// AccountRestriction is the client for interacting with the AccountRestriction builders.
+	AccountRestriction *AccountRestrictionClient
+	// AccountSuspension is the client for interacting with the AccountSuspension builders.
+	AccountSuspension *AccountSuspensionClient
 	// ActingProfile is the client for interacting with the ActingProfile builders.
 	ActingProfile *ActingProfileClient
+	// AdminCreatedAccount is the client for interacting with the AdminCreatedAccount builders.
+	AdminCreatedAccount *AdminCreatedAccountClient
+	// BlackApplication is the client for interacting with the BlackApplication builders.
+	BlackApplication *BlackApplicationClient
 	// BusinessCategory is the client for interacting with the BusinessCategory builders.
 	BusinessCategory *BusinessCategoryClient
+	// BusinessDocument is the client for interacting with the BusinessDocument builders.
+	BusinessDocument *BusinessDocumentClient
+	// CheckmarkGrant is the client for interacting with the CheckmarkGrant builders.
+	CheckmarkGrant *CheckmarkGrantClient
+	// CreatorApplication is the client for interacting with the CreatorApplication builders.
+	CreatorApplication *CreatorApplicationClient
 	// DataExportRequest is the client for interacting with the DataExportRequest builders.
 	DataExportRequest *DataExportRequestClient
 	// DeletionRequest is the client for interacting with the DeletionRequest builders.
@@ -30,6 +48,14 @@ type Tx struct {
 	GeoCountry *GeoCountryClient
 	// GeoRegion is the client for interacting with the GeoRegion builders.
 	GeoRegion *GeoRegionClient
+	// LegalDocument is the client for interacting with the LegalDocument builders.
+	LegalDocument *LegalDocumentClient
+	// LegalNotice is the client for interacting with the LegalNotice builders.
+	LegalNotice *LegalNoticeClient
+	// LegalNoticeDraft is the client for interacting with the LegalNoticeDraft builders.
+	LegalNoticeDraft *LegalNoticeDraftClient
+	// LegalVersion is the client for interacting with the LegalVersion builders.
+	LegalVersion *LegalVersionClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// PolicyVersion is the client for interacting with the PolicyVersion builders.
@@ -38,12 +64,18 @@ type Tx struct {
 	PrivacySetting *PrivacySettingClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
+	// ProfileCheckmark is the client for interacting with the ProfileCheckmark builders.
+	ProfileCheckmark *ProfileCheckmarkClient
+	// ProfileSignal is the client for interacting with the ProfileSignal builders.
+	ProfileSignal *ProfileSignalClient
 	// ReservedUsernameRule is the client for interacting with the ReservedUsernameRule builders.
 	ReservedUsernameRule *ReservedUsernameRuleClient
 	// RetentionPolicy is the client for interacting with the RetentionPolicy builders.
 	RetentionPolicy *RetentionPolicyClient
 	// ShippingAddress is the client for interacting with the ShippingAddress builders.
 	ShippingAddress *ShippingAddressClient
+	// SuggestionDismissal is the client for interacting with the SuggestionDismissal builders.
+	SuggestionDismissal *SuggestionDismissalClient
 	// TermsAcceptance is the client for interacting with the TermsAcceptance builders.
 	TermsAcceptance *TermsAcceptanceClient
 	// UserConsent is the client for interacting with the UserConsent builders.
@@ -52,6 +84,8 @@ type Tx struct {
 	UsernameChange *UsernameChangeClient
 	// UsernameHold is the client for interacting with the UsernameHold builders.
 	UsernameHold *UsernameHoldClient
+	// VerificationApplication is the client for interacting with the VerificationApplication builders.
+	VerificationApplication *VerificationApplicationClient
 
 	// lazily loaded.
 	client     *Client
@@ -183,25 +217,42 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AccountBan = NewAccountBanClient(tx.config)
+	tx.AccountRemoval = NewAccountRemovalClient(tx.config)
+	tx.AccountRestriction = NewAccountRestrictionClient(tx.config)
+	tx.AccountSuspension = NewAccountSuspensionClient(tx.config)
 	tx.ActingProfile = NewActingProfileClient(tx.config)
+	tx.AdminCreatedAccount = NewAdminCreatedAccountClient(tx.config)
+	tx.BlackApplication = NewBlackApplicationClient(tx.config)
 	tx.BusinessCategory = NewBusinessCategoryClient(tx.config)
+	tx.BusinessDocument = NewBusinessDocumentClient(tx.config)
+	tx.CheckmarkGrant = NewCheckmarkGrantClient(tx.config)
+	tx.CreatorApplication = NewCreatorApplicationClient(tx.config)
 	tx.DataExportRequest = NewDataExportRequestClient(tx.config)
 	tx.DeletionRequest = NewDeletionRequestClient(tx.config)
 	tx.GeoAdminArea = NewGeoAdminAreaClient(tx.config)
 	tx.GeoCity = NewGeoCityClient(tx.config)
 	tx.GeoCountry = NewGeoCountryClient(tx.config)
 	tx.GeoRegion = NewGeoRegionClient(tx.config)
+	tx.LegalDocument = NewLegalDocumentClient(tx.config)
+	tx.LegalNotice = NewLegalNoticeClient(tx.config)
+	tx.LegalNoticeDraft = NewLegalNoticeDraftClient(tx.config)
+	tx.LegalVersion = NewLegalVersionClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PolicyVersion = NewPolicyVersionClient(tx.config)
 	tx.PrivacySetting = NewPrivacySettingClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
+	tx.ProfileCheckmark = NewProfileCheckmarkClient(tx.config)
+	tx.ProfileSignal = NewProfileSignalClient(tx.config)
 	tx.ReservedUsernameRule = NewReservedUsernameRuleClient(tx.config)
 	tx.RetentionPolicy = NewRetentionPolicyClient(tx.config)
 	tx.ShippingAddress = NewShippingAddressClient(tx.config)
+	tx.SuggestionDismissal = NewSuggestionDismissalClient(tx.config)
 	tx.TermsAcceptance = NewTermsAcceptanceClient(tx.config)
 	tx.UserConsent = NewUserConsentClient(tx.config)
 	tx.UsernameChange = NewUsernameChangeClient(tx.config)
 	tx.UsernameHold = NewUsernameHoldClient(tx.config)
+	tx.VerificationApplication = NewVerificationApplicationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -211,7 +262,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: ActingProfile.QueryXXX(), the query will be executed
+// applies a query, for example: AccountBan.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

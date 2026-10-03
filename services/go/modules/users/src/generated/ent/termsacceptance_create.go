@@ -47,6 +47,20 @@ func (_c *TermsAcceptanceCreate) SetTermsVersion(v string) *TermsAcceptanceCreat
 	return _c
 }
 
+// SetPolicyVersionID sets the "policy_version_id" field.
+func (_c *TermsAcceptanceCreate) SetPolicyVersionID(v uuid.UUID) *TermsAcceptanceCreate {
+	_c.mutation.SetPolicyVersionID(v)
+	return _c
+}
+
+// SetNillablePolicyVersionID sets the "policy_version_id" field if the given value is not nil.
+func (_c *TermsAcceptanceCreate) SetNillablePolicyVersionID(v *uuid.UUID) *TermsAcceptanceCreate {
+	if v != nil {
+		_c.SetPolicyVersionID(*v)
+	}
+	return _c
+}
+
 // SetAcceptedAt sets the "accepted_at" field.
 func (_c *TermsAcceptanceCreate) SetAcceptedAt(v time.Time) *TermsAcceptanceCreate {
 	_c.mutation.SetAcceptedAt(v)
@@ -229,6 +243,10 @@ func (_c *TermsAcceptanceCreate) createSpec() (*TermsAcceptance, *sqlgraph.Creat
 	if value, ok := _c.mutation.TermsVersion(); ok {
 		_spec.SetField(termsacceptance.FieldTermsVersion, field.TypeString, value)
 		_node.TermsVersion = value
+	}
+	if value, ok := _c.mutation.PolicyVersionID(); ok {
+		_spec.SetField(termsacceptance.FieldPolicyVersionID, field.TypeUUID, value)
+		_node.PolicyVersionID = &value
 	}
 	if value, ok := _c.mutation.AcceptedAt(); ok {
 		_spec.SetField(termsacceptance.FieldAcceptedAt, field.TypeTime, value)

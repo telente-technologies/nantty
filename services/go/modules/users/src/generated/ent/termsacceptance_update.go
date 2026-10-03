@@ -68,6 +68,9 @@ func (_u *TermsAcceptanceUpdate) sqlSave(ctx context.Context) (_node int, err er
 			}
 		}
 	}
+	if _u.mutation.PolicyVersionIDCleared() {
+		_spec.ClearField(termsacceptance.FieldPolicyVersionID, field.TypeUUID)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{termsacceptance.Label}
@@ -158,6 +161,9 @@ func (_u *TermsAcceptanceUpdateOne) sqlSave(ctx context.Context) (_node *TermsAc
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.PolicyVersionIDCleared() {
+		_spec.ClearField(termsacceptance.FieldPolicyVersionID, field.TypeUUID)
 	}
 	_node = &TermsAcceptance{config: _u.config}
 	_spec.Assign = _node.assignValues

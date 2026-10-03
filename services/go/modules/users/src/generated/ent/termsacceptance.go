@@ -24,6 +24,8 @@ type TermsAcceptance struct {
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// TermsVersion holds the value of the "terms_version" field.
 	TermsVersion string `json:"terms_version,omitempty"`
+	// PolicyVersionID holds the value of the "policy_version_id" field.
+	PolicyVersionID *uuid.UUID `json:"policy_version_id,omitempty"`
 	// AcceptedAt holds the value of the "accepted_at" field.
 	AcceptedAt time.Time `json:"accepted_at,omitempty"`
 	// IPAddress holds the value of the "ip_address" field.
@@ -38,6 +40,8 @@ func (*TermsAcceptance) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case termsacceptance.FieldPolicyVersionID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case termsacceptance.FieldTermsVersion, termsacceptance.FieldIPAddress, termsacceptance.FieldUserAgent:
 			values[i] = new(sql.NullString)
 		case termsacceptance.FieldCreatedAt, termsacceptance.FieldAcceptedAt:
@@ -82,6 +86,13 @@ func (_m *TermsAcceptance) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field terms_version", values[i])
 			} else if value.Valid {
 				_m.TermsVersion = value.String
+			}
+		case termsacceptance.FieldPolicyVersionID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field policy_version_id", values[i])
+			} else if value.Valid {
+				_m.PolicyVersionID = new(uuid.UUID)
+				*_m.PolicyVersionID = *value.S.(*uuid.UUID)
 			}
 		case termsacceptance.FieldAcceptedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -145,6 +156,11 @@ func (_m *TermsAcceptance) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("terms_version=")
 	builder.WriteString(_m.TermsVersion)
+	builder.WriteString(", ")
+	if v := _m.PolicyVersionID; v != nil {
+		builder.WriteString("policy_version_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("accepted_at=")
 	builder.WriteString(_m.AcceptedAt.Format(time.ANSIC))
