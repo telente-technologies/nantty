@@ -1,4 +1,5 @@
 import { ApiError } from "@/errors/api.error";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useLocaleStore } from "@/store/locale.store";
 import type { CoinActivityEntry, CoinConversionReceipt, CoinPackage, CurrencyCode, SendTipInput } from "@/types";
 
@@ -8,7 +9,7 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 const COIN_TRANSFER_FEE_PERCENT = 25;
 const MOCK_CHECKOUT_PAGE_URL = "https://zudomart.com/pay/mock";
 
-const COIN_CASH_VALUE_MINOR: Record<CurrencyCode, number> = { NGN: 1_000, GHS: 10, KES: 100, ZAR: 15, GBP: 1, EUR: 1, USD: 1 };
+export const COIN_CASH_VALUE_MINOR: Record<CurrencyCode, number> = { NGN: 1_000, GHS: 10, KES: 100, ZAR: 15, GBP: 1, EUR: 1, USD: 1 };
 const MINIMUM_PAYOUT_MINOR = 1_000;
 
 const mockCoinWallet = { balance: 250, earned: 180 };
@@ -60,7 +61,7 @@ export const coinsMocks: MockRoute[] = [
     const currency = useLocaleStore.getState().currency;
     const cashMinor = amount * (COIN_CASH_VALUE_MINOR[currency] ?? 1);
     if (cashMinor < MINIMUM_PAYOUT_MINOR) {
-      throw new ApiError(422, `Convert at least ${MINIMUM_PAYOUT_MINOR} minor units of ${currency}; ${amount} coins are worth ${cashMinor}.`);
+      throw new ApiError(422, `Convert at least ${formatMoneyForDisplay({ amountMinor: MINIMUM_PAYOUT_MINOR, currency })}; ${amount} coins are worth ${formatMoneyForDisplay({ amountMinor: cashMinor, currency })}.`);
     }
     if (mockCoinWallet.earned < amount) throw new ApiError(422, "You do not have enough earned coins to convert.");
     mockCoinWallet.earned -= amount;

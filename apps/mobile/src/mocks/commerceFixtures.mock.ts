@@ -1,4 +1,4 @@
-import type { Cart, CartItem, Product, ProductSummary } from "@/types";
+import type { Cart, CartItem, CartSellerGroup, GeoSelection, Money, Product, ProductSummary } from "@/types";
 import { multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
@@ -9,7 +9,8 @@ import {
   findCatalogSeedByProductId,
   productIdForKey,
 } from "./productCatalog.mock";
-import { storeSummaryById } from "./storeDirectory.mock";
+import { quoteSellerShipping } from "./shippingEngine.mock";
+import { findDirectoryStoreById, storeSummaryById } from "./storeDirectory.mock";
 
 export const SHIPPING_FEE_PER_STORE_IN_USD_CENTS = 250;
 
@@ -49,20 +50,46 @@ export const buildCartItemFromLine = (line: MockCartLine): CartItem => {
 
 export const storeIdForProduct = (productId: string) => findCatalogSeedByProductId(productId)?.storeId ?? "s_ada";
 
-export const summariseMockCart = (): Cart => {
-  const items = mockCartState.lines.map(buildCartItemFromLine);
+const sumMoney = (amounts: readonly Money[], currency: Money["currency"]): Money =>
+  ({ amountMinor: amounts.reduce((total, amount) => total + amount.amountMinor, 0), currency });
+
+export const buildSellerGroups = (destination: GeoSelection | null): CartSellerGroup[] => {
   const zero = convertUsdCentsToViewerCurrency(0);
-  const itemsTotal = items.reduce(
-    (sum, item) => ({ ...sum, amountMinor: sum.amountMinor + multiplyMoneyByQuantity(item.product.price, item.quantity).amountMinor }),
-    zero,
-  );
-  const distinctStoreCount = new Set(mockCartState.lines.map((line) => storeIdForProduct(line.productId))).size;
-  const shipping = convertUsdCentsToViewerCurrency(distinctStoreCount * SHIPPING_FEE_PER_STORE_IN_USD_CENTS);
+  const items = mockCartState.lines.map(buildCartItemFromLine);
+  const storeIds = [...new Set(mockCartState.lines.map((line) => storeIdForProduct(line.productId)))];
+  return storeIds.map((storeId) => {
+    const groupItems = items.filter((item) => storeIdForProduct(item.product.id) === storeId);
+    const subtotal = sumMoney(groupItems.map((item) => multiplyMoneyByQuantity(item.product.price, item.quantity)), zero.currency);
+    const shipping = quoteSellerShipping(storeId, subtotal, destination);
+    const shippingFee = shipping.status === "calculated" ? shipping.fee!.amountMinor : 0;
+    return {
+      storeId,
+      storeName: findDirectoryStoreById(storeId).name,
+      items: groupItems,
+      subtotal,
+      discounts: zero,
+      shipping,
+      total: { ...subtotal, amountMinor: subtotal.amountMinor + shippingFee },
+    };
+  });
+};
+
+export const isGroupPayable = (group: CartSellerGroup) => group.shipping.status === "calculated";
+
+export const summariseMockCart = (destination: GeoSelection | null = null, addressId: string | null = null): Cart => {
+  const zero = convertUsdCentsToViewerCurrency(0);
+  const groups = buildSellerGroups(destination);
+  const countedGroups = destination ? groups.filter(isGroupPayable) : groups;
+  const itemsTotal = sumMoney(countedGroups.map((group) => group.subtotal), zero.currency);
+  const shipping = sumMoney(countedGroups.map((group) => group.shipping.fee ?? zero), zero.currency);
   return {
-    items,
+    items: groups.flatMap((group) => group.items),
     itemsTotal,
     shopDiscount: zero,
     shipping,
     total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor + shipping.amountMinor },
+    groups,
+    addressId,
+    payableGroupCount: destination ? countedGroups.length : 0,
   };
 };

@@ -6,7 +6,7 @@ import { productSummaryByKey } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { hasSignedInViewerSubscribedToCreator } from "./creatorSubscriptions.mock";
 import { currentSoundForClip } from "./soundCatalog.mock";
-import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
+import { buildFriendsLikedFromFollowedUsers, isAuthorContentVisibleToSignedInViewer, isFollowingUser } from "./socialGraph.mock";
 import { userSummaryById } from "./userDirectory.mock";
 
 const CLIPS_PAGE_SIZE = 6;
@@ -78,12 +78,12 @@ const withCurrentSound = (clip: Clip): Clip => ({
 });
 
 export const findMockClipsByIds = (clipIds: readonly string[]): Clip[] =>
-  clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip).map(withCurrentSound);
+  clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip && isAuthorContentVisibleToSignedInViewer(clip.author.id)).map(withCurrentSound);
 
-const listClipsForFeedTab = (tab: string | null): readonly Clip[] =>
-  tab === "following"
-    ? [...allClips].filter((clip) => clip.isFollowingAuthor && !clip.sponsored).reverse()
-    : allClips;
+const listClipsForFeedTab = (tab: string | null): readonly Clip[] => {
+  const visibleClips = allClips.filter((clip) => isAuthorContentVisibleToSignedInViewer(clip.author.id));
+  return tab === "following" ? visibleClips.filter((clip) => clip.isFollowingAuthor && !clip.sponsored).reverse() : visibleClips;
+};
 
 const pageOfClips = (clips: readonly Clip[], cursor: string | null): Page<Clip> => {
   const start = Number(cursor ?? 0) || 0;

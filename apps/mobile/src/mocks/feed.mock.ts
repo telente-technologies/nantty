@@ -1,6 +1,7 @@
 import type { Page, Post } from "@/types";
 
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
+import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -17,7 +18,7 @@ const listSuggestedClipsWithPosterThumbnails = () =>
 const byNewestFirst = (a: Post, b: Post) => b.createdAt.localeCompare(a.createdAt);
 
 const pageOfPostsWithSponsoredSlot = (cursor: string | null, filter: (post: Post) => boolean = () => true): Page<Post> => {
-  const organic = [...mockPostsState.values()].filter(filter).sort(byNewestFirst);
+  const organic = [...mockPostsState.values()].filter((post) => isAuthorContentVisibleToSignedInViewer(post.author.id)).filter(filter).sort(byNewestFirst);
   const start = Number(cursor ?? 0);
   const pageIndex = Math.floor(start / POSTS_PER_PAGE);
   const pageOfOrganic = organic.slice(start, start + POSTS_PER_PAGE).map(withCurrentProductPrices);

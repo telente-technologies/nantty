@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { ActingProfile, BrandProducts, NewBrandInput } from "@/types/brand.type";
 
 import { BRAND_ID_BY_PRODUCT_KEY, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
+import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { buildCatalogProductSummary, catalogProductSeeds } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -27,7 +28,8 @@ function listProfilesOfSignedInUser(): ActingProfile[] {
   const brandProfiles: ActingProfile[] = mockBrandRecords
     .filter((brand) => brand.ownerUserKey === user.id)
     .map((brand) => ({ kind: "brand", id: brand.id, name: brand.name, handle: brand.handle, avatarUrl: brand.logoUrl, verification: brand.verification }));
-  return [person, ...storeProfile, ...brandProfiles];
+  const creatorProfile: ActingProfile = { kind: "creator", id: `creator_${user.id}`, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: user.verification ?? null };
+  return [person, creatorProfile, ...mockBusinessProfiles, ...storeProfile, ...brandProfiles];
 }
 
 export const brandsMocks: MockRoute[] = [

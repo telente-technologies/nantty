@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 
 import { describeVariant, mockCartState, summariseMockCart } from "./commerceFixtures.mock";
+import { findSignedInAddress } from "./settings.mock";
 import { findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -13,6 +14,11 @@ interface AddToCartBody {
 
 export const cartMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/cart", () => summariseMockCart()),
+  createMockRoute("POST", "/api/v1/cart/shipping-quote", ({ body }) => {
+    const address = findSignedInAddress((body as { addressId: string }).addressId);
+    if (!address) throw new ApiError(404, "Address not found");
+    return summariseMockCart({ countryId: address.countryId, stateId: address.stateId, lgaId: address.lgaId, cityId: address.cityId }, address.id);
+  }),
   createMockRoute("POST", "/api/v1/cart/items", ({ body }) => {
     const { productId, quantity, size, color } = body as AddToCartBody;
     if (!findCatalogSeedByProductId(productId)) throw new ApiError(404, "This product is no longer available");
