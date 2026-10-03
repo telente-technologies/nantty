@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Share, StyleSheet, View, type TextInput } from "react-native";
 
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { CommentComposer } from "@/components/clips/commentComposer";
 import { CommentThreadContext, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
 import { ThreadedCommentList } from "@/components/clips/threadedCommentList";
@@ -10,14 +11,16 @@ import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/posts.service";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useAuthStore } from "@/store/auth.store";
 import type { Post } from "@/types";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDetail">) {
+  const { colors } = useTheme();
   const openUserProfile = useOpenUserProfile();
   const { postId } = route.params;
   const queryClient = useQueryClient();
@@ -26,6 +29,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const commentThread = useCommentThreadController(postId);
+  const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const updateCachedPost = (change: (p: Post) => Post) => queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
 
@@ -41,7 +45,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   };
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <CommentThreadContext.Provider value={commentThread}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <Header title="Post" />
@@ -53,14 +57,16 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                   <PostCard
                     post={post.data}
                     onPressAuthor={() => openUserProfile(post.data!.author.id)}
-                    onToggleFollow={() => {
-                      updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
-                      postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
-                    }}
-                    onToggleLike={() => toggleLikeOnPost.mutate(post.data!.liked)}
+                    onToggleFollow={() =>
+                      requireAuthThen(() => {
+                        updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
+                        postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
+                      }, undefined, "follow creators")
+                    }
+                    onToggleLike={() => requireAuthThen(() => toggleLikeOnPost.mutate(post.data!.liked), undefined, "like posts")}
                     onPressComments={() => composerRef.current?.focus()}
                     onRepost={() => setReshareTarget(post.data ?? null)}
-                    onShare={sharePostLink}
+                    onShare={() => offerSendInChat({ kind: "post", id: postId }, sharePostLink)}
                     onPressOriginalPost={
                       post.data.resharedFrom ? () => navigation.navigate("PostDetail", { postId: post.data.resharedFrom!.id }) : undefined
                     }
@@ -82,6 +88,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             onSubmit={commentThread.submitCommentOrReplyText}
           />
           <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
+          {sendInChatElement}
         </KeyboardAvoidingView>
       </CommentThreadContext.Provider>
     </Screen>

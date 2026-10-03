@@ -5,7 +5,7 @@ import { Analytics24Icon } from "@/components/icons";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/posts.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -15,6 +15,8 @@ import { ErrorState } from "@/components/ui/errorState";
 const DAY_LABELS: readonly string[] = ["S", "M", "T", "W", "T", "F", "S"];
 
 export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const analytics = useQuery({
     queryKey: ["post-analytics", route.params.postId],
     queryFn: () => postsService.fetchPostAnalytics(route.params.postId),
@@ -95,18 +97,18 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   ownerNote: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 2 },
   ownerNoteText: { flex: 1 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  metric: { width: "48.5%", backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 4 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 14 },
+  metric: { width: "48.5%", backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 4 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 14 },
   chart: { flexDirection: "row", alignItems: "flex-end", gap: 8, height: 160 },
   chartColumn: { flex: 1, alignItems: "center", gap: 6 },
   chartTrack: { width: "100%", flex: 1, justifyContent: "flex-end", backgroundColor: colors.skeleton, borderRadius: 6, overflow: "hidden" },
-  chartBar: { width: "100%", backgroundColor: colors.primary, borderRadius: 6 },
+  chartBar: { width: "100%", backgroundColor: colors.primarySolid, borderRadius: 6 },
   postRow: { gap: 4 },
   postText: { flexShrink: 1 },
   footRow: { flexDirection: "row", gap: 16 },
-});
+}));
