@@ -79,3 +79,7 @@ type SocialRelations interface {
 	MentionPrivacyOf(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]MentionPrivacy, error)
 	ListLiveAlertRecipients(ctx context.Context, hostId uuid.UUID, limit int) (recipients []uuid.UUID, truncated bool, err error)
 }
+
+type SubscriberDirectory interface {
+	IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error)
+}
