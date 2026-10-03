@@ -16,7 +16,7 @@ type PaymentRefund struct {
 }
 
 func (PaymentRefund) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Checks(map[string]string{"payment_refunds_amount_positive": "amount_minor > 0"})}
+	return []schema.Annotation{entsql.Checks(map[string]string{"payment_refunds_amount_positive": "amount_minor > 0 AND fee_top_up_minor >= 0"})}
 }
 
 func (PaymentRefund) Mixin() []ent.Mixin {
@@ -31,6 +31,11 @@ func (PaymentRefund) Fields() []ent.Field {
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
 		field.String("reason").MaxLen(300).Default("").Immutable(),
+		field.String("connected_account_id").MaxLen(80).Default("").Immutable(),
+		field.String("beneficiary_user_id").MaxLen(80).Default("").Immutable(),
+		field.Bool("full_refund").Default(false).Immutable(),
+		field.Int64("fee_top_up_minor").Default(0).Immutable(),
+		field.String("fee_top_up_transfer_id").MaxLen(120).Default(""),
 		field.Enum("status").Values("pending", "processing", "succeeded", "failed").Default("pending"),
 		field.String("provider_refund_id").MaxLen(120).Default(""),
 		field.String("failure_reason").MaxLen(300).Default(""),
@@ -41,5 +46,5 @@ func (PaymentRefund) Fields() []ent.Field {
 }
 
 func (PaymentRefund) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("reference").Unique(), index.Fields("status", "created_at"), index.Fields("payment_intent_id")}
+	return []ent.Index{index.Fields("reference").Unique(), index.Fields("status", "created_at"), index.Fields("payment_intent_id"), index.Fields("provider_refund_id")}
 }

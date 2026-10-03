@@ -20,6 +20,7 @@ func (PaymentIntent) Annotations() []schema.Annotation {
 		"payment_intents_amount_positive":           "amount_minor > 0",
 		"payment_intents_refunds_within_amount":     "refunded_minor >= 0 AND refunded_minor <= amount_minor",
 		"payment_intents_provider_fee_not_negative": "provider_fee_minor >= 0",
+		"payment_intents_platform_fee_in_range":     "platform_fee_minor >= 0 AND platform_fee_minor < amount_minor",
 	})}
 }
 
@@ -36,6 +37,10 @@ func (PaymentIntent) Fields() []ent.Field {
 		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
+		field.String("connected_account_id").MaxLen(80).Default("").Immutable(),
+		field.String("beneficiary_user_id").MaxLen(80).Default("").Immutable(),
+		field.Int64("platform_fee_minor").Default(0).Immutable(),
+		field.String("provider_checkout_id").MaxLen(120).Default(""),
 		field.Enum("status").Values("pending", "succeeded", "failed", "cancelled").Default("pending"),
 		field.String("authorization_url").MaxLen(2000).Default(""),
 		field.String("provider_transaction_id").MaxLen(120).Default(""),
@@ -56,5 +61,7 @@ func (PaymentIntent) Indexes() []ent.Index {
 		index.Fields("purpose", "subject_id"),
 		index.Fields("owner_user_id", "created_at"),
 		index.Fields("status", "created_at"),
+		index.Fields("provider_checkout_id"),
+		index.Fields("provider_transaction_id"),
 	}
 }

@@ -15,7 +15,7 @@ type PayoutTransfer struct {
 }
 
 func (PayoutTransfer) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Checks(map[string]string{"payout_transfers_amount_positive": "amount_minor > 0"})}
+	return []schema.Annotation{entsql.Checks(map[string]string{"payout_transfers_amount_positive": "amount_minor > 0 AND fee_minor >= 0"})}
 }
 
 func (PayoutTransfer) Mixin() []ent.Mixin {
@@ -30,8 +30,14 @@ func (PayoutTransfer) Fields() []ent.Field {
 		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
-		field.String("bank_code").MaxLen(20).Immutable(),
-		field.String("destination_last4").MaxLen(4).Immutable(),
+		field.Enum("kind").Values("payout", "platform_transfer").Default("payout").Immutable(),
+		field.String("connected_account_id").MaxLen(80).Default("").Immutable(),
+		field.String("beneficiary_user_id").MaxLen(80).Default("").Immutable(),
+		field.String("transfer_group").MaxLen(120).Default("").Immutable(),
+		field.String("provider_destination_id").MaxLen(120).Default(""),
+		field.Int64("fee_minor").Default(0),
+		field.String("bank_code").MaxLen(20).Default("").Immutable(),
+		field.String("destination_last4").MaxLen(4).Default("").Immutable(),
 		field.Enum("status").Values("processing", "succeeded", "failed").Default("processing"),
 		field.String("provider_transfer_code").MaxLen(120).Default(""),
 		field.String("failure_reason").MaxLen(300).Default(""),
@@ -41,5 +47,5 @@ func (PayoutTransfer) Fields() []ent.Field {
 }
 
 func (PayoutTransfer) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("reference").Unique(), index.Fields("purpose", "subject_id"), index.Fields("status", "created_at")}
+	return []ent.Index{index.Fields("reference").Unique(), index.Fields("purpose", "subject_id"), index.Fields("status", "created_at"), index.Fields("provider_transfer_code"), index.Fields("connected_account_id", "status")}
 }
