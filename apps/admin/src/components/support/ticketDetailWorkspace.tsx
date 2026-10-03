@@ -17,6 +17,7 @@ import { TicketConversation } from "./ticketConversation";
 import styles from "./ticketDetailWorkspace.module.css";
 import { TicketReplyBox } from "./ticketReplyBox";
 import { TicketAssignmentCard, TicketFactsCard, TicketRequesterCard, TicketStatusCard } from "./ticketSidebarCards";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function TicketDetailWorkspace({ ticketId }: { readonly ticketId: string }) {
   const { showToast } = useToast();
@@ -33,7 +34,7 @@ export function TicketDetailWorkspace({ ticketId }: { readonly ticketId: string 
   return (
     <>
       <Link href="/support" className={styles.backLink}>
-        ← All tickets
+        <IconLabel name="arrowLeft24" size={16}>All tickets</IconLabel>
       </Link>
       <PageHeader
         area={`Support · ${ticket.id}`}
