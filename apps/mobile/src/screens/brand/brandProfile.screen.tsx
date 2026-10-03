@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Linking, ScrollView, StyleSheet, View } from "react-native";
@@ -73,7 +74,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
             <Text size={13} lineHeight={16.9}>{formatCountWithThousandsSuffix(details.followers)} followers · {details.categoryName}</Text>
           </View>
         </View>
-        <Text size={13} lineHeight={17.5} style={styles.padded}>{details.description}</Text>
+        <MentionText text={details.description} size={13} lineHeight={17.5} style={styles.padded} />
         {details.website ? (
           <Text size={13} lineHeight={17.5} color={colors.primary} style={styles.padded} accessibilityRole="link" onPress={() => Linking.openURL(details.website!)}>{details.website}</Text>
         ) : null}
