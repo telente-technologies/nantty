@@ -31,6 +31,15 @@ jobs:
       - run: go run golang.org/x/vuln/cmd/govulncheck@latest $(go list -m -f '{{.Dir}}/...')
         working-directory: services/go
 
+  images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deployable: [goIdentity, goLive, goMoney, goCommerce, goAds, goTrust]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: docker build -f services/go/deployables/${{ matrix.deployable }}/Dockerfile -t zudomart/ci-${{ matrix.deployable }} services
+
   gateway:
     runs-on: ubuntu-latest
     steps:
