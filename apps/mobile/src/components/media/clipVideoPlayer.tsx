@@ -4,7 +4,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { Media } from "@/types";
 
 import { buildCachedVideoSourceForMedia, hasPlayableHlsStream } from "./videoSource.util";
@@ -39,6 +39,7 @@ export function ClipVideoPlayer({
   onPlaybackFinished,
   playbackRate = 1,
 }: ClipVideoPlayerProps) {
+  const styles = useStyles();
   const [hasHlsStreamFailed, setHasHlsStreamFailed] = useState(false);
   const [hasRenderedFirstFrame, setHasRenderedFirstFrame] = useState(false);
   const isUsingHlsStream = hasPlayableHlsStream(media) && !hasHlsStreamFailed;
@@ -105,6 +106,7 @@ export function ClipVideoPlayer({
 }
 
 export function VideoPosterOnly({ media, contentFit = "cover", style }: Pick<ClipVideoPlayerProps, "media" | "contentFit" | "style">) {
+  const styles = useStyles();
   return (
     <View style={[styles.root, style]}>
       {media.posterUrl ? (
@@ -120,6 +122,6 @@ export function VideoPosterOnly({ media, contentFit = "cover", style }: Pick<Cli
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { overflow: "hidden", backgroundColor: colors.black },
-});
+}));

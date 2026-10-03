@@ -5,8 +5,9 @@ import { Platform, Pressable, StatusBar, StyleSheet, View, useWindowDimensions }
 import { ArrowsOutSimple24Icon, Cancel20Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
-import type { Media } from "@/types";
+import { makeThemedStyles, useTheme } from "@/theme";
+import { SaveToggleButton } from "@/components/saves/saveToggleButton";
+import type { Media, SaveTarget } from "@/types";
 
 import { ClipVideoPlayer } from "./clipVideoPlayer";
 import { isLandscapeMedia } from "./videoOrientation.util";
@@ -15,11 +16,15 @@ export interface LandscapeVideoFullScreenModalProps {
   readonly media: Media | null;
   readonly isMuted: boolean;
   readonly onClose: () => void;
+  readonly saveTarget?: SaveTarget;
+  readonly savedAccordingToServer?: boolean;
 }
 
 const canLockScreenOrientation = Platform.OS === "ios" || Platform.OS === "android";
 
-export function LandscapeVideoFullScreenModal({ media, isMuted, onClose }: LandscapeVideoFullScreenModalProps) {
+export function LandscapeVideoFullScreenModal({ media, isMuted, onClose, saveTarget, savedAccordingToServer = false }: LandscapeVideoFullScreenModalProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isOpen = media !== null;
   const { width, height } = useWindowDimensions();
   const [isRotated, setIsRotated] = useState(false);
@@ -67,6 +72,11 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose }: Lands
         <Pressable accessibilityRole="button" accessibilityLabel="Exit full screen" hitSlop={12} onPress={onClose} style={styles.close}>
           <Cancel20Icon color={colors.white} />
         </Pressable>
+        {saveTarget ? (
+          <View style={styles.save}>
+            <SaveToggleButton target={saveTarget} savedAccordingToServer={savedAccordingToServer} foregroundColor={colors.white} />
+          </View>
+        ) : null}
         {showRotateButton ? (
           <Pressable
             accessibilityRole="button"
@@ -86,7 +96,7 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose }: Lands
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.black, alignItems: "center", justifyContent: "center" },
   stage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
   rotatedStage: { transform: [{ rotate: "90deg" }] },
@@ -94,6 +104,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 24,
     left: 24,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.overlay,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  save: {
+    position: "absolute",
+    top: 24,
+    right: 24,
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -113,4 +134,4 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: colors.overlay,
   },
-});
+}));

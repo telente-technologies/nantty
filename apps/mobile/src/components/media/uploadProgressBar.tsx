@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { retryFailedUpload } from "@/services/mediaUploadQueue.service";
 import { useUploadJobProgress } from "@/store/uploadQueue.store";
 import type { ID } from "@/types";
@@ -16,6 +16,8 @@ const describeUploadJobStatus = (status: string, percent: number) => {
 };
 
 export function UploadProgressBar({ jobId, showLabel = true }: { jobId: ID | null; showLabel?: boolean }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { job, uploadedFraction } = useUploadJobProgress(jobId);
   if (!job) return null;
   const percent = Math.round(uploadedFraction * 100);
@@ -40,8 +42,8 @@ export function UploadProgressBar({ jobId, showLabel = true }: { jobId: ID | nul
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 4 },
   track: { height: 4, borderRadius: 2, backgroundColor: colors.skeleton, overflow: "hidden" },
   fill: { height: 4, borderRadius: 2 },
-});
+}));

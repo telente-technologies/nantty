@@ -2,9 +2,11 @@ import { Pressable, StyleSheet } from "react-native";
 
 import { ArrowsOutSimple24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function ViewFullScreenButton({ onPress }: { onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel="View full screen" onPress={onPress} style={styles.button}>
       <ArrowsOutSimple24Icon size={16} color={colors.white} />
@@ -15,7 +17,7 @@ export function ViewFullScreenButton({ onPress }: { onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   button: {
     height: 34,
     paddingHorizontal: 14,
@@ -27,4 +29,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-});
+}));
