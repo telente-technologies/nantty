@@ -1,4 +1,5 @@
 import { buildInitialPlansConfiguration } from "@/mocks/seed/configurationPlans.mock";
+import { buildInitialCheckmarkPricing, buildInitialCheckmarkSuggestionRules, buildInitialCreatorThresholds, buildInitialTrialRules } from "@/mocks/seed/configurationTrustRules.mock";
 import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, RevenueRulesConfiguration, UsernameRules } from "@/types/platformConfiguration.type";
 
 export function buildInitialRevenueRules(): RevenueRulesConfiguration {
@@ -24,33 +25,6 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
         { categorySlug: "food-groceries", categoryName: "Food & groceries", basisPoints: 500 },
       ],
     },
-    loyalty: { isEnabled: true, pointsPerMajorUnitSpent: 1, pointExpiryDays: 365 },
-    cashback: {
-      isEnabled: true,
-      rateBasisPoints: 200,
-      capsPerOrder: [
-        { amountMinor: 200_000, currency: "NGN" },
-        { amountMinor: 2_000, currency: "GHS" },
-        { amountMinor: 20_000, currency: "KES" },
-      ],
-      expiryDays: 90,
-    },
-    referral: {
-      isEnabled: true,
-      referrerRewards: [
-        { amountMinor: 100_000, currency: "NGN" },
-        { amountMinor: 1_000, currency: "GHS" },
-      ],
-      refereeRewards: [
-        { amountMinor: 50_000, currency: "NGN" },
-        { amountMinor: 500, currency: "GHS" },
-      ],
-      qualifyingOrderMinimums: [
-        { amountMinor: 500_000, currency: "NGN" },
-        { amountMinor: 5_000, currency: "GHS" },
-      ],
-      maximumReferralsPerMonth: 20,
-    },
   };
 }
 
@@ -68,5 +42,9 @@ export function buildInitialConfigurationDocuments(): { id: keyof ConfigurationD
     { id: "revenue", content: buildInitialRevenueRules(), changeReason: "Launch revenue model approved by finance." },
     { id: "creator-eligibility", content: buildInitialCreatorEligibilityRules(), changeReason: "Creator Program launch criteria." },
     { id: "username-rules", content: buildInitialUsernameRules(), changeReason: "Username policy v1." },
+    { id: "checkmark-suggestions", content: buildInitialCheckmarkSuggestionRules(), changeReason: "Proposed checkmark suggestion defaults." },
+    { id: "creator-thresholds", content: buildInitialCreatorThresholds(), changeReason: "Proposed Creator Program auto-approve and review thresholds." },
+    { id: "trial-rules", content: buildInitialTrialRules(), changeReason: "Launch trial rules." },
+    { id: "checkmark-pricing", content: buildInitialCheckmarkPricing(), changeReason: "Owner pricing: bundle 15%, Gold-only NGN 3,000, Black NGN 50,000." },
   ];
 }
