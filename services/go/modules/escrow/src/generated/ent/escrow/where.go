@@ -137,6 +137,11 @@ func SellerAmountMinor(v int64) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldSellerAmountMinor, v))
 }
 
+// ProcessingFeeMinor applies equality check predicate on the "processing_fee_minor" field. It's identical to ProcessingFeeMinorEQ.
+func ProcessingFeeMinor(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldProcessingFeeMinor, v))
+}
+
 // RefundedMinor applies equality check predicate on the "refunded_minor" field. It's identical to RefundedMinorEQ.
 func RefundedMinor(v int64) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldRefundedMinor, v))
@@ -1125,6 +1130,46 @@ func SellerAmountMinorLT(v int64) predicate.Escrow {
 // SellerAmountMinorLTE applies the LTE predicate on the "seller_amount_minor" field.
 func SellerAmountMinorLTE(v int64) predicate.Escrow {
 	return predicate.Escrow(sql.FieldLTE(FieldSellerAmountMinor, v))
+}
+
+// ProcessingFeeMinorEQ applies the EQ predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldProcessingFeeMinor, v))
+}
+
+// ProcessingFeeMinorNEQ applies the NEQ predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorNEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldProcessingFeeMinor, v))
+}
+
+// ProcessingFeeMinorIn applies the In predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldProcessingFeeMinor, vs...))
+}
+
+// ProcessingFeeMinorNotIn applies the NotIn predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorNotIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldProcessingFeeMinor, vs...))
+}
+
+// ProcessingFeeMinorGT applies the GT predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorGT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldProcessingFeeMinor, v))
+}
+
+// ProcessingFeeMinorGTE applies the GTE predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorGTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldProcessingFeeMinor, v))
+}
+
+// ProcessingFeeMinorLT applies the LT predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorLT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldProcessingFeeMinor, v))
+}
+
+// ProcessingFeeMinorLTE applies the LTE predicate on the "processing_fee_minor" field.
+func ProcessingFeeMinorLTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldProcessingFeeMinor, v))
 }
 
 // RefundedMinorEQ applies the EQ predicate on the "refunded_minor" field.

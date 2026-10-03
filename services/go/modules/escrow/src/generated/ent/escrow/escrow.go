@@ -50,6 +50,8 @@ const (
 	FieldCommissionMinor = "commission_minor"
 	// FieldSellerAmountMinor holds the string denoting the seller_amount_minor field in the database.
 	FieldSellerAmountMinor = "seller_amount_minor"
+	// FieldProcessingFeeMinor holds the string denoting the processing_fee_minor field in the database.
+	FieldProcessingFeeMinor = "processing_fee_minor"
 	// FieldRefundedMinor holds the string denoting the refunded_minor field in the database.
 	FieldRefundedMinor = "refunded_minor"
 	// FieldReleasedToSellerMinor holds the string denoting the released_to_seller_minor field in the database.
@@ -117,6 +119,7 @@ var Columns = []string{
 	FieldCommissionBps,
 	FieldCommissionMinor,
 	FieldSellerAmountMinor,
+	FieldProcessingFeeMinor,
 	FieldRefundedMinor,
 	FieldReleasedToSellerMinor,
 	FieldStatus,
@@ -171,6 +174,8 @@ var (
 	ProductSummaryValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultProcessingFeeMinor holds the default value on creation for the "processing_fee_minor" field.
+	DefaultProcessingFeeMinor int64
 	// DefaultRefundedMinor holds the default value on creation for the "refunded_minor" field.
 	DefaultRefundedMinor int64
 	// DefaultReleasedToSellerMinor holds the default value on creation for the "released_to_seller_minor" field.
@@ -347,6 +352,11 @@ func ByCommissionMinor(opts ...sql.OrderTermOption) OrderOption {
 // BySellerAmountMinor orders the results by the seller_amount_minor field.
 func BySellerAmountMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSellerAmountMinor, opts...).ToFunc()
+}
+
+// ByProcessingFeeMinor orders the results by the processing_fee_minor field.
+func ByProcessingFeeMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProcessingFeeMinor, opts...).ToFunc()
 }
 
 // ByRefundedMinor orders the results by the refunded_minor field.
