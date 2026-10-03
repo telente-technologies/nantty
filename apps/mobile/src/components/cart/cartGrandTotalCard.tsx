@@ -5,12 +5,15 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Cart, Money } from "@/types";
 
-function GrandTotalLine({ label, amount, strong = false }: { label: string; amount: Money; strong?: boolean }) {
+function GrandTotalLine({ label, amount, strong = false, negative = false }: { label: string; amount: Money; strong?: boolean; negative?: boolean }) {
   const styles = useStyles();
   return (
     <View style={styles.line}>
       <Text size={13} weight={strong ? 600 : 400} lineHeight={16.9}>{label}</Text>
-      <MoneyAmount money={amount} symbolSize={11} symbolWeight={500} amountSize={strong ? 15 : 13} amountWeight={strong ? 600 : 500} showDecimals={false} />
+      <View style={styles.amount}>
+        {negative ? <Text size={13} weight={500} lineHeight={16.9}>−</Text> : null}
+        <MoneyAmount money={amount} symbolSize={11} symbolWeight={500} amountSize={strong ? 15 : 13} amountWeight={strong ? 600 : 500} showDecimals={false} />
+      </View>
     </View>
   );
 }
@@ -25,6 +28,7 @@ export function CartGrandTotalCard({ cart }: { cart: Cart }) {
       <View style={styles.card}>
         <GrandTotalLine label="Items" amount={cart.itemsTotal} />
         <GrandTotalLine label="Shipping" amount={cart.shipping} />
+        {cart.storeCredit.amountMinor > 0 ? <GrandTotalLine label="Store credit" amount={cart.storeCredit} negative /> : null}
         <GrandTotalLine label="Total" amount={cart.total} strong />
         {excludedCount > 0 ? (
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
@@ -39,5 +43,6 @@ export function CartGrandTotalCard({ cart }: { cart: Cart }) {
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   section: { gap: 12 },
   card: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.divider, gap: 8 },
+  amount: { flexDirection: "row", alignItems: "baseline" },
   line: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 }));
