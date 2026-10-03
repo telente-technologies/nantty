@@ -2,63 +2,63 @@ package paymentstesting
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"sync/atomic"
-	"time"
-)
 
-var webhookEventCounter atomic.Int64
+	"zudomart/modules/payments/src/modules/gateway/services"
+)
 
 func (harness *MoneyHarness) OnboardConnectedAccount(userId string, acceptPayments bool) string {
 	harness.T.Helper()
 	gateway := harness.Payments.Application.Gateway
-	account, err := gateway.EnsureConnectedAccountForUser(context.Background(), userId, acceptPayments)
+	role := "creator"
+	if acceptPayments {
+		role = "seller"
+	}
+	if err := gateway.SavePayoutOnboardingIdentity(context.Background(), userId, services.OnboardingIdentityInput{
+		Role: role, LegalName: "Temitope Adeyemi", DateOfBirth: "1994-02-03", AddressLine1: "4 Allen Avenue", City: "Ikeja", State: "Lagos", IdType: "bvn", IdNumber: "22212345678",
+	}); err != nil {
+		harness.T.Fatalf("identity for %s: %v", userId, err)
+	}
+	if err := gateway.SavePayoutOnboardingBank(context.Background(), userId, services.OnboardingBankInput{BankCode: "058", BankName: "Guaranty Trust Bank", AccountNumber: "0123456789"}); err != nil {
+		harness.T.Fatalf("bank for %s: %v", userId, err)
+	}
+	gateway.ProcessDueConnectedAccountJobs(context.Background(), 20)
+	account, err := gateway.FindConnectedAccountForUser(context.Background(), harness.Database, userId)
 	if err != nil {
-		harness.T.Fatalf("connected account for %s: %v", userId, err)
+		harness.T.Fatalf("payout account for %s was not created by the worker: %v", userId, err)
 	}
-	harness.Bachs.ActivateAllCapabilities(account.ProviderAccountID)
-	body, headers := SignedBachsWebhook(harness.NextEventId(), "capability.updated", account.ProviderAccountID, map[string]any{"account": account.ProviderAccountID, "capability": "payouts", "status": "active", "requested": true}, time.Now())
-	if response := harness.Call(http.MethodPost, "/webhooks/bachs", "", "", body, headers); response.Status != http.StatusOK {
-		harness.T.Fatalf("capability webhook: %d %s", response.Status, response.Raw)
+	if acceptPayments {
+		return account.SettlementSubaccountCode
 	}
-	return account.ProviderAccountID
+	return account.RecipientCode
 }
 
-func (harness *MoneyHarness) NextEventId() string {
-	return fmt.Sprintf("evt_test_%d_%d", time.Now().UnixNano(), webhookEventCounter.Add(1))
-}
-
-func (harness *MoneyHarness) DeliverBachsEvent(eventType, connectedAccountId string, data map[string]any) HarnessResponse {
+func (harness *MoneyHarness) DeliverPaystackEvent(event string, data map[string]any) HarnessResponse {
 	harness.T.Helper()
-	body, headers := SignedBachsWebhook(harness.NextEventId(), eventType, connectedAccountId, data, time.Now())
-	response := harness.Call(http.MethodPost, "/webhooks/bachs", "", "", body, headers)
+	body, headers := SignedPaystackWebhook(event, data)
+	response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers)
 	if response.Status != http.StatusOK {
-		harness.T.Fatalf("%s webhook: %d %s", eventType, response.Status, response.Raw)
+		harness.T.Fatalf("%s webhook: %d %s", event, response.Status, response.Raw)
 	}
 	return response
 }
 
-func (harness *MoneyHarness) CompleteCheckoutThroughWebhook(reference string, paidAmountOverride, processingFee int64) {
+func (harness *MoneyHarness) PayCheckout(reference string, feeMinor int64, channel string) *FakeTransaction {
 	harness.T.Helper()
-	checkout := harness.Bachs.CompleteCheckout(reference, paidAmountOverride, processingFee)
-	if checkout == nil {
+	transaction := harness.Paystack.CompleteCheckout(reference, 0, feeMinor, channel)
+	if transaction == nil {
 		harness.T.Fatalf("no checkout for %s", reference)
 	}
-	harness.DeliverBachsEvent("collection.succeeded", checkout.AccountId, map[string]any{
-		"charge_id": checkout.ChargeId, "checkout_id": checkout.Id, "reference": reference, "status": "SUCCEEDED",
-		"amount": decimal(checkout.AmountMinor, checkout.Currency), "currency": checkout.Currency,
-		"processing_fee": decimal(processingFee, checkout.Currency), "fee_bearer": "merchant", "metadata": map[string]any{},
-	})
+	harness.DeliverPaystackEvent("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": transaction.Currency})
+	return transaction
 }
 
-func (harness *MoneyHarness) AssertProviderMirrorMatches() {
+func (harness *MoneyHarness) CompleteCheckoutThroughWebhook(reference string, paidAmountOverride, feeMinor int64) *FakeTransaction {
 	harness.T.Helper()
-	report, err := harness.Payments.Application.Gateway.ReconcileProviderMirror(context.Background())
-	if err != nil {
-		harness.T.Fatal(err)
+	transaction := harness.Paystack.CompleteCheckout(reference, paidAmountOverride, feeMinor, "card")
+	if transaction == nil {
+		harness.T.Fatalf("no checkout for %s", reference)
 	}
-	if len(report.Mismatches) != 0 {
-		harness.T.Fatalf("ledger mirror disagrees with provider balances: %+v", report.Mismatches)
-	}
+	harness.DeliverPaystackEvent("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": transaction.Currency})
+	return transaction
 }

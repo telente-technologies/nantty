@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 
@@ -32,7 +33,7 @@ type MoneyHarness struct {
 	Database     *sql.DB
 	LedgerSchema string
 	Ledger       *ledgerservices.Ledger
-	Bachs        *FakeBachs
+	Paystack     *FakePaystack
 	Directory    *PermissiveAccountDirectory
 	Tokens       *moneytesting.TestTokenAuthority
 	Publisher    *events.RecordingPublisher
@@ -48,21 +49,21 @@ func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]inter
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	harness := &MoneyHarness{
 		T: t, Database: database, LedgerSchema: ledgerSchema, Ledger: ledgerservices.NewLedgerInSchema(ledgerSchema),
-		Bachs: StartFakeBachs(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
+		Paystack: StartFakePaystack(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
 		Mux:          http.NewServeMux(),
 		Dependencies: servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("money-test")},
 	}
 	settings := configs.PaymentsSettings{
 		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
-		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "bachs",
-		PlatformCommissionBps: 500, CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG",
+		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "paystack",
+		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG",
+		Paystack:            configs.PaystackSettings{SecretKey: FakePaystackSecretKey, Channels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000},
 		OnboardingReturnUrl: "https://zudomart.test/seller/verification/return", OnboardingRefreshUrl: "https://zudomart.test/seller/verification/refresh",
-		WebSubscriptionPlanProducts: map[string]string{"premium_web": "prod_premium_web"},
+		WebSubscriptionPlanProducts: map[string]string{"premium_web": "PLN_premium_web"},
+		DataEncryptionKey:           bytes.Repeat([]byte{7}, 32), SavedCardFingerprintKey: "fingerprint-test-key", InternalApiToken: strings.Repeat("i", 32),
 	}
-	bachs := integrations.NewBachsConnectProvider(integrations.BachsConnectSettings{
-		BaseUrl: harness.Bachs.Server.URL, SecretKey: FakeBachsSecretKey, WebhookSigningSecrets: []string{FakeBachsSigningSecret}, MaximumAttempts: 3,
-	})
-	providers := map[string]interfaces.ConnectProvider{"bachs": bachs}
+	paystack := integrations.NewPaystackProvider(integrations.PaystackSettings{BaseUrl: harness.Paystack.Server.URL, SecretKey: FakePaystackSecretKey, MaximumAttempts: 3})
+	providers := map[string]interfaces.FullPaymentProvider{"paystack": paystack}
 	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory})
 	if err != nil {
 		t.Fatal(err)
