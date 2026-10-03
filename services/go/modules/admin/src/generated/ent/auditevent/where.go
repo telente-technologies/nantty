@@ -70,6 +70,21 @@ func ActorRole(v string) predicate.AuditEvent {
 	return predicate.AuditEvent(sql.FieldEQ(FieldActorRole, v))
 }
 
+// ActorName applies equality check predicate on the "actor_name" field. It's identical to ActorNameEQ.
+func ActorName(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldActorName, v))
+}
+
+// StepUpVerified applies equality check predicate on the "step_up_verified" field. It's identical to StepUpVerifiedEQ.
+func StepUpVerified(v bool) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldStepUpVerified, v))
+}
+
+// SubjectLabel applies equality check predicate on the "subject_label" field. It's identical to SubjectLabelEQ.
+func SubjectLabel(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldSubjectLabel, v))
+}
+
 // Action applies equality check predicate on the "action" field. It's identical to ActionEQ.
 func Action(v string) predicate.AuditEvent {
 	return predicate.AuditEvent(sql.FieldEQ(FieldAction, v))
@@ -283,6 +298,146 @@ func ActorRoleEqualFold(v string) predicate.AuditEvent {
 // ActorRoleContainsFold applies the ContainsFold predicate on the "actor_role" field.
 func ActorRoleContainsFold(v string) predicate.AuditEvent {
 	return predicate.AuditEvent(sql.FieldContainsFold(FieldActorRole, v))
+}
+
+// ActorNameEQ applies the EQ predicate on the "actor_name" field.
+func ActorNameEQ(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldActorName, v))
+}
+
+// ActorNameNEQ applies the NEQ predicate on the "actor_name" field.
+func ActorNameNEQ(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldNEQ(FieldActorName, v))
+}
+
+// ActorNameIn applies the In predicate on the "actor_name" field.
+func ActorNameIn(vs ...string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldIn(FieldActorName, vs...))
+}
+
+// ActorNameNotIn applies the NotIn predicate on the "actor_name" field.
+func ActorNameNotIn(vs ...string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldNotIn(FieldActorName, vs...))
+}
+
+// ActorNameGT applies the GT predicate on the "actor_name" field.
+func ActorNameGT(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldGT(FieldActorName, v))
+}
+
+// ActorNameGTE applies the GTE predicate on the "actor_name" field.
+func ActorNameGTE(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldGTE(FieldActorName, v))
+}
+
+// ActorNameLT applies the LT predicate on the "actor_name" field.
+func ActorNameLT(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldLT(FieldActorName, v))
+}
+
+// ActorNameLTE applies the LTE predicate on the "actor_name" field.
+func ActorNameLTE(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldLTE(FieldActorName, v))
+}
+
+// ActorNameContains applies the Contains predicate on the "actor_name" field.
+func ActorNameContains(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldContains(FieldActorName, v))
+}
+
+// ActorNameHasPrefix applies the HasPrefix predicate on the "actor_name" field.
+func ActorNameHasPrefix(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldHasPrefix(FieldActorName, v))
+}
+
+// ActorNameHasSuffix applies the HasSuffix predicate on the "actor_name" field.
+func ActorNameHasSuffix(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldHasSuffix(FieldActorName, v))
+}
+
+// ActorNameEqualFold applies the EqualFold predicate on the "actor_name" field.
+func ActorNameEqualFold(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEqualFold(FieldActorName, v))
+}
+
+// ActorNameContainsFold applies the ContainsFold predicate on the "actor_name" field.
+func ActorNameContainsFold(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldContainsFold(FieldActorName, v))
+}
+
+// StepUpVerifiedEQ applies the EQ predicate on the "step_up_verified" field.
+func StepUpVerifiedEQ(v bool) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldStepUpVerified, v))
+}
+
+// StepUpVerifiedNEQ applies the NEQ predicate on the "step_up_verified" field.
+func StepUpVerifiedNEQ(v bool) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldNEQ(FieldStepUpVerified, v))
+}
+
+// SubjectLabelEQ applies the EQ predicate on the "subject_label" field.
+func SubjectLabelEQ(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEQ(FieldSubjectLabel, v))
+}
+
+// SubjectLabelNEQ applies the NEQ predicate on the "subject_label" field.
+func SubjectLabelNEQ(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldNEQ(FieldSubjectLabel, v))
+}
+
+// SubjectLabelIn applies the In predicate on the "subject_label" field.
+func SubjectLabelIn(vs ...string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldIn(FieldSubjectLabel, vs...))
+}
+
+// SubjectLabelNotIn applies the NotIn predicate on the "subject_label" field.
+func SubjectLabelNotIn(vs ...string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldNotIn(FieldSubjectLabel, vs...))
+}
+
+// SubjectLabelGT applies the GT predicate on the "subject_label" field.
+func SubjectLabelGT(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldGT(FieldSubjectLabel, v))
+}
+
+// SubjectLabelGTE applies the GTE predicate on the "subject_label" field.
+func SubjectLabelGTE(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldGTE(FieldSubjectLabel, v))
+}
+
+// SubjectLabelLT applies the LT predicate on the "subject_label" field.
+func SubjectLabelLT(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldLT(FieldSubjectLabel, v))
+}
+
+// SubjectLabelLTE applies the LTE predicate on the "subject_label" field.
+func SubjectLabelLTE(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldLTE(FieldSubjectLabel, v))
+}
+
+// SubjectLabelContains applies the Contains predicate on the "subject_label" field.
+func SubjectLabelContains(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldContains(FieldSubjectLabel, v))
+}
+
+// SubjectLabelHasPrefix applies the HasPrefix predicate on the "subject_label" field.
+func SubjectLabelHasPrefix(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldHasPrefix(FieldSubjectLabel, v))
+}
+
+// SubjectLabelHasSuffix applies the HasSuffix predicate on the "subject_label" field.
+func SubjectLabelHasSuffix(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldHasSuffix(FieldSubjectLabel, v))
+}
+
+// SubjectLabelEqualFold applies the EqualFold predicate on the "subject_label" field.
+func SubjectLabelEqualFold(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldEqualFold(FieldSubjectLabel, v))
+}
+
+// SubjectLabelContainsFold applies the ContainsFold predicate on the "subject_label" field.
+func SubjectLabelContainsFold(v string) predicate.AuditEvent {
+	return predicate.AuditEvent(sql.FieldContainsFold(FieldSubjectLabel, v))
 }
 
 // ActionEQ applies the EQ predicate on the "action" field.

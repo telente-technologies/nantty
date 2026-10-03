@@ -20,6 +20,14 @@ const (
 	FieldActorID = "actor_id"
 	// FieldActorRole holds the string denoting the actor_role field in the database.
 	FieldActorRole = "actor_role"
+	// FieldActorName holds the string denoting the actor_name field in the database.
+	FieldActorName = "actor_name"
+	// FieldActorDepartments holds the string denoting the actor_departments field in the database.
+	FieldActorDepartments = "actor_departments"
+	// FieldStepUpVerified holds the string denoting the step_up_verified field in the database.
+	FieldStepUpVerified = "step_up_verified"
+	// FieldSubjectLabel holds the string denoting the subject_label field in the database.
+	FieldSubjectLabel = "subject_label"
 	// FieldAction holds the string denoting the action field in the database.
 	FieldAction = "action"
 	// FieldSubjectType holds the string denoting the subject_type field in the database.
@@ -48,6 +56,10 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldActorID,
 	FieldActorRole,
+	FieldActorName,
+	FieldActorDepartments,
+	FieldStepUpVerified,
+	FieldSubjectLabel,
 	FieldAction,
 	FieldSubjectType,
 	FieldSubjectID,
@@ -78,6 +90,18 @@ var (
 	DefaultActorRole string
 	// ActorRoleValidator is a validator for the "actor_role" field. It is called by the builders before save.
 	ActorRoleValidator func(string) error
+	// DefaultActorName holds the default value on creation for the "actor_name" field.
+	DefaultActorName string
+	// ActorNameValidator is a validator for the "actor_name" field. It is called by the builders before save.
+	ActorNameValidator func(string) error
+	// DefaultActorDepartments holds the default value on creation for the "actor_departments" field.
+	DefaultActorDepartments []string
+	// DefaultStepUpVerified holds the default value on creation for the "step_up_verified" field.
+	DefaultStepUpVerified bool
+	// DefaultSubjectLabel holds the default value on creation for the "subject_label" field.
+	DefaultSubjectLabel string
+	// SubjectLabelValidator is a validator for the "subject_label" field. It is called by the builders before save.
+	SubjectLabelValidator func(string) error
 	// ActionValidator is a validator for the "action" field. It is called by the builders before save.
 	ActionValidator func(string) error
 	// DefaultSubjectType holds the default value on creation for the "subject_type" field.
@@ -129,6 +153,21 @@ func ByActorID(opts ...sql.OrderTermOption) OrderOption {
 // ByActorRole orders the results by the actor_role field.
 func ByActorRole(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActorRole, opts...).ToFunc()
+}
+
+// ByActorName orders the results by the actor_name field.
+func ByActorName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActorName, opts...).ToFunc()
+}
+
+// ByStepUpVerified orders the results by the step_up_verified field.
+func ByStepUpVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStepUpVerified, opts...).ToFunc()
+}
+
+// BySubjectLabel orders the results by the subject_label field.
+func BySubjectLabel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubjectLabel, opts...).ToFunc()
 }
 
 // ByAction orders the results by the action field.
