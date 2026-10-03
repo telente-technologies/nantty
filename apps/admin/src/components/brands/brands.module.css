@@ -12,7 +12,7 @@
   flex: none;
   border-radius: var(--radius-small);
   background: var(--console-night);
-  color: var(--yellow-500);
+  color: var(--console-night-accent);
   font-weight: 700;
 }
 
@@ -146,7 +146,7 @@
 
 .quote {
   padding: 10px 12px;
-  border-left: 3px solid var(--blue-200);
+  border-left: 3px solid var(--brand-line);
   background: var(--surface-sunken);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
 }
@@ -160,7 +160,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-medium);
-  background: #d9dbe4;
+  background: var(--document-backdrop);
   padding: 24px;
   user-select: none;
   -webkit-user-select: none;
@@ -190,7 +190,7 @@
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
-  color: rgb(185 28 28 / 0.28);
+  color: var(--error-watermark);
 }
 
 @media (max-width: 640px) {
