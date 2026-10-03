@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
@@ -9,6 +9,7 @@ import { colors } from "@/constants/colors.constant";
 import { soundsService } from "@/services/sounds.service";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function ProfileSoundsList({ profile }: { profile: User }) {
   const navigation = useNavigation();
@@ -16,7 +17,7 @@ export function ProfileSoundsList({ profile }: { profile: User }) {
     queryKey: ["users", profile.id, "sounds"],
     queryFn: async () => (await soundsService.searchSounds(profile.username)).filter((sound) => sound.owner.id === profile.id && sound.isOriginal),
   });
-  if (sounds.isLoading) return <ActivityIndicator style={styles.state} color={colors.primary} />;
+  if (sounds.isLoading) return <ListSkeleton />;
   if (!sounds.data?.length) return <Text size={14} color={colors.textSubtle} align="center" style={styles.state}>No original sounds yet</Text>;
   return (
     <View style={styles.list}>

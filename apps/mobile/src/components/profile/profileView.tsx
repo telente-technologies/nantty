@@ -25,6 +25,7 @@ export interface ProfileViewProps {
   readonly onPressPost: (post: Post) => void;
   readonly onOpenStoreTab?: () => void;
   readonly headerAccessory?: ReactNode;
+  readonly isLocked?: boolean;
   readonly onPressPostMore?: (post: Post) => void;
 }
 
@@ -38,7 +39,7 @@ const EMPTY_TAB_MESSAGES: Record<ProfileTabKey, string> = {
 
 export function ProfileView(props: ProfileViewProps) {
   const [activeTab, setActiveTab] = useState<ProfileTabKey>("posts");
-  const visiblePosts = activeTab === "posts" ? props.posts : [];
+  const visiblePosts = activeTab === "posts" && !props.isLocked ? props.posts : [];
 
   const changeTabOrOpenStore = (tab: ProfileTabKey) => {
     if (tab === "store" && props.onOpenStoreTab) {
@@ -72,14 +73,23 @@ export function ProfileView(props: ProfileViewProps) {
             onPressFollowing={props.onPressFollowing}
           />
           {props.headerAccessory}
-          <ProfileTabs tabs={props.tabs} activeTab={activeTab} onChangeTab={changeTabOrOpenStore} />
+          {props.isLocked ? null : <ProfileTabs tabs={props.tabs} activeTab={activeTab} onChangeTab={changeTabOrOpenStore} />}
         </View>
       }
       renderItem={({ item }) => (
         <PostCard post={item} onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
       )}
       ListEmptyComponent={
-        activeTab === "sounds" ? (
+        props.isLocked ? (
+          <View style={styles.privateState} accessibilityRole="summary">
+            <Text size={16} weight={600} lineHeight={20} align="center">
+              This account is private
+            </Text>
+            <Text size={14} lineHeight={18} color={colors.textSubtle} align="center">
+              Follow this account to see their posts.
+            </Text>
+          </View>
+        ) : activeTab === "sounds" ? (
           <ProfileSoundsList profile={props.profile} />
         ) : props.loading ? (
           <ActivityIndicator style={styles.empty} color={colors.primary} />
@@ -99,4 +109,5 @@ const styles = StyleSheet.create({
   header: { gap: 24 },
   content: { paddingBottom: 40 },
   empty: { marginTop: 48 },
+  privateState: { marginTop: 48, paddingHorizontal: 32, gap: 6 },
 });

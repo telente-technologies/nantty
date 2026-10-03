@@ -53,8 +53,9 @@ export function useSaveProfileDetailsMutation() {
 export function useToggleFollowMutation(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (currentlyFollowing: boolean) =>
-      currentlyFollowing ? followsService.unfollowUser(userId) : followsService.followUser(userId),
+    mutationFn: async (currentlyFollowing: boolean) => {
+      await (currentlyFollowing ? followsService.unfollowUser(userId) : followsService.followUser(userId));
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 }

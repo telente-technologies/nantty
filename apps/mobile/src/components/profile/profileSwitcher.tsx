@@ -6,15 +6,18 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { CaretDown24Icon, Check16Icon, Plus16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { brandsService } from "@/services/brands.service";
+import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
 import { VerificationBadge } from "./verificationBadge";
 
-const KIND_LABELS = { person: "Personal profile", brand: "Brand", store: "Store" } as const;
+const KIND_LABELS = { person: "Personal", creator: "Creator", business: "Business", brand: "Brand", store: "Store" } as const;
 
 function useActingProfileWithServerFallback() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
@@ -44,6 +47,7 @@ export function ProfileSwitcherSheet() {
   const { isProfileSwitcherSheetVisible, closeProfileSwitcherSheet } = useProfileSwitcherSheetStore();
   const setActingProfile = useActingProfileStore((s) => s.setActingProfile);
   const active = useActingProfileWithServerFallback();
+  const isCreatorApproved = useCreatorEntry().route === "CreatorDashboard";
   const profiles = useQuery({ queryKey: ["users", "me", "profiles"], queryFn: brandsService.listMyProfiles, enabled: isProfileSwitcherSheetVisible });
 
   const switchProfile = useMutation({
@@ -60,7 +64,9 @@ export function ProfileSwitcherSheet() {
     <BottomSheet visible={isProfileSwitcherSheetVisible} onClose={closeProfileSwitcherSheet} title="Switch profile">
       <View style={styles.list}>
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>Posts, messages and store actions happen as the profile you choose.</Text>
-        {(profiles.data ?? []).map((profile) => (
+        {profiles.isPending ? <ListSkeleton rows={3} padding={0} /> : null}
+        {profiles.isError ? <ErrorState message="Couldn't load your profiles." onRetry={() => profiles.refetch()} /> : null}
+        {(profiles.data ?? []).filter((profile) => profile.kind !== "creator" || isCreatorApproved).map((profile) => (
           <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === active.id }} onPress={() => switchProfile.mutate(profile.id)} style={styles.row}>
             <Avatar uri={profile.avatarUrl} size={40} />
             <View style={styles.texts}>
@@ -73,6 +79,10 @@ export function ProfileSwitcherSheet() {
             {profile.id === active.id ? <Check16Icon color={colors.primary} /> : null}
           </Pressable>
         ))}
+        <Pressable accessibilityRole="button" onPress={() => { closeProfileSwitcherSheet(); navigation.navigate("CreateBusinessProfile"); }} style={styles.row}>
+          <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
+          <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create business profile</Text>
+        </Pressable>
         <Pressable accessibilityRole="button" onPress={() => { closeProfileSwitcherSheet(); navigation.navigate("CreateBrand"); }} style={styles.row}>
           <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
           <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create a brand profile</Text>

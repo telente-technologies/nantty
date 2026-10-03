@@ -9,7 +9,7 @@ import type { User } from "@/types";
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
-type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings";
+type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings" | "FollowRequests" | "Rankings";
 
 export function OwnProfileShortcuts({ profile }: { profile: User }) {
   const navigation = useNavigation();
@@ -17,6 +17,8 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
   const shortcuts: { label: string; route: ShortcutRoute }[] = [
     ...(profile.isSeller ? [{ label: "Seller dashboard", route: "SellerDashboard" as const }] : []),
     { label: creatorEntry.label, route: creatorEntry.route },
+    { label: "Follow requests", route: "FollowRequests" },
+    { label: "Rankings", route: "Rankings" },
     { label: "My orders", route: "Orders" },
     { label: "Wallet", route: "Wallet" },
     { label: profile.verification?.badgeVisible ? "Verification" : "Get verified", route: "Verification" },
@@ -31,6 +33,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
           <Pressable
             key={shortcut.label}
             accessibilityRole="button"
+            disabled={shortcut.route === creatorEntry.route && creatorEntry.isLoading}
             onPress={() => navigation.navigate(shortcut.route)}
             style={styles.shortcut}
           >
