@@ -5,6 +5,7 @@ import { GuestAuthReplayCoordinator } from "@/components/auth/guestAuthReplay";
 import { GuestAuthSheet } from "@/components/auth/guestAuthSheet";
 import { PolicyReacceptScreen } from "@/components/legal/policyReacceptScreen";
 import { PolicyUpdateBanner } from "@/components/legal/policyUpdateBanner";
+import { DialogHost } from "@/components/ui/dialogHost";
 import { ToastHost } from "@/components/ui/toastHost";
 import { SuspendedAccountScreen } from "@/screens/account/suspendedAccount.screen";
 import { usePolicyUpdates } from "@/hooks/usePolicyUpdates.hook";
@@ -36,14 +37,22 @@ export function RootNavigator() {
   const isAccountSuspended = useAuthStore((s) => s.status === "signedIn" && s.user?.account?.status === "suspended");
   const navigationTheme = useNavigationThemeFollowingAppTheme();
   const { blocking: blockingPolicyVersion } = usePolicyUpdates();
-  if (isAccountSuspended) return <SuspendedAccountScreen />;
-  if (blockingPolicyVersion) return <PolicyReacceptScreen version={blockingPolicyVersion} />;
+  if (isAccountSuspended || blockingPolicyVersion) {
+    return (
+      <>
+        {isAccountSuspended ? <SuspendedAccountScreen /> : blockingPolicyVersion ? <PolicyReacceptScreen version={blockingPolicyVersion} /> : null}
+        <DialogHost />
+        <ToastHost />
+      </>
+    );
+  }
   return (
     <NavigationContainer ref={rootNavigationRef} theme={navigationTheme}>
       {canShowMainApp ? <MainNavigator /> : <AuthNavigator />}
       <GuestAuthReplayCoordinator />
       <GuestAuthSheet />
       <PolicyUpdateBanner />
+      <DialogHost />
       <ToastHost />
     </NavigationContainer>
   );
