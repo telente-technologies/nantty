@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { EarnBackLine } from "@/components/store/earnBackLine";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -11,6 +12,8 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { StoreDetail } from "@/types/commerce.type";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 import { PreviewableImage } from "@/components/ui/previewableImage";
+import { Star16Icon } from "@/components/icons";
+import { IconRow } from "@/components/ui/iconRow";
 
 export interface StoreProfileHeaderProps {
   readonly store: StoreDetail;
@@ -58,14 +61,16 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
             <Text size={14} weight={500} lineHeight={16.8}>
               {formatCountWithThousandsSuffix(store.followers)} <Text size={14} lineHeight={16.8}>followers</Text>
             </Text>
-            <Text size={14} weight={500} lineHeight={16.8}>
-              {store.rating.toFixed(1)} ★ <Text size={14} lineHeight={16.8}>({store.reviewCount})</Text>
-            </Text>
+            <IconRow icon={<Star16Icon size={14} />} gap={4}>
+              <Text size={14} weight={500} lineHeight={16.8} accessibilityLabel={`Rated ${store.rating.toFixed(1)} from ${store.reviewCount} reviews`}>
+                {store.rating.toFixed(1)} <Text size={14} lineHeight={16.8}>({store.reviewCount})</Text>
+              </Text>
+            </IconRow>
           </View>
         </View>
       </View>
       <View style={styles.about}>
-        <Text size={13} lineHeight={16.9}>{store.bio}</Text>
+        <MentionText text={store.bio} size={13} lineHeight={16.9} />
         <EarnBackLine basisPoints={store.earnBackBasisPoints} />
         <View style={styles.joined}>
           <CalendarDots16Icon />
