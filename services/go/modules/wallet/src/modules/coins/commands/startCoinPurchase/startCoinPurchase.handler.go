@@ -31,7 +31,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Start
 		storeProductId := pack.StoreProductID
 		return dtos.StartedCoinPurchaseDto{Reference: storeProductId, PurchaseChannel: "store_iap", StoreProductId: &storeProductId}, false, nil
 	}
-	return ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.StartedCoinPurchaseDto]{
+	started, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.StartedCoinPurchaseDto]{
 		Scope: command.UserId + ":coins.purchase", Key: command.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.PackageId, command.Provider, command.Currency, command.ReturnTo),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.StartedCoinPurchaseDto, error) {
@@ -40,4 +40,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Start
 			})
 		},
 	})
+	if err != nil {
+		return started, replayed, err
+	}
+	opened, err := application.Purchases.OpenCheckoutForStartedPurchase(ctx, started)
+	return opened, replayed, err
 }
