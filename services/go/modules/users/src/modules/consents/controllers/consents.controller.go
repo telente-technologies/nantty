@@ -16,6 +16,7 @@ import (
 	listtermsacceptances "zudomart/modules/users/src/modules/consents/queries/listTermsAcceptances"
 	"zudomart/modules/users/src/modules/consents/services"
 	"zudomart/modules/users/src/modules/consents/validators"
+	legalservices "zudomart/modules/users/src/modules/legal/services"
 	"zudomart/modules/users/src/utils"
 	"zudomart/platform/httpserver"
 )
@@ -112,8 +113,27 @@ func (controller ConsentsController) SetMyConsents(writer http.ResponseWriter, r
 		controller.fail(writer, request, err)
 		return
 	}
-	body, err := utils.DecodeAndValidate(writer, request, func(body dtos.SetConsentsRequest) error { return validators.ValidateSetConsentsRequest(body, false) })
-	if err != nil {
+	var body dtos.SetConsentsRequest
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	if body.Decisions == nil {
+		body.Decisions = body.Consents
+	}
+	acceptsPolicy := body.PolicyVersionId != nil && *body.PolicyVersionId != ""
+	if acceptsPolicy {
+		metadata := requestMetadata(request, "account")
+		if err := legalservices.RecordPolicyAcceptance(request.Context(), controller.Container.Client, accountId, *body.PolicyVersionId, metadata.IpAddress, metadata.UserAgent, controller.Container.Now()); err != nil {
+			controller.fail(writer, request, err)
+			return
+		}
+		if len(body.Decisions) == 0 {
+			controller.respondWithStates(writer, request, services.AccountSubject(accountId), nil)
+			return
+		}
+	}
+	if err := validators.ValidateSetConsentsRequest(body, false); err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
