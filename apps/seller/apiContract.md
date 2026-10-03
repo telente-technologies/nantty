@@ -13,7 +13,7 @@ The Zudomart Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) i
 - Money everywhere: `{ "amountMinor": integer, "currency": "NGN"|"GHS"|"KES"|"ZAR"|"GBP"|"EUR"|"USD" }` in the **store's** currency. Request bodies send amounts as `...Minor` integers; the server assumes the store currency and rejects anything else. Percentages are integer basis points (750 = 7.5%).
 - Lists: `{ "data": T[], "nextCursor": string | null }`; query `cursor`, `limit` (default 25, max 200).
 - Errors: `{ "message": string, "code": string, "issues"?: [{ "path", "message" }] }`. `401` only for missing/expired auth (the BFF signs the user out). Validation is `400 VALIDATION_FAILED`.
-- `Idempotency-Key` header (8–128 chars `[A-Za-z0-9_-]`) is **required** on: order refunds, payouts, stock adjustments and transfers, product imports, loyalty adjustments, order fulfilment. Replays return the original response with header `Idempotent-Replayed: true`.
+- `Idempotency-Key` header (8–128 chars `[A-Za-z0-9_-]`) is **required** on: order refunds, payouts, stock adjustments and transfers, product imports, order fulfilment. Replays return the original response with header `Idempotent-Replayed: true`.
 - CSV endpoints return `text/csv; charset=utf-8` with `Content-Disposition: attachment; filename="..."`. Cells beginning with `= + - @` must be neutralised against formula injection.
 - Types referenced below are TypeScript interfaces in `apps/seller/src/types/*.type.ts` (the source of truth for field names and shapes).
 - Roles: `owner | manager | inventory | sales | accountant`. Each role has default permissions (`permissionsByStaffRole` in `apps/seller/src/config/rolePermissions.config.ts`); a staff member may carry a custom `permissions: SellerPermission[]` list (Business plan) that replaces the role defaults. The owner always has every permission. The permission each endpoint needs matches `apiPermissionRules` in that file; the API must enforce the same rules (deny by default).
@@ -511,7 +511,7 @@ Body: `{ name 2–80, phone?, email?, tags?: string[] (≤10, lower-cased, ≤24
 Response 201: Customer. Errors: 400 VALIDATION_FAILED; 409 CUSTOMER_EXISTS `{ message, code, customer }` (same phone or email).
 
 ### GET /api/v1/seller/customers/export
-Permission: customers:view. Same query as the list. Returns CSV: Name, Phone, Email, Zudomart username, City, Tags, Loyalty points, Total spent, Average order value, Currency, Orders, First order, Last order, Marketing opt-in.
+Permission: customers:view. Same query as the list. Returns CSV: Name, Phone, Email, Zudomart username, City, Tags, Total spent, Average order value, Currency, Orders, First order, Last order, Marketing opt-in.
 
 ### GET /api/v1/seller/customers/:customerId
 ### PATCH /api/v1/seller/customers/:customerId
@@ -523,9 +523,6 @@ Response 200: `CursorPage<CustomerPurchase>` = app orders by this buyer, newest 
 
 ### POST /api/v1/seller/customers/:customerId/notes
 Permission: customers:manage. Body `{ body: 2–1000 }`. Response 201: Customer (note prepended, author = caller).
-
-### POST /api/v1/seller/customers/:customerId/loyalty-adjustments
-Permission: customers:manage. `Idempotency-Key` required. Body `{ pointsDelta: non-zero int, |x| ≤ 1,000,000, reason: 3–200 }`. Response 200: Customer. Errors: 422 POINTS_BELOW_ZERO. Audit `customer.loyalty_adjusted`.
 
 ### GET /api/v1/seller/customers/segments
 Permission: customers:view. **Plan: pro** (`customer_segments`).
@@ -821,16 +818,16 @@ Response 200: `AnalyticsBreakdowns`
 
 ## Store settings, locations, staff and audit log
 
-Types: `StoreSettings`, `StoreLocation`, `TaxRate`, `LoyaltyRules`, `NotificationPreferences`, `StorePolicies` (src/types/store.type.ts); `StaffMember`, `AuditLogEntry` (src/types/staff.type.ts); `StorefrontProfile`, `StorefrontUpdateRequest`, `StorefrontOpeningHours`, `StorefrontSocialLinks` (src/types/storefront.type.ts); `SecurityOverview`, `SecuritySession`, `LoginHistoryEntry` (src/types/security.type.ts); `ApiKey`, `CreatedApiKey`, `WebhookEndpoint`, `CreatedWebhookEndpoint`, `WebhookDelivery`, `StoreIntegration` (src/types/developer.type.ts). Every endpoint is scoped to the caller's store (from the access token). Every write appends an audit log entry (actor, action, target, summary, IP). The register-era fields `receipt`, `paymentMethods` and `discountApprovalThresholdBasisPoints` are removed from StoreSettings; reject them with 400 if sent.
+Types: `StoreSettings`, `StoreLocation`, `TaxRate`, `NotificationPreferences`, `StorePolicies` (src/types/store.type.ts); `StaffMember`, `AuditLogEntry` (src/types/staff.type.ts); `StorefrontProfile`, `StorefrontUpdateRequest`, `StorefrontOpeningHours`, `StorefrontSocialLinks` (src/types/storefront.type.ts); `SecurityOverview`, `SecuritySession`, `LoginHistoryEntry` (src/types/security.type.ts); `ApiKey`, `CreatedApiKey`, `WebhookEndpoint`, `CreatedWebhookEndpoint`, `WebhookDelivery`, `StoreIntegration` (src/types/developer.type.ts). Every endpoint is scoped to the caller's store (from the access token). Every write appends an audit log entry (actor, action, target, summary, IP). The register-era fields `receipt`, `paymentMethods` and `discountApprovalThresholdBasisPoints` are removed from StoreSettings; reject them with 400 if sent.
 
 ### GET /api/v1/seller/settings
 Permission: settings:view (every store role)
-Response 200: StoreSettings — `{ storeId, name, handle, logoUrl, description, country, currency, timezone, locale, phone, email, address, taxes: TaxRate[], pricesIncludeTax, policies: { returns, shipping, privacy }, loyalty: LoyaltyRules, notifications: NotificationPreferences }`.
+Response 200: StoreSettings — `{ storeId, name, handle, logoUrl, description, country, currency, timezone, locale, phone, email, address, taxes: TaxRate[], pricesIncludeTax, policies: { returns, shipping, privacy }, notifications: NotificationPreferences }`.
 `NotificationPreferences = { newOrderEmail, newOrderSms, lowStockEmail, lowStockSms, payoutEmail, disputeEmail, reviewEmail, messageDigestEmail, dailySummaryEmail, weeklyPerformanceEmail }` (all boolean).
 
 ### PATCH /api/v1/seller/settings
 Permission: settings:manage (owner, manager)
-Body: partial StoreSettings. Editable keys only: name (2–80), description (≤500), phone (E.164-ish), email, address (5–200), taxes (TaxRate[] ≤20: id [A-Za-z0-9_-]{1,40} unique, name 1–40, rateBasisPoints int 0–10000, isDefault bool, appliesToCategoryIds null | non-empty array of existing category ids; exactly one default and the default has appliesToCategoryIds null), pricesIncludeTax bool, policies ({ returns, shipping, privacy } strings ≤2000 each — shown on the store page, at checkout and on packing slips), loyalty (enabled bool, spendRequiredPerPoint Money 1–100,000,000 minor, redeemValuePerPoint Money 0–10,000,000 minor, both in the store currency; minimumPointsToRedeem int 0–1,000,000), notifications (all NotificationPreferences keys, booleans).
+Body: partial StoreSettings. Editable keys only: name (2–80), description (≤500), phone (E.164-ish), email, address (5–200), taxes (TaxRate[] ≤20: id [A-Za-z0-9_-]{1,40} unique, name 1–40, rateBasisPoints int 0–10000, isDefault bool, appliesToCategoryIds null | non-empty array of existing category ids; exactly one default and the default has appliesToCategoryIds null), pricesIncludeTax bool, policies ({ returns, shipping, privacy } strings ≤2000 each — shown on the store page, at checkout and on packing slips), notifications (all NotificationPreferences keys, booleans).
 Plan: the automated-alert keys `lowStockEmail`, `lowStockSms`, `dailySummaryEmail`, `weeklyPerformanceEmail` can only be switched **on** with feature `automated_alerts` (Pro); otherwise 402 PLAN_FEATURE_REQUIRED. Switching them off is always allowed.
 Read-only (rejected with 400 if sent): storeId, handle, logoUrl, country, currency, timezone, locale.
 Response 200: full StoreSettings after the change.
@@ -1161,3 +1158,40 @@ Only `submitted`/`under_review` claims (409 CLAIM_CLOSED otherwise). Response 20
 ### Product brand tagging (extends the products endpoints)
 `Product.brand?: { brandId, name, relationship: "own"|"authorised_reseller"|"genuine_resale" } | null`.
 `POST /api/v1/seller/products` and `PATCH /api/v1/seller/products/:productId` accept `brand: { brandId, relationship } | null` (omit on PATCH to keep the current tag). Rules: the brand must exist; `own` only when the caller's store is linked to that brand; resale relationships only for **registered** brands. Errors are field issues `brand.brandId` / `brand.relationship` in a 400 VALIDATION_FAILED.
+
+## Free trials, bundle and Gold-only plan (web only, Bachs hosted card setup)
+
+Plans still come from `GET /seller/subscription/plans` (Pro NGN 5,000/mo, Business NGN 15,000/mo; yearly rows carry the admin yearly discount). Billing is **per business profile**: each store/brand has its own subscription, invoices and payment method. The account email is used for the Bachs customer, receipts and reminders; **no endpoint accepts an email**.
+
+### GET /api/v1/seller/subscription/trial
+Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accountEmail (read-only), trialLength: "DAYS_7"|"MONTH_1", trialDays, yearlyDiscountPercent, verificationCharge: Money, isEligible, ineligibleReasons: [{ code, message }], activeTrial: ActiveTrial|null, bundle: { hasActiveBlue, discountPercent, maximumBusinesses }, goldOnlyPlan: { monthly, yearly, isActive } }`. Eligibility is decided by the server from admin rules (account age, verified email, one trial per person/card/device/phone, max risk score, completed orders). `message` is gentle, user-facing copy. `ActiveTrial` = `{ planId, tier, interval, startedAt, endsAt, daysLeft, isCancelled, cardSummary, priceAfterTrial, verificationCharge: { amount, status: "REFUNDED"|"REFUND_PENDING" }, reminders: [{ daysBefore: 3|1, sendsAt }] }`. The client shows reminders at 3 days and 1 day before the end.
+
+Pricing display: monthly with active Blue = price x (1 - bundle%). Yearly = monthly x 12 x (1 - max(yearly%, bundle%)); the bigger discount wins and they never stack. The bundle applies to at most `maximumBusinesses` businesses, lapses at renewal if Blue ends, and never to Black.
+
+### POST /api/v1/seller/subscription/trial/checkout
+Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ authorizationUrl, reference, provider: "bachs" }`. The hosted page saves the card, makes a small verification charge (NGN 50) and refunds it automatically. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
+
+### POST /api/v1/seller/subscription/trial/verify
+Body `{ reference }` (references start `TRL_` for trials, `GLD_` for Gold-only). Response 200: `BillingOffer`. A trial sets the subscription to `trialing` with `currentPeriodEnd` = trial end. Gold appears only after business verification. Error: 404 PAYMENT_NOT_FOUND.
+
+### POST /api/v1/seller/subscription/trial/cancel
+One tap. No charge is made; access continues until the trial end. Response 200: `BillingOffer`. Error: 409 NO_TRIAL.
+
+## Business documents (never blocks store creation or selling)
+
+### GET /api/v1/seller/business-documents
+Permission: settings:view. Response 200: `{ documents: [{ kind: "cac_certificate"|"government_id"|"proof_of_address", label, description, status: "not_uploaded"|"in_review"|"approved"|"rejected", fileName, uploadedAt, rejectionReason }], overallStatus: "not_started"|"in_review"|"needs_attention"|"approved", goldCheckmark: "after_approval"|"needs_plan"|"granted", neverBlocksSelling: true }`. The dashboard shows a banner until `overallStatus` is `approved`; Gold comes with Pro/Business after approval.
+
+### POST /api/v1/seller/business-documents/:kind
+Upload or re-upload (any status except approved). Body `{ fileName, mimeType (pdf|jpeg|png), sizeBytes (≤10 MB) }`; the real backend uploads the bytes through the media upload API (purpose `business_document`) and passes `mediaId`. Response 200: the overview; the document becomes `in_review` and goes to the admin queue. Errors: 400 INVALID_FILE, 404 UNKNOWN_DOCUMENT, 409 ALREADY_APPROVED.
+
+## Store rewards (seller-funded; owner, 2026-10-03)
+Seller-funded store credit. Zudomart does not fund or hold money for it: it is a price reduction the seller absorbs. Credit is valid only at the issuing store, is never cash, never withdrawable, and never usable at other stores. It is earned only when an order completes (after escrow release) and is reversed if the order is refunded.
+
+Types: `StoreRewardsRules`, `StoreRewardsSummary` (src/types/store.type.ts). `StoreSettings.storeRewards = { enabled, percentBackBasisPoints (0–2000), minimumOrder: Money, maxPerOrder: Money, expiryDays (7–730) }`, edited through `PATCH /api/v1/seller/settings` (key `storeRewards`, same rules as other settings keys, store currency only).
+`Customer.storeCreditBalance: Money` and `storeCreditExpiresAt: ISO | null` are read-only (derived from the per-store credit ledger).
+
+### GET /api/v1/seller/marketing/rewards/summary
+Permission: promotions:manage. Response 200: `{ outstandingLiability: Money, customersWithCredit: int, issuedLast30Days: Money, redeemedLast30Days: Money }`.
+
+Backend requirement: per-store credit ledger in go-commerce (not go-money cash): entries per (store, buyer) with earn on order completion, reverse on refund, redeem at checkout as a discount line, expiry.
