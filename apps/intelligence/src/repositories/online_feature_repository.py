@@ -11,7 +11,9 @@ from src.interfaces.feature_backend_interface import (
 from src.models.viewer_online_features_model import ViewerOnlineFeatures
 from src.repositories.online_feature_keyspace_repository import (
     ACCOUNT_AFFINITY_KIND,
+    ACCOUNT_DELETED_FIELD,
     AFFINITY_HALF_LIFE_SECONDS,
+    PERSONALIZATION_OPT_OUT_FIELD,
     TOPIC_AFFINITY_KIND,
     OnlineFeatureKeyspace,
     append_generation_suffix,
@@ -44,6 +46,11 @@ class OnlineFeatureStore:
     def __init__(self, feature_backend: FeatureBackend, keyspace: OnlineFeatureKeyspace) -> None:
         self.feature_backend = feature_backend
         self.keyspace = keyspace
+
+    async def is_personalization_allowed(self, user_id: str) -> bool:
+        rows = await self.feature_backend.read_hash_fields([self.keyspace.consent_key(user_id)])
+        flags = rows[0]
+        return not (flags.get(PERSONALIZATION_OPT_OUT_FIELD, 0.0) or flags.get(ACCOUNT_DELETED_FIELD, 0.0))
 
     async def read_decayed_member_scores(
         self, base_key: str, members: Sequence[str], half_life_seconds: float, read_unix_time_seconds: float
@@ -87,6 +94,11 @@ class OnlineFeatureStore:
     ) -> ViewerOnlineFeatures:
         read_unix_time_seconds = now.timestamp()
         unique_item_ids = list(dict.fromkeys(item_ids))
+        if not await self.is_personalization_allowed(viewer_user_id):
+            item_rows = await self.feature_backend.read_hash_fields(
+                [self.keyspace.item_statistics_key(item_id) for item_id in unique_item_ids]
+            )
+            return ViewerOnlineFeatures(item_statistics_by_item=dict(zip(unique_item_ids, item_rows, strict=True)))
         seen_keys = [self.keyspace.recently_seen_items_key(viewer_user_id)] if include_recently_seen_items else []
         topic_affinity, account_affinity, item_rows, seen_rows = await asyncio.gather(
             self.read_decayed_member_scores(
@@ -117,6 +129,8 @@ class OnlineFeatureStore:
     async def read_viewer_top_topic_affinities(
         self, viewer_user_id: str, limit: int, now: datetime
     ) -> list[tuple[str, float]]:
+        if not await self.is_personalization_allowed(viewer_user_id):
+            return []
         return await self.read_decayed_highest_members(
             self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
             limit,

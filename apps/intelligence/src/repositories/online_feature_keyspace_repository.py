@@ -15,6 +15,11 @@ EXPERIMENT_COUNTER_TTL_SECONDS = 120 * SECONDS_PER_DAY
 TOPIC_AFFINITY_KIND = "topic"
 ACCOUNT_AFFINITY_KIND = "account"
 VALUE_FLOW_HALF_LIFE_SECONDS = 7 * SECONDS_PER_DAY
+BEHAVIOUR_RETENTION_DAYS = 3
+BEHAVIOUR_COUNTER_TTL_SECONDS = BEHAVIOUR_RETENTION_DAYS * SECONDS_PER_DAY
+ACCOUNT_PROFILE_TTL_SECONDS = 90 * SECONDS_PER_DAY
+PERSONALIZATION_OPT_OUT_FIELD = "personalization_opt_out"
+ACCOUNT_DELETED_FIELD = "account_deleted"
 
 
 def format_utc_day_bucket(moment: datetime) -> str:
@@ -79,6 +84,18 @@ class OnlineFeatureKeyspace:
 
     def experiment_counter_key(self, experiment_key: str, variant_name: str) -> str:
         return f"{self.prefix}:exp:{experiment_key}:{variant_name}"
+
+    def consent_key(self, user_id: str) -> str:
+        return f"{self.prefix}:consent:{user_id}"
+
+    def behaviour_counter_key(self, account_id: str, day_bucket: str) -> str:
+        return f"{self.prefix}:behaviour:{day_bucket}:{account_id}"
+
+    def behaviour_distinct_key(self, set_name: str, account_id: str, day_bucket: str) -> str:
+        return f"{self.prefix}:behaviourset:{set_name}:{day_bucket}:{account_id}"
+
+    def account_profile_key(self, account_id: str) -> str:
+        return f"{self.prefix}:acctprofile:{account_id}"
 
     def experiment_distinct_users_key(self, experiment_key: str, variant_name: str) -> str:
         return f"{self.prefix}:expusers:{experiment_key}:{variant_name}"
