@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, Share, StyleSheet, View } from "react-native";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill, type StatusTone } from "@/components/escrow/statusPill";
@@ -11,6 +11,8 @@ import { useReferralSummaryQuery } from "@/components/wallet/walletQueries.hook"
 import { colors } from "@/constants/colors.constant";
 import type { ReferralStatus } from "@/types/rewards.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 const REFERRAL_STATUS_APPEARANCE: Record<ReferralStatus, { label: string; tone: StatusTone }> = {
   invited: { label: "Invited", tone: "neutral" },
@@ -20,13 +22,13 @@ const REFERRAL_STATUS_APPEARANCE: Record<ReferralStatus, { label: string; tone: 
 };
 
 export function ReferralScreen() {
-  const { data: referral, isLoading } = useReferralSummaryQuery();
+  const { data: referral, isLoading, refetch } = useReferralSummaryQuery();
 
   if (!referral) {
     return (
       <Screen>
         <Header title="Invite friends" />
-        {isLoading ? <ActivityIndicator style={styles.state} color={colors.primary} /> : <Text align="center" style={styles.state}>Couldn't load your invite code.</Text>}
+        {isLoading ? <ListSkeleton /> : <ErrorState message="Couldn't load your invite code." onRetry={() => refetch()} />}
       </Screen>
     );
   }
@@ -81,7 +83,6 @@ export function ReferralScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  state: { marginTop: 64 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   hero: { backgroundColor: colors.white, borderRadius: 12, padding: 20, gap: 12 },
   codeBox: { alignSelf: "center", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", borderColor: colors.primary, backgroundColor: colors.primaryTint },

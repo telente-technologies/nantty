@@ -40,7 +40,12 @@ export function CoinActivityScreen() {
           </View>
         )}
         ListEmptyComponent={
-          activity.isPending ? null : (
+          activity.isPending ? null : activity.isError ? (
+            <View style={styles.errorState}>
+              <Text size={14} lineHeight={16.8} color={colors.error} align="center">Could not load coin activity</Text>
+              <Button variant="subtle" title="Retry" onPress={() => activity.refetch()} />
+            </View>
+          ) : (
             <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
               No coin activity yet
             </Text>
@@ -59,6 +64,7 @@ export function CoinActivityScreen() {
 const styles = StyleSheet.create({
   list: { marginHorizontal: 16, marginTop: 24, borderRadius: 12, overflow: "hidden", paddingBottom: 40 },
   separator: { height: 1, backgroundColor: colors.background },
+  errorState: { marginTop: 60, gap: 12, alignItems: "center" },
   empty: { marginTop: 60 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, backgroundColor: colors.white, paddingHorizontal: 16, paddingVertical: 14 },
   flex: { flex: 1 },
