@@ -79,6 +79,18 @@ channels:
         $ref: '#/components/messages/liveViewerCountChanged'
       giftSent:
         $ref: '#/components/messages/giftSent'
+      adImpressionRecorded:
+        $ref: '#/components/messages/adImpressionRecorded'
+      adReviewed:
+        $ref: '#/components/messages/adReviewed'
+      adSpendBatched:
+        $ref: '#/components/messages/adSpendBatched'
+      adCreatorEarningsPosted:
+        $ref: '#/components/messages/adCreatorEarningsPosted'
+      adPremiumPoolAllocated:
+        $ref: '#/components/messages/adPremiumPoolAllocated'
+      adBoostCreated:
+        $ref: '#/components/messages/adBoostCreated'
       goalProgressed:
         $ref: '#/components/messages/goalProgressed'
       goalCompleted:
@@ -293,6 +305,18 @@ operations:
       - $ref: '#/channels/domainEvents/messages/ledgerIntegrityCheckFailed'
       - $ref: '#/channels/domainEvents/messages/giftTransactionCommitted'
       - $ref: '#/channels/domainEvents/messages/battleSettlementCompleted'
+  publishAdsEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/adImpressionRecorded'
+      - $ref: '#/channels/domainEvents/messages/adReviewed'
+      - $ref: '#/channels/domainEvents/messages/adSpendBatched'
+      - $ref: '#/channels/domainEvents/messages/adCreatorEarningsPosted'
+      - $ref: '#/channels/domainEvents/messages/adPremiumPoolAllocated'
+      - $ref: '#/channels/domainEvents/messages/adBoostCreated'
+
 components:
   messages:
     accountRegistered:
@@ -862,3 +886,45 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/battleSettlement.completed.v1.json' } }
+    adImpressionRecorded:
+      name: ad.impressionRecorded
+      headers: { type: object, properties: { eventType: { const: ad.impressionRecorded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ad.impressionRecorded.v1.json' } }
+    adReviewed:
+      name: ad.reviewed
+      headers: { type: object, properties: { eventType: { const: ad.reviewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ad.reviewed.v1.json' } }
+    adSpendBatched:
+      name: adSpend.batched
+      headers: { type: object, properties: { eventType: { const: adSpend.batched } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adSpend.batched.v1.json' } }
+    adCreatorEarningsPosted:
+      name: adCreatorEarnings.posted
+      headers: { type: object, properties: { eventType: { const: adCreatorEarnings.posted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adCreatorEarnings.posted.v1.json' } }
+    adPremiumPoolAllocated:
+      name: adPremiumPool.allocated
+      headers: { type: object, properties: { eventType: { const: adPremiumPool.allocated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adPremiumPool.allocated.v1.json' } }
+    adBoostCreated:
+      name: adBoost.created
+      headers: { type: object, properties: { eventType: { const: adBoost.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adBoost.created.v1.json' } }
