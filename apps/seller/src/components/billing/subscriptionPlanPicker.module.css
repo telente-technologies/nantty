@@ -23,8 +23,8 @@
 }
 
 .premium {
-  border-color: #e8d84a;
-  box-shadow: 0 0 0 3px var(--yellow-50);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 
 .planHeader {

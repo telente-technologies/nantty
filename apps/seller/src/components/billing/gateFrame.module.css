@@ -9,15 +9,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px clamp(16px, 4vw, 40px);
-  background: var(--blue-900);
+  background: var(--rail-surface);
 }
 
 .brand {
-  color: #fff;
+  color: var(--rail-ink-strong);
 }
 
 .header button {
-  color: #c9d1f7;
+  color: var(--rail-ink);
 }
 
 .main {
@@ -51,12 +51,12 @@
 .done .stepMarker {
   background: var(--success);
   border-color: var(--success);
-  color: #fff;
+  color: var(--rail-ink-strong);
 }
 
 .current .stepMarker {
-  border-color: var(--blue-500);
-  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 12px var(--blue-500);
+  border-color: var(--color-brand);
+  box-shadow: inset 0 0 0 4px var(--surface-card), inset 0 0 0 12px var(--blue-500);
 }
 
 .stepTitle {
