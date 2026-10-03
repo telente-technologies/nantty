@@ -1018,8 +1018,8 @@ All of these go through `requireAuthThen`. Guests can read comments and watch li
 | Send in chat | "More" menu on posts, clips, videos, lives, profiles; Share on product | `POST /chat/shares { conversationIds (1–20), reference { kind, id }, note }` returns `{ sentCount, shareCount }` (§25.1) |
 | Report | "More" menu, comment rows | `POST /reports { targetType, targetId, reason, details }` |
 | Live gifts | `/live/[liveId]` | `GET /gifts`, `POST /lives/:id/gifts { giftId, quantity }`. A `402 INSUFFICIENT_COINS` response opens the coin store |
-| Buy coins (web) | coin store dialog | `GET /coins/packages?channel=web`, `POST /coins/purchases { packageId, channel: "web" }` returns `{ reference, checkoutUrl }` (Bachs hosted checkout). `/coins/return?reference=` shows "Confirming payment…" until `POST /coins/purchases/:ref/verify` reports `succeeded`. Production confirms only from the `collection.succeeded` webhook (checkoutPaymentFlowPlan §6–8) |
-| Subscribe to creator | visitor profile (only when the creator has plans) | `GET /creators/:id/subscription-plans` (public), `POST /creators/:id/subscriptions { planId }` returns `{ subscriptionId, checkoutUrl }` (Bachs). `/subscriptions/return` polls `GET /subscriptions/:id` |
+| Buy coins (web) | coin store dialog | `GET /coins/packages?channel=web`, `POST /coins/purchases { packageId, channel: "web" }` returns `{ reference, checkoutUrl }` (Paystack Popup, redirect to `authorizationUrl` as fallback). `/coins/return?reference=` shows "Confirming payment…" until `POST /coins/purchases/:ref/verify` reports `succeeded`. Production confirms only from the `collection.succeeded` webhook (checkoutPaymentFlowPlan §6–8) |
+| Subscribe to creator | visitor profile (only when the creator has plans) | `GET /creators/:id/subscription-plans` (public), `POST /creators/:id/subscriptions { planId }` returns `{ subscriptionId, checkoutUrl }` (Paystack). `/subscriptions/return` polls `GET /subscriptions/:id` |
 
 In mock mode the checkout URLs point straight at the return pages.
 
@@ -1216,14 +1216,14 @@ Spec: owner trials/verification/admin bullets, "Decided 2026-10-03" and backendP
 
 ### 30.2 Seller (web)
 
-- Trial (7 days or 1 month) with card saved through Bachs, refunded verification charge, reminders at 3 and 1 day, one-tap cancel; eligibility comes from the server. Account email only, read-only.
+- Trial (7 days or 1 month) with card saved through Paystack, refunded verification charge, reminders at 3 and 1 day, one-tap cancel; eligibility comes from the server. Account email only, read-only.
 - Per-business billing; "Blue + Gold bundle -15%" shown when Blue is active, yearly wins when it is bigger (no stacking); Gold-only plan card; Gold shows only after business verification.
 - Business documents page and dashboard banner never block selling.
 - Store switcher no longer clips at 390px (CSS fix, not browser-verified).
 
 ### 30.3 Open items
 
-- Real Bachs hosted card setup and refund webhooks; SES delivery and unsubscribe handling; document upload through the media API.
+- Real Paystack hosted card setup and refund webhooks; SES delivery and unsubscribe handling; document upload through the media API.
 - Eligibility signals (device, card, phone, risk score) come from the backend and Python; the mock uses seeded values.
 - Bundle lapse at renewal when Blue ends needs a billing job.
 
@@ -1553,4 +1553,54 @@ Guests cannot report: every entry goes through `requireAuthThen`.
 
 - **[LATER]** real server-side evidence storage with encryption at rest and a purge job; counsel to confirm the retention defaults and the lawful basis for reading user-submitted messages; NCMEC-style child-safety reporting hand-off.
 - Webapp Mute, Requests and Spam report entries and group member reporting wait for those surfaces on the web.
+- Not tested on a device or in a browser; types checked only.
+
+## 38. Payout onboarding (Paystack) **[DONE (mobile + studio + seller, mock)]**
+
+> 3 Oct, Paystack frontend migration: steps are personal details (BVN/NIN), business (registered sellers), bank account (resolved name), and the ID document step only when the state has `requiresDocumentStep`; copy names no provider. Seller fees UI: no product commission; "Payment processing fee" plus "Escrow fee (1.5%, 1% on Business)" on escrow orders, "Payment processing fee" only on direct orders; buyers see no fee lines. Web uses `@paystack/inline-js` (Popup, redirect fallback); mobile physical goods use the `authorization_url` in an in-app browser and confirm server-side; saved card = `authorization_code` in SecureStore behind biometrics ("Saved on this device"). See CHANGELOG 3 Oct.
+
+One "Get paid" flow for sellers and creators. Users never see the payment provider: no dashboard, no login. The Paystack recipient is created in the background (outbox job in go-money), so a Paystack outage never blocks onboarding. Becoming a seller or creator unlocks everything that does not need Paystack. Only direct payments and withdrawals wait. Earnings meanwhile are recorded and show as pending transfer. One account per user: verified as seller means creators skip to "You're verified", and the reverse.
+
+### 38.1 Flow
+
+1. Who you are: legal name, DOB, address, BVN or NIN (11 digits). Sellers choose "registered business".
+2. Business (registered sellers only): CAC number, business type.
+3. Bank: bank list, 10-digit account number, live name resolution. The resolved name must match the legal name (order and case ignored).
+4. Verify your ID: only active when `accountStatus = documentsRequired`. A fresh link is requested on every tap and never cached. It opens in an in-app browser (mobile `openAuthSessionAsync` with `zudomart://payouts/verification-return`; web popup with a return page that signals the opener). Return is never trusted: "Checking your documents…", short status poll, then `underReview` (shows `reviewEstimate` from the API), `verified`, or `actionNeeded` with the exact reasons and "Fix it". 503 on the link: "Try again in a moment". Closed halfway: "Verify your ID: not finished".
+
+Steps save to Zudomart immediately and are sent to Paystack later. Per-step sync badge: Saved, Sending, Done, Needs attention. Resume uses `currentStep` from the server.
+
+### 38.2 Contract for go-money (`/api/v1/payments/...`)
+
+Existing: `GET|POST connected-accounts/me`, `POST connected-accounts/me/onboarding-link` (reuse as the document-link minting call). New:
+
+| Route | Body | Response |
+| --- | --- | --- |
+| `GET payout-onboarding/me` | | `PayoutOnboardingState` |
+| `PUT payout-onboarding/me/identity` | `legalName, dateOfBirth, addressLine1, city, state, idType bvn\|nin, idNumber, registeredBusiness` | state (store only last 4 of the id, send the rest to Paystack via the job) |
+| `PUT payout-onboarding/me/business` | `cacNumber, businessType` | state |
+| `POST payout-onboarding/me/resolve` (web) or `POST /api/v1/banks/resolve-account` (mobile) | `bankCode, accountNumber` | `{ accountName }` full name, never masked here |
+| `PUT payout-onboarding/me/bank` | `bankCode, bankName, accountNumber, resolvedAccountName` | state; 422 `NAME_MISMATCH` if the name differs from the legal name |
+| `POST payout-onboarding/me/retry` | | state; safe to call repeatedly; re-queues account creation when `failed` |
+| `POST payout-onboarding/me/document-link` | | `{ url, returnUrl, expiresAt }`; fresh every call; 409 `ACCOUNT_NOT_READY` unless `documentsRequired`; 503 `LINK_UNAVAILABLE` when Paystack is down |
+| `GET payout-fees` | | `{ currency, kind: "flat", fee: Money, arrivalEstimate, firstPayoutNote }`, from the Paystack-published schedule (NGN 5000 minor today), never hardcoded in clients |
+
+Seller dashboard BFF mirrors these under `/seller/payout-onboarding/*` (`fees` instead of `payout-fees`). `document-link/complete` exists only in mocks, standing in for the hosted page and webhook. Real status changes come from Paystack webhooks plus push.
+
+State: `role, status (not_started|in_progress|pending_review|action_needed|verified), currentStep, completedSteps, requiresBusinessStep, legalName, idType, idLast4, bankSummary, documentStatus, accountStatus (pending_creation|documentsRequired|underReview|failed|actionRequired|verified), syncByStep, earningsPendingTransfer, pendingWithdrawable (Money), reviewEstimate, reasons[{step, code, message}], verifiedVia, withdrawalsEnabled, firstEarningsUnlockAt`.
+
+Withdraw endpoints must reject with 403 until `withdrawalsEnabled`. Push: "Your payout account is ready. Verify your ID" when `documentsRequired` is reached, plus gentle reminders and review outcomes (not built yet).
+
+### 38.3 Entry points
+
+Mobile: Creator Studio home, Wallet, seller dashboard (card with 24h-lock countdown copy), Withdraw (locked state, "Finish payout setup", published fee and arrival estimate). Seller dashboard: Settings, Payouts (full flow), Wallet overview and Withdraw (banner, locked form). Studio web: Lives banner and the new Earnings page.
+
+### 38.4 Mock triggers
+
+ID ending `0000` leads to `actionNeeded`; ID starting `99` leaves account creation `failed` until Try again; ID ending `5030` makes the first link request return 503; account number starting `111` resolves to a different name; `000` is not found. Creation takes about 6 s, review about 12 s.
+
+### 38.5 Open items
+
+- **[LATER]** push and in-app notices, reminder cadence, admin view of onboarding states.
+- Mobile Withdraw only checks verification client-side in mock mode.
 - Not tested on a device or in a browser; types checked only.
