@@ -22,6 +22,8 @@ const (
 	FieldAccountID = "account_id"
 	// FieldKind holds the string denoting the kind field in the database.
 	FieldKind = "kind"
+	// FieldCreatorStatus holds the string denoting the creator_status field in the database.
+	FieldCreatorStatus = "creator_status"
 	// FieldHandle holds the string denoting the handle field in the database.
 	FieldHandle = "handle"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -65,6 +67,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldAccountID,
 	FieldKind,
+	FieldCreatorStatus,
 	FieldHandle,
 	FieldDisplayName,
 	FieldBio,
@@ -139,7 +142,6 @@ type Kind string
 // Kind values.
 const (
 	KindPersonal Kind = "personal"
-	KindCreator  Kind = "creator"
 	KindBusiness Kind = "business"
 )
 
@@ -150,10 +152,38 @@ func (k Kind) String() string {
 // KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
 func KindValidator(k Kind) error {
 	switch k {
-	case KindPersonal, KindCreator, KindBusiness:
+	case KindPersonal, KindBusiness:
 		return nil
 	default:
 		return fmt.Errorf("profile: invalid enum value for kind field: %q", k)
+	}
+}
+
+// CreatorStatus defines the type for the "creator_status" enum field.
+type CreatorStatus string
+
+// CreatorStatusNone is the default value of the CreatorStatus enum.
+const DefaultCreatorStatus = CreatorStatusNone
+
+// CreatorStatus values.
+const (
+	CreatorStatusNone     CreatorStatus = "none"
+	CreatorStatusPending  CreatorStatus = "pending"
+	CreatorStatusApproved CreatorStatus = "approved"
+	CreatorStatusRejected CreatorStatus = "rejected"
+)
+
+func (cs CreatorStatus) String() string {
+	return string(cs)
+}
+
+// CreatorStatusValidator is a validator for the "creator_status" field enum values. It is called by the builders before save.
+func CreatorStatusValidator(cs CreatorStatus) error {
+	switch cs {
+	case CreatorStatusNone, CreatorStatusPending, CreatorStatusApproved, CreatorStatusRejected:
+		return nil
+	default:
+		return fmt.Errorf("profile: invalid enum value for creator_status field: %q", cs)
 	}
 }
 
@@ -204,6 +234,11 @@ func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
 // ByKind orders the results by the kind field.
 func ByKind(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKind, opts...).ToFunc()
+}
+
+// ByCreatorStatus orders the results by the creator_status field.
+func ByCreatorStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorStatus, opts...).ToFunc()
 }
 
 // ByHandle orders the results by the handle field.

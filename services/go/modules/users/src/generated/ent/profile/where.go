@@ -226,6 +226,26 @@ func KindNotIn(vs ...Kind) predicate.Profile {
 	return predicate.Profile(sql.FieldNotIn(FieldKind, vs...))
 }
 
+// CreatorStatusEQ applies the EQ predicate on the "creator_status" field.
+func CreatorStatusEQ(v CreatorStatus) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldCreatorStatus, v))
+}
+
+// CreatorStatusNEQ applies the NEQ predicate on the "creator_status" field.
+func CreatorStatusNEQ(v CreatorStatus) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldCreatorStatus, v))
+}
+
+// CreatorStatusIn applies the In predicate on the "creator_status" field.
+func CreatorStatusIn(vs ...CreatorStatus) predicate.Profile {
+	return predicate.Profile(sql.FieldIn(FieldCreatorStatus, vs...))
+}
+
+// CreatorStatusNotIn applies the NotIn predicate on the "creator_status" field.
+func CreatorStatusNotIn(vs ...CreatorStatus) predicate.Profile {
+	return predicate.Profile(sql.FieldNotIn(FieldCreatorStatus, vs...))
+}
+
 // HandleEQ applies the EQ predicate on the "handle" field.
 func HandleEQ(v string) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldHandle, v))
