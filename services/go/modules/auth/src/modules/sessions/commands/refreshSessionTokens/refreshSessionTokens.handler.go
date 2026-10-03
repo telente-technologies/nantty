@@ -49,7 +49,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 			rejection = authErrors.ErrInvalidRefreshToken
 			return nil
 		}
-		owner, err = tx.Account.Query().Where(account.ID(currentSession.AccountID), account.StatusEQ(account.StatusActive)).Only(ctx)
+		owner, err = tx.Account.Query().Where(account.ID(currentSession.AccountID), account.StatusIn(account.StatusActive, account.StatusSuspended)).Only(ctx)
 		if ent.IsNotFound(err) {
 			rejection = authErrors.ErrInvalidRefreshToken
 			return nil
