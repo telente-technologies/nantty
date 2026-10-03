@@ -36,7 +36,7 @@ func (PaymentIntent) Fields() []ent.Field {
 		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
-		field.Enum("status").Values("pending", "succeeded", "failed").Default("pending"),
+		field.Enum("status").Values("pending", "succeeded", "failed", "cancelled").Default("pending"),
 		field.String("authorization_url").MaxLen(2000).Default(""),
 		field.String("provider_transaction_id").MaxLen(120).Default(""),
 		field.Int64("provider_fee_minor").Default(0),

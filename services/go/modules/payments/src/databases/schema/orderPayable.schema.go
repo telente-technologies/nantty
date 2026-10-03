@@ -31,6 +31,8 @@ func (OrderPayable) Fields() []ent.Field {
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
 		field.String("product_summary").MaxLen(300).Default("").Immutable(),
+		field.Enum("payment_mode").Values("escrow", "direct").Default("escrow").Immutable(),
+		field.Bool("store_verified").Default(false).Immutable(),
 	}
 }
 
