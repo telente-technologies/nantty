@@ -1,0 +1,20 @@
+.stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.card { background: var(--surface-card); border: 1px solid var(--divider); border-radius: var(--radius-medium); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.bars { display: flex; gap: 6px; }
+.bar { flex: 1; height: 4px; border-radius: 2px; background: var(--divider); }
+.barDone { background: var(--color-brand); }
+.why { background: var(--surface-brand-tint); border-radius: var(--radius-medium); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: 4px; }
+.muted { margin: 0; font-size: var(--text-sm); color: var(--ink-muted); line-height: 1.5; }
+.title { margin: 0; font-size: var(--text-xl); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-3); }
+.actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.syncRow { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--text-sm); }
+.resolvedName { font-size: var(--text-md); font-weight: 650; }
+.center { text-align: center; padding: var(--space-6) var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); align-items: center; }
+.notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-medium); font-size: var(--text-sm); background: var(--surface-sunken); color: var(--ink-strong); }
+.noticeError { background: var(--error-soft); color: var(--error); }
+.noticeSuccess { background: var(--success-soft); color: var(--success); }
+.banner { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-4); border-radius: var(--radius-medium); background: var(--surface-brand-tint); border: 1px solid var(--divider); }
+.bannerText { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 220px; }
+.bannerLink { font-weight: 600; color: var(--color-brand); text-decoration: none; }
+.select { width: 100%; }
