@@ -91,7 +91,7 @@ export function BillingSettingsView() {
             items={[
               { label: details.cancelAtPeriodEnd ? "Ends on" : "Renews on", value: formatDateForDisplay(subscription?.currentPeriodEnd) },
               { label: "Payment method", value: details.paymentMethodSummary ?? "—" },
-              { label: "Paid through", value: details.provider === "bachs" ? "Bachs" : details.provider === "flutterwave" ? "Flutterwave" : details.provider === "paystack" ? "Paystack" : "—" },
+              { label: "Paid through", value: details.provider === "paystack" ? "Paystack" : "—" },
               ...(offer ? [{ label: "Receipts go to", value: offer.accountEmail }] : []),
             ]}
           />

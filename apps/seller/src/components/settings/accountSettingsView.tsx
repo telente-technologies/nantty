@@ -10,6 +10,7 @@ import { permissionsByStaffRole, sellerPermissionLabels, sellerPermissions } fro
 import { staffRoleLabels } from "@/constants/roles.constant";
 
 import styles from "./settings.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function AccountSettingsView() {
   const { sessionView, can } = useSellerSession();
@@ -20,7 +21,7 @@ export function AccountSettingsView() {
   const isUsingCustomPermissions = Boolean(access.permissions) && role !== "owner";
   return (
     <>
-      <Panel title="Your Zudomart account" description="You sign in to the dashboard with the same account you use in the Zudomart app. Change your name, photo, email, phone or password in the app under Profile → Account.">
+      <Panel title="Your Zudomart account" description="You sign in to the dashboard with the same account you use in the Zudomart app. Change your name, photo, email, phone or password in the app under Profile › Account.">
         <KeyValueList
           items={[
             { label: "Name", value: user.name ?? "—" },
@@ -43,7 +44,7 @@ export function AccountSettingsView() {
         <ul className={styles.checkboxGrid} aria-label="Your permissions">
           {(role && !isUsingCustomPermissions && role !== "owner" ? sellerPermissions.filter((permission) => permissionsByStaffRole[role].has(permission)) : grantedPermissions).map((permission) => (
             <li key={permission} className={styles.mutedText}>
-              ✓ {sellerPermissionLabels[permission]}
+              <IconLabel name="check16" size={14}>{sellerPermissionLabels[permission]}</IconLabel>
             </li>
           ))}
         </ul>

@@ -33,7 +33,7 @@ export function VerificationSettingsView() {
           ]}
         />
       </Panel>
-      <Panel title="Documents" description="Update documents from the Zudomart app under Profile → Store verification.">
+      <Panel title="Documents" description="Update documents from the Zudomart app under Profile › Store verification.">
         {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <Callout tone="error">{verificationQuery.errorMessage}</Callout>}
         {verificationQuery.data?.note ? <Callout tone="info" title="Note from Zudomart">{verificationQuery.data.note}</Callout> : null}
       </Panel>

@@ -59,7 +59,7 @@ export function SecuritySettingsView() {
 
   return (
     <>
-      <Panel title="Sign-in protection" description="These settings belong to your Zudomart account and also protect the app. Change them in the Zudomart app under Profile → Security.">
+      <Panel title="Sign-in protection" description="These settings belong to your Zudomart account and also protect the app. Change them in the Zudomart app under Profile › Security.">
         <div className={styles.formStack}>
           {security.twoStepVerification.enabled ? null : <Callout tone="caution" title="Turn on 2-step verification">Anyone with your password could get into your store and withdraw money. Add an authenticator app or SMS code in the Zudomart app.</Callout>}
           <KeyValueList
