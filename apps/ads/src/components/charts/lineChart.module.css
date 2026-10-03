@@ -46,17 +46,17 @@
 }
 
 .gridLine {
-  stroke: var(--divider-soft);
+  stroke: var(--chart-grid);
   stroke-width: 1;
 }
 
 .baseline {
-  stroke: var(--divider);
+  stroke: var(--color-border-strong);
   stroke-width: 1;
 }
 
 .axisText {
-  fill: var(--ink-faint);
+  fill: var(--chart-axis);
   font-size: var(--fs-12);
   font-variant-numeric: tabular-nums;
 }
@@ -106,7 +106,7 @@
   width: 180px;
   padding: 8px 10px;
   border-radius: var(--radius-medium);
-  background: var(--surface-card);
+  background: var(--color-elevated);
   border: 1px solid var(--divider-soft);
   box-shadow: var(--shadow-float);
   pointer-events: none;
