@@ -25,6 +25,50 @@ channels:
         $ref: '#/components/messages/accountLoggedIn'
       sessionRefreshTokenReuseDetected:
         $ref: '#/components/messages/sessionRefreshTokenReuseDetected'
+      accountPasswordChanged:
+        $ref: '#/components/messages/accountPasswordChanged'
+      sessionRevoked:
+        $ref: '#/components/messages/sessionRevoked'
+      accountDeactivated:
+        $ref: '#/components/messages/accountDeactivated'
+      profileUpdated:
+        $ref: '#/components/messages/profileUpdated'
+      profileVisibilityChanged:
+        $ref: '#/components/messages/profileVisibilityChanged'
+      usernameChanged:
+        $ref: '#/components/messages/usernameChanged'
+      usernameWithheld:
+        $ref: '#/components/messages/usernameWithheld'
+      businessProfileCreated:
+        $ref: '#/components/messages/businessProfileCreated'
+      creatorProfileCreated:
+        $ref: '#/components/messages/creatorProfileCreated'
+      privacySettingsChanged:
+        $ref: '#/components/messages/privacySettingsChanged'
+      consentGranted:
+        $ref: '#/components/messages/consentGranted'
+      consentWithdrawn:
+        $ref: '#/components/messages/consentWithdrawn'
+      policyVersionPublished:
+        $ref: '#/components/messages/policyVersionPublished'
+      dataExportRequested:
+        $ref: '#/components/messages/dataExportRequested'
+      dataExportCompleted:
+        $ref: '#/components/messages/dataExportCompleted'
+      accountDeletionRequested:
+        $ref: '#/components/messages/accountDeletionRequested'
+      accountDeletionCancelled:
+        $ref: '#/components/messages/accountDeletionCancelled'
+      accountDeletionExecuted:
+        $ref: '#/components/messages/accountDeletionExecuted'
+      retentionPolicyUpdated:
+        $ref: '#/components/messages/retentionPolicyUpdated'
+      exchangeRateUpdated:
+        $ref: '#/components/messages/exchangeRateUpdated'
+      staffInvited:
+        $ref: '#/components/messages/staffInvited'
+      platformSettingChanged:
+        $ref: '#/components/messages/platformSettingChanged'
 operations:
   publishAuthEvents:
     action: send
@@ -34,6 +78,43 @@ operations:
       - $ref: '#/channels/domainEvents/messages/accountRegistered'
       - $ref: '#/channels/domainEvents/messages/accountLoggedIn'
       - $ref: '#/channels/domainEvents/messages/sessionRefreshTokenReuseDetected'
+      - $ref: '#/channels/domainEvents/messages/accountPasswordChanged'
+      - $ref: '#/channels/domainEvents/messages/sessionRevoked'
+      - $ref: '#/channels/domainEvents/messages/accountDeactivated'
+  publishUsersEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/profileUpdated'
+      - $ref: '#/channels/domainEvents/messages/profileVisibilityChanged'
+      - $ref: '#/channels/domainEvents/messages/usernameChanged'
+      - $ref: '#/channels/domainEvents/messages/usernameWithheld'
+      - $ref: '#/channels/domainEvents/messages/businessProfileCreated'
+      - $ref: '#/channels/domainEvents/messages/creatorProfileCreated'
+      - $ref: '#/channels/domainEvents/messages/privacySettingsChanged'
+      - $ref: '#/channels/domainEvents/messages/consentGranted'
+      - $ref: '#/channels/domainEvents/messages/consentWithdrawn'
+      - $ref: '#/channels/domainEvents/messages/policyVersionPublished'
+      - $ref: '#/channels/domainEvents/messages/dataExportRequested'
+      - $ref: '#/channels/domainEvents/messages/dataExportCompleted'
+      - $ref: '#/channels/domainEvents/messages/accountDeletionRequested'
+      - $ref: '#/channels/domainEvents/messages/accountDeletionCancelled'
+      - $ref: '#/channels/domainEvents/messages/accountDeletionExecuted'
+      - $ref: '#/channels/domainEvents/messages/retentionPolicyUpdated'
+  publishCurrencyEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/exchangeRateUpdated'
+  publishAdminEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/staffInvited'
+      - $ref: '#/channels/domainEvents/messages/platformSettingChanged'
 components:
   messages:
     accountRegistered:
@@ -57,3 +138,157 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/session.refreshTokenReuseDetected.v1.json' } }
+    accountPasswordChanged:
+      name: account.passwordChanged
+      headers: { type: object, properties: { eventType: { const: account.passwordChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.passwordChanged.v1.json' } }
+    sessionRevoked:
+      name: session.revoked
+      headers: { type: object, properties: { eventType: { const: session.revoked } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/session.revoked.v1.json' } }
+    accountDeactivated:
+      name: account.deactivated
+      headers: { type: object, properties: { eventType: { const: account.deactivated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.deactivated.v1.json' } }
+    profileUpdated:
+      name: profile.updated
+      headers: { type: object, properties: { eventType: { const: profile.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/profile.updated.v1.json' } }
+    profileVisibilityChanged:
+      name: profile.visibilityChanged
+      headers: { type: object, properties: { eventType: { const: profile.visibilityChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/profile.visibilityChanged.v1.json' } }
+    usernameChanged:
+      name: username.changed
+      headers: { type: object, properties: { eventType: { const: username.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/username.changed.v1.json' } }
+    usernameWithheld:
+      name: username.withheld
+      headers: { type: object, properties: { eventType: { const: username.withheld } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/username.withheld.v1.json' } }
+    businessProfileCreated:
+      name: businessProfile.created
+      headers: { type: object, properties: { eventType: { const: businessProfile.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/businessProfile.created.v1.json' } }
+    creatorProfileCreated:
+      name: creatorProfile.created
+      headers: { type: object, properties: { eventType: { const: creatorProfile.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/creatorProfile.created.v1.json' } }
+    privacySettingsChanged:
+      name: privacy.settingsChanged
+      headers: { type: object, properties: { eventType: { const: privacy.settingsChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/privacy.settingsChanged.v1.json' } }
+    consentGranted:
+      name: consent.granted
+      headers: { type: object, properties: { eventType: { const: consent.granted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/consent.granted.v1.json' } }
+    consentWithdrawn:
+      name: consent.withdrawn
+      headers: { type: object, properties: { eventType: { const: consent.withdrawn } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/consent.withdrawn.v1.json' } }
+    policyVersionPublished:
+      name: policyVersion.published
+      headers: { type: object, properties: { eventType: { const: policyVersion.published } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/policyVersion.published.v1.json' } }
+    dataExportRequested:
+      name: dataExport.requested
+      headers: { type: object, properties: { eventType: { const: dataExport.requested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dataExport.requested.v1.json' } }
+    dataExportCompleted:
+      name: dataExport.completed
+      headers: { type: object, properties: { eventType: { const: dataExport.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dataExport.completed.v1.json' } }
+    accountDeletionRequested:
+      name: account.deletionRequested
+      headers: { type: object, properties: { eventType: { const: account.deletionRequested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.deletionRequested.v1.json' } }
+    accountDeletionCancelled:
+      name: account.deletionCancelled
+      headers: { type: object, properties: { eventType: { const: account.deletionCancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.deletionCancelled.v1.json' } }
+    accountDeletionExecuted:
+      name: account.deletionExecuted
+      headers: { type: object, properties: { eventType: { const: account.deletionExecuted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.deletionExecuted.v1.json' } }
+    retentionPolicyUpdated:
+      name: retentionPolicy.updated
+      headers: { type: object, properties: { eventType: { const: retentionPolicy.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/retentionPolicy.updated.v1.json' } }
+    exchangeRateUpdated:
+      name: exchangeRate.updated
+      headers: { type: object, properties: { eventType: { const: exchangeRate.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/exchangeRate.updated.v1.json' } }
+    staffInvited:
+      name: staff.invited
+      headers: { type: object, properties: { eventType: { const: staff.invited } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/staff.invited.v1.json' } }
+    platformSettingChanged:
+      name: platformSetting.changed
+      headers: { type: object, properties: { eventType: { const: platformSetting.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/platformSetting.changed.v1.json' } }
