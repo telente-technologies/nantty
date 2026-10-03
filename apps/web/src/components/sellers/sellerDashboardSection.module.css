@@ -15,8 +15,8 @@
   padding: 40px 16px;
   border-radius: var(--radius-large);
   background:
-    radial-gradient(circle at 50% 40%, var(--blue-200) 0 32%, transparent 32.5%),
-    var(--blue-50);
+    radial-gradient(circle at 50% 40%, var(--surface-tint-blue-disc) 0 32%, transparent 32.5%),
+    var(--surface-tint-blue);
 }
 
 .phone {
@@ -43,7 +43,7 @@
 
 .capabilityIcon {
   margin-bottom: 6px;
-  color: var(--blue-500);
+  color: var(--icon-brand);
 }
 
 .capabilityTitle {
@@ -74,8 +74,8 @@
   gap: 14px;
   padding: 28px;
   border-radius: var(--radius-large);
-  background: var(--blue-900);
-  color: #fff;
+  background: var(--surface-night);
+  color: var(--ink-on-night);
 }
 
 .webDashboardBadge {
@@ -85,8 +85,8 @@
   justify-self: start;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: var(--yellow-500);
-  color: var(--ink-strong);
+  background: var(--surface-sunshine);
+  color: var(--ink-on-sunshine);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -97,7 +97,7 @@
 }
 
 .webDashboardDescription {
-  color: var(--blue-100);
+  color: var(--ink-on-night-muted);
 }
 
 .webDashboardFeatureList {
@@ -114,7 +114,7 @@
 }
 
 .webDashboardFeatureList li > span {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .webDashboardActions {

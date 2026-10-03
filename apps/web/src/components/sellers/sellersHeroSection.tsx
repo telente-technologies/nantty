@@ -6,7 +6,7 @@ import styles from "./sellersHeroSection.module.css";
 
 export function SellersPageHeroSection() {
   return (
-    <section className={styles.hero} aria-labelledby="sellers-hero-heading">
+    <section className={`${styles.hero} lightIsland`} aria-labelledby="sellers-hero-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
           <p className={styles.eyebrow}>Sell on Zudomart</p>

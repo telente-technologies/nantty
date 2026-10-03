@@ -8,7 +8,7 @@
   padding: clamp(24px, 5vw, 56px);
   border-radius: var(--radius-large);
   background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+  box-shadow: inset 0 0 0 1px var(--line-hairline);
 }
 
 .copyColumn {
@@ -32,8 +32,8 @@
   align-items: flex-start;
   padding: 14px 16px;
   border-radius: 12px;
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
   font-size: 0.925rem;
   font-weight: 500;
 }
@@ -44,7 +44,7 @@
 }
 
 .contact a {
-  color: var(--blue-600);
+  color: var(--ink-accent);
   font-weight: 600;
 }
 

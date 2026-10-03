@@ -13,7 +13,7 @@ const dashboardCapabilities: ReadonlyArray<{ readonly icon: FigmaIconName; reado
   { icon: "speedometer24", title: "Performance", description: "Track sales by hour, day and month, and which posts, clips and lives brought buyers to your store." },
 ];
 
-const webDashboardFeatures = ["Point of sale for your physical shop", "Advanced inventory and variants", "Staff accounts and roles", "Sales and tax reports"] as const;
+const webDashboardFeatures = ["Orders from every channel in one place", "Advanced inventory and variants", "Staff accounts and roles", "Sales and tax reports"] as const;
 
 export function SellerDashboardSection() {
   return (

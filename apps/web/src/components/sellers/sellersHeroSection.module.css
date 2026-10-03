@@ -1,7 +1,7 @@
 .hero {
   margin-top: -72px;
   padding-top: calc(72px + clamp(40px, 7vw, 80px));
-  background: var(--yellow-500);
+  background: var(--surface-sunshine);
   overflow: hidden;
 }
 
@@ -23,7 +23,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--yellow-900);
+  color: var(--ink-on-sunshine-accent);
 }
 
 .heading {
@@ -36,12 +36,12 @@
 .lede {
   max-width: 46ch;
   font-size: clamp(1.05rem, 1.6vw, 1.2rem);
-  color: #2b2806;
+  color: var(--ink-on-sunshine);
 }
 
 .dashboardNote {
   max-width: 46ch;
-  color: #2b2806;
+  color: var(--ink-on-sunshine);
   font-size: 0.95rem;
 }
 
