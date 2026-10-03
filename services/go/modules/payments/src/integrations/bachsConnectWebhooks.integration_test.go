@@ -65,10 +65,10 @@ func TestBachsWebhookSignatureIsVerifiedOnTheRawBodyWithinTheTolerance(t *testin
 
 func TestBachsEventsAreClassifiedForRouting(t *testing.T) {
 	cases := map[string]interfaces.WebhookKind{
-		`{"id":"evt_2","type":"dispute.created","account":"acct_s","data":{"dispute_id":"dsp_1","charge_id":"ch_1","amount":"750.00","currency":"NGN","status":"needs_response"}}`:   interfaces.WebhookKindDispute,
-		`{"id":"evt_3","type":"payout.failed","data":{"withdrawal_id":"pay_1","reference":"zmwd_1","status":"failed"}}`:                                                           interfaces.WebhookKindPayout,
-		`{"id":"evt_4","type":"customer.subscription.updated","data":{"subscription_id":"sub_1","status":"trialing","trial_end":"2026-10-17T00:00:00Z","metadata":{"a":"b"}}}`: interfaces.WebhookKindSubscription,
-		`{"id":"evt_5","type":"capability.updated","account":"acct_s","data":{"capability":"payouts","status":"active"}}`:                                                       interfaces.WebhookKindCapability,
+		`{"id":"evt_2","type":"dispute.created","account":"acct_s","data":{"dispute_id":"dsp_1","charge_id":"ch_1","amount":"750.00","currency":"NGN","status":"needs_response"}}`: interfaces.WebhookKindDispute,
+		`{"id":"evt_3","type":"payout.failed","data":{"withdrawal_id":"pay_1","reference":"zmwd_1","status":"failed"}}`:                                                            interfaces.WebhookKindPayout,
+		`{"id":"evt_4","type":"customer.subscription.updated","data":{"subscription_id":"sub_1","status":"trialing","trial_end":"2026-10-17T00:00:00Z","metadata":{"a":"b"}}}`:     interfaces.WebhookKindSubscription,
+		`{"id":"evt_5","type":"capability.updated","account":"acct_s","data":{"capability":"payouts","status":"active"}}`:                                                          interfaces.WebhookKindCapability,
 	}
 	for body, kind := range cases {
 		notification, err := parseBachsWebhookEnvelope([]byte(body))

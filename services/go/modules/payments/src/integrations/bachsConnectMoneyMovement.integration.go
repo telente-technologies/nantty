@@ -11,8 +11,6 @@ import (
 	"zudomart/modules/payments/src/interfaces"
 )
 
-const defaultNairaPayoutFeeMinor = 5_000
-
 type bachsTransferResponse struct {
 	Id     string `json:"id"`
 	Status string `json:"status"`
@@ -146,11 +144,9 @@ func signedMinorAmount(raw *string, currency string) int64 {
 }
 
 func (provider *BachsConnectProvider) QuotePayoutFee(currency string, amountMinor int64) (int64, error) {
-	if fee, configured := provider.settings.PayoutFeeMinorByCurrency[currency]; configured {
-		return fee, nil
+	rule, known := provider.settings.payoutFeeRule(currency)
+	if !known {
+		return 0, fmt.Errorf("%w: no payout fee known for %s", interfaces.ErrCurrencyNotSupported, currency)
 	}
-	if currency == "NGN" {
-		return defaultNairaPayoutFeeMinor, nil
-	}
-	return 0, fmt.Errorf("%w: no payout fee known for %s", interfaces.ErrCurrencyNotSupported, currency)
+	return rule.Quote(amountMinor), nil
 }

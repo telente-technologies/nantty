@@ -19,6 +19,7 @@ type BachsConnectSettings struct {
 	WebhookTolerance         time.Duration
 	SupportedCurrencies      []string
 	PayoutFeeMinorByCurrency map[string]int64
+	PayoutFeeRules           map[string]PayoutFeeRule
 	RequestTimeout           time.Duration
 	MaximumAttempts          int
 	RetryBaseDelay           time.Duration
