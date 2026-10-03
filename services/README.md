@@ -13,6 +13,7 @@ Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.1
 pnpm backend:up                # Postgres+PostGIS, Valkey, LocalStack (SNS/SQS), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
 pnpm backend:dev:identity      # go-identity on :8101 (auth module), reads services/go/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
+pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Paystack keys are empty by default
 ```
 
 Point the mobile app at `http://<your-ip>:8080` with mocks off to use real auth. One-time codes are written to the
@@ -25,6 +26,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | --- | --- |
 | 8080 | gateway (TS) |
 | 8101 | go-identity |
+| 8103 / 9103 | go-money HTTP / internal gRPC |
 | 4000 | realtime (Phoenix, `/ws`) |
 | 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
 | 16379 | Valkey |
@@ -63,9 +65,12 @@ other languages stay ignored.
 | Proto | Server | Callers |
 | --- | --- | --- |
 | `zudomart/money/v1/live_money.proto` (`LiveMoneyService`: `ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | go-money (`MONEY_GRPC_ADDRESS`, default `:9103`) | go-live |
+| `zudomart/money/v1/checkout_money.proto` (`CheckoutMoneyService`: `RegisterCheckoutPayables`, `RecordOrderFulfilment`, `ConfirmOrderReceipt`, `GetOrderEscrow`) | go-money | go-commerce |
 | `zudomart/auth/v1/account_directory.proto` | go-identity | admin, moderation |
 
-Go import: `moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"`.
+Go import: `moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"`. go-money's gRPC requires
+`authorization: Bearer $MONEY_INTERNAL_GRPC_TOKEN` metadata (32+ characters, required in production). Because the workspace
+now includes `services/contracts`, Docker builds that use `go.work` need `services` as the build context (done for go-money).
 
 ### Go deployables (ECS/Fargate)
 
@@ -258,3 +263,83 @@ each command/query is `commands|queries/<name>/<name>.command|query.go` + `<name
 - LiveKit tokens (host, guest, viewer grants) via `livekit/protocol`; remove/mute use the LiveKit RoomService against `LIVEKIT_URL`.
 - Durable timers: DB deadlines plus a 1 s sweep (`LIVE_TIMER_POLL_INTERVAL`). Domain events (`gift.sent`, `battle.*`, `guest.*`, `goal.*`, `leaderboard.updated`, `stage.updated`, `live.*`) go through the outbox; Phoenix consumes them from `realtime-domain-events` and fans them out to `live:{liveId}` (`guest.invited` to `user:{id}`).
 - Migrations: `cd services/go/modules/live && go run ./cmd/generateMigration <name>`; ent codegen: `cd src/databases && go generate ./...`.
+
+## go-money: ledger, payments, escrow, wallet, creators
+
+Every module owns one schema and its own Atlas migrations (applied at start-up with `-c role=svc_<module>`, so the module
+role owns its tables). At runtime all money modules share one pool logged in as **`svc_money`**, a member of the money
+roles, so one Postgres transaction can touch ledger + wallet/escrow/payments/creators rows together. ent clients use
+`sql/schemaconfig` (schema-qualified tables), so a module's code can only address its own tables. Shared building blocks live
+in `modules/ledger/src` and are imported by the other money modules: `databases` (money transactions with retry on
+serialization/deadlock, shared pool), `loaders` (settings, JWKS user + staff verifiers, gRPC server), `events` (outbox with
+attempt count, backoff and dead-lettering), `utils` (durable idempotency, validation), `middlewares` (staff permissions with
+step-up, same `perm:` claims as `platform/staffauth`).
+
+**Ledger** (`modules/ledger`). Accounts (code + currency, kind, normal side, cached balance, version), journal entries
+(unique `reference`, immutable via ent hooks and immutable fields) and lines (positive amounts, `balance_after`). Posting
+validates balance per currency/unit, takes an advisory lock on the reference, locks accounts in a fixed order, enforces
+non-negative balances for user-owned accounts and updates cached balances in the same transaction. Replays with the same
+lines return the original; different lines are rejected. Reversals post an opposite entry once (`reverses_entry_id` unique).
+Integrity: `VerifyTrialBalanceAndCachedBalances` (trial balance per unit + cached balance drift), run daily and exposed at
+`GET /api/v1/admin/ledger/integrity`. Reconciliation: `POST /api/v1/admin/payments/reconciliations {provider, from, to}`
+pulls the provider's settled charges and classifies breaks (`missingInLedger`, `missingAtProvider`, `amountMismatch`,
+`currencyMismatch`), stored and emitted as `reconciliationBreak.found`.
+
+Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:escrow:{escrowId}` → `seller:{id}:pending`
+(locked; a maturity row per credit, `SELLER_CREDIT_HOLD_PERIOD` 24h, matured every 5 min) → `seller:{id}:available` →
+`seller:{id}:reservedPayout` → paid out. Refunds after release take from pending, then available, then book the rest in
+`seller:{id}:debt` (a receivable repaid first from future maturing credits), so no balance ever goes negative. Coins use
+`user:{id}:coins`, `creator:{id}:earnedCoins`, `live:battle:{battleId}:holding:{userId}`, `platform:giftRevenue`,
+`platform:coinTransferFees`, `platform:coinsInCirculation`.
+
+**Payments** (`modules/payments`). `PaymentProvider` interface with Paystack and Flutterwave adapters (minor units at the
+boundary; Flutterwave major units converted without floats), `StoreReceiptVerifier` skeletons for `apple_iap` and
+`google_play` (return `IAP_NOT_CONFIGURED` until credentials exist). Payment intents have our own reference; a new attempt
+cancels the previous pending one, and a late success on a superseded attempt is auto-refunded. Paid only after a
+signature-verified webhook (HMAC-SHA512 / `verif-hash`, constant time) or a verify call, always re-queried from the provider,
+with amount and currency checked. Webhooks are claimed in `webhook_events` (unique provider + event key); a failed
+processing attempt is retried by the provider, a processed one is reported as a duplicate. Refunds and payout transfers are
+claimed before the provider call and never retried automatically when the outcome is unknown. Key/environment mismatches
+(`sk_live_` outside production, test keys in production) fail at boot.
+
+**Escrow** (`modules/escrow`). One escrow per order, split computed at funding (seller rounds down, platform takes the
+remainder, `ESCROW_PLATFORM_COMMISSION_BPS` 500). States `held → released | refunded | disputed | partiallyRefunded`,
+`disputed → held` (buyer closes) and `released → refunded` (post-release refunds), all compare-and-set with a version.
+Auto-release `ESCROW_INSPECTION_PERIOD` (72h) after the delivered timestamp; an open dispute pauses the timer and closing it
+resumes the remaining window. Unverified stores are escrow-only (`DIRECT_PAYMENT_NOT_ALLOWED`); direct orders credit the
+seller's locked balance at payment. `escrow_events` is the audit trail (actor, trigger) for release, refunds and decisions.
+
+**Wallet** (`modules/wallet`). Coin packages (web and app-store packs priced separately; app clients must use IAP), web
+purchases through payments, IAP receipts with the store fee booked as `expense:appStoreFees:{store}`, store refunds that claw
+back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk_flags` row. Transfers take 25%
+(`COIN_TRANSFER_FEE_BPS`, the recipient rounds down). Earned coins convert to cash (`COIN_CASH_VALUES`,
+`CREATOR_MINIMUM_PAYOUTS`) into `seller:{id}:available`. Payout accounts are AES-256-GCM encrypted (owner id as associated
+data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money
+(quoted provider fee), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
+are paid by the daily payout run (`WALLET_PAYOUT_RUN_INTERVAL`, or `POST /api/v1/admin/payouts/run`) through the
+`SellerSettlementAdapter` (`paystackTransfer`; `heldSubaccountRelease` is a stub).
+
+**Creators** (`modules/creators`). Creator tiers (gift share capped at 7000 bps; starter 5000, partner 6000, top 7000),
+program membership, gift transactions and battle settlements, served over `LiveMoneyService`. A gift debits the sender,
+credits the receiver's earned coins (or the host when the receiver is not an approved creator; or the receiver's battle
+holding during a battle) and the platform fee in one transaction, idempotent on sender + key. Battle settlement runs once
+per battle: keep-own pays each holding to its streamer, winner-takes-all moves every holding except host-removed ones to the
+winner, a tie settles as keep-own, viewers are never refunded. Money events are `giftTransaction.committed` and
+`battleSettlement.completed` (go-live publishes the realtime `gift.sent` / `battle.settled`).
+
+| Route | Notes |
+| --- | --- |
+| `GET /api/v1/coins/packages` (`/packs`), `GET /coins/balance`, `GET /coins/transactions` | `X-Client-Platform: ios\|android` lists IAP packs |
+| `POST /coins/purchases` (IK), `POST /coins/purchases/{reference}/verify`, `POST /coins/iap/receipts` (IK) | |
+| `GET /coins/transfers/quote?coins=`, `POST /coins/transfers` (IK), `POST /creators/earnings/convert` (IK) | |
+| `GET /wallets/me`, `/wallets/me/transactions`, `/wallets/me/escrow-holds` | `{available, pending, locked, inEscrow, payoutRequested, negativeBalance}` |
+| `GET/POST /wallets/me/payout-accounts`, `DELETE /wallets/me/payout-accounts/{id}` | |
+| `GET /wallets/me/withdrawals/quote`, `GET/POST /wallets/me/withdrawals` (IK), `POST /wallets/me/withdrawals/{id}/cancel` | |
+| `GET /api/v1/banks?country=`, `POST /banks/resolve-account` | cached 12h, static NG fallback |
+| `POST /payments/initialize` (IK), `POST /payments/orders/{orderId}/verify`, `POST /payments/webhooks/{provider}`, `POST /payments/store-notifications/{store}` | |
+| `GET /orders/{orderId}/escrow`, `POST /orders/{orderId}/disputes` (IK), `GET /disputes`, `GET /disputes/{id}`, `POST /disputes/{id}/messages` (IK), `POST /disputes/{id}/close` | the gateway cannot route `/orders/{id}/…` by prefix yet |
+| Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`zudomart-admin` audience) with `money.*` permissions |
+
+Not built yet: subscriptions and rewards modules (skeletons), Paystack subaccount splits for direct orders, real App Store /
+Play verification, wallet top-ups, seller reserve percentage, admin-editable money settings (env today), payout-account name
+matching against KYC, a timestamp window on webhooks (replay protection is the event-key claim plus provider re-query).
