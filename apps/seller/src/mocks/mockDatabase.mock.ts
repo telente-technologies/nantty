@@ -14,12 +14,6 @@ export interface MockApiSession {
   revoked: boolean;
 }
 
-export interface MockOperatorSession {
-  readonly staffId: string;
-  readonly storeId: string;
-  readonly expiresAtEpochMs: number;
-}
-
 export interface MockUpload {
   readonly uploadId: string;
   readonly fileName: string;
@@ -45,7 +39,6 @@ export interface MockPlatformState {
   apiSessions: Map<string, MockApiSession>;
   accessTokens: Map<string, { readonly userId: string; readonly sessionId: string; readonly expiresAtEpochMs: number }>;
   usedRefreshTokens: Map<string, string>;
-  operatorSessions: Map<string, MockOperatorSession>;
   pendingSubscriptionCheckouts: Map<string, { readonly storeId: string; readonly planId: string }>;
   subscriptionPlans: SubscriptionPlan[];
   idempotentResponses: Map<string, MockResponse>;
@@ -64,7 +57,6 @@ function seedMockPlatformState(): MockPlatformState {
     apiSessions: new Map(),
     accessTokens: new Map(),
     usedRefreshTokens: new Map(),
-    operatorSessions: new Map(),
     pendingSubscriptionCheckouts: new Map(),
     subscriptionPlans: buildDemoSubscriptionPlans(),
     idempotentResponses: new Map(),

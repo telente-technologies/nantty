@@ -1,5 +1,6 @@
 import { appendMockAuditLogEntry, readGlobalMockSlice, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import type { MockPrincipal } from "@/mocks/mockRouter.mock";
+import { convertSubscriptionPlanToGoldBadgeTier } from "@/mocks/mockStoreMembership.mock";
 import { MockHttpError } from "@/mocks/mockResponses.mock";
 import { seedDemoBrandsMockState, type BrandsMockState, type MockBrandRecord } from "@/mocks/seed/demoBrands.mock";
 import type { Brand, BrandMember, BrandSummary, OfficialStoreDetails, OfficialStoreRequirement, ProductBrandRelationship, ProductBrandTag } from "@/types/brand.type";
@@ -67,7 +68,7 @@ export function presentBrand(brand: MockBrandRecord): Brand {
     website: brand.website,
     country: brand.country,
     registration: brand.registration,
-    verification: { status: owningStore?.verificationStatus ?? "unverified", tier: isGold ? subscription?.plan ?? null : null, badgeVisible: isGold },
+    verification: { status: owningStore?.verificationStatus ?? "unverified", tier: isGold ? convertSubscriptionPlanToGoldBadgeTier(subscription?.plan) : null, badgeVisible: isGold },
     officialStore: buildOfficialStoreDetails(brand).officialStore,
     members: brand.members,
     storeIds: brand.storeIds,

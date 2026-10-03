@@ -1,4 +1,4 @@
-import { readMockDatabase, readMockStoreDataset } from "@/mocks/mockDatabase.mock";
+import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { registerEveryMockHandler } from "@/mocks/mockHandlerRegistry.mock";
 import { findMockMembershipForUserAndStore } from "@/mocks/mockStoreMembership.mock";
 import { MockHttpError, respondWithError } from "@/mocks/mockResponses.mock";
@@ -32,13 +32,7 @@ function resolveMockPrincipalFromHeaders(headers: Headers): MockPrincipal | null
   if (!user) return null;
   const membership = findMockMembershipForUserAndStore(user.id, headers.get("x-seller-store"));
   const principal: MockPrincipal = { userId: user.id, storeId: membership?.storeId ?? null, role: membership?.role ?? null, staffId: membership?.staffId ?? null, actorName: user.name };
-  const operatorToken = headers.get("x-seller-operator");
-  if (!operatorToken || !membership) return principal;
-  const operatorSession = database.operatorSessions.get(operatorToken);
-  if (!operatorSession || operatorSession.expiresAtEpochMs < Date.now() || operatorSession.storeId !== membership.storeId) return principal;
-  const operatorStaff = readMockStoreDataset(membership.storeId).staff.find((staff) => staff.id === operatorSession.staffId && staff.status === "active");
-  if (!operatorStaff) return principal;
-  return { ...principal, role: operatorStaff.role, staffId: operatorStaff.id, actorName: operatorStaff.name };
+  return principal;
 }
 
 function parseJsonBodyIfPresent(headers: Headers, body: Uint8Array | null): unknown {
@@ -72,7 +66,7 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
       locationId: call.headers.get("x-seller-location"),
     }));
   } catch (error) {
-    if (error instanceof MockHttpError) return respondWithError(error.status, error.code, error.message);
+    if (error instanceof MockHttpError) return error.status === 402 && error.code === "PLAN_FEATURE_REQUIRED" ? { status: 402, body: { message: error.message, code: error.code, requiredPlan: /business/i.test(error.message) ? "business" : "pro" } } : respondWithError(error.status, error.code, error.message);
     console.error("Mock handler failed", error);
     return respondWithError(500, "MOCK_FAILURE", "The demo backend hit an error.");
   }
