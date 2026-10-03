@@ -26,16 +26,18 @@ export function useCreatorStatus() {
 export type CreatorEntryRoute = "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram";
 
 export function useCreatorEntry() {
-  const { isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
+  const { creatorStatus, isCreatorStatusLoading } = useCreatorStatus();
   const application = useCreatorApplicationQuery();
+  const personalAccountStatus = creatorStatus.data?.status ?? "none";
   const applicationStatus = application.data?.status ?? null;
+  const effectiveStatus = personalAccountStatus === "none" ? applicationStatus ?? "none" : personalAccountStatus;
   const route: CreatorEntryRoute =
-    isApprovedCreator || applicationStatus === "approved"
+    effectiveStatus === "approved"
       ? "CreatorDashboard"
-      : applicationStatus === "pending" || applicationStatus === "rejected"
+      : effectiveStatus === "pending" || effectiveStatus === "rejected"
         ? "CreatorApplicationStatus"
         : "CreatorProgram";
-  const label = route === "CreatorDashboard" ? "Creator Studio" : route === "CreatorApplicationStatus" ? "Application status" : "Join Creator Program";
+  const label = route === "CreatorDashboard" ? "Creator tools" : route === "CreatorApplicationStatus" ? "Creator application status" : "Switch to creator account";
   return { route, label, isLoading: isCreatorStatusLoading || application.isPending };
 }
 
