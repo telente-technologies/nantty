@@ -22,6 +22,8 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// RegistrationBlock is the client for interacting with the RegistrationBlock builders.
+	RegistrationBlock *RegistrationBlockClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// SigningKey is the client for interacting with the SigningKey builders.
@@ -163,6 +165,7 @@ func (tx *Tx) init() {
 	tx.OneTimeCode = NewOneTimeCodeClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
+	tx.RegistrationBlock = NewRegistrationBlockClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.SigningKey = NewSigningKeyClient(tx.config)
 	tx.SocialIdentity = NewSocialIdentityClient(tx.config)

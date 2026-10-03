@@ -27,6 +27,8 @@ type Session struct {
 	UserAgent string `json:"user_agent,omitempty"`
 	// IPAddress holds the value of the "ip_address" field.
 	IPAddress string `json:"ip_address,omitempty"`
+	// DeviceHash holds the value of the "device_hash" field.
+	DeviceHash *string `json:"device_hash,omitempty"`
 	// LastUsedAt holds the value of the "last_used_at" field.
 	LastUsedAt time.Time `json:"last_used_at,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
@@ -77,7 +79,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldUserAgent, session.FieldIPAddress, session.FieldRevokedReason:
+		case session.FieldUserAgent, session.FieldIPAddress, session.FieldDeviceHash, session.FieldRevokedReason:
 			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt, session.FieldLastUsedAt, session.FieldExpiresAt, session.FieldRevokedAt:
 			values[i] = new(sql.NullTime)
@@ -127,6 +129,13 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field ip_address", values[i])
 			} else if value.Valid {
 				_m.IPAddress = value.String
+			}
+		case session.FieldDeviceHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field device_hash", values[i])
+			} else if value.Valid {
+				_m.DeviceHash = new(string)
+				*_m.DeviceHash = value.String
 			}
 		case session.FieldLastUsedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -211,6 +220,11 @@ func (_m *Session) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ip_address=")
 	builder.WriteString(_m.IPAddress)
+	builder.WriteString(", ")
+	if v := _m.DeviceHash; v != nil {
+		builder.WriteString("device_hash=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("last_used_at=")
 	builder.WriteString(_m.LastUsedAt.Format(time.ANSIC))

@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
+	"zudomart/modules/auth/src/generated/ent/registrationblock"
 	"zudomart/modules/auth/src/generated/ent/session"
 	"zudomart/modules/auth/src/generated/ent/signingkey"
 	"zudomart/modules/auth/src/generated/ent/socialidentity"
@@ -61,8 +62,16 @@ func init() {
 	accountDescRoles := accountFields[5].Descriptor()
 	// account.DefaultRoles holds the default value on creation for the roles field.
 	account.DefaultRoles = accountDescRoles.Default.([]string)
+	// accountDescPhoneHash is the schema descriptor for phone_hash field.
+	accountDescPhoneHash := accountFields[8].Descriptor()
+	// account.PhoneHashValidator is a validator for the "phone_hash" field. It is called by the builders before save.
+	account.PhoneHashValidator = accountDescPhoneHash.Validators[0].(func(string) error)
+	// accountDescMustChangePassword is the schema descriptor for must_change_password field.
+	accountDescMustChangePassword := accountFields[10].Descriptor()
+	// account.DefaultMustChangePassword holds the default value on creation for the must_change_password field.
+	account.DefaultMustChangePassword = accountDescMustChangePassword.Default.(bool)
 	// accountDescUpdatedAt is the schema descriptor for updated_at field.
-	accountDescUpdatedAt := accountFields[8].Descriptor()
+	accountDescUpdatedAt := accountFields[11].Descriptor()
 	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -146,6 +155,49 @@ func init() {
 	refreshtokenDescID := refreshtokenMixinFields0[0].Descriptor()
 	// refreshtoken.DefaultID holds the default value on creation for the id field.
 	refreshtoken.DefaultID = refreshtokenDescID.Default.(func() uuid.UUID)
+	registrationblockMixin := schema.RegistrationBlock{}.Mixin()
+	registrationblockMixinFields0 := registrationblockMixin[0].Fields()
+	_ = registrationblockMixinFields0
+	registrationblockFields := schema.RegistrationBlock{}.Fields()
+	_ = registrationblockFields
+	// registrationblockDescCreatedAt is the schema descriptor for created_at field.
+	registrationblockDescCreatedAt := registrationblockMixinFields0[1].Descriptor()
+	// registrationblock.DefaultCreatedAt holds the default value on creation for the created_at field.
+	registrationblock.DefaultCreatedAt = registrationblockDescCreatedAt.Default.(func() time.Time)
+	// registrationblockDescValueHash is the schema descriptor for value_hash field.
+	registrationblockDescValueHash := registrationblockFields[1].Descriptor()
+	// registrationblock.ValueHashValidator is a validator for the "value_hash" field. It is called by the builders before save.
+	registrationblock.ValueHashValidator = func() func(string) error {
+		validators := registrationblockDescValueHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(value_hash string) error {
+			for _, fn := range fns {
+				if err := fn(value_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// registrationblockDescReason is the schema descriptor for reason field.
+	registrationblockDescReason := registrationblockFields[3].Descriptor()
+	// registrationblock.DefaultReason holds the default value on creation for the reason field.
+	registrationblock.DefaultReason = registrationblockDescReason.Default.(string)
+	// registrationblock.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	registrationblock.ReasonValidator = registrationblockDescReason.Validators[0].(func(string) error)
+	// registrationblockDescCreatedBy is the schema descriptor for created_by field.
+	registrationblockDescCreatedBy := registrationblockFields[4].Descriptor()
+	// registrationblock.DefaultCreatedBy holds the default value on creation for the created_by field.
+	registrationblock.DefaultCreatedBy = registrationblockDescCreatedBy.Default.(string)
+	// registrationblock.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	registrationblock.CreatedByValidator = registrationblockDescCreatedBy.Validators[0].(func(string) error)
+	// registrationblockDescID is the schema descriptor for id field.
+	registrationblockDescID := registrationblockMixinFields0[0].Descriptor()
+	// registrationblock.DefaultID holds the default value on creation for the id field.
+	registrationblock.DefaultID = registrationblockDescID.Default.(func() uuid.UUID)
 	sessionMixin := schema.Session{}.Mixin()
 	sessionMixinFields0 := sessionMixin[0].Fields()
 	_ = sessionMixinFields0
@@ -167,6 +219,10 @@ func init() {
 	session.DefaultIPAddress = sessionDescIPAddress.Default.(string)
 	// session.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
 	session.IPAddressValidator = sessionDescIPAddress.Validators[0].(func(string) error)
+	// sessionDescDeviceHash is the schema descriptor for device_hash field.
+	sessionDescDeviceHash := sessionFields[3].Descriptor()
+	// session.DeviceHashValidator is a validator for the "device_hash" field. It is called by the builders before save.
+	session.DeviceHashValidator = sessionDescDeviceHash.Validators[0].(func(string) error)
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionMixinFields0[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.

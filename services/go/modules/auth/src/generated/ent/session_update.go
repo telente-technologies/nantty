@@ -58,6 +58,26 @@ func (_u *SessionUpdate) SetNillableIPAddress(v *string) *SessionUpdate {
 	return _u
 }
 
+// SetDeviceHash sets the "device_hash" field.
+func (_u *SessionUpdate) SetDeviceHash(v string) *SessionUpdate {
+	_u.mutation.SetDeviceHash(v)
+	return _u
+}
+
+// SetNillableDeviceHash sets the "device_hash" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableDeviceHash(v *string) *SessionUpdate {
+	if v != nil {
+		_u.SetDeviceHash(*v)
+	}
+	return _u
+}
+
+// ClearDeviceHash clears the value of the "device_hash" field.
+func (_u *SessionUpdate) ClearDeviceHash() *SessionUpdate {
+	_u.mutation.ClearDeviceHash()
+	return _u
+}
+
 // SetLastUsedAt sets the "last_used_at" field.
 func (_u *SessionUpdate) SetLastUsedAt(v time.Time) *SessionUpdate {
 	_u.mutation.SetLastUsedAt(v)
@@ -206,6 +226,11 @@ func (_u *SessionUpdate) check() error {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "Session.ip_address": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DeviceHash(); ok {
+		if err := session.DeviceHashValidator(v); err != nil {
+			return &ValidationError{Name: "device_hash", err: fmt.Errorf(`ent: validator failed for field "Session.device_hash": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.RevokedReason(); ok {
 		if err := session.RevokedReasonValidator(v); err != nil {
 			return &ValidationError{Name: "revoked_reason", err: fmt.Errorf(`ent: validator failed for field "Session.revoked_reason": %w`, err)}
@@ -234,6 +259,12 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.IPAddress(); ok {
 		_spec.SetField(session.FieldIPAddress, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeviceHash(); ok {
+		_spec.SetField(session.FieldDeviceHash, field.TypeString, value)
+	}
+	if _u.mutation.DeviceHashCleared() {
+		_spec.ClearField(session.FieldDeviceHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.LastUsedAt(); ok {
 		_spec.SetField(session.FieldLastUsedAt, field.TypeTime, value)
@@ -343,6 +374,26 @@ func (_u *SessionUpdateOne) SetNillableIPAddress(v *string) *SessionUpdateOne {
 	if v != nil {
 		_u.SetIPAddress(*v)
 	}
+	return _u
+}
+
+// SetDeviceHash sets the "device_hash" field.
+func (_u *SessionUpdateOne) SetDeviceHash(v string) *SessionUpdateOne {
+	_u.mutation.SetDeviceHash(v)
+	return _u
+}
+
+// SetNillableDeviceHash sets the "device_hash" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableDeviceHash(v *string) *SessionUpdateOne {
+	if v != nil {
+		_u.SetDeviceHash(*v)
+	}
+	return _u
+}
+
+// ClearDeviceHash clears the value of the "device_hash" field.
+func (_u *SessionUpdateOne) ClearDeviceHash() *SessionUpdateOne {
+	_u.mutation.ClearDeviceHash()
 	return _u
 }
 
@@ -507,6 +558,11 @@ func (_u *SessionUpdateOne) check() error {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "Session.ip_address": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DeviceHash(); ok {
+		if err := session.DeviceHashValidator(v); err != nil {
+			return &ValidationError{Name: "device_hash", err: fmt.Errorf(`ent: validator failed for field "Session.device_hash": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.RevokedReason(); ok {
 		if err := session.RevokedReasonValidator(v); err != nil {
 			return &ValidationError{Name: "revoked_reason", err: fmt.Errorf(`ent: validator failed for field "Session.revoked_reason": %w`, err)}
@@ -552,6 +608,12 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	}
 	if value, ok := _u.mutation.IPAddress(); ok {
 		_spec.SetField(session.FieldIPAddress, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeviceHash(); ok {
+		_spec.SetField(session.FieldDeviceHash, field.TypeString, value)
+	}
+	if _u.mutation.DeviceHashCleared() {
+		_spec.ClearField(session.FieldDeviceHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.LastUsedAt(); ok {
 		_spec.SetField(session.FieldLastUsedAt, field.TypeTime, value)

@@ -71,6 +71,20 @@ func (_c *SessionCreate) SetNillableIPAddress(v *string) *SessionCreate {
 	return _c
 }
 
+// SetDeviceHash sets the "device_hash" field.
+func (_c *SessionCreate) SetDeviceHash(v string) *SessionCreate {
+	_c.mutation.SetDeviceHash(v)
+	return _c
+}
+
+// SetNillableDeviceHash sets the "device_hash" field if the given value is not nil.
+func (_c *SessionCreate) SetNillableDeviceHash(v *string) *SessionCreate {
+	if v != nil {
+		_c.SetDeviceHash(*v)
+	}
+	return _c
+}
+
 // SetLastUsedAt sets the "last_used_at" field.
 func (_c *SessionCreate) SetLastUsedAt(v time.Time) *SessionCreate {
 	_c.mutation.SetLastUsedAt(v)
@@ -222,6 +236,11 @@ func (_c *SessionCreate) check() error {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "Session.ip_address": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.DeviceHash(); ok {
+		if err := session.DeviceHashValidator(v); err != nil {
+			return &ValidationError{Name: "device_hash", err: fmt.Errorf(`ent: validator failed for field "Session.device_hash": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.LastUsedAt(); !ok {
 		return &ValidationError{Name: "last_used_at", err: errors.New(`ent: missing required field "Session.last_used_at"`)}
 	}
@@ -282,6 +301,10 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IPAddress(); ok {
 		_spec.SetField(session.FieldIPAddress, field.TypeString, value)
 		_node.IPAddress = value
+	}
+	if value, ok := _c.mutation.DeviceHash(); ok {
+		_spec.SetField(session.FieldDeviceHash, field.TypeString, value)
+		_node.DeviceHash = &value
 	}
 	if value, ok := _c.mutation.LastUsedAt(); ok {
 		_spec.SetField(session.FieldLastUsedAt, field.TypeTime, value)
