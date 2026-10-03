@@ -81,7 +81,7 @@ func (service *LiveService) creditBattleScore(ctx context.Context, tx *ent.Tx, l
 	if err != nil {
 		return err
 	}
-	totals, err := totalGiftsByReceiverAndSender(ctx, tx.Client(), battleId)
+	totals, err := totalGiftsByReceiverAndSender(ctx, tx.Client(), liveId, battleId)
 	if err != nil {
 		return err
 	}

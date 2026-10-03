@@ -50,8 +50,8 @@ type gifterTotal struct {
 
 func battleScopeKey(battleId uuid.UUID) string { return "battle:" + battleId.String() }
 
-func totalGiftsByReceiverAndSender(ctx context.Context, db *ent.Client, battleId uuid.UUID) ([]gifterTotal, error) {
-	rows, err := db.GiftContribution.Query().Where(giftcontribution.ScopeKey(battleScopeKey(battleId))).All(ctx)
+func totalGiftsByReceiverAndSender(ctx context.Context, db *ent.Client, liveId, battleId uuid.UUID) ([]gifterTotal, error) {
+	rows, err := db.GiftContribution.Query().Where(giftcontribution.LiveID(liveId), giftcontribution.ScopeKey(battleScopeKey(battleId))).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (service *LiveService) presentBattle(ctx context.Context, db *ent.Client, b
 	if err != nil {
 		return types.BattleView{}, err
 	}
-	totals, err := totalGiftsByReceiverAndSender(ctx, db, battle.ID)
+	totals, err := totalGiftsByReceiverAndSender(ctx, db, battle.LiveID, battle.ID)
 	if err != nil {
 		return types.BattleView{}, err
 	}
