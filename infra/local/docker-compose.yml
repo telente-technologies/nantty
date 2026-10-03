@@ -34,13 +34,29 @@ services:
     <<: *local-only
     image: localstack/localstack:4.9
     environment:
-      SERVICES: sns,sqs,ses
+      SERVICES: ses
       AWS_DEFAULT_REGION: eu-west-1
     ports: ["127.0.0.1:14566:4566"]
-    volumes: ["./localstack/create-topics-and-queues.sh:/etc/localstack/init/ready.d/10-create-topics-and-queues.sh:ro"]
+    volumes: ["./localstack/create-ses-identities.sh:/etc/localstack/init/ready.d/10-create-ses-identities.sh:ro"]
     healthcheck:
-      test: ["CMD-SHELL", "test -f /tmp/zudomart-messaging-ready"]
+      test: ["CMD-SHELL", "test -f /tmp/zudomart-ses-ready"]
       interval: 5s
+      retries: 30
+
+  rabbitmq:
+    <<: *local-only
+    image: rabbitmq:4-management
+    hostname: zudomart-rabbitmq
+    ports: ["127.0.0.1:5672:5672", "127.0.0.1:15672:15672", "127.0.0.1:15692:15692"]
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-zudomart.conf:ro
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 5s
+      timeout: 10s
       retries: 30
 
   opensearch:
@@ -98,3 +114,4 @@ volumes:
   opensearch-data:
   object-storage-data:
   clickhouse-data:
+  rabbitmq-data:

@@ -1,0 +1,48 @@
+{
+  "vhost": "zudomart",
+  "administrator": "zudomart",
+  "retryTiers": { "30s": 30000, "2m": 120000, "10m": 600000, "30m": 1800000 },
+  "unroutedRetentionMs": 86400000,
+  "services": {
+    "go-identity": { "publishesEvents": true },
+    "go-commerce": { "publishesEvents": true, "consumes": ["commerce-domain-events"] },
+    "go-live": { "publishesEvents": true },
+    "go-money": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-payouts", "money-domain-events"] },
+    "go-ads": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-ads-reports"] },
+    "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory"] },
+    "social": { "publishesEvents": true },
+    "media": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["media-domain-events", "jobs-media"] },
+    "notifications": { "enqueuesJobs": true, "consumes": ["notifications-domain-events", "jobs-email"] },
+    "realtime": { "consumes": ["realtime-domain-events"] },
+    "intelligence": { "enqueuesJobs": true, "consumes": ["intelligence-domain-events"] }
+  },
+  "eventQueues": {
+    "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched"],
+    "commerce-domain-events": [
+      "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
+      "directPayment.received", "dispute.opened", "dispute.closed"
+    ],
+    "notifications-domain-events": [
+      "account.*", "appeal.*", "cardVerification.*", "checkmark.*", "coinPurchase.*", "comment.created",
+      "creatorApplication.*", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
+      "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received",
+      "order.*", "otp.issued", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "policyVersion.published",
+      "report.closed", "sellerDocuments.*", "session.*", "signIn.*", "twoFactor.*", "videoReply.created",
+      "withdrawal.*"
+    ],
+    "media-domain-events": ["chatMedia.expired"],
+    "realtime-domain-events": [
+      "battle.*", "gift.sent", "goal.*", "guest.*", "leaderboard.updated", "live.*", "stage.updated",
+      "message.created", "notification.created"
+    ],
+    "intelligence-domain-events": [
+      "account.registered", "account.loggedIn", "account.deletionRequested", "account.deletionExecuted",
+      "ad.impressionRecorded", "block.created", "consent.granted", "consent.withdrawn", "follow.created",
+      "gift.sent", "message.sent", "post.created", "product.viewed", "report.created"
+    ]
+  },
+  "jobQueues": [
+    "jobs-email", "jobs-media", "jobs-reports", "jobs-payouts", "jobs-search-indexing", "jobs-ads-reports",
+    "intelligence-trust-advisory"
+  ]
+}

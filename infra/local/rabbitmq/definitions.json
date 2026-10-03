@@ -1,0 +1,2553 @@
+{
+  "users": [
+    {
+      "name": "zudomart",
+      "password_hash": "MCi0gBW4obucnKbSpwx3lkVn078psdRt6v8AguiXD8yMhFgm",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ]
+    },
+    {
+      "name": "go-identity",
+      "password_hash": "UQEhNCsvqr08h0MXujWyC2EE/65J6oV/+q6iGvkWn6jci9go",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "go-commerce",
+      "password_hash": "gt0cRiiyUS0lfVI9p3QGkYk9naR7UvvvUB+BWfx5A4lrpraY",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "go-live",
+      "password_hash": "RyHW/vZsq+EsD7gqFNInKE1A3ixuRbh0+yDAnoOf06ylFfar",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "go-money",
+      "password_hash": "OTEf5hyN9hABQQJoCGWE9vYl2pkN/8F0C6SfJfiDRk4iCs/m",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "go-ads",
+      "password_hash": "CklUhkOA3FUASd4s+lBYqXRyTV6A/Q3UXUN3MIOopwDmFGxj",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "go-trust",
+      "password_hash": "ZBMB+F5mSQOB0v0Z1slOkFFXvxPgdm4dcdShltG5LahPCTWo",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "social",
+      "password_hash": "xvXsew5mEq5u8CNLn9IMtHn0+VHEWNVl+BChfOTWXtIHVni3",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "media",
+      "password_hash": "BmTDPkZVYMYToORU/Woe7nZm0Rq6f5jIaNAPer2pC76aYHzN",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "notifications",
+      "password_hash": "oB7pbGP/u3TFwWDEgfkthtQiE6oAxgVRrV4c9dBKCg3ezoQU",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "realtime",
+      "password_hash": "WWqZHH5OdbjNt5lVpKn0L+4Ssu8GJdEYabC2A1b9n9u0XVTb",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "intelligence",
+      "password_hash": "+EoPCZk9LFQFZU07nBtccmJYp0dMo5QjlO8OPURsSutJhbB1",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "zudomart"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "zudomart",
+      "vhost": "zudomart",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "go-identity",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events)$",
+      "read": "^$"
+    },
+    {
+      "user": "go-commerce",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events|zudomart\\.retry)$",
+      "read": "^(commerce-domain-events)$"
+    },
+    {
+      "user": "go-live",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events)$",
+      "read": "^$"
+    },
+    {
+      "user": "go-money",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(jobs-payouts|money-domain-events)$"
+    },
+    {
+      "user": "go-ads",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(jobs-ads-reports)$"
+    },
+    {
+      "user": "go-trust",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events|zudomart\\.retry)$",
+      "read": "^(intelligence-trust-advisory)$"
+    },
+    {
+      "user": "social",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events)$",
+      "read": "^$"
+    },
+    {
+      "user": "media",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(media-domain-events|jobs-media)$"
+    },
+    {
+      "user": "notifications",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(notifications-domain-events|jobs-email)$"
+    },
+    {
+      "user": "realtime",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.retry)$",
+      "read": "^(realtime-domain-events)$"
+    },
+    {
+      "user": "intelligence",
+      "vhost": "zudomart",
+      "configure": "^$",
+      "write": "^(zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(intelligence-domain-events)$"
+    }
+  ],
+  "topic_permissions": [
+    {
+      "user": "go-identity",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^$",
+      "read": "^$"
+    },
+    {
+      "user": "go-commerce",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(commerce-domain-events)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "go-live",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^$",
+      "read": "^$"
+    },
+    {
+      "user": "go-money",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(jobs-payouts|money-domain-events)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "go-ads",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(jobs-ads-reports)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "go-trust",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(intelligence-trust-advisory)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "social",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^$",
+      "read": "^$"
+    },
+    {
+      "user": "media",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(media-domain-events|jobs-media)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "notifications",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(notifications-domain-events|jobs-email)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "realtime",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(realtime-domain-events)\\.retry\\.",
+      "read": "^$"
+    },
+    {
+      "user": "intelligence",
+      "vhost": "zudomart",
+      "exchange": "zudomart.retry",
+      "write": "^(intelligence-domain-events)\\.retry\\.",
+      "read": "^$"
+    }
+  ],
+  "parameters": [],
+  "policies": [],
+  "exchanges": [
+    {
+      "name": "zudomart.events",
+      "vhost": "zudomart",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "alternate-exchange": "zudomart.unrouted"
+      }
+    },
+    {
+      "name": "zudomart.unrouted",
+      "vhost": "zudomart",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "zudomart.jobs",
+      "vhost": "zudomart",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "zudomart.retry",
+      "vhost": "zudomart",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "zudomart.dlx",
+      "vhost": "zudomart",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "unrouted-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-message-ttl": 86400000,
+        "x-max-length": 100000,
+        "x-overflow": "drop-head"
+      }
+    },
+    {
+      "name": "money-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "money-domain-events.dlq"
+      }
+    },
+    {
+      "name": "money-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "money-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "money-domain-events"
+      }
+    },
+    {
+      "name": "money-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "money-domain-events"
+      }
+    },
+    {
+      "name": "money-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "money-domain-events"
+      }
+    },
+    {
+      "name": "money-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "money-domain-events"
+      }
+    },
+    {
+      "name": "commerce-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "commerce-domain-events.dlq"
+      }
+    },
+    {
+      "name": "commerce-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "commerce-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "commerce-domain-events"
+      }
+    },
+    {
+      "name": "commerce-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "commerce-domain-events"
+      }
+    },
+    {
+      "name": "commerce-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "commerce-domain-events"
+      }
+    },
+    {
+      "name": "commerce-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "commerce-domain-events"
+      }
+    },
+    {
+      "name": "notifications-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "notifications-domain-events.dlq"
+      }
+    },
+    {
+      "name": "notifications-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "notifications-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "notifications-domain-events"
+      }
+    },
+    {
+      "name": "notifications-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "notifications-domain-events"
+      }
+    },
+    {
+      "name": "notifications-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "notifications-domain-events"
+      }
+    },
+    {
+      "name": "notifications-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "notifications-domain-events"
+      }
+    },
+    {
+      "name": "media-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "media-domain-events.dlq"
+      }
+    },
+    {
+      "name": "media-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "media-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "media-domain-events"
+      }
+    },
+    {
+      "name": "media-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "media-domain-events"
+      }
+    },
+    {
+      "name": "media-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "media-domain-events"
+      }
+    },
+    {
+      "name": "media-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "media-domain-events"
+      }
+    },
+    {
+      "name": "realtime-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "realtime-domain-events.dlq"
+      }
+    },
+    {
+      "name": "realtime-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "realtime-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "realtime-domain-events"
+      }
+    },
+    {
+      "name": "realtime-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "realtime-domain-events"
+      }
+    },
+    {
+      "name": "realtime-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "realtime-domain-events"
+      }
+    },
+    {
+      "name": "realtime-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "realtime-domain-events"
+      }
+    },
+    {
+      "name": "intelligence-domain-events",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "intelligence-domain-events.dlq"
+      }
+    },
+    {
+      "name": "intelligence-domain-events.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "intelligence-domain-events.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-domain-events"
+      }
+    },
+    {
+      "name": "intelligence-domain-events.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-domain-events"
+      }
+    },
+    {
+      "name": "intelligence-domain-events.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-domain-events"
+      }
+    },
+    {
+      "name": "intelligence-domain-events.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-domain-events"
+      }
+    },
+    {
+      "name": "jobs-email",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-email.dlq"
+      }
+    },
+    {
+      "name": "jobs-email.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-email.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-email"
+      }
+    },
+    {
+      "name": "jobs-email.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-email"
+      }
+    },
+    {
+      "name": "jobs-email.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-email"
+      }
+    },
+    {
+      "name": "jobs-email.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-email"
+      }
+    },
+    {
+      "name": "jobs-media",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-media.dlq"
+      }
+    },
+    {
+      "name": "jobs-media.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-media.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-media"
+      }
+    },
+    {
+      "name": "jobs-media.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-media"
+      }
+    },
+    {
+      "name": "jobs-media.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-media"
+      }
+    },
+    {
+      "name": "jobs-media.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-media"
+      }
+    },
+    {
+      "name": "jobs-reports",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-reports.dlq"
+      }
+    },
+    {
+      "name": "jobs-reports.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-reports.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-reports"
+      }
+    },
+    {
+      "name": "jobs-reports.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-reports"
+      }
+    },
+    {
+      "name": "jobs-reports.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-reports"
+      }
+    },
+    {
+      "name": "jobs-reports.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-reports"
+      }
+    },
+    {
+      "name": "jobs-payouts",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-payouts.dlq"
+      }
+    },
+    {
+      "name": "jobs-payouts.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-payouts.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-payouts"
+      }
+    },
+    {
+      "name": "jobs-payouts.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-payouts"
+      }
+    },
+    {
+      "name": "jobs-payouts.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-payouts"
+      }
+    },
+    {
+      "name": "jobs-payouts.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-payouts"
+      }
+    },
+    {
+      "name": "jobs-search-indexing",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-search-indexing.dlq"
+      }
+    },
+    {
+      "name": "jobs-search-indexing.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-search-indexing.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-search-indexing"
+      }
+    },
+    {
+      "name": "jobs-search-indexing.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-search-indexing"
+      }
+    },
+    {
+      "name": "jobs-search-indexing.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-search-indexing"
+      }
+    },
+    {
+      "name": "jobs-search-indexing.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-search-indexing"
+      }
+    },
+    {
+      "name": "jobs-ads-reports",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-ads-reports.dlq"
+      }
+    },
+    {
+      "name": "jobs-ads-reports.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-ads-reports.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-ads-reports"
+      }
+    },
+    {
+      "name": "jobs-ads-reports.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-ads-reports"
+      }
+    },
+    {
+      "name": "jobs-ads-reports.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-ads-reports"
+      }
+    },
+    {
+      "name": "jobs-ads-reports.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-ads-reports"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "intelligence-trust-advisory.dlq"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-trust-advisory"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-trust-advisory"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-trust-advisory"
+      }
+    },
+    {
+      "name": "intelligence-trust-advisory.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "intelligence-trust-advisory"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "zudomart.unrouted",
+      "vhost": "zudomart",
+      "destination": "unrouted-events",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "money-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "money-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "money-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "money-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "money-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "money-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.refundRequested",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creatorApplication.approved",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adSpend.batched",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "commerce-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.held",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.released",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.refunded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.partiallyRefunded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "directPayment.received",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "dispute.opened",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "dispute.closed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "notifications-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "appeal.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "cardVerification.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "checkmark.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "coinPurchase.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "comment.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creatorApplication.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "dataExport.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "dispute.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "disputeMessage.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "follow.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "followRequest.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "gift.sent",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "live.started",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "mention.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "messageRequest.received",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "order.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "otp.issued",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "payment.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "paymentRefund.bankDetailsRequired",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "payout.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "payoutAccount.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "planInvoice.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "planTrial.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "policyVersion.published",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "report.closed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "sellerDocuments.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "session.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "signIn.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "twoFactor.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "videoReply.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "withdrawal.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "media-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "media-domain-events",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "media-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "media-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "media-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "media-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "media-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "media-domain-events",
+      "destination_type": "queue",
+      "routing_key": "chatMedia.expired",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "realtime-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "battle.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "gift.sent",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "goal.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "guest.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "leaderboard.updated",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "live.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "stage.updated",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "notification.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events.dlq",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-domain-events.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.registered",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.loggedIn",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.deletionRequested",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.deletionExecuted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "ad.impressionRecorded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "block.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "consent.granted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "consent.withdrawn",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "follow.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "gift.sent",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.sent",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "product.viewed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "report.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-email.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-email.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-email",
+      "destination_type": "queue",
+      "routing_key": "jobs-email",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-email.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-email.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-email.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-email.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-email.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-email.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-email.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-email.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-email",
+      "destination_type": "queue",
+      "routing_key": "jobs-email",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-media.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-media.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-media",
+      "destination_type": "queue",
+      "routing_key": "jobs-media",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-media.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-media.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-media.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-media.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-media.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-media.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-media.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-media.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-media",
+      "destination_type": "queue",
+      "routing_key": "jobs-media",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-reports.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-reports",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-reports.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-reports.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-reports.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-reports.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-reports",
+      "destination_type": "queue",
+      "routing_key": "jobs-reports",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-payouts",
+      "destination_type": "queue",
+      "routing_key": "jobs-payouts",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-search-indexing",
+      "destination_type": "queue",
+      "routing_key": "jobs-search-indexing",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-ads-reports",
+      "destination_type": "queue",
+      "routing_key": "jobs-ads-reports",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory.dlq",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "intelligence-trust-advisory",
+      "destination_type": "queue",
+      "routing_key": "intelligence-trust-advisory",
+      "arguments": {}
+    }
+  ]
+}
