@@ -12,7 +12,7 @@ import (
 	"zudomart/modules/live/internal/ent"
 	battlerecord "zudomart/modules/live/internal/ent/battle"
 	"zudomart/modules/live/internal/ent/battleparticipant"
-	"zudomart/modules/live/internal/ent/gifttransaction"
+	"zudomart/modules/live/internal/ent/giftcontribution"
 )
 
 type StoredSettlement struct {
@@ -48,15 +48,18 @@ type gifterTotal struct {
 	Coins      int64     `json:"coins"`
 }
 
-func totalGiftsByReceiverAndSender(ctx context.Context, db *ent.Client, battleId uuid.UUID, before *time.Time) ([]gifterTotal, error) {
-	query := db.GiftTransaction.Query().Where(gifttransaction.BattleID(battleId))
-	if before != nil {
-		query = query.Where(gifttransaction.CreatedAtLTE(*before))
+func battleScopeKey(battleId uuid.UUID) string { return "battle:" + battleId.String() }
+
+func totalGiftsByReceiverAndSender(ctx context.Context, db *ent.Client, battleId uuid.UUID) ([]gifterTotal, error) {
+	rows, err := db.GiftContribution.Query().Where(giftcontribution.ScopeKey(battleScopeKey(battleId))).All(ctx)
+	if err != nil {
+		return nil, err
 	}
-	var totals []gifterTotal
-	err := query.GroupBy(gifttransaction.FieldReceiverID, gifttransaction.FieldSenderID).
-		Aggregate(ent.As(ent.Sum(gifttransaction.FieldTotalCoins), "coins")).Scan(ctx, &totals)
-	return totals, err
+	totals := make([]gifterTotal, 0, len(rows))
+	for _, row := range rows {
+		totals = append(totals, gifterTotal{ReceiverID: row.ReceiverID, SenderID: row.SenderID, Coins: row.Coins})
+	}
+	return totals, nil
 }
 
 func (application *LiveApplication) presentBattle(ctx context.Context, db *ent.Client, battle *ent.Battle) (BattleView, error) {
@@ -64,7 +67,7 @@ func (application *LiveApplication) presentBattle(ctx context.Context, db *ent.C
 	if err != nil {
 		return BattleView{}, err
 	}
-	totals, err := totalGiftsByReceiverAndSender(ctx, db, battle.ID, battle.EndsAt)
+	totals, err := totalGiftsByReceiverAndSender(ctx, db, battle.ID)
 	if err != nil {
 		return BattleView{}, err
 	}
