@@ -67,7 +67,7 @@ func (service *LiveService) startRecordingWhenEnabled(ctx context.Context, sessi
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveRecordingStarted, session.ID.String(), service.Now(), events.LiveRecordingEventData{
-			LiveId: session.ID.String(), RecordingId: recordingId.String(),
+			LiveId: session.ID.String(), HostId: session.HostID.String(), RecordingId: recordingId.String(),
 		})
 	})
 }
@@ -127,10 +127,14 @@ func (service *LiveService) RecordEgressOutcome(ctx context.Context, outcome Egr
 	if err != nil {
 		return err
 	}
+	session, err := service.Client.LiveSession.Get(ctx, row.LiveID)
+	if err != nil {
+		return err
+	}
 	now := service.Now()
 	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		update := tx.LiveRecording.UpdateOneID(row.ID).SetCompletedAt(now)
-		eventType, data := events.LiveRecordingDone, events.LiveRecordingEventData{LiveId: row.LiveID.String(), RecordingId: row.ID.String()}
+		eventType, data := events.LiveRecordingDone, events.LiveRecordingEventData{LiveId: row.LiveID.String(), HostId: session.HostID.String(), RecordingId: row.ID.String()}
 		if outcome.Succeeded {
 			seconds := int64(time.Duration(outcome.DurationNanos) / time.Second)
 			update.SetState(liverecording.StateCompleted).SetDurationSeconds(seconds).SetSizeBytes(outcome.SizeBytes)

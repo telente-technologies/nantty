@@ -37,6 +37,8 @@ func (service *LiveService) IssueMediaToken(ctx context.Context, actor types.Act
 		}
 		if seated {
 			role, canPublish = "guest", true
+		} else if err := service.requireLiveAccess(ctx, session, actor.UserId); err != nil {
+			return types.MediaTokenView{}, err
 		}
 	}
 	participants, err := service.lookupParticipants(ctx, actor.UserId)
