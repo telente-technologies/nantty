@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/entitlement.granted.v1.json",
+  "title": "entitlement.granted",
+  "description": "A subscription now grants its plan: checkmark (blue, gold, black) and seller plan. goIdentity shows the badge (gold only after KYB); seller gating reads sellerPlan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "subscriptionId",
+    "profileId",
+    "profileType",
+    "ownerUserId",
+    "plan",
+    "status"
+  ],
+  "properties": {
+    "subscriptionId": {
+      "type": "string"
+    },
+    "profileId": {
+      "type": "string"
+    },
+    "profileType": {
+      "type": "string"
+    },
+    "ownerUserId": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "checkmark": {
+      "type": "string"
+    },
+    "sellerPlan": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "validUntil": {
+      "type": "string"
+    }
+  }
+}

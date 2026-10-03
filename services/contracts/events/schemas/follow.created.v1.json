@@ -4,6 +4,53 @@
   "title": "FollowCreated",
   "type": "object",
   "additionalProperties": false,
-  "required": ["followId","followerId","followeeId","state"],
-  "properties": { "followId": { "type": "string", "format": "uuid" }, "followerId": { "type": "string", "format": "uuid" }, "followeeId": { "type": "string", "format": "uuid" }, "state": { "enum": ["requested", "accepted"] } }
+  "required": [
+    "followId",
+    "followerId",
+    "followeeId",
+    "state",
+    "recipientUserId",
+    "actor"
+  ],
+  "properties": {
+    "followId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followeeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "url": {
+      "type": "string"
+    },
+    "state": {
+      "const": "accepted"
+    }
+  }
 }

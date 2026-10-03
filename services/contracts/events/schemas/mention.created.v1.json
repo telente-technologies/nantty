@@ -4,6 +4,68 @@
   "title": "MentionCreated",
   "type": "object",
   "additionalProperties": false,
-  "required": ["authorId","surface"],
-  "properties": { "mentionedUserId": { "type": "string", "format": "uuid" }, "authorId": { "type": "string", "format": "uuid" }, "surface": { "enum": ["post", "comment", "group"] }, "postId": { "type": "string", "format": "uuid" }, "commentId": { "type": "string", "format": "uuid" }, "conversationId": { "type": "string", "format": "uuid" }, "mentionsAll": { "type": "boolean" }, "recipientIds": { "type": "array", "items": { "type": "string", "format": "uuid" } } }
+  "required": [
+    "recipientUserId",
+    "actor",
+    "surface"
+  ],
+  "properties": {
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "mentionedUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "surface": {
+      "enum": [
+        "post",
+        "comment",
+        "group"
+      ]
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "commentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "mentionedEveryone": {
+      "type": "boolean"
+    }
+  }
 }

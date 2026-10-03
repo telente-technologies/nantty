@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/followRequest.created.v1.json",
+  "title": "FollowRequestCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "followId",
+    "followerId",
+    "followeeId",
+    "recipientUserId",
+    "actor"
+  ],
+  "properties": {
+    "followId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followeeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

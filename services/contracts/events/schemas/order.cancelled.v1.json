@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/order.cancelled.v1.json",
+  "title": "OrderCancelled",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "checkoutId",
+    "reason",
+    "status"
+  ],
+  "properties": {
+    "checkoutId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    }
+  }
+}
