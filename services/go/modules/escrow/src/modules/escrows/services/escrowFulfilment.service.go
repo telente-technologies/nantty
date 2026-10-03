@@ -46,7 +46,7 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 			update.SetShippedAt(occurredAt)
 		}
 		if held.Status == escrow.StatusHeld {
-			update.SetAutoReleaseAt(occurredAt.Add(service.Container.Settings.InspectionPeriod))
+			update.SetAutoReleaseAt(occurredAt.Add(service.Container.Policy(ctx).AutoReleasePeriod))
 		}
 	default:
 		return nil, ErrInvalidFulfilmentStage

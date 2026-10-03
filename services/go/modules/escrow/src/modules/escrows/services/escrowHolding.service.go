@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/modules/escrows/models"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/platform/httpserver"
 )
@@ -62,32 +63,64 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 		return err
 	}
 	now := service.Container.Now().UTC()
-	held, err := client.Escrow.Create().
+	direct := payable.PaymentMode == "direct"
+	create := client.Escrow.Create().
 		SetOrderID(payable.OrderId).SetOrderReference(payable.OrderReference).SetCheckoutID(payable.CheckoutId).
 		SetPaymentIntentID(payment.IntentId).SetPaymentReference(payment.Reference).SetProvider(payment.Provider).
 		SetBuyerUserID(payable.BuyerUserId).SetStoreID(payable.StoreId).SetSellerUserID(payable.SellerUserId).
 		SetProductSummary(payable.ProductSummary).SetAmountMinor(payable.AmountMinor).SetCurrency(payable.Currency).
 		SetCommissionBps(commissionBps).SetCommissionMinor(split.CommissionMinor).SetSellerAmountMinor(split.SellerAmountMinor).
-		SetCreatedAt(now).Save(ctx)
+		SetCreatedAt(now)
+	if direct {
+		create.SetPaymentMode(escrow.PaymentModeDirect).SetStatus(escrow.StatusReleased).SetReleasedAt(now).
+			SetReleaseTrigger("directPayment").SetReleasedToSellerMinor(split.SellerAmountMinor)
+	}
+	held, err := create.Save(ctx)
 	if err != nil {
 		return fmt.Errorf("insert escrow for order %s: %w", payable.OrderId, err)
 	}
-	_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+	awaiting := ledgermodels.JournalLineRequest{Account: ledgermodels.PaymentsAwaitingApplicationAccount(payable.Currency), Direction: ledgermodels.Debit, AmountMinor: payable.AmountMinor}
+	if direct {
+		if err := service.creditSellerAndPlatform(ctx, transaction, held, awaiting, "direct-payment:"+payable.OrderId, "Order "+payable.OrderReference+" paid directly"); err != nil {
+			return err
+		}
+	} else if _, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "escrow-hold:" + payable.OrderId, Kind: "escrow.held", Description: "Order " + payable.OrderReference + " paid into escrow",
 		Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference},
 		Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.PaymentsAwaitingApplicationAccount(payable.Currency), Direction: ledgermodels.Debit, AmountMinor: payable.AmountMinor},
-			{Account: ledgermodels.EscrowHoldingAccount(held.ID.String(), payable.Currency), Direction: ledgermodels.Credit, AmountMinor: payable.AmountMinor},
+			awaiting,
+			{Account: ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), payable.Currency), Direction: ledgermodels.Credit, AmountMinor: payable.AmountMinor},
 		},
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
-	if err := service.recordEscrowEvent(ctx, client, held.ID, "held", "system", "", map[string]any{"paymentReference": payment.Reference}); err != nil {
+	eventType, outboxType := "held", "escrow.held"
+	if direct {
+		eventType, outboxType = "paid_directly", "directPayment.received"
+	}
+	if err := service.recordEscrowEvent(ctx, client, held.ID, eventType, "system", "", map[string]any{"paymentReference": payment.Reference}); err != nil {
 		return err
 	}
-	return service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow.held", held.OrderID, now, escrowEventData(held))
+	return service.Container.Outbox.EnqueueInTransaction(ctx, transaction, outboxType, held.OrderID, now, escrowEventData(held))
 }
+
+func (service EscrowService) creditSellerAndPlatform(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, source ledgermodels.JournalLineRequest, reference, description string) error {
+	lines := []ledgermodels.JournalLineRequest{source}
+	lines = appendPositiveCredit(lines, ledgermodels.SellerPendingAccount(held.SellerUserID, held.Currency), held.SellerAmountMinor)
+	lines = appendPositiveCredit(lines, ledgermodels.PlatformCommissionRevenueAccount(held.Currency), held.CommissionMinor)
+	if _, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+		Reference: reference, Kind: "sellerCredit.locked", Description: description,
+		Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": held.OrderID}, Lines: lines,
+	}); err != nil {
+		return err
+	}
+	return service.Container.Sellers.ScheduleLockedCreditInTransaction(ctx, transaction, sellerbalances.LockedSellerCredit{
+		SellerUserId: held.SellerUserID, Currency: held.Currency, AmountMinor: held.SellerAmountMinor,
+		SourceReference: OrderCreditReference(held.OrderID), AvailableAt: service.Container.Now().Add(service.Container.Policy(ctx).SellerCreditHoldPeriod),
+	})
+}
+
+func OrderCreditReference(orderId string) string { return "order-credit:" + orderId }
 
 func (service EscrowService) recordEscrowEvent(ctx context.Context, client *ent.Client, escrowId uuid.UUID, eventType, actorType, actorId string, details map[string]any) error {
 	encoded, err := json.Marshal(details)
