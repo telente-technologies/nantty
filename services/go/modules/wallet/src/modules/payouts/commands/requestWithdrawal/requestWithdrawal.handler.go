@@ -15,11 +15,15 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.WithdrawalDto, bool, error) {
 	application := handler.Application
+	providerAvailable, err := application.Container.Payments.ReadProviderAvailableBalanceForUser(ctx, command.UserId, command.Currency)
+	if err != nil {
+		return dtos.WithdrawalDto{}, false, err
+	}
 	return ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.WithdrawalDto]{
 		Scope: command.UserId + ":wallet.withdraw", Key: command.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.PayoutAccountId, command.AmountMinor, command.Currency),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.WithdrawalDto, error) {
-			return application.Withdrawals.RequestWithdrawalInTransaction(ctx, transaction, command.UserId, command.PayoutAccountId, command.AmountMinor, command.Currency)
+			return application.Withdrawals.RequestWithdrawalInTransaction(ctx, transaction, command.UserId, command.PayoutAccountId, command.AmountMinor, command.Currency, providerAvailable)
 		},
 	})
 }
