@@ -3,7 +3,7 @@
 import { formatMonthKeyAsLongLabel, formatMonthKeyAsShortLabel } from "@/components/customers/customerPresentation.util";
 import { HorizontalBarList } from "@/components/charts/horizontalBarList";
 import { LineChart } from "@/components/charts/lineChart";
-import { renderStarsForRating } from "@/components/reviews/reviewCard";
+import { StarRating } from "@/components/reviews/reviewCard";
 import { Panel } from "@/components/ui/panel";
 import type { ReviewsSummary } from "@/types/review.type";
 import { formatBasisPointsAsPercent } from "@/utils/money.util";
@@ -18,7 +18,7 @@ export function ReviewsSummaryPanel({ summary, locale }: { readonly summary: Rev
       <Panel title="Reputation">
         <div className={styles.stack}>
           <p className={styles.bigRating}>{averageRating.toFixed(1)}</p>
-          <p className={styles.stars} aria-hidden="true">{renderStarsForRating(averageRating)}</p>
+          <p className={styles.stars} aria-hidden="true"><StarRating rating={averageRating} /></p>
           <p className={styles.muted}>{summary.totalReviews.toLocaleString(locale)} reviews · {summary.productReviews} product · {summary.storeReviews} store</p>
           <p className={styles.muted}>You replied to {formatBasisPointsAsPercent(summary.responseRateBasisPoints)} · {summary.unansweredCount} waiting for a reply</p>
           <HorizontalBarList
@@ -35,7 +35,7 @@ export function ReviewsSummaryPanel({ summary, locale }: { readonly summary: Rev
             description="A line showing the average star rating each month."
             series={[{ key: "rating", label: "Average rating", colorVariable: "--caution" }]}
             points={summary.trend.map((point) => ({ label: `${formatMonthKeyAsLongLabel(point.month, locale)} · ${point.reviewCount} reviews`, shortLabel: formatMonthKeyAsShortLabel(point.month, locale), values: { rating: point.averageRatingHundredths } }))}
-            formatValue={(value) => `${(value / 100).toFixed(2)} ★`}
+            formatValue={(value) => `${(value / 100).toFixed(2)} stars`}
             formatAxisValue={(value) => (value / 100).toFixed(1)}
             height={220}
           />

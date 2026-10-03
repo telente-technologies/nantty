@@ -13,10 +13,19 @@ import type { Review } from "@/types/review.type";
 import { formatDateForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./reviews.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
 
-export function renderStarsForRating(rating: number): string {
+export function StarRating({ rating }: { readonly rating: number }) {
   const rounded = Math.round(rating);
-  return `${"★".repeat(rounded)}${"☆".repeat(Math.max(0, 5 - rounded))}`;
+  return (
+    <span style={{ display: "inline-flex", gap: 2 }}>
+      {[1, 2, 3, 4, 5].map((position) => (
+        <span key={position} style={{ opacity: position <= rounded ? 1 : 0.25 }}>
+          <ZudoIcon name="star16" size={14} />
+        </span>
+      ))}
+    </span>
+  );
 }
 
 export function ReviewCard({ review, onReviewChanged }: { readonly review: Review; readonly onReviewChanged: (review: Review) => void }) {
@@ -61,7 +70,7 @@ export function ReviewCard({ review, onReviewChanged }: { readonly review: Revie
           <span className={styles.muted}>@{review.author.username} · {formatRelativeTimeFromNow(review.createdAt)}{review.orderNumber ? ` · ${review.orderNumber}` : ""}</span>
         </span>
         <span className={styles.badges}>
-          <span className={styles.stars} aria-label={`${review.rating} out of 5 stars`}>{renderStarsForRating(review.rating)}</span>
+          <span className={styles.stars} aria-label={`${review.rating} out of 5 stars`}><StarRating rating={review.rating} /></span>
           <StatusBadge tone={review.kind === "store" ? "highlight" : "neutral"}>{review.kind === "store" ? "Store review" : "Product review"}</StatusBadge>
           {review.isVerifiedPurchase ? <StatusBadge tone="success">Verified purchase</StatusBadge> : null}
           {review.status === "reported" ? <StatusBadge tone="caution">Reported</StatusBadge> : null}
