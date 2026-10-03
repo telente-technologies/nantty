@@ -21,6 +21,7 @@ type UserView struct {
 	Verified      bool     `json:"verified"`
 	IsCreator     bool     `json:"isCreator"`
 	CreatorStatus string   `json:"creatorStatus"`
+	AccountStatus string   `json:"accountStatus"`
 	IsSeller      bool     `json:"isSeller"`
 	IsPrivate     bool     `json:"isPrivate"`
 	StoreId       *string  `json:"storeId"`
@@ -57,7 +58,7 @@ func BuildUserView(row *ent.Profile, summary identityports.AccountSummary, inclu
 	view := UserView{
 		Id: row.AccountID.String(), ProfileId: row.ID.String(), Name: row.DisplayName, Username: row.Handle,
 		AvatarUrl: row.AvatarURL, BannerUrl: row.BannerURL, Bio: row.Bio, Website: row.Website,
-		Verified: row.Verified, IsCreator: row.CreatorStatus == profile.CreatorStatusApproved, CreatorStatus: string(row.CreatorStatus), IsSeller: containsRole(summary.Roles, "seller"), IsPrivate: row.IsPrivate,
+		Verified: row.Verified, IsCreator: row.CreatorStatus == profile.CreatorStatusApproved, CreatorStatus: string(row.CreatorStatus), AccountStatus: summary.Status, IsSeller: containsRole(summary.Roles, "seller"), IsPrivate: row.IsPrivate,
 		CountryCode: row.CountryCode, JoinedAt: joinedAt, CreatedAt: joinedAt,
 	}
 	if includePrivateFields {
