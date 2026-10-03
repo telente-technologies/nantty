@@ -53,6 +53,8 @@ export const storeIdForProduct = (productId: string) => findCatalogSeedByProduct
 const sumMoney = (amounts: readonly Money[], currency: Money["currency"]): Money =>
   ({ amountMinor: amounts.reduce((total, amount) => total + amount.amountMinor, 0), currency });
 
+export const mockStoreCreditBalanceMinorByStore: Readonly<Record<string, number>> = { s_ada: 150 };
+
 export const buildSellerGroups = (destination: GeoSelection | null): CartSellerGroup[] => {
   const zero = convertUsdCentsToViewerCurrency(0);
   const items = mockCartState.lines.map(buildCartItemFromLine);
@@ -61,6 +63,7 @@ export const buildSellerGroups = (destination: GeoSelection | null): CartSellerG
     const groupItems = items.filter((item) => storeIdForProduct(item.product.id) === storeId);
     const subtotal = sumMoney(groupItems.map((item) => multiplyMoneyByQuantity(item.product.price, item.quantity)), zero.currency);
     const shipping = quoteSellerShipping(storeId, subtotal, destination);
+    const storeCredit = { ...zero, amountMinor: Math.min(subtotal.amountMinor, mockStoreCreditBalanceMinorByStore[storeId] ?? 0) };
     const shippingFee = shipping.status === "calculated" ? shipping.fee!.amountMinor : 0;
     return {
       storeId,
@@ -68,8 +71,9 @@ export const buildSellerGroups = (destination: GeoSelection | null): CartSellerG
       items: groupItems,
       subtotal,
       discounts: zero,
+      storeCredit,
       shipping,
-      total: { ...subtotal, amountMinor: subtotal.amountMinor + shippingFee },
+      total: { ...subtotal, amountMinor: subtotal.amountMinor - storeCredit.amountMinor + shippingFee },
     };
   });
 };
@@ -82,12 +86,14 @@ export const summariseMockCart = (destination: GeoSelection | null = null, addre
   const countedGroups = destination ? groups.filter(isGroupPayable) : groups;
   const itemsTotal = sumMoney(countedGroups.map((group) => group.subtotal), zero.currency);
   const shipping = sumMoney(countedGroups.map((group) => group.shipping.fee ?? zero), zero.currency);
+  const storeCredit = sumMoney(countedGroups.map((group) => group.storeCredit), zero.currency);
   return {
     items: groups.flatMap((group) => group.items),
     itemsTotal,
     shopDiscount: zero,
+    storeCredit,
     shipping,
-    total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor + shipping.amountMinor },
+    total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor - storeCredit.amountMinor + shipping.amountMinor },
     groups,
     addressId,
     payableGroupCount: destination ? countedGroups.length : 0,

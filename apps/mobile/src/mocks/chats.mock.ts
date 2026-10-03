@@ -3,10 +3,12 @@ import type { Conversation, Message, UserSummary } from "@/types";
 
 import { ApiError } from "@/errors/api.error";
 
+import { buildAttachmentSeedMessages, buildMessagePreviewText, buildPollFromInput, type PollInput } from "./chatAttachments.mock";
 import { buildExpiredMediaSeedMessages, buildLinkSeedMessages } from "./chatRichSeedMessages.mock";
 import { decorateConversation, isConversationHidden, isHiddenByMessageRequestAudience, isOutgoingRequestAllowedByPeer } from "./chatInboxState.mock";
 import { conversationHasStreak, recordStreakSendByMe, seedStreak } from "./chatStreakEngine.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
+import { notifyMentionedUsers, sanitizeMentionsForWrite } from "./mentionRules.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
@@ -74,6 +76,7 @@ export const mockMessagesByConversation = new Map<string, Message[]>([
     [
       ...buildExpiredMediaSeedMessages("c_1", "u_21", textMessage),
       ...buildLinkSeedMessages("c_1", "u_21", textMessage),
+      ...buildAttachmentSeedMessages("c_1", "u_21", textMessage),
       textMessage("m_c1_1", "c_1", "u_21", "Good evening dear, how far with the dress?", 1),
       { ...textMessage("m_c1_2", "c_1", "u_me", "Almost ready! Tailor said Thursday latest", 0.8), readAt: isoDateHoursAgo(0.7) },
       textMessage("m_c1_3", "c_1", "u_21", "Abeg send me the pictures of the aso-ebi when you can 🙏", 0.4),
@@ -137,7 +140,7 @@ export function appendMockMessageAndUpdateConversation(message: Message) {
   const index = mockConversations.findIndex((c) => c.id === message.conversationId);
   if (index >= 0) {
     const current = mockConversations[index]!;
-    mockConversations[index] = { ...current, lastMessage: message.kind === "voice" ? "🎤 Voice note" : message.kind === "shared" ? message.text || "Shared content" : message.text, lastMessageAt: message.createdAt };
+    mockConversations[index] = { ...current, lastMessage: buildMessagePreviewText(message), lastMessageAt: message.createdAt };
   }
   return message;
 }
@@ -186,7 +189,7 @@ export const chatsMocks: MockRoute[] = [
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text: string; kind?: "voice" | "image" | "shared"; mediaId?: string; durationSeconds?: number; linkPreview?: Message["linkPreview"]; sharedContent?: Message["sharedContent"] };
+    const input = body as { text: string; kind?: "voice" | "image" | "shared" | "location" | "liveLocation" | "document" | "poll"; location?: Message["location"]; document?: Message["document"]; poll?: PollInput; mediaId?: string; durationSeconds?: number; linkPreview?: Message["linkPreview"]; sharedContent?: Message["sharedContent"]; mentions?: Message["mentions"] };
     const conversation = findMockConversation(params.conversationId!);
     if (outgoingRequestConversationIds.has(conversation.id) && !isOutgoingRequestAllowedByPeer(conversation.peer.id)) {
       throw new ApiError(403, `${conversation.peer.name} isn't accepting message requests from you`);
@@ -198,6 +201,9 @@ export const chatsMocks: MockRoute[] = [
         : input.kind === "image" && input.mediaId
           ? { id: input.mediaId, type: "image" as const, url: null }
           : null;
+    const isGroupConversation = conversation.kind === "group";
+    const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, isGroupConversation ? "group" : "direct", conversation.id);
+    if (isGroupConversation) notifyMentionedUsers(getSignedInMockUser(), sanitizedMentions, "group", conversation.id);
     if (conversationHasStreak(conversation.id)) recordStreakSendByMe(conversation.id);
     return appendMockMessageAndUpdateConversation({
       id: `m_${Date.now()}`,
@@ -205,9 +211,13 @@ export const chatsMocks: MockRoute[] = [
       senderId: getSignedInMockUser().id,
       text: input.text,
       createdAt,
+      ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
       kind: input.kind ?? "text",
       media,
-      mediaExpiresAt: media ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
+      mediaExpiresAt: media || input.document ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
+      location: input.location ? { ...input.location, updatedAt: createdAt } : null,
+      document: input.document ?? null,
+      poll: input.poll ? buildPollFromInput(input.poll) : null,
       linkPreview: input.linkPreview ?? null,
       sharedContent: input.sharedContent ?? null,
       encryption: { deviceId: "mock-device-1", ciphertext: null, protocol: "signal-v1-pending" },

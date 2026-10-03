@@ -8,7 +8,7 @@ import { withViewerSavedState } from "./savedEntries.mock";
 import { hasSignedInViewerSubscribedToCreator } from "./creatorSubscriptions.mock";
 import { currentSoundForClip } from "./soundCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isAuthorContentVisibleToSignedInViewer, isFollowingUser } from "./socialGraph.mock";
-import { userSummaryById } from "./userDirectory.mock";
+import { SUSPENDED_USER_IDS, userSummaryById } from "./userDirectory.mock";
 
 const CLIPS_PAGE_SIZE = 6;
 const CLIP_IDS_BY_CREATORS = new Set(["clip_amaka_haul", "clip_aisha_fitcheck", "clip_kelechi_bts", "clip_olumide_barber", "clip_bisola_jollof", "clip_dami_break"]);
@@ -79,10 +79,12 @@ const withCurrentSound = (clip: Clip): Clip => ({
 });
 
 export const findMockClipsByIds = (clipIds: readonly string[]): Clip[] =>
-  clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip && isAuthorContentVisibleToSignedInViewer(clip.author.id)).map(withCurrentSound);
+  clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip && !SUSPENDED_USER_IDS.has(clip.author.id) && isAuthorContentVisibleToSignedInViewer(clip.author.id)).map(withCurrentSound);
+
+const isClipAuthorVisible = (authorId: string) => isAuthorContentVisibleToSignedInViewer(authorId) && !SUSPENDED_USER_IDS.has(authorId);
 
 const listClipsForFeedTab = (tab: string | null): readonly Clip[] => {
-  const visibleClips = allClips.filter((clip) => isAuthorContentVisibleToSignedInViewer(clip.author.id));
+  const visibleClips = allClips.filter((clip) => isClipAuthorVisible(clip.author.id));
   return tab === "following" ? visibleClips.filter((clip) => clip.isFollowingAuthor && !clip.sponsored).reverse() : visibleClips;
 };
 

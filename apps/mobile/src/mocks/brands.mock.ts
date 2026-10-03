@@ -1,4 +1,5 @@
 import { ApiError } from "@/errors/api.error";
+import { verificationForProfileKind } from "@/utils/verificationProfile.util";
 import type { ActingProfile, BrandProducts, NewBrandInput } from "@/types/brand.type";
 
 import { BRAND_ID_BY_PRODUCT_KEY, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
@@ -6,7 +7,7 @@ import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { buildCatalogProductSummary, catalogProductSeeds } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { findDirectoryStoreById } from "./storeDirectory.mock";
+import { findDirectoryStoreById, summariseStore } from "./storeDirectory.mock";
 import { checkAvailability } from "./username.mock";
 
 export const followedBrandIds = new Set<string>(["br_adire"]);
@@ -20,15 +21,15 @@ const findBrandOrThrow = (brandId: string) => {
 
 function listProfilesOfSignedInUser(): ActingProfile[] {
   const user = getSignedInMockUser();
-  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: user.verification ?? null };
+  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: verificationForProfileKind(user.verification, "person") };
   const store = user.storeId ? findDirectoryStoreById(user.storeId) : null;
   const storeProfile: ActingProfile[] = store
-    ? [{ kind: "store", id: store.id, name: store.name, handle: store.handle, avatarUrl: user.avatarUrl, verification: user.verification ?? null }]
+    ? [{ kind: "store", id: store.id, name: store.name, handle: store.handle, avatarUrl: user.avatarUrl, verification: summariseStore(store).verification ?? null }]
     : [];
   const brandProfiles: ActingProfile[] = mockBrandRecords
     .filter((brand) => brand.ownerUserKey === user.id)
     .map((brand) => ({ kind: "brand", id: brand.id, name: brand.name, handle: brand.handle, avatarUrl: brand.logoUrl, verification: brand.verification }));
-  const creatorProfile: ActingProfile = { kind: "creator", id: `creator_${user.id}`, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: user.verification ?? null };
+  const creatorProfile: ActingProfile = { kind: "creator", id: `creator_${user.id}`, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: verificationForProfileKind(user.verification, "creator") };
   return [person, creatorProfile, ...mockBusinessProfiles, ...storeProfile, ...brandProfiles];
 }
 

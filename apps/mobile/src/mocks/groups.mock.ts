@@ -11,6 +11,7 @@ import type {
 
 import { appendMockMessageAndUpdateConversation, findMockConversation, mockChatUser, mockConversations, mockMessagesByConversation } from "./chats.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
+import { registerGroupMentionLookup } from "./mentionRules.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const membersByConversationId = new Map<string, ConversationMember[]>([
@@ -25,6 +26,17 @@ const membersByConversationId = new Map<string, ConversationMember[]>([
     ],
   ],
 ]);
+
+registerGroupMentionLookup((conversationId, authorId) => {
+  const members = membersByConversationId.get(conversationId);
+  if (!members) return null;
+  const authorRole = members.find((member) => member.user.id === authorId)?.role;
+  return {
+    memberUserIds: members.map((member) => member.user.id),
+    authorIsAdmin: authorRole === "owner" || authorRole === "admin",
+    onlyAdminsCanMentionAll: findMockConversation(conversationId).onlyAdminsCanMentionAll === true,
+  };
+});
 
 const nextMockId = (prefix: string) => `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
@@ -144,6 +156,7 @@ export const groupsMocks: MockRoute[] = [
     const update = body as ConversationSettingsUpdate;
     const me = getSignedInMockUser();
     const conversationNoun = mockConversations.find((c) => c.id === params.conversationId)?.kind === "channel" ? "channel" : "group";
+    if (update.onlyAdminsCanMentionAll !== undefined) requireGroupAdmin(params.conversationId!);
     if (update.name !== undefined) postSystemNotice(params.conversationId!, `${me.name} renamed the ${conversationNoun} to "${update.name}"`);
     if (update.disappearingMessagesSeconds !== undefined) {
       postSystemNotice(params.conversationId!, `${me.name} ${describeDisappearingSetting(update.disappearingMessagesSeconds)}`);
@@ -152,6 +165,7 @@ export const groupsMocks: MockRoute[] = [
       ...c,
       ...(update.name !== undefined ? { title: update.name } : {}),
       ...(update.disappearingMessagesSeconds !== undefined ? { disappearingMessagesSeconds: update.disappearingMessagesSeconds } : {}),
+      ...(update.onlyAdminsCanMentionAll !== undefined ? { onlyAdminsCanMentionAll: update.onlyAdminsCanMentionAll } : {}),
     }));
   }),
   createMockRoute("POST", "/api/v1/channels", ({ body }) => {

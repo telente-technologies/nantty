@@ -1,7 +1,8 @@
 import { ApiError } from "@/errors/api.error";
-import type { Comment, CommentWithReplies, Page, UserSummary } from "@/types";
+import type { Comment, CommentVideoReply, CommentWithReplies, NewCommentInput, Page, UserSummary } from "@/types";
 
 import { isoDateHoursAgo, me } from "./fixtures.mock";
+import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
@@ -112,6 +113,7 @@ const createStoredComment = (
   parent: Comment | null,
   hoursAgo: number,
   likes: number,
+  mentions?: Comment["mentions"],
 ): Comment => ({
   id: `cm_${postId}_${nextCommentSequence++}`,
   postId,
@@ -124,6 +126,7 @@ const createStoredComment = (
   liked: false,
   replyCount: 0,
   replyingTo: parent ? { userId: parent.author.id, username: parent.author.username } : undefined,
+  ...(mentions?.length ? { mentions } : {}),
 });
 
 const flattenSeedIntoComments = (postId: string, seeds: readonly SeedComment[], parent: Comment | null, output: Comment[]) => {
@@ -144,7 +147,22 @@ const commentsForPost = (postId: string): Comment[] => {
   return commentsByPostId.get(postId)!;
 };
 
-const findCommentAnywhere = (commentId: string): Comment | undefined => {
+const videoRepliesByCommentId = new Map<string, CommentVideoReply[]>();
+
+export const registerMockVideoReply = (commentId: string, reply: CommentVideoReply) => {
+  videoRepliesByCommentId.set(commentId, [reply, ...(videoRepliesByCommentId.get(commentId) ?? [])]);
+};
+
+const withVideoReplyInfo = <T extends Comment>(comment: T): T => {
+  const videoReplies = videoRepliesByCommentId.get(comment.id);
+  return {
+    ...comment,
+    ...(videoReplies?.length ? { videoReplies } : {}),
+    ...(userIdsWhoBlockedTheAuthor.has(comment.author.id) ? { videoReplyBlocked: true } : {}),
+  };
+};
+
+export const findCommentAnywhere = (commentId: string): Comment | undefined => {
   for (const comments of commentsByPostId.values()) {
     const found = comments.find((c) => c.id === commentId);
     if (found) return found;
@@ -178,21 +196,29 @@ export const commentsMocks: MockRoute[] = [
     const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null);
     const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
     const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
-      ...c,
-      previewReplies: directRepliesOf(postId, c.id).slice(0, PREVIEW_REPLY_COUNT),
+      ...withVideoReplyInfo(c),
+      previewReplies: directRepliesOf(postId, c.id).slice(0, PREVIEW_REPLY_COUNT).map(withVideoReplyInfo),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId/replies", ({ params, query }) => {
     const parent = findCommentAnywhere(params.commentId!);
     if (!parent) return { data: [], nextCursor: null };
-    return paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
+    const page = paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
+    return { ...page, data: page.data.map(withVideoReplyInfo) };
+  }),
+  createMockRoute("GET", "/api/v1/comments/:commentId", ({ params }) => {
+    const comment = findCommentAnywhere(params.commentId!);
+    if (!comment) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+    return withVideoReplyInfo(comment);
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
-    const input = body as { text: string; parentCommentId?: string };
+    const input = body as NewCommentInput;
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
-    const created = createStoredComment(postId, me, input.text, parent, 0, 0);
+    const sanitized = sanitizeMentionsForWrite(me, input.mentions, "comment");
+    const created = createStoredComment(postId, me, input.text, parent, 0, 0, sanitized.mentions);
+    notifyMentionedUsers(me, sanitized, "comment");
     const comments = commentsForPost(postId);
     commentsByPostId.set(postId, parent ? [...comments, created] : [created, ...comments]);
     if (parent) replaceStoredComment(parent.id, (c) => ({ ...c, replyCount: c.replyCount + 1 }));
