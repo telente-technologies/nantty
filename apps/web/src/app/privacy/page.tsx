@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { PlaceholderLegalDocument } from "@/components/legal/legalDocument";
-import { privacyPolicySections } from "@/content/privacyPolicy.content";
+import { LegalPolicyPage } from "@/components/legal/legalPolicyPage";
+import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -9,14 +9,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-export default function PrivacyPolicyPage() {
-  return (
-    <PlaceholderLegalDocument
-      title="Privacy policy"
-      summary="What personal data Zudomart collects, why, who we share it with, and the choices you have."
-      versionLabel="[version placeholder]"
-      effectiveDateLabel="[effective date placeholder]"
-      sections={privacyPolicySections}
-    />
-  );
+export default function PrivacyPage() {
+  return <LegalPolicyPage policy={findLegalPolicyOrThrow("privacy")} />;
 }
