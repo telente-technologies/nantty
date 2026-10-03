@@ -34,16 +34,19 @@ func (harness *escrowHarness) ensureSellerOnboarded(orderId string) string {
 	if err != nil {
 		harness.T.Fatal(err)
 	}
+	subaccount := ""
 	for _, payable := range payables {
+		if _, done := harness.onboarded[payable.SellerUserId]; !done {
+			harness.onboarded[payable.SellerUserId] = harness.OnboardConnectedAccount(payable.SellerUserId, true)
+		}
 		if payable.OrderId == orderId {
-			if _, done := harness.onboarded[payable.SellerUserId]; !done {
-				harness.onboarded[payable.SellerUserId] = harness.OnboardConnectedAccount(payable.SellerUserId, true)
-			}
-			return harness.onboarded[payable.SellerUserId]
+			subaccount = harness.onboarded[payable.SellerUserId]
 		}
 	}
-	harness.T.Fatalf("order %s has no payable", orderId)
-	return ""
+	if subaccount == "" {
+		harness.T.Fatalf("order %s has no payable", orderId)
+	}
+	return subaccount
 }
 
 func (harness *escrowHarness) initializePayment(buyer, orderId, key string) paymentstesting.HarnessResponse {
@@ -66,7 +69,7 @@ func (harness *escrowHarness) deliverRefundProcessed(paymentReference string) {
 func (harness *escrowHarness) paymentReferenceForOrder(orderId string) string {
 	var reference string
 	schema := harness.Payments.Application.Container.Settings.Money.DatabaseSchema
-	if err := harness.Database.QueryRow(`SELECT reference FROM "`+schema+`".payment_intents WHERE subject_id = $1 AND status = 'succeeded' ORDER BY created_at LIMIT 1`, orderId).Scan(&reference); err != nil {
+	if err := harness.Database.QueryRow(`SELECT reference FROM "`+schema+`".payment_intents WHERE subject_id IN ($1::text, (SELECT checkout_id FROM "`+schema+`".order_payables WHERE order_id = $1::text)) AND status = 'succeeded' ORDER BY created_at LIMIT 1`, orderId).Scan(&reference); err != nil {
 		harness.T.Fatal(err)
 	}
 	return reference

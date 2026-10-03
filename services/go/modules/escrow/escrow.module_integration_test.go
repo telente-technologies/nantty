@@ -28,8 +28,8 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	if first.Status != http.StatusCreated || replay.Body["reference"] != first.Body["reference"] || replay.Headers.Get("Idempotent-Replayed") != "true" || reused.Status != http.StatusConflict {
 		t.Fatalf("initialize idempotency broken: %d %v / %v %v / %d", first.Status, first.Body, replay.Body, replay.Headers, reused.Status)
 	}
-	if amount := first.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64); amount != 600_000 || first.Body["paymentsInCheckout"].(float64) != 2 || first.Body["checkoutUrl"] == "" {
-		t.Fatalf("one hosted checkout per seller order expected: %v", first.Body)
+	if amount := first.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64); amount != 1_000_000 || first.Body["paymentsInCheckout"].(float64) != 1 || first.Body["checkoutUrl"] == "" {
+		t.Fatalf("one Paystack transaction for the whole checkout expected: %v", first.Body)
 	}
 	if harness.Paystack.Calls("POST /transaction") != 1 {
 		t.Fatalf("transactions initialized = %d", harness.Paystack.Calls("POST /transaction"))
@@ -45,9 +45,9 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	}
 
 	reference := first.Body["reference"].(string)
-	transaction := harness.Paystack.CompleteCheckout(reference, 0, 9_000, "card")
-	body, headers := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": 600_000, "currency": "NGN"})
-	tampered := bytes.Replace(body, []byte("600000"), []byte("900000"), 1)
+	transaction := harness.Paystack.CompleteCheckout(reference, 0, 15_000, "card")
+	body, headers := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": 1_000_000, "currency": "NGN"})
+	tampered := bytes.Replace(body, []byte("1000000"), []byte("9000000"), 1)
 	if response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", tampered, headers); response.Status != http.StatusUnauthorized {
 		t.Fatalf("tampered webhook accepted: %d", response.Status)
 	}
@@ -74,7 +74,7 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	sellerId := "seller-" + firstOrder[:4]
 	escrowId := escrowIdForOrder(t, harness, firstOrder)
 	if harness.balance(ledgermodels.SellerEscrowAccount(sellerId, escrowId, "NGN")) != 582_000 || harness.balance(ledgermodels.PaymentsAwaitingApplicationAccount("NGN")) != 0 ||
-		harness.balance(ledgermodels.PlatformFeesUnearnedAccount("NGN")) != 9_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 0 ||
+		harness.balance(ledgermodels.PlatformFeesUnearnedAccount("NGN")) != 15_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 0 ||
 		harness.balance(ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN")) != harness.Paystack.PlatformBalanceOf("NGN")-10_000_000 {
 		t.Fatalf("escrow must hold 600000 less the 1.5%% escrow fee and the Paystack fee, both paid by the seller")
 	}
@@ -110,7 +110,9 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	if harness.balance(ledgermodels.SellerAvailableAccount(sellerId, "NGN")) != 582_000 || harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 0 {
 		t.Fatal("matured credit did not become available")
 	}
-	harness.payCheckoutThroughWebhook(buyer, secondOrder, 0)
+	if harness.balance(ledgermodels.SellerEscrowAccount("seller-"+secondOrder[:4], escrowIdForOrder(t, harness, secondOrder), "NGN")) != 388_000 || harness.balance(ledgermodels.PlatformFeesUnearnedAccount("NGN")) != 6_000 {
+		t.Fatal("the second seller group of the same payment must be held separately")
+	}
 	if holds := harness.Call(http.MethodGet, "/api/v1/wallets/me/escrow-holds", harness.Tokens.UserAccessToken("seller-"+secondOrder[:4]), "", nil); len(holds.Body["data"].([]any)) != 1 {
 		t.Fatalf("seller holds: %v", holds.Body)
 	}
