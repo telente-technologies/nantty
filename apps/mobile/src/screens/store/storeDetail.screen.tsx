@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
+import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNudge";
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
@@ -17,12 +18,14 @@ import { storesService } from "@/services/stores.service";
 import type { StoreDetail } from "@/types/commerce.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { useAuthStore } from "@/store/auth.store";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const { colors } = useTheme();
   const { storeId } = route.params;
   const queryClient = useQueryClient();
+  const signedInUserId = useAuthStore((state) => state.user?.id);
   const [activeTab, setActiveTab] = useState<StoreTab>("products");
   const store = useQuery({ queryKey: ["stores", storeId], queryFn: () => storesService.fetchStoreById(storeId) });
   const products = useQuery({ queryKey: ["products", "store", storeId], queryFn: () => storesService.fetchStoreProducts(storeId) });
@@ -77,6 +80,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
     <Screen background={colors.surface}>
       {topBar}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {detail.ownerUserId === signedInUserId ? <BusinessDocumentsNudge /> : null}
         <StoreProfileHeader
           store={detail}
           onToggleFollow={() => requireAuthThen(() => toggleStoreFollow.mutate(!detail.isFollowing), undefined, "follow shops")}
