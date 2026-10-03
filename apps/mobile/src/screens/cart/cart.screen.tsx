@@ -1,20 +1,23 @@
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { CartItemRow } from "@/components/cart/cartItemRow";
+import { CartGrandTotalCard } from "@/components/cart/cartGrandTotalCard";
+import { CartSellerGroupCard } from "@/components/cart/cartSellerGroupCard";
+import { DeliveryAddressPicker } from "@/components/cart/deliveryAddressPicker";
 import { EmptyCartState } from "@/components/cart/emptyCartState";
-import { OrderSummaryCard } from "@/components/cart/orderSummaryCard";
 import { PurchaseTermsText } from "@/components/cart/purchaseTermsText";
 import { Frame69424Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
-import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 import { useCartActions, useMyCart } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 export function CartScreen({ navigation }: MainScreenProps<"Cart">) {
-  const cart = useMyCart();
+  const chosenAddressId = useDeliveryAddressStore((state) => state.chosenAddressId);
+  const cart = useMyCart(chosenAddressId);
   const { changeCartItemQuantity, removeCartItem } = useCartActions();
 
   const header = (
@@ -33,7 +36,7 @@ export function CartScreen({ navigation }: MainScreenProps<"Cart">) {
     return (
       <Screen>
         {header}
-        <ActivityIndicator style={styles.state} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -42,9 +45,7 @@ export function CartScreen({ navigation }: MainScreenProps<"Cart">) {
     return (
       <Screen>
         {header}
-        <Text align="center" color={colors.textSubtle} style={styles.state}>
-          Couldn't load your cart.
-        </Text>
+        <ErrorState message="Couldn't load your cart." onRetry={() => cart.refetch()} />
       </Screen>
     );
   }
@@ -63,32 +64,30 @@ export function CartScreen({ navigation }: MainScreenProps<"Cart">) {
     <Screen>
       {header}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View>
-          {summary.items.map((item) => (
-            <CartItemRow
-              key={item.id}
-              item={item}
-              onPress={() => navigation.navigate("ProductDetail", { productId: item.product.id })}
-              onChangeQuantity={(quantity) => changeCartItemQuantity.mutate({ cartItemId: item.id, quantity })}
-              onRemove={() => removeCartItem.mutate(item.id)}
-            />
-          ))}
-        </View>
+        <DeliveryAddressPicker onAddAddress={() => navigation.navigate("AddressForm")} />
+        {summary.groups.map((group) => (
+          <CartSellerGroupCard
+            key={group.storeId}
+            group={group}
+            onOpenProduct={(productId) => navigation.navigate("ProductDetail", { productId })}
+            onChangeQuantity={(cartItemId, quantity) => changeCartItemQuantity.mutate({ cartItemId, quantity })}
+            onRemove={(cartItemId) => removeCartItem.mutate(cartItemId)}
+          />
+        ))}
         <View style={styles.summary}>
-          <OrderSummaryCard itemsTotal={summary.itemsTotal} shopDiscount={summary.shopDiscount} shipping={summary.shipping} total={summary.total} />
+          <CartGrandTotalCard cart={summary} />
           <PurchaseTermsText />
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <Button title="Proceed to Checkout" onPress={() => navigation.navigate("Checkout")} />
+        <Button title="Proceed to Checkout" disabled={!chosenAddressId || summary.payableGroupCount === 0} onPress={() => navigation.navigate("Checkout")} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 64 },
-  content: { paddingHorizontal: 12, paddingBottom: 24, flexGrow: 1 },
-  summary: { marginTop: "auto", paddingTop: 40, gap: 16 },
+  content: { paddingHorizontal: 12, paddingBottom: 24, flexGrow: 1, gap: 16 },
+  summary: { marginTop: "auto", paddingTop: 24, gap: 16 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
 });
