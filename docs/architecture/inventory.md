@@ -132,7 +132,7 @@ Auth module detail:
 | --- | --- | --- |
 | `go-identity` | auth, users, currency, admin | auth only; others are routeless |
 | `go-commerce` | (25 lines; commerce modules) | routeless; the plan lists catalog, inventory, orders |
-| `go-money` | payments, wallet, ledger, escrow, subscriptions, creators, rewards | routeless |
+| `go-money` | payments, wallet, ledger, escrow, subscriptions, creators | routeless |
 | `go-live` | live | routeless |
 | `go-ads` | ads | routeless |
 | `go-trust` | moderation | routeless |
@@ -182,7 +182,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 
 | Item | Count / finding | Evidence |
 | --- | --- | --- |
-| Modules (34 dirs) | admin ads audit auth automation carts categories coins creators creatorSubscriptions currency escrows feeds follows intelligence loyalty media messages moderation notifications orders payments posts products reviews search stores subscriptions support users verifications waitlist wallets | `apps/api/src/modules` |
+| Modules (34 dirs) | admin ads audit auth automation carts categories coins creators creatorSubscriptions currency escrows feeds follows intelligence media messages moderation notifications orders payments posts products reviews search stores subscriptions support users verifications waitlist wallets | `apps/api/src/modules` |
 | Routes | 355 route registrations in 34 `*.routes.ts` files (plan quotes 354); admin has commands but 0 routes; intelligence has 0 routes | grep of `.get(/.post(...` in `src/modules/**/routes`, `docs/backendPlan.md` 1.1 |
 | Heaviest modules | posts 35, subscriptions 26, messages 25, creators 25, products 20, ads 16, users 15, auth 14, follows 14, stores 14 | same grep |
 | Prisma | 124 models in 40 files under `prisma/schema/`, 1 migration (`20260929112825_init`), Prisma 7 with `@prisma/adapter-pg` | `prisma/schema/*.prisma`, `prisma/migrations` |
@@ -220,7 +220,7 @@ Legend: A = `apps/api` Prisma model (124 total, reference), G = Go ent entity (E
 | gifts | `LiveGift` | `gift`, `gift_transaction`, `gift_goal` (live module) | schema EXISTING, no code |
 | live | `LiveSession`, `LiveViewer`, `LiveComment` | `live_session`, `live_viewer`, `live_product`, `join_request` | schema EXISTING, no code |
 | battles, guests | none | `battle`, `battle_participant`, `guest_slot` | schema EXISTING, no code |
-| points, leaderboards | `LoyaltyReward`, `PointsRedemption`, `ReferralCode`, `Referral`, `CashbackPromo` | `points_entry`, `points_rule`, `live_leaderboard_entry` | schema EXISTING, no code |
+| points, leaderboards | none (legacy `LoyaltyReward`, `PointsRedemption`, `ReferralCode`, `Referral`, `CashbackPromo` removed from scope 2026-10-03) | `points_entry`, `points_rule`, `live_leaderboard_entry` | schema EXISTING, no code |
 | ads, campaigns, impressions | 22 ad models: `AdAccount`, `AdAccountMember`, `AdAccountInvite`, `AdActivity`, `AdCampaign`, `AdSet`, `Ad`, `AdSpendCounter`, `AdServing`, `AdEvent`, `AdBillingTransaction`, `AdBoost`, `AdPolicyCategory`, `AdCustomAudience`, `AdCustomerListHash`, `AdAccountBillingSettings`, `AdTopUp`, `AdPaymentMethod`, `AdScheduledReport`, `AdConversionEvent`, `AdExperiment`, `AdAutomatedRule` | none | PROPOSED |
 | creators, earnings, affiliates | `CreatorApplication`, `CreatorProfile`, `CreatorViolation`, `CreatorEarning`, `AffiliateCommission`, `CreatorAffiliation`, `BrandDeal` | none | PROPOSED |
 | subscriptions | `SubscriptionPlan`, `SubscriptionPlanPrice/Entitlement/Perk`, `ProfileSubscription`, `SubscriptionCharge`, `CreatorSubscriptionPlan`, `CreatorSubscription`, `CreatorSubscriptionCharge` | none | PROPOSED |

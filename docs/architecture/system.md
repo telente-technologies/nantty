@@ -107,7 +107,7 @@ flowchart LR
   gw["TS gateway"]:::existing
   idn["go-identity<br/>auth, users, currency, admin"]:::partial
   com["go-commerce<br/>catalog, inventory, orders, analytics"]:::proposed
-  mon["go-money<br/>payments, wallet, ledger, escrow,<br/>subscriptions, creators, rewards"]:::partial
+  mon["go-money<br/>payments, wallet, ledger, escrow,<br/>subscriptions, creators"]:::partial
   live["go-live<br/>sessions, guests, battles"]:::partial
   ads["go-ads<br/>decision engine, attribution"]:::proposed
   trust["go-trust<br/>moderation"]:::proposed

@@ -6,14 +6,14 @@ Status date: 2026-10-03. Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend
 
 | Item | State | Evidence |
 | --- | --- | --- |
-| Go payments / wallet / ledger / escrow / subscriptions / creators / rewards modules | EXISTING as 11-line routeless skeletons, no ent, no migrations | `services/go/modules/{payments,wallet,ledger,escrow,subscriptions,creators,rewards}` |
+| Go payments / wallet / ledger / escrow / subscriptions / creators modules | EXISTING as 11-line routeless skeletons, no ent, no migrations | `services/go/modules/{payments,wallet,ledger,escrow,subscriptions,creators,rewards}` |
 | `go-money` deployable | EXISTING, compiles, routeless | `services/go/cmd/go-money` (inventory 2.4) |
 | `LiveMoneyService` gRPC contract (`ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | EXISTING proto, **no server or client implementation** | `services/contracts/proto/zudomart/money/v1/live_money.proto` |
 | `Money` proto and Go money package (int64 minor units + currency) | EXISTING, tested | `services/contracts/proto/zudomart/common/v1/money.proto`, `services/go/platform/money` |
 | Idempotency middleware (Redis) | EXISTING, wired to no route | `services/go/platform/idempotency` |
 | Webhook signature verification in new services | **ABSENT** | inventory section 7 |
 | Legacy Paystack / Flutterwave gateways (to be replaced by Bachs), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | EXISTING only in the reference monolith, which is never deployed | `apps/api/src/modules/payments/gateways/{paystack,flutterwave}.gateway.ts`, `modules/escrows/jobs/escrowAutoRelease.job.ts`, `modules/wallets/constants/monetizationLedgerAccounts.constant.ts` |
-| Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift, referral_reward, cashback` | EXISTING in Python, not called by any Go/TS caller | `apps/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
+| Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `apps/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
 | Wallet, escrow, coin, payout screens in mobile, seller, admin | MOCK-ONLY | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller` wallet pages, `apps/admin` commerce pages |
 | Everything below | PROPOSED | `docs/backendPlan.md` phases 5 and 6 |
 

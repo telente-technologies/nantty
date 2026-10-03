@@ -71,7 +71,7 @@ Durability: **F** financial (outbox + DLQ + replay + reconciliation, never dropp
 
 | Event | Producer | Consumers | Dur. | Order | Key payload fields | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `account.registered` | auth | users (create personal profile), notifications (welcome), analytics, campaigns (referral) | D | none | accountId, username, countryCode, referralCode? | EXISTING |
+| `account.registered` | auth | users (create personal profile), notifications (welcome), analytics | D | none | accountId, username, countryCode | EXISTING |
 | `account.loggedIn` | auth | trust (risk), analytics | B | none | accountId, sessionId, ipHash, deviceId | EXISTING |
 | `session.refreshTokenReuseDetected` | auth | notifications (security alert), trust | D | none | accountId, sessionId | EXISTING |
 | `account.deletionRequested` | users | every owner of personal data, notifications | D | subject | accountId, requestId, executeAfter | PROPOSED |
@@ -86,7 +86,7 @@ Durability: **F** financial (outbox + DLQ + replay + reconciliation, never dropp
 | `order.shipped` / `order.delivered` / `order.completed` / `order.cancelled` | orders | escrow (release timer), inventory (release on cancel), rewards (completed), notifications, webhooks | F (completed, cancelled) / D | subject | orderGroupId, fromStatus, toStatus, actor, aggregateVersion | PROPOSED |
 | `payment.succeeded` / `payment.failed` | payments | orders, wallet (coin packs), subscriptions, notifications | F | subject | paymentId, purpose, referenceId, amountMinor, currency, provider | PROPOSED |
 | `refund.requested` / `refund.completed` | payments | orders, escrow, inventory (restock), notifications | F | subject | refundId, paymentId, orderGroupId?, amountMinor, currency | PROPOSED |
-| `escrow.held` / `escrow.released` / `escrow.refunded` | escrow | orders, wallet, rewards (cashback), notifications | F | subject | escrowId, orderGroupId, amountMinor, currency, journalEntryId | PROPOSED |
+| `escrow.held` / `escrow.released` / `escrow.refunded` | escrow | orders, wallet, store-rewards (earn or reverse seller-funded store credit), notifications | F | subject | escrowId, orderGroupId, amountMinor, currency, journalEntryId | PROPOSED |
 | `payout.requested` / `payout.paid` / `payout.failed` | wallet | notifications, admin queue, webhooks | F | subject | payoutId, ownerId, amountMinor, currency, providerReference? | PROPOSED |
 | `journalEntry.posted` | ledger | analytics, reconciliation | F | none | entryId, reference, kind, lines[{accountCode, direction, amountMinor, currency}] | PROPOSED |
 | `coins.purchased` | wallet | rewards, analytics | F | subject | purchaseId, accountId, coins, paymentId | PROPOSED |
@@ -219,7 +219,7 @@ Defaults for all jobs unless the row says otherwise: SQS visibility timeout = 6x
 
 | # | Item | Priority | Reason |
 | --- | --- | --- | --- |
-| 1 | Consumer-side durable dedupe (`processed_events`) before any money consumer ships | P0 | At-least-once delivery would double-credit points, cashback, escrow transitions |
+| 1 | Consumer-side durable dedupe (`processed_events`) before any money consumer ships | P0 | At-least-once delivery would double-credit points, store credit, escrow transitions |
 | 2 | Relay attempts/dead-letter + lag alarm | P1 | One bad row stalls every event from that deployable, including financial ones |
 | 3 | Do not rely on transport ordering for gifts/battles | P1 | Standard SNS cannot feed FIFO; build gift path on versions/seq |
 | 4 | Event JSON Schemas for the 21 live/gift/battle types Phoenix already routes | P1 | Router consumes types that no contract defines (`domain_event_router.ex`) |

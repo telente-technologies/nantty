@@ -72,7 +72,7 @@ flowchart LR
     search["search indexing + query"]:::proposed
     support["support tickets"]:::proposed
     integ["seller webhooks, API keys, couriers"]:::proposed
-    camp["campaigns, referrals, waitlist"]:::proposed
+    camp["campaigns, waitlist"]:::proposed
   end
   rt["ex-realtime<br/>/ws, presence, live fan-out,<br/>chat persistence"]:::existing
   py["py-intelligence<br/>ranking, recs, risk, ads pCTR,<br/>moderation scores"]:::existing
@@ -90,7 +90,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | go-identity | auth, users, currency, admin | auth EXISTING (`services/go/deployables/go-identity`, renaming to `goIdentity`); others partial | CPU, p99 login latency | Aurora `auth/users/currency/admin`, Redis, SNS |
 | go-commerce | catalog, inventory, orders, analytics | PROPOSED (skeleton modules) | CPU, checkout p99 | Aurora `catalog/inventory/orders`, go-money gRPC |
-| go-money | payments, wallet, ledger, escrow, subscriptions, creators, rewards | ledger schema EXISTING (no routes); rest PROPOSED | CPU, DB lock wait | Aurora money schemas, Paystack, Flutterwave, IAP |
+| go-money | payments, wallet, ledger, escrow, subscriptions, creators | ledger schema EXISTING (no routes); rest PROPOSED | CPU, DB lock wait | Aurora money schemas, Paystack, Flutterwave, IAP |
 | go-live | live | schema + migrations EXISTING; no routes | CPU, active rooms | Aurora `live`, LiveKit API, Redis, go-money gRPC |
 | go-ads | ads | PROPOSED | decision QPS, p99 < 50 ms | Redis pacing/caps, Python pCTR, go-money |
 | go-trust | moderation | PROPOSED | SQS queue depth | Python moderation scores |
@@ -151,7 +151,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 | Wallets, coins, payout accounts, payouts | wallet | go-money | `wallet` | wallet | mobile, seller | PROPOSED |
 | Escrow, disputes | escrow | go-money | `escrow` | escrow | orders | PROPOSED |
 | Gifts, creator earnings, affiliations | creators | go-money | `creators` | creators | live (gRPC) | PROPOSED; see finding F1 |
-| ZudoPoints, loyalty, referrals | rewards | go-money | `rewards` | rewards (event consumer) | rankings API | PROPOSED; see F1 |
+| ZudoPoints (engagement and gift points only; referral and purchase loyalty/cashback removed) | rewards | go-money | `rewards` | rewards (event consumer) | rankings API | PROPOSED; see F1 |
 | Plans, entitlements, subscriptions | subscriptions | go-money | `subscriptions` | subscriptions | gateway (entitlement cache), catalog | PROPOSED |
 | Live sessions, guests, battles, live products | live | go-live | `live` | live | Phoenix (events), money | partial |
 | Ads, impressions, attribution | ads | go-ads | `ads` | ads | feed (slot fill), money | PROPOSED |

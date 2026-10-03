@@ -21,7 +21,7 @@
       "content.reported",
       "account.registered"
     ],
-    "compute": "ECS on Fargate first (not EKS). Step Functions only for real multi-step orchestration (payout runs, dispute timelines). Go services ship as 6 deployables: go-identity (auth, users, currency, admin), go-commerce (catalog, inventory, orders, analytics), go-money (payments, wallet, ledger, escrow, subscriptions, creators, rewards), go-live (live), go-ads (ads), go-trust (moderation).",
+    "compute": "ECS on Fargate first (not EKS). Step Functions only for real multi-step orchestration (payout runs, dispute timelines). Go services ship as 6 deployables: go-identity (auth, users, currency, admin), go-commerce (catalog, inventory, orders, analytics), go-money (payments, wallet, ledger, escrow, subscriptions, creators; no rewards module, referral and purchase loyalty/cashback removed by the owner on 2026-10-03), go-live (live), go-ads (ads), go-trust (moderation).",
     "media": "Media bytes live in S3 behind CloudFront; Postgres stores only metadata and keys. LiveKit carries live video.",
     "later": "OpenSearch (search) and ClickHouse (seller/creator analytics) come later, fed from domain events.",
     "decisions": "Python returns scores (ranking, fraud risk, moderation classification) and never makes the final financial or moderation call; Go/TS apply a deterministic policy (allow / hold / review / reject) and record it. Feed and clip ranking runs a safety/integrity filter before ranking.",
@@ -71,7 +71,8 @@
       "checkout": { "commands": ["checkOutCart", "lockOrderExchangeRate"], "queries": ["previewCheckoutTotals"], "events": ["orderPlaced"] },
       "orders": { "commands": ["cancelOrder", "confirmOrderReceipt"], "queries": ["getOrder", "listMyOrders", "listStoreOrders"], "events": ["orderCancelled", "orderCompleted"] },
       "fulfilment": { "commands": ["markOrderShipped", "markOrderDelivered", "updateTrackingDetails"], "queries": ["getShipmentTracking"], "events": ["orderShipped", "orderDelivered"] },
-      "returns": { "commands": ["requestReturn", "approveReturn", "receiveReturnedItems"], "queries": ["listReturns"], "events": ["returnApproved"] }
+      "returns": { "commands": ["requestReturn", "approveReturn", "receiveReturnedItems"], "queries": ["listReturns"], "events": ["returnApproved"] },
+      "storeRewards": { "commands": ["setStoreRewardRules", "earnStoreCreditOnOrderCompleted", "reverseStoreCreditOnRefund", "redeemStoreCreditAtCheckout", "expireStoreCredit"], "queries": ["listMyStoreCreditBalances", "getStoreRewardsLiability"], "events": ["storeCreditEarned", "storeCreditRedeemed"], "note": "Seller-funded per-store credit ledger in go-commerce (not go-money cash): redeemable only at the issuing store as a discount, never withdrawable. Added 2026-10-03." }
     },
     "payments": {
       "paymentIntents": { "commands": ["initializePayment", "verifyPaymentWithProvider"], "queries": ["getPayment", "listOrderPayments"], "events": ["paymentSucceeded", "paymentFailed"] },
@@ -119,11 +120,6 @@
       "earnings": { "commands": ["creditGiftEarnings", "creditAffiliateCommission", "creditAdRevenueShare", "creditBattleSettlement"], "queries": ["getCreatorDashboard", "listCreatorEarnings", "getRevenueRules"], "events": ["creatorEarningsCredited"] },
       "affiliations": { "commands": ["requestAffiliation", "approveAffiliation", "setAffiliateCommissionRate"], "queries": ["listAffiliations"], "events": [] },
       "tips": { "commands": ["sendTip"], "queries": [], "events": ["tipSent"] }
-    },
-    "rewards": {
-      "loyalty": { "commands": ["awardLoyaltyPoints", "redeemLoyaltyPoints"], "queries": ["getLoyaltySummary"], "events": ["loyaltyPointsAwarded"] },
-      "cashback": { "commands": ["creditCashbackOnEscrowRelease"], "queries": ["listCashbackCredits"], "events": [] },
-      "referralRewards": { "commands": ["rewardSuccessfulReferral"], "queries": ["getReferralRewards"], "events": ["referralRewarded"] }
     },
     "moderation": {
       "reports": { "commands": ["submitReport", "actOnReport"], "queries": ["listReportQueue", "listMyReports"], "events": ["contentReported", "moderationActionTaken"] },
@@ -213,7 +209,6 @@
     },
     "campaigns": {
       "marketingCampaigns": { "commands": ["createMarketingCampaign", "sendMarketingCampaign"], "queries": ["listMarketingCampaigns"], "events": [] },
-      "referrals": { "commands": ["createReferralCode", "attributeReferralSignup"], "queries": ["getMyReferrals"], "events": ["referralSignupAttributed"] },
       "waitlist": { "commands": ["joinWaitlist"], "queries": ["listWaitlistEntries", "countWaitlistEntries"], "events": [] }
     }
   },
