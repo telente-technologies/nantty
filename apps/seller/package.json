@@ -6,9 +6,12 @@
     "dev": "next dev --port 3200",
     "build": "next build",
     "start": "next start --port 3200",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:contracts": "tsx --test src/contracts/*.test.ts",
+    "lint": "eslint -c ../../packages/eslintConfig/next.config.mjs src"
   },
   "dependencies": {
+    "@paystack/inline-js": "^2.26.0",
     "@zudomart/design-tokens": "workspace:*",
     "@zudomart/web-kit": "workspace:*",
     "next": "^16.3.6",
@@ -19,6 +22,8 @@
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@zudomart/eslint-config": "workspace:*",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
 }

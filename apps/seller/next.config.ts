@@ -13,7 +13,7 @@ function readOriginOrEmpty(configuredUrl: string | undefined): string {
 
 function buildContentSecurityPolicyHeaderValue(): string {
   const mediaOrigin = readOriginOrEmpty(process.env.SELLER_MEDIA_URL);
-  const apiOrigin = readOriginOrEmpty(process.env.SELLER_API_URL ?? (isDevelopmentBuild ? "http://localhost:3000" : undefined));
+  const apiOrigin = readOriginOrEmpty(process.env.SELLER_API_URL ?? (isDevelopmentBuild ? "http://localhost:8080" : undefined));
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],

@@ -56,7 +56,7 @@ Response 200: `SellerAccess` (src/types/sellerAccess.type.ts)
   "storeName": "string | null",
   "verification": { "status": "unverified|pending|verified|suspended|revoked", "color": "GOLD", "tier": "PRO|PREMIUM|null", "badgeVisible": true },
   "subscription": { "status": "trialing|active|past_due|cancelled|expired|suspended", "plan": "PRO|BUSINESS", "currentPeriodEnd": "ISO|null" },
-  "entitlements": { "maxStaffSeats": 25, "maxLocations": 10, "reducedCommission": true, "priorityPlacement": true, "adCredits": { "amountMinor": 5000000, "currency": "NGN" }, "apiAccess": true },
+  "entitlements": { "maxStaffSeats": 25, "maxLocations": 10, "reducedEscrowFee": true, "priorityPlacement": true, "adCredits": { "amountMinor": 5000000, "currency": "NGN" }, "apiAccess": true },
   "role": "owner|manager|inventory|sales|accountant|null",
   "permissions": ["orders:view", "..."] | null
 }
@@ -75,7 +75,7 @@ Permission: store member. Response 200: `SubscriptionDetails` (`subscription`, `
 
 ### POST /api/v1/seller/subscription/checkout
 Permission: billing:manage (owner). Body: `{ planId }`.
-Response 201: `{ authorizationUrl, reference, provider: "paystack"|"flutterwave" }` — the provider's hosted page. The callback URL registered with the provider must be `${DASHBOARD_ORIGIN}/billing-checkout/callback` (Paystack appends `reference`/`trxref`; Flutterwave appends `tx_ref`).
+Response 201: `{ authorizationUrl, accessCode, reference, provider: "paystack" }`. The dashboard opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`. The callback URL must be `${DASHBOARD_ORIGIN}/billing-checkout/callback` (Paystack appends `reference`/`trxref`).
 Errors: 404 PLAN_NOT_FOUND. Verification is not required. Switching plans uses the same endpoint.
 
 ### POST /api/v1/seller/subscription/verify
@@ -289,7 +289,7 @@ Response 200: MediaRecord { mediaId, status, url (null until ready; must be an h
 
 Online orders are the marketplace orders customers place in the Zudomart mobile app — the same records the app shows; the dashboard never creates orders. Types: `OnlineOrder`, `OrderTimelineEvent`, `OrderInternalNote`, `OrderRefund`, `OrderDeliveryDetails`, `ReturnRequest`, `OrderDispute` in `apps/seller/src/types/order.type.ts`; `DeliveryStatus` in `apps/seller/src/types/delivery.type.ts`. All resources are scoped to the caller's store; any id from another store returns 404. Every mutation appends an `OrderTimelineEvent` (visible to the seller) and an audit log entry, and notifies the buyer in the app where noted. Not plan-gated.
 
-`OnlineOrder` (additions to the previous shape): `invoiceNumber` (e.g. `INV-10482`), `buyer.phone: string | null`, `paymentStatus: "paid" | "partially_refunded" | "refunded"`, `paymentProvider: "paystack" | "flutterwave"`, `paymentReference` (the provider transaction reference), `paidAt`, `refundedAmount: Money`, `refunds: OrderRefund[]`, `delivery: { status: DeliveryStatus, riderName, riderPhone, estimatedDeliveryAt, attempts, lastAttemptNote }`, `timeline: OrderTimelineEvent[]` (oldest first; `kind` ∈ placed | paid | accepted | rejected | processing | ready | shipped | delivery_failed | delivered | completed | cancelled | returned | refunded | disputed | note), `notes: OrderInternalNote[]` (seller-only, never shown to the buyer), `conversationId: string | null` (the order-linked chat, if one exists).
+`OnlineOrder` (additions to the previous shape): `invoiceNumber` (e.g. `INV-10482`), `buyer.phone: string | null`, `paymentStatus: "paid" | "partially_refunded" | "refunded"`, `paymentProvider: "paystack"`, `paymentMode: "escrow" | "direct"`, `escrowFee: Money`, `escrowFeeBasisPoints` (150, or 100 on Business), `paymentProcessingFee: Money` (Paystack's fee, charged to the seller on every order; escrow orders also carry the escrow fee, both on the seller-group total including shipping and deducted at payout), `paymentReference` (the provider transaction reference), `paidAt`, `refundedAmount: Money`, `refunds: OrderRefund[]`, `delivery: { status: DeliveryStatus, riderName, riderPhone, estimatedDeliveryAt, attempts, lastAttemptNote }`, `timeline: OrderTimelineEvent[]` (oldest first; `kind` ∈ placed | paid | accepted | rejected | processing | ready | shipped | delivery_failed | delivered | completed | cancelled | returned | refunded | disputed | note), `notes: OrderInternalNote[]` (seller-only, never shown to the buyer), `conversationId: string | null` (the order-linked chat, if one exists).
 
 Status model (`OnlineOrderStatus`): `new` (paid into escrow, awaiting the seller) → `processing` (accepted) → `ready` (packed, awaiting courier) → `shipped` → `delivered` → `completed` (buyer confirmed or auto-release; escrow released). Side states: `cancelled` (rejected/cancelled before shipping), `returned`, `refunded`, `disputed`. `delivery.status` is kept in step: new→pending, processing→preparing, ready→ready_for_pickup, shipped→in_transit (or failed after a failed attempt), delivered/completed→delivered, cancelled/refunded→cancelled, returned→returned.
 
@@ -767,7 +767,7 @@ Errors: 404 SETTLEMENT_NOT_FOUND.
 ### GET /api/v1/seller/finance/fees
 Permission: wallet:view
 Query: from?, to? (default last 30 days)
-Response 200: `FinanceFeeBreakdown { from, to, grossSales, totalFees, netEarnings, lines: FinanceFeeLine[] }`, `FinanceFeeLine { kind: "marketplace_commission"|"payment_processing"|"withdrawal"|"ads"|"subscription", label, description, rateBasisPoints: number|null, count, amount }` — always all five kinds (zero when unused). Commission and processing come from orders created in range (refunded orders excluded, their fees are returned); withdrawal from payouts requested in range; ads and subscription from wallet charges in range.
+Response 200: `FinanceFeeBreakdown { from, to, grossSales, totalFees, netEarnings, lines: FinanceFeeLine[] }`, `FinanceFeeLine { kind: "escrow_fee"|"payment_processing"|"withdrawal"|"ads"|"subscription", label, description, rateBasisPoints: number|null, count, amount }` — always all five kinds (zero when unused). Escrow fee (1.5%, 1% on Business) and processing come from orders created in range (refunded orders excluded, their fees are returned); withdrawal from payouts requested in range; ads and subscription from wallet charges in range.
 
 ### GET /api/v1/seller/finance/refunds
 Permission: wallet:view
@@ -1159,9 +1159,9 @@ Only `submitted`/`under_review` claims (409 CLAIM_CLOSED otherwise). Response 20
 `Product.brand?: { brandId, name, relationship: "own"|"authorised_reseller"|"genuine_resale" } | null`.
 `POST /api/v1/seller/products` and `PATCH /api/v1/seller/products/:productId` accept `brand: { brandId, relationship } | null` (omit on PATCH to keep the current tag). Rules: the brand must exist; `own` only when the caller's store is linked to that brand; resale relationships only for **registered** brands. Errors are field issues `brand.brandId` / `brand.relationship` in a 400 VALIDATION_FAILED.
 
-## Free trials, bundle and Gold-only plan (web only, Bachs hosted card setup)
+## Free trials, bundle and Gold-only plan (web only, Paystack plan with a verification charge)
 
-Plans still come from `GET /seller/subscription/plans` (Pro NGN 5,000/mo, Business NGN 15,000/mo; yearly rows carry the admin yearly discount). Billing is **per business profile**: each store/brand has its own subscription, invoices and payment method. The account email is used for the Bachs customer, receipts and reminders; **no endpoint accepts an email**.
+Plans still come from `GET /seller/subscription/plans` (Pro NGN 5,000/mo, Business NGN 15,000/mo; yearly rows carry the admin yearly discount). Billing is **per business profile**: each store/brand has its own subscription, invoices and payment method. The account email is used for the Paystack customer, receipts and reminders; **no endpoint accepts an email**.
 
 ### GET /api/v1/seller/subscription/trial
 Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accountEmail (read-only), trialLength: "DAYS_7"|"MONTH_1", trialDays, yearlyDiscountPercent, verificationCharge: Money, isEligible, ineligibleReasons: [{ code, message }], activeTrial: ActiveTrial|null, bundle: { hasActiveBlue, discountPercent, maximumBusinesses }, goldOnlyPlan: { monthly, yearly, isActive } }`. Eligibility is decided by the server from admin rules (account age, verified email, one trial per person/card/device/phone, max risk score, completed orders). `message` is gentle, user-facing copy. `ActiveTrial` = `{ planId, tier, interval, startedAt, endsAt, daysLeft, isCancelled, cardSummary, priceAfterTrial, verificationCharge: { amount, status: "REFUNDED"|"REFUND_PENDING" }, reminders: [{ daysBefore: 3|1, sendsAt }] }`. The client shows reminders at 3 days and 1 day before the end.
@@ -1169,7 +1169,7 @@ Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accou
 Pricing display: monthly with active Blue = price x (1 - bundle%). Yearly = monthly x 12 x (1 - max(yearly%, bundle%)); the bigger discount wins and they never stack. The bundle applies to at most `maximumBusinesses` businesses, lapses at renewal if Blue ends, and never to Black.
 
 ### POST /api/v1/seller/subscription/trial/checkout
-Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ authorizationUrl, reference, provider: "bachs" }`. The hosted page saves the card, makes a small verification charge (NGN 50) and refunds it automatically. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
+Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ authorizationUrl, accessCode, reference, provider: "paystack" }`. The dashboard opens the Paystack Popup with `accessCode` (redirect to `authorizationUrl` as the fallback); the card is never handled by Zudomart. Paystack makes a small verification charge (NGN 50) that is refunded at once, and the subscription is created with `start_date` at the end of the free period. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
 
 ### POST /api/v1/seller/subscription/trial/verify
 Body `{ reference }` (references start `TRL_` for trials, `GLD_` for Gold-only). Response 200: `BillingOffer`. A trial sets the subscription to `trialing` with `currentPeriodEnd` = trial end. Gold appears only after business verification. Error: 404 PAYMENT_NOT_FOUND.
