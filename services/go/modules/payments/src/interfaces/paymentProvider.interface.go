@@ -94,6 +94,7 @@ type WebhookNotification struct {
 	Kind                 WebhookKind
 	Reference            string
 	ProviderTransferCode string
+	ProviderRefundId     string
 }
 
 type SettledCharge struct {
