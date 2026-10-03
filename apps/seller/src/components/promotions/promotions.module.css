@@ -15,10 +15,10 @@
 
 .code {
   padding: 2px 8px;
-  border: 1px dashed var(--blue-300);
+  border: 1px dashed color-mix(in srgb, var(--color-brand) 60%, transparent);
   border-radius: 6px;
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--color-brand);
   font-family: var(--font-mono);
   font-weight: 600;
 }
@@ -77,7 +77,7 @@
   padding: 4px 4px 4px 10px;
   border-radius: var(--radius-pill);
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--color-brand);
   font-weight: 600;
   font-size: 12px;
 }
