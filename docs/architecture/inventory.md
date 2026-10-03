@@ -314,7 +314,7 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | # | Doc claim | Reality | Evidence |
 | --- | --- | --- | --- |
 | 1 | `services/README.md` and AWS README list 6 Go deployables as ECS services | all 6 compile, but only go-identity serves anything (auth); 16 of 18 modules are 11-line skeletons; `live` has schema and no handlers | `services/go/modules/*` |
-| 2 | `backendPlan.md` section 0 says the `pos` block in `microservicesPlan.json` must go | already absent from the JSON; but the seller UI still has `cashier`/`pos:*` roles per plan item 15 | grep, `backendPlan.md` 2.13 |
+| 2 | `backendPlan.md` section 0 says the `pos` block in `microservicesPlan.json` must go | already absent from the JSON; the seller UI roles were also cleaned (no `cashier`/`pos:*` left in apps/seller/src, verified 2026-10-03) | grep, `backendPlan.md` 2.13 |
 | 3 | `services/python/README.md`: intelligence reads SQS `intelligence-domain-events` | queue exists in LocalStack; no consumer code in `apps/intelligence` | grep for sqs/boto |
 | 4 | AsyncAPI: consumers filter by `eventType` | local subscriptions have no filter policy and use raw delivery | `create-topics-and-queues.sh` |
 | 5 | Plan treats Elixir as owner of chat | `message.created` is routed but no component produces it; `conversation:*` authorization denies everyone by default | `topic_authorizer.ex` |
