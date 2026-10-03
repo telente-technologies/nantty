@@ -35,7 +35,10 @@ func (provider *PaystackProvider) InitializeCharge(ctx context.Context, request 
 	if request.PlanCode != "" {
 		body["plan"] = request.PlanCode
 	}
-	if request.SettlementAccount != "" {
+	if err := applyDynamicSplit(body, request.SplitShares, request.AmountMinor); err != nil {
+		return interfaces.ChargeSession{}, err
+	}
+	if request.SettlementAccount != "" && len(request.SplitShares) == 0 {
 		if request.PlatformShareMinor < 0 || request.PlatformShareMinor >= request.AmountMinor {
 			return interfaces.ChargeSession{}, errors.New("paystack: the platform share must be below the amount")
 		}
@@ -162,7 +165,10 @@ func (provider *PaystackProvider) ChargeAuthorization(ctx context.Context, reque
 		"email": request.CustomerEmail, "authorization_code": request.AuthorizationCode, "amount": request.AmountMinor, "currency": request.Currency,
 		"reference": request.Reference, "metadata": request.Metadata,
 	}
-	if request.SettlementAccount != "" {
+	if err := applyDynamicSplit(body, request.SplitShares, request.AmountMinor); err != nil {
+		return interfaces.AuthorizationChargeResult{}, err
+	}
+	if request.SettlementAccount != "" && len(request.SplitShares) == 0 {
 		body["subaccount"], body["transaction_charge"], body["bearer"] = request.SettlementAccount, 0, "subaccount"
 		if !request.SubaccountBearsFee {
 			body["bearer"] = "account"
