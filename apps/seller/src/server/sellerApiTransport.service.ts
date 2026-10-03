@@ -9,7 +9,6 @@ export interface BackendCall {
   readonly body?: Uint8Array | null;
   readonly contentType?: string | null;
   readonly accessToken?: string | null;
-  readonly operatorToken?: string | null;
   readonly locationId?: string | null;
   readonly storeId?: string | null;
   readonly forwardedHeaders?: Record<string, string>;
@@ -28,7 +27,6 @@ function buildOutgoingHeaders(call: BackendCall): Headers {
   const headers = new Headers({ Accept: "application/json, text/csv;q=0.9" });
   if (call.contentType) headers.set("Content-Type", call.contentType);
   if (call.accessToken) headers.set("Authorization", `Bearer ${call.accessToken}`);
-  if (call.operatorToken) headers.set("X-Seller-Operator", call.operatorToken);
   if (call.locationId) headers.set("X-Seller-Location", call.locationId);
   if (call.storeId) headers.set("X-Seller-Store", call.storeId);
   headers.set("X-Request-Id", crypto.randomUUID());

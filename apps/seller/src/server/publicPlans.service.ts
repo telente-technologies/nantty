@@ -19,7 +19,7 @@ function readPreferredLocaleFromAcceptLanguage(acceptLanguage: string | null): s
   }
 }
 
-export async function loadPublicGoldPlansForVisitor(): Promise<PublicPricingContext> {
+export async function loadPublicSubscriptionPlansForVisitor(): Promise<PublicPricingContext> {
   const requestHeaders = await headers();
   const forwardedHeaders: Record<string, string> = {};
   const acceptLanguage = requestHeaders.get("accept-language");

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { doesRoleHavePermission, findPermissionRequiredForApiCall } from "@/config/rolePermissions.config";
+import { doesAccessGrantPermission, findPermissionRequiredForApiCall } from "@/config/rolePermissions.config";
 import { isMutationProtectedAgainstCsrf, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
 import { exchangeRefreshTokenForNewTokenPair, renewSellerAccessCache, writeRenewedSessionCookies, type RenewedSellerSession } from "@/server/sellerAuthentication.service";
 import { callSellerBackend, type BackendResult } from "@/server/sellerApiTransport.service";
@@ -8,7 +8,6 @@ import {
   clearEverySessionCookie,
   readApiTokensFromCookies,
   readCachedSellerAccessFromCookies,
-  readPosOperatorFromCookies,
   readSelectedLocationIdFromCookies,
   readSelectedStoreIdFromCookies,
   readSessionIdFromCookies,
@@ -21,7 +20,6 @@ const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match"];
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
 const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$/;
-const pathsNeverProxied = /^\/seller\/staff\/pin-sessions/;
 const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
@@ -48,7 +46,7 @@ async function readRequestBodyWithinLimit(request: NextRequest): Promise<Uint8Ar
 
 export async function forwardBffRequestToSellerApi(request: NextRequest, pathSegments: readonly string[]): Promise<NextResponse> {
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
-  if (!allowedApiPathPattern.test(apiPath) || apiPath.includes("..") || pathsNeverProxied.test(apiPath)) {
+  if (!allowedApiPathPattern.test(apiPath) || apiPath.includes("..")) {
     return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
   }
   const sessionId = readSessionIdFromCookies(request.cookies);
@@ -70,15 +68,13 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
     cachedAccess = renewedSession.cachedAccess;
   }
 
-  const operator = readPosOperatorFromCookies(request.cookies);
-  const effectiveRole = operator?.operator.role ?? cachedAccess.access.role;
   const requiredPermission = findPermissionRequiredForApiCall(request.method, apiPath);
   if (requiredPermission === null) return respondWithBffError(403, "FORBIDDEN", "You do not have access to this.");
   const isAvailableBeforeStoreIsActive = gateApiPathPattern.test(apiPath);
   if (!isAvailableBeforeStoreIsActive && decideSellerAccessDestination(cachedAccess.access) !== "app") {
-    return respondWithBffError(403, "STORE_NOT_ACTIVE", "Your store needs Gold verification and an active plan first.");
+    return respondWithBffError(403, "STORE_NOT_ACTIVE", "This store is restricted. Check the note from Zudomart.");
   }
-  if (requiredPermission !== "signed_in" && !doesRoleHavePermission(effectiveRole, requiredPermission)) {
+  if (requiredPermission !== "signed_in" && !doesAccessGrantPermission(cachedAccess.access, requiredPermission)) {
     return respondWithBffError(403, "FORBIDDEN", "Your role does not allow this. Ask a manager or the store owner.");
   }
 
@@ -101,7 +97,6 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
       body,
       contentType: request.headers.get("content-type"),
       accessToken,
-      operatorToken: operator?.operatorToken ?? null,
       locationId: readSelectedLocationIdFromCookies(request.cookies),
       storeId: readSelectedStoreIdFromCookies(request.cookies),
       forwardedHeaders,
