@@ -54,3 +54,14 @@ func TestGeneratedCandidatesAreValidAndAvoidReservedBases(t *testing.T) {
 		t.Errorf("reserved seed must fall back to user base, got %q", first)
 	}
 }
+
+func TestAllIsReservedForGroupMentions(t *testing.T) {
+	for _, candidate := range []string{"all", "All", "@ALL"} {
+		if _, reserved := FindMatchingReservedRule(NormalizeRequestedUsername(candidate), SystemReservedRules()); !reserved {
+			t.Errorf("%q must be reserved because @all notifies a whole group", candidate)
+		}
+	}
+	if _, reserved := FindMatchingReservedRule("allison", SystemReservedRules()); reserved {
+		t.Error("names that merely start with all stay available")
+	}
+}

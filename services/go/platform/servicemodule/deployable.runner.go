@@ -12,6 +12,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"zudomart/platform/config"
+	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/logging"
@@ -55,7 +56,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	group.Go(func() error {
 		return httpserver.RunHttpServerUntilContextDone(groupContext, httpserver.ServerOptions{
 			Address: address, Handler: handler, Logger: logger,
-			OnShutdown: append(closersForModules(modules), shutDownTracing),
+			OnShutdown: append(closersForModules(modules), events.CloseSharedRabbitConnections, shutDownTracing),
 		})
 	})
 	return group.Wait()
