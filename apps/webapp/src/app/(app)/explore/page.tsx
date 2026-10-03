@@ -5,13 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 import { ProductCard } from "@/components/commerce/productCard";
-import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
+import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { Avatar } from "@/components/ui/media";
 import { searchService, type SearchScope } from "@/services/search.service";
 import { useQuery } from "@tanstack/react-query";
 
-import styles from "./explore.module.css";
+import styles from "./page.module.css";
 
 const scopeOptions: readonly { readonly value: SearchScope; readonly label: string }[] = [
   { value: "all", label: "All" },
@@ -24,7 +25,7 @@ const scopeOptions: readonly { readonly value: SearchScope; readonly label: stri
 function ExploreResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
-  const [scope, setScope] = useState<ScopeValue>(scopeOptions[0]!.value);
+  const [scope, setScope] = useState<SearchScope>(scopeOptions[0]!.value);
 
   const resultsQuery = useQuery({
     queryKey: ["search", query, scope],
@@ -43,7 +44,7 @@ function ExploreResults() {
     );
   }
 
-  if (resultsQuery.isLoading) return <Spinner label="Searching" />;
+  if (resultsQuery.isLoading) return <ProductGridSkeleton gridClassName={styles.productGrid} />;
   if (resultsQuery.isError) return <ErrorState description="Search is unavailable right now." action={<RetryButton onRetry={() => resultsQuery.refetch()} />} />;
 
   const results = resultsQuery.data;
@@ -141,7 +142,6 @@ function ExploreResults() {
   );
 }
 
-type ScopeValue = (typeof scopeOptions)[number]["value"];
 
 export default function ExplorePage() {
   return (
