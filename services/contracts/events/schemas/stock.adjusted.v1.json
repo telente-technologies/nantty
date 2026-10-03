@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/stock.adjusted.v1.json",
+  "title": "StockAdjusted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batchId",
+    "storeId",
+    "locationId",
+    "reason",
+    "lines"
+  ],
+  "properties": {
+    "batchId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "locationId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

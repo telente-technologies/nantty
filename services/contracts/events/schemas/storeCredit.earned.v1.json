@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/storeCredit.earned.v1.json",
+  "title": "StoreCreditEarned",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "storeId",
+    "buyerAccountId",
+    "amountMinor",
+    "currency"
+  ],
+  "properties": {
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "orderGroupId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amountMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    }
+  }
+}

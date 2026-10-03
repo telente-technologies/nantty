@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/store.created.v1.json",
+  "title": "StoreCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "storeId",
+    "ownerAccountId",
+    "businessProfileId",
+    "currency",
+    "countryCode"
+  ],
+  "properties": {
+    "storeId": {
+      "type": "string"
+    },
+    "ownerAccountId": {
+      "type": "string"
+    },
+    "businessProfileId": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "countryCode": {
+      "type": "string"
+    }
+  }
+}
