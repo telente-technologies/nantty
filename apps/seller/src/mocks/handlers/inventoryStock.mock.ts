@@ -14,7 +14,7 @@ function isKnownLocation(locationId: unknown): locationId is string {
   return typeof locationId === "string" && readMockDatabase().locations.some((location) => location.id === locationId);
 }
 
-function readDefaultLocationId(request: MockRequest): string {
+export function readDefaultLocationId(request: MockRequest): string {
   const requested = request.query.get("locationId") ?? request.locationId;
   if (isKnownLocation(requested)) return requested;
   const database = readMockDatabase();
@@ -50,14 +50,14 @@ function describeActor(principal: MockPrincipal) {
   return { id: principal.staffId ?? principal.userId, name: principal.actorName };
 }
 
-function buildInventoryLevelRows(locationId: string): InventoryLevelRow[] {
+export function buildInventoryLevelRows(locationId: string): InventoryLevelRow[] {
   return readMockDatabase().products.filter((product) => product.status !== "archived" && product.trackInventory).flatMap((product) => product.variants.map((variant) => {
     const level = variant.stock.find((candidate) => candidate.locationId === locationId) ?? { onHand: 0, reserved: 0 };
     const available = level.onHand - level.reserved;
     return {
       variantId: variant.id, productId: product.id, productName: product.name, variantTitle: variant.title, sku: variant.sku,
       imageUrl: product.images[0]?.url ?? null, locationId, onHand: level.onHand, reserved: level.reserved, available,
-      lowStockThreshold: variant.lowStockThreshold, costPrice: variant.costPrice,
+      lowStockThreshold: variant.lowStockThreshold, costPrice: variant.costPrice, reorderPoint: variant.reorderPoint, reorderQuantity: variant.reorderQuantity,
       stockValue: variant.costPrice ? { amountMinor: variant.costPrice.amountMinor * Math.max(level.onHand, 0), currency: variant.costPrice.currency } : null,
     };
   }));
@@ -138,11 +138,17 @@ function finishStockTransfer(request: MockRequest, outcome: "received" | "cancel
 export function registerInventoryStockMockRoutes(): void {
   registerMockRoute("GET", "/seller/inventory/levels", (request) => {
     requireMockStorePrincipal(request);
-    const lowStockOnly = request.query.get("lowStockOnly") === "true";
+    const stockFilter = request.query.get("lowStockOnly") === "true" ? "low" : request.query.get("stock");
+    const sortKey = request.query.get("sort") ?? "name";
+    const direction = request.query.get("direction") === "descending" ? -1 : 1;
     const rows = buildInventoryLevelRows(readDefaultLocationId(request))
-      .filter((row) => !lowStockOnly || row.onHand <= row.lowStockThreshold)
+      .filter((row) => (stockFilter === "low" ? row.available <= row.lowStockThreshold : stockFilter === "out" ? row.available <= 0 : stockFilter === "in" ? row.available > row.lowStockThreshold : true))
       .filter((row) => matchesSearchText(request.query.get("q"), row.productName, row.sku, row.variantTitle))
-      .sort((first, second) => first.productName.localeCompare(second.productName) || first.variantTitle.localeCompare(second.variantTitle));
+      .sort((first, second) => {
+        if (sortKey === "onHand" || sortKey === "available" || sortKey === "reserved") return (first[sortKey] - second[sortKey]) * direction;
+        if (sortKey === "value") return ((first.stockValue?.amountMinor ?? 0) - (second.stockValue?.amountMinor ?? 0)) * direction;
+        return (first.productName.localeCompare(second.productName) || first.variantTitle.localeCompare(second.variantTitle)) * direction;
+      });
     return respondWithJson(200, paginateMockList(rows, request.query, 50));
   });
 
