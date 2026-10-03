@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -54,7 +55,11 @@ func (service DisputeService) OpenDisputeInTransaction(ctx context.Context, tran
 		return nil, ErrOrderNotDisputable
 	}
 	now := container.Now().UTC()
-	if err := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusDisputed).ClearAutoReleaseAt().Exec(ctx); err != nil {
+	freeze := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusDisputed).ClearAutoReleaseAt()
+	if held.AutoReleaseAt != nil {
+		freeze.SetPausedReleaseRemainingSeconds(int64(max(held.AutoReleaseAt.Sub(now), 0).Seconds()))
+	}
+	if err := freeze.Exec(ctx); err != nil {
 		return nil, err
 	}
 	evidence, _ := json.Marshal(nonNilStrings(input.EvidenceUrls))
@@ -142,9 +147,12 @@ func (service DisputeService) CloseDisputeByBuyerInTransaction(ctx context.Conte
 		return nil, err
 	}
 	now := container.Now().UTC()
-	update := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusHeld)
-	if held.DeliveredAt != nil {
-		update.SetAutoReleaseAt(now.Add(container.Settings.InspectionPeriod))
+	update := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusHeld).ClearPausedReleaseRemainingSeconds()
+	switch {
+	case held.PausedReleaseRemainingSeconds != nil:
+		update.SetAutoReleaseAt(now.Add(time.Duration(*held.PausedReleaseRemainingSeconds) * time.Second))
+	case held.DeliveredAt != nil:
+		update.SetAutoReleaseAt(now.Add(container.Policy(ctx).AutoReleasePeriod))
 	}
 	if err := update.Exec(ctx); err != nil {
 		return nil, err
