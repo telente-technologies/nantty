@@ -1,0 +1,52 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 460px;
+  margin: var(--space-8) auto;
+  padding: var(--space-7) var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  text-align: center;
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.text {
+  color: var(--ink-muted);
+}
+
+.successMark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
+  font-size: var(--text-xl);
+  font-weight: 900;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-lg);
+  padding-inline: var(--space-5);
+  border-radius: var(--radius-pill);
+  font-weight: 750;
+}
+
+.primary {
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.secondary {
+  border: 1px solid var(--color-border-strong);
+}
