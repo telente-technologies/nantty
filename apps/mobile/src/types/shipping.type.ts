@@ -18,6 +18,7 @@ export interface CartSellerGroup {
   readonly items: readonly CartItem[];
   readonly subtotal: Money;
   readonly discounts: Money;
+  readonly storeCredit: Money;
   readonly shipping: ShippingQuote;
   readonly total: Money;
 }

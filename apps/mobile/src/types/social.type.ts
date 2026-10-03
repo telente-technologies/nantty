@@ -1,6 +1,7 @@
 import type { LiveGiftSentEvent } from "./liveGift.type";
-import type { Comment, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, UserSummary } from "./models.type";
+import type { Comment, CommentStickerLayout, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, ReplyToComment, UserSummary } from "./models.type";
 import type { Money } from "./money.type";
+import type { MentionEntity } from "./mention.type";
 import type { LiveAdSettings } from "./socialGraph.type";
 
 export type ConversationFilter = "all" | "direct";
@@ -47,6 +48,7 @@ export interface CommentWithReplies extends Comment {
 export interface NewCommentInput {
   readonly text: string;
   readonly parentCommentId?: ID;
+  readonly mentions?: readonly MentionEntity[];
 }
 
 export type LiveSource = "camera" | "screen" | "external";
@@ -77,6 +79,9 @@ export interface NewPostInput {
   readonly kind?: "post" | "clip";
   readonly soundId?: ID;
   readonly isAiGenerated?: boolean;
+  readonly mentions?: readonly MentionEntity[];
+  readonly replyToComment?: ReplyToComment;
+  readonly stickerLayout?: CommentStickerLayout;
 }
 
 export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live";
@@ -206,6 +211,7 @@ export interface ConversationSettingsUpdate {
   readonly name?: string;
   readonly photoMediaId?: ID;
   readonly disappearingMessagesSeconds?: number | null;
+  readonly onlyAdminsCanMentionAll?: boolean;
 }
 
 export interface OutgoingVoiceNote {

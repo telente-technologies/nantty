@@ -1,6 +1,7 @@
 import type { Money } from "./money.type";
 import type { Order } from "./cartOrder.type";
 import type { FollowState } from "./socialGraph.type";
+import type { MentionEntity } from "./mention.type";
 
 export type ID = string;
 export type ISODate = string;
@@ -16,6 +17,7 @@ export interface Verification {
   readonly color: VerificationColor;
   readonly tier: VerificationTier;
   readonly badgeVisible: boolean;
+  readonly graceEndsAt?: ISODate | null;
 }
 
 export interface CreatorLiveStatus {
@@ -75,6 +77,7 @@ export interface StoreSummary {
   readonly ratingCount: number;
   readonly reviewCount: number;
   readonly verification?: Verification | null;
+  readonly earnBackBasisPoints?: number | null;
 }
 
 export interface ProductSummary {
@@ -144,6 +147,9 @@ export interface Post {
   readonly viewerHasAccess?: boolean;
   readonly resharedFrom?: Post | null;
   readonly isAiGenerated?: boolean;
+  readonly mentions?: readonly MentionEntity[];
+  readonly replyToComment?: ReplyToComment;
+  readonly stickerLayout?: CommentStickerLayout;
 }
 
 export interface PostAnalyticsDaily {
@@ -176,6 +182,29 @@ export interface Comment {
   readonly liked: boolean;
   readonly replyCount: number;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
+  readonly mentions?: readonly MentionEntity[];
+  readonly videoReplies?: readonly CommentVideoReply[];
+  readonly videoReplyBlocked?: boolean;
+}
+
+export interface CommentVideoReply {
+  readonly clipId: ID;
+  readonly thumbnailUrl: string | null;
+  readonly createdAt: ISODate;
+}
+
+export interface CommentStickerLayout {
+  readonly x: number;
+  readonly y: number;
+  readonly scale: number;
+  readonly rotation: number;
+  readonly hidden?: boolean;
+}
+
+export interface ReplyToComment {
+  readonly commentId: ID;
+  readonly clipId: ID;
+  readonly commenterUserId: ID;
 }
 
 export interface Story {

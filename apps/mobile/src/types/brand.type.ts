@@ -1,4 +1,5 @@
 import type { ID, Product, ProductSummary, StoreSummary, Verification } from "./models.type";
+import type { CreatorProgramStatus } from "./social.type";
 
 export interface BrandSummary {
   readonly id: ID;
@@ -49,10 +50,11 @@ export interface NewBrandInput {
 }
 
 export interface ActingProfile {
-  readonly kind: "person" | "creator" | "business" | "brand" | "store" | "government";
+  readonly kind: "person" | "business" | "brand" | "store" | "government";
   readonly id: ID;
   readonly name: string;
   readonly handle: string;
   readonly avatarUrl: string | null;
   readonly verification: Verification | null;
+  readonly creatorStatus?: CreatorProgramStatus;
 }
