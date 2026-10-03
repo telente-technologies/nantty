@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 MINIMUM_SHARED_SECRET_LENGTH = 32
@@ -35,6 +35,23 @@ class IntelligenceSettings(BaseSettings):
     s3_region: str = "us-east-1"
     s3_access_key_id: SecretStr = SecretStr("")
     s3_secret_access_key: SecretStr = SecretStr("")
+
+    event_bus: Literal["rabbitmq", "sqs"] = Field(
+        default="rabbitmq", validation_alias=AliasChoices("INTELLIGENCE_EVENT_BUS", "EVENT_BUS")
+    )
+    rabbitmq_url: SecretStr = Field(
+        default=SecretStr(""), validation_alias=AliasChoices("INTELLIGENCE_RABBITMQ_URL", "RABBITMQ_URL")
+    )
+    rabbitmq_prefetch: int = Field(default=20, ge=1, le=1000)
+    domain_events_queue: str = "intelligence-domain-events"
+    trust_advisory_queue: str = "intelligence-trust-advisory"
+
+    sqs_endpoint_url: str = ""
+    sqs_region: str = "us-east-1"
+    sqs_access_key_id: SecretStr = SecretStr("")
+    sqs_secret_access_key: SecretStr = SecretStr("")
+    domain_events_queue_url: str = ""
+    trust_advisory_queue_url: str = ""
 
     model_registry_path: Path = Path("./model_registry")
     model_signing_secret: SecretStr = SecretStr("")
