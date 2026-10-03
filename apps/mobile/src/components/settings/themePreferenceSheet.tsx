@@ -32,7 +32,7 @@ export function ThemePreferenceSheet({ visible, selectedPreference, onSelect, on
   const { colors } = useTheme();
   const styles = useStyles();
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Theme">
+    <BottomSheet visible={visible} onClose={onClose} title="Theme" subtitle="Choose how Zudomart looks on this device">
       <View style={styles.content} accessibilityRole="radiogroup">
         {THEME_PREFERENCE_OPTIONS.map((option) => {
           const selected = option.value === selectedPreference;
@@ -43,11 +43,11 @@ export function ThemePreferenceSheet({ visible, selectedPreference, onSelect, on
               accessibilityState={{ checked: selected }}
               accessibilityLabel={option.isBeta ? `${option.label}, beta. ${option.description}` : `${option.label}. ${option.description}`}
               onPress={() => onSelect(option.value)}
-              style={styles.row}
+              style={[styles.row, selected ? styles.rowSelected : null]}
             >
               <View style={styles.text}>
                 <View style={styles.labelRow}>
-                  <Text size={14} lineHeight={16.8}>
+                  <Text size={15} weight={500} lineHeight={20}>
                     {option.label}
                   </Text>
                   {option.isBeta ? (
@@ -62,12 +62,12 @@ export function ThemePreferenceSheet({ visible, selectedPreference, onSelect, on
                   {option.description}
                 </Text>
               </View>
-              {selected ? <Check16Icon color={colors.primary} /> : null}
+              <View style={[styles.radio, selected ? styles.radioOn : null]}>{selected ? <Check16Icon size={12} color={colors.onPrimary} /> : null}</View>
             </Pressable>
           );
         })}
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle} style={styles.note}>
-          Dark mode is in beta. Live and Clips always stay dark.
+        <Text size={12} lineHeight={16.8} color={colors.textMuted} style={styles.note}>
+          Dark mode is in beta. Clips always stay dark.
         </Text>
       </View>
     </BottomSheet>
@@ -76,11 +76,14 @@ export function ThemePreferenceSheet({ visible, selectedPreference, onSelect, on
 
 const useStyles = makeThemedStyles((colors) =>
   StyleSheet.create({
-    content: { paddingHorizontal: 16, paddingBottom: 16 },
-    row: { minHeight: 56, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderBottomWidth: 1, borderBottomColor: colors.background },
+    content: { paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
+    row: { minHeight: 60, paddingHorizontal: 14, paddingVertical: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.divider },
+    rowSelected: { borderColor: colors.primarySolid, backgroundColor: colors.primaryTint },
+    radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.textMuted, alignItems: "center", justifyContent: "center" },
+    radioOn: { borderColor: colors.primarySolid, backgroundColor: colors.primarySolid },
     text: { gap: 2, flexShrink: 1 },
     labelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     betaPill: { paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4, backgroundColor: colors.primaryTint },
-    note: { marginTop: 12 },
+    note: { marginTop: 4 },
   }),
 );

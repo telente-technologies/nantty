@@ -3,12 +3,12 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { consentsService } from "@/services/consents.service";
 import { useAuthStore } from "@/store/auth.store";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 const CONFIRMATION_WORD = "DELETE";
 
@@ -22,7 +22,7 @@ function Section({ title, lines }: { title: string; lines: string[] }) {
     <View style={styles.section}>
       <Text size={13} weight={600} lineHeight={16.9}>{title}</Text>
       {lines.map((line) => (
-        <Text key={line} size={12} lineHeight={16.8} color={colors.textMuted}>{`• ${line}`}</Text>
+        <BulletLine key={line} size={13} lineHeight={18}>{line}</BulletLine>
       ))}
     </View>
   );
@@ -38,22 +38,26 @@ export function DeleteAccountSheet({ visible, onClose }: { visible: boolean; onC
   });
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Delete my account">
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title="Delete my account"
+      subtitle="Scheduled with a grace period, so you can change your mind"
+      scrollable
+      footerActions={[
+        { label: "Delete my account", style: "destructive", disabled: confirmation.trim() !== CONFIRMATION_WORD, loading: requestDeletion.isPending, onPress: () => requestDeletion.mutate() },
+        { label: "Keep my account", style: "secondary", onPress: onClose },
+      ]}
+    >
       <View style={styles.content}>
         <Section title="What gets deleted" lines={DELETED} />
         <Section title="What gets anonymized" lines={ANONYMIZED} />
         <Section title="What we may keep" lines={RETAINED} />
         <TextField label={`Type ${CONFIRMATION_WORD} to confirm`} value={confirmation} onChangeText={setConfirmation} autoCapitalize="characters" autoCorrect={false} />
-        {requestDeletion.isError ? <Text size={12} lineHeight={14.4} color={colors.error}>{requestDeletion.error.message}</Text> : null}
-        <Button
-          title="Delete my account"
-          disabled={confirmation.trim() !== CONFIRMATION_WORD}
-          loading={requestDeletion.isPending}
-          onPress={() => requestDeletion.mutate()}
-        />
+        {requestDeletion.isError ? <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="alert">{requestDeletion.error.message}</Text> : null}
       </View>
     </BottomSheet>
   );
 }
 
-const styles = StyleSheet.create({ content: { paddingHorizontal: 16, paddingBottom: 16, gap: 16 }, section: { gap: 4 } });
+const styles = StyleSheet.create({ content: { paddingTop: 4, gap: 16 }, section: { gap: 4 } });
