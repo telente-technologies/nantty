@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { usePathname } from "next/navigation";
 
 import { useAdminSession } from "@/components/session/adminSessionProvider";
@@ -21,8 +22,8 @@ export function SidebarNavigation({ isOpenOnSmallScreens, onNavigate }: { readon
   return (
     <aside className={`${styles.sidebar} ${isOpenOnSmallScreens ? styles.open : ""}`} aria-label="Admin sections">
       <div className={styles.brand}>
-        <Link href="/" className={styles.wordmark} aria-label="Zudomart Admin home">
-          zudomart<span className={styles.wordmarkSuffix}>admin</span>
+        <Link href="/" aria-label="Zudomart Admin home">
+          <ZudomartWordmark productLabel="Admin" tone="onDark" />
         </Link>
         <EnvironmentBadge environment={environment} />
       </div>
