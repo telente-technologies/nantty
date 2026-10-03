@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 import type { ReactNode } from "react";
 
 import styles from "./authSplitLayout.module.css";
@@ -50,6 +50,7 @@ export function AuthSplitLayout({ children }: { readonly children: ReactNode }) 
       </aside>
 
       <main id="main-content" className={styles.main} tabIndex={-1}>
+        <ThemeSwitcher iconOnly className={styles.themeCorner} />
         <div className={styles.panel}>{children}</div>
       </main>
     </div>

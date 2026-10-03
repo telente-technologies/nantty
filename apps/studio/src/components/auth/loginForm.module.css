@@ -64,7 +64,7 @@
 }
 
 .linkStrong {
-  color: var(--blue-600);
+  color: var(--color-brand);
   font-weight: 700;
   text-decoration: underline;
 }
@@ -77,10 +77,10 @@
   width: 100%;
   max-width: 430px;
   padding: 10px 12px;
-  border: 1px solid var(--yellow-100);
+  border: 1px solid color-mix(in srgb, var(--color-warn) 40%, transparent);
   border-radius: var(--radius-medium);
-  background: var(--yellow-50);
-  color: var(--yellow-900);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
   font-size: var(--text-xs);
 }
 
