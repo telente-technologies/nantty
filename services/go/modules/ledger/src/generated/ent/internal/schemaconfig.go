@@ -7,12 +7,13 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	JournalEntry        string // JournalEntry table.
-	JournalLine         string // JournalLine table.
-	LedgerAccount       string // LedgerAccount table.
-	OutboxEvent         string // OutboxEvent table.
-	ReconciliationBreak string // ReconciliationBreak table.
-	ReconciliationRun   string // ReconciliationRun table.
+	JournalEntry         string // JournalEntry table.
+	JournalLine          string // JournalLine table.
+	LedgerAccount        string // LedgerAccount table.
+	OutboxEvent          string // OutboxEvent table.
+	ReconciliationBreak  string // ReconciliationBreak table.
+	ReconciliationRun    string // ReconciliationRun table.
+	SellerCreditMaturity string // SellerCreditMaturity table.
 }
 
 type schemaCtxKey struct{}
