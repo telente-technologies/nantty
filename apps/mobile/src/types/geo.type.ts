@@ -2,6 +2,7 @@ export type GeoLevel = "state" | "lga" | "city";
 
 export interface GeoCountry {
   readonly id: string;
+  readonly code: string;
   readonly name: string;
   readonly currency: string;
   readonly levels: readonly GeoLevel[];

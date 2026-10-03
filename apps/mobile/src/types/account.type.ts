@@ -128,8 +128,20 @@ export interface UsernameAvailability {
   readonly message?: string;
 }
 
+export interface UsernameChangeRecord {
+  readonly from: string;
+  readonly to: string;
+  readonly changedAt: string;
+  readonly reason: string;
+}
+
 export interface UsernamePolicy {
+  readonly username: string;
   readonly canChangeNow: boolean;
+  readonly cooldownDays: number;
+  readonly maxChangesPerYear: number;
+  readonly quarantineDays: number;
+  readonly history: readonly UsernameChangeRecord[];
   readonly nextChangeAvailableAt: string | null;
   readonly changesRemainingThisYear: number;
   readonly rules: readonly string[];

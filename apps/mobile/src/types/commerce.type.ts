@@ -49,12 +49,36 @@ export interface StoreDetail extends StoreSummary {
   readonly posts: readonly Post[];
 }
 
-export type PaymentProvider = "paystack" | "flutterwave";
+export type PaymentProvider = "paystack";
+
+export type PaymentChannel = "card" | "bank_transfer" | "ussd";
 
 export interface PaymentInitialization {
   readonly orderId: ID;
   readonly reference: string;
   readonly authorizationUrl: string;
+  readonly accessCode: string;
+}
+
+export interface SavedCardDisplay {
+  readonly brand: string;
+  readonly last4: string;
+  readonly expMonth: number;
+  readonly expYear: number;
+}
+
+export interface SavedCardOffer extends SavedCardDisplay {
+  readonly authorizationCode: string;
+}
+
+export interface PaymentVerification {
+  readonly status: "pending" | "paid" | "failed";
+  readonly savedCard?: SavedCardOffer;
+}
+
+export interface SavedCardCharge {
+  readonly status: "paid" | "pending" | "failed" | "action_required";
+  readonly authorizationUrl?: string;
 }
 
 export interface CheckoutResult {

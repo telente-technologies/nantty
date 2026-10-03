@@ -44,6 +44,7 @@ export interface Address {
   readonly state: string;
   readonly isDefault: boolean;
   readonly countryId: string;
+  readonly countryCode: string;
   readonly country: string;
   readonly stateId: string | null;
   readonly lgaId: string | null;
