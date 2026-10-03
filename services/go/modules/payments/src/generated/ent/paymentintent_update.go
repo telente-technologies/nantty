@@ -29,6 +29,20 @@ func (_u *PaymentIntentUpdate) Where(ps ...predicate.PaymentIntent) *PaymentInte
 	return _u
 }
 
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (_u *PaymentIntentUpdate) SetProviderCheckoutID(v string) *PaymentIntentUpdate {
+	_u.mutation.SetProviderCheckoutID(v)
+	return _u
+}
+
+// SetNillableProviderCheckoutID sets the "provider_checkout_id" field if the given value is not nil.
+func (_u *PaymentIntentUpdate) SetNillableProviderCheckoutID(v *string) *PaymentIntentUpdate {
+	if v != nil {
+		_u.SetProviderCheckoutID(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *PaymentIntentUpdate) SetStatus(v paymentintent.Status) *PaymentIntentUpdate {
 	_u.mutation.SetStatus(v)
@@ -243,6 +257,11 @@ func (_u *PaymentIntentUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PaymentIntentUpdate) check() error {
+	if v, ok := _u.mutation.ProviderCheckoutID(); ok {
+		if err := paymentintent.ProviderCheckoutIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_checkout_id", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.provider_checkout_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := paymentintent.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.status": %w`, err)}
@@ -277,6 +296,9 @@ func (_u *PaymentIntentUpdate) sqlSave(ctx context.Context) (_node int, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ProviderCheckoutID(); ok {
+		_spec.SetField(paymentintent.FieldProviderCheckoutID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentintent.FieldStatus, field.TypeEnum, value)
@@ -346,6 +368,20 @@ type PaymentIntentUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PaymentIntentMutation
+}
+
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (_u *PaymentIntentUpdateOne) SetProviderCheckoutID(v string) *PaymentIntentUpdateOne {
+	_u.mutation.SetProviderCheckoutID(v)
+	return _u
+}
+
+// SetNillableProviderCheckoutID sets the "provider_checkout_id" field if the given value is not nil.
+func (_u *PaymentIntentUpdateOne) SetNillableProviderCheckoutID(v *string) *PaymentIntentUpdateOne {
+	if v != nil {
+		_u.SetProviderCheckoutID(*v)
+	}
+	return _u
 }
 
 // SetStatus sets the "status" field.
@@ -575,6 +611,11 @@ func (_u *PaymentIntentUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PaymentIntentUpdateOne) check() error {
+	if v, ok := _u.mutation.ProviderCheckoutID(); ok {
+		if err := paymentintent.ProviderCheckoutIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_checkout_id", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.provider_checkout_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := paymentintent.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.status": %w`, err)}
@@ -626,6 +667,9 @@ func (_u *PaymentIntentUpdateOne) sqlSave(ctx context.Context) (_node *PaymentIn
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ProviderCheckoutID(); ok {
+		_spec.SetField(paymentintent.FieldProviderCheckoutID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentintent.FieldStatus, field.TypeEnum, value)

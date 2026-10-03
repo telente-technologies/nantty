@@ -82,6 +82,76 @@ func (_c *PaymentRefundCreate) SetNillableReason(v *string) *PaymentRefundCreate
 	return _c
 }
 
+// SetConnectedAccountID sets the "connected_account_id" field.
+func (_c *PaymentRefundCreate) SetConnectedAccountID(v string) *PaymentRefundCreate {
+	_c.mutation.SetConnectedAccountID(v)
+	return _c
+}
+
+// SetNillableConnectedAccountID sets the "connected_account_id" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableConnectedAccountID(v *string) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetConnectedAccountID(*v)
+	}
+	return _c
+}
+
+// SetBeneficiaryUserID sets the "beneficiary_user_id" field.
+func (_c *PaymentRefundCreate) SetBeneficiaryUserID(v string) *PaymentRefundCreate {
+	_c.mutation.SetBeneficiaryUserID(v)
+	return _c
+}
+
+// SetNillableBeneficiaryUserID sets the "beneficiary_user_id" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableBeneficiaryUserID(v *string) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetBeneficiaryUserID(*v)
+	}
+	return _c
+}
+
+// SetFullRefund sets the "full_refund" field.
+func (_c *PaymentRefundCreate) SetFullRefund(v bool) *PaymentRefundCreate {
+	_c.mutation.SetFullRefund(v)
+	return _c
+}
+
+// SetNillableFullRefund sets the "full_refund" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableFullRefund(v *bool) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetFullRefund(*v)
+	}
+	return _c
+}
+
+// SetFeeTopUpMinor sets the "fee_top_up_minor" field.
+func (_c *PaymentRefundCreate) SetFeeTopUpMinor(v int64) *PaymentRefundCreate {
+	_c.mutation.SetFeeTopUpMinor(v)
+	return _c
+}
+
+// SetNillableFeeTopUpMinor sets the "fee_top_up_minor" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableFeeTopUpMinor(v *int64) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetFeeTopUpMinor(*v)
+	}
+	return _c
+}
+
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (_c *PaymentRefundCreate) SetFeeTopUpTransferID(v string) *PaymentRefundCreate {
+	_c.mutation.SetFeeTopUpTransferID(v)
+	return _c
+}
+
+// SetNillableFeeTopUpTransferID sets the "fee_top_up_transfer_id" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableFeeTopUpTransferID(v *string) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetFeeTopUpTransferID(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *PaymentRefundCreate) SetStatus(v paymentrefund.Status) *PaymentRefundCreate {
 	_c.mutation.SetStatus(v)
@@ -223,6 +293,26 @@ func (_c *PaymentRefundCreate) defaults() {
 		v := paymentrefund.DefaultReason
 		_c.mutation.SetReason(v)
 	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		v := paymentrefund.DefaultConnectedAccountID
+		_c.mutation.SetConnectedAccountID(v)
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		v := paymentrefund.DefaultBeneficiaryUserID
+		_c.mutation.SetBeneficiaryUserID(v)
+	}
+	if _, ok := _c.mutation.FullRefund(); !ok {
+		v := paymentrefund.DefaultFullRefund
+		_c.mutation.SetFullRefund(v)
+	}
+	if _, ok := _c.mutation.FeeTopUpMinor(); !ok {
+		v := paymentrefund.DefaultFeeTopUpMinor
+		_c.mutation.SetFeeTopUpMinor(v)
+	}
+	if _, ok := _c.mutation.FeeTopUpTransferID(); !ok {
+		v := paymentrefund.DefaultFeeTopUpTransferID
+		_c.mutation.SetFeeTopUpTransferID(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := paymentrefund.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -290,6 +380,36 @@ func (_c *PaymentRefundCreate) check() error {
 	if v, ok := _c.mutation.Reason(); ok {
 		if err := paymentrefund.ReasonValidator(v); err != nil {
 			return &ValidationError{Name: "reason", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.reason": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		return &ValidationError{Name: "connected_account_id", err: errors.New(`ent: missing required field "PaymentRefund.connected_account_id"`)}
+	}
+	if v, ok := _c.mutation.ConnectedAccountID(); ok {
+		if err := paymentrefund.ConnectedAccountIDValidator(v); err != nil {
+			return &ValidationError{Name: "connected_account_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.connected_account_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		return &ValidationError{Name: "beneficiary_user_id", err: errors.New(`ent: missing required field "PaymentRefund.beneficiary_user_id"`)}
+	}
+	if v, ok := _c.mutation.BeneficiaryUserID(); ok {
+		if err := paymentrefund.BeneficiaryUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "beneficiary_user_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.beneficiary_user_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.FullRefund(); !ok {
+		return &ValidationError{Name: "full_refund", err: errors.New(`ent: missing required field "PaymentRefund.full_refund"`)}
+	}
+	if _, ok := _c.mutation.FeeTopUpMinor(); !ok {
+		return &ValidationError{Name: "fee_top_up_minor", err: errors.New(`ent: missing required field "PaymentRefund.fee_top_up_minor"`)}
+	}
+	if _, ok := _c.mutation.FeeTopUpTransferID(); !ok {
+		return &ValidationError{Name: "fee_top_up_transfer_id", err: errors.New(`ent: missing required field "PaymentRefund.fee_top_up_transfer_id"`)}
+	}
+	if v, ok := _c.mutation.FeeTopUpTransferID(); ok {
+		if err := paymentrefund.FeeTopUpTransferIDValidator(v); err != nil {
+			return &ValidationError{Name: "fee_top_up_transfer_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.fee_top_up_transfer_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -387,6 +507,26 @@ func (_c *PaymentRefundCreate) createSpec() (*PaymentRefund, *sqlgraph.CreateSpe
 		_spec.SetField(paymentrefund.FieldReason, field.TypeString, value)
 		_node.Reason = value
 	}
+	if value, ok := _c.mutation.ConnectedAccountID(); ok {
+		_spec.SetField(paymentrefund.FieldConnectedAccountID, field.TypeString, value)
+		_node.ConnectedAccountID = value
+	}
+	if value, ok := _c.mutation.BeneficiaryUserID(); ok {
+		_spec.SetField(paymentrefund.FieldBeneficiaryUserID, field.TypeString, value)
+		_node.BeneficiaryUserID = value
+	}
+	if value, ok := _c.mutation.FullRefund(); ok {
+		_spec.SetField(paymentrefund.FieldFullRefund, field.TypeBool, value)
+		_node.FullRefund = value
+	}
+	if value, ok := _c.mutation.FeeTopUpMinor(); ok {
+		_spec.SetField(paymentrefund.FieldFeeTopUpMinor, field.TypeInt64, value)
+		_node.FeeTopUpMinor = value
+	}
+	if value, ok := _c.mutation.FeeTopUpTransferID(); ok {
+		_spec.SetField(paymentrefund.FieldFeeTopUpTransferID, field.TypeString, value)
+		_node.FeeTopUpTransferID = value
+	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
@@ -462,6 +602,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (u *PaymentRefundUpsert) SetFeeTopUpTransferID(v string) *PaymentRefundUpsert {
+	u.Set(paymentrefund.FieldFeeTopUpTransferID, v)
+	return u
+}
+
+// UpdateFeeTopUpTransferID sets the "fee_top_up_transfer_id" field to the value that was provided on create.
+func (u *PaymentRefundUpsert) UpdateFeeTopUpTransferID() *PaymentRefundUpsert {
+	u.SetExcluded(paymentrefund.FieldFeeTopUpTransferID)
+	return u
+}
 
 // SetStatus sets the "status" field.
 func (u *PaymentRefundUpsert) SetStatus(v paymentrefund.Status) *PaymentRefundUpsert {
@@ -585,6 +737,18 @@ func (u *PaymentRefundUpsertOne) UpdateNewValues() *PaymentRefundUpsertOne {
 		if _, exists := u.create.mutation.Reason(); exists {
 			s.SetIgnore(paymentrefund.FieldReason)
 		}
+		if _, exists := u.create.mutation.ConnectedAccountID(); exists {
+			s.SetIgnore(paymentrefund.FieldConnectedAccountID)
+		}
+		if _, exists := u.create.mutation.BeneficiaryUserID(); exists {
+			s.SetIgnore(paymentrefund.FieldBeneficiaryUserID)
+		}
+		if _, exists := u.create.mutation.FullRefund(); exists {
+			s.SetIgnore(paymentrefund.FieldFullRefund)
+		}
+		if _, exists := u.create.mutation.FeeTopUpMinor(); exists {
+			s.SetIgnore(paymentrefund.FieldFeeTopUpMinor)
+		}
 	}))
 	return u
 }
@@ -614,6 +778,20 @@ func (u *PaymentRefundUpsertOne) Update(set func(*PaymentRefundUpsert)) *Payment
 		set(&PaymentRefundUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (u *PaymentRefundUpsertOne) SetFeeTopUpTransferID(v string) *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetFeeTopUpTransferID(v)
+	})
+}
+
+// UpdateFeeTopUpTransferID sets the "fee_top_up_transfer_id" field to the value that was provided on create.
+func (u *PaymentRefundUpsertOne) UpdateFeeTopUpTransferID() *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdateFeeTopUpTransferID()
+	})
 }
 
 // SetStatus sets the "status" field.
@@ -918,6 +1096,18 @@ func (u *PaymentRefundUpsertBulk) UpdateNewValues() *PaymentRefundUpsertBulk {
 			if _, exists := b.mutation.Reason(); exists {
 				s.SetIgnore(paymentrefund.FieldReason)
 			}
+			if _, exists := b.mutation.ConnectedAccountID(); exists {
+				s.SetIgnore(paymentrefund.FieldConnectedAccountID)
+			}
+			if _, exists := b.mutation.BeneficiaryUserID(); exists {
+				s.SetIgnore(paymentrefund.FieldBeneficiaryUserID)
+			}
+			if _, exists := b.mutation.FullRefund(); exists {
+				s.SetIgnore(paymentrefund.FieldFullRefund)
+			}
+			if _, exists := b.mutation.FeeTopUpMinor(); exists {
+				s.SetIgnore(paymentrefund.FieldFeeTopUpMinor)
+			}
 		}
 	}))
 	return u
@@ -948,6 +1138,20 @@ func (u *PaymentRefundUpsertBulk) Update(set func(*PaymentRefundUpsert)) *Paymen
 		set(&PaymentRefundUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetFeeTopUpTransferID sets the "fee_top_up_transfer_id" field.
+func (u *PaymentRefundUpsertBulk) SetFeeTopUpTransferID(v string) *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetFeeTopUpTransferID(v)
+	})
+}
+
+// UpdateFeeTopUpTransferID sets the "fee_top_up_transfer_id" field to the value that was provided on create.
+func (u *PaymentRefundUpsertBulk) UpdateFeeTopUpTransferID() *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdateFeeTopUpTransferID()
+	})
 }
 
 // SetStatus sets the "status" field.

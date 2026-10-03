@@ -80,6 +80,62 @@ func (_c *PaymentIntentCreate) SetCurrency(v string) *PaymentIntentCreate {
 	return _c
 }
 
+// SetConnectedAccountID sets the "connected_account_id" field.
+func (_c *PaymentIntentCreate) SetConnectedAccountID(v string) *PaymentIntentCreate {
+	_c.mutation.SetConnectedAccountID(v)
+	return _c
+}
+
+// SetNillableConnectedAccountID sets the "connected_account_id" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableConnectedAccountID(v *string) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetConnectedAccountID(*v)
+	}
+	return _c
+}
+
+// SetBeneficiaryUserID sets the "beneficiary_user_id" field.
+func (_c *PaymentIntentCreate) SetBeneficiaryUserID(v string) *PaymentIntentCreate {
+	_c.mutation.SetBeneficiaryUserID(v)
+	return _c
+}
+
+// SetNillableBeneficiaryUserID sets the "beneficiary_user_id" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableBeneficiaryUserID(v *string) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetBeneficiaryUserID(*v)
+	}
+	return _c
+}
+
+// SetPlatformFeeMinor sets the "platform_fee_minor" field.
+func (_c *PaymentIntentCreate) SetPlatformFeeMinor(v int64) *PaymentIntentCreate {
+	_c.mutation.SetPlatformFeeMinor(v)
+	return _c
+}
+
+// SetNillablePlatformFeeMinor sets the "platform_fee_minor" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillablePlatformFeeMinor(v *int64) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetPlatformFeeMinor(*v)
+	}
+	return _c
+}
+
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (_c *PaymentIntentCreate) SetProviderCheckoutID(v string) *PaymentIntentCreate {
+	_c.mutation.SetProviderCheckoutID(v)
+	return _c
+}
+
+// SetNillableProviderCheckoutID sets the "provider_checkout_id" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableProviderCheckoutID(v *string) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetProviderCheckoutID(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *PaymentIntentCreate) SetStatus(v paymentintent.Status) *PaymentIntentCreate {
 	_c.mutation.SetStatus(v)
@@ -279,6 +335,22 @@ func (_c *PaymentIntentCreate) defaults() {
 		v := paymentintent.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		v := paymentintent.DefaultConnectedAccountID
+		_c.mutation.SetConnectedAccountID(v)
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		v := paymentintent.DefaultBeneficiaryUserID
+		_c.mutation.SetBeneficiaryUserID(v)
+	}
+	if _, ok := _c.mutation.PlatformFeeMinor(); !ok {
+		v := paymentintent.DefaultPlatformFeeMinor
+		_c.mutation.SetPlatformFeeMinor(v)
+	}
+	if _, ok := _c.mutation.ProviderCheckoutID(); !ok {
+		v := paymentintent.DefaultProviderCheckoutID
+		_c.mutation.SetProviderCheckoutID(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := paymentintent.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -371,6 +443,33 @@ func (_c *PaymentIntentCreate) check() error {
 	if v, ok := _c.mutation.Currency(); ok {
 		if err := paymentintent.CurrencyValidator(v); err != nil {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.currency": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ConnectedAccountID(); !ok {
+		return &ValidationError{Name: "connected_account_id", err: errors.New(`ent: missing required field "PaymentIntent.connected_account_id"`)}
+	}
+	if v, ok := _c.mutation.ConnectedAccountID(); ok {
+		if err := paymentintent.ConnectedAccountIDValidator(v); err != nil {
+			return &ValidationError{Name: "connected_account_id", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.connected_account_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BeneficiaryUserID(); !ok {
+		return &ValidationError{Name: "beneficiary_user_id", err: errors.New(`ent: missing required field "PaymentIntent.beneficiary_user_id"`)}
+	}
+	if v, ok := _c.mutation.BeneficiaryUserID(); ok {
+		if err := paymentintent.BeneficiaryUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "beneficiary_user_id", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.beneficiary_user_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PlatformFeeMinor(); !ok {
+		return &ValidationError{Name: "platform_fee_minor", err: errors.New(`ent: missing required field "PaymentIntent.platform_fee_minor"`)}
+	}
+	if _, ok := _c.mutation.ProviderCheckoutID(); !ok {
+		return &ValidationError{Name: "provider_checkout_id", err: errors.New(`ent: missing required field "PaymentIntent.provider_checkout_id"`)}
+	}
+	if v, ok := _c.mutation.ProviderCheckoutID(); ok {
+		if err := paymentintent.ProviderCheckoutIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_checkout_id", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.provider_checkout_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -489,6 +588,22 @@ func (_c *PaymentIntentCreate) createSpec() (*PaymentIntent, *sqlgraph.CreateSpe
 		_spec.SetField(paymentintent.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
 	}
+	if value, ok := _c.mutation.ConnectedAccountID(); ok {
+		_spec.SetField(paymentintent.FieldConnectedAccountID, field.TypeString, value)
+		_node.ConnectedAccountID = value
+	}
+	if value, ok := _c.mutation.BeneficiaryUserID(); ok {
+		_spec.SetField(paymentintent.FieldBeneficiaryUserID, field.TypeString, value)
+		_node.BeneficiaryUserID = value
+	}
+	if value, ok := _c.mutation.PlatformFeeMinor(); ok {
+		_spec.SetField(paymentintent.FieldPlatformFeeMinor, field.TypeInt64, value)
+		_node.PlatformFeeMinor = value
+	}
+	if value, ok := _c.mutation.ProviderCheckoutID(); ok {
+		_spec.SetField(paymentintent.FieldProviderCheckoutID, field.TypeString, value)
+		_node.ProviderCheckoutID = value
+	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(paymentintent.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
@@ -584,6 +699,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (u *PaymentIntentUpsert) SetProviderCheckoutID(v string) *PaymentIntentUpsert {
+	u.Set(paymentintent.FieldProviderCheckoutID, v)
+	return u
+}
+
+// UpdateProviderCheckoutID sets the "provider_checkout_id" field to the value that was provided on create.
+func (u *PaymentIntentUpsert) UpdateProviderCheckoutID() *PaymentIntentUpsert {
+	u.SetExcluded(paymentintent.FieldProviderCheckoutID)
+	return u
+}
 
 // SetStatus sets the "status" field.
 func (u *PaymentIntentUpsert) SetStatus(v paymentintent.Status) *PaymentIntentUpsert {
@@ -788,6 +915,15 @@ func (u *PaymentIntentUpsertOne) UpdateNewValues() *PaymentIntentUpsertOne {
 		if _, exists := u.create.mutation.Currency(); exists {
 			s.SetIgnore(paymentintent.FieldCurrency)
 		}
+		if _, exists := u.create.mutation.ConnectedAccountID(); exists {
+			s.SetIgnore(paymentintent.FieldConnectedAccountID)
+		}
+		if _, exists := u.create.mutation.BeneficiaryUserID(); exists {
+			s.SetIgnore(paymentintent.FieldBeneficiaryUserID)
+		}
+		if _, exists := u.create.mutation.PlatformFeeMinor(); exists {
+			s.SetIgnore(paymentintent.FieldPlatformFeeMinor)
+		}
 	}))
 	return u
 }
@@ -817,6 +953,20 @@ func (u *PaymentIntentUpsertOne) Update(set func(*PaymentIntentUpsert)) *Payment
 		set(&PaymentIntentUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (u *PaymentIntentUpsertOne) SetProviderCheckoutID(v string) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetProviderCheckoutID(v)
+	})
+}
+
+// UpdateProviderCheckoutID sets the "provider_checkout_id" field to the value that was provided on create.
+func (u *PaymentIntentUpsertOne) UpdateProviderCheckoutID() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateProviderCheckoutID()
+	})
 }
 
 // SetStatus sets the "status" field.
@@ -1215,6 +1365,15 @@ func (u *PaymentIntentUpsertBulk) UpdateNewValues() *PaymentIntentUpsertBulk {
 			if _, exists := b.mutation.Currency(); exists {
 				s.SetIgnore(paymentintent.FieldCurrency)
 			}
+			if _, exists := b.mutation.ConnectedAccountID(); exists {
+				s.SetIgnore(paymentintent.FieldConnectedAccountID)
+			}
+			if _, exists := b.mutation.BeneficiaryUserID(); exists {
+				s.SetIgnore(paymentintent.FieldBeneficiaryUserID)
+			}
+			if _, exists := b.mutation.PlatformFeeMinor(); exists {
+				s.SetIgnore(paymentintent.FieldPlatformFeeMinor)
+			}
 		}
 	}))
 	return u
@@ -1245,6 +1404,20 @@ func (u *PaymentIntentUpsertBulk) Update(set func(*PaymentIntentUpsert)) *Paymen
 		set(&PaymentIntentUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetProviderCheckoutID sets the "provider_checkout_id" field.
+func (u *PaymentIntentUpsertBulk) SetProviderCheckoutID(v string) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetProviderCheckoutID(v)
+	})
+}
+
+// UpdateProviderCheckoutID sets the "provider_checkout_id" field to the value that was provided on create.
+func (u *PaymentIntentUpsertBulk) UpdateProviderCheckoutID() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateProviderCheckoutID()
+	})
 }
 
 // SetStatus sets the "status" field.

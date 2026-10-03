@@ -34,6 +34,14 @@ type PaymentIntent struct {
 	AmountMinor int64 `json:"amount_minor,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
+	// ConnectedAccountID holds the value of the "connected_account_id" field.
+	ConnectedAccountID string `json:"connected_account_id,omitempty"`
+	// BeneficiaryUserID holds the value of the "beneficiary_user_id" field.
+	BeneficiaryUserID string `json:"beneficiary_user_id,omitempty"`
+	// PlatformFeeMinor holds the value of the "platform_fee_minor" field.
+	PlatformFeeMinor int64 `json:"platform_fee_minor,omitempty"`
+	// ProviderCheckoutID holds the value of the "provider_checkout_id" field.
+	ProviderCheckoutID string `json:"provider_checkout_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status paymentintent.Status `json:"status,omitempty"`
 	// AuthorizationURL holds the value of the "authorization_url" field.
@@ -66,9 +74,9 @@ func (*PaymentIntent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case paymentintent.FieldMetadata:
 			values[i] = new([]byte)
-		case paymentintent.FieldAmountMinor, paymentintent.FieldProviderFeeMinor, paymentintent.FieldRefundedMinor, paymentintent.FieldVersion:
+		case paymentintent.FieldAmountMinor, paymentintent.FieldPlatformFeeMinor, paymentintent.FieldProviderFeeMinor, paymentintent.FieldRefundedMinor, paymentintent.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case paymentintent.FieldReference, paymentintent.FieldPurpose, paymentintent.FieldOwnerUserID, paymentintent.FieldSubjectID, paymentintent.FieldProvider, paymentintent.FieldCurrency, paymentintent.FieldStatus, paymentintent.FieldAuthorizationURL, paymentintent.FieldProviderTransactionID, paymentintent.FieldFailureReason:
+		case paymentintent.FieldReference, paymentintent.FieldPurpose, paymentintent.FieldOwnerUserID, paymentintent.FieldSubjectID, paymentintent.FieldProvider, paymentintent.FieldCurrency, paymentintent.FieldConnectedAccountID, paymentintent.FieldBeneficiaryUserID, paymentintent.FieldProviderCheckoutID, paymentintent.FieldStatus, paymentintent.FieldAuthorizationURL, paymentintent.FieldProviderTransactionID, paymentintent.FieldFailureReason:
 			values[i] = new(sql.NullString)
 		case paymentintent.FieldCreatedAt, paymentintent.FieldPaidAt, paymentintent.FieldFailedAt, paymentintent.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -142,6 +150,30 @@ func (_m *PaymentIntent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field currency", values[i])
 			} else if value.Valid {
 				_m.Currency = value.String
+			}
+		case paymentintent.FieldConnectedAccountID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field connected_account_id", values[i])
+			} else if value.Valid {
+				_m.ConnectedAccountID = value.String
+			}
+		case paymentintent.FieldBeneficiaryUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field beneficiary_user_id", values[i])
+			} else if value.Valid {
+				_m.BeneficiaryUserID = value.String
+			}
+		case paymentintent.FieldPlatformFeeMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field platform_fee_minor", values[i])
+			} else if value.Valid {
+				_m.PlatformFeeMinor = value.Int64
+			}
+		case paymentintent.FieldProviderCheckoutID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_checkout_id", values[i])
+			} else if value.Valid {
+				_m.ProviderCheckoutID = value.String
 			}
 		case paymentintent.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -270,6 +302,18 @@ func (_m *PaymentIntent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("currency=")
 	builder.WriteString(_m.Currency)
+	builder.WriteString(", ")
+	builder.WriteString("connected_account_id=")
+	builder.WriteString(_m.ConnectedAccountID)
+	builder.WriteString(", ")
+	builder.WriteString("beneficiary_user_id=")
+	builder.WriteString(_m.BeneficiaryUserID)
+	builder.WriteString(", ")
+	builder.WriteString("platform_fee_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PlatformFeeMinor))
+	builder.WriteString(", ")
+	builder.WriteString("provider_checkout_id=")
+	builder.WriteString(_m.ProviderCheckoutID)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))

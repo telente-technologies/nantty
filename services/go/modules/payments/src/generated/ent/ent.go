@@ -8,12 +8,16 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/payments/src/generated/ent/billingsubscription"
+	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/paymentrefund"
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
+	"zudomart/modules/payments/src/generated/ent/providerdispute"
+	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -80,14 +84,18 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			idempotentrequest.Table: idempotentrequest.ValidColumn,
-			orderpayable.Table:      orderpayable.ValidColumn,
-			outboxevent.Table:       outboxevent.ValidColumn,
-			paymentintent.Table:     paymentintent.ValidColumn,
-			paymentrefund.Table:     paymentrefund.ValidColumn,
-			payouttransfer.Table:    payouttransfer.ValidColumn,
-			storepurchase.Table:     storepurchase.ValidColumn,
-			webhookevent.Table:      webhookevent.ValidColumn,
+			billingsubscription.Table:       billingsubscription.ValidColumn,
+			connectedaccount.Table:          connectedaccount.ValidColumn,
+			idempotentrequest.Table:         idempotentrequest.ValidColumn,
+			orderpayable.Table:              orderpayable.ValidColumn,
+			outboxevent.Table:               outboxevent.ValidColumn,
+			paymentintent.Table:             paymentintent.ValidColumn,
+			paymentrefund.Table:             paymentrefund.ValidColumn,
+			payouttransfer.Table:            payouttransfer.ValidColumn,
+			providerdispute.Table:           providerdispute.ValidColumn,
+			providerpayoutdestination.Table: providerpayoutdestination.ValidColumn,
+			storepurchase.Table:             storepurchase.ValidColumn,
+			webhookevent.Table:              webhookevent.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

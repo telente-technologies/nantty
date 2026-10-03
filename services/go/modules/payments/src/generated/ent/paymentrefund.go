@@ -32,6 +32,16 @@ type PaymentRefund struct {
 	Currency string `json:"currency,omitempty"`
 	// Reason holds the value of the "reason" field.
 	Reason string `json:"reason,omitempty"`
+	// ConnectedAccountID holds the value of the "connected_account_id" field.
+	ConnectedAccountID string `json:"connected_account_id,omitempty"`
+	// BeneficiaryUserID holds the value of the "beneficiary_user_id" field.
+	BeneficiaryUserID string `json:"beneficiary_user_id,omitempty"`
+	// FullRefund holds the value of the "full_refund" field.
+	FullRefund bool `json:"full_refund,omitempty"`
+	// FeeTopUpMinor holds the value of the "fee_top_up_minor" field.
+	FeeTopUpMinor int64 `json:"fee_top_up_minor,omitempty"`
+	// FeeTopUpTransferID holds the value of the "fee_top_up_transfer_id" field.
+	FeeTopUpTransferID string `json:"fee_top_up_transfer_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status paymentrefund.Status `json:"status,omitempty"`
 	// ProviderRefundID holds the value of the "provider_refund_id" field.
@@ -52,9 +62,11 @@ func (*PaymentRefund) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case paymentrefund.FieldAmountMinor, paymentrefund.FieldAttemptCount:
+		case paymentrefund.FieldFullRefund:
+			values[i] = new(sql.NullBool)
+		case paymentrefund.FieldAmountMinor, paymentrefund.FieldFeeTopUpMinor, paymentrefund.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case paymentrefund.FieldReference, paymentrefund.FieldProvider, paymentrefund.FieldCurrency, paymentrefund.FieldReason, paymentrefund.FieldStatus, paymentrefund.FieldProviderRefundID, paymentrefund.FieldFailureReason:
+		case paymentrefund.FieldReference, paymentrefund.FieldProvider, paymentrefund.FieldCurrency, paymentrefund.FieldReason, paymentrefund.FieldConnectedAccountID, paymentrefund.FieldBeneficiaryUserID, paymentrefund.FieldFeeTopUpTransferID, paymentrefund.FieldStatus, paymentrefund.FieldProviderRefundID, paymentrefund.FieldFailureReason:
 			values[i] = new(sql.NullString)
 		case paymentrefund.FieldCreatedAt, paymentrefund.FieldCompletedAt, paymentrefund.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -122,6 +134,36 @@ func (_m *PaymentRefund) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field reason", values[i])
 			} else if value.Valid {
 				_m.Reason = value.String
+			}
+		case paymentrefund.FieldConnectedAccountID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field connected_account_id", values[i])
+			} else if value.Valid {
+				_m.ConnectedAccountID = value.String
+			}
+		case paymentrefund.FieldBeneficiaryUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field beneficiary_user_id", values[i])
+			} else if value.Valid {
+				_m.BeneficiaryUserID = value.String
+			}
+		case paymentrefund.FieldFullRefund:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field full_refund", values[i])
+			} else if value.Valid {
+				_m.FullRefund = value.Bool
+			}
+		case paymentrefund.FieldFeeTopUpMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field fee_top_up_minor", values[i])
+			} else if value.Valid {
+				_m.FeeTopUpMinor = value.Int64
+			}
+		case paymentrefund.FieldFeeTopUpTransferID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field fee_top_up_transfer_id", values[i])
+			} else if value.Valid {
+				_m.FeeTopUpTransferID = value.String
 			}
 		case paymentrefund.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -216,6 +258,21 @@ func (_m *PaymentRefund) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reason=")
 	builder.WriteString(_m.Reason)
+	builder.WriteString(", ")
+	builder.WriteString("connected_account_id=")
+	builder.WriteString(_m.ConnectedAccountID)
+	builder.WriteString(", ")
+	builder.WriteString("beneficiary_user_id=")
+	builder.WriteString(_m.BeneficiaryUserID)
+	builder.WriteString(", ")
+	builder.WriteString("full_refund=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FullRefund))
+	builder.WriteString(", ")
+	builder.WriteString("fee_top_up_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FeeTopUpMinor))
+	builder.WriteString(", ")
+	builder.WriteString("fee_top_up_transfer_id=")
+	builder.WriteString(_m.FeeTopUpTransferID)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
