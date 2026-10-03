@@ -37,9 +37,21 @@ type SettledPayment struct {
 	PlatformFeeMinor      int64
 	ProviderFeeMinor      int64
 	ProviderTransactionId string
+	ProviderCustomerId    string
 	FailureReason         string
 	SettledAt             time.Time
 	OrderPayables         []OrderPayable
+	Authorization         *CardAuthorizationHandoff
+}
+
+type CardAuthorizationHandoff struct {
+	AuthorizationCode string
+	Signature         string
+	Brand             string
+	Last4             string
+	ExpiryMonth       int
+	ExpiryYear        int
+	Reusable          bool
 }
 
 type PaymentPurposeHandler interface {
@@ -115,6 +127,8 @@ type CreatePaymentIntentRequest struct {
 	PlatformFeeMinor  int64
 	ReturnTo          string
 	Metadata          map[string]string
+
+	SettleToSellerSubaccount bool
 }
 
 type RefundRequest struct {
@@ -123,7 +137,6 @@ type RefundRequest struct {
 	Currency        string
 	Reference       string
 	Reason          string
-	FeeTopUpMinor   int64
 }
 
 type SellerPayoutInstruction struct {
