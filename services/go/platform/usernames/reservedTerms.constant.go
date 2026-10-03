@@ -19,7 +19,7 @@ var exactTerms = []string{
 	"ads", "dashboard", "system", "null", "undefined", "anonymous", "me", "settings", "login", "signup", "account", "accounts", "about",
 	"terms", "privacy", "legal", "careers", "jobs", "press", "news", "status", "blog", "shop", "store", "market", "mart", "seller",
 	"sellers", "buyer", "notifications", "messages", "explore", "search", "home", "contact", "info", "abuse", "postmaster", "hostmaster",
-	"webmaster", "noreply", "owner", "founder", "ceo",
+	"webmaster", "noreply", "owner", "founder", "ceo", "all",
 }
 
 var prefixTerms = []string{
