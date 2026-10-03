@@ -19,9 +19,9 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .chipCount {
