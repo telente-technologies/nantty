@@ -9,6 +9,129 @@ import (
 )
 
 var (
+	// AccountBansColumns holds the columns for the "account_bans" table.
+	AccountBansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "reason", Type: field.TypeString, Size: 1000},
+		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "banned_by", Type: field.TypeString, Size: 64},
+		{Name: "banned_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "lifted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "lifted_by", Type: field.TypeString, Size: 64, Default: ""},
+	}
+	// AccountBansTable holds the schema information for the "account_bans" table.
+	AccountBansTable = &schema.Table{
+		Name:       "account_bans",
+		Columns:    AccountBansColumns,
+		PrimaryKey: []*schema.Column{AccountBansColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "accountban_account_id_lifted_at",
+				Unique:  false,
+				Columns: []*schema.Column{AccountBansColumns[2], AccountBansColumns[7]},
+			},
+			{
+				Name:    "accountban_lifted_at_ends_at",
+				Unique:  false,
+				Columns: []*schema.Column{AccountBansColumns[7], AccountBansColumns[4]},
+			},
+		},
+	}
+	// AccountRemovalsColumns holds the columns for the "account_removals" table.
+	AccountRemovalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "username", Type: field.TypeString, Size: 30},
+		{Name: "trigger", Type: field.TypeEnum, Enums: []string{"admin_delete", "suspension_expired"}},
+		{Name: "reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "deleted_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "applied_steps", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "retained_until", Type: field.TypeTime},
+	}
+	// AccountRemovalsTable holds the schema information for the "account_removals" table.
+	AccountRemovalsTable = &schema.Table{
+		Name:       "account_removals",
+		Columns:    AccountRemovalsColumns,
+		PrimaryKey: []*schema.Column{AccountRemovalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "accountremoval_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{AccountRemovalsColumns[2]},
+			},
+		},
+	}
+	// AccountRestrictionsColumns holds the columns for the "account_restrictions" table.
+	AccountRestrictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "features", Type: field.TypeJSON},
+		{Name: "reason", Type: field.TypeString, Size: 1000},
+		{Name: "ends_at", Type: field.TypeTime},
+		{Name: "created_by", Type: field.TypeString, Size: 64},
+		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "lifted_at", Type: field.TypeTime, Nullable: true},
+	}
+	// AccountRestrictionsTable holds the schema information for the "account_restrictions" table.
+	AccountRestrictionsTable = &schema.Table{
+		Name:       "account_restrictions",
+		Columns:    AccountRestrictionsColumns,
+		PrimaryKey: []*schema.Column{AccountRestrictionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "accountrestriction_account_id_ends_at",
+				Unique:  false,
+				Columns: []*schema.Column{AccountRestrictionsColumns[2], AccountRestrictionsColumns[5]},
+			},
+		},
+	}
+	// AccountSuspensionsColumns holds the columns for the "account_suspensions" table.
+	AccountSuspensionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"staff", "python_suggestion", "user_reports", "chat_report"}, Default: "staff"},
+		{Name: "reason_code", Type: field.TypeString, Size: 40, Default: "OTHER"},
+		{Name: "note", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "suspended_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "suspended_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "deletion_due_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "reinstated", "deleted"}, Default: "active"},
+		{Name: "closed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "appeal_status", Type: field.TypeEnum, Enums: []string{"none", "pending", "upheld", "overturned"}, Default: "none"},
+		{Name: "appeal_message", Type: field.TypeString, Size: 2000, Default: ""},
+		{Name: "appeal_submitted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "appeal_decision_note", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "appeal_decided_by", Type: field.TypeString, Size: 64, Default: ""},
+	}
+	// AccountSuspensionsTable holds the schema information for the "account_suspensions" table.
+	AccountSuspensionsTable = &schema.Table{
+		Name:       "account_suspensions",
+		Columns:    AccountSuspensionsColumns,
+		PrimaryKey: []*schema.Column{AccountSuspensionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "accountsuspension_account_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{AccountSuspensionsColumns[2], AccountSuspensionsColumns[10]},
+			},
+			{
+				Name:    "accountsuspension_status_deletion_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{AccountSuspensionsColumns[10], AccountSuspensionsColumns[9]},
+			},
+			{
+				Name:    "accountsuspension_appeal_status_status",
+				Unique:  false,
+				Columns: []*schema.Column{AccountSuspensionsColumns[12], AccountSuspensionsColumns[10]},
+			},
+		},
+	}
 	// ActingProfilesColumns holds the columns for the "acting_profiles" table.
 	ActingProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -26,6 +149,71 @@ var (
 				Name:    "actingprofile_account_id",
 				Unique:  true,
 				Columns: []*schema.Column{ActingProfilesColumns[1]},
+			},
+		},
+	}
+	// AdminCreatedAccountsColumns holds the columns for the "admin_created_accounts" table.
+	AdminCreatedAccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "profile_type", Type: field.TypeEnum, Enums: []string{"personal", "business", "brand", "government"}},
+		{Name: "created_by", Type: field.TypeString, Size: 64},
+		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "reason", Type: field.TypeString, Size: 1000},
+		{Name: "bypassed_reserved_entries", Type: field.TypeJSON},
+	}
+	// AdminCreatedAccountsTable holds the schema information for the "admin_created_accounts" table.
+	AdminCreatedAccountsTable = &schema.Table{
+		Name:       "admin_created_accounts",
+		Columns:    AdminCreatedAccountsColumns,
+		PrimaryKey: []*schema.Column{AdminCreatedAccountsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "admincreatedaccount_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdminCreatedAccountsColumns[2]},
+			},
+		},
+	}
+	// BlackApplicationsColumns holds the columns for the "black_applications" table.
+	BlackApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "agency_name", Type: field.TypeString, Size: 120},
+		{Name: "handle", Type: field.TypeString, Size: 30},
+		{Name: "representative_name", Type: field.TypeString, Size: 120},
+		{Name: "representative_role", Type: field.TypeString, Size: 120},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"in_review", "awaiting_second_approval", "approved", "rejected", "revoked"}, Default: "in_review"},
+		{Name: "checklist", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "first_approval_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "first_approval_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "first_approval_at", Type: field.TypeTime, Nullable: true},
+		{Name: "second_approval_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "second_approval_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "second_approval_at", Type: field.TypeTime, Nullable: true},
+		{Name: "decision_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "reverification_due_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reverification_reminded_at", Type: field.TypeTime, Nullable: true},
+		{Name: "handle_reserved", Type: field.TypeBool, Default: false},
+	}
+	// BlackApplicationsTable holds the schema information for the "black_applications" table.
+	BlackApplicationsTable = &schema.Table{
+		Name:       "black_applications",
+		Columns:    BlackApplicationsColumns,
+		PrimaryKey: []*schema.Column{BlackApplicationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "blackapplication_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{BlackApplicationsColumns[8], BlackApplicationsColumns[1]},
+			},
+			{
+				Name:    "blackapplication_profile_id",
+				Unique:  false,
+				Columns: []*schema.Column{BlackApplicationsColumns[2]},
 			},
 		},
 	}
@@ -54,6 +242,113 @@ var (
 				Name:    "businesscategory_parent_id",
 				Unique:  false,
 				Columns: []*schema.Column{BusinessCategoriesColumns[2]},
+			},
+		},
+	}
+	// BusinessDocumentsColumns holds the columns for the "business_documents" table.
+	BusinessDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "profile_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"cac_certificate", "identity", "address_proof"}},
+		{Name: "object_key", Type: field.TypeString, Size: 300},
+		{Name: "file_name", Type: field.TypeString, Size: 200},
+		{Name: "content_type", Type: field.TypeString, Size: 100},
+		{Name: "size_bytes", Type: field.TypeInt64},
+		{Name: "is_uploaded", Type: field.TypeBool, Default: false},
+		{Name: "is_current", Type: field.TypeBool, Default: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected"}, Default: "pending"},
+		{Name: "rejection_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "reviewed_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// BusinessDocumentsTable holds the schema information for the "business_documents" table.
+	BusinessDocumentsTable = &schema.Table{
+		Name:       "business_documents",
+		Columns:    BusinessDocumentsColumns,
+		PrimaryKey: []*schema.Column{BusinessDocumentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "businessdocument_account_id_kind_is_current",
+				Unique:  false,
+				Columns: []*schema.Column{BusinessDocumentsColumns[2], BusinessDocumentsColumns[4], BusinessDocumentsColumns[10]},
+			},
+			{
+				Name:    "businessdocument_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{BusinessDocumentsColumns[11], BusinessDocumentsColumns[1]},
+			},
+		},
+	}
+	// CheckmarkGrantsColumns holds the columns for the "checkmark_grants" table.
+	CheckmarkGrantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold", "black"}},
+		{Name: "reason", Type: field.TypeString, Size: 1000},
+		{Name: "granted_by", Type: field.TypeString, Size: 64},
+		{Name: "granted_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "revoked_reason", Type: field.TypeString, Size: 1000, Default: ""},
+	}
+	// CheckmarkGrantsTable holds the schema information for the "checkmark_grants" table.
+	CheckmarkGrantsTable = &schema.Table{
+		Name:       "checkmark_grants",
+		Columns:    CheckmarkGrantsColumns,
+		PrimaryKey: []*schema.Column{CheckmarkGrantsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "checkmarkgrant_profile_id_revoked_at",
+				Unique:  false,
+				Columns: []*schema.Column{CheckmarkGrantsColumns[2], CheckmarkGrantsColumns[8]},
+			},
+			{
+				Name:    "checkmarkgrant_revoked_at_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CheckmarkGrantsColumns[8], CheckmarkGrantsColumns[1]},
+			},
+		},
+	}
+	// CreatorApplicationsColumns holds the columns for the "creator_applications" table.
+	CreatorApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected"}, Default: "pending"},
+		{Name: "decision", Type: field.TypeEnum, Enums: []string{"auto_approve", "manual_review", "not_eligible"}},
+		{Name: "decision_note", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "requirements", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "content_categories", Type: field.TypeJSON},
+		{Name: "social_links", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "sample_content_urls", Type: field.TypeJSON},
+		{Name: "payout_account_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "accepted_terms_version", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "reviewed_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "reviewed_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "decision_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "reapply_available_at", Type: field.TypeTime, Nullable: true},
+	}
+	// CreatorApplicationsTable holds the schema information for the "creator_applications" table.
+	CreatorApplicationsTable = &schema.Table{
+		Name:       "creator_applications",
+		Columns:    CreatorApplicationsColumns,
+		PrimaryKey: []*schema.Column{CreatorApplicationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorapplication_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorApplicationsColumns[2], CreatorApplicationsColumns[1]},
+			},
+			{
+				Name:    "creatorapplication_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorApplicationsColumns[4], CreatorApplicationsColumns[1]},
 			},
 		},
 	}
@@ -215,6 +510,139 @@ var (
 			},
 		},
 	}
+	// LegalDocumentsColumns holds the columns for the "legal_documents" table.
+	LegalDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "key", Type: field.TypeString, Size: 40},
+		{Name: "title", Type: field.TypeString, Size: 80},
+		{Name: "public_path", Type: field.TypeString, Size: 120},
+	}
+	// LegalDocumentsTable holds the schema information for the "legal_documents" table.
+	LegalDocumentsTable = &schema.Table{
+		Name:       "legal_documents",
+		Columns:    LegalDocumentsColumns,
+		PrimaryKey: []*schema.Column{LegalDocumentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "legaldocument_key",
+				Unique:  true,
+				Columns: []*schema.Column{LegalDocumentsColumns[1]},
+			},
+		},
+	}
+	// LegalNoticesColumns holds the columns for the "legal_notices" table.
+	LegalNoticesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "version_id", Type: field.TypeUUID},
+		{Name: "document_key", Type: field.TypeString, Size: 40},
+		{Name: "version_number", Type: field.TypeInt},
+		{Name: "subject", Type: field.TypeString, Size: 200},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "sending", "completed"}, Default: "queued"},
+		{Name: "recipient_count", Type: field.TypeInt, Default: 0},
+		{Name: "sent_count", Type: field.TypeInt, Default: 0},
+		{Name: "excluded_hard_bounces", Type: field.TypeInt, Default: 0},
+		{Name: "excluded_suppressed", Type: field.TypeInt, Default: 0},
+		{Name: "batch_size", Type: field.TypeInt, Default: 50},
+		{Name: "rate_per_second", Type: field.TypeInt, Default: 14},
+		{Name: "batches_done", Type: field.TypeInt, Default: 0},
+		{Name: "queued_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "queued_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LegalNoticesTable holds the schema information for the "legal_notices" table.
+	LegalNoticesTable = &schema.Table{
+		Name:       "legal_notices",
+		Columns:    LegalNoticesColumns,
+		PrimaryKey: []*schema.Column{LegalNoticesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "legalnotice_version_id",
+				Unique:  false,
+				Columns: []*schema.Column{LegalNoticesColumns[2]},
+			},
+			{
+				Name:    "legalnotice_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LegalNoticesColumns[6], LegalNoticesColumns[1]},
+			},
+		},
+	}
+	// LegalNoticeDraftsColumns holds the columns for the "legal_notice_drafts" table.
+	LegalNoticeDraftsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "version_id", Type: field.TypeUUID},
+		{Name: "subject", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "summary_text", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "what_changed", Type: field.TypeJSON},
+		{Name: "reaccept_note", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "updated_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "test_sends", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LegalNoticeDraftsTable holds the schema information for the "legal_notice_drafts" table.
+	LegalNoticeDraftsTable = &schema.Table{
+		Name:       "legal_notice_drafts",
+		Columns:    LegalNoticeDraftsColumns,
+		PrimaryKey: []*schema.Column{LegalNoticeDraftsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "legalnoticedraft_version_id",
+				Unique:  true,
+				Columns: []*schema.Column{LegalNoticeDraftsColumns[1]},
+			},
+		},
+	}
+	// LegalVersionsColumns holds the columns for the "legal_versions" table.
+	LegalVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "document_key", Type: field.TypeString, Size: 40},
+		{Name: "version_number", Type: field.TypeInt},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "in_review", "published", "superseded"}, Default: "draft"},
+		{Name: "body_markdown", Type: field.TypeString, Size: 2147483647},
+		{Name: "change_summary", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "effective_at", Type: field.TypeTime},
+		{Name: "is_material_change", Type: field.TypeBool, Default: false},
+		{Name: "is_flagged_for_legal_review", Type: field.TypeBool, Default: false},
+		{Name: "created_by", Type: field.TypeString, Size: 64},
+		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "submitted_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "submitted_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "submitted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "published_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "published_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "returned_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "rolled_back_from_version_number", Type: field.TypeInt, Nullable: true},
+		{Name: "notice_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// LegalVersionsTable holds the schema information for the "legal_versions" table.
+	LegalVersionsTable = &schema.Table{
+		Name:       "legal_versions",
+		Columns:    LegalVersionsColumns,
+		PrimaryKey: []*schema.Column{LegalVersionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "legalversion_document_key_version_number",
+				Unique:  true,
+				Columns: []*schema.Column{LegalVersionsColumns[2], LegalVersionsColumns[3]},
+			},
+			{
+				Name:    "legalversion_one_open_per_document",
+				Unique:  true,
+				Columns: []*schema.Column{LegalVersionsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status IN ('draft', 'in_review')",
+				},
+			},
+			{
+				Name:    "legalversion_status_published_at",
+				Unique:  false,
+				Columns: []*schema.Column{LegalVersionsColumns[4], LegalVersionsColumns[17]},
+			},
+		},
+	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -274,6 +702,8 @@ var (
 		{Name: "personalization", Type: field.TypeBool, Default: false},
 		{Name: "personalized_ads", Type: field.TypeBool, Default: false},
 		{Name: "marketing", Type: field.TypeBool, Default: false},
+		{Name: "who_can_message_me", Type: field.TypeEnum, Enums: []string{"everyone", "following", "followers", "nobody"}, Default: "everyone"},
+		{Name: "who_can_mention_me", Type: field.TypeEnum, Enums: []string{"everyone", "following", "no_one"}, Default: "everyone"},
 		{Name: "policy_version", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -308,6 +738,7 @@ var (
 		{Name: "is_private", Type: field.TypeBool, Default: false},
 		{Name: "country_code", Type: field.TypeString, Nullable: true, Size: 2},
 		{Name: "verified", Type: field.TypeBool, Default: false},
+		{Name: "profile_type", Type: field.TypeEnum, Enums: []string{"personal", "business", "brand", "government"}, Default: "personal"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "archived"}, Default: "active"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -334,6 +765,82 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "kind = 'personal'",
 				},
+			},
+		},
+	}
+	// ProfileCheckmarksColumns holds the columns for the "profile_checkmarks" table.
+	ProfileCheckmarksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold", "black"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"verified", "suspended", "revoked", "grace", "expired"}, Default: "verified"},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"application", "lifetime_grant", "business_documents", "black_vetting"}},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "current_period_end", Type: field.TypeTime, Nullable: true},
+		{Name: "reverification_due_at", Type: field.TypeTime, Nullable: true},
+		{Name: "grace_ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "handle_reserved", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProfileCheckmarksTable holds the schema information for the "profile_checkmarks" table.
+	ProfileCheckmarksTable = &schema.Table{
+		Name:       "profile_checkmarks",
+		Columns:    ProfileCheckmarksColumns,
+		PrimaryKey: []*schema.Column{ProfileCheckmarksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "profilecheckmark_profile_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProfileCheckmarksColumns[2]},
+			},
+			{
+				Name:    "profilecheckmark_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProfileCheckmarksColumns[3]},
+			},
+			{
+				Name:    "profilecheckmark_status_reverification_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{ProfileCheckmarksColumns[5], ProfileCheckmarksColumns[9]},
+			},
+		},
+	}
+	// ProfileSignalsColumns holds the columns for the "profile_signals" table.
+	ProfileSignalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "real_followers", Type: field.TypeInt, Default: 0},
+		{Name: "original_posts_last_60_days", Type: field.TypeInt, Default: 0},
+		{Name: "days_since_last_violation", Type: field.TypeInt, Default: 100000},
+		{Name: "fraud_score", Type: field.TypeInt, Default: 0},
+		{Name: "risk_score", Type: field.TypeInt, Default: 0},
+		{Name: "id_verified", Type: field.TypeBool, Default: false},
+		{Name: "borderline_content", Type: field.TypeBool, Default: false},
+		{Name: "completed_orders", Type: field.TypeInt, Default: 0},
+		{Name: "success_rate_percent", Type: field.TypeInt, Default: 0},
+		{Name: "has_active_store_or_brand_page", Type: field.TypeBool, Default: false},
+		{Name: "seller_plan", Type: field.TypeEnum, Enums: []string{"FREE", "PRO", "BUSINESS"}, Default: "FREE"},
+		{Name: "source", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProfileSignalsTable holds the schema information for the "profile_signals" table.
+	ProfileSignalsTable = &schema.Table{
+		Name:       "profile_signals",
+		Columns:    ProfileSignalsColumns,
+		PrimaryKey: []*schema.Column{ProfileSignalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "profilesignal_profile_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProfileSignalsColumns[1]},
+			},
+			{
+				Name:    "profilesignal_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProfileSignalsColumns[2]},
 			},
 		},
 	}
@@ -416,12 +923,33 @@ var (
 			},
 		},
 	}
+	// SuggestionDismissalsColumns holds the columns for the "suggestion_dismissals" table.
+	SuggestionDismissalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold"}},
+	}
+	// SuggestionDismissalsTable holds the schema information for the "suggestion_dismissals" table.
+	SuggestionDismissalsTable = &schema.Table{
+		Name:       "suggestion_dismissals",
+		Columns:    SuggestionDismissalsColumns,
+		PrimaryKey: []*schema.Column{SuggestionDismissalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "suggestiondismissal_profile_id_color",
+				Unique:  true,
+				Columns: []*schema.Column{SuggestionDismissalsColumns[2], SuggestionDismissalsColumns[3]},
+			},
+		},
+	}
 	// TermsAcceptancesColumns holds the columns for the "terms_acceptances" table.
 	TermsAcceptancesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "terms_version", Type: field.TypeString, Size: 40},
+		{Name: "policy_version_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "accepted_at", Type: field.TypeTime},
 		{Name: "ip_address", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "user_agent", Type: field.TypeString, Size: 255, Default: ""},
@@ -479,7 +1007,7 @@ var (
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "previous_username", Type: field.TypeString, Size: 30},
 		{Name: "new_username", Type: field.TypeString, Size: 30},
-		{Name: "reason", Type: field.TypeEnum, Enums: []string{"signup", "user_change", "admin_change"}},
+		{Name: "reason", Type: field.TypeEnum, Enums: []string{"signup", "user_change", "admin_change", "admin_reassigned_away", "admin_reassigned_to", "admin_assigned_held"}},
 	}
 	// UsernameChangesTable holds the schema information for the "username_changes" table.
 	UsernameChangesTable = &schema.Table{
@@ -499,7 +1027,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "username", Type: field.TypeString, Size: 30},
-		{Name: "kind", Type: field.TypeEnum, Enums: []string{"withheld", "quarantine"}},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"withheld", "quarantine", "reserved_official"}},
 		{Name: "held_for_account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "reason", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "note", Type: field.TypeString, Size: 500, Default: ""},
@@ -516,6 +1044,40 @@ var (
 				Name:    "usernamehold_username",
 				Unique:  true,
 				Columns: []*schema.Column{UsernameHoldsColumns[2]},
+			},
+		},
+	}
+	// VerificationApplicationsColumns holds the columns for the "verification_applications" table.
+	VerificationApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold"}},
+		{Name: "plan_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected", "suspended", "revoked"}, Default: "pending"},
+		{Name: "applicant", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "document_keys", Type: field.TypeJSON},
+		{Name: "decision_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "reviewed_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "billing_confirmed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// VerificationApplicationsTable holds the schema information for the "verification_applications" table.
+	VerificationApplicationsTable = &schema.Table{
+		Name:       "verification_applications",
+		Columns:    VerificationApplicationsColumns,
+		PrimaryKey: []*schema.Column{VerificationApplicationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "verificationapplication_profile_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationApplicationsColumns[2], VerificationApplicationsColumns[6]},
+			},
+			{
+				Name:    "verificationapplication_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationApplicationsColumns[6], VerificationApplicationsColumns[1]},
 			},
 		},
 	}
@@ -546,25 +1108,42 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AccountBansTable,
+		AccountRemovalsTable,
+		AccountRestrictionsTable,
+		AccountSuspensionsTable,
 		ActingProfilesTable,
+		AdminCreatedAccountsTable,
+		BlackApplicationsTable,
 		BusinessCategoriesTable,
+		BusinessDocumentsTable,
+		CheckmarkGrantsTable,
+		CreatorApplicationsTable,
 		DataExportRequestsTable,
 		DeletionRequestsTable,
 		GeoAdminAreasTable,
 		GeoCitiesTable,
 		GeoCountriesTable,
 		GeoRegionsTable,
+		LegalDocumentsTable,
+		LegalNoticesTable,
+		LegalNoticeDraftsTable,
+		LegalVersionsTable,
 		OutboxEventsTable,
 		PolicyVersionsTable,
 		PrivacySettingsTable,
 		ProfilesTable,
+		ProfileCheckmarksTable,
+		ProfileSignalsTable,
 		ReservedUsernameRulesTable,
 		RetentionPoliciesTable,
 		ShippingAddressesTable,
+		SuggestionDismissalsTable,
 		TermsAcceptancesTable,
 		UserConsentsTable,
 		UsernameChangesTable,
 		UsernameHoldsTable,
+		VerificationApplicationsTable,
 		ProfileCategoriesTable,
 	}
 )
