@@ -48,6 +48,8 @@ type Profile struct {
 	CountryCode *string `json:"country_code,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
+	// ProfileType holds the value of the "profile_type" field.
+	ProfileType profile.ProfileType `json:"profile_type,omitempty"`
 	// Status holds the value of the "status" field.
 	Status profile.Status `json:"status,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -83,7 +85,7 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case profile.FieldIsPrivate, profile.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldStatus:
+		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldProfileType, profile.FieldStatus:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreatedAt, profile.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -206,6 +208,12 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Verified = value.Bool
 			}
+		case profile.FieldProfileType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field profile_type", values[i])
+			} else if value.Valid {
+				_m.ProfileType = profile.ProfileType(value.String)
+			}
 		case profile.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
@@ -315,6 +323,9 @@ func (_m *Profile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Verified))
+	builder.WriteString(", ")
+	builder.WriteString("profile_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProfileType))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))

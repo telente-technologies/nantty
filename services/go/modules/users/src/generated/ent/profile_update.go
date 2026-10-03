@@ -234,6 +234,20 @@ func (_u *ProfileUpdate) SetNillableVerified(v *bool) *ProfileUpdate {
 	return _u
 }
 
+// SetProfileType sets the "profile_type" field.
+func (_u *ProfileUpdate) SetProfileType(v profile.ProfileType) *ProfileUpdate {
+	_u.mutation.SetProfileType(v)
+	return _u
+}
+
+// SetNillableProfileType sets the "profile_type" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillableProfileType(v *profile.ProfileType) *ProfileUpdate {
+	if v != nil {
+		_u.SetProfileType(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *ProfileUpdate) SetStatus(v profile.Status) *ProfileUpdate {
 	_u.mutation.SetStatus(v)
@@ -383,6 +397,11 @@ func (_u *ProfileUpdate) check() error {
 			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Profile.country_code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProfileType(); ok {
+		if err := profile.ProfileTypeValidator(v); err != nil {
+			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := profile.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Profile.status": %w`, err)}
@@ -456,6 +475,9 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ProfileType(); ok {
+		_spec.SetField(profile.FieldProfileType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)
@@ -732,6 +754,20 @@ func (_u *ProfileUpdateOne) SetNillableVerified(v *bool) *ProfileUpdateOne {
 	return _u
 }
 
+// SetProfileType sets the "profile_type" field.
+func (_u *ProfileUpdateOne) SetProfileType(v profile.ProfileType) *ProfileUpdateOne {
+	_u.mutation.SetProfileType(v)
+	return _u
+}
+
+// SetNillableProfileType sets the "profile_type" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillableProfileType(v *profile.ProfileType) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetProfileType(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *ProfileUpdateOne) SetStatus(v profile.Status) *ProfileUpdateOne {
 	_u.mutation.SetStatus(v)
@@ -894,6 +930,11 @@ func (_u *ProfileUpdateOne) check() error {
 			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Profile.country_code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProfileType(); ok {
+		if err := profile.ProfileTypeValidator(v); err != nil {
+			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := profile.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Profile.status": %w`, err)}
@@ -984,6 +1025,9 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ProfileType(); ok {
+		_spec.SetField(profile.FieldProfileType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)

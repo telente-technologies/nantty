@@ -208,6 +208,20 @@ func (_c *ProfileCreate) SetNillableVerified(v *bool) *ProfileCreate {
 	return _c
 }
 
+// SetProfileType sets the "profile_type" field.
+func (_c *ProfileCreate) SetProfileType(v profile.ProfileType) *ProfileCreate {
+	_c.mutation.SetProfileType(v)
+	return _c
+}
+
+// SetNillableProfileType sets the "profile_type" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillableProfileType(v *profile.ProfileType) *ProfileCreate {
+	if v != nil {
+		_c.SetProfileType(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *ProfileCreate) SetStatus(v profile.Status) *ProfileCreate {
 	_c.mutation.SetStatus(v)
@@ -324,6 +338,10 @@ func (_c *ProfileCreate) defaults() {
 		v := profile.DefaultVerified
 		_c.mutation.SetVerified(v)
 	}
+	if _, ok := _c.mutation.ProfileType(); !ok {
+		v := profile.DefaultProfileType
+		_c.mutation.SetProfileType(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := profile.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -421,6 +439,14 @@ func (_c *ProfileCreate) check() error {
 	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Profile.verified"`)}
+	}
+	if _, ok := _c.mutation.ProfileType(); !ok {
+		return &ValidationError{Name: "profile_type", err: errors.New(`ent: missing required field "Profile.profile_type"`)}
+	}
+	if v, ok := _c.mutation.ProfileType(); ok {
+		if err := profile.ProfileTypeValidator(v); err != nil {
+			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Profile.status"`)}
@@ -527,6 +553,10 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)
 		_node.Verified = value
+	}
+	if value, ok := _c.mutation.ProfileType(); ok {
+		_spec.SetField(profile.FieldProfileType, field.TypeEnum, value)
+		_node.ProfileType = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)

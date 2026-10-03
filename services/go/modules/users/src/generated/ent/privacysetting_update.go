@@ -84,6 +84,34 @@ func (_u *PrivacySettingUpdate) SetNillableMarketing(v *bool) *PrivacySettingUpd
 	return _u
 }
 
+// SetWhoCanMessageMe sets the "who_can_message_me" field.
+func (_u *PrivacySettingUpdate) SetWhoCanMessageMe(v privacysetting.WhoCanMessageMe) *PrivacySettingUpdate {
+	_u.mutation.SetWhoCanMessageMe(v)
+	return _u
+}
+
+// SetNillableWhoCanMessageMe sets the "who_can_message_me" field if the given value is not nil.
+func (_u *PrivacySettingUpdate) SetNillableWhoCanMessageMe(v *privacysetting.WhoCanMessageMe) *PrivacySettingUpdate {
+	if v != nil {
+		_u.SetWhoCanMessageMe(*v)
+	}
+	return _u
+}
+
+// SetWhoCanMentionMe sets the "who_can_mention_me" field.
+func (_u *PrivacySettingUpdate) SetWhoCanMentionMe(v privacysetting.WhoCanMentionMe) *PrivacySettingUpdate {
+	_u.mutation.SetWhoCanMentionMe(v)
+	return _u
+}
+
+// SetNillableWhoCanMentionMe sets the "who_can_mention_me" field if the given value is not nil.
+func (_u *PrivacySettingUpdate) SetNillableWhoCanMentionMe(v *privacysetting.WhoCanMentionMe) *PrivacySettingUpdate {
+	if v != nil {
+		_u.SetWhoCanMentionMe(*v)
+	}
+	return _u
+}
+
 // SetPolicyVersion sets the "policy_version" field.
 func (_u *PrivacySettingUpdate) SetPolicyVersion(v string) *PrivacySettingUpdate {
 	_u.mutation.SetPolicyVersion(v)
@@ -147,6 +175,16 @@ func (_u *PrivacySettingUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrivacySettingUpdate) check() error {
+	if v, ok := _u.mutation.WhoCanMessageMe(); ok {
+		if err := privacysetting.WhoCanMessageMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_message_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_message_me": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WhoCanMentionMe(); ok {
+		if err := privacysetting.WhoCanMentionMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_mention_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_mention_me": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PolicyVersion(); ok {
 		if err := privacysetting.PolicyVersionValidator(v); err != nil {
 			return &ValidationError{Name: "policy_version", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.policy_version": %w`, err)}
@@ -178,6 +216,12 @@ func (_u *PrivacySettingUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.WhoCanMessageMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.WhoCanMentionMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMentionMe, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.PolicyVersion(); ok {
 		_spec.SetField(privacysetting.FieldPolicyVersion, field.TypeString, value)
@@ -261,6 +305,34 @@ func (_u *PrivacySettingUpdateOne) SetNillableMarketing(v *bool) *PrivacySetting
 	return _u
 }
 
+// SetWhoCanMessageMe sets the "who_can_message_me" field.
+func (_u *PrivacySettingUpdateOne) SetWhoCanMessageMe(v privacysetting.WhoCanMessageMe) *PrivacySettingUpdateOne {
+	_u.mutation.SetWhoCanMessageMe(v)
+	return _u
+}
+
+// SetNillableWhoCanMessageMe sets the "who_can_message_me" field if the given value is not nil.
+func (_u *PrivacySettingUpdateOne) SetNillableWhoCanMessageMe(v *privacysetting.WhoCanMessageMe) *PrivacySettingUpdateOne {
+	if v != nil {
+		_u.SetWhoCanMessageMe(*v)
+	}
+	return _u
+}
+
+// SetWhoCanMentionMe sets the "who_can_mention_me" field.
+func (_u *PrivacySettingUpdateOne) SetWhoCanMentionMe(v privacysetting.WhoCanMentionMe) *PrivacySettingUpdateOne {
+	_u.mutation.SetWhoCanMentionMe(v)
+	return _u
+}
+
+// SetNillableWhoCanMentionMe sets the "who_can_mention_me" field if the given value is not nil.
+func (_u *PrivacySettingUpdateOne) SetNillableWhoCanMentionMe(v *privacysetting.WhoCanMentionMe) *PrivacySettingUpdateOne {
+	if v != nil {
+		_u.SetWhoCanMentionMe(*v)
+	}
+	return _u
+}
+
 // SetPolicyVersion sets the "policy_version" field.
 func (_u *PrivacySettingUpdateOne) SetPolicyVersion(v string) *PrivacySettingUpdateOne {
 	_u.mutation.SetPolicyVersion(v)
@@ -337,6 +409,16 @@ func (_u *PrivacySettingUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrivacySettingUpdateOne) check() error {
+	if v, ok := _u.mutation.WhoCanMessageMe(); ok {
+		if err := privacysetting.WhoCanMessageMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_message_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_message_me": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WhoCanMentionMe(); ok {
+		if err := privacysetting.WhoCanMentionMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_mention_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_mention_me": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PolicyVersion(); ok {
 		if err := privacysetting.PolicyVersionValidator(v); err != nil {
 			return &ValidationError{Name: "policy_version", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.policy_version": %w`, err)}
@@ -385,6 +467,12 @@ func (_u *PrivacySettingUpdateOne) sqlSave(ctx context.Context) (_node *PrivacyS
 	}
 	if value, ok := _u.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.WhoCanMessageMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.WhoCanMentionMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMentionMe, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.PolicyVersion(); ok {
 		_spec.SetField(privacysetting.FieldPolicyVersion, field.TypeString, value)
