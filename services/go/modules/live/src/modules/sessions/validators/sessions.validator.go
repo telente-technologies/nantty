@@ -17,8 +17,8 @@ func ValidateCreateLiveRequest(body dtos.CreateLiveRequest) error {
 	if !slices.Contains(utils.LiveCategories, body.Category) {
 		collected.Add("category", "must be one of "+strings.Join(utils.LiveCategories, ", "))
 	}
-	if body.Visibility != "" && body.Visibility != "public" && body.Visibility != "followers" {
-		collected.Add("visibility", "must be public or followers")
+	if body.Visibility != "" && body.Visibility != "public" && body.Visibility != "followers" && body.Visibility != "subscribers" {
+		collected.Add("visibility", "must be public, followers or subscribers")
 	}
 	if body.StoreId != "" {
 		utils.ParseIdentifiers("storeId", []string{body.StoreId}, &collected)
