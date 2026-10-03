@@ -29,6 +29,16 @@ const (
 	FieldCurrency = "currency"
 	// FieldReason holds the string denoting the reason field in the database.
 	FieldReason = "reason"
+	// FieldConnectedAccountID holds the string denoting the connected_account_id field in the database.
+	FieldConnectedAccountID = "connected_account_id"
+	// FieldBeneficiaryUserID holds the string denoting the beneficiary_user_id field in the database.
+	FieldBeneficiaryUserID = "beneficiary_user_id"
+	// FieldFullRefund holds the string denoting the full_refund field in the database.
+	FieldFullRefund = "full_refund"
+	// FieldFeeTopUpMinor holds the string denoting the fee_top_up_minor field in the database.
+	FieldFeeTopUpMinor = "fee_top_up_minor"
+	// FieldFeeTopUpTransferID holds the string denoting the fee_top_up_transfer_id field in the database.
+	FieldFeeTopUpTransferID = "fee_top_up_transfer_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldProviderRefundID holds the string denoting the provider_refund_id field in the database.
@@ -55,6 +65,11 @@ var Columns = []string{
 	FieldAmountMinor,
 	FieldCurrency,
 	FieldReason,
+	FieldConnectedAccountID,
+	FieldBeneficiaryUserID,
+	FieldFullRefund,
+	FieldFeeTopUpMinor,
+	FieldFeeTopUpTransferID,
 	FieldStatus,
 	FieldProviderRefundID,
 	FieldFailureReason,
@@ -86,6 +101,22 @@ var (
 	DefaultReason string
 	// ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
 	ReasonValidator func(string) error
+	// DefaultConnectedAccountID holds the default value on creation for the "connected_account_id" field.
+	DefaultConnectedAccountID string
+	// ConnectedAccountIDValidator is a validator for the "connected_account_id" field. It is called by the builders before save.
+	ConnectedAccountIDValidator func(string) error
+	// DefaultBeneficiaryUserID holds the default value on creation for the "beneficiary_user_id" field.
+	DefaultBeneficiaryUserID string
+	// BeneficiaryUserIDValidator is a validator for the "beneficiary_user_id" field. It is called by the builders before save.
+	BeneficiaryUserIDValidator func(string) error
+	// DefaultFullRefund holds the default value on creation for the "full_refund" field.
+	DefaultFullRefund bool
+	// DefaultFeeTopUpMinor holds the default value on creation for the "fee_top_up_minor" field.
+	DefaultFeeTopUpMinor int64
+	// DefaultFeeTopUpTransferID holds the default value on creation for the "fee_top_up_transfer_id" field.
+	DefaultFeeTopUpTransferID string
+	// FeeTopUpTransferIDValidator is a validator for the "fee_top_up_transfer_id" field. It is called by the builders before save.
+	FeeTopUpTransferIDValidator func(string) error
 	// DefaultProviderRefundID holds the default value on creation for the "provider_refund_id" field.
 	DefaultProviderRefundID string
 	// ProviderRefundIDValidator is a validator for the "provider_refund_id" field. It is called by the builders before save.
@@ -173,6 +204,31 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByReason orders the results by the reason field.
 func ByReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReason, opts...).ToFunc()
+}
+
+// ByConnectedAccountID orders the results by the connected_account_id field.
+func ByConnectedAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldConnectedAccountID, opts...).ToFunc()
+}
+
+// ByBeneficiaryUserID orders the results by the beneficiary_user_id field.
+func ByBeneficiaryUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBeneficiaryUserID, opts...).ToFunc()
+}
+
+// ByFullRefund orders the results by the full_refund field.
+func ByFullRefund(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFullRefund, opts...).ToFunc()
+}
+
+// ByFeeTopUpMinor orders the results by the fee_top_up_minor field.
+func ByFeeTopUpMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFeeTopUpMinor, opts...).ToFunc()
+}
+
+// ByFeeTopUpTransferID orders the results by the fee_top_up_transfer_id field.
+func ByFeeTopUpTransferID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFeeTopUpTransferID, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

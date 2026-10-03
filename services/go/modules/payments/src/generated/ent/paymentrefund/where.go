@@ -90,6 +90,31 @@ func Reason(v string) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldEQ(FieldReason, v))
 }
 
+// ConnectedAccountID applies equality check predicate on the "connected_account_id" field. It's identical to ConnectedAccountIDEQ.
+func ConnectedAccountID(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserID applies equality check predicate on the "beneficiary_user_id" field. It's identical to BeneficiaryUserIDEQ.
+func BeneficiaryUserID(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// FullRefund applies equality check predicate on the "full_refund" field. It's identical to FullRefundEQ.
+func FullRefund(v bool) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFullRefund, v))
+}
+
+// FeeTopUpMinor applies equality check predicate on the "fee_top_up_minor" field. It's identical to FeeTopUpMinorEQ.
+func FeeTopUpMinor(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpTransferID applies equality check predicate on the "fee_top_up_transfer_id" field. It's identical to FeeTopUpTransferIDEQ.
+func FeeTopUpTransferID(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFeeTopUpTransferID, v))
+}
+
 // ProviderRefundID applies equality check predicate on the "provider_refund_id" field. It's identical to ProviderRefundIDEQ.
 func ProviderRefundID(v string) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldEQ(FieldProviderRefundID, v))
@@ -493,6 +518,251 @@ func ReasonEqualFold(v string) predicate.PaymentRefund {
 // ReasonContainsFold applies the ContainsFold predicate on the "reason" field.
 func ReasonContainsFold(v string) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldContainsFold(FieldReason, v))
+}
+
+// ConnectedAccountIDEQ applies the EQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDNEQ applies the NEQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDNEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDIn applies the In predicate on the "connected_account_id" field.
+func ConnectedAccountIDIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDNotIn applies the NotIn predicate on the "connected_account_id" field.
+func ConnectedAccountIDNotIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDGT applies the GT predicate on the "connected_account_id" field.
+func ConnectedAccountIDGT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDGTE applies the GTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDGTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLT applies the LT predicate on the "connected_account_id" field.
+func ConnectedAccountIDLT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLTE applies the LTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDLTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContains applies the Contains predicate on the "connected_account_id" field.
+func ConnectedAccountIDContains(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContains(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasPrefix applies the HasPrefix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasPrefix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasPrefix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasSuffix applies the HasSuffix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasSuffix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasSuffix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDEqualFold applies the EqualFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDEqualFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEqualFold(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContainsFold applies the ContainsFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDContainsFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContainsFold(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserIDEQ applies the EQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDNEQ applies the NEQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDIn applies the In predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDNotIn applies the NotIn predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNotIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDGT applies the GT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDGTE applies the GTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLT applies the LT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLTE applies the LTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContains applies the Contains predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContains(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContains(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasPrefix applies the HasPrefix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasPrefix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasPrefix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasSuffix applies the HasSuffix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasSuffix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasSuffix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDEqualFold applies the EqualFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEqualFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEqualFold(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContainsFold applies the ContainsFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContainsFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContainsFold(FieldBeneficiaryUserID, v))
+}
+
+// FullRefundEQ applies the EQ predicate on the "full_refund" field.
+func FullRefundEQ(v bool) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFullRefund, v))
+}
+
+// FullRefundNEQ applies the NEQ predicate on the "full_refund" field.
+func FullRefundNEQ(v bool) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldFullRefund, v))
+}
+
+// FeeTopUpMinorEQ applies the EQ predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorEQ(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpMinorNEQ applies the NEQ predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorNEQ(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpMinorIn applies the In predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorIn(vs ...int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldFeeTopUpMinor, vs...))
+}
+
+// FeeTopUpMinorNotIn applies the NotIn predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorNotIn(vs ...int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldFeeTopUpMinor, vs...))
+}
+
+// FeeTopUpMinorGT applies the GT predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorGT(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGT(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpMinorGTE applies the GTE predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorGTE(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGTE(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpMinorLT applies the LT predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorLT(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLT(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpMinorLTE applies the LTE predicate on the "fee_top_up_minor" field.
+func FeeTopUpMinorLTE(v int64) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLTE(FieldFeeTopUpMinor, v))
+}
+
+// FeeTopUpTransferIDEQ applies the EQ predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDNEQ applies the NEQ predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDNEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDIn applies the In predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldFeeTopUpTransferID, vs...))
+}
+
+// FeeTopUpTransferIDNotIn applies the NotIn predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDNotIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldFeeTopUpTransferID, vs...))
+}
+
+// FeeTopUpTransferIDGT applies the GT predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDGT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGT(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDGTE applies the GTE predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDGTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGTE(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDLT applies the LT predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDLT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLT(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDLTE applies the LTE predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDLTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLTE(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDContains applies the Contains predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDContains(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContains(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDHasPrefix applies the HasPrefix predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDHasPrefix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasPrefix(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDHasSuffix applies the HasSuffix predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDHasSuffix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasSuffix(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDEqualFold applies the EqualFold predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDEqualFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEqualFold(FieldFeeTopUpTransferID, v))
+}
+
+// FeeTopUpTransferIDContainsFold applies the ContainsFold predicate on the "fee_top_up_transfer_id" field.
+func FeeTopUpTransferIDContainsFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContainsFold(FieldFeeTopUpTransferID, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
