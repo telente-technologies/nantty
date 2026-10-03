@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ActivityIndicator, ScrollView, Share, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 
 import { Frame69424Icon } from "@/components/icons";
 import { AboutShopCard } from "@/components/product/aboutShopCard";
@@ -18,14 +18,20 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useCartActions } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { trackProductInteraction } from "@/services/productInteractions.service";
 import { productsService } from "@/services/products.service";
 import { storesService } from "@/services/stores.service";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
 
 export function ProductDetailScreen({ navigation, route }: MainScreenProps<"ProductDetail">) {
   const { productId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
+  useEffect(() => {
+    void trackProductInteraction("product.viewed", { productId });
+  }, [productId]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -79,11 +85,9 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
       <Screen>
         {header}
         {product.isError ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>
-            Couldn't load this product.
-          </Text>
+          <ErrorState message="Couldn't load this product." onRetry={() => product.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -152,7 +156,6 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 64 },
   content: { paddingBottom: 21 },
   gallery: { marginTop: 8 },
   selectors: { paddingHorizontal: 12, marginTop: 24, gap: 12 },

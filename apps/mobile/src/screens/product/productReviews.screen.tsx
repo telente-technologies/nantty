@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 import { Star16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
@@ -10,6 +10,7 @@ import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { reviewsService } from "@/services/reviews.service";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 function StarRow({ rating }: { rating: number }) {
   return (
@@ -29,7 +30,7 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
   return (
     <Screen>
       <Header title="Reviews" />
-      {reviews.isLoading ? <ActivityIndicator style={styles.state} color={colors.primary} /> : null}
+      {reviews.isLoading ? <ListSkeleton /> : null}
       {reviews.data ? (
         <FlatList
           data={reviews.data.reviews}
@@ -63,7 +64,6 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 64 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   summary: { alignItems: "center", paddingVertical: 20, gap: 6 },
   stars: { flexDirection: "row", gap: 2 },
