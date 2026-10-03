@@ -1,5 +1,5 @@
 import type { ProductBrandRelationship } from "@/types/brand.type";
-import type { Product, ProductImage, ProductStatus, StockLevel } from "@/types/catalog.type";
+import type { Product, ProductImage, ProductStatus, ProductVisibility, StockLevel } from "@/types/catalog.type";
 import type { CurrencyCode } from "@/types/money.type";
 import type { ProductUpsertRequest, ProductVariantUpsertRequest } from "@/types/productRequests.type";
 import type { ValidationIssue } from "@/utils/formValidation.util";
@@ -24,6 +24,20 @@ export interface VariantDraft {
   readonly lowStockThresholdText: string;
   readonly openingStockTextByLocationId: Record<string, string>;
   readonly stock: StockLevel[];
+  readonly reorderPoint: number | null;
+  readonly reorderQuantity: number | null;
+}
+
+export interface AttributeDraft {
+  readonly key: string;
+  readonly name: string;
+  readonly value: string;
+}
+
+export interface VideoDraft {
+  readonly key: string;
+  readonly url: string;
+  readonly title: string;
 }
 
 export interface ProductDraft {
@@ -40,6 +54,25 @@ export interface ProductDraft {
   readonly images: ProductImage[];
   readonly brandId: string;
   readonly brandRelationship: ProductBrandRelationship | "";
+  readonly visibility: ProductVisibility;
+  readonly publishAtLocalText: string;
+  readonly attributes: AttributeDraft[];
+  readonly videos: VideoDraft[];
+  readonly supplierId: string;
+}
+
+function convertIsoToLocalDateTimeInputText(isoDate: string | null): string {
+  if (!isoDate) return "";
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "";
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function convertLocalDateTimeInputTextToIso(localText: string): string | null {
+  if (!localText) return null;
+  const date = new Date(localText);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 let draftKeyCounter = 0;
@@ -57,6 +90,7 @@ function createEmptyVariantDraft(optionValues: Record<string, string>, template:
     key: createDraftKey(), id: null, optionValues, sku: "", barcode: "",
     priceText: template?.priceText ?? "", compareAtText: template?.compareAtText ?? "", costText: template?.costText ?? "",
     lowStockThresholdText: template?.lowStockThresholdText ?? "5", openingStockTextByLocationId: {}, stock: [],
+    reorderPoint: template?.reorderPoint ?? null, reorderQuantity: template?.reorderQuantity ?? null,
   };
 }
 
@@ -64,6 +98,7 @@ export function createEmptyProductDraft(): ProductDraft {
   return {
     name: "", description: "", categoryId: "", status: "active", taxable: true, trackInventory: true, publishedOnline: false, tagsText: "",
     options: [], variants: [createEmptyVariantDraft({}, undefined)], images: [], brandId: "", brandRelationship: "",
+    visibility: "public", publishAtLocalText: "", attributes: [], videos: [], supplierId: "",
   };
 }
 
@@ -76,12 +111,18 @@ export function convertProductToDraft(product: Product): ProductDraft {
     images: product.images,
     brandId: product.brand?.brandId ?? "",
     brandRelationship: product.brand?.relationship ?? "",
+    visibility: product.visibility,
+    publishAtLocalText: convertIsoToLocalDateTimeInputText(product.publishAt),
+    attributes: product.attributes.map((attribute) => ({ key: createDraftKey(), name: attribute.name, value: attribute.value })),
+    videos: product.videos.map((video) => ({ key: video.id, url: video.url, title: video.title })),
+    supplierId: product.supplierId ?? "",
     variants: product.variants.map((variant) => ({
       key: variant.id, id: variant.id, optionValues: variant.optionValues, sku: variant.sku, barcode: variant.barcode ?? "",
       priceText: toText(variant.price.amountMinor, variant.price.currency),
       compareAtText: toText(variant.compareAtPrice?.amountMinor, variant.compareAtPrice?.currency),
       costText: toText(variant.costPrice?.amountMinor, variant.costPrice?.currency),
       lowStockThresholdText: String(variant.lowStockThreshold), openingStockTextByLocationId: {}, stock: variant.stock,
+      reorderPoint: variant.reorderPoint, reorderQuantity: variant.reorderQuantity,
     })),
   };
 }
@@ -131,6 +172,8 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       compareAtPriceMinor: parseOptionalMoney(variant.compareAtText, currency, `${label} compare-at price`, `variants.${index}.compareAtPriceMinor`, parseIssues),
       costPriceMinor: parseOptionalMoney(variant.costText, currency, `${label} cost price`, `variants.${index}.costPriceMinor`, parseIssues),
       lowStockThreshold: Number.isFinite(threshold) ? threshold : -1,
+      ...(variant.reorderPoint !== null ? { reorderPoint: variant.reorderPoint } : {}),
+      ...(variant.reorderQuantity !== null ? { reorderQuantity: variant.reorderQuantity } : {}),
       openingStock: isNewProduct
         ? Object.entries(variant.openingStockTextByLocationId).filter(([, quantityText]) => quantityText.trim() !== "").map(([locationId, quantityText]) => ({ locationId, quantity: Number(quantityText) }))
         : [],
@@ -151,6 +194,11 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       imageMediaIds: draft.images.map((image) => image.mediaId),
       variants,
       brand: draft.brandId && draft.brandRelationship ? { brandId: draft.brandId, relationship: draft.brandRelationship } : null,
+      visibility: draft.visibility,
+      publishAt: draft.status === "draft" ? convertLocalDateTimeInputTextToIso(draft.publishAtLocalText) : null,
+      attributes: draft.attributes.filter((attribute) => attribute.name.trim() || attribute.value.trim()).map((attribute) => ({ name: attribute.name.trim(), value: attribute.value.trim() })),
+      videos: draft.videos.filter((video) => video.url.trim()).map((video) => ({ url: video.url.trim(), title: video.title.trim() })),
+      supplierId: draft.supplierId || null,
     },
   };
 }

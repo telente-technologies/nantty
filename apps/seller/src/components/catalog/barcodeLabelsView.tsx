@@ -8,6 +8,7 @@ import { Callout, EmptyState } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
 import { SelectField, ToggleSwitch } from "@/components/ui/formFields";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
+import { ProductsSectionTabs } from "@/components/catalog/productsSectionTabs";
 import { useCursorPagedList } from "@/hooks/useCursorPagedList.hook";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import type { Product, ProductVariant } from "@/types/catalog.type";
@@ -56,10 +57,11 @@ export function BarcodeLabelsView() {
       <div className="noPrint">
         <PageHeader
           eyebrow={<ButtonLink href="/products" variant="ghost" size="small" iconName="arrowLeft24">Products</ButtonLink>}
-          title="Print barcode labels"
-          description="EAN-13 barcodes print as EAN-13; anything else prints as Code 128 from the barcode or SKU, which every USB and Bluetooth scanner reads."
+          title="Product labels"
+          description="Print SKU and barcode labels for packaging and your stockroom, so picking and packing app orders is fast. EAN-13 barcodes print as EAN-13; anything else prints as Code 128."
           actions={<Button variant="primary" iconName="tag24" disabled={labelsToPrint.length === 0} onClick={() => window.print()}>Print {labelsToPrint.length} label{labelsToPrint.length === 1 ? "" : "s"}</Button>}
         />
+        <ProductsSectionTabs />
       </div>
       <div className={styles.layout}>
         <div className="noPrint">

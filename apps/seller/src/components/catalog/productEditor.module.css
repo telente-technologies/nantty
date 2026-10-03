@@ -204,3 +204,42 @@
     grid-template-columns: 1fr;
   }
 }
+
+.attributeList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attributeRow,
+.videoRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.suggestionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.titleWithBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 520px) {
+  .attributeRow,
+  .videoRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .attributeRow > input:first-child,
+  .videoRow > input:first-child {
+    grid-column: 1 / -1;
+  }
+}
