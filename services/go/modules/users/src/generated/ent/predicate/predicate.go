@@ -6,11 +6,38 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AccountBan is the predicate function for accountban builders.
+type AccountBan func(*sql.Selector)
+
+// AccountRemoval is the predicate function for accountremoval builders.
+type AccountRemoval func(*sql.Selector)
+
+// AccountRestriction is the predicate function for accountrestriction builders.
+type AccountRestriction func(*sql.Selector)
+
+// AccountSuspension is the predicate function for accountsuspension builders.
+type AccountSuspension func(*sql.Selector)
+
 // ActingProfile is the predicate function for actingprofile builders.
 type ActingProfile func(*sql.Selector)
 
+// AdminCreatedAccount is the predicate function for admincreatedaccount builders.
+type AdminCreatedAccount func(*sql.Selector)
+
+// BlackApplication is the predicate function for blackapplication builders.
+type BlackApplication func(*sql.Selector)
+
 // BusinessCategory is the predicate function for businesscategory builders.
 type BusinessCategory func(*sql.Selector)
+
+// BusinessDocument is the predicate function for businessdocument builders.
+type BusinessDocument func(*sql.Selector)
+
+// CheckmarkGrant is the predicate function for checkmarkgrant builders.
+type CheckmarkGrant func(*sql.Selector)
+
+// CreatorApplication is the predicate function for creatorapplication builders.
+type CreatorApplication func(*sql.Selector)
 
 // DataExportRequest is the predicate function for dataexportrequest builders.
 type DataExportRequest func(*sql.Selector)
@@ -30,6 +57,18 @@ type GeoCountry func(*sql.Selector)
 // GeoRegion is the predicate function for georegion builders.
 type GeoRegion func(*sql.Selector)
 
+// LegalDocument is the predicate function for legaldocument builders.
+type LegalDocument func(*sql.Selector)
+
+// LegalNotice is the predicate function for legalnotice builders.
+type LegalNotice func(*sql.Selector)
+
+// LegalNoticeDraft is the predicate function for legalnoticedraft builders.
+type LegalNoticeDraft func(*sql.Selector)
+
+// LegalVersion is the predicate function for legalversion builders.
+type LegalVersion func(*sql.Selector)
+
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
 
@@ -42,6 +81,12 @@ type PrivacySetting func(*sql.Selector)
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
 
+// ProfileCheckmark is the predicate function for profilecheckmark builders.
+type ProfileCheckmark func(*sql.Selector)
+
+// ProfileSignal is the predicate function for profilesignal builders.
+type ProfileSignal func(*sql.Selector)
+
 // ReservedUsernameRule is the predicate function for reservedusernamerule builders.
 type ReservedUsernameRule func(*sql.Selector)
 
@@ -50,6 +95,9 @@ type RetentionPolicy func(*sql.Selector)
 
 // ShippingAddress is the predicate function for shippingaddress builders.
 type ShippingAddress func(*sql.Selector)
+
+// SuggestionDismissal is the predicate function for suggestiondismissal builders.
+type SuggestionDismissal func(*sql.Selector)
 
 // TermsAcceptance is the predicate function for termsacceptance builders.
 type TermsAcceptance func(*sql.Selector)
@@ -62,3 +110,6 @@ type UsernameChange func(*sql.Selector)
 
 // UsernameHold is the predicate function for usernamehold builders.
 type UsernameHold func(*sql.Selector)
+
+// VerificationApplication is the predicate function for verificationapplication builders.
+type VerificationApplication func(*sql.Selector)
