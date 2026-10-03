@@ -16,7 +16,7 @@ export function CheckmarkSuggestionEditor({ rules, canWrite, onChange }: EditorP
   const setGold = <Key extends keyof CheckmarkSuggestionRules["gold"]>(key: Key, value: CheckmarkSuggestionRules["gold"][Key]) => onChange((current) => ({ ...current, gold: { ...current.gold, [key]: value } }));
   return (
     <div className={styles.editor}>
-      <h3 className={styles.sectionTitle}>Blue (personal)</h3>
+      <h3 className={styles.sectionTitle}>Blue (personal, incl. creators)</h3>
       <div className={styles.grid}>
         <WholeNumberField label="Minimum account age (days)" value={rules.blue.minimumAccountAgeDays} maximum={3650} isDisabled={disabled} onChange={(value) => setBlue("minimumAccountAgeDays", value)} />
         <WholeNumberField label="Minimum real followers" value={rules.blue.minimumRealFollowers} maximum={10_000_000} isDisabled={disabled} onChange={(value) => setBlue("minimumRealFollowers", value)} />
