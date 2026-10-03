@@ -10,12 +10,10 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { EscrowHoldRow } from "@/components/wallet/escrowHoldRow";
-import { LoyaltyCard } from "@/components/wallet/loyaltyCard";
 import { TransactionRow } from "@/components/wallet/transactionRow";
 import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
 import {
   useEscrowHoldsQuery,
-  useLoyaltySummaryQuery,
   useWalletBalanceQuery,
   useWalletTransactionsQuery,
 } from "@/components/wallet/walletQueries.hook";
@@ -28,7 +26,6 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
   const { data: wallet, isRefetching } = useWalletBalanceQuery();
   const { data: transactions = [] } = useWalletTransactionsQuery();
   const { data: escrowHolds = [] } = useEscrowHoldsQuery();
-  const { data: loyalty } = useLoyaltySummaryQuery();
   const [isBuyCoinsSheetOpen, setIsBuyCoinsSheetOpen] = useState(false);
 
   return (
@@ -63,12 +60,11 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
           <CoinBalanceChip onPress={() => setIsBuyCoinsSheetOpen(true)} />
         </View>
 
-        {loyalty ? <LoyaltyCard loyalty={loyalty} /> : null}
 
         <SettingsGroup>
           <SettingsRow label="Payout accounts" onPress={() => navigation.navigate("PayoutAccounts")} />
+          <SettingsRow label="Store rewards" onPress={() => navigation.navigate("StoreRewards")} />
           <SettingsRow label="All transactions" onPress={() => navigation.navigate("Transactions")} />
-          <SettingsRow label="Invite friends, earn cashback" onPress={() => navigation.navigate("Referral")} />
         </SettingsGroup>
 
         <View style={styles.section}>
