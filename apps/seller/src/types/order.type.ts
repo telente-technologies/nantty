@@ -1,7 +1,42 @@
+import type { DeliveryStatus } from "@/types/delivery.type";
 import type { Money } from "@/types/money.type";
 
-export type OnlineOrderStatus = "paid" | "processing" | "shipped" | "delivered" | "completed" | "cancelled" | "refunded" | "disputed";
+export type OnlineOrderStatus = "new" | "processing" | "ready" | "shipped" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed";
 export type EscrowStatus = "held" | "released" | "refunded" | "disputed";
+export type OrderPaymentStatus = "paid" | "partially_refunded" | "refunded";
+export type OrderPaymentProvider = "paystack" | "flutterwave";
+export type OrderTimelineEventKind = "placed" | "paid" | "accepted" | "rejected" | "processing" | "ready" | "shipped" | "delivery_failed" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed" | "note";
+
+export interface OrderTimelineEvent {
+  readonly id: string;
+  readonly kind: OrderTimelineEventKind;
+  readonly summary: string;
+  readonly actorName: string | null;
+  readonly createdAt: string;
+}
+
+export interface OrderInternalNote {
+  readonly id: string;
+  readonly body: string;
+  readonly authorName: string;
+  readonly createdAt: string;
+}
+
+export interface OrderRefund {
+  readonly id: string;
+  readonly amount: Money;
+  readonly reason: string;
+  readonly createdAt: string;
+}
+
+export interface OrderDeliveryDetails {
+  readonly status: DeliveryStatus;
+  readonly riderName: string | null;
+  readonly riderPhone: string | null;
+  readonly estimatedDeliveryAt: string | null;
+  readonly attempts: number;
+  readonly lastAttemptNote: string | null;
+}
 
 export interface OnlineOrderLine {
   readonly id: string;
@@ -36,7 +71,8 @@ export interface OrderFulfilment {
 export interface OnlineOrder {
   readonly id: string;
   readonly orderNumber: string;
-  readonly buyer: { readonly id: string; readonly name: string; readonly username: string };
+  readonly invoiceNumber: string;
+  readonly buyer: { readonly id: string; readonly name: string; readonly username: string; readonly phone: string | null };
   readonly shippingAddress: ShippingAddress;
   readonly lines: OnlineOrderLine[];
   readonly subtotal: Money;
@@ -50,6 +86,16 @@ export interface OnlineOrder {
   readonly attributedCreator: { readonly id: string; readonly username: string } | null;
   readonly createdAt: string;
   readonly deliveredAt: string | null;
+  readonly paymentStatus: OrderPaymentStatus;
+  readonly paymentProvider: OrderPaymentProvider;
+  readonly paymentReference: string;
+  readonly paidAt: string;
+  readonly refundedAmount: Money;
+  readonly refunds: OrderRefund[];
+  readonly delivery: OrderDeliveryDetails;
+  readonly timeline: OrderTimelineEvent[];
+  readonly notes: OrderInternalNote[];
+  readonly conversationId: string | null;
 }
 
 export type ReturnRequestStatus = "requested" | "approved" | "received" | "refunded" | "declined";

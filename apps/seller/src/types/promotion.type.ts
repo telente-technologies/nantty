@@ -13,7 +13,6 @@ export interface Promotion {
   readonly usageLimit: number | null;
   readonly usageLimitPerCustomer: number | null;
   readonly usedCount: number;
-  readonly channels: ("online" | "pos")[];
   readonly startsAt: string;
   readonly endsAt: string | null;
   readonly status: PromotionStatus;

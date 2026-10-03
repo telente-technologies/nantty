@@ -1,6 +1,6 @@
 import type { ProductBrandRelationship } from "@/types/brand.type";
 import type { Money } from "@/types/money.type";
-import type { ProductOption, ProductStatus, StockAdjustmentReason } from "@/types/catalog.type";
+import type { ProductAttribute, ProductOption, ProductStatus, ProductVisibility, StockAdjustmentReason } from "@/types/catalog.type";
 
 export interface ProductVariantUpsertRequest {
   readonly id: string | null;
@@ -11,6 +11,8 @@ export interface ProductVariantUpsertRequest {
   readonly compareAtPriceMinor: number | null;
   readonly costPriceMinor: number | null;
   readonly lowStockThreshold: number;
+  readonly reorderPoint?: number;
+  readonly reorderQuantity?: number;
   readonly openingStock: { readonly locationId: string; readonly quantity: number }[];
 }
 
@@ -27,9 +29,22 @@ export interface ProductUpsertRequest {
   readonly imageMediaIds: string[];
   readonly variants: ProductVariantUpsertRequest[];
   readonly brand?: { readonly brandId: string; readonly relationship: ProductBrandRelationship } | null;
+  readonly visibility?: ProductVisibility;
+  readonly publishAt?: string | null;
+  readonly attributes?: ProductAttribute[];
+  readonly videos?: { readonly url: string; readonly title: string }[];
+  readonly supplierId?: string | null;
 }
 
-export type ProductBulkAction = "publish" | "unpublish" | "archive";
+export type ProductBulkAction = "publish" | "unpublish" | "archive" | "set_category" | "set_visibility" | "change_price_percent";
+
+export interface ProductBulkActionRequest {
+  readonly action: ProductBulkAction;
+  readonly productIds: string[];
+  readonly categoryId?: string | null;
+  readonly visibility?: ProductVisibility;
+  readonly pricePercentBasisPoints?: number;
+}
 
 export interface ProductBulkActionResult {
   readonly updatedProductIds: string[];
@@ -80,6 +95,8 @@ export interface InventoryLevelRow {
   readonly lowStockThreshold: number;
   readonly costPrice: Money | null;
   readonly stockValue: Money | null;
+  readonly reorderPoint: number;
+  readonly reorderQuantity: number;
 }
 
 export interface StockAdjustmentRequest {
@@ -108,4 +125,76 @@ export interface MediaRecord {
   readonly status: "processing" | "ready" | "failed";
   readonly url: string | null;
   readonly mimeType: string;
+}
+
+export interface ProductUsageSummary {
+  readonly activeProducts: number;
+  readonly draftProducts: number;
+  readonly scheduledProducts: number;
+  readonly archivedProducts: number;
+  readonly maxActiveProducts: number | null;
+}
+
+export interface InventorySummary {
+  readonly locationId: string | null;
+  readonly skuCount: number;
+  readonly onHand: number;
+  readonly reserved: number;
+  readonly available: number;
+  readonly lowStockCount: number;
+  readonly outOfStockCount: number;
+  readonly needsReorderCount: number;
+  readonly stockValue: Money;
+  readonly retailValue: Money;
+}
+
+export interface InventoryLocationSummary {
+  readonly locationId: string;
+  readonly name: string;
+  readonly kind: "store" | "warehouse";
+  readonly city: string;
+  readonly isDefault: boolean;
+  readonly active: boolean;
+  readonly skuCount: number;
+  readonly onHand: number;
+  readonly reserved: number;
+  readonly lowStockCount: number;
+  readonly stockValue: Money;
+}
+
+export interface ReorderSuggestionRow {
+  readonly variantId: string;
+  readonly productId: string;
+  readonly productName: string;
+  readonly variantTitle: string;
+  readonly sku: string;
+  readonly locationId: string;
+  readonly available: number;
+  readonly reorderPoint: number;
+  readonly reorderQuantity: number;
+  readonly suggestedQuantity: number;
+  readonly supplier: { readonly id: string; readonly name: string; readonly leadTimeDays: number } | null;
+  readonly estimatedCost: Money | null;
+}
+
+export interface ReorderLevelUpdateRequest {
+  readonly variantId: string;
+  readonly reorderPoint: number;
+  readonly reorderQuantity: number;
+}
+
+export interface SupplierUpsertRequest {
+  readonly name: string;
+  readonly contactName: string;
+  readonly phone: string;
+  readonly email: string | null;
+  readonly address: string;
+  readonly leadTimeDays: number;
+  readonly paymentTerms: string;
+  readonly notes: string | null;
+}
+
+export interface CategoryUpsertRequest {
+  readonly name: string;
+  readonly description: string;
 }

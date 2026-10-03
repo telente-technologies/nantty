@@ -4,7 +4,6 @@ import type { reportKinds } from "@/constants/reportCatalog.constant";
 export type ReportKind = (typeof reportKinds)[number];
 export type ReportColumnKind = "text" | "money" | "number" | "percent" | "date";
 export type ReportCellValue = string | number | Money | null;
-export type ReportChannelFilter = "all" | "pos" | "online";
 
 export interface ReportColumn {
   readonly key: string;
