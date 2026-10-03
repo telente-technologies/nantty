@@ -14,6 +14,7 @@ pnpm backend:up                # Postgres+PostGIS, Valkey, LocalStack (SNS/SQS),
 pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
 pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Bachs sandbox keys are empty by default
+pnpm backend:dev:notifications # ts.notifications on :8104; consumes SQS, sends email through SES (LocalStack), needs `prisma migrate deploy` once
 ```
 
 Point the mobile app at `http://<your-ip>:8080` with mocks off to use real auth. One-time codes are written to the
@@ -27,6 +28,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 8080 | gateway (TS) |
 | 8101 | goIdentity |
 | 8103 / 9103 | go-money HTTP / internal gRPC |
+| 8104 | ts.notifications |
 | 4000 | realtime (Phoenix, `/ws`) |
 | 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
 | 16379 | Valkey |
@@ -36,7 +38,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 4317/4318 | OTel collector |
 
 Tests: `pnpm backend:test:go` (unit + integration against the compose Postgres; integration tests skip when it is down),
-`pnpm backend:test:gateway`, `pnpm backend:test:realtime`, and `pnpm backend:check` (300-line limit, no raw SQL in TS).
+`pnpm backend:test:gateway`, `pnpm backend:test:notifications`, `pnpm backend:test:realtime`, and `pnpm backend:check` (300-line limit, no raw SQL in TS).
 
 ## Layout
 
@@ -49,6 +51,7 @@ services/
     modules/<service>/ one Go module per JSON service: auth, users, currency, admin (go-identity) are built, the rest are skeletons
     deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
   typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
+  typescript/notifications/ Zudojs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
   python/              pointer to apps/intelligence (not duplicated)
   scripts/             CI checks and test runners
@@ -304,7 +307,7 @@ Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:
 
 **Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `ConnectedAccountProvider`,
 `MoneyMovementProvider`, `DisputeProvider`, `SubscriptionProvider`, combined as `ConnectProvider`) with one adapter,
-`bachsConnect` (`src/integrations/bachsConnect*.integration.go`); another provider only needs a new adapter. Money is int64
+`bachsConnect` (`src/integrations/bachsConnect*.integration.go`); another provider only needs a new adapter. Bachs review, fees, control model and go-live checklist: [`docs/integrations/bachs.md`](../docs/integrations/bachs.md). Money is int64
 minor units inside and Bachs decimal strings at the boundary. The HTTP client has a 15s timeout, sends `Idempotency-Key` on
 every mutation (refused locally without one) and retries only GETs and keyed mutations on network errors, 429 and 5xx.
 Marketplace purchases are direct charges: one hosted checkout per seller order with `X-Account-Id` = the seller account and
