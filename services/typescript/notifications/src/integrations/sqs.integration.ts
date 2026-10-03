@@ -1,6 +1,9 @@
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
-import type { JobQueue, QueueMessage, QueueReader } from "../interfaces/jobQueue.interface.js";
+import type { Logger } from "@zudojs/logger";
+
+import type { JobQueue, MessageBroker, QueueConsumer, QueueMessage, QueueReader } from "../interfaces/jobQueue.interface.js";
+import { QueueConsumerJob } from "../jobs/queueConsumer.job.js";
 
 export class SqsQueueClient implements JobQueue, QueueReader {
   private readonly client: SQSClient;
@@ -21,4 +24,18 @@ export class SqsQueueClient implements JobQueue, QueueReader {
   public async acknowledge(queueUrl: string, receiptHandle: string): Promise<void> {
     await this.client.send(new DeleteMessageCommand({ QueueUrl: queueUrl, ReceiptHandle: receiptHandle }));
   }
+}
+
+export class SqsMessageBroker implements MessageBroker {
+  public constructor(private readonly client: SqsQueueClient, private readonly logger: Logger) {}
+
+  public send(queueUrl: string, body: unknown, delaySeconds = 0): Promise<void> {
+    return this.client.send(queueUrl, body, delaySeconds);
+  }
+
+  public createConsumer(name: string, queueUrl: string, handleMessageBody: (body: string) => Promise<void>): QueueConsumer {
+    return new QueueConsumerJob(name, queueUrl, this.client, handleMessageBody, this.logger);
+  }
+
+  public async close(): Promise<void> {}
 }
