@@ -2,7 +2,8 @@ import { StyleSheet, View } from "react-native";
 
 import { Shield24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 const BUYER_POINTS = [
   "Your money goes to Zudomart, not straight to the seller.",
@@ -17,6 +18,8 @@ const SELLER_POINTS = [
 ];
 
 export function EscrowExplainerCard({ viewerRole }: { viewerRole: "buyer" | "seller" }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const points = viewerRole === "buyer" ? BUYER_POINTS : SELLER_POINTS;
   return (
     <View style={styles.card}>
@@ -38,10 +41,10 @@ export function EscrowExplainerCard({ viewerRole }: { viewerRole: "buyer" | "sel
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: palette.primary[50], borderRadius: 12, padding: 12, gap: 8 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.primaryTint, borderRadius: 12, padding: 12, gap: 8 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   point: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.primary, marginTop: 7 },
+  bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.primarySolid, marginTop: 7 },
   pointText: { flex: 1 },
-});
+}));

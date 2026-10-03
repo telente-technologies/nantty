@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors, palette } from "@/constants/colors.constant";
+import { darkStatusTones, useTheme } from "@/theme";
 
 export type StatusTone = "primary" | "success" | "caution" | "error" | "neutral";
 
@@ -14,7 +15,8 @@ const TONE_COLORS: Record<StatusTone, { background: string; text: string }> = {
 };
 
 export function StatusPill({ label, tone }: { label: string; tone: StatusTone }) {
-  const toneColors = TONE_COLORS[tone];
+  const { isDark } = useTheme();
+  const toneColors = isDark ? darkStatusTones[tone] : TONE_COLORS[tone];
   return (
     <View style={[styles.pill, { backgroundColor: toneColors.background }]}>
       <Text size={12} weight={500} lineHeight={16} color={toneColors.text}>

@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "reac
 import { Cancel20Icon, CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { mediaService, type MediaUploadPurpose } from "@/services/media.service";
 
 export interface PhotoEvidencePickerProps {
@@ -18,6 +18,8 @@ export interface PhotoEvidencePickerProps {
 }
 
 export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhotos = 5, addLabel = "Add photo", onUploadingChange, privateUploadPurpose = "dispute_evidence" }: PhotoEvidencePickerProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -73,10 +75,10 @@ export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhoto
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 8 },
   row: { gap: 8 },
-  thumbnail: { width: 88, height: 88, borderRadius: 8, backgroundColor: colors.white, overflow: "hidden" },
+  thumbnail: { width: 88, height: 88, borderRadius: 8, backgroundColor: colors.surface, overflow: "hidden" },
   add: { borderWidth: 1, borderStyle: "dashed", borderColor: colors.textSubtle, alignItems: "center", justifyContent: "center", gap: 4, padding: 4 },
   remove: { position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: colors.overlay, alignItems: "center", justifyContent: "center" },
-});
+}));

@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface ConfirmActionSheetProps {
   readonly visible: boolean;
@@ -17,6 +17,7 @@ export interface ConfirmActionSheetProps {
 }
 
 export function ConfirmActionSheet({ visible, title, message, confirmTitle, confirming, errorMessage, onConfirm, onClose }: ConfirmActionSheetProps) {
+  const { colors } = useTheme();
   return (
     <BottomSheet visible={visible} onClose={onClose} title={title}>
       <View style={styles.body}>

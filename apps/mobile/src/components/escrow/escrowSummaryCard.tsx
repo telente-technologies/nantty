@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { EscrowDetail } from "@/types/commerce.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -9,6 +9,8 @@ import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "./escrowStage.util"
 import { StatusPill } from "./statusPill";
 
 export function EscrowSummaryCard({ escrow, viewerRole }: { escrow: EscrowDetail; viewerRole: "buyer" | "seller" }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const appearance = ESCROW_STAGE_APPEARANCE[escrow.stage];
   const releaseLine = escrow.releasedAt
     ? `Released ${formatFriendlyDate(escrow.releasedAt)}`
@@ -43,7 +45,7 @@ export function EscrowSummaryCard({ escrow, viewerRole }: { escrow: EscrowDetail
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 6 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 6 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 },
-});
+}));

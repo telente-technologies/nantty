@@ -2,7 +2,7 @@ import { Linking, StyleSheet, View } from "react-native";
 
 import { Check16Icon, Warning20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
 import type { EscrowDetail } from "@/types/commerce.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -92,21 +92,23 @@ function buildTimelineSteps(escrow: EscrowDetail, viewerRole: "buyer" | "seller"
   return [...steps.slice(0, completed + 1), problemStep, ...steps.slice(completed + 1)];
 }
 
-const CIRCLE_COLORS: Record<StepState, { background: string; border: string }> = {
-  done: { background: colors.primary, border: colors.primary },
-  current: { background: colors.white, border: colors.primary },
-  upcoming: { background: colors.white, border: colors.divider },
-  problem: { background: palette.error[50], border: colors.error },
-};
+const circleColorsFor = (colors: ThemeColors): Record<StepState, { background: string; border: string }> => ({
+  done: { background: colors.primarySolid, border: colors.primarySolid },
+  current: { background: colors.surface, border: colors.primary },
+  upcoming: { background: colors.surface, border: colors.divider },
+  problem: { background: colors.errorTint, border: colors.error },
+});
 
 export function EscrowTimeline({ escrow, viewerRole }: { escrow: EscrowDetail; viewerRole: "buyer" | "seller" }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const steps = buildTimelineSteps(escrow, viewerRole);
   return (
     <View accessibilityRole="list">
       {steps.map((step, index) => (
         <View key={step.key} style={styles.step} accessibilityLabel={`${step.title}. ${step.detail}. ${step.state === "done" ? "Done" : step.state === "current" ? "In progress" : ""}`}>
           <View style={styles.rail}>
-            <View style={[styles.circle, { backgroundColor: CIRCLE_COLORS[step.state].background, borderColor: CIRCLE_COLORS[step.state].border }]}>
+            <View style={[styles.circle, { backgroundColor: circleColorsFor(colors)[step.state].background, borderColor: circleColorsFor(colors)[step.state].border }]}>
               {step.state === "done" ? <Check16Icon size={12} color={colors.white} /> : null}
               {step.state === "current" ? <View style={styles.currentDot} /> : null}
               {step.state === "problem" ? <Warning20Icon size={12} color={colors.error} /> : null}
@@ -132,12 +134,12 @@ export function EscrowTimeline({ escrow, viewerRole }: { escrow: EscrowDetail; v
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   step: { flexDirection: "row", gap: 12 },
   rail: { alignItems: "center", width: 20 },
   circle: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
-  currentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  currentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primarySolid },
   line: { width: 2, flex: 1, minHeight: 24, backgroundColor: colors.divider, marginVertical: 2 },
-  lineDone: { backgroundColor: colors.primary },
+  lineDone: { backgroundColor: colors.primarySolid },
   texts: { flex: 1, paddingBottom: 18, gap: 2 },
-});
+}));

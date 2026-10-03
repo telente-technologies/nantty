@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { DisputeMessage } from "@/types/commerce.type";
 
 import { formatFriendlyDateTime } from "./escrowStage.util";
@@ -12,8 +12,9 @@ import { PreviewableImage } from "@/components/ui/previewableImage";
 const ROLE_LABELS = { buyer: "Buyer", seller: "Seller", support: "Zudomart Support" } as const;
 
 export function DisputeMessageBubble({ message, sentByViewer }: { message: DisputeMessage; sentByViewer: boolean }) {
+  const { colors } = useTheme();
   const fromSupport = message.authorRole === "support";
-  const bubbleColor = sentByViewer ? colors.primary : fromSupport ? palette.success[50] : colors.white;
+  const bubbleColor = sentByViewer ? colors.primarySolid : fromSupport ? colors.successTint : colors.surface;
   const textColor = sentByViewer ? colors.white : colors.text;
   return (
     <View style={[styles.row, sentByViewer && styles.rowMine]}>
