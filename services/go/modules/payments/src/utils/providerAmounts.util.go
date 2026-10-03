@@ -63,3 +63,12 @@ func FeeForAmountFromTiers(tiers []TransferFeeTier, amountMinor int64) int64 {
 	}
 	return tiers[len(tiers)-1].FeeMinor
 }
+
+func PlatformFeeForAmount(amountMinor, commissionBps int64) int64 {
+	if amountMinor <= 0 || commissionBps <= 0 {
+		return 0
+	}
+	sellerShareBps := 10_000 - commissionBps
+	sellerShare := amountMinor/10_000*sellerShareBps + amountMinor%10_000*sellerShareBps/10_000
+	return amountMinor - sellerShare
+}
