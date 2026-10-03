@@ -1,5 +1,5 @@
 defmodule Realtime.Topics.TopicAuthorizer do
-  @public_topic_kinds ~w(live battle)
+  @live_topic_kinds ~w(live battle)
 
   def authorize_subscription(principal, topic) do
     case String.split(topic, ":", parts: 2) do
@@ -9,12 +9,18 @@ defmodule Realtime.Topics.TopicAuthorizer do
       ["conversation", conversation_id] ->
         authorize_conversation_member(principal, conversation_id)
 
-      [kind, identifier] when kind in @public_topic_kinds and identifier != "" ->
-        :ok
+      [kind, identifier] when kind in @live_topic_kinds and identifier != "" ->
+        authorize_live_access(principal, topic)
 
       _ ->
         {:error, :forbidden}
     end
+  end
+
+  defp authorize_live_access(principal, topic) do
+    checker = Application.get_env(:realtime, :live_access_checker, Realtime.Topics.LiveAccessClient)
+
+    if checker.can_join?(principal.account_id, topic), do: :ok, else: {:error, :forbidden}
   end
 
   defp authorize_conversation_member(principal, conversation_id) do
