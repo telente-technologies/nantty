@@ -1,0 +1,45 @@
+package container
+
+import (
+	"time"
+
+	"zudomart/modules/escrow/src/configs"
+	"zudomart/modules/escrow/src/generated/ent"
+	_ "zudomart/modules/escrow/src/generated/ent/runtime"
+	"zudomart/modules/ledger/src/databases"
+	ledgerevents "zudomart/modules/ledger/src/events"
+	"zudomart/modules/ledger/src/loaders"
+	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
+	ledgerutils "zudomart/modules/ledger/src/utils"
+	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+)
+
+type Container struct {
+	Resources    loaders.MoneyModuleResources
+	Settings     configs.EscrowSettings
+	Ledger       *ledgerservices.Ledger
+	Payments     *paymentservices.PaymentGateway
+	Outbox       ledgerevents.OutboxTable
+	Idempotency  ledgerutils.SqlIdempotencyRecordStore
+	Now          func() time.Time
+	schemaConfig ent.SchemaConfig
+}
+
+func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs.EscrowSettings, payments *paymentservices.PaymentGateway) *Container {
+	schema := settings.Money.DatabaseSchema
+	return &Container{
+		Resources: resources, Settings: settings, Payments: payments,
+		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
+		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.escrow"},
+		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
+		Now:         time.Now,
+		schemaConfig: ent.SchemaConfig{
+			Dispute: schema, DisputeMessage: schema, DisputeStatusEvent: schema, Escrow: schema,
+			EscrowEvent: schema, IdempotentRequest: schema, OutboxEvent: schema,
+		},
+	}
+}
+
+func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {
+	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(executor)), ent.AlternateSchema(container.schemaConfig))
+}
