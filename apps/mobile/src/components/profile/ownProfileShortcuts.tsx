@@ -1,11 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
+import { CheckmarkSuggestionCards } from "./checkmarkSuggestionCards";
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
@@ -31,6 +32,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
   return (
     <>
       <ProfileSwitcher />
+      <View style={styles.suggestions}><CheckmarkSuggestionCards /></View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {shortcuts.map((shortcut) => (
           <Pressable
@@ -51,5 +53,6 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingHorizontal: 12, gap: 8 },
+  suggestions: { paddingHorizontal: 12, gap: 8 },
   shortcut: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.primaryTint, justifyContent: "center" },
 }));
