@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { businessAppLinks, siteConfig } from "@/lib/siteConfig.config";
 
 import { ForBusinessDisclosureMenu } from "./forBusinessMenu";
@@ -69,6 +71,7 @@ export function SiteHeaderWithFloatingNavigation() {
             </li>
           </ul>
         </nav>
+        <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
         <Link href="/#waitlist" className={styles.waitlistButton}>
           Get early access
         </Link>

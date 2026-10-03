@@ -2,8 +2,8 @@
   position: relative;
   overflow: hidden;
   padding-top: clamp(56px, 8vw, 96px);
-  background: var(--blue-900);
-  color: var(--blue-100);
+  background: var(--surface-night);
+  color: var(--ink-on-night-muted);
 }
 
 .topRow {
@@ -19,18 +19,18 @@
 }
 
 .brandLine {
-  color: var(--blue-100);
+  color: var(--ink-on-night-muted);
 }
 
 .emailLink {
   justify-self: start;
-  color: #fff;
+  color: var(--ink-on-night);
   font-weight: 600;
   text-underline-offset: 4px;
 }
 
 .emailLink:hover {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .linkGroups {
@@ -41,7 +41,7 @@
 
 .groupHeading {
   margin-bottom: 14px;
-  color: #fff;
+  color: var(--ink-on-night);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -57,12 +57,12 @@
 }
 
 .footerLink {
-  color: var(--blue-100);
+  color: var(--ink-on-night-muted);
   text-decoration: none;
 }
 
 .footerLink:hover {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -74,14 +74,14 @@
   gap: 8px 24px;
   margin-top: 56px;
   padding-top: 24px;
-  border-top: 1px solid rgb(181 193 252 / 0.2);
+  border-top: 1px solid var(--line-on-night);
   font-size: 0.875rem;
-  color: var(--blue-200);
+  color: var(--ink-on-night-subtle);
 }
 
 .giantWordmark {
   margin: 24px 0 -0.26em;
-  color: var(--blue-600);
+  color: var(--surface-brand-band);
   font-size: min(22vw, 20rem);
   font-weight: 700;
   letter-spacing: -0.06em;
@@ -108,4 +108,15 @@ button.footerLink {
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.themeSwitcher {
+  --color-sunken: var(--surface-night-chip);
+  --color-border: var(--line-on-night);
+  --color-elevated: var(--surface-brand-band);
+  --color-text: var(--ink-on-night);
+  --color-text-muted: var(--ink-on-night-muted);
+  --color-focus: var(--surface-sunshine);
+  --shadow-card: none;
+  flex-basis: 100%;
 }

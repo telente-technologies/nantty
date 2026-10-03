@@ -1,15 +1,7 @@
-.wordmark {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
+.wordmarkLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-}
-
-.brand {
-  color: var(--blue-600);
-}
-
-.light {
-  color: #fff;
 }

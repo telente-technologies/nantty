@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import { CookieSettingsButton } from "./cookieSettingsButton";
@@ -81,6 +83,7 @@ export function SiteFooterWithGiantWordmark() {
       <div className={`pageContainer ${styles.bottomRow}`}>
         <p>© {currentYear} Zudomart. Made in Nigeria. <CookieSettingsButton className={styles.footerLink} /></p>
         <p>Prices in your local currency. Payments held in escrow until delivery is confirmed.</p>
+        <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
       <p className={styles.giantWordmark} aria-hidden="true">
         zudomart

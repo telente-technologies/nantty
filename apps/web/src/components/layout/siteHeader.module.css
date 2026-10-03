@@ -13,16 +13,16 @@
   margin-inline: auto;
   padding: 8px 8px 8px 22px;
   border-radius: var(--radius-pill);
-  background: rgb(255 255 255 / 0.82);
+  background: var(--surface-glass);
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
   backdrop-filter: saturate(1.4) blur(14px);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.08);
+  box-shadow: inset 0 0 0 1px var(--line-hairline);
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
 .scrolled .pill {
-  background: rgb(255 255 255 / 0.94);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06), var(--shadow-float);
+  background: var(--surface-glass-strong);
+  box-shadow: inset 0 0 0 1px var(--line-hairline), var(--shadow-float);
 }
 
 .desktopNavigation {
@@ -61,27 +61,32 @@
   min-height: 44px;
   padding: 0 20px;
   border-radius: var(--radius-pill);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
 }
 
 .waitlistButton:hover {
-  background: var(--blue-600);
+  background: var(--fill-brand-hover);
+}
+
+.themeSwitcher {
+  flex: none;
+  margin-left: auto;
 }
 
 .menuToggleButton {
   display: grid;
   place-items: center;
+  flex: none;
   width: 44px;
   height: 44px;
-  margin-left: auto;
   border: 0;
   border-radius: 50%;
   background: var(--ink-strong);
-  color: #fff;
+  color: var(--surface-card);
   cursor: pointer;
 }
 
@@ -123,7 +128,7 @@
   justify-content: space-between;
   gap: 32px;
   padding: 32px var(--gutter) 40px;
-  background: var(--blue-500);
+  background: var(--surface-brand-band);
   overflow-y: auto;
 }
 
@@ -141,7 +146,7 @@
 .mobileNavigationLink {
   display: block;
   padding: 6px 0;
-  color: #fff;
+  color: var(--ink-on-night);
   font-size: clamp(2.2rem, 10vw, 3rem);
   font-weight: 800;
   letter-spacing: var(--tracking-display);
@@ -150,12 +155,12 @@
 }
 
 .mobileNavigationLink:hover {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .mobileBusinessHeading {
   margin: 28px 0 8px;
-  color: rgb(255 255 255 / 0.7);
+  color: var(--ink-on-night-muted);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -172,14 +177,14 @@
 .mobileBusinessLink {
   display: block;
   padding: 6px 0;
-  color: #fff;
+  color: var(--ink-on-night);
   font-size: 1.25rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .mobileBusinessLink:hover {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .mobileWaitlistButton {
@@ -188,8 +193,8 @@
   justify-content: center;
   min-height: 56px;
   border-radius: var(--radius-pill);
-  background: var(--yellow-500);
-  color: var(--ink-strong);
+  background: var(--surface-sunshine);
+  color: var(--ink-on-sunshine);
   font-weight: 700;
   text-decoration: none;
 }
@@ -203,5 +208,16 @@
   .menuToggleButton,
   .mobileMenu {
     display: none;
+  }
+
+  .themeSwitcher {
+    display: none;
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .themeSwitcher {
+    display: flex;
   }
 }

@@ -41,8 +41,8 @@
   width: 340px;
   padding: 8px;
   border-radius: var(--radius-medium);
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06), var(--shadow-float);
+  background: var(--color-elevated);
+  box-shadow: inset 0 0 0 1px var(--line-hairline), var(--shadow-float);
 }
 
 .panel[hidden] {
@@ -83,7 +83,7 @@
 .panelIcon {
   flex: none;
   margin-top: 2px;
-  color: var(--blue-500);
+  color: var(--icon-brand);
 }
 
 .externalIcon {
