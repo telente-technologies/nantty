@@ -5,7 +5,7 @@
   min-height: min(88vh, 860px);
   margin-top: -72px;
   overflow: hidden;
-  color: #fff;
+  color: var(--ink-on-night);
   isolation: isolate;
 }
 
@@ -13,22 +13,19 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(120% 80% at 50% 110%, #4563f7 0%, rgb(69 99 247 / 0) 60%),
-    linear-gradient(160deg, #10227a 0%, #1b39cc 55%, #2043f5 100%);
+  background: var(--error-scene-backdrop);
 }
 
 .shade {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    linear-gradient(to bottom, rgb(11 23 82 / 0.1) 0%, rgb(11 23 82 / 0) 35%, rgb(11 23 82 / 0.78) 100%);
+  background: var(--error-scene-shade);
 }
 
 @media (max-width: 720px) {
   .shade {
-    background: linear-gradient(to bottom, rgb(11 23 82 / 0.05) 0%, rgb(11 23 82 / 0.35) 40%, rgb(11 23 82 / 0.85) 100%);
+    background: var(--error-scene-shade-compact);
   }
 }
 
@@ -50,7 +47,7 @@
 }
 
 .statusDigit:nth-child(2) {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
   transform: translateY(0.12em) rotate(-6deg);
 }
 
@@ -62,7 +59,7 @@
 .description {
   max-width: 46ch;
   font-size: 1.1rem;
-  color: var(--blue-50);
+  color: var(--ink-on-night-muted);
 }
 
 .actions {
