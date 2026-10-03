@@ -13,7 +13,7 @@ Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.1
 pnpm backend:up                # Postgres+PostGIS, Valkey, LocalStack (SNS/SQS), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
 pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
-pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Paystack keys are empty by default
+pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Bachs sandbox keys are empty by default
 ```
 
 Point the mobile app at `http://<your-ip>:8080` with mocks off to use real auth. One-time codes are written to the
@@ -78,7 +78,7 @@ includes `services/contracts`, every Go Dockerfile uses `services` as the build 
 | --- | --- | --- |
 | goIdentity | auth, users, currency, admin | low write volume, shared session/JWKS concerns |
 | goCommerce | catalog, inventory, orders, analytics | stock reservation and order creation in one transaction |
-| goMoney | payments, wallet, ledger, escrow, subscriptions, creators, rewards | every balance change commits in one Postgres transaction |
+| goMoney | payments, wallet, ledger, escrow, subscriptions, creators | every balance change commits in one Postgres transaction |
 | goLive | live | hot, latency-sensitive state machine (sessions, guests, battles, gifts) |
 | goAds | ads | separate scaling and billing cadence |
 | goTrust | moderation | async, queue-driven |
@@ -276,14 +276,24 @@ attempt count, backoff and dead-lettering), `utils` (durable idempotency, valida
 step-up, same `perm:` claims as `platform/staffauth`).
 
 **Ledger** (`modules/ledger`). Accounts (code + currency, kind, normal side, cached balance, version), journal entries
-(unique `reference`, immutable via ent hooks and immutable fields) and lines (positive amounts, `balance_after`). Posting
-validates balance per currency/unit, takes an advisory lock on the reference, locks accounts in a fixed order, enforces
-non-negative balances for user-owned accounts and updates cached balances in the same transaction. Replays with the same
-lines return the original; different lines are rejected. Reversals post an opposite entry once (`reverses_entry_id` unique).
-Integrity: `VerifyTrialBalanceAndCachedBalances` (trial balance per unit + cached balance drift), run daily and exposed at
-`GET /api/v1/admin/ledger/integrity`. Reconciliation: `POST /api/v1/admin/payments/reconciliations {provider, from, to}`
-pulls the provider's settled charges and classifies breaks (`missingInLedger`, `missingAtProvider`, `amountMismatch`,
-`currencyMismatch`), stored and emitted as `reconciliationBreak.found`.
+(unique `reference`) and lines (positive amounts, `balance_after`). `journal_entries`, `journal_lines`,
+`reconciliation_runs` and `escrow_events` are append-only in the database: a trigger refuses UPDATE, DELETE and TRUNCATE and
+the service roles lose those grants. Posting validates balance per currency/unit, takes an advisory lock on the reference,
+locks accounts in a fixed order, enforces non-negative balances for user-owned accounts and updates cached balances in the
+same transaction. Shared platform accounts are striped into 16 rows (`<code>:stripe:NN`, chosen by a hash of the entry
+reference) so gifts and payments do not queue on one hot row; balance reads sum the stripes. Replays with the same lines
+return the original; different lines are rejected. Reversals post an opposite entry once (`reverses_entry_id` unique).
+Integrity: `VerifyTrialBalanceAndCachedBalances` pages accounts by id (500 per page) and compares cached balances with their
+lines; it runs daily, also runs the provider mirror reconciliation, and is exposed at `GET /api/v1/admin/ledger/integrity`.
+
+**Zudomart holds nobody's money (Bachs Connect).** Each seller and creator has a Bachs connected account. The ledger
+mirrors those provider-held balances: every account owned by `sellerProviderHeld` (`seller:{id}:providerHeld` asset, and the
+`escrow`, `pending`, `available`, `reservedPayout`, `refundsInFlight`, `debt` states) is provider-held, seller-owned money;
+`platform` accounts (`asset:providerBalance:bachs`, `revenue:commission`, `liability:platformFeesUnearned`, coin and fee
+accounts) are Zudomart's own. A daily mirror check compares `seller:{id}:providerHeld` minus in-flight payouts, refunds and
+unsent fee top-ups with Bachs `available + pending` (`GET /v1/balances`, `X-Account-Id`); a mismatch freezes that account's
+payouts (`connected_accounts.payouts_frozen`) until it matches again. `POST /api/v1/admin/payments/reconciliations` runs it
+on demand.
 
 Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:escrow:{escrowId}` → `seller:{id}:pending`
 (locked; a maturity row per credit, `SELLER_CREDIT_HOLD_PERIOD` 24h, matured every 5 min) → `seller:{id}:available` →
@@ -292,32 +302,47 @@ Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:
 `user:{id}:coins`, `creator:{id}:earnedCoins`, `live:battle:{battleId}:holding:{userId}`, `platform:giftRevenue`,
 `platform:coinTransferFees`, `platform:coinsInCirculation`.
 
-**Payments** (`modules/payments`). `PaymentProvider` interface with Paystack and Flutterwave adapters (minor units at the
-boundary; Flutterwave major units converted without floats), `StoreReceiptVerifier` skeletons for `apple_iap` and
-`google_play` (return `IAP_NOT_CONFIGURED` until credentials exist). Payment intents have our own reference; a new attempt
-cancels the previous pending one, and a late success on a superseded attempt is auto-refunded. Paid only after a
-signature-verified webhook (HMAC-SHA512 / `verif-hash`, constant time) or a verify call, always re-queried from the provider,
-with amount and currency checked. Webhooks are claimed in `webhook_events` (unique provider + event key); a failed
-processing attempt is retried by the provider, a processed one is reported as a duplicate. Refunds and payout transfers are
-claimed before the provider call and never retried automatically when the outcome is unknown. Key/environment mismatches
-(`sk_live_` outside production, test keys in production) fail at boot.
+**Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `ConnectedAccountProvider`,
+`MoneyMovementProvider`, `DisputeProvider`, `SubscriptionProvider`, combined as `ConnectProvider`) with one adapter,
+`bachsConnect` (`src/integrations/bachsConnect*.integration.go`); another provider only needs a new adapter. Money is int64
+minor units inside and Bachs decimal strings at the boundary. The HTTP client has a 15s timeout, sends `Idempotency-Key` on
+every mutation (refused locally without one) and retries only GETs and keyed mutations on network errors, 429 and 5xx.
+Marketplace purchases are direct charges: one hosted checkout per seller order with `X-Account-Id` = the seller account and
+`platform_fee` = the commission, the buyer's verified email from the identity directory (`VERIFY_EMAIL_REQUIRED`
+otherwise; clients never send an email) and success/cancel return URLs from `PAYMENT_RETURN_URLS` (web page or app
+universal link). The intent and an outbox row are written in one transaction; the Bachs checkout call happens after commit
+with key `chk:<reference>`, and intents that never opened a checkout are cancelled after 30 minutes. Paid only after a
+webhook verified with HMAC-SHA256 of `{timestamp}.{raw_body}` (`X-Bachs-Signature-V2`, any `v1` during secret rotation,
+300s tolerance, constant time), deduplicated on the `evt_` id and re-fetched from Bachs before posting. Refunds first move
+the platform fee and processing fee back to the seller account (`POST /v1/transfers`, key `fee-topup:<refundId>`), then
+refund (`refund:<refundId>`). Chargebacks (`dispute.*` webhooks plus a daily List Disputes poll) freeze or settle escrow.
+Seller payouts are `POST /v1/payouts` on the seller account (key `payout:<reference>`), resolved only by `payout.paid` /
+`payout.failed`. Seller and creator accounts: `POST /payments/connected-accounts/me`, hosted onboarding link, capability
+gating, manual payout schedule, NGN virtual account. Web-only subscriptions and trials:
+`POST /payments/subscriptions/checkout` (refused for `X-Client-Platform: ios|android`). Key/environment mismatches
+(`sk_live_` outside production, `sk_sandbox_` in production, base URL mismatch, missing signing secrets) fail at boot.
 
 **Escrow** (`modules/escrow`). One escrow per order, split computed at funding (seller rounds down, platform takes the
 remainder, `ESCROW_PLATFORM_COMMISSION_BPS` 500). States `held → released | refunded | disputed | partiallyRefunded`,
 `disputed → held` (buyer closes) and `released → refunded` (post-release refunds), all compare-and-set with a version.
 Auto-release `ESCROW_INSPECTION_PERIOD` (72h) after the delivered timestamp; an open dispute pauses the timer and closing it
 resumes the remaining window. Unverified stores are escrow-only (`DIRECT_PAYMENT_NOT_ALLOWED`); direct orders credit the
-seller's locked balance at payment. `escrow_events` is the audit trail (actor, trigger) for release, refunds and decisions.
+seller's locked balance at payment. The escrow amount is the seller's net (gross − platform fee − processing fee); the
+platform fee waits in `liability:platformFeesUnearned` until release. `escrow_events` is the audit trail (actor, trigger) for release, refunds and decisions.
 
-**Wallet** (`modules/wallet`). Coin packages (web and app-store packs priced separately; app clients must use IAP), web
+**Wallet** (`modules/wallet`). Coin packages per channel (`web`, `ios`, `android`): coins = floor(price × (1 − channel fee) ÷
+net value per coin) (`COIN_CHANNEL_FEE_BPS`, `COIN_NET_VALUES`), so web packs give more coins per naira; staff edit the price
+table at `GET/PUT /api/v1/admin/coins/price-table[/{packageId}]` (`money.monetization.manage`). App clients must use IAP; web
 purchases through payments, IAP receipts with the store fee booked as `expense:appStoreFees:{store}`, store refunds that claw
 back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk_flags` row. Transfers take 25%
 (`COIN_TRANSFER_FEE_BPS`, the recipient rounds down). Earned coins convert to cash (`COIN_CASH_VALUES`,
-`CREATOR_MINIMUM_PAYOUTS`) into `seller:{id}:available`. Payout accounts are AES-256-GCM encrypted (owner id as associated
-data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money
-(quoted provider fee), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
+`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Zudomart owes it); the daily payout run transfers it from
+Zudomart's Bachs balance to the creator's connected account (`CREATOR_TRANSFER_MINIMUMS`) and only then is it
+withdrawable. Payout accounts are AES-256-GCM encrypted (owner id as associated
+data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money capped
+by the Bachs available balance minus withdrawals not yet sent (read before the transaction; NGN 50 fee on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
 are paid by the daily payout run (`WALLET_PAYOUT_RUN_INTERVAL`, or `POST /api/v1/admin/payouts/run`) through the
-`SellerSettlementAdapter` (`paystackTransfer`; `heldSubaccountRelease` is a stub).
+`SellerSettlementAdapter` (`bachsManualPayout`, the only code path that triggers a Bachs payout).
 
 **Creators** (`modules/creators`). Creator tiers (gift share capped at 7000 bps; starter 5000, partner 6000, top 7000),
 program membership, gift transactions and battle settlements, served over `LiveMoneyService`. A gift debits the sender,
@@ -338,11 +363,13 @@ winner, a tie settles as keep-own, viewers are never refunded. Money events are 
 | `GET /api/v1/banks?country=`, `POST /banks/resolve-account` | cached 12h, static NG fallback |
 | `POST /payments/initialize` (IK), `POST /payments/orders/{orderId}/verify`, `POST /webhooks/{provider}`, `POST /webhooks/store-notifications/{store}` (ALB `/webhooks/*` → go-money, never the gateway; the old `/api/v1/payments/webhooks/*` paths still work against go-money directly) | |
 | `GET /orders/{orderId}/escrow`, `POST /orders/{orderId}/disputes` (IK), `GET /disputes`, `GET /disputes/{id}`, `POST /disputes/{id}/messages` (IK), `POST /disputes/{id}/close` | gateway routes `/orders/*/escrow` and `/orders/*/disputes` (`*` = one path segment) |
-| Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`zudomart-admin` audience) with `money.*` permissions |
+| `GET/POST /payments/connected-accounts/me`, `POST /payments/connected-accounts/me/onboarding-link`, `POST /payments/connected-accounts/me/virtual-account`, `POST /payments/subscriptions/checkout` | onboarding link is created only when the user taps continue |
+| Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/payments/disputes/{id}/evidence`, `/admin/coins/price-table*`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`zudomart-admin` audience) with `money.*` permissions |
 
-Not built yet: subscriptions and rewards modules (skeletons), Paystack subaccount splits for direct orders, real App Store /
-Play verification, wallet top-ups, seller reserve percentage (the `escrow.policy.sellerReserveBps` setting is read but not applied), payout-account name
-matching against KYC, a timestamp window on webhooks (replay protection is the event-key claim plus provider re-query).
+Not built yet: the subscriptions module (skeleton; web billing state lives in `payments.billing_subscriptions` and is
+published as `billingSubscription.*` events), real App Store / Play verification, wallet top-ups, seller reserve percentage
+(the `escrow.policy.sellerReserveBps` setting is read but not applied), payout-account name matching against KYC. Referrals
+and purchase loyalty/cashback were removed by the owner (no rewards module); engagement ZudoPoints in go-live are not money.
 
 **Money settings (admin-owned).** go-money reads `gift.shareTiers` and `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from `admin.platform_settings` through the read-only grant (`ADMIN_DATABASE_SCHEMA`, cached `MONEY_PLATFORM_SETTINGS_TTL` 30s, last good value kept if the read fails). `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD` and the creator tier table are the fallback. Gift share = max(staff-granted member tier, admin tier reached by this month's gift coins), capped at 7000 bps.
 
