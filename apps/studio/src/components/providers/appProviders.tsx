@@ -5,6 +5,8 @@ import { useState, type ReactNode } from "react";
 
 import { isRetryableApiFailure } from "@/services/clientApi.service";
 
+import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
+
 import { SessionProvider } from "./sessionProvider";
 import type { User } from "@/types";
 
@@ -28,6 +30,7 @@ export function AppProviders({ viewer, csrfToken, children }: { readonly viewer:
     <QueryClientProvider client={queryClient}>
       <SessionProvider viewer={viewer} csrfToken={csrfToken}>
         {children}
+        <ConsentBannerHost />
       </SessionProvider>
     </QueryClientProvider>
   );
