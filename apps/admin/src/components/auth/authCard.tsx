@@ -1,3 +1,4 @@
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import type { ReactNode } from "react";
 
 import { EnvironmentBadge } from "@/components/shell/environmentBadge";
@@ -13,9 +14,7 @@ export function AuthCard({ environment, title, description, children, footer }: 
     <div className={styles.page}>
       <section className={styles.brandPanel} aria-label="About this console">
         <div className={styles.brandRow}>
-          <span className={styles.wordmark}>
-            zudomart<span className={styles.suffix}>admin</span>
-          </span>
+          <ZudomartWordmark productLabel="Admin" tone="onDark" height={28} />
           <EnvironmentBadge environment={environment} />
         </div>
         <div className={styles.brandBody}>

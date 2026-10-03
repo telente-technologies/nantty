@@ -25,21 +25,6 @@
   gap: 12px;
 }
 
-.wordmark {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #fff;
-}
-
-.suffix {
-  margin-left: 4px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--yellow-500);
-}
-
 .brandBody {
   max-width: 460px;
 }
