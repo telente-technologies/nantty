@@ -55,12 +55,12 @@
 
 .savedNote {
   background: var(--success-soft);
-  color: var(--success);
+  color: var(--color-success-text);
 }
 
 .errorNote {
   background: var(--error-soft);
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 .toolbar {
@@ -330,7 +330,7 @@
 
 .smallButtonDanger {
   border-color: var(--error);
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 .smallButtonDanger:hover {
