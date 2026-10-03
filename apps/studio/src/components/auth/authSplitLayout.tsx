@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import type { ReactNode } from "react";
 
 import styles from "./authSplitLayout.module.css";
@@ -15,7 +16,7 @@ export function AuthSplitLayout({ children }: { readonly children: ReactNode }) 
       <aside className={styles.aside} aria-label="About Zudomart Studio">
         <div className={styles.asideInner}>
           <Link href="/" className={styles.wordmark}>
-            zudomart <span className={styles.wordmarkStudio}>studio</span>
+            <ZudomartWordmark productLabel="Studio" tone="onDark" />
           </Link>
           <div className={styles.asideCopy}>
             <p className={styles.eyebrow}>Zudomart Studio</p>

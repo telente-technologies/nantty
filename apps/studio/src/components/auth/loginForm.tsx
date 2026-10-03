@@ -10,14 +10,9 @@ import { TextField } from "@/components/ui/field";
 import { StudioRequestError, sendRequestToStudioServer } from "@/services/clientApi.service";
 import { signInWithSocialProvider, type SocialSignInProvider } from "@/services/socialSignIn.service";
 import type { User } from "@/types";
+import { readSafeRelativeRedirectPath } from "@/utils/safeRedirectPath.util";
 
 import styles from "./loginForm.module.css";
-
-function readSafeNextPath(raw: string | null): string {
-  if (!raw) return "/lives";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/lives";
-  return raw;
-}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -39,7 +34,7 @@ export function LoginForm() {
     setBusy(true);
     try {
       await sendRequestToStudioServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
-      router.push(readSafeNextPath(searchParams.get("next")));
+      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/lives"));
       router.refresh();
     } catch (error) {
       setFormError(error instanceof StudioRequestError ? error.message : "Couldn't log in. Check your connection and try again.");
@@ -54,7 +49,7 @@ export function LoginForm() {
     setSigningInWith(provider);
     try {
       await signInWithSocialProvider(provider);
-      router.push(readSafeNextPath(searchParams.get("next")));
+      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/lives"));
       router.refresh();
     } catch (error) {
       setNotice(error instanceof StudioRequestError ? error.message : "Sign-in failed");

@@ -52,7 +52,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-small);
   background: var(--error-soft);
-  color: var(--error);
+  color: var(--color-danger-text);
   font-size: var(--text-sm);
   font-weight: 600;
 }
