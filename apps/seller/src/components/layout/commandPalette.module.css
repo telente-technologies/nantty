@@ -9,7 +9,7 @@
 }
 
 .palette::backdrop {
-  background: rgb(11 23 82 / 0.35);
+  background: var(--color-overlay);
 }
 
 .searchRow {
@@ -61,7 +61,7 @@
 
 .result[aria-selected="true"] {
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--color-brand);
 }
 
 .result span:first-of-type {

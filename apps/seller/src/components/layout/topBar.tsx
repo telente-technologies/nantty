@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { CompactWorkspaceSwitcher } from "@/components/layout/compactWorkspaceSwitcher";
 import { StoreSwitcher } from "@/components/layout/storeSwitcher";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
@@ -51,6 +53,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
         <span className={styles.commandLabel}>Search or jump to…</span>
         <kbd className={styles.shortcut}>Ctrl K</kbd>
       </button>
+      <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
       <div className={styles.account}>
         <span className={styles.avatar} aria-hidden="true">
           {displayName.slice(0, 1).toUpperCase()}

@@ -24,7 +24,7 @@
   inset: 0;
   z-index: 150;
   border: 0;
-  background: rgb(11 23 82 / 0.35);
+  background: var(--color-overlay);
 }
 
 @media print {

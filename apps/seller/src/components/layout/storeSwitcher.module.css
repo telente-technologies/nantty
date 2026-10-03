@@ -92,7 +92,7 @@
 }
 
 .menuItem[aria-checked="true"] {
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .menuItemText {

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ZudomartWordmark } from "@zudomart/web-kit";
+
 import { FeaturePlanBadge } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
@@ -10,17 +12,8 @@ import type { NavigationGroup } from "@/config/navigation.config";
 
 import styles from "./sidebarNavigation.module.css";
 
-export function DashboardWordmark() {
-  return (
-    <span className={styles.wordmark}>
-      <span className={styles.wordmarkBadge} aria-hidden="true">
-        Z
-      </span>
-      <span className={styles.wordmarkText}>
-        Zudomart <span className={styles.wordmarkSuffix}>Dashboard</span>
-      </span>
-    </span>
-  );
+export function DashboardWordmark({ height = 22 }: { readonly height?: number }) {
+  return <ZudomartWordmark productLabel="Dashboard" tone="onDark" height={height} />;
 }
 
 export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: { readonly groups: NavigationGroup[]; readonly isOpenOnSmallScreens: boolean; readonly onNavigate: () => void }) {
