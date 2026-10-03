@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+	currencyservices "zudomart/modules/currency/src/services"
+	"zudomart/platform/identityports"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -58,6 +60,7 @@ func StartCurrencyModuleWithSettings(ctx context.Context, settings configs.Curre
 		_ = client.Close()
 		return nil, err
 	}
+	identityports.Default.RegisterCurrencyResolver(currencyservices.CountryCurrencyResolver{})
 	dependencies.Health.AddReadinessCheck("currency-postgres", postgres.ReadinessCheckForDatabase(database))
 	return &Module{container: deployed, publisher: publisher}, nil
 }
@@ -82,16 +85,7 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.CurrencySettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }
