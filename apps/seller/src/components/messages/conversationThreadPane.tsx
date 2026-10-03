@@ -13,6 +13,7 @@ import type { ConversationMessage, ConversationThread } from "@/types/conversati
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./messages.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function ConversationThreadPane({ conversationId, onBack, onConversationChanged }: { readonly conversationId: string | null; readonly onBack: () => void; readonly onConversationChanged: () => void }) {
   const { showToast } = useToast();
@@ -87,7 +88,7 @@ export function ConversationThreadPane({ conversationId, onBack, onConversationC
             </span>
             {thread.conversation.orderId ? (
               <Link href={`/orders/${thread.conversation.orderId}`} className={styles.orderChip} style={{ marginLeft: "auto" }}>
-                Order {thread.conversation.orderNumber} →
+                <IconLabel name="arrowRight24" size={14}>Order {thread.conversation.orderNumber}</IconLabel>
               </Link>
             ) : null}
           </>
