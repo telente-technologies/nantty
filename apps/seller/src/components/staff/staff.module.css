@@ -21,7 +21,7 @@
 .seatFill {
   height: 100%;
   border-radius: inherit;
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
 }
 
 .seatFillFull {
@@ -96,22 +96,22 @@
   width: 100%;
   text-align: left;
   padding: 10px 12px;
-  border: 1px solid var(--line, #d9d9d9);
+  border: 1px solid var(--divider);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface-card);
   cursor: pointer;
 }
 
 .candidateButton:hover,
 .candidateButton:focus-visible {
-  border-color: #2043f5;
+  border-color: var(--color-brand);
 }
 
 .linkButton {
   border: 0;
   background: none;
   padding: 0;
-  color: #2043f5;
+  color: var(--color-brand);
   cursor: pointer;
   font: inherit;
   text-decoration: underline;
