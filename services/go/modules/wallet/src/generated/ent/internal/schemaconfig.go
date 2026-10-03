@@ -7,6 +7,8 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
+	AdBalanceTopUp    string // AdBalanceTopUp table.
+	AdSpendDebit      string // AdSpendDebit table.
 	CoinConversion    string // CoinConversion table.
 	CoinPackage       string // CoinPackage table.
 	CoinPurchase      string // CoinPurchase table.
@@ -14,6 +16,7 @@ type SchemaConfig struct {
 	IdempotentRequest string // IdempotentRequest table.
 	OutboxEvent       string // OutboxEvent table.
 	PayoutAccount     string // PayoutAccount table.
+	SellerReserveFlag string // SellerReserveFlag table.
 	WalletRiskFlag    string // WalletRiskFlag table.
 	Withdrawal        string // Withdrawal table.
 }

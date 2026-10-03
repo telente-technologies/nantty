@@ -6,6 +6,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AdBalanceTopUp is the predicate function for adbalancetopup builders.
+type AdBalanceTopUp func(*sql.Selector)
+
+// AdSpendDebit is the predicate function for adspenddebit builders.
+type AdSpendDebit func(*sql.Selector)
+
 // CoinConversion is the predicate function for coinconversion builders.
 type CoinConversion func(*sql.Selector)
 
@@ -26,6 +32,9 @@ type OutboxEvent func(*sql.Selector)
 
 // PayoutAccount is the predicate function for payoutaccount builders.
 type PayoutAccount func(*sql.Selector)
+
+// SellerReserveFlag is the predicate function for sellerreserveflag builders.
+type SellerReserveFlag func(*sql.Selector)
 
 // WalletRiskFlag is the predicate function for walletriskflag builders.
 type WalletRiskFlag func(*sql.Selector)

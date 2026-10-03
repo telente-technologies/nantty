@@ -11,6 +11,8 @@ import (
 
 	"zudomart/modules/wallet/src/generated/ent/migrate"
 
+	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
+	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/generated/ent/coinconversion"
 	"zudomart/modules/wallet/src/generated/ent/coinpackage"
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
@@ -18,6 +20,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
 
@@ -35,6 +38,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AdBalanceTopUp is the client for interacting with the AdBalanceTopUp builders.
+	AdBalanceTopUp *AdBalanceTopUpClient
+	// AdSpendDebit is the client for interacting with the AdSpendDebit builders.
+	AdSpendDebit *AdSpendDebitClient
 	// CoinConversion is the client for interacting with the CoinConversion builders.
 	CoinConversion *CoinConversionClient
 	// CoinPackage is the client for interacting with the CoinPackage builders.
@@ -49,6 +56,8 @@ type Client struct {
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
 	PayoutAccount *PayoutAccountClient
+	// SellerReserveFlag is the client for interacting with the SellerReserveFlag builders.
+	SellerReserveFlag *SellerReserveFlagClient
 	// WalletRiskFlag is the client for interacting with the WalletRiskFlag builders.
 	WalletRiskFlag *WalletRiskFlagClient
 	// Withdrawal is the client for interacting with the Withdrawal builders.
@@ -64,6 +73,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AdBalanceTopUp = NewAdBalanceTopUpClient(c.config)
+	c.AdSpendDebit = NewAdSpendDebitClient(c.config)
 	c.CoinConversion = NewCoinConversionClient(c.config)
 	c.CoinPackage = NewCoinPackageClient(c.config)
 	c.CoinPurchase = NewCoinPurchaseClient(c.config)
@@ -71,6 +82,7 @@ func (c *Client) init() {
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PayoutAccount = NewPayoutAccountClient(c.config)
+	c.SellerReserveFlag = NewSellerReserveFlagClient(c.config)
 	c.WalletRiskFlag = NewWalletRiskFlagClient(c.config)
 	c.Withdrawal = NewWithdrawalClient(c.config)
 }
@@ -167,6 +179,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:               ctx,
 		config:            cfg,
+		AdBalanceTopUp:    NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:      NewAdSpendDebitClient(cfg),
 		CoinConversion:    NewCoinConversionClient(cfg),
 		CoinPackage:       NewCoinPackageClient(cfg),
 		CoinPurchase:      NewCoinPurchaseClient(cfg),
@@ -174,6 +188,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		PayoutAccount:     NewPayoutAccountClient(cfg),
+		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
 		WalletRiskFlag:    NewWalletRiskFlagClient(cfg),
 		Withdrawal:        NewWithdrawalClient(cfg),
 	}, nil
@@ -195,6 +210,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:               ctx,
 		config:            cfg,
+		AdBalanceTopUp:    NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:      NewAdSpendDebitClient(cfg),
 		CoinConversion:    NewCoinConversionClient(cfg),
 		CoinPackage:       NewCoinPackageClient(cfg),
 		CoinPurchase:      NewCoinPurchaseClient(cfg),
@@ -202,6 +219,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		PayoutAccount:     NewPayoutAccountClient(cfg),
+		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
 		WalletRiskFlag:    NewWalletRiskFlagClient(cfg),
 		Withdrawal:        NewWithdrawalClient(cfg),
 	}, nil
@@ -210,7 +228,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CoinConversion.
+//		AdBalanceTopUp.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -233,9 +251,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.CoinConversion, c.CoinPackage, c.CoinPurchase, c.CoinTransfer,
-		c.IdempotentRequest, c.OutboxEvent, c.PayoutAccount, c.WalletRiskFlag,
-		c.Withdrawal,
+		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
+		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.OutboxEvent,
+		c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Use(hooks...)
 	}
@@ -245,9 +263,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.CoinConversion, c.CoinPackage, c.CoinPurchase, c.CoinTransfer,
-		c.IdempotentRequest, c.OutboxEvent, c.PayoutAccount, c.WalletRiskFlag,
-		c.Withdrawal,
+		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
+		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.OutboxEvent,
+		c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -256,6 +274,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AdBalanceTopUpMutation:
+		return c.AdBalanceTopUp.mutate(ctx, m)
+	case *AdSpendDebitMutation:
+		return c.AdSpendDebit.mutate(ctx, m)
 	case *CoinConversionMutation:
 		return c.CoinConversion.mutate(ctx, m)
 	case *CoinPackageMutation:
@@ -270,12 +292,280 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OutboxEvent.mutate(ctx, m)
 	case *PayoutAccountMutation:
 		return c.PayoutAccount.mutate(ctx, m)
+	case *SellerReserveFlagMutation:
+		return c.SellerReserveFlag.mutate(ctx, m)
 	case *WalletRiskFlagMutation:
 		return c.WalletRiskFlag.mutate(ctx, m)
 	case *WithdrawalMutation:
 		return c.Withdrawal.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AdBalanceTopUpClient is a client for the AdBalanceTopUp schema.
+type AdBalanceTopUpClient struct {
+	config
+}
+
+// NewAdBalanceTopUpClient returns a client for the AdBalanceTopUp from the given config.
+func NewAdBalanceTopUpClient(c config) *AdBalanceTopUpClient {
+	return &AdBalanceTopUpClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adbalancetopup.Hooks(f(g(h())))`.
+func (c *AdBalanceTopUpClient) Use(hooks ...Hook) {
+	c.hooks.AdBalanceTopUp = append(c.hooks.AdBalanceTopUp, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adbalancetopup.Intercept(f(g(h())))`.
+func (c *AdBalanceTopUpClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdBalanceTopUp = append(c.inters.AdBalanceTopUp, interceptors...)
+}
+
+// Create returns a builder for creating a AdBalanceTopUp entity.
+func (c *AdBalanceTopUpClient) Create() *AdBalanceTopUpCreate {
+	mutation := newAdBalanceTopUpMutation(c.config, OpCreate)
+	return &AdBalanceTopUpCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdBalanceTopUp entities.
+func (c *AdBalanceTopUpClient) CreateBulk(builders ...*AdBalanceTopUpCreate) *AdBalanceTopUpCreateBulk {
+	return &AdBalanceTopUpCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdBalanceTopUpClient) MapCreateBulk(slice any, setFunc func(*AdBalanceTopUpCreate, int)) *AdBalanceTopUpCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdBalanceTopUpCreateBulk{err: fmt.Errorf("calling to AdBalanceTopUpClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdBalanceTopUpCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdBalanceTopUpCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdBalanceTopUp.
+func (c *AdBalanceTopUpClient) Update() *AdBalanceTopUpUpdate {
+	mutation := newAdBalanceTopUpMutation(c.config, OpUpdate)
+	return &AdBalanceTopUpUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdBalanceTopUpClient) UpdateOne(_m *AdBalanceTopUp) *AdBalanceTopUpUpdateOne {
+	mutation := newAdBalanceTopUpMutation(c.config, OpUpdateOne, withAdBalanceTopUp(_m))
+	return &AdBalanceTopUpUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdBalanceTopUpClient) UpdateOneID(id uuid.UUID) *AdBalanceTopUpUpdateOne {
+	mutation := newAdBalanceTopUpMutation(c.config, OpUpdateOne, withAdBalanceTopUpID(id))
+	return &AdBalanceTopUpUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdBalanceTopUp.
+func (c *AdBalanceTopUpClient) Delete() *AdBalanceTopUpDelete {
+	mutation := newAdBalanceTopUpMutation(c.config, OpDelete)
+	return &AdBalanceTopUpDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdBalanceTopUpClient) DeleteOne(_m *AdBalanceTopUp) *AdBalanceTopUpDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdBalanceTopUpClient) DeleteOneID(id uuid.UUID) *AdBalanceTopUpDeleteOne {
+	builder := c.Delete().Where(adbalancetopup.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdBalanceTopUpDeleteOne{builder}
+}
+
+// Query returns a query builder for AdBalanceTopUp.
+func (c *AdBalanceTopUpClient) Query() *AdBalanceTopUpQuery {
+	return &AdBalanceTopUpQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdBalanceTopUp},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdBalanceTopUp entity by its id.
+func (c *AdBalanceTopUpClient) Get(ctx context.Context, id uuid.UUID) (*AdBalanceTopUp, error) {
+	return c.Query().Where(adbalancetopup.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdBalanceTopUpClient) GetX(ctx context.Context, id uuid.UUID) *AdBalanceTopUp {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdBalanceTopUpClient) Hooks() []Hook {
+	return c.hooks.AdBalanceTopUp
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdBalanceTopUpClient) Interceptors() []Interceptor {
+	return c.inters.AdBalanceTopUp
+}
+
+func (c *AdBalanceTopUpClient) mutate(ctx context.Context, m *AdBalanceTopUpMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdBalanceTopUpCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdBalanceTopUpUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdBalanceTopUpUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdBalanceTopUpDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdBalanceTopUp mutation op: %q", m.Op())
+	}
+}
+
+// AdSpendDebitClient is a client for the AdSpendDebit schema.
+type AdSpendDebitClient struct {
+	config
+}
+
+// NewAdSpendDebitClient returns a client for the AdSpendDebit from the given config.
+func NewAdSpendDebitClient(c config) *AdSpendDebitClient {
+	return &AdSpendDebitClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adspenddebit.Hooks(f(g(h())))`.
+func (c *AdSpendDebitClient) Use(hooks ...Hook) {
+	c.hooks.AdSpendDebit = append(c.hooks.AdSpendDebit, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adspenddebit.Intercept(f(g(h())))`.
+func (c *AdSpendDebitClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdSpendDebit = append(c.inters.AdSpendDebit, interceptors...)
+}
+
+// Create returns a builder for creating a AdSpendDebit entity.
+func (c *AdSpendDebitClient) Create() *AdSpendDebitCreate {
+	mutation := newAdSpendDebitMutation(c.config, OpCreate)
+	return &AdSpendDebitCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdSpendDebit entities.
+func (c *AdSpendDebitClient) CreateBulk(builders ...*AdSpendDebitCreate) *AdSpendDebitCreateBulk {
+	return &AdSpendDebitCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdSpendDebitClient) MapCreateBulk(slice any, setFunc func(*AdSpendDebitCreate, int)) *AdSpendDebitCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdSpendDebitCreateBulk{err: fmt.Errorf("calling to AdSpendDebitClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdSpendDebitCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdSpendDebitCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdSpendDebit.
+func (c *AdSpendDebitClient) Update() *AdSpendDebitUpdate {
+	mutation := newAdSpendDebitMutation(c.config, OpUpdate)
+	return &AdSpendDebitUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdSpendDebitClient) UpdateOne(_m *AdSpendDebit) *AdSpendDebitUpdateOne {
+	mutation := newAdSpendDebitMutation(c.config, OpUpdateOne, withAdSpendDebit(_m))
+	return &AdSpendDebitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdSpendDebitClient) UpdateOneID(id uuid.UUID) *AdSpendDebitUpdateOne {
+	mutation := newAdSpendDebitMutation(c.config, OpUpdateOne, withAdSpendDebitID(id))
+	return &AdSpendDebitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdSpendDebit.
+func (c *AdSpendDebitClient) Delete() *AdSpendDebitDelete {
+	mutation := newAdSpendDebitMutation(c.config, OpDelete)
+	return &AdSpendDebitDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdSpendDebitClient) DeleteOne(_m *AdSpendDebit) *AdSpendDebitDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdSpendDebitClient) DeleteOneID(id uuid.UUID) *AdSpendDebitDeleteOne {
+	builder := c.Delete().Where(adspenddebit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdSpendDebitDeleteOne{builder}
+}
+
+// Query returns a query builder for AdSpendDebit.
+func (c *AdSpendDebitClient) Query() *AdSpendDebitQuery {
+	return &AdSpendDebitQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdSpendDebit},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdSpendDebit entity by its id.
+func (c *AdSpendDebitClient) Get(ctx context.Context, id uuid.UUID) (*AdSpendDebit, error) {
+	return c.Query().Where(adspenddebit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdSpendDebitClient) GetX(ctx context.Context, id uuid.UUID) *AdSpendDebit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdSpendDebitClient) Hooks() []Hook {
+	return c.hooks.AdSpendDebit
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdSpendDebitClient) Interceptors() []Interceptor {
+	return c.inters.AdSpendDebit
+}
+
+func (c *AdSpendDebitClient) mutate(ctx context.Context, m *AdSpendDebitMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdSpendDebitCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdSpendDebitUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdSpendDebitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdSpendDebitDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdSpendDebit mutation op: %q", m.Op())
 	}
 }
 
@@ -1210,6 +1500,139 @@ func (c *PayoutAccountClient) mutate(ctx context.Context, m *PayoutAccountMutati
 	}
 }
 
+// SellerReserveFlagClient is a client for the SellerReserveFlag schema.
+type SellerReserveFlagClient struct {
+	config
+}
+
+// NewSellerReserveFlagClient returns a client for the SellerReserveFlag from the given config.
+func NewSellerReserveFlagClient(c config) *SellerReserveFlagClient {
+	return &SellerReserveFlagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellerreserveflag.Hooks(f(g(h())))`.
+func (c *SellerReserveFlagClient) Use(hooks ...Hook) {
+	c.hooks.SellerReserveFlag = append(c.hooks.SellerReserveFlag, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellerreserveflag.Intercept(f(g(h())))`.
+func (c *SellerReserveFlagClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerReserveFlag = append(c.inters.SellerReserveFlag, interceptors...)
+}
+
+// Create returns a builder for creating a SellerReserveFlag entity.
+func (c *SellerReserveFlagClient) Create() *SellerReserveFlagCreate {
+	mutation := newSellerReserveFlagMutation(c.config, OpCreate)
+	return &SellerReserveFlagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerReserveFlag entities.
+func (c *SellerReserveFlagClient) CreateBulk(builders ...*SellerReserveFlagCreate) *SellerReserveFlagCreateBulk {
+	return &SellerReserveFlagCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerReserveFlagClient) MapCreateBulk(slice any, setFunc func(*SellerReserveFlagCreate, int)) *SellerReserveFlagCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerReserveFlagCreateBulk{err: fmt.Errorf("calling to SellerReserveFlagClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerReserveFlagCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerReserveFlagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerReserveFlag.
+func (c *SellerReserveFlagClient) Update() *SellerReserveFlagUpdate {
+	mutation := newSellerReserveFlagMutation(c.config, OpUpdate)
+	return &SellerReserveFlagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerReserveFlagClient) UpdateOne(_m *SellerReserveFlag) *SellerReserveFlagUpdateOne {
+	mutation := newSellerReserveFlagMutation(c.config, OpUpdateOne, withSellerReserveFlag(_m))
+	return &SellerReserveFlagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerReserveFlagClient) UpdateOneID(id uuid.UUID) *SellerReserveFlagUpdateOne {
+	mutation := newSellerReserveFlagMutation(c.config, OpUpdateOne, withSellerReserveFlagID(id))
+	return &SellerReserveFlagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerReserveFlag.
+func (c *SellerReserveFlagClient) Delete() *SellerReserveFlagDelete {
+	mutation := newSellerReserveFlagMutation(c.config, OpDelete)
+	return &SellerReserveFlagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerReserveFlagClient) DeleteOne(_m *SellerReserveFlag) *SellerReserveFlagDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerReserveFlagClient) DeleteOneID(id uuid.UUID) *SellerReserveFlagDeleteOne {
+	builder := c.Delete().Where(sellerreserveflag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerReserveFlagDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerReserveFlag.
+func (c *SellerReserveFlagClient) Query() *SellerReserveFlagQuery {
+	return &SellerReserveFlagQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerReserveFlag},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerReserveFlag entity by its id.
+func (c *SellerReserveFlagClient) Get(ctx context.Context, id uuid.UUID) (*SellerReserveFlag, error) {
+	return c.Query().Where(sellerreserveflag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerReserveFlagClient) GetX(ctx context.Context, id uuid.UUID) *SellerReserveFlag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SellerReserveFlagClient) Hooks() []Hook {
+	return c.hooks.SellerReserveFlag
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerReserveFlagClient) Interceptors() []Interceptor {
+	return c.inters.SellerReserveFlag
+}
+
+func (c *SellerReserveFlagClient) mutate(ctx context.Context, m *SellerReserveFlagMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerReserveFlagCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerReserveFlagUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerReserveFlagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerReserveFlagDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerReserveFlag mutation op: %q", m.Op())
+	}
+}
+
 // WalletRiskFlagClient is a client for the WalletRiskFlag schema.
 type WalletRiskFlagClient struct {
 	config
@@ -1479,12 +1902,14 @@ func (c *WithdrawalClient) mutate(ctx context.Context, m *WithdrawalMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CoinConversion, CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest,
-		OutboxEvent, PayoutAccount, WalletRiskFlag, Withdrawal []ent.Hook
+		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
+		CoinTransfer, IdempotentRequest, OutboxEvent, PayoutAccount, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Hook
 	}
 	inters struct {
-		CoinConversion, CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest,
-		OutboxEvent, PayoutAccount, WalletRiskFlag, Withdrawal []ent.Interceptor
+		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
+		CoinTransfer, IdempotentRequest, OutboxEvent, PayoutAccount, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Interceptor
 	}
 )
 

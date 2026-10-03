@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
+	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/generated/ent/coinconversion"
 	"zudomart/modules/wallet/src/generated/ent/coinpackage"
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
@@ -15,6 +17,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
 
@@ -81,6 +84,8 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			adbalancetopup.Table:    adbalancetopup.ValidColumn,
+			adspenddebit.Table:      adspenddebit.ValidColumn,
 			coinconversion.Table:    coinconversion.ValidColumn,
 			coinpackage.Table:       coinpackage.ValidColumn,
 			coinpurchase.Table:      coinpurchase.ValidColumn,
@@ -88,6 +93,7 @@ func checkColumn(t, c string) error {
 			idempotentrequest.Table: idempotentrequest.ValidColumn,
 			outboxevent.Table:       outboxevent.ValidColumn,
 			payoutaccount.Table:     payoutaccount.ValidColumn,
+			sellerreserveflag.Table: sellerreserveflag.ValidColumn,
 			walletriskflag.Table:    walletriskflag.ValidColumn,
 			withdrawal.Table:        withdrawal.ValidColumn,
 		})

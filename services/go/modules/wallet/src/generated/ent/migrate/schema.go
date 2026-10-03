@@ -9,6 +9,75 @@ import (
 )
 
 var (
+	// AdBalanceTopUpsColumns holds the columns for the "ad_balance_top_ups" table.
+	AdBalanceTopUpsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "ad_account_id", Type: field.TypeString, Size: 80},
+		{Name: "funded_by_user_id", Type: field.TypeString, Size: 80},
+		{Name: "reference", Type: field.TypeString, Size: 80},
+		{Name: "payment_intent_id", Type: field.TypeUUID},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed"}, Default: "pending"},
+		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "credited_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdBalanceTopUpsTable holds the schema information for the "ad_balance_top_ups" table.
+	AdBalanceTopUpsTable = &schema.Table{
+		Name:       "ad_balance_top_ups",
+		Columns:    AdBalanceTopUpsColumns,
+		PrimaryKey: []*schema.Column{AdBalanceTopUpsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adbalancetopup_reference",
+				Unique:  true,
+				Columns: []*schema.Column{AdBalanceTopUpsColumns[4]},
+			},
+			{
+				Name:    "adbalancetopup_ad_account_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdBalanceTopUpsColumns[2], AdBalanceTopUpsColumns[8], AdBalanceTopUpsColumns[1]},
+			},
+			{
+				Name:    "adbalancetopup_funded_by_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdBalanceTopUpsColumns[3], AdBalanceTopUpsColumns[1]},
+			},
+		},
+	}
+	// AdSpendDebitsColumns holds the columns for the "ad_spend_debits" table.
+	AdSpendDebitsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "batch_id", Type: field.TypeString, Size: 80},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 160},
+		{Name: "ad_account_id", Type: field.TypeString, Size: 80},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "requested_minor", Type: field.TypeInt64},
+		{Name: "debited_minor", Type: field.TypeInt64},
+		{Name: "shortfall_minor", Type: field.TypeInt64},
+		{Name: "impression_count", Type: field.TypeInt64, Default: 0},
+	}
+	// AdSpendDebitsTable holds the schema information for the "ad_spend_debits" table.
+	AdSpendDebitsTable = &schema.Table{
+		Name:       "ad_spend_debits",
+		Columns:    AdSpendDebitsColumns,
+		PrimaryKey: []*schema.Column{AdSpendDebitsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adspenddebit_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdSpendDebitsColumns[3]},
+			},
+			{
+				Name:    "adspenddebit_ad_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdSpendDebitsColumns[4], AdSpendDebitsColumns[1]},
+			},
+		},
+	}
 	// CoinConversionsColumns holds the columns for the "coin_conversions" table.
 	CoinConversionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -221,6 +290,34 @@ var (
 			},
 		},
 	}
+	// SellerReserveFlagsColumns holds the columns for the "seller_reserve_flags" table.
+	SellerReserveFlagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
+		{Name: "reserve_bps", Type: field.TypeInt64, Default: 0},
+		{Name: "hold_days", Type: field.TypeInt, Default: 90},
+		{Name: "reason", Type: field.TypeString, Size: 300},
+		{Name: "flagged_by_staff_id", Type: field.TypeString, Size: 80},
+		{Name: "released_at", Type: field.TypeTime, Nullable: true},
+		{Name: "released_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+	}
+	// SellerReserveFlagsTable holds the schema information for the "seller_reserve_flags" table.
+	SellerReserveFlagsTable = &schema.Table{
+		Name:       "seller_reserve_flags",
+		Columns:    SellerReserveFlagsColumns,
+		PrimaryKey: []*schema.Column{SellerReserveFlagsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "seller_reserve_flags_active",
+				Unique:  true,
+				Columns: []*schema.Column{SellerReserveFlagsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "released_at IS NULL",
+				},
+			},
+		},
+	}
 	// WalletRiskFlagsColumns holds the columns for the "wallet_risk_flags" table.
 	WalletRiskFlagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -308,6 +405,8 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AdBalanceTopUpsTable,
+		AdSpendDebitsTable,
 		CoinConversionsTable,
 		CoinPackagesTable,
 		CoinPurchasesTable,
@@ -315,12 +414,18 @@ var (
 		IdempotentRequestsTable,
 		OutboxEventsTable,
 		PayoutAccountsTable,
+		SellerReserveFlagsTable,
 		WalletRiskFlagsTable,
 		WithdrawalsTable,
 	}
 )
 
 func init() {
+	AdBalanceTopUpsTable.Annotation = &entsql.Annotation{}
+	AdBalanceTopUpsTable.Annotation.Checks = map[string]string{
+		"ad_balance_top_ups_amount_positive":      "amount_minor > 0",
+		"ad_balance_top_ups_refund_within_amount": "refunded_minor >= 0 AND refunded_minor <= amount_minor",
+	}
 	CoinConversionsTable.Annotation = &entsql.Annotation{}
 	CoinConversionsTable.Annotation.Checks = map[string]string{
 		"coin_conversions_positive": "coins > 0 AND cash_minor > 0 AND coin_cash_value_minor > 0",

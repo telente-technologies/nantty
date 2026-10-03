@@ -5,6 +5,8 @@ package ent
 import (
 	"time"
 	"zudomart/modules/wallet/src/databases/schema"
+	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
+	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/generated/ent/coinconversion"
 	"zudomart/modules/wallet/src/generated/ent/coinpackage"
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
@@ -12,6 +14,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
 
@@ -22,6 +25,190 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	adbalancetopupMixin := schema.AdBalanceTopUp{}.Mixin()
+	adbalancetopupMixinFields0 := adbalancetopupMixin[0].Fields()
+	_ = adbalancetopupMixinFields0
+	adbalancetopupFields := schema.AdBalanceTopUp{}.Fields()
+	_ = adbalancetopupFields
+	// adbalancetopupDescCreatedAt is the schema descriptor for created_at field.
+	adbalancetopupDescCreatedAt := adbalancetopupMixinFields0[1].Descriptor()
+	// adbalancetopup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adbalancetopup.DefaultCreatedAt = adbalancetopupDescCreatedAt.Default.(func() time.Time)
+	// adbalancetopupDescAdAccountID is the schema descriptor for ad_account_id field.
+	adbalancetopupDescAdAccountID := adbalancetopupFields[0].Descriptor()
+	// adbalancetopup.AdAccountIDValidator is a validator for the "ad_account_id" field. It is called by the builders before save.
+	adbalancetopup.AdAccountIDValidator = func() func(string) error {
+		validators := adbalancetopupDescAdAccountID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(ad_account_id string) error {
+			for _, fn := range fns {
+				if err := fn(ad_account_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalancetopupDescFundedByUserID is the schema descriptor for funded_by_user_id field.
+	adbalancetopupDescFundedByUserID := adbalancetopupFields[1].Descriptor()
+	// adbalancetopup.FundedByUserIDValidator is a validator for the "funded_by_user_id" field. It is called by the builders before save.
+	adbalancetopup.FundedByUserIDValidator = func() func(string) error {
+		validators := adbalancetopupDescFundedByUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(funded_by_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(funded_by_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalancetopupDescReference is the schema descriptor for reference field.
+	adbalancetopupDescReference := adbalancetopupFields[2].Descriptor()
+	// adbalancetopup.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	adbalancetopup.ReferenceValidator = func() func(string) error {
+		validators := adbalancetopupDescReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reference string) error {
+			for _, fn := range fns {
+				if err := fn(reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalancetopupDescCurrency is the schema descriptor for currency field.
+	adbalancetopupDescCurrency := adbalancetopupFields[5].Descriptor()
+	// adbalancetopup.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adbalancetopup.CurrencyValidator = func() func(string) error {
+		validators := adbalancetopupDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalancetopupDescRefundedMinor is the schema descriptor for refunded_minor field.
+	adbalancetopupDescRefundedMinor := adbalancetopupFields[7].Descriptor()
+	// adbalancetopup.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
+	adbalancetopup.DefaultRefundedMinor = adbalancetopupDescRefundedMinor.Default.(int64)
+	// adbalancetopupDescUpdatedAt is the schema descriptor for updated_at field.
+	adbalancetopupDescUpdatedAt := adbalancetopupFields[9].Descriptor()
+	// adbalancetopup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adbalancetopup.DefaultUpdatedAt = adbalancetopupDescUpdatedAt.Default.(func() time.Time)
+	// adbalancetopup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adbalancetopup.UpdateDefaultUpdatedAt = adbalancetopupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adbalancetopupDescID is the schema descriptor for id field.
+	adbalancetopupDescID := adbalancetopupMixinFields0[0].Descriptor()
+	// adbalancetopup.DefaultID holds the default value on creation for the id field.
+	adbalancetopup.DefaultID = adbalancetopupDescID.Default.(func() uuid.UUID)
+	adspenddebitMixin := schema.AdSpendDebit{}.Mixin()
+	adspenddebitMixinFields0 := adspenddebitMixin[0].Fields()
+	_ = adspenddebitMixinFields0
+	adspenddebitFields := schema.AdSpendDebit{}.Fields()
+	_ = adspenddebitFields
+	// adspenddebitDescCreatedAt is the schema descriptor for created_at field.
+	adspenddebitDescCreatedAt := adspenddebitMixinFields0[1].Descriptor()
+	// adspenddebit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adspenddebit.DefaultCreatedAt = adspenddebitDescCreatedAt.Default.(func() time.Time)
+	// adspenddebitDescBatchID is the schema descriptor for batch_id field.
+	adspenddebitDescBatchID := adspenddebitFields[0].Descriptor()
+	// adspenddebit.BatchIDValidator is a validator for the "batch_id" field. It is called by the builders before save.
+	adspenddebit.BatchIDValidator = func() func(string) error {
+		validators := adspenddebitDescBatchID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(batch_id string) error {
+			for _, fn := range fns {
+				if err := fn(batch_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adspenddebitDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	adspenddebitDescIdempotencyKey := adspenddebitFields[1].Descriptor()
+	// adspenddebit.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	adspenddebit.IdempotencyKeyValidator = func() func(string) error {
+		validators := adspenddebitDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adspenddebitDescAdAccountID is the schema descriptor for ad_account_id field.
+	adspenddebitDescAdAccountID := adspenddebitFields[2].Descriptor()
+	// adspenddebit.AdAccountIDValidator is a validator for the "ad_account_id" field. It is called by the builders before save.
+	adspenddebit.AdAccountIDValidator = func() func(string) error {
+		validators := adspenddebitDescAdAccountID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(ad_account_id string) error {
+			for _, fn := range fns {
+				if err := fn(ad_account_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adspenddebitDescCurrency is the schema descriptor for currency field.
+	adspenddebitDescCurrency := adspenddebitFields[3].Descriptor()
+	// adspenddebit.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adspenddebit.CurrencyValidator = func() func(string) error {
+		validators := adspenddebitDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adspenddebitDescImpressionCount is the schema descriptor for impression_count field.
+	adspenddebitDescImpressionCount := adspenddebitFields[7].Descriptor()
+	// adspenddebit.DefaultImpressionCount holds the default value on creation for the impression_count field.
+	adspenddebit.DefaultImpressionCount = adspenddebitDescImpressionCount.Default.(int64)
+	// adspenddebitDescID is the schema descriptor for id field.
+	adspenddebitDescID := adspenddebitMixinFields0[0].Descriptor()
+	// adspenddebit.DefaultID holds the default value on creation for the id field.
+	adspenddebit.DefaultID = adspenddebitDescID.Default.(func() uuid.UUID)
 	coinconversionMixin := schema.CoinConversion{}.Mixin()
 	coinconversionMixinFields0 := coinconversionMixin[0].Fields()
 	_ = coinconversionMixinFields0
@@ -548,6 +735,87 @@ func init() {
 	payoutaccountDescID := payoutaccountMixinFields0[0].Descriptor()
 	// payoutaccount.DefaultID holds the default value on creation for the id field.
 	payoutaccount.DefaultID = payoutaccountDescID.Default.(func() uuid.UUID)
+	sellerreserveflagMixin := schema.SellerReserveFlag{}.Mixin()
+	sellerreserveflagMixinFields0 := sellerreserveflagMixin[0].Fields()
+	_ = sellerreserveflagMixinFields0
+	sellerreserveflagFields := schema.SellerReserveFlag{}.Fields()
+	_ = sellerreserveflagFields
+	// sellerreserveflagDescCreatedAt is the schema descriptor for created_at field.
+	sellerreserveflagDescCreatedAt := sellerreserveflagMixinFields0[1].Descriptor()
+	// sellerreserveflag.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerreserveflag.DefaultCreatedAt = sellerreserveflagDescCreatedAt.Default.(func() time.Time)
+	// sellerreserveflagDescSellerUserID is the schema descriptor for seller_user_id field.
+	sellerreserveflagDescSellerUserID := sellerreserveflagFields[0].Descriptor()
+	// sellerreserveflag.SellerUserIDValidator is a validator for the "seller_user_id" field. It is called by the builders before save.
+	sellerreserveflag.SellerUserIDValidator = func() func(string) error {
+		validators := sellerreserveflagDescSellerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(seller_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(seller_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerreserveflagDescReserveBps is the schema descriptor for reserve_bps field.
+	sellerreserveflagDescReserveBps := sellerreserveflagFields[1].Descriptor()
+	// sellerreserveflag.DefaultReserveBps holds the default value on creation for the reserve_bps field.
+	sellerreserveflag.DefaultReserveBps = sellerreserveflagDescReserveBps.Default.(int64)
+	// sellerreserveflagDescHoldDays is the schema descriptor for hold_days field.
+	sellerreserveflagDescHoldDays := sellerreserveflagFields[2].Descriptor()
+	// sellerreserveflag.DefaultHoldDays holds the default value on creation for the hold_days field.
+	sellerreserveflag.DefaultHoldDays = sellerreserveflagDescHoldDays.Default.(int)
+	// sellerreserveflagDescReason is the schema descriptor for reason field.
+	sellerreserveflagDescReason := sellerreserveflagFields[3].Descriptor()
+	// sellerreserveflag.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	sellerreserveflag.ReasonValidator = func() func(string) error {
+		validators := sellerreserveflagDescReason.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reason string) error {
+			for _, fn := range fns {
+				if err := fn(reason); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerreserveflagDescFlaggedByStaffID is the schema descriptor for flagged_by_staff_id field.
+	sellerreserveflagDescFlaggedByStaffID := sellerreserveflagFields[4].Descriptor()
+	// sellerreserveflag.FlaggedByStaffIDValidator is a validator for the "flagged_by_staff_id" field. It is called by the builders before save.
+	sellerreserveflag.FlaggedByStaffIDValidator = func() func(string) error {
+		validators := sellerreserveflagDescFlaggedByStaffID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(flagged_by_staff_id string) error {
+			for _, fn := range fns {
+				if err := fn(flagged_by_staff_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerreserveflagDescReleasedByStaffID is the schema descriptor for released_by_staff_id field.
+	sellerreserveflagDescReleasedByStaffID := sellerreserveflagFields[6].Descriptor()
+	// sellerreserveflag.DefaultReleasedByStaffID holds the default value on creation for the released_by_staff_id field.
+	sellerreserveflag.DefaultReleasedByStaffID = sellerreserveflagDescReleasedByStaffID.Default.(string)
+	// sellerreserveflag.ReleasedByStaffIDValidator is a validator for the "released_by_staff_id" field. It is called by the builders before save.
+	sellerreserveflag.ReleasedByStaffIDValidator = sellerreserveflagDescReleasedByStaffID.Validators[0].(func(string) error)
+	// sellerreserveflagDescID is the schema descriptor for id field.
+	sellerreserveflagDescID := sellerreserveflagMixinFields0[0].Descriptor()
+	// sellerreserveflag.DefaultID holds the default value on creation for the id field.
+	sellerreserveflag.DefaultID = sellerreserveflagDescID.Default.(func() uuid.UUID)
 	walletriskflagMixin := schema.WalletRiskFlag{}.Mixin()
 	walletriskflagMixinFields0 := walletriskflagMixin[0].Fields()
 	_ = walletriskflagMixinFields0

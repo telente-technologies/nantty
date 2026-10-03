@@ -8,6 +8,30 @@ import (
 	"zudomart/modules/wallet/src/generated/ent"
 )
 
+// The AdBalanceTopUpFunc type is an adapter to allow the use of ordinary
+// function as AdBalanceTopUp mutator.
+type AdBalanceTopUpFunc func(context.Context, *ent.AdBalanceTopUpMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdBalanceTopUpFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdBalanceTopUpMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdBalanceTopUpMutation", m)
+}
+
+// The AdSpendDebitFunc type is an adapter to allow the use of ordinary
+// function as AdSpendDebit mutator.
+type AdSpendDebitFunc func(context.Context, *ent.AdSpendDebitMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdSpendDebitFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdSpendDebitMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdSpendDebitMutation", m)
+}
+
 // The CoinConversionFunc type is an adapter to allow the use of ordinary
 // function as CoinConversion mutator.
 type CoinConversionFunc func(context.Context, *ent.CoinConversionMutation) (ent.Value, error)
@@ -90,6 +114,18 @@ func (f PayoutAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutAccountMutation", m)
+}
+
+// The SellerReserveFlagFunc type is an adapter to allow the use of ordinary
+// function as SellerReserveFlag mutator.
+type SellerReserveFlagFunc func(context.Context, *ent.SellerReserveFlagMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerReserveFlagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerReserveFlagMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerReserveFlagMutation", m)
 }
 
 // The WalletRiskFlagFunc type is an adapter to allow the use of ordinary
