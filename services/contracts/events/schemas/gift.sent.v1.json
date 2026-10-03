@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/gift.sent.v1.json",
+  "title": "GiftSent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "giftTransactionId",
+    "giftId",
+    "animationAssetKey",
+    "displayLevel",
+    "quantity",
+    "totalCoins",
+    "sender",
+    "receiverUserId",
+    "comboId",
+    "comboCount"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "giftTransactionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "giftId": {
+      "type": "string"
+    },
+    "animationAssetKey": {
+      "type": "string"
+    },
+    "displayLevel": {
+      "enum": [
+        "micro",
+        "medium",
+        "large",
+        "global"
+      ]
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "totalCoins": {
+      "type": "integer"
+    },
+    "sender": {
+      "type": "object"
+    },
+    "receiverUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "comboId": {
+      "type": "string"
+    },
+    "comboCount": {
+      "type": "integer"
+    },
+    "battleId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

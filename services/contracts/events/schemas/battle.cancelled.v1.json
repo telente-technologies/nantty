@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.cancelled.v1.json",
+  "title": "BattleCancelled",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "battleId",
+    "reason"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

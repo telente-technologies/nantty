@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.ended.v1.json",
+  "title": "BattleEnded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "battleId",
+    "endReason",
+    "finalScores",
+    "winnerUserIds",
+    "isTie"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "endReason": {
+      "enum": [
+        "timer",
+        "hostEnded",
+        "hostEndedLive",
+        "forfeit"
+      ]
+    },
+    "finalScores": {
+      "type": "array"
+    },
+    "winnerUserIds": {
+      "type": "array"
+    },
+    "isTie": {
+      "type": "boolean"
+    }
+  }
+}

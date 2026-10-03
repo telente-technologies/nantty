@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.winnerCelebrated.v1.json",
+  "title": "BattleWinnerCelebrated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "battleId",
+    "winnerUserIds",
+    "animationAssetId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "winnerUserIds": {
+      "type": "array"
+    },
+    "mvpGifter": {
+      "oneOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "animationAssetId": {
+      "type": "string"
+    }
+  }
+}

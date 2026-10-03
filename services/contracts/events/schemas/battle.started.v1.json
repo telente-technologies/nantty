@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.started.v1.json",
+  "title": "BattleStarted",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "liveId",
+    "battleId",
+    "battle",
+    "winnerTakesAll",
+    "startsAt",
+    "endsAt",
+    "participants"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battle": {
+      "type": "object"
+    },
+    "winnerTakesAll": {
+      "type": "boolean"
+    },
+    "startsAt": {
+      "type": "string"
+    },
+    "endsAt": {
+      "type": "string"
+    },
+    "participants": {
+      "type": "array"
+    }
+  }
+}

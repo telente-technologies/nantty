@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.settled.v1.json",
+  "title": "BattleSettled",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "battleId",
+    "transfers"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transfers": {
+      "type": "array"
+    }
+  }
+}

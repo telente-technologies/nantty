@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.created.v1.json",
+  "title": "BattleCreated",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "liveId",
+    "battleId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battle": {
+      "type": "object"
+    },
+    "winnerTakesAll": {
+      "type": "boolean"
+    },
+    "durationSeconds": {
+      "type": "integer"
+    }
+  }
+}

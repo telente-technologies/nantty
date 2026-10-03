@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battle.scoreUpdated.v1.json",
+  "title": "BattleScoreUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "battleId",
+    "scores",
+    "topGifters"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "battleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "scores": {
+      "type": "array"
+    },
+    "topGifters": {
+      "type": "object"
+    }
+  }
+}
