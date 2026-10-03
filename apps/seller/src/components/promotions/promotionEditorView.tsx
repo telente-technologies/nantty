@@ -17,6 +17,7 @@ import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { Promotion } from "@/types/promotion.type";
 import type { PromotionInput } from "@/utils/promotionValidation.util";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function PromotionEditorView({ promotionId }: { readonly promotionId: string | null }) {
   const router = useRouter();
@@ -75,7 +76,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
   return (
     <PageStack>
       <PageHeader
-        eyebrow={<Link href="/marketing/discounts">← Discounts</Link>}
+        eyebrow={<Link href="/marketing/discounts"><IconLabel name="arrowLeft24" size={16}>Discounts</IconLabel></Link>}
         title={promotion ? promotion.name : "New promotion"}
         description={promotion ? `Used ${promotion.usedCount.toLocaleString()} times` : "Discounts use your store's currency and apply before tax."}
         actions={
