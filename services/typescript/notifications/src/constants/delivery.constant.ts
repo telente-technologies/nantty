@@ -6,4 +6,5 @@ export const manualReason = "manual";
 export const staffAccessAudience = "zudomart-admin";
 export const staffStepUpAudience = "zudomart-admin-step-up";
 export const bulkBatchJobType = "bulkSend.batch";
+export const digestJobType = "digest.run";
 export const unreadEmailJobType = "email.sendIfUnread";
