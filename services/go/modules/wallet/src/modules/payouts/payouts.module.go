@@ -11,14 +11,16 @@ type Application struct {
 	Accounts    services.PayoutAccounts
 	Withdrawals services.Withdrawals
 	Overview    services.WalletOverview
+	Creators    services.CreatorEarningsTransfers
 }
 
 func NewPayoutsApplication(container *container.Container) *Application {
-	banks := &bankservices.BankDirectory{Provider: container.Payments.Container.Providers[container.Settings.DefaultPayoutProvider], Now: container.Now}
+	banks := &bankservices.BankDirectory{Provider: container.Payments.Container.Providers[container.Payments.Container.Settings.DefaultProvider], Now: container.Now}
 	return &Application{
 		Container:   container,
 		Accounts:    services.PayoutAccounts{Container: container, Banks: banks},
 		Withdrawals: services.Withdrawals{Container: container},
 		Overview:    services.WalletOverview{Container: container},
+		Creators:    services.CreatorEarningsTransfers{Container: container},
 	}
 }
