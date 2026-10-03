@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { addressesQueryKey } from "@/components/address/addressBook";
+import { useShippingQuote } from "@/components/address/shippingQuote.hook";
 import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
@@ -10,11 +12,13 @@ import { RetryButton } from "@/components/ui/controls";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { CloseIcon, StoreIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
+import { ordersService } from "@/services/orders.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 
 import styles from "./page.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 function MoneyRow({
   label,
@@ -44,6 +48,10 @@ export default function CartPage() {
     queryFn: cartsService.fetchMyCart,
     retry: false,
   });
+
+  const addressesQuery = useQuery({ queryKey: addressesQueryKey, queryFn: ordersService.fetchMyShippingAddresses, retry: false });
+  const defaultAddress = addressesQuery.data?.find((address) => address.isDefault) ?? addressesQuery.data?.[0] ?? null;
+  const quote = useShippingQuote(defaultAddress?.id ?? null).data ?? null;
 
   const invalidateCart = async () => {
     await queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -78,7 +86,7 @@ export default function CartPage() {
   if (!cart || cart.items.length === 0) {
     return (
       <EmptyState
-        icon="🛒"
+        icon={<AppIcon name="shoppingCart24" size={28} />}
         title="Your cart is empty"
         description="Browse the mart and add something you love."
         action={<Button onClick={() => router.push("/mart")}>Start shopping</Button>}
@@ -170,13 +178,13 @@ export default function CartPage() {
 
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>Summary</h2>
-          <SellerGroupedSummary items={cart.items} />
+          <SellerGroupedSummary items={cart.items} quote={quote} />
           <MoneyRow label="Items total" value={formatMoneyForDisplay(cart.itemsTotal)} />
           {hasDiscount ? <MoneyRow label="Discount" value={`−${formatMoneyForDisplay(cart.shopDiscount)}`} muted /> : null}
           {cart.storeCredit.amountMinor > 0 ? <MoneyRow label="Store credit" value={`−${formatMoneyForDisplay(cart.storeCredit)}`} muted /> : null}
-          <MoneyRow label="Shipping" value={cart.shipping.amountMinor > 0 ? formatMoneyForDisplay(cart.shipping) : "Calculated at checkout"} muted />
+          <MoneyRow label="Shipping" value={quote ? formatMoneyForDisplay(quote.shipping) : "Add an address to calculate"} muted />
           <div className={styles.summaryDivider} />
-          <MoneyRow label="Total" value={formatMoneyForDisplay(cart.total)} strong />
+          <MoneyRow label="Total" value={formatMoneyForDisplay(quote ? quote.total : cart.total)} strong />
           <Button size="lg" fullWidth onClick={() => router.push("/checkout")}>
             Proceed to checkout
           </Button>
