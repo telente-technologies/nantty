@@ -22,7 +22,8 @@ func (Profile) Mixin() []ent.Mixin {
 func (Profile) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
-		field.Enum("kind").Values("personal", "creator", "business").Immutable(),
+		field.Enum("kind").Values("personal", "business").Immutable(),
+		field.Enum("creator_status").Values("none", "pending", "approved", "rejected").Default("none"),
 		field.String("handle").NotEmpty().MaxLen(30),
 		field.String("display_name").Default("").MaxLen(80),
 		field.String("bio").Default("").MaxLen(300),
@@ -48,6 +49,5 @@ func (Profile) Indexes() []ent.Index {
 		index.Fields("handle").Unique(),
 		index.Fields("account_id").StorageKey("profile_account_id"),
 		index.Fields("account_id").StorageKey("profile_one_personal_per_account").Unique().Annotations(entsql.IndexWhere("kind = 'personal'")),
-		index.Fields("account_id").StorageKey("profile_one_creator_per_account").Unique().Annotations(entsql.IndexWhere("kind = 'creator'")),
 	}
 }
