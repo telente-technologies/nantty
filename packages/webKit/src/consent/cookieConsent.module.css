@@ -1,0 +1,99 @@
+.banner {
+  position: fixed;
+  right: var(--space-4, 16px);
+  bottom: var(--space-4, 16px);
+  left: var(--space-4, 16px);
+  z-index: 1000;
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
+  margin-inline: auto 0;
+  overflow-y: auto;
+  padding: var(--space-5, 20px);
+  border: 1px solid var(--color-border, #e4e6f2);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0a0a14);
+  box-shadow: var(--shadow-float, 0 12px 32px -12px rgb(11 23 82 / 0.22));
+  font-size: var(--fs-14, 0.875rem);
+  line-height: 1.5;
+}
+
+.heading {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: var(--fs-16, 1rem);
+}
+
+.text {
+  margin: 0 0 var(--space-4, 16px);
+  color: var(--color-text-muted, #5b5b6b);
+}
+
+.text a {
+  color: var(--color-brand, #2043f5);
+  text-decoration: underline;
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  margin: 0 0 var(--space-4, 16px);
+  padding: 0;
+  list-style: none;
+}
+
+.categoryRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+}
+
+.categoryText {
+  display: block;
+  color: var(--color-text-muted, #5b5b6b);
+  font-size: var(--fs-13, 0.8125rem);
+}
+
+.toggle {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--color-brand, #2043f5);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 40px;
+  padding: 0 var(--space-4, 16px);
+  border-radius: var(--radius-pill, 999px);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid var(--color-brand-solid, #2043f5);
+  background: var(--color-brand-solid, #2043f5);
+  color: var(--color-on-brand, #fff);
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-border-strong, #cdd1e6);
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0a0a14);
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--color-focus, #2043f5);
+  outline-offset: 2px;
+}
