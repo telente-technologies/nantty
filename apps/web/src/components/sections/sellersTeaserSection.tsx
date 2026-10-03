@@ -13,7 +13,7 @@ const sellerBenefits = [
 
 export function SellersTeaserSection() {
   return (
-    <section className={styles.section} aria-labelledby="sellers-teaser-heading">
+    <section className={`${styles.section} lightIsland`} aria-labelledby="sellers-teaser-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.visual}>
           <PhoneFrameWithAppScreen screen="creatorProfileScreen" alt="TundeTech seller profile with a gold business badge, followers and a View Shop button" className={styles.phone} sizes="(min-width: 960px) 300px, 60vw" />

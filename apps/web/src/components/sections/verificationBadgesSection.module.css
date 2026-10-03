@@ -14,8 +14,8 @@
   padding: 40px 16px;
   border-radius: var(--radius-large);
   background:
-    radial-gradient(circle at 50% 42%, var(--blue-500) 0 30%, transparent 30.5%),
-    var(--blue-900);
+    radial-gradient(circle at 50% 42%, var(--surface-brand-band) 0 30%, transparent 30.5%),
+    var(--surface-night);
 }
 
 .phone {
@@ -42,17 +42,17 @@
   padding: 20px;
   border-radius: var(--radius-medium);
   background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+  box-shadow: inset 0 0 0 1px var(--line-hairline);
 }
 
 .blueBadge {
   margin-bottom: 8px;
-  color: var(--blue-500);
+  color: var(--icon-brand);
 }
 
 .goldBadge {
   margin-bottom: 8px;
-  color: var(--yellow-600);
+  color: var(--badge-gold);
 }
 
 .blackBadge {
@@ -84,14 +84,14 @@
   align-items: flex-start;
   padding: 18px 20px;
   border-radius: var(--radius-medium);
-  background: var(--yellow-100);
+  background: var(--surface-sunshine-muted);
   color: var(--ink-strong);
 }
 
 .officialStoreNote > span:first-child {
   flex: none;
   margin-top: 2px;
-  color: var(--yellow-900);
+  color: var(--badge-gold);
 }
 
 @media (min-width: 720px) {

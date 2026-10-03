@@ -1,6 +1,6 @@
 .section {
   padding-block: var(--section-space);
-  background: var(--yellow-500);
+  background: var(--surface-sunshine);
   overflow: hidden;
 }
 
@@ -41,7 +41,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--yellow-900);
+  color: var(--ink-on-sunshine-accent);
 }
 
 .heading {
@@ -51,7 +51,7 @@
 .description {
   max-width: 50ch;
   font-size: 1.1rem;
-  color: #2b2806;
+  color: var(--ink-on-sunshine);
 }
 
 .benefitList {
@@ -74,7 +74,7 @@
   box-sizing: content-box;
   border-radius: 50%;
   background: var(--ink-strong);
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .actions {

@@ -119,7 +119,7 @@
 
 .light .roleOption input:checked + span {
   background: var(--ink-strong);
-  color: #fff;
+  color: var(--surface-card);
 }
 
 .light .inputRow {
@@ -128,7 +128,7 @@
 }
 
 .light .inputRow:focus-within {
-  box-shadow: inset 0 0 0 1px var(--blue-500), var(--focus-ring);
+  box-shadow: inset 0 0 0 1px var(--icon-brand), var(--focus-ring);
 }
 
 .light .emailInput::placeholder {
@@ -136,12 +136,12 @@
 }
 
 .light .submitButton {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
 }
 
 .light .submitButton:hover:not(:disabled) {
-  background: var(--blue-600);
+  background: var(--fill-brand-hover);
 }
 
 .light .hintMessage {
@@ -149,33 +149,33 @@
 }
 
 .light .errorMessage {
-  color: #b91c1c;
+  color: var(--color-danger-text);
 }
 
 .light .joinedMessage {
-  background: #e7f8f1;
-  color: #065f46;
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
 }
 
 .dark .roleFieldset {
-  background: rgb(255 255 255 / 0.12);
+  background: var(--surface-night-chip);
 }
 
 .dark .roleOption span {
-  color: #fff;
+  color: var(--ink-on-night);
 }
 
 .dark .roleOption input:checked + span {
-  background: #fff;
-  color: var(--blue-700);
+  background: var(--ink-on-night);
+  color: var(--surface-brand-band);
 }
 
 .dark .inputRow {
-  background: #fff;
+  background: var(--surface-paper);
 }
 
 .dark .inputRow:focus-within {
-  box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--yellow-500);
+  box-shadow: 0 0 0 3px var(--surface-brand-band), 0 0 0 5px var(--surface-sunshine);
 }
 
 .dark .emailInput {
@@ -188,24 +188,24 @@
 
 .dark .submitButton {
   background: var(--ink-strong);
-  color: #fff;
+  color: var(--surface-paper);
 }
 
 .dark .submitButton:hover:not(:disabled) {
-  background: var(--blue-900);
+  background: var(--ink-muted);
 }
 
 .dark .hintMessage {
-  color: var(--blue-50);
+  color: var(--ink-on-night-muted);
 }
 
 .dark .errorMessage {
-  color: var(--yellow-500);
+  color: var(--surface-sunshine);
 }
 
 .dark .joinedMessage {
-  background: var(--yellow-500);
-  color: var(--ink-strong);
+  background: var(--surface-sunshine);
+  color: var(--ink-on-sunshine);
 }
 
 @media (max-width: 420px) {
