@@ -1,5 +1,5 @@
 import type { StatusTone } from "@/components/ui/statusBadge";
-import type { Product, ProductStatus, ProductVariant } from "@/types/catalog.type";
+import type { Product, ProductStatus, ProductVariant, ProductVisibility } from "@/types/catalog.type";
 import type { Money } from "@/types/money.type";
 import { calculateMarginBasisPoints } from "@/utils/productValidation.util";
 
@@ -29,4 +29,21 @@ export function calculateAverageProductMarginBasisPoints(product: Product): numb
 
 export function isVariantLowOnStock(variant: ProductVariant, locationId: string | null): boolean {
   return sumVariantOnHand(variant, locationId) <= variant.lowStockThreshold;
+}
+
+export const productVisibilityLabel: Record<ProductVisibility, string> = { public: "Everyone", store_only: "Store page only", link_only: "Link only" };
+export const productVisibilityDescription: Record<ProductVisibility, string> = {
+  public: "Shows in Mart, search, feeds and your store page.",
+  store_only: "Only shows on your store page in the app.",
+  link_only: "Hidden from browsing. Only people with the link can buy it.",
+};
+
+export function describeProductPublicationState(product: Pick<Product, "status" | "publishAt">): { label: string; tone: StatusTone } {
+  if (product.status === "draft" && product.publishAt) return { label: "Scheduled", tone: "info" };
+  return { label: productStatusLabel[product.status], tone: productStatusTone[product.status] };
+}
+
+export function calculateCompareAtDiscountBasisPoints(variant: Pick<ProductVariant, "price" | "compareAtPrice">): number | null {
+  if (!variant.compareAtPrice || variant.compareAtPrice.amountMinor <= variant.price.amountMinor) return null;
+  return Math.round(((variant.compareAtPrice.amountMinor - variant.price.amountMinor) * 10_000) / variant.compareAtPrice.amountMinor);
 }

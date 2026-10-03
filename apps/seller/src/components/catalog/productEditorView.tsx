@@ -3,13 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { ProductAttributesSection } from "@/components/catalog/productAttributesSection";
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
 import { ProductBrandSection } from "@/components/catalog/productBrandSection";
 import { convertDraftToUpsertRequest, convertProductToDraft, createEmptyProductDraft, regenerateVariantDraftsForOptions, type OptionDraft, type ProductDraft, type VariantDraft } from "@/components/catalog/productEditorDraft.util";
 import { ProductImagesSection } from "@/components/catalog/productImagesSection";
 import { ProductOptionsSection } from "@/components/catalog/productOptionsSection";
-import { productStatusLabel, productStatusTone } from "@/components/catalog/productPresentation.util";
+import { describeProductPublicationState } from "@/components/catalog/productPresentation.util";
+import { ProductPublishingSection } from "@/components/catalog/productPublishingSection";
+import { ProductSupplierSection } from "@/components/catalog/productSupplierSection";
 import { ProductVariantsTable } from "@/components/catalog/productVariantsTable";
+import { ProductVideosSection } from "@/components/catalog/productVideosSection";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout, LoadingBlock } from "@/components/ui/feedback";
 import { FormErrorSummary } from "@/components/ui/formFields";
@@ -35,6 +39,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const isNewProduct = productId === null;
 
   useEffect(() => {
@@ -66,11 +71,27 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
     }
   }
 
-  async function saveProduct() {
+  async function duplicateProduct() {
+    if (!productId) return;
+    setIsDuplicating(true);
+    try {
+      const copy = await sendSellerApiRequest<Product>(`/seller/products/${encodeURIComponent(productId)}/duplicate`, { method: "POST", body: {} });
+      showToast("Copied as a draft with new SKUs and no stock. Review it before publishing.");
+      router.push(`/products/${copy.id}`);
+    } catch (error) {
+      showToast(readErrorMessageForDisplay(error), "error");
+    } finally {
+      setIsDuplicating(false);
+    }
+  }
+
+  async function saveProduct(saveAsDraft = false) {
     if (!draft || !settings) return;
-    const { request, parseIssues } = convertDraftToUpsertRequest(draft, settings.currency, isNewProduct);
+    const draftToSave = saveAsDraft ? { ...draft, status: "draft" as const, publishedOnline: false } : draft;
+    if (saveAsDraft) setDraft(draftToSave);
+    const { request, parseIssues } = convertDraftToUpsertRequest(draftToSave, settings.currency, isNewProduct);
     const clientIssues = [...parseIssues, ...validateProductUpsertRequest(request, { categoryIds: null, locationIds: locations.map((location) => location.id), skusUsedByOtherProducts: new Set(), barcodesUsedByOtherProducts: new Set() })];
-    if (request.publishedOnline && draft.images.length === 0) clientIssues.push({ path: "images", message: "Add at least one photo before selling on the marketplace." });
+    if (request.publishedOnline && draftToSave.images.length === 0) clientIssues.push({ path: "images", message: "Add at least one photo before selling on the marketplace." });
     const uniqueIssues = clientIssues.filter((issue, index) => clientIssues.findIndex((candidate) => candidate.message === issue.message) === index);
     setIssues(uniqueIssues);
     if (uniqueIssues.length > 0) {
@@ -80,7 +101,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
     setIsSaving(true);
     try {
       const savedProduct = await sendSellerApiRequest<Product>(isNewProduct ? "/seller/products" : `/seller/products/${encodeURIComponent(productId ?? "")}`, { method: isNewProduct ? "POST" : "PATCH", body: request });
-      showToast(isNewProduct ? `${savedProduct.name} created.` : "Changes saved.");
+      showToast(saveAsDraft ? "Saved as a draft." : isNewProduct ? `${savedProduct.name} created.` : "Changes saved.");
       if (isNewProduct) router.push(`/products/${savedProduct.id}`);
       else setDraft(convertProductToDraft(savedProduct));
     } catch (error) {
@@ -92,7 +113,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
   }
 
   async function archiveProduct() {
-    if (!productId || !window.confirm("Archive this product? It leaves the register and the marketplace, and you can restore it by setting it back to active.")) return;
+    if (!productId || !window.confirm("Archive this product? It is removed from the marketplace, and you can restore it by setting it back to active.")) return;
     try {
       await sendSellerApiRequest(`/seller/products/${encodeURIComponent(productId)}`, { method: "DELETE" });
       showToast("Product archived.");
@@ -107,25 +128,35 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       <PageHeader
         eyebrow={<ButtonLink href="/products" variant="ghost" size="small" iconName="arrowLeft24">Products</ButtonLink>}
         title={isNewProduct ? "New product" : draft.name || "Product"}
-        description={isNewProduct ? "Add it once — it sells on the register and, when published, on the Zudomart marketplace." : undefined}
-        actions={!isNewProduct && productQuery.data ? <StatusBadge tone={productStatusTone[draft.status]}>{productStatusLabel[draft.status]}</StatusBadge> : null}
+        description={isNewProduct ? "Add it once. When it is active and listed, customers can buy it in the Zudomart app." : undefined}
+        actions={!isNewProduct && productQuery.data ? (
+          <>
+            <StatusBadge tone={describeProductPublicationState(productQuery.data).tone}>{describeProductPublicationState(productQuery.data).label}</StatusBadge>
+            <Button size="small" iconName="copy16" isBusy={isDuplicating} onClick={() => void duplicateProduct()}>Duplicate</Button>
+          </>
+        ) : null}
       />
       <FormErrorSummary messages={issues.map((issue) => issue.message)} />
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
-          <ProductBasicsSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} isExistingProduct={!isNewProduct} isPublishing={isPublishing} onPublishedOnlineChange={(publishedOnline) => void changeOnlinePublication(publishedOnline)} />
+          <ProductBasicsSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
           <ProductOptionsSection options={draft.options} fieldErrors={fieldErrors} onOptionsChange={updateOptions} />
           <ProductVariantsTable variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} isNewProduct={isNewProduct} onVariantChange={updateVariant} />
+          <ProductAttributesSection attributes={draft.attributes} fieldErrors={fieldErrors} onAttributesChange={(attributes) => updateDraft({ attributes })} />
         </div>
         <div className={styles.sideColumn}>
+          <ProductPublishingSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} isPublishing={isPublishing} onPublishedOnlineChange={(publishedOnline) => void changeOnlinePublication(publishedOnline)} />
           <ProductImagesSection images={draft.images} onUploadingChange={setIsUploading} onImagesChange={(updater) => setDraft((current) => (current ? { ...current, images: updater(current.images) } : current))} />
+          <ProductVideosSection videos={draft.videos} fieldErrors={fieldErrors} onVideosChange={(videos) => updateDraft({ videos })} />
           <ProductBrandSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
+          <ProductSupplierSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
           {!isNewProduct ? <Callout tone="info">Stock changes go through <a href="/inventory/adjustments">stock adjustments</a> or <a href="/inventory/transfers">transfers</a> so every unit is accounted for.</Callout> : null}
         </div>
       </div>
       <div className={styles.saveBar}>
         {!isNewProduct ? <Button variant="ghost" onClick={() => void archiveProduct()} disabled={draft.status === "archived"}>Archive</Button> : null}
         <ButtonLink href="/products">Cancel</ButtonLink>
+        {draft.status !== "draft" || isNewProduct ? <Button onClick={() => void saveProduct(true)} disabled={isSaving || isUploading}>Save as draft</Button> : null}
         <Button variant="primary" onClick={() => void saveProduct()} isBusy={isSaving} disabled={isUploading}>
           {isUploading ? "Waiting for photos…" : isNewProduct ? "Create product" : "Save changes"}
         </Button>

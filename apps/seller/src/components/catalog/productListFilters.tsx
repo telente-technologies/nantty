@@ -12,11 +12,14 @@ export interface ProductListFilterValues {
   readonly categoryId: string;
   readonly status: string;
   readonly online: string;
+  readonly visibility: string;
   readonly stock: string;
   readonly sort: string;
 }
 
-function CompactSelect({ label, value, options, onChange }: { readonly label: string; readonly value: string; readonly options: readonly [string, string][]; readonly onChange: (value: string) => void }) {
+export const defaultProductListFilters: ProductListFilterValues = { searchText: "", categoryId: "", status: "", online: "", visibility: "", stock: "", sort: "updated" };
+
+export function CompactSelect({ label, value, options, onChange }: { readonly label: string; readonly value: string; readonly options: readonly [string, string][]; readonly onChange: (value: string) => void }) {
   return (
     <label className={styles.compactSelect}>
       <span className="visuallyHidden">{label}</span>
@@ -36,10 +39,10 @@ export function ProductListFilters({ value, onValueChange }: { readonly value: P
     <FilterBar>
       <SearchInput label="Search products" placeholder="Search name, SKU or barcode" value={value.searchText} onValueChange={(searchText) => update({ searchText })} />
       <CompactSelect label="Category" value={value.categoryId} onChange={(categoryId) => update({ categoryId })} options={[["", "All categories"], ...(categoriesQuery.data?.data ?? []).map((category): [string, string] => [category.id, category.name])]} />
-      <CompactSelect label="Status" value={value.status} onChange={(status) => update({ status })} options={[["", "Active and draft"], ["active", "Active"], ["draft", "Draft"], ["archived", "Archived"], ["all", "All statuses"]]} />
-      <CompactSelect label="Marketplace" value={value.online} onChange={(online) => update({ online })} options={[["", "Online and in store"], ["true", "Published online"], ["false", "In store only"]]} />
+      <CompactSelect label="Status" value={value.status} onChange={(status) => update({ status })} options={[["", "Active and drafts"], ["active", "Active"], ["draft", "Drafts"], ["scheduled", "Scheduled"], ["archived", "Archived"], ["all", "All statuses"]]} />
+      <CompactSelect label="Marketplace" value={value.online} onChange={(online) => update({ online })} options={[["", "Listed or not"], ["true", "Listed on Zudomart"], ["false", "Not listed"]]} />
+      <CompactSelect label="Visibility" value={value.visibility} onChange={(visibility) => update({ visibility })} options={[["", "Any visibility"], ["public", "Everyone"], ["store_only", "Store page only"], ["link_only", "Link only"]]} />
       <CompactSelect label="Stock" value={value.stock} onChange={(stock) => update({ stock })} options={[["", "Any stock"], ["low", "Low stock"], ["out", "Out of stock"]]} />
-      <CompactSelect label="Sort by" value={value.sort} onChange={(sort) => update({ sort })} options={[["updated", "Recently updated"], ["name", "Name A–Z"], ["price_asc", "Price: low to high"], ["price_desc", "Price: high to low"], ["stock", "Stock: lowest first"]]} />
     </FilterBar>
   );
 }

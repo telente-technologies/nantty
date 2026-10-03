@@ -3,7 +3,10 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 
 import { buildImportRowsFromCsv, findImportRowProblems, guessColumnMappingFromHeaders, type ColumnMapping } from "@/components/catalog/productImportMapping.util";
+import { PlanGate } from "@/components/billing/planGate";
+import { ProductExportPanel } from "@/components/catalog/productExportPanel";
 import { ProductImportResultPanel } from "@/components/catalog/productImportResultPanel";
+import { ProductsSectionTabs } from "@/components/catalog/productsSectionTabs";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
 import { SelectField } from "@/components/ui/formFields";
@@ -77,8 +80,11 @@ export function ProductImportView() {
 
   return (
     <PageStack>
-      <PageHeader eyebrow={<ButtonLink href="/products" variant="ghost" size="small" iconName="arrowLeft24">Products</ButtonLink>} title="Import products" description="Create new products or update prices of existing SKUs from a spreadsheet. Rows with a matching SKU are updated; new names become new products, one row per variant." actions={<Button iconName="boxArrowDown24" onClick={downloadTemplateCsv}>Download template</Button>} />
-      <Panel title="1. Choose a CSV file">
+      <PageHeader eyebrow={<ButtonLink href="/products" variant="ghost" size="small" iconName="arrowLeft24">Products</ButtonLink>} title="Import & export" description="Create new products or update prices of existing SKUs from a spreadsheet. Rows with a matching SKU are updated; new names become new products, one row per variant." />
+      <ProductsSectionTabs />
+      <PlanGate feature="bulk_tools" description="Import and export your whole catalog as a spreadsheet. On Free you can still add and edit products one at a time.">
+      <ProductExportPanel />
+      <Panel title="1. Choose a CSV file" actions={<Button size="small" iconName="boxArrowDown24" onClick={downloadTemplateCsv}>Download template</Button>}>
         <input type="file" accept=".csv,text/csv" onChange={(event) => void readChosenCsvFile(event)} aria-label="CSV file" />
         {fileName ? <p style={{ marginTop: 8 }}>{fileName}: {dataRows.length} rows</p> : null}
         {fileError ? <div style={{ marginTop: 10 }}><Callout tone="error">{fileError}</Callout></div> : null}
@@ -116,6 +122,7 @@ export function ProductImportView() {
         </Panel>
       ) : null}
       {result ? <ProductImportResultPanel result={result} /> : null}
+      </PlanGate>
     </PageStack>
   );
 }

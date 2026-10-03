@@ -55,3 +55,31 @@
   color: var(--caution-ink);
   font-weight: 700;
 }
+
+.outOfStock {
+  color: var(--error-ink);
+  font-weight: 700;
+}
+
+.priceCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.discountTag {
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--success-tint);
+  color: var(--success-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
