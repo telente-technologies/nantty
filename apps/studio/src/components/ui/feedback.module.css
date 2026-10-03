@@ -32,90 +32,13 @@
 
 .inlineLabel {
   font-size: var(--text-sm);
-  color: var(--ink-muted);
+  color: var(--color-text-muted);
 }
 
 @keyframes feedbackSpin {
   to {
     transform: rotate(360deg);
   }
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-9) var(--space-5);
-  text-align: center;
-}
-
-.emptyIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 62px;
-  height: 62px;
-  border-radius: var(--radius-large);
-  background: var(--surface-brand-tint);
-  color: var(--blue-600);
-  font-size: 1.6rem;
-}
-
-.emptyTitle {
-  font-size: var(--text-lg);
-  font-weight: 800;
-}
-
-.emptyDescription {
-  max-width: 46ch;
-  font-size: var(--text-base);
-  color: var(--ink-muted);
-}
-
-.emptyAction {
-  margin-top: var(--space-2);
-}
-
-.errorState {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  margin: var(--space-5) 0;
-  padding: var(--space-4);
-  border: 1px solid #fbcfcf;
-  border-radius: var(--radius-medium);
-  background: var(--error-soft);
-}
-
-.errorMark {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--error);
-  color: #fff;
-  font-weight: 800;
-  font-size: var(--text-sm);
-}
-
-.errorBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.errorTitle {
-  font-weight: 700;
-  color: #991b1b;
-}
-
-.errorDescription {
-  font-size: var(--text-sm);
-  color: #7f1d1d;
 }
 
 .badge {
@@ -131,25 +54,25 @@
 
 .badge_neutral {
   background: var(--surface-sunken);
-  color: var(--ink-muted);
+  color: var(--color-text-muted);
 }
 
 .badge_brand {
   background: var(--surface-brand-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .badge_success {
   background: var(--success-soft);
-  color: #065f46;
+  color: var(--color-success-text);
 }
 
 .badge_warning {
-  background: var(--yellow-50);
-  color: var(--yellow-900);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
 }
 
 .badge_error {
   background: var(--error-soft);
-  color: #991b1b;
+  color: var(--color-danger-text);
 }
