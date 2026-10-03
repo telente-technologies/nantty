@@ -49,11 +49,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.U
 		if err != nil {
 			return err
 		}
-		if err := tx.AccountRestriction.Create().SetAccountID(target.Account.ID).SetFeatures(features).SetReason(reason).SetEndsAt(endsAt).SetCreatedBy(command.Actor.Id).SetCreatedByName(command.Actor.Name).Exec(ctx); err != nil {
+		restriction, err := tx.AccountRestriction.Create().SetAccountID(target.Account.ID).SetFeatures(features).SetReason(reason).SetEndsAt(endsAt).SetCreatedBy(command.Actor.Id).SetCreatedByName(command.Actor.Name).Save(ctx)
+		if err != nil {
 			return err
 		}
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.AccountRestrictedType, target.Account.ID.String(), now, accountevents.AccountRestrictedData{
-			AccountId: target.Account.ID.String(), Features: features, EndsAt: endsAt.UTC().Format(time.RFC3339), Reason: reason,
+			AccountId: target.Account.ID.String(), CaseId: restriction.ID.String(), Reason: reason, Policy: "Community Guidelines", PolicyUrl: accountevents.CommunityGuidelinesUrl, AppealUrl: accountevents.AppealUrl,
+			Restrictions: features, Until: endsAt.UTC().Format(time.RFC3339),
 		}); err != nil {
 			return err
 		}
