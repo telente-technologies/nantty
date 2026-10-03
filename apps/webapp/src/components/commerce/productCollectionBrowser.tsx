@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { ProductCard } from "@/components/commerce/productCard";
+import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { productsService } from "@/services/products.service";
@@ -51,7 +52,7 @@ export function ProductCollectionBrowser({ title, categoryId, collection }: Prod
       </header>
 
       {query.isLoading ? (
-        <Spinner label="Loading products" />
+        <ProductGridSkeleton gridClassName={styles.grid} />
       ) : query.isError ? (
         <ErrorState description="We couldn't load this collection." action={<RetryButton onRetry={() => query.refetch()} />} />
       ) : products.length === 0 ? (
