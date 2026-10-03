@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
@@ -9,15 +10,17 @@ import { StoreProfileHeader } from "@/components/store/storeProfileHeader";
 import { StoreTabs, type StoreTab } from "@/components/store/storeTabs";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { storesService } from "@/services/stores.service";
 import type { StoreDetail } from "@/types/commerce.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
+  const { colors } = useTheme();
   const { storeId } = route.params;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<StoreTab>("products");
@@ -37,6 +40,8 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["stores", storeId] }),
   });
 
+  const { offerSendInChat, sendInChatElement } = useShareToChat();
+
   const topBar = (
     <View style={styles.topBar}>
       <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={8} onPress={() => navigation.goBack()}>
@@ -46,16 +51,17 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
         <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={8} onPress={() => navigation.navigate("Search", { scope: "mart" })}>
           <Frame75232Icon />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={8}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Share store" hitSlop={8} onPress={() => offerSendInChat({ kind: "store", id: storeId })}>
           <Frame75132Icon />
         </Pressable>
       </View>
+      {sendInChatElement}
     </View>
   );
 
   if (!store.data) {
     return (
-      <Screen background={colors.white}>
+      <Screen background={colors.surface}>
         {topBar}
         {store.isError ? (
           <ErrorState message="Couldn't load this store." onRetry={() => store.refetch()} />
@@ -68,13 +74,13 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
 
   const detail = store.data;
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       {topBar}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <StoreProfileHeader
           store={detail}
-          onToggleFollow={() => toggleStoreFollow.mutate(!detail.isFollowing)}
-          onMessage={() => navigation.navigate("Chat", { userId: detail.ownerUserId, name: detail.name })}
+          onToggleFollow={() => requireAuthThen(() => toggleStoreFollow.mutate(!detail.isFollowing), undefined, "follow shops")}
+          onMessage={() => requireAuthThen(() => navigation.navigate("Chat", { userId: detail.ownerUserId, name: detail.name }), undefined, "message sellers")}
         />
         <StoreTabs active={activeTab} onChange={setActiveTab} />
         <View style={styles.tabBody}>
