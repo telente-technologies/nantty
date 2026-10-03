@@ -22,7 +22,7 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
   Home: undefined;
-  Clips: { startId?: string } | undefined;
+  Clips: { startId?: string; commentId?: string } | undefined;
   Create: undefined;
   Chats: undefined;
   Me: undefined;
