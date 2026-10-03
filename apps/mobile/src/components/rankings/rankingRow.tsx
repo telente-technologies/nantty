@@ -2,10 +2,11 @@ import { StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { RankingEntry } from "@/types/socialGraph.type";
 
 export function RankingRow({ entry }: { entry: RankingEntry }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.row} accessibilityLabel={`Rank ${entry.rank}, ${entry.user.name}, ${entry.points} points`}>
       <Text size={14} weight={700} lineHeight={18} color={entry.rank <= 3 ? colors.primary : colors.textMuted} style={styles.rank}>
