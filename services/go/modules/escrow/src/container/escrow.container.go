@@ -1,6 +1,7 @@
 package container
 
 import (
+	"context"
 	"time"
 
 	"zudomart/modules/escrow/src/configs"
@@ -10,6 +11,7 @@ import (
 	ledgerevents "zudomart/modules/ledger/src/events"
 	"zudomart/modules/ledger/src/loaders"
 	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
+	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 )
@@ -18,6 +20,7 @@ type Container struct {
 	Resources    loaders.MoneyModuleResources
 	Settings     configs.EscrowSettings
 	Ledger       *ledgerservices.Ledger
+	Sellers      sellerbalances.SellerBalances
 	Payments     *paymentservices.PaymentGateway
 	Outbox       ledgerevents.OutboxTable
 	Idempotency  ledgerutils.SqlIdempotencyRecordStore
@@ -30,6 +33,7 @@ func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs
 	return &Container{
 		Resources: resources, Settings: settings, Payments: payments,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
+		Sellers:     sellerbalances.NewSellerBalancesInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.escrow"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
@@ -42,4 +46,10 @@ func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs
 
 func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {
 	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(executor)), ent.AlternateSchema(container.schemaConfig))
+}
+
+func (container *Container) Policy(ctx context.Context) loaders.EscrowPolicy {
+	return container.Resources.Platform.ReadEscrowPolicy(ctx, loaders.EscrowPolicy{
+		AutoReleasePeriod: container.Settings.InspectionPeriod, SellerCreditHoldPeriod: container.Settings.SellerCreditHoldPeriod,
+	})
 }
