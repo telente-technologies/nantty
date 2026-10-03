@@ -3,6 +3,10 @@ import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { ChatStreak } from "@/types";
+import { Flame24Icon, HeartBroken24Icon, Hourglass24Icon, Medal24Icon } from "@/components/icons";
+
+const STREAK_FLAME_COLOR = "#F97316";
+const STREAK_MEDAL_COLOR = "#F59E0B";
 
 export interface StreakBadgeProps {
   readonly streak: ChatStreak | null | undefined;
@@ -18,12 +22,12 @@ export function StreakBadge({ streak, size = 12 }: StreakBadgeProps) {
   const isBroken = streak.state === "broken";
   return (
     <View accessible accessibilityLabel={isBroken ? "Streak lost, can be restored" : describeStreakForAccessibility(streak)} style={styles.row}>
-      <Text size={size + 2} lineHeight={size + 6}>{isBroken ? "💔" : "🔥"}</Text>
+      {isBroken ? <HeartBroken24Icon size={size + 4} color={colors.textMuted} /> : <Flame24Icon size={size + 4} color={STREAK_FLAME_COLOR} />}
       {isBroken ? null : (
         <Text size={size} weight={600} lineHeight={size + 4} color={colors.text}>{streak.count}</Text>
       )}
-      {streak.hourglass ? <Text size={size + 1} lineHeight={size + 5}>⏳</Text> : null}
-      {streak.milestoneDays ? <Text size={size + 1} lineHeight={size + 5}>🏅</Text> : null}
+      {streak.hourglass ? <Hourglass24Icon size={size + 2} color={colors.error} /> : null}
+      {streak.milestoneDays ? <Medal24Icon size={size + 2} color={STREAK_MEDAL_COLOR} /> : null}
     </View>
   );
 }

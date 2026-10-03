@@ -4,6 +4,7 @@ import { Animated, Pressable, StyleSheet } from "react-native";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
+import { Medal24Icon } from "@/components/icons";
 
 export interface StreakMilestoneCelebrationProps {
   readonly milestoneDays: number;
@@ -28,7 +29,7 @@ export function StreakMilestoneCelebration({ milestoneDays, peerName, onDismiss 
   return (
     <Pressable accessibilityRole="alert" accessibilityLabel={`${milestoneDays} day streak with ${peerName}. Tap to dismiss`} onPress={onDismiss} style={styles.overlay}>
       <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
-        <Text size={56} lineHeight={64} align="center">🏅</Text>
+        <Medal24Icon size={64} color="#F59E0B" />
         <Text size={22} weight={700} lineHeight={28} align="center">{milestoneDays} day streak!</Text>
         <Text size={14} lineHeight={20} color={colors.textMuted} align="center">You and {peerName} kept the flame alive. Tap to keep chatting.</Text>
       </Animated.View>

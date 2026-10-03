@@ -8,6 +8,8 @@ import { useTheme } from "@/theme";
 import { chatSafetyService } from "@/services/chatSafety.service";
 import type { ChatStreak } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { Flame24Icon, HeartBroken24Icon, Hourglass24Icon } from "@/components/icons";
+import { IconRow } from "@/components/ui/iconRow";
 
 export interface StreakSheetProps {
   readonly visible: boolean;
@@ -35,7 +37,7 @@ export function StreakSheet({ visible, onClose, conversationId, streak, peerName
   return (
     <BottomSheet visible={visible} onClose={onClose} title={`Streak with ${peerName}`}>
       <View style={styles.body}>
-        <Text size={40} lineHeight={48} align="center">{streak.state === "broken" ? "💔" : "🔥"}</Text>
+        <View style={styles.heroIcon}>{streak.state === "broken" ? <HeartBroken24Icon size={48} color={colors.textMuted} /> : <Flame24Icon size={48} color="#F97316" />}</View>
         <Text size={18} weight={600} lineHeight={24} align="center">
           {streak.state === "broken" ? "Streak lost" : `${streak.count} day streak`}
         </Text>
@@ -47,7 +49,7 @@ export function StreakSheet({ visible, onClose, conversationId, streak, peerName
             : `Both of you need to send a message on your own day. ${streak.sentToday.me ? "You sent today." : "You haven't sent today."} ${streak.sentToday.peer ? `${peerName} sent today.` : `${peerName} hasn't sent today.`}`}
         </Text>
         {streak.hourglass ? (
-          <Text size={13} weight={500} lineHeight={18} color={colors.error} align="center">⏳ Your day ends in {formatHoursAndMinutes(streak.secondsUntilMyDayEnds)}</Text>
+          <IconRow icon={<Hourglass24Icon size={16} color={colors.error} />} justify="center"><Text size={13} weight={500} lineHeight={18} color={colors.error} align="center">Your day ends in {formatHoursAndMinutes(streak.secondsUntilMyDayEnds)}</Text></IconRow>
         ) : null}
         <Text size={12} lineHeight={16} color={colors.textMuted} align="center">
           {streak.restoresRemaining} of {streak.restoresPerMonth} restores left this month. Premium members get 6 a month.
@@ -60,4 +62,4 @@ export function StreakSheet({ visible, onClose, conversationId, streak, peerName
   );
 }
 
-const styles = StyleSheet.create({ body: { gap: 12, paddingHorizontal: 20, paddingBottom: 20 } });
+const styles = StyleSheet.create({ body: { gap: 12, paddingHorizontal: 20, paddingBottom: 20 }, heroIcon: { alignItems: "center" } });

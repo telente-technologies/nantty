@@ -15,6 +15,7 @@ import { chatSafetyService } from "@/services/chatSafety.service";
 import { messagesService } from "@/services/messages.service";
 import type { Conversation, SharedContentReference } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { Check16Icon } from "@/components/icons";
 
 export interface SendInChatSheetProps {
   readonly reference: SharedContentReference | null;
@@ -71,7 +72,7 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
                   <Avatar uri={display.avatarUrl} size={40} placeholderColor={colors.primaryTint} />
                   <Text size={14} weight={500} lineHeight={17} numberOfLines={1} style={styles.name}>{display.displayName}</Text>
                   <View style={[styles.check, isSelected && styles.checkSelected]}>
-                    {isSelected ? <Text size={12} weight={700} lineHeight={14} color={colors.white}>✓</Text> : null}
+                    {isSelected ? <Check16Icon size={14} color={colors.white} /> : null}
                   </View>
                 </Pressable>
               );
