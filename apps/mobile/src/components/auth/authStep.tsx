@@ -14,7 +14,7 @@ import { ArrowLeft24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface AuthStepProps {
   readonly title?: string;
@@ -41,6 +41,7 @@ export function AuthStep({
   footer,
   contentGap = 24,
 }: AuthStepProps) {
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   return (
