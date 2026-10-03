@@ -63,7 +63,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Sta
 	if rejection != nil {
 		return models.StaffSessionResult{}, rejection
 	}
-	return services.StaffAuthService{Container: handler.Container}.BuildSessionResult(staff, sessionId, nextRefreshToken)
+	return services.StaffAuthService{Container: handler.Container}.BuildSessionResult(ctx, staff, sessionId, nextRefreshToken)
 }
 
 func (handler Handler) revokeSessionHoldingPreviousRefreshHash(ctx context.Context, tx *ent.Tx, presentedHash string, now time.Time, rejection *error) error {
