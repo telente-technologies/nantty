@@ -18,7 +18,7 @@ export async function sendQueuedOfflineMutationToServer(mutation: QueuedOfflineM
     case "sendMessage": {
       const deliveredMessage = await api.post<Message>(
         `/api/v1/conversations/${mutation.payload.conversationId}/messages`,
-        { text: mutation.payload.text },
+        { text: mutation.payload.text, linkPreview: mutation.payload.linkPreview ?? null },
         idempotencyOptions,
       );
       messageHistoryStore.replacePendingMessageWithDeliveredMessage(mutation.payload.localMessageId, deliveredMessage);

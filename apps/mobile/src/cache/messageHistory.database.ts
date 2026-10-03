@@ -29,7 +29,7 @@ interface SavedMessageRow {
 }
 
 type ConversationExtras = Omit<Conversation, "id" | "peer" | "lastMessage" | "lastMessageAt" | "unread" | "isFriend">;
-type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt">;
+type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "readAt" | "encryption">;
 
 let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
@@ -92,6 +92,11 @@ const extractMessageExtras = (message: Message): MessageExtras => ({
   media: message.media,
   reactions: message.reactions,
   expiresAt: message.expiresAt,
+  mediaExpiresAt: message.mediaExpiresAt,
+  linkPreview: message.linkPreview,
+  sharedContent: message.sharedContent,
+  readAt: message.readAt,
+  encryption: message.encryption,
 });
 
 const hasMessageExpired = (message: Pick<Message, "expiresAt">) => !!message.expiresAt && message.expiresAt <= new Date().toISOString();

@@ -2,10 +2,12 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useOfflineStore } from "@/store/offline.store";
 
 export function OfflineIndicator() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const isOnline = useOfflineStore((state) => state.isOnline);
   const queuedMutationCount = useOfflineStore((state) => state.queuedMutations.length);
@@ -21,7 +23,7 @@ export function OfflineIndicator() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   banner: {
     position: "absolute",
     left: 0,
@@ -31,4 +33,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.avatar,
     opacity: 0.92,
   },
-});
+}));

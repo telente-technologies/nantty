@@ -1,3 +1,5 @@
+import type { LinkPreview } from "@/types";
+
 export type OfflineMutation =
   | { readonly kind: "likePost"; readonly payload: { readonly postId: string } }
   | { readonly kind: "unlikePost"; readonly payload: { readonly postId: string } }
@@ -5,7 +7,7 @@ export type OfflineMutation =
   | { readonly kind: "unfollowUser"; readonly payload: { readonly userId: string } }
   | {
       readonly kind: "sendMessage";
-      readonly payload: { readonly conversationId: string; readonly text: string; readonly localMessageId: string };
+      readonly payload: { readonly conversationId: string; readonly text: string; readonly localMessageId: string; readonly linkPreview?: LinkPreview | null };
     };
 
 export type OfflineMutationKind = OfflineMutation["kind"];

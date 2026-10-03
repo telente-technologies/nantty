@@ -6,6 +6,7 @@ import type { PersistQueryClientOptions } from "@tanstack/react-query-persist-cl
 import Constants from "expo-constants";
 import { AppState, Platform } from "react-native";
 
+import { ApiError } from "@/errors/api.error";
 import { isDeviceConnectedAccordingToNetInfo } from "@/store/offline.store";
 
 const ONE_SECOND_MS = 1_000;
@@ -42,7 +43,7 @@ export const isQuerySafeToPersistOnDevice = (query: Query) =>
 export function createZudomartQueryClient() {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { staleTime: 30 * ONE_SECOND_MS, gcTime: ONE_DAY_MS, retry: 1, networkMode: "offlineFirst" },
+      queries: { staleTime: 30 * ONE_SECOND_MS, gcTime: ONE_DAY_MS, retry: (failureCount, error) => !(error instanceof ApiError && error.status === 401) && failureCount < 1, networkMode: "offlineFirst" },
       mutations: { networkMode: "offlineFirst" },
     },
   });
