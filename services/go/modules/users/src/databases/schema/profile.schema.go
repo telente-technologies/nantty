@@ -35,6 +35,7 @@ func (Profile) Fields() []ent.Field {
 		field.Bool("is_private").Default(false),
 		field.String("country_code").Optional().Nillable().MaxLen(2),
 		field.Bool("verified").Default(false),
+		field.Enum("profile_type").Values("personal", "business", "brand", "government").Default("personal"),
 		field.Enum("status").Values("active", "archived").Default("active"),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
