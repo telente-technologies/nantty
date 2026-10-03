@@ -10,11 +10,14 @@ and the contract inventory is in [`docs/backendPlan.md`](../docs/backendPlan.md)
 Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.19` image, so it does not need a local install.
 
 ```bash
-pnpm backend:up                # Postgres+PostGIS, Valkey, LocalStack (SNS/SQS), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
+pnpm backend:up                # Postgres+PostGIS, Valkey, RabbitMQ, LocalStack (SES), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
 pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
+pnpm backend:dev:social       # ts-social on :8105 (needs go-identity data for profiles), reads services/typescript/social/.env.example
+pnpm backend:dev:media        # ts-media on :8108 (S3 multipart uploads to SeaweedFS, sharp, ffmpeg if installed), reads services/typescript/media/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
-pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Bachs sandbox keys are empty by default
-pnpm backend:dev:notifications # ts.notifications on :8104; consumes SQS, sends email through SES (LocalStack), needs `prisma migrate deploy` once
+pnpm backend:dev:trust         # go-trust (chat reports, advisory suspension cases) on :8106
+pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Paystack test keys are empty by default
+pnpm backend:dev:notifications # ts.notifications on :8104; consumes RabbitMQ, sends email through SES (LocalStack), needs `prisma migrate deploy` once
 ```
 
 Point the mobile app at `http://<your-ip>:8080` with mocks off to use real auth. One-time codes are written to the
@@ -28,11 +31,17 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 8080 | gateway (TS) |
 | 8101 | goIdentity |
 | 8103 / 9103 | go-money HTTP / internal gRPC |
+| 8106 | go-trust (moderation) |
+| 8105 | ts-social |
+| 8108 | ts-media |
 | 8104 | ts.notifications |
 | 4000 | realtime (Phoenix, `/ws`) |
 | 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
 | 16379 | Valkey |
-| 14566 | LocalStack (SNS topic `zudomart-domain-events`, SQS job and consumer queues + DLQs) |
+| 5672 | RabbitMQ AMQP, vhost `zudomart`, one user per service (`<service>` / `<service>-local-only`, see `infra/local/rabbitmq/topology.json`) |
+| 15672 | RabbitMQ management UI (localhost only; `zudomart` / `zudomart-local-only`) |
+| 15692 | RabbitMQ Prometheus metrics (`/metrics`, `/metrics/per-object`) |
+| 14566 | LocalStack (SES only) |
 | 18333 | SeaweedFS S3 API (MinIO no longer publishes public images) |
 | 7880 | LiveKit (`devkey` / local-only secret) |
 | 4317/4318 | OTel collector |
@@ -50,6 +59,7 @@ services/
     platform/          shared Go libraries (below)
     modules/<service>/ one Go module per JSON service: auth, users, currency, admin (go-identity) are built, the rest are skeletons
     deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
+  typescript/social/   Zudojs + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
   typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
   typescript/notifications/ Zudojs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
@@ -80,11 +90,11 @@ includes `services/contracts`, every Go Dockerfile uses `services` as the build 
 | Deployable | Modules | Why grouped |
 | --- | --- | --- |
 | goIdentity | auth, users, currency, admin | low write volume, shared session/JWKS concerns |
-| goCommerce | catalog, inventory, orders, analytics | stock reservation and order creation in one transaction |
+| goCommerce | catalog, inventory, orders, analytics | order, order group and stock reservation commit in one Postgres transaction (role `svc_commerce`); only the go-money call sits outside it |
 | goMoney | payments, wallet, ledger, escrow, subscriptions, creators | every balance change commits in one Postgres transaction |
 | goLive | live | hot, latency-sensitive state machine (sessions, guests, battles, gifts) |
 | goAds | ads | separate scaling and billing cadence |
-| goTrust | moderation | async, queue-driven |
+| goTrust | moderation (chat reports, suspension cases, evidence retention) | async, queue-driven; `pnpm backend:dev:trust` on :8106 |
 
 A module never imports another module's packages (use `platform/identityports`, events or gRPC). Splitting a module into its own deployable is a `main.go` change.
 
@@ -98,7 +108,7 @@ A module never imports another module's packages (use `platform/identityports`, 
 | `idempotency` | `Idempotency-Key` middleware (8-128 `[A-Za-z0-9_-]`, scoped to principal + route, 409 in flight, 422 on reuse with a different body, replay with `Idempotent-Replayed: true`) backed by Redis |
 | `jwtauth` | access-token verifier (remote JWKS with cache, or a local key set) and `RequireVerifiedAccessToken` middleware |
 | `postgres` | pgx pool for ent, schema-scoped URLs (`search_path`), embedded migration runner |
-| `events` | `DomainEventPublisher`, `JobQueue`, outbox relay, event envelope; SNS/SQS implementations; recording/discarding publishers for tests and local runs |
+| `events` | `DomainEventPublisher`, `JobQueue`/`DelayedJobQueue`, `QueueConsumer`, outbox relay, event envelope; RabbitMQ implementation (`EVENT_BUS=rabbitmq`, default) and the old SNS/SQS one (`EVENT_BUS=sqs`); recording/discarding publishers for tests and local runs |
 | `health` | `/healthz` and `/readyz` with named readiness checks |
 | `telemetry` | OpenTelemetry tracing (OTLP when `OTEL_EXPORTER_OTLP_ENDPOINT` is set) and HTTP instrumentation |
 | `httpserver` | graceful server, request id, panic recovery, access log, JSON/error helpers, `ApiError`, `CursorPage` |
@@ -143,10 +153,16 @@ go run ./cmd/generateMigration -rehash                    # after adding a manua
 
 No Kafka on day one. A command writes its business rows **and** an `outbox_events` row in one transaction. The module's
 outbox relay (`events.RelayOutboxEventsUntilContextDone`, `FOR UPDATE SKIP LOCKED`) publishes through the
-`DomainEventPublisher` interface: SNS topic `zudomart-domain-events` with the `eventType` message attribute, fanned out to
-one SQS queue per consumer (filter policies) with a DLQ. Background jobs (email, media, thumbnails, reports, payouts,
-search indexing) go through `JobQueue` (SQS). Consumers must be idempotent on the envelope/job id. Kafka/MSK or
-EventBridge can replace the implementation later without touching business code.
+`DomainEventPublisher` interface. RabbitMQ adopted (owner, 2026-10-03): events go with publisher confirms to the topic
+exchange `zudomart.events` (routing key = event type, `message_id` = envelope id); each consumer owns a durable quorum
+queue bound to the keys it needs. Background jobs (email, media, reports, ad reports, payouts, search indexing, trust
+advisories) go through `JobQueue` to the direct exchange `zudomart.jobs`, one quorum queue per job type. Consumers
+(`QueueConsumer`) use manual acks and prefetch, must be idempotent on the envelope/job id, return
+`events.ErrPoisonMessage` (TS `PoisonMessageError`) for messages that can never succeed, and get 5 attempts with
+backoff (`<queue>.retry.30s/2m/10m/30m`) before `<queue>.dlq`. Wiring: `events.CreateDomainEventPublisherFromEnvironment`
+and `events.CreateJobQueueAndConsumerFromEnvironment` read `EVENT_BUS` (`rabbitmq` default, `sqs` keeps the old SNS/SQS
+adapters), `RABBITMQ_URL` (one user per deployable) and `RABBITMQ_PREFETCH`. Locally RabbitMQ runs in compose; in AWS it
+is Amazon MQ for RabbitMQ (cluster, private subnets). See `docs/architecture/events.md` section 4.
 
 Event types are `<entity>.<pastTense>` (`account.registered`, `order.created`, `gift.sent`). Each event has a JSON Schema
 in `contracts/events/schemas/<type>.v<version>.json` and an entry in `contracts/events/asyncapi.yaml`; the envelope is
@@ -252,7 +268,8 @@ Gateway: `/api/v1/admin/*` is routed with `authentication: "optional"` because s
 3. TypeScript: `services/typescript/<service>` (Zudojs + Prisma, `<name>.<kind>.ts`), then add its route prefix to
    `typescript/gateway/src/routes/upstream.routes.ts` and its URL to `gateway.config.ts`.
 4. Contracts: add each new event's JSON Schema + AsyncAPI message, and proto files for any internal gRPC.
-5. Infra: if the service consumes events, add its queue in `infra/local/localstack/create-topics-and-queues.sh`.
+5. Infra: if the service consumes events or jobs, add its queue, bindings and service grants to
+   `infra/local/rabbitmq/topology.json`, run `pnpm backend:rabbitmq:definitions`, and recreate the broker (`pnpm backend:reset` drops data).
 6. Gateway: add the route prefix with `authentication: "required"` unless the endpoint is public.
 7. Prove it: unit table tests, an integration test, `pnpm backend:check`, and the frontend mock for that domain switched off.
 
@@ -289,14 +306,17 @@ return the original; different lines are rejected. Reversals post an opposite en
 Integrity: `VerifyTrialBalanceAndCachedBalances` pages accounts by id (500 per page) and compares cached balances with their
 lines; it runs daily, also runs the provider mirror reconciliation, and is exposed at `GET /api/v1/admin/ledger/integrity`.
 
-**Zudomart holds nobody's money (Bachs Connect).** Each seller and creator has a Bachs connected account. The ledger
-mirrors those provider-held balances: every account owned by `sellerProviderHeld` (`seller:{id}:providerHeld` asset, and the
-`escrow`, `pending`, `available`, `reservedPayout`, `refundsInFlight`, `debt` states) is provider-held, seller-owned money;
-`platform` accounts (`asset:providerBalance:bachs`, `revenue:commission`, `liability:platformFeesUnearned`, coin and fee
-accounts) are Zudomart's own. A daily mirror check compares `seller:{id}:providerHeld` minus in-flight payouts, refunds and
-unsent fee top-ups with Bachs `available + pending` (`GET /v1/balances`, `X-Account-Id`); a mismatch freezes that account's
-payouts (`connected_accounts.payouts_frozen`) until it matches again. `POST /api/v1/admin/payments/reconciliations` runs it
-on demand.
+**Paystack, Zudomart holding as little as possible.** Direct orders (verified stores) split the whole charge to the
+seller's Paystack settlement subaccount (`bearer: subaccount`, the seller pays Paystack's fee, Zudomart adds nothing); the
+ledger records `seller:{id}:providerHeld` / `seller:{id}:settlingByPaystack` until the nightly reconciliation sees the
+subaccount settlement (`GET /settlement?subaccount=`). Escrow orders (launch path E2, `ESCROW_MODE=e2`; `e1` would add a
+manual-settlement escrow subaccount once Paystack confirms) stay in Zudomart's Paystack balance
+(`asset:providerBalance:paystack`) and are paid out by transfer after release + 24h. The escrow fee is 1.5% of the
+seller-group total incl. shipping (`ESCROW_FEE_BPS`), 1% on the Business plan (`ESCROW_FEE_BUSINESS_PLAN_BPS`, looked up
+through subscriptions); the seller also pays Paystack's processing fee; both are separate ledger lines
+(`liability:platformFeesUnearned` → `revenue:escrowFees` at release, and the recovered `expense:paymentProcessingFees`).
+The nightly reconciliation (`POST /api/v1/admin/payments/reconciliations`, also the ledger integrity job) verifies pending
+intents and transfers by reference, compares `GET /balance` with the ledger and mirrors direct settlements.
 
 Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:escrow:{escrowId}` → `seller:{id}:pending`
 (locked; a maturity row per credit, `SELLER_CREDIT_HOLD_PERIOD` 24h, matured every 5 min) → `seller:{id}:available` →
@@ -305,28 +325,31 @@ Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:
 `user:{id}:coins`, `creator:{id}:earnedCoins`, `live:battle:{battleId}:holding:{userId}`, `platform:giftRevenue`,
 `platform:coinTransferFees`, `platform:coinsInCirculation`.
 
-**Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `ConnectedAccountProvider`,
-`MoneyMovementProvider`, `DisputeProvider`, `SubscriptionProvider`, combined as `ConnectProvider`) with one adapter,
-`bachsConnect` (`src/integrations/bachsConnect*.integration.go`); another provider only needs a new adapter. Bachs review, fees, control model and go-live checklist: [`docs/integrations/bachs.md`](../docs/integrations/bachs.md). Money is int64
-minor units inside and Bachs decimal strings at the boundary. The HTTP client has a 15s timeout, sends `Idempotency-Key` on
-every mutation (refused locally without one) and retries only GETs and keyed mutations on network errors, 429 and 5xx.
-Marketplace purchases are direct charges: one hosted checkout per seller order with `X-Account-Id` = the seller account and
-`platform_fee` = the commission, the buyer's verified email from the identity directory (`VERIFY_EMAIL_REQUIRED`
-otherwise; clients never send an email) and success/cancel return URLs from `PAYMENT_RETURN_URLS` (web page or app
-universal link). The intent and an outbox row are written in one transaction; the Bachs checkout call happens after commit
-with key `chk:<reference>`, and intents that never opened a checkout are cancelled after 30 minutes. Paid only after a
-webhook verified with HMAC-SHA256 of `{timestamp}.{raw_body}` (`X-Bachs-Signature-V2`, any `v1` during secret rotation,
-300s tolerance, constant time), deduplicated on the `evt_` id and re-fetched from Bachs before posting. Refunds first move
-the platform fee and processing fee back to the seller account (`POST /v1/transfers`, key `fee-topup:<refundId>`), then
-refund (`refund:<refundId>`). Chargebacks (`dispute.*` webhooks plus a daily List Disputes poll) freeze or settle escrow.
-Seller payouts are `POST /v1/payouts` on the seller account (key `payout:<reference>`), resolved only by `payout.paid` /
-`payout.failed`. Seller and creator accounts: `POST /payments/connected-accounts/me`, hosted onboarding link, capability
-gating, manual payout schedule, NGN virtual account. Web-only subscriptions and trials:
-`POST /payments/subscriptions/checkout` (refused for `X-Client-Platform: ios|android`). Key/environment mismatches
-(`sk_live_` outside production, `sk_sandbox_` in production, base URL mismatch, missing signing secrets) fail at boot.
+**Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `PayeeProvider`, `MoneyMovementProvider`,
+`DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider`, combined as `FullPaymentProvider`) with one adapter,
+`paystack` (`src/integrations/paystack*.integration.go`, fake API in `paymentsTesting/fakePaystack*.util.go`, recorded
+fixtures in `testdata/paystack`). Review, fees and go-live checklist: [`docs/integrations/paystack.md`](../docs/integrations/paystack.md).
+Money is int64 kobo end to end. The HTTP client has a 15s timeout and retries GETs and reference-keyed POSTs (initialize,
+charge_authorization, transfer) on network errors, 429 and 5xx; Paystack's idempotency is the `reference`. One transaction
+per seller order: the intent and an outbox row commit first, then `POST /transaction/initialize` (account email from the
+identity directory, channels `card,bank,ussd,bank_transfer`, subaccount split for direct orders). Paid only after a webhook
+verified with HMAC-SHA512 of the raw body (`x-paystack-signature`, the previous secret during rotation, optional
+`PAYSTACK_WEBHOOK_IP_ALLOWLIST`), deduplicated on `event:data.id:data.status`, then `GET /transaction/verify`. `abandoned`
+stays pending. Refunds are `POST /refund` from the main balance; `needs-attention` bank-transfer refunds ask the buyer for an
+account (`POST /api/v1/payments/refunds/{id}/bank-destination`, resolved, then `retry_with_customer_details`). Disputes:
+`charge.dispute.*` plus a daily poll; `merchant-accepted` is a lost chargeback. Payout accounts (sellers and creators, one per
+person) follow plans §38 (`/api/v1/payments/payout-onboarding/me*`, `GET /api/v1/payments/payout-fees`): identity and
+business are stored locally (BVN/NIN only last 4 kept, the rest sealed with `DATA_ENCRYPTION_KEY`), the bank step queues
+`createRecipient` and, for sellers, `createSettlementSubaccount` jobs (`connected_account_jobs`: look up before create,
+backoff 1m/5m/30m/2h/6h, dead letter, "Try again", daily requeue, admin `GET /api/v1/admin/payments/payout-accounts/stuck`).
+Withdrawals are refused until the account is verified. Saved cards: a NGN 50 verification charge (refunded at once) hands
+the Paystack `authorization_code` to the device once (`POST /api/v1/payments/saved-cards/setups[/{ref}/complete]`), never
+stored; `POST /api/v1/payments/saved-cards/charges` passes it to `charge_authorization` (paused → 2FA URL, failure → new
+hosted checkout). IAP: Apple JWS + App Store Server API and Google Play Developer API verifiers with refund claw-back.
 
 **Escrow** (`modules/escrow`). One escrow per order, split computed at funding (seller rounds down, platform takes the
-remainder, `ESCROW_PLATFORM_COMMISSION_BPS` 500). States `held → released | refunded | disputed | partiallyRefunded`,
+remainder, `ESCROW_FEE_BPS` 150; commerce refunds arrive as `orderGroup.refundRequested` on `money-domain-events` or at
+`POST /api/v1/internal/order-groups/{orderGroupId}/refunds` with `X-Internal-Token`). States `held → released | refunded | disputed | partiallyRefunded`,
 `disputed → held` (buyer closes) and `released → refunded` (post-release refunds), all compare-and-set with a version.
 Auto-release `ESCROW_INSPECTION_PERIOD` (72h) after the delivered timestamp; an open dispute pauses the timer and closing it
 resumes the remaining window. Unverified stores are escrow-only (`DIRECT_PAYMENT_NOT_ALLOWED`); direct orders credit the
@@ -339,13 +362,21 @@ table at `GET/PUT /api/v1/admin/coins/price-table[/{packageId}]` (`money.monetiz
 purchases through payments, IAP receipts with the store fee booked as `expense:appStoreFees:{store}`, store refunds that claw
 back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk_flags` row. Transfers take 25%
 (`COIN_TRANSFER_FEE_BPS`, the recipient rounds down). Earned coins convert to cash (`COIN_CASH_VALUES`,
-`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Zudomart owes it); the daily payout run transfers it from
-Zudomart's Bachs balance to the creator's connected account (`CREATOR_TRANSFER_MINIMUMS`) and only then is it
-withdrawable. Payout accounts are AES-256-GCM encrypted (owner id as associated
+`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Zudomart owes it); the daily run moves it to `seller:{id}:available` once
+the creator's payout account is verified (`CREATOR_TRANSFER_MINIMUMS`); gap earnings stay payable until then. Payout accounts are AES-256-GCM encrypted (owner id as associated
 data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money capped
-by the Bachs available balance minus withdrawals not yet sent (read before the transaction; NGN 50 fee on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
+by the Paystack balance minus withdrawals not yet sent (read before the transaction; the Paystack transfer fee band on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
 are paid by the daily payout run (`WALLET_PAYOUT_RUN_INTERVAL`, or `POST /api/v1/admin/payouts/run`) through the
-`SellerSettlementAdapter` (`bachsManualPayout`, the only code path that triggers a Bachs payout).
+`SellerSettlementAdapter` (`paystackTransfer`, the only code path that creates a Paystack transfer). Prepaid ad balances:
+`POST /api/v1/ads/balance/top-ups`, `adSpend.batched` debits (or `POST /api/v1/internal/ads/spend-batches`), boost
+debit/refund per `ads_money.proto` at `POST /api/v1/internal/ads/boost-{debits,refunds}`, unused-balance refunds behind
+`ADS_PREPAID_REFUNDS_ENABLED` (legal review). Seller reserve: `PUT /api/v1/admin/wallet/seller-reserves/{sellerUserId}`
+keeps the reserve % locked for `holdDays` when credits mature.
+
+**Subscriptions** (`modules/subscriptions`). Admin price table per country (`/api/v1/admin/subscriptions/price-table`,
+seeded from docs/pricing.md), per-profile billing on Paystack plans, trials (card verification, eligibility, reminders,
+`start_date`), best-of bundle vs yearly, Black grace, IAP for Blue/Premium, and `GET /api/v1/internal/entitlements/{userId}`
+(`X-Internal-Token`: `sellerPlan`, `premium`, `blue`, `gold[]`, `black[]`, `trial`).
 
 **Creators** (`modules/creators`). Creator tiers (gift share capped at 7000 bps; starter 5000, partner 6000, top 7000),
 program membership, gift transactions and battle settlements, served over `LiveMoneyService`. A gift debits the sender,
@@ -379,3 +410,7 @@ and purchase loyalty/cashback were removed by the owner (no rewards module); eng
 ## Elixir file names
 
 `services/elixir/realtime/lib` and `test` use camelCase `<name>.<kind>.ex` (`accessToken.verifier.ex`, `domainEvent.router.ex`, folder `realtimeWeb/`); module names are unchanged.
+
+### Identity and trust endpoints (B1, all done)
+
+Gateway guest browsing and rate limits; admin RBAC (`/admin/roles`, `/admin/admins/*`, `/admin/staff-settings`, audit with filters, CSV, facets); user actions (`/admin/users/{id}/restrict|suspend|reinstate|ban|unban|delete|username/reassign|username/assign-held`, `/admin/usernames/held|hold`, `/admin/suspensions/accounts|cases`, `/users/me/suspension` and its appeal); creator program (`/creators/eligibility|applications`, `/admin/applications/creators`); checkmarks (`/verification/*`, `/admin/verifications`, `/admin/checkmark-grants`, `/admin/accounts`, `/admin/black-applications`); business documents (`/seller/business-documents`, `/admin/business-documents`); legal (`/admin/legal/*`, `/legal/policy-versions/current`, `/users/me/policy-acceptances`); privacy (`/users/me/mention-privacy|message-privacy`); chat reports (`/reports`, `/reports/me`, `/admin/chat-reports`). Internal service endpoints use `X-Internal-Token`: `/internal/enforcement/actions`, `/internal/users/summaries`, `/internal/profiles/{id}/signals`, `/internal/checkmarks/{id}/billing-events`, `/internal/legal/notices/{id}/progress`, `/internal/accounts/{id}/contact-privacy`, `/internal/audit/events|history`, `/internal/suspension-cases`, and the notification directory under `/internal/users/*/notification-recipient` and `/internal/notification-audience/*`.
