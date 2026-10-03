@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { PostCard } from "@/components/feed/postCard";
 import { ProductCard } from "@/components/commerce/productCard";
+import { PostFeedSkeleton } from "@/components/feed/postCardSkeleton";
+import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { RetryButton, SegmentedControl } from "@/components/ui/controls";
 import { feedsService } from "@/services/feeds.service";
@@ -112,7 +114,7 @@ function FeedSection({ feedMode }: { readonly feedMode: FeedMode }) {
     });
   })();
 
-  if (feedQuery.isLoading) return <Spinner label="Loading your feed" />;
+  if (feedQuery.isLoading) return <PostFeedSkeleton />;
   if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." action={<RetryButton onRetry={() => feedQuery.refetch()} />} />;
   if (posts.length === 0) {
     return <EmptyState icon="✦" title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." />;
@@ -205,7 +207,7 @@ function MartSection() {
       </div>
 
       {productsQuery.isLoading ? (
-        <Spinner label="Loading products" />
+        <ProductGridSkeleton gridClassName={styles.productGrid} />
       ) : productsQuery.isError ? (
         <ErrorState description="We couldn't load products." action={<RetryButton onRetry={() => productsQuery.refetch()} />} />
       ) : products.length === 0 ? (
