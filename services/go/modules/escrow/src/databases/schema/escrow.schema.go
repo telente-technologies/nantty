@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
@@ -62,6 +63,10 @@ func (Escrow) Fields() []ent.Field {
 		field.Int64("version").Default(0),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
+}
+
+func (Escrow) Edges() []ent.Edge {
+	return []ent.Edge{edge.To("disputes", Dispute.Type)}
 }
 
 func (Escrow) Indexes() []ent.Index {
