@@ -3,6 +3,7 @@ import { registerBrandMembersMockRoutes } from "@/mocks/handlers/brandMembers.mo
 import { registerBrandProtectionMockRoutes } from "@/mocks/handlers/brandProtection.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, matchesSearchText, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithNoContent, respondWithValidationFailure } from "@/mocks/mockResponses.mock";
+import { convertSubscriptionPlanToGoldBadgeTier } from "@/mocks/mockStoreMembership.mock";
 import { registerMockRoute, type MockPrincipal } from "@/mocks/mockRouter.mock";
 import type { BrandDirectoryEntry, MyStoreEntry } from "@/types/brand.type";
 import type { ValidationIssue } from "@/utils/formValidation.util";
@@ -44,7 +45,7 @@ function listMyStores(principal: MockPrincipal): MyStoreEntry[] {
       storeName: gateStore.storeName,
       brandId: brands.find((brand) => brand.storeIds.includes(gateStore.storeId))?.id ?? null,
       role: membership.role,
-      verification: { status: gateStore.verificationStatus, tier: isGold ? subscription?.plan ?? null : null, badgeVisible: isGold },
+      verification: { status: gateStore.verificationStatus, tier: isGold ? convertSubscriptionPlanToGoldBadgeTier(subscription?.plan) : null, badgeVisible: isGold },
       subscription: subscription ? { status: subscription.status, plan: subscription.plan } : null,
       isCurrent: gateStore.storeId === principal.storeId,
     }];
@@ -107,7 +108,7 @@ export function registerBrandsMockHandlers(): void {
     requireBrandRole(member, ["owner", "admin"], "link stores");
     const storeId = String(readJsonObjectBody(request).storeId ?? "");
     const myStore = listMyStores(principal).find((store) => store.storeId === storeId);
-    if (!myStore || (myStore.role !== "owner" && myStore.role !== "admin")) throw new MockHttpError(403, "STORE_NOT_MANAGED", "You can only link stores where you are the owner or an admin.");
+    if (!myStore || (myStore.role !== "owner" && myStore.role !== "manager")) throw new MockHttpError(403, "STORE_NOT_MANAGED", "You can only link stores where you are the owner or a manager.");
     if (myStore.brandId && myStore.brandId !== brand.id) throw new MockHttpError(409, "STORE_HAS_BRAND", `${myStore.storeName} already belongs to another brand. Unlink it there first.`);
     if (!brand.storeIds.includes(storeId)) brand.storeIds.push(storeId);
     recordBrandAuditEntry(principal, "brand.store_linked", brand.id, `Linked ${myStore.storeName} to ${brand.name}`);
