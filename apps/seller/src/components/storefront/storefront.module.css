@@ -1,0 +1,265 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 20px;
+  align-items: start;
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.previewColumn {
+  position: sticky;
+  top: calc(var(--topbar-height) + 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+}
+
+.imagePickers {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.imagePicker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imageLabel {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.logoBox,
+.coverBox {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed var(--divider);
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.logoBox {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+}
+
+.coverBox {
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  border-radius: var(--radius-medium);
+}
+
+.logoBox img,
+.coverBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hoursRow {
+  display: grid;
+  grid-template-columns: 110px auto minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.hoursRow:last-child {
+  border-bottom: 0;
+}
+
+.timeInput {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  font: inherit;
+}
+
+.closedLabel {
+  grid-column: span 2;
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.featuredList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.featuredRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+}
+
+.thumbnail {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+  object-fit: cover;
+}
+
+.featuredName {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.previewCard {
+  overflow: hidden;
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.previewCover {
+  height: 110px;
+  background: linear-gradient(135deg, var(--blue-500), var(--blue-800));
+}
+
+.previewCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.previewLogo {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: -32px;
+  overflow: hidden;
+  border: 3px solid var(--surface-card);
+  border-radius: 50%;
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 750;
+  font-size: 22px;
+}
+
+.previewLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewName {
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.previewStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.previewProducts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.previewProduct {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.previewProductImage {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+  object-fit: cover;
+}
+
+.socialRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .previewColumn {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .imagePickers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hoursRow {
+    grid-template-columns: 1fr auto;
+  }
+
+  .closedLabel {
+    grid-column: span 2;
+  }
+}
