@@ -414,6 +414,10 @@ export const ModelName = {
   CommentLike: 'CommentLike',
   FeedFeedback: 'FeedFeedback',
   StoryView: 'StoryView',
+  PostViewer: 'PostViewer',
+  PostDailyStat: 'PostDailyStat',
+  Sound: 'Sound',
+  SoundSave: 'SoundSave',
   Follow: 'Follow',
   Block: 'Block',
   OutboxEvent: 'OutboxEvent',
@@ -440,7 +444,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "follow" | "block" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "follow" | "block" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1702,6 +1706,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PostViewer: {
+      payload: Prisma.$PostViewerPayload<ExtArgs>
+      fields: Prisma.PostViewerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostViewerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostViewerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        findFirst: {
+          args: Prisma.PostViewerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostViewerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        findMany: {
+          args: Prisma.PostViewerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>[]
+        }
+        create: {
+          args: Prisma.PostViewerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        createMany: {
+          args: Prisma.PostViewerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PostViewerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>[]
+        }
+        delete: {
+          args: Prisma.PostViewerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        update: {
+          args: Prisma.PostViewerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        deleteMany: {
+          args: Prisma.PostViewerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostViewerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PostViewerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>[]
+        }
+        upsert: {
+          args: Prisma.PostViewerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostViewerPayload>
+        }
+        aggregate: {
+          args: Prisma.PostViewerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostViewer>
+        }
+        groupBy: {
+          args: Prisma.PostViewerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostViewerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostViewerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostViewerCountAggregateOutputType> | number
+        }
+      }
+    }
+    PostDailyStat: {
+      payload: Prisma.$PostDailyStatPayload<ExtArgs>
+      fields: Prisma.PostDailyStatFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostDailyStatFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostDailyStatFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        findFirst: {
+          args: Prisma.PostDailyStatFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostDailyStatFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        findMany: {
+          args: Prisma.PostDailyStatFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>[]
+        }
+        create: {
+          args: Prisma.PostDailyStatCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        createMany: {
+          args: Prisma.PostDailyStatCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PostDailyStatCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>[]
+        }
+        delete: {
+          args: Prisma.PostDailyStatDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        update: {
+          args: Prisma.PostDailyStatUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        deleteMany: {
+          args: Prisma.PostDailyStatDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostDailyStatUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PostDailyStatUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>[]
+        }
+        upsert: {
+          args: Prisma.PostDailyStatUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostDailyStatPayload>
+        }
+        aggregate: {
+          args: Prisma.PostDailyStatAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostDailyStat>
+        }
+        groupBy: {
+          args: Prisma.PostDailyStatGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostDailyStatGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostDailyStatCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostDailyStatCountAggregateOutputType> | number
+        }
+      }
+    }
+    Sound: {
+      payload: Prisma.$SoundPayload<ExtArgs>
+      fields: Prisma.SoundFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SoundFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SoundFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        findFirst: {
+          args: Prisma.SoundFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SoundFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        findMany: {
+          args: Prisma.SoundFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>[]
+        }
+        create: {
+          args: Prisma.SoundCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        createMany: {
+          args: Prisma.SoundCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SoundCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>[]
+        }
+        delete: {
+          args: Prisma.SoundDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        update: {
+          args: Prisma.SoundUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        deleteMany: {
+          args: Prisma.SoundDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SoundUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SoundUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>[]
+        }
+        upsert: {
+          args: Prisma.SoundUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundPayload>
+        }
+        aggregate: {
+          args: Prisma.SoundAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSound>
+        }
+        groupBy: {
+          args: Prisma.SoundGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SoundGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SoundCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SoundCountAggregateOutputType> | number
+        }
+      }
+    }
+    SoundSave: {
+      payload: Prisma.$SoundSavePayload<ExtArgs>
+      fields: Prisma.SoundSaveFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SoundSaveFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SoundSaveFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        findFirst: {
+          args: Prisma.SoundSaveFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SoundSaveFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        findMany: {
+          args: Prisma.SoundSaveFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>[]
+        }
+        create: {
+          args: Prisma.SoundSaveCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        createMany: {
+          args: Prisma.SoundSaveCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SoundSaveCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>[]
+        }
+        delete: {
+          args: Prisma.SoundSaveDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        update: {
+          args: Prisma.SoundSaveUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        deleteMany: {
+          args: Prisma.SoundSaveDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SoundSaveUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SoundSaveUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>[]
+        }
+        upsert: {
+          args: Prisma.SoundSaveUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SoundSavePayload>
+        }
+        aggregate: {
+          args: Prisma.SoundSaveAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSoundSave>
+        }
+        groupBy: {
+          args: Prisma.SoundSaveGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SoundSaveGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SoundSaveCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SoundSaveCountAggregateOutputType> | number
+        }
+      }
+    }
     Follow: {
       payload: Prisma.$FollowPayload<ExtArgs>
       fields: Prisma.FollowFieldRefs
@@ -2706,6 +3006,7 @@ export const PostScalarFieldEnum = {
   repostCount: 'repostCount',
   shareCount: 'shareCount',
   viewCount: 'viewCount',
+  profileVisitCount: 'profileVisitCount',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -2796,6 +3097,50 @@ export const StoryViewScalarFieldEnum = {
 } as const
 
 export type StoryViewScalarFieldEnum = (typeof StoryViewScalarFieldEnum)[keyof typeof StoryViewScalarFieldEnum]
+
+
+export const PostViewerScalarFieldEnum = {
+  postId: 'postId',
+  viewerKey: 'viewerKey',
+  createdAt: 'createdAt'
+} as const
+
+export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof typeof PostViewerScalarFieldEnum]
+
+
+export const PostDailyStatScalarFieldEnum = {
+  postId: 'postId',
+  day: 'day',
+  impressions: 'impressions'
+} as const
+
+export type PostDailyStatScalarFieldEnum = (typeof PostDailyStatScalarFieldEnum)[keyof typeof PostDailyStatScalarFieldEnum]
+
+
+export const SoundScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  title: 'title',
+  isOriginal: 'isOriginal',
+  allowReuse: 'allowReuse',
+  status: 'status',
+  usageCount: 'usageCount',
+  audioUrl: 'audioUrl',
+  coverUrl: 'coverUrl',
+  sourceClipId: 'sourceClipId',
+  createdAt: 'createdAt'
+} as const
+
+export type SoundScalarFieldEnum = (typeof SoundScalarFieldEnum)[keyof typeof SoundScalarFieldEnum]
+
+
+export const SoundSaveScalarFieldEnum = {
+  soundId: 'soundId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type SoundSaveScalarFieldEnum = (typeof SoundSaveScalarFieldEnum)[keyof typeof SoundSaveScalarFieldEnum]
 
 
 export const FollowScalarFieldEnum = {
@@ -3188,6 +3533,20 @@ export type ListEnumMediaKindFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
+ * Reference to a field of type 'SoundStatus'
+ */
+export type EnumSoundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SoundStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SoundStatus[]'
+ */
+export type ListEnumSoundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SoundStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'FollowState'
  */
 export type EnumFollowStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FollowState'>
@@ -3396,6 +3755,10 @@ export type GlobalOmitConfig = {
   commentLike?: Prisma.CommentLikeOmit
   feedFeedback?: Prisma.FeedFeedbackOmit
   storyView?: Prisma.StoryViewOmit
+  postViewer?: Prisma.PostViewerOmit
+  postDailyStat?: Prisma.PostDailyStatOmit
+  sound?: Prisma.SoundOmit
+  soundSave?: Prisma.SoundSaveOmit
   follow?: Prisma.FollowOmit
   block?: Prisma.BlockOmit
   outboxEvent?: Prisma.OutboxEventOmit

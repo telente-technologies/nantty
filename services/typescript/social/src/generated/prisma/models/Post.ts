@@ -32,6 +32,7 @@ export type PostAvgAggregateOutputType = {
   repostCount: number | null
   shareCount: number | null
   viewCount: number | null
+  profileVisitCount: number | null
 }
 
 export type PostSumAggregateOutputType = {
@@ -40,6 +41,7 @@ export type PostSumAggregateOutputType = {
   repostCount: number | null
   shareCount: number | null
   viewCount: number | null
+  profileVisitCount: number | null
 }
 
 export type PostMinAggregateOutputType = {
@@ -60,6 +62,7 @@ export type PostMinAggregateOutputType = {
   repostCount: number | null
   shareCount: number | null
   viewCount: number | null
+  profileVisitCount: number | null
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -83,6 +86,7 @@ export type PostMaxAggregateOutputType = {
   repostCount: number | null
   shareCount: number | null
   viewCount: number | null
+  profileVisitCount: number | null
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -108,6 +112,7 @@ export type PostCountAggregateOutputType = {
   repostCount: number
   shareCount: number
   viewCount: number
+  profileVisitCount: number
   expiresAt: number
   deletedAt: number
   createdAt: number
@@ -121,6 +126,7 @@ export type PostAvgAggregateInputType = {
   repostCount?: true
   shareCount?: true
   viewCount?: true
+  profileVisitCount?: true
 }
 
 export type PostSumAggregateInputType = {
@@ -129,6 +135,7 @@ export type PostSumAggregateInputType = {
   repostCount?: true
   shareCount?: true
   viewCount?: true
+  profileVisitCount?: true
 }
 
 export type PostMinAggregateInputType = {
@@ -149,6 +156,7 @@ export type PostMinAggregateInputType = {
   repostCount?: true
   shareCount?: true
   viewCount?: true
+  profileVisitCount?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -172,6 +180,7 @@ export type PostMaxAggregateInputType = {
   repostCount?: true
   shareCount?: true
   viewCount?: true
+  profileVisitCount?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -197,6 +206,7 @@ export type PostCountAggregateInputType = {
   repostCount?: true
   shareCount?: true
   viewCount?: true
+  profileVisitCount?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -309,6 +319,7 @@ export type PostGroupByOutputType = {
   repostCount: number
   shareCount: number
   viewCount: number
+  profileVisitCount: number
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date
@@ -357,6 +368,7 @@ export type PostWhereInput = {
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
+  profileVisitCount?: Prisma.IntFilter<"Post"> | number
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -387,6 +399,7 @@ export type PostOrderByWithRelationInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -420,6 +433,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
+  profileVisitCount?: Prisma.IntFilter<"Post"> | number
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -450,6 +464,7 @@ export type PostOrderByWithAggregationInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -483,6 +498,7 @@ export type PostScalarWhereWithAggregatesInput = {
   repostCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   shareCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   viewCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  profileVisitCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
@@ -507,6 +523,7 @@ export type PostCreateInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -537,6 +554,7 @@ export type PostUncheckedCreateInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -565,6 +583,7 @@ export type PostUpdateInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -595,6 +614,7 @@ export type PostUncheckedUpdateInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -624,6 +644,7 @@ export type PostCreateManyInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -648,6 +669,7 @@ export type PostUpdateManyMutationInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -673,6 +695,7 @@ export type PostUncheckedUpdateManyInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -713,6 +736,7 @@ export type PostCountOrderByAggregateInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -724,6 +748,7 @@ export type PostAvgOrderByAggregateInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
 }
 
 export type PostMaxOrderByAggregateInput = {
@@ -744,6 +769,7 @@ export type PostMaxOrderByAggregateInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -767,6 +793,7 @@ export type PostMinOrderByAggregateInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -778,6 +805,7 @@ export type PostSumOrderByAggregateInput = {
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+  profileVisitCount?: Prisma.SortOrder
 }
 
 export type PostScalarRelationFilter = {
@@ -916,6 +944,7 @@ export type PostCreateWithoutResharesInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -945,6 +974,7 @@ export type PostUncheckedCreateWithoutResharesInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -977,6 +1007,7 @@ export type PostCreateWithoutResharedFromInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1005,6 +1036,7 @@ export type PostUncheckedCreateWithoutResharedFromInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1054,6 +1086,7 @@ export type PostUpdateWithoutResharesInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1083,6 +1116,7 @@ export type PostUncheckedUpdateWithoutResharesInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1130,6 +1164,7 @@ export type PostScalarWhereInput = {
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
+  profileVisitCount?: Prisma.IntFilter<"Post"> | number
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -1154,6 +1189,7 @@ export type PostCreateWithoutMediaInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1183,6 +1219,7 @@ export type PostUncheckedCreateWithoutMediaInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1226,6 +1263,7 @@ export type PostUpdateWithoutMediaInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1255,6 +1293,7 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1282,6 +1321,7 @@ export type PostCreateWithoutLikesInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1311,6 +1351,7 @@ export type PostUncheckedCreateWithoutLikesInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1354,6 +1395,7 @@ export type PostUpdateWithoutLikesInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1383,6 +1425,7 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1410,6 +1453,7 @@ export type PostCreateWithoutCommentsInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1439,6 +1483,7 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1482,6 +1527,7 @@ export type PostUpdateWithoutCommentsInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1511,6 +1557,7 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1538,6 +1585,7 @@ export type PostCreateManyResharedFromInput = {
   repostCount?: number
   shareCount?: number
   viewCount?: number
+  profileVisitCount?: number
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1562,6 +1610,7 @@ export type PostUpdateWithoutResharedFromInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1590,6 +1639,7 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1618,6 +1668,7 @@ export type PostUncheckedUpdateManyWithoutResharedFromInput = {
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1701,6 +1752,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
+  profileVisitCount?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1732,6 +1784,7 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
+  profileVisitCount?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1758,6 +1811,7 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
+  profileVisitCount?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1784,12 +1838,13 @@ export type PostSelectScalar = {
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
+  profileVisitCount?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
@@ -1834,6 +1889,7 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     repostCount: number
     shareCount: number
     viewCount: number
+    profileVisitCount: number
     expiresAt: Date | null
     deletedAt: Date | null
     createdAt: Date
@@ -2284,6 +2340,7 @@ export interface PostFieldRefs {
   readonly repostCount: Prisma.FieldRef<"Post", 'Int'>
   readonly shareCount: Prisma.FieldRef<"Post", 'Int'>
   readonly viewCount: Prisma.FieldRef<"Post", 'Int'>
+  readonly profileVisitCount: Prisma.FieldRef<"Post", 'Int'>
   readonly expiresAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>

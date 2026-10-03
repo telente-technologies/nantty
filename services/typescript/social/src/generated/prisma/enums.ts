@@ -97,6 +97,15 @@ export const MediaKind = {
 export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind]
 
 
+export const SoundStatus = {
+  available: 'available',
+  under_copyright_review: 'under_copyright_review',
+  removed: 'removed'
+} as const
+
+export type SoundStatus = (typeof SoundStatus)[keyof typeof SoundStatus]
+
+
 export const FollowState = {
   requested: 'requested',
   accepted: 'accepted',

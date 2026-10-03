@@ -127,6 +127,26 @@ export type FeedFeedback = Prisma.FeedFeedbackModel
  */
 export type StoryView = Prisma.StoryViewModel
 /**
+ * Model PostViewer
+ * 
+ */
+export type PostViewer = Prisma.PostViewerModel
+/**
+ * Model PostDailyStat
+ * 
+ */
+export type PostDailyStat = Prisma.PostDailyStatModel
+/**
+ * Model Sound
+ * 
+ */
+export type Sound = Prisma.SoundModel
+/**
+ * Model SoundSave
+ * 
+ */
+export type SoundSave = Prisma.SoundSaveModel
+/**
  * Model Follow
  * 
  */

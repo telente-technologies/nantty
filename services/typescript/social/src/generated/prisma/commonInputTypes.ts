@@ -555,6 +555,23 @@ export type EnumMediaKindWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumMediaKindFilter<$PrismaModel>
 }
 
+export type EnumSoundStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.SoundStatus | Prisma.EnumSoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel> | $Enums.SoundStatus
+}
+
+export type EnumSoundStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SoundStatus | Prisma.EnumSoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSoundStatusWithAggregatesFilter<$PrismaModel> | $Enums.SoundStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel>
+}
+
 export type EnumFollowStateFilter<$PrismaModel = never> = {
   equals?: $Enums.FollowState | Prisma.EnumFollowStateFieldRefInput<$PrismaModel>
   in?: $Enums.FollowState[] | Prisma.ListEnumFollowStateFieldRefInput<$PrismaModel>
@@ -1089,6 +1106,23 @@ export type NestedEnumMediaKindWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMediaKindFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMediaKindFilter<$PrismaModel>
+}
+
+export type NestedEnumSoundStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.SoundStatus | Prisma.EnumSoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel> | $Enums.SoundStatus
+}
+
+export type NestedEnumSoundStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SoundStatus | Prisma.EnumSoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.SoundStatus[] | Prisma.ListEnumSoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSoundStatusWithAggregatesFilter<$PrismaModel> | $Enums.SoundStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSoundStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumFollowStateFilter<$PrismaModel = never> = {

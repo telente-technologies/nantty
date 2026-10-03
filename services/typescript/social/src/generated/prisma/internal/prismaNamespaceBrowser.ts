@@ -68,6 +68,10 @@ export const ModelName = {
   CommentLike: 'CommentLike',
   FeedFeedback: 'FeedFeedback',
   StoryView: 'StoryView',
+  PostViewer: 'PostViewer',
+  PostDailyStat: 'PostDailyStat',
+  Sound: 'Sound',
+  SoundSave: 'SoundSave',
   Follow: 'Follow',
   Block: 'Block',
   OutboxEvent: 'OutboxEvent',
@@ -248,6 +252,7 @@ export const PostScalarFieldEnum = {
   repostCount: 'repostCount',
   shareCount: 'shareCount',
   viewCount: 'viewCount',
+  profileVisitCount: 'profileVisitCount',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -338,6 +343,50 @@ export const StoryViewScalarFieldEnum = {
 } as const
 
 export type StoryViewScalarFieldEnum = (typeof StoryViewScalarFieldEnum)[keyof typeof StoryViewScalarFieldEnum]
+
+
+export const PostViewerScalarFieldEnum = {
+  postId: 'postId',
+  viewerKey: 'viewerKey',
+  createdAt: 'createdAt'
+} as const
+
+export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof typeof PostViewerScalarFieldEnum]
+
+
+export const PostDailyStatScalarFieldEnum = {
+  postId: 'postId',
+  day: 'day',
+  impressions: 'impressions'
+} as const
+
+export type PostDailyStatScalarFieldEnum = (typeof PostDailyStatScalarFieldEnum)[keyof typeof PostDailyStatScalarFieldEnum]
+
+
+export const SoundScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  title: 'title',
+  isOriginal: 'isOriginal',
+  allowReuse: 'allowReuse',
+  status: 'status',
+  usageCount: 'usageCount',
+  audioUrl: 'audioUrl',
+  coverUrl: 'coverUrl',
+  sourceClipId: 'sourceClipId',
+  createdAt: 'createdAt'
+} as const
+
+export type SoundScalarFieldEnum = (typeof SoundScalarFieldEnum)[keyof typeof SoundScalarFieldEnum]
+
+
+export const SoundSaveScalarFieldEnum = {
+  soundId: 'soundId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type SoundSaveScalarFieldEnum = (typeof SoundSaveScalarFieldEnum)[keyof typeof SoundSaveScalarFieldEnum]
 
 
 export const FollowScalarFieldEnum = {
