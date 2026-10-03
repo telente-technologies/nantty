@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { SplashScreen } from "@/screens/auth/splash.screen";
 import { OnboardingScreen } from "@/screens/auth/onboarding.screen";
 import { WelcomeScreen } from "@/screens/auth/welcome.screen";
@@ -18,14 +18,15 @@ import type { AuthStackParamList } from "./navigation.types";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
-export function AuthNavigator() {
+export function AuthNavigator({ embeddedMode }: { embeddedMode?: "signup" | "login" }) {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName={embeddedMode ? "Onboarding" : "Splash"}
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: "slide_from_right" }}
     >
       <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} initialParams={embeddedMode ? { mode: embeddedMode, dismissible: true } : undefined} />
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />

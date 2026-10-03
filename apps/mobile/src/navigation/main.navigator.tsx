@@ -1,6 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { ReactNode } from "react";
 
 import { colors } from "@/constants/colors.constant";
+import { ForcedColorSchemeScope } from "@/theme";
 import { SearchScreen } from "@/screens/explore/search.screen";
 import { NotificationsScreen } from "@/screens/notifications/notifications.screen";
 import { CategoryScreen } from "@/screens/explore/category.screen";
@@ -18,6 +20,7 @@ import { UserProfileScreen } from "@/screens/profile/userProfile.screen";
 import { EditProfileScreen } from "@/screens/profile/editProfile.screen";
 import { ConnectionsScreen } from "@/screens/profile/connections.screen";
 import { SettingsScreen } from "@/screens/settings/settings.screen";
+import { SavedScreen } from "@/screens/profile/saved.screen";
 import { SettingsAccountScreen } from "@/screens/settings/settingsAccount.screen";
 import { SettingsSecurityScreen } from "@/screens/settings/settingsSecurity.screen";
 import { SettingsNotificationsScreen } from "@/screens/settings/settingsNotifications.screen";
@@ -28,6 +31,9 @@ import { AddressFormScreen } from "@/screens/settings/addressForm.screen";
 import { SettingsSupportScreen } from "@/screens/settings/settingsSupport.screen";
 import { SettingsAboutScreen } from "@/screens/settings/settingsAbout.screen";
 import { ChangePasswordScreen } from "@/screens/settings/changePassword.screen";
+import { ChatNotificationSettingsScreen } from "@/screens/messages/chatNotificationSettings.screen";
+import { ChatPasscodeScreen } from "@/screens/messages/chatPasscode.screen";
+import { ChatSettingsScreen } from "@/screens/messages/chatSettings.screen";
 import { BlockedUsersScreen } from "@/screens/settings/blockedUsers.screen";
 import { WalletScreen } from "@/screens/wallet/wallet.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
@@ -77,6 +83,9 @@ import { SettingsPrivacyDataScreen } from "@/screens/settings/settingsPrivacyDat
 import { SettingsPrivacyScreen } from "@/screens/settings/settingsPrivacy.screen";
 import { CreateBrandScreen } from "@/screens/brand/createBrand.screen";
 
+import { guestGateScreenLayout } from "@/components/auth/guestGate";
+import { AuthFlowScreen } from "@/screens/auth/authFlow.screen";
+
 import { MainTabsNavigator } from "./mainTabs.navigator";
 import type { MainStackParamList } from "./navigation.types";
 import { SoundScreen } from "@/screens/sounds/sound.screen";
@@ -84,10 +93,12 @@ import { SoundScreen } from "@/screens/sounds/sound.screen";
 const Stack = createNativeStackNavigator<MainStackParamList>();
 const modal = { presentation: "fullScreenModal", animation: "slide_from_bottom" } as const;
 const dark = { animation: "fade", contentStyle: { backgroundColor: colors.black } } as const;
+const keepOnDarkFirstPalette = ({ route, children }: { route: { name: string }; children: ReactNode }) =>
+  guestGateScreenLayout({ route, children: <ForcedColorSchemeScope scheme="light">{children}</ForcedColorSchemeScope> });
 
 export function MainNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right" }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right" }} screenLayout={guestGateScreenLayout}>
       <Stack.Screen name="Tabs" component={MainTabsNavigator} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
@@ -117,6 +128,9 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsAbout" component={SettingsAboutScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
+      <Stack.Screen name="ChatSettings" component={ChatSettingsScreen} />
+      <Stack.Screen name="ChatNotificationSettings" component={ChatNotificationSettingsScreen} />
+      <Stack.Screen name="ChatPasscode" component={ChatPasscodeScreen} />
       <Stack.Screen name="Wallet" component={WalletScreen} />
       <Stack.Screen name="Transactions" component={TransactionsScreen} />
       <Stack.Screen name="CoinActivity" component={CoinActivityScreen} />
@@ -132,12 +146,12 @@ export function MainNavigator() {
       <Stack.Screen name="NewMessage" component={NewMessageScreen} options={modal} />
       <Stack.Screen name="NewGroup" component={NewGroupScreen} options={modal} />
       <Stack.Screen name="ConversationInfo" component={ConversationInfoScreen} />
-      <Stack.Screen name="CreatePost" component={CreatePostScreen} options={modal} />
+      <Stack.Screen name="CreatePost" component={CreatePostScreen} options={modal} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
       <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} />
-      <Stack.Screen name="Live" component={LiveScreen} options={dark} />
-      <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} />
-      <Stack.Screen name="Story" component={StoryScreen} options={dark} />
+      <Stack.Screen name="Live" component={LiveScreen} options={dark} layout={keepOnDarkFirstPalette} />
+      <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} layout={keepOnDarkFirstPalette} />
+      <Stack.Screen name="Story" component={StoryScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="EscrowStatus" component={EscrowStatusScreen} />
       <Stack.Screen name="DisputeDetail" component={DisputeDetailScreen} />
       <Stack.Screen name="SellerApplicationStatus" component={SellerApplicationStatusScreen} />
@@ -164,7 +178,9 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsPrivacyData" component={SettingsPrivacyDataScreen} />
       <Stack.Screen name="CreateBusinessProfile" component={CreateBusinessProfileScreen} />
       <Stack.Screen name="Rankings" component={RankingsScreen} />
+      <Stack.Screen name="Saved" component={SavedScreen} />
       <Stack.Screen name="Sound" component={SoundScreen} />
+      <Stack.Screen name="AuthFlow" component={AuthFlowScreen} options={modal} />
     </Stack.Navigator>
   );
 }

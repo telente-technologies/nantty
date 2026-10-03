@@ -1,9 +1,11 @@
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import type { SavedItemFilter } from "@/types/saves.type";
+
 export type AuthStackParamList = {
   Splash: undefined;
-  Onboarding: { mode?: "signup" | "login" };
+  Onboarding: { mode?: "signup" | "login"; dismissible?: boolean };
   Welcome: undefined;
   Login: undefined;
   ForgotPassword: undefined;
@@ -54,6 +56,9 @@ export type MainStackParamList = {
   SettingsAbout: undefined;
   ChangePassword: undefined;
   BlockedUsers: undefined;
+  ChatSettings: undefined;
+  ChatNotificationSettings: undefined;
+  ChatPasscode: undefined;
   Wallet: undefined;
   Transactions: undefined;
   CoinActivity: undefined;
@@ -100,8 +105,10 @@ export type MainStackParamList = {
   SettingsPrivacy: undefined;
   SettingsPrivacyData: undefined;
   CreateBusinessProfile: undefined;
+  Saved: { initialFilter?: SavedItemFilter } | undefined;
   Rankings: undefined;
   Sound: { soundId: string };
+  AuthFlow: { mode?: "signup" | "login" } | undefined;
 };
 
 export type RootStackParamList = AuthStackParamList & MainStackParamList;
