@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { ID, ISODate, LiveComment, LiveProduct, LiveSession, OverlayLayer, OverlayScene } from "@/types";
+import type { ID, ISODate, LiveCategory, LiveComment, LiveEarnings, LiveProduct, LiveSession, OverlayLayer, OverlayScene } from "@/types";
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -14,11 +14,15 @@ const buildStreamKey = (liveId: ID) => `sk_${liveId}_${btoa(liveId).replace(/=/g
 const buildHlsUrl = (liveId: ID) => `${readHlsBaseUrl()}/${liveId}/index.m3u8`;
 
 const CATALOG_PRODUCTS: readonly LiveProduct[] = [
-  { id: "prod_1", title: "Handwoven Adire Wrap Dress", priceLabel: "₦42,000", imageUrl: null, pinned: false },
-  { id: "prod_2", title: "Clay Pot with Lid — Medium", priceLabel: "₦18,500", imageUrl: null, pinned: false },
-  { id: "prod_3", title: "Raffia Placemat Set of 4", priceLabel: "₦12,000", imageUrl: null, pinned: false },
-  { id: "prod_4", title: "Shea & Black Soap Bar Duo", priceLabel: "₦9,750", imageUrl: null, pinned: false },
+  { id: "prod_1", title: "Handwoven Adire Wrap Dress", price: { amountMinor: 4200000, currency: "NGN" }, imageUrl: null, pinned: false },
+  { id: "prod_2", title: "Clay Pot with Lid — Medium", price: { amountMinor: 1850000, currency: "NGN" }, imageUrl: null, pinned: false },
+  { id: "prod_3", title: "Raffia Placemat Set of 4", price: { amountMinor: 1200000, currency: "NGN" }, imageUrl: null, pinned: false },
+  { id: "prod_4", title: "Shea & Black Soap Bar Duo", price: { amountMinor: 975000, currency: "NGN" }, imageUrl: null, pinned: false },
 ];
+
+const LIVE_CATEGORY_VALUES: readonly LiveCategory[] = ["justChatting", "gaming", "music", "irl", "education", "shopping"];
+
+const EMPTY_EARNINGS: LiveEarnings = { coins: 0, giftCount: 0, newSubscribers: 0, topGifters: [], battles: [] };
 
 const DEFAULT_LAYERS: readonly OverlayLayer[] = [
   { id: "layer_lower_third", type: "text", name: "Lower third", x: 64, y: 900, width: 720, height: 96, zIndex: 10, opacity: 0.95, text: "Temitope Adeyemi", fontSize: 44, color: "#ffffff", background: "#0b1752", radius: 8 },
@@ -45,6 +49,18 @@ const seedLive = (live: LiveSession) => {
 seedLive({
   id: "live_1",
   title: "Sunday pots restock — live from Ibadan",
+  category: "shopping",
+  earnings: {
+    coins: 18400,
+    giftCount: 212,
+    newSubscribers: 9,
+    topGifters: [
+      { id: "g_1", name: "Kemi", coins: 4200 },
+      { id: "g_2", name: "Chidi", coins: 3100 },
+      { id: "g_3", name: "Bola", coins: 1750 },
+    ],
+    battles: [],
+  },
   state: "live",
   createdAt: hoursAgo(2),
   startedAt: minutesAgo(38),
@@ -63,7 +79,22 @@ seedLive({
 
 seedLive({
   id: "live_2",
-  title: "Adire drop — December Owambe Edit",
+  title: "Late night beats and freestyle with guests",
+  category: "music",
+  earnings: {
+    coins: 52300,
+    giftCount: 640,
+    newSubscribers: 31,
+    topGifters: [
+      { id: "g_4", name: "Tobi", coins: 9800 },
+      { id: "g_5", name: "Amaka", coins: 7400 },
+      { id: "g_6", name: "Sade", coins: 5200 },
+    ],
+    battles: [
+      { id: "b_1", opponentName: "@dj.lagos", coinsFor: 21800, coinsAgainst: 17600 },
+      { id: "b_2", opponentName: "@mc.ife", coinsFor: 9400, coinsAgainst: 11200 },
+    ],
+  },
   state: "ended",
   createdAt: hoursAgo(52),
   startedAt: hoursAgo(51),
@@ -73,13 +104,15 @@ seedLive({
   streamKey: buildStreamKey("live_2"),
   ingestUrl: readIngestUrl(),
   hlsUrl: buildHlsUrl("live_2"),
-  products: [CATALOG_PRODUCTS[0]!],
+  products: [],
   comments: [{ id: "c_3", authorName: "Bola", text: "That gold gele is everything", createdAt: hoursAgo(50) }],
 });
 
 seedLive({
   id: "live_3",
-  title: "Harmattan skincare live",
+  title: "Ranked grind: Rocket League with chat",
+  category: "gaming",
+  earnings: EMPTY_EARNINGS,
   state: "idle",
   createdAt: minutesAgo(4),
   startedAt: null,
@@ -89,7 +122,7 @@ seedLive({
   streamKey: buildStreamKey("live_3"),
   ingestUrl: readIngestUrl(),
   hlsUrl: null,
-  products: [CATALOG_PRODUCTS[3]!],
+  products: [],
   comments: [],
 });
 
@@ -112,10 +145,14 @@ export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => findLiveOrThrow(params.liveId!)),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
     const title = String((body as { title?: unknown } | null)?.title ?? "").trim() || "Untitled live";
+    const rawCategory = (body as { category?: unknown } | null)?.category;
+    const category = (LIVE_CATEGORY_VALUES.includes(rawCategory as LiveCategory) ? rawCategory : "justChatting") as LiveCategory;
     const id = `live_${liveState.size + 1}_${Date.now()}`;
     const live: LiveSession = {
       id,
       title,
+      category,
+      earnings: EMPTY_EARNINGS,
       state: "idle",
       createdAt: new Date().toISOString(),
       startedAt: null,
