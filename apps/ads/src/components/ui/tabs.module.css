@@ -28,8 +28,8 @@
 }
 
 .active {
-  color: var(--blue-500);
-  border-bottom-color: var(--blue-500);
+  color: var(--color-brand);
+  border-bottom-color: var(--color-brand);
 }
 
 .count {

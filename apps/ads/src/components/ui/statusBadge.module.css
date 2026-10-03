@@ -24,7 +24,7 @@
 
 .info {
   background: var(--blue-tint);
-  color: var(--blue-700);
+  color: var(--brand-ink);
 }
 
 .success {

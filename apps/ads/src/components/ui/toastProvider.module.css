@@ -13,7 +13,7 @@
   padding: 10px 14px;
   border-radius: var(--radius-medium);
   background: var(--blue-900);
-  color: #fff;
+  color: var(--on-media);
   box-shadow: var(--shadow-float);
   font-weight: 500;
   border-left: 4px solid var(--yellow-500);

@@ -8,6 +8,7 @@
 
 .cardHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
@@ -24,6 +25,8 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .cardBody {

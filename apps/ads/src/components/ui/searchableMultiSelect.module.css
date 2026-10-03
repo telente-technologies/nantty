@@ -28,8 +28,8 @@
 }
 
 .control:focus-within {
-  border-color: var(--blue-500);
-  box-shadow: 0 0 0 3px rgb(32 67 245 / 0.15);
+  border-color: var(--color-brand);
+  box-shadow: var(--focus-halo);
 }
 
 .chips {
@@ -44,7 +44,7 @@
   padding: 0 4px 0 9px;
   border-radius: var(--radius-pill);
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--brand-ink);
   font-size: var(--fs-13);
   font-weight: 550;
 }
@@ -67,7 +67,7 @@
 }
 
 .chip button:hover {
-  background: rgb(0 0 0 / 0.08);
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 
 .input {
@@ -95,7 +95,7 @@
   padding: 4px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
-  background: var(--surface-card);
+  background: var(--color-elevated);
   box-shadow: var(--shadow-float);
 }
 
