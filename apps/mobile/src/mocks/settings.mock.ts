@@ -5,6 +5,7 @@ import { useLocaleStore } from "@/store/locale.store";
 import type { CountryOption } from "@/types/account.type";
 
 import { getSignedInMockUser, me } from "./fixtures.mock";
+import { buildAddressFromInput } from "./geo.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 let settings: AccountSettings = {
@@ -17,15 +18,22 @@ let settings: AccountSettings = {
   twoFactorEnabled: false,
 };
 
+const seedAddress = (id: string, fullName: string, phone: string, line1: string, areaPath: [string, string, string], isDefault: boolean): Address =>
+  buildAddressFromInput(
+    { fullName, phone, line1, postalCode: "", details: "", isDefault, countryId: "ng", stateId: areaPath[0], lgaId: areaPath[1], cityId: areaPath[2] },
+    id,
+  );
+
 const addressesByUserId = new Map<string, Address[]>([
   [
     "u_me",
     [
-      { id: "a_1", fullName: "Temitope Adeyemi", phone: "+234 803 441 7720", line1: "14 Awolowo Avenue, Old Bodija", city: "Ibadan", state: "Oyo", isDefault: true },
-      { id: "a_2", fullName: "Temitope Adeyemi", phone: "+234 803 441 7720", line1: "5th Floor, 23 Adeola Odeku Street, Victoria Island", city: "Lagos", state: "Lagos", isDefault: false },
+      seedAddress("a_1", "Temitope Adeyemi", "+234 803 441 7720", "14 Awolowo Avenue", ["ng-oyo", "ng-oyo-ibadan-north", "ng-oyo-ibadan-north-bodija"], true),
+      seedAddress("a_2", "Temitope Adeyemi", "+234 803 441 7720", "23 Adeola Odeku Street", ["ng-lagos", "ng-lagos-eti-osa", "ng-lagos-eti-osa-victoria-island"], false),
+      seedAddress("a_4", "Temitope Adeyemi", "+234 803 441 7720", "9 Ogunlana Drive", ["ng-ogun", "ng-ogun-abeokuta-south", "ng-ogun-abeokuta-south-abeokuta"], false),
     ],
   ],
-  ["u_buyer", [{ id: "a_3", fullName: "Kemi Adekunle", phone: "+234 812 660 3149", line1: "7 Bode Thomas Street", city: "Surulere", state: "Lagos", isDefault: true }]],
+  ["u_buyer", [seedAddress("a_3", "Kemi Adekunle", "+234 812 660 3149", "7 Bode Thomas Street", ["ng-lagos", "ng-lagos-surulere", "ng-lagos-surulere-surulere"], true)]],
 ]);
 
 let addresses: Address[] = [];
@@ -38,6 +46,8 @@ const saveSignedInAddresses = () => addressesByUserId.set(getSignedInMockUser().
 const applyDefaultAddress = (id: string, isDefault: boolean) => {
   if (isDefault) addresses = addresses.map((a) => ({ ...a, isDefault: a.id === id }));
 };
+
+export const findSignedInAddress = (addressId: string) => loadSignedInAddresses().find((address) => address.id === addressId);
 
 const SUPPORTED_COUNTRIES: CountryOption[] = [
   { countryCode: "NG", countryName: "Nigeria", currency: "NGN", currencyName: "Nigerian naira" },
@@ -66,7 +76,7 @@ export const settingsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me/addresses", () => loadSignedInAddresses()),
   createMockRoute("POST", "/api/v1/users/me/addresses", ({ body }) => {
     loadSignedInAddresses();
-    const address: Address = { ...(body as ShippingAddressInput), id: `a_${Date.now()}` };
+    const address = buildAddressFromInput(body as ShippingAddressInput, `a_${Date.now()}`);
     addresses = [...addresses, address];
     applyDefaultAddress(address.id, address.isDefault);
     saveSignedInAddresses();
@@ -74,7 +84,8 @@ export const settingsMocks: MockRoute[] = [
   }),
   createMockRoute("PATCH", "/api/v1/users/me/addresses/:addressId", ({ params, body }) => {
     loadSignedInAddresses();
-    addresses = addresses.map((a) => (a.id === params.addressId ? { ...a, ...(body as ShippingAddressInput) } : a));
+    const updated = buildAddressFromInput(body as ShippingAddressInput, params.addressId!);
+    addresses = addresses.map((a) => (a.id === params.addressId ? updated : a));
     applyDefaultAddress(params.addressId!, (body as ShippingAddressInput).isDefault);
     saveSignedInAddresses();
     return addresses.find((a) => a.id === params.addressId);

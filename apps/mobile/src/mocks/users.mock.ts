@@ -4,9 +4,10 @@ import type { User } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
-import { listPostsByAuthor, mockPostsState, withCurrentProductPrices } from "./postCatalog.mock";
+import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { blockedUserIds, followedUserIds, followerUserIds } from "./socialGraph.mock";
+import { setFollowingAuthor } from "./followGraph.mock";
+import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds } from "./socialGraph.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
 import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
@@ -46,14 +47,6 @@ function listConnections(tab: ConnectionTab): ConnectionEntry[] {
   }
 }
 
-const setFollowingAuthor = (userId: string, following: boolean) => {
-  if (following) followedUserIds.add(userId);
-  else followedUserIds.delete(userId);
-  for (const [postId, post] of mockPostsState) {
-    if (post.author.id === userId) mockPostsState.set(postId, { ...post, isFollowingAuthor: following });
-  }
-};
-
 export const usersMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me", () => signedInProfile()),
   createMockRoute("PATCH", "/api/v1/users/me", ({ body }) => {
@@ -66,15 +59,13 @@ export const usersMocks: MockRoute[] = [
     if (params.userId === getSignedInMockUser().id || params.userId === "me") return signedInProfile();
     const user = findDirectoryUserById(params.userId!);
     if (!user) throw new ApiError(404, "This account doesn't exist");
-    return { ...user, isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
+    return { ...user, isPrivate: privateUserIds.has(user.id), followState: followStateForUser(user.id), isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
   }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: listPostsByAuthor(params.userId!).map(withCurrentProductPrices),
+    data: canSignedInUserSeeProfileContent(params.userId!) ? listPostsByAuthor(params.userId!).map(withCurrentProductPrices) : [],
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),
-  createMockRoute("POST", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, true)),
-  createMockRoute("DELETE", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, false)),
   createMockRoute("POST", "/api/v1/users/:userId/block", ({ params }) => {
     blockedUserIds.add(params.userId!);
     setFollowingAuthor(params.userId!, false);

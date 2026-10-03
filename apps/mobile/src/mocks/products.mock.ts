@@ -5,6 +5,7 @@ import type { MartHome, ProductCollection, SearchResults, StoreDetail } from "@/
 import { BRAND_ID_BY_PRODUCT_KEY, brandTagForProductKey, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandSummary } from "./brandDirectory.mock";
 import { followedBrandIds } from "./brands.mock";
 import { martImageUrl } from "./mockImages.mock";
+import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock";
 import {
   buildCatalogProductDetail,
@@ -46,7 +47,7 @@ const buildStoreDetail = (storeId: string): StoreDetail => {
     isFollowing: followedStoreIds.has(store.id),
     verified: store.verified,
     joinedAt: store.joinedAt,
-    posts: listPostsByAuthor(store.ownerUserKey).map(withCurrentProductPrices),
+    posts: (isAuthorContentVisibleToSignedInViewer(store.ownerUserKey) ? listPostsByAuthor(store.ownerUserKey) : []).map(withCurrentProductPrices),
     officialBrand: (() => {
       const brand = mockBrandRecords.find((candidate) => isVerifiedOfficialStoreOfBrand(candidate, store.id));
       return brand ? presentBrandSummary(brand, followedBrandIds) : null;
