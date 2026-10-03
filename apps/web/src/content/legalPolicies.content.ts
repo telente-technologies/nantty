@@ -1,0 +1,54 @@
+import type { LegalDocumentSection } from "@/components/legal/legalDocument";
+
+import { cookiePolicySections } from "./cookiePolicy.content";
+import { adsPolicySections, communityGuidelinesSections, creatorTermsSections, refundEscrowPolicySections, sellerTermsSections } from "./legalNewDocuments.content";
+import { privacyPolicySections } from "./privacyPolicy.content";
+import { termsOfServiceSections } from "./termsOfService.content";
+
+export type LegalPolicySlug = "terms" | "privacy" | "cookies" | "community-guidelines" | "seller-terms" | "creator-terms" | "ads-policy" | "refund-escrow-policy";
+
+export interface LegalPolicyVersion {
+  readonly versionLabel: string;
+  readonly effectiveOn: string;
+  readonly isReviewedByLegal: boolean;
+  readonly changeSummary: string;
+  readonly sections: readonly LegalDocumentSection[];
+}
+
+export interface LegalPolicy {
+  readonly slug: LegalPolicySlug;
+  readonly title: string;
+  readonly summary: string;
+  readonly publicPath: string;
+  readonly currentVersion: LegalPolicyVersion;
+  readonly previousVersions: readonly LegalPolicyVersion[];
+}
+
+const archivedDraftSections: readonly LegalDocumentSection[] = [
+  { id: "archived", heading: "Earlier working draft", paragraphs: ["This earlier working draft was replaced before launch. It is kept so you can see how the document changed. It was never in effect."] },
+];
+
+function buildPolicy(slug: LegalPolicySlug, title: string, summary: string, sections: readonly LegalDocumentSection[], hasEarlierDraft: boolean): LegalPolicy {
+  return {
+    slug, title, summary, publicPath: `/${slug}`,
+    currentVersion: { versionLabel: "1.0 (draft)", effectiveOn: "2026-11-01", isReviewedByLegal: false, changeSummary: "First full draft prepared for legal review.", sections },
+    previousVersions: hasEarlierDraft ? [{ versionLabel: "0.9 (draft)", effectiveOn: "2026-09-15", isReviewedByLegal: false, changeSummary: "Earlier working outline.", sections: archivedDraftSections }] : [],
+  };
+}
+
+export const legalPolicies: readonly LegalPolicy[] = [
+  buildPolicy("terms", "Terms of service", "The rules for buying, selling and posting on Zudomart.", termsOfServiceSections, true),
+  buildPolicy("privacy", "Privacy policy", "What personal data Zudomart collects, why, and the choices you have.", privacyPolicySections, true),
+  buildPolicy("cookies", "Cookie policy", "Which cookies Zudomart uses, why, and how you stay in control.", cookiePolicySections, false),
+  buildPolicy("community-guidelines", "Community guidelines", "How we expect everyone to behave on Zudomart.", communityGuidelinesSections, false),
+  buildPolicy("seller-terms", "Seller terms", "The extra terms that apply when you sell on Zudomart.", sellerTermsSections, false),
+  buildPolicy("creator-terms", "Creator Program terms", "The terms for earning as a Zudomart creator.", creatorTermsSections, false),
+  buildPolicy("ads-policy", "Ads policy", "What can and cannot be advertised on Zudomart.", adsPolicySections, false),
+  buildPolicy("refund-escrow-policy", "Refund and escrow policy", "How payments are held, released and refunded.", refundEscrowPolicySections, false),
+];
+
+export function findLegalPolicyOrThrow(slug: LegalPolicySlug): LegalPolicy {
+  const policy = legalPolicies.find((candidate) => candidate.slug === slug);
+  if (!policy) throw new Error(`Unknown legal policy ${slug}`);
+  return policy;
+}
