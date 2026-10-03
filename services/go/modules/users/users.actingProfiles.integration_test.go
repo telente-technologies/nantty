@@ -2,6 +2,7 @@ package users
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -49,15 +50,10 @@ func TestBusinessProfileCreatorApplicationAndActingProfileSwitching(t *testing.T
 		t.Fatalf("want personal + business, got %v", listed)
 	}
 
-	harness.settings.creatorRequirements = `{"minimumAccountAgeDays":365}`
-	notYet := harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusUnprocessableEntity)
-	if notYet["code"] != "CREATOR_REQUIREMENTS_NOT_MET" {
-		t.Fatalf("unexpected %v", notYet)
-	}
-	harness.settings.creatorRequirements = `{"minimumAccountAgeDays":30}`
+	harness.expect("PUT", "/api/v1/internal/profiles/"+personalId+"/signals", "", map[string]any{"realFollowers": 600, "riskScore": 10, "daysSinceLastViolation": 400}, http.StatusNoContent, "X-Internal-Token", strings.Repeat("u", 32))
 	applied := harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusCreated)
 	if applied["creatorStatus"] != "pending" || applied["isCreator"] != false || applied["username"] != "ada.lovelace" {
-		t.Fatalf("creator is a status on the personal profile: %v", applied)
+		t.Fatalf("a creator with 500 to 999 followers goes to manual review: %v", applied)
 	}
 	harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusConflict)
 	if listed := harness.expect("GET", "/api/v1/users/me/profiles", token, nil, http.StatusOK)["data"].([]any); len(listed) != 2 {

@@ -78,6 +78,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 	}
 	identityports.Default.RegisterStaffTokenService(harness.tokens)
 	identityports.Default.RegisterAccountDirectory(harness.accounts)
+	identityports.Default.RegisterAccountEnforcement(harness.accounts)
 	identityports.Default.RegisterAuditRecorder(harness.audit)
 	identityports.Default.RegisterPlatformSettings(harness.settings)
 	settings := configs.UsersSettings{
@@ -86,7 +87,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		MediaPublicBaseUrl: "https://media.zudomart.test", MediaUploadBaseUrl: "https://upload.zudomart.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
 		Privacy: configs.PrivacySettings{
 			ExportBucket: "users-test-exports", ExportRegion: "eu-west-1", ExportDownloadLinkTtl: time.Minute, ExportArchiveTtl: time.Hour,
-			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: time.Hour, AnonymousConsentPerMinute: 60,
+			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: time.Hour, AnonymousConsentPerMinute: 60, InternalApiToken: strings.Repeat("u", 32), DocumentsBucket: "users-test-documents",
 		},
 	}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), Health: health.NewRegistryForService("users-test")}
