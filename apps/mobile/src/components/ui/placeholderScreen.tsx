@@ -1,5 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
+import { colors } from "@/constants/colors.constant";
+
 import { Header } from "./header";
 import { Screen } from "./screen";
 import { Text } from "./text";
@@ -9,7 +11,7 @@ export function PlaceholderScreen({ name }: { name: string }) {
     <Screen>
       <Header title={name} />
       <View style={styles.body}>
-        <Text color="#909090">{name}</Text>
+        <Text color={colors.textFaint}>{name}</Text>
       </View>
     </Screen>
   );
