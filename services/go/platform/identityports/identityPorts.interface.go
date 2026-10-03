@@ -14,6 +14,7 @@ var (
 	ErrUsernameAlreadyTaken = errors.New("username already taken")
 	ErrPortNotRegistered    = errors.New("identity port not registered")
 	ErrSettingNotFound      = errors.New("platform setting not found")
+	ErrEmailAlreadyTaken    = errors.New("email already taken")
 )
 
 type AccountSummary struct {
@@ -24,7 +25,9 @@ type AccountSummary struct {
 	Birthday      *time.Time
 	Roles         []string
 	EmailVerified bool
+	PhoneVerified bool
 	Active        bool
+	Status        string
 	CreatedAt     time.Time
 }
 
@@ -60,17 +63,21 @@ type StaffTokenService interface {
 }
 
 type AuditEvent struct {
-	ActorId     string
-	ActorRole   string
-	Action      string
-	SubjectType string
-	SubjectId   string
-	Before      json.RawMessage
-	After       json.RawMessage
-	Reason      string
-	IpAddress   string
-	UserAgent   string
-	RequestId   string
+	ActorId          string
+	ActorName        string
+	ActorRole        string
+	ActorDepartments []string
+	SubjectLabel     string
+	StepUpVerified   bool
+	Action           string
+	SubjectType      string
+	SubjectId        string
+	Before           json.RawMessage
+	After            json.RawMessage
+	Reason           string
+	IpAddress        string
+	UserAgent        string
+	RequestId        string
 }
 
 type AuditRecorder interface {
@@ -83,4 +90,45 @@ type AccountCountryLookup interface {
 
 type PlatformSettings interface {
 	ReadSettingValue(ctx context.Context, key string) (json.RawMessage, int, error)
+}
+
+type AccountSession struct {
+	ID         uuid.UUID
+	IpAddress  string
+	UserAgent  string
+	StartedAt  time.Time
+	LastSeenAt time.Time
+}
+
+type BanDetails struct {
+	Reason            string
+	BlockedBy         string
+	BlockFutureSignup bool
+}
+
+type AccountEnforcement interface {
+	SuspendAccountAndRevokeSessions(ctx context.Context, accountId uuid.UUID) error
+	ReinstateAccount(ctx context.Context, accountId uuid.UUID) error
+	BanAccountAndRevokeSessions(ctx context.Context, accountId uuid.UUID, details BanDetails) error
+	LiftBan(ctx context.Context, accountId uuid.UUID) error
+	RevokeAccountSessions(ctx context.Context, accountId uuid.UUID, onlySessionId *uuid.UUID) error
+	ListActiveAccountSessions(ctx context.Context, accountId uuid.UUID) ([]AccountSession, error)
+	MarkAccountDeleted(ctx context.Context, accountId uuid.UUID, anonymizedUsername string) error
+	ChangeAccountPassword(ctx context.Context, accountId uuid.UUID, newPassword string, mustChange bool) error
+	CreateAccountOnBehalf(ctx context.Context, request CreateAccountRequest) (uuid.UUID, error)
+}
+
+type CreateAccountRequest struct {
+	Username string
+	Name     string
+	Email    string
+	Password string
+}
+
+type StaffSessionChecker interface {
+	IsStaffSessionActive(ctx context.Context, staffId, sessionId string) (bool, error)
+}
+
+type AuditHistoryReader interface {
+	ListAuditHistoryForSubject(ctx context.Context, subjectType, subjectId string, limit int) ([]json.RawMessage, error)
 }

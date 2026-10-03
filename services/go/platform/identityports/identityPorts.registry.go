@@ -3,13 +3,16 @@ package identityports
 import "sync"
 
 type Registry struct {
-	mutex    sync.RWMutex
-	accounts AccountDirectory
-	guard    UsernameGuard
-	tokens   StaffTokenService
-	audit    AuditRecorder
-	country  AccountCountryLookup
-	settings PlatformSettings
+	mutex       sync.RWMutex
+	accounts    AccountDirectory
+	guard       UsernameGuard
+	tokens      StaffTokenService
+	audit       AuditRecorder
+	country     AccountCountryLookup
+	settings    PlatformSettings
+	enforcement AccountEnforcement
+	sessions    StaffSessionChecker
+	history     AuditHistoryReader
 }
 
 var Default = &Registry{}
@@ -82,4 +85,34 @@ func (registry *Registry) AccountCountryLookup() (AccountCountryLookup, error) {
 
 func (registry *Registry) PlatformSettings() (PlatformSettings, error) {
 	return readPort(registry, func() PlatformSettings { return registry.settings })
+}
+
+func (registry *Registry) RegisterAccountEnforcement(port AccountEnforcement) {
+	registry.mutex.Lock()
+	registry.enforcement = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) AccountEnforcement() (AccountEnforcement, error) {
+	return readPort(registry, func() AccountEnforcement { return registry.enforcement })
+}
+
+func (registry *Registry) RegisterStaffSessionChecker(port StaffSessionChecker) {
+	registry.mutex.Lock()
+	registry.sessions = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) StaffSessionChecker() (StaffSessionChecker, error) {
+	return readPort(registry, func() StaffSessionChecker { return registry.sessions })
+}
+
+func (registry *Registry) RegisterAuditHistoryReader(port AuditHistoryReader) {
+	registry.mutex.Lock()
+	registry.history = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) AuditHistoryReader() (AuditHistoryReader, error) {
+	return readPort(registry, func() AuditHistoryReader { return registry.history })
 }
