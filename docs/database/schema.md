@@ -828,9 +828,9 @@ erDiagram
 ```mermaid
 erDiagram
   STATE_CHANGE ||--|| OUTBOX_EVENTS : "same tx (every schema)"
-  OUTBOX_EVENTS }o..|| SNS_TOPIC : "relay FOR UPDATE SKIP LOCKED"
-  SNS_TOPIC ||..o{ SQS_QUEUES : "fan-out (PLANNED topology)"
-  SQS_QUEUES ||..o{ CLICKHOUSE_EVENTS : "FUTURE analytics sink"
+  OUTBOX_EVENTS }o..|| RABBITMQ_EXCHANGE : "relay FOR UPDATE SKIP LOCKED"
+  RABBITMQ_EXCHANGE ||..o{ RABBITMQ_QUEUES : "routing-key bindings per consumer"
+  RABBITMQ_QUEUES ||..o{ CLICKHOUSE_EVENTS : "FUTURE analytics sink"
   WEBHOOK_EVENTS ||..o| STATE_CHANGE : "claimed then processed"
   POINTS_ENTRIES ||..o{ LIVE_LEADERBOARD_ENTRIES : "aggregated"
 
@@ -857,11 +857,11 @@ erDiagram
   LIVE_LEADERBOARD_ENTRIES {
     uuid id PK
   }
-  SNS_TOPIC {
-    text arn
+  RABBITMQ_EXCHANGE {
+    text name "zudomart.events"
   }
-  SQS_QUEUES {
-    text url
+  RABBITMQ_QUEUES {
+    text name "quorum, retry tiers, dlq"
   }
   CLICKHOUSE_EVENTS {
     date day
@@ -879,8 +879,8 @@ Two outbox shapes exist: non-money schemas (admin, auth, users, currency, live) 
 | G2 | User/account id types differ: `uuid` in auth, users, live; `varchar` in payments, escrow, wallet, creators, ledger (`owner_id`, `seller_user_id`, ...) | migrations | P2 | Standardise on `uuid` for new tables; convert with expand/contract before tables grow (bigger indexes, no FK/join possible today) |
 | G3 | Missing same-schema FKs (ent edges not declared): `escrow_events.escrow_id`, `dispute_messages/dispute_status_events.dispute_id`, `payment_refunds.payment_intent_id`, `withdrawals.payout_account_id`, `coin_purchases.package_id`, `reconciliation_breaks.journal_entry_id`, `journal_entries.reverses_entry_id`, all `live` children → `live_sessions`/`battles`/`gift_goals`, `acting_profiles.profile_id`, `business_categories.parent_id`, geo hierarchy, `creator_program_members.tier_id` | migrations | P2 (money tables P1) | Add ent edges (FK + index) for money tables first; live children can stay logical if rows are purged by time |
 | G4 | Ledger and escrow tables are not protected like `admin.audit_events` (no `REVOKE UPDATE, DELETE`) | `ledger/src/migrations/20261003110816_*` vs `admin/src/migrations/20261003101500_*` | **P1** | See [transactions.md](transactions.md#4-ledger-immutability) |
-| G5 | Bachs mirror model is mid-implementation (WIP at audit time): `seller:<id>:providerHeld`, `refundsInFlight`, `debt` accounts and per-seller mirror reconciliation (`providerMirrorReconciliation.service.go`) exist in code, but the mirror results are not persisted (only `connected_accounts.payouts_frozen`), there is no `awaiting_settlement` state, and global system accounts (`PaymentsAwaitingApplicationAccount`, `PlatformProviderBalanceAccount`) are still posted on every payment | `ledger/src/modules/journal/models/chartOfAccounts.model.go`, `payments/.../paymentCollectionPosting.service.go`; `docs/checkoutPaymentFlowPlan.md` §3, §11 | P1 | Finish §11 checklist; persist per-account mirror results in `reconciliation_runs/breaks` keyed by `connected_account_id`; see hot-row fix T1 in [transactions.md](transactions.md#6-deviations-in-go-money-found-in-code) |
-| G6 | Checkout granularity: payment intent `subject_id` = checkout id with N `order_payables`; Bachs plan = one charge per seller order group (`reference` = order group id) | `orderPayables.service.go`, plan §11 | P1 | Decide before goCommerce is built; affects `payment_intents (purpose, subject_id)` semantics |
+| G5 | Bachs mirror model (`seller:<id>:providerHeld`, `refundsInFlight`, `debt`, `providerMirrorReconciliation.service.go`, `connected_accounts`) must be replaced. Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03): escrow in Zudomart's Paystack balance (E2) or manual-settlement subaccounts (E1), direct shares split to seller subaccounts, payouts by transfer | `ledger/src/modules/journal/models/chartOfAccounts.model.go`, `payments/.../paymentCollectionPosting.service.go`, `checkoutPaymentFlowPlan.md` §4 and §12 | P0 | New forward migrations: `payout_accounts` (recipient and subaccount codes), intent `split_snapshot`, transfer codes, `saved_card_signatures`; ledger accounts per plan §4; recon runs persisted as `reconciliation_breaks` |
+| G6 | Checkout granularity: payment intent `subject_id` = checkout id with N `order_payables`. Paystack plan = **one transaction per checkout** (dynamic split for direct groups), so this matches the code | `orderPayables.service.go`, plan §6.1 | P1 | Keep `subject_id` = checkout id; store the split per order group in `split_snapshot` |
 | G7 | ZudoPoints in `live.points_entries`; plan puts points in `rewards` (goMoney). Engagement idempotency key is random per call (`"engagement:"+action+":"+uuid.NewString()`), so retries are not deduplicated (caps still apply) | `live/src/services/awardEngagementPoints.service.go` | P2 | Client-supplied key or `(user, live, action, minute)` natural key |
 | G8 | Social, marketplace, inventory, orders, cart, reviews, messaging, notifications, media, ads, moderation: no tables; legacy Prisma models are the only spec | `apps/api/prisma/schema` | Info | Build from §2, §5, §7 above |
 | G9 | `shipping_addresses.is_default` has no partial unique index (one default per account enforced only in Go with `FOR UPDATE`) | `users/.../addressDefault.service.go` | P3 | `UNIQUE (account_id) WHERE is_default` |
