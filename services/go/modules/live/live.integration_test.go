@@ -33,9 +33,10 @@ import (
 )
 
 const (
-	testIssuer   = "https://auth.zudomart.test"
-	testAudience = "zudomart-api"
-	testSecret   = "secret-only-for-local-development-0001"
+	testIssuer        = "https://auth.zudomart.test"
+	testAudience      = "zudomart-api"
+	testSecret        = "secret-only-for-local-development-0001"
+	testInternalToken = "internal-token-only-for-live-tests-0123"
 )
 
 type fakeClock struct {
@@ -64,6 +65,27 @@ type liveHarness struct {
 	publisher *events.RecordingPublisher
 	clock     *fakeClock
 	signer    jwk.Key
+	relations *integrations.InMemorySocialRelations
+	ingress   *integrations.InMemoryIngressController
+	recorder  *integrations.InMemoryRecordingController
+	logs      *syncBuffer
+}
+
+type syncBuffer struct {
+	mutex  sync.Mutex
+	buffer bytes.Buffer
+}
+
+func (sink *syncBuffer) Write(data []byte) (int, error) {
+	sink.mutex.Lock()
+	defer sink.mutex.Unlock()
+	return sink.buffer.Write(data)
+}
+
+func (sink *syncBuffer) String() string {
+	sink.mutex.Lock()
+	defer sink.mutex.Unlock()
+	return sink.buffer.String()
 }
 
 type liveUser struct {
@@ -91,21 +113,25 @@ func startLiveModuleAgainstFreshSchema(t *testing.T) *liveHarness {
 	harness := &liveHarness{
 		t: t, money: integrations.NewInMemoryMoneyGateway(), directory: integrations.NewInMemoryParticipantDirectory(),
 		publisher: &events.RecordingPublisher{}, clock: &fakeClock{current: time.Now()}, signer: signer,
+		relations: integrations.NewInMemorySocialRelations(), ingress: integrations.NewInMemoryIngressController(),
+		recorder: integrations.NewInMemoryRecordingController(), logs: &syncBuffer{},
 	}
 	settings := configs.LiveSettings{
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TokenIssuer: testIssuer, TokenAudience: testAudience,
 		LiveKitUrl: "http://localhost:7880", LiveKitPublicUrl: "ws://localhost:7880", LiveKitApiKey: "devkey", LiveKitApiSecret: testSecret,
 		MediaTokenTimeToLive: 10 * time.Minute, TimerPollInterval: 50 * time.Millisecond, RequireCreatorProgramToHost: true,
-		LiveAdTermsCurrentVersion: "2026-10", GiftPlatformBurstLimitPerSecond: 50,
+		LiveAdTermsCurrentVersion: "2026-10", GiftPlatformBurstLimitPerSecond: 50, InternalApiToken: testInternalToken,
+		PlatformBlockedWords: []string{"platformbad"}, RecordingDownloadTimeToLive: time.Hour, LiveKitWebhookEnabled: true,
 	}
 	verifier := jwtauth.NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, testIssuer, testAudience)
-	logSink := io.Discard
+	logSink := io.Writer(harness.logs)
 	if os.Getenv("LIVE_TEST_LOG") != "" {
-		logSink = os.Stderr
+		logSink = io.MultiWriter(harness.logs, os.Stderr)
 	}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(logSink, nil)), Health: health.NewRegistryForService("live-test")}
 	module, err := StartLiveModuleWithSettings(ctx, settings, Collaborators{
 		Money: harness.money, Directory: harness.directory, Media: integrations.NoopRoomController{}, Verifier: verifier, Publisher: harness.publisher,
+		Ingress: harness.ingress, Recorder: harness.recorder, RecordingStorage: integrations.InMemoryRecordingStorage{}, Relations: harness.relations,
 	}, dependencies)
 	if err != nil {
 		t.Fatal(err)
