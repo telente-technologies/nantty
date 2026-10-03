@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { DisputeMessageBubble } from "@/components/escrow/disputeMessageBubble";
 import { DisputeStatusHistory } from "@/components/escrow/disputeStatusHistory";
@@ -10,6 +10,7 @@ import { DISPUTE_STATUS_APPEARANCE, disputeReasonLabel, formatFriendlyDateTime }
 import { StatusPill } from "@/components/escrow/statusPill";
 import { PaperPlaneTilt24Icon } from "@/components/icons";
 import { Header } from "@/components/ui/header";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -28,6 +29,11 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
   const queryClient = useQueryClient();
   const disputeQuery = useDisputeQuery(disputeId);
   const [draftMessage, setDraftMessage] = useState("");
+  const scrollRef = useRef<ScrollView>(null);
+  const isComposing = useRef(false);
+  const keepLatestMessageVisible = () => {
+    if (isComposing.current) scrollRef.current?.scrollToEnd({ animated: false });
+  };
 
   const sendMessage = useMutation({
     mutationFn: (text: string) => disputesService.sendDisputeMessage(disputeId, text, [], generateIdempotencyKey()),
@@ -58,8 +64,11 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
   return (
     <Screen>
       <Header title={`Dispute · ${dispute.orderReference}`} />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <View style={styles.flex}>
         <ScrollView
+          ref={scrollRef}
+          onLayout={keepLatestMessageVisible}
+          keyboardDismissMode="interactive"
           contentContainerStyle={styles.content}
           refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => disputeQuery.refetch()} tintColor={colors.primary} />}
         >
@@ -109,6 +118,8 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
           <View style={styles.composer}>
             <TextInput
               value={draftMessage}
+              onFocus={() => { isComposing.current = true; }}
+              onBlur={() => { isComposing.current = false; }}
               onChangeText={setDraftMessage}
               placeholder={sellerMustRespond ? "Reply to the buyer and support…" : "Write a message…"}
               placeholderTextColor={colors.textSubtle}
@@ -128,13 +139,15 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
             </Pressable>
           </View>
         )}
-      </KeyboardAvoidingView>
+        <KeyboardSpacer style={styles.keyboardArea} />
+      </View>
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
+  keyboardArea: { backgroundColor: colors.surface },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
