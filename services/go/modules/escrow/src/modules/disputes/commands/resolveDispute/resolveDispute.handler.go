@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	"zudomart/modules/escrow/src/modules/disputes/queries/getDispute"
+	getdispute "zudomart/modules/escrow/src/modules/disputes/queries/getDispute"
 	"zudomart/modules/escrow/src/modules/escrows"
 	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
 	ledgerutils "zudomart/modules/ledger/src/utils"
