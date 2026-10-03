@@ -1,0 +1,53 @@
+generator identity {
+  provider            = "prisma-client"
+  output              = "../../src/generated/identity"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["users", "auth"]
+}
+
+model IdentityProfile {
+  id             String  @id @db.Uuid
+  accountId      String  @map("account_id") @db.Uuid
+  kind           String
+  handle         String
+  displayName    String  @map("display_name")
+  avatarUrl      String? @map("avatar_url")
+  isPrivate      Boolean @map("is_private")
+  verified       Boolean
+  status         String
+  creatorStatus  String  @map("creator_status")
+
+  @@map("profiles")
+  @@schema("users")
+}
+
+model IdentityPrivacySetting {
+  accountId       String @id @map("account_id") @db.Uuid
+  personalization Boolean
+  whoCanMentionMe String  @map("who_can_mention_me")
+
+  @@map("privacy_settings")
+  @@schema("users")
+}
+
+model IdentityAccountSuspension {
+  id        String @id @db.Uuid
+  accountId String @map("account_id") @db.Uuid
+  status    String
+
+  @@map("account_suspensions")
+  @@schema("users")
+}
+
+model IdentityAccount {
+  id        String   @id @db.Uuid
+  createdAt DateTime @map("created_at")
+
+  @@map("accounts")
+  @@schema("auth")
+}
