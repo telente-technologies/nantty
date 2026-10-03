@@ -3,13 +3,14 @@ import { useState } from "react";
 import { AuthStep } from "@/components/auth/authStep";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
 import { isValidEmailAddress } from "@/utils/validators.util";
 
 export function ForgotPasswordScreen({ navigation }: AuthScreenProps<"ForgotPassword">) {
+  const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);

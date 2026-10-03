@@ -7,22 +7,26 @@ import { Apple24Icon, Google24Icon, UserCircle24Icon } from "@/components/icons"
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { SocialSignInCancelledError, type SocialSignInProvider } from "@/errors/socialSignIn.error";
 import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/appleSignIn.service";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useGuestSessionStore } from "@/store/guestSession.store";
 
 const photo = require("../../../assets/images/onboardingMarketPhoto.jpg");
 const ROWS = [-43, -96, -43];
 
 export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboarding">) {
+  const { colors } = useTheme();
   const mode = route.params?.mode ?? "signup";
   const [notice, setNotice] = useState<string | null>(null);
   const [isAppleSignInAvailable, setIsAppleSignInAvailable] = useState(false);
   const [providerSigningIn, setProviderSigningIn] = useState<SocialSignInProvider | null>(null);
   const saveSignedInSession = useAuthStore((s) => s.saveSignedInSession);
+  const startBrowsingAsGuest = useGuestSessionStore((s) => s.startBrowsingAsGuest);
+  const isDismissible = route.params?.dismissible === true;
 
   useEffect(() => {
     let isMounted = true;
@@ -91,6 +95,11 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
             title="Email"
             icon={<UserCircle24Icon />}
             onPress={() => (mode === "login" ? navigation.navigate("Login") : navigation.navigate("SignUpContact"))}
+          />
+          <Button
+            variant="subtle"
+            title={isDismissible ? "Not now" : "Browse first"}
+            onPress={() => (isDismissible ? navigation.getParent()?.goBack() : startBrowsingAsGuest())}
           />
           {notice ? (
             <Text size={12} lineHeight={14.4} color={colors.error} align="center">

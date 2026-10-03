@@ -5,13 +5,15 @@ import { AuthStep } from "@/components/auth/authStep";
 import { Warning20Icon } from "@/components/icons";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { ApiError } from "@/errors/api.error";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   fields: { gap: 24 },
   forgot: { alignSelf: "flex-start" },
   error: {
@@ -95,4 +97,4 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
     backgroundColor: colors.errorTint,
   },
-});
+}));

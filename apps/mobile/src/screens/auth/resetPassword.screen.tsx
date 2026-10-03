@@ -4,7 +4,7 @@ import { AuthStep } from "@/components/auth/authStep";
 import { PasswordRequirements } from "@/components/auth/passwordRequirements";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
@@ -12,6 +12,7 @@ import { useSignUpStore } from "@/store/signup.store";
 import { isPasswordStrongEnoughForAccount } from "@/utils/validators.util";
 
 export function ResetPasswordScreen({ navigation }: AuthScreenProps<"ResetPassword">) {
+  const { colors } = useTheme();
   const otpToken = useSignUpStore((state) => state.otpToken);
   const clearSignUpDraft = useSignUpStore((state) => state.clearSignUpDraft);
   const [newPassword, setNewPassword] = useState("");

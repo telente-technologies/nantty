@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Chip, chipStyles } from "@/components/ui/chip";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -19,6 +19,7 @@ const MINIMUM_TOPICS_TO_CONTINUE = 3;
 const MINIMUM_CUSTOMIZING_SCREEN_DURATION_MS = 1500;
 
 export function PersonalizationScreen({ navigation }: AuthScreenProps<"Personalization">) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const pendingSession = useSignUpStore((state) => state.pendingSession);
   const clearSignUpDraft = useSignUpStore((state) => state.clearSignUpDraft);
