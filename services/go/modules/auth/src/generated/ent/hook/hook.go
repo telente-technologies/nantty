@@ -56,6 +56,18 @@ func (f RefreshTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RefreshTokenMutation", m)
 }
 
+// The RegistrationBlockFunc type is an adapter to allow the use of ordinary
+// function as RegistrationBlock mutator.
+type RegistrationBlockFunc func(context.Context, *ent.RegistrationBlockMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RegistrationBlockFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RegistrationBlockMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RegistrationBlockMutation", m)
+}
+
 // The SessionFunc type is an adapter to allow the use of ordinary
 // function as Session mutator.
 type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
