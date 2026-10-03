@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { StreakBadge } from "@/components/chatSafety/streakBadge";
 import { ArrowLeft24Icon, Bell24Icon, DotsThreeVertical24Icon } from "@/components/icons";
+import { SuspendedBadge } from "@/components/chatSafety/suspendedBadge";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
@@ -40,6 +41,7 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
   const subtitle = showTypingDots && !isGroupLike ? null : secondLine;
   const openUserProfile = useOpenUserProfile();
   const isDirectConversationWithPerson = !!conversation && !!display && !display.isGroup && !display.isChannel && conversation.kind !== "business";
+  const isDirectOrBusiness = !!conversation && !!display && !display.isGroup && !display.isChannel;
   const openPeerProfileOrConversationInfo = () =>
     isDirectConversationWithPerson ? openUserProfile(conversation.peer.id) : onOpenConversationInfo();
   return (
@@ -59,6 +61,7 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
                 <VerificationBadge verification={conversation.peer.verification} legacyVerified={conversation.peer.verified} size={16} />
               ) : null}
               {display?.isBusiness ? <BusinessLabel /> : null}
+              {isDirectOrBusiness && conversation.peer.account?.status === "suspended" ? <SuspendedBadge /> : null}
               {conversation?.streak && conversation.streak.state !== "none" ? (
                 <Pressable accessibilityRole="button" accessibilityLabel="Streak details" hitSlop={8} onPress={onOpenStreak}>
                   <StreakBadge streak={conversation.streak} />
