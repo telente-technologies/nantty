@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/payments/src/integrations"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/repositories"
+	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -25,6 +26,7 @@ type Container struct {
 	Providers      map[string]interfaces.ConnectProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
+	CardHandoffs   utils.SavedCardHandoffStore
 	Ledger         *ledgerservices.Ledger
 	Outbox         ledgerevents.OutboxTable
 	Idempotency    ledgerutils.SqlIdempotencyRecordStore
@@ -36,6 +38,7 @@ type Overrides struct {
 	Providers      map[string]interfaces.ConnectProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
+	CardHandoffs   utils.SavedCardHandoffStore
 }
 
 func NewBachsProviderFromSettings(settings configs.PaymentsSettings) *integrations.BachsConnectProvider {
@@ -45,7 +48,7 @@ func NewBachsProviderFromSettings(settings configs.PaymentsSettings) *integratio
 	})
 }
 
-func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings configs.PaymentsSettings, overrides Overrides) *Container {
+func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings configs.PaymentsSettings, overrides Overrides) (*Container, error) {
 	schema := settings.Money.DatabaseSchema
 	providers := overrides.Providers
 	if providers == nil {
@@ -53,30 +56,34 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 	}
 	storeVerifiers := overrides.StoreVerifiers
 	if storeVerifiers == nil {
-		storeVerifiers = map[string]interfaces.StoreReceiptVerifier{
-			constants.StoreAppleIap:   integrations.NewAppleInAppPurchaseVerifier(settings.AppleInAppPurchaseEnabled, settings.AppleInAppPurchaseFeeBps),
-			constants.StoreGooglePlay: integrations.NewGooglePlayBillingVerifier(settings.GooglePlayBillingEnabled, settings.GooglePlayBillingFeeBps),
+		var err error
+		if storeVerifiers, err = NewStoreVerifiersFromSettings(settings); err != nil {
+			return nil, err
 		}
 	}
 	accounts := overrides.Accounts
 	if accounts == nil {
 		accounts = repositories.SqlVerifiedAccountDirectory{Database: resources.Database, AuthSchema: settings.AccountDirectorySchema}
 	}
+	cardHandoffs := overrides.CardHandoffs
+	if cardHandoffs == nil {
+		cardHandoffs = utils.NewMemorySavedCardHandoffStore(15 * time.Minute)
+	}
 	if settings.DefaultProvider == "" {
 		settings.DefaultProvider = constants.ProviderBachs
 	}
 	return &Container{
-		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts,
+		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.payments"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
 			BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
-			PaymentIntent: schema, PaymentRefund: schema, PayoutTransfer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema,
+			PaymentIntent: schema, PaymentRefund: schema, PayoutTransfer: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema,
 			StorePurchase: schema, WebhookEvent: schema,
 		},
-	}
+	}, nil
 }
 
 func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {
