@@ -171,3 +171,12 @@ type InventoryStock interface {
 	StoreOwnsLocations(ctx context.Context, storeId uuid.UUID, locationIds []uuid.UUID) (bool, error)
 	ListSuppliersForStore(ctx context.Context, storeId uuid.UUID, supplierIds []uuid.UUID) (map[uuid.UUID]string, error)
 }
+
+type StoreRewardsLookup interface {
+	EarnBackBasisPointsByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]int, error)
+}
+
+type PurchaseVerifier interface {
+	FindReceivedPurchaseOfProduct(ctx context.Context, accountId, productId uuid.UUID) (orderNumber string, found bool, err error)
+	FindReceivedPurchaseFromStore(ctx context.Context, accountId, storeId uuid.UUID) (orderNumber string, found bool, err error)
+}
