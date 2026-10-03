@@ -23,15 +23,18 @@ export const navigationGroups: readonly NavigationGroup[] = [
     items: [
       { label: "Overview", href: "/overview", icon: "speedometer24", requirement: "metrics:read", goShortcutKey: "o" },
       { label: "Audit log", href: "/audit", icon: "textIndent24", requirement: "audit:read", goShortcutKey: "l" },
-      { label: "Admins & roles", href: "/admins", icon: "shield24", requirement: "SUPERADMIN", goShortcutKey: "a" },
+      { label: "Admins & roles", href: "/admins", icon: "shield24", requirement: "staff:manage", goShortcutKey: "a" },
     ],
   },
   {
     title: "People",
     items: [
       { label: "Users", href: "/users", icon: "userCircle24", requirement: "users:read", goShortcutKey: "u" },
+      { label: "Accounts", href: "/accounts", icon: "userProfile45", requirement: "verification:grant" },
       { label: "Reserved usernames", href: "/usernames/reserved", icon: "tag24", requirement: "reserved-usernames:manage" },
       { label: "Verification", href: "/verification", icon: "sealCheck20", requirement: "verification:review", goShortcutKey: "v" },
+      { label: "Business documents", href: "/verification/business-documents", icon: "sealCheck20", requirement: "verification:review" },
+      { label: "Black applications", href: "/verification/black", icon: "shield24", requirement: "verification:review" },
       { label: "Seller applications", href: "/applications/sellers", icon: "buildingStore20", requirement: "applications:sellers" },
       { label: "Creator applications", href: "/applications/creators", icon: "videoCamera24", requirement: "applications:creators" },
       { label: "Brands", href: "/brands", icon: "buildingStore20", requirement: "brands:review", goShortcutKey: "b" },
@@ -41,6 +44,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     title: "Trust & safety",
     items: [
       { label: "Reports", href: "/moderation/reports", icon: "warning20", requirement: "moderation:reports", goShortcutKey: "r" },
+      { label: "Suspensions", href: "/moderation/suspensions", icon: "shield24", requirement: "users:suspend" },
       { label: "Appeals", href: "/moderation/appeals", icon: "refresh20", requirement: "moderation:appeals" },
       { label: "Copyright", href: "/moderation/copyright", icon: "speakerHigh24", requirement: "copyright:review", goShortcutKey: "c" },
       { label: "Trademark claims", href: "/ip-claims", icon: "tag24", requirement: "ip-claims:review", goShortcutKey: "t" },
@@ -78,8 +82,20 @@ export const navigationGroups: readonly NavigationGroup[] = [
     ],
   },
   {
+    title: "Legal",
+    items: [
+      { label: "Legal documents", href: "/legal", icon: "textIndent24", requirement: "legal.documents.view" },
+      { label: "Policy notices", href: "/legal/notices", icon: "export24", requirement: "legal.documents.view" },
+    ],
+  },
+  {
     title: "Support",
-    items: [{ label: "Tickets", href: "/support", icon: "headset24", requirement: "support:tickets", goShortcutKey: "s" }],
+    items: [
+      { label: "Tickets", href: "/support", icon: "headset24", requirement: "support:tickets", goShortcutKey: "s" },
+      { label: "Live chat", href: "/support/chat", icon: "chatCircle24", requirement: "support:chat" },
+      { label: "Email", href: "/support/email", icon: "export24", requirement: "support:email" },
+      { label: "Email templates", href: "/support/email-templates", icon: "bell24", requirement: "support:email" },
+    ],
   },
 ];
 

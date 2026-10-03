@@ -42,7 +42,9 @@ const apiAreaRules: readonly ApiAreaRule[] = [
   { prefix: "/admin/experiments", requirement: anyOf("flags:manage") },
   { prefix: "/admin/automation", requirement: anyOf("automation:manage") },
   { prefix: "/admin/notification-templates", requirement: anyOf("templates:manage") },
+  { prefix: "/admin/email-templates", requirement: anyOf("support:email", "legal.documents.view", "legal.documents.edit", "legal.notices.send") },
   { prefix: "/admin/support", requirement: anyOf("support:tickets", "support:assign") },
+  { prefix: "/admin/legal", requirement: anyOf("legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send") },
   { prefix: "/admin/audit", requirement: anyOf("audit:read") },
 ];
 
@@ -58,6 +60,8 @@ const stepUpProtectedCalls: readonly { readonly method: string; readonly pattern
   { method: "POST", pattern: /^\/admin\/brands\/[^/]+\/official-status\/revoke$/ },
   { method: "POST", pattern: /^\/admin\/ip-claims\/[^/]+\/uphold$/ },
   { method: "POST", pattern: /^\/admin\/refunds$/ },
+  { method: "POST", pattern: /^\/admin\/legal\/versions\/[^/]+\/publish$/ },
+  { method: "POST", pattern: /^\/admin\/legal\/notices$/ },
   { method: "POST", pattern: /^\/admin\/payouts\/[^/]+\/approve$/ },
   { method: "POST", pattern: /^\/admin\/coins\/[^/]+\/reverse$/ },
   { method: "PUT", pattern: /^\/admin\/config\/.+$/ },
