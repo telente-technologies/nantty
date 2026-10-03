@@ -150,7 +150,7 @@ var (
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "reason", Type: field.TypeString, Size: 300, Default: ""},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed"}, Default: "pending"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "succeeded", "failed"}, Default: "pending"},
 		{Name: "provider_refund_id", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
