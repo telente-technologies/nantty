@@ -22,9 +22,9 @@ import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
+import { legalMocks } from "./legal.mock";
 import { privacyMocks } from "./privacy.mock";
 import { productsMocks } from "./products.mock";
-import { rewardsMocks } from "./rewards.mock";
 import type { MockRoute } from "./registry.mock";
 import { sellerMocks } from "./seller.mock";
 import { settingsMocks } from "./settings.mock";
@@ -33,10 +33,13 @@ import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
+import { storeRewardsMocks } from "./storeRewards.mock";
 import { walletMocks } from "./wallet.mock";
 import { reportsMocks } from "./reports.mock";
 import { discoveryMocks } from "./discovery.mock";
 import { savesMocks } from "./saves.mock";
+import { webActionsMocks } from "./webActions.mock";
+import { mentionsMocks } from "./mentions.mock";
 import { videosMocks } from "./videos.mock";
 
 export const routes: MockRoute[] = [
@@ -45,6 +48,8 @@ export const routes: MockRoute[] = [
   ...authMocks,
   ...discoveryMocks,
   ...savesMocks,
+  ...webActionsMocks,
+  ...mentionsMocks,
   ...videosMocks,
   ...usersMocks,
   ...feedMocks,
@@ -56,7 +61,6 @@ export const routes: MockRoute[] = [
   ...banksMocks,
   ...creatorSubscriptionsMocks,
   ...creatorProgramMocks,
-  ...rewardsMocks,
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
@@ -78,6 +82,8 @@ export const routes: MockRoute[] = [
   ...storiesMocks,
   ...settingsMocks,
   ...privacyMocks,
+  ...legalMocks,
+  ...storeRewardsMocks,
   ...walletMocks,
   ...sellerMocks,
 ];

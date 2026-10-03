@@ -49,6 +49,8 @@ export const buildCartItemFromLine = (line: MockCartLine): CartItem => {
 
 export const storeIdForProduct = (productId: string) => findCatalogSeedByProductId(productId)?.storeId ?? "s_ada";
 
+export const mockStoreCreditBalanceUsdCentsByStore: Readonly<Record<string, number>> = { s_ada: 150 };
+
 export const summariseMockCart = (): Cart => {
   const items = mockCartState.lines.map(buildCartItemFromLine);
   const zero = convertUsdCentsToViewerCurrency(0);
@@ -58,11 +60,19 @@ export const summariseMockCart = (): Cart => {
   );
   const distinctStoreCount = new Set(mockCartState.lines.map((line) => storeIdForProduct(line.productId))).size;
   const shipping = convertUsdCentsToViewerCurrency(distinctStoreCount * SHIPPING_FEE_PER_STORE_IN_USD_CENTS);
+  const storeCredit = {
+    ...zero,
+    amountMinor: [...new Set(mockCartState.lines.map((line) => storeIdForProduct(line.productId)))].reduce((sum, storeId) => {
+      const storeSubtotal = items.filter((item) => storeIdForProduct(item.product.id) === storeId).reduce((total, item) => total + multiplyMoneyByQuantity(item.product.price, item.quantity).amountMinor, 0);
+      return sum + Math.min(storeSubtotal, convertUsdCentsToViewerCurrency(mockStoreCreditBalanceUsdCentsByStore[storeId] ?? 0).amountMinor);
+    }, 0),
+  };
   return {
     items,
     itemsTotal,
     shopDiscount: zero,
+    storeCredit,
     shipping,
-    total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor + shipping.amountMinor },
+    total: { ...itemsTotal, amountMinor: itemsTotal.amountMinor - storeCredit.amountMinor + shipping.amountMinor },
   };
 };

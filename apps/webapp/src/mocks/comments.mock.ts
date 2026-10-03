@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Comment, CommentWithReplies, Page, UserSummary } from "@/types";
 
 import { isoDateHoursAgo, me } from "./fixtures.mock";
+import { keepAllowedMentionEntities } from "./mentions.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
@@ -190,9 +191,9 @@ export const commentsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
-    const input = body as { text: string; parentCommentId?: string };
+    const input = body as { text: string; parentCommentId?: string; mentions?: unknown };
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
-    const created = createStoredComment(postId, me, input.text, parent, 0, 0);
+    const created = { ...createStoredComment(postId, me, input.text, parent, 0, 0), mentions: keepAllowedMentionEntities(input.text, input.mentions) };
     const comments = commentsForPost(postId);
     commentsByPostId.set(postId, parent ? [...comments, created] : [created, ...comments]);
     if (parent) replaceStoredComment(parent.id, (c) => ({ ...c, replyCount: c.replyCount + 1 }));
