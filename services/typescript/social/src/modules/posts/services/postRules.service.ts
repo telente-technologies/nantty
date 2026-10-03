@@ -5,12 +5,14 @@ export interface MediaDescriptor {
   readonly id: string;
   readonly type: "image" | "video";
   readonly durationSeconds?: number | undefined;
+  readonly status?: "uploaded" | "processing" | "ready" | "failed" | undefined;
 }
 
 export type PostKindInput = "post" | "clip" | "story";
 
 export function assertMediaFitsPostKind(kind: PostKindInput, text: string, media: readonly MediaDescriptor[]): void {
   if (media.length > maximumMediaPerPost) throw unprocessable("TOO_MANY_MEDIA", `A post can have up to ${maximumMediaPerPost} media items.`);
+  if (media.some((item) => item.status === "failed")) throw unprocessable("MEDIA_FAILED", "One of the uploads failed. Remove it and try again.");
   if (kind === "clip") {
     if (media.length !== 1 || media[0]?.type !== "video") throw unprocessable("CLIP_REQUIRES_ONE_VIDEO", "A clip needs exactly one video.");
     const duration = media[0].durationSeconds;
