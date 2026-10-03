@@ -18,8 +18,8 @@
   justify-content: center;
   flex: none;
   border-radius: 50%;
-  background: var(--blue-50);
-  color: var(--blue-800);
+  background: var(--brand-line);
+  color: var(--color-brand);
   font-weight: 700;
 }
 

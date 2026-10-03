@@ -25,12 +25,12 @@
 
 .info {
   background: var(--color-brand-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .brand {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
 }
 
 .success {
@@ -50,5 +50,5 @@
 
 .night {
   background: var(--console-night);
-  color: var(--yellow-500);
+  color: var(--console-night-accent);
 }

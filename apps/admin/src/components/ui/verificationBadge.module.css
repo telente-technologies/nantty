@@ -7,15 +7,15 @@
 }
 
 .blue {
-  color: var(--blue-500);
+  color: var(--verified-blue);
 }
 
 .gold {
-  color: #c99a06;
+  color: var(--verified-gold);
 }
 
 .black {
-  color: #000;
+  color: var(--verified-black);
 }
 
 .hidden {

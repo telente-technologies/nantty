@@ -17,7 +17,7 @@
   padding: 10px 14px;
   border-radius: var(--radius-medium);
   background: var(--console-night);
-  color: #fff;
+  color: var(--console-night-strong);
   box-shadow: var(--shadow-float);
   font-weight: 500;
   animation: rise 160ms ease-out;
@@ -33,7 +33,7 @@
 }
 
 .info {
-  border-color: var(--blue-400);
+  border-color: var(--color-brand);
 }
 
 @keyframes rise {
