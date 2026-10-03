@@ -237,6 +237,8 @@ func convertMilliunitsToMinorUnits(milliunits int64, currency string) int64 {
 	return (scaled + 500) / 1000
 }
 
+const maximumStoreResponseBytes = 2 << 20
+
 func sendJsonRequest(client *http.Client, request *http.Request, destination any) (int, error) {
 	request.Header.Set("Accept", "application/json")
 	response, err := client.Do(request)
@@ -247,7 +249,7 @@ func sendJsonRequest(client *http.Client, request *http.Request, destination any
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return response.StatusCode, fmt.Errorf("%w: store api returned %d", interfaces.ErrProviderUnavailable, response.StatusCode)
 	}
-	if err := json.NewDecoder(http.MaxBytesReader(nil, response.Body, maximumBachsResponseBytes)).Decode(destination); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(nil, response.Body, maximumStoreResponseBytes)).Decode(destination); err != nil {
 		return response.StatusCode, fmt.Errorf("%w: decode store api response: %v", interfaces.ErrProviderUnavailable, err)
 	}
 	return response.StatusCode, nil
