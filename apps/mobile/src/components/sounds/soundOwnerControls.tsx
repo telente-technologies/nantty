@@ -3,7 +3,7 @@ import { StyleSheet, Switch, TextInput, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { ClipSound, UpdateSoundInput } from "@/types";
 
@@ -17,6 +17,8 @@ export interface SoundOwnerControlsProps {
 const MAXIMUM_SOUND_TITLE_LENGTH = 80;
 
 export function SoundOwnerControls({ sound, isSaving, errorMessage, onUpdate }: SoundOwnerControlsProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [draftTitle, setDraftTitle] = useState(sound.title);
   useEffect(() => setDraftTitle(sound.title), [sound.title]);
   const trimmedTitle = draftTitle.trim();
@@ -66,7 +68,7 @@ export function SoundOwnerControls({ sound, isSaving, errorMessage, onUpdate }: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { marginHorizontal: 16, padding: 12, gap: 12, borderWidth: 1, borderColor: colors.divider, borderRadius: 8 },
   renameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   input: {
@@ -83,4 +85,4 @@ const styles = StyleSheet.create({
   },
   switchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   switchText: { flex: 1, gap: 2 },
-});
+}));

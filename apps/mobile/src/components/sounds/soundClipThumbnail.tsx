@@ -3,11 +3,13 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Play24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Clip } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 export function SoundClipThumbnail({ clip, width, onPress }: { clip: Clip; width: number; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const posterUrl = clip.media[0]?.posterUrl ?? null;
   return (
     <Pressable
@@ -29,7 +31,7 @@ export function SoundClipThumbnail({ clip, width, onPress }: { clip: Clip; width
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   tile: { backgroundColor: colors.media, overflow: "hidden" },
   views: { position: "absolute", left: 6, bottom: 6, flexDirection: "row", alignItems: "center", gap: 4 },
-});
+}));

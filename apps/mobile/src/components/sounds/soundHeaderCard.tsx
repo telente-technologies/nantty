@@ -5,7 +5,7 @@ import { BookmarkSimple24Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { explainWhySoundCannotBeReused } from "@/services/sounds.service";
 import type { ClipSound } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
@@ -18,6 +18,8 @@ export interface SoundHeaderCardProps {
 }
 
 export function SoundHeaderCard({ sound, onPressOwner, onToggleSaved, onUseSound }: SoundHeaderCardProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const reasonSoundCannotBeReused = explainWhySoundCannotBeReused(sound);
   return (
     <View style={styles.root}>
@@ -70,7 +72,7 @@ export function SoundHeaderCard({ sound, onPressOwner, onToggleSaved, onUseSound
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { paddingHorizontal: 16, paddingVertical: 16, gap: 14 },
   topRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   cover: { width: 88, height: 88, borderRadius: 8, overflow: "hidden", backgroundColor: colors.media },
@@ -79,4 +81,4 @@ const styles = StyleSheet.create({
   owner: { flexDirection: "row", alignItems: "center", gap: 6 },
   unsaved: { opacity: 0.6 },
   notice: { padding: 12, borderRadius: 8, backgroundColor: colors.skeleton },
-});
+}));
