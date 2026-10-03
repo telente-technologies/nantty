@@ -12,12 +12,15 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 
 	"zudomart/modules/users/src/configs"
+	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
 	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/identityports"
@@ -27,20 +30,27 @@ import (
 )
 
 type usersTestHarness struct {
-	t         *testing.T
-	server    *httptest.Server
-	publisher *events.RecordingPublisher
-	tokens    *identitytest.FakeTokenService
-	accounts  *identitytest.FakeAccountDirectory
-	audit     *recordingAuditRecorder
-	settings  *fixedPlatformSettings
+	t            *testing.T
+	server       *httptest.Server
+	publisher    *events.RecordingPublisher
+	tokens       *identitytest.FakeTokenService
+	accounts     *identitytest.FakeAccountDirectory
+	audit        *recordingAuditRecorder
+	settings     *fixedPlatformSettings
+	databaseUrl  string
+	moneyBlocked *atomic.Bool
+	module       *Module
+	schema       string
 }
 
 type recordingAuditRecorder struct {
+	mutex   sync.Mutex
 	actions []string
 }
 
 func (recorder *recordingAuditRecorder) RecordAuditEvent(_ context.Context, event identityports.AuditEvent) error {
+	recorder.mutex.Lock()
+	defer recorder.mutex.Unlock()
 	recorder.actions = append(recorder.actions, event.Action)
 	return nil
 }
@@ -72,13 +82,23 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { dropSchemaAndClose(administrator, schema) })
-	harness := &usersTestHarness{
+	moneyBlocked := &atomic.Bool{}
+	moneyServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("X-Internal-Token") != strings.Repeat("m", 32) {
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		_, _ = writer.Write([]byte(fmt.Sprintf(`{"pendingWithdrawals":%d,"nonZeroBalances":[],"canDelete":%t}`, map[bool]int{true: 1, false: 0}[moneyBlocked.Load()], !moneyBlocked.Load())))
+	}))
+	t.Cleanup(moneyServer.Close)
+	harness := &usersTestHarness{moneyBlocked: moneyBlocked,
 		t: t, publisher: &events.RecordingPublisher{}, tokens: identitytest.NewFakeTokenService(t), accounts: identitytest.NewFakeAccountDirectory(),
-		audit: &recordingAuditRecorder{}, settings: &fixedPlatformSettings{creatorRequirements: `{"minimumAccountAgeDays":30}`},
+		audit: &recordingAuditRecorder{}, settings: &fixedPlatformSettings{creatorRequirements: `{"minimumAccountAgeDays":30}`}, databaseUrl: databaseUrl, schema: schema,
 	}
 	identityports.Default.RegisterStaffTokenService(harness.tokens)
 	identityports.Default.RegisterAccountDirectory(harness.accounts)
 	identityports.Default.RegisterAccountEnforcement(harness.accounts)
+	identityports.Default.RegisterCurrencyResolver(fixedCurrencies{})
 	identityports.Default.RegisterAuditRecorder(harness.audit)
 	identityports.Default.RegisterPlatformSettings(harness.settings)
 	settings := configs.UsersSettings{
@@ -87,7 +107,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		MediaPublicBaseUrl: "https://media.zudomart.test", MediaUploadBaseUrl: "https://upload.zudomart.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
 		Privacy: configs.PrivacySettings{
 			ExportBucket: "users-test-exports", ExportRegion: "eu-west-1", ExportDownloadLinkTtl: time.Minute, ExportArchiveTtl: time.Hour,
-			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: time.Hour, AnonymousConsentPerMinute: 60, InternalApiToken: strings.Repeat("u", 32), DocumentsBucket: "users-test-documents",
+			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: 200 * time.Millisecond, AnonymousConsentPerMinute: 60, InternalApiToken: strings.Repeat("u", 32), MoneyInternalUrl: moneyServer.URL, MoneyInternalToken: strings.Repeat("m", 32), DocumentsBucket: "users-test-documents",
 		},
 	}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), Health: health.NewRegistryForService("users-test")}
@@ -95,6 +115,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 	if err != nil {
 		t.Fatal(err)
 	}
+	harness.module = module
 	workerContext, stopWorkers := context.WithCancel(ctx)
 	go func() { _ = module.RunBackgroundWorkersUntilContextDone(workerContext) }()
 	mux := http.NewServeMux()
@@ -178,4 +199,61 @@ func mustParseUuid(value string) uuid.UUID {
 		panic(err)
 	}
 	return parsed
+}
+
+func (recorder *recordingAuditRecorder) has(action string) bool {
+	recorder.mutex.Lock()
+	defer recorder.mutex.Unlock()
+	for _, recorded := range recorder.actions {
+		if recorded == action {
+			return true
+		}
+	}
+	return false
+}
+
+func (harness *usersTestHarness) execSql(statement string, arguments ...any) {
+	harness.t.Helper()
+	scoped, err := postgres.ScopeDatabaseUrlToSchema(harness.databaseUrl, harness.schema)
+	if err != nil {
+		harness.t.Fatal(err)
+	}
+	database, err := postgres.OpenDatabaseAndVerifyConnection(context.Background(), scoped, postgres.DefaultPoolSettings())
+	if err != nil {
+		harness.t.Fatal(err)
+	}
+	defer database.Close()
+	if _, err := database.Exec(statement, arguments...); err != nil {
+		harness.t.Fatal(err)
+	}
+}
+
+func (harness *usersTestHarness) staff(role string, permissions ...string) (string, []string) {
+	accessToken, stepUpToken, _ := harness.tokens.SignStaffTokensForTest(harness.t, role, permissions)
+	return accessToken, []string{"X-Step-Up-Token", stepUpToken}
+}
+
+func (harness *usersTestHarness) waitUntil(condition func() bool) bool {
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		if condition() {
+			return true
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return false
+}
+
+func (harness *usersTestHarness) runSuggestionScheduler() {
+	harness.t.Helper()
+	if err := (checkmarkservices.SuggestionScheduler{Container: harness.module.Container()}).RunOnce(context.Background()); err != nil {
+		harness.t.Fatal(err)
+	}
+	time.Sleep(300 * time.Millisecond)
+}
+
+type fixedCurrencies struct{}
+
+func (fixedCurrencies) CurrencyForCountry(countryCode string) (string, bool) {
+	return "NGN", countryCode == "NG"
 }
