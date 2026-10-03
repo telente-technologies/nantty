@@ -1,5 +1,10 @@
 import { ApiError } from "@/errors/api.error";
 
+import { accountStatusMocks } from "./accountStatus.mock";
+import { businessDocumentsMocks } from "./businessDocuments.mock";
+import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
+import { helpCenterMocks } from "./helpCenter.mock";
+import { marketingPreferencesMocks } from "./marketingPreferences.mock";
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
@@ -51,6 +56,11 @@ import { reportsMocks } from "./reports.mock";
 const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
+  ...accountStatusMocks,
+  ...businessDocumentsMocks,
+  ...checkmarkSuggestionMocks,
+  ...helpCenterMocks,
+  ...marketingPreferencesMocks,
   ...authMocks,
   ...followGraphMocks,
   ...usersMocks,

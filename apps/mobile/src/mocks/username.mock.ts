@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { UsernameAvailability, UsernamePolicy } from "@/types/account.type";
+import type { UsernameAvailability, UsernamePolicy, UsernameUnavailableReason } from "@/types/account.type";
 import { isValidUsername } from "@/utils/validators.util";
 
 import { getSignedInMockUser } from "./fixtures.mock";
@@ -24,13 +24,23 @@ export const generateAutomaticUsername = (seed: string) => {
 
 const takenUsernames = () => new Set([...directoryUsers.map((user) => user.username.toLowerCase()), "taken", signedInProfile().username.toLowerCase()]);
 
+const UNAVAILABLE_MESSAGES: Record<UsernameUnavailableReason, string> = {
+  invalid: "Use 3 to 20 letters, numbers, underscores or full stops.",
+  reserved: "This username is reserved.",
+  withheld: "This username is restricted and can't be used.",
+  recently_used: "This username was used recently and isn't available yet.",
+  taken: "This username is already taken.",
+};
+
+const unavailable = (reason: UsernameUnavailableReason): UsernameAvailability => ({ available: false, reason, message: UNAVAILABLE_MESSAGES[reason] });
+
 export function checkAvailability(rawUsername: string): UsernameAvailability {
   const username = rawUsername.trim().toLowerCase();
-  if (!isValidUsername(username)) return { available: false, reason: "invalid" };
-  if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return { available: false, reason: "reserved" };
-  if (WITHHELD_USERNAMES.has(username)) return { available: false, reason: "withheld" };
-  if (RECENTLY_RELEASED_USERNAMES.has(username)) return { available: false, reason: "recently_used" };
-  if (takenUsernames().has(username)) return { available: false, reason: "taken" };
+  if (!isValidUsername(username)) return unavailable("invalid");
+  if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return unavailable("reserved");
+  if (WITHHELD_USERNAMES.has(username)) return unavailable("withheld");
+  if (RECENTLY_RELEASED_USERNAMES.has(username)) return unavailable("recently_used");
+  if (takenUsernames().has(username)) return unavailable("taken");
   return { available: true };
 }
 
@@ -67,7 +77,7 @@ export const usernameMocks: MockRoute[] = [
       throw new ApiError(429, `You can change your username again on ${new Date(policy.nextChangeAvailableAt ?? Date.now()).toDateString()}.`, "USERNAME_CHANGE_RATE_LIMITED");
     }
     const availability = checkAvailability(username);
-    if (!availability.available) throw new ApiError(409, "That username isn't available", availability.reason?.toUpperCase());
+    if (!availability.available) throw new ApiError(409, availability.message ?? "That username isn't available", availability.reason?.toUpperCase());
     const userId = getSignedInMockUser().id;
     usernameChangesByUserId.set(userId, [...(usernameChangesByUserId.get(userId) ?? []), Date.now()]);
     applyProfileEditForSignedInUser({ username: username.trim().toLowerCase() });
