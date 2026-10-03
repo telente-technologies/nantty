@@ -26,8 +26,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 700;
   font-size: var(--fs-13);
 }
