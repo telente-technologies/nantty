@@ -21,11 +21,13 @@ export function GuestAuthSheet() {
   };
 
   return (
-    <BottomSheet visible={reason !== null} onClose={dismissAndForgetAction} title={`Sign in to ${reason ?? "continue"}`}>
+    <BottomSheet
+      visible={reason !== null}
+      onClose={dismissAndForgetAction}
+      title={`Sign in to ${reason ?? "continue"}`}
+      subtitle="Create a free account or sign in. We'll bring you back here and finish what you started."
+    >
       <View style={styles.body}>
-        <Text size={13} style={styles.message}>
-          Create a free account or sign in. We will bring you back here and finish what you started.
-        </Text>
         {isAppleSignInAvailable ? (
           <Button variant="outline" title="Continue with Apple" icon={<Apple24Icon />} loading={providerSigningIn === "apple"} onPress={() => signInWithProvider("apple")} />
         ) : null}
@@ -43,7 +45,6 @@ export function GuestAuthSheet() {
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
-  message: { color: colors.textSubtle },
+  body: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 16, gap: 10 },
   failure: { color: colors.error },
 }));
