@@ -90,6 +90,31 @@ func Currency(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldCurrency, v))
 }
 
+// ConnectedAccountID applies equality check predicate on the "connected_account_id" field. It's identical to ConnectedAccountIDEQ.
+func ConnectedAccountID(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserID applies equality check predicate on the "beneficiary_user_id" field. It's identical to BeneficiaryUserIDEQ.
+func BeneficiaryUserID(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// TransferGroup applies equality check predicate on the "transfer_group" field. It's identical to TransferGroupEQ.
+func TransferGroup(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldTransferGroup, v))
+}
+
+// ProviderDestinationID applies equality check predicate on the "provider_destination_id" field. It's identical to ProviderDestinationIDEQ.
+func ProviderDestinationID(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldProviderDestinationID, v))
+}
+
+// FeeMinor applies equality check predicate on the "fee_minor" field. It's identical to FeeMinorEQ.
+func FeeMinor(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldFeeMinor, v))
+}
+
 // BankCode applies equality check predicate on the "bank_code" field. It's identical to BankCodeEQ.
 func BankCode(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldBankCode, v))
@@ -523,6 +548,326 @@ func CurrencyEqualFold(v string) predicate.PayoutTransfer {
 // CurrencyContainsFold applies the ContainsFold predicate on the "currency" field.
 func CurrencyContainsFold(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldCurrency, v))
+}
+
+// KindEQ applies the EQ predicate on the "kind" field.
+func KindEQ(v Kind) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldKind, v))
+}
+
+// KindNEQ applies the NEQ predicate on the "kind" field.
+func KindNEQ(v Kind) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldKind, v))
+}
+
+// KindIn applies the In predicate on the "kind" field.
+func KindIn(vs ...Kind) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldKind, vs...))
+}
+
+// KindNotIn applies the NotIn predicate on the "kind" field.
+func KindNotIn(vs ...Kind) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldKind, vs...))
+}
+
+// ConnectedAccountIDEQ applies the EQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDNEQ applies the NEQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDNEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDIn applies the In predicate on the "connected_account_id" field.
+func ConnectedAccountIDIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDNotIn applies the NotIn predicate on the "connected_account_id" field.
+func ConnectedAccountIDNotIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDGT applies the GT predicate on the "connected_account_id" field.
+func ConnectedAccountIDGT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDGTE applies the GTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDGTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLT applies the LT predicate on the "connected_account_id" field.
+func ConnectedAccountIDLT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLTE applies the LTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDLTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContains applies the Contains predicate on the "connected_account_id" field.
+func ConnectedAccountIDContains(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContains(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasPrefix applies the HasPrefix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasPrefix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasPrefix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasSuffix applies the HasSuffix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasSuffix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasSuffix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDEqualFold applies the EqualFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDEqualFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEqualFold(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContainsFold applies the ContainsFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDContainsFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserIDEQ applies the EQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDNEQ applies the NEQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDIn applies the In predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDNotIn applies the NotIn predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNotIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDGT applies the GT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDGTE applies the GTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLT applies the LT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLTE applies the LTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContains applies the Contains predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContains(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContains(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasPrefix applies the HasPrefix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasPrefix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasPrefix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasSuffix applies the HasSuffix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasSuffix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasSuffix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDEqualFold applies the EqualFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEqualFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEqualFold(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContainsFold applies the ContainsFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContainsFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldBeneficiaryUserID, v))
+}
+
+// TransferGroupEQ applies the EQ predicate on the "transfer_group" field.
+func TransferGroupEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldTransferGroup, v))
+}
+
+// TransferGroupNEQ applies the NEQ predicate on the "transfer_group" field.
+func TransferGroupNEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldTransferGroup, v))
+}
+
+// TransferGroupIn applies the In predicate on the "transfer_group" field.
+func TransferGroupIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldTransferGroup, vs...))
+}
+
+// TransferGroupNotIn applies the NotIn predicate on the "transfer_group" field.
+func TransferGroupNotIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldTransferGroup, vs...))
+}
+
+// TransferGroupGT applies the GT predicate on the "transfer_group" field.
+func TransferGroupGT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldTransferGroup, v))
+}
+
+// TransferGroupGTE applies the GTE predicate on the "transfer_group" field.
+func TransferGroupGTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldTransferGroup, v))
+}
+
+// TransferGroupLT applies the LT predicate on the "transfer_group" field.
+func TransferGroupLT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldTransferGroup, v))
+}
+
+// TransferGroupLTE applies the LTE predicate on the "transfer_group" field.
+func TransferGroupLTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldTransferGroup, v))
+}
+
+// TransferGroupContains applies the Contains predicate on the "transfer_group" field.
+func TransferGroupContains(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContains(FieldTransferGroup, v))
+}
+
+// TransferGroupHasPrefix applies the HasPrefix predicate on the "transfer_group" field.
+func TransferGroupHasPrefix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasPrefix(FieldTransferGroup, v))
+}
+
+// TransferGroupHasSuffix applies the HasSuffix predicate on the "transfer_group" field.
+func TransferGroupHasSuffix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasSuffix(FieldTransferGroup, v))
+}
+
+// TransferGroupEqualFold applies the EqualFold predicate on the "transfer_group" field.
+func TransferGroupEqualFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEqualFold(FieldTransferGroup, v))
+}
+
+// TransferGroupContainsFold applies the ContainsFold predicate on the "transfer_group" field.
+func TransferGroupContainsFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldTransferGroup, v))
+}
+
+// ProviderDestinationIDEQ applies the EQ predicate on the "provider_destination_id" field.
+func ProviderDestinationIDEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDNEQ applies the NEQ predicate on the "provider_destination_id" field.
+func ProviderDestinationIDNEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDIn applies the In predicate on the "provider_destination_id" field.
+func ProviderDestinationIDIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldProviderDestinationID, vs...))
+}
+
+// ProviderDestinationIDNotIn applies the NotIn predicate on the "provider_destination_id" field.
+func ProviderDestinationIDNotIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldProviderDestinationID, vs...))
+}
+
+// ProviderDestinationIDGT applies the GT predicate on the "provider_destination_id" field.
+func ProviderDestinationIDGT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDGTE applies the GTE predicate on the "provider_destination_id" field.
+func ProviderDestinationIDGTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDLT applies the LT predicate on the "provider_destination_id" field.
+func ProviderDestinationIDLT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDLTE applies the LTE predicate on the "provider_destination_id" field.
+func ProviderDestinationIDLTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDContains applies the Contains predicate on the "provider_destination_id" field.
+func ProviderDestinationIDContains(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContains(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDHasPrefix applies the HasPrefix predicate on the "provider_destination_id" field.
+func ProviderDestinationIDHasPrefix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasPrefix(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDHasSuffix applies the HasSuffix predicate on the "provider_destination_id" field.
+func ProviderDestinationIDHasSuffix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasSuffix(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDEqualFold applies the EqualFold predicate on the "provider_destination_id" field.
+func ProviderDestinationIDEqualFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEqualFold(FieldProviderDestinationID, v))
+}
+
+// ProviderDestinationIDContainsFold applies the ContainsFold predicate on the "provider_destination_id" field.
+func ProviderDestinationIDContainsFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldProviderDestinationID, v))
+}
+
+// FeeMinorEQ applies the EQ predicate on the "fee_minor" field.
+func FeeMinorEQ(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldFeeMinor, v))
+}
+
+// FeeMinorNEQ applies the NEQ predicate on the "fee_minor" field.
+func FeeMinorNEQ(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldFeeMinor, v))
+}
+
+// FeeMinorIn applies the In predicate on the "fee_minor" field.
+func FeeMinorIn(vs ...int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldFeeMinor, vs...))
+}
+
+// FeeMinorNotIn applies the NotIn predicate on the "fee_minor" field.
+func FeeMinorNotIn(vs ...int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldFeeMinor, vs...))
+}
+
+// FeeMinorGT applies the GT predicate on the "fee_minor" field.
+func FeeMinorGT(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldFeeMinor, v))
+}
+
+// FeeMinorGTE applies the GTE predicate on the "fee_minor" field.
+func FeeMinorGTE(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldFeeMinor, v))
+}
+
+// FeeMinorLT applies the LT predicate on the "fee_minor" field.
+func FeeMinorLT(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldFeeMinor, v))
+}
+
+// FeeMinorLTE applies the LTE predicate on the "fee_minor" field.
+func FeeMinorLTE(v int64) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldFeeMinor, v))
 }
 
 // BankCodeEQ applies the EQ predicate on the "bank_code" field.

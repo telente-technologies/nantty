@@ -29,6 +29,18 @@ const (
 	FieldAmountMinor = "amount_minor"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
+	// FieldKind holds the string denoting the kind field in the database.
+	FieldKind = "kind"
+	// FieldConnectedAccountID holds the string denoting the connected_account_id field in the database.
+	FieldConnectedAccountID = "connected_account_id"
+	// FieldBeneficiaryUserID holds the string denoting the beneficiary_user_id field in the database.
+	FieldBeneficiaryUserID = "beneficiary_user_id"
+	// FieldTransferGroup holds the string denoting the transfer_group field in the database.
+	FieldTransferGroup = "transfer_group"
+	// FieldProviderDestinationID holds the string denoting the provider_destination_id field in the database.
+	FieldProviderDestinationID = "provider_destination_id"
+	// FieldFeeMinor holds the string denoting the fee_minor field in the database.
+	FieldFeeMinor = "fee_minor"
 	// FieldBankCode holds the string denoting the bank_code field in the database.
 	FieldBankCode = "bank_code"
 	// FieldDestinationLast4 holds the string denoting the destination_last4 field in the database.
@@ -57,6 +69,12 @@ var Columns = []string{
 	FieldProvider,
 	FieldAmountMinor,
 	FieldCurrency,
+	FieldKind,
+	FieldConnectedAccountID,
+	FieldBeneficiaryUserID,
+	FieldTransferGroup,
+	FieldProviderDestinationID,
+	FieldFeeMinor,
 	FieldBankCode,
 	FieldDestinationLast4,
 	FieldStatus,
@@ -89,8 +107,30 @@ var (
 	ProviderValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultConnectedAccountID holds the default value on creation for the "connected_account_id" field.
+	DefaultConnectedAccountID string
+	// ConnectedAccountIDValidator is a validator for the "connected_account_id" field. It is called by the builders before save.
+	ConnectedAccountIDValidator func(string) error
+	// DefaultBeneficiaryUserID holds the default value on creation for the "beneficiary_user_id" field.
+	DefaultBeneficiaryUserID string
+	// BeneficiaryUserIDValidator is a validator for the "beneficiary_user_id" field. It is called by the builders before save.
+	BeneficiaryUserIDValidator func(string) error
+	// DefaultTransferGroup holds the default value on creation for the "transfer_group" field.
+	DefaultTransferGroup string
+	// TransferGroupValidator is a validator for the "transfer_group" field. It is called by the builders before save.
+	TransferGroupValidator func(string) error
+	// DefaultProviderDestinationID holds the default value on creation for the "provider_destination_id" field.
+	DefaultProviderDestinationID string
+	// ProviderDestinationIDValidator is a validator for the "provider_destination_id" field. It is called by the builders before save.
+	ProviderDestinationIDValidator func(string) error
+	// DefaultFeeMinor holds the default value on creation for the "fee_minor" field.
+	DefaultFeeMinor int64
+	// DefaultBankCode holds the default value on creation for the "bank_code" field.
+	DefaultBankCode string
 	// BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
 	BankCodeValidator func(string) error
+	// DefaultDestinationLast4 holds the default value on creation for the "destination_last4" field.
+	DefaultDestinationLast4 string
 	// DestinationLast4Validator is a validator for the "destination_last4" field. It is called by the builders before save.
 	DestinationLast4Validator func(string) error
 	// DefaultProviderTransferCode holds the default value on creation for the "provider_transfer_code" field.
@@ -108,6 +148,32 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// Kind defines the type for the "kind" enum field.
+type Kind string
+
+// KindPayout is the default value of the Kind enum.
+const DefaultKind = KindPayout
+
+// Kind values.
+const (
+	KindPayout           Kind = "payout"
+	KindPlatformTransfer Kind = "platform_transfer"
+)
+
+func (k Kind) String() string {
+	return string(k)
+}
+
+// KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
+func KindValidator(k Kind) error {
+	switch k {
+	case KindPayout, KindPlatformTransfer:
+		return nil
+	default:
+		return fmt.Errorf("payouttransfer: invalid enum value for kind field: %q", k)
+	}
+}
 
 // Status defines the type for the "status" enum field.
 type Status string
@@ -177,6 +243,36 @@ func ByAmountMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByCurrency orders the results by the currency field.
 func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
+}
+
+// ByKind orders the results by the kind field.
+func ByKind(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKind, opts...).ToFunc()
+}
+
+// ByConnectedAccountID orders the results by the connected_account_id field.
+func ByConnectedAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldConnectedAccountID, opts...).ToFunc()
+}
+
+// ByBeneficiaryUserID orders the results by the beneficiary_user_id field.
+func ByBeneficiaryUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBeneficiaryUserID, opts...).ToFunc()
+}
+
+// ByTransferGroup orders the results by the transfer_group field.
+func ByTransferGroup(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTransferGroup, opts...).ToFunc()
+}
+
+// ByProviderDestinationID orders the results by the provider_destination_id field.
+func ByProviderDestinationID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderDestinationID, opts...).ToFunc()
+}
+
+// ByFeeMinor orders the results by the fee_minor field.
+func ByFeeMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFeeMinor, opts...).ToFunc()
 }
 
 // ByBankCode orders the results by the bank_code field.
