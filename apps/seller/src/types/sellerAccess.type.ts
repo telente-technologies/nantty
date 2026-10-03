@@ -23,7 +23,7 @@ export interface SubscriptionSummary {
 export interface PlanEntitlements {
   readonly maxStaffSeats: number | null;
   readonly maxLocations: number | null;
-  readonly reducedCommission: boolean;
+  readonly reducedEscrowFee: boolean;
   readonly priorityPlacement: boolean;
   readonly adCredits: { readonly amountMinor: number; readonly currency: string } | null;
   readonly apiAccess: boolean;

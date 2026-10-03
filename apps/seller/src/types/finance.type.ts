@@ -2,7 +2,7 @@ import type { Money } from "@/types/money.type";
 import type { EscrowStatus } from "@/types/order.type";
 import type { WalletBalances, WalletTransaction } from "@/types/wallet.type";
 
-export type FinanceFeeKind = "marketplace_commission" | "payment_processing" | "withdrawal" | "ads" | "subscription";
+export type FinanceFeeKind = "escrow_fee" | "payment_processing" | "withdrawal" | "ads" | "subscription";
 
 export interface EscrowEntry {
   readonly orderId: string;
