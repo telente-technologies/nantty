@@ -4,6 +4,7 @@ import { presentPlatformUserSummary, type MockPlatformUserRecord } from "@/mocks
 import { buildDemoAdPolicies, buildDemoAdsForReview, buildDemoAdvertisers, type MockAdPolicyRecord, type MockAdRecord, type MockAdvertiserRecord } from "@/mocks/seed/trustAds.mock";
 import { buildDemoTrustAppeals, type MockAppealRecord } from "@/mocks/seed/trustAppeals.mock";
 import { buildDemoCopyrightClaims, type MockCopyrightClaimRecord } from "@/mocks/seed/trustCopyright.mock";
+import { buildDemoChatReports, type MockChatReportRecord } from "@/mocks/seed/trustChatReports.mock";
 import { buildDemoTrustReports, type MockReportRecord } from "@/mocks/seed/trustReports.mock";
 import { isoMinutesAgo } from "@/mocks/seed/trustTime.mock";
 import type { PriorAuthorAction } from "@/types/moderation.type";
@@ -11,6 +12,8 @@ import type { PlatformUserSummary } from "@/types/platformUser.type";
 
 export interface TrustMockStore {
   readonly reports: MockReportRecord[];
+  readonly chatReports: MockChatReportRecord[];
+  chatEvidenceSettings: { retentionDays: number; legalHoldDays: number };
   readonly appeals: MockAppealRecord[];
   readonly copyrightClaims: MockCopyrightClaimRecord[];
   readonly ads: MockAdRecord[];
@@ -22,6 +25,8 @@ export interface TrustMockStore {
 export function readTrustStore(): TrustMockStore {
   return readMockAreaStore<TrustMockStore>("trust", () => ({
     reports: buildDemoTrustReports(),
+    chatReports: buildDemoChatReports(),
+    chatEvidenceSettings: { retentionDays: 180, legalHoldDays: 730 },
     appeals: buildDemoTrustAppeals(),
     copyrightClaims: buildDemoCopyrightClaims(),
     ads: buildDemoAdsForReview(),

@@ -2,6 +2,7 @@ import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 
 import { registerAdsReviewMockHandlers } from "./adsReview.mock";
 import { registerAdvertiserAccountMockHandlers } from "./advertiserAccounts.mock";
+import { registerChatReportMockHandlers } from "./chatReports.mock";
 import { registerCopyrightClaimMockHandlers } from "./copyrightClaims.mock";
 import { registerModerationAppealMockHandlers } from "./moderationAppeals.mock";
 import { registerModerationReportMockHandlers } from "./moderationReports.mock";
@@ -19,6 +20,14 @@ function registerTrustAndSafetyQueueCounters(): void {
       const openReports = readTrustStore().reports.filter((report) => report.status === "OPEN" || report.status === "IN_REVIEW");
       const now = new Date().toISOString();
       return { count: openReports.length, oldestAt: findOldestTimestamp(openReports.map((report) => report.firstReportedAt)), breachingSla: openReports.filter((report) => report.slaDueAt < now).length };
+    },
+  });
+  registerMockQueueCounter({
+    key: "chatReports", label: "Chat reports", href: "/moderation/chat-reports",
+    readCount: () => {
+      const open = readTrustStore().chatReports.filter((report) => report.status === "OPEN" || report.status === "IN_REVIEW");
+      const now = new Date().toISOString();
+      return { count: open.length, oldestAt: findOldestTimestamp(open.map((report) => report.createdAt)), breachingSla: open.filter((report) => report.slaDueAt < now).length };
     },
   });
   registerMockQueueCounter({
@@ -47,6 +56,7 @@ function registerTrustAndSafetyQueueCounters(): void {
 
 export function registerTrustAndSafetyMockHandlers(): void {
   registerModerationReportMockHandlers();
+  registerChatReportMockHandlers();
   registerModerationAppealMockHandlers();
   registerCopyrightClaimMockHandlers();
   registerAdsReviewMockHandlers();
