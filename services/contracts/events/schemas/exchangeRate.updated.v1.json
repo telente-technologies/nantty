@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/exchangeRate.updated.v1.json",
+  "title": "ExchangeRateUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["currency", "previousUsdRateE8", "usdRateE8", "setBy", "reason"],
+  "properties": {
+    "currency": { "enum": ["NGN", "GHS", "KES", "ZAR", "GBP", "EUR"] },
+    "previousUsdRateE8": { "type": "integer", "minimum": 1 },
+    "usdRateE8": { "type": "integer", "minimum": 1 },
+    "setBy": { "type": "string" },
+    "reason": { "type": "string" }
+  }
+}
