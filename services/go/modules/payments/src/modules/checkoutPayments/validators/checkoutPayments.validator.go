@@ -7,7 +7,11 @@ import (
 
 func ValidateInitializeOrderPaymentRequest(request dtos.InitializeOrderPaymentRequestDto) error {
 	collector := &ledgerutils.IssueCollector{}
-	collector.RequireLength("orderId", request.OrderId, 1, 80)
+	collector.RequireLength("orderId", request.OrderId, 0, 80)
+	collector.RequireLength("checkoutId", request.CheckoutId, 0, 80)
+	if (request.OrderId == "") == (request.CheckoutId == "") {
+		collector.Add("checkoutId", "send exactly one of checkoutId or orderId")
+	}
 	if request.Provider != "" {
 		collector.RequireOneOf("provider", request.Provider, "paystack")
 	}

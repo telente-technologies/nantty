@@ -29,7 +29,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Order
 		return dtos.OrderPaymentStatusDto{}, httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
 	}
 	intents, err := application.Container.Client(database).PaymentIntent.Query().Where(
-		paymentintent.PurposeEQ(paymentintent.Purpose(constants.PurposeOrderCheckout)), paymentintent.SubjectID(command.OrderId), paymentintent.OwnerUserID(command.BuyerUserId),
+		paymentintent.PurposeEQ(paymentintent.Purpose(constants.PurposeOrderCheckout)), paymentintent.SubjectIDIn(command.OrderId, payables[0].CheckoutId), paymentintent.OwnerUserID(command.BuyerUserId),
 	).Order(ent.Desc(paymentintent.FieldCreatedAt)).Limit(10).All(ctx)
 	if err != nil {
 		return dtos.OrderPaymentStatusDto{}, err

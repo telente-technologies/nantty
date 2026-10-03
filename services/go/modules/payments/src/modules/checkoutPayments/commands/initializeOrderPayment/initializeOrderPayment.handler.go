@@ -4,15 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"strings"
 
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/modules/checkoutPayments/dtos"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/platform/httpserver"
 )
+
+var errOrderNotFound = httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
 
 type Handler struct {
 	Application *gateway.Application
@@ -26,32 +28,31 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 	initialized, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.PaymentInitializationDto]{
 		Scope:       command.BuyerUserId + ":payments.initialize",
 		Key:         command.IdempotencyKey,
-		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderId, command.Provider, command.ReturnTo),
+		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderId, command.CheckoutId, command.Provider, command.ReturnTo),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.PaymentInitializationDto, error) {
-			payables, err := application.Gateway.FindCheckoutPayablesForOrder(ctx, transaction, command.OrderId)
+			payables, err := handler.findCheckoutPayables(ctx, transaction, command)
 			if err != nil {
 				return dtos.PaymentInitializationDto{}, err
 			}
-			payable, found := payableForOrder(payables, command.OrderId)
-			if !found || payable.BuyerUserId != command.BuyerUserId {
-				return dtos.PaymentInitializationDto{}, httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
+			groups, total, currency, err := application.Gateway.AllocateCheckoutPayables(ctx, transaction, payables)
+			if err != nil {
+				return dtos.PaymentInitializationDto{}, err
 			}
-			direct := payable.PaymentMode == "direct"
-			escrowFee := int64(0)
-			if !direct {
-				escrowFee = services.EscrowFeeForAmount(payable.AmountMinor, application.Gateway.EscrowFeeBpsForSeller(ctx, payable.SellerUserId))
+			orderIds := make([]string, 0, len(payables))
+			for _, payable := range payables {
+				orderIds = append(orderIds, payable.OrderId)
 			}
+			checkoutId := payables[0].CheckoutId
 			payment, err := application.Gateway.CreatePendingPaymentIntentInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
-				Purpose: constants.PurposeOrderCheckout, OwnerUserId: command.BuyerUserId, SubjectId: payable.OrderId,
-				Provider: command.Provider, AmountMinor: payable.AmountMinor, Currency: payable.Currency, ReturnTo: command.ReturnTo,
-				BeneficiaryUserId: payable.SellerUserId, PlatformFeeMinor: escrowFee, SettleToSellerSubaccount: direct,
-				Metadata: map[string]string{"checkoutId": payable.CheckoutId, "orderId": payable.OrderId, "paymentMode": payable.PaymentMode},
+				Purpose: constants.PurposeOrderCheckout, OwnerUserId: command.BuyerUserId, SubjectId: checkoutId,
+				Provider: command.Provider, AmountMinor: total, Currency: currency, ReturnTo: command.ReturnTo,
+				Metadata: map[string]string{"checkoutId": checkoutId, "orderIds": strings.Join(orderIds, ","), models.CheckoutGroupsMetadataKey: models.EncodeCheckoutGroups(groups)},
 			})
 			if err != nil {
 				return dtos.PaymentInitializationDto{}, err
 			}
 			return dtos.PaymentInitializationDto{
-				OrderId: command.OrderId, Reference: payment.Reference, CallbackUrl: payment.CallbackUrl, PaymentsRemainingInCheckout: len(payables), Payment: payment,
+				OrderId: command.OrderId, CheckoutId: checkoutId, Reference: payment.Reference, CallbackUrl: payment.CallbackUrl, PaymentsRemainingInCheckout: 1, Payment: payment,
 			}, nil
 		},
 	})
@@ -69,11 +70,25 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 	return initialized, replayed, nil
 }
 
-func payableForOrder(payables []models.OrderPayable, orderId string) (models.OrderPayable, bool) {
+func (handler Handler) findCheckoutPayables(ctx context.Context, transaction *sql.Tx, command Command) ([]models.OrderPayable, error) {
+	gateway := handler.Application.Gateway
+	var payables []models.OrderPayable
+	var err error
+	if command.CheckoutId != "" {
+		payables, err = gateway.FindPayablesForCheckout(ctx, transaction, command.CheckoutId)
+	} else {
+		payables, err = gateway.FindCheckoutPayablesForOrder(ctx, transaction, command.OrderId)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if len(payables) == 0 {
+		return nil, errOrderNotFound
+	}
 	for _, payable := range payables {
-		if payable.OrderId == orderId {
-			return payable, true
+		if payable.BuyerUserId != command.BuyerUserId {
+			return nil, errOrderNotFound
 		}
 	}
-	return models.OrderPayable{}, false
+	return payables, nil
 }

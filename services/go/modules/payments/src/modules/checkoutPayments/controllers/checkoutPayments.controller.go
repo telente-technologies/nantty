@@ -36,7 +36,7 @@ func (controller CheckoutPaymentsController) InitializeOrderPayment(writer http.
 		return
 	}
 	result, replayed, err := initializeorderpayment.Handler{Application: controller.Application}.Execute(request.Context(), initializeorderpayment.Command{
-		BuyerUserId: principal.UserId, OrderId: body.OrderId, Provider: body.Provider, ReturnTo: body.ReturnTo, IdempotencyKey: key,
+		BuyerUserId: principal.UserId, OrderId: body.OrderId, CheckoutId: body.CheckoutId, Provider: body.Provider, ReturnTo: body.ReturnTo, IdempotencyKey: key,
 	})
 	if err != nil {
 		controller.respondWithError(writer, request, err)
