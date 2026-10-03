@@ -9,7 +9,7 @@ import { useUsernameAvailability } from "@/components/settings/usernameAvailabil
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
@@ -21,6 +21,8 @@ const POLICY_NOTES = [
 ];
 
 export function SettingsUsernameScreen({ navigation }: MainScreenProps<"SettingsUsername">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const updateSignedInUser = useAuthStore((state) => state.updateSignedInUser);
   const { data: profile } = useMyProfileQuery();
@@ -79,4 +81,4 @@ export function SettingsUsernameScreen({ navigation }: MainScreenProps<"Settings
   );
 }
 
-const styles = StyleSheet.create({ card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 6 } });
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 6 } }));

@@ -3,9 +3,10 @@ import { Linking } from "react-native";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export function SettingsNotificationsScreen() {
+  const { colors } = useTheme();
   const { data: settings } = useAccountSettingsQuery();
   const updateSettings = useUpdateAccountSettingsMutation();
   const pushEnabled = settings?.pushNotificationsEnabled ?? true;

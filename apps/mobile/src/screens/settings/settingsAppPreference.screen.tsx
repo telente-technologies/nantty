@@ -4,15 +4,20 @@ import { Linking } from "react-native";
 
 import { splitMoneyIntoSymbolAndAmount } from "@/components/seller/splitMoney.util";
 import { CountryPickerSheet } from "@/components/settings/countryPickerSheet";
+import { describeThemePreference, ThemePreferenceSheet } from "@/components/settings/themePreferenceSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { localeService } from "@/services/locale.service";
 import { usersService } from "@/services/users.service";
 import { useLocaleStore } from "@/store/locale.store";
+import { useThemePreferenceStore, type ThemePreference } from "@/store/themePreference.store";
 
 export function SettingsAppPreferenceScreen() {
   const queryClient = useQueryClient();
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [themeSheetVisible, setThemeSheetVisible] = useState(false);
+  const themePreference = useThemePreferenceStore((s) => s.preference);
+  const setThemePreference = useThemePreferenceStore((s) => s.setPreference);
   const countryCode = useLocaleStore((s) => s.countryCode);
   const currency = useLocaleStore((s) => s.currency);
   const { data: countries = [] } = useQuery({ queryKey: ["locale", "countries"], queryFn: usersService.listSupportedCountries });
@@ -29,17 +34,29 @@ export function SettingsAppPreferenceScreen() {
     },
   });
 
+  const chooseThemePreference = (preference: ThemePreference) => {
+    setThemePreference(preference);
+    setThemeSheetVisible(false);
+    usersService.updateMyThemePreference(preference).catch(() => undefined);
+  };
+
   const currencySymbol = splitMoneyIntoSymbolAndAmount({ amountMinor: 0, currency }).symbol || currency;
   const currencyLabel = currentCountry ? `${currentCountry.currencyName} (${currencySymbol})` : currencySymbol;
 
   return (
     <SettingsPage title="App Preference">
       <SettingsGroup>
-        <SettingsRow label="Theme" trailing={{ text: "Light Mode" }} />
+        <SettingsRow label="Theme" trailing={{ text: describeThemePreference(themePreference) }} onPress={() => setThemeSheetVisible(true)} />
         <SettingsRow label="Language" trailing={{ text: "English" }} />
         <SettingsRow label="Country & Currency" trailing={{ text: currencyLabel }} onPress={() => setPickerVisible(true)} />
         <SettingsRow label="Accessibility" onPress={() => Linking.openSettings()} />
       </SettingsGroup>
+      <ThemePreferenceSheet
+        visible={themeSheetVisible}
+        selectedPreference={themePreference}
+        onSelect={chooseThemePreference}
+        onClose={() => setThemeSheetVisible(false)}
+      />
       <CountryPickerSheet
         visible={pickerVisible}
         countries={countries}

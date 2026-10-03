@@ -6,10 +6,11 @@ import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup"
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsPrivacy">) {
+  const { colors } = useTheme();
   const { data: profile } = useMyProfileQuery();
   const saveProfile = useSaveProfileDetailsMutation();
   const pendingRequests = useFollowRequestsQuery().data?.data.length ?? 0;

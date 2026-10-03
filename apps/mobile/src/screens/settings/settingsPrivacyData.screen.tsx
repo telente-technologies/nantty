@@ -10,7 +10,7 @@ import { SettingsPage } from "@/components/settings/settingsPage";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { legalLinks } from "@/config/legalLinks.config";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import type { ConsentKey } from "@/types";
@@ -23,6 +23,7 @@ const CONSENT_OPTIONS: { key: ConsentKey; label: string; description: string }[]
 ];
 
 export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"SettingsPrivacyData">) {
+  const { colors } = useTheme();
   const consents = useConsentsQuery();
   const updateConsent = useUpdateConsentMutation();
   const [deleteSheetVisible, setDeleteSheetVisible] = useState(false);

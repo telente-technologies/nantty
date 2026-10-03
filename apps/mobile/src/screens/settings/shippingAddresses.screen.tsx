@@ -10,11 +10,12 @@ import { SettingsGroup } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 
 export function ShippingAddressesScreen({ navigation }: MainScreenProps<"ShippingAddresses">) {
+  const { colors } = useTheme();
   const { data: addresses = [], isLoading, refetch } = useQuery({
     queryKey: profileQueryKeys.addresses,
     queryFn: usersService.listMyShippingAddresses,
