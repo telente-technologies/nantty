@@ -1,13 +1,3 @@
--- create "disputes" table
-CREATE TABLE "disputes" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "escrow_id" uuid NOT NULL, "order_id" character varying NOT NULL, "opened_by_user_id" character varying NOT NULL, "reason" character varying NOT NULL, "description" character varying NOT NULL DEFAULT '', "evidence_urls" jsonb NOT NULL, "status" character varying NOT NULL DEFAULT 'awaiting_seller', "respond_by_at" timestamptz NULL, "resolution_note" character varying NOT NULL DEFAULT '', "refund_amount_minor" bigint NOT NULL DEFAULT 0, "resolved_by_staff_id" character varying NOT NULL DEFAULT '', "resolved_at" timestamptz NULL, "version" bigint NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
--- create index "dispute_escrow_id" to table: "disputes"
-CREATE INDEX "dispute_escrow_id" ON "disputes" ("escrow_id");
--- create index "dispute_opened_by_user_id_created_at" to table: "disputes"
-CREATE INDEX "dispute_opened_by_user_id_created_at" ON "disputes" ("opened_by_user_id", "created_at");
--- create index "dispute_order_id" to table: "disputes"
-CREATE INDEX "dispute_order_id" ON "disputes" ("order_id");
--- create index "dispute_status_created_at" to table: "disputes"
-CREATE INDEX "dispute_status_created_at" ON "disputes" ("status", "created_at");
 -- create "dispute_messages" table
 CREATE TABLE "dispute_messages" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "dispute_id" uuid NOT NULL, "author_user_id" character varying NOT NULL, "author_role" character varying NOT NULL, "text" character varying NOT NULL, "attachment_urls" jsonb NOT NULL, PRIMARY KEY ("id"));
 -- create index "disputemessage_dispute_id_created_at" to table: "dispute_messages"
@@ -40,3 +30,13 @@ CREATE UNIQUE INDEX "idempotentrequest_scope_key" ON "idempotent_requests" ("sco
 CREATE TABLE "outbox_events" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "event_type" character varying NOT NULL, "subject" character varying NOT NULL, "payload" jsonb NOT NULL, "published_at" timestamptz NULL, "attempt_count" bigint NOT NULL DEFAULT 0, "next_attempt_at" timestamptz NULL, "last_error" character varying NOT NULL DEFAULT '', "dead_lettered_at" timestamptz NULL, PRIMARY KEY ("id"));
 -- create index "outboxevent_published_at_dead_lettered_at_created_at" to table: "outbox_events"
 CREATE INDEX "outboxevent_published_at_dead_lettered_at_created_at" ON "outbox_events" ("published_at", "dead_lettered_at", "created_at");
+-- create "disputes" table
+CREATE TABLE "disputes" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "order_id" character varying NOT NULL, "opened_by_user_id" character varying NOT NULL, "reason" character varying NOT NULL, "description" character varying NOT NULL DEFAULT '', "evidence_urls" jsonb NOT NULL, "status" character varying NOT NULL DEFAULT 'awaiting_seller', "respond_by_at" timestamptz NULL, "resolution_note" character varying NOT NULL DEFAULT '', "refund_amount_minor" bigint NOT NULL DEFAULT 0, "resolved_by_staff_id" character varying NOT NULL DEFAULT '', "resolved_at" timestamptz NULL, "version" bigint NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, "escrow_id" uuid NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "disputes_escrows_disputes" FOREIGN KEY ("escrow_id") REFERENCES "escrows" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- create index "dispute_escrow_id" to table: "disputes"
+CREATE INDEX "dispute_escrow_id" ON "disputes" ("escrow_id");
+-- create index "dispute_opened_by_user_id_created_at" to table: "disputes"
+CREATE INDEX "dispute_opened_by_user_id_created_at" ON "disputes" ("opened_by_user_id", "created_at");
+-- create index "dispute_order_id" to table: "disputes"
+CREATE INDEX "dispute_order_id" ON "disputes" ("order_id");
+-- create index "dispute_status_created_at" to table: "disputes"
+CREATE INDEX "dispute_status_created_at" ON "disputes" ("status", "created_at");

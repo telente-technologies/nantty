@@ -1,3 +1,13 @@
+-- reverse: create index "dispute_status_created_at" to table: "disputes"
+DROP INDEX "dispute_status_created_at";
+-- reverse: create index "dispute_order_id" to table: "disputes"
+DROP INDEX "dispute_order_id";
+-- reverse: create index "dispute_opened_by_user_id_created_at" to table: "disputes"
+DROP INDEX "dispute_opened_by_user_id_created_at";
+-- reverse: create index "dispute_escrow_id" to table: "disputes"
+DROP INDEX "dispute_escrow_id";
+-- reverse: create "disputes" table
+DROP TABLE "disputes";
 -- reverse: create index "outboxevent_published_at_dead_lettered_at_created_at" to table: "outbox_events"
 DROP INDEX "outboxevent_published_at_dead_lettered_at_created_at";
 -- reverse: create "outbox_events" table
@@ -30,13 +40,3 @@ DROP TABLE "dispute_status_events";
 DROP INDEX "disputemessage_dispute_id_created_at";
 -- reverse: create "dispute_messages" table
 DROP TABLE "dispute_messages";
--- reverse: create index "dispute_status_created_at" to table: "disputes"
-DROP INDEX "dispute_status_created_at";
--- reverse: create index "dispute_order_id" to table: "disputes"
-DROP INDEX "dispute_order_id";
--- reverse: create index "dispute_opened_by_user_id_created_at" to table: "disputes"
-DROP INDEX "dispute_opened_by_user_id_created_at";
--- reverse: create index "dispute_escrow_id" to table: "disputes"
-DROP INDEX "dispute_escrow_id";
--- reverse: create "disputes" table
-DROP TABLE "disputes";
