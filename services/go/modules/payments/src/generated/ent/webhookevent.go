@@ -30,6 +30,8 @@ type WebhookEvent struct {
 	Reference string `json:"reference,omitempty"`
 	// PayloadSha256 holds the value of the "payload_sha256" field.
 	PayloadSha256 string `json:"payload_sha256,omitempty"`
+	// RawPayload holds the value of the "raw_payload" field.
+	RawPayload *[]byte `json:"raw_payload,omitempty"`
 	// ProcessedAt holds the value of the "processed_at" field.
 	ProcessedAt *time.Time `json:"processed_at,omitempty"`
 	// AttemptCount holds the value of the "attempt_count" field.
@@ -44,6 +46,8 @@ func (*WebhookEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case webhookevent.FieldRawPayload:
+			values[i] = new([]byte)
 		case webhookevent.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
 		case webhookevent.FieldProvider, webhookevent.FieldEventKey, webhookevent.FieldEventType, webhookevent.FieldReference, webhookevent.FieldPayloadSha256, webhookevent.FieldLastError:
@@ -108,6 +112,12 @@ func (_m *WebhookEvent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field payload_sha256", values[i])
 			} else if value.Valid {
 				_m.PayloadSha256 = value.String
+			}
+		case webhookevent.FieldRawPayload:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field raw_payload", values[i])
+			} else if value != nil {
+				_m.RawPayload = value
 			}
 		case webhookevent.FieldProcessedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -181,6 +191,11 @@ func (_m *WebhookEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("payload_sha256=")
 	builder.WriteString(_m.PayloadSha256)
+	builder.WriteString(", ")
+	if v := _m.RawPayload; v != nil {
+		builder.WriteString("raw_payload=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	if v := _m.ProcessedAt; v != nil {
 		builder.WriteString("processed_at=")

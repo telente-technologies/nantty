@@ -26,6 +26,8 @@ const (
 	FieldReference = "reference"
 	// FieldPayloadSha256 holds the string denoting the payload_sha256 field in the database.
 	FieldPayloadSha256 = "payload_sha256"
+	// FieldRawPayload holds the string denoting the raw_payload field in the database.
+	FieldRawPayload = "raw_payload"
 	// FieldProcessedAt holds the string denoting the processed_at field in the database.
 	FieldProcessedAt = "processed_at"
 	// FieldAttemptCount holds the string denoting the attempt_count field in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldEventType,
 	FieldReference,
 	FieldPayloadSha256,
+	FieldRawPayload,
 	FieldProcessedAt,
 	FieldAttemptCount,
 	FieldLastError,

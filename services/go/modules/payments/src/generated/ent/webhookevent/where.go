@@ -85,6 +85,11 @@ func PayloadSha256(v string) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldEQ(FieldPayloadSha256, v))
 }
 
+// RawPayload applies equality check predicate on the "raw_payload" field. It's identical to RawPayloadEQ.
+func RawPayload(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldRawPayload, v))
+}
+
 // ProcessedAt applies equality check predicate on the "processed_at" field. It's identical to ProcessedAtEQ.
 func ProcessedAt(v time.Time) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldEQ(FieldProcessedAt, v))
@@ -463,6 +468,56 @@ func PayloadSha256EqualFold(v string) predicate.WebhookEvent {
 // PayloadSha256ContainsFold applies the ContainsFold predicate on the "payload_sha256" field.
 func PayloadSha256ContainsFold(v string) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldContainsFold(FieldPayloadSha256, v))
+}
+
+// RawPayloadEQ applies the EQ predicate on the "raw_payload" field.
+func RawPayloadEQ(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldRawPayload, v))
+}
+
+// RawPayloadNEQ applies the NEQ predicate on the "raw_payload" field.
+func RawPayloadNEQ(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNEQ(FieldRawPayload, v))
+}
+
+// RawPayloadIn applies the In predicate on the "raw_payload" field.
+func RawPayloadIn(vs ...[]byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIn(FieldRawPayload, vs...))
+}
+
+// RawPayloadNotIn applies the NotIn predicate on the "raw_payload" field.
+func RawPayloadNotIn(vs ...[]byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotIn(FieldRawPayload, vs...))
+}
+
+// RawPayloadGT applies the GT predicate on the "raw_payload" field.
+func RawPayloadGT(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGT(FieldRawPayload, v))
+}
+
+// RawPayloadGTE applies the GTE predicate on the "raw_payload" field.
+func RawPayloadGTE(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGTE(FieldRawPayload, v))
+}
+
+// RawPayloadLT applies the LT predicate on the "raw_payload" field.
+func RawPayloadLT(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLT(FieldRawPayload, v))
+}
+
+// RawPayloadLTE applies the LTE predicate on the "raw_payload" field.
+func RawPayloadLTE(v []byte) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLTE(FieldRawPayload, v))
+}
+
+// RawPayloadIsNil applies the IsNil predicate on the "raw_payload" field.
+func RawPayloadIsNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIsNull(FieldRawPayload))
+}
+
+// RawPayloadNotNil applies the NotNil predicate on the "raw_payload" field.
+func RawPayloadNotNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotNull(FieldRawPayload))
 }
 
 // ProcessedAtEQ applies the EQ predicate on the "processed_at" field.

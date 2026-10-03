@@ -138,6 +138,9 @@ func (_u *WebhookEventUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
+	if _u.mutation.RawPayloadCleared() {
+		_spec.ClearField(webhookevent.FieldRawPayload, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.ProcessedAt(); ok {
 		_spec.SetField(webhookevent.FieldProcessedAt, field.TypeTime, value)
 	}
@@ -313,6 +316,9 @@ func (_u *WebhookEventUpdateOne) sqlSave(ctx context.Context) (_node *WebhookEve
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.RawPayloadCleared() {
+		_spec.ClearField(webhookevent.FieldRawPayload, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.ProcessedAt(); ok {
 		_spec.SetField(webhookevent.FieldProcessedAt, field.TypeTime, value)

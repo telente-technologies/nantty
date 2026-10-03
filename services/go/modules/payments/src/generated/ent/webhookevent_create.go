@@ -68,6 +68,12 @@ func (_c *WebhookEventCreate) SetPayloadSha256(v string) *WebhookEventCreate {
 	return _c
 }
 
+// SetRawPayload sets the "raw_payload" field.
+func (_c *WebhookEventCreate) SetRawPayload(v []byte) *WebhookEventCreate {
+	_c.mutation.SetRawPayload(v)
+	return _c
+}
+
 // SetProcessedAt sets the "processed_at" field.
 func (_c *WebhookEventCreate) SetProcessedAt(v time.Time) *WebhookEventCreate {
 	_c.mutation.SetProcessedAt(v)
@@ -294,6 +300,10 @@ func (_c *WebhookEventCreate) createSpec() (*WebhookEvent, *sqlgraph.CreateSpec)
 		_spec.SetField(webhookevent.FieldPayloadSha256, field.TypeString, value)
 		_node.PayloadSha256 = value
 	}
+	if value, ok := _c.mutation.RawPayload(); ok {
+		_spec.SetField(webhookevent.FieldRawPayload, field.TypeBytes, value)
+		_node.RawPayload = &value
+	}
 	if value, ok := _c.mutation.ProcessedAt(); ok {
 		_spec.SetField(webhookevent.FieldProcessedAt, field.TypeTime, value)
 		_node.ProcessedAt = &value
@@ -440,6 +450,9 @@ func (u *WebhookEventUpsertOne) UpdateNewValues() *WebhookEventUpsertOne {
 		}
 		if _, exists := u.create.mutation.PayloadSha256(); exists {
 			s.SetIgnore(webhookevent.FieldPayloadSha256)
+		}
+		if _, exists := u.create.mutation.RawPayload(); exists {
+			s.SetIgnore(webhookevent.FieldRawPayload)
 		}
 	}))
 	return u
@@ -728,6 +741,9 @@ func (u *WebhookEventUpsertBulk) UpdateNewValues() *WebhookEventUpsertBulk {
 			}
 			if _, exists := b.mutation.PayloadSha256(); exists {
 				s.SetIgnore(webhookevent.FieldPayloadSha256)
+			}
+			if _, exists := b.mutation.RawPayload(); exists {
+				s.SetIgnore(webhookevent.FieldRawPayload)
 			}
 		}
 	}))
