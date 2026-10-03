@@ -11,6 +11,7 @@ const DAY_IN_MS = 86_400_000;
 const DAYS_BETWEEN_USERNAME_CHANGES = 30;
 const CHANGES_ALLOWED_PER_YEAR = 3;
 
+const EXACT_ONLY_RESERVED_USERNAMES = new Set(["all"]);
 const RESERVED_USERNAMES = new Set(["admin", "support", "zudomart", "official", "help", "security", "verify", "payments", "escrow", "staff", "moderator", "root", "billing", "news"]);
 const WITHHELD_USERNAMES = new Set(["lagosstategovt", "cbn", "efcc"]);
 const RECENTLY_RELEASED_USERNAMES = new Set(["enyodev", "mayweda_dev"]);
@@ -37,6 +38,7 @@ const unavailable = (reason: UsernameUnavailableReason): UsernameAvailability =>
 export function checkAvailability(rawUsername: string): UsernameAvailability {
   const username = rawUsername.trim().toLowerCase();
   if (!isValidUsername(username)) return unavailable("invalid");
+  if (EXACT_ONLY_RESERVED_USERNAMES.has(username.toLowerCase())) return unavailable("reserved");
   if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return unavailable("reserved");
   if (WITHHELD_USERNAMES.has(username)) return unavailable("withheld");
   if (RECENTLY_RELEASED_USERNAMES.has(username)) return unavailable("recently_used");

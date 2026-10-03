@@ -10,7 +10,7 @@ import { setFollowingAuthor } from "./followGraph.mock";
 import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds } from "./socialGraph.mock";
 import { findActiveLiveForHost } from "./activeLives.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
-import { SUSPENDED_USER_IDS, directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
+import { SUSPENDED_USER_IDS, directoryUsers, directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
 const profileEditsByUserId = new Map<string, Partial<User>>();
 
@@ -56,6 +56,14 @@ export const usersMocks: MockRoute[] = [
     return signedInProfile();
   }),
   createMockRoute("GET", "/api/v1/users/me/blocked", () => listConnections("blocked")),
+  createMockRoute("GET", "/api/v1/users/by-username/:username", ({ params }) => {
+    const handle = params.username!.toLowerCase();
+    const signedIn = getSignedInMockUser();
+    if (signedIn.username.toLowerCase() === handle) return { id: signedIn.id };
+    const user = directoryUsers.find((candidate) => candidate.username.toLowerCase() === handle);
+    if (!user) throw new ApiError(404, "This account doesn't exist");
+    return { id: user.id };
+  }),
   createMockRoute("GET", "/api/v1/users/:userId", ({ params }) => {
     if (params.userId === getSignedInMockUser().id || params.userId === "me") return signedInProfile();
     const user = findDirectoryUserById(params.userId!);

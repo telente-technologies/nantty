@@ -10,18 +10,21 @@ import {
   userIdsWhoBlockedTheAuthor,
 } from "./mentionRules.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { followedUserIds } from "./socialGraph.mock";
+import { followedUserIds, followerUserIds } from "./socialGraph.mock";
 import { directoryUsers, summariseUser } from "./userDirectory.mock";
 
 const MAXIMUM_CANDIDATES = 15;
 const EVERYONE_ADMIN_ONLY_REASON = "Only admins can @all in this group";
 
 const rankOfUser = (userId: string, surface: MentionSurface): MentionCandidate["rank"] =>
-  surface === "group" || surface === "direct" ? "member" : followedUserIds.has(userId) ? "following" : recentlyInteractedUserIds.includes(userId) ? "recent" : "other";
+  surface === "group" || surface === "direct" ? "member" : followedUserIds.has(userId) ? "following" : followerUserIds.includes(userId) ? "follower" : recentlyInteractedUserIds.includes(userId) ? "recent" : "other";
 
-const rankOrder: Readonly<Record<MentionCandidate["rank"], number>> = { following: 0, recent: 1, member: 1, other: 2 };
+const rankOrder: Readonly<Record<MentionCandidate["rank"], number>> = { following: 0, follower: 1, recent: 2, member: 2, other: 3 };
 
 const matchesTerm = (name: string, username: string, term: string) => !term || name.toLowerCase().includes(term) || username.toLowerCase().includes(term);
+
+const matchScore = (name: string, username: string, term: string) =>
+  !term ? 3 : username.toLowerCase() === term ? 0 : username.toLowerCase().startsWith(term) || name.toLowerCase().startsWith(term) ? 1 : 2;
 
 const listCandidates = (surface: MentionSurface, term: string, conversationId: string | null): MentionCandidate[] => {
   const author = getSignedInMockUser();
@@ -32,7 +35,12 @@ const listCandidates = (surface: MentionSurface, term: string, conversationId: s
     .filter((user) => surface !== "direct" || (!!conversationId && findMockConversation(conversationId).peer.id === user.id))
     .filter((user) => matchesTerm(user.name, user.username, term))
     .map((user) => ({ user: summariseUser(user), allowsMentions: doesUserAllowMentionsFromAuthor(user.id, author.id), rank: rankOfUser(user.id, surface) }))
-    .sort((a, b) => rankOrder[a.rank] - rankOrder[b.rank])
+    .sort((a, b) => {
+      const networkDelta = Number(a.rank === "other") - Number(b.rank === "other");
+      if (networkDelta) return networkDelta;
+      const scoreDelta = matchScore(a.user.name, a.user.username, term) - matchScore(b.user.name, b.user.username, term);
+      return scoreDelta || rankOrder[a.rank] - rankOrder[b.rank];
+    })
     .slice(0, MAXIMUM_CANDIDATES);
 };
 

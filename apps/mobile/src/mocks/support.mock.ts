@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { ContentReport, NewSupportTicketInput, SupportTicketDetail } from "@/types/support.type";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
+import { listMyChatReportsMock } from "./chatReports.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const SUPPORT_AGENT_NAME = "Zudomart Support";
@@ -86,5 +87,5 @@ export const supportMocks: MockRoute[] = [
     scheduleAgentReply(ticket.id);
     return message;
   }),
-  createMockRoute("GET", "/api/v1/reports/me", () => reports),
+  createMockRoute("GET", "/api/v1/reports/me", () => [...listMyChatReportsMock(), ...reports]),
 ];

@@ -45,6 +45,7 @@ const publicRoutePatterns: ReadonlySet<string> = new Set([
   "GET /api/v1/stores/:storeId/products",
   "GET /api/v1/stories/tray",
   "GET /api/v1/topics",
+  "GET /api/v1/users/by-username/:username",
   "GET /api/v1/users/:userId",
   "GET /api/v1/users/:userId/connections",
   "GET /api/v1/users/:userId/followers",
