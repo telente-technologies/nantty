@@ -85,7 +85,7 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose, saveTar
             onPress={rotateToFillScreen}
             style={styles.rotate}
           >
-            <ArrowsOutSimple24Icon color={colors.white} size={18} />
+            <ArrowsOutSimple24Icon color={colors.white} size={16} />
             <Text size={13} lineHeight={16} weight={500} color={colors.white}>
               Rotate
             </Text>
