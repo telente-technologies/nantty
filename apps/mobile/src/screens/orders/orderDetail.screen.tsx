@@ -101,6 +101,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           <Button variant="subtle" title="Contact seller" style={styles.flex} onPress={() => escrow.data && navigation.navigate("Chat", { userId: escrow.data.sellerUserId, name: detail.store.name })} />
           {canDispute ? <Button variant="subtle" title="Open a dispute" style={styles.flex} onPress={() => navigation.navigate("OpenDispute", { orderId })} /> : null}
         </View>
+        <Button variant="subtle" title="Get help with this order" onPress={() => navigation.navigate("NewSupportTicket", { category: "order", linkedReference: { kind: "order", id: orderId, label: `Order ${detail.reference}` } })} />
       </View>
       <ConfirmActionSheet
         visible={confirmSheetVisible}
