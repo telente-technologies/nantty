@@ -15,9 +15,10 @@ export interface ShareLiveSheetProps {
   readonly liveId: string;
   readonly visible: boolean;
   readonly onClose: () => void;
+  readonly onShared?: () => void;
 }
 
-export function ShareLiveSheet({ liveId, visible, onClose }: ShareLiveSheetProps) {
+export function ShareLiveSheet({ liveId, visible, onClose, onShared }: ShareLiveSheetProps) {
   const [query, setQuery] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<readonly string[]>([]);
   const people = useQuery({
@@ -36,6 +37,7 @@ export function ShareLiveSheet({ liveId, visible, onClose }: ShareLiveSheetProps
       await Share.share({ message: `https://zudomart.com/live/${liveId}` }).catch(() => undefined);
     }
     setSelectedUserIds([]);
+    onShared?.();
     onClose();
   };
 

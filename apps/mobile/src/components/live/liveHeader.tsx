@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
-import type { LiveSessionDetails } from "@/types";
+import type { LiveCategory, LiveSessionDetails } from "@/types";
 
 export interface LiveHeaderProps {
   readonly session: LiveSessionDetails;
@@ -53,6 +53,15 @@ function LiveViewerCountBadge({ viewers }: { viewers: number }) {
   );
 }
 
+const LIVE_CATEGORY_LABELS: Record<LiveCategory, string> = {
+  justChatting: "Just chatting",
+  gaming: "Gaming",
+  music: "Music",
+  irl: "IRL",
+  education: "Learning",
+  shopping: "Shopping",
+};
+
 export function LiveHeader(props: LiveHeaderProps) {
   const openUserProfile = useOpenUserProfile();
   const { session } = props;
@@ -92,6 +101,13 @@ export function LiveHeader(props: LiveHeaderProps) {
         </Pressable>
       </View>
       <View style={styles.right}>
+        {session.category && session.category !== "justChatting" ? (
+          <View style={styles.categoryChip}>
+            <Text size={11} weight={500} lineHeight={14} color={colors.white}>
+              {LIVE_CATEGORY_LABELS[session.category]}
+            </Text>
+          </View>
+        ) : null}
         {props.showTitle ? <LiveViewerCountBadge viewers={session.viewers} /> : null}
         {!props.showTitle && !props.isHost && !props.isFollowingHost ? (
           <FollowPill large isFollowing={false} onPress={props.onToggleFollow} />
@@ -114,6 +130,7 @@ const styles = StyleSheet.create({
   count: { flexDirection: "row", alignItems: "center", gap: 2 },
   countDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.avatar },
   right: { flexDirection: "row", alignItems: "center", gap: 12 },
+  categoryChip: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(0,0,0,0.45)" },
   viewerBadge: { height: 27, padding: 4, borderRadius: 4, backgroundColor: colors.placeholder, flexDirection: "row", alignItems: "center", gap: 4 },
   liveTag: { height: 19, paddingHorizontal: 4, borderRadius: 2, backgroundColor: colors.error, justifyContent: "center" },
   viewerCount: { flexDirection: "row", alignItems: "center", gap: 2 },
