@@ -3,7 +3,7 @@ CREATE TABLE "idempotent_requests" ("id" uuid NOT NULL, "created_at" timestamptz
 -- create index "idempotentrequest_scope_key" to table: "idempotent_requests"
 CREATE UNIQUE INDEX "idempotentrequest_scope_key" ON "idempotent_requests" ("scope", "key");
 -- create "order_payables" table
-CREATE TABLE "order_payables" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "checkout_id" character varying NOT NULL, "order_id" character varying NOT NULL, "order_reference" character varying NOT NULL, "buyer_user_id" character varying NOT NULL, "store_id" character varying NOT NULL, "seller_user_id" character varying NOT NULL, "amount_minor" bigint NOT NULL, "currency" character varying NOT NULL, "product_summary" character varying NOT NULL DEFAULT '', PRIMARY KEY ("id"), CONSTRAINT "order_payables_amount_positive" CHECK (amount_minor > 0));
+CREATE TABLE "order_payables" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "checkout_id" character varying NOT NULL, "order_id" character varying NOT NULL, "order_reference" character varying NOT NULL, "buyer_user_id" character varying NOT NULL, "store_id" character varying NOT NULL, "seller_user_id" character varying NOT NULL, "amount_minor" bigint NOT NULL, "currency" character varying NOT NULL, "product_summary" character varying NOT NULL DEFAULT '', "payment_mode" character varying NOT NULL DEFAULT 'escrow', "store_verified" boolean NOT NULL DEFAULT false, PRIMARY KEY ("id"), CONSTRAINT "order_payables_amount_positive" CHECK (amount_minor > 0));
 -- create index "orderpayable_checkout_id" to table: "order_payables"
 CREATE INDEX "orderpayable_checkout_id" ON "order_payables" ("checkout_id");
 -- create index "orderpayable_order_id" to table: "order_payables"
