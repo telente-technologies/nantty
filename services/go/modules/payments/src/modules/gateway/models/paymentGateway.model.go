@@ -18,6 +18,8 @@ type OrderPayable struct {
 	AmountMinor    int64  `json:"amountMinor"`
 	Currency       string `json:"currency"`
 	ProductSummary string `json:"productSummary"`
+	PaymentMode    string `json:"paymentMode"`
+	StoreVerified  bool   `json:"storeVerified"`
 }
 
 type SettledPayment struct {
@@ -83,6 +85,7 @@ type PaymentIntentView struct {
 	Amount           MoneyView  `json:"amount"`
 	Status           string     `json:"status"`
 	AuthorizationUrl *string    `json:"authorizationUrl"`
+	AccessCode       string     `json:"accessCode,omitempty"`
 	CallbackUrl      string     `json:"callbackUrl,omitempty"`
 	RefundedAmount   MoneyView  `json:"refundedAmount"`
 	PaidAt           *time.Time `json:"paidAt"`
