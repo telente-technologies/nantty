@@ -31,7 +31,6 @@ export function RevenueEffectPreview({ rules }: { readonly rules: RevenueRulesCo
   const transferFeeCoins = Math.ceil((giftCoins * rules.coinTransferFeeBasisPoints) / 10_000);
   const effectiveOrderTotal = orderTotal && orderTotal.currency === currency ? orderTotal : moneyOf((coinValue?.amountMinor ?? 100) * 5_000, currency);
   const commissionMinor = applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.marketplaceCommission.defaultBasisPoints);
-  const cashbackMinor = rules.cashback.isEnabled ? Math.min(applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.cashback.rateBasisPoints), rules.cashback.capsPerOrder.find((cap) => cap.currency === currency)?.amountMinor ?? Number.MAX_SAFE_INTEGER) : 0;
 
   return (
     <Card title="Effect preview (unsaved values included)">
@@ -49,7 +48,6 @@ export function RevenueEffectPreview({ rules }: { readonly rules: RevenueRulesCo
           { label: `Fee if these coins are transferred (${formatBasisPointsAsPercent(rules.coinTransferFeeBasisPoints)})`, value: `${formatWholeNumber(transferFeeCoins)} coins` },
           { label: `Commission on this order (${formatBasisPointsAsPercent(rules.marketplaceCommission.defaultBasisPoints)} default)`, value: formatMoneyForDisplay(moneyOf(commissionMinor, currency)) },
           { label: "Seller receives before withdrawal fee", value: formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor - commissionMinor, currency)) },
-          { label: "Buyer cashback on this order", value: rules.cashback.isEnabled ? formatMoneyForDisplay(moneyOf(cashbackMinor, currency)) : "Cashback is off" },
           { label: `Creator share of ${formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor, currency))} ad revenue`, value: formatMoneyForDisplay(moneyOf(applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.creatorAdShareBasisPoints), currency)) },
         ]}
       />

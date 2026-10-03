@@ -1,10 +1,10 @@
 import { NoticeBanner } from "@/components/ui/feedback";
-import { CheckboxField, SelectField, TextAreaField } from "@/components/ui/formFields";
+import { SelectField, TextAreaField } from "@/components/ui/formFields";
 import { Card } from "@/components/ui/surfaces";
 import type { RevenueRulesConfiguration } from "@/types/platformConfiguration.type";
 import { formatBasisPointsAsPercent } from "@/utils/formatting.util";
 
-import { BasisPointsField, MoneyPerCurrencyEditor, WholeNumberField } from "../shared/configurationFields";
+import { BasisPointsField, MoneyPerCurrencyEditor } from "../shared/configurationFields";
 import { CommissionOverridesEditor } from "./commissionOverridesEditor";
 import { RevenueEffectPreview } from "./revenueEffectPreview";
 import styles from "./revenueRules.module.css";
@@ -43,28 +43,6 @@ export function RevenueRulesEditor({ rules, canWrite, onChange }: RevenueRulesEd
       </div>
       <div className={styles.column}>
         <RevenueEffectPreview rules={rules} />
-        <Card title="Loyalty points">
-          <CheckboxField label="Loyalty points are on" checked={rules.loyalty.isEnabled} disabled={isDisabled} onChange={(event) => onChange((current) => ({ ...current, loyalty: { ...current.loyalty, isEnabled: event.target.checked } }))} />
-          <div className={styles.grid}>
-            <WholeNumberField label="Points per whole unit spent" value={rules.loyalty.pointsPerMajorUnitSpent} maximum={100} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, loyalty: { ...current.loyalty, pointsPerMajorUnitSpent: value } }))} />
-            <WholeNumberField label="Points expire after (days)" value={rules.loyalty.pointExpiryDays} minimum={30} maximum={1095} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, loyalty: { ...current.loyalty, pointExpiryDays: value } }))} />
-          </div>
-        </Card>
-        <Card title="Cashback">
-          <CheckboxField label="Cashback is on" checked={rules.cashback.isEnabled} disabled={isDisabled} onChange={(event) => onChange((current) => ({ ...current, cashback: { ...current.cashback, isEnabled: event.target.checked } }))} />
-          <div className={styles.grid}>
-            <BasisPointsField label="Cashback rate" basisPoints={rules.cashback.rateBasisPoints} maximumBasisPoints={2000} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, cashback: { ...current.cashback, rateBasisPoints: value } }))} />
-            <WholeNumberField label="Cashback expires after (days)" value={rules.cashback.expiryDays} minimum={7} maximum={365} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, cashback: { ...current.cashback, expiryDays: value } }))} />
-          </div>
-          <MoneyPerCurrencyEditor label="Maximum cashback per order" amounts={rules.cashback.capsPerOrder} supportedCurrencies={currencies} isDisabled={isDisabled} onChange={(capsPerOrder) => onChange((current) => ({ ...current, cashback: { ...current.cashback, capsPerOrder } }))} />
-        </Card>
-        <Card title="Referrals">
-          <CheckboxField label="Referral rewards are on" checked={rules.referral.isEnabled} disabled={isDisabled} onChange={(event) => onChange((current) => ({ ...current, referral: { ...current.referral, isEnabled: event.target.checked } }))} />
-          <WholeNumberField label="Maximum rewarded referrals per person per month" value={rules.referral.maximumReferralsPerMonth} maximum={1000} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, referral: { ...current.referral, maximumReferralsPerMonth: value } }))} />
-          <MoneyPerCurrencyEditor label="Reward for the person who invites" amounts={rules.referral.referrerRewards} supportedCurrencies={currencies} isDisabled={isDisabled} onChange={(referrerRewards) => onChange((current) => ({ ...current, referral: { ...current.referral, referrerRewards } }))} />
-          <MoneyPerCurrencyEditor label="Reward for the new person" amounts={rules.referral.refereeRewards} supportedCurrencies={currencies} isDisabled={isDisabled} onChange={(refereeRewards) => onChange((current) => ({ ...current, referral: { ...current.referral, refereeRewards } }))} />
-          <MoneyPerCurrencyEditor label="First order must be at least" amounts={rules.referral.qualifyingOrderMinimums} supportedCurrencies={currencies} isDisabled={isDisabled} onChange={(qualifyingOrderMinimums) => onChange((current) => ({ ...current, referral: { ...current.referral, qualifyingOrderMinimums } }))} />
-        </Card>
       </div>
     </div>
   );
