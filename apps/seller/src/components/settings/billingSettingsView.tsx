@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
-import { describeGoldEntitlements, GoldPlanPicker } from "@/components/billing/goldPlanPicker";
+import { SubscriptionPlanPicker } from "@/components/billing/subscriptionPlanPicker";
+import { planFeatureDescriptions, sellerPlanLabels, type PlanFeature } from "@/config/planFeatures.config";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
+import { describePlanEntitlements } from "@/utils/goldEntitlements.util";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
@@ -34,13 +37,15 @@ export function BillingSettingsView() {
   const details = subscriptionQuery.data;
   const subscription = details?.subscription ?? null;
   const entitlements = sessionView?.access.entitlements ?? null;
+  const { plan } = usePlanFeatures();
+  const requestedFeature = typeof window === "undefined" ? null : (new URLSearchParams(window.location.search).get("feature") as PlanFeature | null);
 
   async function confirmSubscriptionChange() {
     if (!pendingAction) return;
     setIsSubmitting(true);
     try {
       await sendSellerApiRequest(`/seller/subscription/${pendingAction}`, { method: "POST" });
-      showToast(pendingAction === "cancel" ? "Your Gold plan will end at the close of this period." : "Your Gold plan will renew as normal.");
+      showToast(pendingAction === "cancel" ? "Your plan will end at the close of this period. You keep Free after that." : "Your plan will renew as normal.");
       subscriptionQuery.reload();
       setPendingAction(null);
     } catch (error) {
@@ -55,15 +60,20 @@ export function BillingSettingsView() {
 
   return (
     <>
+      {requestedFeature && planFeatureDescriptions[requestedFeature] ? (
+        <Callout tone="info" title={`${planFeatureDescriptions[requestedFeature].title} needs an upgrade`}>
+          {planFeatureDescriptions[requestedFeature].description} Pick a plan below to switch it on.
+        </Callout>
+      ) : null}
       <Panel
-        title={subscription ? `Gold ${subscription.plan === "PREMIUM" ? "Premium" : "Pro"}` : "No Gold plan"}
-        description="Your Gold plan gives your store the gold badge and this dashboard."
+        title={`${sellerPlanLabels[plan]} plan`}
+        description={plan === "free" ? "You are on Free. Every basic selling tool is included — upgrade when you need more." : "Thanks for growing with Zudomart."}
         actions={subscription ? <StatusBadge tone={subscriptionStatusTone[subscription.status]}>{subscriptionStatusLabel[subscription.status]}</StatusBadge> : null}
       >
         <div className={styles.formStack}>
           {details.cancelAtPeriodEnd && subscription ? (
             <Callout tone="caution" title="Your plan is set to end" action={<Button size="small" onClick={() => setPendingAction("resume")}>Keep my plan</Button>}>
-              Gold and dashboard access stop on {formatDateForDisplay(subscription.currentPeriodEnd)}.
+              Paid features stop on {formatDateForDisplay(subscription.currentPeriodEnd)}. You keep the dashboard on Free.
             </Callout>
           ) : null}
           <KeyValueList
@@ -75,7 +85,7 @@ export function BillingSettingsView() {
           />
           {entitlements ? (
             <ul className={styles.categoryChecklist} aria-label="Included in your plan">
-              {describeGoldEntitlements(entitlements).map((description) => (
+              {describePlanEntitlements(entitlements).map((description) => (
                 <li key={description} className={styles.rowTitle}>
                   <ZudoIcon name="check16" size={14} /> {description}
                 </li>
@@ -92,11 +102,11 @@ export function BillingSettingsView() {
         </div>
       </Panel>
       <Panel title="Change plan" description="Switching opens our payment partner's page. You come straight back here after paying.">
-        <GoldPlanPicker currentPlanId={details.planId} />
+        <SubscriptionPlanPicker currentPlanId={details.planId} currentPlan={plan} />
       </Panel>
       <Panel title="Invoices" padded={false}>
         <DataTable<SubscriptionInvoice>
-          caption="Gold plan invoices"
+          caption="Plan invoices"
           rows={details.invoices}
           readRowKey={(invoice) => invoice.id}
           emptyState="No invoices yet."
@@ -112,7 +122,7 @@ export function BillingSettingsView() {
         isOpen={pendingAction !== null}
         onClose={() => setPendingAction(null)}
         width="small"
-        title={pendingAction === "cancel" ? "Cancel your Gold plan?" : "Keep your Gold plan?"}
+        title={pendingAction === "cancel" ? "Cancel your plan?" : "Keep your plan?"}
         footer={
           <>
             <Button onClick={() => setPendingAction(null)}>Not now</Button>
@@ -123,7 +133,7 @@ export function BillingSettingsView() {
         }
       >
         {pendingAction === "cancel"
-          ? `You keep Gold and the dashboard until ${formatDateForDisplay(subscription?.currentPeriodEnd)}. After that the gold badge is removed and staff lose dashboard access. Your products and online orders stay.`
+          ? `You keep paid features until ${formatDateForDisplay(subscription?.currentPeriodEnd)}. After that your store moves to Free: products, orders and payouts keep working, and Pro or Business tools lock until you upgrade again.`
           : "Your plan will renew automatically at the end of this period."}
       </ModalDialog>
     </>
