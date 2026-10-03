@@ -48,3 +48,13 @@ func SeedLegalDocumentsIfMissing(ctx context.Context, client *ent.Client) error 
 	}
 	return nil
 }
+
+func EventKindFor(documentKey string) string {
+	switch documentKey {
+	case "privacy":
+		return "privacy_policy"
+	case "cookies":
+		return "cookie_policy"
+	}
+	return documentKey
+}

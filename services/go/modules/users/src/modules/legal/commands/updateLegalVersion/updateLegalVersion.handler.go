@@ -32,7 +32,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.V
 		if version.Status != legalversion.StatusDraft {
 			return usersErrors.Conflict("NOT_DRAFT", "Only a draft can be edited.")
 		}
-		if updated, err = version.Update().SetBodyMarkdown(command.BodyMarkdown).SetChangeSummary(command.ChangeSummary).SetEffectiveAt(effectiveAt).SetIsMaterialChange(command.IsMaterialChange).SetIsFlaggedForLegalReview(command.IsMaterialChange).Save(ctx); err != nil {
+		if updated, err = version.Update().SetBodyMarkdown(command.BodyMarkdown).SetChangeSummary(command.ChangeSummary).SetEffectiveAt(effectiveAt).SetEffectiveAtIsDefault(command.EffectiveAt == "").SetIsMaterialChange(command.IsMaterialChange).SetIsFlaggedForLegalReview(command.IsMaterialChange).Save(ctx); err != nil {
 			return err
 		}
 		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{

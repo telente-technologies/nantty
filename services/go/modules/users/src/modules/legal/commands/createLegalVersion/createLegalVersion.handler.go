@@ -40,7 +40,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.V
 			return err
 		}
 		create := tx.LegalVersion.Create().SetDocumentKey(command.DocumentKey).SetVersionNumber(next).SetBodyMarkdown(command.BodyMarkdown).SetChangeSummary(command.ChangeSummary).
-			SetEffectiveAt(effectiveAt).SetIsMaterialChange(command.IsMaterialChange).SetIsFlaggedForLegalReview(command.IsMaterialChange).SetCreatedBy(command.Actor.Id).SetCreatedByName(command.Actor.Name)
+			SetEffectiveAt(effectiveAt).SetEffectiveAtIsDefault(command.EffectiveAt == "").SetIsMaterialChange(command.IsMaterialChange).SetIsFlaggedForLegalReview(command.IsMaterialChange).SetCreatedBy(command.Actor.Id).SetCreatedByName(command.Actor.Name)
 		if command.RolledBackFrom != nil {
 			create.SetRolledBackFromVersionNumber(*command.RolledBackFrom)
 		}

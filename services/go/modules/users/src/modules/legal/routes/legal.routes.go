@@ -42,5 +42,6 @@ func MountLegalRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/legal/notices", allowed(true, send)(http.HandlerFunc(controller.QueueNotice)))
 	mux.HandleFunc("GET /api/v1/legal/policy-versions/current", controller.CurrentPolicyVersions)
 	mux.Handle("GET /api/v1/users/me/policy-acceptances", jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.MyAcceptances)))
+	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/policy-gate", controller.PolicyGate)
 	mux.HandleFunc("PUT /api/v1/internal/legal/notices/{noticeId}/progress", controller.RecordNoticeProgress)
 }

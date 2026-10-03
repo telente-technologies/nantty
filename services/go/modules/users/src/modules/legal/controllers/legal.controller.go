@@ -4,6 +4,8 @@ import (
 	"crypto/subtle"
 	"net/http"
 
+	"github.com/google/uuid"
+
 	"zudomart/modules/users/src/container"
 	createlegalversion "zudomart/modules/users/src/modules/legal/commands/createLegalVersion"
 	publishlegalversion "zudomart/modules/users/src/modules/legal/commands/publishLegalVersion"
@@ -20,6 +22,7 @@ import (
 	getnotice "zudomart/modules/users/src/modules/legal/queries/getNotice"
 	listcurrentpolicyversions "zudomart/modules/users/src/modules/legal/queries/listCurrentPolicyVersions"
 	listlegaldocuments "zudomart/modules/users/src/modules/legal/queries/listLegalDocuments"
+	"zudomart/modules/users/src/modules/legal/services"
 	"zudomart/modules/users/src/utils"
 	"zudomart/platform/httpserver"
 )
@@ -198,4 +201,19 @@ func (controller LegalController) RecordNoticeProgress(writer http.ResponseWrite
 		NoticeId: request.PathValue("noticeId"), Status: body.Status, SentCount: body.SentCount, ExcludedHardBounces: body.ExcludedHardBounces, ExcludedSuppressed: body.ExcludedSuppressed, BatchesDone: body.BatchesDone,
 	})
 	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller LegalController) PolicyGate(writer http.ResponseWriter, request *http.Request) {
+	expected := controller.Container.Settings.Privacy.InternalApiToken
+	if expected == "" || subtle.ConstantTimeCompare([]byte(expected), []byte(request.Header.Get("X-Internal-Token"))) != 1 {
+		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+		return
+	}
+	accountId, err := uuid.Parse(request.PathValue("accountId"))
+	if err != nil {
+		controller.respond(writer, request, 0, nil, httpserver.ErrNotFound)
+		return
+	}
+	gate, err := services.EvaluatePolicyGate(request.Context(), controller.Container.Client, accountId, controller.Container.Now())
+	controller.respond(writer, request, http.StatusOK, gate, err)
 }

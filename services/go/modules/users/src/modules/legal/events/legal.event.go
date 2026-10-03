@@ -1,5 +1,20 @@
 package events
 
+const PolicyVersionPublishedType = "policyVersion.published"
+
+type PolicyVersionPublishedNotice struct {
+	Kind             string   `json:"kind"`
+	Version          string   `json:"version"`
+	EffectiveAt      string   `json:"effectiveAt"`
+	PublishedBy      string   `json:"publishedBy"`
+	VersionId        string   `json:"versionId"`
+	DocumentKey      string   `json:"documentKey"`
+	DocumentTitle    string   `json:"documentTitle"`
+	ChangeSummary    string   `json:"changeSummary"`
+	WhatChanged      []string `json:"whatChanged"`
+	IsMaterialChange bool     `json:"isMaterialChange"`
+}
+
 const (
 	PolicyPublishedType          = "policy.published"
 	LegalNoticeQueuedType        = "legalNotice.queued"

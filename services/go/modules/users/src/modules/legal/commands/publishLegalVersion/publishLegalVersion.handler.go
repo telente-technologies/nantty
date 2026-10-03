@@ -34,6 +34,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return err
 		}
 		now := handler.Container.Now()
+		if version.IsMaterialChange && version.EffectiveAtIsDefault && version.EffectiveAt.Before(now.Add(services.MaterialNoticePeriod)) {
+			if version, err = version.Update().SetEffectiveAt(now.Add(services.MaterialNoticePeriod)).Save(ctx); err != nil {
+				return err
+			}
+		}
 		if _, err := tx.LegalVersion.Update().Where(legalversion.DocumentKey(version.DocumentKey), legalversion.StatusEQ(legalversion.StatusPublished)).SetStatus(legalversion.StatusSuperseded).Save(ctx); err != nil {
 			return err
 		}
@@ -64,6 +69,16 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		}); err != nil {
 			return err
 		}
+		changed := draft.WhatChanged
+		if changed == nil {
+			changed = []string{}
+		}
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, legalevents.PolicyVersionPublishedType, version.ID.String(), now, legalevents.PolicyVersionPublishedNotice{
+			Kind: services.EventKindFor(version.DocumentKey), Version: "v" + services.VersionNumberText(version.VersionNumber), EffectiveAt: version.EffectiveAt.UTC().Format("2006-01-02T15:04:05Z07:00"), PublishedBy: command.Actor.Id,
+			VersionId: version.ID.String(), DocumentKey: version.DocumentKey, DocumentTitle: definition.Title, ChangeSummary: version.ChangeSummary, WhatChanged: changed, IsMaterialChange: version.IsMaterialChange,
+		}); err != nil {
+			return err
+		}
 		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{
 			Action: "legal_version.published", SubjectType: "legal_version", SubjectId: version.ID.String(), SubjectLabel: version.DocumentKey, Reason: reason,
 			Before: map[string]any{"status": version.Status}, After: map[string]any{"status": "published", "versionNumber": version.VersionNumber, "noticeQueued": noticeId != nil, "shortNoticeAcknowledged": command.AcknowledgeShortNotice},
@@ -82,7 +97,7 @@ func (handler Handler) assertPublishable(version *ent.LegalVersion, command Comm
 	if version.CreatedBy == command.Actor.Id || version.SubmittedBy == command.Actor.Id {
 		return usersErrors.Conflict("SAME_ADMIN", "A different admin must publish this version.")
 	}
-	if version.IsMaterialChange && version.EffectiveAt.Before(handler.Container.Now().Add(services.MaterialNoticePeriod)) && !command.AcknowledgeShortNotice {
+	if version.IsMaterialChange && !version.EffectiveAtIsDefault && version.EffectiveAt.Before(handler.Container.Now().Add(services.MaterialNoticePeriod)) && !command.AcknowledgeShortNotice {
 		return usersErrors.Conflict("SHORT_NOTICE", "A material change needs 30 days notice unless legal cleared a shorter period.")
 	}
 	return nil
