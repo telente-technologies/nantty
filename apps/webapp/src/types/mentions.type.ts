@@ -23,7 +23,7 @@ export type MentionEntity = UserMentionEntity | EveryoneMentionEntity;
 export interface MentionCandidate {
   readonly user: UserSummary;
   readonly allowsMentions: boolean;
-  readonly rank: "following" | "recent" | "other" | "member";
+  readonly rank: "following" | "follower" | "recent" | "other" | "member";
 }
 
 export interface MentionCandidatesResponse {

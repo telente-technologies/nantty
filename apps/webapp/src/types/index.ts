@@ -6,3 +6,4 @@ export * from "./money.type";
 export * from "./social.type";
 export * from "./saves.type";
 export * from "./mentions.type";
+export * from "./chatReport.type";

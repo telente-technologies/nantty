@@ -37,7 +37,7 @@ export type ContentReportStatus = "received" | "reviewing" | "action_taken" | "n
 
 export interface ContentReport {
   readonly id: ID;
-  readonly targetType: "post" | "user" | "comment" | "live" | "product" | "message";
+  readonly targetType: "post" | "user" | "comment" | "live" | "product" | "message" | "conversation" | "group";
   readonly targetLabel: string;
   readonly reason: string;
   readonly status: ContentReportStatus;
