@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
+import { parseThemePreference, readHtmlThemeAttribute, ThemeInitScript, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { AppProviders } from "@/components/providers/appProviders";
 import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2043F5",
+  ...themeViewport,
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -30,14 +31,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const cookieStore = await cookies();
   const sessionId = readSessionIdFromCookies(cookieStore);
   const viewer = readCachedViewerFromCookies(cookieStore);
+  const themePreference = parseThemePreference(cookieStore.get(themeCookieName)?.value);
 
   return (
-    <html lang="en-NG" className={interFont.variable}>
+    <html lang="en-NG" className={interFont.variable} data-theme={readHtmlThemeAttribute(themePreference)} suppressHydrationWarning>
+      <head>
+        <ThemeInitScript />
+      </head>
       <body>
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
-        <AppProviders viewer={viewer} csrfToken={sessionId ? deriveCsrfTokenForSession(sessionId) : null}>
+        <AppProviders viewer={viewer} themePreference={themePreference} csrfToken={sessionId ? deriveCsrfTokenForSession(sessionId) : null}>
           {children}
         </AppProviders>
       </body>

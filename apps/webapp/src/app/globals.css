@@ -10,13 +10,14 @@
   --surface-app: var(--color-bg);
   --surface-card: var(--color-surface);
   --surface-sunken: var(--color-sunken);
-  --surface-inverse: var(--blue-900);
+  --surface-inverse: var(--color-inverse);
   --surface-brand-tint: var(--color-brand-tint);
 
   --ink-strong: var(--color-text);
   --ink-muted: var(--color-text-muted);
   --ink-faint: var(--color-text-subtle);
   --ink-inverse: var(--color-on-brand);
+  --surface-hover: var(--color-surface-hover);
   --divider: var(--color-border);
   --divider-strong: var(--color-border-strong);
 
@@ -41,8 +42,9 @@
   --gutter: clamp(16px, 4vw, 40px);
   --content-width: 1240px;
   --reading-width: 680px;
-  --shell-rail-width: 84px;
-  --shell-nav-width: 248px;
+  --shell-rail-width: 76px;
+  --shell-nav-width: 232px;
+  --shell-right-rail-width: 288px;
   --bottom-bar-height: 62px;
 
   --z-nav: 40;
@@ -141,8 +143,8 @@ button {
 }
 
 ::selection {
-  background: var(--yellow-500);
-  color: var(--ink-strong);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
