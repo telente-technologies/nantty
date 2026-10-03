@@ -18,7 +18,14 @@ type AccountDirectoryService struct {
 }
 
 func (application AccountDirectoryService) FindAccountSummary(ctx context.Context, accountId uuid.UUID) (identityports.AccountSummary, bool, error) {
-	found, err := application.Container.Client.Account.Get(ctx, accountId)
+	return application.summarize(application.Container.Client.Account.Get(ctx, accountId))
+}
+
+func (application AccountDirectoryService) FindAccountSummaryByUsername(ctx context.Context, username string) (identityports.AccountSummary, bool, error) {
+	return application.summarize(application.Container.Client.Account.Query().Where(account.Username(username)).Only(ctx))
+}
+
+func (application AccountDirectoryService) summarize(found *ent.Account, err error) (identityports.AccountSummary, bool, error) {
 	if ent.IsNotFound(err) {
 		return identityports.AccountSummary{}, false, nil
 	}
