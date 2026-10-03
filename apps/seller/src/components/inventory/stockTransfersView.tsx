@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { PlanGate } from "@/components/billing/planGate";
 import { InventoryTabs } from "@/components/inventory/inventoryTabs";
 import { NewStockTransferDialog } from "@/components/inventory/newStockTransferDialog";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
 import { useCursorPagedList } from "@/hooks/useCursorPagedList.hook";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { StockTransfer, StockTransferStatus } from "@/types/catalog.type";
@@ -22,11 +24,10 @@ import styles from "./inventoryViews.module.css";
 const transferStatusTone: Record<StockTransferStatus, StatusTone> = { in_transit: "info", received: "success", cancelled: "neutral" };
 const transferStatusLabel: Record<StockTransferStatus, string> = { in_transit: "In transit", received: "Received", cancelled: "Cancelled" };
 
-export function StockTransfersView() {
+function StockTransfersPanel({ isDialogOpen, onDialogClose }: { readonly isDialogOpen: boolean; readonly onDialogClose: () => void }) {
   const { locations } = useStoreContext();
   const { showToast } = useToast();
   const [statusFilter, setStatusFilter] = useState<"" | StockTransferStatus>("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [busyTransferId, setBusyTransferId] = useState<string | null>(null);
   const transfers = useCursorPagedList<StockTransfer>("/seller/inventory/transfers", { status: statusFilter, limit: 25 });
   const locationName = (locationId: string) => locations.find((location) => location.id === locationId)?.name ?? locationId;
@@ -65,9 +66,7 @@ export function StockTransfersView() {
   ];
 
   return (
-    <PageStack>
-      <PageHeader title="Stock transfers" description="Move stock between your shops and warehouse. Units in transit are not sellable anywhere." actions={<Button variant="primary" iconName="repeat24" onClick={() => setIsDialogOpen(true)} disabled={locations.length < 2}>New transfer</Button>} />
-      <InventoryTabs />
+    <>
       {locations.length < 2 ? <Callout tone="info">Add a second location in Settings to transfer stock.</Callout> : null}
       <Panel padded={false}>
         <div className={styles.toolbar}>
@@ -76,7 +75,22 @@ export function StockTransfersView() {
         {transfers.errorMessage ? <div className={styles.toolbar}><Callout tone="error">{transfers.errorMessage}</Callout></div> : null}
         <DataTable caption="Stock transfers" columns={columns} rows={transfers.items} readRowKey={(transfer) => transfer.id} isLoading={transfers.isLoading} hasMore={transfers.hasMore} onLoadMore={transfers.loadMore} isLoadingMore={transfers.isLoadingMore} emptyState={<EmptyState iconName="repeat24" title="No transfers yet" description="Send stock from your warehouse to a shop when it runs low." />} />
       </Panel>
-      <NewStockTransferDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} onSaved={() => { setIsDialogOpen(false); transfers.reload(); }} />
+      <NewStockTransferDialog isOpen={isDialogOpen} onClose={onDialogClose} onSaved={() => { onDialogClose(); transfers.reload(); }} />
+    </>
+  );
+}
+
+export function StockTransfersView() {
+  const { locations } = useStoreContext();
+  const { hasFeature } = usePlanFeatures();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  return (
+    <PageStack>
+      <PageHeader title="Stock transfers" description="Move stock between your shops and warehouses. Units in transit cannot be sold anywhere." actions={hasFeature("advanced_inventory") ? <Button variant="primary" iconName="repeat24" onClick={() => setIsDialogOpen(true)} disabled={locations.length < 2}>New transfer</Button> : null} />
+      <InventoryTabs />
+      <PlanGate feature="advanced_inventory" description="Send stock between your shops and warehouses and receive it at the other end, with a full record.">
+        <StockTransfersPanel isDialogOpen={isDialogOpen} onDialogClose={() => setIsDialogOpen(false)} />
+      </PlanGate>
     </PageStack>
   );
 }
