@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useQuery } from "@tanstack/react-query";
 import { FlatList, StyleSheet, View } from "react-native";
 
@@ -58,7 +59,7 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
                 </View>
                 <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatTimeSincePosted(item.createdAt)}</Text>
               </View>
-              <Text size={13} lineHeight={16.9} color={colors.textMuted}>{item.text}</Text>
+              <MentionText text={item.text} size={13} lineHeight={16.9} color={colors.textMuted} />
             </View>
           )}
         />
