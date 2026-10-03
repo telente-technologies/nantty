@@ -1,0 +1,50 @@
+import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Button } from "@/components/ui/button";
+import { TextField } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+import { ApiError } from "@/services/apiClient.service";
+import type { LiveGiftGoal } from "@/types";
+
+import { useSaveLiveGiftGoal } from "./liveGiftStats.hook";
+
+export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { liveId: string; goal: LiveGiftGoal | null; visible: boolean; onClose: () => void }) {
+  const [title, setTitle] = useState("");
+  const [targetText, setTargetText] = useState("");
+  const saveGoal = useSaveLiveGiftGoal(liveId);
+  const editableGoal = goal?.status === "active" ? goal : null;
+
+  useEffect(() => {
+    if (!visible) return;
+    setTitle(editableGoal?.title ?? "");
+    setTargetText(editableGoal ? String(editableGoal.targetCoins) : "");
+  }, [visible, editableGoal]);
+
+  const targetCoins = Number.parseInt(targetText, 10);
+  const canSave = title.trim().length > 0 && Number.isInteger(targetCoins) && targetCoins >= 10;
+  const saveGoalAndClose = () =>
+    saveGoal.mutate({ goalId: editableGoal?.id ?? null, input: { title: title.trim(), targetCoins } }, { onSuccess: onClose });
+
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title={editableGoal ? "Edit gift goal" : "Set a gift goal"} floating>
+      <View style={styles.body}>
+        <Text size={13} lineHeight={18} color={colors.textMuted}>
+          Viewers see a progress bar and everyone celebrates when you reach it.
+        </Text>
+        <TextField label="What's the goal for?" placeholder="e.g. New ring light" value={title} onChangeText={setTitle} maxLength={40} />
+        <TextField label="Target (coins)" placeholder="2000" value={targetText} onChangeText={(text) => setTargetText(text.replace(/\D/g, ""))} keyboardType="number-pad" />
+        {saveGoal.isError ? (
+          <Text size={12} lineHeight={16} color={colors.error} accessibilityLiveRegion="polite">
+            {saveGoal.error instanceof ApiError ? saveGoal.error.message : "We couldn't save your goal. Try again."}
+          </Text>
+        ) : null}
+        <Button title="Save goal" disabled={!canSave} loading={saveGoal.isPending} onPress={saveGoalAndClose} />
+      </View>
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } });

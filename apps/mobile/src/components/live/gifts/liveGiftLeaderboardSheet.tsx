@@ -1,0 +1,31 @@
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors.constant";
+
+import { LiveGiftLeaderboardList } from "./liveGiftLeaderboardList";
+import { useLiveGiftLeaderboard } from "./liveGiftStats.hook";
+
+export function LiveGiftLeaderboardSheet({ liveId, visible, onClose }: { liveId: string; visible: boolean; onClose: () => void }) {
+  const leaderboard = useLiveGiftLeaderboard(liveId, visible);
+  const viewerRank = leaderboard.data?.viewerRank;
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title="Top supporters this live" floating>
+      <View style={styles.body}>
+        {leaderboard.isPending ? <ActivityIndicator color={colors.primary} /> : null}
+        <LiveGiftLeaderboardList entries={leaderboard.data?.data ?? []} emptyMessage="No points yet. Send a gift, like or share to top the ranking." />
+        {viewerRank ? (
+          <Text size={13} weight={600} lineHeight={18} color={colors.primary} align="center">
+            You're #{viewerRank} on this live
+          </Text>
+        ) : null}
+        <Text size={12} lineHeight={16} color={colors.textMuted} align="center">
+          Ranked by ZudoPoints from gifts, likes, shares, follows and watch time.
+        </Text>
+      </View>
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } });
