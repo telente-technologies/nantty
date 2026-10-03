@@ -10,7 +10,7 @@ import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { searchService, type SearchScope } from "@/services/search.service";
@@ -34,6 +34,7 @@ function useDebouncedText(text: string, delayMs: number) {
 }
 
 export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
+  const { colors } = useTheme();
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<SearchScope>(route.params?.scope === "mart" ? "products" : "all");
   const debouncedQuery = useDebouncedText(query.trim(), 300);
@@ -48,7 +49,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
   const data = results.data;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header />
       <View style={styles.searchRow}>
         <SearchBar value={query} onChangeText={setQuery} placeholder="Search for anything..." />

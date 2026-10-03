@@ -6,13 +6,14 @@ import { ProductMasonry } from "@/components/home/productMasonry";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { productsService } from "@/services/products.service";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function CategoryScreen({ route }: MainScreenProps<"Category">) {
+  const { colors } = useTheme();
   const { categoryId, name, collection } = route.params;
   useEffect(() => {
     void trackProductInteraction("category.viewed", { categoryId: collection ?? categoryId });
@@ -26,7 +27,7 @@ export function CategoryScreen({ route }: MainScreenProps<"Category">) {
   });
   const allProducts = (products.data?.pages ?? []).flatMap((page) => page.data);
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title={name} />
       <FlatList
         data={[0]}
