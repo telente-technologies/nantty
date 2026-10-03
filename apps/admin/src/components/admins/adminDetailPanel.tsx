@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { AuditHistoryList } from "@/components/audit/auditHistoryList";
-import { useAdminSession } from "@/components/session/adminSessionProvider";
+import { useAdminPermissions, useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { ConfirmActionDialog } from "@/components/ui/confirmActionDialog";
 import { ErrorBlock, LoadingBlock, NoticeBanner } from "@/components/ui/feedback";
@@ -19,16 +19,20 @@ import { formatDateTime } from "@/utils/formatting.util";
 
 import { PermissionSummary } from "./permissionChecklist";
 
-type StateAction = "disable" | "enable" | "reset-mfa";
+type StateAction = "disable" | "enable" | "reset-mfa" | "suspend" | "revoke" | "approve";
 
 const stateActionCopy: Record<StateAction, { title: string; confirmLabel: string; consequences: string[]; tone: "danger" | "default" }> = {
   disable: { title: "Disable this admin", confirmLabel: "Disable admin", tone: "danger", consequences: ["Every active session is signed out immediately.", "They cannot sign in until re-enabled.", "Their past actions stay in the audit log."] },
+  suspend: { title: "Suspend this admin's access", confirmLabel: "Suspend access", tone: "danger", consequences: ["Every active session is killed immediately.", "They cannot sign in until a superadmin enables them again."] },
+  revoke: { title: "Revoke this admin's access", confirmLabel: "Revoke access", tone: "danger", consequences: ["Every active session is killed immediately.", "Revoking is permanent. They would need a new invitation.", "Their past actions stay in the audit log."] },
+  approve: { title: "Approve this superadmin", confirmLabel: "Approve superadmin", tone: "default", consequences: ["A second superadmin approves, so the invitation can now be sent.", "You cannot approve a superadmin you created."] },
   enable: { title: "Enable this admin", confirmLabel: "Enable admin", tone: "default", consequences: ["They can sign in again with their password and authenticator.", "Any lockout from failed attempts is cleared."] },
   "reset-mfa": { title: "Reset two-step verification", confirmLabel: "Reset MFA", tone: "danger", consequences: ["Their authenticator, passkeys and recovery codes stop working.", "Every active session is signed out.", "They must set up a new authenticator at next sign-in."] },
 };
 
 export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: { readonly adminId: string; readonly onClose: () => void; readonly onEditAccess: (admin: AdminAccountSummary) => void; readonly onChanged: () => void }) {
   const { admin: signedInAdmin } = useAdminSession();
+  const { isSuperadmin } = useAdminPermissions();
   const { showToast } = useToast();
   const detail = useAdminQuery((signal) => fetchAdminAccountDetail(adminId, signal), adminId);
   const [pendingAction, setPendingAction] = useState<StateAction | null>(null);
@@ -45,7 +49,7 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
   }
 
   const account = detail.data?.admin ?? null;
-  const isProtected = account ? account.role === "SUPERADMIN" || account.id === signedInAdmin.id : true;
+  const isProtected = account ? (account.role === "SUPERADMIN" && !isSuperadmin) || account.id === signedInAdmin.id || account.status === "REVOKED" : true;
   return (
     <SidePanel
       isOpen
@@ -56,16 +60,16 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
       footer={
         account && !isProtected ? (
           <>
-            <Button variant="primary" iconName="shield24" onClick={() => onEditAccess(account)}>
-              Change access
-            </Button>
-            {account.status === "DISABLED" || account.status === "LOCKED" ? (
+            {account.role !== "SUPERADMIN" ? <Button variant="primary" iconName="shield24" onClick={() => onEditAccess(account)}>Change access</Button> : null}
+            {account.status === "PENDING_APPROVAL" ? <Button variant="primary" onClick={() => setPendingAction("approve")}>Approve superadmin</Button> : null}
+            {account.status === "DISABLED" || account.status === "LOCKED" || account.status === "SUSPENDED" ? (
               <Button onClick={() => setPendingAction("enable")}>{account.status === "LOCKED" ? "Unlock" : "Enable"}</Button>
             ) : (
-              <Button variant="quietDanger" onClick={() => setPendingAction("disable")}>
-                Disable
+              <Button variant="quietDanger" onClick={() => setPendingAction("suspend")}>
+                Suspend access
               </Button>
             )}
+            <Button variant="danger" onClick={() => setPendingAction("revoke")}>Revoke</Button>
             <Button variant="quietDanger" onClick={() => setPendingAction("reset-mfa")}>
               Reset MFA
             </Button>
@@ -77,7 +81,7 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
       {detail.isLoading && !account ? <LoadingBlock /> : null}
       {account ? (
         <>
-          {isProtected ? <NoticeBanner tone="info">{account.role === "SUPERADMIN" ? "Superadmins are created and changed only with the backend CLI bootstrap." : "This is your own account. Another superadmin must change it."}</NoticeBanner> : null}
+          {isProtected ? <NoticeBanner tone="info">{account.role === "SUPERADMIN" && !isSuperadmin ? "Only a superadmin can change a superadmin." : "This is your own account. Another superadmin must change it."}</NoticeBanner> : null}
           <KeyValueList
             columns={3}
             items={[
@@ -91,7 +95,10 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
           />
           <SectionHeading>Permissions</SectionHeading>
           {account.role === "SUPERADMIN" ? <p>Every permission, including managing admins.</p> : <PermissionSummary permissions={account.permissions} />}
-          <SectionHeading>History</SectionHeading>
+          {account.roleNames.length > 0 ? <p>Roles: {account.roleNames.join(", ")}</p> : null}
+          <SectionHeading>Last actions by {account.name}</SectionHeading>
+          <AuditHistoryList entries={detail.data?.lastActions ?? []} />
+          <SectionHeading>History of changes to this account</SectionHeading>
           <AuditHistoryList entries={detail.data?.history ?? []} />
         </>
       ) : null}
