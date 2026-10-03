@@ -1,4 +1,4 @@
-import type { Post, PostAnalytics } from "@/types";
+import type { CommentWithReplies, Page, Post, PostAnalytics } from "@/types";
 
 import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
 
@@ -8,6 +8,8 @@ export const postsService = {
   likePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "POST", idempotencyKey: createIdempotencyKey("like") }),
   unlikePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "DELETE" }),
   repostPost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/repost`, { method: "POST" }),
+  fetchCommentsPage: (postId: string, cursor: string | null) =>
+    sendRequestToWebappServer<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined } }),
   recordPostShare: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/share`, { method: "POST" }),
 };
 

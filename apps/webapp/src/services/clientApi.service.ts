@@ -1,3 +1,5 @@
+import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
+
 export interface ApiErrorBody {
   readonly message: string;
   readonly code?: string;
@@ -43,10 +45,9 @@ export function buildQueryString(query: WebappRequestOptions["query"]): string {
   return searchParamsText ? `?${searchParamsText}` : "";
 }
 
-function redirectToLoginAfterSessionEnded(): void {
+function promptSignInAfterUnauthenticatedResponse(): void {
   if (typeof window === "undefined") return;
-  const nextPath = `${window.location.pathname}${window.location.search}`;
-  window.location.assign(`/login?next=${encodeURIComponent(nextPath)}`);
+  useAuthPromptStore.getState().openAuthPrompt("Sign in to continue. Anything you were doing will pick up where you left off.");
 }
 
 export async function sendRequestToWebappServer<Payload>(apiPath: string, options: WebappRequestOptions = {}): Promise<Payload> {
@@ -77,7 +78,7 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
 
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    if (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED") redirectToLoginAfterSessionEnded();
+    if (method !== "GET" && (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED")) promptSignInAfterUnauthenticatedResponse();
     throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
   }
   if (!response.ok) {
