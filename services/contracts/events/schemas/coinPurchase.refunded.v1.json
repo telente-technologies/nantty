@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/coinPurchase.refunded.v1.json",
+  "title": "CoinPurchaseRefunded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coinPurchaseId",
+    "userId",
+    "packageId",
+    "coins",
+    "source",
+    "amount",
+    "recoveredCoins",
+    "shortfallCoins"
+  ],
+  "properties": {
+    "coinPurchaseId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "packageId": {
+      "type": "string"
+    },
+    "coins": {
+      "type": "integer"
+    },
+    "source": {
+      "enum": [
+        "web",
+        "apple",
+        "google"
+      ]
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "recoveredCoins": {
+      "type": "integer"
+    },
+    "shortfallCoins": {
+      "type": "integer"
+    }
+  }
+}

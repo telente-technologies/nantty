@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/dispute.resolved.v1.json",
+  "title": "DisputeResolved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "disputeId",
+    "orderId",
+    "escrowId",
+    "status",
+    "buyerUserId",
+    "sellerUserId",
+    "storeId",
+    "reason"
+  ],
+  "properties": {
+    "disputeId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "escrowId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "buyerUserId": {
+      "type": "string"
+    },
+    "sellerUserId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

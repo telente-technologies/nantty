@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/battleSettlement.completed.v1.json",
+  "title": "BattleSettlementCompleted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "battleId",
+    "liveId",
+    "rule",
+    "winnerUserId",
+    "transfers"
+  ],
+  "properties": {
+    "battleId": {
+      "type": "string"
+    },
+    "liveId": {
+      "type": "string"
+    },
+    "rule": {
+      "enum": [
+        "keepOwn",
+        "winnerTakesAll"
+      ]
+    },
+    "winnerUserId": {
+      "type": "string"
+    },
+    "transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fromUserId": {
+            "type": "string"
+          },
+          "toUserId": {
+            "type": "string"
+          },
+          "coins": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

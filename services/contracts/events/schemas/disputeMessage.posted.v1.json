@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/disputeMessage.posted.v1.json",
+  "title": "DisputeMessagePosted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "disputeId",
+    "messageId",
+    "authorRole",
+    "buyerUserId",
+    "sellerUserId"
+  ],
+  "properties": {
+    "disputeId": {
+      "type": "string"
+    },
+    "messageId": {
+      "type": "string"
+    },
+    "authorRole": {
+      "enum": [
+        "buyer",
+        "seller",
+        "support"
+      ]
+    },
+    "buyerUserId": {
+      "type": "string"
+    },
+    "sellerUserId": {
+      "type": "string"
+    }
+  }
+}

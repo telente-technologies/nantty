@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/coinTransfer.completed.v1.json",
+  "title": "CoinTransferCompleted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coinTransferId",
+    "senderUserId",
+    "recipientUserId",
+    "coins",
+    "feeCoins",
+    "netCoins"
+  ],
+  "properties": {
+    "coinTransferId": {
+      "type": "string"
+    },
+    "senderUserId": {
+      "type": "string"
+    },
+    "recipientUserId": {
+      "type": "string"
+    },
+    "coins": {
+      "type": "integer"
+    },
+    "feeCoins": {
+      "type": "integer"
+    },
+    "netCoins": {
+      "type": "integer"
+    }
+  }
+}
