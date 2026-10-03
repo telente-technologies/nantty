@@ -14,8 +14,21 @@ type CoinPackageDto struct {
 	BonusCoins      int64    `json:"bonusCoins"`
 	TotalCoins      int64    `json:"totalCoins"`
 	PurchaseChannel string   `json:"purchaseChannel"`
+	ClientPlatform  string   `json:"clientPlatform"`
 	StoreProductId  *string  `json:"storeProductId"`
 	Price           MoneyDto `json:"price"`
+}
+
+type CoinPackagePriceRowDto struct {
+	Id             string           `json:"id"`
+	Name           string           `json:"name"`
+	ClientPlatform string           `json:"clientPlatform"`
+	Coins          int64            `json:"coins"`
+	BonusCoins     int64            `json:"bonusCoins"`
+	Prices         map[string]int64 `json:"prices"`
+	StoreProductId string           `json:"storeProductId"`
+	Active         bool             `json:"active"`
+	SortOrder      int              `json:"sortOrder"`
 }
 
 type CoinBalanceDto struct {
@@ -58,6 +71,7 @@ type StartedCoinPurchaseDto struct {
 	CallbackUrl      *string          `json:"callbackUrl,omitempty"`
 	StoreProductId   *string          `json:"storeProductId,omitempty"`
 	Purchase         *CoinPurchaseDto `json:"purchase"`
+	PaymentIntentId  string           `json:"paymentIntentId,omitempty"`
 }
 
 type VerifiedCoinPurchaseDto struct {
