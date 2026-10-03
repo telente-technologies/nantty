@@ -11,7 +11,7 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
   storeId: adireLabStudioStoreId,
   recordKey: "adire",
   receiptPrefix: "ADL",
-  randomSeeds: { products: 31_052_026, posHistory: 5151, onlineOrders: 818 },
+  randomSeeds: { products: 31_052_026, onlineOrders: 818 },
   buildSettings: () =>
     buildDemoStoreSettingsFromBasics({
       storeId: adireLabStudioStoreId,
@@ -26,21 +26,13 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
       email: "studio@adirelab.ng",
       address: "21 Herbert Macaulay Way, Yaba, Lagos",
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: null }],
-      receiptHeaderText: "E se! Thank you for wearing Adire Lab.",
-      receiptFooterText: "Find us on Zudomart @adirelab.studio",
-      returnPolicy: "Exchanges within 5 days with this receipt. Custom and altered pieces cannot be returned.",
-      paperWidth: "58mm",
-      cardTerminalInstructions: "Use the Paystack terminal on the counter.",
-      bankTransferInstructions: "Zenith Bank · 1014427730 · Adire Lab Studio",
+      returnPolicy: "Exchanges within 5 days with proof of purchase. Custom and altered pieces cannot be returned.",
+      shippingPolicy: "Lagos deliveries in 1–2 days. Custom pieces ship within 7 working days of your order.",
       loyalty: { enabled: false, spendRequiredPerPointMinor: 100_000, redeemValuePerPointMinor: 1_000, minimumPointsToRedeem: 100 },
     }),
   buildLocations: () => [
     { id: "loc_adire_yaba", name: "Yaba studio", kind: "store", address: "21 Herbert Macaulay Way", city: "Yaba", state: "Lagos", country: "NG", phone: "+234 803 555 0268", isDefault: true, active: true },
     { id: "loc_adire_abeokuta", name: "Abeokuta dye workshop", kind: "warehouse", address: "Itoku Market Road", city: "Abeokuta", state: "Ogun", country: "NG", phone: null, isDefault: false, active: true },
-  ],
-  buildRegisters: () => [
-    { id: "reg_adire_yaba_1", locationId: "loc_adire_yaba", name: "Studio counter", openShiftId: null, active: true },
-    { id: "reg_adire_yaba_2", locationId: "loc_adire_yaba", name: "Fitting room tablet", openShiftId: null, active: true },
   ],
   buildCategories: () => [
     { id: "cat_womenswear", name: "Womenswear" },
@@ -49,13 +41,13 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
     { id: "cat_textiles", name: "Fabric & home textiles" },
   ],
   buildStaff: () => [
-    buildDemoStaffRecord({ id: "stf_adaeze_adire", userId: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", role: "owner", locationIds: ["loc_adire_yaba", "loc_adire_abeokuta"] }, "1111", 0),
-    buildDemoStaffRecord({ id: "stf_toyin_adire", userId: "usr_toyin", name: "Toyin Afolabi", username: "toyin.afolabi", role: "manager", locationIds: ["loc_adire_yaba", "loc_adire_abeokuta"] }, "3690", 0),
-    buildDemoStaffRecord({ id: "stf_zainab_adire", userId: "usr_zainab", name: "Zainab Yusuf", username: "zainab.yusuf", role: "cashier", locationIds: ["loc_adire_yaba"] }, "2468", 0),
+    buildDemoStaffRecord({ id: "stf_adaeze_adire", userId: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", role: "owner", locationIds: ["loc_adire_yaba", "loc_adire_abeokuta"] }, 0),
+    buildDemoStaffRecord({ id: "stf_toyin_adire", userId: "usr_toyin", name: "Toyin Afolabi", username: "toyin.afolabi", role: "manager", locationIds: ["loc_adire_yaba", "loc_adire_abeokuta"] }, 0),
+    buildDemoStaffRecord({ id: "stf_zainab_adire", userId: "usr_zainab", name: "Zainab Yusuf", username: "zainab.yusuf", role: "sales", locationIds: ["loc_adire_yaba"] }, 0),
   ],
   buildPromotions: (currency) => [
-    { id: "promo_adire_first", name: "First adire 10%", kind: "coupon", code: "ADIRE10", discount: { kind: "percent", value: 1000 }, scope: { kind: "all", ids: [] }, minimumSpend: { amountMinor: 2_000_000, currency }, usageLimit: null, usageLimitPerCustomer: 1, usedCount: 9, channels: ["online", "pos"], startsAt: buildIsoDateDaysAgo(40), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(40) },
-    { id: "promo_adire_owambe", name: "Owambe season", kind: "scheduled_sale", code: null, discount: { kind: "percent", value: 1500 }, scope: { kind: "categories", ids: ["cat_accessories"] }, minimumSpend: null, usageLimit: null, usageLimitPerCustomer: null, usedCount: 0, channels: ["online", "pos"], startsAt: buildIsoDateDaysAgo(-14, 0), endsAt: buildIsoDateDaysAgo(-28, 23), status: "scheduled", createdAt: buildIsoDateDaysAgo(2) },
+    { id: "promo_adire_first", name: "First adire 10%", kind: "coupon", code: "ADIRE10", discount: { kind: "percent", value: 1000 }, scope: { kind: "all", ids: [] }, minimumSpend: { amountMinor: 2_000_000, currency }, usageLimit: null, usageLimitPerCustomer: 1, usedCount: 9, startsAt: buildIsoDateDaysAgo(40), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(40) },
+    { id: "promo_adire_owambe", name: "Owambe season", kind: "scheduled_sale", code: null, discount: { kind: "percent", value: 1500 }, scope: { kind: "categories", ids: ["cat_accessories"] }, minimumSpend: null, usageLimit: null, usageLimitPerCustomer: null, usedCount: 0, startsAt: buildIsoDateDaysAgo(-14, 0), endsAt: buildIsoDateDaysAgo(-28, 23), status: "scheduled", createdAt: buildIsoDateDaysAgo(2) },
   ],
   catalog: {
     blueprints: [
@@ -87,19 +79,6 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
     ],
     firstCustomerNote: { body: "Ordered matching gele for her sister's wedding. Likes wine and gold.", authorStaffId: "stf_toyin_adire", authorName: "Toyin Afolabi" },
   },
-  posHistory: {
-    registerCashiers: [
-      { registerId: "reg_adire_yaba_1", locationId: "loc_adire_yaba", cashier: { id: "stf_zainab_adire", name: "Zainab Yusuf" } },
-      { registerId: "reg_adire_yaba_2", locationId: "loc_adire_yaba", cashier: { id: "stf_toyin_adire", name: "Toyin Afolabi" } },
-    ],
-    registersWithOpenShiftToday: ["reg_adire_yaba_1"],
-    historyLengthInDays: 75,
-    salesPerClosedShift: [1, 5],
-    salesPerOpenShift: [1, 3],
-    openingFloatMinor: 1_000_000,
-    firstReceiptSequence: 300,
-    customerShare: 0.4,
-  },
   onlineOrders: {
     orderCount: 16,
     historyLengthInDays: 30,
@@ -130,7 +109,7 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
     availableMinor: 21_640_000,
   },
   auditEntries: [
-    ["stf_adaeze_adire", "staff.invited", "staff", "Invited Zainab Yusuf as cashier", 12],
+    ["stf_adaeze_adire", "staff.invited", "staff", "Invited Zainab Yusuf as sales staff", 12],
     ["stf_toyin_adire", "inventory.adjusted", "variant", "Received 20 × Hand-dyed Indigo Adire from Abeokuta dye workshop", 2],
     ["stf_toyin_adire", "order.shipped", "order", "Marked ZM-58418 as shipped with GIG Logistics", 4],
     ["stf_adaeze_adire", "settings.updated", "store", "Turned off loyalty points", 9],

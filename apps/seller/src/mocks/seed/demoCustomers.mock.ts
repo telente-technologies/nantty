@@ -10,13 +10,16 @@ export function buildDemoCustomersFromPlan(plan: DemoCustomerPlan, recordKey: st
     phone,
     email,
     zudomartUsername: username,
+    city: null,
     tags,
     notes: index === 0 && plan.firstCustomerNote
       ? [{ id: buildStoreScopedRecordId("note", recordKey, 1), body: plan.firstCustomerNote.body, author: { id: plan.firstCustomerNote.authorStaffId, name: plan.firstCustomerNote.authorName }, createdAt: buildIsoDateDaysAgo(20) }]
       : [],
     loyaltyPoints,
     totalSpent: { amountMinor: 0, currency },
+    averageOrderValue: null,
     purchasesCount: 0,
+    firstPurchaseAt: null,
     lastPurchaseAt: null,
     createdAt: buildIsoDateDaysAgo(150 - index * 9),
     marketingOptIn: index % 3 !== 1,

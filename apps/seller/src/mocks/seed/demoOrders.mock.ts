@@ -2,14 +2,8 @@ import type { Product } from "@/types/catalog.type";
 import type { CurrencyCode, Money } from "@/types/money.type";
 import type { OnlineOrder, OnlineOrderStatus, OrderDispute, ReturnRequest } from "@/types/order.type";
 import { buildStoreScopedRecordId, type DemoOnlineOrderPlan } from "@/mocks/seed/demoStoreProfile.mock";
+import { buildDemoDeliveryDetails, buildDemoOrderTimeline, buildDemoPaymentReference, convertOrderStatusToEscrowStatus, pickOrderStatusForAge } from "@/mocks/seed/demoOrderLifecycle.mock";
 import { buildIsoDateDaysAgo, createSeededRandomNumberGenerator, pickRandomIntegerInclusive, pickRandomItem } from "@/mocks/seed/seededRandom.mock";
-
-function pickStatusForAge(daysAgo: number, random: () => number): OnlineOrderStatus {
-  if (daysAgo <= 1) return random() < 0.6 ? "paid" : "processing";
-  if (daysAgo <= 4) return pickRandomItem<OnlineOrderStatus>(["processing", "shipped", "shipped", "delivered"], random);
-  if (daysAgo <= 8) return pickRandomItem<OnlineOrderStatus>(["shipped", "delivered", "completed", "completed"], random);
-  return pickRandomItem<OnlineOrderStatus>(["completed", "completed", "completed", "completed", "cancelled", "refunded"], random);
-}
 
 export interface DemoOnlineOrderOptions {
   readonly plan: DemoOnlineOrderPlan;
@@ -47,16 +41,24 @@ export function buildDemoOnlineOrders(products: readonly Product[], options: Dem
     });
     const subtotalMinor = lines.reduce((sum, line) => sum + line.lineTotal.amountMinor, 0);
     const shippingMinor = buyer.state === plan.homeState ? plan.shippingFeeMinor.homeState : plan.shippingFeeMinor.otherStates;
-    const status = orderIndex === plan.disputedOrderIndex ? "disputed" : pickStatusForAge(daysAgo, random);
+    const status: OnlineOrderStatus = orderIndex === plan.disputedOrderIndex ? "disputed" : pickOrderStatusForAge(daysAgo, random);
     const createdAt = buildIsoDateDaysAgo(daysAgo, pickRandomIntegerInclusive(8, 21, random), pickRandomIntegerInclusive(0, 59, random));
-    const isShippedOrLater = ["shipped", "delivered", "completed", "disputed"].includes(status);
-    const escrowStatus = status === "completed" ? "released" : status === "refunded" || status === "cancelled" ? "refunded" : status === "disputed" ? "disputed" : "held";
+    const isShippedOrLater = ["shipped", "delivered", "completed", "disputed", "returned"].includes(status);
+    const escrowStatus = convertOrderStatusToEscrowStatus(status);
+    const orderNumber = `ZM-${String(plan.firstOrderNumber + orderIndex)}`;
+    const orderKey = buildStoreScopedRecordId("o", recordKey, orderIndex + 1);
+    const courier = isShippedOrLater ? pickRandomItem(["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox"], random) : null;
+    const paymentProvider = random() < 0.7 ? ("paystack" as const) : ("flutterwave" as const);
+    const isFailedAttempt = status === "shipped" && random() < 0.25;
+    const isRefunded = status === "refunded" || status === "returned" || status === "cancelled";
+    const buyerPhone = "+23480" + String(30000000 + orderIndex * 7919).slice(0, 8);
     const creator = plan.creators.length > 0 && random() < plan.creatorShare ? pickRandomItem(plan.creators, random) : null;
     orders.push({
       id: buildStoreScopedRecordId("ord", recordKey, String(orderIndex + 1).padStart(4, "0")),
-      orderNumber: `ZM-${String(plan.firstOrderNumber + orderIndex)}`,
-      buyer: { id: buyer.id, name: buyer.name, username: buyer.username },
-      shippingAddress: { recipientName: buyer.name, phone: "+23480" + String(30000000 + orderIndex * 7919).slice(0, 8), line1: `${pickRandomIntegerInclusive(2, 90, random)} Market Road`, city: buyer.city, state: buyer.state, country: "NG" },
+      orderNumber,
+      invoiceNumber: `INV-${orderNumber.replace("ZM-", "")}`,
+      buyer: { id: buyer.id, name: buyer.name, username: buyer.username, phone: buyerPhone },
+      shippingAddress: { recipientName: buyer.name, phone: buyerPhone, line1: `${pickRandomIntegerInclusive(2, 90, random)} Market Road`, city: buyer.city, state: buyer.state, country: "NG" },
       lines,
       subtotal: toStoreMoney(subtotalMinor),
       shippingFee: toStoreMoney(shippingMinor),
@@ -66,11 +68,21 @@ export function buildDemoOnlineOrders(products: readonly Product[], options: Dem
       escrowStatus,
       escrowReleaseAt: status === "delivered" ? buildIsoDateDaysAgo(daysAgo - 3) : null,
       fulfilment: isShippedOrLater
-        ? { courier: pickRandomItem(["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox"], random), trackingNumber: `TRK${pickRandomIntegerInclusive(10000000, 99999999, random)}`, trackingUrl: null, shippedAt: buildIsoDateDaysAgo(Math.max(daysAgo - 1, 0), 15), fromLocationId: plan.fulfilmentLocationId }
+        ? { courier: courier ?? "GIG Logistics", trackingNumber: `TRK${pickRandomIntegerInclusive(10000000, 99999999, random)}`, trackingUrl: null, shippedAt: buildIsoDateDaysAgo(Math.max(daysAgo - 1, 0), 15), fromLocationId: plan.fulfilmentLocationId }
         : null,
       attributedCreator: creator,
       createdAt,
-      deliveredAt: ["delivered", "completed"].includes(status) ? buildIsoDateDaysAgo(Math.max(daysAgo - 3, 0), 13) : null,
+      deliveredAt: ["delivered", "completed", "disputed"].includes(status) ? buildIsoDateDaysAgo(Math.max(daysAgo - 3, 0), 13) : null,
+      paymentStatus: isRefunded ? "refunded" : "paid",
+      paymentProvider,
+      paymentReference: buildDemoPaymentReference(paymentProvider, orderNumber, random),
+      paidAt: createdAt,
+      refundedAmount: toStoreMoney(isRefunded ? subtotalMinor + shippingMinor : 0),
+      refunds: isRefunded ? [{ id: `rf_${orderKey}`, amount: toStoreMoney(subtotalMinor + shippingMinor), reason: status === "returned" ? "Item returned" : status === "cancelled" ? "Order cancelled" : "Out of stock after payment", createdAt: buildIsoDateDaysAgo(Math.max(daysAgo - 2, 0), 12) }] : [],
+      delivery: buildDemoDeliveryDetails(status, daysAgo, isFailedAttempt, random),
+      timeline: buildDemoOrderTimeline({ orderKey, status, daysAgo, buyerName: buyer.name, courier, sellerName: "You" }),
+      notes: orderIndex % 9 === 0 ? [{ id: `note_${orderKey}`, body: "Buyer asked for gift wrapping — add a thank-you card.", authorName: "Store team", createdAt: buildIsoDateDaysAgo(daysAgo, 12) }] : [],
+      conversationId: orderIndex < 14 ? buildStoreScopedRecordId("conv", recordKey, `order_${orderIndex + 1}`) : null,
     });
   }
   return orders.reverse();
