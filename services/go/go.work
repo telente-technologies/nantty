@@ -17,7 +17,6 @@ use (
 	./modules/moderation
 	./modules/orders
 	./modules/payments
-	./modules/rewards
 	./modules/subscriptions
 	./modules/users
 	./modules/wallet
