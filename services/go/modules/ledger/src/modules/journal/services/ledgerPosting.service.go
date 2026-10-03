@@ -41,6 +41,7 @@ func (ledger *Ledger) clientFor(executor databases.ExecutorQuerier) *ent.Client 
 }
 
 func (ledger *Ledger) PostBalancedJournalEntry(ctx context.Context, transaction *sql.Tx, request models.JournalEntryRequest) (models.PostedJournalEntry, error) {
+	request.Lines = stripePlatformAccountLines(request.Lines, request.Reference)
 	if err := validators.ValidateJournalEntryRequest(request); err != nil {
 		return models.PostedJournalEntry{}, err
 	}
@@ -203,4 +204,13 @@ func nonNilMetadata(metadata map[string]any) map[string]any {
 		return map[string]any{}
 	}
 	return metadata
+}
+
+func stripePlatformAccountLines(lines []models.JournalLineRequest, reference string) []models.JournalLineRequest {
+	striped := make([]models.JournalLineRequest, len(lines))
+	for index, line := range lines {
+		line.Account = models.PlatformAccountStripeForReference(line.Account, reference)
+		striped[index] = line
+	}
+	return striped
 }

@@ -60,7 +60,7 @@ func (ledger *Ledger) ReconcileProviderSettlements(ctx context.Context, transact
 		return ReconciliationReport{}, models.NewInvalidJournalEntryError("reconciliation needs a provider and a window that ends after it starts")
 	}
 	client := ledger.clientFor(transaction)
-	collected, err := ledger.collectProviderClearingDebitsByExternalReference(ctx, client, request.Provider)
+	collected, err := ledger.collectPlatformProviderBalanceDebitsByExternalReference(ctx, client, request.Provider, request.WindowStartsAt.Add(-reconciliationSettlementLag), request.WindowEndsAt.Add(reconciliationSettlementLag))
 	if err != nil {
 		return ReconciliationReport{}, err
 	}
@@ -92,12 +92,14 @@ func (ledger *Ledger) ReconcileProviderSettlements(ctx context.Context, transact
 	return report, ledger.persistReconciliationRun(ctx, client, request, &report, collected)
 }
 
-func (ledger *Ledger) collectProviderClearingDebitsByExternalReference(ctx context.Context, client *ent.Client, provider string) (map[string]collectedAmount, error) {
+const reconciliationSettlementLag = 72 * time.Hour
+
+func (ledger *Ledger) collectPlatformProviderBalanceDebitsByExternalReference(ctx context.Context, client *ent.Client, provider string, from, to time.Time) (map[string]collectedAmount, error) {
 	lines, err := client.JournalLine.Query().
 		Where(
 			journalline.DirectionEQ(journalline.DirectionDebit),
-			journalline.HasAccountWith(ledgeraccount.Code(models.ProviderClearingAccount(provider, "").Code)),
-			journalline.HasEntryWith(journalentry.ExternalReferenceNEQ(""), journalentry.ReversesEntryIDIsNil()),
+			journalline.HasAccountWith(ledgeraccount.CodeIn(models.PlatformAccountStripeCodes(models.PlatformProviderBalanceAccount(provider, "").Code)...)),
+			journalline.HasEntryWith(journalentry.ExternalReferenceNEQ(""), journalentry.ReversesEntryIDIsNil(), journalentry.PostedAtGTE(from), journalentry.PostedAtLT(to)),
 		).
 		WithEntry().All(ctx)
 	if err != nil {

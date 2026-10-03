@@ -26,18 +26,26 @@ func (ledger *Ledger) ReadAccountBalances(ctx context.Context, executor database
 		return balances, nil
 	}
 	codes := make([]string, 0, len(accounts))
+	requestedKeyByStoredCode := map[string]string{}
 	for _, account := range accounts {
 		balances[account.Key()] = 0
-		codes = append(codes, account.Code)
+		storedCodes := []string{account.Code}
+		if account.IsStripedPlatformAccount() && !models.IsStripeCode(account.Code) {
+			storedCodes = models.PlatformAccountStripeCodes(account.Code)
+		}
+		for _, code := range storedCodes {
+			codes = append(codes, code)
+			requestedKeyByStoredCode[code] = account.Code
+		}
 	}
 	rows, err := ledger.clientFor(executor).LedgerAccount.Query().Where(ledgeraccount.CodeIn(codes...)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	for _, row := range rows {
-		key := models.AccountKey{Code: row.Code, Currency: row.Currency}
+		key := models.AccountKey{Code: requestedKeyByStoredCode[row.Code], Currency: row.Currency}
 		if _, requested := balances[key]; requested {
-			balances[key] = row.BalanceMinor
+			balances[key] += row.BalanceMinor
 		}
 	}
 	return balances, nil
@@ -50,13 +58,17 @@ type AccountBalance struct {
 }
 
 func (ledger *Ledger) ListBalancesOfAccountsWithCode(ctx context.Context, executor databases.ExecutorQuerier, code string) ([]AccountBalance, error) {
-	rows, err := ledger.clientFor(executor).LedgerAccount.Query().Where(ledgeraccount.Code(code)).Order(ent.Asc(ledgeraccount.FieldCurrency)).All(ctx)
+	rows, err := ledger.clientFor(executor).LedgerAccount.Query().Where(ledgeraccount.CodeIn(models.PlatformAccountStripeCodes(models.PlatformAccountBaseCode(code))...)).Order(ent.Asc(ledgeraccount.FieldCurrency)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	balances := make([]AccountBalance, len(rows))
-	for index, row := range rows {
-		balances[index] = AccountBalance{Code: row.Code, Currency: row.Currency, BalanceMinor: row.BalanceMinor}
+	balances := []AccountBalance{}
+	for _, row := range rows {
+		if count := len(balances); count > 0 && balances[count-1].Currency == row.Currency {
+			balances[count-1].BalanceMinor += row.BalanceMinor
+			continue
+		}
+		balances = append(balances, AccountBalance{Code: models.PlatformAccountBaseCode(code), Currency: row.Currency, BalanceMinor: row.BalanceMinor})
 	}
 	return balances, nil
 }

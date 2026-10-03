@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/ledger/src/generated/ent"
 	"zudomart/modules/ledger/src/generated/ent/journalline"
+	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
 )
 
 type CurrencyTrialBalance struct {
@@ -31,31 +32,45 @@ func (report LedgerIntegrityReport) Healthy() bool {
 	return report.EveryCurrencyBalanced && report.EveryCachedBalanceMatchesLines
 }
 
+const integrityAccountPageSize = 500
+
 func (ledger *Ledger) VerifyTrialBalanceAndCachedBalances(ctx context.Context, executor databases.ExecutorQuerier) (LedgerIntegrityReport, error) {
 	client := ledger.clientFor(executor)
-	var currencyTotals []struct {
-		Currency  string `json:"currency"`
-		Direction string `json:"direction"`
-		Sum       int64  `json:"sum"`
-	}
-	if err := client.JournalLine.Query().GroupBy(journalline.FieldCurrency, journalline.FieldDirection).
-		Aggregate(ent.Sum(journalline.FieldAmountMinor)).Scan(ctx, &currencyTotals); err != nil {
-		return LedgerIntegrityReport{}, err
-	}
 	byCurrency := map[string]*CurrencyTrialBalance{}
-	for _, row := range currencyTotals {
-		totals, exists := byCurrency[row.Currency]
-		if !exists {
-			totals = &CurrencyTrialBalance{Currency: row.Currency}
-			byCurrency[row.Currency] = totals
+	report := LedgerIntegrityReport{EveryCurrencyBalanced: true, EveryCachedBalanceMatchesLines: true, AccountsWithDriftedBalances: []string{}}
+	var after *uuid.UUID
+	for {
+		query := client.LedgerAccount.Query().Order(ent.Asc(ledgeraccount.FieldID)).Limit(integrityAccountPageSize)
+		if after != nil {
+			query = query.Where(ledgeraccount.IDGT(*after))
 		}
-		if row.Direction == string(models.Debit) {
-			totals.DebitsMinor = row.Sum
-		} else {
-			totals.CreditsMinor = row.Sum
+		page, err := query.All(ctx)
+		if err != nil {
+			return LedgerIntegrityReport{}, err
+		}
+		if len(page) == 0 {
+			break
+		}
+		drifted, err := ledger.findDriftedAccountsInPage(ctx, client, page)
+		if err != nil {
+			return LedgerIntegrityReport{}, err
+		}
+		report.AccountsWithDriftedBalances = append(report.AccountsWithDriftedBalances, drifted...)
+		for _, account := range page {
+			totals, exists := byCurrency[account.Currency]
+			if !exists {
+				totals = &CurrencyTrialBalance{Currency: account.Currency}
+				byCurrency[account.Currency] = totals
+			}
+			totals.DebitsMinor += account.DebitsTotalMinor
+			totals.CreditsMinor += account.CreditsTotalMinor
+		}
+		last := page[len(page)-1].ID
+		after = &last
+		if len(page) < integrityAccountPageSize {
+			break
 		}
 	}
-	report := LedgerIntegrityReport{EveryCurrencyBalanced: true, EveryCachedBalanceMatchesLines: true, AccountsWithDriftedBalances: []string{}}
 	for _, totals := range byCurrency {
 		totals.Balanced = totals.DebitsMinor == totals.CreditsMinor
 		report.EveryCurrencyBalanced = report.EveryCurrencyBalanced && totals.Balanced
@@ -64,22 +79,22 @@ func (ledger *Ledger) VerifyTrialBalanceAndCachedBalances(ctx context.Context, e
 	sort.Slice(report.Currencies, func(left, right int) bool {
 		return report.Currencies[left].Currency < report.Currencies[right].Currency
 	})
-	drifted, err := ledger.findAccountsWhoseCachedBalanceDisagreesWithLines(ctx, client)
-	if err != nil {
-		return LedgerIntegrityReport{}, err
-	}
-	report.AccountsWithDriftedBalances = drifted
-	report.EveryCachedBalanceMatchesLines = len(drifted) == 0
+	sort.Strings(report.AccountsWithDriftedBalances)
+	report.EveryCachedBalanceMatchesLines = len(report.AccountsWithDriftedBalances) == 0
 	return report, nil
 }
 
-func (ledger *Ledger) findAccountsWhoseCachedBalanceDisagreesWithLines(ctx context.Context, client *ent.Client) ([]string, error) {
+func (ledger *Ledger) findDriftedAccountsInPage(ctx context.Context, client *ent.Client, page []*ent.LedgerAccount) ([]string, error) {
+	identifiers := make([]uuid.UUID, len(page))
+	for index, account := range page {
+		identifiers[index] = account.ID
+	}
 	var accountTotals []struct {
 		AccountId uuid.UUID `json:"account_id"`
 		Direction string    `json:"direction"`
 		Sum       int64     `json:"sum"`
 	}
-	if err := client.JournalLine.Query().GroupBy(journalline.FieldAccountID, journalline.FieldDirection).
+	if err := client.JournalLine.Query().Where(journalline.AccountIDIn(identifiers...)).GroupBy(journalline.FieldAccountID, journalline.FieldDirection).
 		Aggregate(ent.Sum(journalline.FieldAmountMinor)).Scan(ctx, &accountTotals); err != nil {
 		return nil, err
 	}
@@ -92,12 +107,8 @@ func (ledger *Ledger) findAccountsWhoseCachedBalanceDisagreesWithLines(ctx conte
 			credits[row.AccountId] = row.Sum
 		}
 	}
-	accounts, err := client.LedgerAccount.Query().All(ctx)
-	if err != nil {
-		return nil, err
-	}
 	drifted := []string{}
-	for _, account := range accounts {
+	for _, account := range page {
 		expected := credits[account.ID] - debits[account.ID]
 		if NormalSideIsDebit(models.AccountKind(account.Kind)) {
 			expected = -expected
@@ -106,7 +117,6 @@ func (ledger *Ledger) findAccountsWhoseCachedBalanceDisagreesWithLines(ctx conte
 			drifted = append(drifted, account.Code+" "+account.Currency)
 		}
 	}
-	sort.Strings(drifted)
 	return drifted, nil
 }
 
