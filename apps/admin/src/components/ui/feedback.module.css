@@ -76,7 +76,7 @@
 }
 
 .info {
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
   border-color: var(--blue-500);
 }
 

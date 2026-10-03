@@ -50,7 +50,7 @@
 
 .secondary:hover:not(:disabled) {
   background: var(--surface-hover);
-  border-color: var(--blue-200);
+  border-color: var(--blue-100);
 }
 
 .ghost {

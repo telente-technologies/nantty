@@ -68,7 +68,7 @@
 }
 
 .selectedRow td {
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
 }
 
 .selectedRow td:first-child {

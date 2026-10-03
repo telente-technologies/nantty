@@ -12,7 +12,7 @@
 
 .linked:hover {
   text-decoration: none;
-  border-color: var(--blue-300);
+  border-color: var(--blue-200);
 }
 
 .attention {

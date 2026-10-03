@@ -40,7 +40,7 @@
   min-width: 18px;
   padding: 0 5px;
   border-radius: var(--radius-pill);
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
   color: var(--blue-700);
   font-size: 11px;
   text-align: center;
