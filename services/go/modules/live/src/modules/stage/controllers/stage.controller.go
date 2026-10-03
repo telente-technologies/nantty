@@ -42,7 +42,7 @@ func (controller StageController) SearchViewersToInvite(writer http.ResponseWrit
 	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
 		viewers, err := (searchviewerstoinvite.Handler{Container: controller.Container}).Execute(request.Context(), searchviewerstoinvite.Query{Actor: actor, LiveId: liveId, Search: request.URL.Query().Get("q")})
 		if err == nil {
-			httpserver.WriteJsonResponse(writer, http.StatusOK, viewers)
+			httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(viewers, ""))
 		}
 		return err
 	})
