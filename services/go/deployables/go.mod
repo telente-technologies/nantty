@@ -17,7 +17,6 @@ require (
 	zudomart/modules/moderation v0.0.0
 	zudomart/modules/orders v0.0.0
 	zudomart/modules/payments v0.0.0
-	zudomart/modules/rewards v0.0.0
 	zudomart/modules/subscriptions v0.0.0
 	zudomart/modules/users v0.0.0
 	zudomart/modules/wallet v0.0.0
@@ -114,7 +113,6 @@ replace (
 	zudomart/modules/moderation => ../modules/moderation
 	zudomart/modules/orders => ../modules/orders
 	zudomart/modules/payments => ../modules/payments
-	zudomart/modules/rewards => ../modules/rewards
 	zudomart/modules/subscriptions => ../modules/subscriptions
 	zudomart/modules/users => ../modules/users
 	zudomart/modules/wallet => ../modules/wallet
