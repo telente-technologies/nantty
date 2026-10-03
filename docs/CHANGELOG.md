@@ -283,6 +283,18 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 | `src/types/models.type.ts` | `CreatorLiveStatus`; `UserSummary.live`. |
 | `src/mocks/activeLives.mock.ts`, `userDirectory.mock.ts`, `users.mock.ts` | Hosts mapped to active lives; summaries carry `live`; hidden for private non-followed profiles. |
 
+### Tap any image to preview it
+
+| File | Change |
+| --- | --- |
+| `src/components/ui/previewableImage.tsx` | **New.** `useImagePreview()` + `PreviewableImage` open the existing `MediaLightbox` (full screen, swipe, double-tap zoom) for any image URL list. |
+| `src/components/profile/profileSummary.tsx` | Profile photo and cover photo open the preview; when the user is live, tap still opens the live and **long-press** opens the photo. |
+| `src/components/store/storeProfileHeader.tsx`, `src/screens/brand/brandProfile.screen.tsx` | Store and brand logo + cover open the preview. |
+| `src/components/product/productGallery.tsx` | Tapping a product image opens the full gallery at that image. |
+| `src/components/chat/chatBubble.tsx`, `src/components/escrow/disputeMessageBubble.tsx` | Chat photos and dispute attachments open the preview (attachments swipe as a gallery). |
+
+---
+
 ## apps/webapp
 
 ### Shipping config & web privacy (§23)

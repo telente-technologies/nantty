@@ -166,16 +166,16 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 | Endpoint | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| POST /lives `{title,category,storeId?,productIds?,visibility?}` | M St | ◐ | Server body has no `category` (plans §20). Studio `app/(studio)/lives/page.tsx` calls `createLive(title)` without category (type error) |
-| GET /lives, /lives/suggested, /lives/:id | M St | ✅ | Studio expects `state: idle\|connecting\|live\|ended`, `ingestUrl`, `streamKey`, `hlsUrl`, `peakViewers`, `earnings{coins,giftCount,newSubscribers,topGifters,battles}`; server has `status` and none of the media fields. Mobile expects `playbackUrl`, `coverUrl`, `giftsEnabled`, `hostIsCreator`, `pinnedProductId`. **One `LiveSessionDto` must cover both** (§4.2.6) |
-| POST /lives/:id/start | St | ✗ | idle → connecting |
+| POST /lives `{title,category,storeId?,productIds?,visibility?}` | M St | ◐ | Server body has no `category` (plans §20). Studio `app/(studio)/lives/page.tsx` calls `createLive(title)` without category (type error) **✅ built (go-live):** creates and goes live (`startNow:false` keeps `idle`); category, visibility, storeId/productIds (seller only), live-ad settings + `acceptedLiveAdTermsVersion` stored per session. |
+| GET /lives, /lives/suggested, /lives/:id | M St | ✅ | Studio expects `state: idle\|connecting\|live\|ended`, `ingestUrl`, `streamKey`, `hlsUrl`, `peakViewers`, `earnings{coins,giftCount,newSubscribers,topGifters,battles}`; server has `status` and none of the media fields. Mobile expects `playbackUrl`, `coverUrl`, `giftsEnabled`, `hostIsCreator`, `pinnedProductId`. **One `LiveSessionDto` must cover both** (§4.2.6) **✅ built (go-live):** `GET /lives/:id` and `/lives/suggested` (bare array, as the mobile mock). `products` is `[]` until go-commerce summaries are wired; `coverUrl`/`playbackUrl` are null. |
+| POST /lives/:id/start | St | ✗ | idle → connecting **✅ built (go-live):** idle → live. |
 | POST /lives/:id/stream-key → `{ingestUrl,streamKey}` | M St | ✗ | LiveKit Ingress (RTMP/WHIP) |
-| POST /lives/:id/end, join, leave, reactions, share | M St | ✅ | |
+| POST /lives/:id/end, join, leave, reactions, share | M St | ✅ | **✅ built (go-live):** reactions is a 204 acknowledgement, share awards share points. |
 | GET/POST /lives/:id/comments | M St | ✅ | Studio expects bare `LiveComment[]` with `authorName`; webapp/mobile expect `Page` with `author{}`. Standardise on `Page<LiveComment>` with `author{id,name,username,avatarUrl}` and change Studio |
-| GET/POST /lives/:id/products, POST /lives/:id/pins `{productId}`, GET /live-products | M St | ◐ | Server has only POST /products `{productId(uuid), pin}`. Add GET, `/pins`, and a seller catalogue picker; products only for hosts with a store (plans §20) |
+| GET/POST /lives/:id/products, POST /lives/:id/pins `{productId}`, GET /live-products | M St | ◐ | Server has only POST /products `{productId(uuid), pin}`. Add GET, `/pins`, and a seller catalogue picker; products only for hosts with a store (plans §20) **✅ built (go-live):** `POST /pins`, `GET /products` (seller role only). Comments and overlays are not built. |
 | GET/PUT /lives/:id/overlays, GET /overlay-scenes/:sceneId (public) | St | ✗ | go.live (scene JSON in Postgres JSONB) |
-| GET /gifts, POST /lives/:id/gifts `{giftId,quantity}` | M W | ✅ | Gift ids differ: API `rose,heart,fire,crown,rocket`; webapp mock `gift_rose,gift_jollof,…`; mobile mock 6 gifts. Catalogue becomes server data (§4.1) |
-| Guests, battles | — | ✗ | New (§4.2) |
+| GET /gifts, POST /lives/:id/gifts `{giftId,quantity}` | M W | ✅ | Gift ids differ: API `rose,heart,fire,crown,rocket`; webapp mock `gift_rose,gift_jollof,…`; mobile mock 6 gifts. Catalogue becomes server data (§4.1) **✅ built (go-live):** `GET /gifts` (ETag), `POST /live/gifts` and the `/lives/:id/gifts` alias, admin CRUD under `/admin/gifts`; money via go-money `ChargeGiftAndCreditCreator`. |
+| Guests, battles | — | ✗ | New (§4.2) **✅ built (go-live):** guests, join requests, battles, `GET /stage`, media-token; shapes follow the mobile mock (`LiveStage` snapshots). |
 
 ### 2.7 Coins, creators, subscriptions — owner **go.creators / go.wallet / go.subscriptions**
 
@@ -409,6 +409,8 @@ Turn on the remaining py.intelligence calls (risk for gifts/coins/payouts, socia
 Mock-mode frontends for these are being built in parallel. The contracts below are what those mocks should converge on. Field names follow existing conventions (camelCase, `Money`, integer coins, cursor pages).
 
 ### 4.1 TikTok-style live gifts
+
+> **Built in go-live (3 Oct 2026).** `POST /live/gifts` validates (live active, gift active, quantity 1-100, receiver on stage, 10 gifts/s per sender), then calls go-money `ChargeGiftAndCreditCreator` with the client `Idempotency-Key`; go-live stores **no money row**. The `GiftTransaction` lives in go-money. go-live keeps the catalogue (`gifts`, seeded with the mobile 26), goals (`gift_goals`), combos (`gift_combos`, 3 s window, Postgres not Redis), and read models fed from the charge response (`gift_contributions`, `goal_contributions`, points, session counters) behind a `processed_gifts` inbox so replays never double-apply. Events `gift.sent`, `goal.progressed|completed`, `leaderboard.updated` go through the outbox; `gift.combo.*` is not emitted (the combo count rides on `gift.sent`).
 
 **Stack and why**
 
@@ -837,6 +839,8 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 **4.4.5 Launch scope:** sponsored feed, pre-roll, post-roll, Shorts feed ads, attribution, frequency caps, fraud filtering and basic revenue share. Mid-roll and live ads ship later as switches.
 
 ### 4.5 ZudoPoints and social graph
+
+> **Live part built in go-live (3 Oct 2026).** `points_entries` / `points_rules` live in the `live` schema (not a separate `points` schema). Like points cap at 10/min per user via the `like` rule (`perMinuteCap`), share/follow once per live, watch once a minute; gifts award `support` points to the sender and `stream` points to the receiver (1 per coin, rules `gift`/`giftReceived`). Per-stream boards are stored at `live.ended`; `GET /rankings` aggregates on demand (no hourly rebuild yet); the country scope uses `X-Client-Region` captured when the live starts. Profiles, social graph and follow awards from the users service are not part of this batch.
 
 **4.5.1 ZudoPoints** (Go `points` schema; Redis for rate limits and live boards)
 
