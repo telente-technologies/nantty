@@ -14,6 +14,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// BillingSubscription is the client for interacting with the BillingSubscription builders.
+	BillingSubscription *BillingSubscriptionClient
+	// ConnectedAccount is the client for interacting with the ConnectedAccount builders.
+	ConnectedAccount *ConnectedAccountClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderPayable is the client for interacting with the OrderPayable builders.
@@ -26,6 +30,10 @@ type Tx struct {
 	PaymentRefund *PaymentRefundClient
 	// PayoutTransfer is the client for interacting with the PayoutTransfer builders.
 	PayoutTransfer *PayoutTransferClient
+	// ProviderDispute is the client for interacting with the ProviderDispute builders.
+	ProviderDispute *ProviderDisputeClient
+	// ProviderPayoutDestination is the client for interacting with the ProviderPayoutDestination builders.
+	ProviderPayoutDestination *ProviderPayoutDestinationClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
@@ -161,12 +169,16 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.BillingSubscription = NewBillingSubscriptionClient(tx.config)
+	tx.ConnectedAccount = NewConnectedAccountClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OrderPayable = NewOrderPayableClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PaymentIntent = NewPaymentIntentClient(tx.config)
 	tx.PaymentRefund = NewPaymentRefundClient(tx.config)
 	tx.PayoutTransfer = NewPayoutTransferClient(tx.config)
+	tx.ProviderDispute = NewProviderDisputeClient(tx.config)
+	tx.ProviderPayoutDestination = NewProviderPayoutDestinationClient(tx.config)
 	tx.StorePurchase = NewStorePurchaseClient(tx.config)
 	tx.WebhookEvent = NewWebhookEventClient(tx.config)
 }
@@ -178,7 +190,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: IdempotentRequest.QueryXXX(), the query will be executed
+// applies a query, for example: BillingSubscription.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
