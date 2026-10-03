@@ -11,7 +11,7 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useWalletBalanceQuery } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { boostsService } from "@/services/boosts.service";
@@ -30,6 +30,8 @@ const GOALS: readonly { readonly id: BoostGoal; readonly label: string; readonly
 ];
 
 export function PromotePostScreen({ navigation, route }: MainScreenProps<"PromotePost">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { postId } = route.params;
   const signedInUser = useAuthStore((state) => state.user);
   const countryCode = useLocaleStore((state) => state.countryCode ?? state.deviceRegionCode ?? "NG");
@@ -128,10 +130,10 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
   sectionTitle: { marginTop: 12 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  estimate: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 4, marginTop: 12 },
+  estimate: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 4, marginTop: 12 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
-});
+}));

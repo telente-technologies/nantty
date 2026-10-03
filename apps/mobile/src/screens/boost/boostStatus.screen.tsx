@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { boostsService } from "@/services/boosts.service";
 import type { Boost } from "@/types/boost.type";
@@ -24,6 +24,8 @@ const STATUS_APPEARANCE: Record<Boost["status"], { label: string; tone: StatusTo
 };
 
 export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostStatus">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const boost = useQuery({ queryKey: ["boosts", route.params.boostId], queryFn: () => boostsService.fetchBoostById(route.params.boostId), refetchInterval: 30_000 });
   if (!boost.data) {
     return (
@@ -68,9 +70,9 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  metric: { width: "48.5%", backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 4 },
-});
+  metric: { width: "48.5%", backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 4 },
+}));
