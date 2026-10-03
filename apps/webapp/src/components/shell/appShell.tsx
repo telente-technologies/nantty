@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { PolicyUpdateHost } from "@/components/legal/policyUpdateHost";
 import { useSession } from "@/components/providers/sessionProvider";
 
 import styles from "./appShell.module.css";
@@ -122,6 +123,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
 
       <div className={styles.mainColumn}>
         <TopBar badgeCounts={counts} />
+        <PolicyUpdateHost />
         <div className={bodyClasses}>
           <main id="main-content" className={styles.content} tabIndex={-1}>
             {children}
