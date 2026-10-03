@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { findFirstPageAllowedForRole } from "@/config/rolePermissions.config";
+import { findFirstPageAllowedForAccess } from "@/config/rolePermissions.config";
 import { readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 import { renewSellerAccessCache, writeRenewedSessionCookies } from "@/server/sellerAuthentication.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readSelectedStoreIdFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
   const destination = decideSellerAccessDestination(renewed.cachedAccess.access);
   const targetPath = destination === "app"
-    ? requestedPath === "/" || requestedPath.startsWith("/access") ? findFirstPageAllowedForRole(renewed.cachedAccess.access.role) : requestedPath
+    ? requestedPath === "/" || requestedPath.startsWith("/access") ? findFirstPageAllowedForAccess(renewed.cachedAccess.access) : requestedPath
     : requestedPath.startsWith("/access") ? requestedPath : gatePagePathByDestination[destination];
   const response = NextResponse.redirect(new URL(targetPath, request.nextUrl.origin), 303);
   writeRenewedSessionCookies(response, renewed);
