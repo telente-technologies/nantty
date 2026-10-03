@@ -1,12 +1,16 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { MediaPager } from "@/components/feed/mediaPager";
+import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
+import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
+import { MentionText } from "@/components/mentions/mentionText";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode, ID, PostAudience } from "@/types";
+import type { MentionEntity } from "@/types/mention.type";
 
 import { AiGeneratedToggleRow } from "./aiGeneratedToggleRow";
 import { CreateModePill } from "./createModePill";
@@ -17,6 +21,7 @@ import { PostToolbar } from "./postToolbar";
 
 export interface PostComposerDraft {
   readonly text: string;
+  readonly mentions: readonly MentionEntity[];
   readonly audience: PostAudience;
   readonly kind: "clip" | "video" | "photo";
   readonly isAiGenerated: boolean;
@@ -37,6 +42,7 @@ export interface PostComposerPanelProps {
   readonly validationHint: string | null;
   readonly onPublish: () => void;
   readonly soundPicker?: ReactNode;
+  readonly videoReplyStage?: ReactNode;
 }
 
 export function PostComposerPanel({
@@ -54,10 +60,20 @@ export function PostComposerPanel({
   validationHint,
   onPublish,
   soundPicker,
+  videoReplyStage,
 }: PostComposerPanelProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  const mentionComposer = useMentionComposer({
+    surface: "post",
+    text: draft.text,
+    mentions: draft.mentions,
+    inputRef,
+    signInReason: "post",
+    onChange: (text, mentions) => onChangeDraft({ ...draft, text, mentions }),
+  });
   const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
   const toggleAudience = () => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" });
 
@@ -65,11 +81,10 @@ export function PostComposerPanel({
     return (
       <ScrollView contentContainerStyle={styles.preview}>
         {draft.text ? (
-          <Text size={14} lineHeight={16.8}>
-            {draft.text}
-          </Text>
+          <MentionText text={draft.text} mentions={draft.mentions} size={14} lineHeight={16.8} />
         ) : null}
-        {draftMediaItems.length > 0 ? (
+        {videoReplyStage ?? null}
+        {!videoReplyStage && draftMediaItems.length > 0 ? (
           <View style={styles.previewMedia}>
             <MediaPager media={convertDraftItemsToPreviewMedia(draftMediaItems)} height={335} />
           </View>
@@ -88,9 +103,12 @@ export function PostComposerPanel({
     <View style={styles.flex}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.compose} keyboardShouldPersistTaps="handled">
         <TextInput
-          value={draft.text}
-          onChangeText={(text) => onChangeDraft({ ...draft, text })}
-          onFocus={() => setFocused(true)}
+          ref={inputRef}
+          {...mentionComposer.inputProps}
+          onFocus={() => {
+            mentionComposer.inputProps.onFocus();
+            setFocused(true);
+          }}
           onBlur={() => setFocused(false)}
           placeholder="What’s happening?"
           placeholderTextColor={colors.textMuted}
@@ -101,6 +119,8 @@ export function PostComposerPanel({
           accessibilityLabel="What’s happening?"
           style={styles.input}
         />
+        <MentionCountLabel mentionCount={mentionComposer.mentionCount} />
+        {videoReplyStage ?? null}
         <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={onRemoveDraftMedia} />
         {validationHint ? (
           <Text size={12} lineHeight={16.8} color={colors.error} accessibilityLiveRegion="polite">
@@ -110,7 +130,8 @@ export function PostComposerPanel({
         {soundPicker}
         <AiGeneratedToggleRow value={draft.isAiGenerated} onChange={(isAiGenerated) => onChangeDraft({ ...draft, isAiGenerated })} />
       </ScrollView>
-      {focused ? null : (
+      {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
+      {focused || videoReplyStage ? null : (
         <View style={styles.pill}>
           <CreateModePill mode={mode} onChangeMode={onChangeMode} />
         </View>
