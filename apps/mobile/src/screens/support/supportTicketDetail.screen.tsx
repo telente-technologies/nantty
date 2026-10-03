@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -14,6 +14,7 @@ import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { supportService } from "@/services/support.service";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTicketDetail">) {
   const { ticketId } = route.params;
@@ -31,7 +32,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
     return (
       <Screen>
         <Header title="Support" />
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -71,7 +72,6 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 14 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
   bubbleWrap: { maxWidth: "85%", gap: 4 },

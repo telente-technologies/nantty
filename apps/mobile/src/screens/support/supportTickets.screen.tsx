@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -11,6 +11,8 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { supportService } from "@/services/support.service";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export const supportTicketsQueryKey = ["support", "tickets"] as const;
 
@@ -36,7 +38,7 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
             <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Updated {formatFriendlyDate(item.updatedAt)}</Text>
           </Pressable>
         )}
-        ListEmptyComponent={tickets.isLoading ? <ActivityIndicator color={colors.primary} /> : <Text align="center" color={colors.textSubtle}>No support requests yet.</Text>}
+        ListEmptyComponent={tickets.isLoading ? <ListSkeleton rows={3} /> : tickets.isError ? <ErrorState message="Couldn't load your requests." onRetry={() => tickets.refetch()} /> : <Text align="center" color={colors.textSubtle}>No support requests yet.</Text>}
       />
     </Screen>
   );

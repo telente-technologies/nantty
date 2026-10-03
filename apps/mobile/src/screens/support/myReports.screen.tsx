@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -9,6 +9,8 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { supportService } from "@/services/support.service";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function MyReportsScreen() {
   const reports = useQuery({ queryKey: ["reports", "mine"], queryFn: supportService.listMyContentReports });
@@ -31,7 +33,7 @@ export function MyReportsScreen() {
             {item.outcomeNote ? <Text size={13} lineHeight={17.5}>{item.outcomeNote}</Text> : null}
           </View>
         )}
-        ListEmptyComponent={reports.isLoading ? <ActivityIndicator color={colors.primary} /> : <Text align="center" color={colors.textSubtle}>You haven't reported anything.</Text>}
+        ListEmptyComponent={reports.isLoading ? <ListSkeleton rows={3} /> : reports.isError ? <ErrorState message="Couldn't load your reports." onRetry={() => reports.refetch()} /> : <Text align="center" color={colors.textSubtle}>You haven't reported anything.</Text>}
       />
     </Screen>
   );
