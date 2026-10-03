@@ -54,6 +54,7 @@ type paystackEnvelope[Data any] struct {
 func (provider *PaystackProvider) InitializeCharge(ctx context.Context, request interfaces.ChargeRequest) (interfaces.ChargeSession, error) {
 	var response paystackEnvelope[struct {
 		AuthorizationUrl string `json:"authorization_url"`
+		AccessCode       string `json:"access_code"`
 	}]
 	body := map[string]any{"email": request.Email, "amount": request.AmountMinor, "currency": request.Currency, "reference": request.Reference, "callback_url": request.CallbackUrl, "metadata": request.Metadata}
 	if err := provider.http.sendJson(ctx, http.MethodPost, "/transaction/initialize", body, &response); err != nil {
@@ -62,7 +63,7 @@ func (provider *PaystackProvider) InitializeCharge(ctx context.Context, request 
 	if response.Data.AuthorizationUrl == "" {
 		return interfaces.ChargeSession{}, fmt.Errorf("%w: paystack returned no authorization url", interfaces.ErrProviderUnavailable)
 	}
-	return interfaces.ChargeSession{AuthorizationUrl: response.Data.AuthorizationUrl}, nil
+	return interfaces.ChargeSession{AuthorizationUrl: response.Data.AuthorizationUrl, AccessCode: response.Data.AccessCode}, nil
 }
 
 type paystackTransaction struct {
