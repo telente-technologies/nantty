@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { paymentsService } from "@/services/payments.service";
 
@@ -17,6 +17,7 @@ const DELAY_BETWEEN_VERIFY_ATTEMPTS_MS = 1500;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">) {
+  const { colors } = useTheme();
   const { orderId, authorizationUrl } = route.params;
   const [status, setStatus] = useState<PaymentStatus>("opening");
   const openedOnce = useRef(false);

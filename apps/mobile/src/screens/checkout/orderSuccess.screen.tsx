@@ -4,10 +4,12 @@ import { Check16Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"OrderSuccess">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Screen>
       <View style={styles.body}>
@@ -30,8 +32,8 @@ export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"Order
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { flex: 1, paddingHorizontal: 40, alignItems: "center", justifyContent: "center", gap: 12 },
   badge: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.success, alignItems: "center", justifyContent: "center", marginBottom: 12 },
   footer: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
-});
+}));

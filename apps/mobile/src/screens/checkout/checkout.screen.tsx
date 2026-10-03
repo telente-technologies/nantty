@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { useLoyaltySummaryQuery } from "@/components/wallet/walletQueries.hook";
 import { cartQueryKey, useMyCart } from "@/hooks/useCart.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -30,6 +30,7 @@ const PROVIDERS: { id: PaymentProvider; name: string; note: string }[] = [
 ];
 
 export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const addresses = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses });
   const { chosenAddressId, chooseDeliveryAddress } = useDeliveryAddressStore();
