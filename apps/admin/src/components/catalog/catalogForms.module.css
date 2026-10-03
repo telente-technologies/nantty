@@ -70,7 +70,7 @@
 }
 
 .imageOption input:checked + img {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
 }
 
 .imageOption input:focus-visible + img {
