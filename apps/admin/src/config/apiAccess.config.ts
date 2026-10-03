@@ -11,6 +11,7 @@ const anyOf = (...permissions: AdminPermission[]): ApiAccessRequirement => ({ ki
 
 const apiAreaRules: readonly ApiAreaRule[] = [
   { prefix: "/admin/account", requirement: { kind: "anyAdmin" } },
+  { prefix: "/admin/consents", requirement: { kind: "anyAdmin" } },
   { prefix: "/admin/admins", requirement: { kind: "superadmin" } },
   { prefix: "/admin/metrics", requirement: anyOf("metrics:read") },
   { prefix: "/admin/users", requirement: anyOf("users:read", "support:tickets", "verification:review", "moderation:reports") },
