@@ -6,7 +6,7 @@ import type { CountryOption } from "@/types/account.type";
 
 import { getSignedInMockUser, me } from "./fixtures.mock";
 import { buildAddressFromInput } from "./geo.mock";
-import { createMockRoute, type MockRoute } from "./registry.mock";
+import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 
 let settings: AccountSettings = {
   email: me.email ?? "testzudomart@yahoo.com",
@@ -60,7 +60,7 @@ const SUPPORTED_COUNTRIES: CountryOption[] = [
 ];
 
 export const settingsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/locale/countries", () => SUPPORTED_COUNTRIES),
+  createMockRoute("GET", "/api/v1/locale/countries", () => mockPage(SUPPORTED_COUNTRIES)),
   createMockRoute("PATCH", "/api/v1/users/me/preferences", ({ body }) => {
     const { countryCode, theme } = body as { countryCode?: string; theme?: AccountSettings["theme"] };
     if (theme) settings = { ...settings, theme };
@@ -75,7 +75,7 @@ export const settingsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/users/me/deactivate", () => undefined),
   createMockRoute("POST", "/api/v1/auth/password/change", () => undefined),
-  createMockRoute("GET", "/api/v1/users/me/addresses", () => loadSignedInAddresses()),
+  createMockRoute("GET", "/api/v1/users/me/addresses", () => mockPage(loadSignedInAddresses())),
   createMockRoute("POST", "/api/v1/users/me/addresses", ({ body }) => {
     loadSignedInAddresses();
     const address = buildAddressFromInput(body as ShippingAddressInput, `a_${Date.now()}`);

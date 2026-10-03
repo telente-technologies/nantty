@@ -2,14 +2,14 @@ import { ApiError } from "@/errors/api.error";
 import type { Address, GeoArea, GeoCountry, GeoSelection, ShippingAddressInput } from "@/types";
 
 import { GHANA_REGIONS, KENYA_COUNTIES, NIGERIA_CITIES_BY_LGA, NIGERIA_STATES_WITH_LGAS } from "./geoNigeria.mock";
-import { createMockRoute, type MockRoute } from "./registry.mock";
+import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 
 const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 export const geoCountries: readonly GeoCountry[] = [
-  { id: "ng", name: "Nigeria", currency: "NGN", levels: ["state", "lga", "city"], stateLabel: "State", lgaLabel: "LGA" },
-  { id: "gh", name: "Ghana", currency: "GHS", levels: ["state"], stateLabel: "Region", lgaLabel: "District" },
-  { id: "ke", name: "Kenya", currency: "KES", levels: ["state"], stateLabel: "County", lgaLabel: "Sub-county" },
+  { id: "ng", code: "NG", name: "Nigeria", currency: "NGN", levels: ["state", "lga", "city"], stateLabel: "State", lgaLabel: "LGA" },
+  { id: "gh", code: "GH", name: "Ghana", currency: "GHS", levels: ["state"], stateLabel: "Region", lgaLabel: "District" },
+  { id: "ke", code: "KE", name: "Kenya", currency: "KES", levels: ["state"], stateLabel: "County", lgaLabel: "Sub-county" },
 ];
 
 const areasById = new Map<string, GeoArea>();
@@ -64,6 +64,7 @@ export const buildAddressFromInput = (input: ShippingAddressInput, id: string): 
     details: input.details.trim(),
     isDefault: input.isDefault,
     countryId: country.id,
+    countryCode: country.code,
     country: country.name,
     stateId: selection.stateId,
     state: findGeoArea(selection.stateId)?.name ?? "",
@@ -75,8 +76,8 @@ export const buildAddressFromInput = (input: ShippingAddressInput, id: string): 
 };
 
 export const geoMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/geo/countries", () => geoCountries),
-  createMockRoute("GET", "/api/v1/geo/countries/:parentId/regions", ({ params }) => childrenByParentId.get(params.parentId!) ?? []),
-  createMockRoute("GET", "/api/v1/geo/regions/:parentId/admin-areas", ({ params }) => childrenByParentId.get(params.parentId!) ?? []),
-  createMockRoute("GET", "/api/v1/geo/admin-areas/:parentId/cities", ({ params }) => childrenByParentId.get(params.parentId!) ?? []),
+  createMockRoute("GET", "/api/v1/geo/countries", () => mockPage(geoCountries)),
+  createMockRoute("GET", "/api/v1/geo/countries/:parentId/regions", ({ params }) => mockPage(childrenByParentId.get(params.parentId!) ?? [])),
+  createMockRoute("GET", "/api/v1/geo/regions/:parentId/admin-areas", ({ params }) => mockPage(childrenByParentId.get(params.parentId!) ?? [])),
+  createMockRoute("GET", "/api/v1/geo/admin-areas/:parentId/cities", ({ params }) => mockPage(childrenByParentId.get(params.parentId!) ?? [])),
 ];

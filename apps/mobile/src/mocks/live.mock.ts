@@ -7,7 +7,7 @@ import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
 import { productImageUrlsForProduct } from "./mockImages.mock";
 import { productSummaryByKey } from "./productCatalog.mock";
 import { findDirectoryUserById, summariseUser, userSummaryById, type DirectoryUserId } from "./userDirectory.mock";
-import { createMockRoute, type MockRoute } from "./registry.mock";
+import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 
 const viewer = (i: number) => buildMockUserSummary(70 + i);
 
@@ -78,12 +78,14 @@ const buildStreamCredentials = (liveId: string) => {
 
 export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/suggested", () =>
-    SUGGESTED_LIVE_SEEDS.map(([userId, title, productKey], index) => ({
-      id: `live_s${index}`,
-      host: summariseUser(findDirectoryUserById(userId)!),
-      title,
-      coverUrl: productImageUrlsForProduct(productKey)[0] ?? null,
-    })),
+    mockPage(
+      SUGGESTED_LIVE_SEEDS.map(([userId, title, productKey], index) => ({
+        id: `live_s${index}`,
+        host: summariseUser(findDirectoryUserById(userId)!),
+        title,
+        coverUrl: productImageUrlsForProduct(productKey)[0] ?? null,
+      })),
+    ),
   ),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {

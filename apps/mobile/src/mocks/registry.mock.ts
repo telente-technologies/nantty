@@ -14,6 +14,8 @@ export interface MockRoute {
   readonly handler: (ctx: MockContext) => unknown;
 }
 
+export const mockPage = <T>(data: readonly T[]): { data: readonly T[]; nextCursor: string | null } => ({ data, nextCursor: null });
+
 export const createMockRoute = (method: MockMethod, path: string, handler: MockRoute["handler"]): MockRoute => ({ method, path, handler });
 
 export const matchMockPathAndExtractParams = (pattern: string, path: string): Record<string, string> | null => {

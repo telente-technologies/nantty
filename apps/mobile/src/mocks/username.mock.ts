@@ -46,6 +46,12 @@ export function checkAvailability(rawUsername: string): UsernameAvailability {
   return { available: true };
 }
 
+export const buildUsernameUnavailableError = (availability: UsernameAvailability) => {
+  const message = availability.message ?? "That username isn't available";
+  if (availability.reason === "taken") return new ApiError(409, message, "USERNAME_TAKEN");
+  return new ApiError(422, message, availability.reason === "invalid" ? "USERNAME_INVALID" : "USERNAME_UNAVAILABLE");
+};
+
 function buildPolicy(): UsernamePolicy {
   const changes = usernameChangesByUserId.get(getSignedInMockUser().id) ?? [];
   const changesInLastYear = changes.filter((time) => Date.now() - time < 365 * DAY_IN_MS);
@@ -53,9 +59,14 @@ function buildPolicy(): UsernamePolicy {
   const nextAllowed = lastChange + DAYS_BETWEEN_USERNAME_CHANGES * DAY_IN_MS;
   const remaining = Math.max(0, CHANGES_ALLOWED_PER_YEAR - changesInLastYear.length);
   return {
+    username: signedInProfile().username,
     canChangeNow: remaining > 0 && Date.now() >= nextAllowed,
     nextChangeAvailableAt: Date.now() >= nextAllowed ? null : new Date(nextAllowed).toISOString(),
     changesRemainingThisYear: remaining,
+    cooldownDays: DAYS_BETWEEN_USERNAME_CHANGES,
+    maxChangesPerYear: CHANGES_ALLOWED_PER_YEAR,
+    quarantineDays: 14,
+    history: [],
     rules: [
       `You can change your username once every ${DAYS_BETWEEN_USERNAME_CHANGES} days, up to ${CHANGES_ALLOWED_PER_YEAR} times a year.`,
       "Your old username is held for 14 days so nobody can pretend to be you.",
@@ -76,10 +87,10 @@ export const usernameMocks: MockRoute[] = [
     const { username } = body as { username: string };
     const policy = buildPolicy();
     if (!policy.canChangeNow) {
-      throw new ApiError(429, `You can change your username again on ${new Date(policy.nextChangeAvailableAt ?? Date.now()).toDateString()}.`, "USERNAME_CHANGE_RATE_LIMITED");
+      throw new ApiError(429, `You can change your username again on ${new Date(policy.nextChangeAvailableAt ?? Date.now()).toDateString()}.`, "USERNAME_CHANGE_TOO_SOON");
     }
     const availability = checkAvailability(username);
-    if (!availability.available) throw new ApiError(409, availability.message ?? "That username isn't available", availability.reason?.toUpperCase());
+    if (!availability.available) throw buildUsernameUnavailableError(availability);
     const userId = getSignedInMockUser().id;
     usernameChangesByUserId.set(userId, [...(usernameChangesByUserId.get(userId) ?? []), Date.now()]);
     applyProfileEditForSignedInUser({ username: username.trim().toLowerCase() });

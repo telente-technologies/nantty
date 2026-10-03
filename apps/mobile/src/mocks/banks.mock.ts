@@ -46,6 +46,7 @@ export const banksMocks: MockRoute[] = [
     if (!SUPPORTED_BANKS.some((candidate) => candidate.code === bankCode)) throw new ApiError(422, "Choose your bank");
     if (!/^\d{10}$/.test(accountNumber)) throw new ApiError(422, "Account numbers have 10 digits");
     if (accountNumber.startsWith("000")) throw new ApiError(404, "We couldn't find that account. Check the number and bank.", "ACCOUNT_NOT_FOUND");
+    if (accountNumber.startsWith("111")) return { accountName: "CHUKWUEMEKA OBI" };
     return { accountName: getSignedInMockUser().name.toUpperCase() };
   }),
 ];

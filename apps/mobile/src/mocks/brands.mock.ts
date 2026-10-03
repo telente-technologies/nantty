@@ -7,7 +7,7 @@ import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { resolveMockCreatorStatusForSignedInUser } from "./creators.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { buildCatalogProductSummary, catalogProductSeeds } from "./productCatalog.mock";
-import { createMockRoute, type MockRoute } from "./registry.mock";
+import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 import { findDirectoryStoreById, summariseStore } from "./storeDirectory.mock";
 import { checkAvailability } from "./username.mock";
 
@@ -64,7 +64,7 @@ export const brandsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/brands/:brandId/follow", ({ params }) => void followedBrandIds.add(findBrandOrThrow(params.brandId!).id)),
   createMockRoute("DELETE", "/api/v1/brands/:brandId/follow", ({ params }) => void followedBrandIds.delete(params.brandId!)),
-  createMockRoute("GET", "/api/v1/users/me/profiles", () => listProfilesOfSignedInUser()),
+  createMockRoute("GET", "/api/v1/users/me/profiles", () => mockPage(listProfilesOfSignedInUser())),
   createMockRoute("GET", "/api/v1/users/me/acting-profile", () => {
     const profiles = listProfilesOfSignedInUser();
     return profiles.find((profile) => profile.id === actingProfileIdByUserId.get(getSignedInMockUser().id)) ?? profiles[0];

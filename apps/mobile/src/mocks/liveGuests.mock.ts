@@ -1,7 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import { MAXIMUM_STREAMERS_ON_STAGE, type MuteStreamerInput } from "@/types/liveStage.type";
 
-import { createMockRoute, type MockRoute } from "./registry.mock";
+import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 import { hashTextToSeed, INVITE_RESPONSE_DELAY_MS, listMockAudienceUsers, VIEWER_REQUEST_AUTO_APPROVE_MS, type MockStage } from "./liveStageSeeds.mock";
 import {
   addGuestToMockStageOrThrow,
@@ -33,8 +33,10 @@ export const liveGuestsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/:liveId/viewers", ({ params, query }) => {
     const stage = findOrCreateMockStageAdvancedToNow(params.liveId!);
     const search = (query.get("q") ?? "").trim().toLowerCase();
-    return listMockAudienceUsers().filter(
-      (user) => !isStreamerOnMockStage(stage, user.id) && (!search || user.name.toLowerCase().includes(search) || user.username.toLowerCase().includes(search)),
+    return mockPage(
+      listMockAudienceUsers().filter(
+        (user) => !isStreamerOnMockStage(stage, user.id) && (!search || user.name.toLowerCase().includes(search) || user.username.toLowerCase().includes(search)),
+      ),
     );
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/guests/invitations", ({ params, body }) => {
