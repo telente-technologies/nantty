@@ -22,6 +22,28 @@
   --ink-on-rail: var(--blue-50);
   --divider: var(--color-border-strong);
   --divider-soft: var(--color-border);
+  --row-hover: var(--color-surface-hover);
+  --brand-ink: var(--blue-700);
+  --brand-border: var(--blue-300);
+  --brand-border-soft: var(--blue-50);
+  --focus-halo: 0 0 0 3px color-mix(in srgb, var(--color-brand) 18%, transparent);
+  --notice-bg: var(--yellow-50);
+  --notice-border: var(--yellow-100);
+  --notice-ink: var(--yellow-900);
+  --success-border: color-mix(in srgb, var(--color-success) 32%, var(--color-surface));
+  --caution-border: color-mix(in srgb, var(--color-warn) 40%, var(--color-surface));
+  --error-border: color-mix(in srgb, var(--color-danger) 32%, var(--color-surface));
+  --on-media: #ffffff;
+  --on-media-muted: rgb(255 255 255 / 0.85);
+  --media-scrim: rgb(0 0 0 / 0.55);
+  --media-backdrop: #000000;
+  --media-chip: rgb(255 255 255 / 0.92);
+  --landing-lift: 0 30px 60px -28px rgb(11 23 82 / 0.45);
+  --landing-lift-soft: 0 12px 32px -18px rgb(11 23 82 / 0.3);
+  --landing-stage-glow: var(--blue-400);
+  --landing-stage: var(--blue-500);
+  --landing-badge: var(--blue-900);
+  --pacing-track: var(--blue-900);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
 
@@ -31,6 +53,44 @@
 
   --rail-width: 232px;
   --topbar-height: 56px;
+}
+
+:root[data-theme="dark"] {
+  --brand-ink: var(--blue-200);
+  --brand-border: #4a5bb5;
+  --brand-border-soft: #2b3570;
+  --notice-bg: #262410;
+  --notice-border: #4a4513;
+  --notice-ink: #f3e88a;
+  --surface-rail: #0e1438;
+  --surface-rail-raised: #172058;
+  --media-chip: rgb(20 23 38 / 0.9);
+  --landing-lift: 0 30px 60px -24px rgb(0 0 0 / 0.75);
+  --landing-lift-soft: 0 12px 32px -18px rgb(0 0 0 / 0.6);
+  --landing-stage-glow: #3a55e6;
+  --landing-stage: #1a2c99;
+  --landing-badge: #232b6e;
+  --pacing-track: #2c3566;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-ink: var(--blue-200);
+    --brand-border: #4a5bb5;
+    --brand-border-soft: #2b3570;
+    --notice-bg: #262410;
+    --notice-border: #4a4513;
+    --notice-ink: #f3e88a;
+    --surface-rail: #0e1438;
+    --surface-rail-raised: #172058;
+    --media-chip: rgb(20 23 38 / 0.9);
+    --landing-lift: 0 30px 60px -24px rgb(0 0 0 / 0.75);
+    --landing-lift-soft: 0 12px 32px -18px rgb(0 0 0 / 0.6);
+    --landing-stage-glow: #3a55e6;
+    --landing-stage: #1a2c99;
+    --landing-badge: #232b6e;
+    --pacing-track: #2c3566;
+  }
 }
 
 *,
@@ -93,7 +153,7 @@ h3 {
 }
 
 a {
-  color: var(--blue-500);
+  color: var(--color-brand);
   text-decoration: none;
 }
 
