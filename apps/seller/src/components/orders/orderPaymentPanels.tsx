@@ -22,6 +22,8 @@ export function OrderPaymentPanels({ order }: { readonly order: OnlineOrder }) {
             { label: "Delivery", value: formatMoney(order.shippingFee) },
             { label: "Customer paid", value: formatMoney(order.total) },
             ...(order.refundedAmount.amountMinor > 0 ? [{ label: "Refunded", value: `− ${formatMoney(order.refundedAmount)}` }] : []),
+            { label: "Payment processing fee", value: `− ${formatMoney(order.paymentProcessingFee)}` },
+            ...(order.paymentMode === "escrow" ? [{ label: `Escrow fee (${order.escrowFeeBasisPoints / 100}%)`, value: `− ${formatMoney(order.escrowFee)}` }] : []),
             { label: "Your payout", value: formatMoney(order.sellerPayout) },
             { label: "Paid with", value: paymentProviderLabels[order.paymentProvider] },
             { label: "Paid on", value: formatDateTimeForDisplay(order.paidAt) },

@@ -26,6 +26,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./orders.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 const refundableStatuses = new Set(["processing", "ready", "shipped", "delivered", "completed", "returned"]);
 
@@ -69,7 +70,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
   return (
     <PageStack>
       <PageHeader
-        eyebrow={<Link href="/orders">← Orders</Link>}
+        eyebrow={<Link href="/orders"><IconLabel name="arrowLeft24" size={16}>Orders</IconLabel></Link>}
         title={`Order ${order.orderNumber}`}
         description={`Placed in the Zudomart app ${formatDateTimeForDisplay(order.createdAt)} by ${order.buyer.name} (@${order.buyer.username})`}
         actions={

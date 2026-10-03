@@ -12,6 +12,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./packingSlipView.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function PackingSlipView({ orderId }: { readonly orderId: string }) {
   const { settings } = useStoreContext();
@@ -26,7 +27,7 @@ export function PackingSlipView({ orderId }: { readonly orderId: string }) {
     <div className={styles.page}>
       <style>{`@media print { @page { size: ${paperSize}; margin: 12mm; } }`}</style>
       <div className={`${styles.toolbar} noPrint`}>
-        <Link href={`/orders/${order.id}`}>← Back to order</Link>
+        <Link href={`/orders/${order.id}`}><IconLabel name="arrowLeft24" size={16}>Back to order</IconLabel></Link>
         <SegmentedControl label="Paper size" value={paperSize} onValueChange={setPaperSize} options={[{ value: "A5", label: "A5" }, { value: "A4", label: "A4" }]} />
         <Button variant="primary" iconName="export24" onClick={() => window.print()}>
           Print packing slip

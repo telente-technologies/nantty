@@ -18,6 +18,7 @@ import type { OrderDispute } from "@/types/order.type";
 import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./orders.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 const senderLabels = { buyer: "Buyer", seller: "You", zudomart: "Zudomart" } as const;
 
@@ -59,7 +60,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
   return (
     <PageStack>
       <PageHeader
-        eyebrow={<Link href="/orders/disputes">← Disputes</Link>}
+        eyebrow={<Link href="/orders/disputes"><IconLabel name="arrowLeft24" size={16}>Disputes</IconLabel></Link>}
         title={`Dispute on ${dispute.orderNumber}`}
         description={`${dispute.buyerName} · ${dispute.reason}`}
         actions={

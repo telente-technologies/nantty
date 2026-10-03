@@ -12,6 +12,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./packingSlipView.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: string; readonly documentKind: "invoice" | "receipt" }) {
   const { settings } = useStoreContext();
@@ -29,7 +30,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
     <div className={styles.page}>
       <style>{"@media print { @page { size: A4; margin: 14mm; } }"}</style>
       <div className={`${styles.toolbar} noPrint`}>
-        <Link href={`/orders/${order.id}`}>← Back to order</Link>
+        <Link href={`/orders/${order.id}`}><IconLabel name="arrowLeft24" size={16}>Back to order</IconLabel></Link>
         <Link href={`/orders/${order.id}/invoice${isReceipt ? "" : "?document=receipt"}`}>Switch to {isReceipt ? "invoice" : "receipt"}</Link>
         <Button variant="primary" iconName="export24" onClick={() => window.print()}>
           Print or save as PDF
