@@ -5,13 +5,15 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { soundsService } from "@/services/sounds.service";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function ProfileSoundsList({ profile }: { profile: User }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const sounds = useQuery({
     queryKey: ["users", profile.id, "sounds"],
@@ -36,10 +38,10 @@ export function ProfileSoundsList({ profile }: { profile: User }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   state: { marginTop: 48 },
   list: { paddingHorizontal: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
   cover: { width: 48, height: 48, borderRadius: 8, backgroundColor: colors.skeleton, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   texts: { flex: 1, gap: 2 },
-});
+}));

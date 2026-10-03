@@ -9,7 +9,7 @@ import {
   Frame75332Icon,
   MagnifyingGlass24Icon,
 } from "@/components/icons";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface ProfileHeaderBarProps {
   readonly variant: "own" | "other";
@@ -19,6 +19,7 @@ export interface ProfileHeaderBarProps {
 }
 
 function OwnProfileCircleButton({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} hitSlop={8} onPress={onPress} style={styles.circle}>
       {children}
@@ -35,6 +36,8 @@ function OtherProfileSquareButton({ label, onPress, children }: { label: string;
 }
 
 export function ProfileHeaderBar({ variant, onBack, onSearch, onMore }: ProfileHeaderBarProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   if (variant === "own") {
     return (
       <View style={[styles.bar, styles.ownBar]}>
@@ -77,10 +80,10 @@ export function ProfileHeaderBar({ variant, onBack, onSearch, onMore }: ProfileH
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   ownBar: { paddingLeft: 16, paddingRight: 12 },
   otherBar: { paddingHorizontal: 12, paddingTop: 8, height: 52 },
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   circle: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
-});
+}));

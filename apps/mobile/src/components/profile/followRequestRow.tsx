@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { FollowRequest } from "@/types/socialGraph.type";
 
 export interface FollowRequestRowProps {
@@ -14,6 +14,8 @@ export interface FollowRequestRowProps {
 }
 
 export function FollowRequestRow({ request, disabled, onApprove, onDecline, onPressUser }: FollowRequestRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { requester } = request;
   return (
     <View style={styles.row}>
@@ -34,11 +36,11 @@ export function FollowRequestRow({ request, disabled, onApprove, onDecline, onPr
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingHorizontal: 16, minHeight: 64, flexDirection: "row", alignItems: "center", gap: 8 },
   identity: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   names: { flex: 1, gap: 2 },
   button: { height: 30, paddingHorizontal: 10, borderRadius: 4, justifyContent: "center" },
-  approve: { backgroundColor: colors.primary },
+  approve: { backgroundColor: colors.primarySolid },
   decline: { backgroundColor: colors.chip },
-});
+}));

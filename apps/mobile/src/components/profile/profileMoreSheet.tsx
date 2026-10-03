@@ -2,12 +2,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { followsService } from "@/services/follows.service";
 import { REPORT_REASON_OPTIONS, reportsService, type ReportReason } from "@/services/reports.service";
 import type { User } from "@/types";
+import { isViewerSignedIn, requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
 
 export interface ProfileMoreSheetProps {
   readonly profile: User;
@@ -18,6 +20,9 @@ export interface ProfileMoreSheetProps {
 }
 
 export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendCoins }: ProfileMoreSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const { openSendInChat, sendInChatElement } = useShareToChat();
   const [mode, setMode] = useState<"menu" | "report" | "reported">("menu");
   const closeAndReset = () => {
     setMode("menu");
@@ -28,6 +33,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
     onSuccess: () => setMode("reported"),
   });
   const block = useMutation({ mutationFn: () => followsService.blockUser(profile.id), onSuccess: () => { closeAndReset(); onBlocked(); } });
+  const requireSignIn = (action: () => void, reason: string) => requireAuthAfterClosingModal(closeAndReset, action, reason);
   const shareProfileLink = () => {
     closeAndReset();
     Share.share({ message: `${profile.name} on Zudomart: https://zudomart.com/@${profile.username}` });
@@ -40,18 +46,28 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
   );
 
   return (
+    <>
+    {sendInChatElement}
     <BottomSheet visible={visible} onClose={closeAndReset} title={mode === "report" ? `Report @${profile.username}` : undefined} floating={mode === "menu"}>
       {mode === "menu" ? (
         <View style={styles.menu}>
+          {option("Send in chat", () =>
+            requireSignIn(() => {
+              closeAndReset();
+              openSendInChat({ kind: "profile", id: profile.id });
+            }, "send this in chat"),
+          )}
           {option("Share or copy profile link", shareProfileLink)}
           {onSendCoins
-            ? option(`Send coins to ${profile.name}`, () => {
-                closeAndReset();
-                onSendCoins();
-              })
+            ? option(`Send coins to ${profile.name}`, () =>
+                requireSignIn(() => {
+                  closeAndReset();
+                  onSendCoins();
+                }, "send coins"),
+              )
             : null}
-          {option(`Report @${profile.username}`, () => setMode("report"), colors.error)}
-          {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => block.mutate(), colors.error)}
+          {option(`Report @${profile.username}`, () => (isViewerSignedIn() ? setMode("report") : requireSignIn(() => undefined, "report accounts")), colors.error)}
+          {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => requireSignIn(() => block.mutate(), "block accounts"), colors.error)}
         </View>
       ) : mode === "report" ? (
         <ScrollView style={styles.list} contentContainerStyle={styles.menu}>
@@ -66,12 +82,13 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
         </View>
       )}
     </BottomSheet>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   menu: { paddingHorizontal: 16, paddingBottom: 12 },
   list: { maxHeight: 420 },
   option: { minHeight: 50, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
   done: { padding: 16, gap: 8 },
-});
+}));

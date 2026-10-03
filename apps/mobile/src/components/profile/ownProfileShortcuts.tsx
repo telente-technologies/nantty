@@ -2,16 +2,18 @@ import { useNavigation } from "@react-navigation/native";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
-type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings" | "FollowRequests" | "Rankings";
+type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings" | "FollowRequests" | "Rankings" | "Saved";
 
 export function OwnProfileShortcuts({ profile }: { profile: User }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const creatorEntry = useCreatorEntry();
   const shortcuts: { label: string; route: ShortcutRoute }[] = [
@@ -19,6 +21,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
     { label: creatorEntry.label, route: creatorEntry.route },
     { label: "Follow requests", route: "FollowRequests" },
     { label: "Rankings", route: "Rankings" },
+    { label: "Saved", route: "Saved" },
     { label: "My orders", route: "Orders" },
     { label: "Wallet", route: "Wallet" },
     { label: profile.verification?.badgeVisible ? "Verification" : "Get verified", route: "Verification" },
@@ -46,7 +49,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingHorizontal: 12, gap: 8 },
   shortcut: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.primaryTint, justifyContent: "center" },
-});
+}));

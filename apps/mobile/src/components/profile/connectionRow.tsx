@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { DotsThreeVertical24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 import { VerificationBadge } from "./verificationBadge";
 import type { UserSummary } from "@/types";
@@ -18,6 +18,7 @@ export interface ConnectionRowProps {
 }
 
 export function ConnectionRow({ user, actionLabel, actionHighlighted, onPressAction, onPressUser, onPressMore }: ConnectionRowProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.row}>
       <Pressable accessibilityRole="button" accessibilityLabel={`${user.name}, @${user.username}`} onPress={onPressUser} style={styles.identity}>
@@ -40,7 +41,7 @@ export function ConnectionRow({ user, actionLabel, actionHighlighted, onPressAct
             accessibilityRole="button"
             accessibilityLabel={`${actionLabel} ${user.name}`}
             onPress={onPressAction}
-            style={[styles.action, { backgroundColor: actionHighlighted ? colors.primary : colors.chip }]}
+            style={[styles.action, { backgroundColor: actionHighlighted ? colors.primarySolid : colors.chip }]}
           >
             <Text size={13} weight={500} lineHeight={16.9} color={actionHighlighted ? colors.white : colors.text}>
               {actionLabel}

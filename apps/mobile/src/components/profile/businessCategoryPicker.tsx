@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { BusinessCategory, BusinessCategorySelection } from "@/types/socialGraph.type";
 
 export interface BusinessCategoryPickerProps {
@@ -21,6 +21,8 @@ const describeSelection = (selection: BusinessCategorySelection, categories: rea
 };
 
 export function BusinessCategoryPicker({ categories, value, onChange }: BusinessCategoryPickerProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
   const [customName, setCustomName] = useState("");
   const topLevel = categories.filter((category) => category.parentId === null);
@@ -81,8 +83,8 @@ export function BusinessCategoryPicker({ categories, value, onChange }: Business
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 12 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  selected: { paddingHorizontal: 10, height: 30, borderRadius: 15, backgroundColor: colors.primary, justifyContent: "center" },
-});
+  selected: { paddingHorizontal: 10, height: 30, borderRadius: 15, backgroundColor: colors.primarySolid, justifyContent: "center" },
+}));
