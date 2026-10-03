@@ -9,15 +9,10 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { WebappRequestError, sendRequestToWebappServer } from "@/services/clientApi.service";
 import type { User } from "@/types";
+import { readSafeRelativeRedirectPath } from "@/utils/safeRedirectPath.util";
 
 import { SocialSignInButtons } from "../socialSignIn";
 import styles from "../authForm.module.css";
-
-function readSafeNextPath(raw: string | null): string {
-  if (!raw) return "/";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/";
-  return raw;
-}
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -36,7 +31,7 @@ function LoginForm() {
     setBusy(true);
     try {
       await sendRequestToWebappServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
-      router.push(readSafeNextPath(searchParams.get("next")));
+      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/"));
       router.refresh();
     } catch (error) {
       setFormError(error instanceof WebappRequestError ? error.message : "Couldn't log in. Check your connection and try again.");
