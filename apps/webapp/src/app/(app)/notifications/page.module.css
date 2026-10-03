@@ -40,7 +40,7 @@
 }
 
 .itemUnread {
-  border-color: var(--blue-200);
+  border-color: var(--color-border-strong);
   background: var(--surface-brand-tint);
 }
 
