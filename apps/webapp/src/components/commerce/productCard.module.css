@@ -10,7 +10,7 @@
 }
 
 .card:hover {
-  border-color: var(--blue-200);
+  border-color: var(--color-border-strong);
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -28,7 +28,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(60% 60% at 30% 30%, rgb(69 99 247 / 0.16) 0%, transparent 60%),
+    radial-gradient(60% 60% at 30% 30%, color-mix(in srgb, var(--color-brand) 16%, transparent) 0%, transparent 60%),
     var(--surface-sunken);
 }
 
@@ -39,8 +39,8 @@
   z-index: 1;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
-  background: rgb(10 10 20 / 0.72);
-  color: #fff;
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
   font-size: var(--text-2xs);
   font-weight: 700;
   backdrop-filter: blur(6px);
@@ -79,5 +79,5 @@
 .lowStock {
   font-size: var(--text-2xs);
   font-weight: 700;
-  color: var(--caution);
+  color: var(--color-warn-text);
 }
