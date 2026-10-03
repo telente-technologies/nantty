@@ -64,7 +64,7 @@ function AdsPerformancePanels() {
               title="Daily ad spend and attributed revenue"
               description="Two lines per day: ad spend in yellow and revenue from orders attributed to ads in blue."
               series={[
-                { key: "revenue", label: "Attributed revenue", colorVariable: "--blue-500" },
+                { key: "revenue", label: "Attributed revenue", colorVariable: "--chart-1" },
                 { key: "spend", label: "Spend", colorVariable: "--caution" },
               ]}
               points={summary.daily.map((point) => ({ label: formatShortDateLabel(point.date, locale), shortLabel: formatShortDateLabel(point.date, locale), values: { revenue: point.attributedRevenue.amountMinor, spend: point.spend.amountMinor } }))}
