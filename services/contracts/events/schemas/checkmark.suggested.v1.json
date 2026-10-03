@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/checkmark.suggested.v1.json",
+  "title": "checkmark.suggested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "checkmark",
+    "accountName",
+    "price",
+    "reasons"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "checkmark": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

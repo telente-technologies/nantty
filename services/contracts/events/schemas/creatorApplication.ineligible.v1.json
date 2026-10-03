@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/creatorApplication.ineligible.v1.json",
+  "title": "creatorApplication.ineligible",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "requirements"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "target"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "target": {
+            "type": "integer"
+          },
+          "display": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reapplyFrom": {
+      "type": "string"
+    }
+  }
+}
