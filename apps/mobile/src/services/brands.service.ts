@@ -14,7 +14,7 @@ export const brandsService = {
   listBusinessCategories: () => api.get<Page<BusinessCategory>>("/api/v1/business-categories"),
   createBusinessProfile: (input: BusinessProfileInput, idempotencyKey: string) =>
     api.post<ActingProfile>("/api/v1/users/me/business-profiles", input, { idempotencyKey }),
-  listMyProfiles: () => api.get<ActingProfile[]>("/api/v1/users/me/profiles"),
+  listMyProfiles: () => api.getList<ActingProfile>("/api/v1/users/me/profiles"),
   fetchMyActingProfile: () => api.get<ActingProfile>("/api/v1/users/me/acting-profile"),
   switchActingProfile: (profileId: string) => api.put<ActingProfile>("/api/v1/users/me/acting-profile", { profileId }),
 };

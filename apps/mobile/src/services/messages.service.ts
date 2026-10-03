@@ -82,5 +82,5 @@ export const messagesService = {
     api.delete<MessageReactionSummary[]>(`/api/v1/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`),
   markConversationAsRead: (conversationId: string) => api.post<void>(`/api/v1/conversations/${conversationId}/read`),
   searchConversationsAndPeople: (query: string) => api.get<ChatSearchResults>("/api/v1/conversations/search", { q: query }),
-  fetchPeopleToMessage: (query: string) => api.get<UserSummary[]>("/api/v1/search/people", { q: query }),
+  fetchPeopleToMessage: (query: string) => api.getList<UserSummary>("/api/v1/search/people", { q: query }),
 };

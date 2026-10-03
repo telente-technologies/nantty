@@ -1,8 +1,8 @@
 import type { AuthSession, Topic } from "@/types";
 
-import type { SocialSignInProvider } from "@/errors/socialSignIn.error";
+import { SocialSignInNotConfiguredError, type SocialSignInProvider } from "@/errors/socialSignIn.error";
 
-import { api } from "./apiClient.service";
+import { ApiError, api } from "./apiClient.service";
 import { requestAppleIdentityTokenWithNonce, type AppleFullName } from "./appleSignIn.service";
 import { requestGoogleIdTokenWithNonce } from "./googleSignIn.service";
 
@@ -13,6 +13,11 @@ export interface RegisterInput {
   readonly username?: string;
   readonly otpToken: string;
 }
+
+const rethrowSocialSignInNotConfigured = (provider: SocialSignInProvider) => (error: unknown): never => {
+  if (error instanceof ApiError && error.code === "SOCIAL_SIGN_IN_NOT_CONFIGURED") throw new SocialSignInNotConfiguredError(provider);
+  throw error;
+};
 
 export const authService = {
   logInWithEmailOrUsername: (identifier: string, password: string) => api.post<AuthSession>("/api/v1/auth/login", { identifier, password }, { auth: false }),
@@ -28,9 +33,11 @@ export const authService = {
   fetchPersonalizationTopics: () => api.get<Topic[]>("/api/v1/topics"),
   saveSelectedTopics: (topicIds: readonly string[]) => api.put<void>("/api/v1/users/me/topics", { topicIds }),
   exchangeGoogleIdTokenForSession: (idToken: string, nonce: string) =>
-    api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce }, { auth: false }),
+    api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce }, { auth: false }).catch(rethrowSocialSignInNotConfigured("google")),
   exchangeAppleIdentityTokenForSession: (identityToken: string, nonce: string, fullName: AppleFullName | null) =>
-    api.post<AuthSession>("/api/v1/auth/apple", { identityToken, nonce, ...(fullName ? { fullName } : {}) }, { auth: false }),
+    api
+      .post<AuthSession>("/api/v1/auth/apple", { identityToken, nonce, ...(fullName ? { fullName } : {}) }, { auth: false })
+      .catch(rethrowSocialSignInNotConfigured("apple")),
   signInWithSocialProvider: async (provider: SocialSignInProvider): Promise<AuthSession> => {
     if (provider === "google") {
       const { idToken, nonce } = await requestGoogleIdTokenWithNonce();

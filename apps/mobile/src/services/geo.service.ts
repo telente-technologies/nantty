@@ -3,9 +3,9 @@ import type { GeoArea, GeoCountry, GeoLevel } from "@/types";
 import { api } from "./apiClient.service";
 
 export const geoService = {
-  fetchCountries: () => api.get<GeoCountry[]>("/api/v1/geo/countries"),
+  fetchCountries: () => api.getList<GeoCountry>("/api/v1/geo/countries"),
   fetchAreasUnderParent: (parentId: string, level: GeoLevel) =>
-    api.get<GeoArea[]>(
+    api.getList<GeoArea>(
       level === "state"
         ? `/api/v1/geo/countries/${parentId}/regions`
         : level === "lga"

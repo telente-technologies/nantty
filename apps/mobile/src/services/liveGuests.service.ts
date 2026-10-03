@@ -8,7 +8,7 @@ const battlePath = (battleId: string) => `/api/v1/battles/${battleId}`;
 
 export const liveGuestsService = {
   fetchLiveStage: (liveId: string) => api.get<LiveStage>(`${livePath(liveId)}/stage`),
-  searchLiveViewersToInvite: (liveId: string, query: string) => api.get<UserSummary[]>(`${livePath(liveId)}/viewers`, { q: query }),
+  searchLiveViewersToInvite: (liveId: string, query: string) => api.getList<UserSummary>(`${livePath(liveId)}/viewers`, { q: query }),
   inviteViewerToStage: (liveId: string, userId: string) => api.post<LiveStage>(`${livePath(liveId)}/guests/invitations`, { userId }),
   respondToStageInvitation: (liveId: string, slotId: string, response: "accept" | "decline") =>
     api.post<LiveStage>(`${livePath(liveId)}/guests/invitations/${slotId}/${response}`),

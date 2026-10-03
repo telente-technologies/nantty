@@ -1,4 +1,4 @@
-import { apiConfig } from "@/config/api.config";
+import { shouldUseMockForPath } from "@/config/api.config";
 import type { ID, MediaAsset, MediaUploadPurpose, MediaVariant } from "@/types";
 
 import type { LocalMediaFile } from "./mediaPreparation.service";
@@ -55,7 +55,7 @@ export const mediaService = {
     const jobId = await enqueueLocalMediaForUpload(describeLocalImageFromUri(localUri, contentType), purpose);
     onUploadJobCreated?.(jobId);
     const asset = await waitForProcessedMediaAsset(jobId);
-    if (apiConfig.useMocks) return localUri;
+    if (shouldUseMockForPath("/api/v1/media")) return localUri;
     const publicUrl = pickLargestDisplayableImageUrl(asset);
     if (!publicUrl) throw new Error("Upload finished but no image is available yet. Please try again.");
     return publicUrl;

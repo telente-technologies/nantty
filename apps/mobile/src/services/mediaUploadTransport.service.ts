@@ -1,12 +1,11 @@
-import * as Crypto from "expo-crypto";
 import { File, Paths, UploadType } from "expo-file-system";
 import { Platform } from "react-native";
 
-import { apiConfig } from "@/config/api.config";
+import { shouldUseMockForPath } from "@/config/api.config";
 import { ApiError } from "@/errors/api.error";
-import type { CompletedUpload, CreateUploadSessionRequest, ID, MediaAsset, UploadSession, UploadSessionStatus } from "@/types";
+import type { ChunkUploadUrl, CompletedUpload, CreateUploadSessionRequest, ID, MediaAsset, UploadSession, UploadSessionStatus } from "@/types";
 
-import { api, getAuthorizedRequestHeaders, refreshSessionAfterUnauthorizedResponse } from "./apiClient.service";
+import { api } from "./apiClient.service";
 
 const webBlobsByUri = new Map<string, Blob>();
 
@@ -32,38 +31,23 @@ export async function readChunkBytesFromLocalFile(fileUri: string, offsetBytes: 
   }
 }
 
-export async function calculateSha256HexOfBytes(bytes: Uint8Array) {
-  const digest = await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, bytes as Uint8Array<ArrayBuffer>);
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-const parseUploadedChunksResponse = (bodyText: string): { uploadedChunks: number[] } => {
-  const payload = JSON.parse(bodyText || "{}") as { data?: { uploadedChunks: number[] }; uploadedChunks?: number[] };
-  return { uploadedChunks: payload.data?.uploadedChunks ?? payload.uploadedChunks ?? [] };
-};
-
-async function sendChunkBytesOverNetworkOnce(
-  path: string,
+async function putChunkToObjectStorageOnce(
+  url: string,
   chunkBytes: Uint8Array,
-  chunkSha256: string,
   onBytesSent: (bytesSent: number) => void,
 ): Promise<{ status: number; bodyText: string }> {
-  const headers = { ...getAuthorizedRequestHeaders(), "Content-Type": "application/octet-stream", "X-Chunk-Sha256": chunkSha256 };
-  const url = `${apiConfig.baseUrl}${path}`;
   if (Platform.OS === "web") {
-    const response = await fetch(url, { method: "PUT", headers, body: chunkBytes as Uint8Array<ArrayBuffer> });
+    const response = await fetch(url, { method: "PUT", body: chunkBytes as Uint8Array<ArrayBuffer> });
     onBytesSent(chunkBytes.byteLength);
     return { status: response.status, bodyText: await response.text() };
   }
-  const temporaryChunkFile = new File(Paths.cache, `chunk-${chunkSha256.slice(0, 16)}-${Date.now()}.bin`);
+  const temporaryChunkFile = new File(Paths.cache, `chunk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.bin`);
   temporaryChunkFile.create({ overwrite: true });
   temporaryChunkFile.write(chunkBytes);
   try {
     const result = await temporaryChunkFile.upload(url, {
       httpMethod: "PUT",
       uploadType: UploadType.BINARY_CONTENT,
-      mimeType: "application/octet-stream",
-      headers,
       sessionType: "background",
       onProgress: ({ bytesSent }) => onBytesSent(bytesSent),
     });
@@ -78,33 +62,17 @@ export const mediaUploadTransport = {
   fetchUploadSessionStatus: (uploadId: ID) => api.get<UploadSessionStatus>(`/api/v1/media/uploads/${uploadId}`),
   completeUploadSession: (uploadId: ID) => api.post<CompletedUpload>(`/api/v1/media/uploads/${uploadId}/complete`),
   fetchMediaAsset: (mediaId: ID) => api.get<MediaAsset>(`/api/v1/media/${mediaId}`),
-  uploadChunk: async (
-    uploadId: ID,
-    chunkIndex: number,
-    chunkBytes: Uint8Array,
-    onBytesSent: (bytesSent: number) => void,
-  ): Promise<{ uploadedChunks: number[] }> => {
-    const path = `/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}`;
-    const chunkSha256 = await calculateSha256HexOfBytes(chunkBytes);
-    if (apiConfig.useMocks) {
-      const result = await api.put<{ uploadedChunks: number[] }>(path, { byteLength: chunkBytes.byteLength, chunkSha256 });
+  abortUploadSession: (uploadId: ID) => api.delete<void>(`/api/v1/media/uploads/${uploadId}`),
+  fetchChunkUploadUrl: (uploadId: ID, chunkIndex: number) =>
+    api.get<ChunkUploadUrl>(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}/url`),
+  uploadChunk: async (uploadId: ID, chunkIndex: number, chunkBytes: Uint8Array, onBytesSent: (bytesSent: number) => void) => {
+    const target = await mediaUploadTransport.fetchChunkUploadUrl(uploadId, chunkIndex);
+    if (shouldUseMockForPath(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}/url`)) {
+      await api.put(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}`, { byteLength: chunkBytes.byteLength });
       onBytesSent(chunkBytes.byteLength);
-      return result;
+      return;
     }
-    let response = await sendChunkBytesOverNetworkOnce(path, chunkBytes, chunkSha256, onBytesSent);
-    if (response.status === 401 && (await refreshSessionAfterUnauthorizedResponse())) {
-      response = await sendChunkBytesOverNetworkOnce(path, chunkBytes, chunkSha256, onBytesSent);
-    }
-    if (response.status < 200 || response.status >= 300) {
-      const error = (() => {
-        try {
-          return JSON.parse(response.bodyText) as { message?: string; code?: string };
-        } catch {
-          return {};
-        }
-      })();
-      throw new ApiError(response.status, error.message ?? "Upload failed", error.code);
-    }
-    return parseUploadedChunksResponse(response.bodyText);
+    const response = await putChunkToObjectStorageOnce(target.url, chunkBytes, onBytesSent);
+    if (response.status < 200 || response.status >= 300) throw new ApiError(response.status, "Upload failed", "CHUNK_UPLOAD_FAILED");
   },
 };

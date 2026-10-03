@@ -1,10 +1,11 @@
-import { apiConfig } from "@/config/api.config";
+import { apiConfig, shouldUseMockForPath } from "@/config/api.config";
 import { resolveMockApiRequest } from "@/mocks";
 import { useAuthStore } from "@/store/auth.store";
 import { useLocaleStore } from "@/store/locale.store";
 import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";
 
 import { ApiError } from "@/errors/api.error";
+import type { Page } from "@/types";
 
 export { ApiError };
 
@@ -21,6 +22,13 @@ const appendQueryStringToPath = (path: string, query?: RequestOptions["query"]) 
   const entries = Object.entries(query ?? {}).filter(([, v]) => v !== undefined) as [string, string | number | boolean][];
   if (entries.length === 0) return path;
   return `${path}?${entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`).join("&")}`;
+};
+
+export const unwrapApiPayload = <T>(payload: unknown): T => {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) return payload as T;
+  const record = payload as { data?: unknown };
+  if ("nextCursor" in record) return payload as T;
+  return (record.data ?? payload) as T;
 };
 
 let refreshing: Promise<boolean> | null = null;
@@ -43,7 +51,7 @@ async function refreshAccessTokenWithRefreshToken(): Promise<boolean> {
 
 async function sendHttpRequest<T>(method: Method, path: string, options: RequestOptions = {}): Promise<T> {
   const url = appendQueryStringToPath(path, options.query);
-  if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey, !useAuthStore.getState().accessToken);
+  if (shouldUseMockForPath(path)) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey, !useAuthStore.getState().accessToken);
 
   const headers: Record<string, string> = { Accept: "application/json", ...getAuthorizedRequestHeaders(options.auth !== false) };
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
@@ -63,7 +71,7 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
       const error = (payload ?? {}) as { message?: string; code?: string };
       throw new ApiError(response.status, error.message ?? "Something went wrong", error.code);
     }
-    return ((payload as { data?: T } | undefined)?.data ?? payload) as T;
+    return unwrapApiPayload<T>(payload);
   } finally {
     clearTimeout(timer);
   }
@@ -99,8 +107,18 @@ async function sendRequestWithTokenRefresh<T>(method: Method, path: string, opti
   }
 }
 
+export const toPageEnvelope = <T>(payload: unknown): Page<T> => {
+  if (Array.isArray(payload)) return { data: payload as T[], nextCursor: null };
+  const record = (payload ?? {}) as { data?: T[]; nextCursor?: string | null };
+  return { data: record.data ?? [], nextCursor: record.nextCursor ?? null };
+};
+
 export const api = {
   get: <T>(path: string, query?: RequestOptions["query"]) => sendRequestWithTokenRefresh<T>("GET", path, { query }),
+  getPage: async <T>(path: string, query?: RequestOptions["query"]) =>
+    toPageEnvelope<T>(await sendRequestWithTokenRefresh<unknown>("GET", path, { query })),
+  getList: async <T>(path: string, query?: RequestOptions["query"]) =>
+    toPageEnvelope<T>(await sendRequestWithTokenRefresh<unknown>("GET", path, { query })).data,
   post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("POST", path, { ...options, body }),
   put: <T>(path: string, body?: unknown) => sendRequestWithTokenRefresh<T>("PUT", path, { body }),
   patch: <T>(path: string, body?: unknown) => sendRequestWithTokenRefresh<T>("PATCH", path, { body }),

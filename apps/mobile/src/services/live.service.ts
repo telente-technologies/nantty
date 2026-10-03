@@ -14,8 +14,8 @@ export const liveService = {
     api.post<LiveSessionDetails>("/api/v1/lives", { title, category, ...monetization }),
   issueStreamKey: (liveId: string) => api.post<{ ingestUrl: string; streamKey: string }>(`/api/v1/lives/${liveId}/stream-key`),
   endLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/end`),
-  fetchSuggestedLives: () => api.get<SuggestedLive[]>("/api/v1/lives/suggested"),
-  fetchPeopleToShareLiveWith: (query: string) => api.get<UserSummary[]>("/api/v1/search/people", { q: query }),
+  fetchSuggestedLives: () => api.getList<SuggestedLive>("/api/v1/lives/suggested"),
+  fetchPeopleToShareLiveWith: (query: string) => api.getList<UserSummary>("/api/v1/search/people", { q: query }),
   shareLiveWithPeople: (liveId: string, userIds: readonly string[]) => api.post<void>(`/api/v1/lives/${liveId}/share`, { userIds }),
   followLiveHost: (userId: string) => api.post<void>(`/api/v1/users/${userId}/follow`),
 };

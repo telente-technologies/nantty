@@ -16,7 +16,7 @@ import { api, generateIdempotencyKey } from "./apiClient.service";
 
 export const coinsService = {
   fetchCoinBalance: () => api.get<CoinBalance>("/api/v1/coins/balance"),
-  fetchCoinPackages: () => api.get<CoinPackage[]>("/api/v1/coins/packages"),
+  fetchCoinPackages: () => api.getList<CoinPackage>("/api/v1/coins/packages"),
   listCoinActivity: (cursor: string | null) => api.get<Page<CoinActivityEntry>>("/api/v1/coins/transactions", { cursor: cursor ?? undefined }),
   convertEarnedCoins: (coins: number, idempotencyKey = generateIdempotencyKey()) =>
     api.post<CoinConversionReceipt>("/api/v1/creators/earnings/convert", { coins }, { idempotencyKey }),
