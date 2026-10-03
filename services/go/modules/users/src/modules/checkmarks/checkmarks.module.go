@@ -1,9 +1,14 @@
 package checkmarks
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"context"
 	"net/http"
 	"time"
+	applyentitlement "zudomart/modules/users/src/modules/checkmarks/commands/applyEntitlement"
+	platformevents "zudomart/platform/events"
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/modules/checkmarks/routes"
@@ -42,5 +47,28 @@ func RunBackgroundWorkersUntilContextDone(ctx context.Context, c *container.Cont
 			return nil
 		case <-ticker.C:
 		}
+	}
+}
+
+func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.Container, production bool) {
+	queueName := c.Settings.EntitlementEventsQueue
+	if queueName == "" {
+		return
+	}
+	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, platformevents.MessageBusSelection{DeployableName: "go-identity", Logger: c.Logger, IsProduction: production})
+	if err != nil || queues == nil {
+		c.Logger.ErrorContext(ctx, "entitlement consumer disabled: no message broker configured", "error", err)
+		return
+	}
+	handler := services.HandleEntitlementEventMessage(func(ctx context.Context, eventType string, data json.RawMessage) error {
+		var command applyentitlement.Command
+		if err := json.Unmarshal(data, &command); err != nil {
+			return fmt.Errorf("%w: %v", platformevents.ErrPoisonMessage, err)
+		}
+		command.EventType = eventType
+		return applyentitlement.Handler{Container: c}.Execute(ctx, command)
+	})
+	if err := queues.ConsumeQueueUntilContextDone(ctx, queueName, handler, c.Logger); err != nil && ctx.Err() == nil {
+		c.Logger.ErrorContext(ctx, "entitlement consumer stopped", "error", err)
 	}
 }
