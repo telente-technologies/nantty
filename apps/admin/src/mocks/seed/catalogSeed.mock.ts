@@ -21,12 +21,12 @@ function daysFromNowIso(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString();
 }
 
-type CategorySeed = readonly [name: string, iconName: string | null, productCount: number, children: readonly (readonly [string, number])[], commissionOverride?: number];
+type CategorySeed = readonly [name: string, iconName: string | null, productCount: number, children: readonly (readonly [string, number])[]];
 
 const categorySeeds: readonly CategorySeed[] = [
-  ["Fashion", "tag24", 0, [["Women's clothing", 48_210], ["Men's clothing", 31_870], ["Aso-ebi & traditional", 12_430], ["Shoes", 22_950], ["Bags", 9_310]], 700],
+  ["Fashion", "tag24", 0, [["Women's clothing", 48_210], ["Men's clothing", 31_870], ["Aso-ebi & traditional", 12_430], ["Shoes", 22_950], ["Bags", 9_310]]],
   ["Beauty", "star16", 0, [["Skincare", 18_400], ["Hair & wigs", 26_120], ["Makeup", 11_760], ["Fragrance", 5_230]]],
-  ["Electronics", "speakerHigh24", 0, [["Phones & tablets", 14_890], ["Laptops", 3_420], ["Audio", 6_780], ["Phone accessories", 21_300]], 500],
+  ["Electronics", "speakerHigh24", 0, [["Phones & tablets", 14_890], ["Laptops", 3_420], ["Audio", 6_780], ["Phone accessories", 21_300]]],
   ["Home & kitchen", "buildingStore20", 0, [["Kitchen & dining", 9_870], ["Home decor", 7_120], ["Furniture", 2_310]]],
   ["Food & groceries", "shoppingCart24", 0, [["Spices & soup ingredients", 4_560], ["Drinks", 3_210], ["Snacks", 2_980]]],
   ["Kids & baby", "userCircle24", 0, [["Baby essentials", 3_870], ["Toys", 2_140]]],
@@ -39,12 +39,12 @@ function slugify(text: string): string {
 
 export function buildDemoCatalogCategories(): CatalogCategory[] {
   const categories: CatalogCategory[] = [];
-  categorySeeds.forEach(([name, iconName, , children, commissionOverride], parentIndex) => {
+  categorySeeds.forEach(([name, iconName, , children], parentIndex) => {
     const parentId = `cat_${String(parentIndex + 1).padStart(2, "0")}`;
     const productCount = children.reduce((sum, [, count]) => sum + count, 0);
-    categories.push({ id: parentId, parentId: null, name, slug: slugify(name), iconName, isActive: true, sortOrder: parentIndex, productCount, commissionOverrideBasisPoints: commissionOverride ?? null, updatedAt: daysFromNowIso(-40 + parentIndex) });
+    categories.push({ id: parentId, parentId: null, name, slug: slugify(name), iconName, isActive: true, sortOrder: parentIndex, productCount, updatedAt: daysFromNowIso(-40 + parentIndex) });
     children.forEach(([childName, childCount], childIndex) => {
-      categories.push({ id: `${parentId}_${String(childIndex + 1).padStart(2, "0")}`, parentId, name: childName, slug: slugify(childName), iconName: null, isActive: !(parentIndex === 6 && childIndex === 1), sortOrder: childIndex, productCount: childCount, commissionOverrideBasisPoints: null, updatedAt: daysFromNowIso(-30 + childIndex) });
+      categories.push({ id: `${parentId}_${String(childIndex + 1).padStart(2, "0")}`, parentId, name: childName, slug: slugify(childName), iconName: null, isActive: !(parentIndex === 6 && childIndex === 1), sortOrder: childIndex, productCount: childCount, updatedAt: daysFromNowIso(-30 + childIndex) });
     });
   });
   return categories;

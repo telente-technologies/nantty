@@ -17,14 +17,7 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
       { amountMinor: 1, currency: "USD" },
     ],
     withdrawalFee: { mode: "PASS_THROUGH", note: "We charge exactly what Paystack or Flutterwave charges for the transfer. No Zudomart margin." },
-    marketplaceCommission: {
-      defaultBasisPoints: 750,
-      categoryOverrides: [
-        { categorySlug: "fashion", categoryName: "Fashion", basisPoints: 700 },
-        { categorySlug: "phones-tablets", categoryName: "Phones & tablets", basisPoints: 450 },
-        { categorySlug: "food-groceries", categoryName: "Food & groceries", basisPoints: 500 },
-      ],
-    },
+    escrowFee: { defaultBasisPoints: 150, businessPlanBasisPoints: 100 },
   };
 }
 

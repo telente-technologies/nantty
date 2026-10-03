@@ -39,7 +39,7 @@ const orderSeedRows: readonly OrderSeedRow[] = [
   { number: "ZM-24819", buyer: 11, seller: 23, store: "Jide Kicks", currency: "NGN", items: [["Canvas low-tops, EU 40", "s3", 1, 28_000_00]], delivery: 2_500_00, stage: "DELIVERED", hoursAgo: 40, city: "Enugu" },
 ];
 
-const commissionBasisPointsByCurrency: Record<string, number> = { NGN: 700 };
+const commissionBasisPointsByCurrency: Record<string, number> = { NGN: 150 };
 
 export function readDemoUserIdForIndex(index: number): string {
   return `usr_${String(index).padStart(4, "0")}`;
@@ -105,7 +105,7 @@ export function buildDemoOrders(readDisplayName: (userId: string) => string): Mo
       currency: row.currency,
       items,
       deliveryFeeMinor: row.delivery,
-      commissionBasisPoints: commissionBasisPointsByCurrency[row.currency] ?? 800,
+      commissionBasisPoints: commissionBasisPointsByCurrency[row.currency] ?? 150,
       deliveryCity: row.city,
       courier: row.stage === "PAID" ? null : "GIG Logistics",
       trackingNumber: row.stage === "PAID" ? null : `GIG${(7_340_000 + rowIndex * 1_137).toString()}`,
