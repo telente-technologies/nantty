@@ -48,11 +48,24 @@ function listConnections(tab: ConnectionTab): ConnectionEntry[] {
   }
 }
 
+const previewUrlByMediaId = new Map<string, string>();
+
 export const usersMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me", () => signedInProfile()),
+  createMockRoute("POST", "/api/v1/users/me/media/upload-intents", ({ body }) => {
+    const { purpose, previewUri } = body as { purpose: string; previewUri?: string };
+    const mediaId = `media_${purpose}_${Date.now().toString(36)}`;
+    previewUrlByMediaId.set(mediaId, previewUri ?? "");
+    const expiresAt = new Date(Date.now() + 600_000).toISOString();
+    return { mediaId, uploadUrl: `mock://upload/${mediaId}`, method: "PUT", headers: {}, publicUrl: previewUri ?? "", expiresAt, maximumSize: 5_242_880 };
+  }),
   createMockRoute("PATCH", "/api/v1/users/me", ({ body }) => {
     const userId = getSignedInMockUser().id;
-    profileEditsByUserId.set(userId, { ...profileEditsByUserId.get(userId), ...(body as Partial<User>) });
+    const { avatarMediaId, bannerMediaId, ...rest } = body as Partial<User> & { avatarMediaId?: string | null; bannerMediaId?: string | null };
+    const mediaEdits: { avatarUrl?: string | null; bannerUrl?: string | null } = {};
+    if (avatarMediaId !== undefined) mediaEdits.avatarUrl = avatarMediaId ? previewUrlByMediaId.get(avatarMediaId) || null : null;
+    if (bannerMediaId !== undefined) mediaEdits.bannerUrl = bannerMediaId ? previewUrlByMediaId.get(bannerMediaId) || null : null;
+    profileEditsByUserId.set(userId, { ...profileEditsByUserId.get(userId), ...rest, ...mediaEdits });
     return signedInProfile();
   }),
   createMockRoute("GET", "/api/v1/users/me/blocked", () => listConnections("blocked")),
