@@ -19,7 +19,10 @@ var (
 		{Name: "birthday", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "date"}},
 		{Name: "roles", Type: field.TypeJSON},
 		{Name: "email_verified_at", Type: field.TypeTime, Nullable: true},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "deactivated"}, Default: "active"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "deactivated", "suspended", "banned", "deleted"}, Default: "active"},
+		{Name: "phone_hash", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "phone_verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "must_change_password", Type: field.TypeBool, Default: false},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
@@ -122,12 +125,42 @@ var (
 			},
 		},
 	}
+	// RegistrationBlocksColumns holds the columns for the "registration_blocks" table.
+	RegistrationBlocksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"email", "phone", "device"}},
+		{Name: "value_hash", Type: field.TypeString, Size: 64},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "created_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "lifted_at", Type: field.TypeTime, Nullable: true},
+	}
+	// RegistrationBlocksTable holds the schema information for the "registration_blocks" table.
+	RegistrationBlocksTable = &schema.Table{
+		Name:       "registration_blocks",
+		Columns:    RegistrationBlocksColumns,
+		PrimaryKey: []*schema.Column{RegistrationBlocksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "registrationblock_kind_value_hash_lifted_at",
+				Unique:  false,
+				Columns: []*schema.Column{RegistrationBlocksColumns[2], RegistrationBlocksColumns[3], RegistrationBlocksColumns[7]},
+			},
+			{
+				Name:    "registrationblock_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{RegistrationBlocksColumns[4]},
+			},
+		},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "user_agent", Type: field.TypeString, Size: 255, Default: ""},
 		{Name: "ip_address", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "device_hash", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "last_used_at", Type: field.TypeTime},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
@@ -142,7 +175,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_accounts_sessions",
-				Columns:    []*schema.Column{SessionsColumns[8]},
+				Columns:    []*schema.Column{SessionsColumns[9]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -151,7 +184,7 @@ var (
 			{
 				Name:    "session_account_id_revoked_at",
 				Unique:  false,
-				Columns: []*schema.Column{SessionsColumns[8], SessionsColumns[6]},
+				Columns: []*schema.Column{SessionsColumns[9], SessionsColumns[7]},
 			},
 		},
 	}
@@ -224,6 +257,7 @@ var (
 		OneTimeCodesTable,
 		OutboxEventsTable,
 		RefreshTokensTable,
+		RegistrationBlocksTable,
 		SessionsTable,
 		SigningKeysTable,
 		SocialIdentitiesTable,
