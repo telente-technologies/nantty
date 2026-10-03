@@ -14,6 +14,7 @@ func MountAuditLogRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("GET /api/v1/admin/audit/facets", read(http.HandlerFunc(controller.Facets)))
 	mux.Handle("GET /api/v1/admin/audit/export", container.Guard.RequireStaff("audit:export", false)(http.HandlerFunc(controller.Export)))
 	mux.HandleFunc("POST /api/v1/internal/audit/events", controller.RecordFromService)
+	mux.HandleFunc("POST /api/v1/internal/admin/audit-entries", controller.RecordNotificationAudit)
 	mux.HandleFunc("GET /api/v1/internal/audit/history", controller.HistoryForService)
 	mux.Handle("GET /api/v1/admin/audit/{entryId}", read(http.HandlerFunc(controller.Get)))
 }

@@ -166,3 +166,33 @@ func (controller AuditLogController) HistoryForService(writer http.ResponseWrite
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": history, "nextCursor": nil})
 }
+
+type notificationAuditRequest struct {
+	Action     string          `json:"action"`
+	ActorId    string          `json:"actorId"`
+	TargetType string          `json:"targetType"`
+	TargetId   string          `json:"targetId"`
+	Reason     string          `json:"reason"`
+	Detail     json.RawMessage `json:"detail"`
+}
+
+func (controller AuditLogController) RecordNotificationAudit(writer http.ResponseWriter, request *http.Request) {
+	expected := controller.Container.Settings.InternalApiToken
+	if expected == "" || subtle.ConstantTimeCompare([]byte(expected), []byte(request.Header.Get("X-Internal-Token"))) != 1 {
+		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+		return
+	}
+	var body notificationAuditRequest
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		httprequests.RespondWithError(writer, request, controller.Container.Logger, err)
+		return
+	}
+	if body.ActorId == "" || body.Action == "" {
+		httprequests.RespondWithError(writer, request, controller.Container.Logger, adminerrors.ValidationFailedFor("action", "actorId and action are required"))
+		return
+	}
+	err := recordauditevent.Handler{Container: controller.Container}.Execute(request.Context(), recordauditevent.Command{Event: identityports.AuditEvent{
+		ActorId: body.ActorId, Action: body.Action, SubjectType: body.TargetType, SubjectId: body.TargetId, Reason: body.Reason, After: body.Detail,
+	}})
+	httprequests.RespondNoContentOrError(writer, request, controller.Container.Logger, err)
+}

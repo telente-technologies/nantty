@@ -64,3 +64,13 @@ func TestEveryDefaultSettingPassesItsOwnValidator(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultAiGeneratedMultiplierIsThirtyPercentOfTheNormalCreatorShare(t *testing.T) {
+	policy := PlatformSettingDefinitions[MonetizationPolicyKey].DefaultValue.(MonetizationPolicy)
+	for _, row := range policy.Rows {
+		want := map[string]int{"original": 10000, "ai_generated": 3000}[row.Id]
+		if row.MultiplierBps != want {
+			t.Fatalf("%s multiplier is %d, want %d", row.Id, row.MultiplierBps, want)
+		}
+	}
+}

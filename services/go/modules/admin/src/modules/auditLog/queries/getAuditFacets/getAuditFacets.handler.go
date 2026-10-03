@@ -35,10 +35,13 @@ func (handler Handler) Execute(ctx context.Context) (Result, error) {
 		}
 	}
 	slices.Sort(result.Areas)
-	var actors []Actor
+	var actors []struct {
+		ActorId   string `json:"actor_id"`
+		ActorName string `json:"actor_name"`
+	}
 	err = handler.Container.Client.AuditEvent.Query().GroupBy(auditevent.FieldActorID, auditevent.FieldActorName).Scan(ctx, &actors)
 	for _, actor := range actors {
-		result.Actors = append(result.Actors, actor)
+		result.Actors = append(result.Actors, Actor{Id: actor.ActorId, Name: actor.ActorName})
 	}
 	return result, err
 }

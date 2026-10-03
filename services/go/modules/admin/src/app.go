@@ -97,7 +97,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)
 	handler := middlewares.AttachClientDetailsToContext(routes)
-	for _, prefix := range []string{"/api/v1/admin/", "/api/v1/platform-config/", "/api/v1/internal/platform-config/", "/api/v1/internal/audit/"} {
+	for _, prefix := range []string{"/api/v1/admin/", "/api/v1/platform-config/", "/api/v1/internal/platform-config/", "/api/v1/internal/audit/", "/api/v1/internal/admin/", "/api/v1/internal/admins/"} {
 		mux.Handle(prefix, handler)
 	}
 }
@@ -115,16 +115,7 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.AdminSettings, dependencies servicemodule.Dependencies) (events.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: admin outbox events are marked published without leaving the process")
-		return events.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := events.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return events.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return events.CreateDomainEventPublisherFromEnvironment(ctx, events.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }

@@ -1,7 +1,13 @@
 package controllers
 
 import (
+	"crypto/subtle"
 	"net/http"
+
+	"github.com/google/uuid"
+
+	adminerrors "zudomart/modules/admin/src/errors"
+	"zudomart/modules/admin/src/generated/ent"
 
 	"zudomart/modules/admin/src/container"
 	approvesuperadmin "zudomart/modules/admin/src/modules/staffAdmins/commands/approveSuperadmin"
@@ -153,4 +159,26 @@ func (controller StaffAdminsController) UpdateSettings(writer http.ResponseWrite
 	actor, _ := staffauth.StaffFromContext(request.Context())
 	result, err := updatestaffsettings.Handler{Container: controller.Container}.Execute(request.Context(), updatestaffsettings.Command{Actor: actor, RequireSecondSuperadminApproval: *body.RequireSecondSuperadminApproval, Reason: body.Reason})
 	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAdminsController) NotificationRecipient(writer http.ResponseWriter, request *http.Request) {
+	expected := controller.Container.Settings.InternalApiToken
+	if expected == "" || subtle.ConstantTimeCompare([]byte(expected), []byte(request.Header.Get("X-Internal-Token"))) != 1 {
+		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+		return
+	}
+	staffId, err := uuid.Parse(request.PathValue("staffId"))
+	if err != nil {
+		controller.respond(writer, request, 0, nil, adminerrors.StaffNotFound)
+		return
+	}
+	row, err := controller.Container.Client.StaffAccount.Get(request.Context(), staffId)
+	if ent.IsNotFound(err) {
+		err = adminerrors.StaffNotFound
+	}
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	controller.respond(writer, request, http.StatusOK, map[string]any{"email": row.Email, "name": row.DisplayName, "status": row.Status}, nil)
 }

@@ -72,6 +72,7 @@ type TrialRules struct {
 type CheckmarkPricingRules struct {
 	BundleDiscountPercent   int        `json:"bundleDiscountPercent"`
 	BundleMaximumBusinesses int        `json:"bundleMaximumBusinesses"`
+	BlueMonthlyPrice        MoneyValue `json:"blueMonthlyPrice"`
 	GoldOnlyMonthlyPrice    MoneyValue `json:"goldOnlyMonthlyPrice"`
 	BlackMonthlyPrice       MoneyValue `json:"blackMonthlyPrice"`
 	BlackGraceDays          int        `json:"blackGraceDays"`
@@ -104,7 +105,7 @@ func init() {
 			TrialLength: "DAYS_7", YearlyDiscountPercent: 20, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, OnePerPhone: true, MaximumRiskScore: 50,
 		}},
 		CheckmarkPricingKey: {Validate: validateCheckmarkPricing, WritePermission: "config:plans", DefaultValue: CheckmarkPricingRules{
-			BundleDiscountPercent: 15, BundleMaximumBusinesses: 3, GoldOnlyMonthlyPrice: MoneyValue{AmountMinor: 300000, Currency: "NGN"}, BlackMonthlyPrice: MoneyValue{AmountMinor: 5000000, Currency: "NGN"}, BlackGraceDays: 14,
+			BundleDiscountPercent: 15, BundleMaximumBusinesses: 3, BlueMonthlyPrice: MoneyValue{AmountMinor: 250000, Currency: "NGN"}, GoldOnlyMonthlyPrice: MoneyValue{AmountMinor: 300000, Currency: "NGN"}, BlackMonthlyPrice: MoneyValue{AmountMinor: 5000000, Currency: "NGN"}, BlackGraceDays: 14,
 		}},
 	} {
 		PlatformSettingDefinitions[key] = definition
@@ -186,7 +187,7 @@ func validateCheckmarkPricing(raw json.RawMessage) (json.RawMessage, error) {
 	if err := decodeStrictly(raw, &value); err != nil {
 		return nil, err
 	}
-	for _, money := range []MoneyValue{value.GoldOnlyMonthlyPrice, value.BlackMonthlyPrice} {
+	for _, money := range []MoneyValue{value.BlueMonthlyPrice, value.GoldOnlyMonthlyPrice, value.BlackMonthlyPrice} {
 		if money.AmountMinor < 0 || len(money.Currency) != 3 {
 			return nil, adminerrors.Unprocessable("Prices need a non-negative amountMinor and a three-letter currency.")
 		}

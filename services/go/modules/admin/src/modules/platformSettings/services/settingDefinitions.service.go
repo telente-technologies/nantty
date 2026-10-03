@@ -26,7 +26,7 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 	}},
 	MonetizationPolicyKey: {Validate: validateMonetizationPolicy, WritePermission: "config:revenue", DefaultValue: MonetizationPolicy{Rows: []MonetizationRow{
 		{Id: "original", Label: "Original content", MultiplierBps: 10000, Active: true},
-		{Id: "ai_generated", Label: "AI-generated content", MultiplierBps: 5000, Active: true},
+		{Id: "ai_generated", Label: "AI-generated content", MultiplierBps: 3000, Active: true},
 	}}},
 	GiftShareTiersKey: {Validate: validateGiftShareTiers, WritePermission: "config:revenue", DefaultValue: GiftShareTiers{Tiers: []GiftShareTier{
 		{MinimumMonthlyGiftCoins: 0, CreatorShareBps: 5000},
