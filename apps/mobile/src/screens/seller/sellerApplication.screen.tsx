@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
@@ -46,6 +46,7 @@ const convertDraftToSubmission = (draft: SellerApplicationDraft): SellerApplicat
 });
 
 export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerApplication">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<SellerApplicationDraft>(EMPTY_DRAFT);
   const [stepIndex, setStepIndex] = useState(0);

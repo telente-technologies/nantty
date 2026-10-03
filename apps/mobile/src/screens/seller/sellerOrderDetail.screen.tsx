@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
@@ -22,6 +22,8 @@ import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMo
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"SellerOrderDetail">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { orderId } = route.params;
   const queryClient = useQueryClient();
   const [shipSheetVisible, setShipSheetVisible] = useState(false);
@@ -64,7 +66,7 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
         <EscrowSummaryCard escrow={escrow} viewerRole="seller" />
         {fundsHeld ? (
           <View style={styles.heldNotice}>
-            <Text size={13} weight={500} lineHeight={16.9} color={palette.caution[800]}>Funds held in escrow until the buyer confirms</Text>
+            <Text size={13} weight={500} lineHeight={16.9} color={colors.cautionStrongText}>Funds held in escrow until the buyer confirms</Text>
             <Text size={12} lineHeight={16.8} color={colors.textMuted}>
               {order.status === "disputed"
                 ? "The buyer opened a dispute, so the release is paused. Respond quickly to resolve it."
@@ -107,8 +109,8 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  heldNotice: { backgroundColor: palette.caution[50], borderRadius: 12, padding: 12, gap: 4 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 16 },
-});
+  heldNotice: { backgroundColor: colors.cautionTint, borderRadius: 12, padding: 12, gap: 4 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 16 },
+}));

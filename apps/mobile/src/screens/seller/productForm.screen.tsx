@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { mediaService } from "@/services/media.service";
 import { sellerService } from "@/services/seller.service";
@@ -26,6 +26,8 @@ const splitCommaSeparatedList = (value: string) => value.split(",").map((v) => v
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
 export function ProductFormScreen({ navigation, route }: MainScreenProps<"ProductForm">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const productId = route.params?.productId;
   const queryClient = useQueryClient();
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM);
@@ -126,9 +128,9 @@ export function ProductFormScreen({ navigation, route }: MainScreenProps<"Produc
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40, gap: 24 },
   images: { gap: 8 },
   image: { width: 96, height: 96, borderRadius: 8, backgroundColor: colors.chip, overflow: "hidden" },
   addImage: { alignItems: "center", justifyContent: "center", gap: 4 },
-});
+}));

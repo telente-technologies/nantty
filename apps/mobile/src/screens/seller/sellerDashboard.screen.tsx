@@ -13,13 +13,15 @@ import { StoreOrderRow } from "@/components/seller/storeOrderRow";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import type { SellerDashboardPeriod } from "@/types/account.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 
 export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDashboard">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [period, setPeriod] = useState<SellerDashboardPeriod>("today");
   const [ordersExpanded, setOrdersExpanded] = useState(true);
   const [inventoryExpanded, setInventoryExpanded] = useState(true);
@@ -94,6 +96,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
 }
 
 function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: boolean; onToggle: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ expanded }} onPress={onToggle} style={styles.sectionTitle}>
       <Text size={16} weight={500} lineHeight={19.2}>
@@ -106,7 +109,7 @@ function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 12, paddingBottom: 40, gap: 16 },
   total: { alignItems: "center", gap: 8, marginTop: 12, marginBottom: 9 },
   amount: { flexDirection: "row", alignItems: "center" },
@@ -117,4 +120,4 @@ const styles = StyleSheet.create({
   quickLinks: { flexDirection: "row", gap: 8 },
   quickLink: { flex: 1 },
   inventory: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 16 },
-});
+}));

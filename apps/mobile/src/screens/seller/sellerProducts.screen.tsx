@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
 
 export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProducts">) {
+  const { colors } = useTheme();
   const { data: products = [], isLoading, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
   return (
     <Screen>

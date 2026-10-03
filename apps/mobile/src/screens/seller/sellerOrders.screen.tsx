@@ -8,7 +8,7 @@ import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
 import type { OrderStatus } from "@/types";
@@ -22,6 +22,8 @@ const FILTERS: { key: "all" | OrderStatus; label: string }[] = [
 ];
 
 export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
   const { data: orders = [], isLoading, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
   const visibleOrders = useMemo(
@@ -61,11 +63,11 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   filtersBar: { flexGrow: 0, flexShrink: 0 },
   filters: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
   list: { paddingHorizontal: 12, paddingBottom: 40 },
   separator: { height: 12 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 12 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 12 },
   empty: { marginTop: 80 },
-});
+}));
