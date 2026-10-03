@@ -74,10 +74,6 @@ func ActiveProfileIdFor(ctx context.Context, application *container.Container, a
 	return selection.ProfileID.String(), nil
 }
 
-func HasActiveCreatorProfile(ctx context.Context, application *container.Container, accountId uuid.UUID) (bool, error) {
-	return application.Client.Profile.Query().Where(profile.AccountID(accountId), profile.KindEQ(profile.KindCreator), profile.StatusEQ(profile.StatusActive)).Exist(ctx)
-}
-
 func TruncateRunes(value string, maximum int) string {
 	runes := []rune(strings.TrimSpace(value))
 	if len(runes) > maximum {
