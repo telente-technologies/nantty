@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { AnalyticsIcon, ChatIcon, HeartIcon, MoreIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { AnalyticsIcon, ChatIcon, HeartIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { MentionText } from "@/components/mentions/mentionText";
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Avatar, MediaImage } from "@/components/ui/media";
@@ -52,12 +54,20 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
         <Link href={`/post/${post.id}`} className={styles.timestamp}>
           <time dateTime={post.createdAt}>{formatTimeSincePosted(post.createdAt)}</time>
         </Link>
-        <button type="button" className={styles.moreButton} aria-label="More options">
-          <MoreIcon size={20} />
-        </button>
+        <ContentActionsMenu
+          shareKind={hasVideoMedia(post) ? "video" : "post"}
+          reportTargetType="post"
+          targetId={post.id}
+          canonicalPath={`/post/${post.id}`}
+          isOwnContent={viewer?.id === post.author.id}
+        />
       </header>
 
-      {post.text ? <p className={styles.text}>{post.text}</p> : null}
+      {post.text ? (
+        <p className={styles.text}>
+          <MentionText text={post.text} mentions={post.mentions} />
+        </p>
+      ) : null}
       <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) ? `/watch/${post.id}` : null} />
 
       {post.products.length > 0 ? (
@@ -87,10 +97,10 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
           <HeartIcon size={19} />
           {formatCountWithThousandsSuffix(optimisticLikes)}
         </button>
-        <span className={styles.action}>
+        <Link href={`/post/${post.id}#comments`} className={styles.action} aria-label={`${post.comments} comments`}>
           <ChatIcon size={18} />
           {formatCountWithThousandsSuffix(post.comments)}
-        </span>
+        </Link>
         <span className={styles.action}>
           <ShareIcon size={18} />
           {formatCountWithThousandsSuffix(post.reposts)}

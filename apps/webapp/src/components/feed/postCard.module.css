@@ -67,22 +67,7 @@
   text-decoration: underline;
 }
 
-.moreButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--control-md);
-  height: var(--control-md);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--ink-muted);
-}
 
-.moreButton:hover {
-  background: var(--color-surface-hover);
-  color: var(--ink-strong);
-}
 
 .text {
   font-size: var(--text-md);
@@ -180,7 +165,8 @@
   font-weight: 700;
 }
 
-button.action:hover {
+button.action:hover,
+a.action:hover {
   background: var(--color-surface-hover);
   color: var(--ink-strong);
 }
