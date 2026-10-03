@@ -45,7 +45,7 @@ func (controller PlatformSettingsController) Update(writer http.ResponseWriter, 
 	}
 	actor, _ := staffauth.StaffFromContext(request.Context())
 	result, err := updateplatformsetting.Handler{Container: controller.Container}.Execute(request.Context(), updateplatformsetting.Command{
-		Actor: actor, Key: request.PathValue("key"), Value: body.Value, ExpectedVersion: body.ExpectedVersion, Reason: body.Reason,
+		Actor: actor, Key: request.PathValue("key"), Value: body.EffectiveValue(), ExpectedVersion: body.ExpectedVersion, Reason: body.Reason,
 	})
 	controller.respond(writer, request, result, err)
 }
