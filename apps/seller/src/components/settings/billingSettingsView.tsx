@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { TrialOfferNotice } from "@/components/billing/trialOfferNotice";
+import { TrialReminderCallout, TrialStatusPanel } from "@/components/billing/trialStatusPanel";
 import { SubscriptionPlanPicker } from "@/components/billing/subscriptionPlanPicker";
 import { planFeatureDescriptions, sellerPlanLabels, type PlanFeature } from "@/config/planFeatures.config";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
@@ -18,6 +20,7 @@ import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
+import type { BillingOffer } from "@/types/billingOffer.type";
 import type { SubscriptionStatus } from "@/types/sellerAccess.type";
 import type { SubscriptionDetails, SubscriptionInvoice } from "@/types/subscription.type";
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
@@ -32,6 +35,8 @@ export function BillingSettingsView() {
   const { formatMoney } = useMoneyFormatter();
   const { showToast } = useToast();
   const subscriptionQuery = useSellerQuery<SubscriptionDetails>("/seller/subscription");
+  const offerQuery = useSellerQuery<BillingOffer>("/seller/subscription/trial");
+  const offer = offerQuery.data;
   const [pendingAction, setPendingAction] = useState<"cancel" | "resume" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const details = subscriptionQuery.data;
@@ -65,6 +70,12 @@ export function BillingSettingsView() {
           {planFeatureDescriptions[requestedFeature].description} Pick a plan below to switch it on.
         </Callout>
       ) : null}
+      <Callout tone="info" title={`Billing for ${offer?.profileName ?? sessionView?.access.storeName ?? "this business profile"}`}>
+        Each business or brand profile has its own plan, invoices and payment method. Gold comes with Pro and Business, and only shows once the business is verified.
+      </Callout>
+      {offer?.activeTrial ? <TrialReminderCallout trial={offer.activeTrial} onCancelled={() => { offerQuery.reload(); subscriptionQuery.reload(); }} /> : null}
+      {offer?.activeTrial ? <TrialStatusPanel trial={offer.activeTrial} onChanged={() => { offerQuery.reload(); subscriptionQuery.reload(); }} /> : null}
+      {offer && plan === "free" ? <TrialOfferNotice offer={offer} /> : null}
       <Panel
         title={`${sellerPlanLabels[plan]} plan`}
         description={plan === "free" ? "You are on Free. Every basic selling tool is included — upgrade when you need more." : "Thanks for growing with Zudomart."}
@@ -80,7 +91,8 @@ export function BillingSettingsView() {
             items={[
               { label: details.cancelAtPeriodEnd ? "Ends on" : "Renews on", value: formatDateForDisplay(subscription?.currentPeriodEnd) },
               { label: "Payment method", value: details.paymentMethodSummary ?? "—" },
-              { label: "Paid through", value: details.provider === "flutterwave" ? "Flutterwave" : details.provider === "paystack" ? "Paystack" : "—" },
+              { label: "Paid through", value: details.provider === "bachs" ? "Bachs" : details.provider === "flutterwave" ? "Flutterwave" : details.provider === "paystack" ? "Paystack" : "—" },
+              ...(offer ? [{ label: "Receipts go to", value: offer.accountEmail }] : []),
             ]}
           />
           {entitlements ? (
@@ -102,7 +114,7 @@ export function BillingSettingsView() {
         </div>
       </Panel>
       <Panel title="Change plan" description="Switching opens our payment partner's page. You come straight back here after paying.">
-        <SubscriptionPlanPicker currentPlanId={details.planId} currentPlan={plan} />
+        <SubscriptionPlanPicker currentPlanId={details.planId} currentPlan={plan} offer={offer} />
       </Panel>
       <Panel title="Invoices" padded={false}>
         <DataTable<SubscriptionInvoice>

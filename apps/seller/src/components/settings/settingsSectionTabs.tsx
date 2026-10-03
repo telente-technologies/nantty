@@ -14,11 +14,11 @@ const settingsSections: { href: string; label: string; exact?: boolean; permissi
   { href: "/settings/shipping", label: "Shipping", permission: "delivery:manage" },
   { href: "/settings/locations", label: "Locations", permission: "settings:view" },
   { href: "/settings/taxes", label: "Taxes", permission: "settings:view" },
-  { href: "/settings/loyalty", label: "Loyalty", permission: "settings:view" },
   { href: "/settings/team", label: "Team", permission: "staff:manage" },
   { href: "/settings/developers", label: "API keys & webhooks", permission: "developer:manage" },
   { href: "/settings/integrations", label: "Integrations", permission: "settings:view" },
   { href: "/settings/billing", label: "Plan & billing", permission: "billing:manage" },
+  { href: "/settings/business-documents", label: "Business documents", permission: "settings:view" },
   { href: "/settings/verification", label: "Verification", permission: "settings:view" },
 ];
 
