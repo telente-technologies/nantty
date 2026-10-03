@@ -6,6 +6,7 @@ export interface PolicyVersionSummary {
   readonly title: string;
   readonly versionLabel: string;
   readonly summary: string;
+  readonly whatChanged?: readonly string[];
   readonly publishedAt: string;
   readonly effectiveAt: string;
   readonly isMaterialChange: boolean;
