@@ -63,7 +63,7 @@
   padding: 8px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
-  background: var(--surface-card);
+  background: var(--color-elevated);
   box-shadow: var(--shadow-float);
 }
 

@@ -18,8 +18,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 700;
 }
 
@@ -32,7 +32,7 @@
   padding: 12px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
-  background: var(--surface-card);
+  background: var(--color-elevated);
   box-shadow: var(--shadow-float);
 }
 
@@ -47,13 +47,19 @@
   text-overflow: ellipsis;
 }
 
+.themeSwitcher {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--divider-soft);
+}
+
 .signOutButton {
   width: 100%;
   margin-top: 12px;
   height: 32px;
   border: 1px solid var(--divider);
   border-radius: var(--radius-medium);
-  background: var(--surface-card);
+  background: transparent;
   font-weight: 550;
 }
 

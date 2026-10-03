@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { useAdsSession } from "@/components/session/adsSessionProvider";
 import { accountsApi } from "@/services/accountsApi.service";
 
@@ -31,6 +33,7 @@ export function UserMenu() {
       <div className={styles.panel}>
         <p className={styles.name}>{displayName}</p>
         {session?.user.email ? <p className={styles.detail}>{session.user.email}</p> : null}
+        <ThemeSwitcher label="Theme" showLabel className={styles.themeSwitcher} />
         <button type="button" className={styles.signOutButton} onClick={signOutAndReturnToLogin} disabled={isSigningOut}>
           {isSigningOut ? "Signing out…" : "Sign out"}
         </button>

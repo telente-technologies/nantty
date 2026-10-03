@@ -65,13 +65,13 @@
 .navigationLink:hover,
 .policyLink:hover {
   background: var(--surface-rail-raised);
-  color: #fff;
+  color: var(--color-on-brand);
   text-decoration: none;
 }
 
 .activeLink {
   background: var(--surface-rail-raised);
-  color: #fff;
+  color: var(--color-on-brand);
   font-weight: 600;
 }
 
@@ -102,7 +102,7 @@
   top: 0;
   z-index: 10;
   height: var(--topbar-height);
-  background: rgb(255 255 255 / 0.92);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--divider-soft);
 }
@@ -136,7 +136,7 @@
 
 .balancePill:hover {
   text-decoration: none;
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .balanceLabel {
