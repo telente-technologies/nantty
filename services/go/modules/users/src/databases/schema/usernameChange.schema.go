@@ -20,7 +20,7 @@ func (UsernameChange) Fields() []ent.Field {
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
 		field.String("previous_username").Immutable().MaxLen(30),
 		field.String("new_username").Immutable().MaxLen(30),
-		field.Enum("reason").Values("signup", "user_change", "admin_change").Immutable(),
+		field.Enum("reason").Values("signup", "user_change", "admin_change", "admin_reassigned_away", "admin_reassigned_to", "admin_assigned_held").Immutable(),
 	}
 }
 

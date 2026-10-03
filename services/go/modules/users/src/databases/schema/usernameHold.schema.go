@@ -18,7 +18,7 @@ func (UsernameHold) Mixin() []ent.Mixin {
 func (UsernameHold) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("username").NotEmpty().MaxLen(30),
-		field.Enum("kind").Values("withheld", "quarantine"),
+		field.Enum("kind").Values("withheld", "quarantine", "reserved_official"),
 		field.UUID("held_for_account_id", uuid.UUID{}).Optional().Nillable(),
 		field.String("reason").Default("").MaxLen(120),
 		field.String("note").Default("").MaxLen(500),

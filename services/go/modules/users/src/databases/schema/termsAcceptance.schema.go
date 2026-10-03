@@ -19,6 +19,7 @@ func (TermsAcceptance) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
 		field.String("terms_version").NotEmpty().MaxLen(40).Immutable(),
+		field.UUID("policy_version_id", uuid.UUID{}).Optional().Nillable().Immutable(),
 		field.Time("accepted_at").Immutable(),
 		field.String("ip_address").Default("").MaxLen(64).Immutable(),
 		field.String("user_agent").Default("").MaxLen(255).Immutable(),
