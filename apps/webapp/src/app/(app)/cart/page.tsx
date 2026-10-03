@@ -173,6 +173,7 @@ export default function CartPage() {
           <SellerGroupedSummary items={cart.items} />
           <MoneyRow label="Items total" value={formatMoneyForDisplay(cart.itemsTotal)} />
           {hasDiscount ? <MoneyRow label="Discount" value={`−${formatMoneyForDisplay(cart.shopDiscount)}`} muted /> : null}
+          {cart.storeCredit.amountMinor > 0 ? <MoneyRow label="Store credit" value={`−${formatMoneyForDisplay(cart.storeCredit)}`} muted /> : null}
           <MoneyRow label="Shipping" value={cart.shipping.amountMinor > 0 ? formatMoneyForDisplay(cart.shipping) : "Calculated at checkout"} muted />
           <div className={styles.summaryDivider} />
           <MoneyRow label="Total" value={formatMoneyForDisplay(cart.total)} strong />
