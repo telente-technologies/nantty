@@ -5,6 +5,8 @@ import { registerFinanceAndReportsMockHandlers } from "@/mocks/handlers/financeA
 import { registerStorefrontAndWorkspaceMockHandlers } from "@/mocks/handlers/storefrontAndWorkspace.mock";
 import { registerCatalogOperationsMockHandlers } from "@/mocks/handlers/catalogOperations.mock";
 import { registerAccessAndAuthMockHandlers } from "@/mocks/handlers/accessAndAuth.mock";
+import { registerBillingOfferMockHandlers } from "@/mocks/handlers/billingOffer.mock";
+import { registerBusinessDocumentMockHandlers } from "@/mocks/handlers/businessDocuments.mock";
 import { registerAffiliatesMockHandlers } from "@/mocks/handlers/affiliates.mock";
 import { registerBrandsMockHandlers } from "@/mocks/handlers/brands.mock";
 import { registerConsentsMockHandlers } from "@/mocks/handlers/consentsHandlers.mock";
@@ -15,6 +17,8 @@ import { registerTeamAndSettingsMockHandlers } from "@/mocks/handlers/teamAndSet
 
 export function registerEveryMockHandler(): void {
   registerAccessAndAuthMockHandlers();
+  registerBillingOfferMockHandlers();
+  registerBusinessDocumentMockHandlers();
   registerConsentsMockHandlers();
   registerTeamAndSettingsMockHandlers();
   registerCatalogMockHandlers();
