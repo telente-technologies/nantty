@@ -14,7 +14,7 @@ var (
 	InvalidRefreshToken = httpserver.NewApiError(http.StatusUnauthorized, "INVALID_REFRESH_TOKEN", "Your session has ended. Sign in again.")
 	RefreshTokenReused  = httpserver.NewApiError(http.StatusUnauthorized, "REFRESH_TOKEN_REUSED", "Your session has ended. Sign in again.")
 	InvalidInvitation   = httpserver.NewApiError(http.StatusBadRequest, "INVALID_INVITATION", "This invitation is invalid or has expired.")
-	EmailAlreadyInUse   = httpserver.NewApiError(http.StatusConflict, "EMAIL_TAKEN", "A staff account with this email already exists.")
+	EmailAlreadyInUse   = httpserver.NewApiError(http.StatusConflict, "ADMIN_EXISTS", "A staff account with this email already exists.")
 	StaffNotFound       = httpserver.NewApiError(http.StatusNotFound, "STAFF_NOT_FOUND", "That staff account was not found.")
 	SuperadminRequired  = httpserver.NewApiError(http.StatusForbidden, "SUPERADMIN_REQUIRED", "Only a superadmin can do that.")
 	MfaNotEnrolled      = httpserver.NewApiError(http.StatusConflict, "MFA_NOT_ENROLLED", "Set up multi-factor authentication first.")
@@ -22,6 +22,18 @@ var (
 	VersionConflict     = httpserver.NewApiError(http.StatusConflict, "VERSION_CONFLICT", "This setting changed since you loaded it. Reload and try again.")
 	TooManyRequests     = httpserver.NewApiError(http.StatusTooManyRequests, "RATE_LIMITED", "Too many attempts. Try again shortly.")
 )
+
+func ValidationFailedFor(path, message string) *httpserver.ApiError {
+	return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: path, Message: message}})
+}
+
+func Conflict(code, message string) *httpserver.ApiError {
+	return httpserver.NewApiError(http.StatusConflict, code, message)
+}
+
+func Forbidden(code, message string) *httpserver.ApiError {
+	return httpserver.NewApiError(http.StatusForbidden, code, message)
+}
 
 func Unprocessable(message string) *httpserver.ApiError {
 	return httpserver.NewApiError(http.StatusUnprocessableEntity, "UNPROCESSABLE", message)
