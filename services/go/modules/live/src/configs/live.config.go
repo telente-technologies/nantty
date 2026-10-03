@@ -22,6 +22,13 @@ type LiveSettings struct {
 	MediaTokenTimeToLive            time.Duration
 	MoneyGrpcAddress                string
 	AccountDirectoryGrpcAddress     string
+	MoneyGrpcToken                  string
+	AccountDirectoryGrpcToken       string
+	MoneyCallTimeout                time.Duration
+	AccountDirectoryCallTimeout     time.Duration
+	GrpcRetryAttempts               int
+	GrpcRetryBackoff                time.Duration
+	AllowInMemoryMoneyFake          bool
 	TimerPollInterval               time.Duration
 	GuestRequiresMediaConfirmation  bool
 	RequireCreatorProgramToHost     bool
@@ -48,14 +55,28 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		MediaTokenTimeToLive:            reader.ReadDurationOrDefault("LIVE_MEDIA_TOKEN_TTL", 10*time.Minute),
 		MoneyGrpcAddress:                reader.ReadStringOrDefault("LIVE_MONEY_GRPC_ADDRESS", ""),
 		AccountDirectoryGrpcAddress:     reader.ReadStringOrDefault("LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS", ""),
+		MoneyGrpcToken:                  reader.ReadStringOrDefault("LIVE_MONEY_GRPC_TOKEN", ""),
+		AccountDirectoryGrpcToken:       reader.ReadStringOrDefault("LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN", ""),
+		MoneyCallTimeout:                reader.ReadDurationOrDefault("LIVE_MONEY_CALL_TIMEOUT", 5*time.Second),
+		AccountDirectoryCallTimeout:     reader.ReadDurationOrDefault("LIVE_ACCOUNT_DIRECTORY_CALL_TIMEOUT", 2*time.Second),
+		GrpcRetryAttempts:               reader.ReadIntegerOrDefault("LIVE_GRPC_RETRY_ATTEMPTS", 3),
+		GrpcRetryBackoff:                reader.ReadDurationOrDefault("LIVE_GRPC_RETRY_BACKOFF", 100*time.Millisecond),
 		TimerPollInterval:               reader.ReadDurationOrDefault("LIVE_TIMER_POLL_INTERVAL", time.Second),
 		GuestRequiresMediaConfirmation:  reader.ReadStringOrDefault("LIVE_GUEST_REQUIRES_MEDIA_CONFIRMATION", "false") == "true",
 		RequireCreatorProgramToHost:     reader.ReadStringOrDefault("LIVE_REQUIRE_CREATOR_PROGRAM_TO_HOST", "true") == "true",
 		LiveAdTermsCurrentVersion:       reader.ReadStringOrDefault("LIVE_AD_TERMS_VERSION", "2026-10"),
 		GiftPlatformBurstLimitPerSecond: reader.ReadIntegerOrDefault("LIVE_GIFT_BURST_LIMIT_PER_SECOND", 10),
 	}
-	if settings.IsProduction() && (settings.MoneyGrpcAddress == "" || settings.AccountDirectoryGrpcAddress == "") {
-		reader.ReadRequiredString("LIVE_MONEY_AND_ACCOUNT_DIRECTORY_GRPC_ADDRESSES_REQUIRED_IN_PRODUCTION")
+	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
+	if settings.IsProduction() {
+		settings.MoneyGrpcAddress = reader.ReadRequiredString("LIVE_MONEY_GRPC_ADDRESS")
+		settings.AccountDirectoryGrpcAddress = reader.ReadRequiredString("LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS")
+		if len(settings.MoneyGrpcToken) < 32 {
+			reader.ReadRequiredString("LIVE_MONEY_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
+		}
+		if len(settings.AccountDirectoryGrpcToken) < 32 {
+			reader.ReadRequiredString("LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
+		}
 	}
 	return settings
 }
