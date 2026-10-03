@@ -1,5 +1,6 @@
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { hasMockStepUp } from "@/mocks/mockGuards.mock";
+import { readRoleNames } from "@/mocks/handlers/platform/staffAccess.mock";
 import { createMockId, readIsoNow } from "@/mocks/mockResponses.mock";
 import type { MockRequest } from "@/mocks/mockRouter.mock";
 import type { AuditJsonValue, AuditLogEntry, AuditTarget } from "@/types/audit.type";
@@ -20,10 +21,12 @@ function toAuditJson(value: unknown): AuditJsonValue | null {
 
 export function recordMockAuditEntry(request: MockRequest, input: MockAuditInput): AuditLogEntry {
   const principal = request.principal;
+  const staff = principal ? readMockDatabase().admins.find((admin) => admin.id === principal.adminId) : undefined;
+  const departments = staff ? (staff.role === "SUPERADMIN" ? ["Superadmin"] : readRoleNames(staff.roleIds)) : [];
   const entry: AuditLogEntry = Object.freeze({
     id: createMockId("aud"),
     occurredAt: readIsoNow(),
-    actor: principal ? { id: principal.adminId, name: principal.name, kind: "ADMIN" as const, role: principal.role } : { id: "system", name: "System", kind: "SYSTEM" as const, role: null },
+    actor: principal ? { id: principal.adminId, name: principal.name, kind: "ADMIN" as const, role: principal.role, departments } : { id: "system", name: "System", kind: "SYSTEM" as const, role: null },
     action: input.action,
     area: input.area,
     target: input.target,

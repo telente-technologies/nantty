@@ -1,6 +1,7 @@
 import { registerBrandsMockHandlers } from "@/mocks/handlers/brands/brandsHandlers.mock";
 import { registerConfigurationMockHandlers } from "@/mocks/handlers/configuration/configurationHandlers.mock";
 import { registerContentAndSupportMockHandlers } from "@/mocks/handlers/content/contentHandlers.mock";
+import { registerLegalMockHandlers } from "@/mocks/handlers/legal/legalHandlers.mock";
 import { registerMoneyMockHandlers } from "@/mocks/handlers/money/moneyHandlers.mock";
 import { registerPeopleMockHandlers } from "@/mocks/handlers/people/peopleHandlers.mock";
 import { registerPlatformMockHandlers } from "@/mocks/handlers/platform/platformHandlers.mock";
@@ -14,4 +15,5 @@ export function registerEveryMockHandler(): void {
   registerConfigurationMockHandlers();
   registerContentAndSupportMockHandlers();
   registerBrandsMockHandlers();
+  registerLegalMockHandlers();
 }
