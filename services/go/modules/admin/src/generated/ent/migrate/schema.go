@@ -14,6 +14,10 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "actor_id", Type: field.TypeString, Size: 64},
 		{Name: "actor_role", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "actor_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "actor_departments", Type: field.TypeJSON},
+		{Name: "step_up_verified", Type: field.TypeBool, Default: false},
+		{Name: "subject_label", Type: field.TypeString, Size: 200, Default: ""},
 		{Name: "action", Type: field.TypeString, Size: 100},
 		{Name: "subject_type", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "subject_id", Type: field.TypeString, Size: 128, Default: ""},
@@ -33,7 +37,7 @@ var (
 			{
 				Name:    "auditevent_action_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{AuditEventsColumns[4], AuditEventsColumns[1]},
+				Columns: []*schema.Column{AuditEventsColumns[8], AuditEventsColumns[1]},
 			},
 			{
 				Name:    "auditevent_actor_id_created_at",
@@ -43,7 +47,7 @@ var (
 			{
 				Name:    "auditevent_subject_type_subject_id",
 				Unique:  false,
-				Columns: []*schema.Column{AuditEventsColumns[5], AuditEventsColumns[6]},
+				Columns: []*schema.Column{AuditEventsColumns[9], AuditEventsColumns[10]},
 			},
 		},
 	}
@@ -121,16 +125,19 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Size: 254},
 		{Name: "display_name", Type: field.TypeString, Size: 80, Default: ""},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"superadmin", "admin"}},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"superadmin", "admin", "support"}},
+		{Name: "role_ids", Type: field.TypeJSON},
 		{Name: "permissions", Type: field.TypeJSON},
 		{Name: "password_hash", Type: field.TypeString, Nullable: true},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"invited", "active", "disabled"}, Default: "invited"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"invited", "active", "disabled", "suspended", "revoked", "pending_approval"}, Default: "invited"},
 		{Name: "totp_secret_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "totp_confirmed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "totp_last_used_step", Type: field.TypeInt64, Default: 0},
 		{Name: "failed_attempts", Type: field.TypeInt, Default: 0},
 		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "approved_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "approved_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// StaffAccountsTable holds the schema information for the "staff_accounts" table.
@@ -208,6 +215,30 @@ var (
 			},
 		},
 	}
+	// StaffRolesColumns holds the columns for the "staff_roles" table.
+	StaffRolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 60},
+		{Name: "department", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "permissions", Type: field.TypeJSON},
+		{Name: "is_template", Type: field.TypeBool, Default: false},
+		{Name: "created_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// StaffRolesTable holds the schema information for the "staff_roles" table.
+	StaffRolesTable = &schema.Table{
+		Name:       "staff_roles",
+		Columns:    StaffRolesColumns,
+		PrimaryKey: []*schema.Column{StaffRolesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "staffrole_name",
+				Unique:  true,
+				Columns: []*schema.Column{StaffRolesColumns[2]},
+			},
+		},
+	}
 	// StaffSessionsColumns holds the columns for the "staff_sessions" table.
 	StaffSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -261,6 +292,7 @@ var (
 		StaffAccountsTable,
 		StaffInvitationsTable,
 		StaffLoginChallengesTable,
+		StaffRolesTable,
 		StaffSessionsTable,
 	}
 )
