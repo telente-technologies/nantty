@@ -36,11 +36,29 @@ type GuestSlot func(*sql.Selector)
 // JoinRequest is the predicate function for joinrequest builders.
 type JoinRequest func(*sql.Selector)
 
+// LiveComment is the predicate function for livecomment builders.
+type LiveComment func(*sql.Selector)
+
+// LiveIngress is the predicate function for liveingress builders.
+type LiveIngress func(*sql.Selector)
+
 // LiveLeaderboardEntry is the predicate function for liveleaderboardentry builders.
 type LiveLeaderboardEntry func(*sql.Selector)
 
+// LiveModerator is the predicate function for livemoderator builders.
+type LiveModerator func(*sql.Selector)
+
 // LiveProduct is the predicate function for liveproduct builders.
 type LiveProduct func(*sql.Selector)
+
+// LiveRecording is the predicate function for liverecording builders.
+type LiveRecording func(*sql.Selector)
+
+// LiveRestriction is the predicate function for liverestriction builders.
+type LiveRestriction func(*sql.Selector)
+
+// LiveRoomSetting is the predicate function for liveroomsetting builders.
+type LiveRoomSetting func(*sql.Selector)
 
 // LiveSession is the predicate function for livesession builders.
 type LiveSession func(*sql.Selector)
@@ -50,6 +68,9 @@ type LiveViewer func(*sql.Selector)
 
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
+
+// OverlayScene is the predicate function for overlayscene builders.
+type OverlayScene func(*sql.Selector)
 
 // PointsEntry is the predicate function for pointsentry builders.
 type PointsEntry func(*sql.Selector)

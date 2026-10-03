@@ -34,16 +34,30 @@ type Tx struct {
 	GuestSlot *GuestSlotClient
 	// JoinRequest is the client for interacting with the JoinRequest builders.
 	JoinRequest *JoinRequestClient
+	// LiveComment is the client for interacting with the LiveComment builders.
+	LiveComment *LiveCommentClient
+	// LiveIngress is the client for interacting with the LiveIngress builders.
+	LiveIngress *LiveIngressClient
 	// LiveLeaderboardEntry is the client for interacting with the LiveLeaderboardEntry builders.
 	LiveLeaderboardEntry *LiveLeaderboardEntryClient
+	// LiveModerator is the client for interacting with the LiveModerator builders.
+	LiveModerator *LiveModeratorClient
 	// LiveProduct is the client for interacting with the LiveProduct builders.
 	LiveProduct *LiveProductClient
+	// LiveRecording is the client for interacting with the LiveRecording builders.
+	LiveRecording *LiveRecordingClient
+	// LiveRestriction is the client for interacting with the LiveRestriction builders.
+	LiveRestriction *LiveRestrictionClient
+	// LiveRoomSetting is the client for interacting with the LiveRoomSetting builders.
+	LiveRoomSetting *LiveRoomSettingClient
 	// LiveSession is the client for interacting with the LiveSession builders.
 	LiveSession *LiveSessionClient
 	// LiveViewer is the client for interacting with the LiveViewer builders.
 	LiveViewer *LiveViewerClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// OverlayScene is the client for interacting with the OverlayScene builders.
+	OverlayScene *OverlaySceneClient
 	// PointsEntry is the client for interacting with the PointsEntry builders.
 	PointsEntry *PointsEntryClient
 	// PointsRule is the client for interacting with the PointsRule builders.
@@ -191,11 +205,18 @@ func (tx *Tx) init() {
 	tx.GoalContribution = NewGoalContributionClient(tx.config)
 	tx.GuestSlot = NewGuestSlotClient(tx.config)
 	tx.JoinRequest = NewJoinRequestClient(tx.config)
+	tx.LiveComment = NewLiveCommentClient(tx.config)
+	tx.LiveIngress = NewLiveIngressClient(tx.config)
 	tx.LiveLeaderboardEntry = NewLiveLeaderboardEntryClient(tx.config)
+	tx.LiveModerator = NewLiveModeratorClient(tx.config)
 	tx.LiveProduct = NewLiveProductClient(tx.config)
+	tx.LiveRecording = NewLiveRecordingClient(tx.config)
+	tx.LiveRestriction = NewLiveRestrictionClient(tx.config)
+	tx.LiveRoomSetting = NewLiveRoomSettingClient(tx.config)
 	tx.LiveSession = NewLiveSessionClient(tx.config)
 	tx.LiveViewer = NewLiveViewerClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.OverlayScene = NewOverlaySceneClient(tx.config)
 	tx.PointsEntry = NewPointsEntryClient(tx.config)
 	tx.PointsRule = NewPointsRuleClient(tx.config)
 	tx.ProcessedGift = NewProcessedGiftClient(tx.config)

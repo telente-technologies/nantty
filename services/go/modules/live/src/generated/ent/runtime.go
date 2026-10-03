@@ -15,11 +15,18 @@ import (
 	"zudomart/modules/live/src/generated/ent/goalcontribution"
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
+	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
+	"zudomart/modules/live/src/generated/ent/livemoderator"
 	"zudomart/modules/live/src/generated/ent/liveproduct"
+	"zudomart/modules/live/src/generated/ent/liverecording"
+	"zudomart/modules/live/src/generated/ent/liverestriction"
+	"zudomart/modules/live/src/generated/ent/liveroomsetting"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
+	"zudomart/modules/live/src/generated/ent/overlayscene"
 	"zudomart/modules/live/src/generated/ent/pointsentry"
 	"zudomart/modules/live/src/generated/ent/pointsrule"
 	"zudomart/modules/live/src/generated/ent/processedgift"
@@ -320,6 +327,58 @@ func init() {
 	joinrequestDescID := joinrequestMixinFields0[0].Descriptor()
 	// joinrequest.DefaultID holds the default value on creation for the id field.
 	joinrequest.DefaultID = joinrequestDescID.Default.(func() uuid.UUID)
+	livecommentMixin := schema.LiveComment{}.Mixin()
+	livecommentMixinFields0 := livecommentMixin[0].Fields()
+	_ = livecommentMixinFields0
+	livecommentFields := schema.LiveComment{}.Fields()
+	_ = livecommentFields
+	// livecommentDescCreatedAt is the schema descriptor for created_at field.
+	livecommentDescCreatedAt := livecommentMixinFields0[1].Descriptor()
+	// livecomment.DefaultCreatedAt holds the default value on creation for the created_at field.
+	livecomment.DefaultCreatedAt = livecommentDescCreatedAt.Default.(func() time.Time)
+	// livecommentDescBody is the schema descriptor for body field.
+	livecommentDescBody := livecommentFields[2].Descriptor()
+	// livecomment.BodyValidator is a validator for the "body" field. It is called by the builders before save.
+	livecomment.BodyValidator = func() func(string) error {
+		validators := livecommentDescBody.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(body string) error {
+			for _, fn := range fns {
+				if err := fn(body); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// livecommentDescID is the schema descriptor for id field.
+	livecommentDescID := livecommentMixinFields0[0].Descriptor()
+	// livecomment.DefaultID holds the default value on creation for the id field.
+	livecomment.DefaultID = livecommentDescID.Default.(func() uuid.UUID)
+	liveingressMixin := schema.LiveIngress{}.Mixin()
+	liveingressMixinFields0 := liveingressMixin[0].Fields()
+	_ = liveingressMixinFields0
+	liveingressFields := schema.LiveIngress{}.Fields()
+	_ = liveingressFields
+	// liveingressDescCreatedAt is the schema descriptor for created_at field.
+	liveingressDescCreatedAt := liveingressMixinFields0[1].Descriptor()
+	// liveingress.DefaultCreatedAt holds the default value on creation for the created_at field.
+	liveingress.DefaultCreatedAt = liveingressDescCreatedAt.Default.(func() time.Time)
+	// liveingressDescLivekitIngressID is the schema descriptor for livekit_ingress_id field.
+	liveingressDescLivekitIngressID := liveingressFields[1].Descriptor()
+	// liveingress.LivekitIngressIDValidator is a validator for the "livekit_ingress_id" field. It is called by the builders before save.
+	liveingress.LivekitIngressIDValidator = liveingressDescLivekitIngressID.Validators[0].(func(string) error)
+	// liveingressDescStreamKeyHint is the schema descriptor for stream_key_hint field.
+	liveingressDescStreamKeyHint := liveingressFields[3].Descriptor()
+	// liveingress.StreamKeyHintValidator is a validator for the "stream_key_hint" field. It is called by the builders before save.
+	liveingress.StreamKeyHintValidator = liveingressDescStreamKeyHint.Validators[0].(func(string) error)
+	// liveingressDescID is the schema descriptor for id field.
+	liveingressDescID := liveingressMixinFields0[0].Descriptor()
+	// liveingress.DefaultID holds the default value on creation for the id field.
+	liveingress.DefaultID = liveingressDescID.Default.(func() uuid.UUID)
 	liveleaderboardentryMixin := schema.LiveLeaderboardEntry{}.Mixin()
 	liveleaderboardentryMixinFields0 := liveleaderboardentryMixin[0].Fields()
 	_ = liveleaderboardentryMixinFields0
@@ -345,6 +404,19 @@ func init() {
 	liveleaderboardentryDescID := liveleaderboardentryMixinFields0[0].Descriptor()
 	// liveleaderboardentry.DefaultID holds the default value on creation for the id field.
 	liveleaderboardentry.DefaultID = liveleaderboardentryDescID.Default.(func() uuid.UUID)
+	livemoderatorMixin := schema.LiveModerator{}.Mixin()
+	livemoderatorMixinFields0 := livemoderatorMixin[0].Fields()
+	_ = livemoderatorMixinFields0
+	livemoderatorFields := schema.LiveModerator{}.Fields()
+	_ = livemoderatorFields
+	// livemoderatorDescCreatedAt is the schema descriptor for created_at field.
+	livemoderatorDescCreatedAt := livemoderatorMixinFields0[1].Descriptor()
+	// livemoderator.DefaultCreatedAt holds the default value on creation for the created_at field.
+	livemoderator.DefaultCreatedAt = livemoderatorDescCreatedAt.Default.(func() time.Time)
+	// livemoderatorDescID is the schema descriptor for id field.
+	livemoderatorDescID := livemoderatorMixinFields0[0].Descriptor()
+	// livemoderator.DefaultID holds the default value on creation for the id field.
+	livemoderator.DefaultID = livemoderatorDescID.Default.(func() uuid.UUID)
 	liveproductMixin := schema.LiveProduct{}.Mixin()
 	liveproductMixinFields0 := liveproductMixin[0].Fields()
 	_ = liveproductMixinFields0
@@ -366,6 +438,70 @@ func init() {
 	liveproductDescID := liveproductMixinFields0[0].Descriptor()
 	// liveproduct.DefaultID holds the default value on creation for the id field.
 	liveproduct.DefaultID = liveproductDescID.Default.(func() uuid.UUID)
+	liverecordingMixin := schema.LiveRecording{}.Mixin()
+	liverecordingMixinFields0 := liverecordingMixin[0].Fields()
+	_ = liverecordingMixinFields0
+	liverecordingFields := schema.LiveRecording{}.Fields()
+	_ = liverecordingFields
+	// liverecordingDescCreatedAt is the schema descriptor for created_at field.
+	liverecordingDescCreatedAt := liverecordingMixinFields0[1].Descriptor()
+	// liverecording.DefaultCreatedAt holds the default value on creation for the created_at field.
+	liverecording.DefaultCreatedAt = liverecordingDescCreatedAt.Default.(func() time.Time)
+	// liverecordingDescEgressID is the schema descriptor for egress_id field.
+	liverecordingDescEgressID := liverecordingFields[1].Descriptor()
+	// liverecording.EgressIDValidator is a validator for the "egress_id" field. It is called by the builders before save.
+	liverecording.EgressIDValidator = liverecordingDescEgressID.Validators[0].(func(string) error)
+	// liverecordingDescObjectKey is the schema descriptor for object_key field.
+	liverecordingDescObjectKey := liverecordingFields[3].Descriptor()
+	// liverecording.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
+	liverecording.ObjectKeyValidator = liverecordingDescObjectKey.Validators[0].(func(string) error)
+	// liverecordingDescDurationSeconds is the schema descriptor for duration_seconds field.
+	liverecordingDescDurationSeconds := liverecordingFields[4].Descriptor()
+	// liverecording.DefaultDurationSeconds holds the default value on creation for the duration_seconds field.
+	liverecording.DefaultDurationSeconds = liverecordingDescDurationSeconds.Default.(int64)
+	// liverecordingDescSizeBytes is the schema descriptor for size_bytes field.
+	liverecordingDescSizeBytes := liverecordingFields[5].Descriptor()
+	// liverecording.DefaultSizeBytes holds the default value on creation for the size_bytes field.
+	liverecording.DefaultSizeBytes = liverecordingDescSizeBytes.Default.(int64)
+	// liverecordingDescFailureReason is the schema descriptor for failure_reason field.
+	liverecordingDescFailureReason := liverecordingFields[6].Descriptor()
+	// liverecording.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	liverecording.FailureReasonValidator = liverecordingDescFailureReason.Validators[0].(func(string) error)
+	// liverecordingDescID is the schema descriptor for id field.
+	liverecordingDescID := liverecordingMixinFields0[0].Descriptor()
+	// liverecording.DefaultID holds the default value on creation for the id field.
+	liverecording.DefaultID = liverecordingDescID.Default.(func() uuid.UUID)
+	liverestrictionMixin := schema.LiveRestriction{}.Mixin()
+	liverestrictionMixinFields0 := liverestrictionMixin[0].Fields()
+	_ = liverestrictionMixinFields0
+	liverestrictionFields := schema.LiveRestriction{}.Fields()
+	_ = liverestrictionFields
+	// liverestrictionDescCreatedAt is the schema descriptor for created_at field.
+	liverestrictionDescCreatedAt := liverestrictionMixinFields0[1].Descriptor()
+	// liverestriction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	liverestriction.DefaultCreatedAt = liverestrictionDescCreatedAt.Default.(func() time.Time)
+	// liverestrictionDescReason is the schema descriptor for reason field.
+	liverestrictionDescReason := liverestrictionFields[4].Descriptor()
+	// liverestriction.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	liverestriction.ReasonValidator = liverestrictionDescReason.Validators[0].(func(string) error)
+	// liverestrictionDescID is the schema descriptor for id field.
+	liverestrictionDescID := liverestrictionMixinFields0[0].Descriptor()
+	// liverestriction.DefaultID holds the default value on creation for the id field.
+	liverestriction.DefaultID = liverestrictionDescID.Default.(func() uuid.UUID)
+	liveroomsettingFields := schema.LiveRoomSetting{}.Fields()
+	_ = liveroomsettingFields
+	// liveroomsettingDescCommentsEnabled is the schema descriptor for comments_enabled field.
+	liveroomsettingDescCommentsEnabled := liveroomsettingFields[1].Descriptor()
+	// liveroomsetting.DefaultCommentsEnabled holds the default value on creation for the comments_enabled field.
+	liveroomsetting.DefaultCommentsEnabled = liveroomsettingDescCommentsEnabled.Default.(bool)
+	// liveroomsettingDescSlowModeSeconds is the schema descriptor for slow_mode_seconds field.
+	liveroomsettingDescSlowModeSeconds := liveroomsettingFields[2].Descriptor()
+	// liveroomsetting.DefaultSlowModeSeconds holds the default value on creation for the slow_mode_seconds field.
+	liveroomsetting.DefaultSlowModeSeconds = liveroomsettingDescSlowModeSeconds.Default.(int)
+	// liveroomsettingDescRecordEnabled is the schema descriptor for record_enabled field.
+	liveroomsettingDescRecordEnabled := liveroomsettingFields[5].Descriptor()
+	// liveroomsetting.DefaultRecordEnabled holds the default value on creation for the record_enabled field.
+	liveroomsetting.DefaultRecordEnabled = liveroomsettingDescRecordEnabled.Default.(bool)
 	livesessionMixin := schema.LiveSession{}.Mixin()
 	livesessionMixinFields0 := livesessionMixin[0].Fields()
 	_ = livesessionMixinFields0
@@ -479,6 +615,54 @@ func init() {
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
 	outboxevent.DefaultID = outboxeventDescID.Default.(func() uuid.UUID)
+	overlaysceneFields := schema.OverlayScene{}.Fields()
+	_ = overlaysceneFields
+	// overlaysceneDescCreatedAt is the schema descriptor for created_at field.
+	overlaysceneDescCreatedAt := overlaysceneFields[1].Descriptor()
+	// overlayscene.DefaultCreatedAt holds the default value on creation for the created_at field.
+	overlayscene.DefaultCreatedAt = overlaysceneDescCreatedAt.Default.(func() time.Time)
+	// overlaysceneDescUpdatedAt is the schema descriptor for updated_at field.
+	overlaysceneDescUpdatedAt := overlaysceneFields[2].Descriptor()
+	// overlayscene.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	overlayscene.DefaultUpdatedAt = overlaysceneDescUpdatedAt.Default.(func() time.Time)
+	// overlayscene.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	overlayscene.UpdateDefaultUpdatedAt = overlaysceneDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// overlaysceneDescName is the schema descriptor for name field.
+	overlaysceneDescName := overlaysceneFields[5].Descriptor()
+	// overlayscene.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	overlayscene.NameValidator = func() func(string) error {
+		validators := overlaysceneDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// overlaysceneDescIsMain is the schema descriptor for is_main field.
+	overlaysceneDescIsMain := overlaysceneFields[6].Descriptor()
+	// overlayscene.DefaultIsMain holds the default value on creation for the is_main field.
+	overlayscene.DefaultIsMain = overlaysceneDescIsMain.Default.(bool)
+	// overlaysceneDescPublishedName is the schema descriptor for published_name field.
+	overlaysceneDescPublishedName := overlaysceneFields[9].Descriptor()
+	// overlayscene.PublishedNameValidator is a validator for the "published_name" field. It is called by the builders before save.
+	overlayscene.PublishedNameValidator = overlaysceneDescPublishedName.Validators[0].(func(string) error)
+	// overlaysceneDescRevision is the schema descriptor for revision field.
+	overlaysceneDescRevision := overlaysceneFields[11].Descriptor()
+	// overlayscene.DefaultRevision holds the default value on creation for the revision field.
+	overlayscene.DefaultRevision = overlaysceneDescRevision.Default.(int)
+	// overlaysceneDescID is the schema descriptor for id field.
+	overlaysceneDescID := overlaysceneFields[0].Descriptor()
+	// overlayscene.DefaultID holds the default value on creation for the id field.
+	overlayscene.DefaultID = overlaysceneDescID.Default.(func() string)
+	// overlayscene.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	overlayscene.IDValidator = overlaysceneDescID.Validators[0].(func(string) error)
 	pointsentryMixin := schema.PointsEntry{}.Mixin()
 	pointsentryMixinFields0 := pointsentryMixin[0].Fields()
 	_ = pointsentryMixinFields0
