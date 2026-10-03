@@ -22,16 +22,19 @@ func (StaffAccount) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("email").NotEmpty().MaxLen(254),
 		field.String("display_name").Default("").MaxLen(80),
-		field.Enum("role").Values("superadmin", "admin").Immutable(),
+		field.Enum("role").Values("superadmin", "admin", "support"),
+		field.Strings("role_ids").Default([]string{}),
 		field.Strings("permissions").Default([]string{}),
 		field.String("password_hash").Optional().Nillable().Sensitive(),
-		field.Enum("status").Values("invited", "active", "disabled").Default("invited"),
+		field.Enum("status").Values("invited", "active", "disabled", "suspended", "revoked", "pending_approval").Default("invited"),
 		field.Bytes("totp_secret_encrypted").Optional().Sensitive(),
 		field.Time("totp_confirmed_at").Optional().Nillable(),
 		field.Int64("totp_last_used_step").Default(0),
 		field.Int("failed_attempts").Default(0).NonNegative(),
 		field.Time("locked_until").Optional().Nillable(),
 		field.UUID("created_by", uuid.UUID{}).Optional().Nillable().Immutable(),
+		field.UUID("approved_by", uuid.UUID{}).Optional().Nillable(),
+		field.Time("approved_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

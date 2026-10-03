@@ -19,6 +19,10 @@ func (AuditEvent) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("actor_id").NotEmpty().Immutable().MaxLen(64),
 		field.String("actor_role").Default("").Immutable().MaxLen(32),
+		field.String("actor_name").Default("").Immutable().MaxLen(120),
+		field.Strings("actor_departments").Default([]string{}).Immutable(),
+		field.Bool("step_up_verified").Default(false).Immutable(),
+		field.String("subject_label").Default("").Immutable().MaxLen(200),
 		field.String("action").NotEmpty().Immutable().MaxLen(100),
 		field.String("subject_type").Default("").Immutable().MaxLen(64),
 		field.String("subject_id").Default("").Immutable().MaxLen(128),
