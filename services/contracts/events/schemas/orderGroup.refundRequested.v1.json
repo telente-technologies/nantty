@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.refundRequested.v1.json",
+  "title": "OrderGroupRefundRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orderGroupId",
+    "storeId",
+    "buyerAccountId",
+    "amountMinor",
+    "currency",
+    "reason"
+  ],
+  "properties": {
+    "orderGroupId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "amountMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "description": "Emitted when a paid order group is cancelled or a return is received. go-money consumes it to refund the escrow of orderId = orderGroupId. amountMinor is the amount to refund (the whole order total on cancellation); reason is free text, or return:<returnId> for returns. Idempotency key for the refund: orderGroupId + reason."
+}

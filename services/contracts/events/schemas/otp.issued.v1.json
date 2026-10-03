@@ -6,14 +6,13 @@
   "additionalProperties": false,
   "required": [
     "destination",
-    "code",
+    "codeSealed",
+    "keyId",
+    "expiresAt",
     "purpose"
   ],
   "properties": {
     "destination": {
-      "type": "string"
-    },
-    "code": {
       "type": "string"
     },
     "purpose": {
@@ -24,6 +23,17 @@
     },
     "expiresInMinutes": {
       "type": "integer"
+    },
+    "codeSealed": {
+      "type": "string",
+      "description": "base64(nonce||AES-256-GCM ciphertext||tag) of the code; key shared by goIdentity and notifications only"
+    },
+    "keyId": {
+      "type": "string"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.statusChanged.v1.json",
+  "title": "OrderGroupStatusChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orderGroupId",
+    "storeId",
+    "from",
+    "to",
+    "reference",
+    "actorKind"
+  ],
+  "properties": {
+    "orderGroupId": {
+      "type": "string"
+    },
+    "checkoutId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "sellerAccountId": {
+      "type": "string"
+    },
+    "from": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "actorKind": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/payoutAccount.creationFailed.v1.json",
+  "title": "payoutAccount.creationFailed",
+  "description": "Creating the payout account failed after all retries (dead letter). The user sees 'Try again'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "userId",
+    "lastError"
+  ],
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "lastError": {
+      "type": "string"
+    }
+  }
+}

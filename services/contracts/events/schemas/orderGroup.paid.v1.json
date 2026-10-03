@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.paid.v1.json",
+  "title": "OrderGroupPaid",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orderGroupId",
+    "checkoutId",
+    "storeId",
+    "buyerAccountId",
+    "totalMinor",
+    "currency"
+  ],
+  "properties": {
+    "orderGroupId": {
+      "type": "string"
+    },
+    "checkoutId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "totalMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    }
+  }
+}

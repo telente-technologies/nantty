@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/order.created.v1.json",
+  "title": "OrderCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "checkoutId",
+    "buyerAccountId",
+    "currency",
+    "totalMinor",
+    "orderGroupCount"
+  ],
+  "properties": {
+    "checkoutId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "totalMinor": {
+      "type": "integer"
+    },
+    "orderGroupCount": {
+      "type": "integer"
+    }
+  }
+}
