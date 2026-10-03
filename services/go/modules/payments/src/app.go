@@ -63,4 +63,6 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	})
 }
 
-func (module *Module) Close(context.Context) error { return module.Application.Container.Resources.Close() }
+func (module *Module) Close(context.Context) error {
+	return module.Application.Container.Resources.Close()
+}
