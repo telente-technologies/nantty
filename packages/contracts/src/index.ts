@@ -1,7 +1,3 @@
-/**
- * Shared API contracts between frontend and backend.
- */
-
 export interface ApiResponse<T> {
   readonly data: T;
   readonly status: number;
