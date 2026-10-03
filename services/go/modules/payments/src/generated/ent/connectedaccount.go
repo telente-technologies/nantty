@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -26,8 +27,34 @@ type ConnectedAccount struct {
 	Provider string `json:"provider,omitempty"`
 	// ProviderAccountID holds the value of the "provider_account_id" field.
 	ProviderAccountID string `json:"provider_account_id,omitempty"`
+	// Status holds the value of the "status" field.
+	Status connectedaccount.Status `json:"status,omitempty"`
+	// LastError holds the value of the "last_error" field.
+	LastError string `json:"last_error,omitempty"`
+	// VerificationStatus holds the value of the "verification_status" field.
+	VerificationStatus connectedaccount.VerificationStatus `json:"verification_status,omitempty"`
+	// VerificationReasons holds the value of the "verification_reasons" field.
+	VerificationReasons []byte `json:"verification_reasons,omitempty"`
+	// VerificationStatusChangedAt holds the value of the "verification_status_changed_at" field.
+	VerificationStatusChangedAt *time.Time `json:"verification_status_changed_at,omitempty"`
+	// VerificationNudgedAt holds the value of the "verification_nudged_at" field.
+	VerificationNudgedAt *time.Time `json:"verification_nudged_at,omitempty"`
 	// AcceptsPayments holds the value of the "accepts_payments" field.
 	AcceptsPayments bool `json:"accepts_payments,omitempty"`
+	// Roles holds the value of the "roles" field.
+	Roles []string `json:"roles,omitempty"`
+	// RecipientCode holds the value of the "recipient_code" field.
+	RecipientCode string `json:"recipient_code,omitempty"`
+	// SettlementSubaccountCode holds the value of the "settlement_subaccount_code" field.
+	SettlementSubaccountCode string `json:"settlement_subaccount_code,omitempty"`
+	// EscrowSubaccountCode holds the value of the "escrow_subaccount_code" field.
+	EscrowSubaccountCode string `json:"escrow_subaccount_code,omitempty"`
+	// BankCode holds the value of the "bank_code" field.
+	BankCode string `json:"bank_code,omitempty"`
+	// AccountLast4 holds the value of the "account_last4" field.
+	AccountLast4 string `json:"account_last4,omitempty"`
+	// AccountName holds the value of the "account_name" field.
+	AccountName string `json:"account_name,omitempty"`
 	// CapabilityStatuses holds the value of the "capability_statuses" field.
 	CapabilityStatuses []byte `json:"capability_statuses,omitempty"`
 	// OutstandingRequirements holds the value of the "outstanding_requirements" field.
@@ -56,15 +83,15 @@ func (*ConnectedAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case connectedaccount.FieldCapabilityStatuses, connectedaccount.FieldOutstandingRequirements:
+		case connectedaccount.FieldVerificationReasons, connectedaccount.FieldRoles, connectedaccount.FieldCapabilityStatuses, connectedaccount.FieldOutstandingRequirements:
 			values[i] = new([]byte)
 		case connectedaccount.FieldAcceptsPayments, connectedaccount.FieldManualPayoutScheduleConfirmed, connectedaccount.FieldPayoutsFrozen:
 			values[i] = new(sql.NullBool)
 		case connectedaccount.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case connectedaccount.FieldUserID, connectedaccount.FieldProvider, connectedaccount.FieldProviderAccountID, connectedaccount.FieldPayoutsFrozenReason, connectedaccount.FieldVirtualAccountNumber, connectedaccount.FieldVirtualAccountBankName:
+		case connectedaccount.FieldUserID, connectedaccount.FieldProvider, connectedaccount.FieldProviderAccountID, connectedaccount.FieldStatus, connectedaccount.FieldLastError, connectedaccount.FieldVerificationStatus, connectedaccount.FieldRecipientCode, connectedaccount.FieldSettlementSubaccountCode, connectedaccount.FieldEscrowSubaccountCode, connectedaccount.FieldBankCode, connectedaccount.FieldAccountLast4, connectedaccount.FieldAccountName, connectedaccount.FieldPayoutsFrozenReason, connectedaccount.FieldVirtualAccountNumber, connectedaccount.FieldVirtualAccountBankName:
 			values[i] = new(sql.NullString)
-		case connectedaccount.FieldCreatedAt, connectedaccount.FieldRequirementsDeadlineAt, connectedaccount.FieldUpdatedAt:
+		case connectedaccount.FieldCreatedAt, connectedaccount.FieldVerificationStatusChangedAt, connectedaccount.FieldVerificationNudgedAt, connectedaccount.FieldRequirementsDeadlineAt, connectedaccount.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case connectedaccount.FieldID:
 			values[i] = new(uuid.UUID)
@@ -113,11 +140,93 @@ func (_m *ConnectedAccount) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ProviderAccountID = value.String
 			}
+		case connectedaccount.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = connectedaccount.Status(value.String)
+			}
+		case connectedaccount.FieldLastError:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_error", values[i])
+			} else if value.Valid {
+				_m.LastError = value.String
+			}
+		case connectedaccount.FieldVerificationStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field verification_status", values[i])
+			} else if value.Valid {
+				_m.VerificationStatus = connectedaccount.VerificationStatus(value.String)
+			}
+		case connectedaccount.FieldVerificationReasons:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field verification_reasons", values[i])
+			} else if value != nil {
+				_m.VerificationReasons = *value
+			}
+		case connectedaccount.FieldVerificationStatusChangedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field verification_status_changed_at", values[i])
+			} else if value.Valid {
+				_m.VerificationStatusChangedAt = new(time.Time)
+				*_m.VerificationStatusChangedAt = value.Time
+			}
+		case connectedaccount.FieldVerificationNudgedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field verification_nudged_at", values[i])
+			} else if value.Valid {
+				_m.VerificationNudgedAt = new(time.Time)
+				*_m.VerificationNudgedAt = value.Time
+			}
 		case connectedaccount.FieldAcceptsPayments:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field accepts_payments", values[i])
 			} else if value.Valid {
 				_m.AcceptsPayments = value.Bool
+			}
+		case connectedaccount.FieldRoles:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field roles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Roles); err != nil {
+					return fmt.Errorf("unmarshal field roles: %w", err)
+				}
+			}
+		case connectedaccount.FieldRecipientCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field recipient_code", values[i])
+			} else if value.Valid {
+				_m.RecipientCode = value.String
+			}
+		case connectedaccount.FieldSettlementSubaccountCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_subaccount_code", values[i])
+			} else if value.Valid {
+				_m.SettlementSubaccountCode = value.String
+			}
+		case connectedaccount.FieldEscrowSubaccountCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field escrow_subaccount_code", values[i])
+			} else if value.Valid {
+				_m.EscrowSubaccountCode = value.String
+			}
+		case connectedaccount.FieldBankCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field bank_code", values[i])
+			} else if value.Valid {
+				_m.BankCode = value.String
+			}
+		case connectedaccount.FieldAccountLast4:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_last4", values[i])
+			} else if value.Valid {
+				_m.AccountLast4 = value.String
+			}
+		case connectedaccount.FieldAccountName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_name", values[i])
+			} else if value.Valid {
+				_m.AccountName = value.String
 			}
 		case connectedaccount.FieldCapabilityStatuses:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -228,8 +337,51 @@ func (_m *ConnectedAccount) String() string {
 	builder.WriteString("provider_account_id=")
 	builder.WriteString(_m.ProviderAccountID)
 	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("last_error=")
+	builder.WriteString(_m.LastError)
+	builder.WriteString(", ")
+	builder.WriteString("verification_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VerificationStatus))
+	builder.WriteString(", ")
+	builder.WriteString("verification_reasons=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VerificationReasons))
+	builder.WriteString(", ")
+	if v := _m.VerificationStatusChangedAt; v != nil {
+		builder.WriteString("verification_status_changed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.VerificationNudgedAt; v != nil {
+		builder.WriteString("verification_nudged_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("accepts_payments=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AcceptsPayments))
+	builder.WriteString(", ")
+	builder.WriteString("roles=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Roles))
+	builder.WriteString(", ")
+	builder.WriteString("recipient_code=")
+	builder.WriteString(_m.RecipientCode)
+	builder.WriteString(", ")
+	builder.WriteString("settlement_subaccount_code=")
+	builder.WriteString(_m.SettlementSubaccountCode)
+	builder.WriteString(", ")
+	builder.WriteString("escrow_subaccount_code=")
+	builder.WriteString(_m.EscrowSubaccountCode)
+	builder.WriteString(", ")
+	builder.WriteString("bank_code=")
+	builder.WriteString(_m.BankCode)
+	builder.WriteString(", ")
+	builder.WriteString("account_last4=")
+	builder.WriteString(_m.AccountLast4)
+	builder.WriteString(", ")
+	builder.WriteString("account_name=")
+	builder.WriteString(_m.AccountName)
 	builder.WriteString(", ")
 	builder.WriteString("capability_statuses=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CapabilityStatuses))

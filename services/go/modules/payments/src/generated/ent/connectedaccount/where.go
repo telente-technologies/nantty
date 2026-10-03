@@ -75,9 +75,59 @@ func ProviderAccountID(v string) predicate.ConnectedAccount {
 	return predicate.ConnectedAccount(sql.FieldEQ(FieldProviderAccountID, v))
 }
 
+// LastError applies equality check predicate on the "last_error" field. It's identical to LastErrorEQ.
+func LastError(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldLastError, v))
+}
+
+// VerificationReasons applies equality check predicate on the "verification_reasons" field. It's identical to VerificationReasonsEQ.
+func VerificationReasons(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationReasons, v))
+}
+
+// VerificationStatusChangedAt applies equality check predicate on the "verification_status_changed_at" field. It's identical to VerificationStatusChangedAtEQ.
+func VerificationStatusChangedAt(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationNudgedAt applies equality check predicate on the "verification_nudged_at" field. It's identical to VerificationNudgedAtEQ.
+func VerificationNudgedAt(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationNudgedAt, v))
+}
+
 // AcceptsPayments applies equality check predicate on the "accepts_payments" field. It's identical to AcceptsPaymentsEQ.
 func AcceptsPayments(v bool) predicate.ConnectedAccount {
 	return predicate.ConnectedAccount(sql.FieldEQ(FieldAcceptsPayments, v))
+}
+
+// RecipientCode applies equality check predicate on the "recipient_code" field. It's identical to RecipientCodeEQ.
+func RecipientCode(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldRecipientCode, v))
+}
+
+// SettlementSubaccountCode applies equality check predicate on the "settlement_subaccount_code" field. It's identical to SettlementSubaccountCodeEQ.
+func SettlementSubaccountCode(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldSettlementSubaccountCode, v))
+}
+
+// EscrowSubaccountCode applies equality check predicate on the "escrow_subaccount_code" field. It's identical to EscrowSubaccountCodeEQ.
+func EscrowSubaccountCode(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldEscrowSubaccountCode, v))
+}
+
+// BankCode applies equality check predicate on the "bank_code" field. It's identical to BankCodeEQ.
+func BankCode(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldBankCode, v))
+}
+
+// AccountLast4 applies equality check predicate on the "account_last4" field. It's identical to AccountLast4EQ.
+func AccountLast4(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldAccountLast4, v))
+}
+
+// AccountName applies equality check predicate on the "account_name" field. It's identical to AccountNameEQ.
+func AccountName(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldAccountName, v))
 }
 
 // CapabilityStatuses applies equality check predicate on the "capability_statuses" field. It's identical to CapabilityStatusesEQ.
@@ -365,6 +415,261 @@ func ProviderAccountIDContainsFold(v string) predicate.ConnectedAccount {
 	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldProviderAccountID, v))
 }
 
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// LastErrorEQ applies the EQ predicate on the "last_error" field.
+func LastErrorEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldLastError, v))
+}
+
+// LastErrorNEQ applies the NEQ predicate on the "last_error" field.
+func LastErrorNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldLastError, v))
+}
+
+// LastErrorIn applies the In predicate on the "last_error" field.
+func LastErrorIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldLastError, vs...))
+}
+
+// LastErrorNotIn applies the NotIn predicate on the "last_error" field.
+func LastErrorNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldLastError, vs...))
+}
+
+// LastErrorGT applies the GT predicate on the "last_error" field.
+func LastErrorGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldLastError, v))
+}
+
+// LastErrorGTE applies the GTE predicate on the "last_error" field.
+func LastErrorGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldLastError, v))
+}
+
+// LastErrorLT applies the LT predicate on the "last_error" field.
+func LastErrorLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldLastError, v))
+}
+
+// LastErrorLTE applies the LTE predicate on the "last_error" field.
+func LastErrorLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldLastError, v))
+}
+
+// LastErrorContains applies the Contains predicate on the "last_error" field.
+func LastErrorContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldLastError, v))
+}
+
+// LastErrorHasPrefix applies the HasPrefix predicate on the "last_error" field.
+func LastErrorHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldLastError, v))
+}
+
+// LastErrorHasSuffix applies the HasSuffix predicate on the "last_error" field.
+func LastErrorHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldLastError, v))
+}
+
+// LastErrorEqualFold applies the EqualFold predicate on the "last_error" field.
+func LastErrorEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldLastError, v))
+}
+
+// LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
+func LastErrorContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldLastError, v))
+}
+
+// VerificationStatusEQ applies the EQ predicate on the "verification_status" field.
+func VerificationStatusEQ(v VerificationStatus) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationStatus, v))
+}
+
+// VerificationStatusNEQ applies the NEQ predicate on the "verification_status" field.
+func VerificationStatusNEQ(v VerificationStatus) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldVerificationStatus, v))
+}
+
+// VerificationStatusIn applies the In predicate on the "verification_status" field.
+func VerificationStatusIn(vs ...VerificationStatus) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldVerificationStatus, vs...))
+}
+
+// VerificationStatusNotIn applies the NotIn predicate on the "verification_status" field.
+func VerificationStatusNotIn(vs ...VerificationStatus) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldVerificationStatus, vs...))
+}
+
+// VerificationReasonsEQ applies the EQ predicate on the "verification_reasons" field.
+func VerificationReasonsEQ(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsNEQ applies the NEQ predicate on the "verification_reasons" field.
+func VerificationReasonsNEQ(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsIn applies the In predicate on the "verification_reasons" field.
+func VerificationReasonsIn(vs ...[]byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldVerificationReasons, vs...))
+}
+
+// VerificationReasonsNotIn applies the NotIn predicate on the "verification_reasons" field.
+func VerificationReasonsNotIn(vs ...[]byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldVerificationReasons, vs...))
+}
+
+// VerificationReasonsGT applies the GT predicate on the "verification_reasons" field.
+func VerificationReasonsGT(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsGTE applies the GTE predicate on the "verification_reasons" field.
+func VerificationReasonsGTE(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsLT applies the LT predicate on the "verification_reasons" field.
+func VerificationReasonsLT(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsLTE applies the LTE predicate on the "verification_reasons" field.
+func VerificationReasonsLTE(v []byte) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldVerificationReasons, v))
+}
+
+// VerificationReasonsIsNil applies the IsNil predicate on the "verification_reasons" field.
+func VerificationReasonsIsNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIsNull(FieldVerificationReasons))
+}
+
+// VerificationReasonsNotNil applies the NotNil predicate on the "verification_reasons" field.
+func VerificationReasonsNotNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotNull(FieldVerificationReasons))
+}
+
+// VerificationStatusChangedAtEQ applies the EQ predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtEQ(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtNEQ applies the NEQ predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtNEQ(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtIn applies the In predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtIn(vs ...time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldVerificationStatusChangedAt, vs...))
+}
+
+// VerificationStatusChangedAtNotIn applies the NotIn predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtNotIn(vs ...time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldVerificationStatusChangedAt, vs...))
+}
+
+// VerificationStatusChangedAtGT applies the GT predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtGT(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtGTE applies the GTE predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtGTE(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtLT applies the LT predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtLT(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtLTE applies the LTE predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtLTE(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldVerificationStatusChangedAt, v))
+}
+
+// VerificationStatusChangedAtIsNil applies the IsNil predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtIsNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIsNull(FieldVerificationStatusChangedAt))
+}
+
+// VerificationStatusChangedAtNotNil applies the NotNil predicate on the "verification_status_changed_at" field.
+func VerificationStatusChangedAtNotNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotNull(FieldVerificationStatusChangedAt))
+}
+
+// VerificationNudgedAtEQ applies the EQ predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtEQ(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtNEQ applies the NEQ predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtNEQ(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtIn applies the In predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtIn(vs ...time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldVerificationNudgedAt, vs...))
+}
+
+// VerificationNudgedAtNotIn applies the NotIn predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtNotIn(vs ...time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldVerificationNudgedAt, vs...))
+}
+
+// VerificationNudgedAtGT applies the GT predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtGT(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtGTE applies the GTE predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtGTE(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtLT applies the LT predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtLT(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtLTE applies the LTE predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtLTE(v time.Time) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldVerificationNudgedAt, v))
+}
+
+// VerificationNudgedAtIsNil applies the IsNil predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtIsNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIsNull(FieldVerificationNudgedAt))
+}
+
+// VerificationNudgedAtNotNil applies the NotNil predicate on the "verification_nudged_at" field.
+func VerificationNudgedAtNotNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotNull(FieldVerificationNudgedAt))
+}
+
 // AcceptsPaymentsEQ applies the EQ predicate on the "accepts_payments" field.
 func AcceptsPaymentsEQ(v bool) predicate.ConnectedAccount {
 	return predicate.ConnectedAccount(sql.FieldEQ(FieldAcceptsPayments, v))
@@ -373,6 +678,406 @@ func AcceptsPaymentsEQ(v bool) predicate.ConnectedAccount {
 // AcceptsPaymentsNEQ applies the NEQ predicate on the "accepts_payments" field.
 func AcceptsPaymentsNEQ(v bool) predicate.ConnectedAccount {
 	return predicate.ConnectedAccount(sql.FieldNEQ(FieldAcceptsPayments, v))
+}
+
+// RolesIsNil applies the IsNil predicate on the "roles" field.
+func RolesIsNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIsNull(FieldRoles))
+}
+
+// RolesNotNil applies the NotNil predicate on the "roles" field.
+func RolesNotNil() predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotNull(FieldRoles))
+}
+
+// RecipientCodeEQ applies the EQ predicate on the "recipient_code" field.
+func RecipientCodeEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldRecipientCode, v))
+}
+
+// RecipientCodeNEQ applies the NEQ predicate on the "recipient_code" field.
+func RecipientCodeNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldRecipientCode, v))
+}
+
+// RecipientCodeIn applies the In predicate on the "recipient_code" field.
+func RecipientCodeIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldRecipientCode, vs...))
+}
+
+// RecipientCodeNotIn applies the NotIn predicate on the "recipient_code" field.
+func RecipientCodeNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldRecipientCode, vs...))
+}
+
+// RecipientCodeGT applies the GT predicate on the "recipient_code" field.
+func RecipientCodeGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldRecipientCode, v))
+}
+
+// RecipientCodeGTE applies the GTE predicate on the "recipient_code" field.
+func RecipientCodeGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldRecipientCode, v))
+}
+
+// RecipientCodeLT applies the LT predicate on the "recipient_code" field.
+func RecipientCodeLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldRecipientCode, v))
+}
+
+// RecipientCodeLTE applies the LTE predicate on the "recipient_code" field.
+func RecipientCodeLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldRecipientCode, v))
+}
+
+// RecipientCodeContains applies the Contains predicate on the "recipient_code" field.
+func RecipientCodeContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldRecipientCode, v))
+}
+
+// RecipientCodeHasPrefix applies the HasPrefix predicate on the "recipient_code" field.
+func RecipientCodeHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldRecipientCode, v))
+}
+
+// RecipientCodeHasSuffix applies the HasSuffix predicate on the "recipient_code" field.
+func RecipientCodeHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldRecipientCode, v))
+}
+
+// RecipientCodeEqualFold applies the EqualFold predicate on the "recipient_code" field.
+func RecipientCodeEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldRecipientCode, v))
+}
+
+// RecipientCodeContainsFold applies the ContainsFold predicate on the "recipient_code" field.
+func RecipientCodeContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldRecipientCode, v))
+}
+
+// SettlementSubaccountCodeEQ applies the EQ predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeNEQ applies the NEQ predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeIn applies the In predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldSettlementSubaccountCode, vs...))
+}
+
+// SettlementSubaccountCodeNotIn applies the NotIn predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldSettlementSubaccountCode, vs...))
+}
+
+// SettlementSubaccountCodeGT applies the GT predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeGTE applies the GTE predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeLT applies the LT predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeLTE applies the LTE predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeContains applies the Contains predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeHasPrefix applies the HasPrefix predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeHasSuffix applies the HasSuffix predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeEqualFold applies the EqualFold predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldSettlementSubaccountCode, v))
+}
+
+// SettlementSubaccountCodeContainsFold applies the ContainsFold predicate on the "settlement_subaccount_code" field.
+func SettlementSubaccountCodeContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldSettlementSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeEQ applies the EQ predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeNEQ applies the NEQ predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeIn applies the In predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldEscrowSubaccountCode, vs...))
+}
+
+// EscrowSubaccountCodeNotIn applies the NotIn predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldEscrowSubaccountCode, vs...))
+}
+
+// EscrowSubaccountCodeGT applies the GT predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeGTE applies the GTE predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeLT applies the LT predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeLTE applies the LTE predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeContains applies the Contains predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeHasPrefix applies the HasPrefix predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeHasSuffix applies the HasSuffix predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeEqualFold applies the EqualFold predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldEscrowSubaccountCode, v))
+}
+
+// EscrowSubaccountCodeContainsFold applies the ContainsFold predicate on the "escrow_subaccount_code" field.
+func EscrowSubaccountCodeContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldEscrowSubaccountCode, v))
+}
+
+// BankCodeEQ applies the EQ predicate on the "bank_code" field.
+func BankCodeEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldBankCode, v))
+}
+
+// BankCodeNEQ applies the NEQ predicate on the "bank_code" field.
+func BankCodeNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldBankCode, v))
+}
+
+// BankCodeIn applies the In predicate on the "bank_code" field.
+func BankCodeIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldBankCode, vs...))
+}
+
+// BankCodeNotIn applies the NotIn predicate on the "bank_code" field.
+func BankCodeNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldBankCode, vs...))
+}
+
+// BankCodeGT applies the GT predicate on the "bank_code" field.
+func BankCodeGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldBankCode, v))
+}
+
+// BankCodeGTE applies the GTE predicate on the "bank_code" field.
+func BankCodeGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldBankCode, v))
+}
+
+// BankCodeLT applies the LT predicate on the "bank_code" field.
+func BankCodeLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldBankCode, v))
+}
+
+// BankCodeLTE applies the LTE predicate on the "bank_code" field.
+func BankCodeLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldBankCode, v))
+}
+
+// BankCodeContains applies the Contains predicate on the "bank_code" field.
+func BankCodeContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldBankCode, v))
+}
+
+// BankCodeHasPrefix applies the HasPrefix predicate on the "bank_code" field.
+func BankCodeHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldBankCode, v))
+}
+
+// BankCodeHasSuffix applies the HasSuffix predicate on the "bank_code" field.
+func BankCodeHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldBankCode, v))
+}
+
+// BankCodeEqualFold applies the EqualFold predicate on the "bank_code" field.
+func BankCodeEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldBankCode, v))
+}
+
+// BankCodeContainsFold applies the ContainsFold predicate on the "bank_code" field.
+func BankCodeContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldBankCode, v))
+}
+
+// AccountLast4EQ applies the EQ predicate on the "account_last4" field.
+func AccountLast4EQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldAccountLast4, v))
+}
+
+// AccountLast4NEQ applies the NEQ predicate on the "account_last4" field.
+func AccountLast4NEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldAccountLast4, v))
+}
+
+// AccountLast4In applies the In predicate on the "account_last4" field.
+func AccountLast4In(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldAccountLast4, vs...))
+}
+
+// AccountLast4NotIn applies the NotIn predicate on the "account_last4" field.
+func AccountLast4NotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldAccountLast4, vs...))
+}
+
+// AccountLast4GT applies the GT predicate on the "account_last4" field.
+func AccountLast4GT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldAccountLast4, v))
+}
+
+// AccountLast4GTE applies the GTE predicate on the "account_last4" field.
+func AccountLast4GTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldAccountLast4, v))
+}
+
+// AccountLast4LT applies the LT predicate on the "account_last4" field.
+func AccountLast4LT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldAccountLast4, v))
+}
+
+// AccountLast4LTE applies the LTE predicate on the "account_last4" field.
+func AccountLast4LTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldAccountLast4, v))
+}
+
+// AccountLast4Contains applies the Contains predicate on the "account_last4" field.
+func AccountLast4Contains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldAccountLast4, v))
+}
+
+// AccountLast4HasPrefix applies the HasPrefix predicate on the "account_last4" field.
+func AccountLast4HasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldAccountLast4, v))
+}
+
+// AccountLast4HasSuffix applies the HasSuffix predicate on the "account_last4" field.
+func AccountLast4HasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldAccountLast4, v))
+}
+
+// AccountLast4EqualFold applies the EqualFold predicate on the "account_last4" field.
+func AccountLast4EqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldAccountLast4, v))
+}
+
+// AccountLast4ContainsFold applies the ContainsFold predicate on the "account_last4" field.
+func AccountLast4ContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldAccountLast4, v))
+}
+
+// AccountNameEQ applies the EQ predicate on the "account_name" field.
+func AccountNameEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEQ(FieldAccountName, v))
+}
+
+// AccountNameNEQ applies the NEQ predicate on the "account_name" field.
+func AccountNameNEQ(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNEQ(FieldAccountName, v))
+}
+
+// AccountNameIn applies the In predicate on the "account_name" field.
+func AccountNameIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldIn(FieldAccountName, vs...))
+}
+
+// AccountNameNotIn applies the NotIn predicate on the "account_name" field.
+func AccountNameNotIn(vs ...string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldNotIn(FieldAccountName, vs...))
+}
+
+// AccountNameGT applies the GT predicate on the "account_name" field.
+func AccountNameGT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGT(FieldAccountName, v))
+}
+
+// AccountNameGTE applies the GTE predicate on the "account_name" field.
+func AccountNameGTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldGTE(FieldAccountName, v))
+}
+
+// AccountNameLT applies the LT predicate on the "account_name" field.
+func AccountNameLT(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLT(FieldAccountName, v))
+}
+
+// AccountNameLTE applies the LTE predicate on the "account_name" field.
+func AccountNameLTE(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldLTE(FieldAccountName, v))
+}
+
+// AccountNameContains applies the Contains predicate on the "account_name" field.
+func AccountNameContains(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContains(FieldAccountName, v))
+}
+
+// AccountNameHasPrefix applies the HasPrefix predicate on the "account_name" field.
+func AccountNameHasPrefix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasPrefix(FieldAccountName, v))
+}
+
+// AccountNameHasSuffix applies the HasSuffix predicate on the "account_name" field.
+func AccountNameHasSuffix(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldHasSuffix(FieldAccountName, v))
+}
+
+// AccountNameEqualFold applies the EqualFold predicate on the "account_name" field.
+func AccountNameEqualFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldEqualFold(FieldAccountName, v))
+}
+
+// AccountNameContainsFold applies the ContainsFold predicate on the "account_name" field.
+func AccountNameContainsFold(v string) predicate.ConnectedAccount {
+	return predicate.ConnectedAccount(sql.FieldContainsFold(FieldAccountName, v))
 }
 
 // CapabilityStatusesEQ applies the EQ predicate on the "capability_statuses" field.

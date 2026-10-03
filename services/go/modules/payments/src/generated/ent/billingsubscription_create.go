@@ -96,6 +96,34 @@ func (_c *BillingSubscriptionCreate) SetNillableProviderSubscriptionID(v *string
 	return _c
 }
 
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (_c *BillingSubscriptionCreate) SetProviderCustomerID(v string) *BillingSubscriptionCreate {
+	_c.mutation.SetProviderCustomerID(v)
+	return _c
+}
+
+// SetNillableProviderCustomerID sets the "provider_customer_id" field if the given value is not nil.
+func (_c *BillingSubscriptionCreate) SetNillableProviderCustomerID(v *string) *BillingSubscriptionCreate {
+	if v != nil {
+		_c.SetProviderCustomerID(*v)
+	}
+	return _c
+}
+
+// SetEmailToken sets the "email_token" field.
+func (_c *BillingSubscriptionCreate) SetEmailToken(v string) *BillingSubscriptionCreate {
+	_c.mutation.SetEmailToken(v)
+	return _c
+}
+
+// SetNillableEmailToken sets the "email_token" field if the given value is not nil.
+func (_c *BillingSubscriptionCreate) SetNillableEmailToken(v *string) *BillingSubscriptionCreate {
+	if v != nil {
+		_c.SetEmailToken(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *BillingSubscriptionCreate) SetStatus(v string) *BillingSubscriptionCreate {
 	_c.mutation.SetStatus(v)
@@ -227,6 +255,14 @@ func (_c *BillingSubscriptionCreate) defaults() {
 		v := billingsubscription.DefaultProviderSubscriptionID
 		_c.mutation.SetProviderSubscriptionID(v)
 	}
+	if _, ok := _c.mutation.ProviderCustomerID(); !ok {
+		v := billingsubscription.DefaultProviderCustomerID
+		_c.mutation.SetProviderCustomerID(v)
+	}
+	if _, ok := _c.mutation.EmailToken(); !ok {
+		v := billingsubscription.DefaultEmailToken
+		_c.mutation.SetEmailToken(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := billingsubscription.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -300,6 +336,22 @@ func (_c *BillingSubscriptionCreate) check() error {
 	if v, ok := _c.mutation.ProviderSubscriptionID(); ok {
 		if err := billingsubscription.ProviderSubscriptionIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_subscription_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_subscription_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ProviderCustomerID(); !ok {
+		return &ValidationError{Name: "provider_customer_id", err: errors.New(`ent: missing required field "BillingSubscription.provider_customer_id"`)}
+	}
+	if v, ok := _c.mutation.ProviderCustomerID(); ok {
+		if err := billingsubscription.ProviderCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_customer_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_customer_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.EmailToken(); !ok {
+		return &ValidationError{Name: "email_token", err: errors.New(`ent: missing required field "BillingSubscription.email_token"`)}
+	}
+	if v, ok := _c.mutation.EmailToken(); ok {
+		if err := billingsubscription.EmailTokenValidator(v); err != nil {
+			return &ValidationError{Name: "email_token", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.email_token": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -381,6 +433,14 @@ func (_c *BillingSubscriptionCreate) createSpec() (*BillingSubscription, *sqlgra
 	if value, ok := _c.mutation.ProviderSubscriptionID(); ok {
 		_spec.SetField(billingsubscription.FieldProviderSubscriptionID, field.TypeString, value)
 		_node.ProviderSubscriptionID = value
+	}
+	if value, ok := _c.mutation.ProviderCustomerID(); ok {
+		_spec.SetField(billingsubscription.FieldProviderCustomerID, field.TypeString, value)
+		_node.ProviderCustomerID = value
+	}
+	if value, ok := _c.mutation.EmailToken(); ok {
+		_spec.SetField(billingsubscription.FieldEmailToken, field.TypeString, value)
+		_node.EmailToken = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(billingsubscription.FieldStatus, field.TypeString, value)
@@ -475,6 +535,30 @@ func (u *BillingSubscriptionUpsert) SetProviderSubscriptionID(v string) *Billing
 // UpdateProviderSubscriptionID sets the "provider_subscription_id" field to the value that was provided on create.
 func (u *BillingSubscriptionUpsert) UpdateProviderSubscriptionID() *BillingSubscriptionUpsert {
 	u.SetExcluded(billingsubscription.FieldProviderSubscriptionID)
+	return u
+}
+
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (u *BillingSubscriptionUpsert) SetProviderCustomerID(v string) *BillingSubscriptionUpsert {
+	u.Set(billingsubscription.FieldProviderCustomerID, v)
+	return u
+}
+
+// UpdateProviderCustomerID sets the "provider_customer_id" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsert) UpdateProviderCustomerID() *BillingSubscriptionUpsert {
+	u.SetExcluded(billingsubscription.FieldProviderCustomerID)
+	return u
+}
+
+// SetEmailToken sets the "email_token" field.
+func (u *BillingSubscriptionUpsert) SetEmailToken(v string) *BillingSubscriptionUpsert {
+	u.Set(billingsubscription.FieldEmailToken, v)
+	return u
+}
+
+// UpdateEmailToken sets the "email_token" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsert) UpdateEmailToken() *BillingSubscriptionUpsert {
+	u.SetExcluded(billingsubscription.FieldEmailToken)
 	return u
 }
 
@@ -647,6 +731,34 @@ func (u *BillingSubscriptionUpsertOne) SetProviderSubscriptionID(v string) *Bill
 func (u *BillingSubscriptionUpsertOne) UpdateProviderSubscriptionID() *BillingSubscriptionUpsertOne {
 	return u.Update(func(s *BillingSubscriptionUpsert) {
 		s.UpdateProviderSubscriptionID()
+	})
+}
+
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (u *BillingSubscriptionUpsertOne) SetProviderCustomerID(v string) *BillingSubscriptionUpsertOne {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.SetProviderCustomerID(v)
+	})
+}
+
+// UpdateProviderCustomerID sets the "provider_customer_id" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsertOne) UpdateProviderCustomerID() *BillingSubscriptionUpsertOne {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.UpdateProviderCustomerID()
+	})
+}
+
+// SetEmailToken sets the "email_token" field.
+func (u *BillingSubscriptionUpsertOne) SetEmailToken(v string) *BillingSubscriptionUpsertOne {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.SetEmailToken(v)
+	})
+}
+
+// UpdateEmailToken sets the "email_token" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsertOne) UpdateEmailToken() *BillingSubscriptionUpsertOne {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.UpdateEmailToken()
 	})
 }
 
@@ -999,6 +1111,34 @@ func (u *BillingSubscriptionUpsertBulk) SetProviderSubscriptionID(v string) *Bil
 func (u *BillingSubscriptionUpsertBulk) UpdateProviderSubscriptionID() *BillingSubscriptionUpsertBulk {
 	return u.Update(func(s *BillingSubscriptionUpsert) {
 		s.UpdateProviderSubscriptionID()
+	})
+}
+
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (u *BillingSubscriptionUpsertBulk) SetProviderCustomerID(v string) *BillingSubscriptionUpsertBulk {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.SetProviderCustomerID(v)
+	})
+}
+
+// UpdateProviderCustomerID sets the "provider_customer_id" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsertBulk) UpdateProviderCustomerID() *BillingSubscriptionUpsertBulk {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.UpdateProviderCustomerID()
+	})
+}
+
+// SetEmailToken sets the "email_token" field.
+func (u *BillingSubscriptionUpsertBulk) SetEmailToken(v string) *BillingSubscriptionUpsertBulk {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.SetEmailToken(v)
+	})
+}
+
+// UpdateEmailToken sets the "email_token" field to the value that was provided on create.
+func (u *BillingSubscriptionUpsertBulk) UpdateEmailToken() *BillingSubscriptionUpsertBulk {
+	return u.Update(func(s *BillingSubscriptionUpsert) {
+		s.UpdateEmailToken()
 	})
 }
 

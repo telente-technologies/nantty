@@ -56,6 +56,90 @@ func (_c *ConnectedAccountCreate) SetProviderAccountID(v string) *ConnectedAccou
 	return _c
 }
 
+// SetNillableProviderAccountID sets the "provider_account_id" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableProviderAccountID(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetProviderAccountID(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *ConnectedAccountCreate) SetStatus(v connectedaccount.Status) *ConnectedAccountCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableStatus(v *connectedaccount.Status) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetLastError sets the "last_error" field.
+func (_c *ConnectedAccountCreate) SetLastError(v string) *ConnectedAccountCreate {
+	_c.mutation.SetLastError(v)
+	return _c
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableLastError(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetLastError(*v)
+	}
+	return _c
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (_c *ConnectedAccountCreate) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountCreate {
+	_c.mutation.SetVerificationStatus(v)
+	return _c
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableVerificationStatus(v *connectedaccount.VerificationStatus) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetVerificationStatus(*v)
+	}
+	return _c
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (_c *ConnectedAccountCreate) SetVerificationReasons(v []byte) *ConnectedAccountCreate {
+	_c.mutation.SetVerificationReasons(v)
+	return _c
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (_c *ConnectedAccountCreate) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountCreate {
+	_c.mutation.SetVerificationStatusChangedAt(v)
+	return _c
+}
+
+// SetNillableVerificationStatusChangedAt sets the "verification_status_changed_at" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableVerificationStatusChangedAt(v *time.Time) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetVerificationStatusChangedAt(*v)
+	}
+	return _c
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (_c *ConnectedAccountCreate) SetVerificationNudgedAt(v time.Time) *ConnectedAccountCreate {
+	_c.mutation.SetVerificationNudgedAt(v)
+	return _c
+}
+
+// SetNillableVerificationNudgedAt sets the "verification_nudged_at" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableVerificationNudgedAt(v *time.Time) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetVerificationNudgedAt(*v)
+	}
+	return _c
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (_c *ConnectedAccountCreate) SetAcceptsPayments(v bool) *ConnectedAccountCreate {
 	_c.mutation.SetAcceptsPayments(v)
@@ -66,6 +150,96 @@ func (_c *ConnectedAccountCreate) SetAcceptsPayments(v bool) *ConnectedAccountCr
 func (_c *ConnectedAccountCreate) SetNillableAcceptsPayments(v *bool) *ConnectedAccountCreate {
 	if v != nil {
 		_c.SetAcceptsPayments(*v)
+	}
+	return _c
+}
+
+// SetRoles sets the "roles" field.
+func (_c *ConnectedAccountCreate) SetRoles(v []string) *ConnectedAccountCreate {
+	_c.mutation.SetRoles(v)
+	return _c
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (_c *ConnectedAccountCreate) SetRecipientCode(v string) *ConnectedAccountCreate {
+	_c.mutation.SetRecipientCode(v)
+	return _c
+}
+
+// SetNillableRecipientCode sets the "recipient_code" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableRecipientCode(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetRecipientCode(*v)
+	}
+	return _c
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (_c *ConnectedAccountCreate) SetSettlementSubaccountCode(v string) *ConnectedAccountCreate {
+	_c.mutation.SetSettlementSubaccountCode(v)
+	return _c
+}
+
+// SetNillableSettlementSubaccountCode sets the "settlement_subaccount_code" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableSettlementSubaccountCode(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetSettlementSubaccountCode(*v)
+	}
+	return _c
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (_c *ConnectedAccountCreate) SetEscrowSubaccountCode(v string) *ConnectedAccountCreate {
+	_c.mutation.SetEscrowSubaccountCode(v)
+	return _c
+}
+
+// SetNillableEscrowSubaccountCode sets the "escrow_subaccount_code" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableEscrowSubaccountCode(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetEscrowSubaccountCode(*v)
+	}
+	return _c
+}
+
+// SetBankCode sets the "bank_code" field.
+func (_c *ConnectedAccountCreate) SetBankCode(v string) *ConnectedAccountCreate {
+	_c.mutation.SetBankCode(v)
+	return _c
+}
+
+// SetNillableBankCode sets the "bank_code" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableBankCode(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetBankCode(*v)
+	}
+	return _c
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (_c *ConnectedAccountCreate) SetAccountLast4(v string) *ConnectedAccountCreate {
+	_c.mutation.SetAccountLast4(v)
+	return _c
+}
+
+// SetNillableAccountLast4 sets the "account_last4" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableAccountLast4(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetAccountLast4(*v)
+	}
+	return _c
+}
+
+// SetAccountName sets the "account_name" field.
+func (_c *ConnectedAccountCreate) SetAccountName(v string) *ConnectedAccountCreate {
+	_c.mutation.SetAccountName(v)
+	return _c
+}
+
+// SetNillableAccountName sets the "account_name" field if the given value is not nil.
+func (_c *ConnectedAccountCreate) SetNillableAccountName(v *string) *ConnectedAccountCreate {
+	if v != nil {
+		_c.SetAccountName(*v)
 	}
 	return _c
 }
@@ -247,9 +421,49 @@ func (_c *ConnectedAccountCreate) defaults() {
 		v := connectedaccount.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.ProviderAccountID(); !ok {
+		v := connectedaccount.DefaultProviderAccountID
+		_c.mutation.SetProviderAccountID(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := connectedaccount.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		v := connectedaccount.DefaultLastError
+		_c.mutation.SetLastError(v)
+	}
+	if _, ok := _c.mutation.VerificationStatus(); !ok {
+		v := connectedaccount.DefaultVerificationStatus
+		_c.mutation.SetVerificationStatus(v)
+	}
 	if _, ok := _c.mutation.AcceptsPayments(); !ok {
 		v := connectedaccount.DefaultAcceptsPayments
 		_c.mutation.SetAcceptsPayments(v)
+	}
+	if _, ok := _c.mutation.RecipientCode(); !ok {
+		v := connectedaccount.DefaultRecipientCode
+		_c.mutation.SetRecipientCode(v)
+	}
+	if _, ok := _c.mutation.SettlementSubaccountCode(); !ok {
+		v := connectedaccount.DefaultSettlementSubaccountCode
+		_c.mutation.SetSettlementSubaccountCode(v)
+	}
+	if _, ok := _c.mutation.EscrowSubaccountCode(); !ok {
+		v := connectedaccount.DefaultEscrowSubaccountCode
+		_c.mutation.SetEscrowSubaccountCode(v)
+	}
+	if _, ok := _c.mutation.BankCode(); !ok {
+		v := connectedaccount.DefaultBankCode
+		_c.mutation.SetBankCode(v)
+	}
+	if _, ok := _c.mutation.AccountLast4(); !ok {
+		v := connectedaccount.DefaultAccountLast4
+		_c.mutation.SetAccountLast4(v)
+	}
+	if _, ok := _c.mutation.AccountName(); !ok {
+		v := connectedaccount.DefaultAccountName
+		_c.mutation.SetAccountName(v)
 	}
 	if _, ok := _c.mutation.ManualPayoutScheduleConfirmed(); !ok {
 		v := connectedaccount.DefaultManualPayoutScheduleConfirmed
@@ -314,8 +528,80 @@ func (_c *ConnectedAccountCreate) check() error {
 			return &ValidationError{Name: "provider_account_id", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.provider_account_id": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "ConnectedAccount.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := connectedaccount.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		return &ValidationError{Name: "last_error", err: errors.New(`ent: missing required field "ConnectedAccount.last_error"`)}
+	}
+	if v, ok := _c.mutation.LastError(); ok {
+		if err := connectedaccount.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.last_error": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.VerificationStatus(); !ok {
+		return &ValidationError{Name: "verification_status", err: errors.New(`ent: missing required field "ConnectedAccount.verification_status"`)}
+	}
+	if v, ok := _c.mutation.VerificationStatus(); ok {
+		if err := connectedaccount.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.verification_status": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.AcceptsPayments(); !ok {
 		return &ValidationError{Name: "accepts_payments", err: errors.New(`ent: missing required field "ConnectedAccount.accepts_payments"`)}
+	}
+	if _, ok := _c.mutation.RecipientCode(); !ok {
+		return &ValidationError{Name: "recipient_code", err: errors.New(`ent: missing required field "ConnectedAccount.recipient_code"`)}
+	}
+	if v, ok := _c.mutation.RecipientCode(); ok {
+		if err := connectedaccount.RecipientCodeValidator(v); err != nil {
+			return &ValidationError{Name: "recipient_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.recipient_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.SettlementSubaccountCode(); !ok {
+		return &ValidationError{Name: "settlement_subaccount_code", err: errors.New(`ent: missing required field "ConnectedAccount.settlement_subaccount_code"`)}
+	}
+	if v, ok := _c.mutation.SettlementSubaccountCode(); ok {
+		if err := connectedaccount.SettlementSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.settlement_subaccount_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.EscrowSubaccountCode(); !ok {
+		return &ValidationError{Name: "escrow_subaccount_code", err: errors.New(`ent: missing required field "ConnectedAccount.escrow_subaccount_code"`)}
+	}
+	if v, ok := _c.mutation.EscrowSubaccountCode(); ok {
+		if err := connectedaccount.EscrowSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "escrow_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.escrow_subaccount_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BankCode(); !ok {
+		return &ValidationError{Name: "bank_code", err: errors.New(`ent: missing required field "ConnectedAccount.bank_code"`)}
+	}
+	if v, ok := _c.mutation.BankCode(); ok {
+		if err := connectedaccount.BankCodeValidator(v); err != nil {
+			return &ValidationError{Name: "bank_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.bank_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.AccountLast4(); !ok {
+		return &ValidationError{Name: "account_last4", err: errors.New(`ent: missing required field "ConnectedAccount.account_last4"`)}
+	}
+	if v, ok := _c.mutation.AccountLast4(); ok {
+		if err := connectedaccount.AccountLast4Validator(v); err != nil {
+			return &ValidationError{Name: "account_last4", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_last4": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.AccountName(); !ok {
+		return &ValidationError{Name: "account_name", err: errors.New(`ent: missing required field "ConnectedAccount.account_name"`)}
+	}
+	if v, ok := _c.mutation.AccountName(); ok {
+		if err := connectedaccount.AccountNameValidator(v); err != nil {
+			return &ValidationError{Name: "account_name", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_name": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.CapabilityStatuses(); !ok {
 		return &ValidationError{Name: "capability_statuses", err: errors.New(`ent: missing required field "ConnectedAccount.capability_statuses"`)}
@@ -412,9 +698,61 @@ func (_c *ConnectedAccountCreate) createSpec() (*ConnectedAccount, *sqlgraph.Cre
 		_spec.SetField(connectedaccount.FieldProviderAccountID, field.TypeString, value)
 		_node.ProviderAccountID = value
 	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(connectedaccount.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.LastError(); ok {
+		_spec.SetField(connectedaccount.FieldLastError, field.TypeString, value)
+		_node.LastError = value
+	}
+	if value, ok := _c.mutation.VerificationStatus(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatus, field.TypeEnum, value)
+		_node.VerificationStatus = value
+	}
+	if value, ok := _c.mutation.VerificationReasons(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationReasons, field.TypeBytes, value)
+		_node.VerificationReasons = value
+	}
+	if value, ok := _c.mutation.VerificationStatusChangedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatusChangedAt, field.TypeTime, value)
+		_node.VerificationStatusChangedAt = &value
+	}
+	if value, ok := _c.mutation.VerificationNudgedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationNudgedAt, field.TypeTime, value)
+		_node.VerificationNudgedAt = &value
+	}
 	if value, ok := _c.mutation.AcceptsPayments(); ok {
 		_spec.SetField(connectedaccount.FieldAcceptsPayments, field.TypeBool, value)
 		_node.AcceptsPayments = value
+	}
+	if value, ok := _c.mutation.Roles(); ok {
+		_spec.SetField(connectedaccount.FieldRoles, field.TypeJSON, value)
+		_node.Roles = value
+	}
+	if value, ok := _c.mutation.RecipientCode(); ok {
+		_spec.SetField(connectedaccount.FieldRecipientCode, field.TypeString, value)
+		_node.RecipientCode = value
+	}
+	if value, ok := _c.mutation.SettlementSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldSettlementSubaccountCode, field.TypeString, value)
+		_node.SettlementSubaccountCode = value
+	}
+	if value, ok := _c.mutation.EscrowSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldEscrowSubaccountCode, field.TypeString, value)
+		_node.EscrowSubaccountCode = value
+	}
+	if value, ok := _c.mutation.BankCode(); ok {
+		_spec.SetField(connectedaccount.FieldBankCode, field.TypeString, value)
+		_node.BankCode = value
+	}
+	if value, ok := _c.mutation.AccountLast4(); ok {
+		_spec.SetField(connectedaccount.FieldAccountLast4, field.TypeString, value)
+		_node.AccountLast4 = value
+	}
+	if value, ok := _c.mutation.AccountName(); ok {
+		_spec.SetField(connectedaccount.FieldAccountName, field.TypeString, value)
+		_node.AccountName = value
 	}
 	if value, ok := _c.mutation.CapabilityStatuses(); ok {
 		_spec.SetField(connectedaccount.FieldCapabilityStatuses, field.TypeBytes, value)
@@ -508,6 +846,108 @@ type (
 	}
 )
 
+// SetProviderAccountID sets the "provider_account_id" field.
+func (u *ConnectedAccountUpsert) SetProviderAccountID(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldProviderAccountID, v)
+	return u
+}
+
+// UpdateProviderAccountID sets the "provider_account_id" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateProviderAccountID() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldProviderAccountID)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *ConnectedAccountUpsert) SetStatus(v connectedaccount.Status) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateStatus() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldStatus)
+	return u
+}
+
+// SetLastError sets the "last_error" field.
+func (u *ConnectedAccountUpsert) SetLastError(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldLastError, v)
+	return u
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateLastError() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldLastError)
+	return u
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *ConnectedAccountUpsert) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldVerificationStatus, v)
+	return u
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateVerificationStatus() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldVerificationStatus)
+	return u
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (u *ConnectedAccountUpsert) SetVerificationReasons(v []byte) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldVerificationReasons, v)
+	return u
+}
+
+// UpdateVerificationReasons sets the "verification_reasons" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateVerificationReasons() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldVerificationReasons)
+	return u
+}
+
+// ClearVerificationReasons clears the value of the "verification_reasons" field.
+func (u *ConnectedAccountUpsert) ClearVerificationReasons() *ConnectedAccountUpsert {
+	u.SetNull(connectedaccount.FieldVerificationReasons)
+	return u
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsert) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldVerificationStatusChangedAt, v)
+	return u
+}
+
+// UpdateVerificationStatusChangedAt sets the "verification_status_changed_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateVerificationStatusChangedAt() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldVerificationStatusChangedAt)
+	return u
+}
+
+// ClearVerificationStatusChangedAt clears the value of the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsert) ClearVerificationStatusChangedAt() *ConnectedAccountUpsert {
+	u.SetNull(connectedaccount.FieldVerificationStatusChangedAt)
+	return u
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsert) SetVerificationNudgedAt(v time.Time) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldVerificationNudgedAt, v)
+	return u
+}
+
+// UpdateVerificationNudgedAt sets the "verification_nudged_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateVerificationNudgedAt() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldVerificationNudgedAt)
+	return u
+}
+
+// ClearVerificationNudgedAt clears the value of the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsert) ClearVerificationNudgedAt() *ConnectedAccountUpsert {
+	u.SetNull(connectedaccount.FieldVerificationNudgedAt)
+	return u
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (u *ConnectedAccountUpsert) SetAcceptsPayments(v bool) *ConnectedAccountUpsert {
 	u.Set(connectedaccount.FieldAcceptsPayments, v)
@@ -517,6 +957,96 @@ func (u *ConnectedAccountUpsert) SetAcceptsPayments(v bool) *ConnectedAccountUps
 // UpdateAcceptsPayments sets the "accepts_payments" field to the value that was provided on create.
 func (u *ConnectedAccountUpsert) UpdateAcceptsPayments() *ConnectedAccountUpsert {
 	u.SetExcluded(connectedaccount.FieldAcceptsPayments)
+	return u
+}
+
+// SetRoles sets the "roles" field.
+func (u *ConnectedAccountUpsert) SetRoles(v []string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldRoles, v)
+	return u
+}
+
+// UpdateRoles sets the "roles" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateRoles() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldRoles)
+	return u
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (u *ConnectedAccountUpsert) ClearRoles() *ConnectedAccountUpsert {
+	u.SetNull(connectedaccount.FieldRoles)
+	return u
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (u *ConnectedAccountUpsert) SetRecipientCode(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldRecipientCode, v)
+	return u
+}
+
+// UpdateRecipientCode sets the "recipient_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateRecipientCode() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldRecipientCode)
+	return u
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (u *ConnectedAccountUpsert) SetSettlementSubaccountCode(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldSettlementSubaccountCode, v)
+	return u
+}
+
+// UpdateSettlementSubaccountCode sets the "settlement_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateSettlementSubaccountCode() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldSettlementSubaccountCode)
+	return u
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (u *ConnectedAccountUpsert) SetEscrowSubaccountCode(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldEscrowSubaccountCode, v)
+	return u
+}
+
+// UpdateEscrowSubaccountCode sets the "escrow_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateEscrowSubaccountCode() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldEscrowSubaccountCode)
+	return u
+}
+
+// SetBankCode sets the "bank_code" field.
+func (u *ConnectedAccountUpsert) SetBankCode(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldBankCode, v)
+	return u
+}
+
+// UpdateBankCode sets the "bank_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateBankCode() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldBankCode)
+	return u
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (u *ConnectedAccountUpsert) SetAccountLast4(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldAccountLast4, v)
+	return u
+}
+
+// UpdateAccountLast4 sets the "account_last4" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateAccountLast4() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldAccountLast4)
+	return u
+}
+
+// SetAccountName sets the "account_name" field.
+func (u *ConnectedAccountUpsert) SetAccountName(v string) *ConnectedAccountUpsert {
+	u.Set(connectedaccount.FieldAccountName, v)
+	return u
+}
+
+// UpdateAccountName sets the "account_name" field to the value that was provided on create.
+func (u *ConnectedAccountUpsert) UpdateAccountName() *ConnectedAccountUpsert {
+	u.SetExcluded(connectedaccount.FieldAccountName)
 	return u
 }
 
@@ -678,9 +1208,6 @@ func (u *ConnectedAccountUpsertOne) UpdateNewValues() *ConnectedAccountUpsertOne
 		if _, exists := u.create.mutation.Provider(); exists {
 			s.SetIgnore(connectedaccount.FieldProvider)
 		}
-		if _, exists := u.create.mutation.ProviderAccountID(); exists {
-			s.SetIgnore(connectedaccount.FieldProviderAccountID)
-		}
 	}))
 	return u
 }
@@ -712,6 +1239,125 @@ func (u *ConnectedAccountUpsertOne) Update(set func(*ConnectedAccountUpsert)) *C
 	return u
 }
 
+// SetProviderAccountID sets the "provider_account_id" field.
+func (u *ConnectedAccountUpsertOne) SetProviderAccountID(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetProviderAccountID(v)
+	})
+}
+
+// UpdateProviderAccountID sets the "provider_account_id" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateProviderAccountID() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateProviderAccountID()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *ConnectedAccountUpsertOne) SetStatus(v connectedaccount.Status) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateStatus() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *ConnectedAccountUpsertOne) SetLastError(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateLastError() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *ConnectedAccountUpsertOne) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationStatus(v)
+	})
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateVerificationStatus() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationStatus()
+	})
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (u *ConnectedAccountUpsertOne) SetVerificationReasons(v []byte) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationReasons(v)
+	})
+}
+
+// UpdateVerificationReasons sets the "verification_reasons" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateVerificationReasons() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationReasons()
+	})
+}
+
+// ClearVerificationReasons clears the value of the "verification_reasons" field.
+func (u *ConnectedAccountUpsertOne) ClearVerificationReasons() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationReasons()
+	})
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsertOne) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationStatusChangedAt(v)
+	})
+}
+
+// UpdateVerificationStatusChangedAt sets the "verification_status_changed_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateVerificationStatusChangedAt() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationStatusChangedAt()
+	})
+}
+
+// ClearVerificationStatusChangedAt clears the value of the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsertOne) ClearVerificationStatusChangedAt() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationStatusChangedAt()
+	})
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsertOne) SetVerificationNudgedAt(v time.Time) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationNudgedAt(v)
+	})
+}
+
+// UpdateVerificationNudgedAt sets the "verification_nudged_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateVerificationNudgedAt() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationNudgedAt()
+	})
+}
+
+// ClearVerificationNudgedAt clears the value of the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsertOne) ClearVerificationNudgedAt() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationNudgedAt()
+	})
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (u *ConnectedAccountUpsertOne) SetAcceptsPayments(v bool) *ConnectedAccountUpsertOne {
 	return u.Update(func(s *ConnectedAccountUpsert) {
@@ -723,6 +1369,111 @@ func (u *ConnectedAccountUpsertOne) SetAcceptsPayments(v bool) *ConnectedAccount
 func (u *ConnectedAccountUpsertOne) UpdateAcceptsPayments() *ConnectedAccountUpsertOne {
 	return u.Update(func(s *ConnectedAccountUpsert) {
 		s.UpdateAcceptsPayments()
+	})
+}
+
+// SetRoles sets the "roles" field.
+func (u *ConnectedAccountUpsertOne) SetRoles(v []string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetRoles(v)
+	})
+}
+
+// UpdateRoles sets the "roles" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateRoles() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateRoles()
+	})
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (u *ConnectedAccountUpsertOne) ClearRoles() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearRoles()
+	})
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (u *ConnectedAccountUpsertOne) SetRecipientCode(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetRecipientCode(v)
+	})
+}
+
+// UpdateRecipientCode sets the "recipient_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateRecipientCode() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateRecipientCode()
+	})
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (u *ConnectedAccountUpsertOne) SetSettlementSubaccountCode(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetSettlementSubaccountCode(v)
+	})
+}
+
+// UpdateSettlementSubaccountCode sets the "settlement_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateSettlementSubaccountCode() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateSettlementSubaccountCode()
+	})
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (u *ConnectedAccountUpsertOne) SetEscrowSubaccountCode(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetEscrowSubaccountCode(v)
+	})
+}
+
+// UpdateEscrowSubaccountCode sets the "escrow_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateEscrowSubaccountCode() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateEscrowSubaccountCode()
+	})
+}
+
+// SetBankCode sets the "bank_code" field.
+func (u *ConnectedAccountUpsertOne) SetBankCode(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetBankCode(v)
+	})
+}
+
+// UpdateBankCode sets the "bank_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateBankCode() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateBankCode()
+	})
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (u *ConnectedAccountUpsertOne) SetAccountLast4(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetAccountLast4(v)
+	})
+}
+
+// UpdateAccountLast4 sets the "account_last4" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateAccountLast4() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateAccountLast4()
+	})
+}
+
+// SetAccountName sets the "account_name" field.
+func (u *ConnectedAccountUpsertOne) SetAccountName(v string) *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetAccountName(v)
+	})
+}
+
+// UpdateAccountName sets the "account_name" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertOne) UpdateAccountName() *ConnectedAccountUpsertOne {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateAccountName()
 	})
 }
 
@@ -1072,9 +1823,6 @@ func (u *ConnectedAccountUpsertBulk) UpdateNewValues() *ConnectedAccountUpsertBu
 			if _, exists := b.mutation.Provider(); exists {
 				s.SetIgnore(connectedaccount.FieldProvider)
 			}
-			if _, exists := b.mutation.ProviderAccountID(); exists {
-				s.SetIgnore(connectedaccount.FieldProviderAccountID)
-			}
 		}
 	}))
 	return u
@@ -1107,6 +1855,125 @@ func (u *ConnectedAccountUpsertBulk) Update(set func(*ConnectedAccountUpsert)) *
 	return u
 }
 
+// SetProviderAccountID sets the "provider_account_id" field.
+func (u *ConnectedAccountUpsertBulk) SetProviderAccountID(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetProviderAccountID(v)
+	})
+}
+
+// UpdateProviderAccountID sets the "provider_account_id" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateProviderAccountID() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateProviderAccountID()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *ConnectedAccountUpsertBulk) SetStatus(v connectedaccount.Status) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateStatus() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *ConnectedAccountUpsertBulk) SetLastError(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateLastError() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *ConnectedAccountUpsertBulk) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationStatus(v)
+	})
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateVerificationStatus() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationStatus()
+	})
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (u *ConnectedAccountUpsertBulk) SetVerificationReasons(v []byte) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationReasons(v)
+	})
+}
+
+// UpdateVerificationReasons sets the "verification_reasons" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateVerificationReasons() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationReasons()
+	})
+}
+
+// ClearVerificationReasons clears the value of the "verification_reasons" field.
+func (u *ConnectedAccountUpsertBulk) ClearVerificationReasons() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationReasons()
+	})
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsertBulk) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationStatusChangedAt(v)
+	})
+}
+
+// UpdateVerificationStatusChangedAt sets the "verification_status_changed_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateVerificationStatusChangedAt() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationStatusChangedAt()
+	})
+}
+
+// ClearVerificationStatusChangedAt clears the value of the "verification_status_changed_at" field.
+func (u *ConnectedAccountUpsertBulk) ClearVerificationStatusChangedAt() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationStatusChangedAt()
+	})
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsertBulk) SetVerificationNudgedAt(v time.Time) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetVerificationNudgedAt(v)
+	})
+}
+
+// UpdateVerificationNudgedAt sets the "verification_nudged_at" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateVerificationNudgedAt() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateVerificationNudgedAt()
+	})
+}
+
+// ClearVerificationNudgedAt clears the value of the "verification_nudged_at" field.
+func (u *ConnectedAccountUpsertBulk) ClearVerificationNudgedAt() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearVerificationNudgedAt()
+	})
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (u *ConnectedAccountUpsertBulk) SetAcceptsPayments(v bool) *ConnectedAccountUpsertBulk {
 	return u.Update(func(s *ConnectedAccountUpsert) {
@@ -1118,6 +1985,111 @@ func (u *ConnectedAccountUpsertBulk) SetAcceptsPayments(v bool) *ConnectedAccoun
 func (u *ConnectedAccountUpsertBulk) UpdateAcceptsPayments() *ConnectedAccountUpsertBulk {
 	return u.Update(func(s *ConnectedAccountUpsert) {
 		s.UpdateAcceptsPayments()
+	})
+}
+
+// SetRoles sets the "roles" field.
+func (u *ConnectedAccountUpsertBulk) SetRoles(v []string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetRoles(v)
+	})
+}
+
+// UpdateRoles sets the "roles" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateRoles() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateRoles()
+	})
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (u *ConnectedAccountUpsertBulk) ClearRoles() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.ClearRoles()
+	})
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (u *ConnectedAccountUpsertBulk) SetRecipientCode(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetRecipientCode(v)
+	})
+}
+
+// UpdateRecipientCode sets the "recipient_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateRecipientCode() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateRecipientCode()
+	})
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (u *ConnectedAccountUpsertBulk) SetSettlementSubaccountCode(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetSettlementSubaccountCode(v)
+	})
+}
+
+// UpdateSettlementSubaccountCode sets the "settlement_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateSettlementSubaccountCode() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateSettlementSubaccountCode()
+	})
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (u *ConnectedAccountUpsertBulk) SetEscrowSubaccountCode(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetEscrowSubaccountCode(v)
+	})
+}
+
+// UpdateEscrowSubaccountCode sets the "escrow_subaccount_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateEscrowSubaccountCode() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateEscrowSubaccountCode()
+	})
+}
+
+// SetBankCode sets the "bank_code" field.
+func (u *ConnectedAccountUpsertBulk) SetBankCode(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetBankCode(v)
+	})
+}
+
+// UpdateBankCode sets the "bank_code" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateBankCode() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateBankCode()
+	})
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (u *ConnectedAccountUpsertBulk) SetAccountLast4(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetAccountLast4(v)
+	})
+}
+
+// UpdateAccountLast4 sets the "account_last4" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateAccountLast4() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateAccountLast4()
+	})
+}
+
+// SetAccountName sets the "account_name" field.
+func (u *ConnectedAccountUpsertBulk) SetAccountName(v string) *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.SetAccountName(v)
+	})
+}
+
+// UpdateAccountName sets the "account_name" field to the value that was provided on create.
+func (u *ConnectedAccountUpsertBulk) UpdateAccountName() *ConnectedAccountUpsertBulk {
+	return u.Update(func(s *ConnectedAccountUpsert) {
+		s.UpdateAccountName()
 	})
 }
 

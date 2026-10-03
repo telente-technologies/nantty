@@ -3,6 +3,7 @@
 package connectedaccount
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -22,8 +23,34 @@ const (
 	FieldProvider = "provider"
 	// FieldProviderAccountID holds the string denoting the provider_account_id field in the database.
 	FieldProviderAccountID = "provider_account_id"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldLastError holds the string denoting the last_error field in the database.
+	FieldLastError = "last_error"
+	// FieldVerificationStatus holds the string denoting the verification_status field in the database.
+	FieldVerificationStatus = "verification_status"
+	// FieldVerificationReasons holds the string denoting the verification_reasons field in the database.
+	FieldVerificationReasons = "verification_reasons"
+	// FieldVerificationStatusChangedAt holds the string denoting the verification_status_changed_at field in the database.
+	FieldVerificationStatusChangedAt = "verification_status_changed_at"
+	// FieldVerificationNudgedAt holds the string denoting the verification_nudged_at field in the database.
+	FieldVerificationNudgedAt = "verification_nudged_at"
 	// FieldAcceptsPayments holds the string denoting the accepts_payments field in the database.
 	FieldAcceptsPayments = "accepts_payments"
+	// FieldRoles holds the string denoting the roles field in the database.
+	FieldRoles = "roles"
+	// FieldRecipientCode holds the string denoting the recipient_code field in the database.
+	FieldRecipientCode = "recipient_code"
+	// FieldSettlementSubaccountCode holds the string denoting the settlement_subaccount_code field in the database.
+	FieldSettlementSubaccountCode = "settlement_subaccount_code"
+	// FieldEscrowSubaccountCode holds the string denoting the escrow_subaccount_code field in the database.
+	FieldEscrowSubaccountCode = "escrow_subaccount_code"
+	// FieldBankCode holds the string denoting the bank_code field in the database.
+	FieldBankCode = "bank_code"
+	// FieldAccountLast4 holds the string denoting the account_last4 field in the database.
+	FieldAccountLast4 = "account_last4"
+	// FieldAccountName holds the string denoting the account_name field in the database.
+	FieldAccountName = "account_name"
 	// FieldCapabilityStatuses holds the string denoting the capability_statuses field in the database.
 	FieldCapabilityStatuses = "capability_statuses"
 	// FieldOutstandingRequirements holds the string denoting the outstanding_requirements field in the database.
@@ -55,7 +82,20 @@ var Columns = []string{
 	FieldUserID,
 	FieldProvider,
 	FieldProviderAccountID,
+	FieldStatus,
+	FieldLastError,
+	FieldVerificationStatus,
+	FieldVerificationReasons,
+	FieldVerificationStatusChangedAt,
+	FieldVerificationNudgedAt,
 	FieldAcceptsPayments,
+	FieldRoles,
+	FieldRecipientCode,
+	FieldSettlementSubaccountCode,
+	FieldEscrowSubaccountCode,
+	FieldBankCode,
+	FieldAccountLast4,
+	FieldAccountName,
 	FieldCapabilityStatuses,
 	FieldOutstandingRequirements,
 	FieldRequirementsDeadlineAt,
@@ -85,10 +125,40 @@ var (
 	UserIDValidator func(string) error
 	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	ProviderValidator func(string) error
+	// DefaultProviderAccountID holds the default value on creation for the "provider_account_id" field.
+	DefaultProviderAccountID string
 	// ProviderAccountIDValidator is a validator for the "provider_account_id" field. It is called by the builders before save.
 	ProviderAccountIDValidator func(string) error
+	// DefaultLastError holds the default value on creation for the "last_error" field.
+	DefaultLastError string
+	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	LastErrorValidator func(string) error
 	// DefaultAcceptsPayments holds the default value on creation for the "accepts_payments" field.
 	DefaultAcceptsPayments bool
+	// DefaultRecipientCode holds the default value on creation for the "recipient_code" field.
+	DefaultRecipientCode string
+	// RecipientCodeValidator is a validator for the "recipient_code" field. It is called by the builders before save.
+	RecipientCodeValidator func(string) error
+	// DefaultSettlementSubaccountCode holds the default value on creation for the "settlement_subaccount_code" field.
+	DefaultSettlementSubaccountCode string
+	// SettlementSubaccountCodeValidator is a validator for the "settlement_subaccount_code" field. It is called by the builders before save.
+	SettlementSubaccountCodeValidator func(string) error
+	// DefaultEscrowSubaccountCode holds the default value on creation for the "escrow_subaccount_code" field.
+	DefaultEscrowSubaccountCode string
+	// EscrowSubaccountCodeValidator is a validator for the "escrow_subaccount_code" field. It is called by the builders before save.
+	EscrowSubaccountCodeValidator func(string) error
+	// DefaultBankCode holds the default value on creation for the "bank_code" field.
+	DefaultBankCode string
+	// BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	BankCodeValidator func(string) error
+	// DefaultAccountLast4 holds the default value on creation for the "account_last4" field.
+	DefaultAccountLast4 string
+	// AccountLast4Validator is a validator for the "account_last4" field. It is called by the builders before save.
+	AccountLast4Validator func(string) error
+	// DefaultAccountName holds the default value on creation for the "account_name" field.
+	DefaultAccountName string
+	// AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	AccountNameValidator func(string) error
 	// DefaultManualPayoutScheduleConfirmed holds the default value on creation for the "manual_payout_schedule_confirmed" field.
 	DefaultManualPayoutScheduleConfirmed bool
 	// DefaultPayoutsFrozen holds the default value on creation for the "payouts_frozen" field.
@@ -114,6 +184,63 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusCreated is the default value of the Status enum.
+const DefaultStatus = StatusCreated
+
+// Status values.
+const (
+	StatusPendingCreation Status = "pending_creation"
+	StatusCreated         Status = "created"
+	StatusFailed          Status = "failed"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPendingCreation, StatusCreated, StatusFailed:
+		return nil
+	default:
+		return fmt.Errorf("connectedaccount: invalid enum value for status field: %q", s)
+	}
+}
+
+// VerificationStatus defines the type for the "verification_status" enum field.
+type VerificationStatus string
+
+// VerificationStatusNotStarted is the default value of the VerificationStatus enum.
+const DefaultVerificationStatus = VerificationStatusNotStarted
+
+// VerificationStatus values.
+const (
+	VerificationStatusNotStarted        VerificationStatus = "not_started"
+	VerificationStatusDocumentsRequired VerificationStatus = "documentsRequired"
+	VerificationStatusInProgress        VerificationStatus = "inProgress"
+	VerificationStatusUnderReview       VerificationStatus = "underReview"
+	VerificationStatusActionNeeded      VerificationStatus = "actionNeeded"
+	VerificationStatusVerified          VerificationStatus = "verified"
+)
+
+func (vs VerificationStatus) String() string {
+	return string(vs)
+}
+
+// VerificationStatusValidator is a validator for the "verification_status" field enum values. It is called by the builders before save.
+func VerificationStatusValidator(vs VerificationStatus) error {
+	switch vs {
+	case VerificationStatusNotStarted, VerificationStatusDocumentsRequired, VerificationStatusInProgress, VerificationStatusUnderReview, VerificationStatusActionNeeded, VerificationStatusVerified:
+		return nil
+	default:
+		return fmt.Errorf("connectedaccount: invalid enum value for verification_status field: %q", vs)
+	}
+}
 
 // OrderOption defines the ordering options for the ConnectedAccount queries.
 type OrderOption func(*sql.Selector)
@@ -143,9 +270,64 @@ func ByProviderAccountID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderAccountID, opts...).ToFunc()
 }
 
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByLastError orders the results by the last_error field.
+func ByLastError(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastError, opts...).ToFunc()
+}
+
+// ByVerificationStatus orders the results by the verification_status field.
+func ByVerificationStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerificationStatus, opts...).ToFunc()
+}
+
+// ByVerificationStatusChangedAt orders the results by the verification_status_changed_at field.
+func ByVerificationStatusChangedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerificationStatusChangedAt, opts...).ToFunc()
+}
+
+// ByVerificationNudgedAt orders the results by the verification_nudged_at field.
+func ByVerificationNudgedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerificationNudgedAt, opts...).ToFunc()
+}
+
 // ByAcceptsPayments orders the results by the accepts_payments field.
 func ByAcceptsPayments(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAcceptsPayments, opts...).ToFunc()
+}
+
+// ByRecipientCode orders the results by the recipient_code field.
+func ByRecipientCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRecipientCode, opts...).ToFunc()
+}
+
+// BySettlementSubaccountCode orders the results by the settlement_subaccount_code field.
+func BySettlementSubaccountCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementSubaccountCode, opts...).ToFunc()
+}
+
+// ByEscrowSubaccountCode orders the results by the escrow_subaccount_code field.
+func ByEscrowSubaccountCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEscrowSubaccountCode, opts...).ToFunc()
+}
+
+// ByBankCode orders the results by the bank_code field.
+func ByBankCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBankCode, opts...).ToFunc()
+}
+
+// ByAccountLast4 orders the results by the account_last4 field.
+func ByAccountLast4(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountLast4, opts...).ToFunc()
+}
+
+// ByAccountName orders the results by the account_name field.
+func ByAccountName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountName, opts...).ToFunc()
 }
 
 // ByRequirementsDeadlineAt orders the results by the requirements_deadline_at field.

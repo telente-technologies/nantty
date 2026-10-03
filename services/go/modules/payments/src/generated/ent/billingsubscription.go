@@ -34,6 +34,10 @@ type BillingSubscription struct {
 	ProviderCheckoutID string `json:"provider_checkout_id,omitempty"`
 	// ProviderSubscriptionID holds the value of the "provider_subscription_id" field.
 	ProviderSubscriptionID string `json:"provider_subscription_id,omitempty"`
+	// ProviderCustomerID holds the value of the "provider_customer_id" field.
+	ProviderCustomerID string `json:"provider_customer_id,omitempty"`
+	// EmailToken holds the value of the "email_token" field.
+	EmailToken string `json:"-"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
 	// TrialEndsAt holds the value of the "trial_ends_at" field.
@@ -52,7 +56,7 @@ func (*BillingSubscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case billingsubscription.FieldOwnerUserID, billingsubscription.FieldPlanCode, billingsubscription.FieldProvider, billingsubscription.FieldReference, billingsubscription.FieldProviderProductID, billingsubscription.FieldProviderCheckoutID, billingsubscription.FieldProviderSubscriptionID, billingsubscription.FieldStatus:
+		case billingsubscription.FieldOwnerUserID, billingsubscription.FieldPlanCode, billingsubscription.FieldProvider, billingsubscription.FieldReference, billingsubscription.FieldProviderProductID, billingsubscription.FieldProviderCheckoutID, billingsubscription.FieldProviderSubscriptionID, billingsubscription.FieldProviderCustomerID, billingsubscription.FieldEmailToken, billingsubscription.FieldStatus:
 			values[i] = new(sql.NullString)
 		case billingsubscription.FieldCreatedAt, billingsubscription.FieldTrialEndsAt, billingsubscription.FieldCurrentPeriodEndsAt, billingsubscription.FieldDowngradedAt, billingsubscription.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -126,6 +130,18 @@ func (_m *BillingSubscription) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field provider_subscription_id", values[i])
 			} else if value.Valid {
 				_m.ProviderSubscriptionID = value.String
+			}
+		case billingsubscription.FieldProviderCustomerID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_customer_id", values[i])
+			} else if value.Valid {
+				_m.ProviderCustomerID = value.String
+			}
+		case billingsubscription.FieldEmailToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email_token", values[i])
+			} else if value.Valid {
+				_m.EmailToken = value.String
 			}
 		case billingsubscription.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -219,6 +235,11 @@ func (_m *BillingSubscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("provider_subscription_id=")
 	builder.WriteString(_m.ProviderSubscriptionID)
+	builder.WriteString(", ")
+	builder.WriteString("provider_customer_id=")
+	builder.WriteString(_m.ProviderCustomerID)
+	builder.WriteString(", ")
+	builder.WriteString("email_token=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)

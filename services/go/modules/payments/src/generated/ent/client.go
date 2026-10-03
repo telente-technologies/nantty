@@ -13,14 +13,18 @@ import (
 
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
+	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/paymentrefund"
+	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
+	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -42,6 +46,8 @@ type Client struct {
 	BillingSubscription *BillingSubscriptionClient
 	// ConnectedAccount is the client for interacting with the ConnectedAccount builders.
 	ConnectedAccount *ConnectedAccountClient
+	// ConnectedAccountJob is the client for interacting with the ConnectedAccountJob builders.
+	ConnectedAccountJob *ConnectedAccountJobClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderPayable is the client for interacting with the OrderPayable builders.
@@ -52,12 +58,18 @@ type Client struct {
 	PaymentIntent *PaymentIntentClient
 	// PaymentRefund is the client for interacting with the PaymentRefund builders.
 	PaymentRefund *PaymentRefundClient
+	// PayoutOnboarding is the client for interacting with the PayoutOnboarding builders.
+	PayoutOnboarding *PayoutOnboardingClient
 	// PayoutTransfer is the client for interacting with the PayoutTransfer builders.
 	PayoutTransfer *PayoutTransferClient
+	// ProviderCustomer is the client for interacting with the ProviderCustomer builders.
+	ProviderCustomer *ProviderCustomerClient
 	// ProviderDispute is the client for interacting with the ProviderDispute builders.
 	ProviderDispute *ProviderDisputeClient
 	// ProviderPayoutDestination is the client for interacting with the ProviderPayoutDestination builders.
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
+	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
+	SavedCardSetup *SavedCardSetupClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
@@ -75,14 +87,18 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.BillingSubscription = NewBillingSubscriptionClient(c.config)
 	c.ConnectedAccount = NewConnectedAccountClient(c.config)
+	c.ConnectedAccountJob = NewConnectedAccountJobClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OrderPayable = NewOrderPayableClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PaymentIntent = NewPaymentIntentClient(c.config)
 	c.PaymentRefund = NewPaymentRefundClient(c.config)
+	c.PayoutOnboarding = NewPayoutOnboardingClient(c.config)
 	c.PayoutTransfer = NewPayoutTransferClient(c.config)
+	c.ProviderCustomer = NewProviderCustomerClient(c.config)
 	c.ProviderDispute = NewProviderDisputeClient(c.config)
 	c.ProviderPayoutDestination = NewProviderPayoutDestinationClient(c.config)
+	c.SavedCardSetup = NewSavedCardSetupClient(c.config)
 	c.StorePurchase = NewStorePurchaseClient(c.config)
 	c.WebhookEvent = NewWebhookEventClient(c.config)
 }
@@ -181,14 +197,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:                    cfg,
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
+		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		OrderPayable:              NewOrderPayableClient(cfg),
 		OutboxEvent:               NewOutboxEventClient(cfg),
 		PaymentIntent:             NewPaymentIntentClient(cfg),
 		PaymentRefund:             NewPaymentRefundClient(cfg),
+		PayoutOnboarding:          NewPayoutOnboardingClient(cfg),
 		PayoutTransfer:            NewPayoutTransferClient(cfg),
+		ProviderCustomer:          NewProviderCustomerClient(cfg),
 		ProviderDispute:           NewProviderDisputeClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
+		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
@@ -212,14 +232,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:                    cfg,
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
+		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		OrderPayable:              NewOrderPayableClient(cfg),
 		OutboxEvent:               NewOutboxEventClient(cfg),
 		PaymentIntent:             NewPaymentIntentClient(cfg),
 		PaymentRefund:             NewPaymentRefundClient(cfg),
+		PayoutOnboarding:          NewPayoutOnboardingClient(cfg),
 		PayoutTransfer:            NewPayoutTransferClient(cfg),
+		ProviderCustomer:          NewProviderCustomerClient(cfg),
 		ProviderDispute:           NewProviderDisputeClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
+		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
@@ -251,10 +275,11 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.BillingSubscription, c.ConnectedAccount, c.IdempotentRequest, c.OrderPayable,
-		c.OutboxEvent, c.PaymentIntent, c.PaymentRefund, c.PayoutTransfer,
-		c.ProviderDispute, c.ProviderPayoutDestination, c.StorePurchase,
-		c.WebhookEvent,
+		c.BillingSubscription, c.ConnectedAccount, c.ConnectedAccountJob,
+		c.IdempotentRequest, c.OrderPayable, c.OutboxEvent, c.PaymentIntent,
+		c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer,
+		c.ProviderDispute, c.ProviderPayoutDestination, c.SavedCardSetup,
+		c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -264,10 +289,11 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.BillingSubscription, c.ConnectedAccount, c.IdempotentRequest, c.OrderPayable,
-		c.OutboxEvent, c.PaymentIntent, c.PaymentRefund, c.PayoutTransfer,
-		c.ProviderDispute, c.ProviderPayoutDestination, c.StorePurchase,
-		c.WebhookEvent,
+		c.BillingSubscription, c.ConnectedAccount, c.ConnectedAccountJob,
+		c.IdempotentRequest, c.OrderPayable, c.OutboxEvent, c.PaymentIntent,
+		c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer,
+		c.ProviderDispute, c.ProviderPayoutDestination, c.SavedCardSetup,
+		c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -280,6 +306,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BillingSubscription.mutate(ctx, m)
 	case *ConnectedAccountMutation:
 		return c.ConnectedAccount.mutate(ctx, m)
+	case *ConnectedAccountJobMutation:
+		return c.ConnectedAccountJob.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
 	case *OrderPayableMutation:
@@ -290,12 +318,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PaymentIntent.mutate(ctx, m)
 	case *PaymentRefundMutation:
 		return c.PaymentRefund.mutate(ctx, m)
+	case *PayoutOnboardingMutation:
+		return c.PayoutOnboarding.mutate(ctx, m)
 	case *PayoutTransferMutation:
 		return c.PayoutTransfer.mutate(ctx, m)
+	case *ProviderCustomerMutation:
+		return c.ProviderCustomer.mutate(ctx, m)
 	case *ProviderDisputeMutation:
 		return c.ProviderDispute.mutate(ctx, m)
 	case *ProviderPayoutDestinationMutation:
 		return c.ProviderPayoutDestination.mutate(ctx, m)
+	case *SavedCardSetupMutation:
+		return c.SavedCardSetup.mutate(ctx, m)
 	case *StorePurchaseMutation:
 		return c.StorePurchase.mutate(ctx, m)
 	case *WebhookEventMutation:
@@ -568,6 +602,139 @@ func (c *ConnectedAccountClient) mutate(ctx context.Context, m *ConnectedAccount
 		return (&ConnectedAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ConnectedAccount mutation op: %q", m.Op())
+	}
+}
+
+// ConnectedAccountJobClient is a client for the ConnectedAccountJob schema.
+type ConnectedAccountJobClient struct {
+	config
+}
+
+// NewConnectedAccountJobClient returns a client for the ConnectedAccountJob from the given config.
+func NewConnectedAccountJobClient(c config) *ConnectedAccountJobClient {
+	return &ConnectedAccountJobClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `connectedaccountjob.Hooks(f(g(h())))`.
+func (c *ConnectedAccountJobClient) Use(hooks ...Hook) {
+	c.hooks.ConnectedAccountJob = append(c.hooks.ConnectedAccountJob, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `connectedaccountjob.Intercept(f(g(h())))`.
+func (c *ConnectedAccountJobClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ConnectedAccountJob = append(c.inters.ConnectedAccountJob, interceptors...)
+}
+
+// Create returns a builder for creating a ConnectedAccountJob entity.
+func (c *ConnectedAccountJobClient) Create() *ConnectedAccountJobCreate {
+	mutation := newConnectedAccountJobMutation(c.config, OpCreate)
+	return &ConnectedAccountJobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ConnectedAccountJob entities.
+func (c *ConnectedAccountJobClient) CreateBulk(builders ...*ConnectedAccountJobCreate) *ConnectedAccountJobCreateBulk {
+	return &ConnectedAccountJobCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ConnectedAccountJobClient) MapCreateBulk(slice any, setFunc func(*ConnectedAccountJobCreate, int)) *ConnectedAccountJobCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ConnectedAccountJobCreateBulk{err: fmt.Errorf("calling to ConnectedAccountJobClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ConnectedAccountJobCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ConnectedAccountJobCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ConnectedAccountJob.
+func (c *ConnectedAccountJobClient) Update() *ConnectedAccountJobUpdate {
+	mutation := newConnectedAccountJobMutation(c.config, OpUpdate)
+	return &ConnectedAccountJobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConnectedAccountJobClient) UpdateOne(_m *ConnectedAccountJob) *ConnectedAccountJobUpdateOne {
+	mutation := newConnectedAccountJobMutation(c.config, OpUpdateOne, withConnectedAccountJob(_m))
+	return &ConnectedAccountJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConnectedAccountJobClient) UpdateOneID(id uuid.UUID) *ConnectedAccountJobUpdateOne {
+	mutation := newConnectedAccountJobMutation(c.config, OpUpdateOne, withConnectedAccountJobID(id))
+	return &ConnectedAccountJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ConnectedAccountJob.
+func (c *ConnectedAccountJobClient) Delete() *ConnectedAccountJobDelete {
+	mutation := newConnectedAccountJobMutation(c.config, OpDelete)
+	return &ConnectedAccountJobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ConnectedAccountJobClient) DeleteOne(_m *ConnectedAccountJob) *ConnectedAccountJobDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ConnectedAccountJobClient) DeleteOneID(id uuid.UUID) *ConnectedAccountJobDeleteOne {
+	builder := c.Delete().Where(connectedaccountjob.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConnectedAccountJobDeleteOne{builder}
+}
+
+// Query returns a query builder for ConnectedAccountJob.
+func (c *ConnectedAccountJobClient) Query() *ConnectedAccountJobQuery {
+	return &ConnectedAccountJobQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeConnectedAccountJob},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ConnectedAccountJob entity by its id.
+func (c *ConnectedAccountJobClient) Get(ctx context.Context, id uuid.UUID) (*ConnectedAccountJob, error) {
+	return c.Query().Where(connectedaccountjob.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConnectedAccountJobClient) GetX(ctx context.Context, id uuid.UUID) *ConnectedAccountJob {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ConnectedAccountJobClient) Hooks() []Hook {
+	return c.hooks.ConnectedAccountJob
+}
+
+// Interceptors returns the client interceptors.
+func (c *ConnectedAccountJobClient) Interceptors() []Interceptor {
+	return c.inters.ConnectedAccountJob
+}
+
+func (c *ConnectedAccountJobClient) mutate(ctx context.Context, m *ConnectedAccountJobMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ConnectedAccountJobCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ConnectedAccountJobUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ConnectedAccountJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ConnectedAccountJobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ConnectedAccountJob mutation op: %q", m.Op())
 	}
 }
 
@@ -1236,6 +1403,139 @@ func (c *PaymentRefundClient) mutate(ctx context.Context, m *PaymentRefundMutati
 	}
 }
 
+// PayoutOnboardingClient is a client for the PayoutOnboarding schema.
+type PayoutOnboardingClient struct {
+	config
+}
+
+// NewPayoutOnboardingClient returns a client for the PayoutOnboarding from the given config.
+func NewPayoutOnboardingClient(c config) *PayoutOnboardingClient {
+	return &PayoutOnboardingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `payoutonboarding.Hooks(f(g(h())))`.
+func (c *PayoutOnboardingClient) Use(hooks ...Hook) {
+	c.hooks.PayoutOnboarding = append(c.hooks.PayoutOnboarding, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `payoutonboarding.Intercept(f(g(h())))`.
+func (c *PayoutOnboardingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PayoutOnboarding = append(c.inters.PayoutOnboarding, interceptors...)
+}
+
+// Create returns a builder for creating a PayoutOnboarding entity.
+func (c *PayoutOnboardingClient) Create() *PayoutOnboardingCreate {
+	mutation := newPayoutOnboardingMutation(c.config, OpCreate)
+	return &PayoutOnboardingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PayoutOnboarding entities.
+func (c *PayoutOnboardingClient) CreateBulk(builders ...*PayoutOnboardingCreate) *PayoutOnboardingCreateBulk {
+	return &PayoutOnboardingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PayoutOnboardingClient) MapCreateBulk(slice any, setFunc func(*PayoutOnboardingCreate, int)) *PayoutOnboardingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PayoutOnboardingCreateBulk{err: fmt.Errorf("calling to PayoutOnboardingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PayoutOnboardingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PayoutOnboardingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PayoutOnboarding.
+func (c *PayoutOnboardingClient) Update() *PayoutOnboardingUpdate {
+	mutation := newPayoutOnboardingMutation(c.config, OpUpdate)
+	return &PayoutOnboardingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PayoutOnboardingClient) UpdateOne(_m *PayoutOnboarding) *PayoutOnboardingUpdateOne {
+	mutation := newPayoutOnboardingMutation(c.config, OpUpdateOne, withPayoutOnboarding(_m))
+	return &PayoutOnboardingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PayoutOnboardingClient) UpdateOneID(id uuid.UUID) *PayoutOnboardingUpdateOne {
+	mutation := newPayoutOnboardingMutation(c.config, OpUpdateOne, withPayoutOnboardingID(id))
+	return &PayoutOnboardingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PayoutOnboarding.
+func (c *PayoutOnboardingClient) Delete() *PayoutOnboardingDelete {
+	mutation := newPayoutOnboardingMutation(c.config, OpDelete)
+	return &PayoutOnboardingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PayoutOnboardingClient) DeleteOne(_m *PayoutOnboarding) *PayoutOnboardingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PayoutOnboardingClient) DeleteOneID(id uuid.UUID) *PayoutOnboardingDeleteOne {
+	builder := c.Delete().Where(payoutonboarding.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PayoutOnboardingDeleteOne{builder}
+}
+
+// Query returns a query builder for PayoutOnboarding.
+func (c *PayoutOnboardingClient) Query() *PayoutOnboardingQuery {
+	return &PayoutOnboardingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePayoutOnboarding},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PayoutOnboarding entity by its id.
+func (c *PayoutOnboardingClient) Get(ctx context.Context, id uuid.UUID) (*PayoutOnboarding, error) {
+	return c.Query().Where(payoutonboarding.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PayoutOnboardingClient) GetX(ctx context.Context, id uuid.UUID) *PayoutOnboarding {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PayoutOnboardingClient) Hooks() []Hook {
+	return c.hooks.PayoutOnboarding
+}
+
+// Interceptors returns the client interceptors.
+func (c *PayoutOnboardingClient) Interceptors() []Interceptor {
+	return c.inters.PayoutOnboarding
+}
+
+func (c *PayoutOnboardingClient) mutate(ctx context.Context, m *PayoutOnboardingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PayoutOnboardingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PayoutOnboardingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PayoutOnboardingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PayoutOnboardingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PayoutOnboarding mutation op: %q", m.Op())
+	}
+}
+
 // PayoutTransferClient is a client for the PayoutTransfer schema.
 type PayoutTransferClient struct {
 	config
@@ -1366,6 +1666,139 @@ func (c *PayoutTransferClient) mutate(ctx context.Context, m *PayoutTransferMuta
 		return (&PayoutTransferDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PayoutTransfer mutation op: %q", m.Op())
+	}
+}
+
+// ProviderCustomerClient is a client for the ProviderCustomer schema.
+type ProviderCustomerClient struct {
+	config
+}
+
+// NewProviderCustomerClient returns a client for the ProviderCustomer from the given config.
+func NewProviderCustomerClient(c config) *ProviderCustomerClient {
+	return &ProviderCustomerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `providercustomer.Hooks(f(g(h())))`.
+func (c *ProviderCustomerClient) Use(hooks ...Hook) {
+	c.hooks.ProviderCustomer = append(c.hooks.ProviderCustomer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `providercustomer.Intercept(f(g(h())))`.
+func (c *ProviderCustomerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProviderCustomer = append(c.inters.ProviderCustomer, interceptors...)
+}
+
+// Create returns a builder for creating a ProviderCustomer entity.
+func (c *ProviderCustomerClient) Create() *ProviderCustomerCreate {
+	mutation := newProviderCustomerMutation(c.config, OpCreate)
+	return &ProviderCustomerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProviderCustomer entities.
+func (c *ProviderCustomerClient) CreateBulk(builders ...*ProviderCustomerCreate) *ProviderCustomerCreateBulk {
+	return &ProviderCustomerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderCustomerClient) MapCreateBulk(slice any, setFunc func(*ProviderCustomerCreate, int)) *ProviderCustomerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderCustomerCreateBulk{err: fmt.Errorf("calling to ProviderCustomerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderCustomerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderCustomerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProviderCustomer.
+func (c *ProviderCustomerClient) Update() *ProviderCustomerUpdate {
+	mutation := newProviderCustomerMutation(c.config, OpUpdate)
+	return &ProviderCustomerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderCustomerClient) UpdateOne(_m *ProviderCustomer) *ProviderCustomerUpdateOne {
+	mutation := newProviderCustomerMutation(c.config, OpUpdateOne, withProviderCustomer(_m))
+	return &ProviderCustomerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderCustomerClient) UpdateOneID(id uuid.UUID) *ProviderCustomerUpdateOne {
+	mutation := newProviderCustomerMutation(c.config, OpUpdateOne, withProviderCustomerID(id))
+	return &ProviderCustomerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProviderCustomer.
+func (c *ProviderCustomerClient) Delete() *ProviderCustomerDelete {
+	mutation := newProviderCustomerMutation(c.config, OpDelete)
+	return &ProviderCustomerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderCustomerClient) DeleteOne(_m *ProviderCustomer) *ProviderCustomerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderCustomerClient) DeleteOneID(id uuid.UUID) *ProviderCustomerDeleteOne {
+	builder := c.Delete().Where(providercustomer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderCustomerDeleteOne{builder}
+}
+
+// Query returns a query builder for ProviderCustomer.
+func (c *ProviderCustomerClient) Query() *ProviderCustomerQuery {
+	return &ProviderCustomerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProviderCustomer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProviderCustomer entity by its id.
+func (c *ProviderCustomerClient) Get(ctx context.Context, id uuid.UUID) (*ProviderCustomer, error) {
+	return c.Query().Where(providercustomer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderCustomerClient) GetX(ctx context.Context, id uuid.UUID) *ProviderCustomer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderCustomerClient) Hooks() []Hook {
+	return c.hooks.ProviderCustomer
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderCustomerClient) Interceptors() []Interceptor {
+	return c.inters.ProviderCustomer
+}
+
+func (c *ProviderCustomerClient) mutate(ctx context.Context, m *ProviderCustomerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderCustomerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderCustomerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderCustomerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderCustomerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProviderCustomer mutation op: %q", m.Op())
 	}
 }
 
@@ -1632,6 +2065,139 @@ func (c *ProviderPayoutDestinationClient) mutate(ctx context.Context, m *Provide
 		return (&ProviderPayoutDestinationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ProviderPayoutDestination mutation op: %q", m.Op())
+	}
+}
+
+// SavedCardSetupClient is a client for the SavedCardSetup schema.
+type SavedCardSetupClient struct {
+	config
+}
+
+// NewSavedCardSetupClient returns a client for the SavedCardSetup from the given config.
+func NewSavedCardSetupClient(c config) *SavedCardSetupClient {
+	return &SavedCardSetupClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `savedcardsetup.Hooks(f(g(h())))`.
+func (c *SavedCardSetupClient) Use(hooks ...Hook) {
+	c.hooks.SavedCardSetup = append(c.hooks.SavedCardSetup, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `savedcardsetup.Intercept(f(g(h())))`.
+func (c *SavedCardSetupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SavedCardSetup = append(c.inters.SavedCardSetup, interceptors...)
+}
+
+// Create returns a builder for creating a SavedCardSetup entity.
+func (c *SavedCardSetupClient) Create() *SavedCardSetupCreate {
+	mutation := newSavedCardSetupMutation(c.config, OpCreate)
+	return &SavedCardSetupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SavedCardSetup entities.
+func (c *SavedCardSetupClient) CreateBulk(builders ...*SavedCardSetupCreate) *SavedCardSetupCreateBulk {
+	return &SavedCardSetupCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SavedCardSetupClient) MapCreateBulk(slice any, setFunc func(*SavedCardSetupCreate, int)) *SavedCardSetupCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SavedCardSetupCreateBulk{err: fmt.Errorf("calling to SavedCardSetupClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SavedCardSetupCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SavedCardSetupCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SavedCardSetup.
+func (c *SavedCardSetupClient) Update() *SavedCardSetupUpdate {
+	mutation := newSavedCardSetupMutation(c.config, OpUpdate)
+	return &SavedCardSetupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SavedCardSetupClient) UpdateOne(_m *SavedCardSetup) *SavedCardSetupUpdateOne {
+	mutation := newSavedCardSetupMutation(c.config, OpUpdateOne, withSavedCardSetup(_m))
+	return &SavedCardSetupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SavedCardSetupClient) UpdateOneID(id uuid.UUID) *SavedCardSetupUpdateOne {
+	mutation := newSavedCardSetupMutation(c.config, OpUpdateOne, withSavedCardSetupID(id))
+	return &SavedCardSetupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SavedCardSetup.
+func (c *SavedCardSetupClient) Delete() *SavedCardSetupDelete {
+	mutation := newSavedCardSetupMutation(c.config, OpDelete)
+	return &SavedCardSetupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SavedCardSetupClient) DeleteOne(_m *SavedCardSetup) *SavedCardSetupDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SavedCardSetupClient) DeleteOneID(id uuid.UUID) *SavedCardSetupDeleteOne {
+	builder := c.Delete().Where(savedcardsetup.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SavedCardSetupDeleteOne{builder}
+}
+
+// Query returns a query builder for SavedCardSetup.
+func (c *SavedCardSetupClient) Query() *SavedCardSetupQuery {
+	return &SavedCardSetupQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSavedCardSetup},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SavedCardSetup entity by its id.
+func (c *SavedCardSetupClient) Get(ctx context.Context, id uuid.UUID) (*SavedCardSetup, error) {
+	return c.Query().Where(savedcardsetup.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SavedCardSetupClient) GetX(ctx context.Context, id uuid.UUID) *SavedCardSetup {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SavedCardSetupClient) Hooks() []Hook {
+	return c.hooks.SavedCardSetup
+}
+
+// Interceptors returns the client interceptors.
+func (c *SavedCardSetupClient) Interceptors() []Interceptor {
+	return c.inters.SavedCardSetup
+}
+
+func (c *SavedCardSetupClient) mutate(ctx context.Context, m *SavedCardSetupMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SavedCardSetupCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SavedCardSetupUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SavedCardSetupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SavedCardSetupDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SavedCardSetup mutation op: %q", m.Op())
 	}
 }
 
@@ -1904,14 +2470,16 @@ func (c *WebhookEventClient) mutate(ctx context.Context, m *WebhookEventMutation
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		BillingSubscription, ConnectedAccount, IdempotentRequest, OrderPayable,
-		OutboxEvent, PaymentIntent, PaymentRefund, PayoutTransfer, ProviderDispute,
-		ProviderPayoutDestination, StorePurchase, WebhookEvent []ent.Hook
+		BillingSubscription, ConnectedAccount, ConnectedAccountJob, IdempotentRequest,
+		OrderPayable, OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding,
+		PayoutTransfer, ProviderCustomer, ProviderDispute, ProviderPayoutDestination,
+		SavedCardSetup, StorePurchase, WebhookEvent []ent.Hook
 	}
 	inters struct {
-		BillingSubscription, ConnectedAccount, IdempotentRequest, OrderPayable,
-		OutboxEvent, PaymentIntent, PaymentRefund, PayoutTransfer, ProviderDispute,
-		ProviderPayoutDestination, StorePurchase, WebhookEvent []ent.Interceptor
+		BillingSubscription, ConnectedAccount, ConnectedAccountJob, IdempotentRequest,
+		OrderPayable, OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding,
+		PayoutTransfer, ProviderCustomer, ProviderDispute, ProviderPayoutDestination,
+		SavedCardSetup, StorePurchase, WebhookEvent []ent.Interceptor
 	}
 )
 

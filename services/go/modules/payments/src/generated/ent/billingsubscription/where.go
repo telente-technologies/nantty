@@ -95,6 +95,16 @@ func ProviderSubscriptionID(v string) predicate.BillingSubscription {
 	return predicate.BillingSubscription(sql.FieldEQ(FieldProviderSubscriptionID, v))
 }
 
+// ProviderCustomerID applies equality check predicate on the "provider_customer_id" field. It's identical to ProviderCustomerIDEQ.
+func ProviderCustomerID(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEQ(FieldProviderCustomerID, v))
+}
+
+// EmailToken applies equality check predicate on the "email_token" field. It's identical to EmailTokenEQ.
+func EmailToken(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEQ(FieldEmailToken, v))
+}
+
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
 func Status(v string) predicate.BillingSubscription {
 	return predicate.BillingSubscription(sql.FieldEQ(FieldStatus, v))
@@ -613,6 +623,136 @@ func ProviderSubscriptionIDEqualFold(v string) predicate.BillingSubscription {
 // ProviderSubscriptionIDContainsFold applies the ContainsFold predicate on the "provider_subscription_id" field.
 func ProviderSubscriptionIDContainsFold(v string) predicate.BillingSubscription {
 	return predicate.BillingSubscription(sql.FieldContainsFold(FieldProviderSubscriptionID, v))
+}
+
+// ProviderCustomerIDEQ applies the EQ predicate on the "provider_customer_id" field.
+func ProviderCustomerIDEQ(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEQ(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDNEQ applies the NEQ predicate on the "provider_customer_id" field.
+func ProviderCustomerIDNEQ(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldNEQ(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDIn applies the In predicate on the "provider_customer_id" field.
+func ProviderCustomerIDIn(vs ...string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldIn(FieldProviderCustomerID, vs...))
+}
+
+// ProviderCustomerIDNotIn applies the NotIn predicate on the "provider_customer_id" field.
+func ProviderCustomerIDNotIn(vs ...string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldNotIn(FieldProviderCustomerID, vs...))
+}
+
+// ProviderCustomerIDGT applies the GT predicate on the "provider_customer_id" field.
+func ProviderCustomerIDGT(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldGT(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDGTE applies the GTE predicate on the "provider_customer_id" field.
+func ProviderCustomerIDGTE(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldGTE(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDLT applies the LT predicate on the "provider_customer_id" field.
+func ProviderCustomerIDLT(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldLT(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDLTE applies the LTE predicate on the "provider_customer_id" field.
+func ProviderCustomerIDLTE(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldLTE(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDContains applies the Contains predicate on the "provider_customer_id" field.
+func ProviderCustomerIDContains(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldContains(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDHasPrefix applies the HasPrefix predicate on the "provider_customer_id" field.
+func ProviderCustomerIDHasPrefix(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldHasPrefix(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDHasSuffix applies the HasSuffix predicate on the "provider_customer_id" field.
+func ProviderCustomerIDHasSuffix(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldHasSuffix(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDEqualFold applies the EqualFold predicate on the "provider_customer_id" field.
+func ProviderCustomerIDEqualFold(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEqualFold(FieldProviderCustomerID, v))
+}
+
+// ProviderCustomerIDContainsFold applies the ContainsFold predicate on the "provider_customer_id" field.
+func ProviderCustomerIDContainsFold(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldContainsFold(FieldProviderCustomerID, v))
+}
+
+// EmailTokenEQ applies the EQ predicate on the "email_token" field.
+func EmailTokenEQ(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEQ(FieldEmailToken, v))
+}
+
+// EmailTokenNEQ applies the NEQ predicate on the "email_token" field.
+func EmailTokenNEQ(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldNEQ(FieldEmailToken, v))
+}
+
+// EmailTokenIn applies the In predicate on the "email_token" field.
+func EmailTokenIn(vs ...string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldIn(FieldEmailToken, vs...))
+}
+
+// EmailTokenNotIn applies the NotIn predicate on the "email_token" field.
+func EmailTokenNotIn(vs ...string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldNotIn(FieldEmailToken, vs...))
+}
+
+// EmailTokenGT applies the GT predicate on the "email_token" field.
+func EmailTokenGT(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldGT(FieldEmailToken, v))
+}
+
+// EmailTokenGTE applies the GTE predicate on the "email_token" field.
+func EmailTokenGTE(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldGTE(FieldEmailToken, v))
+}
+
+// EmailTokenLT applies the LT predicate on the "email_token" field.
+func EmailTokenLT(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldLT(FieldEmailToken, v))
+}
+
+// EmailTokenLTE applies the LTE predicate on the "email_token" field.
+func EmailTokenLTE(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldLTE(FieldEmailToken, v))
+}
+
+// EmailTokenContains applies the Contains predicate on the "email_token" field.
+func EmailTokenContains(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldContains(FieldEmailToken, v))
+}
+
+// EmailTokenHasPrefix applies the HasPrefix predicate on the "email_token" field.
+func EmailTokenHasPrefix(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldHasPrefix(FieldEmailToken, v))
+}
+
+// EmailTokenHasSuffix applies the HasSuffix predicate on the "email_token" field.
+func EmailTokenHasSuffix(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldHasSuffix(FieldEmailToken, v))
+}
+
+// EmailTokenEqualFold applies the EqualFold predicate on the "email_token" field.
+func EmailTokenEqualFold(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldEqualFold(FieldEmailToken, v))
+}
+
+// EmailTokenContainsFold applies the ContainsFold predicate on the "email_token" field.
+func EmailTokenContainsFold(v string) predicate.BillingSubscription {
+	return predicate.BillingSubscription(sql.FieldContainsFold(FieldEmailToken, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

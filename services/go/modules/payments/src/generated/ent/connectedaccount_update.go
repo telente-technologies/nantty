@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,6 +30,114 @@ func (_u *ConnectedAccountUpdate) Where(ps ...predicate.ConnectedAccount) *Conne
 	return _u
 }
 
+// SetProviderAccountID sets the "provider_account_id" field.
+func (_u *ConnectedAccountUpdate) SetProviderAccountID(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetProviderAccountID(v)
+	return _u
+}
+
+// SetNillableProviderAccountID sets the "provider_account_id" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableProviderAccountID(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetProviderAccountID(*v)
+	}
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *ConnectedAccountUpdate) SetStatus(v connectedaccount.Status) *ConnectedAccountUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableStatus(v *connectedaccount.Status) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *ConnectedAccountUpdate) SetLastError(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableLastError(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (_u *ConnectedAccountUpdate) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountUpdate {
+	_u.mutation.SetVerificationStatus(v)
+	return _u
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableVerificationStatus(v *connectedaccount.VerificationStatus) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetVerificationStatus(*v)
+	}
+	return _u
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (_u *ConnectedAccountUpdate) SetVerificationReasons(v []byte) *ConnectedAccountUpdate {
+	_u.mutation.SetVerificationReasons(v)
+	return _u
+}
+
+// ClearVerificationReasons clears the value of the "verification_reasons" field.
+func (_u *ConnectedAccountUpdate) ClearVerificationReasons() *ConnectedAccountUpdate {
+	_u.mutation.ClearVerificationReasons()
+	return _u
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (_u *ConnectedAccountUpdate) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountUpdate {
+	_u.mutation.SetVerificationStatusChangedAt(v)
+	return _u
+}
+
+// SetNillableVerificationStatusChangedAt sets the "verification_status_changed_at" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableVerificationStatusChangedAt(v *time.Time) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetVerificationStatusChangedAt(*v)
+	}
+	return _u
+}
+
+// ClearVerificationStatusChangedAt clears the value of the "verification_status_changed_at" field.
+func (_u *ConnectedAccountUpdate) ClearVerificationStatusChangedAt() *ConnectedAccountUpdate {
+	_u.mutation.ClearVerificationStatusChangedAt()
+	return _u
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (_u *ConnectedAccountUpdate) SetVerificationNudgedAt(v time.Time) *ConnectedAccountUpdate {
+	_u.mutation.SetVerificationNudgedAt(v)
+	return _u
+}
+
+// SetNillableVerificationNudgedAt sets the "verification_nudged_at" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableVerificationNudgedAt(v *time.Time) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetVerificationNudgedAt(*v)
+	}
+	return _u
+}
+
+// ClearVerificationNudgedAt clears the value of the "verification_nudged_at" field.
+func (_u *ConnectedAccountUpdate) ClearVerificationNudgedAt() *ConnectedAccountUpdate {
+	_u.mutation.ClearVerificationNudgedAt()
+	return _u
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (_u *ConnectedAccountUpdate) SetAcceptsPayments(v bool) *ConnectedAccountUpdate {
 	_u.mutation.SetAcceptsPayments(v)
@@ -39,6 +148,108 @@ func (_u *ConnectedAccountUpdate) SetAcceptsPayments(v bool) *ConnectedAccountUp
 func (_u *ConnectedAccountUpdate) SetNillableAcceptsPayments(v *bool) *ConnectedAccountUpdate {
 	if v != nil {
 		_u.SetAcceptsPayments(*v)
+	}
+	return _u
+}
+
+// SetRoles sets the "roles" field.
+func (_u *ConnectedAccountUpdate) SetRoles(v []string) *ConnectedAccountUpdate {
+	_u.mutation.SetRoles(v)
+	return _u
+}
+
+// AppendRoles appends value to the "roles" field.
+func (_u *ConnectedAccountUpdate) AppendRoles(v []string) *ConnectedAccountUpdate {
+	_u.mutation.AppendRoles(v)
+	return _u
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (_u *ConnectedAccountUpdate) ClearRoles() *ConnectedAccountUpdate {
+	_u.mutation.ClearRoles()
+	return _u
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (_u *ConnectedAccountUpdate) SetRecipientCode(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetRecipientCode(v)
+	return _u
+}
+
+// SetNillableRecipientCode sets the "recipient_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableRecipientCode(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetRecipientCode(*v)
+	}
+	return _u
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (_u *ConnectedAccountUpdate) SetSettlementSubaccountCode(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetSettlementSubaccountCode(v)
+	return _u
+}
+
+// SetNillableSettlementSubaccountCode sets the "settlement_subaccount_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableSettlementSubaccountCode(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetSettlementSubaccountCode(*v)
+	}
+	return _u
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (_u *ConnectedAccountUpdate) SetEscrowSubaccountCode(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetEscrowSubaccountCode(v)
+	return _u
+}
+
+// SetNillableEscrowSubaccountCode sets the "escrow_subaccount_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableEscrowSubaccountCode(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetEscrowSubaccountCode(*v)
+	}
+	return _u
+}
+
+// SetBankCode sets the "bank_code" field.
+func (_u *ConnectedAccountUpdate) SetBankCode(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetBankCode(v)
+	return _u
+}
+
+// SetNillableBankCode sets the "bank_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableBankCode(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetBankCode(*v)
+	}
+	return _u
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (_u *ConnectedAccountUpdate) SetAccountLast4(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetAccountLast4(v)
+	return _u
+}
+
+// SetNillableAccountLast4 sets the "account_last4" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableAccountLast4(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetAccountLast4(*v)
+	}
+	return _u
+}
+
+// SetAccountName sets the "account_name" field.
+func (_u *ConnectedAccountUpdate) SetAccountName(v string) *ConnectedAccountUpdate {
+	_u.mutation.SetAccountName(v)
+	return _u
+}
+
+// SetNillableAccountName sets the "account_name" field if the given value is not nil.
+func (_u *ConnectedAccountUpdate) SetNillableAccountName(v *string) *ConnectedAccountUpdate {
+	if v != nil {
+		_u.SetAccountName(*v)
 	}
 	return _u
 }
@@ -215,6 +426,56 @@ func (_u *ConnectedAccountUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ConnectedAccountUpdate) check() error {
+	if v, ok := _u.mutation.ProviderAccountID(); ok {
+		if err := connectedaccount.ProviderAccountIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_account_id", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.provider_account_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := connectedaccount.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := connectedaccount.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.last_error": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.VerificationStatus(); ok {
+		if err := connectedaccount.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.verification_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RecipientCode(); ok {
+		if err := connectedaccount.RecipientCodeValidator(v); err != nil {
+			return &ValidationError{Name: "recipient_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.recipient_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SettlementSubaccountCode(); ok {
+		if err := connectedaccount.SettlementSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.settlement_subaccount_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EscrowSubaccountCode(); ok {
+		if err := connectedaccount.EscrowSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "escrow_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.escrow_subaccount_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BankCode(); ok {
+		if err := connectedaccount.BankCodeValidator(v); err != nil {
+			return &ValidationError{Name: "bank_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.bank_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AccountLast4(); ok {
+		if err := connectedaccount.AccountLast4Validator(v); err != nil {
+			return &ValidationError{Name: "account_last4", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_last4": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AccountName(); ok {
+		if err := connectedaccount.AccountNameValidator(v); err != nil {
+			return &ValidationError{Name: "account_name", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PayoutsFrozenReason(); ok {
 		if err := connectedaccount.PayoutsFrozenReasonValidator(v); err != nil {
 			return &ValidationError{Name: "payouts_frozen_reason", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.payouts_frozen_reason": %w`, err)}
@@ -245,8 +506,67 @@ func (_u *ConnectedAccountUpdate) sqlSave(ctx context.Context) (_node int, err e
 			}
 		}
 	}
+	if value, ok := _u.mutation.ProviderAccountID(); ok {
+		_spec.SetField(connectedaccount.FieldProviderAccountID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(connectedaccount.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(connectedaccount.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.VerificationStatus(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.VerificationReasons(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationReasons, field.TypeBytes, value)
+	}
+	if _u.mutation.VerificationReasonsCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationReasons, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.VerificationStatusChangedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatusChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.VerificationStatusChangedAtCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationStatusChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.VerificationNudgedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationNudgedAt, field.TypeTime, value)
+	}
+	if _u.mutation.VerificationNudgedAtCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationNudgedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.AcceptsPayments(); ok {
 		_spec.SetField(connectedaccount.FieldAcceptsPayments, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Roles(); ok {
+		_spec.SetField(connectedaccount.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, connectedaccount.FieldRoles, value)
+		})
+	}
+	if _u.mutation.RolesCleared() {
+		_spec.ClearField(connectedaccount.FieldRoles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RecipientCode(); ok {
+		_spec.SetField(connectedaccount.FieldRecipientCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldSettlementSubaccountCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EscrowSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldEscrowSubaccountCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BankCode(); ok {
+		_spec.SetField(connectedaccount.FieldBankCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountLast4(); ok {
+		_spec.SetField(connectedaccount.FieldAccountLast4, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountName(); ok {
+		_spec.SetField(connectedaccount.FieldAccountName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CapabilityStatuses(); ok {
 		_spec.SetField(connectedaccount.FieldCapabilityStatuses, field.TypeBytes, value)
@@ -306,6 +626,114 @@ type ConnectedAccountUpdateOne struct {
 	mutation *ConnectedAccountMutation
 }
 
+// SetProviderAccountID sets the "provider_account_id" field.
+func (_u *ConnectedAccountUpdateOne) SetProviderAccountID(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetProviderAccountID(v)
+	return _u
+}
+
+// SetNillableProviderAccountID sets the "provider_account_id" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableProviderAccountID(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetProviderAccountID(*v)
+	}
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *ConnectedAccountUpdateOne) SetStatus(v connectedaccount.Status) *ConnectedAccountUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableStatus(v *connectedaccount.Status) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *ConnectedAccountUpdateOne) SetLastError(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableLastError(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (_u *ConnectedAccountUpdateOne) SetVerificationStatus(v connectedaccount.VerificationStatus) *ConnectedAccountUpdateOne {
+	_u.mutation.SetVerificationStatus(v)
+	return _u
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableVerificationStatus(v *connectedaccount.VerificationStatus) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetVerificationStatus(*v)
+	}
+	return _u
+}
+
+// SetVerificationReasons sets the "verification_reasons" field.
+func (_u *ConnectedAccountUpdateOne) SetVerificationReasons(v []byte) *ConnectedAccountUpdateOne {
+	_u.mutation.SetVerificationReasons(v)
+	return _u
+}
+
+// ClearVerificationReasons clears the value of the "verification_reasons" field.
+func (_u *ConnectedAccountUpdateOne) ClearVerificationReasons() *ConnectedAccountUpdateOne {
+	_u.mutation.ClearVerificationReasons()
+	return _u
+}
+
+// SetVerificationStatusChangedAt sets the "verification_status_changed_at" field.
+func (_u *ConnectedAccountUpdateOne) SetVerificationStatusChangedAt(v time.Time) *ConnectedAccountUpdateOne {
+	_u.mutation.SetVerificationStatusChangedAt(v)
+	return _u
+}
+
+// SetNillableVerificationStatusChangedAt sets the "verification_status_changed_at" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableVerificationStatusChangedAt(v *time.Time) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetVerificationStatusChangedAt(*v)
+	}
+	return _u
+}
+
+// ClearVerificationStatusChangedAt clears the value of the "verification_status_changed_at" field.
+func (_u *ConnectedAccountUpdateOne) ClearVerificationStatusChangedAt() *ConnectedAccountUpdateOne {
+	_u.mutation.ClearVerificationStatusChangedAt()
+	return _u
+}
+
+// SetVerificationNudgedAt sets the "verification_nudged_at" field.
+func (_u *ConnectedAccountUpdateOne) SetVerificationNudgedAt(v time.Time) *ConnectedAccountUpdateOne {
+	_u.mutation.SetVerificationNudgedAt(v)
+	return _u
+}
+
+// SetNillableVerificationNudgedAt sets the "verification_nudged_at" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableVerificationNudgedAt(v *time.Time) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetVerificationNudgedAt(*v)
+	}
+	return _u
+}
+
+// ClearVerificationNudgedAt clears the value of the "verification_nudged_at" field.
+func (_u *ConnectedAccountUpdateOne) ClearVerificationNudgedAt() *ConnectedAccountUpdateOne {
+	_u.mutation.ClearVerificationNudgedAt()
+	return _u
+}
+
 // SetAcceptsPayments sets the "accepts_payments" field.
 func (_u *ConnectedAccountUpdateOne) SetAcceptsPayments(v bool) *ConnectedAccountUpdateOne {
 	_u.mutation.SetAcceptsPayments(v)
@@ -316,6 +744,108 @@ func (_u *ConnectedAccountUpdateOne) SetAcceptsPayments(v bool) *ConnectedAccoun
 func (_u *ConnectedAccountUpdateOne) SetNillableAcceptsPayments(v *bool) *ConnectedAccountUpdateOne {
 	if v != nil {
 		_u.SetAcceptsPayments(*v)
+	}
+	return _u
+}
+
+// SetRoles sets the "roles" field.
+func (_u *ConnectedAccountUpdateOne) SetRoles(v []string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetRoles(v)
+	return _u
+}
+
+// AppendRoles appends value to the "roles" field.
+func (_u *ConnectedAccountUpdateOne) AppendRoles(v []string) *ConnectedAccountUpdateOne {
+	_u.mutation.AppendRoles(v)
+	return _u
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (_u *ConnectedAccountUpdateOne) ClearRoles() *ConnectedAccountUpdateOne {
+	_u.mutation.ClearRoles()
+	return _u
+}
+
+// SetRecipientCode sets the "recipient_code" field.
+func (_u *ConnectedAccountUpdateOne) SetRecipientCode(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetRecipientCode(v)
+	return _u
+}
+
+// SetNillableRecipientCode sets the "recipient_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableRecipientCode(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetRecipientCode(*v)
+	}
+	return _u
+}
+
+// SetSettlementSubaccountCode sets the "settlement_subaccount_code" field.
+func (_u *ConnectedAccountUpdateOne) SetSettlementSubaccountCode(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetSettlementSubaccountCode(v)
+	return _u
+}
+
+// SetNillableSettlementSubaccountCode sets the "settlement_subaccount_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableSettlementSubaccountCode(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetSettlementSubaccountCode(*v)
+	}
+	return _u
+}
+
+// SetEscrowSubaccountCode sets the "escrow_subaccount_code" field.
+func (_u *ConnectedAccountUpdateOne) SetEscrowSubaccountCode(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetEscrowSubaccountCode(v)
+	return _u
+}
+
+// SetNillableEscrowSubaccountCode sets the "escrow_subaccount_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableEscrowSubaccountCode(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetEscrowSubaccountCode(*v)
+	}
+	return _u
+}
+
+// SetBankCode sets the "bank_code" field.
+func (_u *ConnectedAccountUpdateOne) SetBankCode(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetBankCode(v)
+	return _u
+}
+
+// SetNillableBankCode sets the "bank_code" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableBankCode(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetBankCode(*v)
+	}
+	return _u
+}
+
+// SetAccountLast4 sets the "account_last4" field.
+func (_u *ConnectedAccountUpdateOne) SetAccountLast4(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetAccountLast4(v)
+	return _u
+}
+
+// SetNillableAccountLast4 sets the "account_last4" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableAccountLast4(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetAccountLast4(*v)
+	}
+	return _u
+}
+
+// SetAccountName sets the "account_name" field.
+func (_u *ConnectedAccountUpdateOne) SetAccountName(v string) *ConnectedAccountUpdateOne {
+	_u.mutation.SetAccountName(v)
+	return _u
+}
+
+// SetNillableAccountName sets the "account_name" field if the given value is not nil.
+func (_u *ConnectedAccountUpdateOne) SetNillableAccountName(v *string) *ConnectedAccountUpdateOne {
+	if v != nil {
+		_u.SetAccountName(*v)
 	}
 	return _u
 }
@@ -505,6 +1035,56 @@ func (_u *ConnectedAccountUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ConnectedAccountUpdateOne) check() error {
+	if v, ok := _u.mutation.ProviderAccountID(); ok {
+		if err := connectedaccount.ProviderAccountIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_account_id", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.provider_account_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := connectedaccount.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := connectedaccount.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.last_error": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.VerificationStatus(); ok {
+		if err := connectedaccount.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.verification_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RecipientCode(); ok {
+		if err := connectedaccount.RecipientCodeValidator(v); err != nil {
+			return &ValidationError{Name: "recipient_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.recipient_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SettlementSubaccountCode(); ok {
+		if err := connectedaccount.SettlementSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "settlement_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.settlement_subaccount_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EscrowSubaccountCode(); ok {
+		if err := connectedaccount.EscrowSubaccountCodeValidator(v); err != nil {
+			return &ValidationError{Name: "escrow_subaccount_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.escrow_subaccount_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BankCode(); ok {
+		if err := connectedaccount.BankCodeValidator(v); err != nil {
+			return &ValidationError{Name: "bank_code", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.bank_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AccountLast4(); ok {
+		if err := connectedaccount.AccountLast4Validator(v); err != nil {
+			return &ValidationError{Name: "account_last4", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_last4": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AccountName(); ok {
+		if err := connectedaccount.AccountNameValidator(v); err != nil {
+			return &ValidationError{Name: "account_name", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.account_name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PayoutsFrozenReason(); ok {
 		if err := connectedaccount.PayoutsFrozenReasonValidator(v); err != nil {
 			return &ValidationError{Name: "payouts_frozen_reason", err: fmt.Errorf(`ent: validator failed for field "ConnectedAccount.payouts_frozen_reason": %w`, err)}
@@ -552,8 +1132,67 @@ func (_u *ConnectedAccountUpdateOne) sqlSave(ctx context.Context) (_node *Connec
 			}
 		}
 	}
+	if value, ok := _u.mutation.ProviderAccountID(); ok {
+		_spec.SetField(connectedaccount.FieldProviderAccountID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(connectedaccount.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(connectedaccount.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.VerificationStatus(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.VerificationReasons(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationReasons, field.TypeBytes, value)
+	}
+	if _u.mutation.VerificationReasonsCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationReasons, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.VerificationStatusChangedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationStatusChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.VerificationStatusChangedAtCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationStatusChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.VerificationNudgedAt(); ok {
+		_spec.SetField(connectedaccount.FieldVerificationNudgedAt, field.TypeTime, value)
+	}
+	if _u.mutation.VerificationNudgedAtCleared() {
+		_spec.ClearField(connectedaccount.FieldVerificationNudgedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.AcceptsPayments(); ok {
 		_spec.SetField(connectedaccount.FieldAcceptsPayments, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Roles(); ok {
+		_spec.SetField(connectedaccount.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, connectedaccount.FieldRoles, value)
+		})
+	}
+	if _u.mutation.RolesCleared() {
+		_spec.ClearField(connectedaccount.FieldRoles, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RecipientCode(); ok {
+		_spec.SetField(connectedaccount.FieldRecipientCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SettlementSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldSettlementSubaccountCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EscrowSubaccountCode(); ok {
+		_spec.SetField(connectedaccount.FieldEscrowSubaccountCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BankCode(); ok {
+		_spec.SetField(connectedaccount.FieldBankCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountLast4(); ok {
+		_spec.SetField(connectedaccount.FieldAccountLast4, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountName(); ok {
+		_spec.SetField(connectedaccount.FieldAccountName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CapabilityStatuses(); ok {
 		_spec.SetField(connectedaccount.FieldCapabilityStatuses, field.TypeBytes, value)

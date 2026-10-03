@@ -30,6 +30,10 @@ const (
 	FieldProviderCheckoutID = "provider_checkout_id"
 	// FieldProviderSubscriptionID holds the string denoting the provider_subscription_id field in the database.
 	FieldProviderSubscriptionID = "provider_subscription_id"
+	// FieldProviderCustomerID holds the string denoting the provider_customer_id field in the database.
+	FieldProviderCustomerID = "provider_customer_id"
+	// FieldEmailToken holds the string denoting the email_token field in the database.
+	FieldEmailToken = "email_token"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldTrialEndsAt holds the string denoting the trial_ends_at field in the database.
@@ -55,6 +59,8 @@ var Columns = []string{
 	FieldProviderProductID,
 	FieldProviderCheckoutID,
 	FieldProviderSubscriptionID,
+	FieldProviderCustomerID,
+	FieldEmailToken,
 	FieldStatus,
 	FieldTrialEndsAt,
 	FieldCurrentPeriodEndsAt,
@@ -93,6 +99,14 @@ var (
 	DefaultProviderSubscriptionID string
 	// ProviderSubscriptionIDValidator is a validator for the "provider_subscription_id" field. It is called by the builders before save.
 	ProviderSubscriptionIDValidator func(string) error
+	// DefaultProviderCustomerID holds the default value on creation for the "provider_customer_id" field.
+	DefaultProviderCustomerID string
+	// ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	ProviderCustomerIDValidator func(string) error
+	// DefaultEmailToken holds the default value on creation for the "email_token" field.
+	DefaultEmailToken string
+	// EmailTokenValidator is a validator for the "email_token" field. It is called by the builders before save.
+	EmailTokenValidator func(string) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -151,6 +165,16 @@ func ByProviderCheckoutID(opts ...sql.OrderTermOption) OrderOption {
 // ByProviderSubscriptionID orders the results by the provider_subscription_id field.
 func ByProviderSubscriptionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderSubscriptionID, opts...).ToFunc()
+}
+
+// ByProviderCustomerID orders the results by the provider_customer_id field.
+func ByProviderCustomerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderCustomerID, opts...).ToFunc()
+}
+
+// ByEmailToken orders the results by the email_token field.
+func ByEmailToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailToken, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

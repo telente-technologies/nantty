@@ -57,6 +57,34 @@ func (_u *BillingSubscriptionUpdate) SetNillableProviderSubscriptionID(v *string
 	return _u
 }
 
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (_u *BillingSubscriptionUpdate) SetProviderCustomerID(v string) *BillingSubscriptionUpdate {
+	_u.mutation.SetProviderCustomerID(v)
+	return _u
+}
+
+// SetNillableProviderCustomerID sets the "provider_customer_id" field if the given value is not nil.
+func (_u *BillingSubscriptionUpdate) SetNillableProviderCustomerID(v *string) *BillingSubscriptionUpdate {
+	if v != nil {
+		_u.SetProviderCustomerID(*v)
+	}
+	return _u
+}
+
+// SetEmailToken sets the "email_token" field.
+func (_u *BillingSubscriptionUpdate) SetEmailToken(v string) *BillingSubscriptionUpdate {
+	_u.mutation.SetEmailToken(v)
+	return _u
+}
+
+// SetNillableEmailToken sets the "email_token" field if the given value is not nil.
+func (_u *BillingSubscriptionUpdate) SetNillableEmailToken(v *string) *BillingSubscriptionUpdate {
+	if v != nil {
+		_u.SetEmailToken(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *BillingSubscriptionUpdate) SetStatus(v string) *BillingSubscriptionUpdate {
 	_u.mutation.SetStatus(v)
@@ -190,6 +218,16 @@ func (_u *BillingSubscriptionUpdate) check() error {
 			return &ValidationError{Name: "provider_subscription_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_subscription_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProviderCustomerID(); ok {
+		if err := billingsubscription.ProviderCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_customer_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_customer_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EmailToken(); ok {
+		if err := billingsubscription.EmailTokenValidator(v); err != nil {
+			return &ValidationError{Name: "email_token", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.email_token": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := billingsubscription.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.status": %w`, err)}
@@ -215,6 +253,12 @@ func (_u *BillingSubscriptionUpdate) sqlSave(ctx context.Context) (_node int, er
 	}
 	if value, ok := _u.mutation.ProviderSubscriptionID(); ok {
 		_spec.SetField(billingsubscription.FieldProviderSubscriptionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProviderCustomerID(); ok {
+		_spec.SetField(billingsubscription.FieldProviderCustomerID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EmailToken(); ok {
+		_spec.SetField(billingsubscription.FieldEmailToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(billingsubscription.FieldStatus, field.TypeString, value)
@@ -286,6 +330,34 @@ func (_u *BillingSubscriptionUpdateOne) SetProviderSubscriptionID(v string) *Bil
 func (_u *BillingSubscriptionUpdateOne) SetNillableProviderSubscriptionID(v *string) *BillingSubscriptionUpdateOne {
 	if v != nil {
 		_u.SetProviderSubscriptionID(*v)
+	}
+	return _u
+}
+
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (_u *BillingSubscriptionUpdateOne) SetProviderCustomerID(v string) *BillingSubscriptionUpdateOne {
+	_u.mutation.SetProviderCustomerID(v)
+	return _u
+}
+
+// SetNillableProviderCustomerID sets the "provider_customer_id" field if the given value is not nil.
+func (_u *BillingSubscriptionUpdateOne) SetNillableProviderCustomerID(v *string) *BillingSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetProviderCustomerID(*v)
+	}
+	return _u
+}
+
+// SetEmailToken sets the "email_token" field.
+func (_u *BillingSubscriptionUpdateOne) SetEmailToken(v string) *BillingSubscriptionUpdateOne {
+	_u.mutation.SetEmailToken(v)
+	return _u
+}
+
+// SetNillableEmailToken sets the "email_token" field if the given value is not nil.
+func (_u *BillingSubscriptionUpdateOne) SetNillableEmailToken(v *string) *BillingSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetEmailToken(*v)
 	}
 	return _u
 }
@@ -436,6 +508,16 @@ func (_u *BillingSubscriptionUpdateOne) check() error {
 			return &ValidationError{Name: "provider_subscription_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_subscription_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProviderCustomerID(); ok {
+		if err := billingsubscription.ProviderCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_customer_id", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.provider_customer_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EmailToken(); ok {
+		if err := billingsubscription.EmailTokenValidator(v); err != nil {
+			return &ValidationError{Name: "email_token", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.email_token": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := billingsubscription.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "BillingSubscription.status": %w`, err)}
@@ -478,6 +560,12 @@ func (_u *BillingSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Bil
 	}
 	if value, ok := _u.mutation.ProviderSubscriptionID(); ok {
 		_spec.SetField(billingsubscription.FieldProviderSubscriptionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProviderCustomerID(); ok {
+		_spec.SetField(billingsubscription.FieldProviderCustomerID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EmailToken(); ok {
+		_spec.SetField(billingsubscription.FieldEmailToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(billingsubscription.FieldStatus, field.TypeString, value)
