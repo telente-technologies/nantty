@@ -42,3 +42,25 @@ func (AdStatsDaily) Indexes() []ent.Index {
 		index.Fields("campaign_id", "day"),
 	}
 }
+
+type AdConversion struct{ ent.Schema }
+
+func (AdConversion) Mixin() []ent.Mixin { return []ent.Mixin{TimeOrderedIdentifierMixin{}} }
+
+func (AdConversion) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("conversion_id").NotEmpty().MaxLen(128).Immutable(),
+		field.String("store_id").MaxLen(80).Immutable(),
+		field.String("user_id").MaxLen(80).Immutable(),
+		field.UUID("impression_id", uuid.UUID{}).Immutable(),
+		field.UUID("ad_id", uuid.UUID{}).Immutable(),
+		field.UUID("account_id", uuid.UUID{}).Immutable(),
+		field.Int64("value_minor").Immutable(),
+		field.String("currency").MinLen(3).MaxLen(3).Immutable(),
+		field.Time("occurred_at").Immutable(),
+	}
+}
+
+func (AdConversion) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("conversion_id").Unique(), index.Fields("account_id", "occurred_at")}
+}

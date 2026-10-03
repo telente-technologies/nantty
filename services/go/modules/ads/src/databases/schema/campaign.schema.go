@@ -94,7 +94,7 @@ func (Ad) Fields() []ent.Field {
 		field.String("appeal_resolution_note").MaxLen(600).Default(""),
 		field.String("format").MaxLen(20),
 		field.JSON("creative", types.StoredCreative{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
-		field.JSON("auto_check_flags", []types.AutoCheckFlag{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
+		field.JSON("auto_check_flags", []types.AutoCheckFlag{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}).Default(func() []types.AutoCheckFlag { return []types.AutoCheckFlag{} }),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

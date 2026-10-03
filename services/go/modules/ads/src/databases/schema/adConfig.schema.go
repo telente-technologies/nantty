@@ -30,27 +30,6 @@ func (AdFrequencyPolicy) Fields() []ent.Field {
 
 func (AdFrequencyPolicy) Indexes() []ent.Index { return []ent.Index{index.Fields("format").Unique()} }
 
-type AdMonetizationPolicy struct{ ent.Schema }
-
-func (AdMonetizationPolicy) Mixin() []ent.Mixin { return []ent.Mixin{TimeOrderedIdentifierMixin{}} }
-
-func (AdMonetizationPolicy) Fields() []ent.Field {
-	return []ent.Field{
-		field.String("key").NotEmpty().MaxLen(60).Immutable(),
-		field.Enum("revenue_source").Values("ads", "premium", "gifts", "subscriptions").Default("ads").Immutable(),
-		field.String("content_type").MaxLen(40),
-		field.Int("creator_share_bps"),
-		field.Int("multiplier_bps"),
-		field.Time("effective_from"),
-		field.Time("effective_to").Optional().Nillable(),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-	}
-}
-
-func (AdMonetizationPolicy) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("key").Unique(), index.Fields("revenue_source", "content_type")}
-}
-
 type AdContentSignal struct{ ent.Schema }
 
 func (AdContentSignal) Fields() []ent.Field {

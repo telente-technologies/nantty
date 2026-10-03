@@ -60,6 +60,7 @@ func (AdImpression) Fields() []ent.Field {
 func (AdImpression) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("served_at").Annotations(entsql.IndexType("BRIN")),
+		index.Fields("user_id", "clicked_at").Annotations(entsql.IndexWhere("clicked_at IS NOT NULL")),
 		index.Fields("fraud_status", "served_at").Annotations(entsql.IndexWhere("charge_micros > 0 AND settlement_batch_id IS NULL")),
 	}
 }
