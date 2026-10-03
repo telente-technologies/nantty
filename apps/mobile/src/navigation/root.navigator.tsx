@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { GuestAuthReplayCoordinator } from "@/components/auth/guestAuthReplay";
 import { GuestAuthSheet } from "@/components/auth/guestAuthSheet";
+import { SuspendedAccountScreen } from "@/screens/account/suspendedAccount.screen";
 import { useAuthStore } from "@/store/auth.store";
 import { useGuestSessionStore } from "@/store/guestSession.store";
 import { useTheme } from "@/theme";
@@ -28,7 +29,9 @@ export function RootNavigator() {
   const isSignedIn = useAuthStore((s) => s.status === "signedIn");
   const isBrowsingAsGuest = useGuestSessionStore((s) => s.isBrowsingAsGuest);
   const canShowMainApp = isSignedIn || isBrowsingAsGuest;
+  const isAccountSuspended = useAuthStore((s) => s.status === "signedIn" && s.user?.account?.status === "suspended");
   const navigationTheme = useNavigationThemeFollowingAppTheme();
+  if (isAccountSuspended) return <SuspendedAccountScreen />;
   return (
     <NavigationContainer ref={rootNavigationRef} theme={navigationTheme}>
       {canShowMainApp ? <MainNavigator /> : <AuthNavigator />}

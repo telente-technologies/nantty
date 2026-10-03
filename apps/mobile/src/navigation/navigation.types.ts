@@ -2,6 +2,7 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import type { SavedItemFilter } from "@/types/saves.type";
+import type { SupportLinkedReference, SupportTicketCategory } from "@/types/support.type";
 
 export type AuthStackParamList = {
   Splash: undefined;
@@ -95,7 +96,10 @@ export type MainStackParamList = {
   PromotePost: { postId: string };
   BoostStatus: { boostId: string };
   SupportTickets: undefined;
-  NewSupportTicket: undefined;
+  NewSupportTicket: { category?: SupportTicketCategory; linkedReference?: SupportLinkedReference } | undefined;
+  HelpCenter: undefined;
+  HelpArticle: { articleId: string };
+  BusinessDocuments: undefined;
   SupportTicketDetail: { ticketId: string };
   MyReports: undefined;
   SettingsUsername: undefined;
