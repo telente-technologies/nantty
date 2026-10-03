@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 
 import { ProductCard } from "@/components/product/productCard";
 import { useCartActions } from "@/hooks/useCart.hook";
+import { trackProductInteraction } from "@/services/productInteractions.service";
 import type { AdPlacement, ProductSummary } from "@/types";
 
 const TALL_IMAGE = 227;
@@ -26,7 +27,10 @@ export function ProductMasonry({ products, adPlacement = "mart" }: { products: r
               adPlacement={adPlacement}
               width="100%"
               imageHeight={(rowIndex + columnIndex) % 2 === 0 ? TALL_IMAGE : SHORT_IMAGE}
-              onPress={() => navigation.navigate("ProductDetail", { productId: product.id })}
+              onPress={() => {
+                void trackProductInteraction("product.clicked", { productId: product.id });
+                navigation.navigate("ProductDetail", { productId: product.id });
+              }}
               onAddToCart={() => addProductToCart.mutate({ productId: product.id, quantity: 1 })}
             />
           ))}

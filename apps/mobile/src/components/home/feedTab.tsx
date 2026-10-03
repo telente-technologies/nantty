@@ -15,6 +15,7 @@ import type { Post, ProductSummary } from "@/types";
 import { PostProductsSheet } from "./postProductsSheet";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 import { TopicFilterRow } from "./topicFilterRow";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 type FeedRow = { type: "post"; post: Post } | { type: "suggestedClips" };
 type FeedMode = "for-you" | "following";
@@ -114,7 +115,7 @@ export function FeedTab() {
         refreshControl={<RefreshControl refreshing={feed.isRefetching} onRefresh={() => feed.refetch()} tintColor={colors.primary} />}
         ListEmptyComponent={
           feed.isLoading ? (
-            <ActivityIndicator style={styles.state} color={colors.primary} />
+            <ListSkeleton />
           ) : (
             <Text style={styles.state} align="center" color={colors.textSubtle}>
               {feed.isError ? "Couldn't load your feed. Pull to try again." : "No posts yet. Follow people to fill your feed."}

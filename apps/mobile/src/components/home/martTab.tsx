@@ -11,6 +11,7 @@ import { CategoryTabs } from "./categoryTabs";
 import { MartShowcase } from "./martShowcase";
 import { ProductMasonry } from "./productMasonry";
 import { SellOnZudomartBanner } from "./sellOnZudomartBanner";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const COLLECTION_FOR_TILE = {
   sales: { collection: "sales_of_the_day", name: "Sales of the Day" },
@@ -66,7 +67,7 @@ export function MartTab() {
         />
       </View>
       {products.isLoading ? (
-        <ActivityIndicator style={styles.state} color={colors.primary} />
+        <ListSkeleton />
       ) : allProducts.length === 0 ? (
         <Text style={styles.state} align="center" color={colors.textSubtle}>
           {products.isError ? "Couldn't load products. Pull to try again." : "No products in this category yet."}
