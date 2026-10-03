@@ -37,8 +37,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
 }
 
 .streamTitle {
@@ -59,8 +59,8 @@
   padding: 40px 16px;
   border-radius: var(--radius-large);
   background:
-    radial-gradient(circle at 50% 45%, var(--yellow-500) 0 34%, transparent 34.5%),
-    var(--yellow-100);
+    radial-gradient(circle at 50% 45%, var(--surface-sunshine) 0 34%, transparent 34.5%),
+    var(--surface-sunshine-muted);
 }
 
 .phone {

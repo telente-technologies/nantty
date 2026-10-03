@@ -20,7 +20,7 @@
   overflow: hidden;
   border-radius: var(--radius-large);
   background: var(--surface-card);
-  box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
+  box-shadow: inset 0 0 0 1px var(--line-hairline);
 }
 
 .stepText {
@@ -37,8 +37,8 @@
   height: 32px;
   margin-bottom: 8px;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -60,7 +60,7 @@
   height: 260px;
   padding-top: 8px;
   overflow: hidden;
-  background: linear-gradient(to bottom, var(--surface-card), var(--blue-50));
+  background: linear-gradient(to bottom, var(--surface-card), var(--surface-tint-blue));
 }
 
 .phone {
@@ -74,7 +74,7 @@
 }
 
 .stepCard:nth-child(4) .screenWindow {
-  background: linear-gradient(to bottom, var(--surface-card), var(--yellow-100));
+  background: linear-gradient(to bottom, var(--surface-card), var(--surface-sunshine-muted));
 }
 
 @media (min-width: 640px) {

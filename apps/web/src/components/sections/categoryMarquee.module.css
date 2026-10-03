@@ -3,8 +3,8 @@
   z-index: 4;
   overflow: hidden;
   padding-block: 18px;
-  background: var(--ink-strong);
-  color: #fff;
+  background: var(--surface-inverse);
+  color: var(--ink-on-inverse);
 }
 
 .track {
@@ -39,7 +39,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--yellow-500);
+  background: var(--surface-sunshine);
 }
 
 @keyframes slide-categories {

@@ -22,7 +22,7 @@
 }
 
 .contactNote a {
-  color: var(--blue-600);
+  color: var(--ink-accent);
   font-weight: 600;
   text-underline-offset: 3px;
 }
@@ -52,7 +52,7 @@
 }
 
 .question:hover {
-  color: var(--blue-600);
+  color: var(--ink-accent);
 }
 
 .toggleIcon {
