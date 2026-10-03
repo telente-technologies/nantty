@@ -1,0 +1,12 @@
+{
+  "name": "@zudomart/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./native.ts",
+  "types": "./native.ts",
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./native": "./native.ts"
+  }
+}
