@@ -5,7 +5,7 @@ import type { OnlineOrderStatus } from "@/types/order.type";
 
 export const metadata: Metadata = { title: "Orders" };
 
-const onlineOrderStatuses: OnlineOrderStatus[] = ["paid", "processing", "shipped", "delivered", "completed", "cancelled", "refunded", "disputed"];
+const onlineOrderStatuses: OnlineOrderStatus[] = ["new", "processing", "ready", "shipped", "delivered", "completed", "cancelled", "returned", "refunded", "disputed"];
 
 export default async function OrdersPage({ searchParams }: { readonly searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
