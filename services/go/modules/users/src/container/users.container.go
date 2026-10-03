@@ -7,17 +7,24 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
+
 	"zudomart/modules/users/src/configs"
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/platform/jwtauth"
 )
 
 type Container struct {
-	Client         *ent.Client
-	Settings       configs.UsersSettings
-	Logger         *slog.Logger
-	Now            func() time.Time
-	AccessVerifier *jwtauth.AccessTokenVerifier
+	Client             *ent.Client
+	Settings           configs.UsersSettings
+	Logger             *slog.Logger
+	Now                func() time.Time
+	AccessVerifier     *jwtauth.AccessTokenVerifier
+	PendingWithdrawals PendingWithdrawalChecker
+}
+
+type PendingWithdrawalChecker interface {
+	HasPendingWithdrawals(ctx context.Context, accountId uuid.UUID) (bool, error)
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {
