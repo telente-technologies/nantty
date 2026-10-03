@@ -40,7 +40,7 @@ export default function LivePage() {
         <ul className={styles.grid}>
           {livesQuery.data?.map((live) => (
             <li key={live.id}>
-              <Link href={`/user/${live.host.id}`} className={styles.card}>
+              <Link href={`/live/${live.id}`} className={styles.card}>
                 <span className={styles.cover}>
                   <MediaImage src={live.coverUrl} alt="" sizes="(max-width: 768px) 50vw, 300px" />
                   <span className={styles.liveBadge}>LIVE</span>
