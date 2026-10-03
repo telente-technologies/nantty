@@ -18,6 +18,8 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { disputesService } from "@/services/disputes.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"DisputeDetail">) {
   const { disputeId } = route.params;
@@ -38,9 +40,9 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
       <Screen>
         <Header title="Dispute" />
         {disputeQuery.isError ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>Couldn't load this dispute.</Text>
+          <ErrorState message="Couldn't load this dispute." onRetry={() => disputeQuery.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -131,7 +133,6 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  state: { marginTop: 64 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
