@@ -5,25 +5,42 @@ package ent
 import (
 	"time"
 	"zudomart/modules/users/src/databases/schema"
+	"zudomart/modules/users/src/generated/ent/accountban"
+	"zudomart/modules/users/src/generated/ent/accountremoval"
+	"zudomart/modules/users/src/generated/ent/accountrestriction"
+	"zudomart/modules/users/src/generated/ent/accountsuspension"
 	"zudomart/modules/users/src/generated/ent/actingprofile"
+	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
+	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
+	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
+	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
 	"zudomart/modules/users/src/generated/ent/deletionrequest"
 	"zudomart/modules/users/src/generated/ent/geoadminarea"
 	"zudomart/modules/users/src/generated/ent/geocity"
 	"zudomart/modules/users/src/generated/ent/geocountry"
 	"zudomart/modules/users/src/generated/ent/georegion"
+	"zudomart/modules/users/src/generated/ent/legaldocument"
+	"zudomart/modules/users/src/generated/ent/legalnotice"
+	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
+	"zudomart/modules/users/src/generated/ent/legalversion"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
 	"zudomart/modules/users/src/generated/ent/profile"
+	"zudomart/modules/users/src/generated/ent/profilecheckmark"
+	"zudomart/modules/users/src/generated/ent/profilesignal"
 	"zudomart/modules/users/src/generated/ent/reservedusernamerule"
 	"zudomart/modules/users/src/generated/ent/retentionpolicy"
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
+	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
 	"zudomart/modules/users/src/generated/ent/termsacceptance"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
+	"zudomart/modules/users/src/generated/ent/verificationapplication"
 
 	"github.com/google/uuid"
 )
@@ -32,6 +49,150 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountbanMixin := schema.AccountBan{}.Mixin()
+	accountbanMixinFields0 := accountbanMixin[0].Fields()
+	_ = accountbanMixinFields0
+	accountbanFields := schema.AccountBan{}.Fields()
+	_ = accountbanFields
+	// accountbanDescCreatedAt is the schema descriptor for created_at field.
+	accountbanDescCreatedAt := accountbanMixinFields0[1].Descriptor()
+	// accountban.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accountban.DefaultCreatedAt = accountbanDescCreatedAt.Default.(func() time.Time)
+	// accountbanDescReason is the schema descriptor for reason field.
+	accountbanDescReason := accountbanFields[1].Descriptor()
+	// accountban.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	accountban.ReasonValidator = accountbanDescReason.Validators[0].(func(string) error)
+	// accountbanDescBannedBy is the schema descriptor for banned_by field.
+	accountbanDescBannedBy := accountbanFields[3].Descriptor()
+	// accountban.BannedByValidator is a validator for the "banned_by" field. It is called by the builders before save.
+	accountban.BannedByValidator = accountbanDescBannedBy.Validators[0].(func(string) error)
+	// accountbanDescBannedByName is the schema descriptor for banned_by_name field.
+	accountbanDescBannedByName := accountbanFields[4].Descriptor()
+	// accountban.DefaultBannedByName holds the default value on creation for the banned_by_name field.
+	accountban.DefaultBannedByName = accountbanDescBannedByName.Default.(string)
+	// accountban.BannedByNameValidator is a validator for the "banned_by_name" field. It is called by the builders before save.
+	accountban.BannedByNameValidator = accountbanDescBannedByName.Validators[0].(func(string) error)
+	// accountbanDescLiftedBy is the schema descriptor for lifted_by field.
+	accountbanDescLiftedBy := accountbanFields[6].Descriptor()
+	// accountban.DefaultLiftedBy holds the default value on creation for the lifted_by field.
+	accountban.DefaultLiftedBy = accountbanDescLiftedBy.Default.(string)
+	// accountban.LiftedByValidator is a validator for the "lifted_by" field. It is called by the builders before save.
+	accountban.LiftedByValidator = accountbanDescLiftedBy.Validators[0].(func(string) error)
+	// accountbanDescID is the schema descriptor for id field.
+	accountbanDescID := accountbanMixinFields0[0].Descriptor()
+	// accountban.DefaultID holds the default value on creation for the id field.
+	accountban.DefaultID = accountbanDescID.Default.(func() uuid.UUID)
+	accountremovalMixin := schema.AccountRemoval{}.Mixin()
+	accountremovalMixinFields0 := accountremovalMixin[0].Fields()
+	_ = accountremovalMixinFields0
+	accountremovalFields := schema.AccountRemoval{}.Fields()
+	_ = accountremovalFields
+	// accountremovalDescCreatedAt is the schema descriptor for created_at field.
+	accountremovalDescCreatedAt := accountremovalMixinFields0[1].Descriptor()
+	// accountremoval.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accountremoval.DefaultCreatedAt = accountremovalDescCreatedAt.Default.(func() time.Time)
+	// accountremovalDescUsername is the schema descriptor for username field.
+	accountremovalDescUsername := accountremovalFields[1].Descriptor()
+	// accountremoval.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	accountremoval.UsernameValidator = accountremovalDescUsername.Validators[0].(func(string) error)
+	// accountremovalDescReason is the schema descriptor for reason field.
+	accountremovalDescReason := accountremovalFields[3].Descriptor()
+	// accountremoval.DefaultReason holds the default value on creation for the reason field.
+	accountremoval.DefaultReason = accountremovalDescReason.Default.(string)
+	// accountremoval.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	accountremoval.ReasonValidator = accountremovalDescReason.Validators[0].(func(string) error)
+	// accountremovalDescDeletedBy is the schema descriptor for deleted_by field.
+	accountremovalDescDeletedBy := accountremovalFields[4].Descriptor()
+	// accountremoval.DefaultDeletedBy holds the default value on creation for the deleted_by field.
+	accountremoval.DefaultDeletedBy = accountremovalDescDeletedBy.Default.(string)
+	// accountremoval.DeletedByValidator is a validator for the "deleted_by" field. It is called by the builders before save.
+	accountremoval.DeletedByValidator = accountremovalDescDeletedBy.Validators[0].(func(string) error)
+	// accountremovalDescID is the schema descriptor for id field.
+	accountremovalDescID := accountremovalMixinFields0[0].Descriptor()
+	// accountremoval.DefaultID holds the default value on creation for the id field.
+	accountremoval.DefaultID = accountremovalDescID.Default.(func() uuid.UUID)
+	accountrestrictionMixin := schema.AccountRestriction{}.Mixin()
+	accountrestrictionMixinFields0 := accountrestrictionMixin[0].Fields()
+	_ = accountrestrictionMixinFields0
+	accountrestrictionFields := schema.AccountRestriction{}.Fields()
+	_ = accountrestrictionFields
+	// accountrestrictionDescCreatedAt is the schema descriptor for created_at field.
+	accountrestrictionDescCreatedAt := accountrestrictionMixinFields0[1].Descriptor()
+	// accountrestriction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accountrestriction.DefaultCreatedAt = accountrestrictionDescCreatedAt.Default.(func() time.Time)
+	// accountrestrictionDescReason is the schema descriptor for reason field.
+	accountrestrictionDescReason := accountrestrictionFields[2].Descriptor()
+	// accountrestriction.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	accountrestriction.ReasonValidator = accountrestrictionDescReason.Validators[0].(func(string) error)
+	// accountrestrictionDescCreatedBy is the schema descriptor for created_by field.
+	accountrestrictionDescCreatedBy := accountrestrictionFields[4].Descriptor()
+	// accountrestriction.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	accountrestriction.CreatedByValidator = accountrestrictionDescCreatedBy.Validators[0].(func(string) error)
+	// accountrestrictionDescCreatedByName is the schema descriptor for created_by_name field.
+	accountrestrictionDescCreatedByName := accountrestrictionFields[5].Descriptor()
+	// accountrestriction.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	accountrestriction.DefaultCreatedByName = accountrestrictionDescCreatedByName.Default.(string)
+	// accountrestriction.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	accountrestriction.CreatedByNameValidator = accountrestrictionDescCreatedByName.Validators[0].(func(string) error)
+	// accountrestrictionDescID is the schema descriptor for id field.
+	accountrestrictionDescID := accountrestrictionMixinFields0[0].Descriptor()
+	// accountrestriction.DefaultID holds the default value on creation for the id field.
+	accountrestriction.DefaultID = accountrestrictionDescID.Default.(func() uuid.UUID)
+	accountsuspensionMixin := schema.AccountSuspension{}.Mixin()
+	accountsuspensionMixinFields0 := accountsuspensionMixin[0].Fields()
+	_ = accountsuspensionMixinFields0
+	accountsuspensionFields := schema.AccountSuspension{}.Fields()
+	_ = accountsuspensionFields
+	// accountsuspensionDescCreatedAt is the schema descriptor for created_at field.
+	accountsuspensionDescCreatedAt := accountsuspensionMixinFields0[1].Descriptor()
+	// accountsuspension.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accountsuspension.DefaultCreatedAt = accountsuspensionDescCreatedAt.Default.(func() time.Time)
+	// accountsuspensionDescReasonCode is the schema descriptor for reason_code field.
+	accountsuspensionDescReasonCode := accountsuspensionFields[2].Descriptor()
+	// accountsuspension.DefaultReasonCode holds the default value on creation for the reason_code field.
+	accountsuspension.DefaultReasonCode = accountsuspensionDescReasonCode.Default.(string)
+	// accountsuspension.ReasonCodeValidator is a validator for the "reason_code" field. It is called by the builders before save.
+	accountsuspension.ReasonCodeValidator = accountsuspensionDescReasonCode.Validators[0].(func(string) error)
+	// accountsuspensionDescNote is the schema descriptor for note field.
+	accountsuspensionDescNote := accountsuspensionFields[3].Descriptor()
+	// accountsuspension.DefaultNote holds the default value on creation for the note field.
+	accountsuspension.DefaultNote = accountsuspensionDescNote.Default.(string)
+	// accountsuspension.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	accountsuspension.NoteValidator = accountsuspensionDescNote.Validators[0].(func(string) error)
+	// accountsuspensionDescSuspendedBy is the schema descriptor for suspended_by field.
+	accountsuspensionDescSuspendedBy := accountsuspensionFields[4].Descriptor()
+	// accountsuspension.DefaultSuspendedBy holds the default value on creation for the suspended_by field.
+	accountsuspension.DefaultSuspendedBy = accountsuspensionDescSuspendedBy.Default.(string)
+	// accountsuspension.SuspendedByValidator is a validator for the "suspended_by" field. It is called by the builders before save.
+	accountsuspension.SuspendedByValidator = accountsuspensionDescSuspendedBy.Validators[0].(func(string) error)
+	// accountsuspensionDescSuspendedByName is the schema descriptor for suspended_by_name field.
+	accountsuspensionDescSuspendedByName := accountsuspensionFields[5].Descriptor()
+	// accountsuspension.DefaultSuspendedByName holds the default value on creation for the suspended_by_name field.
+	accountsuspension.DefaultSuspendedByName = accountsuspensionDescSuspendedByName.Default.(string)
+	// accountsuspension.SuspendedByNameValidator is a validator for the "suspended_by_name" field. It is called by the builders before save.
+	accountsuspension.SuspendedByNameValidator = accountsuspensionDescSuspendedByName.Validators[0].(func(string) error)
+	// accountsuspensionDescAppealMessage is the schema descriptor for appeal_message field.
+	accountsuspensionDescAppealMessage := accountsuspensionFields[11].Descriptor()
+	// accountsuspension.DefaultAppealMessage holds the default value on creation for the appeal_message field.
+	accountsuspension.DefaultAppealMessage = accountsuspensionDescAppealMessage.Default.(string)
+	// accountsuspension.AppealMessageValidator is a validator for the "appeal_message" field. It is called by the builders before save.
+	accountsuspension.AppealMessageValidator = accountsuspensionDescAppealMessage.Validators[0].(func(string) error)
+	// accountsuspensionDescAppealDecisionNote is the schema descriptor for appeal_decision_note field.
+	accountsuspensionDescAppealDecisionNote := accountsuspensionFields[13].Descriptor()
+	// accountsuspension.DefaultAppealDecisionNote holds the default value on creation for the appeal_decision_note field.
+	accountsuspension.DefaultAppealDecisionNote = accountsuspensionDescAppealDecisionNote.Default.(string)
+	// accountsuspension.AppealDecisionNoteValidator is a validator for the "appeal_decision_note" field. It is called by the builders before save.
+	accountsuspension.AppealDecisionNoteValidator = accountsuspensionDescAppealDecisionNote.Validators[0].(func(string) error)
+	// accountsuspensionDescAppealDecidedBy is the schema descriptor for appeal_decided_by field.
+	accountsuspensionDescAppealDecidedBy := accountsuspensionFields[14].Descriptor()
+	// accountsuspension.DefaultAppealDecidedBy holds the default value on creation for the appeal_decided_by field.
+	accountsuspension.DefaultAppealDecidedBy = accountsuspensionDescAppealDecidedBy.Default.(string)
+	// accountsuspension.AppealDecidedByValidator is a validator for the "appeal_decided_by" field. It is called by the builders before save.
+	accountsuspension.AppealDecidedByValidator = accountsuspensionDescAppealDecidedBy.Validators[0].(func(string) error)
+	// accountsuspensionDescID is the schema descriptor for id field.
+	accountsuspensionDescID := accountsuspensionMixinFields0[0].Descriptor()
+	// accountsuspension.DefaultID holds the default value on creation for the id field.
+	accountsuspension.DefaultID = accountsuspensionDescID.Default.(func() uuid.UUID)
 	actingprofileFields := schema.ActingProfile{}.Fields()
 	_ = actingprofileFields
 	// actingprofileDescUpdatedAt is the schema descriptor for updated_at field.
@@ -40,6 +201,96 @@ func init() {
 	actingprofile.DefaultUpdatedAt = actingprofileDescUpdatedAt.Default.(func() time.Time)
 	// actingprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	actingprofile.UpdateDefaultUpdatedAt = actingprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	admincreatedaccountMixin := schema.AdminCreatedAccount{}.Mixin()
+	admincreatedaccountMixinFields0 := admincreatedaccountMixin[0].Fields()
+	_ = admincreatedaccountMixinFields0
+	admincreatedaccountFields := schema.AdminCreatedAccount{}.Fields()
+	_ = admincreatedaccountFields
+	// admincreatedaccountDescCreatedAt is the schema descriptor for created_at field.
+	admincreatedaccountDescCreatedAt := admincreatedaccountMixinFields0[1].Descriptor()
+	// admincreatedaccount.DefaultCreatedAt holds the default value on creation for the created_at field.
+	admincreatedaccount.DefaultCreatedAt = admincreatedaccountDescCreatedAt.Default.(func() time.Time)
+	// admincreatedaccountDescCreatedBy is the schema descriptor for created_by field.
+	admincreatedaccountDescCreatedBy := admincreatedaccountFields[2].Descriptor()
+	// admincreatedaccount.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	admincreatedaccount.CreatedByValidator = admincreatedaccountDescCreatedBy.Validators[0].(func(string) error)
+	// admincreatedaccountDescCreatedByName is the schema descriptor for created_by_name field.
+	admincreatedaccountDescCreatedByName := admincreatedaccountFields[3].Descriptor()
+	// admincreatedaccount.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	admincreatedaccount.DefaultCreatedByName = admincreatedaccountDescCreatedByName.Default.(string)
+	// admincreatedaccount.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	admincreatedaccount.CreatedByNameValidator = admincreatedaccountDescCreatedByName.Validators[0].(func(string) error)
+	// admincreatedaccountDescReason is the schema descriptor for reason field.
+	admincreatedaccountDescReason := admincreatedaccountFields[4].Descriptor()
+	// admincreatedaccount.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	admincreatedaccount.ReasonValidator = admincreatedaccountDescReason.Validators[0].(func(string) error)
+	// admincreatedaccountDescID is the schema descriptor for id field.
+	admincreatedaccountDescID := admincreatedaccountMixinFields0[0].Descriptor()
+	// admincreatedaccount.DefaultID holds the default value on creation for the id field.
+	admincreatedaccount.DefaultID = admincreatedaccountDescID.Default.(func() uuid.UUID)
+	blackapplicationMixin := schema.BlackApplication{}.Mixin()
+	blackapplicationMixinFields0 := blackapplicationMixin[0].Fields()
+	_ = blackapplicationMixinFields0
+	blackapplicationFields := schema.BlackApplication{}.Fields()
+	_ = blackapplicationFields
+	// blackapplicationDescCreatedAt is the schema descriptor for created_at field.
+	blackapplicationDescCreatedAt := blackapplicationMixinFields0[1].Descriptor()
+	// blackapplication.DefaultCreatedAt holds the default value on creation for the created_at field.
+	blackapplication.DefaultCreatedAt = blackapplicationDescCreatedAt.Default.(func() time.Time)
+	// blackapplicationDescAgencyName is the schema descriptor for agency_name field.
+	blackapplicationDescAgencyName := blackapplicationFields[2].Descriptor()
+	// blackapplication.AgencyNameValidator is a validator for the "agency_name" field. It is called by the builders before save.
+	blackapplication.AgencyNameValidator = blackapplicationDescAgencyName.Validators[0].(func(string) error)
+	// blackapplicationDescHandle is the schema descriptor for handle field.
+	blackapplicationDescHandle := blackapplicationFields[3].Descriptor()
+	// blackapplication.HandleValidator is a validator for the "handle" field. It is called by the builders before save.
+	blackapplication.HandleValidator = blackapplicationDescHandle.Validators[0].(func(string) error)
+	// blackapplicationDescRepresentativeName is the schema descriptor for representative_name field.
+	blackapplicationDescRepresentativeName := blackapplicationFields[4].Descriptor()
+	// blackapplication.RepresentativeNameValidator is a validator for the "representative_name" field. It is called by the builders before save.
+	blackapplication.RepresentativeNameValidator = blackapplicationDescRepresentativeName.Validators[0].(func(string) error)
+	// blackapplicationDescRepresentativeRole is the schema descriptor for representative_role field.
+	blackapplicationDescRepresentativeRole := blackapplicationFields[5].Descriptor()
+	// blackapplication.RepresentativeRoleValidator is a validator for the "representative_role" field. It is called by the builders before save.
+	blackapplication.RepresentativeRoleValidator = blackapplicationDescRepresentativeRole.Validators[0].(func(string) error)
+	// blackapplicationDescFirstApprovalBy is the schema descriptor for first_approval_by field.
+	blackapplicationDescFirstApprovalBy := blackapplicationFields[8].Descriptor()
+	// blackapplication.DefaultFirstApprovalBy holds the default value on creation for the first_approval_by field.
+	blackapplication.DefaultFirstApprovalBy = blackapplicationDescFirstApprovalBy.Default.(string)
+	// blackapplication.FirstApprovalByValidator is a validator for the "first_approval_by" field. It is called by the builders before save.
+	blackapplication.FirstApprovalByValidator = blackapplicationDescFirstApprovalBy.Validators[0].(func(string) error)
+	// blackapplicationDescFirstApprovalByName is the schema descriptor for first_approval_by_name field.
+	blackapplicationDescFirstApprovalByName := blackapplicationFields[9].Descriptor()
+	// blackapplication.DefaultFirstApprovalByName holds the default value on creation for the first_approval_by_name field.
+	blackapplication.DefaultFirstApprovalByName = blackapplicationDescFirstApprovalByName.Default.(string)
+	// blackapplication.FirstApprovalByNameValidator is a validator for the "first_approval_by_name" field. It is called by the builders before save.
+	blackapplication.FirstApprovalByNameValidator = blackapplicationDescFirstApprovalByName.Validators[0].(func(string) error)
+	// blackapplicationDescSecondApprovalBy is the schema descriptor for second_approval_by field.
+	blackapplicationDescSecondApprovalBy := blackapplicationFields[11].Descriptor()
+	// blackapplication.DefaultSecondApprovalBy holds the default value on creation for the second_approval_by field.
+	blackapplication.DefaultSecondApprovalBy = blackapplicationDescSecondApprovalBy.Default.(string)
+	// blackapplication.SecondApprovalByValidator is a validator for the "second_approval_by" field. It is called by the builders before save.
+	blackapplication.SecondApprovalByValidator = blackapplicationDescSecondApprovalBy.Validators[0].(func(string) error)
+	// blackapplicationDescSecondApprovalByName is the schema descriptor for second_approval_by_name field.
+	blackapplicationDescSecondApprovalByName := blackapplicationFields[12].Descriptor()
+	// blackapplication.DefaultSecondApprovalByName holds the default value on creation for the second_approval_by_name field.
+	blackapplication.DefaultSecondApprovalByName = blackapplicationDescSecondApprovalByName.Default.(string)
+	// blackapplication.SecondApprovalByNameValidator is a validator for the "second_approval_by_name" field. It is called by the builders before save.
+	blackapplication.SecondApprovalByNameValidator = blackapplicationDescSecondApprovalByName.Validators[0].(func(string) error)
+	// blackapplicationDescDecisionReason is the schema descriptor for decision_reason field.
+	blackapplicationDescDecisionReason := blackapplicationFields[14].Descriptor()
+	// blackapplication.DefaultDecisionReason holds the default value on creation for the decision_reason field.
+	blackapplication.DefaultDecisionReason = blackapplicationDescDecisionReason.Default.(string)
+	// blackapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	blackapplication.DecisionReasonValidator = blackapplicationDescDecisionReason.Validators[0].(func(string) error)
+	// blackapplicationDescHandleReserved is the schema descriptor for handle_reserved field.
+	blackapplicationDescHandleReserved := blackapplicationFields[17].Descriptor()
+	// blackapplication.DefaultHandleReserved holds the default value on creation for the handle_reserved field.
+	blackapplication.DefaultHandleReserved = blackapplicationDescHandleReserved.Default.(bool)
+	// blackapplicationDescID is the schema descriptor for id field.
+	blackapplicationDescID := blackapplicationMixinFields0[0].Descriptor()
+	// blackapplication.DefaultID holds the default value on creation for the id field.
+	blackapplication.DefaultID = blackapplicationDescID.Default.(func() uuid.UUID)
 	businesscategoryMixin := schema.BusinessCategory{}.Mixin()
 	businesscategoryMixinFields0 := businesscategoryMixin[0].Fields()
 	_ = businesscategoryMixinFields0
@@ -89,6 +340,161 @@ func init() {
 	businesscategoryDescID := businesscategoryMixinFields0[0].Descriptor()
 	// businesscategory.DefaultID holds the default value on creation for the id field.
 	businesscategory.DefaultID = businesscategoryDescID.Default.(func() uuid.UUID)
+	businessdocumentMixin := schema.BusinessDocument{}.Mixin()
+	businessdocumentMixinFields0 := businessdocumentMixin[0].Fields()
+	_ = businessdocumentMixinFields0
+	businessdocumentFields := schema.BusinessDocument{}.Fields()
+	_ = businessdocumentFields
+	// businessdocumentDescCreatedAt is the schema descriptor for created_at field.
+	businessdocumentDescCreatedAt := businessdocumentMixinFields0[1].Descriptor()
+	// businessdocument.DefaultCreatedAt holds the default value on creation for the created_at field.
+	businessdocument.DefaultCreatedAt = businessdocumentDescCreatedAt.Default.(func() time.Time)
+	// businessdocumentDescObjectKey is the schema descriptor for object_key field.
+	businessdocumentDescObjectKey := businessdocumentFields[3].Descriptor()
+	// businessdocument.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
+	businessdocument.ObjectKeyValidator = func() func(string) error {
+		validators := businessdocumentDescObjectKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(object_key string) error {
+			for _, fn := range fns {
+				if err := fn(object_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// businessdocumentDescFileName is the schema descriptor for file_name field.
+	businessdocumentDescFileName := businessdocumentFields[4].Descriptor()
+	// businessdocument.FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
+	businessdocument.FileNameValidator = businessdocumentDescFileName.Validators[0].(func(string) error)
+	// businessdocumentDescContentType is the schema descriptor for content_type field.
+	businessdocumentDescContentType := businessdocumentFields[5].Descriptor()
+	// businessdocument.ContentTypeValidator is a validator for the "content_type" field. It is called by the builders before save.
+	businessdocument.ContentTypeValidator = businessdocumentDescContentType.Validators[0].(func(string) error)
+	// businessdocumentDescIsUploaded is the schema descriptor for is_uploaded field.
+	businessdocumentDescIsUploaded := businessdocumentFields[7].Descriptor()
+	// businessdocument.DefaultIsUploaded holds the default value on creation for the is_uploaded field.
+	businessdocument.DefaultIsUploaded = businessdocumentDescIsUploaded.Default.(bool)
+	// businessdocumentDescIsCurrent is the schema descriptor for is_current field.
+	businessdocumentDescIsCurrent := businessdocumentFields[8].Descriptor()
+	// businessdocument.DefaultIsCurrent holds the default value on creation for the is_current field.
+	businessdocument.DefaultIsCurrent = businessdocumentDescIsCurrent.Default.(bool)
+	// businessdocumentDescRejectionReason is the schema descriptor for rejection_reason field.
+	businessdocumentDescRejectionReason := businessdocumentFields[10].Descriptor()
+	// businessdocument.DefaultRejectionReason holds the default value on creation for the rejection_reason field.
+	businessdocument.DefaultRejectionReason = businessdocumentDescRejectionReason.Default.(string)
+	// businessdocument.RejectionReasonValidator is a validator for the "rejection_reason" field. It is called by the builders before save.
+	businessdocument.RejectionReasonValidator = businessdocumentDescRejectionReason.Validators[0].(func(string) error)
+	// businessdocumentDescReviewedByName is the schema descriptor for reviewed_by_name field.
+	businessdocumentDescReviewedByName := businessdocumentFields[11].Descriptor()
+	// businessdocument.DefaultReviewedByName holds the default value on creation for the reviewed_by_name field.
+	businessdocument.DefaultReviewedByName = businessdocumentDescReviewedByName.Default.(string)
+	// businessdocument.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
+	businessdocument.ReviewedByNameValidator = businessdocumentDescReviewedByName.Validators[0].(func(string) error)
+	// businessdocumentDescID is the schema descriptor for id field.
+	businessdocumentDescID := businessdocumentMixinFields0[0].Descriptor()
+	// businessdocument.DefaultID holds the default value on creation for the id field.
+	businessdocument.DefaultID = businessdocumentDescID.Default.(func() uuid.UUID)
+	checkmarkgrantMixin := schema.CheckmarkGrant{}.Mixin()
+	checkmarkgrantMixinFields0 := checkmarkgrantMixin[0].Fields()
+	_ = checkmarkgrantMixinFields0
+	checkmarkgrantFields := schema.CheckmarkGrant{}.Fields()
+	_ = checkmarkgrantFields
+	// checkmarkgrantDescCreatedAt is the schema descriptor for created_at field.
+	checkmarkgrantDescCreatedAt := checkmarkgrantMixinFields0[1].Descriptor()
+	// checkmarkgrant.DefaultCreatedAt holds the default value on creation for the created_at field.
+	checkmarkgrant.DefaultCreatedAt = checkmarkgrantDescCreatedAt.Default.(func() time.Time)
+	// checkmarkgrantDescReason is the schema descriptor for reason field.
+	checkmarkgrantDescReason := checkmarkgrantFields[3].Descriptor()
+	// checkmarkgrant.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	checkmarkgrant.ReasonValidator = checkmarkgrantDescReason.Validators[0].(func(string) error)
+	// checkmarkgrantDescGrantedBy is the schema descriptor for granted_by field.
+	checkmarkgrantDescGrantedBy := checkmarkgrantFields[4].Descriptor()
+	// checkmarkgrant.GrantedByValidator is a validator for the "granted_by" field. It is called by the builders before save.
+	checkmarkgrant.GrantedByValidator = checkmarkgrantDescGrantedBy.Validators[0].(func(string) error)
+	// checkmarkgrantDescGrantedByName is the schema descriptor for granted_by_name field.
+	checkmarkgrantDescGrantedByName := checkmarkgrantFields[5].Descriptor()
+	// checkmarkgrant.DefaultGrantedByName holds the default value on creation for the granted_by_name field.
+	checkmarkgrant.DefaultGrantedByName = checkmarkgrantDescGrantedByName.Default.(string)
+	// checkmarkgrant.GrantedByNameValidator is a validator for the "granted_by_name" field. It is called by the builders before save.
+	checkmarkgrant.GrantedByNameValidator = checkmarkgrantDescGrantedByName.Validators[0].(func(string) error)
+	// checkmarkgrantDescRevokedByName is the schema descriptor for revoked_by_name field.
+	checkmarkgrantDescRevokedByName := checkmarkgrantFields[7].Descriptor()
+	// checkmarkgrant.DefaultRevokedByName holds the default value on creation for the revoked_by_name field.
+	checkmarkgrant.DefaultRevokedByName = checkmarkgrantDescRevokedByName.Default.(string)
+	// checkmarkgrant.RevokedByNameValidator is a validator for the "revoked_by_name" field. It is called by the builders before save.
+	checkmarkgrant.RevokedByNameValidator = checkmarkgrantDescRevokedByName.Validators[0].(func(string) error)
+	// checkmarkgrantDescRevokedReason is the schema descriptor for revoked_reason field.
+	checkmarkgrantDescRevokedReason := checkmarkgrantFields[8].Descriptor()
+	// checkmarkgrant.DefaultRevokedReason holds the default value on creation for the revoked_reason field.
+	checkmarkgrant.DefaultRevokedReason = checkmarkgrantDescRevokedReason.Default.(string)
+	// checkmarkgrant.RevokedReasonValidator is a validator for the "revoked_reason" field. It is called by the builders before save.
+	checkmarkgrant.RevokedReasonValidator = checkmarkgrantDescRevokedReason.Validators[0].(func(string) error)
+	// checkmarkgrantDescID is the schema descriptor for id field.
+	checkmarkgrantDescID := checkmarkgrantMixinFields0[0].Descriptor()
+	// checkmarkgrant.DefaultID holds the default value on creation for the id field.
+	checkmarkgrant.DefaultID = checkmarkgrantDescID.Default.(func() uuid.UUID)
+	creatorapplicationMixin := schema.CreatorApplication{}.Mixin()
+	creatorapplicationMixinFields0 := creatorapplicationMixin[0].Fields()
+	_ = creatorapplicationMixinFields0
+	creatorapplicationFields := schema.CreatorApplication{}.Fields()
+	_ = creatorapplicationFields
+	// creatorapplicationDescCreatedAt is the schema descriptor for created_at field.
+	creatorapplicationDescCreatedAt := creatorapplicationMixinFields0[1].Descriptor()
+	// creatorapplication.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorapplication.DefaultCreatedAt = creatorapplicationDescCreatedAt.Default.(func() time.Time)
+	// creatorapplicationDescDecisionNote is the schema descriptor for decision_note field.
+	creatorapplicationDescDecisionNote := creatorapplicationFields[4].Descriptor()
+	// creatorapplication.DefaultDecisionNote holds the default value on creation for the decision_note field.
+	creatorapplication.DefaultDecisionNote = creatorapplicationDescDecisionNote.Default.(string)
+	// creatorapplication.DecisionNoteValidator is a validator for the "decision_note" field. It is called by the builders before save.
+	creatorapplication.DecisionNoteValidator = creatorapplicationDescDecisionNote.Validators[0].(func(string) error)
+	// creatorapplicationDescContentCategories is the schema descriptor for content_categories field.
+	creatorapplicationDescContentCategories := creatorapplicationFields[6].Descriptor()
+	// creatorapplication.DefaultContentCategories holds the default value on creation for the content_categories field.
+	creatorapplication.DefaultContentCategories = creatorapplicationDescContentCategories.Default.([]string)
+	// creatorapplicationDescSampleContentUrls is the schema descriptor for sample_content_urls field.
+	creatorapplicationDescSampleContentUrls := creatorapplicationFields[8].Descriptor()
+	// creatorapplication.DefaultSampleContentUrls holds the default value on creation for the sample_content_urls field.
+	creatorapplication.DefaultSampleContentUrls = creatorapplicationDescSampleContentUrls.Default.([]string)
+	// creatorapplicationDescPayoutAccountID is the schema descriptor for payout_account_id field.
+	creatorapplicationDescPayoutAccountID := creatorapplicationFields[9].Descriptor()
+	// creatorapplication.DefaultPayoutAccountID holds the default value on creation for the payout_account_id field.
+	creatorapplication.DefaultPayoutAccountID = creatorapplicationDescPayoutAccountID.Default.(string)
+	// creatorapplication.PayoutAccountIDValidator is a validator for the "payout_account_id" field. It is called by the builders before save.
+	creatorapplication.PayoutAccountIDValidator = creatorapplicationDescPayoutAccountID.Validators[0].(func(string) error)
+	// creatorapplicationDescAcceptedTermsVersion is the schema descriptor for accepted_terms_version field.
+	creatorapplicationDescAcceptedTermsVersion := creatorapplicationFields[10].Descriptor()
+	// creatorapplication.DefaultAcceptedTermsVersion holds the default value on creation for the accepted_terms_version field.
+	creatorapplication.DefaultAcceptedTermsVersion = creatorapplicationDescAcceptedTermsVersion.Default.(string)
+	// creatorapplication.AcceptedTermsVersionValidator is a validator for the "accepted_terms_version" field. It is called by the builders before save.
+	creatorapplication.AcceptedTermsVersionValidator = creatorapplicationDescAcceptedTermsVersion.Validators[0].(func(string) error)
+	// creatorapplicationDescReviewedBy is the schema descriptor for reviewed_by field.
+	creatorapplicationDescReviewedBy := creatorapplicationFields[11].Descriptor()
+	// creatorapplication.DefaultReviewedBy holds the default value on creation for the reviewed_by field.
+	creatorapplication.DefaultReviewedBy = creatorapplicationDescReviewedBy.Default.(string)
+	// creatorapplication.ReviewedByValidator is a validator for the "reviewed_by" field. It is called by the builders before save.
+	creatorapplication.ReviewedByValidator = creatorapplicationDescReviewedBy.Validators[0].(func(string) error)
+	// creatorapplicationDescReviewedByName is the schema descriptor for reviewed_by_name field.
+	creatorapplicationDescReviewedByName := creatorapplicationFields[12].Descriptor()
+	// creatorapplication.DefaultReviewedByName holds the default value on creation for the reviewed_by_name field.
+	creatorapplication.DefaultReviewedByName = creatorapplicationDescReviewedByName.Default.(string)
+	// creatorapplication.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
+	creatorapplication.ReviewedByNameValidator = creatorapplicationDescReviewedByName.Validators[0].(func(string) error)
+	// creatorapplicationDescDecisionReason is the schema descriptor for decision_reason field.
+	creatorapplicationDescDecisionReason := creatorapplicationFields[14].Descriptor()
+	// creatorapplication.DefaultDecisionReason holds the default value on creation for the decision_reason field.
+	creatorapplication.DefaultDecisionReason = creatorapplicationDescDecisionReason.Default.(string)
+	// creatorapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	creatorapplication.DecisionReasonValidator = creatorapplicationDescDecisionReason.Validators[0].(func(string) error)
+	// creatorapplicationDescID is the schema descriptor for id field.
+	creatorapplicationDescID := creatorapplicationMixinFields0[0].Descriptor()
+	// creatorapplication.DefaultID holds the default value on creation for the id field.
+	creatorapplication.DefaultID = creatorapplicationDescID.Default.(func() uuid.UUID)
 	dataexportrequestMixin := schema.DataExportRequest{}.Mixin()
 	dataexportrequestMixinFields0 := dataexportrequestMixin[0].Fields()
 	_ = dataexportrequestMixinFields0
@@ -315,6 +721,206 @@ func init() {
 	georegionDescID := georegionMixinFields0[0].Descriptor()
 	// georegion.DefaultID holds the default value on creation for the id field.
 	georegion.DefaultID = georegionDescID.Default.(func() uuid.UUID)
+	legaldocumentFields := schema.LegalDocument{}.Fields()
+	_ = legaldocumentFields
+	// legaldocumentDescKey is the schema descriptor for key field.
+	legaldocumentDescKey := legaldocumentFields[0].Descriptor()
+	// legaldocument.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	legaldocument.KeyValidator = func() func(string) error {
+		validators := legaldocumentDescKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(key string) error {
+			for _, fn := range fns {
+				if err := fn(key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// legaldocumentDescTitle is the schema descriptor for title field.
+	legaldocumentDescTitle := legaldocumentFields[1].Descriptor()
+	// legaldocument.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	legaldocument.TitleValidator = legaldocumentDescTitle.Validators[0].(func(string) error)
+	// legaldocumentDescPublicPath is the schema descriptor for public_path field.
+	legaldocumentDescPublicPath := legaldocumentFields[2].Descriptor()
+	// legaldocument.PublicPathValidator is a validator for the "public_path" field. It is called by the builders before save.
+	legaldocument.PublicPathValidator = legaldocumentDescPublicPath.Validators[0].(func(string) error)
+	legalnoticeMixin := schema.LegalNotice{}.Mixin()
+	legalnoticeMixinFields0 := legalnoticeMixin[0].Fields()
+	_ = legalnoticeMixinFields0
+	legalnoticeFields := schema.LegalNotice{}.Fields()
+	_ = legalnoticeFields
+	// legalnoticeDescCreatedAt is the schema descriptor for created_at field.
+	legalnoticeDescCreatedAt := legalnoticeMixinFields0[1].Descriptor()
+	// legalnotice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	legalnotice.DefaultCreatedAt = legalnoticeDescCreatedAt.Default.(func() time.Time)
+	// legalnoticeDescDocumentKey is the schema descriptor for document_key field.
+	legalnoticeDescDocumentKey := legalnoticeFields[1].Descriptor()
+	// legalnotice.DocumentKeyValidator is a validator for the "document_key" field. It is called by the builders before save.
+	legalnotice.DocumentKeyValidator = legalnoticeDescDocumentKey.Validators[0].(func(string) error)
+	// legalnoticeDescSubject is the schema descriptor for subject field.
+	legalnoticeDescSubject := legalnoticeFields[3].Descriptor()
+	// legalnotice.SubjectValidator is a validator for the "subject" field. It is called by the builders before save.
+	legalnotice.SubjectValidator = legalnoticeDescSubject.Validators[0].(func(string) error)
+	// legalnoticeDescRecipientCount is the schema descriptor for recipient_count field.
+	legalnoticeDescRecipientCount := legalnoticeFields[5].Descriptor()
+	// legalnotice.DefaultRecipientCount holds the default value on creation for the recipient_count field.
+	legalnotice.DefaultRecipientCount = legalnoticeDescRecipientCount.Default.(int)
+	// legalnoticeDescSentCount is the schema descriptor for sent_count field.
+	legalnoticeDescSentCount := legalnoticeFields[6].Descriptor()
+	// legalnotice.DefaultSentCount holds the default value on creation for the sent_count field.
+	legalnotice.DefaultSentCount = legalnoticeDescSentCount.Default.(int)
+	// legalnoticeDescExcludedHardBounces is the schema descriptor for excluded_hard_bounces field.
+	legalnoticeDescExcludedHardBounces := legalnoticeFields[7].Descriptor()
+	// legalnotice.DefaultExcludedHardBounces holds the default value on creation for the excluded_hard_bounces field.
+	legalnotice.DefaultExcludedHardBounces = legalnoticeDescExcludedHardBounces.Default.(int)
+	// legalnoticeDescExcludedSuppressed is the schema descriptor for excluded_suppressed field.
+	legalnoticeDescExcludedSuppressed := legalnoticeFields[8].Descriptor()
+	// legalnotice.DefaultExcludedSuppressed holds the default value on creation for the excluded_suppressed field.
+	legalnotice.DefaultExcludedSuppressed = legalnoticeDescExcludedSuppressed.Default.(int)
+	// legalnoticeDescBatchSize is the schema descriptor for batch_size field.
+	legalnoticeDescBatchSize := legalnoticeFields[9].Descriptor()
+	// legalnotice.DefaultBatchSize holds the default value on creation for the batch_size field.
+	legalnotice.DefaultBatchSize = legalnoticeDescBatchSize.Default.(int)
+	// legalnoticeDescRatePerSecond is the schema descriptor for rate_per_second field.
+	legalnoticeDescRatePerSecond := legalnoticeFields[10].Descriptor()
+	// legalnotice.DefaultRatePerSecond holds the default value on creation for the rate_per_second field.
+	legalnotice.DefaultRatePerSecond = legalnoticeDescRatePerSecond.Default.(int)
+	// legalnoticeDescBatchesDone is the schema descriptor for batches_done field.
+	legalnoticeDescBatchesDone := legalnoticeFields[11].Descriptor()
+	// legalnotice.DefaultBatchesDone holds the default value on creation for the batches_done field.
+	legalnotice.DefaultBatchesDone = legalnoticeDescBatchesDone.Default.(int)
+	// legalnoticeDescQueuedBy is the schema descriptor for queued_by field.
+	legalnoticeDescQueuedBy := legalnoticeFields[12].Descriptor()
+	// legalnotice.DefaultQueuedBy holds the default value on creation for the queued_by field.
+	legalnotice.DefaultQueuedBy = legalnoticeDescQueuedBy.Default.(string)
+	// legalnotice.QueuedByValidator is a validator for the "queued_by" field. It is called by the builders before save.
+	legalnotice.QueuedByValidator = legalnoticeDescQueuedBy.Validators[0].(func(string) error)
+	// legalnoticeDescQueuedByName is the schema descriptor for queued_by_name field.
+	legalnoticeDescQueuedByName := legalnoticeFields[13].Descriptor()
+	// legalnotice.DefaultQueuedByName holds the default value on creation for the queued_by_name field.
+	legalnotice.DefaultQueuedByName = legalnoticeDescQueuedByName.Default.(string)
+	// legalnotice.QueuedByNameValidator is a validator for the "queued_by_name" field. It is called by the builders before save.
+	legalnotice.QueuedByNameValidator = legalnoticeDescQueuedByName.Validators[0].(func(string) error)
+	// legalnoticeDescUpdatedAt is the schema descriptor for updated_at field.
+	legalnoticeDescUpdatedAt := legalnoticeFields[14].Descriptor()
+	// legalnotice.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	legalnotice.DefaultUpdatedAt = legalnoticeDescUpdatedAt.Default.(func() time.Time)
+	// legalnotice.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	legalnotice.UpdateDefaultUpdatedAt = legalnoticeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// legalnoticeDescID is the schema descriptor for id field.
+	legalnoticeDescID := legalnoticeMixinFields0[0].Descriptor()
+	// legalnotice.DefaultID holds the default value on creation for the id field.
+	legalnotice.DefaultID = legalnoticeDescID.Default.(func() uuid.UUID)
+	legalnoticedraftFields := schema.LegalNoticeDraft{}.Fields()
+	_ = legalnoticedraftFields
+	// legalnoticedraftDescSubject is the schema descriptor for subject field.
+	legalnoticedraftDescSubject := legalnoticedraftFields[1].Descriptor()
+	// legalnoticedraft.DefaultSubject holds the default value on creation for the subject field.
+	legalnoticedraft.DefaultSubject = legalnoticedraftDescSubject.Default.(string)
+	// legalnoticedraft.SubjectValidator is a validator for the "subject" field. It is called by the builders before save.
+	legalnoticedraft.SubjectValidator = legalnoticedraftDescSubject.Validators[0].(func(string) error)
+	// legalnoticedraftDescSummaryText is the schema descriptor for summary_text field.
+	legalnoticedraftDescSummaryText := legalnoticedraftFields[2].Descriptor()
+	// legalnoticedraft.DefaultSummaryText holds the default value on creation for the summary_text field.
+	legalnoticedraft.DefaultSummaryText = legalnoticedraftDescSummaryText.Default.(string)
+	// legalnoticedraftDescWhatChanged is the schema descriptor for what_changed field.
+	legalnoticedraftDescWhatChanged := legalnoticedraftFields[3].Descriptor()
+	// legalnoticedraft.DefaultWhatChanged holds the default value on creation for the what_changed field.
+	legalnoticedraft.DefaultWhatChanged = legalnoticedraftDescWhatChanged.Default.([]string)
+	// legalnoticedraftDescReacceptNote is the schema descriptor for reaccept_note field.
+	legalnoticedraftDescReacceptNote := legalnoticedraftFields[4].Descriptor()
+	// legalnoticedraft.DefaultReacceptNote holds the default value on creation for the reaccept_note field.
+	legalnoticedraft.DefaultReacceptNote = legalnoticedraftDescReacceptNote.Default.(string)
+	// legalnoticedraft.ReacceptNoteValidator is a validator for the "reaccept_note" field. It is called by the builders before save.
+	legalnoticedraft.ReacceptNoteValidator = legalnoticedraftDescReacceptNote.Validators[0].(func(string) error)
+	// legalnoticedraftDescUpdatedByName is the schema descriptor for updated_by_name field.
+	legalnoticedraftDescUpdatedByName := legalnoticedraftFields[5].Descriptor()
+	// legalnoticedraft.DefaultUpdatedByName holds the default value on creation for the updated_by_name field.
+	legalnoticedraft.DefaultUpdatedByName = legalnoticedraftDescUpdatedByName.Default.(string)
+	// legalnoticedraft.UpdatedByNameValidator is a validator for the "updated_by_name" field. It is called by the builders before save.
+	legalnoticedraft.UpdatedByNameValidator = legalnoticedraftDescUpdatedByName.Validators[0].(func(string) error)
+	// legalnoticedraftDescUpdatedAt is the schema descriptor for updated_at field.
+	legalnoticedraftDescUpdatedAt := legalnoticedraftFields[7].Descriptor()
+	// legalnoticedraft.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	legalnoticedraft.DefaultUpdatedAt = legalnoticedraftDescUpdatedAt.Default.(func() time.Time)
+	// legalnoticedraft.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	legalnoticedraft.UpdateDefaultUpdatedAt = legalnoticedraftDescUpdatedAt.UpdateDefault.(func() time.Time)
+	legalversionMixin := schema.LegalVersion{}.Mixin()
+	legalversionMixinFields0 := legalversionMixin[0].Fields()
+	_ = legalversionMixinFields0
+	legalversionFields := schema.LegalVersion{}.Fields()
+	_ = legalversionFields
+	// legalversionDescCreatedAt is the schema descriptor for created_at field.
+	legalversionDescCreatedAt := legalversionMixinFields0[1].Descriptor()
+	// legalversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	legalversion.DefaultCreatedAt = legalversionDescCreatedAt.Default.(func() time.Time)
+	// legalversionDescDocumentKey is the schema descriptor for document_key field.
+	legalversionDescDocumentKey := legalversionFields[0].Descriptor()
+	// legalversion.DocumentKeyValidator is a validator for the "document_key" field. It is called by the builders before save.
+	legalversion.DocumentKeyValidator = legalversionDescDocumentKey.Validators[0].(func(string) error)
+	// legalversionDescChangeSummary is the schema descriptor for change_summary field.
+	legalversionDescChangeSummary := legalversionFields[4].Descriptor()
+	// legalversion.DefaultChangeSummary holds the default value on creation for the change_summary field.
+	legalversion.DefaultChangeSummary = legalversionDescChangeSummary.Default.(string)
+	// legalversion.ChangeSummaryValidator is a validator for the "change_summary" field. It is called by the builders before save.
+	legalversion.ChangeSummaryValidator = legalversionDescChangeSummary.Validators[0].(func(string) error)
+	// legalversionDescIsMaterialChange is the schema descriptor for is_material_change field.
+	legalversionDescIsMaterialChange := legalversionFields[6].Descriptor()
+	// legalversion.DefaultIsMaterialChange holds the default value on creation for the is_material_change field.
+	legalversion.DefaultIsMaterialChange = legalversionDescIsMaterialChange.Default.(bool)
+	// legalversionDescIsFlaggedForLegalReview is the schema descriptor for is_flagged_for_legal_review field.
+	legalversionDescIsFlaggedForLegalReview := legalversionFields[7].Descriptor()
+	// legalversion.DefaultIsFlaggedForLegalReview holds the default value on creation for the is_flagged_for_legal_review field.
+	legalversion.DefaultIsFlaggedForLegalReview = legalversionDescIsFlaggedForLegalReview.Default.(bool)
+	// legalversionDescCreatedBy is the schema descriptor for created_by field.
+	legalversionDescCreatedBy := legalversionFields[8].Descriptor()
+	// legalversion.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	legalversion.CreatedByValidator = legalversionDescCreatedBy.Validators[0].(func(string) error)
+	// legalversionDescCreatedByName is the schema descriptor for created_by_name field.
+	legalversionDescCreatedByName := legalversionFields[9].Descriptor()
+	// legalversion.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	legalversion.DefaultCreatedByName = legalversionDescCreatedByName.Default.(string)
+	// legalversion.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	legalversion.CreatedByNameValidator = legalversionDescCreatedByName.Validators[0].(func(string) error)
+	// legalversionDescSubmittedBy is the schema descriptor for submitted_by field.
+	legalversionDescSubmittedBy := legalversionFields[10].Descriptor()
+	// legalversion.DefaultSubmittedBy holds the default value on creation for the submitted_by field.
+	legalversion.DefaultSubmittedBy = legalversionDescSubmittedBy.Default.(string)
+	// legalversion.SubmittedByValidator is a validator for the "submitted_by" field. It is called by the builders before save.
+	legalversion.SubmittedByValidator = legalversionDescSubmittedBy.Validators[0].(func(string) error)
+	// legalversionDescSubmittedByName is the schema descriptor for submitted_by_name field.
+	legalversionDescSubmittedByName := legalversionFields[11].Descriptor()
+	// legalversion.DefaultSubmittedByName holds the default value on creation for the submitted_by_name field.
+	legalversion.DefaultSubmittedByName = legalversionDescSubmittedByName.Default.(string)
+	// legalversion.SubmittedByNameValidator is a validator for the "submitted_by_name" field. It is called by the builders before save.
+	legalversion.SubmittedByNameValidator = legalversionDescSubmittedByName.Validators[0].(func(string) error)
+	// legalversionDescPublishedBy is the schema descriptor for published_by field.
+	legalversionDescPublishedBy := legalversionFields[13].Descriptor()
+	// legalversion.DefaultPublishedBy holds the default value on creation for the published_by field.
+	legalversion.DefaultPublishedBy = legalversionDescPublishedBy.Default.(string)
+	// legalversion.PublishedByValidator is a validator for the "published_by" field. It is called by the builders before save.
+	legalversion.PublishedByValidator = legalversionDescPublishedBy.Validators[0].(func(string) error)
+	// legalversionDescPublishedByName is the schema descriptor for published_by_name field.
+	legalversionDescPublishedByName := legalversionFields[14].Descriptor()
+	// legalversion.DefaultPublishedByName holds the default value on creation for the published_by_name field.
+	legalversion.DefaultPublishedByName = legalversionDescPublishedByName.Default.(string)
+	// legalversion.PublishedByNameValidator is a validator for the "published_by_name" field. It is called by the builders before save.
+	legalversion.PublishedByNameValidator = legalversionDescPublishedByName.Validators[0].(func(string) error)
+	// legalversionDescReturnedReason is the schema descriptor for returned_reason field.
+	legalversionDescReturnedReason := legalversionFields[16].Descriptor()
+	// legalversion.DefaultReturnedReason holds the default value on creation for the returned_reason field.
+	legalversion.DefaultReturnedReason = legalversionDescReturnedReason.Default.(string)
+	// legalversion.ReturnedReasonValidator is a validator for the "returned_reason" field. It is called by the builders before save.
+	legalversion.ReturnedReasonValidator = legalversionDescReturnedReason.Validators[0].(func(string) error)
+	// legalversionDescID is the schema descriptor for id field.
+	legalversionDescID := legalversionMixinFields0[0].Descriptor()
+	// legalversion.DefaultID holds the default value on creation for the id field.
+	legalversion.DefaultID = legalversionDescID.Default.(func() uuid.UUID)
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0
@@ -400,13 +1006,13 @@ func init() {
 	// privacysetting.DefaultMarketing holds the default value on creation for the marketing field.
 	privacysetting.DefaultMarketing = privacysettingDescMarketing.Default.(bool)
 	// privacysettingDescPolicyVersion is the schema descriptor for policy_version field.
-	privacysettingDescPolicyVersion := privacysettingFields[5].Descriptor()
+	privacysettingDescPolicyVersion := privacysettingFields[7].Descriptor()
 	// privacysetting.DefaultPolicyVersion holds the default value on creation for the policy_version field.
 	privacysetting.DefaultPolicyVersion = privacysettingDescPolicyVersion.Default.(string)
 	// privacysetting.PolicyVersionValidator is a validator for the "policy_version" field. It is called by the builders before save.
 	privacysetting.PolicyVersionValidator = privacysettingDescPolicyVersion.Validators[0].(func(string) error)
 	// privacysettingDescUpdatedAt is the schema descriptor for updated_at field.
-	privacysettingDescUpdatedAt := privacysettingFields[6].Descriptor()
+	privacysettingDescUpdatedAt := privacysettingFields[8].Descriptor()
 	// privacysetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	privacysetting.DefaultUpdatedAt = privacysettingDescUpdatedAt.Default.(func() time.Time)
 	// privacysetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -483,7 +1089,7 @@ func init() {
 	// profile.DefaultVerified holds the default value on creation for the verified field.
 	profile.DefaultVerified = profileDescVerified.Default.(bool)
 	// profileDescUpdatedAt is the schema descriptor for updated_at field.
-	profileDescUpdatedAt := profileFields[15].Descriptor()
+	profileDescUpdatedAt := profileFields[16].Descriptor()
 	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
 	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -492,6 +1098,139 @@ func init() {
 	profileDescID := profileMixinFields0[0].Descriptor()
 	// profile.DefaultID holds the default value on creation for the id field.
 	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
+	profilecheckmarkMixin := schema.ProfileCheckmark{}.Mixin()
+	profilecheckmarkMixinFields0 := profilecheckmarkMixin[0].Fields()
+	_ = profilecheckmarkMixinFields0
+	profilecheckmarkFields := schema.ProfileCheckmark{}.Fields()
+	_ = profilecheckmarkFields
+	// profilecheckmarkDescCreatedAt is the schema descriptor for created_at field.
+	profilecheckmarkDescCreatedAt := profilecheckmarkMixinFields0[1].Descriptor()
+	// profilecheckmark.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profilecheckmark.DefaultCreatedAt = profilecheckmarkDescCreatedAt.Default.(func() time.Time)
+	// profilecheckmarkDescHandleReserved is the schema descriptor for handle_reserved field.
+	profilecheckmarkDescHandleReserved := profilecheckmarkFields[9].Descriptor()
+	// profilecheckmark.DefaultHandleReserved holds the default value on creation for the handle_reserved field.
+	profilecheckmark.DefaultHandleReserved = profilecheckmarkDescHandleReserved.Default.(bool)
+	// profilecheckmarkDescUpdatedAt is the schema descriptor for updated_at field.
+	profilecheckmarkDescUpdatedAt := profilecheckmarkFields[10].Descriptor()
+	// profilecheckmark.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profilecheckmark.DefaultUpdatedAt = profilecheckmarkDescUpdatedAt.Default.(func() time.Time)
+	// profilecheckmark.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profilecheckmark.UpdateDefaultUpdatedAt = profilecheckmarkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// profilecheckmarkDescID is the schema descriptor for id field.
+	profilecheckmarkDescID := profilecheckmarkMixinFields0[0].Descriptor()
+	// profilecheckmark.DefaultID holds the default value on creation for the id field.
+	profilecheckmark.DefaultID = profilecheckmarkDescID.Default.(func() uuid.UUID)
+	profilesignalFields := schema.ProfileSignal{}.Fields()
+	_ = profilesignalFields
+	// profilesignalDescRealFollowers is the schema descriptor for real_followers field.
+	profilesignalDescRealFollowers := profilesignalFields[2].Descriptor()
+	// profilesignal.DefaultRealFollowers holds the default value on creation for the real_followers field.
+	profilesignal.DefaultRealFollowers = profilesignalDescRealFollowers.Default.(int)
+	// profilesignal.RealFollowersValidator is a validator for the "real_followers" field. It is called by the builders before save.
+	profilesignal.RealFollowersValidator = profilesignalDescRealFollowers.Validators[0].(func(int) error)
+	// profilesignalDescOriginalPostsLast60Days is the schema descriptor for original_posts_last_60_days field.
+	profilesignalDescOriginalPostsLast60Days := profilesignalFields[3].Descriptor()
+	// profilesignal.DefaultOriginalPostsLast60Days holds the default value on creation for the original_posts_last_60_days field.
+	profilesignal.DefaultOriginalPostsLast60Days = profilesignalDescOriginalPostsLast60Days.Default.(int)
+	// profilesignal.OriginalPostsLast60DaysValidator is a validator for the "original_posts_last_60_days" field. It is called by the builders before save.
+	profilesignal.OriginalPostsLast60DaysValidator = profilesignalDescOriginalPostsLast60Days.Validators[0].(func(int) error)
+	// profilesignalDescDaysSinceLastViolation is the schema descriptor for days_since_last_violation field.
+	profilesignalDescDaysSinceLastViolation := profilesignalFields[4].Descriptor()
+	// profilesignal.DefaultDaysSinceLastViolation holds the default value on creation for the days_since_last_violation field.
+	profilesignal.DefaultDaysSinceLastViolation = profilesignalDescDaysSinceLastViolation.Default.(int)
+	// profilesignal.DaysSinceLastViolationValidator is a validator for the "days_since_last_violation" field. It is called by the builders before save.
+	profilesignal.DaysSinceLastViolationValidator = profilesignalDescDaysSinceLastViolation.Validators[0].(func(int) error)
+	// profilesignalDescFraudScore is the schema descriptor for fraud_score field.
+	profilesignalDescFraudScore := profilesignalFields[5].Descriptor()
+	// profilesignal.DefaultFraudScore holds the default value on creation for the fraud_score field.
+	profilesignal.DefaultFraudScore = profilesignalDescFraudScore.Default.(int)
+	// profilesignal.FraudScoreValidator is a validator for the "fraud_score" field. It is called by the builders before save.
+	profilesignal.FraudScoreValidator = func() func(int) error {
+		validators := profilesignalDescFraudScore.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(fraud_score int) error {
+			for _, fn := range fns {
+				if err := fn(fraud_score); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profilesignalDescRiskScore is the schema descriptor for risk_score field.
+	profilesignalDescRiskScore := profilesignalFields[6].Descriptor()
+	// profilesignal.DefaultRiskScore holds the default value on creation for the risk_score field.
+	profilesignal.DefaultRiskScore = profilesignalDescRiskScore.Default.(int)
+	// profilesignal.RiskScoreValidator is a validator for the "risk_score" field. It is called by the builders before save.
+	profilesignal.RiskScoreValidator = func() func(int) error {
+		validators := profilesignalDescRiskScore.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(risk_score int) error {
+			for _, fn := range fns {
+				if err := fn(risk_score); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profilesignalDescIDVerified is the schema descriptor for id_verified field.
+	profilesignalDescIDVerified := profilesignalFields[7].Descriptor()
+	// profilesignal.DefaultIDVerified holds the default value on creation for the id_verified field.
+	profilesignal.DefaultIDVerified = profilesignalDescIDVerified.Default.(bool)
+	// profilesignalDescBorderlineContent is the schema descriptor for borderline_content field.
+	profilesignalDescBorderlineContent := profilesignalFields[8].Descriptor()
+	// profilesignal.DefaultBorderlineContent holds the default value on creation for the borderline_content field.
+	profilesignal.DefaultBorderlineContent = profilesignalDescBorderlineContent.Default.(bool)
+	// profilesignalDescCompletedOrders is the schema descriptor for completed_orders field.
+	profilesignalDescCompletedOrders := profilesignalFields[9].Descriptor()
+	// profilesignal.DefaultCompletedOrders holds the default value on creation for the completed_orders field.
+	profilesignal.DefaultCompletedOrders = profilesignalDescCompletedOrders.Default.(int)
+	// profilesignal.CompletedOrdersValidator is a validator for the "completed_orders" field. It is called by the builders before save.
+	profilesignal.CompletedOrdersValidator = profilesignalDescCompletedOrders.Validators[0].(func(int) error)
+	// profilesignalDescSuccessRatePercent is the schema descriptor for success_rate_percent field.
+	profilesignalDescSuccessRatePercent := profilesignalFields[10].Descriptor()
+	// profilesignal.DefaultSuccessRatePercent holds the default value on creation for the success_rate_percent field.
+	profilesignal.DefaultSuccessRatePercent = profilesignalDescSuccessRatePercent.Default.(int)
+	// profilesignal.SuccessRatePercentValidator is a validator for the "success_rate_percent" field. It is called by the builders before save.
+	profilesignal.SuccessRatePercentValidator = func() func(int) error {
+		validators := profilesignalDescSuccessRatePercent.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(success_rate_percent int) error {
+			for _, fn := range fns {
+				if err := fn(success_rate_percent); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profilesignalDescHasActiveStoreOrBrandPage is the schema descriptor for has_active_store_or_brand_page field.
+	profilesignalDescHasActiveStoreOrBrandPage := profilesignalFields[11].Descriptor()
+	// profilesignal.DefaultHasActiveStoreOrBrandPage holds the default value on creation for the has_active_store_or_brand_page field.
+	profilesignal.DefaultHasActiveStoreOrBrandPage = profilesignalDescHasActiveStoreOrBrandPage.Default.(bool)
+	// profilesignalDescSource is the schema descriptor for source field.
+	profilesignalDescSource := profilesignalFields[13].Descriptor()
+	// profilesignal.DefaultSource holds the default value on creation for the source field.
+	profilesignal.DefaultSource = profilesignalDescSource.Default.(string)
+	// profilesignal.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	profilesignal.SourceValidator = profilesignalDescSource.Validators[0].(func(string) error)
+	// profilesignalDescUpdatedAt is the schema descriptor for updated_at field.
+	profilesignalDescUpdatedAt := profilesignalFields[14].Descriptor()
+	// profilesignal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profilesignal.DefaultUpdatedAt = profilesignalDescUpdatedAt.Default.(func() time.Time)
+	// profilesignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profilesignal.UpdateDefaultUpdatedAt = profilesignalDescUpdatedAt.UpdateDefault.(func() time.Time)
 	reservedusernameruleMixin := schema.ReservedUsernameRule{}.Mixin()
 	reservedusernameruleMixinFields0 := reservedusernameruleMixin[0].Fields()
 	_ = reservedusernameruleMixinFields0
@@ -686,6 +1425,19 @@ func init() {
 	shippingaddressDescID := shippingaddressMixinFields0[0].Descriptor()
 	// shippingaddress.DefaultID holds the default value on creation for the id field.
 	shippingaddress.DefaultID = shippingaddressDescID.Default.(func() uuid.UUID)
+	suggestiondismissalMixin := schema.SuggestionDismissal{}.Mixin()
+	suggestiondismissalMixinFields0 := suggestiondismissalMixin[0].Fields()
+	_ = suggestiondismissalMixinFields0
+	suggestiondismissalFields := schema.SuggestionDismissal{}.Fields()
+	_ = suggestiondismissalFields
+	// suggestiondismissalDescCreatedAt is the schema descriptor for created_at field.
+	suggestiondismissalDescCreatedAt := suggestiondismissalMixinFields0[1].Descriptor()
+	// suggestiondismissal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	suggestiondismissal.DefaultCreatedAt = suggestiondismissalDescCreatedAt.Default.(func() time.Time)
+	// suggestiondismissalDescID is the schema descriptor for id field.
+	suggestiondismissalDescID := suggestiondismissalMixinFields0[0].Descriptor()
+	// suggestiondismissal.DefaultID holds the default value on creation for the id field.
+	suggestiondismissal.DefaultID = suggestiondismissalDescID.Default.(func() uuid.UUID)
 	termsacceptanceMixin := schema.TermsAcceptance{}.Mixin()
 	termsacceptanceMixinFields0 := termsacceptanceMixin[0].Fields()
 	_ = termsacceptanceMixinFields0
@@ -714,13 +1466,13 @@ func init() {
 		}
 	}()
 	// termsacceptanceDescIPAddress is the schema descriptor for ip_address field.
-	termsacceptanceDescIPAddress := termsacceptanceFields[3].Descriptor()
+	termsacceptanceDescIPAddress := termsacceptanceFields[4].Descriptor()
 	// termsacceptance.DefaultIPAddress holds the default value on creation for the ip_address field.
 	termsacceptance.DefaultIPAddress = termsacceptanceDescIPAddress.Default.(string)
 	// termsacceptance.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
 	termsacceptance.IPAddressValidator = termsacceptanceDescIPAddress.Validators[0].(func(string) error)
 	// termsacceptanceDescUserAgent is the schema descriptor for user_agent field.
-	termsacceptanceDescUserAgent := termsacceptanceFields[4].Descriptor()
+	termsacceptanceDescUserAgent := termsacceptanceFields[5].Descriptor()
 	// termsacceptance.DefaultUserAgent holds the default value on creation for the user_agent field.
 	termsacceptance.DefaultUserAgent = termsacceptanceDescUserAgent.Default.(string)
 	// termsacceptance.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
@@ -852,4 +1604,39 @@ func init() {
 	usernameholdDescID := usernameholdMixinFields0[0].Descriptor()
 	// usernamehold.DefaultID holds the default value on creation for the id field.
 	usernamehold.DefaultID = usernameholdDescID.Default.(func() uuid.UUID)
+	verificationapplicationMixin := schema.VerificationApplication{}.Mixin()
+	verificationapplicationMixinFields0 := verificationapplicationMixin[0].Fields()
+	_ = verificationapplicationMixinFields0
+	verificationapplicationFields := schema.VerificationApplication{}.Fields()
+	_ = verificationapplicationFields
+	// verificationapplicationDescCreatedAt is the schema descriptor for created_at field.
+	verificationapplicationDescCreatedAt := verificationapplicationMixinFields0[1].Descriptor()
+	// verificationapplication.DefaultCreatedAt holds the default value on creation for the created_at field.
+	verificationapplication.DefaultCreatedAt = verificationapplicationDescCreatedAt.Default.(func() time.Time)
+	// verificationapplicationDescPlanID is the schema descriptor for plan_id field.
+	verificationapplicationDescPlanID := verificationapplicationFields[3].Descriptor()
+	// verificationapplication.DefaultPlanID holds the default value on creation for the plan_id field.
+	verificationapplication.DefaultPlanID = verificationapplicationDescPlanID.Default.(string)
+	// verificationapplication.PlanIDValidator is a validator for the "plan_id" field. It is called by the builders before save.
+	verificationapplication.PlanIDValidator = verificationapplicationDescPlanID.Validators[0].(func(string) error)
+	// verificationapplicationDescDocumentKeys is the schema descriptor for document_keys field.
+	verificationapplicationDescDocumentKeys := verificationapplicationFields[6].Descriptor()
+	// verificationapplication.DefaultDocumentKeys holds the default value on creation for the document_keys field.
+	verificationapplication.DefaultDocumentKeys = verificationapplicationDescDocumentKeys.Default.([]string)
+	// verificationapplicationDescDecisionReason is the schema descriptor for decision_reason field.
+	verificationapplicationDescDecisionReason := verificationapplicationFields[7].Descriptor()
+	// verificationapplication.DefaultDecisionReason holds the default value on creation for the decision_reason field.
+	verificationapplication.DefaultDecisionReason = verificationapplicationDescDecisionReason.Default.(string)
+	// verificationapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	verificationapplication.DecisionReasonValidator = verificationapplicationDescDecisionReason.Validators[0].(func(string) error)
+	// verificationapplicationDescReviewedByName is the schema descriptor for reviewed_by_name field.
+	verificationapplicationDescReviewedByName := verificationapplicationFields[8].Descriptor()
+	// verificationapplication.DefaultReviewedByName holds the default value on creation for the reviewed_by_name field.
+	verificationapplication.DefaultReviewedByName = verificationapplicationDescReviewedByName.Default.(string)
+	// verificationapplication.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
+	verificationapplication.ReviewedByNameValidator = verificationapplicationDescReviewedByName.Validators[0].(func(string) error)
+	// verificationapplicationDescID is the schema descriptor for id field.
+	verificationapplicationDescID := verificationapplicationMixinFields0[0].Descriptor()
+	// verificationapplication.DefaultID holds the default value on creation for the id field.
+	verificationapplication.DefaultID = verificationapplicationDescID.Default.(func() uuid.UUID)
 }
