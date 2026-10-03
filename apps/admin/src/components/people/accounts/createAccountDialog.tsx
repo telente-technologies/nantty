@@ -13,7 +13,7 @@ import type { AdminCreatedAccount, ProfileType } from "@/types/accountsAdmin.typ
 
 const countryOptions = [{ value: "NG", label: "Nigeria" }, { value: "GH", label: "Ghana" }, { value: "KE", label: "Kenya" }, { value: "ZA", label: "South Africa" }, { value: "GB", label: "United Kingdom" }, { value: "US", label: "United States" }];
 
-const profileOptions = [{ value: "PERSONAL", label: "Personal" }, { value: "CREATOR", label: "Creator" }, { value: "BUSINESS", label: "Business" }, { value: "BRAND", label: "Brand" }, { value: "GOVERNMENT", label: "Government" }];
+const profileOptions = [{ value: "PERSONAL", label: "Personal" }, { value: "BUSINESS", label: "Business" }, { value: "BRAND", label: "Brand" }, { value: "GOVERNMENT", label: "Government" }];
 
 export function CreateAccountDialog({ onClose, onCreated }: { readonly onClose: () => void; readonly onCreated: (account: AdminCreatedAccount) => void }) {
   const [username, setUsername] = useState("");
@@ -56,7 +56,7 @@ export function CreateAccountDialog({ onClose, onCreated }: { readonly onClose: 
       <TextField label="Display name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} error={readIssueMessageForField(mutation.validationIssues, "displayName")} />
       <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="off" error={readIssueMessageForField(mutation.validationIssues, "email")} />
       <TextField label="Temporary password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" hint="At least 12 characters with upper case, lower case and a number." error={readIssueMessageForField(mutation.validationIssues, "password")} />
-      <SelectField label="Profile type" value={profileType} onChange={(event) => setProfileType(event.target.value as ProfileType)} options={profileOptions} hint="Decides which checkmark it can ever hold: Blue for personal and creator, Gold for business and brand, Black for government." />
+      <SelectField label="Profile type" value={profileType} onChange={(event) => setProfileType(event.target.value as ProfileType)} options={profileOptions} hint="Decides which checkmark it can ever hold: Blue for personal (including creator accounts), Gold for business and brand, Black for government." />
       <SelectField label="Country" value={country} onChange={(event) => setCountry(event.target.value)} options={countryOptions} />
     </ConfirmActionDialog>
   );
