@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import styles from "./appIcon.module.css";
 
@@ -45,7 +45,15 @@ export type AppIconName =
   | "truck24"
   | "userCircle24"
   | "videoCamera24"
-  | "warning20";
+  | "warning20"
+  | "arrowDown24"
+  | "arrowUp24"
+  | "musicNotes24"
+  | "note24"
+  | "package24"
+  | "searchOff24"
+  | "shoppingBag24"
+  | "sparkle24";
 
 const MULTI_COLOUR_ICONS: ReadonlySet<AppIconName> = new Set(["google24"]);
 
@@ -72,4 +80,20 @@ export function AppIcon({ name, size = 24, className }: AppIconProps) {
 
   const iconStyle = { "--icon-url": `url("/icons/${name}.svg")`, "--icon-size": `${size}px` } as CSSProperties;
   return <span aria-hidden="true" className={className ? `${styles.tinted} ${className}` : styles.tinted} style={iconStyle} />;
+}
+
+interface IconLabelProps {
+  readonly name: AppIconName;
+  readonly size?: number;
+  readonly children: ReactNode;
+  readonly className?: string;
+}
+
+export function IconLabel({ name, size = 14, children, className }: IconLabelProps) {
+  return (
+    <span className={className ? `${styles.iconLabel} ${className}` : styles.iconLabel}>
+      <AppIcon name={name} size={size} />
+      {children}
+    </span>
+  );
 }
