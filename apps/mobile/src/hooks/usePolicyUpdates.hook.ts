@@ -20,8 +20,13 @@ export function usePolicyUpdates() {
   });
   const accepted = new Set(acceptances.data?.acceptedPolicyVersionIds ?? []);
   const pending = (versions.data?.items ?? []).filter((version) => BANNER_DOCUMENT_KEYS.includes(version.documentKey) && !accepted.has(version.policyVersionId));
+  const acceptAllPending = async () => {
+    for (const version of pending) await acceptMutation.mutateAsync(version);
+  };
   return {
     isSignedIn,
+    pending,
+    acceptAllPending,
     blocking: pending.find((version) => version.isMaterialChange && Date.parse(version.effectiveAt) <= Date.now()) ?? null,
     bannerVersions: pending.filter((version) => !dismissedIds.includes(version.policyVersionId)),
     accept: acceptMutation.mutateAsync,
