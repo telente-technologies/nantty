@@ -37,6 +37,7 @@ type ChargedGift struct {
 	LedgerTransactionId string
 	SenderCoinBalance   int64
 	CreatedAt           time.Time
+	Replayed            bool
 }
 
 type BattleParticipantOutcome string
@@ -85,7 +86,14 @@ type BattleSettlement struct {
 	SettledAt           time.Time           `json:"settledAt"`
 }
 
+type BattleGiftTotal struct {
+	ReceiverUserId string
+	GrossCoins     int64
+	GiftCount      int64
+}
+
 type MoneyGateway interface {
+	GetBattleGiftTotals(ctx context.Context, battleId string) ([]BattleGiftTotal, error)
 	ChargeGiftAndCreditCreator(ctx context.Context, request ChargeGiftRequest) (ChargedGift, error)
 	SettleBattle(ctx context.Context, request SettleBattleRequest) (BattleSettlement, error)
 	GetCoinBalance(ctx context.Context, userId string) (int64, error)
