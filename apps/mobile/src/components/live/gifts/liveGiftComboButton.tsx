@@ -8,6 +8,7 @@ import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.h
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 import type { LiveGiftComboWindow } from "./sendLiveGift.hook";
+import { liveGlass } from "../liveSurface.constant";
 
 const RING_SIZE = 76;
 const RING_STROKE = 5;
@@ -66,7 +67,7 @@ export function LiveGiftComboButton({ comboWindow, windowMs, onComboTap, onWindo
         </Svg>
         <View style={styles.content}>
           <LiveGiftArtwork assetKey={comboWindow.gift.previewAssetKey} size={26} />
-          <Text size={13} weight={700} lineHeight={15} color={colors.white}>
+          <Text size={13} weight={700} lineHeight={15} color={liveGlass.ink}>
             Combo
           </Text>
         </View>

@@ -3,12 +3,12 @@ import { Animated, Easing, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 import type { LiveGiftBannerEntry } from "./liveGiftOverlayQueues.hook";
+import { liveGlass } from "../liveSurface.constant";
 
-const BANNER_TINT_BY_LEVEL = { micro: "rgba(0,0,0,0.45)", medium: "rgba(120,40,200,0.62)", large: "rgba(214,140,0,0.72)", global: "rgba(200,30,90,0.75)" } as const;
+const BANNER_TINT_BY_LEVEL = { micro: liveGlass.background, medium: "rgba(120,40,200,0.62)", large: "rgba(214,140,0,0.72)", global: "rgba(200,30,90,0.75)" } as const;
 
 function LiveGiftBanner({ banner }: { banner: LiveGiftBannerEntry }) {
   const slideIn = useRef(new Animated.Value(0)).current;
@@ -35,7 +35,7 @@ function LiveGiftBanner({ banner }: { banner: LiveGiftBannerEntry }) {
       <View style={[styles.pill, { backgroundColor: BANNER_TINT_BY_LEVEL[event.displayLevel] }]}>
         <Avatar uri={event.sender.avatarUrl ?? null} size={34} />
         <View style={styles.texts}>
-          <Text size={13} weight={600} lineHeight={16} color={colors.white} numberOfLines={1}>
+          <Text size={13} weight={600} lineHeight={16} color={liveGlass.ink} numberOfLines={1}>
             {event.sender.name}
           </Text>
           <Text size={11} lineHeight={14} color="rgba(255,255,255,0.85)" numberOfLines={1}>

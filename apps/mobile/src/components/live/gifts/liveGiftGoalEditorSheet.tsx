@@ -5,13 +5,15 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { ApiError } from "@/services/apiClient.service";
 import type { LiveGiftGoal } from "@/types";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useSaveLiveGiftGoal } from "./liveGiftStats.hook";
 
 export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { liveId: string; goal: LiveGiftGoal | null; visible: boolean; onClose: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [title, setTitle] = useState("");
   const [targetText, setTargetText] = useState("");
   const saveGoal = useSaveLiveGiftGoal(liveId);
@@ -47,4 +49,4 @@ export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { li
   );
 }
 
-const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } });
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } }));

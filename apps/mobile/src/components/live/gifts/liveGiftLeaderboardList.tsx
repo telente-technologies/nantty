@@ -2,10 +2,12 @@ import { StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveGiftLeaderboardEntry } from "@/types";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function LiveGiftLeaderboardList({ entries, emptyMessage }: { entries: readonly LiveGiftLeaderboardEntry[]; emptyMessage: string }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   if (entries.length === 0) {
     return (
       <Text size={13} lineHeight={18} color={colors.textMuted} align="center">
@@ -38,9 +40,9 @@ export function LiveGiftLeaderboardList({ entries, emptyMessage }: { entries: re
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { gap: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   rank: { width: 20, textAlign: "center" },
   names: { flex: 1 },
-});
+}));

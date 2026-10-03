@@ -3,9 +3,9 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveGiftGoal, LiveGiftSentEvent } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 import { useLiveGiftCatalog } from "./liveGiftCatalog.hook";
@@ -22,6 +22,8 @@ export interface LiveGiftHostDashboardSheetProps {
 }
 
 function StatTile({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.tile}>
       <Text size={18} weight={700} lineHeight={22}>
@@ -35,6 +37,8 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 export function LiveGiftHostDashboardSheet(props: LiveGiftHostDashboardSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const stats = useLiveGiftStreamStats(props.liveId, props.visible);
   const { giftsById } = useLiveGiftCatalog(props.visible);
   const earnings = stats.data?.estimatedEarnings;
@@ -88,12 +92,12 @@ export function LiveGiftHostDashboardSheet(props: LiveGiftHostDashboardSheetProp
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   scroll: { maxHeight: 560 },
   body: { paddingHorizontal: 16, paddingBottom: 24, gap: 18 },
   tiles: { flexDirection: "row", gap: 8 },
-  tile: { flex: 1, padding: 10, borderRadius: 10, backgroundColor: colors.background, gap: 2 },
+  tile: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: colors.background, gap: 2 },
   section: { gap: 10 },
   recentRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   recentText: { flex: 1 },
-});
+}));

@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveGiftGoal } from "@/types";
 
 import { LiveGiftParticleBurst } from "./liveGiftParticles";
+import { liveGlass } from "../liveSurface.constant";
+import { Check16Icon } from "@/components/icons";
 
 const CELEBRATION_MS = 3_200;
 
@@ -20,7 +21,7 @@ function LiveGiftGoalCelebration({ title }: { title: string }) {
     <View pointerEvents="none" style={styles.celebration} accessibilityLiveRegion="assertive" accessibilityLabel={`Goal reached: ${title}`}>
       <LiveGiftParticleBurst progress={progress} assetKey="fireworks-v1" count={24} distance={150} />
       <Animated.View style={[styles.celebrationPill, { opacity, transform: [{ scale }] }]}>
-        <Text size={18} weight={700} lineHeight={22} color={colors.white} align="center">
+        <Text size={18} weight={700} lineHeight={22} color={liveGlass.ink} align="center">
           Goal reached!
         </Text>
         <Text size={13} lineHeight={17} color="#FFE14D" align="center" numberOfLines={1}>
@@ -63,10 +64,12 @@ export function LiveGiftGoalBar({ goal, onPress }: { goal: LiveGiftGoal; onPress
         style={styles.bar}
       >
         <View style={styles.labels}>
-          <Text size={11} weight={600} lineHeight={14} color={colors.white} numberOfLines={1} style={styles.title}>
-            {goal.status === "completed" ? "✓ " : ""}
-            {goal.title}
-          </Text>
+          <View style={styles.title}>
+            {goal.status === "completed" ? <Check16Icon size={12} color={liveGlass.ink} /> : null}
+            <Text size={11} weight={600} lineHeight={14} color={liveGlass.ink} numberOfLines={1} style={styles.titleText}>
+              {goal.title}
+            </Text>
+          </View>
           <Text size={11} lineHeight={14} color="rgba(255,255,255,0.85)">
             {goal.progressCoins.toLocaleString("en-US")}/{goal.targetCoins.toLocaleString("en-US")}
           </Text>
@@ -81,11 +84,12 @@ export function LiveGiftGoalBar({ goal, onPress }: { goal: LiveGiftGoal; onPress
 }
 
 const styles = StyleSheet.create({
-  bar: { width: 168, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.4)", gap: 4 },
+  bar: { width: 168, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: liveGlass.background, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border, gap: 4 },
   labels: { flexDirection: "row", justifyContent: "space-between", gap: 6 },
-  title: { flexShrink: 1 },
+  title: { flexShrink: 1, flexDirection: "row", alignItems: "center", gap: 4 },
+  titleText: { flexShrink: 1 },
   track: { height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.25)", overflow: "hidden" },
   fill: { height: 5, borderRadius: 3, backgroundColor: "#FFC233" },
   celebration: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center" },
-  celebrationPill: { paddingHorizontal: 22, paddingVertical: 12, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.55)", maxWidth: "80%" },
+  celebrationPill: { paddingHorizontal: 22, paddingVertical: 12, borderRadius: 16, backgroundColor: liveGlass.backgroundStrong, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border, maxWidth: "80%" },
 });

@@ -2,12 +2,14 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { LiveGiftLeaderboardList } from "./liveGiftLeaderboardList";
 import { useLiveGiftLeaderboard } from "./liveGiftStats.hook";
 
 export function LiveGiftLeaderboardSheet({ liveId, visible, onClose }: { liveId: string; visible: boolean; onClose: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const leaderboard = useLiveGiftLeaderboard(liveId, visible);
   const viewerRank = leaderboard.data?.viewerRank;
   return (
@@ -28,4 +30,4 @@ export function LiveGiftLeaderboardSheet({ liveId, visible, onClose }: { liveId:
   );
 }
 
-const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } });
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } }));
