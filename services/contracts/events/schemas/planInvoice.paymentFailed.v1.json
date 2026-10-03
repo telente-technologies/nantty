@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/planInvoice.paymentFailed.v1.json",
+  "title": "planInvoice.paymentFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "storeName",
+    "plan",
+    "price",
+    "interval",
+    "cardLabel",
+    "reason",
+    "retryAt",
+    "downgradeAt"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "interval": {
+      "type": "string"
+    },
+    "cardLabel": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "retryAt": {
+      "type": "string"
+    },
+    "downgradeAt": {
+      "type": "string"
+    }
+  }
+}

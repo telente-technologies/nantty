@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/planTrial.ending.v1.json",
+  "title": "planTrial.ending",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "storeName",
+    "plan",
+    "price",
+    "interval",
+    "daysLeft",
+    "trialEndsAt",
+    "cardLabel"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "interval": {
+      "type": "string"
+    },
+    "daysLeft": {
+      "type": "integer"
+    },
+    "trialEndsAt": {
+      "type": "string"
+    },
+    "cardLabel": {
+      "type": "string"
+    }
+  }
+}

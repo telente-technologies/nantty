@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/message.created.v1.json",
+  "title": "MessageCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["conversationId","message"],
+  "properties": { "conversationId": { "type": "string", "format": "uuid" }, "message": { "type": "object" }, "recipientIds": { "type": "array", "items": { "type": "string", "format": "uuid" } } }
+}

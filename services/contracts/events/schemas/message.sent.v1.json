@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/message.sent.v1.json",
+  "title": "MessageSent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["conversationId","messageId","senderId","kind","recipientIds","sentAt"],
+  "properties": { "conversationId": { "type": "string", "format": "uuid" }, "messageId": { "type": "string", "format": "uuid" }, "senderId": { "type": "string", "format": "uuid" }, "kind": { "type": "string" }, "recipientIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }, "isNewConversation": { "type": "boolean" }, "inboxFolderByRecipient": { "type": "object" }, "sentAt": { "type": "string", "format": "date-time" } }
+}

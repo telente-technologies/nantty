@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/otp.issued.v1.json",
+  "title": "otp.issued",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "destination",
+    "code",
+    "purpose"
+  ],
+  "properties": {
+    "destination": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "expiresInMinutes": {
+      "type": "integer"
+    }
+  }
+}
