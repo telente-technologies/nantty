@@ -66,7 +66,7 @@
 .statement {
   white-space: pre-wrap;
   padding: 8px 10px;
-  border-left: 3px solid var(--blue-500);
+  border-left: 3px solid var(--color-brand);
   background: var(--color-brand-tint);
 }
 

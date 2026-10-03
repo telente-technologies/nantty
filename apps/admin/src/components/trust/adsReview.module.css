@@ -32,8 +32,8 @@
   align-self: flex-start;
   padding: 4px 10px;
   border-radius: var(--radius-small);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-size: 12px;
   font-weight: 600;
 }
