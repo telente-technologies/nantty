@@ -81,8 +81,29 @@ type Escrow struct {
 	// Version holds the value of the "version" field.
 	Version int64 `json:"version,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the EscrowQuery when eager-loading is set.
+	Edges        EscrowEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// EscrowEdges holds the relations/edges for other nodes in the graph.
+type EscrowEdges struct {
+	// Disputes holds the value of the disputes edge.
+	Disputes []*Dispute `json:"disputes,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// DisputesOrErr returns the Disputes value or an error if the edge
+// was not loaded in eager-loading.
+func (e EscrowEdges) DisputesOrErr() ([]*Dispute, error) {
+	if e.loadedTypes[0] {
+		return e.Disputes, nil
+	}
+	return nil, &NotLoadedError{edge: "disputes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -329,6 +350,11 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Escrow) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryDisputes queries the "disputes" edge of the Escrow entity.
+func (_m *Escrow) QueryDisputes() *DisputeQuery {
+	return NewEscrowClient(_m.config).QueryDisputes(_m)
 }
 
 // Update returns a builder for updating this Escrow.

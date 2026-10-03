@@ -47,7 +47,6 @@ type DisputeMutation struct {
 	typ                    string
 	id                     *uuid.UUID
 	created_at             *time.Time
-	escrow_id              *uuid.UUID
 	order_id               *string
 	opened_by_user_id      *string
 	reason                 *dispute.Reason
@@ -64,6 +63,8 @@ type DisputeMutation struct {
 	addversion             *int64
 	updated_at             *time.Time
 	clearedFields          map[string]struct{}
+	escrow                 *uuid.UUID
+	clearedescrow          bool
 	done                   bool
 	oldValue               func(context.Context) (*Dispute, error)
 	predicates             []predicate.Dispute
@@ -211,12 +212,12 @@ func (m *DisputeMutation) ResetCreatedAt() {
 
 // SetEscrowID sets the "escrow_id" field.
 func (m *DisputeMutation) SetEscrowID(u uuid.UUID) {
-	m.escrow_id = &u
+	m.escrow = &u
 }
 
 // EscrowID returns the value of the "escrow_id" field in the mutation.
 func (m *DisputeMutation) EscrowID() (r uuid.UUID, exists bool) {
-	v := m.escrow_id
+	v := m.escrow
 	if v == nil {
 		return
 	}
@@ -242,7 +243,7 @@ func (m *DisputeMutation) OldEscrowID(ctx context.Context) (v uuid.UUID, err err
 
 // ResetEscrowID resets all changes to the "escrow_id" field.
 func (m *DisputeMutation) ResetEscrowID() {
-	m.escrow_id = nil
+	m.escrow = nil
 }
 
 // SetOrderID sets the "order_id" field.
@@ -779,6 +780,33 @@ func (m *DisputeMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// ClearEscrow clears the "escrow" edge to the Escrow entity.
+func (m *DisputeMutation) ClearEscrow() {
+	m.clearedescrow = true
+	m.clearedFields[dispute.FieldEscrowID] = struct{}{}
+}
+
+// EscrowCleared reports if the "escrow" edge to the Escrow entity was cleared.
+func (m *DisputeMutation) EscrowCleared() bool {
+	return m.clearedescrow
+}
+
+// EscrowIDs returns the "escrow" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EscrowID instead. It exists only for internal usage by the builders.
+func (m *DisputeMutation) EscrowIDs() (ids []uuid.UUID) {
+	if id := m.escrow; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEscrow resets all changes to the "escrow" edge.
+func (m *DisputeMutation) ResetEscrow() {
+	m.escrow = nil
+	m.clearedescrow = false
+}
+
 // Where appends a list predicates to the DisputeMutation builder.
 func (m *DisputeMutation) Where(ps ...predicate.Dispute) {
 	m.predicates = append(m.predicates, ps...)
@@ -817,7 +845,7 @@ func (m *DisputeMutation) Fields() []string {
 	if m.created_at != nil {
 		fields = append(fields, dispute.FieldCreatedAt)
 	}
-	if m.escrow_id != nil {
+	if m.escrow != nil {
 		fields = append(fields, dispute.FieldEscrowID)
 	}
 	if m.order_id != nil {
@@ -1192,19 +1220,28 @@ func (m *DisputeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DisputeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.escrow != nil {
+		edges = append(edges, dispute.EdgeEscrow)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DisputeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case dispute.EdgeEscrow:
+		if id := m.escrow; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DisputeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1216,25 +1253,42 @@ func (m *DisputeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DisputeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedescrow {
+		edges = append(edges, dispute.EdgeEscrow)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DisputeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case dispute.EdgeEscrow:
+		return m.clearedescrow
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DisputeMutation) ClearEdge(name string) error {
+	switch name {
+	case dispute.EdgeEscrow:
+		m.ClearEscrow()
+		return nil
+	}
 	return fmt.Errorf("unknown Dispute unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DisputeMutation) ResetEdge(name string) error {
+	switch name {
+	case dispute.EdgeEscrow:
+		m.ResetEscrow()
+		return nil
+	}
 	return fmt.Errorf("unknown Dispute edge %s", name)
 }
 
@@ -2380,6 +2434,9 @@ type EscrowMutation struct {
 	addversion                  *int64
 	updated_at                  *time.Time
 	clearedFields               map[string]struct{}
+	disputes                    map[uuid.UUID]struct{}
+	removeddisputes             map[uuid.UUID]struct{}
+	cleareddisputes             bool
 	done                        bool
 	oldValue                    func(context.Context) (*Escrow, error)
 	predicates                  []predicate.Escrow
@@ -3872,6 +3929,60 @@ func (m *EscrowMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// AddDisputeIDs adds the "disputes" edge to the Dispute entity by ids.
+func (m *EscrowMutation) AddDisputeIDs(ids ...uuid.UUID) {
+	if m.disputes == nil {
+		m.disputes = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.disputes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDisputes clears the "disputes" edge to the Dispute entity.
+func (m *EscrowMutation) ClearDisputes() {
+	m.cleareddisputes = true
+}
+
+// DisputesCleared reports if the "disputes" edge to the Dispute entity was cleared.
+func (m *EscrowMutation) DisputesCleared() bool {
+	return m.cleareddisputes
+}
+
+// RemoveDisputeIDs removes the "disputes" edge to the Dispute entity by IDs.
+func (m *EscrowMutation) RemoveDisputeIDs(ids ...uuid.UUID) {
+	if m.removeddisputes == nil {
+		m.removeddisputes = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.disputes, ids[i])
+		m.removeddisputes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDisputes returns the removed IDs of the "disputes" edge to the Dispute entity.
+func (m *EscrowMutation) RemovedDisputesIDs() (ids []uuid.UUID) {
+	for id := range m.removeddisputes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DisputesIDs returns the "disputes" edge IDs in the mutation.
+func (m *EscrowMutation) DisputesIDs() (ids []uuid.UUID) {
+	for id := range m.disputes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDisputes resets all changes to the "disputes" edge.
+func (m *EscrowMutation) ResetDisputes() {
+	m.disputes = nil
+	m.cleareddisputes = false
+	m.removeddisputes = nil
+}
+
 // Where appends a list predicates to the EscrowMutation builder.
 func (m *EscrowMutation) Where(ps ...predicate.Escrow) {
 	m.predicates = append(m.predicates, ps...)
@@ -4664,49 +4775,85 @@ func (m *EscrowMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EscrowMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.disputes != nil {
+		edges = append(edges, escrow.EdgeDisputes)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *EscrowMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case escrow.EdgeDisputes:
+		ids := make([]ent.Value, 0, len(m.disputes))
+		for id := range m.disputes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EscrowMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removeddisputes != nil {
+		edges = append(edges, escrow.EdgeDisputes)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *EscrowMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case escrow.EdgeDisputes:
+		ids := make([]ent.Value, 0, len(m.removeddisputes))
+		for id := range m.removeddisputes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EscrowMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.cleareddisputes {
+		edges = append(edges, escrow.EdgeDisputes)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *EscrowMutation) EdgeCleared(name string) bool {
+	switch name {
+	case escrow.EdgeDisputes:
+		return m.cleareddisputes
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *EscrowMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Escrow unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *EscrowMutation) ResetEdge(name string) error {
+	switch name {
+	case escrow.EdgeDisputes:
+		m.ResetDisputes()
+		return nil
+	}
 	return fmt.Errorf("unknown Escrow edge %s", name)
 }
 

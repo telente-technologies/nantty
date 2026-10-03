@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/escrow/src/generated/ent/dispute"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 
 	"entgo.io/ent/dialect"
@@ -372,6 +373,21 @@ func (_c *EscrowCreate) SetNillableID(v *uuid.UUID) *EscrowCreate {
 		_c.SetID(*v)
 	}
 	return _c
+}
+
+// AddDisputeIDs adds the "disputes" edge to the Dispute entity by IDs.
+func (_c *EscrowCreate) AddDisputeIDs(ids ...uuid.UUID) *EscrowCreate {
+	_c.mutation.AddDisputeIDs(ids...)
+	return _c
+}
+
+// AddDisputes adds the "disputes" edges to the Dispute entity.
+func (_c *EscrowCreate) AddDisputes(v ...*Dispute) *EscrowCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDisputeIDs(ids...)
 }
 
 // Mutation returns the EscrowMutation object of the builder.
@@ -775,6 +791,23 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(escrow.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := _c.mutation.DisputesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -217,6 +217,9 @@ func (_u *DisputeUpdate) check() error {
 			return &ValidationError{Name: "resolved_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "Dispute.resolved_by_staff_id": %w`, err)}
 		}
 	}
+	if _u.mutation.EscrowCleared() && len(_u.mutation.EscrowIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Dispute.escrow"`)
+	}
 	return nil
 }
 
@@ -490,6 +493,9 @@ func (_u *DisputeUpdateOne) check() error {
 		if err := dispute.ResolvedByStaffIDValidator(v); err != nil {
 			return &ValidationError{Name: "resolved_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "Dispute.resolved_by_staff_id": %w`, err)}
 		}
+	}
+	if _u.mutation.EscrowCleared() && len(_u.mutation.EscrowIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Dispute.escrow"`)
 	}
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/escrow/src/generated/ent/dispute"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/generated/ent/internal"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
@@ -14,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // EscrowUpdate is the builder for updating Escrow entities.
@@ -308,9 +310,45 @@ func (_u *EscrowUpdate) SetUpdatedAt(v time.Time) *EscrowUpdate {
 	return _u
 }
 
+// AddDisputeIDs adds the "disputes" edge to the Dispute entity by IDs.
+func (_u *EscrowUpdate) AddDisputeIDs(ids ...uuid.UUID) *EscrowUpdate {
+	_u.mutation.AddDisputeIDs(ids...)
+	return _u
+}
+
+// AddDisputes adds the "disputes" edges to the Dispute entity.
+func (_u *EscrowUpdate) AddDisputes(v ...*Dispute) *EscrowUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDisputeIDs(ids...)
+}
+
 // Mutation returns the EscrowMutation object of the builder.
 func (_u *EscrowUpdate) Mutation() *EscrowMutation {
 	return _u.mutation
+}
+
+// ClearDisputes clears all "disputes" edges to the Dispute entity.
+func (_u *EscrowUpdate) ClearDisputes() *EscrowUpdate {
+	_u.mutation.ClearDisputes()
+	return _u
+}
+
+// RemoveDisputeIDs removes the "disputes" edge to Dispute entities by IDs.
+func (_u *EscrowUpdate) RemoveDisputeIDs(ids ...uuid.UUID) *EscrowUpdate {
+	_u.mutation.RemoveDisputeIDs(ids...)
+	return _u
+}
+
+// RemoveDisputes removes "disputes" edges to Dispute entities.
+func (_u *EscrowUpdate) RemoveDisputes(v ...*Dispute) *EscrowUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDisputeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -468,6 +506,54 @@ func (_u *EscrowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(escrow.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DisputesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDisputesIDs(); len(nodes) > 0 && !_u.mutation.DisputesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DisputesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.Node.Schema = _u.schemaConfig.Escrow
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -770,9 +856,45 @@ func (_u *EscrowUpdateOne) SetUpdatedAt(v time.Time) *EscrowUpdateOne {
 	return _u
 }
 
+// AddDisputeIDs adds the "disputes" edge to the Dispute entity by IDs.
+func (_u *EscrowUpdateOne) AddDisputeIDs(ids ...uuid.UUID) *EscrowUpdateOne {
+	_u.mutation.AddDisputeIDs(ids...)
+	return _u
+}
+
+// AddDisputes adds the "disputes" edges to the Dispute entity.
+func (_u *EscrowUpdateOne) AddDisputes(v ...*Dispute) *EscrowUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDisputeIDs(ids...)
+}
+
 // Mutation returns the EscrowMutation object of the builder.
 func (_u *EscrowUpdateOne) Mutation() *EscrowMutation {
 	return _u.mutation
+}
+
+// ClearDisputes clears all "disputes" edges to the Dispute entity.
+func (_u *EscrowUpdateOne) ClearDisputes() *EscrowUpdateOne {
+	_u.mutation.ClearDisputes()
+	return _u
+}
+
+// RemoveDisputeIDs removes the "disputes" edge to Dispute entities by IDs.
+func (_u *EscrowUpdateOne) RemoveDisputeIDs(ids ...uuid.UUID) *EscrowUpdateOne {
+	_u.mutation.RemoveDisputeIDs(ids...)
+	return _u
+}
+
+// RemoveDisputes removes "disputes" edges to Dispute entities.
+func (_u *EscrowUpdateOne) RemoveDisputes(v ...*Dispute) *EscrowUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDisputeIDs(ids...)
 }
 
 // Where appends a list predicates to the EscrowUpdate builder.
@@ -960,6 +1082,54 @@ func (_u *EscrowUpdateOne) sqlSave(ctx context.Context) (_node *Escrow, err erro
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(escrow.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DisputesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDisputesIDs(); len(nodes) > 0 && !_u.mutation.DisputesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DisputesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.DisputesTable,
+			Columns: []string{escrow.DisputesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dispute.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.Node.Schema = _u.schemaConfig.Escrow
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

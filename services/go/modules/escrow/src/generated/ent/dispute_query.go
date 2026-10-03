@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"zudomart/modules/escrow/src/generated/ent/dispute"
+	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/generated/ent/internal"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
@@ -25,6 +26,7 @@ type DisputeQuery struct {
 	order      []dispute.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Dispute
+	withEscrow *EscrowQuery
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -60,6 +62,31 @@ func (_q *DisputeQuery) Unique(unique bool) *DisputeQuery {
 func (_q *DisputeQuery) Order(o ...dispute.OrderOption) *DisputeQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryEscrow chains the current query on the "escrow" edge.
+func (_q *DisputeQuery) QueryEscrow() *EscrowQuery {
+	query := (&EscrowClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dispute.Table, dispute.FieldID, selector),
+			sqlgraph.To(escrow.Table, escrow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dispute.EscrowTable, dispute.EscrowColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.Escrow
+		step.Edge.Schema = schemaConfig.Dispute
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Dispute entity from the query.
@@ -254,10 +281,22 @@ func (_q *DisputeQuery) Clone() *DisputeQuery {
 		order:      append([]dispute.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.Dispute{}, _q.predicates...),
+		withEscrow: _q.withEscrow.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithEscrow tells the query-builder to eager-load the nodes that are connected to
+// the "escrow" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DisputeQuery) WithEscrow(opts ...func(*EscrowQuery)) *DisputeQuery {
+	query := (&EscrowClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withEscrow = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -336,8 +375,11 @@ func (_q *DisputeQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *DisputeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dispute, error) {
 	var (
-		nodes = []*Dispute{}
-		_spec = _q.querySpec()
+		nodes       = []*Dispute{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withEscrow != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Dispute).scanValues(nil, columns)
@@ -345,6 +387,7 @@ func (_q *DisputeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Disp
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Dispute{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	_spec.Node.Schema = _q.schemaConfig.Dispute
@@ -361,7 +404,43 @@ func (_q *DisputeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Disp
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withEscrow; query != nil {
+		if err := _q.loadEscrow(ctx, query, nodes, nil,
+			func(n *Dispute, e *Escrow) { n.Edges.Escrow = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *DisputeQuery) loadEscrow(ctx context.Context, query *EscrowQuery, nodes []*Dispute, init func(*Dispute), assign func(*Dispute, *Escrow)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Dispute)
+	for i := range nodes {
+		fk := nodes[i].EscrowID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(escrow.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "escrow_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *DisputeQuery) sqlCount(ctx context.Context) (int, error) {
@@ -393,6 +472,9 @@ func (_q *DisputeQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != dispute.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withEscrow != nil {
+			_spec.Node.AddColumnOnce(dispute.FieldEscrowID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

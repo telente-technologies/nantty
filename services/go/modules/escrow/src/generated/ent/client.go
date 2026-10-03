@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 
 	stdsql "database/sql"
@@ -367,6 +368,25 @@ func (c *DisputeClient) GetX(ctx context.Context, id uuid.UUID) *Dispute {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryEscrow queries the escrow edge of a Dispute.
+func (c *DisputeClient) QueryEscrow(_m *Dispute) *EscrowQuery {
+	query := (&EscrowClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dispute.Table, dispute.FieldID, id),
+			sqlgraph.To(escrow.Table, escrow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dispute.EscrowTable, dispute.EscrowColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Escrow
+		step.Edge.Schema = schemaConfig.Dispute
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -766,6 +786,25 @@ func (c *EscrowClient) GetX(ctx context.Context, id uuid.UUID) *Escrow {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryDisputes queries the disputes edge of a Escrow.
+func (c *EscrowClient) QueryDisputes(_m *Escrow) *DisputeQuery {
+	query := (&DisputeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(escrow.Table, escrow.FieldID, id),
+			sqlgraph.To(dispute.Table, dispute.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, escrow.DisputesTable, escrow.DisputesColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Dispute
+		step.Edge.Schema = schemaConfig.Dispute
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

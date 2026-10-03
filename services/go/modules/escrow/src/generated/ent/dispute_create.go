@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"zudomart/modules/escrow/src/generated/ent/dispute"
+	"zudomart/modules/escrow/src/generated/ent/escrow"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -208,6 +209,11 @@ func (_c *DisputeCreate) SetNillableID(v *uuid.UUID) *DisputeCreate {
 	return _c
 }
 
+// SetEscrow sets the "escrow" edge to the Escrow entity.
+func (_c *DisputeCreate) SetEscrow(v *Escrow) *DisputeCreate {
+	return _c.SetEscrowID(v.ID)
+}
+
 // Mutation returns the DisputeMutation object of the builder.
 func (_c *DisputeCreate) Mutation() *DisputeMutation {
 	return _c.mutation
@@ -357,6 +363,9 @@ func (_c *DisputeCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Dispute.updated_at"`)}
 	}
+	if len(_c.mutation.EscrowIDs()) == 0 {
+		return &ValidationError{Name: "escrow", err: errors.New(`ent: missing required edge "Dispute.escrow"`)}
+	}
 	return nil
 }
 
@@ -397,10 +406,6 @@ func (_c *DisputeCreate) createSpec() (*Dispute, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(dispute.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := _c.mutation.EscrowID(); ok {
-		_spec.SetField(dispute.FieldEscrowID, field.TypeUUID, value)
-		_node.EscrowID = value
 	}
 	if value, ok := _c.mutation.OrderID(); ok {
 		_spec.SetField(dispute.FieldOrderID, field.TypeString, value)
@@ -453,6 +458,24 @@ func (_c *DisputeCreate) createSpec() (*Dispute, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(dispute.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := _c.mutation.EscrowIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dispute.EscrowTable,
+			Columns: []string{dispute.EscrowColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(escrow.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.EscrowID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
