@@ -2,7 +2,7 @@
   position: relative;
   overflow: hidden;
   padding: clamp(56px, 8vw, 96px) var(--landing-gutter) 0;
-  background: var(--blue-900);
+  background: var(--deep-surface);
   color: var(--blue-100);
 }
 
@@ -26,12 +26,12 @@
 }
 
 .wordmark {
-  color: #fff;
+  color: var(--deep-ink);
 }
 
 .emailLink {
   justify-self: start;
-  color: #fff;
+  color: var(--deep-ink);
   font-weight: 650;
   overflow-wrap: anywhere;
 }
@@ -48,8 +48,8 @@
 
 .groupHeading {
   margin-bottom: 14px;
-  color: #fff;
-  font-size: 13px;
+  color: var(--deep-ink);
+  font-size: var(--fs-13);
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -75,14 +75,27 @@
   gap: 8px 24px;
   margin-top: 56px;
   padding-top: 24px;
-  border-top: 1px solid rgb(181 193 252 / 0.2);
-  font-size: 14px;
+  border-top: 1px solid var(--deep-hairline);
+  font-size: var(--fs-14);
   color: var(--blue-200);
+}
+
+.bottomRow p {
+  align-self: center;
+}
+
+.themeSwitcher {
+  --color-sunken: var(--deep-hover);
+  --color-border: var(--deep-hairline);
+  --color-elevated: var(--deep-hairline-strong);
+  --color-text: var(--deep-ink);
+  --color-text-muted: var(--deep-ink-muted);
+  --shadow-card: none;
 }
 
 .giantWordmark {
   margin: 24px 0 -0.24em;
-  color: var(--blue-600);
+  color: var(--color-brand);
   font-size: min(19vw, 18rem);
   font-weight: 750;
   letter-spacing: -0.06em;

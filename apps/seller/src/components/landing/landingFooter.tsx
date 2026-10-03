@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
 import { contactEmailDisplayText, contactMailtoHref } from "@/config/siteMetadata.config";
 
@@ -41,6 +43,7 @@ export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly ma
       <div className={styles.bottomRow}>
         <p>© {new Date().getFullYear()} Zudomart. Made in Nigeria.</p>
         <p>Online orders are paid into escrow and released after delivery.</p>
+        <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
       <p className={styles.giantWordmark} aria-hidden="true">
         dashboard
