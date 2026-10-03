@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { EscrowExplainerCard } from "@/components/escrow/escrowExplainerCard";
@@ -13,6 +13,8 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 const STAGES_BUYER_CAN_CONFIRM = new Set(["shipped", "delivered"]);
 const STAGES_BUYER_CAN_DISPUTE = new Set(["seller_preparing", "paid_into_escrow", "shipped", "delivered"]);
@@ -29,11 +31,9 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
       <Screen>
         <Header title="Payment protection" />
         {escrowQuery.isError ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>
-            Couldn't load the escrow status. Pull down to try again.
-          </Text>
+          <ErrorState message="Couldn't load the escrow status." onRetry={() => escrowQuery.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -98,7 +98,6 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 64, paddingHorizontal: 32 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 16 },
   actions: { gap: 12 },
