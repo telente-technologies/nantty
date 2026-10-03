@@ -182,6 +182,11 @@ func AutoReleaseAt(v time.Time) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldAutoReleaseAt, v))
 }
 
+// PausedReleaseRemainingSeconds applies equality check predicate on the "paused_release_remaining_seconds" field. It's identical to PausedReleaseRemainingSecondsEQ.
+func PausedReleaseRemainingSeconds(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldPausedReleaseRemainingSeconds, v))
+}
+
 // BuyerConfirmedAt applies equality check predicate on the "buyer_confirmed_at" field. It's identical to BuyerConfirmedAtEQ.
 func BuyerConfirmedAt(v time.Time) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldBuyerConfirmedAt, v))
@@ -875,6 +880,26 @@ func ProductSummaryEqualFold(v string) predicate.Escrow {
 // ProductSummaryContainsFold applies the ContainsFold predicate on the "product_summary" field.
 func ProductSummaryContainsFold(v string) predicate.Escrow {
 	return predicate.Escrow(sql.FieldContainsFold(FieldProductSummary, v))
+}
+
+// PaymentModeEQ applies the EQ predicate on the "payment_mode" field.
+func PaymentModeEQ(v PaymentMode) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeNEQ applies the NEQ predicate on the "payment_mode" field.
+func PaymentModeNEQ(v PaymentMode) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeIn applies the In predicate on the "payment_mode" field.
+func PaymentModeIn(vs ...PaymentMode) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldPaymentMode, vs...))
+}
+
+// PaymentModeNotIn applies the NotIn predicate on the "payment_mode" field.
+func PaymentModeNotIn(vs ...PaymentMode) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldPaymentMode, vs...))
 }
 
 // AmountMinorEQ applies the EQ predicate on the "amount_minor" field.
@@ -1595,6 +1620,56 @@ func AutoReleaseAtIsNil() predicate.Escrow {
 // AutoReleaseAtNotNil applies the NotNil predicate on the "auto_release_at" field.
 func AutoReleaseAtNotNil() predicate.Escrow {
 	return predicate.Escrow(sql.FieldNotNull(FieldAutoReleaseAt))
+}
+
+// PausedReleaseRemainingSecondsEQ applies the EQ predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsNEQ applies the NEQ predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsNEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsIn applies the In predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldPausedReleaseRemainingSeconds, vs...))
+}
+
+// PausedReleaseRemainingSecondsNotIn applies the NotIn predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsNotIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldPausedReleaseRemainingSeconds, vs...))
+}
+
+// PausedReleaseRemainingSecondsGT applies the GT predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsGT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsGTE applies the GTE predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsGTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsLT applies the LT predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsLT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsLTE applies the LTE predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsLTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldPausedReleaseRemainingSeconds, v))
+}
+
+// PausedReleaseRemainingSecondsIsNil applies the IsNil predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsIsNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldIsNull(FieldPausedReleaseRemainingSeconds))
+}
+
+// PausedReleaseRemainingSecondsNotNil applies the NotNil predicate on the "paused_release_remaining_seconds" field.
+func PausedReleaseRemainingSecondsNotNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotNull(FieldPausedReleaseRemainingSeconds))
 }
 
 // BuyerConfirmedAtEQ applies the EQ predicate on the "buyer_confirmed_at" field.

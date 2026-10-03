@@ -38,6 +38,8 @@ const (
 	FieldSellerUserID = "seller_user_id"
 	// FieldProductSummary holds the string denoting the product_summary field in the database.
 	FieldProductSummary = "product_summary"
+	// FieldPaymentMode holds the string denoting the payment_mode field in the database.
+	FieldPaymentMode = "payment_mode"
 	// FieldAmountMinor holds the string denoting the amount_minor field in the database.
 	FieldAmountMinor = "amount_minor"
 	// FieldCurrency holds the string denoting the currency field in the database.
@@ -68,6 +70,8 @@ const (
 	FieldDeliveredAt = "delivered_at"
 	// FieldAutoReleaseAt holds the string denoting the auto_release_at field in the database.
 	FieldAutoReleaseAt = "auto_release_at"
+	// FieldPausedReleaseRemainingSeconds holds the string denoting the paused_release_remaining_seconds field in the database.
+	FieldPausedReleaseRemainingSeconds = "paused_release_remaining_seconds"
 	// FieldBuyerConfirmedAt holds the string denoting the buyer_confirmed_at field in the database.
 	FieldBuyerConfirmedAt = "buyer_confirmed_at"
 	// FieldReleasedAt holds the string denoting the released_at field in the database.
@@ -107,6 +111,7 @@ var Columns = []string{
 	FieldStoreID,
 	FieldSellerUserID,
 	FieldProductSummary,
+	FieldPaymentMode,
 	FieldAmountMinor,
 	FieldCurrency,
 	FieldCommissionBps,
@@ -122,6 +127,7 @@ var Columns = []string{
 	FieldTrackingURL,
 	FieldDeliveredAt,
 	FieldAutoReleaseAt,
+	FieldPausedReleaseRemainingSeconds,
 	FieldBuyerConfirmedAt,
 	FieldReleasedAt,
 	FieldRefundedAt,
@@ -194,6 +200,32 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// PaymentMode defines the type for the "payment_mode" enum field.
+type PaymentMode string
+
+// PaymentModeEscrow is the default value of the PaymentMode enum.
+const DefaultPaymentMode = PaymentModeEscrow
+
+// PaymentMode values.
+const (
+	PaymentModeEscrow PaymentMode = "escrow"
+	PaymentModeDirect PaymentMode = "direct"
+)
+
+func (pm PaymentMode) String() string {
+	return string(pm)
+}
+
+// PaymentModeValidator is a validator for the "payment_mode" field enum values. It is called by the builders before save.
+func PaymentModeValidator(pm PaymentMode) error {
+	switch pm {
+	case PaymentModeEscrow, PaymentModeDirect:
+		return nil
+	default:
+		return fmt.Errorf("escrow: invalid enum value for payment_mode field: %q", pm)
+	}
+}
 
 // Status defines the type for the "status" enum field.
 type Status string
@@ -287,6 +319,11 @@ func ByProductSummary(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProductSummary, opts...).ToFunc()
 }
 
+// ByPaymentMode orders the results by the payment_mode field.
+func ByPaymentMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPaymentMode, opts...).ToFunc()
+}
+
 // ByAmountMinor orders the results by the amount_minor field.
 func ByAmountMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAmountMinor, opts...).ToFunc()
@@ -360,6 +397,11 @@ func ByDeliveredAt(opts ...sql.OrderTermOption) OrderOption {
 // ByAutoReleaseAt orders the results by the auto_release_at field.
 func ByAutoReleaseAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAutoReleaseAt, opts...).ToFunc()
+}
+
+// ByPausedReleaseRemainingSeconds orders the results by the paused_release_remaining_seconds field.
+func ByPausedReleaseRemainingSeconds(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPausedReleaseRemainingSeconds, opts...).ToFunc()
 }
 
 // ByBuyerConfirmedAt orders the results by the buyer_confirmed_at field.
