@@ -47,6 +47,8 @@ func convertPrincipalToStaff(principal jwtauth.Principal) staffauth.Staff {
 	for _, role := range principal.Roles {
 		if permission, isPermission := strings.CutPrefix(role, staffPermissionClaimPrefix); isPermission {
 			staff.Permissions = append(staff.Permissions, permission)
+		} else if name, isName := strings.CutPrefix(role, "name:"); isName {
+			staff.Name = name
 		} else {
 			staff.Role = role
 		}
