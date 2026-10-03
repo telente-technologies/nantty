@@ -7,14 +7,18 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	IdempotentRequest string // IdempotentRequest table.
-	OrderPayable      string // OrderPayable table.
-	OutboxEvent       string // OutboxEvent table.
-	PaymentIntent     string // PaymentIntent table.
-	PaymentRefund     string // PaymentRefund table.
-	PayoutTransfer    string // PayoutTransfer table.
-	StorePurchase     string // StorePurchase table.
-	WebhookEvent      string // WebhookEvent table.
+	BillingSubscription       string // BillingSubscription table.
+	ConnectedAccount          string // ConnectedAccount table.
+	IdempotentRequest         string // IdempotentRequest table.
+	OrderPayable              string // OrderPayable table.
+	OutboxEvent               string // OutboxEvent table.
+	PaymentIntent             string // PaymentIntent table.
+	PaymentRefund             string // PaymentRefund table.
+	PayoutTransfer            string // PayoutTransfer table.
+	ProviderDispute           string // ProviderDispute table.
+	ProviderPayoutDestination string // ProviderPayoutDestination table.
+	StorePurchase             string // StorePurchase table.
+	WebhookEvent              string // WebhookEvent table.
 }
 
 type schemaCtxKey struct{}
