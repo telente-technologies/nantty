@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
+import { MarketingFrequencyPicker } from "@/components/settings/marketingFrequencyPicker";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSheet } from "@/components/settings/deleteAccountSheet";
 import { useConsentsQuery, useUpdateConsentMutation } from "@/components/settings/privacyQueries.hook";
@@ -19,7 +20,7 @@ const CONSENT_OPTIONS: { key: ConsentKey; label: string; description: string }[]
   { key: "personalization", label: "Personalization", description: "Use what you view, search and buy to tailor your feed and recommendations." },
   { key: "advertising", label: "Personalized ads", description: "Show ads based on your activity. Turning this off still shows ads, just less relevant." },
   { key: "analytics", label: "Analytics", description: "Share anonymous usage data so we can fix problems and improve Zudomart." },
-  { key: "marketing", label: "Marketing messages", description: "Receive offers, news and product updates by email and push." },
+  { key: "marketing", label: "Marketing messages", description: "Personalised picks from verified sellers, price drops, back in stock, weekly digest." },
 ];
 
 export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"SettingsPrivacyData">) {
@@ -41,13 +42,15 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
         {consents.isError ? <ErrorState message="Couldn't load your privacy choices." onRetry={() => consents.refetch()} /> : null}
         {consents.data
           ? CONSENT_OPTIONS.map((option) => (
-              <ConsentToggleRow
-                key={option.key}
-                label={option.label}
-                description={option.description}
-                enabled={consents.data.consents[option.key]}
-                onChange={(enabled) => updateConsent.mutate({ key: option.key, enabled })}
-              />
+              <View key={option.key}>
+                <ConsentToggleRow
+                  label={option.label}
+                  description={option.description}
+                  enabled={consents.data.consents[option.key]}
+                  onChange={(enabled) => updateConsent.mutate({ key: option.key, enabled })}
+                />
+                {option.key === "marketing" ? <MarketingFrequencyPicker marketingEnabled={consents.data.consents.marketing} /> : null}
+              </View>
             ))
           : null}
         {updateConsent.isError ? <Text size={12} lineHeight={14.4} color={colors.error} accessibilityRole="alert">Couldn't save that choice. Try again.</Text> : null}
