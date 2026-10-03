@@ -849,3 +849,14 @@ Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship thems
 - Policy text is a draft and makes no compliance claim. Retention periods, the processor list, the cookie inventory and the legal entity details are marked for the team and counsel to fill in.
 - **[LATER]** LGAs for the remaining states, carrier rates, per-item weight rules, snapshot stored on the order at checkout by the real backend, optional scripts (analytics and advertising SDKs) wrapped in `ConsentGuard` once chosen, real consent storage and audit trail.
 
+
+---
+
+## 24. Live badge on stories and profile avatars **[DONE (mobile, mock)]**
+
+- `UserSummary.live?: { liveId, startedAt } | null` (`types/models.type.ts`, `CreatorLiveStatus`). The backend fills it from go-live; Phoenix `livestream.started/ended` should invalidate cached summaries.
+- Stories tray (`components/chat/storyTray.tsx`): live creators sort first and get a pulsing red ring with a LIVE pill (`components/live/liveAvatarRing.tsx`). Tapping opens `Live`, not the story.
+- Story viewer (`screens/story/story.screen.tsx`): when the author is live, a "LIVE · Watch" pill in the header replaces the viewer with the livestream.
+- Profile (`components/profile/profileSummary.tsx`): the avatar gets the LIVE ring and opens `Live` on tap.
+- Rules: live beats story; the pulse is off under reduced motion; the mock hides `live` on private profiles for non-followers (`mocks/users.mock.ts`). Hosts are mapped in `mocks/activeLives.mock.ts`.
+- **[LATER]** the badge on feed and post authors, search, followers lists and the chat header; a lock and subscribe prompt for subscriber-only lives; realtime invalidation.

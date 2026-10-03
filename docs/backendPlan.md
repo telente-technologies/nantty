@@ -98,31 +98,31 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 | Endpoint | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| POST /auth/login `{identifier,password}` | M W St SD Ad | ✅ | Identifier is email or username; UI says "Email" only (plans §6.4) |
-| POST /auth/register `{email,birthday,password,username?,name?,otpToken}` | M W | ✅ | Webapp BFF sends `name`, mobile does not: accept optional `name` |
-| POST /auth/otp/send, /auth/otp/verify | M W SD | ✅ | `purpose: signup\|reset\|login` |
-| POST /auth/password/reset, /auth/password/change | M W SD | ✅ | |
-| POST /auth/refresh, /auth/logout | all | ✅ | Rotation + reuse detection (SECURITY.md) |
-| POST /auth/google `{idToken,nonce}`, /auth/apple `{identityToken,nonce,fullName?}` | M W | ✅ | Studio mock lacks these routes (`apps/studio/src/mocks/auth.mock.ts`), so social sign-in 404s there |
-| GET /auth/username-available | M W | ✅ | |
-| GET /auth/username-suggestion?seed | M W | ✗ | Add to go.users.usernames (`suggestUsername` is in the JSON) |
-| GET/DELETE /auth/sessions[/:id] | — | ✅ | No UI yet |
+| POST /auth/login `{identifier,password}` | M W St SD Ad | ✅ | Identifier is email or username; UI says "Email" only (plans §6.4) **✅ built (go-identity).** |
+| POST /auth/register `{email,birthday,password,username?,name?,otpToken}` | M W | ✅ | Webapp BFF sends `name`, mobile does not: accept optional `name` **✅ built (go-identity).** |
+| POST /auth/otp/send, /auth/otp/verify | M W SD | ✅ | `purpose: signup\|reset\|login` **✅ built (go-identity).** |
+| POST /auth/password/reset, /auth/password/change | M W SD | ✅ | **✅ built (go-identity).** |
+| POST /auth/refresh, /auth/logout | all | ✅ | Rotation + reuse detection (SECURITY.md) **✅ built (go-identity).** |
+| POST /auth/google `{idToken,nonce}`, /auth/apple `{identityToken,nonce,fullName?}` | M W | ✅ | Studio mock lacks these routes (`apps/studio/src/mocks/auth.mock.ts`), so social sign-in 404s there **✅ built (go-identity).** |
+| GET /auth/username-available | M W | ✅ | **✅ built (go-identity).** |
+| GET /auth/username-suggestion?seed | M W | ✗ | Add to go.users.usernames (`suggestUsername` is in the JSON) **✅ built (go-identity).** |
+| GET/DELETE /auth/sessions[/:id] | — | ✅ | No UI yet **✅ built (go-identity).** |
 
 ### 2.2 Users, profiles, social graph — owner **go.users** (follows → **ts.social**)
 
 | Endpoint | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| GET/PATCH /users/me, GET /users/:id, GET /users/username/:username | M W | ✅ | PATCH sends `avatarUrl`/`bannerUrl` URLs, but media elsewhere uses `mediaId`s. Accept `avatarMediaId`/`bannerMediaId`, keep URL for one release |
-| GET/PATCH /users/me/settings, PATCH /users/me/preferences `{countryCode}`, POST /users/me/deactivate | M W | ✅ | Mobile `AccountSettings.language` is the literal `"en"` (`apps/mobile/src/types`): widen to a locale string |
+| GET/PATCH /users/me, GET /users/:id, GET /users/username/:username | M W | ✅ | PATCH sends `avatarUrl`/`bannerUrl` URLs, but media elsewhere uses `mediaId`s. Accept `avatarMediaId`/`bannerMediaId`, keep URL for one release **✅ built (go-identity).** |
+| GET/PATCH /users/me/settings, PATCH /users/me/preferences `{countryCode}`, POST /users/me/deactivate | M W | ✅ | Mobile `AccountSettings.language` is the literal `"en"` (`apps/mobile/src/types`): widen to a locale string **Partly built:** only `PATCH /users/me/preferences` and `POST /users/me/deactivate` exist; settings and topics stay mocked. |
 | GET/PUT /users/me/topics, GET /topics | M W | ✅ | Webapp mock topic ids `t_1` vs server uuid validation on `topicId` |
-| CRUD /users/me/addresses | M W | ✅ | Mobile address has only `line1,city,state`. Server needs `countryCode` (currency/shipping), optional `line2`, `postalCode` |
-| GET /users/me/username-policy, PATCH /users/me/username | M W | ◐ | Prisma models `UsernameChange/Hold/ReservedUsername` exist, but no routes |
-| GET /users/me/profiles, GET/PUT /users/me/acting-profile | M | ✗ | go.users.actingProfiles |
+| CRUD /users/me/addresses | M W | ✅ | Mobile address has only `line1,city,state`. Server needs `countryCode` (currency/shipping), optional `line2`, `postalCode` **✅ built (go-identity).** |
+| GET /users/me/username-policy, PATCH /users/me/username | M W | ◐ | Prisma models `UsernameChange/Hold/ReservedUsername` exist, but no routes **✅ built (go-identity).** |
+| GET /users/me/profiles, GET/PUT /users/me/acting-profile | M | ✗ | go.users.actingProfiles **✅ built (go-identity).** |
 | GET/POST /brands, /brands/:id[/products,/follow] | M | ✗ | go.users.brands + go.catalog.listBrandProducts |
 | POST/DELETE /users/:id/follow, /stores/:id/follow; GET followers/following/follow-status/connections | M W | ✅ | Offline queue sends `Idempotency-Key` on follow and the online path does not, so the key must be **optional** here |
 | POST/DELETE /users/:id/block, GET /users/me/blocked | M W | ✅ | |
 | GET /search/people | M W | ✅ | → ts.search |
-| GET /locale, /locale/countries, /currencies | M W L | ✅ | → go.currency |
+| GET /locale, /locale/countries, /currencies | M W L | ✅ | → go.currency **✅ built (go-identity).** |
 | GET /verification/plans, /verification/me, POST /verification/applications, /verification/subscription/cancel | M | ◐ | Server has `/verification/apply` + `/verification/me`. Rename to the mobile paths, and add plans (go.subscriptions) |
 
 ### 2.3 Feed, posts, clips, stories, sounds — owner **ts.social / ts.feed**
@@ -293,6 +293,29 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 19. **Live create body.** Studio `createLive(title)` is missing `category` (`apps/studio/src/app/(studio)/lives/page.tsx`).
 
 ---
+
+### 2.14 Built so far: go-identity (auth, users, currency, admin)
+
+Done and covered by integration tests: everything marked **✅ built** in §2.1 and §2.2, plus these additions that have no mobile client yet:
+
+- Auth: `DELETE /auth/sessions` (revoke all other sessions), `GET /auth/sessions` is cursor-paged (`{data,nextCursor}`).
+- Users: `POST /users/me/media/upload-intents` (signed placeholder upload, replaced by ts.media), `PATCH /users/me/business-profiles/{id}`, `POST /users/me/creator-profile`, `GET /business-categories`, staff username tools (`/admin/usernames/reserved`, `/admin/usernames/withheld`).
+- Geo and addresses: `GET /geo/countries`, `/geo/countries/{code}/regions`, `/geo/regions/{id}/admin-areas|cities`, `/geo/admin-areas/{id}/cities`; `/users/me/addresses` carries `regionId`, `adminAreaId`, `cityId` plus resolved names (Nigeria: states and LGAs seeded, the city step stays optional).
+- Privacy: consent ledger (`/policies/current`, `/consents` anonymous by `X-Device-Id`, `/users/me/consents`, `/users/me/consents/merge`, `/users/me/terms-acceptances`), `/users/me/privacy-settings`, data export (`/users/me/data-exports`), deletion (`/users/me/deletion-request`).
+- Currency: `GET /currency/convert`, staff `GET/PUT /admin/exchange-rates` (step-up).
+- Admin: staff auth with TOTP and step-up, invitations, settings store (`creator.requirements`, `monetization.policy`, `gift.shareTiers`), audit log and export. Superadmins are created only with the CLI.
+
+Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`, `/api/v1/users`, `/api/v1/business-categories`, `/api/v1/locale`, `/api/v1/currencies`, `/api/v1/geo`):
+
+1. **Lists are envelopes.** `GET /users/me/profiles`, `/users/me/addresses`, `/locale/countries`, `/business-categories`, `/auth/sessions`, `/geo/*` return `{data,nextCursor}`. The mobile `apiClient` returns an object that has a `nextCursor` key untouched, so `listMyProfiles`, `listMyShippingAddresses` and `listSupportedCountries` must read `.data`.
+2. **Profile and counters.** `GET /users/me` returns `followers`, `following`, `posts` as 0 and no follow state: ts.social must overlay them. `name` is empty until the user sets one (social sign-in fills it from the provider); show `username` as a fallback.
+3. **Avatar and banner.** Prefer `avatarMediaId`/`bannerMediaId` from `POST /users/me/media/upload-intents`; `avatarUrl`/`bannerUrl` still work (https only). Clearing sends `null`.
+4. **Social sign-in.** Send the raw nonce: Google compares it to the token's `nonce` claim, Apple accepts the SHA-256 hex the app already puts in the token. A missing provider configuration answers `503 SOCIAL_SIGN_IN_NOT_CONFIGURED`.
+5. **Username availability** now returns `reason` (`taken|reserved|invalid|recently_used|withheld`); `PATCH /users/me/username` answers 429 `USERNAME_CHANGE_TOO_SOON`, 409 `USERNAME_TAKEN`, 422 `USERNAME_INVALID|USERNAME_UNAVAILABLE`. `GET /users/me/username-policy` also returns `username`, `cooldownDays`, `maxChangesPerYear`, `quarantineDays`, `history`.
+6. **Acting profiles** use the mobile vocabulary in `kind` (`person|creator|business`) and the plan vocabulary in `type` (`personal|creator|business`); business creation is `POST /users/me/business-profiles` with `categories: [{categoryId, subcategoryId, customName}]`.
+7. **Addresses** send `countryCode`, `regionId` (and `adminAreaId`, `cityId` where the country has them); free-text `state`/`city` is accepted only for countries without seeded data.
+8. **Password change/reset** return 204 with no body; change keeps the current session and revokes the others, so the app should keep its refresh token.
+9. **Still mocked** for these prefixes: `/users/me/settings`, `/topics`, `/users/me/topics`, `/users/me/blocked`, follows, verification, brands (`/brands`).
 
 ## 3. Wiring order
 

@@ -271,6 +271,18 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 
 ---
 
+### Live badge on stories and profile (§24)
+
+| File | Change |
+| --- | --- |
+| `src/components/live/liveAvatarRing.tsx` | **New.** Red ring + LIVE pill around an avatar; the pulse respects reduced motion. |
+| `src/components/chat/storyTray.tsx` | Live creators sort first, show the ring, and tap → `Live`. New `onPressLive` prop. |
+| `src/screens/messages/chats.screen.tsx` | Passes `onPressLive` → `navigation.navigate("Live", { liveId })`. |
+| `src/screens/story/story.screen.tsx` | "LIVE · Watch" header pill when the story author is live. |
+| `src/components/profile/profileSummary.tsx` | The profile avatar shows the LIVE ring and opens the livestream. |
+| `src/types/models.type.ts` | `CreatorLiveStatus`; `UserSummary.live`. |
+| `src/mocks/activeLives.mock.ts`, `userDirectory.mock.ts`, `users.mock.ts` | Hosts mapped to active lives; summaries carry `live`; hidden for private non-followed profiles. |
+
 ## apps/webapp
 
 ### Shipping config & web privacy (§23)
