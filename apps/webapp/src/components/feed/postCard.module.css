@@ -227,7 +227,7 @@
 }
 
 .actionActive {
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 .actionBubble {

@@ -1,0 +1,28 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.headerText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+}
