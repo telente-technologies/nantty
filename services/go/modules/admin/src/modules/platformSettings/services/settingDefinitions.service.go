@@ -14,25 +14,26 @@ const (
 )
 
 type SettingDefinition struct {
-	Validate     func(raw json.RawMessage) (json.RawMessage, error)
-	DefaultValue any
-	Public       bool
+	Validate        func(raw json.RawMessage) (json.RawMessage, error)
+	DefaultValue    any
+	Public          bool
+	WritePermission string
 }
 
 var PlatformSettingDefinitions = map[string]SettingDefinition{
-	CreatorRequirementsKey: {Validate: validateCreatorRequirements, Public: true, DefaultValue: CreatorRequirements{
+	CreatorRequirementsKey: {Validate: validateCreatorRequirements, Public: true, WritePermission: "config:rules", DefaultValue: CreatorRequirements{
 		MinimumFollowers: 1000, MinimumAccountAgeDays: 30, MinimumOriginalPosts: 10, MaximumRecentStrikes: 0, StrikeLookbackDays: 90, RequireVerifiedEmail: true,
 	}},
-	MonetizationPolicyKey: {Validate: validateMonetizationPolicy, DefaultValue: MonetizationPolicy{Rows: []MonetizationRow{
+	MonetizationPolicyKey: {Validate: validateMonetizationPolicy, WritePermission: "config:revenue", DefaultValue: MonetizationPolicy{Rows: []MonetizationRow{
 		{Id: "original", Label: "Original content", MultiplierBps: 10000, Active: true},
 		{Id: "ai_generated", Label: "AI-generated content", MultiplierBps: 5000, Active: true},
 	}}},
-	GiftShareTiersKey: {Validate: validateGiftShareTiers, DefaultValue: GiftShareTiers{Tiers: []GiftShareTier{
+	GiftShareTiersKey: {Validate: validateGiftShareTiers, WritePermission: "config:revenue", DefaultValue: GiftShareTiers{Tiers: []GiftShareTier{
 		{MinimumMonthlyGiftCoins: 0, CreatorShareBps: 5000},
 		{MinimumMonthlyGiftCoins: 500000, CreatorShareBps: 6000},
 		{MinimumMonthlyGiftCoins: 5000000, CreatorShareBps: maximumCreatorShareBps},
 	}}},
-	EscrowPolicyKey: {Validate: validateEscrowPolicy, DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	EscrowPolicyKey: {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
 }
 
 type CreatorRequirements struct {
