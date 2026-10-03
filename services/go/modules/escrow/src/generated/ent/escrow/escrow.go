@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -79,8 +80,17 @@ const (
 	FieldVersion = "version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeDisputes holds the string denoting the disputes edge name in mutations.
+	EdgeDisputes = "disputes"
 	// Table holds the table name of the escrow in the database.
 	Table = "escrows"
+	// DisputesTable is the table that holds the disputes relation/edge.
+	DisputesTable = "disputes"
+	// DisputesInverseTable is the table name for the Dispute entity.
+	// It exists in this package in order to avoid circular dependency with the "dispute" package.
+	DisputesInverseTable = "disputes"
+	// DisputesColumn is the table column denoting the disputes relation/edge.
+	DisputesColumn = "escrow_id"
 )
 
 // Columns holds all SQL columns for escrow fields.
@@ -380,4 +390,25 @@ func ByVersion(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDisputesCount orders the results by disputes count.
+func ByDisputesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDisputesStep(), opts...)
+	}
+}
+
+// ByDisputes orders the results by disputes terms.
+func ByDisputes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDisputesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newDisputesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DisputesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DisputesTable, DisputesColumn),
+	)
 }

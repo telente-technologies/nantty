@@ -4,9 +4,11 @@ package escrow
 
 import (
 	"time"
+	"zudomart/modules/escrow/src/generated/ent/internal"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -1888,6 +1890,35 @@ func UpdatedAtLT(v time.Time) predicate.Escrow {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Escrow {
 	return predicate.Escrow(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// HasDisputes applies the HasEdge predicate on the "disputes" edge.
+func HasDisputes() predicate.Escrow {
+	return predicate.Escrow(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DisputesTable, DisputesColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Dispute
+		step.Edge.Schema = schemaConfig.Dispute
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDisputesWith applies the HasEdge predicate on the "disputes" edge with a given conditions (other predicates).
+func HasDisputesWith(preds ...predicate.Dispute) predicate.Escrow {
+	return predicate.Escrow(func(s *sql.Selector) {
+		step := newDisputesStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Dispute
+		step.Edge.Schema = schemaConfig.Dispute
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.
