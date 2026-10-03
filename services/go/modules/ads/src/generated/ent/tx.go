@@ -24,14 +24,20 @@ type Tx struct {
 	AdAccountMember *AdAccountMemberClient
 	// AdActivityEntry is the client for interacting with the AdActivityEntry builders.
 	AdActivityEntry *AdActivityEntryClient
+	// AdAudienceMember is the client for interacting with the AdAudienceMember builders.
+	AdAudienceMember *AdAudienceMemberClient
 	// AdBoost is the client for interacting with the AdBoost builders.
 	AdBoost *AdBoostClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
+	// AdConversion is the client for interacting with the AdConversion builders.
+	AdConversion *AdConversionClient
 	// AdCreatorEarning is the client for interacting with the AdCreatorEarning builders.
 	AdCreatorEarning *AdCreatorEarningClient
+	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
+	AdCustomAudience *AdCustomAudienceClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
 	AdFrequencyPolicy *AdFrequencyPolicyClient
 	// AdFundsTransaction is the client for interacting with the AdFundsTransaction builders.
@@ -40,12 +46,14 @@ type Tx struct {
 	AdGroup *AdGroupClient
 	// AdImpression is the client for interacting with the AdImpression builders.
 	AdImpression *AdImpressionClient
-	// AdMonetizationPolicy is the client for interacting with the AdMonetizationPolicy builders.
-	AdMonetizationPolicy *AdMonetizationPolicyClient
+	// AdMedia is the client for interacting with the AdMedia builders.
+	AdMedia *AdMediaClient
 	// AdPolicyCategory is the client for interacting with the AdPolicyCategory builders.
 	AdPolicyCategory *AdPolicyCategoryClient
 	// AdPoolDaily is the client for interacting with the AdPoolDaily builders.
 	AdPoolDaily *AdPoolDailyClient
+	// AdScheduledReport is the client for interacting with the AdScheduledReport builders.
+	AdScheduledReport *AdScheduledReportClient
 	// AdSpendBatch is the client for interacting with the AdSpendBatch builders.
 	AdSpendBatch *AdSpendBatchClient
 	// AdStatsDaily is the client for interacting with the AdStatsDaily builders.
@@ -188,17 +196,21 @@ func (tx *Tx) init() {
 	tx.AdAccountInvite = NewAdAccountInviteClient(tx.config)
 	tx.AdAccountMember = NewAdAccountMemberClient(tx.config)
 	tx.AdActivityEntry = NewAdActivityEntryClient(tx.config)
+	tx.AdAudienceMember = NewAdAudienceMemberClient(tx.config)
 	tx.AdBoost = NewAdBoostClient(tx.config)
 	tx.AdCampaign = NewAdCampaignClient(tx.config)
 	tx.AdContentSignal = NewAdContentSignalClient(tx.config)
+	tx.AdConversion = NewAdConversionClient(tx.config)
 	tx.AdCreatorEarning = NewAdCreatorEarningClient(tx.config)
+	tx.AdCustomAudience = NewAdCustomAudienceClient(tx.config)
 	tx.AdFrequencyPolicy = NewAdFrequencyPolicyClient(tx.config)
 	tx.AdFundsTransaction = NewAdFundsTransactionClient(tx.config)
 	tx.AdGroup = NewAdGroupClient(tx.config)
 	tx.AdImpression = NewAdImpressionClient(tx.config)
-	tx.AdMonetizationPolicy = NewAdMonetizationPolicyClient(tx.config)
+	tx.AdMedia = NewAdMediaClient(tx.config)
 	tx.AdPolicyCategory = NewAdPolicyCategoryClient(tx.config)
 	tx.AdPoolDaily = NewAdPoolDailyClient(tx.config)
+	tx.AdScheduledReport = NewAdScheduledReportClient(tx.config)
 	tx.AdSpendBatch = NewAdSpendBatchClient(tx.config)
 	tx.AdStatsDaily = NewAdStatsDailyClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)

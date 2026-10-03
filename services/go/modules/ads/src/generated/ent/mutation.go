@@ -13,17 +13,21 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
+	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
+	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/admonetizationpolicy"
+	"zudomart/modules/ads/src/generated/ent/admedia"
 	"zudomart/modules/ads/src/generated/ent/adpolicycategory"
 	"zudomart/modules/ads/src/generated/ent/adpooldaily"
+	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
 	"zudomart/modules/ads/src/generated/ent/adspendbatch"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/outboxevent"
@@ -44,25 +48,29 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAd                   = "Ad"
-	TypeAdAccount            = "AdAccount"
-	TypeAdAccountInvite      = "AdAccountInvite"
-	TypeAdAccountMember      = "AdAccountMember"
-	TypeAdActivityEntry      = "AdActivityEntry"
-	TypeAdBoost              = "AdBoost"
-	TypeAdCampaign           = "AdCampaign"
-	TypeAdContentSignal      = "AdContentSignal"
-	TypeAdCreatorEarning     = "AdCreatorEarning"
-	TypeAdFrequencyPolicy    = "AdFrequencyPolicy"
-	TypeAdFundsTransaction   = "AdFundsTransaction"
-	TypeAdGroup              = "AdGroup"
-	TypeAdImpression         = "AdImpression"
-	TypeAdMonetizationPolicy = "AdMonetizationPolicy"
-	TypeAdPolicyCategory     = "AdPolicyCategory"
-	TypeAdPoolDaily          = "AdPoolDaily"
-	TypeAdSpendBatch         = "AdSpendBatch"
-	TypeAdStatsDaily         = "AdStatsDaily"
-	TypeOutboxEvent          = "OutboxEvent"
+	TypeAd                 = "Ad"
+	TypeAdAccount          = "AdAccount"
+	TypeAdAccountInvite    = "AdAccountInvite"
+	TypeAdAccountMember    = "AdAccountMember"
+	TypeAdActivityEntry    = "AdActivityEntry"
+	TypeAdAudienceMember   = "AdAudienceMember"
+	TypeAdBoost            = "AdBoost"
+	TypeAdCampaign         = "AdCampaign"
+	TypeAdContentSignal    = "AdContentSignal"
+	TypeAdConversion       = "AdConversion"
+	TypeAdCreatorEarning   = "AdCreatorEarning"
+	TypeAdCustomAudience   = "AdCustomAudience"
+	TypeAdFrequencyPolicy  = "AdFrequencyPolicy"
+	TypeAdFundsTransaction = "AdFundsTransaction"
+	TypeAdGroup            = "AdGroup"
+	TypeAdImpression       = "AdImpression"
+	TypeAdMedia            = "AdMedia"
+	TypeAdPolicyCategory   = "AdPolicyCategory"
+	TypeAdPoolDaily        = "AdPoolDaily"
+	TypeAdScheduledReport  = "AdScheduledReport"
+	TypeAdSpendBatch       = "AdSpendBatch"
+	TypeAdStatsDaily       = "AdStatsDaily"
+	TypeOutboxEvent        = "OutboxEvent"
 )
 
 // AdMutation represents an operation that mutates the Ad nodes in the graph.
@@ -5363,6 +5371,386 @@ func (m *AdActivityEntryMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdActivityEntry edge %s", name)
 }
 
+// AdAudienceMemberMutation represents an operation that mutates the AdAudienceMember nodes in the graph.
+type AdAudienceMemberMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	audience_id   *uuid.UUID
+	user_id       *uuid.UUID
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*AdAudienceMember, error)
+	predicates    []predicate.AdAudienceMember
+}
+
+var _ ent.Mutation = (*AdAudienceMemberMutation)(nil)
+
+// adaudiencememberOption allows management of the mutation configuration using functional options.
+type adaudiencememberOption func(*AdAudienceMemberMutation)
+
+// newAdAudienceMemberMutation creates new mutation for the AdAudienceMember entity.
+func newAdAudienceMemberMutation(c config, op Op, opts ...adaudiencememberOption) *AdAudienceMemberMutation {
+	m := &AdAudienceMemberMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdAudienceMember,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdAudienceMemberID sets the ID field of the mutation.
+func withAdAudienceMemberID(id int) adaudiencememberOption {
+	return func(m *AdAudienceMemberMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdAudienceMember
+		)
+		m.oldValue = func(ctx context.Context) (*AdAudienceMember, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdAudienceMember.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdAudienceMember sets the old AdAudienceMember of the mutation.
+func withAdAudienceMember(node *AdAudienceMember) adaudiencememberOption {
+	return func(m *AdAudienceMemberMutation) {
+		m.oldValue = func(context.Context) (*AdAudienceMember, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdAudienceMemberMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdAudienceMemberMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdAudienceMemberMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdAudienceMemberMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdAudienceMember.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAudienceID sets the "audience_id" field.
+func (m *AdAudienceMemberMutation) SetAudienceID(u uuid.UUID) {
+	m.audience_id = &u
+}
+
+// AudienceID returns the value of the "audience_id" field in the mutation.
+func (m *AdAudienceMemberMutation) AudienceID() (r uuid.UUID, exists bool) {
+	v := m.audience_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAudienceID returns the old "audience_id" field's value of the AdAudienceMember entity.
+// If the AdAudienceMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdAudienceMemberMutation) OldAudienceID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAudienceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAudienceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAudienceID: %w", err)
+	}
+	return oldValue.AudienceID, nil
+}
+
+// ResetAudienceID resets all changes to the "audience_id" field.
+func (m *AdAudienceMemberMutation) ResetAudienceID() {
+	m.audience_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdAudienceMemberMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdAudienceMemberMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdAudienceMember entity.
+// If the AdAudienceMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdAudienceMemberMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdAudienceMemberMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// Where appends a list predicates to the AdAudienceMemberMutation builder.
+func (m *AdAudienceMemberMutation) Where(ps ...predicate.AdAudienceMember) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdAudienceMemberMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdAudienceMemberMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdAudienceMember, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdAudienceMemberMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdAudienceMemberMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdAudienceMember).
+func (m *AdAudienceMemberMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdAudienceMemberMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.audience_id != nil {
+		fields = append(fields, adaudiencemember.FieldAudienceID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adaudiencemember.FieldUserID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdAudienceMemberMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adaudiencemember.FieldAudienceID:
+		return m.AudienceID()
+	case adaudiencemember.FieldUserID:
+		return m.UserID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdAudienceMemberMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adaudiencemember.FieldAudienceID:
+		return m.OldAudienceID(ctx)
+	case adaudiencemember.FieldUserID:
+		return m.OldUserID(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdAudienceMember field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdAudienceMemberMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adaudiencemember.FieldAudienceID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAudienceID(v)
+		return nil
+	case adaudiencemember.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdAudienceMember field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdAudienceMemberMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdAudienceMemberMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdAudienceMemberMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AdAudienceMember numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdAudienceMemberMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdAudienceMemberMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdAudienceMemberMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdAudienceMember nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdAudienceMemberMutation) ResetField(name string) error {
+	switch name {
+	case adaudiencemember.FieldAudienceID:
+		m.ResetAudienceID()
+		return nil
+	case adaudiencemember.FieldUserID:
+		m.ResetUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown AdAudienceMember field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdAudienceMemberMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdAudienceMemberMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdAudienceMemberMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdAudienceMemberMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdAudienceMemberMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdAudienceMemberMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdAudienceMemberMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdAudienceMember unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdAudienceMemberMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdAudienceMember edge %s", name)
+}
+
 // AdBoostMutation represents an operation that mutates the AdBoost nodes in the graph.
 type AdBoostMutation struct {
 	config
@@ -9090,6 +9478,860 @@ func (m *AdContentSignalMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdContentSignal edge %s", name)
 }
 
+// AdConversionMutation represents an operation that mutates the AdConversion nodes in the graph.
+type AdConversionMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	conversion_id  *string
+	store_id       *string
+	user_id        *string
+	impression_id  *uuid.UUID
+	ad_id          *uuid.UUID
+	account_id     *uuid.UUID
+	value_minor    *int64
+	addvalue_minor *int64
+	currency       *string
+	occurred_at    *time.Time
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*AdConversion, error)
+	predicates     []predicate.AdConversion
+}
+
+var _ ent.Mutation = (*AdConversionMutation)(nil)
+
+// adconversionOption allows management of the mutation configuration using functional options.
+type adconversionOption func(*AdConversionMutation)
+
+// newAdConversionMutation creates new mutation for the AdConversion entity.
+func newAdConversionMutation(c config, op Op, opts ...adconversionOption) *AdConversionMutation {
+	m := &AdConversionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdConversion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdConversionID sets the ID field of the mutation.
+func withAdConversionID(id uuid.UUID) adconversionOption {
+	return func(m *AdConversionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdConversion
+		)
+		m.oldValue = func(ctx context.Context) (*AdConversion, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdConversion.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdConversion sets the old AdConversion of the mutation.
+func withAdConversion(node *AdConversion) adconversionOption {
+	return func(m *AdConversionMutation) {
+		m.oldValue = func(context.Context) (*AdConversion, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdConversionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdConversionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdConversion entities.
+func (m *AdConversionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdConversionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdConversionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdConversion.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdConversionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdConversionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdConversionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetConversionID sets the "conversion_id" field.
+func (m *AdConversionMutation) SetConversionID(s string) {
+	m.conversion_id = &s
+}
+
+// ConversionID returns the value of the "conversion_id" field in the mutation.
+func (m *AdConversionMutation) ConversionID() (r string, exists bool) {
+	v := m.conversion_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConversionID returns the old "conversion_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldConversionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConversionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConversionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConversionID: %w", err)
+	}
+	return oldValue.ConversionID, nil
+}
+
+// ResetConversionID resets all changes to the "conversion_id" field.
+func (m *AdConversionMutation) ResetConversionID() {
+	m.conversion_id = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *AdConversionMutation) SetStoreID(s string) {
+	m.store_id = &s
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *AdConversionMutation) StoreID() (r string, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldStoreID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *AdConversionMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdConversionMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdConversionMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdConversionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetImpressionID sets the "impression_id" field.
+func (m *AdConversionMutation) SetImpressionID(u uuid.UUID) {
+	m.impression_id = &u
+}
+
+// ImpressionID returns the value of the "impression_id" field in the mutation.
+func (m *AdConversionMutation) ImpressionID() (r uuid.UUID, exists bool) {
+	v := m.impression_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImpressionID returns the old "impression_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldImpressionID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImpressionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImpressionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImpressionID: %w", err)
+	}
+	return oldValue.ImpressionID, nil
+}
+
+// ResetImpressionID resets all changes to the "impression_id" field.
+func (m *AdConversionMutation) ResetImpressionID() {
+	m.impression_id = nil
+}
+
+// SetAdID sets the "ad_id" field.
+func (m *AdConversionMutation) SetAdID(u uuid.UUID) {
+	m.ad_id = &u
+}
+
+// AdID returns the value of the "ad_id" field in the mutation.
+func (m *AdConversionMutation) AdID() (r uuid.UUID, exists bool) {
+	v := m.ad_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdID returns the old "ad_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldAdID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdID: %w", err)
+	}
+	return oldValue.AdID, nil
+}
+
+// ResetAdID resets all changes to the "ad_id" field.
+func (m *AdConversionMutation) ResetAdID() {
+	m.ad_id = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *AdConversionMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdConversionMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdConversionMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetValueMinor sets the "value_minor" field.
+func (m *AdConversionMutation) SetValueMinor(i int64) {
+	m.value_minor = &i
+	m.addvalue_minor = nil
+}
+
+// ValueMinor returns the value of the "value_minor" field in the mutation.
+func (m *AdConversionMutation) ValueMinor() (r int64, exists bool) {
+	v := m.value_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValueMinor returns the old "value_minor" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldValueMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValueMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValueMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValueMinor: %w", err)
+	}
+	return oldValue.ValueMinor, nil
+}
+
+// AddValueMinor adds i to the "value_minor" field.
+func (m *AdConversionMutation) AddValueMinor(i int64) {
+	if m.addvalue_minor != nil {
+		*m.addvalue_minor += i
+	} else {
+		m.addvalue_minor = &i
+	}
+}
+
+// AddedValueMinor returns the value that was added to the "value_minor" field in this mutation.
+func (m *AdConversionMutation) AddedValueMinor() (r int64, exists bool) {
+	v := m.addvalue_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetValueMinor resets all changes to the "value_minor" field.
+func (m *AdConversionMutation) ResetValueMinor() {
+	m.value_minor = nil
+	m.addvalue_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AdConversionMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AdConversionMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AdConversionMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetOccurredAt sets the "occurred_at" field.
+func (m *AdConversionMutation) SetOccurredAt(t time.Time) {
+	m.occurred_at = &t
+}
+
+// OccurredAt returns the value of the "occurred_at" field in the mutation.
+func (m *AdConversionMutation) OccurredAt() (r time.Time, exists bool) {
+	v := m.occurred_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOccurredAt returns the old "occurred_at" field's value of the AdConversion entity.
+// If the AdConversion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdConversionMutation) OldOccurredAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOccurredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOccurredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOccurredAt: %w", err)
+	}
+	return oldValue.OccurredAt, nil
+}
+
+// ResetOccurredAt resets all changes to the "occurred_at" field.
+func (m *AdConversionMutation) ResetOccurredAt() {
+	m.occurred_at = nil
+}
+
+// Where appends a list predicates to the AdConversionMutation builder.
+func (m *AdConversionMutation) Where(ps ...predicate.AdConversion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdConversionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdConversionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdConversion, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdConversionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdConversionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdConversion).
+func (m *AdConversionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdConversionMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, adconversion.FieldCreatedAt)
+	}
+	if m.conversion_id != nil {
+		fields = append(fields, adconversion.FieldConversionID)
+	}
+	if m.store_id != nil {
+		fields = append(fields, adconversion.FieldStoreID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adconversion.FieldUserID)
+	}
+	if m.impression_id != nil {
+		fields = append(fields, adconversion.FieldImpressionID)
+	}
+	if m.ad_id != nil {
+		fields = append(fields, adconversion.FieldAdID)
+	}
+	if m.account_id != nil {
+		fields = append(fields, adconversion.FieldAccountID)
+	}
+	if m.value_minor != nil {
+		fields = append(fields, adconversion.FieldValueMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, adconversion.FieldCurrency)
+	}
+	if m.occurred_at != nil {
+		fields = append(fields, adconversion.FieldOccurredAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdConversionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adconversion.FieldCreatedAt:
+		return m.CreatedAt()
+	case adconversion.FieldConversionID:
+		return m.ConversionID()
+	case adconversion.FieldStoreID:
+		return m.StoreID()
+	case adconversion.FieldUserID:
+		return m.UserID()
+	case adconversion.FieldImpressionID:
+		return m.ImpressionID()
+	case adconversion.FieldAdID:
+		return m.AdID()
+	case adconversion.FieldAccountID:
+		return m.AccountID()
+	case adconversion.FieldValueMinor:
+		return m.ValueMinor()
+	case adconversion.FieldCurrency:
+		return m.Currency()
+	case adconversion.FieldOccurredAt:
+		return m.OccurredAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdConversionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adconversion.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adconversion.FieldConversionID:
+		return m.OldConversionID(ctx)
+	case adconversion.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case adconversion.FieldUserID:
+		return m.OldUserID(ctx)
+	case adconversion.FieldImpressionID:
+		return m.OldImpressionID(ctx)
+	case adconversion.FieldAdID:
+		return m.OldAdID(ctx)
+	case adconversion.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case adconversion.FieldValueMinor:
+		return m.OldValueMinor(ctx)
+	case adconversion.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case adconversion.FieldOccurredAt:
+		return m.OldOccurredAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdConversion field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdConversionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adconversion.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adconversion.FieldConversionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConversionID(v)
+		return nil
+	case adconversion.FieldStoreID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case adconversion.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adconversion.FieldImpressionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImpressionID(v)
+		return nil
+	case adconversion.FieldAdID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdID(v)
+		return nil
+	case adconversion.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case adconversion.FieldValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValueMinor(v)
+		return nil
+	case adconversion.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case adconversion.FieldOccurredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOccurredAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdConversion field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdConversionMutation) AddedFields() []string {
+	var fields []string
+	if m.addvalue_minor != nil {
+		fields = append(fields, adconversion.FieldValueMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdConversionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adconversion.FieldValueMinor:
+		return m.AddedValueMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdConversionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adconversion.FieldValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddValueMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdConversion numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdConversionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdConversionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdConversionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdConversion nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdConversionMutation) ResetField(name string) error {
+	switch name {
+	case adconversion.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adconversion.FieldConversionID:
+		m.ResetConversionID()
+		return nil
+	case adconversion.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case adconversion.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adconversion.FieldImpressionID:
+		m.ResetImpressionID()
+		return nil
+	case adconversion.FieldAdID:
+		m.ResetAdID()
+		return nil
+	case adconversion.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case adconversion.FieldValueMinor:
+		m.ResetValueMinor()
+		return nil
+	case adconversion.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case adconversion.FieldOccurredAt:
+		m.ResetOccurredAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdConversion field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdConversionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdConversionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdConversionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdConversionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdConversionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdConversionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdConversionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdConversion unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdConversionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdConversion edge %s", name)
+}
+
 // AdCreatorEarningMutation represents an operation that mutates the AdCreatorEarning nodes in the graph.
 type AdCreatorEarningMutation struct {
 	config
@@ -9792,6 +11034,1184 @@ func (m *AdCreatorEarningMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdCreatorEarningMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdCreatorEarning edge %s", name)
+}
+
+// AdCustomAudienceMutation represents an operation that mutates the AdCustomAudience nodes in the graph.
+type AdCustomAudienceMutation struct {
+	config
+	op                              Op
+	typ                             string
+	id                              *uuid.UUID
+	created_at                      *time.Time
+	account_id                      *uuid.UUID
+	name                            *string
+	_type                           *adcustomaudience.Type
+	status                          *adcustomaudience.Status
+	matched_count                   *int64
+	addmatched_count                *int64
+	retention_days                  *int
+	addretention_days               *int
+	description                     *string
+	params                          *[]byte
+	lookalike_source_id             *uuid.UUID
+	lookalike_country_code          *string
+	lookalike_similarity_percent    *int
+	addlookalike_similarity_percent *int
+	idempotency_key                 *string
+	updated_at                      *time.Time
+	clearedFields                   map[string]struct{}
+	done                            bool
+	oldValue                        func(context.Context) (*AdCustomAudience, error)
+	predicates                      []predicate.AdCustomAudience
+}
+
+var _ ent.Mutation = (*AdCustomAudienceMutation)(nil)
+
+// adcustomaudienceOption allows management of the mutation configuration using functional options.
+type adcustomaudienceOption func(*AdCustomAudienceMutation)
+
+// newAdCustomAudienceMutation creates new mutation for the AdCustomAudience entity.
+func newAdCustomAudienceMutation(c config, op Op, opts ...adcustomaudienceOption) *AdCustomAudienceMutation {
+	m := &AdCustomAudienceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdCustomAudience,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdCustomAudienceID sets the ID field of the mutation.
+func withAdCustomAudienceID(id uuid.UUID) adcustomaudienceOption {
+	return func(m *AdCustomAudienceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdCustomAudience
+		)
+		m.oldValue = func(ctx context.Context) (*AdCustomAudience, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdCustomAudience.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdCustomAudience sets the old AdCustomAudience of the mutation.
+func withAdCustomAudience(node *AdCustomAudience) adcustomaudienceOption {
+	return func(m *AdCustomAudienceMutation) {
+		m.oldValue = func(context.Context) (*AdCustomAudience, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdCustomAudienceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdCustomAudienceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdCustomAudience entities.
+func (m *AdCustomAudienceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdCustomAudienceMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdCustomAudienceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdCustomAudience.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdCustomAudienceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdCustomAudienceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdCustomAudienceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *AdCustomAudienceMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdCustomAudienceMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdCustomAudienceMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *AdCustomAudienceMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *AdCustomAudienceMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *AdCustomAudienceMutation) ResetName() {
+	m.name = nil
+}
+
+// SetType sets the "type" field.
+func (m *AdCustomAudienceMutation) SetType(a adcustomaudience.Type) {
+	m._type = &a
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *AdCustomAudienceMutation) GetType() (r adcustomaudience.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldType(ctx context.Context) (v adcustomaudience.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *AdCustomAudienceMutation) ResetType() {
+	m._type = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AdCustomAudienceMutation) SetStatus(a adcustomaudience.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AdCustomAudienceMutation) Status() (r adcustomaudience.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldStatus(ctx context.Context) (v adcustomaudience.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AdCustomAudienceMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetMatchedCount sets the "matched_count" field.
+func (m *AdCustomAudienceMutation) SetMatchedCount(i int64) {
+	m.matched_count = &i
+	m.addmatched_count = nil
+}
+
+// MatchedCount returns the value of the "matched_count" field in the mutation.
+func (m *AdCustomAudienceMutation) MatchedCount() (r int64, exists bool) {
+	v := m.matched_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchedCount returns the old "matched_count" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldMatchedCount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchedCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchedCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchedCount: %w", err)
+	}
+	return oldValue.MatchedCount, nil
+}
+
+// AddMatchedCount adds i to the "matched_count" field.
+func (m *AdCustomAudienceMutation) AddMatchedCount(i int64) {
+	if m.addmatched_count != nil {
+		*m.addmatched_count += i
+	} else {
+		m.addmatched_count = &i
+	}
+}
+
+// AddedMatchedCount returns the value that was added to the "matched_count" field in this mutation.
+func (m *AdCustomAudienceMutation) AddedMatchedCount() (r int64, exists bool) {
+	v := m.addmatched_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMatchedCount resets all changes to the "matched_count" field.
+func (m *AdCustomAudienceMutation) ResetMatchedCount() {
+	m.matched_count = nil
+	m.addmatched_count = nil
+}
+
+// SetRetentionDays sets the "retention_days" field.
+func (m *AdCustomAudienceMutation) SetRetentionDays(i int) {
+	m.retention_days = &i
+	m.addretention_days = nil
+}
+
+// RetentionDays returns the value of the "retention_days" field in the mutation.
+func (m *AdCustomAudienceMutation) RetentionDays() (r int, exists bool) {
+	v := m.retention_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRetentionDays returns the old "retention_days" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldRetentionDays(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRetentionDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRetentionDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRetentionDays: %w", err)
+	}
+	return oldValue.RetentionDays, nil
+}
+
+// AddRetentionDays adds i to the "retention_days" field.
+func (m *AdCustomAudienceMutation) AddRetentionDays(i int) {
+	if m.addretention_days != nil {
+		*m.addretention_days += i
+	} else {
+		m.addretention_days = &i
+	}
+}
+
+// AddedRetentionDays returns the value that was added to the "retention_days" field in this mutation.
+func (m *AdCustomAudienceMutation) AddedRetentionDays() (r int, exists bool) {
+	v := m.addretention_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRetentionDays clears the value of the "retention_days" field.
+func (m *AdCustomAudienceMutation) ClearRetentionDays() {
+	m.retention_days = nil
+	m.addretention_days = nil
+	m.clearedFields[adcustomaudience.FieldRetentionDays] = struct{}{}
+}
+
+// RetentionDaysCleared returns if the "retention_days" field was cleared in this mutation.
+func (m *AdCustomAudienceMutation) RetentionDaysCleared() bool {
+	_, ok := m.clearedFields[adcustomaudience.FieldRetentionDays]
+	return ok
+}
+
+// ResetRetentionDays resets all changes to the "retention_days" field.
+func (m *AdCustomAudienceMutation) ResetRetentionDays() {
+	m.retention_days = nil
+	m.addretention_days = nil
+	delete(m.clearedFields, adcustomaudience.FieldRetentionDays)
+}
+
+// SetDescription sets the "description" field.
+func (m *AdCustomAudienceMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *AdCustomAudienceMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *AdCustomAudienceMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetParams sets the "params" field.
+func (m *AdCustomAudienceMutation) SetParams(b []byte) {
+	m.params = &b
+}
+
+// Params returns the value of the "params" field in the mutation.
+func (m *AdCustomAudienceMutation) Params() (r []byte, exists bool) {
+	v := m.params
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParams returns the old "params" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldParams(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParams is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParams requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParams: %w", err)
+	}
+	return oldValue.Params, nil
+}
+
+// ResetParams resets all changes to the "params" field.
+func (m *AdCustomAudienceMutation) ResetParams() {
+	m.params = nil
+}
+
+// SetLookalikeSourceID sets the "lookalike_source_id" field.
+func (m *AdCustomAudienceMutation) SetLookalikeSourceID(u uuid.UUID) {
+	m.lookalike_source_id = &u
+}
+
+// LookalikeSourceID returns the value of the "lookalike_source_id" field in the mutation.
+func (m *AdCustomAudienceMutation) LookalikeSourceID() (r uuid.UUID, exists bool) {
+	v := m.lookalike_source_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLookalikeSourceID returns the old "lookalike_source_id" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldLookalikeSourceID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLookalikeSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLookalikeSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLookalikeSourceID: %w", err)
+	}
+	return oldValue.LookalikeSourceID, nil
+}
+
+// ClearLookalikeSourceID clears the value of the "lookalike_source_id" field.
+func (m *AdCustomAudienceMutation) ClearLookalikeSourceID() {
+	m.lookalike_source_id = nil
+	m.clearedFields[adcustomaudience.FieldLookalikeSourceID] = struct{}{}
+}
+
+// LookalikeSourceIDCleared returns if the "lookalike_source_id" field was cleared in this mutation.
+func (m *AdCustomAudienceMutation) LookalikeSourceIDCleared() bool {
+	_, ok := m.clearedFields[adcustomaudience.FieldLookalikeSourceID]
+	return ok
+}
+
+// ResetLookalikeSourceID resets all changes to the "lookalike_source_id" field.
+func (m *AdCustomAudienceMutation) ResetLookalikeSourceID() {
+	m.lookalike_source_id = nil
+	delete(m.clearedFields, adcustomaudience.FieldLookalikeSourceID)
+}
+
+// SetLookalikeCountryCode sets the "lookalike_country_code" field.
+func (m *AdCustomAudienceMutation) SetLookalikeCountryCode(s string) {
+	m.lookalike_country_code = &s
+}
+
+// LookalikeCountryCode returns the value of the "lookalike_country_code" field in the mutation.
+func (m *AdCustomAudienceMutation) LookalikeCountryCode() (r string, exists bool) {
+	v := m.lookalike_country_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLookalikeCountryCode returns the old "lookalike_country_code" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldLookalikeCountryCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLookalikeCountryCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLookalikeCountryCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLookalikeCountryCode: %w", err)
+	}
+	return oldValue.LookalikeCountryCode, nil
+}
+
+// ResetLookalikeCountryCode resets all changes to the "lookalike_country_code" field.
+func (m *AdCustomAudienceMutation) ResetLookalikeCountryCode() {
+	m.lookalike_country_code = nil
+}
+
+// SetLookalikeSimilarityPercent sets the "lookalike_similarity_percent" field.
+func (m *AdCustomAudienceMutation) SetLookalikeSimilarityPercent(i int) {
+	m.lookalike_similarity_percent = &i
+	m.addlookalike_similarity_percent = nil
+}
+
+// LookalikeSimilarityPercent returns the value of the "lookalike_similarity_percent" field in the mutation.
+func (m *AdCustomAudienceMutation) LookalikeSimilarityPercent() (r int, exists bool) {
+	v := m.lookalike_similarity_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLookalikeSimilarityPercent returns the old "lookalike_similarity_percent" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldLookalikeSimilarityPercent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLookalikeSimilarityPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLookalikeSimilarityPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLookalikeSimilarityPercent: %w", err)
+	}
+	return oldValue.LookalikeSimilarityPercent, nil
+}
+
+// AddLookalikeSimilarityPercent adds i to the "lookalike_similarity_percent" field.
+func (m *AdCustomAudienceMutation) AddLookalikeSimilarityPercent(i int) {
+	if m.addlookalike_similarity_percent != nil {
+		*m.addlookalike_similarity_percent += i
+	} else {
+		m.addlookalike_similarity_percent = &i
+	}
+}
+
+// AddedLookalikeSimilarityPercent returns the value that was added to the "lookalike_similarity_percent" field in this mutation.
+func (m *AdCustomAudienceMutation) AddedLookalikeSimilarityPercent() (r int, exists bool) {
+	v := m.addlookalike_similarity_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLookalikeSimilarityPercent resets all changes to the "lookalike_similarity_percent" field.
+func (m *AdCustomAudienceMutation) ResetLookalikeSimilarityPercent() {
+	m.lookalike_similarity_percent = nil
+	m.addlookalike_similarity_percent = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *AdCustomAudienceMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *AdCustomAudienceMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *AdCustomAudienceMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdCustomAudienceMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdCustomAudienceMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdCustomAudience entity.
+// If the AdCustomAudience object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCustomAudienceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdCustomAudienceMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdCustomAudienceMutation builder.
+func (m *AdCustomAudienceMutation) Where(ps ...predicate.AdCustomAudience) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdCustomAudienceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdCustomAudienceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdCustomAudience, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdCustomAudienceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdCustomAudienceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdCustomAudience).
+func (m *AdCustomAudienceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdCustomAudienceMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.created_at != nil {
+		fields = append(fields, adcustomaudience.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, adcustomaudience.FieldAccountID)
+	}
+	if m.name != nil {
+		fields = append(fields, adcustomaudience.FieldName)
+	}
+	if m._type != nil {
+		fields = append(fields, adcustomaudience.FieldType)
+	}
+	if m.status != nil {
+		fields = append(fields, adcustomaudience.FieldStatus)
+	}
+	if m.matched_count != nil {
+		fields = append(fields, adcustomaudience.FieldMatchedCount)
+	}
+	if m.retention_days != nil {
+		fields = append(fields, adcustomaudience.FieldRetentionDays)
+	}
+	if m.description != nil {
+		fields = append(fields, adcustomaudience.FieldDescription)
+	}
+	if m.params != nil {
+		fields = append(fields, adcustomaudience.FieldParams)
+	}
+	if m.lookalike_source_id != nil {
+		fields = append(fields, adcustomaudience.FieldLookalikeSourceID)
+	}
+	if m.lookalike_country_code != nil {
+		fields = append(fields, adcustomaudience.FieldLookalikeCountryCode)
+	}
+	if m.lookalike_similarity_percent != nil {
+		fields = append(fields, adcustomaudience.FieldLookalikeSimilarityPercent)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, adcustomaudience.FieldIdempotencyKey)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adcustomaudience.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdCustomAudienceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adcustomaudience.FieldCreatedAt:
+		return m.CreatedAt()
+	case adcustomaudience.FieldAccountID:
+		return m.AccountID()
+	case adcustomaudience.FieldName:
+		return m.Name()
+	case adcustomaudience.FieldType:
+		return m.GetType()
+	case adcustomaudience.FieldStatus:
+		return m.Status()
+	case adcustomaudience.FieldMatchedCount:
+		return m.MatchedCount()
+	case adcustomaudience.FieldRetentionDays:
+		return m.RetentionDays()
+	case adcustomaudience.FieldDescription:
+		return m.Description()
+	case adcustomaudience.FieldParams:
+		return m.Params()
+	case adcustomaudience.FieldLookalikeSourceID:
+		return m.LookalikeSourceID()
+	case adcustomaudience.FieldLookalikeCountryCode:
+		return m.LookalikeCountryCode()
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		return m.LookalikeSimilarityPercent()
+	case adcustomaudience.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case adcustomaudience.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdCustomAudienceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adcustomaudience.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adcustomaudience.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case adcustomaudience.FieldName:
+		return m.OldName(ctx)
+	case adcustomaudience.FieldType:
+		return m.OldType(ctx)
+	case adcustomaudience.FieldStatus:
+		return m.OldStatus(ctx)
+	case adcustomaudience.FieldMatchedCount:
+		return m.OldMatchedCount(ctx)
+	case adcustomaudience.FieldRetentionDays:
+		return m.OldRetentionDays(ctx)
+	case adcustomaudience.FieldDescription:
+		return m.OldDescription(ctx)
+	case adcustomaudience.FieldParams:
+		return m.OldParams(ctx)
+	case adcustomaudience.FieldLookalikeSourceID:
+		return m.OldLookalikeSourceID(ctx)
+	case adcustomaudience.FieldLookalikeCountryCode:
+		return m.OldLookalikeCountryCode(ctx)
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		return m.OldLookalikeSimilarityPercent(ctx)
+	case adcustomaudience.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case adcustomaudience.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdCustomAudience field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCustomAudienceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adcustomaudience.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adcustomaudience.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case adcustomaudience.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case adcustomaudience.FieldType:
+		v, ok := value.(adcustomaudience.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case adcustomaudience.FieldStatus:
+		v, ok := value.(adcustomaudience.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case adcustomaudience.FieldMatchedCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchedCount(v)
+		return nil
+	case adcustomaudience.FieldRetentionDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRetentionDays(v)
+		return nil
+	case adcustomaudience.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case adcustomaudience.FieldParams:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParams(v)
+		return nil
+	case adcustomaudience.FieldLookalikeSourceID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLookalikeSourceID(v)
+		return nil
+	case adcustomaudience.FieldLookalikeCountryCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLookalikeCountryCode(v)
+		return nil
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLookalikeSimilarityPercent(v)
+		return nil
+	case adcustomaudience.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case adcustomaudience.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCustomAudience field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdCustomAudienceMutation) AddedFields() []string {
+	var fields []string
+	if m.addmatched_count != nil {
+		fields = append(fields, adcustomaudience.FieldMatchedCount)
+	}
+	if m.addretention_days != nil {
+		fields = append(fields, adcustomaudience.FieldRetentionDays)
+	}
+	if m.addlookalike_similarity_percent != nil {
+		fields = append(fields, adcustomaudience.FieldLookalikeSimilarityPercent)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdCustomAudienceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adcustomaudience.FieldMatchedCount:
+		return m.AddedMatchedCount()
+	case adcustomaudience.FieldRetentionDays:
+		return m.AddedRetentionDays()
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		return m.AddedLookalikeSimilarityPercent()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCustomAudienceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adcustomaudience.FieldMatchedCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMatchedCount(v)
+		return nil
+	case adcustomaudience.FieldRetentionDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRetentionDays(v)
+		return nil
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLookalikeSimilarityPercent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCustomAudience numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdCustomAudienceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adcustomaudience.FieldRetentionDays) {
+		fields = append(fields, adcustomaudience.FieldRetentionDays)
+	}
+	if m.FieldCleared(adcustomaudience.FieldLookalikeSourceID) {
+		fields = append(fields, adcustomaudience.FieldLookalikeSourceID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdCustomAudienceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdCustomAudienceMutation) ClearField(name string) error {
+	switch name {
+	case adcustomaudience.FieldRetentionDays:
+		m.ClearRetentionDays()
+		return nil
+	case adcustomaudience.FieldLookalikeSourceID:
+		m.ClearLookalikeSourceID()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCustomAudience nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdCustomAudienceMutation) ResetField(name string) error {
+	switch name {
+	case adcustomaudience.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adcustomaudience.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case adcustomaudience.FieldName:
+		m.ResetName()
+		return nil
+	case adcustomaudience.FieldType:
+		m.ResetType()
+		return nil
+	case adcustomaudience.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case adcustomaudience.FieldMatchedCount:
+		m.ResetMatchedCount()
+		return nil
+	case adcustomaudience.FieldRetentionDays:
+		m.ResetRetentionDays()
+		return nil
+	case adcustomaudience.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case adcustomaudience.FieldParams:
+		m.ResetParams()
+		return nil
+	case adcustomaudience.FieldLookalikeSourceID:
+		m.ResetLookalikeSourceID()
+		return nil
+	case adcustomaudience.FieldLookalikeCountryCode:
+		m.ResetLookalikeCountryCode()
+		return nil
+	case adcustomaudience.FieldLookalikeSimilarityPercent:
+		m.ResetLookalikeSimilarityPercent()
+		return nil
+	case adcustomaudience.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case adcustomaudience.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCustomAudience field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdCustomAudienceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdCustomAudienceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdCustomAudienceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdCustomAudienceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdCustomAudienceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdCustomAudienceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdCustomAudienceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdCustomAudience unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdCustomAudienceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdCustomAudience edge %s", name)
 }
 
 // AdFrequencyPolicyMutation represents an operation that mutates the AdFrequencyPolicy nodes in the graph.
@@ -15661,40 +18081,46 @@ func (m *AdImpressionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdImpression edge %s", name)
 }
 
-// AdMonetizationPolicyMutation represents an operation that mutates the AdMonetizationPolicy nodes in the graph.
-type AdMonetizationPolicyMutation struct {
+// AdMediaMutation represents an operation that mutates the AdMedia nodes in the graph.
+type AdMediaMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *uuid.UUID
-	created_at           *time.Time
-	key                  *string
-	revenue_source       *admonetizationpolicy.RevenueSource
-	content_type         *string
-	creator_share_bps    *int
-	addcreator_share_bps *int
-	multiplier_bps       *int
-	addmultiplier_bps    *int
-	effective_from       *time.Time
-	effective_to         *time.Time
-	updated_at           *time.Time
-	clearedFields        map[string]struct{}
-	done                 bool
-	oldValue             func(context.Context) (*AdMonetizationPolicy, error)
-	predicates           []predicate.AdMonetizationPolicy
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	account_id          *uuid.UUID
+	uploaded_by         *uuid.UUID
+	file_name           *string
+	mime_type           *string
+	size_bytes          *int64
+	addsize_bytes       *int64
+	kind                *admedia.Kind
+	object_key          *string
+	status              *admedia.Status
+	width               *int
+	addwidth            *int
+	height              *int
+	addheight           *int
+	duration_seconds    *int
+	addduration_seconds *int
+	updated_at          *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*AdMedia, error)
+	predicates          []predicate.AdMedia
 }
 
-var _ ent.Mutation = (*AdMonetizationPolicyMutation)(nil)
+var _ ent.Mutation = (*AdMediaMutation)(nil)
 
-// admonetizationpolicyOption allows management of the mutation configuration using functional options.
-type admonetizationpolicyOption func(*AdMonetizationPolicyMutation)
+// admediaOption allows management of the mutation configuration using functional options.
+type admediaOption func(*AdMediaMutation)
 
-// newAdMonetizationPolicyMutation creates new mutation for the AdMonetizationPolicy entity.
-func newAdMonetizationPolicyMutation(c config, op Op, opts ...admonetizationpolicyOption) *AdMonetizationPolicyMutation {
-	m := &AdMonetizationPolicyMutation{
+// newAdMediaMutation creates new mutation for the AdMedia entity.
+func newAdMediaMutation(c config, op Op, opts ...admediaOption) *AdMediaMutation {
+	m := &AdMediaMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeAdMonetizationPolicy,
+		typ:           TypeAdMedia,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -15703,20 +18129,20 @@ func newAdMonetizationPolicyMutation(c config, op Op, opts ...admonetizationpoli
 	return m
 }
 
-// withAdMonetizationPolicyID sets the ID field of the mutation.
-func withAdMonetizationPolicyID(id uuid.UUID) admonetizationpolicyOption {
-	return func(m *AdMonetizationPolicyMutation) {
+// withAdMediaID sets the ID field of the mutation.
+func withAdMediaID(id uuid.UUID) admediaOption {
+	return func(m *AdMediaMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *AdMonetizationPolicy
+			value *AdMedia
 		)
-		m.oldValue = func(ctx context.Context) (*AdMonetizationPolicy, error) {
+		m.oldValue = func(ctx context.Context) (*AdMedia, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().AdMonetizationPolicy.Get(ctx, id)
+					value, err = m.Client().AdMedia.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -15725,10 +18151,10 @@ func withAdMonetizationPolicyID(id uuid.UUID) admonetizationpolicyOption {
 	}
 }
 
-// withAdMonetizationPolicy sets the old AdMonetizationPolicy of the mutation.
-func withAdMonetizationPolicy(node *AdMonetizationPolicy) admonetizationpolicyOption {
-	return func(m *AdMonetizationPolicyMutation) {
-		m.oldValue = func(context.Context) (*AdMonetizationPolicy, error) {
+// withAdMedia sets the old AdMedia of the mutation.
+func withAdMedia(node *AdMedia) admediaOption {
+	return func(m *AdMediaMutation) {
+		m.oldValue = func(context.Context) (*AdMedia, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -15737,7 +18163,7 @@ func withAdMonetizationPolicy(node *AdMonetizationPolicy) admonetizationpolicyOp
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AdMonetizationPolicyMutation) Client() *Client {
+func (m AdMediaMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -15745,7 +18171,7 @@ func (m AdMonetizationPolicyMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m AdMonetizationPolicyMutation) Tx() (*Tx, error) {
+func (m AdMediaMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -15755,14 +18181,14 @@ func (m AdMonetizationPolicyMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of AdMonetizationPolicy entities.
-func (m *AdMonetizationPolicyMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of AdMedia entities.
+func (m *AdMediaMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AdMonetizationPolicyMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AdMediaMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -15773,7 +18199,7 @@ func (m *AdMonetizationPolicyMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AdMonetizationPolicyMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *AdMediaMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -15782,19 +18208,19 @@ func (m *AdMonetizationPolicyMutation) IDs(ctx context.Context) ([]uuid.UUID, er
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().AdMonetizationPolicy.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().AdMedia.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *AdMonetizationPolicyMutation) SetCreatedAt(t time.Time) {
+func (m *AdMediaMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AdMonetizationPolicyMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *AdMediaMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -15802,10 +18228,10 @@ func (m *AdMonetizationPolicyMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AdMediaMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -15820,322 +18246,507 @@ func (m *AdMonetizationPolicyMutation) OldCreatedAt(ctx context.Context) (v time
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AdMonetizationPolicyMutation) ResetCreatedAt() {
+func (m *AdMediaMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetKey sets the "key" field.
-func (m *AdMonetizationPolicyMutation) SetKey(s string) {
-	m.key = &s
+// SetAccountID sets the "account_id" field.
+func (m *AdMediaMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
 }
 
-// Key returns the value of the "key" field in the mutation.
-func (m *AdMonetizationPolicyMutation) Key() (r string, exists bool) {
-	v := m.key
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdMediaMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldKey returns the old "key" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldAccountID returns the old "account_id" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldKey(ctx context.Context) (v string, err error) {
+func (m *AdMediaMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldKey requires an ID field in the mutation")
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
 	}
-	return oldValue.Key, nil
+	return oldValue.AccountID, nil
 }
 
-// ResetKey resets all changes to the "key" field.
-func (m *AdMonetizationPolicyMutation) ResetKey() {
-	m.key = nil
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdMediaMutation) ResetAccountID() {
+	m.account_id = nil
 }
 
-// SetRevenueSource sets the "revenue_source" field.
-func (m *AdMonetizationPolicyMutation) SetRevenueSource(as admonetizationpolicy.RevenueSource) {
-	m.revenue_source = &as
+// SetUploadedBy sets the "uploaded_by" field.
+func (m *AdMediaMutation) SetUploadedBy(u uuid.UUID) {
+	m.uploaded_by = &u
 }
 
-// RevenueSource returns the value of the "revenue_source" field in the mutation.
-func (m *AdMonetizationPolicyMutation) RevenueSource() (r admonetizationpolicy.RevenueSource, exists bool) {
-	v := m.revenue_source
+// UploadedBy returns the value of the "uploaded_by" field in the mutation.
+func (m *AdMediaMutation) UploadedBy() (r uuid.UUID, exists bool) {
+	v := m.uploaded_by
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRevenueSource returns the old "revenue_source" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldUploadedBy returns the old "uploaded_by" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldRevenueSource(ctx context.Context) (v admonetizationpolicy.RevenueSource, err error) {
+func (m *AdMediaMutation) OldUploadedBy(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRevenueSource is only allowed on UpdateOne operations")
+		return v, errors.New("OldUploadedBy is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRevenueSource requires an ID field in the mutation")
+		return v, errors.New("OldUploadedBy requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRevenueSource: %w", err)
+		return v, fmt.Errorf("querying old value for OldUploadedBy: %w", err)
 	}
-	return oldValue.RevenueSource, nil
+	return oldValue.UploadedBy, nil
 }
 
-// ResetRevenueSource resets all changes to the "revenue_source" field.
-func (m *AdMonetizationPolicyMutation) ResetRevenueSource() {
-	m.revenue_source = nil
+// ResetUploadedBy resets all changes to the "uploaded_by" field.
+func (m *AdMediaMutation) ResetUploadedBy() {
+	m.uploaded_by = nil
 }
 
-// SetContentType sets the "content_type" field.
-func (m *AdMonetizationPolicyMutation) SetContentType(s string) {
-	m.content_type = &s
+// SetFileName sets the "file_name" field.
+func (m *AdMediaMutation) SetFileName(s string) {
+	m.file_name = &s
 }
 
-// ContentType returns the value of the "content_type" field in the mutation.
-func (m *AdMonetizationPolicyMutation) ContentType() (r string, exists bool) {
-	v := m.content_type
+// FileName returns the value of the "file_name" field in the mutation.
+func (m *AdMediaMutation) FileName() (r string, exists bool) {
+	v := m.file_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldContentType returns the old "content_type" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldFileName returns the old "file_name" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldContentType(ctx context.Context) (v string, err error) {
+func (m *AdMediaMutation) OldFileName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContentType is only allowed on UpdateOne operations")
+		return v, errors.New("OldFileName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContentType requires an ID field in the mutation")
+		return v, errors.New("OldFileName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContentType: %w", err)
+		return v, fmt.Errorf("querying old value for OldFileName: %w", err)
 	}
-	return oldValue.ContentType, nil
+	return oldValue.FileName, nil
 }
 
-// ResetContentType resets all changes to the "content_type" field.
-func (m *AdMonetizationPolicyMutation) ResetContentType() {
-	m.content_type = nil
+// ResetFileName resets all changes to the "file_name" field.
+func (m *AdMediaMutation) ResetFileName() {
+	m.file_name = nil
 }
 
-// SetCreatorShareBps sets the "creator_share_bps" field.
-func (m *AdMonetizationPolicyMutation) SetCreatorShareBps(i int) {
-	m.creator_share_bps = &i
-	m.addcreator_share_bps = nil
+// SetMimeType sets the "mime_type" field.
+func (m *AdMediaMutation) SetMimeType(s string) {
+	m.mime_type = &s
 }
 
-// CreatorShareBps returns the value of the "creator_share_bps" field in the mutation.
-func (m *AdMonetizationPolicyMutation) CreatorShareBps() (r int, exists bool) {
-	v := m.creator_share_bps
+// MimeType returns the value of the "mime_type" field in the mutation.
+func (m *AdMediaMutation) MimeType() (r string, exists bool) {
+	v := m.mime_type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCreatorShareBps returns the old "creator_share_bps" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldMimeType returns the old "mime_type" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldCreatorShareBps(ctx context.Context) (v int, err error) {
+func (m *AdMediaMutation) OldMimeType(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatorShareBps is only allowed on UpdateOne operations")
+		return v, errors.New("OldMimeType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatorShareBps requires an ID field in the mutation")
+		return v, errors.New("OldMimeType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatorShareBps: %w", err)
+		return v, fmt.Errorf("querying old value for OldMimeType: %w", err)
 	}
-	return oldValue.CreatorShareBps, nil
+	return oldValue.MimeType, nil
 }
 
-// AddCreatorShareBps adds i to the "creator_share_bps" field.
-func (m *AdMonetizationPolicyMutation) AddCreatorShareBps(i int) {
-	if m.addcreator_share_bps != nil {
-		*m.addcreator_share_bps += i
+// ResetMimeType resets all changes to the "mime_type" field.
+func (m *AdMediaMutation) ResetMimeType() {
+	m.mime_type = nil
+}
+
+// SetSizeBytes sets the "size_bytes" field.
+func (m *AdMediaMutation) SetSizeBytes(i int64) {
+	m.size_bytes = &i
+	m.addsize_bytes = nil
+}
+
+// SizeBytes returns the value of the "size_bytes" field in the mutation.
+func (m *AdMediaMutation) SizeBytes() (r int64, exists bool) {
+	v := m.size_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSizeBytes returns the old "size_bytes" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMediaMutation) OldSizeBytes(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSizeBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSizeBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSizeBytes: %w", err)
+	}
+	return oldValue.SizeBytes, nil
+}
+
+// AddSizeBytes adds i to the "size_bytes" field.
+func (m *AdMediaMutation) AddSizeBytes(i int64) {
+	if m.addsize_bytes != nil {
+		*m.addsize_bytes += i
 	} else {
-		m.addcreator_share_bps = &i
+		m.addsize_bytes = &i
 	}
 }
 
-// AddedCreatorShareBps returns the value that was added to the "creator_share_bps" field in this mutation.
-func (m *AdMonetizationPolicyMutation) AddedCreatorShareBps() (r int, exists bool) {
-	v := m.addcreator_share_bps
+// AddedSizeBytes returns the value that was added to the "size_bytes" field in this mutation.
+func (m *AdMediaMutation) AddedSizeBytes() (r int64, exists bool) {
+	v := m.addsize_bytes
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetCreatorShareBps resets all changes to the "creator_share_bps" field.
-func (m *AdMonetizationPolicyMutation) ResetCreatorShareBps() {
-	m.creator_share_bps = nil
-	m.addcreator_share_bps = nil
+// ResetSizeBytes resets all changes to the "size_bytes" field.
+func (m *AdMediaMutation) ResetSizeBytes() {
+	m.size_bytes = nil
+	m.addsize_bytes = nil
 }
 
-// SetMultiplierBps sets the "multiplier_bps" field.
-func (m *AdMonetizationPolicyMutation) SetMultiplierBps(i int) {
-	m.multiplier_bps = &i
-	m.addmultiplier_bps = nil
+// SetKind sets the "kind" field.
+func (m *AdMediaMutation) SetKind(a admedia.Kind) {
+	m.kind = &a
 }
 
-// MultiplierBps returns the value of the "multiplier_bps" field in the mutation.
-func (m *AdMonetizationPolicyMutation) MultiplierBps() (r int, exists bool) {
-	v := m.multiplier_bps
+// Kind returns the value of the "kind" field in the mutation.
+func (m *AdMediaMutation) Kind() (r admedia.Kind, exists bool) {
+	v := m.kind
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldMultiplierBps returns the old "multiplier_bps" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldKind returns the old "kind" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldMultiplierBps(ctx context.Context) (v int, err error) {
+func (m *AdMediaMutation) OldKind(ctx context.Context) (v admedia.Kind, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMultiplierBps is only allowed on UpdateOne operations")
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMultiplierBps requires an ID field in the mutation")
+		return v, errors.New("OldKind requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMultiplierBps: %w", err)
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
 	}
-	return oldValue.MultiplierBps, nil
+	return oldValue.Kind, nil
 }
 
-// AddMultiplierBps adds i to the "multiplier_bps" field.
-func (m *AdMonetizationPolicyMutation) AddMultiplierBps(i int) {
-	if m.addmultiplier_bps != nil {
-		*m.addmultiplier_bps += i
+// ResetKind resets all changes to the "kind" field.
+func (m *AdMediaMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetObjectKey sets the "object_key" field.
+func (m *AdMediaMutation) SetObjectKey(s string) {
+	m.object_key = &s
+}
+
+// ObjectKey returns the value of the "object_key" field in the mutation.
+func (m *AdMediaMutation) ObjectKey() (r string, exists bool) {
+	v := m.object_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldObjectKey returns the old "object_key" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMediaMutation) OldObjectKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldObjectKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldObjectKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldObjectKey: %w", err)
+	}
+	return oldValue.ObjectKey, nil
+}
+
+// ResetObjectKey resets all changes to the "object_key" field.
+func (m *AdMediaMutation) ResetObjectKey() {
+	m.object_key = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AdMediaMutation) SetStatus(a admedia.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AdMediaMutation) Status() (r admedia.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMediaMutation) OldStatus(ctx context.Context) (v admedia.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AdMediaMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetWidth sets the "width" field.
+func (m *AdMediaMutation) SetWidth(i int) {
+	m.width = &i
+	m.addwidth = nil
+}
+
+// Width returns the value of the "width" field in the mutation.
+func (m *AdMediaMutation) Width() (r int, exists bool) {
+	v := m.width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWidth returns the old "width" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMediaMutation) OldWidth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWidth: %w", err)
+	}
+	return oldValue.Width, nil
+}
+
+// AddWidth adds i to the "width" field.
+func (m *AdMediaMutation) AddWidth(i int) {
+	if m.addwidth != nil {
+		*m.addwidth += i
 	} else {
-		m.addmultiplier_bps = &i
+		m.addwidth = &i
 	}
 }
 
-// AddedMultiplierBps returns the value that was added to the "multiplier_bps" field in this mutation.
-func (m *AdMonetizationPolicyMutation) AddedMultiplierBps() (r int, exists bool) {
-	v := m.addmultiplier_bps
+// AddedWidth returns the value that was added to the "width" field in this mutation.
+func (m *AdMediaMutation) AddedWidth() (r int, exists bool) {
+	v := m.addwidth
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetMultiplierBps resets all changes to the "multiplier_bps" field.
-func (m *AdMonetizationPolicyMutation) ResetMultiplierBps() {
-	m.multiplier_bps = nil
-	m.addmultiplier_bps = nil
+// ResetWidth resets all changes to the "width" field.
+func (m *AdMediaMutation) ResetWidth() {
+	m.width = nil
+	m.addwidth = nil
 }
 
-// SetEffectiveFrom sets the "effective_from" field.
-func (m *AdMonetizationPolicyMutation) SetEffectiveFrom(t time.Time) {
-	m.effective_from = &t
+// SetHeight sets the "height" field.
+func (m *AdMediaMutation) SetHeight(i int) {
+	m.height = &i
+	m.addheight = nil
 }
 
-// EffectiveFrom returns the value of the "effective_from" field in the mutation.
-func (m *AdMonetizationPolicyMutation) EffectiveFrom() (r time.Time, exists bool) {
-	v := m.effective_from
+// Height returns the value of the "height" field in the mutation.
+func (m *AdMediaMutation) Height() (r int, exists bool) {
+	v := m.height
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEffectiveFrom returns the old "effective_from" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldHeight returns the old "height" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldEffectiveFrom(ctx context.Context) (v time.Time, err error) {
+func (m *AdMediaMutation) OldHeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEffectiveFrom is only allowed on UpdateOne operations")
+		return v, errors.New("OldHeight is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEffectiveFrom requires an ID field in the mutation")
+		return v, errors.New("OldHeight requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEffectiveFrom: %w", err)
+		return v, fmt.Errorf("querying old value for OldHeight: %w", err)
 	}
-	return oldValue.EffectiveFrom, nil
+	return oldValue.Height, nil
 }
 
-// ResetEffectiveFrom resets all changes to the "effective_from" field.
-func (m *AdMonetizationPolicyMutation) ResetEffectiveFrom() {
-	m.effective_from = nil
+// AddHeight adds i to the "height" field.
+func (m *AdMediaMutation) AddHeight(i int) {
+	if m.addheight != nil {
+		*m.addheight += i
+	} else {
+		m.addheight = &i
+	}
 }
 
-// SetEffectiveTo sets the "effective_to" field.
-func (m *AdMonetizationPolicyMutation) SetEffectiveTo(t time.Time) {
-	m.effective_to = &t
-}
-
-// EffectiveTo returns the value of the "effective_to" field in the mutation.
-func (m *AdMonetizationPolicyMutation) EffectiveTo() (r time.Time, exists bool) {
-	v := m.effective_to
+// AddedHeight returns the value that was added to the "height" field in this mutation.
+func (m *AdMediaMutation) AddedHeight() (r int, exists bool) {
+	v := m.addheight
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEffectiveTo returns the old "effective_to" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// ResetHeight resets all changes to the "height" field.
+func (m *AdMediaMutation) ResetHeight() {
+	m.height = nil
+	m.addheight = nil
+}
+
+// SetDurationSeconds sets the "duration_seconds" field.
+func (m *AdMediaMutation) SetDurationSeconds(i int) {
+	m.duration_seconds = &i
+	m.addduration_seconds = nil
+}
+
+// DurationSeconds returns the value of the "duration_seconds" field in the mutation.
+func (m *AdMediaMutation) DurationSeconds() (r int, exists bool) {
+	v := m.duration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDurationSeconds returns the old "duration_seconds" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldEffectiveTo(ctx context.Context) (v *time.Time, err error) {
+func (m *AdMediaMutation) OldDurationSeconds(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEffectiveTo is only allowed on UpdateOne operations")
+		return v, errors.New("OldDurationSeconds is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEffectiveTo requires an ID field in the mutation")
+		return v, errors.New("OldDurationSeconds requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEffectiveTo: %w", err)
+		return v, fmt.Errorf("querying old value for OldDurationSeconds: %w", err)
 	}
-	return oldValue.EffectiveTo, nil
+	return oldValue.DurationSeconds, nil
 }
 
-// ClearEffectiveTo clears the value of the "effective_to" field.
-func (m *AdMonetizationPolicyMutation) ClearEffectiveTo() {
-	m.effective_to = nil
-	m.clearedFields[admonetizationpolicy.FieldEffectiveTo] = struct{}{}
+// AddDurationSeconds adds i to the "duration_seconds" field.
+func (m *AdMediaMutation) AddDurationSeconds(i int) {
+	if m.addduration_seconds != nil {
+		*m.addduration_seconds += i
+	} else {
+		m.addduration_seconds = &i
+	}
 }
 
-// EffectiveToCleared returns if the "effective_to" field was cleared in this mutation.
-func (m *AdMonetizationPolicyMutation) EffectiveToCleared() bool {
-	_, ok := m.clearedFields[admonetizationpolicy.FieldEffectiveTo]
+// AddedDurationSeconds returns the value that was added to the "duration_seconds" field in this mutation.
+func (m *AdMediaMutation) AddedDurationSeconds() (r int, exists bool) {
+	v := m.addduration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDurationSeconds clears the value of the "duration_seconds" field.
+func (m *AdMediaMutation) ClearDurationSeconds() {
+	m.duration_seconds = nil
+	m.addduration_seconds = nil
+	m.clearedFields[admedia.FieldDurationSeconds] = struct{}{}
+}
+
+// DurationSecondsCleared returns if the "duration_seconds" field was cleared in this mutation.
+func (m *AdMediaMutation) DurationSecondsCleared() bool {
+	_, ok := m.clearedFields[admedia.FieldDurationSeconds]
 	return ok
 }
 
-// ResetEffectiveTo resets all changes to the "effective_to" field.
-func (m *AdMonetizationPolicyMutation) ResetEffectiveTo() {
-	m.effective_to = nil
-	delete(m.clearedFields, admonetizationpolicy.FieldEffectiveTo)
+// ResetDurationSeconds resets all changes to the "duration_seconds" field.
+func (m *AdMediaMutation) ResetDurationSeconds() {
+	m.duration_seconds = nil
+	m.addduration_seconds = nil
+	delete(m.clearedFields, admedia.FieldDurationSeconds)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *AdMonetizationPolicyMutation) SetUpdatedAt(t time.Time) {
+func (m *AdMediaMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AdMonetizationPolicyMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *AdMediaMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -16143,10 +18754,10 @@ func (m *AdMonetizationPolicyMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the AdMonetizationPolicy entity.
-// If the AdMonetizationPolicy object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the AdMedia entity.
+// If the AdMedia object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMonetizationPolicyMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AdMediaMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -16161,19 +18772,19 @@ func (m *AdMonetizationPolicyMutation) OldUpdatedAt(ctx context.Context) (v time
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AdMonetizationPolicyMutation) ResetUpdatedAt() {
+func (m *AdMediaMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// Where appends a list predicates to the AdMonetizationPolicyMutation builder.
-func (m *AdMonetizationPolicyMutation) Where(ps ...predicate.AdMonetizationPolicy) {
+// Where appends a list predicates to the AdMediaMutation builder.
+func (m *AdMediaMutation) Where(ps ...predicate.AdMedia) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the AdMonetizationPolicyMutation builder. Using this method,
+// WhereP appends storage-level predicates to the AdMediaMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AdMonetizationPolicyMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.AdMonetizationPolicy, len(ps))
+func (m *AdMediaMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdMedia, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -16181,51 +18792,63 @@ func (m *AdMonetizationPolicyMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *AdMonetizationPolicyMutation) Op() Op {
+func (m *AdMediaMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *AdMonetizationPolicyMutation) SetOp(op Op) {
+func (m *AdMediaMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (AdMonetizationPolicy).
-func (m *AdMonetizationPolicyMutation) Type() string {
+// Type returns the node type of this mutation (AdMedia).
+func (m *AdMediaMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *AdMonetizationPolicyMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+func (m *AdMediaMutation) Fields() []string {
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
-		fields = append(fields, admonetizationpolicy.FieldCreatedAt)
+		fields = append(fields, admedia.FieldCreatedAt)
 	}
-	if m.key != nil {
-		fields = append(fields, admonetizationpolicy.FieldKey)
+	if m.account_id != nil {
+		fields = append(fields, admedia.FieldAccountID)
 	}
-	if m.revenue_source != nil {
-		fields = append(fields, admonetizationpolicy.FieldRevenueSource)
+	if m.uploaded_by != nil {
+		fields = append(fields, admedia.FieldUploadedBy)
 	}
-	if m.content_type != nil {
-		fields = append(fields, admonetizationpolicy.FieldContentType)
+	if m.file_name != nil {
+		fields = append(fields, admedia.FieldFileName)
 	}
-	if m.creator_share_bps != nil {
-		fields = append(fields, admonetizationpolicy.FieldCreatorShareBps)
+	if m.mime_type != nil {
+		fields = append(fields, admedia.FieldMimeType)
 	}
-	if m.multiplier_bps != nil {
-		fields = append(fields, admonetizationpolicy.FieldMultiplierBps)
+	if m.size_bytes != nil {
+		fields = append(fields, admedia.FieldSizeBytes)
 	}
-	if m.effective_from != nil {
-		fields = append(fields, admonetizationpolicy.FieldEffectiveFrom)
+	if m.kind != nil {
+		fields = append(fields, admedia.FieldKind)
 	}
-	if m.effective_to != nil {
-		fields = append(fields, admonetizationpolicy.FieldEffectiveTo)
+	if m.object_key != nil {
+		fields = append(fields, admedia.FieldObjectKey)
+	}
+	if m.status != nil {
+		fields = append(fields, admedia.FieldStatus)
+	}
+	if m.width != nil {
+		fields = append(fields, admedia.FieldWidth)
+	}
+	if m.height != nil {
+		fields = append(fields, admedia.FieldHeight)
+	}
+	if m.duration_seconds != nil {
+		fields = append(fields, admedia.FieldDurationSeconds)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, admonetizationpolicy.FieldUpdatedAt)
+		fields = append(fields, admedia.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -16233,25 +18856,33 @@ func (m *AdMonetizationPolicyMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *AdMonetizationPolicyMutation) Field(name string) (ent.Value, bool) {
+func (m *AdMediaMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case admonetizationpolicy.FieldCreatedAt:
+	case admedia.FieldCreatedAt:
 		return m.CreatedAt()
-	case admonetizationpolicy.FieldKey:
-		return m.Key()
-	case admonetizationpolicy.FieldRevenueSource:
-		return m.RevenueSource()
-	case admonetizationpolicy.FieldContentType:
-		return m.ContentType()
-	case admonetizationpolicy.FieldCreatorShareBps:
-		return m.CreatorShareBps()
-	case admonetizationpolicy.FieldMultiplierBps:
-		return m.MultiplierBps()
-	case admonetizationpolicy.FieldEffectiveFrom:
-		return m.EffectiveFrom()
-	case admonetizationpolicy.FieldEffectiveTo:
-		return m.EffectiveTo()
-	case admonetizationpolicy.FieldUpdatedAt:
+	case admedia.FieldAccountID:
+		return m.AccountID()
+	case admedia.FieldUploadedBy:
+		return m.UploadedBy()
+	case admedia.FieldFileName:
+		return m.FileName()
+	case admedia.FieldMimeType:
+		return m.MimeType()
+	case admedia.FieldSizeBytes:
+		return m.SizeBytes()
+	case admedia.FieldKind:
+		return m.Kind()
+	case admedia.FieldObjectKey:
+		return m.ObjectKey()
+	case admedia.FieldStatus:
+		return m.Status()
+	case admedia.FieldWidth:
+		return m.Width()
+	case admedia.FieldHeight:
+		return m.Height()
+	case admedia.FieldDurationSeconds:
+		return m.DurationSeconds()
+	case admedia.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
 	return nil, false
@@ -16260,92 +18891,128 @@ func (m *AdMonetizationPolicyMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *AdMonetizationPolicyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *AdMediaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case admonetizationpolicy.FieldCreatedAt:
+	case admedia.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case admonetizationpolicy.FieldKey:
-		return m.OldKey(ctx)
-	case admonetizationpolicy.FieldRevenueSource:
-		return m.OldRevenueSource(ctx)
-	case admonetizationpolicy.FieldContentType:
-		return m.OldContentType(ctx)
-	case admonetizationpolicy.FieldCreatorShareBps:
-		return m.OldCreatorShareBps(ctx)
-	case admonetizationpolicy.FieldMultiplierBps:
-		return m.OldMultiplierBps(ctx)
-	case admonetizationpolicy.FieldEffectiveFrom:
-		return m.OldEffectiveFrom(ctx)
-	case admonetizationpolicy.FieldEffectiveTo:
-		return m.OldEffectiveTo(ctx)
-	case admonetizationpolicy.FieldUpdatedAt:
+	case admedia.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case admedia.FieldUploadedBy:
+		return m.OldUploadedBy(ctx)
+	case admedia.FieldFileName:
+		return m.OldFileName(ctx)
+	case admedia.FieldMimeType:
+		return m.OldMimeType(ctx)
+	case admedia.FieldSizeBytes:
+		return m.OldSizeBytes(ctx)
+	case admedia.FieldKind:
+		return m.OldKind(ctx)
+	case admedia.FieldObjectKey:
+		return m.OldObjectKey(ctx)
+	case admedia.FieldStatus:
+		return m.OldStatus(ctx)
+	case admedia.FieldWidth:
+		return m.OldWidth(ctx)
+	case admedia.FieldHeight:
+		return m.OldHeight(ctx)
+	case admedia.FieldDurationSeconds:
+		return m.OldDurationSeconds(ctx)
+	case admedia.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown AdMonetizationPolicy field %s", name)
+	return nil, fmt.Errorf("unknown AdMedia field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *AdMonetizationPolicyMutation) SetField(name string, value ent.Value) error {
+func (m *AdMediaMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case admonetizationpolicy.FieldCreatedAt:
+	case admedia.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case admonetizationpolicy.FieldKey:
+	case admedia.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case admedia.FieldUploadedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUploadedBy(v)
+		return nil
+	case admedia.FieldFileName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetKey(v)
+		m.SetFileName(v)
 		return nil
-	case admonetizationpolicy.FieldRevenueSource:
-		v, ok := value.(admonetizationpolicy.RevenueSource)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRevenueSource(v)
-		return nil
-	case admonetizationpolicy.FieldContentType:
+	case admedia.FieldMimeType:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetContentType(v)
+		m.SetMimeType(v)
 		return nil
-	case admonetizationpolicy.FieldCreatorShareBps:
+	case admedia.FieldSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSizeBytes(v)
+		return nil
+	case admedia.FieldKind:
+		v, ok := value.(admedia.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case admedia.FieldObjectKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetObjectKey(v)
+		return nil
+	case admedia.FieldStatus:
+		v, ok := value.(admedia.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case admedia.FieldWidth:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCreatorShareBps(v)
+		m.SetWidth(v)
 		return nil
-	case admonetizationpolicy.FieldMultiplierBps:
+	case admedia.FieldHeight:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetMultiplierBps(v)
+		m.SetHeight(v)
 		return nil
-	case admonetizationpolicy.FieldEffectiveFrom:
-		v, ok := value.(time.Time)
+	case admedia.FieldDurationSeconds:
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEffectiveFrom(v)
+		m.SetDurationSeconds(v)
 		return nil
-	case admonetizationpolicy.FieldEffectiveTo:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEffectiveTo(v)
-		return nil
-	case admonetizationpolicy.FieldUpdatedAt:
+	case admedia.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -16353,18 +19020,24 @@ func (m *AdMonetizationPolicyMutation) SetField(name string, value ent.Value) er
 		m.SetUpdatedAt(v)
 		return nil
 	}
-	return fmt.Errorf("unknown AdMonetizationPolicy field %s", name)
+	return fmt.Errorf("unknown AdMedia field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *AdMonetizationPolicyMutation) AddedFields() []string {
+func (m *AdMediaMutation) AddedFields() []string {
 	var fields []string
-	if m.addcreator_share_bps != nil {
-		fields = append(fields, admonetizationpolicy.FieldCreatorShareBps)
+	if m.addsize_bytes != nil {
+		fields = append(fields, admedia.FieldSizeBytes)
 	}
-	if m.addmultiplier_bps != nil {
-		fields = append(fields, admonetizationpolicy.FieldMultiplierBps)
+	if m.addwidth != nil {
+		fields = append(fields, admedia.FieldWidth)
+	}
+	if m.addheight != nil {
+		fields = append(fields, admedia.FieldHeight)
+	}
+	if m.addduration_seconds != nil {
+		fields = append(fields, admedia.FieldDurationSeconds)
 	}
 	return fields
 }
@@ -16372,12 +19045,16 @@ func (m *AdMonetizationPolicyMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *AdMonetizationPolicyMutation) AddedField(name string) (ent.Value, bool) {
+func (m *AdMediaMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case admonetizationpolicy.FieldCreatorShareBps:
-		return m.AddedCreatorShareBps()
-	case admonetizationpolicy.FieldMultiplierBps:
-		return m.AddedMultiplierBps()
+	case admedia.FieldSizeBytes:
+		return m.AddedSizeBytes()
+	case admedia.FieldWidth:
+		return m.AddedWidth()
+	case admedia.FieldHeight:
+		return m.AddedHeight()
+	case admedia.FieldDurationSeconds:
+		return m.AddedDurationSeconds()
 	}
 	return nil, false
 }
@@ -16385,135 +19062,161 @@ func (m *AdMonetizationPolicyMutation) AddedField(name string) (ent.Value, bool)
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *AdMonetizationPolicyMutation) AddField(name string, value ent.Value) error {
+func (m *AdMediaMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case admonetizationpolicy.FieldCreatorShareBps:
-		v, ok := value.(int)
+	case admedia.FieldSizeBytes:
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddCreatorShareBps(v)
+		m.AddSizeBytes(v)
 		return nil
-	case admonetizationpolicy.FieldMultiplierBps:
+	case admedia.FieldWidth:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddMultiplierBps(v)
+		m.AddWidth(v)
+		return nil
+	case admedia.FieldHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHeight(v)
+		return nil
+	case admedia.FieldDurationSeconds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDurationSeconds(v)
 		return nil
 	}
-	return fmt.Errorf("unknown AdMonetizationPolicy numeric field %s", name)
+	return fmt.Errorf("unknown AdMedia numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *AdMonetizationPolicyMutation) ClearedFields() []string {
+func (m *AdMediaMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(admonetizationpolicy.FieldEffectiveTo) {
-		fields = append(fields, admonetizationpolicy.FieldEffectiveTo)
+	if m.FieldCleared(admedia.FieldDurationSeconds) {
+		fields = append(fields, admedia.FieldDurationSeconds)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *AdMonetizationPolicyMutation) FieldCleared(name string) bool {
+func (m *AdMediaMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *AdMonetizationPolicyMutation) ClearField(name string) error {
+func (m *AdMediaMutation) ClearField(name string) error {
 	switch name {
-	case admonetizationpolicy.FieldEffectiveTo:
-		m.ClearEffectiveTo()
+	case admedia.FieldDurationSeconds:
+		m.ClearDurationSeconds()
 		return nil
 	}
-	return fmt.Errorf("unknown AdMonetizationPolicy nullable field %s", name)
+	return fmt.Errorf("unknown AdMedia nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *AdMonetizationPolicyMutation) ResetField(name string) error {
+func (m *AdMediaMutation) ResetField(name string) error {
 	switch name {
-	case admonetizationpolicy.FieldCreatedAt:
+	case admedia.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case admonetizationpolicy.FieldKey:
-		m.ResetKey()
+	case admedia.FieldAccountID:
+		m.ResetAccountID()
 		return nil
-	case admonetizationpolicy.FieldRevenueSource:
-		m.ResetRevenueSource()
+	case admedia.FieldUploadedBy:
+		m.ResetUploadedBy()
 		return nil
-	case admonetizationpolicy.FieldContentType:
-		m.ResetContentType()
+	case admedia.FieldFileName:
+		m.ResetFileName()
 		return nil
-	case admonetizationpolicy.FieldCreatorShareBps:
-		m.ResetCreatorShareBps()
+	case admedia.FieldMimeType:
+		m.ResetMimeType()
 		return nil
-	case admonetizationpolicy.FieldMultiplierBps:
-		m.ResetMultiplierBps()
+	case admedia.FieldSizeBytes:
+		m.ResetSizeBytes()
 		return nil
-	case admonetizationpolicy.FieldEffectiveFrom:
-		m.ResetEffectiveFrom()
+	case admedia.FieldKind:
+		m.ResetKind()
 		return nil
-	case admonetizationpolicy.FieldEffectiveTo:
-		m.ResetEffectiveTo()
+	case admedia.FieldObjectKey:
+		m.ResetObjectKey()
 		return nil
-	case admonetizationpolicy.FieldUpdatedAt:
+	case admedia.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case admedia.FieldWidth:
+		m.ResetWidth()
+		return nil
+	case admedia.FieldHeight:
+		m.ResetHeight()
+		return nil
+	case admedia.FieldDurationSeconds:
+		m.ResetDurationSeconds()
+		return nil
+	case admedia.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown AdMonetizationPolicy field %s", name)
+	return fmt.Errorf("unknown AdMedia field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AdMonetizationPolicyMutation) AddedEdges() []string {
+func (m *AdMediaMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *AdMonetizationPolicyMutation) AddedIDs(name string) []ent.Value {
+func (m *AdMediaMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AdMonetizationPolicyMutation) RemovedEdges() []string {
+func (m *AdMediaMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *AdMonetizationPolicyMutation) RemovedIDs(name string) []ent.Value {
+func (m *AdMediaMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AdMonetizationPolicyMutation) ClearedEdges() []string {
+func (m *AdMediaMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *AdMonetizationPolicyMutation) EdgeCleared(name string) bool {
+func (m *AdMediaMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *AdMonetizationPolicyMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown AdMonetizationPolicy unique edge %s", name)
+func (m *AdMediaMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdMedia unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *AdMonetizationPolicyMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown AdMonetizationPolicy edge %s", name)
+func (m *AdMediaMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdMedia edge %s", name)
 }
 
 // AdPolicyCategoryMutation represents an operation that mutates the AdPolicyCategory nodes in the graph.
@@ -18073,6 +20776,932 @@ func (m *AdPoolDailyMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdPoolDailyMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdPoolDaily edge %s", name)
+}
+
+// AdScheduledReportMutation represents an operation that mutates the AdScheduledReport nodes in the graph.
+type AdScheduledReportMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	account_id       *uuid.UUID
+	created_by       *uuid.UUID
+	name             *string
+	recipients       *[]string
+	appendrecipients []string
+	frequency        *adscheduledreport.Frequency
+	breakdown        *string
+	metrics          *[]string
+	appendmetrics    []string
+	next_send_at     *time.Time
+	last_sent_at     *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*AdScheduledReport, error)
+	predicates       []predicate.AdScheduledReport
+}
+
+var _ ent.Mutation = (*AdScheduledReportMutation)(nil)
+
+// adscheduledreportOption allows management of the mutation configuration using functional options.
+type adscheduledreportOption func(*AdScheduledReportMutation)
+
+// newAdScheduledReportMutation creates new mutation for the AdScheduledReport entity.
+func newAdScheduledReportMutation(c config, op Op, opts ...adscheduledreportOption) *AdScheduledReportMutation {
+	m := &AdScheduledReportMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdScheduledReport,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdScheduledReportID sets the ID field of the mutation.
+func withAdScheduledReportID(id uuid.UUID) adscheduledreportOption {
+	return func(m *AdScheduledReportMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdScheduledReport
+		)
+		m.oldValue = func(ctx context.Context) (*AdScheduledReport, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdScheduledReport.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdScheduledReport sets the old AdScheduledReport of the mutation.
+func withAdScheduledReport(node *AdScheduledReport) adscheduledreportOption {
+	return func(m *AdScheduledReportMutation) {
+		m.oldValue = func(context.Context) (*AdScheduledReport, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdScheduledReportMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdScheduledReportMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdScheduledReport entities.
+func (m *AdScheduledReportMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdScheduledReportMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdScheduledReportMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdScheduledReport.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdScheduledReportMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdScheduledReportMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdScheduledReportMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *AdScheduledReportMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdScheduledReportMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdScheduledReportMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *AdScheduledReportMutation) SetCreatedBy(u uuid.UUID) {
+	m.created_by = &u
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *AdScheduledReportMutation) CreatedBy() (r uuid.UUID, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldCreatedBy(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *AdScheduledReportMutation) ResetCreatedBy() {
+	m.created_by = nil
+}
+
+// SetName sets the "name" field.
+func (m *AdScheduledReportMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *AdScheduledReportMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *AdScheduledReportMutation) ResetName() {
+	m.name = nil
+}
+
+// SetRecipients sets the "recipients" field.
+func (m *AdScheduledReportMutation) SetRecipients(s []string) {
+	m.recipients = &s
+	m.appendrecipients = nil
+}
+
+// Recipients returns the value of the "recipients" field in the mutation.
+func (m *AdScheduledReportMutation) Recipients() (r []string, exists bool) {
+	v := m.recipients
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecipients returns the old "recipients" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldRecipients(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecipients is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecipients requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecipients: %w", err)
+	}
+	return oldValue.Recipients, nil
+}
+
+// AppendRecipients adds s to the "recipients" field.
+func (m *AdScheduledReportMutation) AppendRecipients(s []string) {
+	m.appendrecipients = append(m.appendrecipients, s...)
+}
+
+// AppendedRecipients returns the list of values that were appended to the "recipients" field in this mutation.
+func (m *AdScheduledReportMutation) AppendedRecipients() ([]string, bool) {
+	if len(m.appendrecipients) == 0 {
+		return nil, false
+	}
+	return m.appendrecipients, true
+}
+
+// ResetRecipients resets all changes to the "recipients" field.
+func (m *AdScheduledReportMutation) ResetRecipients() {
+	m.recipients = nil
+	m.appendrecipients = nil
+}
+
+// SetFrequency sets the "frequency" field.
+func (m *AdScheduledReportMutation) SetFrequency(a adscheduledreport.Frequency) {
+	m.frequency = &a
+}
+
+// Frequency returns the value of the "frequency" field in the mutation.
+func (m *AdScheduledReportMutation) Frequency() (r adscheduledreport.Frequency, exists bool) {
+	v := m.frequency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFrequency returns the old "frequency" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldFrequency(ctx context.Context) (v adscheduledreport.Frequency, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFrequency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFrequency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFrequency: %w", err)
+	}
+	return oldValue.Frequency, nil
+}
+
+// ResetFrequency resets all changes to the "frequency" field.
+func (m *AdScheduledReportMutation) ResetFrequency() {
+	m.frequency = nil
+}
+
+// SetBreakdown sets the "breakdown" field.
+func (m *AdScheduledReportMutation) SetBreakdown(s string) {
+	m.breakdown = &s
+}
+
+// Breakdown returns the value of the "breakdown" field in the mutation.
+func (m *AdScheduledReportMutation) Breakdown() (r string, exists bool) {
+	v := m.breakdown
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBreakdown returns the old "breakdown" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldBreakdown(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBreakdown is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBreakdown requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBreakdown: %w", err)
+	}
+	return oldValue.Breakdown, nil
+}
+
+// ResetBreakdown resets all changes to the "breakdown" field.
+func (m *AdScheduledReportMutation) ResetBreakdown() {
+	m.breakdown = nil
+}
+
+// SetMetrics sets the "metrics" field.
+func (m *AdScheduledReportMutation) SetMetrics(s []string) {
+	m.metrics = &s
+	m.appendmetrics = nil
+}
+
+// Metrics returns the value of the "metrics" field in the mutation.
+func (m *AdScheduledReportMutation) Metrics() (r []string, exists bool) {
+	v := m.metrics
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetrics returns the old "metrics" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldMetrics(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetrics is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetrics requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetrics: %w", err)
+	}
+	return oldValue.Metrics, nil
+}
+
+// AppendMetrics adds s to the "metrics" field.
+func (m *AdScheduledReportMutation) AppendMetrics(s []string) {
+	m.appendmetrics = append(m.appendmetrics, s...)
+}
+
+// AppendedMetrics returns the list of values that were appended to the "metrics" field in this mutation.
+func (m *AdScheduledReportMutation) AppendedMetrics() ([]string, bool) {
+	if len(m.appendmetrics) == 0 {
+		return nil, false
+	}
+	return m.appendmetrics, true
+}
+
+// ResetMetrics resets all changes to the "metrics" field.
+func (m *AdScheduledReportMutation) ResetMetrics() {
+	m.metrics = nil
+	m.appendmetrics = nil
+}
+
+// SetNextSendAt sets the "next_send_at" field.
+func (m *AdScheduledReportMutation) SetNextSendAt(t time.Time) {
+	m.next_send_at = &t
+}
+
+// NextSendAt returns the value of the "next_send_at" field in the mutation.
+func (m *AdScheduledReportMutation) NextSendAt() (r time.Time, exists bool) {
+	v := m.next_send_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextSendAt returns the old "next_send_at" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldNextSendAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextSendAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextSendAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextSendAt: %w", err)
+	}
+	return oldValue.NextSendAt, nil
+}
+
+// ResetNextSendAt resets all changes to the "next_send_at" field.
+func (m *AdScheduledReportMutation) ResetNextSendAt() {
+	m.next_send_at = nil
+}
+
+// SetLastSentAt sets the "last_sent_at" field.
+func (m *AdScheduledReportMutation) SetLastSentAt(t time.Time) {
+	m.last_sent_at = &t
+}
+
+// LastSentAt returns the value of the "last_sent_at" field in the mutation.
+func (m *AdScheduledReportMutation) LastSentAt() (r time.Time, exists bool) {
+	v := m.last_sent_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSentAt returns the old "last_sent_at" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldLastSentAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSentAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSentAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSentAt: %w", err)
+	}
+	return oldValue.LastSentAt, nil
+}
+
+// ClearLastSentAt clears the value of the "last_sent_at" field.
+func (m *AdScheduledReportMutation) ClearLastSentAt() {
+	m.last_sent_at = nil
+	m.clearedFields[adscheduledreport.FieldLastSentAt] = struct{}{}
+}
+
+// LastSentAtCleared returns if the "last_sent_at" field was cleared in this mutation.
+func (m *AdScheduledReportMutation) LastSentAtCleared() bool {
+	_, ok := m.clearedFields[adscheduledreport.FieldLastSentAt]
+	return ok
+}
+
+// ResetLastSentAt resets all changes to the "last_sent_at" field.
+func (m *AdScheduledReportMutation) ResetLastSentAt() {
+	m.last_sent_at = nil
+	delete(m.clearedFields, adscheduledreport.FieldLastSentAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdScheduledReportMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdScheduledReportMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdScheduledReport entity.
+// If the AdScheduledReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdScheduledReportMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdScheduledReportMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdScheduledReportMutation builder.
+func (m *AdScheduledReportMutation) Where(ps ...predicate.AdScheduledReport) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdScheduledReportMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdScheduledReportMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdScheduledReport, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdScheduledReportMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdScheduledReportMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdScheduledReport).
+func (m *AdScheduledReportMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdScheduledReportMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, adscheduledreport.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, adscheduledreport.FieldAccountID)
+	}
+	if m.created_by != nil {
+		fields = append(fields, adscheduledreport.FieldCreatedBy)
+	}
+	if m.name != nil {
+		fields = append(fields, adscheduledreport.FieldName)
+	}
+	if m.recipients != nil {
+		fields = append(fields, adscheduledreport.FieldRecipients)
+	}
+	if m.frequency != nil {
+		fields = append(fields, adscheduledreport.FieldFrequency)
+	}
+	if m.breakdown != nil {
+		fields = append(fields, adscheduledreport.FieldBreakdown)
+	}
+	if m.metrics != nil {
+		fields = append(fields, adscheduledreport.FieldMetrics)
+	}
+	if m.next_send_at != nil {
+		fields = append(fields, adscheduledreport.FieldNextSendAt)
+	}
+	if m.last_sent_at != nil {
+		fields = append(fields, adscheduledreport.FieldLastSentAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adscheduledreport.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdScheduledReportMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adscheduledreport.FieldCreatedAt:
+		return m.CreatedAt()
+	case adscheduledreport.FieldAccountID:
+		return m.AccountID()
+	case adscheduledreport.FieldCreatedBy:
+		return m.CreatedBy()
+	case adscheduledreport.FieldName:
+		return m.Name()
+	case adscheduledreport.FieldRecipients:
+		return m.Recipients()
+	case adscheduledreport.FieldFrequency:
+		return m.Frequency()
+	case adscheduledreport.FieldBreakdown:
+		return m.Breakdown()
+	case adscheduledreport.FieldMetrics:
+		return m.Metrics()
+	case adscheduledreport.FieldNextSendAt:
+		return m.NextSendAt()
+	case adscheduledreport.FieldLastSentAt:
+		return m.LastSentAt()
+	case adscheduledreport.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdScheduledReportMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adscheduledreport.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adscheduledreport.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case adscheduledreport.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case adscheduledreport.FieldName:
+		return m.OldName(ctx)
+	case adscheduledreport.FieldRecipients:
+		return m.OldRecipients(ctx)
+	case adscheduledreport.FieldFrequency:
+		return m.OldFrequency(ctx)
+	case adscheduledreport.FieldBreakdown:
+		return m.OldBreakdown(ctx)
+	case adscheduledreport.FieldMetrics:
+		return m.OldMetrics(ctx)
+	case adscheduledreport.FieldNextSendAt:
+		return m.OldNextSendAt(ctx)
+	case adscheduledreport.FieldLastSentAt:
+		return m.OldLastSentAt(ctx)
+	case adscheduledreport.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdScheduledReport field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdScheduledReportMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adscheduledreport.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adscheduledreport.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case adscheduledreport.FieldCreatedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case adscheduledreport.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case adscheduledreport.FieldRecipients:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecipients(v)
+		return nil
+	case adscheduledreport.FieldFrequency:
+		v, ok := value.(adscheduledreport.Frequency)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFrequency(v)
+		return nil
+	case adscheduledreport.FieldBreakdown:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBreakdown(v)
+		return nil
+	case adscheduledreport.FieldMetrics:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetrics(v)
+		return nil
+	case adscheduledreport.FieldNextSendAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextSendAt(v)
+		return nil
+	case adscheduledreport.FieldLastSentAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSentAt(v)
+		return nil
+	case adscheduledreport.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdScheduledReport field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdScheduledReportMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdScheduledReportMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdScheduledReportMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AdScheduledReport numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdScheduledReportMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adscheduledreport.FieldLastSentAt) {
+		fields = append(fields, adscheduledreport.FieldLastSentAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdScheduledReportMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdScheduledReportMutation) ClearField(name string) error {
+	switch name {
+	case adscheduledreport.FieldLastSentAt:
+		m.ClearLastSentAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdScheduledReport nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdScheduledReportMutation) ResetField(name string) error {
+	switch name {
+	case adscheduledreport.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adscheduledreport.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case adscheduledreport.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case adscheduledreport.FieldName:
+		m.ResetName()
+		return nil
+	case adscheduledreport.FieldRecipients:
+		m.ResetRecipients()
+		return nil
+	case adscheduledreport.FieldFrequency:
+		m.ResetFrequency()
+		return nil
+	case adscheduledreport.FieldBreakdown:
+		m.ResetBreakdown()
+		return nil
+	case adscheduledreport.FieldMetrics:
+		m.ResetMetrics()
+		return nil
+	case adscheduledreport.FieldNextSendAt:
+		m.ResetNextSendAt()
+		return nil
+	case adscheduledreport.FieldLastSentAt:
+		m.ResetLastSentAt()
+		return nil
+	case adscheduledreport.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdScheduledReport field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdScheduledReportMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdScheduledReportMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdScheduledReportMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdScheduledReportMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdScheduledReportMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdScheduledReportMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdScheduledReportMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdScheduledReport unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdScheduledReportMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdScheduledReport edge %s", name)
 }
 
 // AdSpendBatchMutation represents an operation that mutates the AdSpendBatch nodes in the graph.

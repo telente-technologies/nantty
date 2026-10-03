@@ -13,17 +13,21 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
+	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/admonetizationpolicy"
+	"zudomart/modules/ads/src/generated/ent/admedia"
 	"zudomart/modules/ads/src/generated/ent/adpolicycategory"
 	"zudomart/modules/ads/src/generated/ent/adpooldaily"
+	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
 	"zudomart/modules/ads/src/generated/ent/adspendbatch"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/outboxevent"
+	"zudomart/modules/ads/src/types"
 
 	"github.com/google/uuid"
 )
@@ -93,6 +97,10 @@ func init() {
 	adDescFormat := adFields[16].Descriptor()
 	// ad.FormatValidator is a validator for the "format" field. It is called by the builders before save.
 	ad.FormatValidator = adDescFormat.Validators[0].(func(string) error)
+	// adDescAutoCheckFlags is the schema descriptor for auto_check_flags field.
+	adDescAutoCheckFlags := adFields[18].Descriptor()
+	// ad.DefaultAutoCheckFlags holds the default value on creation for the auto_check_flags field.
+	ad.DefaultAutoCheckFlags = adDescAutoCheckFlags.Default.(func() []types.AutoCheckFlag)
 	// adDescUpdatedAt is the schema descriptor for updated_at field.
 	adDescUpdatedAt := adFields[19].Descriptor()
 	// ad.DefaultUpdatedAt holds the default value on creation for the updated_at field.
@@ -447,6 +455,63 @@ func init() {
 	adcontentsignal.DefaultUpdatedAt = adcontentsignalDescUpdatedAt.Default.(func() time.Time)
 	// adcontentsignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	adcontentsignal.UpdateDefaultUpdatedAt = adcontentsignalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	adconversionMixin := schema.AdConversion{}.Mixin()
+	adconversionMixinFields0 := adconversionMixin[0].Fields()
+	_ = adconversionMixinFields0
+	adconversionFields := schema.AdConversion{}.Fields()
+	_ = adconversionFields
+	// adconversionDescCreatedAt is the schema descriptor for created_at field.
+	adconversionDescCreatedAt := adconversionMixinFields0[1].Descriptor()
+	// adconversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adconversion.DefaultCreatedAt = adconversionDescCreatedAt.Default.(func() time.Time)
+	// adconversionDescConversionID is the schema descriptor for conversion_id field.
+	adconversionDescConversionID := adconversionFields[0].Descriptor()
+	// adconversion.ConversionIDValidator is a validator for the "conversion_id" field. It is called by the builders before save.
+	adconversion.ConversionIDValidator = func() func(string) error {
+		validators := adconversionDescConversionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(conversion_id string) error {
+			for _, fn := range fns {
+				if err := fn(conversion_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adconversionDescStoreID is the schema descriptor for store_id field.
+	adconversionDescStoreID := adconversionFields[1].Descriptor()
+	// adconversion.StoreIDValidator is a validator for the "store_id" field. It is called by the builders before save.
+	adconversion.StoreIDValidator = adconversionDescStoreID.Validators[0].(func(string) error)
+	// adconversionDescUserID is the schema descriptor for user_id field.
+	adconversionDescUserID := adconversionFields[2].Descriptor()
+	// adconversion.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	adconversion.UserIDValidator = adconversionDescUserID.Validators[0].(func(string) error)
+	// adconversionDescCurrency is the schema descriptor for currency field.
+	adconversionDescCurrency := adconversionFields[7].Descriptor()
+	// adconversion.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adconversion.CurrencyValidator = func() func(string) error {
+		validators := adconversionDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adconversionDescID is the schema descriptor for id field.
+	adconversionDescID := adconversionMixinFields0[0].Descriptor()
+	// adconversion.DefaultID holds the default value on creation for the id field.
+	adconversion.DefaultID = adconversionDescID.Default.(func() uuid.UUID)
 	adcreatorearningMixin := schema.AdCreatorEarning{}.Mixin()
 	adcreatorearningMixinFields0 := adcreatorearningMixin[0].Fields()
 	_ = adcreatorearningMixinFields0
@@ -494,6 +559,69 @@ func init() {
 	adcreatorearningDescID := adcreatorearningMixinFields0[0].Descriptor()
 	// adcreatorearning.DefaultID holds the default value on creation for the id field.
 	adcreatorearning.DefaultID = adcreatorearningDescID.Default.(func() uuid.UUID)
+	adcustomaudienceMixin := schema.AdCustomAudience{}.Mixin()
+	adcustomaudienceMixinFields0 := adcustomaudienceMixin[0].Fields()
+	_ = adcustomaudienceMixinFields0
+	adcustomaudienceFields := schema.AdCustomAudience{}.Fields()
+	_ = adcustomaudienceFields
+	// adcustomaudienceDescCreatedAt is the schema descriptor for created_at field.
+	adcustomaudienceDescCreatedAt := adcustomaudienceMixinFields0[1].Descriptor()
+	// adcustomaudience.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adcustomaudience.DefaultCreatedAt = adcustomaudienceDescCreatedAt.Default.(func() time.Time)
+	// adcustomaudienceDescName is the schema descriptor for name field.
+	adcustomaudienceDescName := adcustomaudienceFields[1].Descriptor()
+	// adcustomaudience.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	adcustomaudience.NameValidator = func() func(string) error {
+		validators := adcustomaudienceDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adcustomaudienceDescMatchedCount is the schema descriptor for matched_count field.
+	adcustomaudienceDescMatchedCount := adcustomaudienceFields[4].Descriptor()
+	// adcustomaudience.DefaultMatchedCount holds the default value on creation for the matched_count field.
+	adcustomaudience.DefaultMatchedCount = adcustomaudienceDescMatchedCount.Default.(int64)
+	// adcustomaudienceDescDescription is the schema descriptor for description field.
+	adcustomaudienceDescDescription := adcustomaudienceFields[6].Descriptor()
+	// adcustomaudience.DefaultDescription holds the default value on creation for the description field.
+	adcustomaudience.DefaultDescription = adcustomaudienceDescDescription.Default.(string)
+	// adcustomaudience.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	adcustomaudience.DescriptionValidator = adcustomaudienceDescDescription.Validators[0].(func(string) error)
+	// adcustomaudienceDescLookalikeCountryCode is the schema descriptor for lookalike_country_code field.
+	adcustomaudienceDescLookalikeCountryCode := adcustomaudienceFields[9].Descriptor()
+	// adcustomaudience.DefaultLookalikeCountryCode holds the default value on creation for the lookalike_country_code field.
+	adcustomaudience.DefaultLookalikeCountryCode = adcustomaudienceDescLookalikeCountryCode.Default.(string)
+	// adcustomaudience.LookalikeCountryCodeValidator is a validator for the "lookalike_country_code" field. It is called by the builders before save.
+	adcustomaudience.LookalikeCountryCodeValidator = adcustomaudienceDescLookalikeCountryCode.Validators[0].(func(string) error)
+	// adcustomaudienceDescLookalikeSimilarityPercent is the schema descriptor for lookalike_similarity_percent field.
+	adcustomaudienceDescLookalikeSimilarityPercent := adcustomaudienceFields[10].Descriptor()
+	// adcustomaudience.DefaultLookalikeSimilarityPercent holds the default value on creation for the lookalike_similarity_percent field.
+	adcustomaudience.DefaultLookalikeSimilarityPercent = adcustomaudienceDescLookalikeSimilarityPercent.Default.(int)
+	// adcustomaudienceDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	adcustomaudienceDescIdempotencyKey := adcustomaudienceFields[11].Descriptor()
+	// adcustomaudience.DefaultIdempotencyKey holds the default value on creation for the idempotency_key field.
+	adcustomaudience.DefaultIdempotencyKey = adcustomaudienceDescIdempotencyKey.Default.(string)
+	// adcustomaudience.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	adcustomaudience.IdempotencyKeyValidator = adcustomaudienceDescIdempotencyKey.Validators[0].(func(string) error)
+	// adcustomaudienceDescUpdatedAt is the schema descriptor for updated_at field.
+	adcustomaudienceDescUpdatedAt := adcustomaudienceFields[12].Descriptor()
+	// adcustomaudience.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adcustomaudience.DefaultUpdatedAt = adcustomaudienceDescUpdatedAt.Default.(func() time.Time)
+	// adcustomaudience.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adcustomaudience.UpdateDefaultUpdatedAt = adcustomaudienceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adcustomaudienceDescID is the schema descriptor for id field.
+	adcustomaudienceDescID := adcustomaudienceMixinFields0[0].Descriptor()
+	// adcustomaudience.DefaultID holds the default value on creation for the id field.
+	adcustomaudience.DefaultID = adcustomaudienceDescID.Default.(func() uuid.UUID)
 	adfrequencypolicyMixin := schema.AdFrequencyPolicy{}.Mixin()
 	adfrequencypolicyMixinFields0 := adfrequencypolicyMixin[0].Fields()
 	_ = adfrequencypolicyMixinFields0
@@ -725,47 +853,59 @@ func init() {
 	adimpressionDescPlatformShareMicros := adimpressionFields[35].Descriptor()
 	// adimpression.DefaultPlatformShareMicros holds the default value on creation for the platform_share_micros field.
 	adimpression.DefaultPlatformShareMicros = adimpressionDescPlatformShareMicros.Default.(int64)
-	admonetizationpolicyMixin := schema.AdMonetizationPolicy{}.Mixin()
-	admonetizationpolicyMixinFields0 := admonetizationpolicyMixin[0].Fields()
-	_ = admonetizationpolicyMixinFields0
-	admonetizationpolicyFields := schema.AdMonetizationPolicy{}.Fields()
-	_ = admonetizationpolicyFields
-	// admonetizationpolicyDescCreatedAt is the schema descriptor for created_at field.
-	admonetizationpolicyDescCreatedAt := admonetizationpolicyMixinFields0[1].Descriptor()
-	// admonetizationpolicy.DefaultCreatedAt holds the default value on creation for the created_at field.
-	admonetizationpolicy.DefaultCreatedAt = admonetizationpolicyDescCreatedAt.Default.(func() time.Time)
-	// admonetizationpolicyDescKey is the schema descriptor for key field.
-	admonetizationpolicyDescKey := admonetizationpolicyFields[0].Descriptor()
-	// admonetizationpolicy.KeyValidator is a validator for the "key" field. It is called by the builders before save.
-	admonetizationpolicy.KeyValidator = func() func(string) error {
-		validators := admonetizationpolicyDescKey.Validators
+	admediaMixin := schema.AdMedia{}.Mixin()
+	admediaMixinFields0 := admediaMixin[0].Fields()
+	_ = admediaMixinFields0
+	admediaFields := schema.AdMedia{}.Fields()
+	_ = admediaFields
+	// admediaDescCreatedAt is the schema descriptor for created_at field.
+	admediaDescCreatedAt := admediaMixinFields0[1].Descriptor()
+	// admedia.DefaultCreatedAt holds the default value on creation for the created_at field.
+	admedia.DefaultCreatedAt = admediaDescCreatedAt.Default.(func() time.Time)
+	// admediaDescFileName is the schema descriptor for file_name field.
+	admediaDescFileName := admediaFields[2].Descriptor()
+	// admedia.FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
+	admedia.FileNameValidator = func() func(string) error {
+		validators := admediaDescFileName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(key string) error {
+		return func(file_name string) error {
 			for _, fn := range fns {
-				if err := fn(key); err != nil {
+				if err := fn(file_name); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
 	}()
-	// admonetizationpolicyDescContentType is the schema descriptor for content_type field.
-	admonetizationpolicyDescContentType := admonetizationpolicyFields[2].Descriptor()
-	// admonetizationpolicy.ContentTypeValidator is a validator for the "content_type" field. It is called by the builders before save.
-	admonetizationpolicy.ContentTypeValidator = admonetizationpolicyDescContentType.Validators[0].(func(string) error)
-	// admonetizationpolicyDescUpdatedAt is the schema descriptor for updated_at field.
-	admonetizationpolicyDescUpdatedAt := admonetizationpolicyFields[7].Descriptor()
-	// admonetizationpolicy.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	admonetizationpolicy.DefaultUpdatedAt = admonetizationpolicyDescUpdatedAt.Default.(func() time.Time)
-	// admonetizationpolicy.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	admonetizationpolicy.UpdateDefaultUpdatedAt = admonetizationpolicyDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// admonetizationpolicyDescID is the schema descriptor for id field.
-	admonetizationpolicyDescID := admonetizationpolicyMixinFields0[0].Descriptor()
-	// admonetizationpolicy.DefaultID holds the default value on creation for the id field.
-	admonetizationpolicy.DefaultID = admonetizationpolicyDescID.Default.(func() uuid.UUID)
+	// admediaDescMimeType is the schema descriptor for mime_type field.
+	admediaDescMimeType := admediaFields[3].Descriptor()
+	// admedia.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	admedia.MimeTypeValidator = admediaDescMimeType.Validators[0].(func(string) error)
+	// admediaDescObjectKey is the schema descriptor for object_key field.
+	admediaDescObjectKey := admediaFields[6].Descriptor()
+	// admedia.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
+	admedia.ObjectKeyValidator = admediaDescObjectKey.Validators[0].(func(string) error)
+	// admediaDescWidth is the schema descriptor for width field.
+	admediaDescWidth := admediaFields[8].Descriptor()
+	// admedia.DefaultWidth holds the default value on creation for the width field.
+	admedia.DefaultWidth = admediaDescWidth.Default.(int)
+	// admediaDescHeight is the schema descriptor for height field.
+	admediaDescHeight := admediaFields[9].Descriptor()
+	// admedia.DefaultHeight holds the default value on creation for the height field.
+	admedia.DefaultHeight = admediaDescHeight.Default.(int)
+	// admediaDescUpdatedAt is the schema descriptor for updated_at field.
+	admediaDescUpdatedAt := admediaFields[11].Descriptor()
+	// admedia.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	admedia.DefaultUpdatedAt = admediaDescUpdatedAt.Default.(func() time.Time)
+	// admedia.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	admedia.UpdateDefaultUpdatedAt = admediaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// admediaDescID is the schema descriptor for id field.
+	admediaDescID := admediaMixinFields0[0].Descriptor()
+	// admedia.DefaultID holds the default value on creation for the id field.
+	admedia.DefaultID = admediaDescID.Default.(func() uuid.UUID)
 	adpolicycategoryMixin := schema.AdPolicyCategory{}.Mixin()
 	adpolicycategoryMixinFields0 := adpolicycategoryMixin[0].Fields()
 	_ = adpolicycategoryMixinFields0
@@ -850,6 +990,47 @@ func init() {
 	adpooldailyDescID := adpooldailyMixinFields0[0].Descriptor()
 	// adpooldaily.DefaultID holds the default value on creation for the id field.
 	adpooldaily.DefaultID = adpooldailyDescID.Default.(func() uuid.UUID)
+	adscheduledreportMixin := schema.AdScheduledReport{}.Mixin()
+	adscheduledreportMixinFields0 := adscheduledreportMixin[0].Fields()
+	_ = adscheduledreportMixinFields0
+	adscheduledreportFields := schema.AdScheduledReport{}.Fields()
+	_ = adscheduledreportFields
+	// adscheduledreportDescCreatedAt is the schema descriptor for created_at field.
+	adscheduledreportDescCreatedAt := adscheduledreportMixinFields0[1].Descriptor()
+	// adscheduledreport.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adscheduledreport.DefaultCreatedAt = adscheduledreportDescCreatedAt.Default.(func() time.Time)
+	// adscheduledreportDescName is the schema descriptor for name field.
+	adscheduledreportDescName := adscheduledreportFields[2].Descriptor()
+	// adscheduledreport.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	adscheduledreport.NameValidator = func() func(string) error {
+		validators := adscheduledreportDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adscheduledreportDescBreakdown is the schema descriptor for breakdown field.
+	adscheduledreportDescBreakdown := adscheduledreportFields[5].Descriptor()
+	// adscheduledreport.BreakdownValidator is a validator for the "breakdown" field. It is called by the builders before save.
+	adscheduledreport.BreakdownValidator = adscheduledreportDescBreakdown.Validators[0].(func(string) error)
+	// adscheduledreportDescUpdatedAt is the schema descriptor for updated_at field.
+	adscheduledreportDescUpdatedAt := adscheduledreportFields[9].Descriptor()
+	// adscheduledreport.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adscheduledreport.DefaultUpdatedAt = adscheduledreportDescUpdatedAt.Default.(func() time.Time)
+	// adscheduledreport.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adscheduledreport.UpdateDefaultUpdatedAt = adscheduledreportDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adscheduledreportDescID is the schema descriptor for id field.
+	adscheduledreportDescID := adscheduledreportMixinFields0[0].Descriptor()
+	// adscheduledreport.DefaultID holds the default value on creation for the id field.
+	adscheduledreport.DefaultID = adscheduledreportDescID.Default.(func() uuid.UUID)
 	adspendbatchMixin := schema.AdSpendBatch{}.Mixin()
 	adspendbatchMixinFields0 := adspendbatchMixin[0].Fields()
 	_ = adspendbatchMixinFields0
