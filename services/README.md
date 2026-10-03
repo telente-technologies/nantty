@@ -11,7 +11,7 @@ Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.1
 
 ```bash
 pnpm backend:up                # Postgres+PostGIS, Valkey, LocalStack (SNS/SQS), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
-pnpm backend:dev:identity      # go-identity on :8101 (auth module), reads services/go/.env.example
+pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
 pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Paystack keys are empty by default
 ```
@@ -25,7 +25,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | Local port | What |
 | --- | --- |
 | 8080 | gateway (TS) |
-| 8101 | go-identity |
+| 8101 | goIdentity |
 | 8103 / 9103 | go-money HTTP / internal gRPC |
 | 4000 | realtime (Phoenix, `/ws`) |
 | 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
@@ -47,7 +47,7 @@ services/
     go.work
     platform/          shared Go libraries (below)
     modules/<service>/ one Go module per JSON service: auth, users, currency, admin (go-identity) are built, the rest are skeletons
-    deployables/       6 binaries that group modules; one Dockerfile each (build context services/go)
+    deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
   typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
   python/              pointer to apps/intelligence (not duplicated)
@@ -65,23 +65,23 @@ other languages stay ignored.
 | Proto | Server | Callers |
 | --- | --- | --- |
 | `zudomart/money/v1/live_money.proto` (`LiveMoneyService`: `ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | go-money (`MONEY_GRPC_ADDRESS`, default `:9103`) | go-live |
-| `zudomart/money/v1/checkout_money.proto` (`CheckoutMoneyService`: `RegisterCheckoutPayables`, `RecordOrderFulfilment`, `ConfirmOrderReceipt`, `GetOrderEscrow`) | go-money | go-commerce |
-| `zudomart/auth/v1/account_directory.proto` | go-identity | admin, moderation |
+| `zudomart/money/v1/checkout_money.proto` (`CheckoutMoneyService`: `RegisterCheckoutPayables`, `RecordOrderFulfilment`, `ConfirmOrderReceipt`, `GetOrderEscrow`) | go-money | goCommerce |
+| `zudomart/auth/v1/account_directory.proto` | goIdentity | admin, moderation |
 
 Go import: `moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"`. go-money's gRPC requires
 `authorization: Bearer $MONEY_INTERNAL_GRPC_TOKEN` metadata (32+ characters, required in production). Because the workspace
-now includes `services/contracts`, Docker builds that use `go.work` need `services` as the build context (done for go-money).
+includes `services/contracts`, every Go Dockerfile uses `services` as the build context (all six build; CI builds them in the `images` job).
 
 ### Go deployables (ECS/Fargate)
 
 | Deployable | Modules | Why grouped |
 | --- | --- | --- |
-| go-identity | auth, users, currency, admin | low write volume, shared session/JWKS concerns |
-| go-commerce | catalog, inventory, orders, analytics | stock reservation and order creation in one transaction |
-| go-money | payments, wallet, ledger, escrow, subscriptions, creators, rewards | every balance change commits in one Postgres transaction |
-| go-live | live | hot, latency-sensitive state machine (sessions, guests, battles, gifts) |
-| go-ads | ads | separate scaling and billing cadence |
-| go-trust | moderation | async, queue-driven |
+| goIdentity | auth, users, currency, admin | low write volume, shared session/JWKS concerns |
+| goCommerce | catalog, inventory, orders, analytics | stock reservation and order creation in one transaction |
+| goMoney | payments, wallet, ledger, escrow, subscriptions, creators, rewards | every balance change commits in one Postgres transaction |
+| goLive | live | hot, latency-sensitive state machine (sessions, guests, battles, gifts) |
+| goAds | ads | separate scaling and billing cadence |
+| goTrust | moderation | async, queue-driven |
 
 A module never imports another module's packages (use `platform/identityports`, events or gRPC). Splitting a module into its own deployable is a `main.go` change.
 
@@ -153,7 +153,7 @@ Python returns scores only; Go/TS apply a deterministic allow / hold / review / 
 
 ## go-identity: auth, users, currency, admin
 
-All four modules live in `deployables/go-identity` and follow the Zudojs Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
+All four modules live in `deployables/goIdentity` and follow the Zudojs Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
 each command or query is a folder with `<name>.command.go` + `<name>.handler.go`). Modules never import each other. They talk
 through narrow ports in `platform/identityports` (registered at start-up, in-process today, replaceable by gRPC when a module is split out):
 `AccountDirectory` (auth), `UsernameGuard` and `AccountCountryLookup` (users), `StaffTokenService` (auth), `AuditRecorder` and
@@ -258,7 +258,7 @@ Gateway: `/api/v1/admin/*` is routed with `authentication: "optional"` because s
 Zudojs Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
 each command/query is `commands|queries/<name>/<name>.command|query.go` + `<name>.handler.go`; modules: sessions, stage, battles, gifts, points). `pnpm backend:dev:live` runs it on :8102.
 
-- Writes only the `live` schema. Money goes through go-money gRPC (`LIVE_MONEY_GRPC_ADDRESS`; without it a clearly logged in-memory fake is used outside production). Names and creator-program roles come from the auth account directory (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`, otherwise the granted `auth.accounts` columns).
+- Writes only the `live` schema. Money goes through go-money gRPC (`LIVE_MONEY_GRPC_ADDRESS`, `LIVE_MONEY_GRPC_TOKEN`, `LIVE_MONEY_CALL_TIMEOUT` 5s, `LIVE_GRPC_RETRY_ATTEMPTS` 3 on `UNAVAILABLE` only; the in-memory fake is used only when the address is empty outside production, and production refuses to start without addresses and 32+ character tokens). Names and creator-program roles come from the auth account directory (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`/`_TOKEN`; without an address the granted `auth.accounts` columns are used outside production). `deployables/goLive/liveMoney.integration_test.go` runs go-live against a real go-money (gift, balanced ledger, `gift.sent` and `giftTransaction.committed` outbox rows). Lists (`/lives/suggested`, `/lives/:id/viewers`) are `{data, nextCursor}`.
 - Tokens are verified in Go with `platform/jwtauth` against the auth JWKS (`AUTH_JWKS_URL`); the gateway headers are not trusted.
 - LiveKit tokens (host, guest, viewer grants) via `livekit/protocol`; remove/mute use the LiveKit RoomService against `LIVEKIT_URL`.
 - Durable timers: DB deadlines plus a 1 s sweep (`LIVE_TIMER_POLL_INTERVAL`). Domain events (`gift.sent`, `battle.*`, `guest.*`, `goal.*`, `leaderboard.updated`, `stage.updated`, `live.*`) go through the outbox; Phoenix consumes them from `realtime-domain-events` and fans them out to `live:{liveId}` (`guest.invited` to `user:{id}`).
@@ -336,10 +336,16 @@ winner, a tie settles as keep-own, viewers are never refunded. Money events are 
 | `GET/POST /wallets/me/payout-accounts`, `DELETE /wallets/me/payout-accounts/{id}` | |
 | `GET /wallets/me/withdrawals/quote`, `GET/POST /wallets/me/withdrawals` (IK), `POST /wallets/me/withdrawals/{id}/cancel` | |
 | `GET /api/v1/banks?country=`, `POST /banks/resolve-account` | cached 12h, static NG fallback |
-| `POST /payments/initialize` (IK), `POST /payments/orders/{orderId}/verify`, `POST /payments/webhooks/{provider}`, `POST /payments/store-notifications/{store}` | |
-| `GET /orders/{orderId}/escrow`, `POST /orders/{orderId}/disputes` (IK), `GET /disputes`, `GET /disputes/{id}`, `POST /disputes/{id}/messages` (IK), `POST /disputes/{id}/close` | the gateway cannot route `/orders/{id}/…` by prefix yet |
+| `POST /payments/initialize` (IK), `POST /payments/orders/{orderId}/verify`, `POST /webhooks/{provider}`, `POST /webhooks/store-notifications/{store}` (ALB `/webhooks/*` → go-money, never the gateway; the old `/api/v1/payments/webhooks/*` paths still work against go-money directly) | |
+| `GET /orders/{orderId}/escrow`, `POST /orders/{orderId}/disputes` (IK), `GET /disputes`, `GET /disputes/{id}`, `POST /disputes/{id}/messages` (IK), `POST /disputes/{id}/close` | gateway routes `/orders/*/escrow` and `/orders/*/disputes` (`*` = one path segment) |
 | Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`zudomart-admin` audience) with `money.*` permissions |
 
 Not built yet: subscriptions and rewards modules (skeletons), Paystack subaccount splits for direct orders, real App Store /
-Play verification, wallet top-ups, seller reserve percentage, admin-editable money settings (env today), payout-account name
+Play verification, wallet top-ups, seller reserve percentage (the `escrow.policy.sellerReserveBps` setting is read but not applied), payout-account name
 matching against KYC, a timestamp window on webhooks (replay protection is the event-key claim plus provider re-query).
+
+**Money settings (admin-owned).** go-money reads `gift.shareTiers` and `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from `admin.platform_settings` through the read-only grant (`ADMIN_DATABASE_SCHEMA`, cached `MONEY_PLATFORM_SETTINGS_TTL` 30s, last good value kept if the read fails). `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD` and the creator tier table are the fallback. Gift share = max(staff-granted member tier, admin tier reached by this month's gift coins), capped at 7000 bps.
+
+## Elixir file names
+
+`services/elixir/realtime/lib` and `test` use camelCase `<name>.<kind>.ex` (`accessToken.verifier.ex`, `domainEvent.router.ex`, folder `realtimeWeb/`); module names are unchanged.
