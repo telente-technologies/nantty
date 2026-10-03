@@ -6,7 +6,7 @@
 }
 
 .heading {
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   font-weight: 650;
   margin-bottom: 6px;
 }
@@ -33,11 +33,11 @@
 
 .placementName {
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: var(--fs-13);
 }
 
 .statusLabel {
-  font-size: 11px;
+  font-size: var(--fs-12);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -45,7 +45,7 @@
 
 .message {
   grid-column: 2 / 4;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
@@ -66,6 +66,6 @@
 
 .error {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--error-ink);
 }
