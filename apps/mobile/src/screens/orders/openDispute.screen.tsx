@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
@@ -21,6 +21,8 @@ const MINIMUM_DESCRIPTION_LENGTH = 20;
 const REASONS_THAT_NEED_PHOTOS = new Set<DisputeReason>(["damaged", "not_as_described", "wrong_item"]);
 
 export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDispute">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { orderId } = route.params;
   const queryClient = useQueryClient();
   const [reason, setReason] = useState<DisputeReason | null>(null);
@@ -106,7 +108,7 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
   notice: { backgroundColor: colors.primaryTint, borderRadius: 12, padding: 12, gap: 4 },
   reasons: { gap: 8 },
@@ -117,11 +119,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.textSubtle,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     textAlignVertical: "top",
     fontFamily: fontFamily[400],
     fontSize: 14,
     color: colors.text,
   },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
-});
+}));

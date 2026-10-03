@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ordersService } from "@/services/orders.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -20,6 +20,8 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { orderId } = route.params;
   const [confirmSheetVisible, setConfirmSheetVisible] = useState(false);
   const order = useQuery({ queryKey: ["orders", "detail", orderId], queryFn: () => ordersService.fetchOrderById(orderId) });
@@ -114,13 +116,13 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
-  escrowCard: { backgroundColor: colors.white, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  escrowCard: { backgroundColor: colors.surface, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   divider: { height: 1, backgroundColor: colors.background },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
   footerRow: { flexDirection: "row", gap: 12 },
-});
+}));

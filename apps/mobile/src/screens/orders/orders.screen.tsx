@@ -7,7 +7,7 @@ import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ordersService } from "@/services/orders.service";
 import type { Order, OrderStatus } from "@/types";
@@ -41,6 +41,8 @@ const describeOrderForList = (order: Order) =>
   `${order.store.name} • ${order.reference} • ${formatTimeSincePosted(order.createdAt)} ago`;
 
 export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [filter, setFilter] = useState<OrderFilterKey>("all");
   const orders = useQuery({ queryKey: ["orders", "all"], queryFn: () => ordersService.fetchMyOrders(null) });
 
@@ -90,13 +92,13 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   filtersBar: { flexGrow: 0, flexShrink: 0 },
   filters: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
   list: { paddingHorizontal: 16, paddingBottom: 32 },
   sectionTitle: { marginTop: 16, marginBottom: 8 },
-  row: { backgroundColor: colors.white, paddingHorizontal: 12 },
+  row: { backgroundColor: colors.surface, paddingHorizontal: 12 },
   firstRow: { borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingTop: 4 },
   lastRow: { borderBottomLeftRadius: 12, borderBottomRightRadius: 12, paddingBottom: 4 },
   state: { marginTop: 64 },
-});
+}));
