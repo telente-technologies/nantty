@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -35,9 +36,7 @@ export function ProductInfoSection({ title, body, collapsible = false }: Product
         <View style={styles.titleRow}>{heading}</View>
       )}
       {expanded ? (
-        <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-          {body}
-        </Text>
+        <MentionText text={body} size={13} lineHeight={16.9} color={colors.textMuted} />
       ) : null}
     </View>
   );
