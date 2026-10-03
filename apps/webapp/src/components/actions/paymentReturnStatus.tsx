@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Spinner } from "@/components/ui/feedback";
 
 import styles from "./paymentReturnStatus.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 interface PaymentReturnStatusProps {
   readonly state: "confirming" | "succeeded" | "failed";
@@ -28,7 +29,7 @@ export function PaymentReturnStatus({ state, confirmingText, succeededTitle, suc
       ) : state === "succeeded" ? (
         <>
           <span className={styles.successMark} aria-hidden="true">
-            ✓
+            <AppIcon name="check16" size={28} />
           </span>
           <h1 className={styles.title}>{succeededTitle}</h1>
           <p className={styles.text}>{succeededText}</p>

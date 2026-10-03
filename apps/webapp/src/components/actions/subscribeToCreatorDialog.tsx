@@ -9,6 +9,7 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
 import styles from "./actionDialogs.module.css";
 
@@ -24,7 +25,10 @@ export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorNa
   const plansQuery = useQuery({ queryKey: ["creatorPlans", creatorId], queryFn: () => creatorSubscriptionsService.fetchPlans(creatorId), enabled: isOpen, retry: false });
   const subscribeMutation = useMutation({
     mutationFn: (planId: string) => creatorSubscriptionsService.startSubscription(creatorId, planId),
-    onSuccess: (checkout) => window.location.assign(checkout.checkoutUrl),
+    onSuccess: async (checkout) => {
+      const outcome = await openPaystackCheckout(checkout);
+      if (outcome === "completed") window.location.assign(`/subscriptions/return?subscriptionId=${encodeURIComponent(checkout.subscriptionId)}`);
+    },
   });
   const plans = plansQuery.data ?? [];
 
@@ -33,7 +37,7 @@ export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorNa
       isOpen={isOpen}
       onClose={onClose}
       title={`Subscribe to ${creatorName}`}
-      description="Support this creator and unlock subscriber-only posts, clips and lives. Checkout opens on Bachs."
+      description="Support this creator and unlock subscriber-only posts, clips and lives. Pay by card, bank transfer or USSD in a secure window."
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
