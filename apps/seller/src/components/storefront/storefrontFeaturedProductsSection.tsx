@@ -15,6 +15,7 @@ import type { CursorPage } from "@/types/pagination.type";
 import type { StorefrontFeaturedProduct } from "@/types/storefront.type";
 
 import styles from "./storefront.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
 
 const maximumFeaturedProducts = 8;
 
@@ -59,10 +60,10 @@ export function StorefrontFeaturedProductsSection({ draft, onDraftChange }: { re
               </span>
               {product.isAvailable ? null : <StatusBadge tone="caution">Hidden</StatusBadge>}
               <Button size="small" variant="ghost" aria-label={`Move ${product.name} up`} disabled={index === 0} onClick={() => moveFeaturedProduct(index, -1)}>
-                ↑
+                <ZudoIcon name="arrowUp24" size={16} />
               </Button>
               <Button size="small" variant="ghost" aria-label={`Move ${product.name} down`} disabled={index === featured.length - 1} onClick={() => moveFeaturedProduct(index, 1)}>
-                ↓
+                <ZudoIcon name="arrowDown24" size={16} />
               </Button>
               <IconButton iconName="trash24" label={`Stop featuring ${product.name}`} size="small" onClick={() => onDraftChange({ featuredProducts: featured.filter((candidate) => candidate.productId !== product.productId) })} />
             </li>

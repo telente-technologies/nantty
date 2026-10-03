@@ -7,6 +7,7 @@ import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { storefrontWeekdays, type StorefrontProfile } from "@/types/storefront.type";
 
 import styles from "./storefront.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 function readStoreInitials(storeName: string): string {
   return storeName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]?.toUpperCase() ?? "").join("") || "Z";
@@ -34,7 +35,7 @@ export function StorefrontPreviewCard({ draft, profile }: { readonly draft: Stor
         {draft.tagline ? <span>{draft.tagline}</span> : null}
         <span className={styles.previewStats}>
           <span>{new Intl.NumberFormat("en-NG", { notation: "compact" }).format(profile.followerCount)} followers</span>
-          {profile.averageRating !== null ? <span>★ {profile.averageRating.toFixed(1)}</span> : null}
+          {profile.averageRating !== null ? <IconLabel name="star16" size={12}>{profile.averageRating.toFixed(1)}</IconLabel> : null}
           <StatusBadge tone={isOpen ? "success" : "neutral"}>{isOpen ? "Open now" : "Closed"}</StatusBadge>
         </span>
         {draft.description ? <p className={styles.muted}>{draft.description.length > 140 ? `${draft.description.slice(0, 140)}…` : draft.description}</p> : null}
