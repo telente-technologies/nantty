@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { UserSummary } from "@/types";
 
 export interface PersonRowProps {
@@ -14,6 +14,7 @@ export interface PersonRowProps {
 }
 
 export function PersonRow({ person, onPress, right, avatarSize = 54 }: PersonRowProps) {
+  const { colors } = useTheme();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={person.name} onPress={onPress} style={styles.row}>
       <Avatar uri={person.avatarUrl} size={avatarSize} placeholderColor={colors.primaryTint} />

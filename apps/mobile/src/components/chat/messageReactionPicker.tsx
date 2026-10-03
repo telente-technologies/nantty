@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 
 export const MESSAGE_REACTION_EMOJI = ["❤️", "😂", "🔥", "👍", "😮", "🙏"] as const;
@@ -13,6 +13,7 @@ export interface MessageReactionPickerProps {
 }
 
 export function MessageReactionPicker({ visible, onPickEmoji, onClose }: MessageReactionPickerProps) {
+  const styles = useStyles();
   return (
     <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable accessibilityLabel="Close reactions" style={styles.backdrop} onPress={onClose}>
@@ -36,7 +37,7 @@ export function MessageReactionPicker({ visible, onPickEmoji, onClose }: Message
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: colors.overlay, alignItems: "center", justifyContent: "center" },
-  bar: { flexDirection: "row", gap: 14, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, backgroundColor: colors.white },
-});
+  bar: { flexDirection: "row", gap: 14, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, backgroundColor: colors.surface },
+}));

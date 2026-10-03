@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 const DOT_COUNT = 3;
 const DOT_BOUNCE_DURATION_MS = 320;
 const DOT_STAGGER_MS = 160;
 
 function BouncingDot({ staggerMs }: { readonly staggerMs: number }) {
+  const styles = useStyles();
   const translateY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -26,6 +27,7 @@ function BouncingDot({ staggerMs }: { readonly staggerMs: number }) {
 }
 
 export function TypingDots() {
+  const styles = useStyles();
   return (
     <View style={styles.row} accessibilityRole="text" accessibilityLabel="Typing" accessible>
       {Array.from({ length: DOT_COUNT }, (_, index) => (
@@ -35,7 +37,7 @@ export function TypingDots() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -51,4 +53,4 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: colors.textMuted,
   },
-});
+}));

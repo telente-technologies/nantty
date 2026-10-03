@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { MessageReactionSummary } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
@@ -12,6 +12,7 @@ export interface MessageReactionsRowProps {
 }
 
 export function MessageReactionsRow({ reactions, onToggleReaction, alignEnd }: MessageReactionsRowProps) {
+  const styles = useStyles();
   if (reactions.length === 0) return null;
   return (
     <View style={[styles.row, alignEnd && styles.alignEnd]}>
@@ -33,9 +34,9 @@ export function MessageReactionsRow({ reactions, onToggleReaction, alignEnd }: M
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
   alignEnd: { justifyContent: "flex-end" },
-  chip: { height: 24, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.divider, backgroundColor: colors.white, justifyContent: "center" },
+  chip: { height: 24, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.divider, backgroundColor: colors.surface, justifyContent: "center" },
   chipSelected: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
-});
+}));

@@ -4,7 +4,7 @@ import { Frame30132Icon } from "@/components/icons";
 import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { StoryTrayItem } from "@/types";
 
 export interface StoryTrayProps {
@@ -19,6 +19,8 @@ const sortLiveCreatorsFirst = (items: readonly StoryTrayItem[]) =>
   [...items].sort((left, right) => Number(Boolean(right.user.live)) - Number(Boolean(left.user.live)));
 
 export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, onPressLive }: StoryTrayProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       <Pressable accessibilityRole="button" accessibilityLabel="Add story" onPress={onPressAddStory} style={styles.item}>
@@ -74,7 +76,7 @@ export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, o
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingHorizontal: 16, gap: 12 },
   item: { width: 68, alignItems: "center", gap: 4 },
   bubble: { width: 68, height: 60 },
@@ -82,4 +84,4 @@ const styles = StyleSheet.create({
   ring: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primaryTint },
   ringUnseen: { borderWidth: 1, borderColor: colors.primary },
   badge: { position: "absolute", right: 0, bottom: 0 },
-});
+}));

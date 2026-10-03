@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { PauseFill24Icon, Play24Icon } from "@/components/icons";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
 import type { MessageAttachedMedia } from "@/types";
 
@@ -18,6 +18,7 @@ export interface VoiceNoteBubbleProps {
 }
 
 export function VoiceNoteBubble({ media, isMine, deliveryStatus }: VoiceNoteBubbleProps) {
+  const { colors } = useTheme();
   const player = useAudioPlayer(media.url ? { uri: media.url } : null);
   const status = useAudioPlayerStatus(player);
   const durationSeconds = media.durationSeconds || status.duration || 0;

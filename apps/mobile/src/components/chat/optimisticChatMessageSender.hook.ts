@@ -9,6 +9,7 @@ import {
 } from "@/cache/messageSync.util";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { buildLocalPendingMessageFromDraft, messagesService } from "@/services/messages.service";
+import { buildLinkPreviewOnSenderDevice } from "@/services/linkPreviews.service";
 import type { Message } from "@/types";
 
 export function useOptimisticChatMessageSender(conversationId: string | undefined, myUserId: string) {
@@ -31,7 +32,8 @@ export function useOptimisticChatMessageSender(conversationId: string | undefine
   return useCallback(
     async (text: string) => {
       if (!conversationId) return;
-      const draft = { conversationId, senderId: myUserId, text, localMessageId: `local_${generateIdempotencyKey()}` };
+      const linkPreview = await buildLinkPreviewOnSenderDevice(text);
+      const draft = { conversationId, senderId: myUserId, text, linkPreview, localMessageId: `local_${generateIdempotencyKey()}` };
       const pendingMessage = buildLocalPendingMessageFromDraft(draft);
       savePendingOutgoingMessageLocally(pendingMessage);
       updateCachedConversationMessages((messages) => [...messages, { ...pendingMessage, deliveryStatus: "pending" }]);
@@ -41,6 +43,7 @@ export function useOptimisticChatMessageSender(conversationId: string | undefine
         replacePendingMessageWithDeliveredMessageLocally(draft.localMessageId, result.message);
         replaceCachedMessage(draft.localMessageId, result.message, "sent");
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        queryClient.invalidateQueries({ queryKey: ["conversation"] });
       } catch {
         markPendingMessageAsFailedLocally(draft.localMessageId);
         replaceCachedMessage(draft.localMessageId, pendingMessage, "failed");

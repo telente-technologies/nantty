@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface SmallTabProps {
   readonly label: string;
@@ -10,12 +10,13 @@ export interface SmallTabProps {
 }
 
 export function SmallTab({ label, selected = false, onPress }: SmallTabProps) {
+  const { colors } = useTheme();
   return (
     <Pressable
       accessibilityRole="tab"
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={[styles.tab, { backgroundColor: selected ? colors.chip : colors.white }]}
+      style={[styles.tab, { backgroundColor: selected ? colors.chip : colors.surface }]}
     >
       <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={selected ? colors.black : colors.textMuted}>
         {label}
