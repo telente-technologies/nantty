@@ -1,8 +1,10 @@
 package middlewares
 
 import (
+	"crypto/subtle"
 	"net/http"
 	"slices"
+	"strings"
 
 	"zudomart/modules/live/src/container"
 	"zudomart/platform/httpserver"
@@ -50,4 +52,21 @@ func requireAdminRole(handler http.HandlerFunc) http.Handler {
 		}
 		handler(writer, request)
 	})
+}
+
+func InternalToken(deployed *container.Container) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			expected := deployed.Settings.InternalApiToken
+			presented := request.Header.Get("X-Internal-Token")
+			if presented == "" {
+				presented = strings.TrimPrefix(request.Header.Get("Authorization"), "Bearer ")
+			}
+			if expected == "" || subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
+				httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+				return
+			}
+			handler(writer, request)
+		})
+	}
 }

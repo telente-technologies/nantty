@@ -3,6 +3,7 @@ package utils
 import (
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -71,4 +72,24 @@ func ClientRegion(request *http.Request) string {
 		return ""
 	}
 	return region
+}
+
+func PageParameters(request *http.Request, defaultLimit, maximumLimit int) (string, int, error) {
+	limit := defaultLimit
+	if raw := request.URL.Query().Get("limit"); raw != "" {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed < 1 || parsed > maximumLimit {
+			return "", 0, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "limit", Message: "must be between 1 and " + strconv.Itoa(maximumLimit)}})
+		}
+		limit = parsed
+	}
+	return request.URL.Query().Get("cursor"), limit, nil
+}
+
+func DecodeOptionalBody[Request any](writer http.ResponseWriter, request *http.Request, validate func(Request) error) (Request, error) {
+	var body Request
+	if request.ContentLength == 0 && request.Header.Get("Transfer-Encoding") == "" {
+		return body, nil
+	}
+	return DecodeAndValidate(writer, request, validate)
 }
