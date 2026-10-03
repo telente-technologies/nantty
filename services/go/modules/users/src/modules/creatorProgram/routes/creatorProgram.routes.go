@@ -1,0 +1,26 @@
+package routes
+
+import (
+	"net/http"
+
+	"zudomart/modules/users/src/container"
+	"zudomart/modules/users/src/modules/creatorProgram/controllers"
+	"zudomart/platform/identityports"
+	"zudomart/platform/jwtauth"
+	"zudomart/platform/staffauth"
+)
+
+func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Container) {
+	controller := controllers.CreatorProgramController{Container: container}
+	requireAccessToken := jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)
+	guard := staffauth.Guard{Registry: identityports.Default}
+	review := guard.RequireStaff("applications:creators", false)
+	mux.Handle("GET /api/v1/creators/eligibility", requireAccessToken(http.HandlerFunc(controller.Eligibility)))
+	mux.Handle("GET /api/v1/creators/applications/me", requireAccessToken(http.HandlerFunc(controller.MyApplication)))
+	mux.Handle("POST /api/v1/creators/applications", requireAccessToken(http.HandlerFunc(controller.Submit)))
+	mux.Handle("GET /api/v1/admin/applications/creators", review(http.HandlerFunc(controller.List)))
+	mux.Handle("GET /api/v1/admin/applications/creators/{applicationId}", review(http.HandlerFunc(controller.Detail)))
+	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/approve", review(http.HandlerFunc(controller.Approve)))
+	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/reject", review(http.HandlerFunc(controller.Reject)))
+	mux.HandleFunc("PUT /api/v1/internal/profiles/{profileId}/signals", controller.PutSignals)
+}
