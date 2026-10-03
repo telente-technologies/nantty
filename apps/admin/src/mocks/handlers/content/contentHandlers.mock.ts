@@ -4,6 +4,9 @@ import { registerCatalogCategoryMockHandlers } from "./catalogCategories.mock";
 import { registerCatalogFeatureMockHandlers } from "./catalogFeatures.mock";
 import { registerCatalogTopicMockHandlers } from "./catalogTopics.mock";
 import { readSupportMockStore } from "./contentStores.mock";
+import { registerEmailTemplateMockHandlers } from "./emailTemplates.mock";
+import { registerSupportChatMockHandlers } from "./supportChat.mock";
+import { registerSupportEmailMockHandlers } from "./supportEmail.mock";
 import { registerSupportMacroMockHandlers } from "./supportMacros.mock";
 import { isSupportTicketBreachingSla } from "./supportTicketPresenter.mock";
 import { registerSupportTicketMockHandlers } from "./supportTickets.mock";
@@ -20,5 +23,8 @@ export function registerContentAndSupportMockHandlers(): void {
   registerCatalogFeatureMockHandlers();
   registerSupportTicketMockHandlers();
   registerSupportMacroMockHandlers();
+  registerSupportChatMockHandlers();
+  registerSupportEmailMockHandlers();
+  registerEmailTemplateMockHandlers();
   registerMockQueueCounter({ key: "supportTickets", label: "Support tickets", href: "/support", readCount: countOpenSupportTickets });
 }
