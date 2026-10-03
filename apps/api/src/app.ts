@@ -84,7 +84,6 @@ export function createApp(options: AppOptions): Runtime {
       applicationName: "zudomart",
       applicationVersion: "0.1.0",
       environment: options.config.nodeEnv,
-      // Signals are handled explicitly in server.ts.
       handleSignals: false,
     },
   );

@@ -44,8 +44,6 @@ const dependencies = createDependencies({
     return { ready, checks };
   },
 });
-// Modules reach the composition root through the runtime container:
-// context.application.container.resolve(APP_DEPENDENCIES).
 runtime.context.container.registerValue(APP_DEPENDENCIES, dependencies);
 
 const router = createRouter(createApplicationRouterOptions());
