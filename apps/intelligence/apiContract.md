@@ -724,6 +724,88 @@ Null fields are left unchanged. Response `{"soundId": "snd_001", "isVerifiedOrig
 - Fallback when Python is down or times out: accept the upload, queue the fingerprint/match job for retry
   with backoff. Never block publishing solely on this check; the copyright review happens afterwards.
 
+## 7b. Safety, trust and consent scoring (B7)
+
+Python returns scores and suggestions only. Go/TS services make every decision and keep a deterministic
+fallback; none of these calls may sit in the critical path of a payment (use the timeout and fall back).
+
+| endpoint | client timeout | fallback |
+|---|---|---|
+| POST /v1/chat/spam-score | 60 ms | no throttle; the caller's own rate limits |
+| POST /v1/moderation/classify | 150 ms | existing keyword/report rules, queue for review |
+| POST /v1/risk/score-extended | 120 ms | the service's conservative rules; unknown => `review` |
+| POST /v1/creators/real-followers | 500 ms | use raw follower count with the manual-review gate |
+| POST /v1/ads/predicted-ctr | 80 ms | smoothed historical CTR from the ads store |
+
+### POST /v1/chat/spam-score
+
+Sender behaviour metadata only. The contract rejects unknown fields (422), so `text`, `body` or any message content can never be sent.
+`behaviour` fields (all optional): `accountAgeHours`, `messagesLastHour`, `messagesLastDay`, `newRecipientsLastHour` (new-recipient fan-out),
+`distinctRecipientsLastDay`, `recipientReplyRate`, `blockRate`, `reportRate`, `linksSentLastDay`, `reportedLinksCount`, `deviceAccountCount`, `ipAccountCount`.
+`useStoredBehaviour` (default true) merges counters built from `message.sent` metadata events (max of supplied and stored values).
+Response: `{senderId, score, level, recommendedAction: allow|throttle|review, reasons[{code,weight}], suspensionSuggested, metadata}`.
+
+### POST /v1/moderation/classify
+
+`{contentId, contentType: post|comment|clip_caption|bio|product_listing|store_description, text (1..5000), authorId?}`.
+This endpoint intentionally receives public post text (an explicit exception to the no-free-text rule), and only for public content, never chat or private messages.
+Categories: `scam, spam, harassment, violence, prohibited_goods, personal_data`. Text heuristics run first (regex signals, Luhn card check,
+noisy-OR); a registered `ModerationModel` (`version`, `classify(text, contentType)`) can only raise a category score, and a model failure
+degrades to heuristics (`metadata.degraded`). Response: `{contentId, categories[{category,score,signals}], topCategory, score, suggestedAction: allow|review|block, classifierSources, metadata}`.
+`block` is a suggestion; thresholds are 0.5 review, 0.85 block.
+
+### POST /v1/risk/score-extended
+
+Subjects not covered by `/v1/risk/score`: `account, payment, ad_click, referral_removed, refund, marketplace`. Exactly one signals block matching
+`subjectType` (`account`, `payment`, `adClick`, `referralRemoved`, `refund`, `marketplace`), camelCase fields as in
+`src/modules/extended_risk/dtos/extended_risk_dto.py`. Response: `{subjectType, subjectId, score, level, recommendedAction, reasons, suspensionSuggested, metadata}`.
+
+### Suspension suggestions (goTrust advisory queue)
+
+When an `account`, `ad_click`, `referral_removed` or `marketplace` risk score, or a chat spam score, is >= 0.8, Python publishes one message per
+account, source and UTC day as a persistent RabbitMQ job (exchange `zudomart.jobs`, routing key `INTELLIGENCE_TRUST_ADVISORY_QUEUE`, default `intelligence-trust-advisory`; `EVENT_BUS=sqs` keeps `INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`):
+`{suggestionId, subjectType:"account", subjectId, source, score, evidence:[{code,weight}], advisoryOnly:true, generatedAt}`, `message_id = suggestionId`, `type = suspension.suggested`.
+It never suspends anything; goTrust opens an advisory case. Publish failures are logged and never fail the scoring call.
+
+### POST /v1/creators/real-followers
+
+`{creatorId, followers[<=5000]: {followerId, accountAgeDays, hasProfilePhoto, postCount, activeDaysLast30, followedAccountCount, deviceClusterSize, signupBurstSize, phoneVerified}, totalFollowerCount?}`.
+Per-follower authenticity is a multiplicative rule model. Response: `{creatorId, sampledFollowers, estimatedRealRatio, estimatedRealFollowers, realFollowersLowerBound, suspiciousFollowers, topReasons, metadata}`.
+With `totalFollowerCount` the sampled ratio is scaled to the total. Use `realFollowersLowerBound` against the eligibility threshold; the decision stays in Go.
+
+### POST /v1/ads/predicted-ctr
+
+`{placement, viewer, candidates[<=300 AdCandidate]}` => `{predictions[{adId, predictedClickRate}], personalized, metadata}`. Uses the same features and `ad_click`
+model (or heuristic) as `/v1/ads/select`; `personalized:false` when the viewer opted out or the store is unavailable.
+
+### Domain event consumer (RabbitMQ)
+
+`RABBITMQ_URL` (or `INTELLIGENCE_RABBITMQ_URL`; user `intelligence`) starts an aio-pika consumer on `INTELLIGENCE_DOMAIN_EVENTS_QUEUE` (default `intelligence-domain-events`, prefetch `INTELLIGENCE_RABBITMQ_PREFETCH`, default 20) in the app lifespan, with reconnect backoff. `EVENT_BUS=sqs` keeps the old SQS poller (`INTELLIGENCE_DOMAIN_EVENTS_QUEUE_URL`). Bodies may be raw JSON or SNS-wrapped (`{"Message": "..."}`):
+Contract events use the published `services/contracts/events/schemas/envelope.v1.json` shape
+(`{id, type, source, subject, schemaVersion, occurredAt, data}`, `type` without version suffix) and are normalised internally;
+actor = `data.accountId` (gift.sent: `data.sender.userId`, falling back to `subject`). The other events use a flat internal shape
+`{eventId, eventType, occurredAt, actorId, country?, payload}`.
+
+| eventType | source | effect |
+|---|---|---|
+| account.registered (v1) | contract | account age profile |
+| account.loggedIn (v1) | contract | login counter |
+| consent.granted / consent.withdrawn (v1) | contract | `consentType` personalization or advertising withdrawn => opt-out, purge and read gating; personalization granted => opt back in; other types ignored |
+| account.deletionRequested (v1) | contract | stops personalization immediately |
+| account.deletionExecuted (v1) | contract | purges all features, tombstone so late events are dropped |
+| gift.sent (v1) | contract | value-flow risk graph (giftTransactionId, receiverUserId, totalCoins, liveId) |
+
+Expected from social/commerce/ads; must match their contract schemas once published (names and flat payloads are provisional):
+`product.viewed`, `follow.created`, `post.created`, `message.sent`, `report.created`, `block.created`, `ad.impressionRecorded`.
+`message.sent` carries metadata only: `{recipientId, conversationId, containsLink?, linkReported?, deviceId?, ipHash?}`; extra fields reject the event.
+Personalization-gated: product.viewed, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.
+
+Idempotent by `eventId` (7 days); a message is acked once processed or a duplicate; malformed (poison) messages are rejected to `intelligence-domain-events.dlq`;
+backend failures are republished to the retry queues (30 s, 2 m, 10 m, 30 m) and dead-lettered after the fifth attempt. Opted-out users get no affinity/seen features and
+`read_viewer_online_features` / top-topic reads return empty, so feed, clips, search, recommendations, social proof and ads fall back to
+popularity/recency/relevance. Safety counters (messages metadata, logins, reports, gifts) are kept for fraud and abuse scoring.
+Known limit: counterparties' incoming value-flow sets still list a deleted account's id until their TTL expires.
+
 ## 8. What the TS API must do
 
 - [ ] Signed HTTP client (section 2) with per-endpoint timeouts (section 4) and a circuit breaker.
