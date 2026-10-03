@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -111,9 +112,7 @@ export function ProfileSummary({ profile, variant, actions, identityAction, onPr
       </View>
 
       {profile.bio ? (
-        <Text size={13} lineHeight={16.9} style={styles.bio}>
-          {profile.bio}
-        </Text>
+        <MentionText text={profile.bio} size={13} lineHeight={16.9} style={styles.bio} />
       ) : null}
 
       <View style={styles.joined}>

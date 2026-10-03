@@ -64,22 +64,21 @@ export function ProfileSwitcherSheet() {
   if (!active) return null;
 
   return (
-    <BottomSheet visible={isProfileSwitcherSheetVisible} onClose={closeProfileSwitcherSheet} title="Switch profile">
+    <BottomSheet visible={isProfileSwitcherSheetVisible} onClose={closeProfileSwitcherSheet} title="Switch profile" subtitle="Posts, messages and store actions happen as the profile you choose." scrollable>
       <View style={styles.list}>
-        <Text size={12} lineHeight={16.8} color={colors.textMuted}>Posts, messages and store actions happen as the profile you choose.</Text>
         {profiles.isPending ? <ListSkeleton rows={3} padding={0} /> : null}
         {profiles.isError ? <ErrorState message="Couldn't load your profiles." onRetry={() => profiles.refetch()} /> : null}
         {(profiles.data ?? []).map((profile) => (
-          <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === active.id }} onPress={() => switchProfile.mutate(profile.id)} style={styles.row}>
+          <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === active.id }} onPress={() => switchProfile.mutate(profile.id)} style={[styles.row, styles.profileRow, profile.id === active.id ? styles.profileRowActive : null]}>
             <Avatar uri={profile.avatarUrl} size={40} />
             <View style={styles.texts}>
               <View style={styles.nameRow}>
                 <Text size={14} weight={500} lineHeight={16.8}>{profile.name}</Text>
                 <VerificationBadge verification={verificationForProfileKind(profile.verification, profile.kind)} size={14} />
               </View>
-              <Text size={12} lineHeight={16} color={colors.textSubtle}>@{profile.handle} · {KIND_LABELS[profile.kind]}</Text>
+              <Text size={12} lineHeight={16} color={colors.textMuted}>@{profile.handle} · {KIND_LABELS[profile.kind]}</Text>
             </View>
-            {profile.id === active.id ? <Check16Icon color={colors.primary} /> : null}
+            <View style={[styles.radio, profile.id === active.id ? styles.radioOn : null]}>{profile.id === active.id ? <Check16Icon size={12} color={colors.onPrimary} /> : null}</View>
           </Pressable>
         ))}
         <Pressable accessibilityRole="button" onPress={() => { closeProfileSwitcherSheet(); navigation.navigate("CreateBusinessProfile"); }} style={styles.row}>
@@ -97,7 +96,11 @@ export function ProfileSwitcherSheet() {
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   chip: { alignSelf: "flex-start", marginHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
-  list: { paddingHorizontal: 16, paddingBottom: 20, gap: 4 },
+  list: { paddingTop: 4, gap: 8 },
+  profileRow: { paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.divider },
+  profileRowActive: { borderColor: colors.primarySolid, backgroundColor: colors.primaryTint },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.textMuted, alignItems: "center", justifyContent: "center" },
+  radioOn: { borderColor: colors.primarySolid, backgroundColor: colors.primarySolid },
   row: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 56 },
   texts: { flex: 1, gap: 2 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },

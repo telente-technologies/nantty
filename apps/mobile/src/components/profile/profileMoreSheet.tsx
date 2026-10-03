@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { followsService } from "@/services/follows.service";
 import { REPORT_REASON_OPTIONS, reportsService, type ReportReason } from "@/services/reports.service";
@@ -67,7 +68,10 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
               )
             : null}
           {option(`Report @${profile.username}`, () => (isViewerSignedIn() ? setMode("report") : requireSignIn(() => undefined, "report accounts")), colors.error)}
-          {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => requireSignIn(() => block.mutate(), "block accounts"), colors.error)}
+          {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => requireSignIn(() => showAlertWithButtons(`Block ${profile.name}?`, "They won't be able to find your profile, see your posts or message you. They won't be told you blocked them.", [
+              { text: "Cancel", style: "cancel" },
+              { text: "Block", style: "destructive", onPress: () => block.mutate() },
+            ]), "block accounts"), colors.error)}
         </View>
       ) : mode === "report" ? (
         <ScrollView style={styles.list} contentContainerStyle={styles.menu}>
@@ -77,7 +81,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
       ) : (
         <View style={styles.done}>
           <Text size={16} weight={600} lineHeight={19.2}>Thanks for letting us know</Text>
-          <Text size={13} lineHeight={17.5} color={colors.textMuted}>We'll review this account. You can follow the outcome in Settings → Support → My reports.</Text>
+          <Text size={13} lineHeight={17.5} color={colors.textMuted}>We'll review this account. You can follow the outcome in Settings › Support › My reports.</Text>
           {option("Done", closeAndReset, colors.primary)}
         </View>
       )}
