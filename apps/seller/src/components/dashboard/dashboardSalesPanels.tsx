@@ -49,7 +49,7 @@ export function DashboardRevenueChartPanel({ summary }: { readonly summary: Dash
       <LineChart
         title="Daily sales for the last 30 days"
         description="A line showing sales from app orders for each of the last 30 days."
-        series={[{ key: "revenue", label: "Sales", colorVariable: "--blue-500" }]}
+        series={[{ key: "revenue", label: "Sales", colorVariable: "--chart-1" }]}
         points={points}
         formatValue={(value) => formatMoney({ amountMinor: value, currency: chartCurrency })}
         formatAxisValue={(value) => formatMoneyCompact({ amountMinor: value, currency: chartCurrency })}
