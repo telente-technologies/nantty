@@ -18,7 +18,7 @@ export function CartItemSummary({ item, onPress }: { item: CartItem; onPress?: (
         <Text size={14} weight={500} lineHeight={16.8} numberOfLines={1}>{item.product.name}</Text>
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
           Qty {item.quantity}
-          {item.variant ? ` • ${item.variant}` : ""}
+          {item.variant ? ` · ${item.variant}` : ""}
         </Text>
       </View>
       <Text size={14} weight={500} lineHeight={16.8}>{formatMoneyForDisplay(multiplyMoneyByQuantity(item.product.price, item.quantity))}</Text>
