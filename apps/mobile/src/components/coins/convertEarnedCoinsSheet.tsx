@@ -35,6 +35,7 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
     onSuccess: () => {
       pendingIdempotencyKey.current = null;
       queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["coin-activity"] });
     },
   });
 
@@ -65,7 +66,10 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
             <TextField
               label="Earned coins to convert"
               value={typedCoins}
-              onChangeText={(text) => setTypedCoins(text.replace(/[^0-9]/g, "").slice(0, 7))}
+              onChangeText={(text) => {
+                pendingIdempotencyKey.current = null;
+                setTypedCoins(text.replace(/[^0-9]/g, "").slice(0, 7));
+              }}
               keyboardType="number-pad"
             />
             {typedCoins && !hasValidAmount ? (
