@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, FlatList, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
@@ -21,6 +22,7 @@ import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Clip, ClipsFeedTab } from "@/types";
 
 import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 type ClipsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, "Clips">,
@@ -113,7 +115,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const updateEngagement = (clip: Clip, change: (current: ClipEngagement) => ClipEngagement) =>
     setEngagementByClipId((all) => ({ ...all, [clip.id]: change(all[clip.id] ?? engagementFor(clip)) }));
 
-  const toggleLikeOnClip = (clip: Clip) => {
+  const applyLikeToggleOnClip = (clip: Clip) => {
     const wasLiked = engagementFor(clip).liked;
     updateEngagement(clip, (e) => ({ ...e, liked: !wasLiked, likes: e.likes + (wasLiked ? -1 : 1) }));
     (wasLiked ? clipsService.unlikeClip(clip.id) : clipsService.likeClip(clip.id)).catch(() =>
@@ -121,15 +123,21 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     );
   };
 
+  const toggleLikeOnClip = (clip: Clip) => requireAuthThen(() => applyLikeToggleOnClip(clip), undefined, "like clips");
+
   const likeClipWithDoubleTap = (clip: Clip) => {
     if (!engagementFor(clip).liked) toggleLikeOnClip(clip);
   };
 
-  const toggleFollowOnClipAuthor = (clip: Clip) => {
+  const applyFollowOnClipAuthor = (clip: Clip) => {
     const wasFollowing = engagementFor(clip).isFollowing;
     updateEngagement(clip, (e) => ({ ...e, isFollowing: !wasFollowing }));
     if (!wasFollowing) clipsService.followClipAuthor(clip.author.id).catch(() => updateEngagement(clip, (e) => ({ ...e, isFollowing: false })));
   };
+
+  const toggleFollowOnClipAuthor = (clip: Clip) => requireAuthThen(() => applyFollowOnClipAuthor(clip), undefined, "follow creators");
+
+  const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const shareClipLink = async (clip: Clip) => {
     await Share.share({ message: `https://zudomart.com/clips/${clip.id}` }).catch(() => undefined);
@@ -150,6 +158,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
 
   return (
     <View style={styles.root} onLayout={(e) => setPageHeight(Math.round(e.nativeEvent.layout.height))}>
+      {sendInChatElement}
       {pageHeight > 0 ? (
         <FlatList
           key={`clips-list-opened-at-${clipIndexToOpenListAt}`}
@@ -190,7 +199,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
               onLikeByDoubleTap={() => likeClipWithDoubleTap(item)}
               onToggleFollow={() => toggleFollowOnClipAuthor(item)}
               onOpenComments={() => setCommentsForClipId(item.id)}
-              onShare={() => shareClipLink(item)}
+              onShare={() => offerSendInChat({ kind: "clip", id: item.id }, () => shareClipLink(item))}
               onPressAuthor={() => openUserProfile(item.author.id)}
               onOpenPromotedLive={(liveSessionId) => navigation.navigate("Live", { liveId: liveSessionId })}
             />
