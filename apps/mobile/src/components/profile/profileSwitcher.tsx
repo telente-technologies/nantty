@@ -9,7 +9,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { brandsService } from "@/services/brands.service";
 import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { useActingProfileStore } from "@/store/actingProfile.store";
@@ -29,6 +29,7 @@ function useActingProfileWithServerFallback() {
 }
 
 export function ProfileSwitcher() {
+  const styles = useStyles();
   const active = useActingProfileWithServerFallback();
   const openProfileSwitcherSheet = useProfileSwitcherSheetStore((s) => s.openProfileSwitcherSheet);
   if (!active) return null;
@@ -42,6 +43,8 @@ export function ProfileSwitcher() {
 }
 
 export function ProfileSwitcherSheet() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
   const { isProfileSwitcherSheetVisible, closeProfileSwitcherSheet } = useProfileSwitcherSheetStore();
@@ -92,11 +95,11 @@ export function ProfileSwitcherSheet() {
   );
 }
 
-const styles = StyleSheet.create({
-  chip: { alignSelf: "flex-start", marginHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.divider },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  chip: { alignSelf: "flex-start", marginHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
   list: { paddingHorizontal: 16, paddingBottom: 20, gap: 4 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 56 },
   texts: { flex: 1, gap: 2 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   plus: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
-});
+}));

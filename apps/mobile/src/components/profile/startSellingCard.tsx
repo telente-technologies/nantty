@@ -6,10 +6,12 @@ import { BuildingStore20Icon } from "@/components/icons";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { sellerService } from "@/services/seller.service";
 
 export function StartSellingCard({ compact = false }: { compact?: boolean }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const application = useQuery({ queryKey: sellerQueryKeys.application, queryFn: sellerService.fetchMySellerApplication });
   const underReview = application.data?.status === "pending";
@@ -34,8 +36,8 @@ export function StartSellingCard({ compact = false }: { compact?: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { backgroundColor: colors.primaryTint, borderRadius: 12, padding: 14, gap: 8 },
   compact: { marginHorizontal: 12 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));

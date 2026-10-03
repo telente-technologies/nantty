@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import { SealCheck20Icon } from "@/components/icons";
 import { colors, palette } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { Verification, VerificationColor } from "@/types";
 
 export const VERIFICATION_BADGE_COLORS: Record<VerificationColor, string> = {
@@ -26,9 +27,11 @@ export const isVerificationBadgeVisible = (verification?: Verification | null) =
   !!verification && verification.badgeVisible && verification.status === "active" && verification.tier !== "ESSENTIAL";
 
 export function VerificationBadge({ verification, legacyVerified = false, size = 16 }: VerificationBadgeProps) {
+  const theme = useTheme();
   const visible = verification ? isVerificationBadgeVisible(verification) : legacyVerified;
   if (!visible) return null;
-  const badgeColor = VERIFICATION_BADGE_COLORS[verification?.color ?? "blue"];
+  const badgeColorName = verification?.color ?? "blue";
+  const badgeColor = theme.isDark && badgeColorName !== "gold" ? theme.colors[badgeColorName === "black" ? "text" : "primary"] : VERIFICATION_BADGE_COLORS[badgeColorName];
   return (
     <View accessible accessibilityLabel={ACCESSIBILITY_LABELS[verification?.color ?? "blue"]} style={{ flexShrink: 0 }}>
       <SealCheck20Icon size={size} color={badgeColor} />

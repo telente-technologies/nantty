@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { BrandBilibili20Icon, BuildingStore20Icon, MessageShare20Icon, Refresh20Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export type ProfileTabKey = "posts" | "reposts" | "clips" | "sounds" | "store";
 
@@ -21,6 +21,7 @@ export interface ProfileTabsProps {
 }
 
 export function ProfileTabs({ tabs, activeTab, onChangeTab }: ProfileTabsProps) {
+  const styles = useStyles();
   return (
     <View style={styles.row} accessibilityRole="tablist">
       {tabs.map((tab) => {
@@ -48,8 +49,8 @@ export function ProfileTabs({ tabs, activeTab, onChangeTab }: ProfileTabsProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { height: 36, paddingHorizontal: 16, flexDirection: "row", gap: 8 },
   tab: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, borderBottomWidth: 1, borderBottomColor: "transparent" },
   activeTab: { borderBottomColor: colors.black },
-});
+}));

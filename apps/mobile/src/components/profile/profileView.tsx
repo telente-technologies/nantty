@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "r
 
 import { PostCard } from "@/components/feed/postCard";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { Post, User } from "@/types";
 
 import { ProfileSoundsList } from "./profileSoundsList";
@@ -38,6 +38,7 @@ const EMPTY_TAB_MESSAGES: Record<ProfileTabKey, string> = {
 };
 
 export function ProfileView(props: ProfileViewProps) {
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState<ProfileTabKey>("posts");
   const visiblePosts = activeTab === "posts" && !props.isLocked ? props.posts : [];
 

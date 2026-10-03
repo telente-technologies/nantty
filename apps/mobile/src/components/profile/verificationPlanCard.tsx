@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { VerificationPlan } from "@/types/verification.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -10,6 +10,8 @@ import { VERIFICATION_BADGE_COLORS, VerificationBadge } from "./verificationBadg
 const TIER_NAMES: Record<string, string> = { VERIFIED: "Verified", PREMIUM: "Premium", PRO: "Pro", ESSENTIAL: "Essential", OFFICIAL: "Official" };
 
 export function VerificationPlanCard({ plan, selected, current, onPress }: { plan: VerificationPlan; selected?: boolean; current?: boolean; onPress?: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const accent = VERIFICATION_BADGE_COLORS[plan.color];
   return (
     <Pressable
@@ -35,9 +37,9 @@ export function VerificationPlanCard({ plan, selected, current, onPress }: { pla
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 14, gap: 8, borderWidth: 1.5, borderColor: colors.white },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 8, borderWidth: 1.5, borderColor: colors.surface },
   header: { flexDirection: "row", alignItems: "center", gap: 8 },
   perk: { gap: 1 },
-});
+}));

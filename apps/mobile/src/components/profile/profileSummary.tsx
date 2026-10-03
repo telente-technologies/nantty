@@ -6,7 +6,7 @@ import { CalendarDots16Icon } from "@/components/icons";
 import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
 import { PreviewableImage, useImagePreview } from "@/components/ui/previewableImage";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
@@ -29,6 +29,7 @@ export interface ProfileSummaryProps {
 }
 
 function ProfileAvatar({ profile, borderRadius }: { readonly profile: User; readonly borderRadius: number }) {
+  const styles = useStyles();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const { openImagePreview, imagePreviewElement } = useImagePreview();
   const avatarImage = profile.avatarUrl ? <Image source={{ uri: profile.avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null;
@@ -61,10 +62,12 @@ function ProfileAvatar({ profile, borderRadius }: { readonly profile: User; read
 const formatJoinedMonthAndYear = (isoDate: string) => formatJoinedDate(isoDate).replace(/ (\d{4})$/, ", $1");
 
 export function ProfileSummary({ profile, variant, actions, identityAction, onPressFollowers, onPressFollowing }: ProfileSummaryProps) {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles();
   const isOwn = variant === "own";
   return (
     <View style={styles.root}>
-      <View style={[styles.banner, { backgroundColor: isOwn ? "#C4C4C4" : colors.placeholder }]}>
+      <View style={[styles.banner, { backgroundColor: isOwn && !isDark ? "#C4C4C4" : colors.placeholder }]}>
         {profile.bannerUrl ? (
           <PreviewableImage imageUrl={profile.bannerUrl} accessibilityLabel={`View ${profile.name}'s cover photo`} style={StyleSheet.absoluteFill}>
             <Image source={{ uri: profile.bannerUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -154,7 +157,7 @@ function Stat({ count, label, onPress }: { count: number; label: string; onPress
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { paddingHorizontal: 12 },
   banner: { height: 100, borderRadius: 8, marginTop: 4, overflow: "hidden" },
   identity: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 12 },
@@ -183,6 +186,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
   },
-  highlightedAction: { backgroundColor: colors.primary, borderColor: colors.primary },
+  highlightedAction: { backgroundColor: colors.primarySolid, borderColor: colors.primary },
   pressed: { opacity: 0.7 },
-});
+}));
