@@ -4,17 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { PostCard } from "@/components/feed/postCard";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { ProfileContentTabs } from "./profileContentTabs";
 import { Button } from "@/components/ui/button";
-import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { Avatar, MediaImage } from "@/components/ui/media";
-import { BellIcon, LogOutIcon, SettingsIcon, StoreIcon } from "@/components/ui/icons";
+import { BellIcon, BookmarkIcon, LogOutIcon, OrdersIcon, SettingsIcon } from "@/components/ui/icons";
 import { followsService } from "@/services/posts.service";
 import { sendRequestToWebappServer } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
-import { usersService } from "@/services/users.service";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 import type { User } from "@/types";
 
@@ -39,17 +37,11 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
   const queryClient = useQueryClient();
   const [isFollowing, setIsFollowing] = useState(user.isFollowing ?? false);
 
-  const postsQuery = useQuery({
-    queryKey: ["profile", "posts", user.id],
-    queryFn: () => usersService.fetchPostsByUserId(user.id),
-    retry: false,
-  });
-
   const followMutation = useMutation({
     mutationFn: (followNow: boolean) => (followNow ? followsService.followUser(user.id) : followsService.unfollowUser(user.id)),
     onMutate: async (followNow) => {
       setIsFollowing(followNow);
-      await queryClient.cancelQueries({ queryKey: ["profile", "posts", user.id] });
+      await queryClient.cancelQueries({ queryKey: ["profile", user.id] });
     },
     onError: (_error, followNow) => setIsFollowing(!followNow),
   });
@@ -84,8 +76,11 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
           {isSelf ? (
             <>
               <div className={styles.iconLinks}>
+                <Link href="/saved" className={styles.iconLink} aria-label="Saved items">
+                  <BookmarkIcon size={18} />
+                </Link>
                 <Link href="/orders" className={styles.iconLink} aria-label="Your orders">
-                  <StoreIcon size={18} />
+                  <OrdersIcon size={18} />
                 </Link>
                 <Link href="/notifications" className={styles.iconLink} aria-label="Notifications">
                   <BellIcon size={18} />
@@ -97,10 +92,10 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
             </>
           ) : (
             <>
-              <Button size="sm" busy={followMutation.isPending} onClick={() => followMutation.mutate(!isFollowing)}>
+              <Button size="sm" busy={followMutation.isPending} onClick={() => requireAuthThen(() => followMutation.mutate(!isFollowing), `Sign in to follow ${user.name}.`)}>
                 {isFollowing ? "Following" : "Follow"}
               </Button>
-              <Button size="sm" variant="secondary" busy={startChat.isPending} onClick={() => startChat.mutate()}>
+              <Button size="sm" variant="secondary" busy={startChat.isPending} onClick={() => requireAuthThen(() => startChat.mutate(), `Sign in to message ${user.name}.`)}>
                 Message
               </Button>
             </>
@@ -114,22 +109,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
         <Stat label="Following" value={user.following} />
       </div>
 
-      <section className={styles.posts}>
-        <h2 className={styles.postsTitle}>Posts</h2>
-        {postsQuery.isLoading ? (
-          <Spinner label="Loading posts" />
-        ) : postsQuery.isError ? (
-          <ErrorState description="We couldn't load these posts." action={<RetryButton onRetry={() => postsQuery.refetch()} />} />
-        ) : (postsQuery.data?.data ?? []).length === 0 ? (
-          <EmptyState icon="📝" title="No posts yet" description={isSelf ? "Share something with your followers." : `${user.name} hasn't posted yet.`} />
-        ) : (
-          <div className={styles.postList}>
-            {postsQuery.data?.data.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </section>
+      <ProfileContentTabs user={user} isSelf={isSelf} />
     </div>
   );
 }
