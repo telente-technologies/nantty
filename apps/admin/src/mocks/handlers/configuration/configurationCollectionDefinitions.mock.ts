@@ -9,14 +9,15 @@ import type { ExperimentContent, FeatureFlagContent } from "@/types/featureFlags
 import type { NotificationTemplateContent } from "@/types/notificationTemplate.type";
 import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, PlansConfiguration, RevenueRulesConfiguration } from "@/types/platformConfiguration.type";
 
+import { validateCheckmarkPricing, validateCheckmarkSuggestionRules, validateCreatorThresholds, validateTrialRules } from "./configurationTrustRulesValidation.mock";
 import { validateCreatorEligibilityRules, validatePlansConfiguration, validateRevenueRules, validateUsernameRules } from "./configurationDocumentValidation.mock";
 import { configurationRecordIdPattern, validateAutomationRuleContent, validateExperimentContent, validateFeatureFlagContent, validateNotificationTemplateContent } from "./configurationEntityValidation.mock";
 import type { VersionedCollectionDefinition } from "./versionedCollections.mock";
 
 type AnyDocumentContent = ConfigurationDocumentContentByKey[keyof ConfigurationDocumentContentByKey];
 
-const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules" };
-const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules" };
+const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules", "checkmark-suggestions": "config:rules", "creator-thresholds": "config:rules", "trial-rules": "config:rules", "checkmark-pricing": "config:plans" };
+const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules", "checkmark-suggestions": "Checkmark suggestion thresholds", "creator-thresholds": "Creator Program thresholds", "trial-rules": "Trial rules", "checkmark-pricing": "Checkmark pricing" };
 
 export const configurationDocumentsDefinition: VersionedCollectionDefinition<AnyDocumentContent> = {
   storeName: "documents",
@@ -32,6 +33,10 @@ export const configurationDocumentsDefinition: VersionedCollectionDefinition<Any
     if (recordId === "revenue") return validateRevenueRules(rawContent, currentContent as RevenueRulesConfiguration | null);
     if (recordId === "creator-eligibility") return validateCreatorEligibilityRules(rawContent) satisfies CreatorEligibilityRules;
     if (recordId === "username-rules") return validateUsernameRules(rawContent);
+    if (recordId === "checkmark-suggestions") return validateCheckmarkSuggestionRules(rawContent);
+    if (recordId === "creator-thresholds") return validateCreatorThresholds(rawContent);
+    if (recordId === "trial-rules") return validateTrialRules(rawContent);
+    if (recordId === "checkmark-pricing") return validateCheckmarkPricing(rawContent);
     failNotFound("Configuration document");
   },
   isValidNewRecordId: () => false,

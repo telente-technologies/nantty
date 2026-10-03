@@ -68,9 +68,6 @@ export function validateRevenueRules(rawContent: unknown, currentContent: Revenu
     return { categorySlug: readTextValue(override, "categorySlug", path, 60, 2), categoryName: readTextValue(override, "categoryName", path, 80, 2), basisPoints: readBasisPoints(override, "basisPoints", path, 3000) };
   });
   if (new Set(overrides.map((override) => override.categorySlug)).size !== overrides.length) failValidation("content.marketplaceCommission.categoryOverrides", "Each category can have only one override.");
-  const loyalty = readObjectAtPath(content.loyalty, "content.loyalty");
-  const cashback = readObjectAtPath(content.cashback, "content.cashback");
-  const referral = readObjectAtPath(content.referral, "content.referral");
   const withdrawalFee = readObjectAtPath(content.withdrawalFee, "content.withdrawalFee");
   return {
     supportedCurrencies,
@@ -81,15 +78,6 @@ export function validateRevenueRules(rawContent: unknown, currentContent: Revenu
     coinUnitValues: readMoneyPerCurrencyList(content, "coinUnitValues", "content", supportedCurrencies),
     withdrawalFee: { mode: readEnumFromObject(withdrawalFee, "mode", "content.withdrawalFee", ["PASS_THROUGH"] as const), note: readTextValue(withdrawalFee, "note", "content.withdrawalFee", 300, 5) },
     marketplaceCommission: { defaultBasisPoints: readBasisPoints(commission, "defaultBasisPoints", "content.marketplaceCommission", 3000), categoryOverrides: overrides },
-    loyalty: { isEnabled: readBooleanValue(loyalty, "isEnabled", "content.loyalty"), pointsPerMajorUnitSpent: readIntegerBetween(loyalty, "pointsPerMajorUnitSpent", "content.loyalty", 0, 100), pointExpiryDays: readIntegerBetween(loyalty, "pointExpiryDays", "content.loyalty", 30, 1095) },
-    cashback: { isEnabled: readBooleanValue(cashback, "isEnabled", "content.cashback"), rateBasisPoints: readBasisPoints(cashback, "rateBasisPoints", "content.cashback", 2000), capsPerOrder: readMoneyPerCurrencyList(cashback, "capsPerOrder", "content.cashback", supportedCurrencies), expiryDays: readIntegerBetween(cashback, "expiryDays", "content.cashback", 7, 365) },
-    referral: {
-      isEnabled: readBooleanValue(referral, "isEnabled", "content.referral"),
-      referrerRewards: readMoneyPerCurrencyList(referral, "referrerRewards", "content.referral", supportedCurrencies),
-      refereeRewards: readMoneyPerCurrencyList(referral, "refereeRewards", "content.referral", supportedCurrencies),
-      qualifyingOrderMinimums: readMoneyPerCurrencyList(referral, "qualifyingOrderMinimums", "content.referral", supportedCurrencies),
-      maximumReferralsPerMonth: readIntegerBetween(referral, "maximumReferralsPerMonth", "content.referral", 0, 1000),
-    },
   };
 }
 
