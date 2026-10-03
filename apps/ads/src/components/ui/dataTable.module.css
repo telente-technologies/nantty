@@ -31,7 +31,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .table th {
@@ -41,7 +41,7 @@
   background: var(--surface-app);
   text-align: left;
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
   padding: 8px 12px;
   border-bottom: 1px solid var(--divider);

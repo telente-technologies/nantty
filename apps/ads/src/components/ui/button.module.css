@@ -20,31 +20,31 @@
 }
 
 .medium {
-  height: 36px;
+  height: var(--control-md);
   padding: 0 14px;
-  font-size: 13.5px;
+  font-size: var(--fs-14);
 }
 
 .small {
-  height: 28px;
+  height: var(--control-sm);
   padding: 0 10px;
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   border-radius: var(--radius-small);
 }
 
 .iconOnly.medium {
-  width: 36px;
+  width: var(--control-md);
   padding: 0;
 }
 
 .iconOnly.small {
-  width: 28px;
+  width: var(--control-sm);
   padding: 0;
 }
 
 .primary {
   background: var(--blue-500);
-  color: #fff;
+  color: var(--color-on-brand);
 }
 
 .primary:hover:not(:disabled) {
@@ -57,7 +57,7 @@
 }
 
 .accent:hover:not(:disabled) {
-  background: #e6d41a;
+  background: var(--yellow-600);
 }
 
 .secondary {
