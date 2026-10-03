@@ -29,3 +29,15 @@ infra/aws/
 
 Deployables on ECS: `gateway` (TS), `go-identity`, `go-commerce`, `go-money`, `go-live`, `go-ads`, `go-trust`,
 `realtime` (Elixir, clustered with DNSCluster over Cloud Map), and `intelligence` (Python, internal only).
+
+## ALB path rules
+
+| Priority | Path | Target group |
+| --- | --- | --- |
+| 10 | `/webhooks/*` | `go-money` (port 8080) |
+| 20 | `/ws*` | `realtime` |
+| default | `/*` | `gateway` |
+
+`/webhooks/*` goes straight to go-money: provider webhooks are verified against the raw body signature, and the gateway re-serialises request bodies, which would break it. The gateway must not claim this path (its route table has no `/webhooks/*` entry and a test pins that). The internal gRPC ports (go-money `9103`, go-identity `9101`) are reachable only inside the VPC through Cloud Map and are never attached to the ALB.
+
+Docker images are built with `services` as the build context: `docker build -f services/go/deployables/goMoney/Dockerfile services`. ECR repositories and ECS service names stay kebab-case (`go-money`); the source folders are camelCase (`goMoney`).
