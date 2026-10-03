@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
 import { ClipPage, type ClipEngagement } from "@/components/clips/clipPage";
 import { ClipsHeader } from "@/components/clips/clipsHeader";
+import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/components/clips/clipGestureTipsSeen.util";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
@@ -29,7 +30,6 @@ type ClipsScreenProps = CompositeScreenProps<
   NativeStackScreenProps<MainStackParamList>
 >;
 
-let hasShownClipGestureTips = false;
 const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
 const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
 
@@ -38,6 +38,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const insets = useSafeAreaInsets();
   const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const myUserId = useAuthStore((s) => s.user?.id ?? null);
   const openUserProfile = useOpenUserProfile();
   const [tab, setTab] = useState<ClipsFeedTab>("forYou");
   const [pageHeight, setPageHeight] = useState(0);
@@ -47,7 +48,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const toggleMute = useVideoAudioStore((state) => state.toggleMute);
   const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
   const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
-  const [showGestureTips, setShowGestureTips] = useState(!hasShownClipGestureTips);
+  const [showGestureTips, setShowGestureTips] = useState(() => shouldShowClipGestureTips(myUserId));
   const clipsListRef = useRef<FlatList<Clip>>(null);
   const [clipIndexToOpenListAt, setClipIndexToOpenListAt] = useState(0);
 
@@ -144,8 +145,12 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     clipsService.recordClipShare(clip.id).catch(() => undefined);
   };
 
+  useEffect(() => {
+    if (shouldShowClipGestureTips(myUserId)) setShowGestureTips(true);
+  }, [myUserId]);
+
   const dismissGestureTips = () => {
-    hasShownClipGestureTips = true;
+    rememberClipGestureTipsSeen(myUserId);
     setShowGestureTips(false);
   };
 
@@ -216,7 +221,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
         />
       </View>
       {showGestureTips && clipsFeed.isSuccess ? <GestureTipsOverlay onDismiss={dismissGestureTips} /> : null}
-      <ClipCommentsSheet postId={commentsForClipId} myAvatarUrl={myAvatarUrl} onClose={() => setCommentsForClipId(null)} />
+      <ClipCommentsSheet postId={commentsForClipId} clip={clips.find((clip) => clip.id === commentsForClipId) ?? null} myAvatarUrl={myAvatarUrl} onClose={() => setCommentsForClipId(null)} />
     </View>
   );
 }
