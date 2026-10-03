@@ -32,7 +32,7 @@ type StockChange struct {
 
 func availableAtLeast(quantity int) predicate.StockLevel {
 	return predicate.StockLevel(func(selector *sql.Selector) {
-		selector.Where(sql.ExprP("on_hand - reserved >= ?", quantity))
+		selector.Where(sql.P(func(builder *sql.Builder) { builder.WriteString("on_hand - reserved >= ").Arg(quantity) }))
 	})
 }
 
@@ -58,7 +58,9 @@ func ApplyStockChangeInTransaction(ctx context.Context, tx *ent.Tx, level *ent.S
 	}
 	if change.OnHandDelta < 0 && !change.AllowBelowReserved {
 		guards = append(guards, predicate.StockLevel(func(selector *sql.Selector) {
-			selector.Where(sql.ExprP("on_hand + ? >= reserved + ?", change.OnHandDelta, change.ReservedDelta))
+			selector.Where(sql.P(func(builder *sql.Builder) {
+				builder.WriteString("on_hand + ").Arg(change.OnHandDelta).WriteString(" >= reserved + ").Arg(change.ReservedDelta)
+			}))
 		}))
 	}
 	affected, err := tx.StockLevel.Update().Where(guards...).AddOnHand(change.OnHandDelta).AddReserved(change.ReservedDelta).Save(ctx)

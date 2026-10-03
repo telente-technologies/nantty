@@ -1,6 +1,8 @@
 package services
 
 import (
+	"github.com/google/uuid"
+
 	"zudomart/modules/inventory/src/enums"
 	"zudomart/modules/inventory/src/generated/ent"
 	"zudomart/modules/inventory/src/types"
@@ -63,5 +65,18 @@ func MovementView(row *ent.StockMovement, description commerceports.VariantDescr
 		Id: row.ID.String(), Kind: row.Kind, VariantId: row.VariantID.String(), ProductId: description.ProductId.String(), ProductName: description.ProductTitle,
 		VariantTitle: description.VariantTitle, Sku: description.Sku, LocationId: row.LocationID.String(), QuantityDelta: delta,
 		Reference: row.Reference, Note: NoteOrNil(row.Note), ActorName: row.ActorName, CreatedAt: row.CreatedAt,
+	}
+}
+
+func TransferViewFromRows(transfer *ent.StockTransfer, lines []*ent.StockTransferLine, descriptions map[uuid.UUID]commerceports.VariantDescription) types.StockTransferView {
+	views := make([]types.StockTransferLineView, 0, len(lines))
+	for _, line := range lines {
+		description := descriptions[line.VariantID]
+		views = append(views, types.StockTransferLineView{VariantId: line.VariantID.String(), ProductName: description.ProductTitle, VariantTitle: description.VariantTitle, Quantity: line.Quantity})
+	}
+	return types.StockTransferView{
+		Id: transfer.ID.String(), Reference: transfer.Reference, FromLocationId: transfer.FromLocationID.String(), ToLocationId: transfer.ToLocationID.String(),
+		Status: transfer.Status, Lines: views, Note: NoteOrNil(transfer.Note), CreatedBy: types.PersonView{Id: transfer.CreatedByAccountID.String()},
+		CreatedAt: transfer.CreatedAt, ReceivedAt: transfer.ReceivedAt,
 	}
 }
