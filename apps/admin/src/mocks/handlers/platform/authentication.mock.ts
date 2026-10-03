@@ -64,6 +64,7 @@ export function registerAuthenticationMockHandlers(): void {
       }
       return respondWithError(401, "INVALID_CREDENTIALS", "That email and password do not match an admin account.");
     }
+    if (admin.status === "SUSPENDED" || admin.status === "REVOKED" || admin.status === "PENDING_APPROVAL") return respondWithError(403, "ACCOUNT_DISABLED", "This admin access is not active. Ask a superadmin.");
     if (admin.status === "DISABLED") return respondWithError(403, "ACCOUNT_DISABLED", "This admin account is disabled. Ask a superadmin.");
     if (admin.status === "INVITED") return respondWithError(403, "INVITATION_PENDING", "Finish setting up your account from the invitation email first.");
     admin.failedLoginAttempts = 0;

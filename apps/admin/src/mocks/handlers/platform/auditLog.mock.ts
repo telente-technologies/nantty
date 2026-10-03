@@ -46,9 +46,9 @@ export function registerAuditLogMockHandlers(): void {
   registerMockRoute("GET", "/admin/audit/export", (request) => {
     requireMockPermission(request, "audit:export");
     const entries = filterAuditEntries(request);
-    const header = ["occurredAt", "actor", "role", "action", "area", "targetType", "targetId", "targetLabel", "reason", "stepUp", "ipAddress", "requestId", "before", "after"];
+    const header = ["occurredAt", "actor", "staffId", "role", "departments", "action", "area", "targetType", "targetId", "targetLabel", "reason", "stepUp", "ipAddress", "requestId", "before", "after"];
     const rows = entries.map((entry) =>
-      [entry.occurredAt, entry.actor.name, entry.actor.role ?? "", entry.action, entry.area, entry.target.type, entry.target.id, entry.target.label, entry.reason ?? "", String(entry.stepUpVerified), entry.ipAddress ?? "", entry.requestId, JSON.stringify(entry.before), JSON.stringify(entry.after)]
+      [entry.occurredAt, entry.actor.name, entry.actor.id, entry.actor.role ?? "", (entry.actor.departments ?? []).join("; "), entry.action, entry.area, entry.target.type, entry.target.id, entry.target.label, entry.reason ?? "", String(entry.stepUpVerified), entry.ipAddress ?? "", entry.requestId, JSON.stringify(entry.before), JSON.stringify(entry.after)]
         .map((cell) => escapeCsvCell(cell))
         .join(","),
     );
