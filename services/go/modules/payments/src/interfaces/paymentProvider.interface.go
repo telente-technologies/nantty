@@ -26,6 +26,7 @@ type ChargeRequest struct {
 
 type ChargeSession struct {
 	AuthorizationUrl string
+	AccessCode       string
 }
 
 type ChargeVerification struct {
