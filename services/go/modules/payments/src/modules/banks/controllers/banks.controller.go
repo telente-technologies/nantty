@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/modules/banks/commands/resolveBankAccount"
+	resolvebankaccount "zudomart/modules/payments/src/modules/banks/commands/resolveBankAccount"
 	"zudomart/modules/payments/src/modules/banks/dtos"
-	"zudomart/modules/payments/src/modules/banks/queries/listBanks"
+	listbanks "zudomart/modules/payments/src/modules/banks/queries/listBanks"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/platform/httpserver"
 )
