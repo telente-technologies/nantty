@@ -1,6 +1,6 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
-import type { AdminAccountSummary, AdminActiveSession, AdminPasskey, AdminRole } from "@/types/admin.type";
+import type { AdminAccountSummary, AdminActiveSession, AdminPasskey, AdminRole, AdminRoleDefinition, StaffSettings } from "@/types/admin.type";
 import type { PagedList } from "@/types/api.type";
 import type { AuditLogEntry } from "@/types/audit.type";
 import type { MetricsRange, OverviewMetrics } from "@/types/metrics.type";
@@ -20,14 +20,15 @@ export function fetchAdminAccounts(filters: AdminListFilters, signal?: AbortSign
   return sendAdminApiRequest("/admin/admins", { query: { ...filters }, signal });
 }
 
-export function fetchAdminAccountDetail(adminId: string, signal?: AbortSignal): Promise<{ admin: AdminAccountSummary; activeSessionCount: number; history: AuditLogEntry[] }> {
+export function fetchAdminAccountDetail(adminId: string, signal?: AbortSignal): Promise<{ admin: AdminAccountSummary; activeSessionCount: number; lastActions: AuditLogEntry[]; history: AuditLogEntry[] }> {
   return sendAdminApiRequest(`/admin/admins/${encodeURIComponent(adminId)}`, { signal });
 }
 
 export interface CreateAdminInput {
   readonly email: string;
   readonly name: string;
-  readonly role: Exclude<AdminRole, "SUPERADMIN">;
+  readonly role: AdminRole;
+  readonly roleIds: readonly string[];
   readonly permissions: readonly AdminPermission[];
   readonly reason: string;
 }
@@ -36,11 +37,11 @@ export function createAdminAccount(input: CreateAdminInput): Promise<{ admin: Ad
   return sendAdminApiRequest("/admin/admins", { method: "POST", body: input });
 }
 
-export function replaceAdminPermissions(adminId: string, input: { role: Exclude<AdminRole, "SUPERADMIN">; permissions: readonly AdminPermission[]; reason: string }): Promise<{ admin: AdminAccountSummary }> {
+export function replaceAdminPermissions(adminId: string, input: { role: Exclude<AdminRole, "SUPERADMIN">; roleIds: readonly string[]; permissions: readonly AdminPermission[]; reason: string }): Promise<{ admin: AdminAccountSummary }> {
   return sendAdminApiRequest(`/admin/admins/${encodeURIComponent(adminId)}/permissions`, { method: "PUT", body: input });
 }
 
-export function changeAdminAccountState(adminId: string, action: "disable" | "enable" | "reset-mfa", reason: string): Promise<{ admin: AdminAccountSummary }> {
+export function changeAdminAccountState(adminId: string, action: "disable" | "enable" | "reset-mfa" | "suspend" | "revoke" | "approve", reason: string): Promise<{ admin: AdminAccountSummary }> {
   return sendAdminApiRequest(`/admin/admins/${encodeURIComponent(adminId)}/${action}`, { method: "POST", body: { reason } });
 }
 
@@ -93,4 +94,20 @@ export function registerOwnPasskey(label: string, credential: Record<string, unk
 
 export function removeOwnPasskey(passkeyId: string): Promise<void> {
   return sendAdminApiRequest(`/admin/account/passkeys/${encodeURIComponent(passkeyId)}`, { method: "DELETE" });
+}
+
+export function fetchAdminRoles(signal?: AbortSignal): Promise<{ items: AdminRoleDefinition[] }> {
+  return sendAdminApiRequest("/admin/roles", { signal });
+}
+
+export function createCustomAdminRole(input: { name: string; permissions: readonly AdminPermission[]; reason: string }): Promise<AdminRoleDefinition> {
+  return sendAdminApiRequest("/admin/roles", { method: "POST", body: input });
+}
+
+export function fetchStaffSettings(signal?: AbortSignal): Promise<StaffSettings> {
+  return sendAdminApiRequest("/admin/staff-settings", { signal });
+}
+
+export function saveStaffSettings(input: StaffSettings & { reason: string }): Promise<StaffSettings> {
+  return sendAdminApiRequest("/admin/staff-settings", { method: "PUT", body: input });
 }

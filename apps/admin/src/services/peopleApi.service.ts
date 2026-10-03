@@ -1,6 +1,6 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { PagedList } from "@/types/api.type";
-import type { UserDetail, UserListFilters, UserPersonalDataResponse, UsernameWithholdResult, WithheldUsername } from "@/types/peopleUsers.type";
+import type { HeldUsername, UserDetail, UserListFilters, UserPersonalDataResponse, UsernameWithholdResult, WithheldUsername } from "@/types/peopleUsers.type";
 import type { PlatformUserSummary } from "@/types/platformUser.type";
 import type { ConfusablePreview, ReservedUsernameCategory, ReservedUsernameEntry, ReservedUsernameKind } from "@/types/usernames.type";
 
@@ -68,4 +68,28 @@ export function addReservedUsername(input: { value: string; kind: ReservedUserna
 
 export function removeReservedUsername(entryId: string, reason: string): Promise<void> {
   return sendAdminApiRequest(`/admin/reserved-usernames/${encodeURIComponent(entryId)}/remove`, { method: "POST", body: { reason } });
+}
+
+export function restrictPlatformUser(userId: string, input: { reason: string; features: readonly string[]; durationDays: number }): Promise<UserDetail> {
+  return sendAdminApiRequest(userPath(userId, "/restrict"), { method: "POST", body: input });
+}
+
+export function deletePlatformUser(userId: string, input: { reason: string; confirmUsername: string }): Promise<UserDetail & { deletion: { removed: string[]; anonymizedRecords: Record<string, number>; retainedUntil: string } }> {
+  return sendAdminApiRequest(userPath(userId, "/delete"), { method: "POST", body: input });
+}
+
+export function reassignPlatformUsername(userId: string, input: { reason: string; recipientUserId: string }): Promise<UserDetail> {
+  return sendAdminApiRequest(userPath(userId, "/username/reassign"), { method: "POST", body: input });
+}
+
+export function fetchHeldUsernames(signal?: AbortSignal): Promise<{ items: HeldUsername[] }> {
+  return sendAdminApiRequest("/admin/usernames/held", { signal });
+}
+
+export function fetchUsernameHold(username: string, signal?: AbortSignal): Promise<HeldUsername | { username: string; releasedAt: null; availableAt: null; isHeld: false }> {
+  return sendAdminApiRequest("/admin/usernames/hold", { query: { username }, signal });
+}
+
+export function assignHeldUsername(userId: string, input: { username: string; reason: string; bypassHold: boolean }): Promise<UserDetail> {
+  return sendAdminApiRequest(userPath(userId, "/username/assign-held"), { method: "POST", body: input });
 }
