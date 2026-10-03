@@ -1,0 +1,4 @@
+h1:HmwimizcgcmNL+oG4xlQN0d1NUrZs3dXXi+qhLorRtI=
+20261003094035_create_auth_tables.up.sql h1:KtaB3JZqg9eMzXAQZ13OTwIzR/UCL/D/Pd6ovWwq10I=
+20261003094100_grant_read_access_to_other_services.up.sql h1:dm6FlDJY5uDWy1FsIQMK4n9ybbHvvp75M3+GKkOtwWU=
+20261003100736_add_social_identities.up.sql h1:yvOY8CUiLIVUyq+LBsvCtgD02zJZ1fgA7M6wfnE8KJo=
