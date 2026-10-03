@@ -26,7 +26,7 @@ export function BrandStoresView() {
   const { showToast } = useToast();
   const [busyStoreId, setBusyStoreId] = useState<string | null>(null);
   const canManage = canEditDashboardSettings && canBrandRoleManage(myRole);
-  const linkableStores = myStores.filter((store) => !brand.storeIds.includes(store.storeId) && store.brandId === null && (store.role === "owner" || store.role === "admin"));
+  const linkableStores = myStores.filter((store) => !brand.storeIds.includes(store.storeId) && store.brandId === null && (store.role === "owner" || store.role === "manager"));
 
   async function linkStoreToBrand(store: MyStoreEntry) {
     setBusyStoreId(store.storeId);
