@@ -17,7 +17,7 @@
 
 .reportLink:hover {
   text-decoration: none;
-  border-color: var(--blue-300);
+  border-color: color-mix(in srgb, var(--color-brand) 60%, transparent);
   background: var(--blue-tint);
 }
 
