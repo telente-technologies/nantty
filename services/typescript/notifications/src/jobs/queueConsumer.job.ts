@@ -1,8 +1,9 @@
 import type { Logger } from "@zudojs/logger";
 
-import type { QueueReader } from "../interfaces/jobQueue.interface.js";
+import { PoisonMessageError } from "../errors/poisonMessage.error.js";
+import type { QueueConsumer, QueueReader } from "../interfaces/jobQueue.interface.js";
 
-export class QueueConsumerJob {
+export class QueueConsumerJob implements QueueConsumer {
   private running = false;
   private loop: Promise<void> | undefined;
 
@@ -42,8 +43,8 @@ export class QueueConsumerJob {
     try {
       await this.handleMessageBody(body);
     } catch (error) {
-      this.logger.error("message handling failed, it will be retried", { queue: this.name, messageId, error: error instanceof Error ? error.message : String(error) });
-      return;
+      if (error instanceof PoisonMessageError) this.logger.warn("poison message dropped", { queue: this.name, messageId, error: error.message });
+      else return void this.logger.error("message handling failed, it will be retried", { queue: this.name, messageId, error: error instanceof Error ? error.message : String(error) });
     }
     await this.reader.acknowledge(this.queueUrl, receiptHandle).catch((error: unknown) => this.logger.error("message acknowledge failed", { queue: this.name, messageId, error: error instanceof Error ? error.message : String(error) }));
   }
