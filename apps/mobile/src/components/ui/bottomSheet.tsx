@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
 import { makeThemedStyles } from "@/theme";
 
+import { KeyboardSpacer } from "./keyboardSpacer";
 import { Text } from "./text";
 import { FrameAwareModal } from "./frameAwareModal";
 
 const SHEET_TOP_GAP = 12;
+const FLOATING_GAP = 14;
 
 export interface BottomSheetProps {
   readonly visible: boolean;
@@ -27,13 +29,13 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
   const tallestSheetHeight = frame.height - insets.top - SHEET_TOP_GAP;
   return (
     <FrameAwareModal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <View style={[styles.flex, { paddingTop: insets.top + SHEET_TOP_GAP }]}>
         <Pressable accessibilityLabel="Close" style={styles.backdrop} onPress={onClose} />
         <View
           style={[
             styles.sheet,
             { maxHeight: tallestSheetHeight },
-            floating ? [styles.floating, { marginBottom: Math.max(insets.bottom, 12) + 14 }] : { paddingBottom: insets.bottom },
+            floating ? styles.floating : null,
             style,
           ]}
           accessibilityViewIsModal
@@ -50,7 +52,12 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
           ) : null}
           {children}
         </View>
-      </KeyboardAvoidingView>
+        <KeyboardSpacer
+          restingHeight={floating ? Math.max(insets.bottom, 12) + FLOATING_GAP : undefined}
+          openedGap={floating ? FLOATING_GAP : 0}
+          style={floating ? null : styles.keyboardArea}
+        />
+      </View>
     </FrameAwareModal>
   );
 }
@@ -58,7 +65,8 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1, justifyContent: "flex-end" },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: colors.overlay },
-  sheet: { backgroundColor: colors.elevated, borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: "hidden" },
+  keyboardArea: { backgroundColor: colors.elevated },
+  sheet: { flexShrink: 1, backgroundColor: colors.elevated, borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: "hidden" },
   floating: { marginHorizontal: 11, borderRadius: 16 },
   titleRow: { paddingHorizontal: 13, paddingTop: 16, paddingBottom: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 }));
