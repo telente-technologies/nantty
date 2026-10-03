@@ -4,6 +4,8 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon, DotsThreeVertical24Icon } from "@/components/icons";
+import { LiveTopSupportersList } from "@/components/live/gifts/liveTopSupportersList";
+import { LiveTopSupporterCard } from "@/components/live/gifts/liveTopSupporterCard";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -35,6 +37,8 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
             Live Ended
           </Text>
         </View>
+        <LiveTopSupporterCard liveId={route.params.liveId} />
+        <LiveTopSupportersList liveId={route.params.liveId} />
       </View>
       {suggested.data && suggested.data.length > 0 ? (
         <View style={[styles.sheet, { paddingBottom: insets.bottom }]}>
@@ -64,7 +68,7 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   header: { height: 24, paddingHorizontal: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  host: { marginTop: 213, alignItems: "center", gap: 12 },
+  host: { marginTop: 72, alignItems: "center", gap: 12 },
   hostText: { gap: 4, alignItems: "center" },
   sheet: {
     flex: 1,

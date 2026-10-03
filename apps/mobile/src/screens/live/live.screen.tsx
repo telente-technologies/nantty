@@ -8,18 +8,21 @@ import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } 
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { LikeBurst } from "@/components/clips/likeBurst";
-import { LiveGiftBurst } from "@/components/live/liveGiftBurst";
-import { LiveGiftPickerSheet } from "@/components/live/liveGiftPickerSheet";
-import { useLiveGifting } from "@/components/live/liveGifting.hook";
+import { LiveGiftOverlay } from "@/components/live/gifts/liveGiftOverlay";
+import { LiveGiftPickerSheet } from "@/components/live/gifts/liveGiftPickerSheet";
+import { useLiveGiftComments } from "@/components/live/gifts/liveGiftComments.hook";
 import { LiveCommentBar } from "@/components/live/liveCommentBar";
 import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
 import { LiveHeader } from "@/components/live/liveHeader";
 import { LiveProductsSheet } from "@/components/live/liveProductsSheet";
 import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
+import { useLiveEngagementPoints } from "@/components/live/points/liveZudoPoints.hook";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
 import { doesLiveStageShowVideo, LiveVideoStage } from "@/components/live/liveVideoStage";
+import { useLiveStageWithActions } from "@/components/live/guests/liveStage.hook";
+import { LiveStageLayer } from "@/components/live/guests/liveStageLayer";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
@@ -43,7 +46,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [showPinProducts, setShowPinProducts] = useState(false);
   const [showViewerLiveOptions, setShowViewerLiveOptions] = useState(false);
   const live = useLiveSessionWithActions(liveId, hasJoined);
-  const gifting = useLiveGifting(liveId, showGiftPicker);
+  const livePoints = useLiveEngagementPoints(liveId, hasJoined && !isHost);
+  const liveStage = useLiveStageWithActions(liveId, hasJoined);
+  const giftComments = useLiveGiftComments(liveId, live.session.data ? [live.session.data.host] : []);
   const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
   const creatorEntry = useCreatorEntry();
   const session = live.session.data;
@@ -58,6 +63,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       lastStageTapAt.current = 0;
       setLikeBurstKey((key) => key + 1);
       live.sendReaction("❤️");
+      livePoints.awardLikePoints();
       return;
     }
     lastStageTapAt.current = now;
@@ -133,10 +139,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
 
   const showsTitle = isHost || live.isFollowingHost;
   const isHostCameraAllowed = !!cameraPermission?.granted;
-  const isShownOverVideo = doesLiveStageShowVideo(session, isHost, isHostCameraAllowed);
+  const isShownOverVideo = liveStage.isMultiGuestLayout || doesLiveStageShowVideo(session, isHost, isHostCameraAllowed);
+  const liveHasProducts = session.products.length > 0;
+  const hostCanPinProductsToThisLive = hostCanPinAffiliatedProducts && (liveHasProducts || session.category === "shopping");
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
+      {liveStage.isMultiGuestLayout ? null : (
+        <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
+      )}
       {isHost ? null : (
         <Pressable
           accessibilityRole="button"
@@ -146,6 +156,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         />
       )}
       {isHost ? null : <LikeBurst burstKey={likeBurstKey} />}
+      <LiveStageLayer
+        liveId={liveId}
+        session={session}
+        controller={liveStage}
+        canViewerSendGifts={viewerCanSendGifts}
+        isCameraPermissionGranted={isHostCameraAllowed}
+        isPlaybackAllowed={isScreenFocused}
+      />
       <LiveHeader
         isShownOverVideo={isShownOverVideo}
         session={session}
@@ -153,12 +171,15 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         isHost={isHost}
         isFollowingHost={live.isFollowingHost}
         onBack={() => navigation.goBack()}
-        onToggleFollow={live.followHost}
+        onToggleFollow={() => {
+          if (!live.isFollowingHost) livePoints.awardFollowPoints();
+          live.followHost();
+        }}
         onMore={openLiveOptions}
       />
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
-        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...gifting.sentGiftComments]} isShownOverVideo={isShownOverVideo} />
+        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...giftComments]} isShownOverVideo={isShownOverVideo} />
         <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} />
       </View>
       <View style={[styles.commentBarArea, { paddingBottom: insets.bottom }]}>
@@ -166,7 +187,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           onSend={(text) => live.sendComment.mutate(text)}
           onToggleReactions={() => setReactionsExpanded((e) => !e)}
           onPressProducts={
-            hostCanPinAffiliatedProducts ? () => setShowPinProducts(true) : session.products.length > 0 ? () => setShowProducts(true) : undefined
+            hostCanPinProductsToThisLive ? () => setShowPinProducts(true) : liveHasProducts ? () => setShowProducts(true) : undefined
           }
           onPressGift={viewerCanSendGifts ? () => setShowGiftPicker(true) : undefined}
           onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
@@ -175,23 +196,11 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       {showTipSheet ? (
         <TipSheet target={{ targetType: "live", targetId: liveId, creatorName: session.host.name }} onClose={() => setShowTipSheet(false)} />
       ) : null}
-      <LiveGiftBurst burst={gifting.latestGiftBurst} />
+      <LiveGiftOverlay liveId={liveId} streamer={session.host} isHost={isHost} topOffset={insets.top + 60} />
       {viewerCanSendGifts ? (
-        <LiveGiftPickerSheet
-          visible={showGiftPicker}
-          gifts={gifting.giftCatalog.data ?? []}
-          isLoadingGifts={gifting.giftCatalog.isPending && showGiftPicker}
-          isSendingGift={gifting.sendGift.isPending}
-          errorMessage={gifting.giftSendingErrorMessage}
-          hasNotEnoughCoins={gifting.hasNotEnoughCoinsForGift}
-          onChangeSelection={gifting.forgetPendingGiftAttempt}
-          onSendGift={(gift, quantity) =>
-            gifting.sendGift.mutate({ gift, quantity }, { onSuccess: () => setShowGiftPicker(false) })
-          }
-          onClose={() => setShowGiftPicker(false)}
-        />
+        <LiveGiftPickerSheet liveId={liveId} recipientUserId={session.host.id} visible={showGiftPicker} onClose={() => setShowGiftPicker(false)} />
       ) : null}
-      {hostCanPinAffiliatedProducts ? (
+      {hostCanPinProductsToThisLive ? (
         <LivePinProductsSheet
           visible={showPinProducts}
           liveId={liveId}
@@ -199,8 +208,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           onClose={() => setShowPinProducts(false)}
         />
       ) : null}
-      <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
+      <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} onShared={livePoints.awardSharePoints} />
       {isHost ? null : viewerLiveOptionsSheet}
+      {liveHasProducts ? (
       <LiveProductsSheet
         visible={showProducts}
         products={session.products}
@@ -210,6 +220,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           navigation.navigate("ProductDetail", { productId });
         }}
       />
+      ) : null}
     </View>
   );
 }
