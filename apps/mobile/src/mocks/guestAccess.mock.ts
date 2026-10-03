@@ -51,6 +51,7 @@ const publicRoutePatterns: ReadonlySet<string> = new Set([
   "GET /api/v1/users/:userId/following",
   "GET /api/v1/users/:userId/posts",
   "GET /api/v1/users/:userId/stories",
+  "POST /api/v1/mentions/resolve",
   "POST /api/v1/lives/:liveId/join",
   "POST /api/v1/lives/:liveId/leave",
   "POST /api/v1/ads/events",

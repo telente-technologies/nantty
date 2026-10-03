@@ -4,6 +4,7 @@ import { accountStatusMocks } from "./accountStatus.mock";
 import { businessDocumentsMocks } from "./businessDocuments.mock";
 import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
 import { helpCenterMocks } from "./helpCenter.mock";
+import { mentionsMocks } from "./mentions.mock";
 import { marketingPreferencesMocks } from "./marketingPreferences.mock";
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
@@ -14,6 +15,7 @@ import { brandsMocks } from "./brands.mock";
 import { cartMocks } from "./cart.mock";
 import { chatContentMocks } from "./chatContent.mock";
 import { chatInboxMocks } from "./chatInbox.mock";
+import { chatAttachmentMocks } from "./chatAttachmentRoutes.mock";
 import { chatsMocks } from "./chats.mock";
 import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
@@ -36,12 +38,13 @@ import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
 import { productsMocks } from "./products.mock";
+import { storeRewardsMocks } from "./storeRewards.mock";
 import { savesMocks } from "./saves.mock";
-import { rewardsMocks } from "./rewards.mock";
 import { guestAccessMocks } from "./guestAccess.mock";
 import { matchMockPathAndExtractParams, type MockRoute } from "./registry.mock";
 import { sellerMocks } from "./seller.mock";
 import { geoMocks } from "./geo.mock";
+import { legalMocks } from "./legal.mock";
 import { privacyMocks } from "./privacy.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
@@ -61,12 +64,14 @@ const routes: MockRoute[] = [
   ...checkmarkSuggestionMocks,
   ...helpCenterMocks,
   ...marketingPreferencesMocks,
+  ...mentionsMocks,
   ...authMocks,
   ...followGraphMocks,
   ...usersMocks,
   ...feedMocks,
   ...postsMocks,
   ...productsMocks,
+  ...storeRewardsMocks,
   ...savesMocks,
   ...cartMocks,
   ...ordersMocks,
@@ -74,7 +79,6 @@ const routes: MockRoute[] = [
   ...banksMocks,
   ...creatorSubscriptionsMocks,
   ...creatorProgramMocks,
-  ...rewardsMocks,
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
@@ -82,6 +86,7 @@ const routes: MockRoute[] = [
   ...supportMocks,
   ...groupsMocks,
   ...chatsMocks,
+  ...chatAttachmentMocks,
   ...chatInboxMocks,
   ...chatContentMocks,
   ...clipsMocks,
@@ -102,6 +107,7 @@ const routes: MockRoute[] = [
   ...settingsMocks,
   ...geoMocks,
   ...privacyMocks,
+  ...legalMocks,
   ...walletMocks,
   ...sellerMocks,
 ];

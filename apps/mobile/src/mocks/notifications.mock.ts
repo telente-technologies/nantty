@@ -1,6 +1,7 @@
 import type { CategorizedNotification } from "@/types/commerce.type";
 
-import { isoDateHoursAgo, signedInUserIsTheDemoSeller } from "./fixtures.mock";
+import { getSignedInMockUser, isoDateHoursAgo, signedInUserIsTheDemoSeller } from "./fixtures.mock";
+import { listMentionNotificationsFor } from "./mentionNotifications.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { userSummaryById } from "./userDirectory.mock";
 
@@ -26,12 +27,14 @@ const sellerNotifications: CategorizedNotification[] = [
 let readNotificationIds = new Set<string>();
 
 const listSignedInNotifications = () =>
-  [...(signedInUserIsTheDemoSeller() ? sellerNotifications : []), ...buyerNotifications]
+  [...(signedInUserIsTheDemoSeller() ? sellerNotifications : []), ...buyerNotifications, ...listMentionNotificationsFor(getSignedInMockUser().id)]
     .map((notification) => ({ ...notification, read: notification.read || readNotificationIds.has(notification.id) }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
 export const notificationsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/notifications", () => listSignedInNotifications()),
+  createMockRoute("GET", "/api/v1/notifications", ({ query }) =>
+    listSignedInNotifications().filter((notification) => query.get("filter") !== "mentions" || notification.kind === "mention"),
+  ),
   createMockRoute("POST", "/api/v1/notifications/read-all", () => {
     readNotificationIds = new Set(listSignedInNotifications().map((notification) => notification.id));
   }),

@@ -2,8 +2,11 @@ import { ApiError } from "@/errors/api.error";
 import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
-import { appendMockClip } from "./clips.mock";
+import { appendMockClip, findMockClipsByIds } from "./clips.mock";
+import { findCommentAnywhere, registerMockVideoReply } from "./comments.mock";
 import { currentSoundForClip, findMutableSoundState } from "./soundCatalog.mock";
+import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
+import { recordVideoReplyNotification } from "./mentionNotifications.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 interface MockUploadSession {
@@ -112,11 +115,25 @@ export const mediaMocks: MockRoute[] = [
     if (input.kind === "clip" && (media.length !== 1 || media[0]?.type !== "video")) {
       throw new ApiError(422, "A clip needs exactly one video.", "CLIP_NEEDS_ONE_VIDEO");
     }
+    const videoReplyTarget = input.replyToComment;
+    if (videoReplyTarget) {
+      if (input.kind !== "clip") throw new ApiError(422, "A video reply must be a clip.", "VIDEO_REPLY_NEEDS_CLIP");
+      const originalClip = findMockClipsByIds([videoReplyTarget.clipId])[0];
+      if (!originalClip || originalClip.author.id !== getSignedInMockUser().id) {
+        throw new ApiError(403, "Only the clip's author can reply with a video.", "FORBIDDEN");
+      }
+      const targetComment = findCommentAnywhere(videoReplyTarget.commentId);
+      if (!targetComment || targetComment.postId !== originalClip.id) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+      if (userIdsWhoBlockedTheAuthor.has(targetComment.author.id)) {
+        throw new ApiError(403, "You can't reply to this comment with a video.", "VIDEO_REPLY_BLOCKED");
+      }
+    }
     if (input.soundId) {
       const sound = findMutableSoundState(input.soundId);
       if (!sound) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
       if (!sound.allowReuse || sound.status !== "available") throw new ApiError(422, "That sound can't be reused", "SOUND_REUSE_NOT_ALLOWED");
     }
+    const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, "post");
     const post: Post = {
       id: nextMockId("p"),
       kind: input.kind === "clip" ? "clip" : "post",
@@ -135,7 +152,15 @@ export const mediaMocks: MockRoute[] = [
       products: [],
       sponsored: null,
       isAiGenerated: input.isAiGenerated === true,
+      ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
+      ...(videoReplyTarget ? { replyToComment: videoReplyTarget } : {}),
+      ...(videoReplyTarget && input.stickerLayout ? { stickerLayout: input.stickerLayout } : {}),
     };
+    notifyMentionedUsers(post.author, sanitizedMentions, "post");
+    if (videoReplyTarget) {
+      registerMockVideoReply(videoReplyTarget.commentId, { clipId: post.id, thumbnailUrl: media[0]?.posterUrl ?? null, createdAt: post.createdAt });
+      recordVideoReplyNotification(post.author, videoReplyTarget.commenterUserId);
+    }
     if (post.kind === "clip") {
       appendMockClip({ ...post, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
     }
