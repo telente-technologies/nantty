@@ -19,6 +19,7 @@ import { deriveCustomerTypeFromPurchases } from "@/utils/customerSegmentRules.ut
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./customers.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function CustomerDetailView({ customerId }: { readonly customerId: string }) {
   const { formatMoney } = useMoneyFormatter();
@@ -34,7 +35,7 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
   return (
     <PageStack>
       <PageHeader
-        eyebrow={<Link href="/customers">← Customers</Link>}
+        eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>}
         title={customer.name}
         description={`${customer.zudomartUsername ? `@${customer.zudomartUsername} on Zudomart` : "No Zudomart username"}${customer.city ? ` · ${customer.city}` : ""}`}
         actions={

@@ -20,6 +20,7 @@ import type { CustomerSegment } from "@/types/customer.type";
 import type { CursorPage } from "@/types/pagination.type";
 
 import styles from "./customerSegments.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 function CustomerSegmentCard({ segment, canEdit, onEdit, onDelete }: { readonly segment: CustomerSegment; readonly canEdit: boolean; readonly onEdit: () => void; readonly onDelete: () => void }) {
   const { formatMoney, formatMoneyCompact, currency } = useMoneyFormatter();
@@ -100,7 +101,7 @@ export function CustomerSegmentsView() {
   const { hasFeature } = usePlanFeatures();
   return (
     <PageStack>
-      <PageHeader eyebrow={<Link href="/customers">← Customers</Link>} title="Customer segments" description="Group your Zudomart buyers by how much and how often they order, then target them with discount codes and flash sales." />
+      <PageHeader eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>} title="Customer segments" description="Group your Zudomart buyers by how much and how often they order, then target them with discount codes and flash sales." />
       <PlanGate feature="customer_segments" description="Segments group customers into New, Returning, VIP and At risk automatically, and let you build your own rules. Available on Pro and Business.">
         {hasFeature("customer_segments") ? <CustomerSegmentsList /> : null}
       </PlanGate>
