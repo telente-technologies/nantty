@@ -50,7 +50,7 @@ const findStreamPreviewForHost = (hostId: string) => {
   return { coverUrl: hostClip?.posterUrl ?? null, playbackUrl: hostClip?.videoUrl ?? null };
 };
 
-const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOrDefault(liveId).hostId)): LiveSessionDetails => ({
+export const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOrDefault(liveId).hostId)): LiveSessionDetails => ({
   id: liveId,
   host: { ...host, followers: findDirectoryUserById(host.id)?.followers ?? 0, following: findDirectoryUserById(host.id)?.following ?? 0 },
   title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Zudomart",

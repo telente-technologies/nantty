@@ -7,6 +7,8 @@ import { boostsMocks } from "./boosts.mock";
 import { businessProfilesMocks } from "./businessProfiles.mock";
 import { brandsMocks } from "./brands.mock";
 import { cartMocks } from "./cart.mock";
+import { chatContentMocks } from "./chatContent.mock";
+import { chatInboxMocks } from "./chatInbox.mock";
 import { chatsMocks } from "./chats.mock";
 import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
@@ -29,8 +31,10 @@ import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
 import { productsMocks } from "./products.mock";
+import { savesMocks } from "./saves.mock";
 import { rewardsMocks } from "./rewards.mock";
-import type { MockRoute } from "./registry.mock";
+import { guestAccessMocks } from "./guestAccess.mock";
+import { matchMockPathAndExtractParams, type MockRoute } from "./registry.mock";
 import { sellerMocks } from "./seller.mock";
 import { geoMocks } from "./geo.mock";
 import { privacyMocks } from "./privacy.mock";
@@ -53,6 +57,7 @@ const routes: MockRoute[] = [
   ...feedMocks,
   ...postsMocks,
   ...productsMocks,
+  ...savesMocks,
   ...cartMocks,
   ...ordersMocks,
   ...disputesMocks,
@@ -67,6 +72,8 @@ const routes: MockRoute[] = [
   ...supportMocks,
   ...groupsMocks,
   ...chatsMocks,
+  ...chatInboxMocks,
+  ...chatContentMocks,
   ...clipsMocks,
   ...commentsMocks,
   ...soundsMocks,
@@ -89,25 +96,16 @@ const routes: MockRoute[] = [
   ...sellerMocks,
 ];
 
-const matchMockPathAndExtractParams = (pattern: string, path: string): Record<string, string> | null => {
-  const a = pattern.split("/");
-  const b = path.split("/");
-  if (a.length !== b.length) return null;
-  const params: Record<string, string> = {};
-  for (let i = 0; i < a.length; i++) {
-    if (a[i]!.startsWith(":")) params[a[i]!.slice(1)] = decodeURIComponent(b[i]!);
-    else if (a[i] !== b[i]) return null;
-  }
-  return params;
-};
-
-export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown, idempotencyKey?: string): Promise<T> {
+export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown, idempotencyKey?: string, isGuest = false): Promise<T> {
   const [path = "", search = ""] = url.split("?");
   await new Promise((resolve) => setTimeout(resolve, 250));
   for (const r of routes) {
     if (r.method !== method) continue;
     const params = matchMockPathAndExtractParams(r.path, path);
-    if (params) return r.handler({ params, query: new URLSearchParams(search), body, idempotencyKey }) as T;
+    if (!params) continue;
+    if (isGuest && !guestAccessMocks.isAllowedWithoutSession(method, r.path, params)) throw new ApiError(401, "Sign in to continue", "unauthorized");
+    const result = r.handler({ params, query: new URLSearchParams(search), body, idempotencyKey, isGuest }) as T;
+    return isGuest ? guestAccessMocks.withViewerStateCleared(result) : result;
   }
   throw new ApiError(404, `No mock for ${method} ${path}`);
 }

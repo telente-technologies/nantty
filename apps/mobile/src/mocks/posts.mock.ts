@@ -5,6 +5,7 @@ import { getSignedInMockUser } from "./fixtures.mock";
 import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { withViewerSavedState } from "./savedEntries.mock";
 
 export { mockPostsState };
 
@@ -46,7 +47,7 @@ export const postsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
     const post = findPostIncludingSponsored(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");
-    return withCurrentProductPrices(post);
+    return withViewerSavedState(withCurrentProductPrices(post));
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/like", ({ params }) =>
     updateMockPost(params.postId!, (p) => ({ ...p, liked: true, likes: p.liked ? p.likes : p.likes + 1 })),

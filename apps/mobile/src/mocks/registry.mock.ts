@@ -5,6 +5,7 @@ export interface MockContext {
   readonly query: URLSearchParams;
   readonly body: unknown;
   readonly idempotencyKey?: string;
+  readonly isGuest?: boolean;
 }
 
 export interface MockRoute {
@@ -14,3 +15,15 @@ export interface MockRoute {
 }
 
 export const createMockRoute = (method: MockMethod, path: string, handler: MockRoute["handler"]): MockRoute => ({ method, path, handler });
+
+export const matchMockPathAndExtractParams = (pattern: string, path: string): Record<string, string> | null => {
+  const a = pattern.split("/");
+  const b = path.split("/");
+  if (a.length !== b.length) return null;
+  const params: Record<string, string> = {};
+  for (let i = 0; i < a.length; i++) {
+    if (a[i]!.startsWith(":")) params[a[i]!.slice(1)] = decodeURIComponent(b[i]!);
+    else if (a[i] !== b[i]) return null;
+  }
+  return params;
+};

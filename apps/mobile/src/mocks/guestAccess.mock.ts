@@ -1,0 +1,89 @@
+const publicRoutePatterns: ReadonlySet<string> = new Set([
+  "GET /api/v1/auth/username-available",
+  "GET /api/v1/auth/username-suggestion",
+  "GET /api/v1/brands",
+  "GET /api/v1/brands/:brandId",
+  "GET /api/v1/brands/:brandId/products",
+  "GET /api/v1/business-categories",
+  "GET /api/v1/categories",
+  "GET /api/v1/clips",
+  "GET /api/v1/comments/:commentId/replies",
+  "GET /api/v1/creators/:creatorId/subscription-plans",
+  "GET /api/v1/feeds/for-you",
+  "GET /api/v1/feeds/suggested-clips",
+  "GET /api/v1/geo/admin-areas/:parentId/cities",
+  "GET /api/v1/geo/countries",
+  "GET /api/v1/geo/countries/:parentId/regions",
+  "GET /api/v1/geo/regions/:parentId/admin-areas",
+  "GET /api/v1/gifts",
+  "GET /api/v1/link-previews/resolve",
+  "GET /api/v1/lives/:liveId",
+  "GET /api/v1/lives/:liveId/comments",
+  "GET /api/v1/lives/:liveId/gift-goals",
+  "GET /api/v1/lives/:liveId/leaderboard",
+  "GET /api/v1/lives/:liveId/stage",
+  "GET /api/v1/lives/:liveId/viewers",
+  "GET /api/v1/lives/suggested",
+  "GET /api/v1/locale",
+  "GET /api/v1/locale/countries",
+  "GET /api/v1/mart/home",
+  "GET /api/v1/media/:mediaId",
+  "GET /api/v1/posts/:postId",
+  "GET /api/v1/posts/:postId/comments",
+  "GET /api/v1/products",
+  "GET /api/v1/products/featured",
+  "GET /api/v1/products/:productId",
+  "GET /api/v1/products/:productId/reviews",
+  "GET /api/v1/rankings",
+  "GET /api/v1/search",
+  "GET /api/v1/search/people",
+  "GET /api/v1/sounds",
+  "GET /api/v1/sounds/trending",
+  "GET /api/v1/sounds/:soundId",
+  "GET /api/v1/sounds/:soundId/clips",
+  "GET /api/v1/stores/:storeId",
+  "GET /api/v1/stores/:storeId/products",
+  "GET /api/v1/stories/tray",
+  "GET /api/v1/topics",
+  "GET /api/v1/users/:userId",
+  "GET /api/v1/users/:userId/connections",
+  "GET /api/v1/users/:userId/followers",
+  "GET /api/v1/users/:userId/following",
+  "GET /api/v1/users/:userId/posts",
+  "GET /api/v1/users/:userId/stories",
+  "POST /api/v1/lives/:liveId/join",
+  "POST /api/v1/lives/:liveId/leave",
+  "POST /api/v1/ads/events",
+  "POST /api/v1/feeds/feedback",
+  "POST /api/v1/stories/:storyId/seen",
+  "POST /api/v1/posts/:postId/share",
+  "POST /api/v1/lives/:liveId/engagement",
+  "POST /api/v1/analytics/product-interactions",
+  "PATCH /api/v1/users/me/preferences",
+]);
+
+const VIEWER_STATE_FLAGS: ReadonlySet<string> = new Set([
+  "liked",
+  "isFollowing",
+  "isFollowingAuthor",
+  "isFollowingHost",
+  "savedByViewer",
+  "bookmarked",
+  "following",
+]);
+
+const isAuthRoute = (path: string) => path.startsWith("/api/v1/auth/");
+
+const clearViewerStateFlags = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(clearViewerStateFlags);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key, VIEWER_STATE_FLAGS.has(key) && typeof entry === "boolean" ? false : clearViewerStateFlags(entry)]),
+  );
+};
+
+export const guestAccessMocks = {
+  isAllowedWithoutSession: (method: string, routePath: string, params: Record<string, string>) =>
+    isAuthRoute(routePath) || (publicRoutePatterns.has(`${method} ${routePath}`) && !Object.values(params).includes("me")),
+  withViewerStateCleared: <T>(result: T): T => clearViewerStateFlags(result) as T,
+};

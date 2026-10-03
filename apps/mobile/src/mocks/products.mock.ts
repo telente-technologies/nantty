@@ -17,6 +17,7 @@ import {
   listProductSummariesInStore,
   listProductsInCollection,
 } from "./productCatalog.mock";
+import { isSavedBySignedInViewer, saveTargetForSignedInViewer, unsaveTargetForSignedInViewer } from "./savedEntries.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { buildReviewSummaryForProduct } from "./reviewFixtures.mock";
 import { directoryStores, findDirectoryStoreById, productCategories, storeBannerUrl, summariseStore } from "./storeDirectory.mock";
@@ -105,6 +106,7 @@ export const productsMocks: MockRoute[] = [
     return {
       ...detail,
       liked: likedProductIds.has(detail.id),
+      savedByViewer: isSavedBySignedInViewer("product", detail.id),
       related: detail.related.map(withLikeState),
       brand: brandTagForProductKey(seed.key),
       isOfficialStore: !!brand && isVerifiedOfficialStoreOfBrand(brand, seed.storeId),
@@ -112,7 +114,8 @@ export const productsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/products/:productId/like", ({ params }) => void likedProductIds.add(params.productId!)),
   createMockRoute("DELETE", "/api/v1/products/:productId/like", ({ params }) => void likedProductIds.delete(params.productId!)),
-  createMockRoute("POST", "/api/v1/products/:productId/bookmark", () => undefined),
+  createMockRoute("POST", "/api/v1/products/:productId/bookmark", ({ params }) => saveTargetForSignedInViewer("product", params.productId!)),
+  createMockRoute("DELETE", "/api/v1/products/:productId/bookmark", ({ params }) => unsaveTargetForSignedInViewer("product", params.productId!)),
   createMockRoute("GET", "/api/v1/products/:productId/reviews", ({ params }) => buildReviewSummaryForProduct(params.productId!)),
   createMockRoute("POST", "/api/v1/products/:productId/reviews", () => undefined),
   createMockRoute("GET", "/api/v1/stores/:storeId", ({ params }) => buildStoreDetail(params.storeId!)),

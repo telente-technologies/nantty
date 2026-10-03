@@ -62,7 +62,9 @@ const SUPPORTED_COUNTRIES: CountryOption[] = [
 export const settingsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/locale/countries", () => SUPPORTED_COUNTRIES),
   createMockRoute("PATCH", "/api/v1/users/me/preferences", ({ body }) => {
-    const { countryCode } = body as { countryCode: string };
+    const { countryCode, theme } = body as { countryCode?: string; theme?: AccountSettings["theme"] };
+    if (theme) settings = { ...settings, theme };
+    if (countryCode === undefined) return;
     settings = { ...settings, countryCode };
     useLocaleStore.setState({ deviceRegionCode: countryCode });
   }),
