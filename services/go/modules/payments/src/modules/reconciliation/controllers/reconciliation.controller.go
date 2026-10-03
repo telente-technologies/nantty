@@ -6,7 +6,7 @@ import (
 
 	"zudomart/modules/ledger/src/utils"
 	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/reconciliation/commands/reconcileProviderSettlements"
+	reconcileprovidersettlements "zudomart/modules/payments/src/modules/reconciliation/commands/reconcileProviderSettlements"
 	"zudomart/modules/payments/src/modules/reconciliation/dtos"
 	"zudomart/platform/httpserver"
 )
