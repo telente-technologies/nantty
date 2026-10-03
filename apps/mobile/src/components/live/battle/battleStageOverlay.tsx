@@ -1,7 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveBattle, LiveBattleGiftEvent } from "@/types/liveStage.type";
 
 import { secondsRemainingUntil } from "./battleClock.hook";
@@ -9,6 +8,7 @@ import { BattleConfetti } from "./battleConfetti";
 import { BattleResultBanner } from "./battleResultBanner";
 import { BattleTugOfWarBar } from "./battleScoreBar";
 import { BattleTimerPill } from "./battleTimerPill";
+import { liveGlass } from "../liveSurface.constant";
 
 const FINAL_SECONDS = 10;
 
@@ -22,7 +22,7 @@ export interface BattleStageOverlayProps {
 function BigCenterNumber({ value, isSubtle }: { value: string; isSubtle: boolean }) {
   return (
     <View style={styles.bigNumberWrap} pointerEvents="none">
-      <Text size={isSubtle ? 64 : 88} weight={700} lineHeight={isSubtle ? 72 : 96} color={isSubtle ? "rgba(255,255,255,0.55)" : colors.white} style={styles.bigNumber}>
+      <Text size={isSubtle ? 64 : 88} weight={700} lineHeight={isSubtle ? 72 : 96} color={isSubtle ? "rgba(255,255,255,0.55)" : liveGlass.ink} style={styles.bigNumber}>
         {value}
       </Text>
     </View>
@@ -34,7 +34,7 @@ function RecentBattleGiftTicker({ battle, recentGifts }: { battle: LiveBattle; r
   return (
     <View style={styles.ticker} pointerEvents="none">
       {recentGifts.slice(-2).map((gift) => (
-        <Text key={gift.id} size={10} lineHeight={13} color={colors.white} numberOfLines={1} style={styles.tickerLine}>
+        <Text key={gift.id} size={10} lineHeight={13} color={liveGlass.ink} numberOfLines={1} style={styles.tickerLine}>
           @{gift.sender.username} sent {gift.giftEmoji} to {nameOf(gift.recipientUserId)} · +{gift.coins}
         </Text>
       ))}
@@ -74,7 +74,7 @@ export function BattleStageOverlay({ battle, recentGifts, now, gridHeight }: Bat
 const styles = StyleSheet.create({
   top: { position: "absolute", top: 6, left: 0, right: 0, alignItems: "center", gap: 4 },
   ticker: { alignItems: "center", maxWidth: "80%" },
-  tickerLine: { backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 8, paddingHorizontal: 6, overflow: "hidden", marginTop: 2 },
+  tickerLine: { backgroundColor: liveGlass.background, borderRadius: 8, paddingHorizontal: 6, overflow: "hidden", marginTop: 2 },
   bigNumberWrap: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },
   bigNumber: { textShadowColor: "rgba(0,0,0,0.5)", textShadowRadius: 8 },
   resultWrap: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center" },

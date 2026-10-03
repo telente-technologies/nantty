@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Pressable, StyleSheet, Switch, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { Check16Icon } from "@/components/icons";
+import { buildModalPalette } from "@/components/ui/modalChrome.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { LiveStageStreamer, CreateLiveBattleInput } from "@/types/liveStage.type";
 
 const BATTLE_DURATION_OPTIONS = [
@@ -25,6 +26,8 @@ export interface BattleSetupSheetProps {
 }
 
 export function BattleSetupSheet(props: BattleSetupSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [durationSeconds, setDurationSeconds] = useState<number>(BATTLE_DURATION_OPTIONS[0].seconds);
   const [isWinnerTakesAll, setIsWinnerTakesAll] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<readonly string[]>([]);
@@ -37,8 +40,23 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
     setSelectedUserIds((current) => (current.includes(userId) ? current.filter((id) => id !== userId) : [...current, userId]));
 
   return (
-    <BottomSheet visible={props.visible} onClose={props.onClose} title="Start a battle">
-      <ScrollView contentContainerStyle={styles.body}>
+    <BottomSheet
+      visible={props.visible}
+      onClose={props.onClose}
+      title="Start a battle"
+      subtitle="Highest coin score when the timer ends wins"
+      scrollable
+      footerActions={[
+        {
+          label: selectedUserIds.length < 2 ? "Pick at least 2 streamers" : "Start battle",
+          style: "primary",
+          disabled: selectedUserIds.length < 2,
+          loading: props.isStarting,
+          onPress: () => props.onStartBattle({ durationSeconds, winnerTakesAll: isWinnerTakesAll, participantUserIds: selectedUserIds }),
+        },
+      ]}
+    >
+      <View style={styles.body}>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
           Viewers tap a streamer on stage to send them gifts. Every coin gifted adds to that streamer's score. Highest score when the timer ends wins.
         </Text>
@@ -61,11 +79,7 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
                 {streamer.role === "host" ? " (you)" : ""}
               </Text>
               <View style={[styles.checkbox, isSelected ? styles.checkboxChecked : null]}>
-                {isSelected ? (
-                  <Text size={12} weight={700} lineHeight={14} color={colors.white}>
-                    ✓
-                  </Text>
-                ) : null}
+                {isSelected ? <Check16Icon size={14} color={colors.onPrimary} /> : null}
               </View>
             </Pressable>
           );
@@ -93,7 +107,8 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
             accessibilityLabel="Winner takes all"
             value={isWinnerTakesAll}
             onValueChange={setIsWinnerTakesAll}
-            trackColor={{ true: colors.primary, false: colors.disabled }}
+            trackColor={{ true: colors.primarySolid, false: colors.disabled }}
+            thumbColor="#FFFFFF"
           />
         </View>
         <Text size={12} lineHeight={17} color={colors.textMuted}>
@@ -104,25 +119,20 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
             {props.errorMessage}
           </Text>
         ) : null}
-        <Button
-          title={selectedUserIds.length < 2 ? "Pick at least 2 streamers" : "Start battle"}
-          disabled={selectedUserIds.length < 2}
-          loading={props.isStarting}
-          onPress={() =>
-            props.onStartBattle({ durationSeconds, winnerTakesAll: isWinnerTakesAll, participantUserIds: selectedUserIds })
-          }
-        />
-      </ScrollView>
+      </View>
     </BottomSheet>
   );
 }
 
-const styles = StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
-  flex: { flex: 1 },
-  participantRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: colors.divider, alignItems: "center", justifyContent: "center" },
-  checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chips: { flexDirection: "row", gap: 8 },
-  ruleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+const useStyles = makeThemedStyles((colors, scheme) => {
+  const palette = buildModalPalette(colors, scheme);
+  return StyleSheet.create({
+    body: { gap: 12, paddingTop: 4 },
+    flex: { flex: 1 },
+    participantRow: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 48, paddingHorizontal: 12, borderRadius: 12, backgroundColor: palette.inset },
+    checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: scheme === "dark" ? "#8E8E92" : "#80869F", alignItems: "center", justifyContent: "center" },
+    checkboxChecked: { backgroundColor: colors.primarySolid, borderColor: colors.primarySolid },
+    chips: { flexDirection: "row", gap: 8 },
+    ruleRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 12, backgroundColor: palette.inset },
+  });
 });

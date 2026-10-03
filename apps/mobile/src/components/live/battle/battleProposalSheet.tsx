@@ -1,12 +1,13 @@
 import { StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Button } from "@/components/ui/button";
+import { ModalActionStack } from "@/components/ui/modalActions";
+import { buildModalPalette } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { LiveBattleProposal } from "@/types/liveStage.type";
 
-const CONSENT_LABEL = { pending: "Waiting…", accepted: "Accepted ✓", declined: "Declined" } as const;
+const CONSENT_LABEL = { pending: "Waiting…", accepted: "Accepted", declined: "Declined" } as const;
 
 export interface BattleProposalSheetProps {
   readonly proposal: LiveBattleProposal | null;
@@ -23,12 +24,15 @@ export interface BattleProposalSheetProps {
 }
 
 export function BattleProposalSheet(props: BattleProposalSheetProps) {
+  const { colors, scheme } = useTheme();
+  const styles = useStyles();
+  const palette = buildModalPalette(colors, scheme);
   const { proposal } = props;
   if (!proposal) return null;
   const nameOf = (userId: string) => proposal.participants.find((user) => user.id === userId)?.name ?? "Guest";
   const minutes = Math.round(proposal.durationSeconds / 60);
   return (
-    <BottomSheet visible={props.isVisible} onClose={props.onClose} title="Winner takes all?" floating>
+    <BottomSheet visible={props.isVisible} onClose={props.onClose} title="Winner takes all?" subtitle={`${minutes}-minute battle`} floating>
       <View style={styles.body}>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
           {props.isHostView ? "You" : props.hostName} proposed a {minutes}-minute winner-takes-all battle. When it ends, every coin gifted to the other streamers goes to the
@@ -40,7 +44,7 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
                 <Text size={14} lineHeight={17} style={styles.flex} numberOfLines={1}>
                   {nameOf(consent.userId)}
                 </Text>
-                <Text size={13} weight={600} lineHeight={16} color={consent.state === "declined" ? colors.error : consent.state === "accepted" ? colors.success : colors.textMuted}>
+                <Text size={13} weight={600} lineHeight={16} color={consent.state === "declined" ? palette.destructiveInk : consent.state === "accepted" ? colors.successText : colors.textMuted}>
                   {CONSENT_LABEL[consent.state]}
                 </Text>
               </View>
@@ -51,18 +55,22 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
             <Text size={13} lineHeight={18}>
               Someone declined. Run it as a normal battle where everyone keeps their own coins, or cancel.
             </Text>
-            <View style={styles.buttons}>
-              <Button title="Cancel battle" variant="outline" style={styles.flex} onPress={() => props.onCancel(proposal.id)} />
-              <Button title="Run normal battle" style={styles.flex} loading={props.isActionPending} onPress={() => props.onRunWithoutWinnerTakesAll(proposal.id)} />
-            </View>
+            <ModalActionStack
+              actions={[
+                { label: "Run normal battle", style: "primary", loading: props.isActionPending, onPress: () => props.onRunWithoutWinnerTakesAll(proposal.id) },
+                { label: "Cancel battle", style: "secondary", onPress: () => props.onCancel(proposal.id) },
+              ]}
+            />
           </>
         ) : null}
-        {props.isHostView && !proposal.needsHostDecision ? <Button title="Cancel battle" variant="outline" onPress={() => props.onCancel(proposal.id)} /> : null}
+        {props.isHostView && !proposal.needsHostDecision ? <ModalActionStack actions={[{ label: "Cancel battle", style: "secondary", onPress: () => props.onCancel(proposal.id) }]} /> : null}
         {!props.isHostView ? (
-          <View style={styles.buttons}>
-            <Button title="Decline" variant="outline" style={styles.flex} onPress={() => props.onDecline(proposal.id)} />
-            <Button title="Accept" style={styles.flex} loading={props.isActionPending} onPress={() => props.onAccept(proposal.id)} />
-          </View>
+          <ModalActionStack
+            actions={[
+              { label: "Accept", style: "primary", loading: props.isActionPending, onPress: () => props.onAccept(proposal.id) },
+              { label: "Decline", style: "secondary", onPress: () => props.onDecline(proposal.id) },
+            ]}
+          />
         ) : null}
       </View>
     </BottomSheet>
@@ -72,9 +80,11 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
 export const isMyConsentPending = (proposal: LiveBattleProposal | null, userId: string | null) =>
   !!proposal && proposal.consents.some((consent) => consent.userId === userId && consent.state === "pending");
 
-const styles = StyleSheet.create({
-  body: { padding: 16, gap: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flex: { flex: 1 },
-  buttons: { flexDirection: "row", gap: 10 },
+const useStyles = makeThemedStyles((colors, scheme) => {
+  const palette = buildModalPalette(colors, scheme);
+  return StyleSheet.create({
+    body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
+    row: { flexDirection: "row", alignItems: "center", gap: 8, minHeight: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: palette.inset },
+    flex: { flex: 1 },
+  });
 });

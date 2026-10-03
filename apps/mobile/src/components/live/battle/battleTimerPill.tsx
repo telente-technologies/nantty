@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 import { Animated, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 
 import { formatBattleClock } from "./battleClock.hook";
+import { liveAccent, liveGlass } from "../liveSurface.constant";
 
 const FINAL_SECONDS = 10;
 
@@ -30,7 +30,7 @@ export function BattleTimerPill({ secondsRemaining, label }: { secondsRemaining:
       accessibilityLabel={`${label}, ${secondsRemaining} seconds left`}
       style={[styles.pill, isFinalSeconds ? styles.pillFinal : null, { transform: [{ scale: pulse }] }]}
     >
-      <Text size={11} weight={700} lineHeight={14} color={colors.white}>
+      <Text size={11} weight={700} lineHeight={14} color={liveGlass.ink}>
         {label} {formatBattleClock(secondsRemaining)}
       </Text>
     </Animated.View>
@@ -38,6 +38,6 @@ export function BattleTimerPill({ secondsRemaining, label }: { secondsRemaining:
 }
 
 const styles = StyleSheet.create({
-  pill: { alignSelf: "center", backgroundColor: "rgba(0,0,0,0.65)", borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
-  pillFinal: { backgroundColor: colors.live },
+  pill: { alignSelf: "center", backgroundColor: liveGlass.backgroundStrong, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
+  pillFinal: { backgroundColor: liveAccent.red },
 });

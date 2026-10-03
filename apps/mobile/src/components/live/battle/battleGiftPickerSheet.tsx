@@ -9,10 +9,12 @@ import { LiveGiftArtwork } from "@/components/live/gifts/liveGiftArtwork";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveBattle, LiveStage, LiveStageStreamer } from "@/types/liveStage.type";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useSendBattleGiftToStreamer } from "./sendBattleGift.adapter";
+import { Coin24Icon } from "@/components/icons";
+import { IconRow } from "@/components/ui/iconRow";
 
 export interface BattleGiftPickerSheetProps {
   readonly liveId: string;
@@ -25,6 +27,8 @@ export interface BattleGiftPickerSheetProps {
 }
 
 export function BattleGiftPickerSheet(props: BattleGiftPickerSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [selectedGiftId, setSelectedGiftId] = useState<string | null>(null);
   const isVisible = props.recipient !== null;
   const runningBattleId = props.battle?.state === "active" ? props.battle.id : null;
@@ -76,9 +80,11 @@ export function BattleGiftPickerSheet(props: BattleGiftPickerSheetProps) {
                   <Text size={11} weight={500} lineHeight={14} numberOfLines={1}>
                     {gift.name}
                   </Text>
-                  <Text size={10} lineHeight={12} color={colors.textMuted}>
-                    🪙 {gift.priceCoins.toLocaleString("en-US")}
-                  </Text>
+                  <IconRow icon={<Coin24Icon size={12} />} justify="center" gap={3}>
+                    <Text size={10} lineHeight={12} color={colors.textMuted}>
+                      {gift.priceCoins.toLocaleString("en-US")}
+                    </Text>
+                  </IconRow>
                 </Pressable>
               );
             })}
@@ -101,7 +107,7 @@ export function BattleGiftPickerSheet(props: BattleGiftPickerSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 },
   flex: { flex: 1 },
   recipientRow: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -115,5 +121,5 @@ const styles = StyleSheet.create({
     borderColor: colors.divider,
     gap: 2,
   },
-  giftTileSelected: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
-});
+  giftTileSelected: { borderColor: colors.primarySolid, backgroundColor: colors.primaryTint },
+}));
