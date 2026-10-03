@@ -69,9 +69,9 @@ describe("money routes", () => {
   });
 
   it.each([
-    ["POST", "/webhooks/paystack"],
+    ["POST", "/webhooks/bachs"],
     ["POST", "/webhooks/store-notifications/apple_iap"],
-    ["POST", "/api/v1/payments/webhooks/paystack"],
+    ["POST", "/api/v1/payments/webhooks/bachs"],
   ])("provider webhooks never pass through the gateway: %s %s", (method, path) => {
     const route = resolveUpstreamRouteForRequest(method, path);
     expect(route === undefined || route.authentication === "required").toBe(true);
