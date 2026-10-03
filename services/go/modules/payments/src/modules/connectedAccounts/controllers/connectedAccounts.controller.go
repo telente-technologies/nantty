@@ -26,7 +26,7 @@ func (controller ConnectedAccountsController) GetMyConnectedAccount(writer http.
 		controller.fail(writer, request, err)
 		return
 	}
-	account, err := controller.Application.Gateway.FindConnectedAccountForUser(request.Context(), controller.Application.Container.Resources.Database, principal.UserId)
+	account, err := controller.Application.Gateway.FindConnectedAccountRowForUser(request.Context(), controller.Application.Container.Resources.Database, principal.UserId)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -50,7 +50,7 @@ func (controller ConnectedAccountsController) CreateMyConnectedAccount(writer ht
 		controller.fail(writer, request, err)
 		return
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusCreated, services.ConvertConnectedAccountToView(account))
+	httpserver.WriteJsonResponse(writer, http.StatusAccepted, services.ConvertConnectedAccountToView(account))
 }
 
 func (controller ConnectedAccountsController) CreateMyOnboardingLink(writer http.ResponseWriter, request *http.Request) {
@@ -59,26 +59,7 @@ func (controller ConnectedAccountsController) CreateMyOnboardingLink(writer http
 		controller.fail(writer, request, err)
 		return
 	}
-	link, err := controller.Application.Gateway.CreateOnboardingLinkForUser(request.Context(), principal.UserId)
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	httpserver.WriteJsonResponse(writer, http.StatusCreated, dtos.OnboardingLinkDto{Url: link.Url, ExpiresAt: link.ExpiresAt})
-}
-
-func (controller ConnectedAccountsController) CreateMyVirtualAccount(writer http.ResponseWriter, request *http.Request) {
-	principal, err := ledgerutils.RequirePrincipal(request)
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	view, err := controller.Application.Gateway.CreateVirtualAccountForUser(request.Context(), principal.UserId)
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	httpserver.WriteJsonResponse(writer, http.StatusCreated, view)
+	controller.fail(writer, request, controller.Application.Gateway.CreatePayoutVerificationLink(request.Context(), principal.UserId))
 }
 
 func (controller ConnectedAccountsController) StartWebSubscriptionCheckout(writer http.ResponseWriter, request *http.Request) {

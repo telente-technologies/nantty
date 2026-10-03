@@ -22,3 +22,28 @@ type DisputeEvidenceRequestDto struct {
 	ProductDescription string `json:"productDescription"`
 	Notes              string `json:"notes"`
 }
+
+type ConnectedAccountIdentityRequestDto struct {
+	FirstName              string `json:"firstName"`
+	LastName               string `json:"lastName"`
+	DateOfBirth            string `json:"dateOfBirth"`
+	BankVerificationNumber string `json:"bvn"`
+	NationalIdNumber       string `json:"nin"`
+	PhoneNumber            string `json:"phoneNumber"`
+	AddressLine1           string `json:"addressLine1"`
+	City                   string `json:"city"`
+	State                  string `json:"state"`
+}
+
+type InternalDomainEventDto struct {
+	Type string `json:"type"`
+	Data struct {
+		AccountId string `json:"accountId"`
+	} `json:"data"`
+}
+
+type PayoutDestinationRequestDto struct {
+	BankCode      string `json:"bankCode"`
+	AccountNumber string `json:"accountNumber"`
+	Currency      string `json:"currency"`
+}
