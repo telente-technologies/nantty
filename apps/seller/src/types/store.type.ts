@@ -9,11 +9,19 @@ export interface TaxRate {
   readonly appliesToCategoryIds: string[] | null;
 }
 
-export interface LoyaltyRules {
+export interface StoreRewardsRules {
   readonly enabled: boolean;
-  readonly spendRequiredPerPoint: Money;
-  readonly redeemValuePerPoint: Money;
-  readonly minimumPointsToRedeem: number;
+  readonly percentBackBasisPoints: number;
+  readonly minimumOrder: Money;
+  readonly maxPerOrder: Money;
+  readonly expiryDays: number;
+}
+
+export interface StoreRewardsSummary {
+  readonly outstandingLiability: Money;
+  readonly customersWithCredit: number;
+  readonly issuedLast30Days: Money;
+  readonly redeemedLast30Days: Money;
 }
 
 export interface NotificationPreferences {
@@ -51,7 +59,7 @@ export interface StoreSettings {
   readonly taxes: TaxRate[];
   readonly pricesIncludeTax: boolean;
   readonly policies: StorePolicies;
-  readonly loyalty: LoyaltyRules;
+  readonly storeRewards: StoreRewardsRules;
   readonly notifications: NotificationPreferences;
 }
 

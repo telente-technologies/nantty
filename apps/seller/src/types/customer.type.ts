@@ -16,7 +16,8 @@ export interface Customer {
   readonly city: string | null;
   readonly tags: string[];
   readonly notes: CustomerNote[];
-  readonly loyaltyPoints: number;
+  readonly storeCreditBalance: Money;
+  readonly storeCreditExpiresAt: string | null;
   readonly totalSpent: Money;
   readonly averageOrderValue: Money | null;
   readonly purchasesCount: number;
