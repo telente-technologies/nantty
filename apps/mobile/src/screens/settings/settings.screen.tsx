@@ -16,7 +16,6 @@ import {
   MagnifyingGlass24Icon,
   Question24Icon,
   SealCheck20Icon,
-  Share24Icon,
   Shield24Icon,
   SquaresFour24Icon,
   Tag24Icon,
@@ -117,7 +116,6 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.text} />} onPress={() => navigation.navigate("Verification")} />
         <SettingsRow label="Create business profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBusinessProfile")} />
         <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
-        <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />
       </SettingsGroup>
 
       <SettingsGroup>

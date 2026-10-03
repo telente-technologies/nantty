@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { useFollowRequestsQuery } from "@/components/profile/followRequests.hook";
 import { useMyProfileQuery, useSaveProfileDetailsMutation } from "@/components/profile/profileQueries.hook";
+import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { Chip } from "@/components/ui/chip";
@@ -30,6 +31,7 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
             : "Anyone can see your posts and follow you."}
         </Text>
       </View>
+      <MentionPrivacySection />
       <SettingsGroup>
         <SettingsRow
           label="Follow requests"
