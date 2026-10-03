@@ -21,6 +21,7 @@ func (Session) Fields() []ent.Field {
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
 		field.String("user_agent").Default("").MaxLen(255),
 		field.String("ip_address").Default("").MaxLen(64),
+		field.String("device_hash").Optional().Nillable().MaxLen(64),
 		field.Time("last_used_at"),
 		field.Time("expires_at"),
 		field.Time("revoked_at").Optional().Nillable(),
