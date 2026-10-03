@@ -23,3 +23,6 @@ type ReconciliationBreak func(*sql.Selector)
 
 // ReconciliationRun is the predicate function for reconciliationrun builders.
 type ReconciliationRun func(*sql.Selector)
+
+// SellerCreditMaturity is the predicate function for sellercreditmaturity builders.
+type SellerCreditMaturity func(*sql.Selector)
