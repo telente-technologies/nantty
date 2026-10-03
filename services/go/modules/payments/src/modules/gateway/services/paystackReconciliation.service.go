@@ -118,7 +118,7 @@ func (gateway *PaymentGateway) settleDirectChargesForSubaccount(ctx context.Cont
 			return count, convertProviderError(err)
 		}
 		for _, reference := range references {
-			settled, err := gateway.postDirectChargeSettled(ctx, reference, settlement.ProviderSettlementId)
+			settled, err := gateway.postDirectChargeSettled(ctx, reference, settlement.ProviderSettlementId, seller.SettlementSubaccountCode)
 			if err != nil {
 				return count, err
 			}
@@ -130,27 +130,58 @@ func (gateway *PaymentGateway) settleDirectChargesForSubaccount(ctx context.Cont
 	return count, nil
 }
 
-func (gateway *PaymentGateway) postDirectChargeSettled(ctx context.Context, reference, settlementId string) (bool, error) {
+type directSettlement struct {
+	journalReference string
+	sellerUserId     string
+	amountMinor      int64
+}
+
+func directSettlementsFor(intent *ent.PaymentIntent, subaccount string) []directSettlement {
+	if groups := checkoutGroupsOf(intent); len(groups) > 0 {
+		var settlements []directSettlement
+		for _, group := range groups {
+			if group.IsDirect() && group.Subaccount == subaccount {
+				settlements = append(settlements, directSettlement{journalReference: "direct-settled-" + intent.Reference + "-" + group.OrderId, sellerUserId: group.SellerUserId, amountMinor: group.ShareMinor})
+			}
+		}
+		return settlements
+	}
+	if !IsConnectedAccountCharge(intent) {
+		return nil
+	}
+	return []directSettlement{{journalReference: "direct-settled-" + intent.Reference, sellerUserId: intent.BeneficiaryUserID, amountMinor: AppliedCollectionAmount(intent)}}
+}
+
+func (gateway *PaymentGateway) postDirectChargeSettled(ctx context.Context, reference, settlementId, subaccount string) (bool, error) {
 	intent, err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentIntent.Query().Where(paymentintent.Reference(reference)).Only(ctx)
-	if ent.IsNotFound(err) || (err == nil && (!IsConnectedAccountCharge(intent) || intent.Status != paymentintent.StatusSucceeded)) {
+	if ent.IsNotFound(err) || (err == nil && intent.Status != paymentintent.StatusSucceeded) {
 		return false, nil
 	}
 	if err != nil {
 		return false, err
 	}
-	journalReference := "direct-settled-" + intent.Reference
-	if _, found, err := gateway.Container.Ledger.FindJournalEntryByReference(ctx, gateway.Container.Resources.Database, journalReference); err != nil || found {
-		return false, err
-	}
-	amount := AppliedCollectionAmount(intent)
-	return true, databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		_, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: journalReference, Kind: "directPayment.settledByPaystack", ExternalReference: settlementId, Description: "Paystack settled the direct payment to the seller's bank",
-			Lines: []ledgermodels.JournalLineRequest{
-				{Account: ledgermodels.SellerSettlingByPaystackAccount(intent.BeneficiaryUserID, intent.Currency), Direction: ledgermodels.Debit, AmountMinor: amount},
-				{Account: ledgermodels.SellerProviderHeldFundsAccount(intent.BeneficiaryUserID, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: amount},
-			},
+	posted := false
+	for _, settlement := range directSettlementsFor(intent, subaccount) {
+		if _, found, err := gateway.Container.Ledger.FindJournalEntryByReference(ctx, gateway.Container.Resources.Database, settlement.journalReference); err != nil || found {
+			if err != nil {
+				return posted, err
+			}
+			continue
+		}
+		err := databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+			_, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+				Reference: settlement.journalReference, Kind: "directPayment.settledByPaystack", ExternalReference: settlementId, Description: "Paystack settled the direct payment to the seller's bank",
+				Lines: []ledgermodels.JournalLineRequest{
+					{Account: ledgermodels.SellerSettlingByPaystackAccount(settlement.sellerUserId, intent.Currency), Direction: ledgermodels.Debit, AmountMinor: settlement.amountMinor},
+					{Account: ledgermodels.SellerProviderHeldFundsAccount(settlement.sellerUserId, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: settlement.amountMinor},
+				},
+			})
+			return err
 		})
-		return err
-	})
+		if err != nil {
+			return posted, err
+		}
+		posted = true
+	}
+	return posted, nil
 }

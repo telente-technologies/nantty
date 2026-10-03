@@ -190,7 +190,13 @@ func (gateway *PaymentGateway) buildSettledPayment(ctx context.Context, client *
 	if intent.Purpose != constants.PurposeOrderCheckout {
 		return payment, nil
 	}
-	payables, err := client.OrderPayable.Query().Where(orderpayable.OrderID(intent.SubjectID)).Order(ent.Asc(orderpayable.FieldCreatedAt)).All(ctx)
+	groups := checkoutGroupsOf(intent)
+	query := client.OrderPayable.Query().Where(orderpayable.OrderID(intent.SubjectID))
+	if len(groups) > 0 {
+		query = client.OrderPayable.Query().Where(orderpayable.CheckoutID(intent.SubjectID))
+		payment.GroupAllocations = models.SettleCheckoutGroups(groups, intent.ProviderFeeMinor)
+	}
+	payables, err := query.Order(ent.Asc(orderpayable.FieldCreatedAt)).All(ctx)
 	if err != nil {
 		return payment, err
 	}

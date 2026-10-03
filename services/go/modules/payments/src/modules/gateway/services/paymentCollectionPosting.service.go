@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
@@ -30,10 +31,7 @@ func (gateway *PaymentGateway) postCollectionJournalEntries(ctx context.Context,
 		Reference: "payment-received:" + intent.Reference, Kind: "payment.received", ExternalReference: intent.Reference,
 		Description: "Payment received into the platform account",
 		Metadata:    map[string]any{"paymentIntentId": intent.ID.String(), "purpose": string(intent.Purpose)},
-		Lines: []ledgermodels.JournalLineRequest{
-			{Account: platformBalance, Direction: ledgermodels.Debit, AmountMinor: intent.AmountMinor},
-			{Account: ledgermodels.PaymentsAwaitingApplicationAccount(intent.Currency), Direction: ledgermodels.Credit, AmountMinor: intent.AmountMinor},
-		},
+		Lines:       CollectionLinesForIntent(intent.Provider, intent.Currency, intent.AmountMinor, checkoutGroupsOf(intent)),
 	})
 	if err != nil || intent.ProviderFeeMinor == 0 {
 		return err
@@ -103,4 +101,27 @@ func AppendPositiveLine(lines []ledgermodels.JournalLineRequest, account ledgerm
 		return lines
 	}
 	return append(lines, ledgermodels.JournalLineRequest{Account: account, Direction: direction, AmountMinor: amountMinor})
+}
+
+func checkoutGroupsOf(intent *ent.PaymentIntent) []models.CheckoutGroupAllocation {
+	metadata := map[string]string{}
+	_ = json.Unmarshal(intent.Metadata, &metadata)
+	return models.DecodeCheckoutGroups(metadata)
+}
+
+func CollectionLinesForIntent(provider, currency string, amountMinor int64, groups []models.CheckoutGroupAllocation) []ledgermodels.JournalLineRequest {
+	var directShares, directFees int64
+	var sellerLines []ledgermodels.JournalLineRequest
+	for _, group := range groups {
+		if !group.IsDirect() {
+			continue
+		}
+		directShares += group.ShareMinor
+		directFees += group.EstimatedFeeMinor
+		sellerLines = AppendPositiveLine(sellerLines, ledgermodels.SellerProviderHeldFundsAccount(group.SellerUserId, currency), ledgermodels.Debit, group.ShareMinor)
+	}
+	lines := AppendPositiveLine(nil, ledgermodels.PlatformProviderBalanceAccount(provider, currency), ledgermodels.Debit, amountMinor-directShares)
+	lines = append(lines, sellerLines...)
+	lines = AppendPositiveLine(lines, ledgermodels.PaymentsAwaitingApplicationAccount(currency), ledgermodels.Credit, amountMinor-directFees)
+	return AppendPositiveLine(lines, ledgermodels.PaymentProcessingFeeExpenseAccount(currency), ledgermodels.Credit, directFees)
 }

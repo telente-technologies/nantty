@@ -52,7 +52,10 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	metadata := map[string]string{}
 	_ = json.Unmarshal(intent.Metadata, &metadata)
 	delete(metadata, callbackUrlMetadataKey)
+	splitShares := SplitSharesForGroups(models.DecodeCheckoutGroups(metadata))
+	delete(metadata, models.CheckoutGroupsMetadataKey)
 	result, err := provider.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{
+		SplitShares:   splitShares,
 		CustomerEmail: contact.Email, AuthorizationCode: request.AuthorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
 		Currency: intent.Currency, SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee, Metadata: metadata,
 	})

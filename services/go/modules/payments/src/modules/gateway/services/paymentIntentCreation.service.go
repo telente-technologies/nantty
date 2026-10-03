@@ -118,8 +118,11 @@ func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context
 		return models.PaymentIntentView{}, err
 	}
 	metadata["purpose"], metadata["paymentIntentId"], metadata["subjectId"] = string(intent.Purpose), intent.ID.String(), intent.SubjectID
+	splitShares := SplitSharesForGroups(models.DecodeCheckoutGroups(metadata))
+	delete(metadata, models.CheckoutGroupsMetadataKey)
 	session, err := provider.InitializeCharge(ctx, interfaces.ChargeRequest{
-		Reference: intent.Reference, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
+		SplitShares: splitShares,
+		Reference:   intent.Reference, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
 		SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee,
 		CustomerEmail: contact.Email, CustomerLabel: customerDisplayName(contact), SuccessUrl: callbackUrl, Channels: gateway.Container.Settings.Paystack.Channels,
 		PlanCode: metadata["paystackPlanCode"], ExpiresInMinutes: gateway.Container.Settings.CheckoutExpiryMinutes, Metadata: metadata,
