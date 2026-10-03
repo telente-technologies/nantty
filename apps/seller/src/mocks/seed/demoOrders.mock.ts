@@ -5,6 +5,11 @@ import { buildStoreScopedRecordId, type DemoOnlineOrderPlan } from "@/mocks/seed
 import { buildDemoDeliveryDetails, buildDemoOrderTimeline, buildDemoPaymentReference, convertOrderStatusToEscrowStatus, pickOrderStatusForAge } from "@/mocks/seed/demoOrderLifecycle.mock";
 import { buildIsoDateDaysAgo, createSeededRandomNumberGenerator, pickRandomIntegerInclusive, pickRandomItem } from "@/mocks/seed/seededRandom.mock";
 
+function computeDemoProcessingFeeMinor(totalMinor: number): number {
+  const flatMinor = totalMinor < 250_000 ? 0 : 10_000;
+  return Math.min(200_000, Math.round(totalMinor * 0.015) + flatMinor);
+}
+
 export interface DemoOnlineOrderOptions {
   readonly plan: DemoOnlineOrderPlan;
   readonly randomSeed: number;
@@ -48,7 +53,7 @@ export function buildDemoOnlineOrders(products: readonly Product[], options: Dem
     const orderNumber = `ZM-${String(plan.firstOrderNumber + orderIndex)}`;
     const orderKey = buildStoreScopedRecordId("o", recordKey, orderIndex + 1);
     const courier = isShippedOrLater ? pickRandomItem(["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox"], random) : null;
-    const paymentProvider = random() < 0.7 ? ("paystack" as const) : ("flutterwave" as const);
+    const paymentProvider = "paystack" as const;
     const isFailedAttempt = status === "shipped" && random() < 0.25;
     const isRefunded = status === "refunded" || status === "returned" || status === "cancelled";
     const buyerPhone = "+23480" + String(30000000 + orderIndex * 7919).slice(0, 8);
@@ -63,7 +68,11 @@ export function buildDemoOnlineOrders(products: readonly Product[], options: Dem
       subtotal: toStoreMoney(subtotalMinor),
       shippingFee: toStoreMoney(shippingMinor),
       total: toStoreMoney(subtotalMinor + shippingMinor),
-      sellerPayout: toStoreMoney(Math.round(subtotalMinor * 0.95)),
+      sellerPayout: toStoreMoney(subtotalMinor + shippingMinor - Math.round(((subtotalMinor + shippingMinor) * 150) / 10_000) - computeDemoProcessingFeeMinor(subtotalMinor + shippingMinor)),
+      paymentMode: "escrow",
+      escrowFee: toStoreMoney(Math.round(((subtotalMinor + shippingMinor) * 150) / 10_000)),
+      escrowFeeBasisPoints: 150,
+      paymentProcessingFee: toStoreMoney(computeDemoProcessingFeeMinor(subtotalMinor + shippingMinor)),
       status,
       escrowStatus,
       escrowReleaseAt: status === "delivered" ? buildIsoDateDaysAgo(daysAgo - 3) : null,

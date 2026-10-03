@@ -91,7 +91,7 @@ export function buildDemoOrderTimeline({ orderKey, status, daysAgo, buyerName, c
   return events;
 }
 
-export function buildDemoPaymentReference(provider: "paystack" | "flutterwave", orderNumber: string, random: () => number): string {
+export function buildDemoPaymentReference(provider: "paystack", orderNumber: string, random: () => number): string {
   const randomPart = Math.floor(random() * 36 ** 8).toString(36).toUpperCase().padStart(8, "0");
   return provider === "paystack" ? `PSK_${randomPart}_${orderNumber.replace("ZM-", "")}` : `FLW-MOCK-${randomPart}`;
 }

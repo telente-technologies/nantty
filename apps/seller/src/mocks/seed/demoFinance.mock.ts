@@ -13,8 +13,8 @@ function naira(amountMinor: number): Money {
   return { amountMinor, currency: "NGN" };
 }
 
-const proPlanEntitlements: PlanEntitlements = { maxStaffSeats: 5, maxLocations: 3, reducedCommission: false, priorityPlacement: false, adCredits: { amountMinor: 1_000_000, currency: "NGN" }, apiAccess: false };
-const businessPlanEntitlements: PlanEntitlements = { maxStaffSeats: 25, maxLocations: 10, reducedCommission: true, priorityPlacement: true, adCredits: { amountMinor: 5_000_000, currency: "NGN" }, apiAccess: true };
+const proPlanEntitlements: PlanEntitlements = { maxStaffSeats: 5, maxLocations: 3, reducedEscrowFee: false, priorityPlacement: false, adCredits: { amountMinor: 100_000, currency: "NGN" }, apiAccess: false };
+const businessPlanEntitlements: PlanEntitlements = { maxStaffSeats: 25, maxLocations: 10, reducedEscrowFee: true, priorityPlacement: true, adCredits: { amountMinor: 500_000, currency: "NGN" }, apiAccess: true };
 
 export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
   const proPerks = [
@@ -22,17 +22,18 @@ export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
     { title: "Grow faster", description: "Bulk tools, advanced analytics and reports, segments and a team." },
     { title: "Monthly ad credit", description: "Credit you can spend in Ads Manager each month." },
   ];
-  const premiumPerks = [
+  const proFeePerk = { title: "1.5% escrow fee", description: "Escrow orders carry a 1.5% fee plus Paystack's payment processing fee. Direct payments carry only the processing fee." };
+  const businessPerks = [
     ...proPerks,
-    { title: "Lower commission", description: "A reduced marketplace commission on every online order." },
+    { title: "1% escrow fee on Business", description: "A lower 1% fee on escrow orders, plus Paystack's payment processing fee. Direct payments carry only the processing fee." },
     { title: "Priority placement", description: "Your products rank higher in Mart and search." },
     { title: "API access", description: "Connect your own tools to your store data." },
   ];
   return [
-    { id: "pro_monthly", tier: "PRO", price: naira(500_000), interval: "month", entitlements: proPlanEntitlements, perks: proPerks },
-    { id: "business_monthly", tier: "BUSINESS", price: naira(1_500_000), interval: "month", entitlements: businessPlanEntitlements, perks: premiumPerks },
-    { id: "pro_yearly", tier: "PRO", price: naira(4_800_000), interval: "year", entitlements: proPlanEntitlements, perks: proPerks },
-    { id: "business_yearly", tier: "BUSINESS", price: naira(14_400_000), interval: "year", entitlements: businessPlanEntitlements, perks: premiumPerks },
+    { id: "pro_monthly", tier: "PRO", price: naira(500_000), interval: "month", entitlements: proPlanEntitlements, perks: [proFeePerk, ...proPerks] },
+    { id: "business_monthly", tier: "BUSINESS", price: naira(1_500_000), interval: "month", entitlements: businessPlanEntitlements, perks: businessPerks },
+    { id: "pro_yearly", tier: "PRO", price: naira(4_800_000), interval: "year", entitlements: proPlanEntitlements, perks: [proFeePerk, ...proPerks] },
+    { id: "business_yearly", tier: "BUSINESS", price: naira(14_400_000), interval: "year", entitlements: businessPlanEntitlements, perks: businessPerks },
   ];
 }
 
@@ -68,7 +69,7 @@ export function buildDemoGateStores(): MockGateStore[] {
       storeName: "Adire Lab Studio",
       verificationStatus: "verified",
       verificationNote: null,
-      subscription: { subscription: { status: "active", plan: "PRO", currentPeriodEnd: buildIsoDateDaysAgo(-9, 0) }, planId: "pro_monthly", cancelAtPeriodEnd: false, paymentMethodSummary: "Mastercard •••• 2210", provider: "flutterwave", invoices: [] },
+      subscription: { subscription: { status: "active", plan: "PRO", currentPeriodEnd: buildIsoDateDaysAgo(-9, 0) }, planId: "pro_monthly", cancelAtPeriodEnd: false, paymentMethodSummary: "Mastercard •••• 2210", provider: "paystack", invoices: [] },
     },
   ];
 }
