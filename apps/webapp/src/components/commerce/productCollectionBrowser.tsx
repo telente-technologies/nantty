@@ -11,6 +11,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import type { ProductCollection } from "@/types/commerce.type";
 
 import styles from "./productCollectionBrowser.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 interface ProductCollectionBrowserProps {
   readonly title: string;
@@ -56,7 +57,7 @@ export function ProductCollectionBrowser({ title, categoryId, collection }: Prod
       ) : query.isError ? (
         <ErrorState description="We couldn't load this collection." action={<RetryButton onRetry={() => query.refetch()} />} />
       ) : products.length === 0 ? (
-        <EmptyState icon="🛍" title="Nothing here yet" description="Products in this section will appear here soon." />
+        <EmptyState icon={<AppIcon name="shoppingBag24" size={28} />} title="Nothing here yet" description="Products in this section will appear here soon." />
       ) : (
         <div className={styles.grid}>
           {products.map((product) => (

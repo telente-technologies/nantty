@@ -39,3 +39,7 @@
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
+
+.warn {
+  color: var(--error);
+}

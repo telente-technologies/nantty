@@ -13,6 +13,7 @@ import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSent
 import { productsService } from "@/services/products.service";
 
 import styles from "./martBrowser.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 const featuredCollections = [
   { href: "/collections/sales_of_the_day", label: "Sales of the Day", caption: "Fresh deals every morning" },
@@ -89,7 +90,7 @@ export function MartBrowser() {
       ) : productsQuery.isError ? (
         <ErrorState description="We couldn't load products." action={<RetryButton onRetry={() => productsQuery.refetch()} />} />
       ) : products.length === 0 ? (
-        <EmptyState icon="🛍" title="Nothing here yet" description="No products in this category right now. Try another category." />
+        <EmptyState icon={<AppIcon name="shoppingBag24" size={28} />} title="Nothing here yet" description="No products in this category right now. Try another category." />
       ) : (
         <div className={styles.productGrid}>
           {products.map((product) => (
