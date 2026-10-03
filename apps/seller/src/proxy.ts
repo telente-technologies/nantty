@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { doesRoleHavePermission, findFirstPageAllowedForRole, findPermissionRequiredForPage } from "@/config/rolePermissions.config";
-import { readCachedSellerAccessFromCookies, readPosOperatorFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
+import { doesAccessGrantPermission, findFirstPageAllowedForAccess, findPermissionRequiredForPage } from "@/config/rolePermissions.config";
+import { readCachedSellerAccessFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
 import { decideSellerAccessDestination, gatePagePathByDestination } from "@/utils/sellerAccessDestination.util";
 
-const publicPagePaths = new Set(["/login", "/offline", "/forgot-password"]);
+const publicPagePaths = new Set(["/login", "/forgot-password"]);
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {
   const targetUrl = new URL(pathname, request.nextUrl.origin);
@@ -29,18 +29,17 @@ export function proxy(request: NextRequest) {
   const destination = decideSellerAccessDestination(cachedAccess.access);
   const isGatePage = pathname === "/access" || pathname.startsWith("/access/");
   const isBillingCheckoutPage = pathname.startsWith("/billing-checkout/");
-  if (isBillingCheckoutPage) return destination === "app" || destination === "billing" ? NextResponse.next() : redirectTo(request, gatePagePathByDestination[destination]);
+  if (isBillingCheckoutPage) return destination === "app" ? NextResponse.next() : redirectTo(request, gatePagePathByDestination[destination]);
   if (destination !== "app") {
     const gatePath = gatePagePathByDestination[destination];
     const isAllowedGatePage = pathname === gatePath || pathname.startsWith(`${gatePath}/`);
     return isAllowedGatePage ? NextResponse.next() : redirectTo(request, gatePath);
   }
 
-  const effectiveRole = readPosOperatorFromCookies(request.cookies)?.operator.role ?? cachedAccess.access.role;
-  if (pathname === "/" || isGatePage) return redirectTo(request, findFirstPageAllowedForRole(effectiveRole));
+  if (pathname === "/" || isGatePage) return redirectTo(request, findFirstPageAllowedForAccess(cachedAccess.access));
   const requiredPermission = findPermissionRequiredForPage(pathname);
-  if (requiredPermission && !doesRoleHavePermission(effectiveRole, requiredPermission)) {
-    const fallbackPath = findFirstPageAllowedForRole(effectiveRole);
+  if (requiredPermission && !doesAccessGrantPermission(cachedAccess.access, requiredPermission)) {
+    const fallbackPath = findFirstPageAllowedForAccess(cachedAccess.access);
     return fallbackPath === pathname ? NextResponse.next() : redirectTo(request, fallbackPath, { denied: pathname });
   }
   return NextResponse.next();
