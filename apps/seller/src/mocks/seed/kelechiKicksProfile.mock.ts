@@ -9,7 +9,7 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
   storeId: kelechiKicksStoreId,
   recordKey: "kicks",
   receiptPrefix: "KK",
-  randomSeeds: { products: 11_042_026, posHistory: 6262, onlineOrders: 929 },
+  randomSeeds: { products: 11_042_026, onlineOrders: 929 },
   buildSettings: () =>
     buildDemoStoreSettingsFromBasics({
       storeId: kelechiKicksStoreId,
@@ -24,26 +24,21 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
       email: "orders@kelechikicks.ng",
       address: "Shop 14, Ariaria International Market, Aba, Abia",
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: null }],
-      receiptHeaderText: "Walk with confidence.",
-      receiptFooterText: "Shop Kelechi Kicks on Zudomart @kelechi.kicks",
       returnPolicy: "Size exchanges within 7 days if the shoes are unworn and in the box.",
-      paperWidth: "80mm",
-      cardTerminalInstructions: "Use the OPay terminal and write the approval code.",
-      bankTransferInstructions: "Access Bank · 0712245509 · Kelechi Kicks Ventures",
+      shippingPolicy: "We ship from Aba nationwide in 2–5 working days. Abia and Enugu orders often arrive next day.",
       loyalty: { enabled: true, spendRequiredPerPointMinor: 200_000, redeemValuePerPointMinor: 1_000, minimumPointsToRedeem: 50 },
     }),
   buildLocations: () => [
     { id: "loc_kicks_ariaria", name: "Ariaria shop", kind: "store", address: "Shop 14, Ariaria International Market", city: "Aba", state: "Abia", country: "NG", phone: "+234 807 555 0155", isDefault: true, active: true },
   ],
-  buildRegisters: () => [{ id: "reg_kicks_ariaria_1", locationId: "loc_kicks_ariaria", name: "Shop till", openShiftId: null, active: true }],
   buildCategories: () => [
     { id: "cat_leather_shoes", name: "Leather shoes" },
     { id: "cat_sneakers", name: "Sneakers" },
     { id: "cat_shoe_care", name: "Shoe care" },
   ],
   buildStaff: () => [
-    buildDemoStaffRecord({ id: "stf_kelechi", userId: "usr_kelechi", name: "Kelechi Obi", username: "kelechi.kicks", role: "owner", locationIds: ["loc_kicks_ariaria"] }, "1357", 0),
-    buildDemoStaffRecord({ id: "stf_emeka_kicks", userId: "usr_emeka", name: "Emeka Nnaji", username: "emeka.sells", role: "cashier", locationIds: ["loc_kicks_ariaria"] }, "8642", 1),
+    buildDemoStaffRecord({ id: "stf_kelechi", userId: "usr_kelechi", name: "Kelechi Obi", username: "kelechi.kicks", role: "owner", locationIds: ["loc_kicks_ariaria"] }, 0),
+    buildDemoStaffRecord({ id: "stf_emeka_kicks", userId: "usr_emeka", name: "Emeka Nnaji", username: "emeka.sells", role: "sales", locationIds: ["loc_kicks_ariaria"] }, 1),
   ],
   buildPromotions: () => [],
   catalog: {
@@ -71,16 +66,6 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
       ["Obinna Eze", "+2348121237704", "obinna.eze@gmail.com", null, ["wholesale"], 300],
     ],
     firstCustomerNote: null,
-  },
-  posHistory: {
-    registerCashiers: [{ registerId: "reg_kicks_ariaria_1", locationId: "loc_kicks_ariaria", cashier: { id: "stf_emeka_kicks", name: "Emeka Nnaji" } }],
-    registersWithOpenShiftToday: [],
-    historyLengthInDays: 60,
-    salesPerClosedShift: [1, 4],
-    salesPerOpenShift: [1, 2],
-    openingFloatMinor: 500_000,
-    firstReceiptSequence: 100,
-    customerShare: 0.3,
   },
   onlineOrders: {
     orderCount: 9,
@@ -110,7 +95,7 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
     availableMinor: 6_320_000,
   },
   auditEntries: [
-    ["stf_kelechi", "staff.invited", "staff", "Invited Emeka Nnaji as cashier", 20],
+    ["stf_kelechi", "staff.invited", "staff", "Invited Emeka Nnaji as sales staff", 20],
     ["stf_kelechi", "settings.updated", "store", "Uploaded CAC certificate for verification", 2],
   ],
 };

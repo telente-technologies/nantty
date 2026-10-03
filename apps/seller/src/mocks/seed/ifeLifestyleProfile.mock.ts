@@ -1,6 +1,6 @@
 import { buildIfeLifestylePromotions } from "@/mocks/seed/demoFinance.mock";
 import { buildIfeLifestyleStaffRecords } from "@/mocks/seed/demoPeople.mock";
-import { buildIfeLifestyleCategories, buildIfeLifestyleLocations, buildIfeLifestyleRegisters, buildIfeLifestyleStoreSettings, demoMainStoreId } from "@/mocks/seed/demoStore.mock";
+import { buildIfeLifestyleCategories, buildIfeLifestyleLocations, buildIfeLifestyleStoreSettings, demoMainStoreId } from "@/mocks/seed/demoStore.mock";
 import type { DemoStoreProfile } from "@/mocks/seed/demoStoreProfile.mock";
 import { ifeLifestyleBrandTagsByProductKey, ifeLifestyleProductBlueprints } from "@/mocks/seed/ifeLifestyleCatalog.mock";
 
@@ -8,10 +8,9 @@ export const ifeLifestyleStoreProfile: DemoStoreProfile = {
   storeId: demoMainStoreId,
   recordKey: null,
   receiptPrefix: "IFE",
-  randomSeeds: { products: 20260929, posHistory: 4242, onlineOrders: 777 },
+  randomSeeds: { products: 20260929, onlineOrders: 777 },
   buildSettings: buildIfeLifestyleStoreSettings,
   buildLocations: buildIfeLifestyleLocations,
-  buildRegisters: buildIfeLifestyleRegisters,
   buildCategories: buildIfeLifestyleCategories,
   buildStaff: buildIfeLifestyleStaffRecords,
   buildPromotions: buildIfeLifestylePromotions,
@@ -40,21 +39,6 @@ export const ifeLifestyleStoreProfile: DemoStoreProfile = {
       ["Tobi Ajayi", "+2348091234512", null, "tobi.ajayi", ["creator"], 1760],
     ],
     firstCustomerNote: { body: "Prefers size M. Likes to be called when new adire shirts arrive.", authorStaffId: "stf_tunde", authorName: "Tunde Bakare" },
-  },
-  posHistory: {
-    registerCashiers: [
-      { registerId: "reg_lekki_1", locationId: "loc_lekki", cashier: { id: "stf_blessing", name: "Blessing Eze" } },
-      { registerId: "reg_lekki_2", locationId: "loc_lekki", cashier: { id: "stf_tunde", name: "Tunde Bakare" } },
-      { registerId: "reg_ikeja_1", locationId: "loc_ikeja", cashier: { id: "stf_chidi", name: "Chidi Amadi" } },
-      { registerId: "reg_wuse_1", locationId: "loc_wuse", cashier: { id: "stf_amina", name: "Amina Bello" } },
-    ],
-    registersWithOpenShiftToday: ["reg_ikeja_1", "reg_wuse_1"],
-    historyLengthInDays: 45,
-    salesPerClosedShift: [5, 16],
-    salesPerOpenShift: [3, 7],
-    openingFloatMinor: 2_000_000,
-    firstReceiptSequence: 1000,
-    customerShare: 0.35,
   },
   onlineOrders: {
     orderCount: 48,
@@ -94,12 +78,12 @@ export const ifeLifestyleStoreProfile: DemoStoreProfile = {
     availableMinor: 73_280_000,
   },
   auditEntries: [
-    ["stf_adaeze", "staff.invited", "staff", "Invited Seun Alabi as cashier", 0],
-    ["stf_tunde", "pos.discount_approved", "sale", "Approved 20% discount on IFE-1432", 0],
+    ["stf_adaeze", "staff.invited", "staff", "Invited Seun Alabi as sales staff", 0],
+    ["stf_tunde", "order.accepted", "order", "Accepted order ZM-10432 from @kemi.adebayo", 0],
     ["stf_ibrahim", "inventory.adjusted", "variant", "Counted Raw Shea Butter 250g: +12 at Apapa warehouse", 1],
     ["stf_adaeze", "payout.requested", "payout", "Withdrew ₦485,000 to GTBank ******4471", 3],
-    ["stf_tunde", "pos.refund_issued", "sale", "Refunded 1 × Wireless Earbuds on IFE-1398", 4],
-    ["stf_adaeze", "settings.updated", "store", "Changed receipt return policy", 6],
+    ["stf_tunde", "order.refunded", "order", "Refunded 1 × Wireless Earbuds on ZM-10398", 4],
+    ["stf_adaeze", "settings.updated", "store", "Updated the return policy", 6],
     ["stf_ngozi", "order.shipped", "order", "Marked ZM-58244 as shipped with GIG Logistics", 7],
   ],
 };

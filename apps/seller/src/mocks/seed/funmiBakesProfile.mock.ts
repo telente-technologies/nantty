@@ -9,7 +9,7 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
   storeId: funmiBakesStoreId,
   recordKey: "funmi",
   receiptPrefix: "FB",
-  randomSeeds: { products: 7_072_026, posHistory: 7373, onlineOrders: 1031 },
+  randomSeeds: { products: 7_072_026, onlineOrders: 1031 },
   buildSettings: () =>
     buildDemoStoreSettingsFromBasics({
       storeId: funmiBakesStoreId,
@@ -24,19 +24,14 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
       email: "hello@funmibakes.ng",
       address: "7 Adelabu Street, Surulere, Lagos",
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: ["cat_gifts"] }],
-      receiptHeaderText: "Baked with love by Funmi.",
-      receiptFooterText: "Order cakes on Zudomart @funmibakes",
       returnPolicy: "Food items cannot be returned. Tell us within 24 hours if anything is wrong with your order.",
-      paperWidth: "58mm",
-      cardTerminalInstructions: "Use the Moniepoint terminal by the display fridge.",
-      bankTransferInstructions: "Moniepoint MFB · 5023318841 · Funmi Bakes",
+      shippingPolicy: "Cakes are delivered within Lagos only, on the date you choose at checkout.",
       loyalty: { enabled: true, spendRequiredPerPointMinor: 50_000, redeemValuePerPointMinor: 500, minimumPointsToRedeem: 40 },
     }),
   buildLocations: () => [
     { id: "loc_funmi_surulere", name: "Surulere bakery", kind: "store", address: "7 Adelabu Street", city: "Surulere", state: "Lagos", country: "NG", phone: "+234 814 555 0166", isDefault: true, active: true },
     { id: "loc_funmi_kitchen", name: "Central kitchen", kind: "warehouse", address: "3 Ogunlana Drive", city: "Surulere", state: "Lagos", country: "NG", phone: null, isDefault: false, active: true },
   ],
-  buildRegisters: () => [{ id: "reg_funmi_counter", locationId: "loc_funmi_surulere", name: "Bakery counter", openShiftId: null, active: true }],
   buildCategories: () => [
     { id: "cat_cakes", name: "Cakes & bakes" },
     { id: "cat_snacks", name: "Snacks & small chops" },
@@ -44,11 +39,11 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
     { id: "cat_gifts", name: "Gifts" },
   ],
   buildStaff: () => [
-    buildDemoStaffRecord({ id: "stf_funmi", userId: "usr_funmi", name: "Funmilayo Adeyemi", username: "funmibakes", role: "owner", locationIds: ["loc_funmi_surulere", "loc_funmi_kitchen"] }, "2020", 0),
-    buildDemoStaffRecord({ id: "stf_ifeoma_funmi", userId: "usr_ifeoma", name: "Ifeoma Nwankwo", username: "ifeoma.reads", role: "cashier", locationIds: ["loc_funmi_surulere"] }, "7410", 0),
+    buildDemoStaffRecord({ id: "stf_funmi", userId: "usr_funmi", name: "Funmilayo Adeyemi", username: "funmibakes", role: "owner", locationIds: ["loc_funmi_surulere", "loc_funmi_kitchen"] }, 0),
+    buildDemoStaffRecord({ id: "stf_ifeoma_funmi", userId: "usr_ifeoma", name: "Ifeoma Nwankwo", username: "ifeoma.reads", role: "sales", locationIds: ["loc_funmi_surulere"] }, 0),
   ],
   buildPromotions: (currency) => [
-    { id: "promo_funmi_saturday", name: "Sweet Saturday", kind: "automatic", code: null, discount: { kind: "amount", value: 50_000 }, scope: { kind: "categories", ids: ["cat_snacks"] }, minimumSpend: { amountMinor: 500_000, currency }, usageLimit: null, usageLimitPerCustomer: null, usedCount: 23, channels: ["pos"], startsAt: buildIsoDateDaysAgo(30), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(31) },
+    { id: "promo_funmi_saturday", name: "Sweet Saturday", kind: "automatic", code: null, discount: { kind: "amount", value: 50_000 }, scope: { kind: "categories", ids: ["cat_snacks"] }, minimumSpend: { amountMinor: 500_000, currency }, usageLimit: null, usageLimitPerCustomer: null, usedCount: 23, startsAt: buildIsoDateDaysAgo(30), endsAt: null, status: "active", createdAt: buildIsoDateDaysAgo(31) },
   ],
   catalog: {
     blueprints: [
@@ -79,16 +74,6 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
     ],
     firstCustomerNote: { body: "Orders a red velvet cake for her office every last Friday.", authorStaffId: "stf_funmi", authorName: "Funmilayo Adeyemi" },
   },
-  posHistory: {
-    registerCashiers: [{ registerId: "reg_funmi_counter", locationId: "loc_funmi_surulere", cashier: { id: "stf_ifeoma_funmi", name: "Ifeoma Nwankwo" } }],
-    registersWithOpenShiftToday: ["reg_funmi_counter"],
-    historyLengthInDays: 75,
-    salesPerClosedShift: [6, 14],
-    salesPerOpenShift: [3, 6],
-    openingFloatMinor: 500_000,
-    firstReceiptSequence: 500,
-    customerShare: 0.25,
-  },
   onlineOrders: {
     orderCount: 12,
     historyLengthInDays: 30,
@@ -117,7 +102,7 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
     availableMinor: 3_975_000,
   },
   auditEntries: [
-    ["stf_funmi", "staff.invited", "staff", "Invited Ifeoma Nwankwo as cashier", 25],
+    ["stf_funmi", "staff.invited", "staff", "Invited Ifeoma Nwankwo as sales staff", 25],
     ["stf_funmi", "inventory.adjusted", "variant", "Baked 40 × Banana Bread Loaf at Central kitchen", 0],
   ],
 };
