@@ -84,8 +84,9 @@ type Kind string
 
 // Kind values.
 const (
-	KindWithheld   Kind = "withheld"
-	KindQuarantine Kind = "quarantine"
+	KindWithheld         Kind = "withheld"
+	KindQuarantine       Kind = "quarantine"
+	KindReservedOfficial Kind = "reserved_official"
 )
 
 func (k Kind) String() string {
@@ -95,7 +96,7 @@ func (k Kind) String() string {
 // KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
 func KindValidator(k Kind) error {
 	switch k {
-	case KindWithheld, KindQuarantine:
+	case KindWithheld, KindQuarantine, KindReservedOfficial:
 		return nil
 	default:
 		return fmt.Errorf("usernamehold: invalid enum value for kind field: %q", k)
