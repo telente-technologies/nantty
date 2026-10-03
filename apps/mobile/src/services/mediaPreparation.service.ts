@@ -34,7 +34,7 @@ const MEGABYTE = 1024 * 1024;
 const MAXIMUM_IMAGE_BYTES_BEFORE_COMPRESSION = 40 * MEGABYTE;
 const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
   post: 1024 * MEGABYTE,
-  clip: 1024 * MEGABYTE,
+  clip: 512 * MEGABYTE,
   story: 300 * MEGABYTE,
   chat: 200 * MEGABYTE,
   product: 300 * MEGABYTE,
@@ -45,7 +45,7 @@ const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
   identity_document: 0,
   verification_document: 0,
 };
-const MAXIMUM_VIDEO_SECONDS_BY_PURPOSE: Partial<Record<MediaUploadPurpose, number>> = { story: 60, clip: 600, post: 600 };
+const MAXIMUM_VIDEO_SECONDS_BY_PURPOSE: Partial<Record<MediaUploadPurpose, number>> = { story: 60, clip: 180, post: 600 };
 const MAXIMUM_IMAGE_LONG_EDGE_PIXELS = 2048;
 const IMAGE_COMPRESSION_QUALITY = 0.8;
 

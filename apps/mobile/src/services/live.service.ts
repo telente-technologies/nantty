@@ -1,4 +1,5 @@
-import type { LiveComment, LiveSessionDetails, Page, SuggestedLive, UserSummary } from "@/types";
+import type { LiveMonetizationInput } from "@/types/socialGraph.type";
+import type { LiveCategory, LiveComment, LiveSessionDetails, Page, SuggestedLive, UserSummary } from "@/types";
 
 import { api } from "./apiClient.service";
 
@@ -9,7 +10,8 @@ export const liveService = {
   fetchLiveComments: (liveId: string, cursor?: string) => api.get<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`, { cursor }),
   sendCommentToLive: (liveId: string, text: string) => api.post<LiveComment>(`/api/v1/lives/${liveId}/comments`, { text }),
   sendReactionToLive: (liveId: string, emoji: string) => api.post<void>(`/api/v1/lives/${liveId}/reactions`, { emoji }),
-  startLiveSessionWithTitle: (title: string) => api.post<LiveSessionDetails>("/api/v1/lives", { title }),
+  startLiveSessionWithTitle: (title: string, category: LiveCategory, monetization?: LiveMonetizationInput) =>
+    api.post<LiveSessionDetails>("/api/v1/lives", { title, category, ...monetization }),
   issueStreamKey: (liveId: string) => api.post<{ ingestUrl: string; streamKey: string }>(`/api/v1/lives/${liveId}/stream-key`),
   endLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/end`),
   fetchSuggestedLives: () => api.get<SuggestedLive[]>("/api/v1/lives/suggested"),

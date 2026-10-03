@@ -8,6 +8,7 @@ export interface ProfileDetailsUpdate {
   readonly bio?: string;
   readonly avatarUrl?: string | null;
   readonly bannerUrl?: string | null;
+  readonly isPrivate?: boolean;
 }
 
 export const usersService = {
