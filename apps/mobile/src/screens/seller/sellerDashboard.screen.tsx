@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNudge";
 import { InventoryCard } from "@/components/seller/inventoryCard";
 import { PeriodChips } from "@/components/seller/periodChips";
 import { SalesChart } from "@/components/seller/salesChart";
@@ -38,6 +39,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
           </HeaderAction>
         }
       />
+      <BusinessDocumentsNudge />
       <PeriodChips value={period} onChange={setPeriod} />
       {isLoading || !dashboard || !totalSales ? (
         <ListSkeleton />
