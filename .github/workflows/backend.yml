@@ -1,0 +1,51 @@
+name: Backend
+
+on:
+  pull_request:
+    paths: ["services/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
+  push:
+    branches: [main]
+    paths: ["services/**", "infra/local/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash services/scripts/check-backend-file-lengths.sh
+      - run: bash services/scripts/check-no-raw-sql-in-typescript.sh
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: services/go/platform/go.mod
+          cache-dependency-path: services/go/**/go.sum
+      - run: docker compose -f infra/local/docker-compose.yml up -d --wait postgres
+      - run: bash services/scripts/test-go-workspace.sh
+      - run: go run golang.org/x/vuln/cmd/govulncheck@latest $(go list -m -f '{{.Dir}}/...')
+        working-directory: services/go
+
+  gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @zudomart/gateway...
+      - run: pnpm --filter @zudomart/gateway typecheck
+      - run: pnpm --filter @zudomart/gateway test
+
+  realtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash services/scripts/test-realtime-in-docker.sh
