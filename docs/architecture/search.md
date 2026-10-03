@@ -85,3 +85,16 @@ Document shape: `{id, version, updatedAt, deletedAt?, visibility, ...}`. Visibil
 | S3 | Indexing failures invisible | DLQ without replay tool | stale search silently | DLQ depth alarm + replay script; lag metric. **Near term** | Low | Low | P2 |
 | S4 | Reindex strategy absent | none | mapping change means downtime | alias-swap reindex job from day one of OpenSearch. **Near term** | Medium | Medium | P2 |
 | S5 | OpenSearch cost and ops | none | running a domain for a small catalog is premature | adopt only on triggers in section 5. **Scale stage** | Medium | Low | P3 |
+
+## 8. MVP implementation and OpenSearch migration path (2026-10-04)
+
+The MVP is `services/typescript/search` (`@zudomart/search`, port 8109, schema `search`, Prisma). Documents are built from domain events plus a read of the owning service (`SourceHydrator`), stored in `search.documents` with a `tsvector` column written by the indexer and a `pg_trgm` GIN index on the normalised title. Visibility (blocks, private profiles, suspended accounts, follower-only posts, availability) is applied at query time from small replica tables fed by `block.*`, `follow.*`, `profile.visibilityChanged`, `accountStatus.changed` and consent events. Ranking is deterministic (exact, prefix, trigram similarity, `ts_rank_cd`, popularity, region, kind bonus) with keyset cursors; the Python `/v1/search/rerank` call is optional, first page only, behind personalization consent, with a 100 ms timeout and a circuit breaker.
+
+Migration to OpenSearch (no code written, per owner decision):
+
+1. Add `OpenSearchSearchBackend` next to the Prisma query repository behind the existing `SearchQueryStore` interface; the HTTP contract does not change.
+2. Add an `OpenSearchIndexStore` implementing `SearchIndexStore`; the event processor and builders are reused, `version` becomes the external version.
+3. Mapping per kind from `SearchDocument` (title with edge-ngram and standard analyzers, tags keyword, summary stored not indexed, visibility/available/ownerAccountId/region as filters). Block, private and suspended filters stay in the application as a post-filter on a small over-fetch, or move to filter clauses using a per-viewer terms lookup.
+4. Backfill by keyset scan of `search.documents` into `search_v{N}`, dual-write during the scan, swap the alias, drop the old index.
+5. Shadow-query both backends, compare top-10 overlap per scope, flip per scope by flag. Keep Postgres as the fallback for one release.
+6. Triggers: p95 above 300 ms on the replica, over about 500k documents, or a need for facets, synonyms or multilingual analyzers.
