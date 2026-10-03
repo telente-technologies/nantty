@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ConsentChoicesSection } from "@/components/settings/consentChoicesSection";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSection } from "@/components/settings/deleteAccountSection";
+import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
 
@@ -17,6 +18,7 @@ export default function PrivacyAndDataPage() {
         <h1 className={styles.title}>Privacy &amp; Data</h1>
       </div>
       <ConsentChoicesSection />
+      <MentionPrivacySection />
       <DataExportSection />
       <section aria-labelledby="policies-heading" className={styles.block}>
         <h2 id="policies-heading" className={styles.blockHeading}>Policies</h2>
