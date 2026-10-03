@@ -34,11 +34,14 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	var session services.StartedSession
 	isNewUser := false
 	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		owner, isNewUser, err = application.findOrCreateAccountForSocialIdentityInTransaction(ctx, tx, verified, command.FullName)
+		owner, isNewUser, err = application.findOrCreateAccountForSocialIdentityInTransaction(ctx, tx, verified, command.FullName, command.Client.DeviceId)
 		if err != nil {
 			return err
 		}
-		if owner.Status != account.StatusActive {
+		if owner.Status == account.StatusBanned {
+			return authErrors.ErrAccountBanned
+		}
+		if owner.Status != account.StatusActive && owner.Status != account.StatusSuspended {
 			return authErrors.ErrInvalidCredentials
 		}
 		if session, err = services.StartSessionWithFirstRefreshTokenInTransaction(ctx, application.Container, tx, owner.ID, command.Client); err != nil {
@@ -59,7 +62,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	return types.AuthenticationResult{Tokens: tokens, Account: owner, IsNewUser: isNewUser}, err
 }
 
-func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName string) (*ent.Account, bool, error) {
+func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName, deviceId string) (*ent.Account, bool, error) {
 	linked, err := tx.SocialIdentity.Query().Where(socialidentity.ProviderEQ(socialidentity.Provider(verified.Provider)), socialidentity.Subject(verified.Subject)).Only(ctx)
 	if err == nil {
 		owner, err := tx.Account.Get(ctx, linked.AccountID)
@@ -77,6 +80,9 @@ func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx
 		return nil, false, err
 	}
 	if created {
+		if err := services.AssertSignupIsNotBlockedInTransaction(ctx, tx, application.Settings.OneTimeCodePepper, verified.Email, deviceId); err != nil {
+			return nil, false, err
+		}
 		if owner, err = application.createAccountForSocialIdentityInTransaction(ctx, tx, verified, fullName); err != nil {
 			return nil, false, err
 		}
