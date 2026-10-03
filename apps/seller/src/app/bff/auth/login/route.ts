@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { findFirstPageAllowedForRole } from "@/config/rolePermissions.config";
+import { findFirstPageAllowedForAccess } from "@/config/rolePermissions.config";
 import { respondWithBffError } from "@/server/bffGateway.service";
 import { isRequestFromDashboardOrigin, readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 import { convertCurrentUserToSignedInUser, renewSellerAccessCache, writeRenewedSessionCookies } from "@/server/sellerAuthentication.service";
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const destination = decideSellerAccessDestination(renewed.cachedAccess.access);
   const redirectTo = destination === "app"
-    ? readSafeRelativeRedirectPath(typeof body?.next === "string" ? body.next : null, findFirstPageAllowedForRole(renewed.cachedAccess.access.role))
+    ? readSafeRelativeRedirectPath(typeof body?.next === "string" ? body.next : null, findFirstPageAllowedForAccess(renewed.cachedAccess.access))
     : gatePagePathByDestination[destination];
   const response = NextResponse.json({ destination, redirectTo }, { headers: { "Cache-Control": "no-store" } });
   writeSessionIdCookie(response, sessionId);
