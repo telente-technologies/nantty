@@ -5,8 +5,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Check16Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/chip";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
+import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Topic } from "@/types";
 
 export type FeedMode = "for-you" | "following";
@@ -61,29 +62,21 @@ export function TopicFilterRow({ topics, selectedTopicId, feedMode, onSelectTopi
 
 function ModeMenuItem({ label, selected, onPress }: { readonly label: string; readonly selected: boolean; readonly onPress: () => void }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <Pressable accessibilityRole="menuitem" accessibilityState={{ selected }} onPress={onPress} style={styles.menuItem}>
       <Text size={14} lineHeight={18} weight={selected ? 600 : 400}>
         {label}
       </Text>
-      {selected ? <Check16Icon /> : null}
+      {selected ? <Check16Icon color={colors.primary} /> : null}
     </Pressable>
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   row: { flexGrow: 0, backgroundColor: colors.surface },
   content: { paddingTop: 12, paddingBottom: 12, paddingLeft: 16, paddingRight: 16, gap: 8 },
   menuBackdrop: { flex: 1 },
-  menu: {
-    marginLeft: 16,
-    alignSelf: "flex-start",
-    minWidth: 180,
-    borderRadius: 8,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    paddingVertical: 4,
-  },
-  menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, gap: 12 },
+  menu: { marginLeft: 16, alignSelf: "flex-start", ...buildPopoverMenuSurface(colors, scheme) },
+  menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 48, paddingHorizontal: 16, gap: 12 },
 }));
