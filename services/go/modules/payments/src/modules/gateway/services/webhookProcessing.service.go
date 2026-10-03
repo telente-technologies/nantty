@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
+	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/platform/httpserver"
@@ -64,25 +65,48 @@ func (gateway *PaymentGateway) HandleProviderWebhook(ctx context.Context, provid
 
 func (gateway *PaymentGateway) processVerifiedWebhook(ctx context.Context, notification interfaces.WebhookNotification) error {
 	switch notification.Kind {
-	case interfaces.WebhookKindCharge:
-		if !hasOwnPaymentReferencePrefix(notification.Reference) {
-			return nil
-		}
-		_, err := gateway.VerifyAndSettlePaymentIntentByReference(ctx, notification.Reference)
-		if errors.Is(err, ErrPaymentNotFound) || errors.Is(err, ErrPaymentAmountMismatch) {
-			return nil
-		}
-		return err
-	case interfaces.WebhookKindTransfer:
-		_, err := gateway.FinalizeTransferByReferenceWithProvider(ctx, notification.Reference)
-		return err
+	case interfaces.WebhookKindCharge, interfaces.WebhookKindCheckout:
+		return gateway.settleFromChargeNotification(ctx, notification)
 	case interfaces.WebhookKindRefund:
-		if notification.ProviderRefundId == "" || !strings.Contains(notification.EventType, "processed") && !strings.Contains(notification.EventType, "completed") {
+		return gateway.HandleRefundNotification(ctx, notification.ProviderObjectId, notification.Reference, notification.EventType)
+	case interfaces.WebhookKindPayout:
+		return gateway.HandlePayoutNotification(ctx, notification)
+	case interfaces.WebhookKindTransfer:
+		return gateway.HandleTransferNotification(ctx, notification.ProviderObjectId)
+	case interfaces.WebhookKindDispute:
+		return gateway.HandleProviderDisputeNotification(ctx, notification)
+	case interfaces.WebhookKindAccount, interfaces.WebhookKindCapability:
+		if notification.ConnectedAccountId == "" {
 			return nil
 		}
-		return gateway.MarkRefundSucceededByProviderRefundId(ctx, notification.ProviderRefundId)
+		return gateway.RefreshConnectedAccountFromProvider(ctx, notification.ConnectedAccountId, notification.Capability, notification.Status)
+	case interfaces.WebhookKindSubscription, interfaces.WebhookKindInvoice:
+		return gateway.HandleSubscriptionNotification(ctx, notification)
 	}
 	return nil
+}
+
+func (gateway *PaymentGateway) settleFromChargeNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
+	reference := notification.Reference
+	if !hasOwnPaymentReferencePrefix(reference) && notification.ProviderCheckoutId != "" {
+		intent, err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentIntent.Query().
+			Where(paymentintent.ProviderCheckoutID(notification.ProviderCheckoutId)).Only(ctx)
+		if ent.IsNotFound(err) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		reference = intent.Reference
+	}
+	if !hasOwnPaymentReferencePrefix(reference) {
+		return nil
+	}
+	_, err := gateway.verifyAndSettlePaymentIntent(ctx, reference, notification.ProviderChargeId)
+	if errors.Is(err, ErrPaymentNotFound) || errors.Is(err, ErrPaymentAmountMismatch) {
+		return nil
+	}
+	return err
 }
 
 func hasOwnPaymentReferencePrefix(reference string) bool {
