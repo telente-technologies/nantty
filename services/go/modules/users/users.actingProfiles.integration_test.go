@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBusinessCreatorAndActingProfileSwitching(t *testing.T) {
+func TestBusinessProfileCreatorApplicationAndActingProfileSwitching(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	_, token := harness.newAccount("ada.lovelace", "Ada Lovelace")
 	_, otherToken := harness.newAccount("grace.hopper", "Grace")
@@ -50,18 +50,18 @@ func TestBusinessCreatorAndActingProfileSwitching(t *testing.T) {
 	}
 
 	harness.settings.creatorRequirements = `{"minimumAccountAgeDays":365}`
-	notYet := harness.expect("POST", "/api/v1/users/me/creator-profile", token, map[string]any{}, http.StatusUnprocessableEntity)
+	notYet := harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusUnprocessableEntity)
 	if notYet["code"] != "CREATOR_REQUIREMENTS_NOT_MET" {
 		t.Fatalf("unexpected %v", notYet)
 	}
 	harness.settings.creatorRequirements = `{"minimumAccountAgeDays":30}`
-	creator := harness.expect("POST", "/api/v1/users/me/creator-profile", token, map[string]any{"bio": "I make things"}, http.StatusCreated)
-	if creator["kind"] != "creator" || creator["handle"] != "ada.lovelace_creator" {
-		t.Fatalf("unexpected creator profile %v", creator)
+	applied := harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusCreated)
+	if applied["creatorStatus"] != "pending" || applied["isCreator"] != false || applied["username"] != "ada.lovelace" {
+		t.Fatalf("creator is a status on the personal profile: %v", applied)
 	}
-	harness.expect("POST", "/api/v1/users/me/creator-profile", token, map[string]any{}, http.StatusConflict)
-	if me := harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK); me["isCreator"] != true {
-		t.Fatalf("isCreator must reflect the creator profile: %v", me)
+	harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusConflict)
+	if listed := harness.expect("GET", "/api/v1/users/me/profiles", token, nil, http.StatusOK)["data"].([]any); len(listed) != 2 {
+		t.Fatalf("a creator application must not add a profile: %v", listed)
 	}
-	harness.waitForPublishedEvents("businessProfile.created", "creatorProfile.created")
+	harness.waitForPublishedEvents("businessProfile.created", "creatorApplication.submitted")
 }
