@@ -12,7 +12,7 @@ import { PaperPlaneTilt24Icon } from "@/components/icons";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
@@ -22,6 +22,8 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 
 export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"DisputeDetail">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { disputeId } = route.params;
   const queryClient = useQueryClient();
   const disputeQuery = useDisputeQuery(disputeId);
@@ -131,17 +133,17 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
   description: { marginTop: 4 },
   evidence: { gap: 8 },
   evidencePhoto: { width: 96, height: 96, borderRadius: 8 },
   messages: { gap: 14 },
-  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.divider },
+  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.divider },
   input: { flex: 1, minHeight: 40, maxHeight: 120, borderRadius: 20, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 10, fontFamily: fontFamily[400], fontSize: 14, color: colors.text },
-  send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
+  send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
   sendDisabled: { backgroundColor: colors.disabled },
-});
+}));
