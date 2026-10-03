@@ -11,6 +11,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = 2;
@@ -29,7 +30,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
     <Screen background={colors.white}>
       <Header title="Sound" />
       {sound.isPending ? (
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       ) : !soundData ? (
         <Text size={14} lineHeight={19.6} color={colors.textMuted} align="center" style={styles.loading}>
           This sound isn't available right now.
