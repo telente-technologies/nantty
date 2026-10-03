@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"time"
+
 	"zudomart/modules/ledger/src/modules/journal/models"
 
 	"github.com/google/uuid"
@@ -138,4 +139,30 @@ func (ledger *Ledger) FindJournalEntryByReference(ctx context.Context, executor 
 		return models.PostedJournalEntry{}, false, err
 	}
 	return convertStoredJournalEntry(entry), true, nil
+}
+
+func (ledger *Ledger) SumBalancesOfAccountsWithCodePrefix(ctx context.Context, executor databases.ExecutorQuerier, codePrefix, currency string) (int64, error) {
+	var sums []struct {
+		Sum *int64 `json:"sum"`
+	}
+	err := ledger.clientFor(executor).LedgerAccount.Query().
+		Where(ledgeraccount.CodeHasPrefix(codePrefix), ledgeraccount.Currency(currency)).
+		Aggregate(ent.Sum(ledgeraccount.FieldBalanceMinor)).Scan(ctx, &sums)
+	if err != nil || len(sums) == 0 || sums[0].Sum == nil {
+		return 0, err
+	}
+	return *sums[0].Sum, nil
+}
+
+func (ledger *Ledger) ListBalancesOfAccountsWithCodePrefix(ctx context.Context, executor databases.ExecutorQuerier, codePrefix, currency string) ([]AccountBalance, error) {
+	rows, err := ledger.clientFor(executor).LedgerAccount.Query().Where(ledgeraccount.CodeHasPrefix(codePrefix), ledgeraccount.Currency(currency)).
+		Order(ent.Asc(ledgeraccount.FieldCode)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	balances := make([]AccountBalance, len(rows))
+	for index, row := range rows {
+		balances[index] = AccountBalance{Code: row.Code, Currency: row.Currency, BalanceMinor: row.BalanceMinor}
+	}
+	return balances, nil
 }

@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
 	"zudomart/modules/ledger/src/modules/journal/models"
 
 	"zudomart/modules/ledger/src/databases"
@@ -227,7 +228,7 @@ func TestReconciliationClassifiesEveryBreak(t *testing.T) {
 	collect := func(reference string, amount int64) {
 		harness.mustPost(models.JournalEntryRequest{Reference: "collect-" + reference, Kind: "test.collected", ExternalReference: reference, Lines: []models.JournalLineRequest{
 			{Account: models.ProviderClearingAccount("paystack", "NGN"), Direction: models.Debit, AmountMinor: amount},
-			{Account: models.UserWalletAccount("grace", "NGN"), Direction: models.Credit, AmountMinor: amount},
+			{Account: models.SellerAvailableAccount("grace", "NGN"), Direction: models.Credit, AmountMinor: amount},
 		}})
 	}
 	collect("ps_matched", 5000)

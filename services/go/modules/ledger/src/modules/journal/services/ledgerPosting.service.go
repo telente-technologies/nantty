@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
 	"zudomart/modules/ledger/src/modules/journal/models"
 	"zudomart/modules/ledger/src/modules/journal/validators"
 
@@ -31,7 +32,7 @@ func NewLedgerInSchema(schema string) *Ledger {
 func SchemaConfigForLedgerTables(schema string) ent.SchemaConfig {
 	return ent.SchemaConfig{
 		JournalEntry: schema, JournalLine: schema, LedgerAccount: schema, OutboxEvent: schema,
-		ReconciliationBreak: schema, ReconciliationRun: schema,
+		ReconciliationBreak: schema, ReconciliationRun: schema, SellerCreditMaturity: schema,
 	}
 }
 
