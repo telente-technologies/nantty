@@ -34,6 +34,28 @@ type PaymentsSettings struct {
 	GooglePlayBillingFeeBps     int64
 	AppleInAppPurchaseEnabled   bool
 	GooglePlayBillingEnabled    bool
+	AppleStore                  AppleStoreSettings
+	GooglePlay                  GooglePlaySettings
+	SavedCardFingerprintKey     string
+}
+
+type AppleStoreSettings struct {
+	BundleId            string
+	Environment         string
+	RootCertificatesPem string
+	IssuerId            string
+	KeyId               string
+	PrivateKeyPem       string
+	ApiBaseUrl          string
+}
+
+type GooglePlaySettings struct {
+	PackageName            string
+	ServiceAccountJson     string
+	ApiBaseUrl             string
+	ProductPrices          string
+	SubscriptionProductIds []string
+	PushToken              string
 }
 
 func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) PaymentsSettings {
@@ -56,8 +78,23 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("BACHS_SUBSCRIPTION_PLAN_PRODUCTS", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
 		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),
-		AppleInAppPurchaseEnabled:   reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", "") != "",
-		GooglePlayBillingEnabled:    reader.ReadStringOrDefault("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "") != "",
+		AppleStore: AppleStoreSettings{
+			BundleId: reader.ReadStringOrDefault("APPLE_IAP_BUNDLE_ID", ""), Environment: reader.ReadStringOrDefault("APPLE_IAP_ENVIRONMENT", "Sandbox"),
+			RootCertificatesPem: reader.ReadStringOrDefault("APPLE_IAP_ROOT_CERTIFICATES_PEM", ""), IssuerId: reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", ""),
+			KeyId: reader.ReadStringOrDefault("APPLE_IAP_KEY_ID", ""), PrivateKeyPem: reader.ReadStringOrDefault("APPLE_IAP_PRIVATE_KEY_PEM", ""),
+			ApiBaseUrl: reader.ReadStringOrDefault("APPLE_IAP_API_BASE_URL", "https://api.storekit-sandbox.itunes.apple.com"),
+		},
+		GooglePlay: GooglePlaySettings{
+			PackageName: reader.ReadStringOrDefault("GOOGLE_PLAY_PACKAGE_NAME", ""), ServiceAccountJson: reader.ReadStringOrDefault("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", ""),
+			ApiBaseUrl: reader.ReadStringOrDefault("GOOGLE_PLAY_API_BASE_URL", "https://androidpublisher.googleapis.com"), ProductPrices: reader.ReadStringOrDefault("GOOGLE_PLAY_PRODUCT_PRICES", ""),
+			SubscriptionProductIds: reader.ReadCommaSeparatedListOrDefault("GOOGLE_PLAY_SUBSCRIPTION_PRODUCTS", nil), PushToken: reader.ReadStringOrDefault("GOOGLE_PLAY_RTDN_PUSH_TOKEN", ""),
+		},
+		SavedCardFingerprintKey: reader.ReadStringOrDefault("SAVED_CARD_FINGERPRINT_KEY", ""),
+	}
+	settings.AppleInAppPurchaseEnabled = settings.AppleStore.BundleId != "" && settings.AppleStore.RootCertificatesPem != ""
+	settings.GooglePlayBillingEnabled = settings.GooglePlay.PackageName != "" && settings.GooglePlay.ServiceAccountJson != ""
+	if settings.Money.IsProduction() && settings.SavedCardFingerprintKey == "" {
+		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")
 	}
 	for _, problem := range ProviderKeyEnvironmentMismatches(settings) {
 		reader.ReadRequiredString(problem)
