@@ -26,7 +26,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Escro
 			if err != nil {
 				return dtos.EscrowDetailDto{}, err
 			}
-			return services.ConvertEscrowToDetail(settlement.Escrow, application.Container.Settings.InspectionPeriod, nil, nil), nil
+			return services.ConvertEscrowToDetail(settlement.Escrow, application.Container.Policy(ctx).AutoReleasePeriod, nil, nil), nil
 		},
 	})
 	if err == nil && !replayed {
