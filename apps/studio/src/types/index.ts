@@ -63,6 +63,18 @@ export interface LiveComment {
   readonly createdAt: ISODate;
 }
 
+export interface Page<T> {
+  readonly data: readonly T[];
+  readonly nextCursor: string | null;
+}
+
+export interface LiveCommentWire {
+  readonly id: ID;
+  readonly author: { readonly id: ID; readonly name: string; readonly username: string; readonly avatarUrl: string | null };
+  readonly text: string;
+  readonly createdAt: ISODate;
+}
+
 export interface LiveSession {
   readonly id: ID;
   readonly title: string;
