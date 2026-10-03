@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -45,8 +46,17 @@ const (
 	FieldVersion = "version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeEscrow holds the string denoting the escrow edge name in mutations.
+	EdgeEscrow = "escrow"
 	// Table holds the table name of the dispute in the database.
 	Table = "disputes"
+	// EscrowTable is the table that holds the escrow relation/edge.
+	EscrowTable = "disputes"
+	// EscrowInverseTable is the table name for the Escrow entity.
+	// It exists in this package in order to avoid circular dependency with the "escrow" package.
+	EscrowInverseTable = "escrows"
+	// EscrowColumn is the table column denoting the escrow relation/edge.
+	EscrowColumn = "escrow_id"
 )
 
 // Columns holds all SQL columns for dispute fields.
@@ -241,4 +251,18 @@ func ByVersion(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByEscrowField orders the results by escrow field.
+func ByEscrowField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newEscrowStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newEscrowStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(EscrowInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, EscrowTable, EscrowColumn),
+	)
 }

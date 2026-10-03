@@ -4,9 +4,11 @@ package dispute
 
 import (
 	"time"
+	"zudomart/modules/escrow/src/generated/ent/internal"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -178,26 +180,6 @@ func EscrowIDIn(vs ...uuid.UUID) predicate.Dispute {
 // EscrowIDNotIn applies the NotIn predicate on the "escrow_id" field.
 func EscrowIDNotIn(vs ...uuid.UUID) predicate.Dispute {
 	return predicate.Dispute(sql.FieldNotIn(FieldEscrowID, vs...))
-}
-
-// EscrowIDGT applies the GT predicate on the "escrow_id" field.
-func EscrowIDGT(v uuid.UUID) predicate.Dispute {
-	return predicate.Dispute(sql.FieldGT(FieldEscrowID, v))
-}
-
-// EscrowIDGTE applies the GTE predicate on the "escrow_id" field.
-func EscrowIDGTE(v uuid.UUID) predicate.Dispute {
-	return predicate.Dispute(sql.FieldGTE(FieldEscrowID, v))
-}
-
-// EscrowIDLT applies the LT predicate on the "escrow_id" field.
-func EscrowIDLT(v uuid.UUID) predicate.Dispute {
-	return predicate.Dispute(sql.FieldLT(FieldEscrowID, v))
-}
-
-// EscrowIDLTE applies the LTE predicate on the "escrow_id" field.
-func EscrowIDLTE(v uuid.UUID) predicate.Dispute {
-	return predicate.Dispute(sql.FieldLTE(FieldEscrowID, v))
 }
 
 // OrderIDEQ applies the EQ predicate on the "order_id" field.
@@ -823,6 +805,35 @@ func UpdatedAtLT(v time.Time) predicate.Dispute {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Dispute {
 	return predicate.Dispute(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// HasEscrow applies the HasEdge predicate on the "escrow" edge.
+func HasEscrow() predicate.Dispute {
+	return predicate.Dispute(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, EscrowTable, EscrowColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Escrow
+		step.Edge.Schema = schemaConfig.Dispute
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEscrowWith applies the HasEdge predicate on the "escrow" edge with a given conditions (other predicates).
+func HasEscrowWith(preds ...predicate.Escrow) predicate.Dispute {
+	return predicate.Dispute(func(s *sql.Selector) {
+		step := newEscrowStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Escrow
+		step.Edge.Schema = schemaConfig.Dispute
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.
