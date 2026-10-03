@@ -1,6 +1,7 @@
 package events
 
 type CreatorApplicationSubmittedEventData struct {
-	AccountId string `json:"accountId"`
-	ProfileId string `json:"profileId"`
+	AccountId          string `json:"accountId"`
+	ApplicationId      string `json:"applicationId"`
+	DecisionWithinDays int    `json:"decisionWithinDays"`
 }
