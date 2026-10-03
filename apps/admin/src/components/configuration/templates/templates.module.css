@@ -19,9 +19,9 @@
 
 .variableChip {
   padding: 2px 8px;
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--blue-100);
   border-radius: var(--radius-pill);
-  background: var(--blue-50);
+  background: var(--color-brand-tint);
   color: var(--blue-700);
   font-family: var(--font-mono);
   font-size: 11.5px;
