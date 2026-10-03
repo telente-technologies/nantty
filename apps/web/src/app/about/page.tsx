@@ -67,7 +67,7 @@ export default function AboutPage() {
             Join the waitlist
           </ActionLinkStyledAsButton>
         </div>
-        <div className={`${styles.splitCard} ${styles.splitCardSeller}`}>
+        <div className={`${styles.splitCard} ${styles.splitCardSeller} lightIsland`}>
           <h2 className={styles.splitHeading}>Selling?</h2>
           <p>See how stores, live selling, escrow and payouts work for sellers.</p>
           <ActionLinkStyledAsButton href="/sellers">Sell on Zudomart</ActionLinkStyledAsButton>

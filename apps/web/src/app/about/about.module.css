@@ -51,7 +51,7 @@
 }
 
 .principleIcon {
-  color: var(--blue-500);
+  color: var(--icon-brand);
 }
 
 .principleTitle {
@@ -82,12 +82,12 @@
 }
 
 .splitCardBuyer {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--surface-brand-band);
+  color: var(--ink-on-night);
 }
 
 .splitCardSeller {
-  background: var(--yellow-500);
+  background: var(--surface-sunshine);
 }
 
 @media (min-width: 720px) {
