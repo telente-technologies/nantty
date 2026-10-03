@@ -1,0 +1,156 @@
+terraform {
+  required_version = ">= 1.6.0"
+  required_providers {
+    aws = { source = "hashicorp/aws", version = "~> 5.70" }
+  }
+}
+
+locals {
+  name = "zudomart-${var.environment}"
+}
+
+resource "aws_security_group" "alb" {
+  name_prefix = "${local.name}-alb-"
+  description = "Public ALB"
+  vpc_id      = var.vpc_id
+  ingress {
+    description      = "HTTPS from the internet"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  ingress {
+    description      = "HTTP, redirected to HTTPS"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  egress {
+    description = "To tasks inside the VPC"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+  lifecycle { create_before_destroy = true }
+}
+
+resource "aws_lb" "this" {
+  name                       = local.name
+  load_balancer_type         = "application"
+  subnets                    = var.public_subnet_ids
+  security_groups            = [aws_security_group.alb.id]
+  idle_timeout               = 3600
+  drop_invalid_header_fields = true
+  enable_deletion_protection = var.deletion_protection
+  enable_http2               = true
+  desync_mitigation_mode     = "strictest"
+
+  access_logs {
+    bucket  = var.logs_bucket_id
+    prefix  = "alb"
+    enabled = true
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = var.certificate_arn
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "application/json"
+      message_body = "{\"message\":\"Not found.\",\"code\":\"NOT_FOUND\"}"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_security_group" "internal_alb" {
+  name_prefix = "${local.name}-internal-alb-"
+  description = "Internal ALB for service-to-service HTTP"
+  vpc_id      = var.vpc_id
+  ingress {
+    description     = "HTTP from ECS tasks"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [var.tasks_security_group_id]
+  }
+  egress {
+    description     = "To ECS tasks"
+    from_port       = 0
+    to_port         = 65535
+    protocol        = "tcp"
+    security_groups = [var.tasks_security_group_id]
+  }
+  lifecycle { create_before_destroy = true }
+}
+
+resource "aws_lb" "internal" {
+  name                       = "${local.name}-int"
+  internal                   = true
+  load_balancer_type         = "application"
+  subnets                    = var.private_subnet_ids
+  security_groups            = [aws_security_group.internal_alb.id]
+  idle_timeout               = 120
+  drop_invalid_header_fields = true
+  enable_deletion_protection = var.deletion_protection
+  access_logs {
+    bucket  = var.logs_bucket_id
+    prefix  = "alb-internal"
+    enabled = true
+  }
+}
+
+resource "aws_lb_listener" "internal" {
+  load_balancer_arn = aws_lb.internal.arn
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "application/json"
+      message_body = "{\"message\":\"Not found.\",\"code\":\"NOT_FOUND\"}"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_route53_zone" "internal" {
+  name = "svc.${var.environment}.zudomart.internal"
+  vpc { vpc_id = var.vpc_id }
+}
+
+resource "aws_route53_record" "internal_services" {
+  for_each = toset(var.internal_service_names)
+  zone_id  = aws_route53_zone.internal.zone_id
+  name     = "${each.key}.${aws_route53_zone.internal.name}"
+  type     = "A"
+  alias {
+    name                   = aws_lb.internal.dns_name
+    zone_id                = aws_lb.internal.zone_id
+    evaluate_target_health = true
+  }
+}
