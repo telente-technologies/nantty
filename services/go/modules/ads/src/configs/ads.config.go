@@ -54,6 +54,9 @@ type AdsSettings struct {
 	UploadUrlLifetime      time.Duration
 	ReportLinkLifetime     time.Duration
 	ReportSweepInterval    time.Duration
+	MoneyGrpcAddress       string
+	MoneyInternalToken     string
+	MoneyHttpUrl           string
 }
 
 func (settings AdsSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -105,6 +108,9 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 	}
 	settings.AdTokenKeys = readAdTokenKeys(reader, settings.AdTokenActiveKeyId, settings.IsProduction())
 	settings.InternalSharedSecret = reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", "")
+	settings.MoneyGrpcAddress = reader.ReadStringOrDefault("ADS_MONEY_GRPC_ADDRESS", "")
+	settings.MoneyInternalToken = reader.ReadStringOrDefault("ADS_MONEY_INTERNAL_TOKEN", "")
+	settings.MoneyHttpUrl = reader.ReadStringOrDefault("ADS_MONEY_HTTP_URL", "")
 	settings.AllowInMemoryFunding = !settings.IsProduction()
 	if settings.IsProduction() {
 		settings.AssetsBucket = reader.ReadRequiredString("ADS_ASSETS_BUCKET")
