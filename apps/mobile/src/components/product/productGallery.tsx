@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
 import { useState } from "react";
-import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import { FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
+import { useImagePreview } from "@/components/ui/previewableImage";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 
@@ -14,6 +15,7 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, 393);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const { openImagePreview, imagePreviewElement } = useImagePreview();
   const pages: (string | null)[] = images.length > 0 ? [...images] : [null, null, null, null];
 
   return (
@@ -26,9 +28,16 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
         keyExtractor={(_, index) => String(index)}
         onMomentumScrollEnd={(e) => setActiveImageIndex(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
         renderItem={({ item, index }) => (
-          <View style={[styles.image, { width: pageWidth }]} accessibilityLabel={`Product image ${index + 1} of ${pages.length}`}>
+          <Pressable
+            style={[styles.image, { width: pageWidth }]}
+            accessibilityRole={item ? "imagebutton" : "image"}
+            accessibilityLabel={`Product image ${index + 1} of ${pages.length}`}
+            accessibilityHint={item ? "Opens the image full screen" : undefined}
+            disabled={!item}
+            onPress={() => openImagePreview(images, index)}
+          >
             {item ? <Image source={{ uri: item }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
-          </View>
+          </Pressable>
         )}
       />
       {promo ? (
@@ -43,6 +52,7 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
           <View key={index} style={index === activeImageIndex ? styles.activeBar : styles.bar} />
         ))}
       </View>
+      {imagePreviewElement}
     </View>
   );
 }
