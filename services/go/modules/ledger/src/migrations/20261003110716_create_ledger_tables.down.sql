@@ -20,6 +20,14 @@ DROP INDEX "ledgeraccount_owner_type_owner_id";
 DROP INDEX "ledgeraccount_code_currency";
 -- reverse: create "ledger_accounts" table
 DROP TABLE "ledger_accounts";
+-- reverse: create index "sellercreditmaturity_source_reference" to table: "seller_credit_maturities"
+DROP INDEX "sellercreditmaturity_source_reference";
+-- reverse: create index "sellercreditmaturity_seller_user_id_currency_matured_at" to table: "seller_credit_maturities"
+DROP INDEX "sellercreditmaturity_seller_user_id_currency_matured_at";
+-- reverse: create index "sellercreditmaturity_matured_at_available_at" to table: "seller_credit_maturities"
+DROP INDEX "sellercreditmaturity_matured_at_available_at";
+-- reverse: create "seller_credit_maturities" table
+DROP TABLE "seller_credit_maturities";
 -- reverse: create index "outboxevent_published_at_dead_lettered_at_created_at" to table: "outbox_events"
 DROP INDEX "outboxevent_published_at_dead_lettered_at_created_at";
 -- reverse: create "outbox_events" table
