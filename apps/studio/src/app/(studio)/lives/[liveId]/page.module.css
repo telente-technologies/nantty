@@ -27,7 +27,7 @@
 }
 
 .back:hover {
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .titleRow {
@@ -53,8 +53,8 @@
 }
 
 .state_connecting {
-  background: var(--yellow-50);
-  color: var(--yellow-900);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
 }
 
 .state_live {
@@ -247,7 +247,7 @@
 .chip:hover {
   border-style: solid;
   background: var(--surface-brand-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .commentForm {
