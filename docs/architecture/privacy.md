@@ -71,7 +71,7 @@ flowchart LR
   EV --> C4{marketing consent?}
   C4 -- yes --> NF[Marketing email / push]
   C4 -- no --> TX[Transactional only]
-  PAY2[go-money] --> PSP[Paystack / Flutterwave / Stripe\nprocessor]
+  PAY2[go-money] --> PSP[Bachs Connect\nprocessor]
   ID2[go-identity] --> EML[Email / SMS provider\nprocessor]
 ```
 

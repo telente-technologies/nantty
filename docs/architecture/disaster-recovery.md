@@ -85,7 +85,7 @@ Class: **Critical** (core flow stops or must fail safe), **Important** (degraded
 | SQS / SNS | Important | publish errors, queue age | outbox keeps rows, relay retries (EXISTING); business transaction already committed; jobs delayed; realtime loses live updates, clients poll REST (plan 5.6 recovery path) | drop events or publish before commit |
 | Python intelligence | Optional | timeout (budget 100-200 ms), breaker | feed uses deterministic ranking (follow graph + recency + trending cache); ads deterministic eligibility, empty slot if engine fails; risk score unavailable means go-money applies conservative thresholds (hold, lower limits), never auto-approve high-value | block checkout on a missing score for low-risk amounts only if policy says so, otherwise hold |
 | Phoenix realtime | Important | `/healthz`, socket count | purchases, orders, REST unaffected; chat and live viewers fall back to polling `?after=`; gifts still settle in ledger, animations replay from state on reconnect | let Phoenix decide any money state |
-| Payment provider (Paystack/Flutterwave/Stripe) | Critical for payments | provider error rate, webhook lag | failover to second provider where the product supports it (provider-agnostic interface); otherwise hide pay button with message, keep browse and cart; pending payments reconciled by polling provider after recovery; wallet-funded purchases continue | mark paid without provider verification |
+| Payment provider (Bachs) | Critical for payments | provider error rate, webhook lag | single provider at launch (the provider interface leaves room for a second one): hide the pay button with a message, keep browse and cart; pending payments reconciled by polling provider after recovery; wallet-funded purchases continue | mark paid without provider verification |
 | LiveKit | Important | room API errors | existing lives show reconnecting state, new lives disabled with banner; commerce unaffected | |
 | Search (Postgres FTS now, OpenSearch later) | Important | query errors | fall back to Postgres trigram/FTS; category browse and browse feed remain | |
 | Object storage (S3/CloudFront) | Important | 5xx on origin | CDN serves cached; CloudFront origin group fails over to replica; uploads queued client-side (upload queue EXISTING in mobile); text content continues | |
@@ -126,6 +126,6 @@ Core principle: the marketplace read path (browse, product pages, orders view) d
 
 ### DR5. Provider-agnostic payment interface with a second provider
 - **Problem:** one provider outage halts payments.
-- **Recommendation:** interface and sandbox tests for both Paystack and Flutterwave (already planned); route by availability and cost.
+- **Recommendation:** keep the Bachs adapter behind the provider interface with fixture and fake-API tests (done); add a second provider only if Bachs availability requires it.
 - **Complexity:** M. **Risk:** medium. **Priority: P2**, ship with one, design for two.
 - **Tag:** Near term.

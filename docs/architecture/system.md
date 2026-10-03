@@ -149,7 +149,7 @@ flowchart LR
   rt["Phoenix fan-out"]:::existing
   os[("OpenSearch")]:::future
   ch[("ClickHouse")]:::future
-  paystack["Paystack / Flutterwave"]:::proposed
+  bachs["Bachs Connect (seller and creator connected accounts)"]
   iap["Apple / Google IAP"]:::proposed
   livekit["LiveKit SFU, Ingress, Egress"]:::existing
   comms["SES email, SMS, FCM/APNs push"]:::proposed
@@ -160,7 +160,7 @@ flowchart LR
   svc -- "enqueue" --> jobs --> workers
   workers --> os & ch
   workers --> comms
-  paystack & iap -- "signed webhooks" --> svc
+  bachs & iap -- "signed webhooks" --> svc
   livekit -- "webhooks" --> svc
 ```
 

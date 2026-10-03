@@ -6,13 +6,13 @@ Status date: 2026-10-03. Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend
 
 | Item | State | Evidence |
 | --- | --- | --- |
-| Go payments / wallet / ledger / escrow / subscriptions / creators modules | EXISTING as 11-line routeless skeletons, no ent, no migrations | `services/go/modules/{payments,wallet,ledger,escrow,subscriptions,creators,rewards}` |
+| Go payments / wallet / ledger / escrow / creators modules | EXISTING with ent schemas, migrations and integration tests (subscriptions is still a skeleton; the rewards module was deleted) | `services/go/modules/{payments,wallet,ledger,escrow,creators}` |
 | `go-money` deployable | EXISTING, compiles, routeless | `services/go/cmd/go-money` (inventory 2.4) |
 | `LiveMoneyService` gRPC contract (`ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | EXISTING proto, **no server or client implementation** | `services/contracts/proto/zudomart/money/v1/live_money.proto` |
 | `Money` proto and Go money package (int64 minor units + currency) | EXISTING, tested | `services/contracts/proto/zudomart/common/v1/money.proto`, `services/go/platform/money` |
 | Idempotency middleware (Redis) | EXISTING, wired to no route | `services/go/platform/idempotency` |
-| Webhook signature verification in new services | **ABSENT** | inventory section 7 |
-| Legacy Paystack / Flutterwave gateways (to be replaced by Bachs), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | EXISTING only in the reference monolith, which is never deployed | `apps/api/src/modules/payments/gateways/{paystack,flutterwave}.gateway.ts`, `modules/escrows/jobs/escrowAutoRelease.job.ts`, `modules/wallets/constants/monetizationLedgerAccounts.constant.ts` |
+| Webhook signature verification in new services | EXISTING for Bachs (`POST /webhooks/bachs`, HMAC-SHA256 + 300 s tolerance + `evt_` dedupe) | `services/go/modules/payments/src/integrations/bachsConnectWebhooks.integration.go` |
+| Legacy card gateways (replaced by Bachs Connect in the new stack), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | EXISTING only in the reference monolith, which is never deployed | `apps/api/src/modules/payments/gateways/*.gateway.ts`, `modules/escrows/jobs/escrowAutoRelease.job.ts`, `modules/wallets/constants/monetizationLedgerAccounts.constant.ts` |
 | Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `apps/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
 | Wallet, escrow, coin, payout screens in mobile, seller, admin | MOCK-ONLY | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller` wallet pages, `apps/admin` commerce pages |
 | Everything below | PROPOSED | `docs/backendPlan.md` phases 5 and 6 |
@@ -74,7 +74,7 @@ The ledger is a **mirror and record** of balances Bachs holds (seller account `p
 
 | Adapter | Capabilities | Verification | Status |
 | --- | --- | --- | --- |
-| bachsConnect | create connected account, account link (hosted onboarding), checkout session (direct charge: `X-Account-Id`, `platform_fee`, `reference`), refund, transfer (platform to account), payout (`X-Account-Id`), balances, bank resolve, disputes (list, evidence, submit) | `X-Bachs-Signature-V2`: HMAC-SHA256 hex of `{timestamp}.{raw_body}`, 300 second tolerance, dedupe on event `id`, re-fetch before posting (https://docs.bachs.io/guides/webhooks/overview). `Idempotency-Key` on every POST (https://docs.bachs.io/guides/idempotency) | PROPOSED, replaces the Paystack and Flutterwave code in `services/go/modules/payments` and `wallet` |
+| bachsConnect | create connected account, account link (hosted onboarding), checkout session (direct charge: `X-Account-Id`, `platform_fee`, `reference`), refund, transfer (platform to account), payout (`X-Account-Id`), balances, bank resolve, disputes (list, evidence, submit) | `X-Bachs-Signature-V2`: HMAC-SHA256 hex of `{timestamp}.{raw_body}`, 300 second tolerance, dedupe on event `id`, re-fetch before posting (https://docs.bachs.io/guides/webhooks/overview). `Idempotency-Key` on every POST (https://docs.bachs.io/guides/idempotency) | EXISTING (`services/go/modules/payments/src/integrations/bachsConnect*.integration.go`), the only provider; fixture and fake-API tests |
 | Apple IAP | verify transaction, receive refund/revoke/renewal notifications | StoreKit 2 signed JWS verified against Apple chain on the server; App Store Server API for status; Notifications v2 | PROPOSED, new work (monolith has `POST /coins/iap/receipts` as a contract only) |
 | Google Play | verify purchase token, acknowledge, consume, RTDN via Pub/Sub push | Play Developer API `purchases.products/subscriptions` get; RTDN authenticated push | PROPOSED, new work |
 
