@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { BellRinging24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
@@ -11,6 +11,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { notificationsService } from "@/services/notifications.service";
 import type { CategorizedNotification } from "@/types/commerce.type";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const notificationsQueryKey = ["notifications"] as const;
 
@@ -71,7 +72,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
         )}
         ListEmptyComponent={
           notifications.isLoading ? (
-            <ActivityIndicator style={styles.state} color={colors.primary} />
+            <ListSkeleton />
           ) : (
             <Text align="center" color={colors.textSubtle} style={styles.state}>You're all caught up.</Text>
           )
