@@ -61,8 +61,8 @@
 .stateBadge {
   justify-self: start;
   padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-13);
   font-weight: 700;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .questionItem {
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--surface-app);
   box-shadow: inset 0 0 0 1px rgb(11 23 82 / 0.06);
 }
@@ -121,10 +121,10 @@
   gap: 16px;
   padding: 18px 20px;
   font-weight: 650;
-  font-size: 1.02rem;
+  font-size: var(--fs-16);
   cursor: pointer;
   list-style: none;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .question::-webkit-details-marker {
@@ -183,7 +183,7 @@
 .callToActionLede {
   max-width: 46ch;
   color: var(--blue-50);
-  font-size: 1.05rem;
+  font-size: var(--fs-16);
 }
 
 .callToActionActions {
@@ -254,13 +254,13 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--blue-900);
   color: var(--yellow-500);
 }
 
 .pillarTitle {
-  font-size: 1.15rem;
+  font-size: var(--fs-20);
   font-weight: 750;
   letter-spacing: -0.03em;
 }

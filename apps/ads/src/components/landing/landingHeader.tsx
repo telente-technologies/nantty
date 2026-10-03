@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdsWordmark } from "@/components/shell/adsWordmark";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 
 import { LandingActionLink, type LandingAction } from "./landingPrimitives";
 import styles from "./landingLayout.module.css";
@@ -19,7 +19,7 @@ export function LandingHeaderWithFloatingNavigation({ primaryAction }: { readonl
     <header className={styles.header}>
       <div className={styles.headerPill}>
         <Link href="/" className={styles.wordmarkLink} aria-label="Zudomart Ads home">
-          <AdsWordmark tone="onLight" />
+          <ZudomartWordmark productLabel="Ads" tone="onLight" />
         </Link>
         <nav aria-label="Main" className={styles.headerNavigation}>
           <ul>
