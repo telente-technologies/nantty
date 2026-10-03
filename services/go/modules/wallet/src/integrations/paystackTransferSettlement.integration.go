@@ -10,13 +10,13 @@ import (
 	"zudomart/modules/wallet/src/interfaces"
 )
 
-type BachsManualPayoutSettlement struct {
+type PaystackTransferSettlement struct {
 	Payments *paymentservices.PaymentGateway
 }
 
-func (settlement BachsManualPayoutSettlement) Name() string { return "bachsManualPayout" }
+func (settlement PaystackTransferSettlement) Name() string { return "paystackTransfer" }
 
-func (settlement BachsManualPayoutSettlement) SettleSellerPayout(ctx context.Context, instruction interfaces.SellerPayoutInstruction) (string, error) {
+func (settlement PaystackTransferSettlement) SettleSellerPayout(ctx context.Context, instruction interfaces.SellerPayoutInstruction) (string, error) {
 	status, err := settlement.Payments.InitiateSellerPayout(ctx, paymentmodels.SellerPayoutInstruction{
 		Purpose: paymentconstants.PurposeWithdrawal, SubjectId: instruction.WithdrawalId, BeneficiaryUserId: instruction.UserId, Reference: instruction.Reference,
 		AmountMinor: instruction.AmountMinor, FeeMinor: instruction.FeeMinor, Currency: instruction.Currency, BankCode: instruction.BankCode, AccountNumber: instruction.AccountNumber,
