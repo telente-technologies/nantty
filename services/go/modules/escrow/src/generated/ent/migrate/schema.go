@@ -128,6 +128,7 @@ var (
 		{Name: "commission_bps", Type: field.TypeInt64},
 		{Name: "commission_minor", Type: field.TypeInt64},
 		{Name: "seller_amount_minor", Type: field.TypeInt64},
+		{Name: "processing_fee_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "released_to_seller_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "disputed", "released", "refunded", "partiallyRefunded"}, Default: "held"},
@@ -160,12 +161,22 @@ var (
 			{
 				Name:    "escrow_status_auto_release_at",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[20], EscrowsColumns[27]},
+				Columns: []*schema.Column{EscrowsColumns[21], EscrowsColumns[28]},
 			},
 			{
-				Name:    "escrow_seller_user_id_status",
+				Name:    "escrow_seller_user_id_status_id",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[20]},
+				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[21], EscrowsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						EscrowsColumns[0].Name: true,
+					},
+				},
+			},
+			{
+				Name:    "escrow_payment_intent_id",
+				Unique:  false,
+				Columns: []*schema.Column{EscrowsColumns[5]},
 			},
 			{
 				Name:    "escrow_buyer_user_id_created_at",
@@ -269,6 +280,6 @@ func init() {
 		"escrows_amount_positive":         "amount_minor > 0",
 		"escrows_commission_bps_in_range": "commission_bps >= 0 AND commission_bps <= 10000",
 		"escrows_refund_within_amount":    "refunded_minor >= 0 AND refunded_minor <= amount_minor",
-		"escrows_split_sums_to_amount":    "commission_minor >= 0 AND seller_amount_minor >= 0 AND commission_minor + seller_amount_minor = amount_minor",
+		"escrows_split_sums_to_amount":    "commission_minor >= 0 AND seller_amount_minor >= 0 AND processing_fee_minor >= 0 AND commission_minor + seller_amount_minor + processing_fee_minor = amount_minor",
 	}
 }
