@@ -31,6 +31,7 @@ type FakeTransaction struct {
 	AuthorizationCode string
 	Metadata          map[string]any
 	PaidAt            time.Time
+	SplitShares       map[string]int64
 }
 
 type FakeTransfer struct {
@@ -190,6 +191,15 @@ func (fake *FakePaystack) CompleteCheckout(reference string, paidAmountOverride,
 }
 
 func (fake *FakePaystack) creditForTransaction(transaction *FakeTransaction) {
+	if len(transaction.SplitShares) > 0 {
+		var shares int64
+		for subaccount, share := range transaction.SplitShares {
+			fake.SubaccountBalances[subaccount] += share
+			shares += share
+		}
+		fake.PlatformBalance[transaction.Currency] += transaction.AmountMinor - shares - transaction.FeeMinor
+		return
+	}
 	if transaction.Subaccount != "" {
 		fake.SubaccountBalances[transaction.Subaccount] += transaction.AmountMinor - transaction.FeeMinor
 		return

@@ -101,6 +101,7 @@ func (fake *FakePaystack) initializeTransaction(request fakeRequest) (int, any, 
 	fake.Transactions[reference] = &FakeTransaction{
 		Id: fake.nextId, Reference: reference, AmountMinor: number(request.body["amount"]), Currency: text(request.body["currency"]), Email: text(request.body["email"]),
 		Subaccount: text(request.body["subaccount"]), Bearer: text(request.body["bearer"]), PlanCode: text(request.body["plan"]), Status: "pending", Metadata: metadata,
+		SplitShares: splitSharesFrom(request.body),
 	}
 	return http.StatusOK, map[string]any{"authorization_url": "https://checkout.paystack.test/" + reference, "access_code": "ac_" + reference, "reference": reference}, nil
 }
@@ -115,6 +116,7 @@ func (fake *FakePaystack) chargeAuthorization(request fakeRequest) (int, any, an
 	transaction := &FakeTransaction{
 		Id: fake.nextId, Reference: reference, AmountMinor: number(request.body["amount"]), Currency: text(request.body["currency"]), Email: text(request.body["email"]),
 		Subaccount: text(request.body["subaccount"]), Channel: "card", AuthorizationCode: code, Status: "success", CustomerCode: "CUS_" + strings.ReplaceAll(text(request.body["email"]), "@", "_"),
+		SplitShares: splitSharesFrom(request.body),
 	}
 	fake.Transactions[reference] = transaction
 	switch {
@@ -214,7 +216,7 @@ func (fake *FakePaystack) settlementTransactions(settlementId string) (int, any,
 	subaccount := "ACCT_" + strings.TrimPrefix(settlementId, "9")
 	items := []map[string]any{}
 	for _, transaction := range fake.Transactions {
-		if transaction.Subaccount == subaccount && transaction.Status == "success" {
+		if _, inSplit := transaction.SplitShares[subaccount]; (transaction.Subaccount == subaccount || inSplit) && transaction.Status == "success" {
 			items = append(items, map[string]any{"reference": transaction.Reference})
 		}
 	}
@@ -228,4 +230,16 @@ func settlementIdFor(subaccount string) int64 {
 		value = value*10 + int64(digit-'0')
 	}
 	return value
+}
+
+func splitSharesFrom(body map[string]any) map[string]int64 {
+	split, _ := body["split"].(map[string]any)
+	entries, _ := split["subaccounts"].([]any)
+	shares := map[string]int64{}
+	for _, entry := range entries {
+		if share, ok := entry.(map[string]any); ok {
+			shares[text(share["subaccount"])] += number(share["share"])
+		}
+	}
+	return shares
 }
