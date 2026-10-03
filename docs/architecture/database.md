@@ -1,5 +1,7 @@
 # Database architecture
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 As of 2026-10-03. Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE**. Facts: [inventory.md](inventory.md) section 3.
 
 Fixed decisions: one Aurora PostgreSQL + PostGIS cluster, one schema per owning service, one `svc_<service>` login role per service, read-only grants to others through `zudomart_readers` (granted per table in the owner's migration). Only the owner writes. Money is `int64` minor units + ISO currency; coins are integer `COIN`; points are never money. ent + Atlas for Go, Prisma for TS.
@@ -87,9 +89,10 @@ erDiagram
   }
   PROFILE {
     uuid id PK
-    uuid account_id FK "partial UK one personal, one creator per account"
+    uuid account_id FK "partial UK one personal per account"
     string handle UK
-    enum kind "personal|creator|business"
+    enum kind "personal|business"
+    enum creator_status "none|pending|approved|rejected"
     bool is_private
   }
   ACTING_PROFILE {
