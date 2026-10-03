@@ -269,6 +269,26 @@ func PurchaseChannelNotIn(vs ...PurchaseChannel) predicate.CoinPackage {
 	return predicate.CoinPackage(sql.FieldNotIn(FieldPurchaseChannel, vs...))
 }
 
+// ClientPlatformEQ applies the EQ predicate on the "client_platform" field.
+func ClientPlatformEQ(v ClientPlatform) predicate.CoinPackage {
+	return predicate.CoinPackage(sql.FieldEQ(FieldClientPlatform, v))
+}
+
+// ClientPlatformNEQ applies the NEQ predicate on the "client_platform" field.
+func ClientPlatformNEQ(v ClientPlatform) predicate.CoinPackage {
+	return predicate.CoinPackage(sql.FieldNEQ(FieldClientPlatform, v))
+}
+
+// ClientPlatformIn applies the In predicate on the "client_platform" field.
+func ClientPlatformIn(vs ...ClientPlatform) predicate.CoinPackage {
+	return predicate.CoinPackage(sql.FieldIn(FieldClientPlatform, vs...))
+}
+
+// ClientPlatformNotIn applies the NotIn predicate on the "client_platform" field.
+func ClientPlatformNotIn(vs ...ClientPlatform) predicate.CoinPackage {
+	return predicate.CoinPackage(sql.FieldNotIn(FieldClientPlatform, vs...))
+}
+
 // PricesEQ applies the EQ predicate on the "prices" field.
 func PricesEQ(v []byte) predicate.CoinPackage {
 	return predicate.CoinPackage(sql.FieldEQ(FieldPrices, v))

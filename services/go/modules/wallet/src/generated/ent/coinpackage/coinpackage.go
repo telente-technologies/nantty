@@ -22,6 +22,8 @@ const (
 	FieldBonusCoins = "bonus_coins"
 	// FieldPurchaseChannel holds the string denoting the purchase_channel field in the database.
 	FieldPurchaseChannel = "purchase_channel"
+	// FieldClientPlatform holds the string denoting the client_platform field in the database.
+	FieldClientPlatform = "client_platform"
 	// FieldPrices holds the string denoting the prices field in the database.
 	FieldPrices = "prices"
 	// FieldStoreProductID holds the string denoting the store_product_id field in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldCoins,
 	FieldBonusCoins,
 	FieldPurchaseChannel,
+	FieldClientPlatform,
 	FieldPrices,
 	FieldStoreProductID,
 	FieldActive,
@@ -104,6 +107,33 @@ func PurchaseChannelValidator(pc PurchaseChannel) error {
 	}
 }
 
+// ClientPlatform defines the type for the "client_platform" enum field.
+type ClientPlatform string
+
+// ClientPlatformWeb is the default value of the ClientPlatform enum.
+const DefaultClientPlatform = ClientPlatformWeb
+
+// ClientPlatform values.
+const (
+	ClientPlatformWeb     ClientPlatform = "web"
+	ClientPlatformIos     ClientPlatform = "ios"
+	ClientPlatformAndroid ClientPlatform = "android"
+)
+
+func (cp ClientPlatform) String() string {
+	return string(cp)
+}
+
+// ClientPlatformValidator is a validator for the "client_platform" field enum values. It is called by the builders before save.
+func ClientPlatformValidator(cp ClientPlatform) error {
+	switch cp {
+	case ClientPlatformWeb, ClientPlatformIos, ClientPlatformAndroid:
+		return nil
+	default:
+		return fmt.Errorf("coinpackage: invalid enum value for client_platform field: %q", cp)
+	}
+}
+
 // OrderOption defines the ordering options for the CoinPackage queries.
 type OrderOption func(*sql.Selector)
 
@@ -130,6 +160,11 @@ func ByBonusCoins(opts ...sql.OrderTermOption) OrderOption {
 // ByPurchaseChannel orders the results by the purchase_channel field.
 func ByPurchaseChannel(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPurchaseChannel, opts...).ToFunc()
+}
+
+// ByClientPlatform orders the results by the client_platform field.
+func ByClientPlatform(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClientPlatform, opts...).ToFunc()
 }
 
 // ByStoreProductID orders the results by the store_product_id field.
