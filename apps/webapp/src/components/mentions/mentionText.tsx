@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useMemo } from "react";
 
 import { showToast } from "@/components/ui/toast";
 import { mentionsService } from "@/services/mentions.service";
 import { isUserMentionEntity, type MentionEntity } from "@/types/mentions.type";
-import { splitTextIntoMentionSegments } from "@/utils/mentions.util";
+import { splitTextByTags } from "@/utils/usernameTags.util";
 
 import styles from "./mentions.module.css";
 
@@ -23,10 +24,18 @@ function useResolvedMentionedUsers(mentions: readonly MentionEntity[] | undefine
 
 export function MentionText({ text, mentions }: { readonly text: string; readonly mentions?: readonly MentionEntity[] }) {
   const resolvedQuery = useResolvedMentionedUsers(mentions);
+  const segments = useMemo(() => splitTextByTags(text, (mentions ?? []).filter((mention) => mention.start >= 0 && mention.length > 1 && mention.start + mention.length <= text.length && text[mention.start] === "@")), [text, mentions]);
   return (
     <>
-      {splitTextIntoMentionSegments(text, mentions).map((segment, index) => {
-        const mention = segment.mention;
+      {segments.map((segment, index) => {
+        const mention = segment.entity;
+        if (segment.username) {
+          return (
+            <Link key={index} href={`/u/${segment.username}`} className={styles.mention}>
+              {segment.text}
+            </Link>
+          );
+        }
         if (!mention) return <span key={index}>{segment.text}</span>;
         if (!isUserMentionEntity(mention)) {
           return (
