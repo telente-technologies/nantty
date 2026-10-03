@@ -8,7 +8,8 @@ import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
+import { buildModalPalette, modalRadius } from "@/components/ui/modalChrome.constant";
 import type { Clip } from "@/types";
 
 import { CommentComposer } from "./commentComposer";
@@ -30,6 +31,7 @@ export interface ClipCommentsSheetProps {
 
 export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentId, onClose }: ClipCommentsSheetProps) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const commentThread = useCommentThreadController(postId, onClose, {
@@ -59,12 +61,13 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
         <View style={[styles.root, { paddingTop: insets.top + SHEET_TOP_GAP }]}>
           <Pressable accessibilityLabel="Close comments" style={styles.backdrop} onPress={onClose} />
           <View style={styles.sheet} accessibilityViewIsModal>
+            <View style={styles.handle} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
             <View style={styles.titleRow}>
-              <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">
+              <Text size={17} weight={600} lineHeight={22} accessibilityRole="header">
                 Comments
               </Text>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={onClose}>
-                <Cancel20Icon />
+              <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={onClose} style={styles.closeButton}>
+                <Cancel20Icon size={18} color={colors.textMuted} />
               </Pressable>
             </View>
             {isClipAuthor ? (
@@ -74,7 +77,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
                 onPress={() => commentThread.setIsPickingVideoReplyComment(!commentThread.isPickingVideoReplyComment)}
                 style={styles.videoReplyButton}
               >
-                <VideoCamera24Icon size={16} />
+                <VideoCamera24Icon size={16} color={colors.text} />
                 <Text size={13} weight={600} lineHeight={16}>
                   {commentThread.isPickingVideoReplyComment ? "Tap a comment to reply with video" : "Reply with video"}
                 </Text>
@@ -96,23 +99,28 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => {
+  const palette = buildModalPalette(colors, scheme);
+  return StyleSheet.create({
   root: { flex: 1, justifyContent: "flex-end" },
   flexFill: { flex: 1 },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: colors.overlay },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: palette.scrim },
   sheet: {
     height: SHEET_HEIGHT,
     flexShrink: 1,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
+    backgroundColor: palette.surface,
+    borderTopLeftRadius: modalRadius.sheet,
+    borderTopRightRadius: modalRadius.sheet,
+    borderWidth: scheme === "dark" ? StyleSheet.hairlineWidth : 0,
     borderBottomWidth: 0,
-    borderColor: colors.divider,
+    borderColor: palette.border,
     overflow: "hidden",
   },
+  handle: { alignSelf: "center", width: 36, height: 5, borderRadius: 3, marginTop: 8, backgroundColor: palette.handle },
+  closeButton: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
   videoReplyButton: { flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", marginHorizontal: 16, marginTop: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16, backgroundColor: colors.chip },
-  keyboardArea: { backgroundColor: colors.surface },
-  titleRow: { paddingHorizontal: 16, paddingTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  list: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 16 },
-}));
+  keyboardArea: { backgroundColor: palette.surface },
+  titleRow: { paddingHorizontal: 16, paddingTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 },
+  });
+});

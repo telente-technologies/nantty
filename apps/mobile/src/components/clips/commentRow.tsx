@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Heart20Icon, HeartFill72Icon, VideoCamera24Icon } from "@/components/icons";
+import { Heart20Icon, HeartFill72Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VideoReplyChip } from "./videoReply/videoReplyChip";
 import { ReportSheet } from "@/components/moderation/reportSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
+import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
@@ -50,20 +51,23 @@ export function CommentRow({
   const isReply = visualIndentLevel > 0;
   const [isReportSheetOpen, setIsReportSheetOpen] = useState(false);
   const openUserProfile = useOpenUserProfile();
-  const offerToReportComment = () =>
-    showAlertWithButtons("Comment options", undefined, [
-      { text: "Cancel", style: "cancel" },
-      ...(onReplyWithVideo ? [{ text: "Reply with video", onPress: onReplyWithVideo }] : []),
-      { text: "Report comment", style: "destructive", onPress: () => requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report") },
-    ]);
+  const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
+  const offerToReportComment = () => setIsOptionsSheetOpen(true);
   const confirmDeletingOwnComment = () => {
     if (!canDelete || !onDelete) return;
+    setIsOptionsSheetOpen(true);
+  };
+  const askBeforeDeleting = () =>
     showAlertWithButtons("Delete comment?", "This also removes the replies under it.", [
       { text: "Cancel", style: "cancel" },
-      ...(onReplyWithVideo ? [{ text: "Reply with video", onPress: onReplyWithVideo }] : []),
-      { text: "Delete", style: "destructive", onPress: onDelete },
+      { text: "Delete", style: "destructive", onPress: () => onDelete?.() },
     ]);
-  };
+  const commentOptions: ActionSheetOption[] = [
+    ...(onReplyWithVideo ? [{ label: "Reply with video", icon: <VideoCamera24Icon size={20} color={colors.text} />, onPress: onReplyWithVideo }] : []),
+    ...(canDelete && onDelete
+      ? [{ label: "Delete comment", icon: <Trash24Icon size={20} />, destructive: true, onPress: askBeforeDeleting }]
+      : [{ label: "Report comment", icon: <Warning20Icon />, destructive: true, onPress: () => requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report") }]),
+  ];
   return (
     <Pressable
       onPress={isPickingForVideoReply && onReplyWithVideo ? onReplyWithVideo : undefined}
@@ -129,6 +133,7 @@ export function CommentRow({
         {isReportSheetOpen ? (
         <ReportSheet target={{ targetType: "comment", targetId: comment.id }} onClose={() => setIsReportSheetOpen(false)} />
       ) : null}
+        <ActionSheet visible={isOptionsSheetOpen} onClose={() => setIsOptionsSheetOpen(false)} title="Comment options" options={commentOptions} />
     </Pressable>
     </Pressable>
   );
