@@ -1,4 +1,4 @@
-import { isMockBackendEnabled, readStudioApiBaseUrl } from "@/config/studioEnvironment.config";
+import { shouldUseRealBackend, readStudioApiBaseUrl } from "@/config/studioEnvironment.config";
 import { ApiError } from "@/errors/api.error";
 import { dispatchMockApiRequest } from "@/mocks/dispatch.mock";
 import type { ApiErrorBody } from "@/types/apiError.type";
@@ -76,7 +76,7 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
 
 export async function callStudioBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return isMockBackendEnabled() ? callMockBackend(call) : callRealBackend(call, headers);
+  return shouldUseRealBackend(call.path) ? callRealBackend(call, headers) : callMockBackend(call);
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {
