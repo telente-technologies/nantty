@@ -4,6 +4,7 @@ import { clipVideoSeeds, type ClipVideoSeed } from "./clipsVideoCatalog.mock";
 import { isoDateHoursAgo } from "./fixtures.mock";
 import { productSummaryByKey } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { withViewerSavedState } from "./savedEntries.mock";
 import { hasSignedInViewerSubscribedToCreator } from "./creatorSubscriptions.mock";
 import { currentSoundForClip } from "./soundCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isAuthorContentVisibleToSignedInViewer, isFollowingUser } from "./socialGraph.mock";
@@ -72,7 +73,7 @@ export const appendMockClip = (clip: Clip) => {
 };
 
 const withCurrentSound = (clip: Clip): Clip => ({
-  ...clip,
+  ...withViewerSavedState(clip, "clip"),
   sound: currentSoundForClip(clip.id),
   viewerHasAccess: clip.viewerHasAccess || hasSignedInViewerSubscribedToCreator(clip.author.id),
 });

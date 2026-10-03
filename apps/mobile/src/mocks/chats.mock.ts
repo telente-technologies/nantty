@@ -1,6 +1,11 @@
 import { isMessageAfterSyncCursor } from "@/cache/messageHistory.type";
 import type { Conversation, Message, UserSummary } from "@/types";
 
+import { ApiError } from "@/errors/api.error";
+
+import { buildExpiredMediaSeedMessages, buildLinkSeedMessages } from "./chatRichSeedMessages.mock";
+import { decorateConversation, isConversationHidden, isHiddenByMessageRequestAudience, isOutgoingRequestAllowedByPeer } from "./chatInboxState.mock";
+import { conversationHasStreak, recordStreakSendByMe, seedStreak } from "./chatStreakEngine.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryUserById, summariseUser } from "./userDirectory.mock";
@@ -41,7 +46,16 @@ export const mockConversations: Conversation[] = [
   },
   directConversation("c_3", "u_7", "Arsenal no go carry last this season, trust me", 8, 0, true),
   { ...directConversation("c_4", "u_2", "Yes, the earbuds come with a 1-year warranty", 30, 0, false), kind: "business", store: { id: "s_tunde", name: "TundeTech Gadgets" } },
+  directConversation("c_req_1", "u_20", "Hi! I saw your store, do you ship to Abuja?", 3, 1, false),
+  directConversation("c_req_2", "u_9", "Hello, I'd love to shoot your next collection", 6, 1, false),
+  directConversation("c_req_3", "u_16", "Please can I get the price list?", 12, 2, false),
+  directConversation("c_spam_1", "u_18", "WIN a free iPhone! Tap the link now", 1, 1, false),
+  directConversation("c_spam_2", "u_24", "Earn 50k daily from home, reply YES", 2, 1, false),
 ];
+
+seedStreak("c_1", "u_21", { count: 99, daysSinceCounted: 1, peerSentToday: true });
+seedStreak("c_3", "u_7", { count: 23, daysSinceCounted: 2, peerSentToday: false });
+const outgoingRequestConversationIds = new Set<string>();
 
 const textMessage = (id: string, conversationId: string, senderId: string, text: string, hoursAgo: number): Message => ({
   id,
@@ -57,11 +71,18 @@ export const mockMessagesByConversation = new Map<string, Message[]>([
   [
     "c_1",
     [
+      ...buildExpiredMediaSeedMessages("c_1", "u_21", textMessage),
+      ...buildLinkSeedMessages("c_1", "u_21", textMessage),
       textMessage("m_c1_1", "c_1", "u_21", "Good evening dear, how far with the dress?", 1),
-      textMessage("m_c1_2", "c_1", "u_me", "Almost ready! Tailor said Thursday latest", 0.8),
+      { ...textMessage("m_c1_2", "c_1", "u_me", "Almost ready! Tailor said Thursday latest", 0.8), readAt: isoDateHoursAgo(0.7) },
       textMessage("m_c1_3", "c_1", "u_21", "Abeg send me the pictures of the aso-ebi when you can 🙏", 0.4),
     ],
   ],
+  ["c_req_1", [textMessage("m_rq1", "c_req_1", "u_20", "Hi! I saw your store, do you ship to Abuja?", 3)]],
+  ["c_req_2", [textMessage("m_rq2", "c_req_2", "u_9", "Hello, I'd love to shoot your next collection", 6)]],
+  ["c_req_3", [textMessage("m_rq3", "c_req_3", "u_16", "Please can I get the price list?", 12)]],
+  ["c_spam_1", [textMessage("m_sp1", "c_spam_1", "u_18", "WIN a free iPhone! Tap the link now", 1)]],
+  ["c_spam_2", [textMessage("m_sp2", "c_spam_2", "u_24", "Earn 50k daily from home, reply YES", 2)]],
   [
     "c_2",
     [
@@ -107,7 +128,7 @@ export function appendMockMessageAndUpdateConversation(message: Message) {
   const index = mockConversations.findIndex((c) => c.id === message.conversationId);
   if (index >= 0) {
     const current = mockConversations[index]!;
-    mockConversations[index] = { ...current, lastMessage: message.kind === "voice" ? "🎤 Voice note" : message.text, lastMessageAt: message.createdAt };
+    mockConversations[index] = { ...current, lastMessage: message.kind === "voice" ? "🎤 Voice note" : message.kind === "shared" ? message.text || "Shared content" : message.text, lastMessageAt: message.createdAt };
   }
   return message;
 }
@@ -120,9 +141,13 @@ const withExpiryForConversation = (conversationId: string, createdAt: string) =>
 const people = ["u_20", "u_21", "u_7", "u_10", "u_13", "u_11", "u_14", "u_19"].map(mockChatUser);
 
 export const chatsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/conversations", ({ query }) =>
-    query.get("filter") === "direct" ? mockConversations.filter((c) => c.isFriend && (c.kind ?? "direct") === "direct") : mockConversations,
-  ),
+  createMockRoute("GET", "/api/v1/conversations", ({ query }) => {
+    const folder = query.get("folder") ?? "chats";
+    return mockConversations
+      .filter((c) => !isConversationHidden(c.id) && !isHiddenByMessageRequestAudience(c))
+      .map(decorateConversation)
+      .filter((c) => c.inboxFolder === folder && (query.get("filter") !== "direct" || (c.isFriend && (c.kind ?? "direct") === "direct")));
+  }),
   createMockRoute("GET", "/api/v1/conversations/search", ({ query }) => {
     const term = (query.get("q") ?? "").toLowerCase();
     return {
@@ -132,7 +157,7 @@ export const chatsMocks: MockRoute[] = [
       people: people.filter((p) => p.name.toLowerCase().includes(term)),
     };
   }),
-  createMockRoute("GET", "/api/v1/conversations/:conversationId", ({ params }) => findMockConversation(params.conversationId!)),
+  createMockRoute("GET", "/api/v1/conversations/:conversationId", ({ params }) => decorateConversation(findMockConversation(params.conversationId!))),
   createMockRoute("GET", "/api/v1/conversations/:conversationId/messages", ({ params, query }) => {
     const allMessages = mockMessagesByConversation.get(params.conversationId!) ?? [];
     const afterCursor = query.get("after");
@@ -148,10 +173,15 @@ export const chatsMocks: MockRoute[] = [
     const peer = people.find((p) => p.id === userId) ?? fallbackPeer();
     const conversation: Conversation = { id: `c_${userId}`, peer, lastMessage: "", lastMessageAt: new Date().toISOString(), unread: 0, isFriend: false, kind: "direct" };
     mockConversations.push(conversation);
+    outgoingRequestConversationIds.add(conversation.id);
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text: string; kind?: "voice" | "image"; mediaId?: string; durationSeconds?: number };
+    const input = body as { text: string; kind?: "voice" | "image" | "shared"; mediaId?: string; durationSeconds?: number; linkPreview?: Message["linkPreview"]; sharedContent?: Message["sharedContent"] };
+    const conversation = findMockConversation(params.conversationId!);
+    if (outgoingRequestConversationIds.has(conversation.id) && !isOutgoingRequestAllowedByPeer(conversation.peer.id)) {
+      throw new ApiError(403, `${conversation.peer.name} isn't accepting message requests from you`);
+    }
     const createdAt = new Date().toISOString();
     const media =
       input.kind === "voice" && input.mediaId
@@ -159,6 +189,7 @@ export const chatsMocks: MockRoute[] = [
         : input.kind === "image" && input.mediaId
           ? { id: input.mediaId, type: "image" as const, url: null }
           : null;
+    if (conversationHasStreak(conversation.id)) recordStreakSendByMe(conversation.id);
     return appendMockMessageAndUpdateConversation({
       id: `m_${Date.now()}`,
       conversationId: params.conversationId!,
@@ -167,10 +198,15 @@ export const chatsMocks: MockRoute[] = [
       createdAt,
       kind: input.kind ?? "text",
       media,
+      mediaExpiresAt: media ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
+      linkPreview: input.linkPreview ?? null,
+      sharedContent: input.sharedContent ?? null,
+      encryption: { deviceId: "mock-device-1", ciphertext: null, protocol: "signal-v1-pending" },
       expiresAt: withExpiryForConversation(params.conversationId!, createdAt),
     });
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/read", ({ params }) => {
+    if (decorateConversation(findMockConversation(params.conversationId!)).inboxFolder !== "chats") return;
     const index = mockConversations.findIndex((c) => c.id === params.conversationId);
     if (index >= 0) mockConversations[index] = { ...mockConversations[index]!, unread: 0 };
   }),
