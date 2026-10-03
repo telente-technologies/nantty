@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { Frame30132Icon } from "@/components/icons";
+import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
@@ -11,9 +12,13 @@ export interface StoryTrayProps {
   readonly myAvatarUrl: string | null;
   readonly onPressAddStory: () => void;
   readonly onPressStory: (userId: string) => void;
+  readonly onPressLive: (liveId: string) => void;
 }
 
-export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory }: StoryTrayProps) {
+const sortLiveCreatorsFirst = (items: readonly StoryTrayItem[]) =>
+  [...items].sort((left, right) => Number(Boolean(right.user.live)) - Number(Boolean(left.user.live)));
+
+export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, onPressLive }: StoryTrayProps) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       <Pressable accessibilityRole="button" accessibilityLabel="Add story" onPress={onPressAddStory} style={styles.item}>
@@ -27,25 +32,44 @@ export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory }:
           Add Story
         </Text>
       </Pressable>
-      {items.map((item) => (
-        <Pressable
-          key={item.user.id}
-          accessibilityRole="button"
-          accessibilityLabel={`View ${item.user.name}'s story`}
-          onPress={() => onPressStory(item.user.id)}
-          style={styles.item}
-        >
-          <View style={styles.bubble}>
-            <View style={[styles.ring, item.hasUnseen && styles.ringUnseen]} />
-            <View style={styles.badge}>
-              <Avatar uri={item.user.avatarUrl} size={32} />
+      {sortLiveCreatorsFirst(items).map((item) =>
+        item.user.live ? (
+          <Pressable
+            key={item.user.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.user.name} is live, open livestream`}
+            onPress={() => onPressLive(item.user.live!.liveId)}
+            style={styles.item}
+          >
+            <View style={styles.liveBubble}>
+              <LiveAvatarRing size={50}>
+                <Avatar uri={item.user.avatarUrl} size={50} />
+              </LiveAvatarRing>
             </View>
-          </View>
-          <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
-            {item.user.name}
-          </Text>
-        </Pressable>
-      ))}
+            <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
+              {item.user.name}
+            </Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            key={item.user.id}
+            accessibilityRole="button"
+            accessibilityLabel={`View ${item.user.name}'s story`}
+            onPress={() => onPressStory(item.user.id)}
+            style={styles.item}
+          >
+            <View style={styles.bubble}>
+              <View style={[styles.ring, item.hasUnseen && styles.ringUnseen]} />
+              <View style={styles.badge}>
+                <Avatar uri={item.user.avatarUrl} size={32} />
+              </View>
+            </View>
+            <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
+              {item.user.name}
+            </Text>
+          </Pressable>
+        ),
+      )}
     </ScrollView>
   );
 }
@@ -54,6 +78,7 @@ const styles = StyleSheet.create({
   row: { paddingHorizontal: 16, gap: 12 },
   item: { width: 68, alignItems: "center", gap: 4 },
   bubble: { width: 68, height: 60 },
+  liveBubble: { width: 68, height: 60, alignItems: "center", justifyContent: "center" },
   ring: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primaryTint },
   ringUnseen: { borderWidth: 1, borderColor: colors.primary },
   badge: { position: "absolute", right: 0, bottom: 0 },
