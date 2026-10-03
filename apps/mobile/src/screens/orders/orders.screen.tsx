@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 
 import { OrderListItem } from "@/components/order/orderListItem";
 import { Chip } from "@/components/ui/chip";
@@ -12,6 +12,8 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ordersService } from "@/services/orders.service";
 import type { Order, OrderStatus } from "@/types";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 type OrderFilterKey = "all" | "to_ship" | "on_the_way" | "to_confirm" | "completed" | "disputed" | "cancelled";
 
@@ -76,11 +78,11 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
         )}
         ListEmptyComponent={
           orders.isLoading ? (
-            <ActivityIndicator style={styles.state} color={colors.primary} />
+            <ListSkeleton />
+          ) : orders.isError ? (
+            <ErrorState message="Couldn't load your orders." onRetry={() => orders.refetch()} />
           ) : (
-            <Text align="center" color={colors.textSubtle} style={styles.state}>
-              {orders.isError ? "Couldn't load your orders. Pull down to try again." : "No orders here yet."}
-            </Text>
+            <Text align="center" color={colors.textSubtle} style={styles.state}>No orders here yet.</Text>
           )
         }
       />

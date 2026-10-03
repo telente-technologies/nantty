@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
@@ -16,6 +16,8 @@ import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ordersService } from "@/services/orders.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
   const { orderId } = route.params;
@@ -29,9 +31,9 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <Screen>
         <Header title="Order" />
         {order.isError ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>Couldn't load this order.</Text>
+          <ErrorState message="Couldn't load this order." onRetry={() => order.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -114,7 +116,6 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  state: { marginTop: 64 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
   escrowCard: { backgroundColor: colors.white, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
