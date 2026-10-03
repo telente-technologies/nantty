@@ -13,6 +13,7 @@ import { LiveGiftOverlay } from "@/components/live/gifts/liveGiftOverlay";
 import { LiveGiftPickerSheet } from "@/components/live/gifts/liveGiftPickerSheet";
 import { useLiveGiftComments } from "@/components/live/gifts/liveGiftComments.hook";
 import { LiveCommentBar } from "@/components/live/liveCommentBar";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
 import { LiveHeader } from "@/components/live/liveHeader";
 import { LiveProductsSheet } from "@/components/live/liveProductsSheet";
@@ -191,7 +192,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...giftComments]} isShownOverVideo={isShownOverVideo} />
         <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} />
       </View>
-      <View style={[styles.commentBarArea, { paddingBottom: insets.bottom }]}>
+      <View style={styles.commentBarArea}>
         <LiveCommentBar
           onSend={(text) => requireAuthThen(() => live.sendComment.mutate(text), undefined, "comment on lives")}
           onToggleReactions={() => setReactionsExpanded((e) => !e)}
@@ -201,6 +202,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           onPressGift={viewerCanSendGifts ? () => requireAuthThen(() => setShowGiftPicker(true), undefined, "send gifts") : undefined}
           onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
         />
+        <KeyboardSpacer />
       </View>
       {showTipSheet ? (
         <TipSheet target={{ targetType: "live", targetId: liveId, creatorName: session.host.name }} onClose={() => setShowTipSheet(false)} />
