@@ -28,7 +28,7 @@
 }
 
 .rollout input {
-  accent-color: var(--blue-500);
+  accent-color: var(--color-brand);
 }
 
 .rolloutLabel {
