@@ -1,0 +1,44 @@
+package controllers
+
+import (
+	"net/http"
+
+	"zudomart/modules/auth/src/container"
+	registeraccount "zudomart/modules/auth/src/modules/registration/commands/registerAccount"
+	"zudomart/modules/auth/src/modules/registration/dtos"
+	checkusernameavailability "zudomart/modules/auth/src/modules/registration/queries/checkUsernameAvailability"
+	"zudomart/modules/auth/src/modules/registration/validators"
+	"zudomart/modules/auth/src/types"
+	"zudomart/modules/auth/src/utils"
+	"zudomart/platform/httpserver"
+)
+
+type RegistrationController struct {
+	Container *container.Container
+}
+
+func (controller RegistrationController) RegisterAccount(writer http.ResponseWriter, request *http.Request) {
+	body, err := utils.DecodeAndValidate[dtos.RegisterRequest](writer, request, validators.ValidateRegisterRequest)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	result, err := registeraccount.Handler{Container: controller.Container}.Execute(request.Context(), registeraccount.Command{
+		Email: body.Email, Birthday: body.Birthday, Password: body.Password, Username: body.Username,
+		Name: body.Name, OtpToken: body.OtpToken, Client: utils.ReadClientDetails(request),
+	})
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusCreated, types.ConvertAuthenticationResultToSessionResponse(result))
+}
+
+func (controller RegistrationController) CheckUsernameAvailability(writer http.ResponseWriter, request *http.Request) {
+	result, err := checkusernameavailability.Handler{Container: controller.Container}.Execute(request.Context(), checkusernameavailability.Query{Username: request.URL.Query().Get("username")})
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, result)
+}
