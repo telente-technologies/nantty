@@ -1,3 +1,4 @@
+import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentCard } from "./chatSafety.type";
 import type { ID, ISODate, UserSummary } from "./models.type";
 
 export interface Conversation {
@@ -15,6 +16,10 @@ export interface Conversation {
   readonly myRole?: "owner" | "admin" | "member" | "subscriber";
   readonly disappearingMessagesSeconds?: number | null;
   readonly store?: { readonly id: ID; readonly name: string } | null;
+  readonly inboxFolder?: InboxFolder;
+  readonly spamReason?: string | null;
+  readonly streak?: ChatStreak | null;
+  readonly mutedUntil?: ISODate | "always" | null;
 }
 
 export interface MessageReactionSummary {
@@ -36,9 +41,14 @@ export interface Message {
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "system";
+  readonly kind?: "text" | "voice" | "image" | "system" | "shared";
   readonly sender?: UserSummary;
   readonly media?: MessageAttachedMedia | null;
   readonly reactions?: readonly MessageReactionSummary[];
   readonly expiresAt?: ISODate | null;
+  readonly mediaExpiresAt?: ISODate | null;
+  readonly linkPreview?: LinkPreview | null;
+  readonly sharedContent?: SharedContentCard | null;
+  readonly readAt?: ISODate | null;
+  readonly encryption?: MessageEncryptionEnvelope | null;
 }

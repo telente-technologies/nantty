@@ -30,6 +30,7 @@ export interface BrandTag {
 export interface BrandedProduct extends Product {
   readonly brand?: BrandTag | null;
   readonly isOfficialStore?: boolean;
+  readonly savedByViewer?: boolean;
 }
 
 export interface BrandProducts {
