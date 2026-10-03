@@ -12,6 +12,7 @@ type PaymentInitializationDto struct {
 	OrderId          string                   `json:"orderId"`
 	Reference        string                   `json:"reference"`
 	AuthorizationUrl string                   `json:"authorizationUrl"`
+	AccessCode       string                   `json:"accessCode,omitempty"`
 	CallbackUrl      string                   `json:"callbackUrl"`
 	Payment          models.PaymentIntentView `json:"payment"`
 }
