@@ -30,6 +30,38 @@ channels:
         $ref: '#/components/messages/followRejected'
       blockCreated:
         $ref: '#/components/messages/blockCreated'
+      postDeleted:
+        $ref: '#/components/messages/postDeleted'
+      blockRemoved:
+        $ref: '#/components/messages/blockRemoved'
+      followRemoved:
+        $ref: '#/components/messages/followRemoved'
+      brandUpdated:
+        $ref: '#/components/messages/brandUpdated'
+      categoryUpdated:
+        $ref: '#/components/messages/categoryUpdated'
+      soundUpdated:
+        $ref: '#/components/messages/soundUpdated'
+      contentVisibilityChanged:
+        $ref: '#/components/messages/contentVisibilityChanged'
+      strikeIssued:
+        $ref: '#/components/messages/strikeIssued'
+      strikeRevoked:
+        $ref: '#/components/messages/strikeRevoked'
+      copyrightClaimReceived:
+        $ref: '#/components/messages/copyrightClaimReceived'
+      copyrightClaimDecided:
+        $ref: '#/components/messages/copyrightClaimDecided'
+      copyrightClaimCounterNoticeReceived:
+        $ref: '#/components/messages/copyrightClaimCounterNoticeReceived'
+      copyrightClaimCounterNoticeDecided:
+        $ref: '#/components/messages/copyrightClaimCounterNoticeDecided'
+      copyrightClaimRestored:
+        $ref: '#/components/messages/copyrightClaimRestored'
+      ipClaimReceived:
+        $ref: '#/components/messages/ipClaimReceived'
+      ipClaimDecided:
+        $ref: '#/components/messages/ipClaimDecided'
       postCreated:
         $ref: '#/components/messages/postCreated'
       mentionCreated:
@@ -1681,3 +1713,115 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/media.deleted.v1.json' } }
+    postDeleted:
+      name: post.deleted
+      headers: { type: object, properties: { eventType: { const: post.deleted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.deleted.v1.json' } }
+    blockRemoved:
+      name: block.removed
+      headers: { type: object, properties: { eventType: { const: block.removed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/block.removed.v1.json' } }
+    followRemoved:
+      name: follow.removed
+      headers: { type: object, properties: { eventType: { const: follow.removed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/follow.removed.v1.json' } }
+    brandUpdated:
+      name: brand.updated
+      headers: { type: object, properties: { eventType: { const: brand.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/brand.updated.v1.json' } }
+    categoryUpdated:
+      name: category.updated
+      headers: { type: object, properties: { eventType: { const: category.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/category.updated.v1.json' } }
+    soundUpdated:
+      name: sound.updated
+      headers: { type: object, properties: { eventType: { const: sound.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/sound.updated.v1.json' } }
+    contentVisibilityChanged:
+      name: content.visibilityChanged
+      headers: { type: object, properties: { eventType: { const: content.visibilityChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/content.visibilityChanged.v1.json' } }
+    strikeIssued:
+      name: strike.issued
+      headers: { type: object, properties: { eventType: { const: strike.issued } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/strike.issued.v1.json' } }
+    strikeRevoked:
+      name: strike.revoked
+      headers: { type: object, properties: { eventType: { const: strike.revoked } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/strike.revoked.v1.json' } }
+    copyrightClaimReceived:
+      name: copyrightClaim.received
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.received } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.received.v1.json' } }
+    copyrightClaimDecided:
+      name: copyrightClaim.decided
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.decided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.decided.v1.json' } }
+    copyrightClaimCounterNoticeReceived:
+      name: copyrightClaim.counterNoticeReceived
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.counterNoticeReceived } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.counterNoticeReceived.v1.json' } }
+    copyrightClaimCounterNoticeDecided:
+      name: copyrightClaim.counterNoticeDecided
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.counterNoticeDecided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.counterNoticeDecided.v1.json' } }
+    copyrightClaimRestored:
+      name: copyrightClaim.restored
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.restored } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.restored.v1.json' } }
+    ipClaimReceived:
+      name: ipClaim.received
+      headers: { type: object, properties: { eventType: { const: ipClaim.received } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ipClaim.received.v1.json' } }
+    ipClaimDecided:
+      name: ipClaim.decided
+      headers: { type: object, properties: { eventType: { const: ipClaim.decided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ipClaim.decided.v1.json' } }
