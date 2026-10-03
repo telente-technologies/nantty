@@ -16,35 +16,52 @@ const (
 )
 
 type ChargeRequest struct {
-	Reference   string
-	AmountMinor int64
-	Currency    string
-	Email       string
-	CallbackUrl string
-	Metadata    map[string]string
+	Reference          string
+	IdempotencyKey     string
+	AmountMinor        int64
+	Currency           string
+	ConnectedAccountId string
+	PlatformFeeMinor   int64
+	CustomerEmail      string
+	CustomerName       string
+	SuccessUrl         string
+	CancelUrl          string
+	ExpiresInMinutes   int
+	Metadata           map[string]string
 }
 
 type ChargeSession struct {
-	AuthorizationUrl string
-	AccessCode       string
+	CheckoutUrl        string
+	ProviderCheckoutId string
+	ExpiresAt          *time.Time
+}
+
+type ChargeLookup struct {
+	Reference          string
+	ProviderCheckoutId string
+	ConnectedAccountId string
 }
 
 type ChargeVerification struct {
-	Reference             string
-	Outcome               ProviderOutcome
-	AmountMinor           int64
-	Currency              string
-	ProviderTransactionId string
-	ProviderFeeMinor      int64
-	FailureReason         string
+	Reference        string
+	Outcome          ProviderOutcome
+	AmountMinor      int64
+	Currency         string
+	ProviderChargeId string
+	ProviderFeeMinor int64
+	PlatformFeeMinor int64
+	FailureReason    string
 }
 
 type RefundRequest struct {
-	PaymentReference      string
-	ProviderTransactionId string
-	RefundReference       string
-	AmountMinor           int64
-	Currency              string
+	ProviderChargeId   string
+	ConnectedAccountId string
+	RefundReference    string
+	IdempotencyKey     string
+	AmountMinor        int64
+	Currency           string
+	FullRefund         bool
+	Reason             string
 }
 
 type RefundResult struct {
@@ -53,70 +70,29 @@ type RefundResult struct {
 	FailureReason    string
 }
 
-type TransferRequest struct {
-	Reference     string
-	AmountMinor   int64
-	Currency      string
-	BankCode      string
-	AccountNumber string
-	AccountName   string
-	Narration     string
-}
-
-type TransferLookup struct {
-	Reference            string
-	ProviderTransferCode string
-}
-
-type TransferResult struct {
-	ProviderTransferCode string
-	Outcome              ProviderOutcome
-	FailureReason        string
-}
-
 type Bank struct {
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	CountryCode string `json:"countryCode"`
 }
 
-type WebhookKind string
-
-const (
-	WebhookKindCharge   WebhookKind = "charge"
-	WebhookKindTransfer WebhookKind = "transfer"
-	WebhookKindRefund   WebhookKind = "refund"
-	WebhookKindOther    WebhookKind = "other"
-)
-
-type WebhookNotification struct {
-	EventKey             string
-	EventType            string
-	Kind                 WebhookKind
-	Reference            string
-	ProviderTransferCode string
-	ProviderRefundId     string
-}
-
-type SettledCharge struct {
-	Reference   string
-	AmountMinor int64
-	Currency    string
-}
-
 type PaymentProvider interface {
 	Name() string
 	SupportsCurrency(currency string) bool
 	InitializeCharge(ctx context.Context, request ChargeRequest) (ChargeSession, error)
-	VerifyCharge(ctx context.Context, reference string) (ChargeVerification, error)
+	VerifyCharge(ctx context.Context, lookup ChargeLookup) (ChargeVerification, error)
 	RefundCharge(ctx context.Context, request RefundRequest) (RefundResult, error)
-	InitiateTransfer(ctx context.Context, request TransferRequest) (TransferResult, error)
-	VerifyTransfer(ctx context.Context, lookup TransferLookup) (TransferResult, error)
-	QuoteTransferFee(currency string, amountMinor int64) (int64, error)
 	ResolveBankAccountName(ctx context.Context, bankCode, accountNumber string) (string, error)
 	ListBanks(ctx context.Context, countryCode string) ([]Bank, error)
 	VerifyWebhookSignatureAndParse(rawBody []byte, headers http.Header) (WebhookNotification, error)
-	ListSettledCharges(ctx context.Context, from, to time.Time) ([]SettledCharge, error)
+}
+
+type ConnectProvider interface {
+	PaymentProvider
+	ConnectedAccountProvider
+	MoneyMovementProvider
+	DisputeProvider
+	SubscriptionProvider
 }
 
 type StoreReceipt struct {
@@ -150,11 +126,14 @@ type StoreReceiptVerifier interface {
 
 var (
 	ErrInvalidWebhookSignature        = errors.New("invalid webhook signature")
+	ErrStaleWebhookTimestamp          = errors.New("webhook timestamp outside the allowed tolerance")
 	ErrMalformedWebhookPayload        = errors.New("malformed webhook payload")
 	ErrProviderUnavailable            = errors.New("payment provider unavailable")
 	ErrProviderNotConfigured          = errors.New("payment provider is not configured")
 	ErrCurrencyNotSupported           = errors.New("currency not supported by provider")
 	ErrBankAccountNotFound            = errors.New("bank account not found")
+	ErrInsufficientProviderBalance    = errors.New("provider balance is too low for this movement")
+	ErrConnectedAccountInDebt         = errors.New("connected account has a negative provider balance")
 	ErrStoreVerificationNotConfigured = errors.New("store receipt verification is not configured")
 	ErrStoreReceiptInvalid            = errors.New("store receipt could not be verified")
 )
