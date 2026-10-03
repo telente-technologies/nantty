@@ -46,29 +46,33 @@ func (service ReservationService) Reserve(ctx context.Context, request commercep
 		return firstNonNil(err, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "reference", Message: "reference and lines are required"}}))
 	}
 	return service.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		existing, err := tx.StockReservation.Query().Where(stockreservation.Reference(request.Reference)).All(ctx)
-		if err != nil {
+		return service.reserveInTransaction(ctx, tx, lines, request)
+	})
+}
+
+func (service ReservationService) reserveInTransaction(ctx context.Context, tx *ent.Tx, lines []commerceports.StockLine, request commerceports.ReserveStockRequest) error {
+	existing, err := tx.StockReservation.Query().Where(stockreservation.Reference(request.Reference)).All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(existing) > 0 {
+		return verifyExistingReservationMatches(existing, lines)
+	}
+	variantIds := make([]uuid.UUID, 0, len(lines))
+	for _, line := range lines {
+		variantIds = append(variantIds, line.VariantId)
+	}
+	levels, err := LockStockLevelsForVariants(ctx, tx, variantIds)
+	if err != nil {
+		return err
+	}
+	for _, line := range lines {
+		if err := service.reserveLineInTransaction(ctx, tx, levels, line, request); err != nil {
 			return err
 		}
-		if len(existing) > 0 {
-			return verifyExistingReservationMatches(existing, lines)
-		}
-		variantIds := make([]uuid.UUID, 0, len(lines))
-		for _, line := range lines {
-			variantIds = append(variantIds, line.VariantId)
-		}
-		levels, err := LockStockLevelsForVariants(ctx, tx, variantIds)
-		if err != nil {
-			return err
-		}
-		for _, line := range lines {
-			if err := service.reserveLineInTransaction(ctx, tx, levels, line, request); err != nil {
-				return err
-			}
-		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "reservation.created", request.Reference, service.Container.Now(), map[string]any{
-			"reference": request.Reference, "expiresAt": request.ExpiresAt, "lines": lines,
-		})
+	}
+	return events.EnqueueOutboxEventInTransaction(ctx, tx, "reservation.created", request.Reference, service.Container.Now(), map[string]any{
+		"reference": request.Reference, "expiresAt": request.ExpiresAt, "lines": lines,
 	})
 }
 

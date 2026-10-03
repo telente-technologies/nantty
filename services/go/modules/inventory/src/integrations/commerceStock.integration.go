@@ -2,6 +2,7 @@ package integrations
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 
@@ -27,6 +28,10 @@ func (stock CommerceStock) reservations() services.ReservationService {
 
 func (stock CommerceStock) Reserve(ctx context.Context, request commerceports.ReserveStockRequest) error {
 	return stock.reservations().Reserve(ctx, request)
+}
+
+func (stock CommerceStock) ReserveWithin(ctx context.Context, transaction *sql.Tx, callerSchema string, request commerceports.ReserveStockRequest) error {
+	return stock.reservations().ReserveWithin(ctx, transaction, callerSchema, request)
 }
 
 func (stock CommerceStock) Release(ctx context.Context, reference string) error {

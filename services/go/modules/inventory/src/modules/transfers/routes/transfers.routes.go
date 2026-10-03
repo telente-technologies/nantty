@@ -10,8 +10,8 @@ import (
 
 func MountTransfersRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.TransfersController{Container: deployed}
-	reader := middlewares.StoreMember(deployed, "inventory:manage", false)
-	writer := middlewares.StoreMember(deployed, "inventory:manage", true)
+	reader := middlewares.StoreMemberFeature(deployed, "inventory:manage", "advanced_inventory", false)
+	writer := middlewares.StoreMemberFeature(deployed, "inventory:manage", "advanced_inventory", true)
 	mux.Handle("GET /api/v1/seller/inventory/transfers", reader(controller.ListTransfers))
 	mux.Handle("POST /api/v1/seller/inventory/transfers", writer(controller.CreateTransfer))
 	mux.Handle("POST /api/v1/seller/inventory/transfers/{transferId}/receive", writer(controller.ReceiveTransfer))

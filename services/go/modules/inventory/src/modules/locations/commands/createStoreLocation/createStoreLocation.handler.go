@@ -9,9 +9,11 @@ import (
 	"zudomart/modules/inventory/src/container"
 	inventoryerrors "zudomart/modules/inventory/src/errors"
 	"zudomart/modules/inventory/src/generated/ent"
+	"zudomart/modules/inventory/src/generated/ent/stocklocation"
 	"zudomart/modules/inventory/src/services"
 	"zudomart/modules/inventory/src/types"
 	"zudomart/platform/commerceports"
+	"zudomart/platform/sellerplans"
 )
 
 type Handler struct {
@@ -20,8 +22,15 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, command Command) (types.StoreLocationView, error) {
 	request := command.Request
+	active, err := handler.Container.Client.StockLocation.Query().Where(stocklocation.StoreID(command.Store.StoreId), stocklocation.Active(true)).Count(ctx)
+	if err != nil {
+		return types.StoreLocationView{}, err
+	}
+	if limit := sellerplans.LimitsFor(sellerplans.Default.PlanOf(ctx, command.Store.OwnerAccountId)).MaxLocations; !sellerplans.Default.AllowAll && active >= limit {
+		return types.StoreLocationView{}, inventoryerrors.LocationLimitReached
+	}
 	var created *ent.StockLocation
-	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		hasDefault, err := tx.StockLocation.Query().Where(stockLocationDefaultOf(command.Store.StoreId)).Exist(ctx)
 		if err != nil {
 			return err

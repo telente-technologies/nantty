@@ -12,6 +12,7 @@ func Api(status int, code, message string) *httpserver.ApiError {
 
 var (
 	LocationNotFound        = Api(http.StatusNotFound, "LOCATION_NOT_FOUND", "That location could not be found.")
+	LocationLimitReached    = Api(http.StatusConflict, "LOCATION_LIMIT_REACHED", "Your plan has reached its location limit.")
 	LocationExists          = Api(http.StatusConflict, "LOCATION_EXISTS", "A location with that name already exists.")
 	DefaultLocationRequired = Api(http.StatusConflict, "DEFAULT_LOCATION", "The default location must stay active.")
 	VariantNotFound         = Api(http.StatusNotFound, "VARIANT_NOT_FOUND", "That variant could not be found.")

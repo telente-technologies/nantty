@@ -29,6 +29,7 @@ import (
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
+	"zudomart/platform/sellerplans"
 	"zudomart/platform/servicemodule"
 	"zudomart/platform/usersdirectory"
 )
@@ -46,6 +47,7 @@ type Module struct {
 
 func NewInventoryModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
 	settings := configs.ReadInventorySettingsFromEnvironment(dependencies.Environment)
+	sellerplans.ConfigureFromEnvironment(dependencies.Environment, settings.IsProduction())
 	if err := dependencies.Environment.CombinedConfigurationError(); err != nil {
 		return nil, err
 	}
@@ -127,16 +129,7 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.InventorySettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }

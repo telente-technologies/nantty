@@ -10,5 +10,5 @@ import (
 
 func MountMovementsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.MovementsController{Container: deployed}
-	mux.Handle("GET /api/v1/seller/inventory/movements", middlewares.StoreMember(deployed, "inventory:manage", false)(controller.ListMovements))
+	mux.Handle("GET /api/v1/seller/inventory/movements", middlewares.StoreMemberFeature(deployed, "inventory:manage", "advanced_inventory", false)(controller.ListMovements))
 }
