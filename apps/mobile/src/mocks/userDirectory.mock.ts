@@ -1,6 +1,7 @@
 import type { User, UserSummary, Verification } from "@/types";
 
 import { avatarImageUrlForUser, buildUnsplashImageUrl, coverImageUrlForUser, type DirectoryUserKey } from "./mockImages.mock";
+import { findActiveLiveForHost } from "./activeLives.mock";
 import { unsplashPhotoIds } from "./unsplashPhotoIds.mock";
 
 export type DirectoryUserId = DirectoryUserKey | "u_gov";
@@ -111,6 +112,7 @@ export const summariseUser = (user: User): UserSummary => ({
   verified: user.verified,
   verification: user.verification ?? null,
   isCreator: user.isCreator ?? false,
+  live: findActiveLiveForHost(user.id),
 });
 
 export const userSummaryById = (userId: DirectoryUserId): UserSummary => summariseUser(findDirectoryUserById(userId)!);

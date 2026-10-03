@@ -8,6 +8,7 @@ import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock"
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { setFollowingAuthor } from "./followGraph.mock";
 import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds } from "./socialGraph.mock";
+import { findActiveLiveForHost } from "./activeLives.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
 import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
@@ -59,7 +60,15 @@ export const usersMocks: MockRoute[] = [
     if (params.userId === getSignedInMockUser().id || params.userId === "me") return signedInProfile();
     const user = findDirectoryUserById(params.userId!);
     if (!user) throw new ApiError(404, "This account doesn't exist");
-    return { ...user, isPrivate: privateUserIds.has(user.id), followState: followStateForUser(user.id), isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
+    const isHiddenPrivateProfile = privateUserIds.has(user.id) && !followedUserIds.has(user.id);
+    return {
+      ...user,
+      live: isHiddenPrivateProfile ? null : findActiveLiveForHost(user.id),
+      isPrivate: privateUserIds.has(user.id),
+      followState: followStateForUser(user.id),
+      isFollowing: followedUserIds.has(user.id),
+      followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0),
+    };
   }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
     data: canSignedInUserSeeProfileContent(params.userId!) ? listPostsByAuthor(params.userId!).map(withCurrentProductPrices) : [],
