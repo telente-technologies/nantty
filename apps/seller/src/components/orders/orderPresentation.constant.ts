@@ -1,13 +1,16 @@
 import type { StatusTone } from "@/components/ui/statusBadge";
-import type { DisputeStatus, EscrowStatus, OnlineOrderStatus, ReturnRequestStatus } from "@/types/order.type";
+import type { DeliveryStatus } from "@/types/delivery.type";
+import type { DisputeStatus, EscrowStatus, OnlineOrderStatus, OrderPaymentStatus, ReturnRequestStatus } from "@/types/order.type";
 
 export const orderStatusPresentation: Record<OnlineOrderStatus, { readonly label: string; readonly tone: StatusTone }> = {
-  paid: { label: "Paid — to pack", tone: "highlight" },
+  new: { label: "New", tone: "highlight" },
   processing: { label: "Processing", tone: "info" },
+  ready: { label: "Ready", tone: "info" },
   shipped: { label: "Shipped", tone: "info" },
   delivered: { label: "Delivered", tone: "success" },
   completed: { label: "Completed", tone: "success" },
   cancelled: { label: "Cancelled", tone: "neutral" },
+  returned: { label: "Returned", tone: "caution" },
   refunded: { label: "Refunded", tone: "neutral" },
   disputed: { label: "Disputed", tone: "error" },
 };
@@ -42,3 +45,24 @@ export const ordersSectionTabs = [
   { href: "/orders/returns", label: "Returns" },
   { href: "/orders/disputes", label: "Disputes" },
 ];
+
+export const orderStatusFilterOrder: readonly OnlineOrderStatus[] = ["new", "processing", "ready", "shipped", "delivered", "completed", "cancelled", "returned", "refunded", "disputed"];
+
+export const paymentStatusPresentation: Record<OrderPaymentStatus, { readonly label: string; readonly tone: StatusTone }> = {
+  paid: { label: "Paid", tone: "success" },
+  partially_refunded: { label: "Partly refunded", tone: "caution" },
+  refunded: { label: "Refunded", tone: "neutral" },
+};
+
+export const deliveryStatusPresentation: Record<DeliveryStatus, { readonly label: string; readonly tone: StatusTone }> = {
+  pending: { label: "Pending", tone: "highlight" },
+  preparing: { label: "Preparing", tone: "info" },
+  ready_for_pickup: { label: "Ready for pickup", tone: "info" },
+  in_transit: { label: "In transit", tone: "info" },
+  delivered: { label: "Delivered", tone: "success" },
+  failed: { label: "Failed attempt", tone: "error" },
+  cancelled: { label: "Cancelled", tone: "neutral" },
+  returned: { label: "Returned", tone: "caution" },
+};
+
+export const paymentProviderLabels: Record<"paystack" | "flutterwave", string> = { paystack: "Paystack", flutterwave: "Flutterwave" };
