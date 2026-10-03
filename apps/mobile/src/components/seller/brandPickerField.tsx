@@ -7,11 +7,13 @@ import { BrandRow } from "@/components/store/brandRow";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { brandsService } from "@/services/brands.service";
 import type { BrandSummary } from "@/types/brand.type";
 
 export function BrandPickerField({ selectedBrandName, onSelectBrand }: { selectedBrandName: string | null; onSelectBrand: (brand: BrandSummary | null) => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const brands = useQuery({ queryKey: ["brands", "search", search.trim()], queryFn: () => brandsService.searchBrands(search.trim()), enabled: open });
@@ -42,10 +44,10 @@ export function BrandPickerField({ selectedBrandName, onSelectBrand }: { selecte
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
-  box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: colors.white },
+  box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: colors.surface },
   sheet: { paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
   list: { maxHeight: 380 },
   none: { minHeight: 48, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
-});
+}));

@@ -3,13 +3,15 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { BoxArrowDown24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 const LOW_STOCK_THRESHOLD = 5;
 
 export function InventoryCard({ product, onPress }: { product: ProductSummary; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const stock = product.stock ?? 0;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${product.name}, ${stock} in stock`} onPress={onPress} style={styles.card}>
@@ -36,11 +38,11 @@ export function InventoryCard({ product, onPress }: { product: ProductSummary; o
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { width: 175, gap: 8 },
   image: { height: 170, backgroundColor: colors.placeholder, overflow: "hidden" },
   info: { gap: 8 },
   nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 },
   name: { flexShrink: 1 },
   stock: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));

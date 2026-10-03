@@ -5,7 +5,7 @@ import { SelectableRow } from "@/components/cart/selectableRow";
 import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { IdentityDocumentType } from "@/types/account.type";
 
 import type { ApplicationStepProps } from "./applicationStoreAndContactSteps";
@@ -19,6 +19,7 @@ export const IDENTITY_DOCUMENT_OPTIONS: readonly { readonly id: IdentityDocument
 ];
 
 export function ApplicationIdentityStep({ draft, onChange, onUploadingChange }: ApplicationStepProps & { onUploadingChange: (uploading: boolean) => void }) {
+  const { colors } = useTheme();
   const [numberFieldFocused, setNumberFieldFocused] = useState(false);
   return (
     <View style={styles.fields}>

@@ -4,12 +4,13 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { BankPickerField } from "@/components/wallet/bankPickerSheet";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { banksService } from "@/services/banks.service";
 
 import type { ApplicationStepProps } from "./applicationStoreAndContactSteps";
 
 export function ApplicationPayoutStep({ draft, onChange }: ApplicationStepProps) {
+  const { colors } = useTheme();
   const [resolving, setResolving] = useState(false);
   const [resolveError, setResolveError] = useState<string | null>(null);
 

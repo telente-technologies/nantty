@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { categoriesService } from "@/services/categories.service";
 import type { SellerApplicationDraft } from "@/types/account.type";
 
@@ -11,6 +11,7 @@ import { IDENTITY_DOCUMENT_OPTIONS } from "./applicationIdentityStep";
 import { maskAllButLastFourCharacters } from "./maskSensitiveNumber.util";
 
 export function ApplicationReviewStep({ draft, onEditStep }: { draft: SellerApplicationDraft; onEditStep: (stepIndex: number) => void }) {
+  const { colors } = useTheme();
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoriesService.fetchProductCategories });
   const categoryName = categories.data?.find((category) => category.id === draft.categoryId)?.name ?? "";
   const documentLabel = IDENTITY_DOCUMENT_OPTIONS.find((option) => option.id === draft.identityDocumentType)?.label ?? "";

@@ -1,9 +1,11 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function ApplicationStepHeader({ stepNumber, totalSteps, title, subtitle }: { stepNumber: number; totalSteps: number; title: string; subtitle: string }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.root}>
       <View style={styles.track} accessibilityLabel={`Step ${stepNumber} of ${totalSteps}`}>
@@ -24,9 +26,9 @@ export function ApplicationStepHeader({ stepNumber, totalSteps, title, subtitle 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 8 },
   track: { flexDirection: "row", gap: 4, marginBottom: 8 },
   segment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.divider },
-  segmentDone: { backgroundColor: colors.primary },
-});
+  segmentDone: { backgroundColor: colors.primarySolid },
+}));

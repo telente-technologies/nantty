@@ -5,7 +5,7 @@ import { OptionSelect } from "@/components/product/optionSelect";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { categoriesService } from "@/services/categories.service";
 import type { SellerApplicationDraft } from "@/types/account.type";
 
@@ -17,6 +17,7 @@ export interface ApplicationStepProps {
 }
 
 export function ApplicationStoreStep({ draft, onChange }: ApplicationStepProps) {
+  const { colors } = useTheme();
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoriesService.fetchProductCategories });
   return (
     <View style={styles.fields}>
@@ -44,6 +45,7 @@ export function ApplicationStoreStep({ draft, onChange }: ApplicationStepProps) 
 }
 
 export function ApplicationContactStep({ draft, onChange }: ApplicationStepProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.fields}>
       <TextField
