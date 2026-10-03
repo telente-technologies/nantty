@@ -56,6 +56,7 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeWithdrawal, module.Payouts.Withdrawals)
+	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeCreatorEarnings, module.Payouts.Creators)
 	return module, nil
 }
 
@@ -86,6 +87,8 @@ func (module *Module) runPayoutsEveryIntervalUntilContextDone(ctx context.Contex
 		case <-ctx.Done():
 			return
 		case <-payoutTicker.C:
+			creators := module.Payouts.Creators.TransferCreatorEarningsToConnectedAccounts(ctx, time.Now().UTC().Format("2006-01-02"))
+			module.Coins.Container.Resources.Logger.InfoContext(ctx, "creator earnings transfers finished", slog.Any("report", creators))
 			report := module.Payouts.Withdrawals.RunPayoutBatch(ctx, 1_000)
 			module.Coins.Container.Resources.Logger.InfoContext(ctx, "payout run finished", slog.Any("report", report))
 		case <-confirmTicker.C:
