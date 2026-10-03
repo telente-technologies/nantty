@@ -8,7 +8,7 @@ export interface GatewayConfig {
   readonly upstreams: Readonly<Record<UpstreamName, string>>;
 }
 
-export type UpstreamName = "identity" | "live";
+export type UpstreamName = "identity" | "live" | "money";
 
 function readRequiredEnvironmentVariable(name: string, problems: string[]): string {
   const value = process.env[name]?.trim() ?? "";
@@ -34,7 +34,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
       issuer: readRequiredEnvironmentVariable("AUTH_TOKEN_ISSUER", problems),
       audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
     },
-    upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102") },
+    upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103") },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (problems.length > 0) throw new Error(`Invalid gateway configuration: ${problems.join("; ")}`);
