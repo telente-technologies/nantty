@@ -46,8 +46,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	if err != nil {
 		return types.UserView{}, err
 	}
-	isCreator, err := services.HasActiveCreatorProfile(ctx, application.Container, owner)
-	return types.BuildUserView(row, summary, isCreator, true), err
+	return types.BuildUserView(row, summary, true), err
 }
 
 func (application Handler) applyProfileFieldChanges(update *ent.ProfileUpdateOne, command Command, current *ent.Profile) ([]string, error) {
