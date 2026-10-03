@@ -1,0 +1,99 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "esm"
+  importFileExtension = "js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pg_trgm]
+}
+
+model SearchDocument {
+  kind            String
+  entityId        String   @map("entity_id")
+  docKey          String   @map("doc_key")
+  ownerAccountId  String?  @map("owner_account_id")
+  title           String
+  titleNormalized String   @map("title_normalized")
+  subtitle        String?
+  body            String   @default("")
+  tagsText        String   @default("") @map("tags_text")
+  tags            String[]
+  summary         Json
+  visibility      String
+  available       Boolean
+  popularity      Float    @default(0)
+  region          String?
+  version         BigInt
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime @map("created_at")
+  updatedAt       DateTime @default(now()) @map("updated_at")
+  tsv             Unsupported("tsvector")?
+
+  @@id([kind, entityId])
+  @@index([tsv], type: Gin)
+  @@index([titleNormalized(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([ownerAccountId])
+  @@index([tags], type: Gin)
+  @@map("documents")
+}
+
+model AccountState {
+  accountId String   @id @map("account_id")
+  status    String   @default("active")
+  isPrivate Boolean  @default(false) @map("is_private")
+  version   BigInt   @default(0)
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("account_states")
+}
+
+model Block {
+  blockerId String @map("blocker_id")
+  blockedId String @map("blocked_id")
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+model Follow {
+  followerId String @map("follower_id")
+  followeeId String @map("followee_id")
+
+  @@id([followerId, followeeId])
+  @@index([followeeId])
+  @@map("follows")
+}
+
+model Consent {
+  accountId   String   @map("account_id")
+  consentType String   @map("consent_type")
+  granted     Boolean
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@id([accountId, consentType])
+  @@map("consents")
+}
+
+model ProcessedEvent {
+  eventId     String   @id @map("event_id")
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("processed_events")
+}
+
+model RecentSearch {
+  id              String   @id @default(uuid()) @db.Uuid
+  accountId       String   @map("account_id")
+  queryNormalized String   @map("query_normalized")
+  queryDisplay    String   @map("query_display")
+  searchedAt      DateTime @default(now()) @map("searched_at")
+
+  @@unique([accountId, queryNormalized])
+  @@index([accountId, searchedAt(sort: Desc)])
+  @@map("recent_searches")
+}
