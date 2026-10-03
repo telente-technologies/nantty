@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.topSupporterSelected.v1.json",
+  "title": "LiveTopSupporterSelected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "user",
+    "coins",
+    "points"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "user": {
+      "type": "object"
+    },
+    "coins": {
+      "type": "integer"
+    },
+    "points": {
+      "type": "integer"
+    }
+  }
+}

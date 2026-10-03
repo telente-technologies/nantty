@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/leaderboard.updated.v1.json",
+  "title": "LeaderboardUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "scope",
+    "top"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "scope": {
+      "enum": [
+        "live",
+        "stream",
+        "recipient"
+      ]
+    },
+    "top": {
+      "type": "array",
+      "maxItems": 5
+    }
+  }
+}

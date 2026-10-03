@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.ended.v1.json",
+  "title": "LiveEnded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "endedAt",
+    "peakViewers",
+    "giftCount",
+    "totalCoins"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "hostId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "endedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "peakViewers": {
+      "type": "integer"
+    },
+    "giftCount": {
+      "type": "integer"
+    },
+    "totalCoins": {
+      "type": "integer"
+    }
+  }
+}

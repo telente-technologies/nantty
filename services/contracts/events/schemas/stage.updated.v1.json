@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/stage.updated.v1.json",
+  "title": "StageUpdated",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "liveId",
+    "layout",
+    "phase",
+    "streamers"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "layout": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string"
+    },
+    "streamers": {
+      "type": "array",
+      "maxItems": 10
+    }
+  }
+}
