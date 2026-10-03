@@ -37,7 +37,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return Result{}, usersErrors.Conflict("PENDING_WITHDRAWALS", "Settle or cancel pending withdrawals before deleting this account.")
 		}
 	}
-	outcome, err := services.RemoveAccountDataAndAnonymize(ctx, handler.Container, target.Account.ID, target.Account.Username, "admin_delete", reason, command.Actor.Id)
+	outcome, err := services.RemoveAccountDataAndAnonymize(ctx, handler.Container, target.Account.ID, target.Account.Username, derefEmail(target.Account.Email), "admin_delete", reason, command.Actor.Id)
 	if err != nil {
 		return Result{}, err
 	}
@@ -51,4 +51,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	target.Account.Status, target.Account.Username, target.Profile = "deleted", "", nil
 	detail, err := services.BuildUserDetail(ctx, handler.Container, target)
 	return Result{UserDetail: detail, Deletion: outcome}, err
+}
+
+func derefEmail(email *string) string {
+	if email == nil {
+		return ""
+	}
+	return *email
 }
