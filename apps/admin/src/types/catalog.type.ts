@@ -9,7 +9,6 @@ export interface CatalogCategory {
   readonly isActive: boolean;
   readonly sortOrder: number;
   readonly productCount: number;
-  readonly commissionOverrideBasisPoints: number | null;
   readonly updatedAt: string;
 }
 

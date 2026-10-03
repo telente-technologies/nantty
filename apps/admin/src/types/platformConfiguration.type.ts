@@ -47,12 +47,6 @@ export interface PlansConfiguration {
   readonly plans: readonly VerificationPlan[];
 }
 
-export interface CategoryCommissionOverride {
-  readonly categorySlug: string;
-  readonly categoryName: string;
-  readonly basisPoints: number;
-}
-
 export interface RevenueRulesConfiguration {
   readonly supportedCurrencies: readonly string[];
   readonly creatorAdShareBasisPoints: number;
@@ -61,7 +55,7 @@ export interface RevenueRulesConfiguration {
   readonly coinTransferFeeBasisPoints: number;
   readonly coinUnitValues: readonly Money[];
   readonly withdrawalFee: { readonly mode: "PASS_THROUGH"; readonly note: string };
-  readonly marketplaceCommission: { readonly defaultBasisPoints: number; readonly categoryOverrides: readonly CategoryCommissionOverride[] };
+  readonly escrowFee: { readonly defaultBasisPoints: number; readonly businessPlanBasisPoints: number };
 }
 
 export interface CreatorEligibilityRules {
@@ -131,6 +125,7 @@ export interface TrialRules {
 export interface CheckmarkPricingRules {
   readonly bundleDiscountPercent: number;
   readonly bundleMaximumBusinesses: number;
+  readonly blueMonthlyPrice: Money;
   readonly goldOnlyMonthlyPrice: Money;
   readonly blackMonthlyPrice: Money;
   readonly blackGraceDays: number;

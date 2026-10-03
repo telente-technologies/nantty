@@ -14,6 +14,7 @@ export interface PagedList<Item> {
   readonly page: number;
   readonly pageSize: number;
   readonly total: number;
+  readonly nextCursor?: string | null;
 }
 
 export interface Money {
