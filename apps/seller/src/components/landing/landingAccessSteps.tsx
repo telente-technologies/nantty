@@ -1,9 +1,9 @@
 import styles from "./landingAccessSteps.module.css";
 
 const accessSteps = [
-  { title: "Verify your business in the app", description: "In the Zudomart app, go to Profile → Start selling and send your business details, ID and payout account. Reviews usually take one or two working days.", image: "/photos/shopkeeperPhone.webp", imageAlt: "A shop owner in an apron checking his phone at his stall", kind: "photo" as const },
-  { title: "Choose Gold Pro or Gold Premium", description: "Gold puts the gold badge on your store and unlocks this dashboard. Pay securely on our payment partner's page.", image: "/photos/boutiqueFriends.webp", imageAlt: "Two women shopping between clothing racks in a boutique", kind: "photo" as const },
-  { title: "Sign in here with the same account", description: "Your store, products, orders and wallet are already waiting. Invite your team and open the register.", image: "/screenshots/dashboardOverview.webp", imageAlt: "The dashboard home after signing in", kind: "screenshot" as const },
+  { title: "Start selling in the app", description: "In the Zudomart app, go to Profile → Start selling and set up your store and payout account. Once your store is approved you can sell from anywhere.", image: "/photos/shopkeeperPhone.webp", imageAlt: "A shop owner in an apron checking his phone at his stall", kind: "photo" as const },
+  { title: "Sign in here — it is free", description: "Every approved Zudomart seller can use the dashboard on the Free plan. No Gold verification or paid plan needed.", image: "/photos/boutiqueFriends.webp", imageAlt: "Two women shopping between clothing racks in a boutique", kind: "photo" as const },
+  { title: "Upgrade when you grow", description: "Your store, products, orders and wallet are already waiting. Move to Pro or Business for bulk tools, advanced analytics, a team and more.", image: "/screenshots/dashboardOverview.webp", imageAlt: "The dashboard home after signing in", kind: "screenshot" as const },
 ];
 
 export function LandingAccessSteps() {
@@ -12,7 +12,7 @@ export function LandingAccessSteps() {
       <div className={styles.inner}>
         <p className={styles.eyebrow}>How to get access</p>
         <h2 id="access-heading" className={styles.heading}>
-          Three steps from the app to your counter.
+          Three steps from the app to running your business.
         </h2>
         <ol className={styles.steps}>
           {accessSteps.map((step, stepIndex) => (

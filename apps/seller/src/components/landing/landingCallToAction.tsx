@@ -8,9 +8,9 @@ export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: s
       <div className={styles.panel}>
         <div className={styles.copy}>
           <h2 id="cta-heading" className={styles.heading}>
-            Open the till. Your store is waiting.
+            Your business is waiting. It is free to start.
           </h2>
-          <p className={styles.description}>Sign in with the account you use in the Zudomart app. Not selling on Zudomart yet? Start in the app, then come back here.</p>
+          <p className={styles.description}>Sign in with the account you use in the Zudomart app — free for every Zudomart seller, upgrade to Pro or Business when you grow. Not selling on Zudomart yet? Start in the app, then come back here.</p>
           <div className={styles.actions}>
             <Link href="/login" className={styles.primaryAction}>
               Sign in with your Zudomart account
@@ -21,7 +21,7 @@ export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: s
           </div>
         </div>
         <div className={styles.photoColumn}>
-          <img src="/photos/shopCounterOwner.webp" alt="A shop owner smiling behind the counter of her provisions store" width={1400} height={933} loading="lazy" className={styles.photo} />
+          <img src="/photos/shopCounterOwner.webp" alt="A Zudomart seller smiling in her provisions store" width={1400} height={933} loading="lazy" className={styles.photo} />
         </div>
       </div>
     </section>

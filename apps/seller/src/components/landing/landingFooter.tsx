@@ -18,7 +18,7 @@ export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly ma
           <span className={styles.wordmark}>
             <DashboardWordmark />
           </span>
-          <p>The point of sale and back office for Gold-verified Zudomart businesses. Nigeria first.</p>
+          <p>Sell from anywhere with the app. Run your business with the dashboard. Free for every Zudomart seller. Nigeria first.</p>
           <a href={contactMailtoHref} className={styles.emailLink}>
             {contactEmailDisplayText}
           </a>

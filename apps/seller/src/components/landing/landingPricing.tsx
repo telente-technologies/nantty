@@ -1,7 +1,7 @@
 import Link from "next/link";
 
+import { freePlanPromise, planHighlightsByPlan } from "@/config/planFeatures.config";
 import type { SubscriptionPlan } from "@/types/subscription.type";
-import { describeGoldEntitlements } from "@/utils/goldEntitlements.util";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import styles from "./landingPricing.module.css";
@@ -19,21 +19,37 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
         <div className={styles.intro}>
           <p className={styles.eyebrow}>Who it is for</p>
           <h2 id="pricing-heading" className={styles.heading}>
-            Verified businesses on <span className={styles.goldWord}>Gold</span>.
+            <span className={styles.goldWord}>Free</span> for every Zudomart seller.
           </h2>
           <p className={styles.lede}>
-            The dashboard comes with Gold verification — the same plan that puts the gold badge on your store in the app. Pick the plan in the app or here after you sign in. Prices show in your local currency.
+            {freePlanPromise} Sign in with your Zudomart app account — no Gold verification or paid plan needed. Paid plans show in your local currency.
           </p>
         </div>
         {plansToShow.length === 0 ? (
-          <p className={styles.unavailable}>Plans are loading slowly right now. Sign in or open the Zudomart app to see Gold prices.</p>
+          <p className={styles.unavailable}>Paid plan prices are loading slowly right now. The Free plan is always available — just sign in.</p>
         ) : (
           <ul className={styles.planGrid}>
+            <li className={styles.planCard}>
+              <div className={styles.planHeader}>
+                <h3 className={styles.planName}>Free</h3>
+              </div>
+              <p className={styles.price}>
+                Free<span> forever</span>
+              </p>
+              <ul className={styles.entitlements}>
+                {planHighlightsByPlan.free.map((highlight) => (
+                  <li key={highlight}>{highlight}</li>
+                ))}
+              </ul>
+              <Link href="/login" className={styles.planButton}>
+                Sign in free
+              </Link>
+            </li>
             {plansToShow.map((plan) => {
               const yearlyPlan = findYearlyPlanForTier(plans, plan.tier);
-              const planName = `Gold ${plan.tier === "PREMIUM" ? "Premium" : "Pro"}`;
+              const planName = plan.tier === "BUSINESS" ? "Business" : "Pro";
               return (
-                <li key={plan.id} className={`${styles.planCard} ${plan.tier === "PREMIUM" ? styles.premium : ""}`}>
+                <li key={plan.id} className={`${styles.planCard} ${plan.tier === "BUSINESS" ? styles.premium : ""}`}>
                   <div className={styles.planHeader}>
                     <span className={styles.badge} aria-hidden="true">
                       ✓
@@ -46,8 +62,8 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
                   </p>
                   {yearlyPlan && plan.interval === "month" ? <p className={styles.yearly}>or {formatMoneyForDisplay(yearlyPlan.price, locale)} a year</p> : null}
                   <ul className={styles.entitlements}>
-                    {describeGoldEntitlements(plan.entitlements, locale).map((description) => (
-                      <li key={description}>{description}</li>
+                    {planHighlightsByPlan[plan.tier === "BUSINESS" ? "business" : "pro"].map((highlight) => (
+                      <li key={highlight}>{highlight}</li>
                     ))}
                   </ul>
                   <ul className={styles.perks}>
@@ -59,7 +75,7 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
                     ))}
                   </ul>
                   <Link href="/login" className={styles.planButton}>
-                    Sign in to choose {planName}
+                    Sign in to upgrade to {planName}
                   </Link>
                 </li>
               );

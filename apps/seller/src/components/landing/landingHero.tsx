@@ -5,12 +5,12 @@ export function LandingHero() {
     <section className={styles.hero} aria-labelledby="landing-hero-heading">
       <div className={styles.layout}>
         <div className={styles.copy}>
-          <p className={styles.eyebrow}>Zudomart Dashboard · for Gold sellers</p>
+          <p className={styles.eyebrow}>Zudomart Dashboard · free for every seller</p>
           <h1 id="landing-hero-heading" className={styles.heading}>
-            Your counter, your stockroom and your online store on <span className={styles.receiptTag}>one screen.</span>
+            Sell from anywhere with the app. Run your business <span className={styles.receiptTag}>here.</span>
           </h1>
           <p className={styles.lede}>
-            The back office and point of sale for verified Zudomart businesses. Ring up sales at the counter, ship marketplace orders, manage stock across shops, and get paid out of escrow — with the same account as your app.
+            Your seller operating system: manage products and stock, fulfil the orders customers place in the Zudomart app, see what sells, run promotions, track payouts from escrow and bring your team in — with the same account as your app. Free for every Zudomart seller; upgrade to Pro or Business when you grow.
           </p>
           <form action="/login" method="get" className={styles.signInPill}>
             <label htmlFor="hero-identifier" className="visuallyHidden">
@@ -23,7 +23,7 @@ export function LandingHero() {
           </form>
           <ul className={styles.proofList}>
             <li>Same account as the app</li>
-            <li>Keeps selling offline</li>
+            <li>Free plan, no card needed</li>
             <li>Escrow payouts to your bank</li>
           </ul>
         </div>
@@ -39,11 +39,11 @@ export function LandingHero() {
             <img src="/screenshots/dashboardOverview.webp" alt="The dashboard home: sales today, a 30-day revenue chart, wallet balances and online orders by status" width={1440} height={900} className={styles.browserScreenshot} />
           </figure>
           <figure className={styles.tabletFrame}>
-            <img src="/screenshots/posRegister.webp" alt="The register on a tablet with a receipt-style cart" width={1180} height={820} className={styles.tabletScreenshot} />
+            <img src="/screenshots/orderEscrow.webp" alt="An app order with escrow status and the mark-as-shipped form" width={1180} height={820} className={styles.tabletScreenshot} />
           </figure>
           <p className={`${styles.chip} ${styles.offlineChip}`}>
             <span className={styles.chipDot} aria-hidden="true" />
-            Offline? Sales queue up and sync when you are back.
+            App orders land here the moment customers pay.
           </p>
           <p className={`${styles.chip} ${styles.escrowChip}`}>
             <span className={styles.chipBadge} aria-hidden="true">
