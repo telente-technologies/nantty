@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/content.visibilityChanged.v1.json",
+  "title": "ContentVisibilityChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targetType",
+    "targetId",
+    "visibility",
+    "source",
+    "referenceId",
+    "reason"
+  ],
+  "properties": {
+    "targetType": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "ownerId": {
+      "type": "string"
+    },
+    "visibility": {
+      "enum": [
+        "visible",
+        "restricted",
+        "hidden",
+        "removed"
+      ]
+    },
+    "source": {
+      "enum": [
+        "report",
+        "classifier",
+        "copyright",
+        "ip_claim"
+      ]
+    },
+    "referenceId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

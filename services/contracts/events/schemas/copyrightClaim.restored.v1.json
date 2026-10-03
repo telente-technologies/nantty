@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/copyrightClaim.restored.v1.json",
+  "title": "CopyrightClaimRestored",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "targetType",
+    "targetId"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "targetType": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "infringerId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

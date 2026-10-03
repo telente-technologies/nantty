@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/copyrightClaim.counterNoticeDecided.v1.json",
+  "title": "CopyrightClaimCounterNoticeDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "noticeId",
+    "outcome",
+    "claimantEmail",
+    "restoreEligibleAt"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "noticeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "court_action_recorded"
+      ]
+    },
+    "claimantEmail": {
+      "type": "string"
+    },
+    "infringerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "restoreEligibleAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

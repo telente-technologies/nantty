@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/block.removed.v1.json",
+  "title": "BlockRemoved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "blockerId",
+    "blockedId"
+  ],
+  "properties": {
+    "blockerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "blockedId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/copyrightClaim.counterNoticeReceived.v1.json",
+  "title": "CopyrightClaimCounterNoticeReceived",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "noticeId",
+    "infringerId",
+    "restoreEligibleAt"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "noticeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "infringerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "restoreEligibleAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
