@@ -1,0 +1,95 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
+
+import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
+import { Avatar } from "@/components/ui/avatar";
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/errorState";
+import { TextField } from "@/components/ui/input";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { Text } from "@/components/ui/text";
+import { makeThemedStyles, useTheme } from "@/theme";
+import { chatSafetyService } from "@/services/chatSafety.service";
+import { messagesService } from "@/services/messages.service";
+import type { Conversation, SharedContentReference } from "@/types";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+
+export interface SendInChatSheetProps {
+  readonly reference: SharedContentReference | null;
+  readonly onClose: () => void;
+}
+
+const canPostInConversation = (conversation: Conversation) => (conversation.kind ?? "direct") !== "channel" || conversation.myRole !== "subscriber";
+
+export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const queryClient = useQueryClient();
+  const [selectedConversationIds, setSelectedConversationIds] = useState<readonly string[]>([]);
+  const [note, setNote] = useState("");
+  const chats = useQuery({ queryKey: ["conversations", "share-targets"], queryFn: () => messagesService.fetchConversationList("all"), enabled: !!reference });
+  const send = useMutation({
+    mutationFn: () => chatSafetyService.sendContentToChats({ conversationIds: selectedConversationIds, reference: reference!, note }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      onClose();
+      showAlertWithButtons("Sent", `Shared in ${result.sentCount} ${result.sentCount === 1 ? "chat" : "chats"}.`);
+    },
+    onError: (error) => showAlertWithButtons("Couldn't send", error instanceof Error ? error.message : undefined),
+  });
+
+  useEffect(() => {
+    if (!reference) {
+      setSelectedConversationIds([]);
+      setNote("");
+    }
+  }, [reference]);
+
+  const toggle = (conversationId: string) =>
+    setSelectedConversationIds((current) => (current.includes(conversationId) ? current.filter((id) => id !== conversationId) : [...current, conversationId]));
+
+  return (
+    <BottomSheet visible={!!reference} onClose={onClose} title="Send in chat">
+      <View style={styles.body}>
+        {chats.isLoading ? (
+          <ListSkeleton rows={4} avatarSize={40} />
+        ) : chats.isError ? (
+          <ErrorState message="Couldn't load your chats." onRetry={() => chats.refetch()} />
+        ) : (
+          <FlatList
+            style={styles.list}
+            data={(chats.data ?? []).filter(canPostInConversation)}
+            keyExtractor={(conversation) => conversation.id}
+            ListEmptyComponent={<Text size={13} lineHeight={18} color={colors.textMuted} align="center">You have no chats yet.</Text>}
+            renderItem={({ item }) => {
+              const display = describeConversationForDisplay(item);
+              const isSelected = selectedConversationIds.includes(item.id);
+              return (
+                <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: isSelected }} onPress={() => toggle(item.id)} style={styles.row}>
+                  <Avatar uri={display.avatarUrl} size={40} placeholderColor={colors.primaryTint} />
+                  <Text size={14} weight={500} lineHeight={17} numberOfLines={1} style={styles.name}>{display.displayName}</Text>
+                  <View style={[styles.check, isSelected && styles.checkSelected]}>
+                    {isSelected ? <Text size={12} weight={700} lineHeight={14} color={colors.white}>✓</Text> : null}
+                  </View>
+                </Pressable>
+              );
+            }}
+          />
+        )}
+        <TextField label="Add a note (optional)" value={note} onChangeText={setNote} maxLength={200} />
+        <Button title={selectedConversationIds.length > 1 ? `Send to ${selectedConversationIds.length} chats` : "Send"} disabled={selectedConversationIds.length === 0} loading={send.isPending} onPress={() => send.mutate()} />
+      </View>
+    </BottomSheet>
+  );
+}
+
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  body: { gap: 12, paddingHorizontal: 20, paddingBottom: 16 },
+  list: { maxHeight: 300 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+  name: { flex: 1 },
+  check: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.divider, alignItems: "center", justifyContent: "center" },
+  checkSelected: { backgroundColor: colors.primarySolid, borderColor: colors.primary },
+}));
