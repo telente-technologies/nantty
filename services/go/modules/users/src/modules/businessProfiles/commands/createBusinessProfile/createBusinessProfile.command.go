@@ -7,10 +7,11 @@ type CategorySelection struct {
 }
 
 type Command struct {
-	AccountId   string
-	DisplayName string
-	Handle      string
-	Description string
-	Website     *string
-	Categories  []CategorySelection
+	AccountId    string
+	DisplayName  string
+	Handle       string
+	Description  string
+	Website      *string
+	BusinessType string
+	Categories   []CategorySelection
 }

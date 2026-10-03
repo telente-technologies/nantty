@@ -68,7 +68,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Acti
 		if err != nil {
 			return err
 		}
-		builder := tx.Profile.Create().SetAccountID(owner).SetKind(profile.KindBusiness).SetHandle(handle).SetDisplayName(name).SetBio(strings.TrimSpace(command.Description)).AddCategoryIDs(categoryIds...)
+		builder := tx.Profile.Create().SetAccountID(owner).SetKind(profile.KindBusiness).SetProfileType(profile.ProfileType(businessTypeOf(command.BusinessType))).SetHandle(handle).SetDisplayName(name).SetBio(strings.TrimSpace(command.Description)).AddCategoryIDs(categoryIds...)
 		if command.Website != nil {
 			builder.SetWebsite(*command.Website)
 		}
@@ -146,4 +146,11 @@ func (handler Handler) createPendingCustomCategory(ctx context.Context, tx *ent.
 		return uuid.Nil, err
 	}
 	return created.ID, nil
+}
+
+func businessTypeOf(requested string) string {
+	if requested == "brand" || requested == "government" {
+		return requested
+	}
+	return "business"
 }
