@@ -42,7 +42,7 @@ export function AnalyticsLocationPanel({ breakdowns }: { readonly breakdowns: An
       description="Where buyers had their orders delivered"
       actions={<SegmentedControl label="Location level" value={level} onValueChange={setLevel} options={[{ value: "state", label: "State" }, { value: "city", label: "City" }]} />}
     >
-      <HorizontalBarList title={`Sales by ${level}`} items={items} colorVariable="--blue-300" />
+      <HorizontalBarList title={`Sales by ${level}`} items={items} colorVariable="--chart-4" />
     </Panel>
   );
 }
@@ -57,7 +57,7 @@ export function AnalyticsTimePanel({ breakdowns }: { readonly breakdowns: Analyt
       <StackedBarChart
         title="Sales by hour of day"
         description="Bars for each hour of the day showing sales from app orders placed in that hour."
-        series={[{ key: "revenue", label: "Sales by hour", colorVariable: "--blue-500" }]}
+        series={[{ key: "revenue", label: "Sales by hour", colorVariable: "--chart-1" }]}
         points={breakdowns.byHourOfDay.map((row) => ({ label: formatHourSlotLabel(row.slot), shortLabel: String(row.slot).padStart(2, "0"), values: { revenue: row.revenue.amountMinor } }))}
         formatValue={(value) => formatMoney({ amountMinor: value, currency })}
         formatAxisValue={(value) => formatMoneyCompact({ amountMinor: value, currency })}
@@ -65,7 +65,7 @@ export function AnalyticsTimePanel({ breakdowns }: { readonly breakdowns: Analyt
       />
       <HorizontalBarList
         title="Orders by weekday"
-        colorVariable="--blue-200"
+        colorVariable="--chart-4"
         items={breakdowns.byWeekday.map((row) => ({ key: String(row.slot), label: weekdayShortNames[row.slot] ?? String(row.slot), value: row.ordersCount, displayValue: `${row.ordersCount} orders`, detail: formatMoney(row.revenue) }))}
       />
       </div>

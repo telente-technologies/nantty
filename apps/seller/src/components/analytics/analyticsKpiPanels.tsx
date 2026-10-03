@@ -46,7 +46,7 @@ export function AnalyticsSalesChartPanel({ overview }: { readonly overview: Anal
           title={`Gross and net sales ${bucketDescription}`}
           description="Two lines: gross sales from app orders and net sales after refunds and Zudomart fees."
           series={[
-            { key: "gross", label: "Gross sales", colorVariable: "--blue-500" },
+            { key: "gross", label: "Gross sales", colorVariable: "--chart-1" },
             { key: "net", label: "Net sales", colorVariable: "--success" },
           ]}
           points={points}
