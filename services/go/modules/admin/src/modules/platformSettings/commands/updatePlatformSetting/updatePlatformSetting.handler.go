@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/admin/src/modules/platformSettings/models"
 	"zudomart/modules/admin/src/modules/platformSettings/services"
 	"zudomart/modules/admin/src/repositories"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 )
 
@@ -24,6 +25,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 	definition, known := services.PlatformSettingDefinitions[command.Key]
 	if !known {
 		return models.PlatformSettingView{}, adminerrors.SettingNotFound
+	}
+	if !command.Actor.CanAny(definition.WritePermission, "settings:edit") {
+		return models.PlatformSettingView{}, httpserver.ErrForbidden
 	}
 	reason := strings.TrimSpace(command.Reason)
 	if len(reason) < 5 || len(reason) > 500 {
