@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/product.clicked.v1.json",
+  "title": "ProductClicked",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "occurredAt",
+    "personalized"
+  ],
+  "properties": {
+    "occurredAt": {
+      "type": "string"
+    },
+    "productId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "categoryId": {
+      "type": "string"
+    },
+    "query": {
+      "type": "string"
+    },
+    "surface": {
+      "type": "string"
+    },
+    "position": {
+      "type": "integer"
+    },
+    "resultCount": {
+      "type": "integer"
+    },
+    "variantId": {
+      "type": "string"
+    },
+    "personalized": {
+      "type": "boolean"
+    },
+    "actorId": {
+      "type": "string"
+    },
+    "sessionId": {
+      "type": "string"
+    }
+  }
+}

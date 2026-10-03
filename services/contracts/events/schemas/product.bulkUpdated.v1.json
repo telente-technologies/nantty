@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/product.bulkUpdated.v1.json",
+  "title": "ProductBulkUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "storeId",
+    "action",
+    "productIds"
+  ],
+  "properties": {
+    "storeId": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "productIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

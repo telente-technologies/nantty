@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/policy.published.v1.json",
+  "title": "PolicyPublished",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policyVersionId",
+    "documentKey",
+    "documentTitle",
+    "versionNumber",
+    "isMaterialChange",
+    "effectiveAt",
+    "recipients"
+  ],
+  "properties": {
+    "policyVersionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "documentKey": {
+      "type": "string"
+    },
+    "documentTitle": {
+      "type": "string"
+    },
+    "versionNumber": {
+      "type": "integer"
+    },
+    "isMaterialChange": {
+      "type": "boolean"
+    },
+    "effectiveAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "noticeId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recipients": {
+      "const": "all_active_users"
+    },
+    "email": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

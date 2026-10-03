@@ -15,7 +15,12 @@
       "enum": [
         "privacy_policy",
         "cookie_policy",
-        "terms"
+        "terms",
+        "community-guidelines",
+        "seller-terms",
+        "creator-terms",
+        "ads-policy",
+        "refund-escrow-policy"
       ]
     },
     "version": {
@@ -27,6 +32,28 @@
     },
     "publishedBy": {
       "type": "string"
+    },
+    "versionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "documentKey": {
+      "type": "string"
+    },
+    "documentTitle": {
+      "type": "string"
+    },
+    "changeSummary": {
+      "type": "string"
+    },
+    "whatChanged": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isMaterialChange": {
+      "type": "boolean"
     }
   }
 }

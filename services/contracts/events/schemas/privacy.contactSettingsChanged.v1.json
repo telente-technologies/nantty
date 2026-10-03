@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/privacy.contactSettingsChanged.v1.json",
+  "title": "PrivacyContactSettingsChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "whoCanMessageMe",
+    "whoCanMentionMe"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "whoCanMessageMe": {
+      "type": "string"
+    },
+    "whoCanMentionMe": {
+      "type": "string"
+    }
+  }
+}

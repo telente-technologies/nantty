@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/product.published.v1.json",
+  "title": "ProductPublished",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "productId",
+    "storeId"
+  ],
+  "properties": {
+    "productId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "scheduled": {
+      "type": "boolean"
+    },
+    "listed": {
+      "type": "boolean"
+    }
+  }
+}
