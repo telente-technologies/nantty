@@ -9,6 +9,12 @@ import { ChatSearchPanel } from "@/components/chat/chatSearchPanel";
 import { ChatsOptionsMenu } from "@/components/chat/chatsOptionsMenu";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
 import { ChatsEmptyState } from "@/components/chat/chatsEmptyState";
+import { ChatLockGate } from "@/components/chatSafety/chatLockGate";
+import { InboxFolderMenu } from "@/components/chatSafety/inboxFolderMenu";
+import { InboxRequestActions } from "@/components/chatSafety/inboxRequestActions";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { messagesService } from "@/services/messages.service";
 import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
 import { ConversationRow } from "@/components/chat/conversationRow";
 import { SmallTab } from "@/components/chat/smallTab";
@@ -16,22 +22,25 @@ import { StoryTray } from "@/components/chat/storyTray";
 import { ArrowLeft24Icon, DotsThreeVertical24Icon, MagnifyingGlass24Icon, WechatLogo48Icon } from "@/components/icons";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { storiesService } from "@/services/stories.service";
 import { useAuthStore } from "@/store/auth.store";
-import type { ConversationFilter } from "@/types";
+import type { ConversationFilter, InboxFolder } from "@/types";
 
 export function ChatsScreen() {
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const [filter, setFilter] = useState<ConversationFilter>("all");
+  const [folder, setFolder] = useState<InboxFolder>("chats");
   const [isSearching, setIsSearching] = useState(false);
   const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const conversations = useQuery({
-    queryKey: ["conversations", filter],
-    queryFn: () => fetchConversationListAndSaveLocally(filter),
+    queryKey: ["conversations", filter, folder],
+    queryFn: () => (folder === "chats" ? fetchConversationListAndSaveLocally(filter) : messagesService.fetchInboxFolder(folder)),
     placeholderData: () => {
+      if (folder !== "chats") return undefined;
       const savedConversations = readSavedConversationsForInstantDisplay(filter);
       return savedConversations.length > 0 ? savedConversations : undefined;
     },
@@ -42,17 +51,14 @@ export function ChatsScreen() {
   const goBackFromChats = () => (isSearching ? setIsSearching(false) : navigation.navigate("Tabs", { screen: "Home" }));
 
   return (
-    <Screen background={isEmpty ? colors.background : colors.white}>
+    <Screen background={isEmpty ? colors.background : colors.surface}>
+      <ChatLockGate>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={goBackFromChats}>
             <ArrowLeft24Icon />
           </Pressable>
-          {isSearching ? null : (
-            <Text size={isEmpty ? 18 : 21} weight={500} lineHeight={isEmpty ? 21.6 : 25.2} letterSpacing={-0.42} accessibilityRole="header">
-              Chats
-            </Text>
-          )}
+          {isSearching ? null : <InboxFolderMenu folder={folder} topOffset={insets.top + 44} titleSize={isEmpty ? 18 : 21} onSelect={setFolder} />}
         </View>
         <View style={styles.headerRight}>
           {isSearching ? null : (
@@ -72,9 +78,9 @@ export function ChatsScreen() {
           onOpenPerson={(person) => navigation.navigate("Chat", { userId: person.id, name: person.name })}
         />
       ) : conversations.isLoading ? (
-        <View style={styles.skeleton}>
-          <ChatsSkeleton />
-        </View>
+        <View style={styles.skeleton}>{folder === "chats" ? <ChatsSkeleton /> : <ListSkeleton avatarSize={56} />}</View>
+      ) : conversations.isError && !conversations.data ? (
+        <ErrorState message="Couldn't load your messages." onRetry={() => conversations.refetch()} />
       ) : (
         <FlatList
           data={conversations.data ?? []}
@@ -93,13 +99,23 @@ export function ChatsScreen() {
                   onPressLive={(liveId) => navigation.navigate("Live", { liveId })}
                 />
               </View>
-              <View style={styles.tabs} accessibilityRole="tablist">
-                <SmallTab label="All Messages" selected={filter === "all"} onPress={() => setFilter("all")} />
-                <SmallTab label="Direct Messages" selected={filter === "direct"} onPress={() => setFilter("direct")} />
-              </View>
+              {folder === "chats" ? (
+                <View style={styles.tabs} accessibilityRole="tablist">
+                  <SmallTab label="All Messages" selected={filter === "all"} onPress={() => setFilter("all")} />
+                  <SmallTab label="Direct Messages" selected={filter === "direct"} onPress={() => setFilter("direct")} />
+                </View>
+              ) : null}
             </View>
           }
-          ListEmptyComponent={<ChatsEmptyState />}
+          ListEmptyComponent={
+            folder === "chats" ? (
+              <ChatsEmptyState />
+            ) : (
+              <Text size={14} lineHeight={20} color={colors.textMuted} align="center" style={styles.emptyFolder}>
+                {folder === "requests" ? "No message requests." : "No chats flagged as spam."}
+              </Text>
+            )
+          }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => (
             <View style={styles.rowWrap}>
@@ -107,6 +123,7 @@ export function ChatsScreen() {
                 conversation={item}
                 onPress={() => navigation.navigate("Chat", { conversationId: item.id, name: describeConversationForDisplay(item).displayName })}
               />
+              {folder === "chats" ? null : <InboxRequestActions conversation={item} showExplanation />}
             </View>
           )}
         />
@@ -128,7 +145,9 @@ export function ChatsScreen() {
         onClose={() => setIsOptionsMenuVisible(false)}
         onCreateGroup={() => navigation.navigate("NewGroup", { kind: "group" })}
         onCreateChannel={() => navigation.navigate("NewGroup", { kind: "channel" })}
+        onOpenSettings={() => navigation.navigate("ChatSettings")}
       />
+      </ChatLockGate>
     </Screen>
   );
 }
@@ -138,6 +157,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 18 },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 11 },
   skeleton: { flex: 1, marginTop: 16 },
+  emptyFolder: { marginTop: 80 },
   list: { paddingBottom: 96 },
   listEmpty: { flexGrow: 1 },
   listHeader: { paddingTop: 16 },

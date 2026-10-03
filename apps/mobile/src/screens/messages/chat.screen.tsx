@@ -10,6 +10,12 @@ import { ChatComposerWithVoiceNotes } from "@/components/chat/chatComposerWithVo
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
 import { ConversationIntro } from "@/components/chat/conversationIntro";
+import { ChatLockGate } from "@/components/chatSafety/chatLockGate";
+import { ChatMuteSheet } from "@/components/chatSafety/chatMuteSheet";
+import { InboxRequestActions } from "@/components/chatSafety/inboxRequestActions";
+import { StreakMilestoneCelebration } from "@/components/chatSafety/streakMilestoneCelebration";
+import { StreakSheet } from "@/components/chatSafety/streakSheet";
+import { chatSafetyService } from "@/services/chatSafety.service";
 import { MessageReactionPicker } from "@/components/chat/messageReactionPicker";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset.hook";
 import { useMessageReactionToggle } from "@/components/chat/messageReactions.hook";
@@ -20,7 +26,7 @@ import { useUsersTypingInConversation } from "@/components/chat/typingIndicators
 import { TypingDots } from "@/components/chat/typingDots";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { messagesService } from "@/services/messages.service";
 import { realtimeService } from "@/services/realtime.service";
@@ -29,6 +35,7 @@ import { useAuthStore } from "@/store/auth.store";
 const EXPIRED_MESSAGE_SWEEP_INTERVAL_MS = 30_000;
 
 function TypingRow() {
+  const styles = useStyles();
   return (
     <View style={styles.typingRow}>
       <TypingDots />
@@ -44,11 +51,16 @@ const formatConversationDayLabel = (iso: string) => {
 };
 
 export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { userId, name } = route.params;
   const queryClient = useQueryClient();
   const myUserId = useAuthStore((s) => s.user?.id ?? "u_me");
   const listRef = useRef<FlatList<LocallyStoredMessage>>(null);
   const [messageBeingReactedTo, setMessageBeingReactedTo] = useState<LocallyStoredMessage | null>(null);
+  const [isMuteSheetOpen, setIsMuteSheetOpen] = useState(false);
+  const [isStreakSheetOpen, setIsStreakSheetOpen] = useState(false);
+  const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
   const { inset: keyboardInset, handleLayout } = useKeyboardInset();
 
   const conversation = useQuery({
@@ -68,8 +80,10 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const usersTyping = useUsersTypingInConversation(conversationId);
 
   useEffect(() => {
-    if (conversationId) messagesService.markConversationAsRead(conversationId).catch(() => undefined);
-  }, [conversationId]);
+    if (conversationId && conversation.data?.inboxFolder !== "requests" && conversation.data?.inboxFolder !== "spam") {
+      messagesService.markConversationAsRead(conversationId).catch(() => undefined);
+    }
+  }, [conversationId, conversation.data?.inboxFolder]);
 
   useEffect(() => {
     if (keyboardInset > 0) listRef.current?.scrollToEnd({ animated: false });
@@ -92,12 +106,19 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const items = messages.data ?? [];
   const disappearingSeconds = conversation.data?.disappearingMessagesSeconds ?? null;
   const isMyMessage = (message: LocallyStoredMessage) => message.senderId === myUserId || message.senderId === "u_me";
+  const inboxFolder = conversation.data?.inboxFolder ?? "chats";
+  const streak = conversation.data?.streak ?? null;
+  const dismissCelebration = () => {
+    setIsCelebrationDismissed(true);
+    if (conversationId) chatSafetyService.acknowledgeStreakCelebration(conversationId).catch(() => undefined);
+  };
   const openConversationInfo = () => {
     if (conversationId) navigation.navigate("ConversationInfo", { conversationId });
   };
 
   return (
-    <Screen background={colors.white} edges={["top", "bottom"]}>
+    <Screen background={colors.surface} edges={["top", "bottom"]}>
+      <ChatLockGate>
       <View style={[styles.flex, { paddingBottom: keyboardInset }]} onLayout={handleLayout}>
         <ChatHeader
           conversation={conversation.data}
@@ -105,6 +126,8 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           usersTyping={usersTyping}
           onGoBack={() => navigation.goBack()}
           onOpenConversationInfo={openConversationInfo}
+          onOpenStreak={() => setIsStreakSheetOpen(true)}
+          onOpenMute={() => setIsMuteSheetOpen(true)}
         />
         {disappearingSeconds ? (
           <View style={styles.disappearingBanner}>
@@ -150,13 +173,18 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
               deliveryStatus={item.deliveryStatus}
               isMine={isMyMessage(item)}
               showSenderIdentity={isGroupLike}
+              showReadReceipt={inboxFolder === "chats"}
               onLongPress={item.deliveryStatus === "sent" && item.kind !== "system" ? () => setMessageBeingReactedTo(item) : undefined}
               onToggleReaction={(emoji, shouldReact) => toggleReactionOnMessage(item, emoji, shouldReact).catch(() => undefined)}
             />
           )}
         />
 
-        {display && !display.canPostMessages ? (
+        {conversation.data && inboxFolder !== "chats" ? (
+          <View style={styles.readOnlyNotice}>
+            <InboxRequestActions conversation={conversation.data} showExplanation onRemoved={() => navigation.goBack()} />
+          </View>
+        ) : display && !display.canPostMessages ? (
           <View style={styles.readOnlyNotice}>
             <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
               Only admins can post in this channel. Long press a post to react.
@@ -172,7 +200,15 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
             }}
           />
         )}
+        {streak?.milestoneCelebrationPending && !isCelebrationDismissed && peer ? (
+          <StreakMilestoneCelebration milestoneDays={streak.milestoneDays ?? 0} peerName={peer.name} onDismiss={dismissCelebration} />
+        ) : null}
       </View>
+      {conversationId && peer && streak && streak.state !== "none" ? (
+        <StreakSheet visible={isStreakSheetOpen} onClose={() => setIsStreakSheetOpen(false)} conversationId={conversationId} streak={streak} peerName={peer.name} />
+      ) : null}
+      {conversationId ? <ChatMuteSheet visible={isMuteSheetOpen} onClose={() => setIsMuteSheetOpen(false)} conversationId={conversationId} isMuted={!!conversation.data?.mutedUntil} /> : null}
+      </ChatLockGate>
       <MessageReactionPicker
         visible={!!messageBeingReactedTo}
         onClose={() => setMessageBeingReactedTo(null)}
@@ -185,7 +221,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   disappearingBanner: { marginTop: 8, paddingHorizontal: 24 },
   dayDivider: { gap: 12, marginBottom: 10, marginTop: 8 },
@@ -194,4 +230,4 @@ const styles = StyleSheet.create({
   typingRow: { paddingHorizontal: 20, paddingTop: 4, flexDirection: "row", justifyContent: "flex-start" },
   listContent: { paddingBottom: 12 },
   readOnlyNotice: { paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.divider },
-});
+}));

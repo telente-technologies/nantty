@@ -6,17 +6,19 @@ import { PersonRow } from "@/components/chat/personRow";
 import { Cancel20Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { messagesService } from "@/services/messages.service";
 
 export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [query, setQuery] = useState("");
   const people = useQuery({ queryKey: ["people-to-message", query], queryFn: () => messagesService.fetchPeopleToMessage(query) });
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={() => navigation.goBack()}>
           <Cancel20Icon />
@@ -60,7 +62,7 @@ export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 24 },
   searchBox: {
     marginHorizontal: 16,
@@ -85,4 +87,4 @@ const styles = StyleSheet.create({
   },
   list: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40 },
   gap: { height: 8 },
-});
+}));

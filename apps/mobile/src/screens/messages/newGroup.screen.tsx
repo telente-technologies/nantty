@@ -10,7 +10,7 @@ import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { channelsService } from "@/services/channels.service";
@@ -21,6 +21,8 @@ import type { UserSummary } from "@/types";
 const MAXIMUM_GROUP_NAME_LENGTH = 60;
 
 export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isChannel = route.params.kind === "channel";
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
@@ -56,7 +58,7 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
   const canCreate = name.trim().length > 0 && (isChannel || selectedPeople.length > 0);
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={() => navigation.goBack()}>
           <Cancel20Icon />
@@ -118,7 +120,7 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 24 },
   body: { flex: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, gap: 16 },
   identityRow: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -145,4 +147,4 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(14),
     color: colors.text,
   },
-});
+}));

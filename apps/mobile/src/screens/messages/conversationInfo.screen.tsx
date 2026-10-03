@@ -12,7 +12,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { channelsService } from "@/services/channels.service";
@@ -22,6 +22,8 @@ import { useAuthStore } from "@/store/auth.store";
 import type { Conversation, ConversationSettingsUpdate, UserSummary } from "@/types";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { conversationId } = route.params;
   const queryClient = useQueryClient();
   const myUserId = useAuthStore((s) => s.user?.id ?? "u_me");
@@ -81,7 +83,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   const errorMessage = (updateSettings.error ?? runMemberAction.error ?? leaveConversation.error)?.message ?? null;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={() => navigation.goBack()}>
           <ArrowLeft24Icon />
@@ -91,6 +93,11 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         </Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.encryptionNotice} accessibilityRole="text">
+          <Text size={12} lineHeight={17} color={colors.textMuted} align="center">
+            🔒 Messages are end-to-end encrypted. Only people in this chat can read them.
+          </Text>
+        </View>
         <View style={styles.identity}>
           <Avatar uri={display?.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
           <View style={styles.nameRow}>
@@ -188,7 +195,8 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  encryptionNotice: { paddingHorizontal: 24, paddingVertical: 12 },
   header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 18 },
   content: { paddingHorizontal: 16, paddingBottom: 40, gap: 24 },
   identity: { alignItems: "center", gap: 8, paddingTop: 8 },
@@ -207,4 +215,4 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(15),
     color: colors.text,
   },
-});
+}));
