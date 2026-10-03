@@ -6,8 +6,14 @@ import (
 	"time"
 	"zudomart/modules/moderation/src/databases/schema"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
+	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
+	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
+	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
+	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
 
 	"github.com/google/uuid"
@@ -88,6 +94,154 @@ func init() {
 	chatreportDescID := chatreportMixinFields0[0].Descriptor()
 	// chatreport.DefaultID holds the default value on creation for the id field.
 	chatreport.DefaultID = chatreportDescID.Default.(func() uuid.UUID)
+	contentreportMixin := schema.ContentReport{}.Mixin()
+	contentreportMixinFields0 := contentreportMixin[0].Fields()
+	_ = contentreportMixinFields0
+	contentreportFields := schema.ContentReport{}.Fields()
+	_ = contentreportFields
+	// contentreportDescCreatedAt is the schema descriptor for created_at field.
+	contentreportDescCreatedAt := contentreportMixinFields0[1].Descriptor()
+	// contentreport.DefaultCreatedAt holds the default value on creation for the created_at field.
+	contentreport.DefaultCreatedAt = contentreportDescCreatedAt.Default.(func() time.Time)
+	// contentreportDescTargetID is the schema descriptor for target_id field.
+	contentreportDescTargetID := contentreportFields[1].Descriptor()
+	// contentreport.TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
+	contentreport.TargetIDValidator = contentreportDescTargetID.Validators[0].(func(string) error)
+	// contentreportDescPrimaryReason is the schema descriptor for primary_reason field.
+	contentreportDescPrimaryReason := contentreportFields[5].Descriptor()
+	// contentreport.PrimaryReasonValidator is a validator for the "primary_reason" field. It is called by the builders before save.
+	contentreport.PrimaryReasonValidator = contentreportDescPrimaryReason.Validators[0].(func(string) error)
+	// contentreportDescReportCount is the schema descriptor for report_count field.
+	contentreportDescReportCount := contentreportFields[7].Descriptor()
+	// contentreport.DefaultReportCount holds the default value on creation for the report_count field.
+	contentreport.DefaultReportCount = contentreportDescReportCount.Default.(int)
+	// contentreportDescID is the schema descriptor for id field.
+	contentreportDescID := contentreportMixinFields0[0].Descriptor()
+	// contentreport.DefaultID holds the default value on creation for the id field.
+	contentreport.DefaultID = contentreportDescID.Default.(func() uuid.UUID)
+	contentreportentryMixin := schema.ContentReportEntry{}.Mixin()
+	contentreportentryMixinFields0 := contentreportentryMixin[0].Fields()
+	_ = contentreportentryMixinFields0
+	contentreportentryFields := schema.ContentReportEntry{}.Fields()
+	_ = contentreportentryFields
+	// contentreportentryDescCreatedAt is the schema descriptor for created_at field.
+	contentreportentryDescCreatedAt := contentreportentryMixinFields0[1].Descriptor()
+	// contentreportentry.DefaultCreatedAt holds the default value on creation for the created_at field.
+	contentreportentry.DefaultCreatedAt = contentreportentryDescCreatedAt.Default.(func() time.Time)
+	// contentreportentryDescReason is the schema descriptor for reason field.
+	contentreportentryDescReason := contentreportentryFields[2].Descriptor()
+	// contentreportentry.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	contentreportentry.ReasonValidator = contentreportentryDescReason.Validators[0].(func(string) error)
+	// contentreportentryDescDetails is the schema descriptor for details field.
+	contentreportentryDescDetails := contentreportentryFields[3].Descriptor()
+	// contentreportentry.DefaultDetails holds the default value on creation for the details field.
+	contentreportentry.DefaultDetails = contentreportentryDescDetails.Default.(string)
+	// contentreportentry.DetailsValidator is a validator for the "details" field. It is called by the builders before save.
+	contentreportentry.DetailsValidator = contentreportentryDescDetails.Validators[0].(func(string) error)
+	// contentreportentryDescSourceEventID is the schema descriptor for source_event_id field.
+	contentreportentryDescSourceEventID := contentreportentryFields[5].Descriptor()
+	// contentreportentry.SourceEventIDValidator is a validator for the "source_event_id" field. It is called by the builders before save.
+	contentreportentry.SourceEventIDValidator = contentreportentryDescSourceEventID.Validators[0].(func(string) error)
+	// contentreportentryDescID is the schema descriptor for id field.
+	contentreportentryDescID := contentreportentryMixinFields0[0].Descriptor()
+	// contentreportentry.DefaultID holds the default value on creation for the id field.
+	contentreportentry.DefaultID = contentreportentryDescID.Default.(func() uuid.UUID)
+	copyrightclaimMixin := schema.CopyrightClaim{}.Mixin()
+	copyrightclaimMixinFields0 := copyrightclaimMixin[0].Fields()
+	_ = copyrightclaimMixinFields0
+	copyrightclaimFields := schema.CopyrightClaim{}.Fields()
+	_ = copyrightclaimFields
+	// copyrightclaimDescCreatedAt is the schema descriptor for created_at field.
+	copyrightclaimDescCreatedAt := copyrightclaimMixinFields0[1].Descriptor()
+	// copyrightclaim.DefaultCreatedAt holds the default value on creation for the created_at field.
+	copyrightclaim.DefaultCreatedAt = copyrightclaimDescCreatedAt.Default.(func() time.Time)
+	// copyrightclaimDescClaimantName is the schema descriptor for claimant_name field.
+	copyrightclaimDescClaimantName := copyrightclaimFields[1].Descriptor()
+	// copyrightclaim.DefaultClaimantName holds the default value on creation for the claimant_name field.
+	copyrightclaim.DefaultClaimantName = copyrightclaimDescClaimantName.Default.(string)
+	// copyrightclaim.ClaimantNameValidator is a validator for the "claimant_name" field. It is called by the builders before save.
+	copyrightclaim.ClaimantNameValidator = copyrightclaimDescClaimantName.Validators[0].(func(string) error)
+	// copyrightclaimDescClaimantOrganization is the schema descriptor for claimant_organization field.
+	copyrightclaimDescClaimantOrganization := copyrightclaimFields[2].Descriptor()
+	// copyrightclaim.DefaultClaimantOrganization holds the default value on creation for the claimant_organization field.
+	copyrightclaim.DefaultClaimantOrganization = copyrightclaimDescClaimantOrganization.Default.(string)
+	// copyrightclaim.ClaimantOrganizationValidator is a validator for the "claimant_organization" field. It is called by the builders before save.
+	copyrightclaim.ClaimantOrganizationValidator = copyrightclaimDescClaimantOrganization.Validators[0].(func(string) error)
+	// copyrightclaimDescClaimantEmail is the schema descriptor for claimant_email field.
+	copyrightclaimDescClaimantEmail := copyrightclaimFields[3].Descriptor()
+	// copyrightclaim.ClaimantEmailValidator is a validator for the "claimant_email" field. It is called by the builders before save.
+	copyrightclaim.ClaimantEmailValidator = copyrightclaimDescClaimantEmail.Validators[0].(func(string) error)
+	// copyrightclaimDescRepresents is the schema descriptor for represents field.
+	copyrightclaimDescRepresents := copyrightclaimFields[4].Descriptor()
+	// copyrightclaim.DefaultRepresents holds the default value on creation for the represents field.
+	copyrightclaim.DefaultRepresents = copyrightclaimDescRepresents.Default.(string)
+	// copyrightclaim.RepresentsValidator is a validator for the "represents" field. It is called by the builders before save.
+	copyrightclaim.RepresentsValidator = copyrightclaimDescRepresents.Validators[0].(func(string) error)
+	// copyrightclaimDescWorkTitle is the schema descriptor for work_title field.
+	copyrightclaimDescWorkTitle := copyrightclaimFields[5].Descriptor()
+	// copyrightclaim.WorkTitleValidator is a validator for the "work_title" field. It is called by the builders before save.
+	copyrightclaim.WorkTitleValidator = copyrightclaimDescWorkTitle.Validators[0].(func(string) error)
+	// copyrightclaimDescTargetID is the schema descriptor for target_id field.
+	copyrightclaimDescTargetID := copyrightclaimFields[8].Descriptor()
+	// copyrightclaim.TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
+	copyrightclaim.TargetIDValidator = copyrightclaimDescTargetID.Validators[0].(func(string) error)
+	// copyrightclaimDescRightsBasis is the schema descriptor for rights_basis field.
+	copyrightclaimDescRightsBasis := copyrightclaimFields[12].Descriptor()
+	// copyrightclaim.RightsBasisValidator is a validator for the "rights_basis" field. It is called by the builders before save.
+	copyrightclaim.RightsBasisValidator = copyrightclaimDescRightsBasis.Validators[0].(func(string) error)
+	// copyrightclaimDescSwornStatement is the schema descriptor for sworn_statement field.
+	copyrightclaimDescSwornStatement := copyrightclaimFields[13].Descriptor()
+	// copyrightclaim.SwornStatementValidator is a validator for the "sworn_statement" field. It is called by the builders before save.
+	copyrightclaim.SwornStatementValidator = copyrightclaimDescSwornStatement.Validators[0].(func(string) error)
+	// copyrightclaimDescClaimedUrls is the schema descriptor for claimed_urls field.
+	copyrightclaimDescClaimedUrls := copyrightclaimFields[14].Descriptor()
+	// copyrightclaim.DefaultClaimedUrls holds the default value on creation for the claimed_urls field.
+	copyrightclaim.DefaultClaimedUrls = copyrightclaimDescClaimedUrls.Default.([]string)
+	// copyrightclaimDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	copyrightclaimDescIdempotencyKey := copyrightclaimFields[20].Descriptor()
+	// copyrightclaim.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	copyrightclaim.IdempotencyKeyValidator = copyrightclaimDescIdempotencyKey.Validators[0].(func(string) error)
+	// copyrightclaimDescID is the schema descriptor for id field.
+	copyrightclaimDescID := copyrightclaimMixinFields0[0].Descriptor()
+	// copyrightclaim.DefaultID holds the default value on creation for the id field.
+	copyrightclaim.DefaultID = copyrightclaimDescID.Default.(func() uuid.UUID)
+	counternoticeMixin := schema.CounterNotice{}.Mixin()
+	counternoticeMixinFields0 := counternoticeMixin[0].Fields()
+	_ = counternoticeMixinFields0
+	counternoticeFields := schema.CounterNotice{}.Fields()
+	_ = counternoticeFields
+	// counternoticeDescCreatedAt is the schema descriptor for created_at field.
+	counternoticeDescCreatedAt := counternoticeMixinFields0[1].Descriptor()
+	// counternotice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	counternotice.DefaultCreatedAt = counternoticeDescCreatedAt.Default.(func() time.Time)
+	// counternoticeDescStatement is the schema descriptor for statement field.
+	counternoticeDescStatement := counternoticeFields[2].Descriptor()
+	// counternotice.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	counternotice.StatementValidator = counternoticeDescStatement.Validators[0].(func(string) error)
+	// counternoticeDescContactEmail is the schema descriptor for contact_email field.
+	counternoticeDescContactEmail := counternoticeFields[3].Descriptor()
+	// counternotice.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
+	counternotice.ContactEmailValidator = counternoticeDescContactEmail.Validators[0].(func(string) error)
+	// counternoticeDescCourtActionRecorded is the schema descriptor for court_action_recorded field.
+	counternoticeDescCourtActionRecorded := counternoticeFields[6].Descriptor()
+	// counternotice.DefaultCourtActionRecorded holds the default value on creation for the court_action_recorded field.
+	counternotice.DefaultCourtActionRecorded = counternoticeDescCourtActionRecorded.Default.(bool)
+	// counternoticeDescDecidedByID is the schema descriptor for decided_by_id field.
+	counternoticeDescDecidedByID := counternoticeFields[7].Descriptor()
+	// counternotice.DefaultDecidedByID holds the default value on creation for the decided_by_id field.
+	counternotice.DefaultDecidedByID = counternoticeDescDecidedByID.Default.(string)
+	// counternotice.DecidedByIDValidator is a validator for the "decided_by_id" field. It is called by the builders before save.
+	counternotice.DecidedByIDValidator = counternoticeDescDecidedByID.Validators[0].(func(string) error)
+	// counternoticeDescDecisionReason is the schema descriptor for decision_reason field.
+	counternoticeDescDecisionReason := counternoticeFields[8].Descriptor()
+	// counternotice.DefaultDecisionReason holds the default value on creation for the decision_reason field.
+	counternotice.DefaultDecisionReason = counternoticeDescDecisionReason.Default.(string)
+	// counternotice.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	counternotice.DecisionReasonValidator = counternoticeDescDecisionReason.Validators[0].(func(string) error)
+	// counternoticeDescID is the schema descriptor for id field.
+	counternoticeDescID := counternoticeMixinFields0[0].Descriptor()
+	// counternotice.DefaultID holds the default value on creation for the id field.
+	counternotice.DefaultID = counternoticeDescID.Default.(func() uuid.UUID)
 	evidenceretentionsettingFields := schema.EvidenceRetentionSetting{}.Fields()
 	_ = evidenceretentionsettingFields
 	// evidenceretentionsettingDescRetentionDays is the schema descriptor for retention_days field.
@@ -142,6 +296,41 @@ func init() {
 	evidenceretentionsetting.DefaultUpdatedAt = evidenceretentionsettingDescUpdatedAt.Default.(func() time.Time)
 	// evidenceretentionsetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	evidenceretentionsetting.UpdateDefaultUpdatedAt = evidenceretentionsettingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	ipclaimMixin := schema.IpClaim{}.Mixin()
+	ipclaimMixinFields0 := ipclaimMixin[0].Fields()
+	_ = ipclaimMixinFields0
+	ipclaimFields := schema.IpClaim{}.Fields()
+	_ = ipclaimFields
+	// ipclaimDescCreatedAt is the schema descriptor for created_at field.
+	ipclaimDescCreatedAt := ipclaimMixinFields0[1].Descriptor()
+	// ipclaim.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ipclaim.DefaultCreatedAt = ipclaimDescCreatedAt.Default.(func() time.Time)
+	// ipclaimDescClaimantBrandID is the schema descriptor for claimant_brand_id field.
+	ipclaimDescClaimantBrandID := ipclaimFields[2].Descriptor()
+	// ipclaim.ClaimantBrandIDValidator is a validator for the "claimant_brand_id" field. It is called by the builders before save.
+	ipclaim.ClaimantBrandIDValidator = ipclaimDescClaimantBrandID.Validators[0].(func(string) error)
+	// ipclaimDescListingID is the schema descriptor for listing_id field.
+	ipclaimDescListingID := ipclaimFields[6].Descriptor()
+	// ipclaim.ListingIDValidator is a validator for the "listing_id" field. It is called by the builders before save.
+	ipclaim.ListingIDValidator = ipclaimDescListingID.Validators[0].(func(string) error)
+	// ipclaimDescStatement is the schema descriptor for statement field.
+	ipclaimDescStatement := ipclaimFields[9].Descriptor()
+	// ipclaim.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	ipclaim.StatementValidator = ipclaimDescStatement.Validators[0].(func(string) error)
+	// ipclaimDescTrademarkReference is the schema descriptor for trademark_reference field.
+	ipclaimDescTrademarkReference := ipclaimFields[10].Descriptor()
+	// ipclaim.DefaultTrademarkReference holds the default value on creation for the trademark_reference field.
+	ipclaim.DefaultTrademarkReference = ipclaimDescTrademarkReference.Default.(string)
+	// ipclaim.TrademarkReferenceValidator is a validator for the "trademark_reference" field. It is called by the builders before save.
+	ipclaim.TrademarkReferenceValidator = ipclaimDescTrademarkReference.Validators[0].(func(string) error)
+	// ipclaimDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	ipclaimDescIdempotencyKey := ipclaimFields[16].Descriptor()
+	// ipclaim.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	ipclaim.IdempotencyKeyValidator = ipclaimDescIdempotencyKey.Validators[0].(func(string) error)
+	// ipclaimDescID is the schema descriptor for id field.
+	ipclaimDescID := ipclaimMixinFields0[0].Descriptor()
+	// ipclaim.DefaultID holds the default value on creation for the id field.
+	ipclaim.DefaultID = ipclaimDescID.Default.(func() uuid.UUID)
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0
@@ -159,6 +348,61 @@ func init() {
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
 	outboxevent.DefaultID = outboxeventDescID.Default.(func() uuid.UUID)
+	strikeMixin := schema.Strike{}.Mixin()
+	strikeMixinFields0 := strikeMixin[0].Fields()
+	_ = strikeMixinFields0
+	strikeFields := schema.Strike{}.Fields()
+	_ = strikeFields
+	// strikeDescCreatedAt is the schema descriptor for created_at field.
+	strikeDescCreatedAt := strikeMixinFields0[1].Descriptor()
+	// strike.DefaultCreatedAt holds the default value on creation for the created_at field.
+	strike.DefaultCreatedAt = strikeDescCreatedAt.Default.(func() time.Time)
+	// strikeDescPolicy is the schema descriptor for policy field.
+	strikeDescPolicy := strikeFields[2].Descriptor()
+	// strike.PolicyValidator is a validator for the "policy" field. It is called by the builders before save.
+	strike.PolicyValidator = strikeDescPolicy.Validators[0].(func(string) error)
+	// strikeDescReason is the schema descriptor for reason field.
+	strikeDescReason := strikeFields[3].Descriptor()
+	// strike.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	strike.ReasonValidator = strikeDescReason.Validators[0].(func(string) error)
+	// strikeDescIssuedByID is the schema descriptor for issued_by_id field.
+	strikeDescIssuedByID := strikeFields[5].Descriptor()
+	// strike.DefaultIssuedByID holds the default value on creation for the issued_by_id field.
+	strike.DefaultIssuedByID = strikeDescIssuedByID.Default.(string)
+	// strike.IssuedByIDValidator is a validator for the "issued_by_id" field. It is called by the builders before save.
+	strike.IssuedByIDValidator = strikeDescIssuedByID.Validators[0].(func(string) error)
+	// strikeDescIssuedByName is the schema descriptor for issued_by_name field.
+	strikeDescIssuedByName := strikeFields[6].Descriptor()
+	// strike.DefaultIssuedByName holds the default value on creation for the issued_by_name field.
+	strike.DefaultIssuedByName = strikeDescIssuedByName.Default.(string)
+	// strike.IssuedByNameValidator is a validator for the "issued_by_name" field. It is called by the builders before save.
+	strike.IssuedByNameValidator = strikeDescIssuedByName.Validators[0].(func(string) error)
+	// strikeDescReferenceType is the schema descriptor for reference_type field.
+	strikeDescReferenceType := strikeFields[7].Descriptor()
+	// strike.DefaultReferenceType holds the default value on creation for the reference_type field.
+	strike.DefaultReferenceType = strikeDescReferenceType.Default.(string)
+	// strike.ReferenceTypeValidator is a validator for the "reference_type" field. It is called by the builders before save.
+	strike.ReferenceTypeValidator = strikeDescReferenceType.Validators[0].(func(string) error)
+	// strikeDescReferenceID is the schema descriptor for reference_id field.
+	strikeDescReferenceID := strikeFields[8].Descriptor()
+	// strike.DefaultReferenceID holds the default value on creation for the reference_id field.
+	strike.DefaultReferenceID = strikeDescReferenceID.Default.(string)
+	// strike.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	strike.ReferenceIDValidator = strikeDescReferenceID.Validators[0].(func(string) error)
+	// strikeDescReferenceKey is the schema descriptor for reference_key field.
+	strikeDescReferenceKey := strikeFields[9].Descriptor()
+	// strike.ReferenceKeyValidator is a validator for the "reference_key" field. It is called by the builders before save.
+	strike.ReferenceKeyValidator = strikeDescReferenceKey.Validators[0].(func(string) error)
+	// strikeDescRevokedReason is the schema descriptor for revoked_reason field.
+	strikeDescRevokedReason := strikeFields[12].Descriptor()
+	// strike.DefaultRevokedReason holds the default value on creation for the revoked_reason field.
+	strike.DefaultRevokedReason = strikeDescRevokedReason.Default.(string)
+	// strike.RevokedReasonValidator is a validator for the "revoked_reason" field. It is called by the builders before save.
+	strike.RevokedReasonValidator = strikeDescRevokedReason.Validators[0].(func(string) error)
+	// strikeDescID is the schema descriptor for id field.
+	strikeDescID := strikeMixinFields0[0].Descriptor()
+	// strike.DefaultID holds the default value on creation for the id field.
+	strike.DefaultID = strikeDescID.Default.(func() uuid.UUID)
 	suspensioncaseMixin := schema.SuspensionCase{}.Mixin()
 	suspensioncaseMixinFields0 := suspensioncaseMixin[0].Fields()
 	_ = suspensioncaseMixinFields0

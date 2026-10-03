@@ -9,11 +9,29 @@ import (
 // ChatReport is the predicate function for chatreport builders.
 type ChatReport func(*sql.Selector)
 
+// ContentReport is the predicate function for contentreport builders.
+type ContentReport func(*sql.Selector)
+
+// ContentReportEntry is the predicate function for contentreportentry builders.
+type ContentReportEntry func(*sql.Selector)
+
+// CopyrightClaim is the predicate function for copyrightclaim builders.
+type CopyrightClaim func(*sql.Selector)
+
+// CounterNotice is the predicate function for counternotice builders.
+type CounterNotice func(*sql.Selector)
+
 // EvidenceRetentionSetting is the predicate function for evidenceretentionsetting builders.
 type EvidenceRetentionSetting func(*sql.Selector)
 
+// IpClaim is the predicate function for ipclaim builders.
+type IpClaim func(*sql.Selector)
+
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
+
+// Strike is the predicate function for strike builders.
+type Strike func(*sql.Selector)
 
 // SuspensionCase is the predicate function for suspensioncase builders.
 type SuspensionCase func(*sql.Selector)

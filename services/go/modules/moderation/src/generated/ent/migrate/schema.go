@@ -70,6 +70,173 @@ var (
 			},
 		},
 	}
+	// ContentReportsColumns holds the columns for the "content_reports" table.
+	ContentReportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"post", "comment", "clip", "live", "product", "store", "sound", "user"}},
+		{Name: "target_id", Type: field.TypeString, Size: 128},
+		{Name: "author_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "in_review", "resolved", "dismissed"}, Default: "open"},
+		{Name: "priority", Type: field.TypeEnum, Enums: []string{"low", "normal", "high", "urgent"}, Default: "normal"},
+		{Name: "primary_reason", Type: field.TypeString, Size: 40},
+		{Name: "reason_counts", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "report_count", Type: field.TypeInt, Default: 0},
+		{Name: "first_reported_at", Type: field.TypeTime},
+		{Name: "last_reported_at", Type: field.TypeTime},
+		{Name: "sla_due_at", Type: field.TypeTime},
+		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"visible", "hidden", "restricted", "removed"}, Default: "visible"},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier"}, Default: "user"},
+		{Name: "target_preview", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "classifier_scores", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "classifier_action", Type: field.TypeEnum, Enums: []string{"none", "allow", "reduce", "hold"}, Default: "none"},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+	}
+	// ContentReportsTable holds the schema information for the "content_reports" table.
+	ContentReportsTable = &schema.Table{
+		Name:       "content_reports",
+		Columns:    ContentReportsColumns,
+		PrimaryKey: []*schema.Column{ContentReportsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "contentreport_target_type_target_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentReportsColumns[2], ContentReportsColumns[3]},
+			},
+			{
+				Name:    "contentreport_status_priority_sla_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{ContentReportsColumns[5], ContentReportsColumns[6], ContentReportsColumns[12]},
+			},
+			{
+				Name:    "contentreport_author_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentReportsColumns[4]},
+			},
+		},
+	}
+	// ContentReportEntriesColumns holds the columns for the "content_report_entries" table.
+	ContentReportEntriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "report_id", Type: field.TypeUUID},
+		{Name: "reporter_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "reason", Type: field.TypeString, Size: 40},
+		{Name: "details", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier"}, Default: "user"},
+		{Name: "source_event_id", Type: field.TypeString, Nullable: true, Size: 128},
+	}
+	// ContentReportEntriesTable holds the schema information for the "content_report_entries" table.
+	ContentReportEntriesTable = &schema.Table{
+		Name:       "content_report_entries",
+		Columns:    ContentReportEntriesColumns,
+		PrimaryKey: []*schema.Column{ContentReportEntriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "contentreportentry_report_id_reporter_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentReportEntriesColumns[2], ContentReportEntriesColumns[3]},
+			},
+			{
+				Name:    "contentreportentry_source_event_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentReportEntriesColumns[7]},
+			},
+			{
+				Name:    "contentreportentry_reporter_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ContentReportEntriesColumns[3], ContentReportEntriesColumns[1]},
+			},
+		},
+	}
+	// CopyrightClaimsColumns holds the columns for the "copyright_claims" table.
+	CopyrightClaimsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "claimant_user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "claimant_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "claimant_organization", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "claimant_email", Type: field.TypeString, Size: 254},
+		{Name: "represents", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "work_title", Type: field.TypeString, Size: 1000},
+		{Name: "work_type", Type: field.TypeEnum, Enums: []string{"sound", "video", "image", "text"}, Default: "video"},
+		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"clip", "sound", "post", "live"}},
+		{Name: "target_id", Type: field.TypeString, Size: 128},
+		{Name: "infringer_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "target_flag", Type: field.TypeEnum, Enums: []string{"visible", "limited", "taken_down"}, Default: "visible"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "needs_info", "upheld", "rejected", "counter_notice", "restored"}, Default: "pending"},
+		{Name: "rights_basis", Type: field.TypeString, Size: 1000},
+		{Name: "sworn_statement", Type: field.TypeString, Size: 1000},
+		{Name: "claimed_urls", Type: field.TypeJSON},
+		{Name: "target_preview", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "audio_matches", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "top_audio_match_percent", Type: field.TypeInt, Nullable: true},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "strike_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 128},
+	}
+	// CopyrightClaimsTable holds the schema information for the "copyright_claims" table.
+	CopyrightClaimsTable = &schema.Table{
+		Name:       "copyright_claims",
+		Columns:    CopyrightClaimsColumns,
+		PrimaryKey: []*schema.Column{CopyrightClaimsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "copyrightclaim_claimant_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{CopyrightClaimsColumns[2], CopyrightClaimsColumns[22]},
+			},
+			{
+				Name:    "copyrightclaim_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CopyrightClaimsColumns[13], CopyrightClaimsColumns[1]},
+			},
+			{
+				Name:    "copyrightclaim_infringer_id",
+				Unique:  false,
+				Columns: []*schema.Column{CopyrightClaimsColumns[11]},
+			},
+			{
+				Name:    "copyrightclaim_target_type_target_id",
+				Unique:  false,
+				Columns: []*schema.Column{CopyrightClaimsColumns[9], CopyrightClaimsColumns[10]},
+			},
+		},
+	}
+	// CounterNoticesColumns holds the columns for the "counter_notices" table.
+	CounterNoticesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "claim_id", Type: field.TypeUUID},
+		{Name: "submitter_id", Type: field.TypeUUID},
+		{Name: "statement", Type: field.TypeString, Size: 2000},
+		{Name: "contact_email", Type: field.TypeString, Size: 254},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "accepted", "rejected"}, Default: "pending"},
+		{Name: "restore_eligible_at", Type: field.TypeTime},
+		{Name: "court_action_recorded", Type: field.TypeBool, Default: false},
+		{Name: "decided_by_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "decision_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "restored_at", Type: field.TypeTime, Nullable: true},
+	}
+	// CounterNoticesTable holds the schema information for the "counter_notices" table.
+	CounterNoticesTable = &schema.Table{
+		Name:       "counter_notices",
+		Columns:    CounterNoticesColumns,
+		PrimaryKey: []*schema.Column{CounterNoticesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "counternotice_claim_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{CounterNoticesColumns[2], CounterNoticesColumns[6]},
+			},
+			{
+				Name:    "counternotice_status_restore_eligible_at",
+				Unique:  false,
+				Columns: []*schema.Column{CounterNoticesColumns[6], CounterNoticesColumns[7]},
+			},
+		},
+	}
 	// EvidenceRetentionSettingsColumns holds the columns for the "evidence_retention_settings" table.
 	EvidenceRetentionSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -83,6 +250,56 @@ var (
 		Name:       "evidence_retention_settings",
 		Columns:    EvidenceRetentionSettingsColumns,
 		PrimaryKey: []*schema.Column{EvidenceRetentionSettingsColumns[0]},
+	}
+	// IPClaimsColumns holds the columns for the "ip_claims" table.
+	IPClaimsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"trademark", "counterfeit"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "needs_info", "upheld", "rejected"}, Default: "open"},
+		{Name: "claimant_brand_id", Type: field.TypeString, Size: 128},
+		{Name: "claimant_brand", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "claimant_user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "accused_seller_id", Type: field.TypeUUID},
+		{Name: "listing_id", Type: field.TypeString, Size: 128},
+		{Name: "listing", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "listing_status", Type: field.TypeEnum, Enums: []string{"live", "delisted"}, Default: "live"},
+		{Name: "statement", Type: field.TypeString, Size: 2000},
+		{Name: "trademark_reference", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "evidence", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "seller_response", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "sla_due_at", Type: field.TypeTime},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "strike_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 128},
+	}
+	// IPClaimsTable holds the schema information for the "ip_claims" table.
+	IPClaimsTable = &schema.Table{
+		Name:       "ip_claims",
+		Columns:    IPClaimsColumns,
+		PrimaryKey: []*schema.Column{IPClaimsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ipclaim_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{IPClaimsColumns[18]},
+			},
+			{
+				Name:    "ipclaim_status_sla_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{IPClaimsColumns[3], IPClaimsColumns[15]},
+			},
+			{
+				Name:    "ipclaim_accused_seller_id",
+				Unique:  false,
+				Columns: []*schema.Column{IPClaimsColumns[7]},
+			},
+			{
+				Name:    "ipclaim_listing_id",
+				Unique:  false,
+				Columns: []*schema.Column{IPClaimsColumns[8]},
+			},
+		},
 	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
@@ -103,6 +320,47 @@ var (
 				Name:    "outboxevent_published_at_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{OutboxEventsColumns[5], OutboxEventsColumns[1]},
+			},
+		},
+	}
+	// StrikesColumns holds the columns for the "strikes" table.
+	StrikesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"warning", "strike"}, Default: "strike"},
+		{Name: "policy", Type: field.TypeString, Size: 120},
+		{Name: "reason", Type: field.TypeString, Size: 1000},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"moderation", "copyright", "manual", "ip_claim"}},
+		{Name: "issued_by_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "issued_by_name", Type: field.TypeString, Size: 120, Default: "System"},
+		{Name: "reference_type", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "reference_id", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "reference_key", Type: field.TypeString, Nullable: true, Size: 220},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_reason", Type: field.TypeString, Size: 500, Default: ""},
+	}
+	// StrikesTable holds the schema information for the "strikes" table.
+	StrikesTable = &schema.Table{
+		Name:       "strikes",
+		Columns:    StrikesColumns,
+		PrimaryKey: []*schema.Column{StrikesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "strike_account_id_reference_key",
+				Unique:  true,
+				Columns: []*schema.Column{StrikesColumns[2], StrikesColumns[11]},
+			},
+			{
+				Name:    "strike_account_id_revoked_at_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{StrikesColumns[2], StrikesColumns[13], StrikesColumns[12]},
+			},
+			{
+				Name:    "strike_reference_type_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{StrikesColumns[9], StrikesColumns[10]},
 			},
 		},
 	}
@@ -150,8 +408,14 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ChatReportsTable,
+		ContentReportsTable,
+		ContentReportEntriesTable,
+		CopyrightClaimsTable,
+		CounterNoticesTable,
 		EvidenceRetentionSettingsTable,
+		IPClaimsTable,
 		OutboxEventsTable,
+		StrikesTable,
 		SuspensionCasesTable,
 	}
 )
