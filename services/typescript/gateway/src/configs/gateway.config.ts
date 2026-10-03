@@ -1,0 +1,42 @@
+export interface GatewayConfig {
+  readonly host: string;
+  readonly port: number;
+  readonly corsOrigins: readonly string[];
+  readonly rateLimitMaxPerMinute: number;
+  readonly upstreamTimeoutMs: number;
+  readonly accessToken: { readonly jwksUrl: string; readonly issuer: string; readonly audience: string };
+  readonly upstreams: Readonly<Record<UpstreamName, string>>;
+}
+
+export type UpstreamName = "identity";
+
+function readRequiredEnvironmentVariable(name: string, problems: string[]): string {
+  const value = process.env[name]?.trim() ?? "";
+  if (value === "") problems.push(`${name} is required`);
+  return value;
+}
+
+function readEnvironmentVariableOrDefault(name: string, fallback: string): string {
+  const value = process.env[name]?.trim();
+  return value === undefined || value === "" ? fallback : value;
+}
+
+export function loadGatewayConfigFromEnvironment(): GatewayConfig {
+  const problems: string[] = [];
+  const config: GatewayConfig = {
+    host: readEnvironmentVariableOrDefault("HOST", "0.0.0.0"),
+    port: Number(readEnvironmentVariableOrDefault("PORT", "8080")),
+    corsOrigins: readEnvironmentVariableOrDefault("CORS_ORIGINS", "http://localhost:3000").split(",").map((origin) => origin.trim()).filter(Boolean),
+    rateLimitMaxPerMinute: Number(readEnvironmentVariableOrDefault("RATE_LIMIT_MAX_PER_MINUTE", "600")),
+    upstreamTimeoutMs: Number(readEnvironmentVariableOrDefault("UPSTREAM_TIMEOUT_MS", "10000")),
+    accessToken: {
+      jwksUrl: readRequiredEnvironmentVariable("AUTH_JWKS_URL", problems),
+      issuer: readRequiredEnvironmentVariable("AUTH_TOKEN_ISSUER", problems),
+      audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+    },
+    upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems) },
+  };
+  if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if (problems.length > 0) throw new Error(`Invalid gateway configuration: ${problems.join("; ")}`);
+  return config;
+}
