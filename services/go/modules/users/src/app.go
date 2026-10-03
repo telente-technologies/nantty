@@ -112,6 +112,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go func() { _ = privacy.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = checkmarks.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
+	go checkmarks.ConsumeEntitlementEventsUntilContextDone(ctx, module.container, module.container.Settings.IsProduction())
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,

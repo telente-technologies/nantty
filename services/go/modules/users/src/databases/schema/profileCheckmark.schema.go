@@ -23,7 +23,7 @@ func (ProfileCheckmark) Fields() []ent.Field {
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
 		field.Enum("color").Values("blue", "gold", "black"),
 		field.Enum("status").Values("verified", "suspended", "revoked", "grace", "expired").Default("verified"),
-		field.Enum("source").Values("application", "lifetime_grant", "business_documents", "black_vetting"),
+		field.Enum("source").Values("application", "lifetime_grant", "business_documents", "black_vetting", "subscription"),
 		field.UUID("source_id", uuid.UUID{}).Optional().Nillable(),
 		field.Time("current_period_end").Optional().Nillable(),
 		field.Time("reverification_due_at").Optional().Nillable(),

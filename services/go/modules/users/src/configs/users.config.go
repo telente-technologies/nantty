@@ -22,6 +22,7 @@ type UsersSettings struct {
 	MediaUploadSigningKey       []byte
 	MediaUploadIntentTimeToLive time.Duration
 	Privacy                     PrivacySettings
+	EntitlementEventsQueue      string
 }
 
 func (settings UsersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -42,6 +43,7 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		MediaUploadSigningKey:       readSigningKey(reader, "USERS_MEDIA_UPLOAD_SIGNING_KEY"),
 		MediaUploadIntentTimeToLive: reader.ReadDurationOrDefault("USERS_MEDIA_UPLOAD_INTENT_TTL", 10*time.Minute),
 		Privacy:                     ReadPrivacySettingsFromEnvironment(reader),
+		EntitlementEventsQueue:      reader.ReadStringOrDefault("USERS_ENTITLEMENT_EVENTS_QUEUE", ""),
 	}
 	return settings
 }

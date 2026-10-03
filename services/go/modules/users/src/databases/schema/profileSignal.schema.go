@@ -29,6 +29,9 @@ func (ProfileSignal) Fields() []ent.Field {
 		field.Bool("has_active_store_or_brand_page").Default(false),
 		field.Enum("seller_plan").Values("FREE", "PRO", "BUSINESS").Default("FREE"),
 		field.Time("checkmark_suggested_at").Optional().Nillable(),
+		field.Time("premium_until").Optional().Nillable(),
+		field.Time("seller_plan_until").Optional().Nillable(),
+		field.Bool("seller_plan_trialing").Default(false),
 		field.String("source").Default("").MaxLen(40),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
