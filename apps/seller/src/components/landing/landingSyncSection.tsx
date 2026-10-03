@@ -4,7 +4,7 @@ const sharedRecords = [
   { title: "Products and stock", description: "Add a product here and it is in your app store. Change stock here and the app shows it straight away." },
   { title: "Orders", description: "Orders customers place in the app land here to accept, pack and ship." },
   { title: "Wallet", description: "Escrow, pending and available balances are the same numbers you see on your phone." },
-  { title: "Customers", description: "Everyone who buys from you in the app is in one list, with their history and loyalty points." },
+  { title: "Customers", description: "Everyone who buys from you in the app is in one list, with their order history." },
 ];
 
 export function LandingSyncSection() {
