@@ -4,6 +4,7 @@ import { Platform, Pressable, StatusBar, StyleSheet, View, useWindowDimensions }
 
 import { ArrowsOutSimple24Icon, Cancel20Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
+import { mediaGlass } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
@@ -107,7 +108,9 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.overlay,
+    backgroundColor: mediaGlass.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: mediaGlass.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -118,7 +121,9 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.overlay,
+    backgroundColor: mediaGlass.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: mediaGlass.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -132,6 +137,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     height: 40,
     paddingHorizontal: 18,
     borderRadius: 20,
-    backgroundColor: colors.overlay,
+    backgroundColor: mediaGlass.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: mediaGlass.border,
   },
 }));
