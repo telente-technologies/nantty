@@ -170,6 +170,46 @@ func MarketingNEQ(v bool) predicate.PrivacySetting {
 	return predicate.PrivacySetting(sql.FieldNEQ(FieldMarketing, v))
 }
 
+// WhoCanMessageMeEQ applies the EQ predicate on the "who_can_message_me" field.
+func WhoCanMessageMeEQ(v WhoCanMessageMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldEQ(FieldWhoCanMessageMe, v))
+}
+
+// WhoCanMessageMeNEQ applies the NEQ predicate on the "who_can_message_me" field.
+func WhoCanMessageMeNEQ(v WhoCanMessageMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNEQ(FieldWhoCanMessageMe, v))
+}
+
+// WhoCanMessageMeIn applies the In predicate on the "who_can_message_me" field.
+func WhoCanMessageMeIn(vs ...WhoCanMessageMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldIn(FieldWhoCanMessageMe, vs...))
+}
+
+// WhoCanMessageMeNotIn applies the NotIn predicate on the "who_can_message_me" field.
+func WhoCanMessageMeNotIn(vs ...WhoCanMessageMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNotIn(FieldWhoCanMessageMe, vs...))
+}
+
+// WhoCanMentionMeEQ applies the EQ predicate on the "who_can_mention_me" field.
+func WhoCanMentionMeEQ(v WhoCanMentionMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldEQ(FieldWhoCanMentionMe, v))
+}
+
+// WhoCanMentionMeNEQ applies the NEQ predicate on the "who_can_mention_me" field.
+func WhoCanMentionMeNEQ(v WhoCanMentionMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNEQ(FieldWhoCanMentionMe, v))
+}
+
+// WhoCanMentionMeIn applies the In predicate on the "who_can_mention_me" field.
+func WhoCanMentionMeIn(vs ...WhoCanMentionMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldIn(FieldWhoCanMentionMe, vs...))
+}
+
+// WhoCanMentionMeNotIn applies the NotIn predicate on the "who_can_mention_me" field.
+func WhoCanMentionMeNotIn(vs ...WhoCanMentionMe) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNotIn(FieldWhoCanMentionMe, vs...))
+}
+
 // PolicyVersionEQ applies the EQ predicate on the "policy_version" field.
 func PolicyVersionEQ(v string) predicate.PrivacySetting {
 	return predicate.PrivacySetting(sql.FieldEQ(FieldPolicyVersion, v))

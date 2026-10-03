@@ -3,6 +3,7 @@
 package privacysetting
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -23,6 +24,10 @@ const (
 	FieldPersonalizedAds = "personalized_ads"
 	// FieldMarketing holds the string denoting the marketing field in the database.
 	FieldMarketing = "marketing"
+	// FieldWhoCanMessageMe holds the string denoting the who_can_message_me field in the database.
+	FieldWhoCanMessageMe = "who_can_message_me"
+	// FieldWhoCanMentionMe holds the string denoting the who_can_mention_me field in the database.
+	FieldWhoCanMentionMe = "who_can_mention_me"
 	// FieldPolicyVersion holds the string denoting the policy_version field in the database.
 	FieldPolicyVersion = "policy_version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -39,6 +44,8 @@ var Columns = []string{
 	FieldPersonalization,
 	FieldPersonalizedAds,
 	FieldMarketing,
+	FieldWhoCanMessageMe,
+	FieldWhoCanMentionMe,
 	FieldPolicyVersion,
 	FieldUpdatedAt,
 }
@@ -72,6 +79,61 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 )
 
+// WhoCanMessageMe defines the type for the "who_can_message_me" enum field.
+type WhoCanMessageMe string
+
+// WhoCanMessageMeEveryone is the default value of the WhoCanMessageMe enum.
+const DefaultWhoCanMessageMe = WhoCanMessageMeEveryone
+
+// WhoCanMessageMe values.
+const (
+	WhoCanMessageMeEveryone  WhoCanMessageMe = "everyone"
+	WhoCanMessageMeFollowing WhoCanMessageMe = "following"
+	WhoCanMessageMeFollowers WhoCanMessageMe = "followers"
+	WhoCanMessageMeNobody    WhoCanMessageMe = "nobody"
+)
+
+func (wcmm WhoCanMessageMe) String() string {
+	return string(wcmm)
+}
+
+// WhoCanMessageMeValidator is a validator for the "who_can_message_me" field enum values. It is called by the builders before save.
+func WhoCanMessageMeValidator(wcmm WhoCanMessageMe) error {
+	switch wcmm {
+	case WhoCanMessageMeEveryone, WhoCanMessageMeFollowing, WhoCanMessageMeFollowers, WhoCanMessageMeNobody:
+		return nil
+	default:
+		return fmt.Errorf("privacysetting: invalid enum value for who_can_message_me field: %q", wcmm)
+	}
+}
+
+// WhoCanMentionMe defines the type for the "who_can_mention_me" enum field.
+type WhoCanMentionMe string
+
+// WhoCanMentionMeEveryone is the default value of the WhoCanMentionMe enum.
+const DefaultWhoCanMentionMe = WhoCanMentionMeEveryone
+
+// WhoCanMentionMe values.
+const (
+	WhoCanMentionMeEveryone  WhoCanMentionMe = "everyone"
+	WhoCanMentionMeFollowing WhoCanMentionMe = "following"
+	WhoCanMentionMeNoOne     WhoCanMentionMe = "no_one"
+)
+
+func (wcmm WhoCanMentionMe) String() string {
+	return string(wcmm)
+}
+
+// WhoCanMentionMeValidator is a validator for the "who_can_mention_me" field enum values. It is called by the builders before save.
+func WhoCanMentionMeValidator(wcmm WhoCanMentionMe) error {
+	switch wcmm {
+	case WhoCanMentionMeEveryone, WhoCanMentionMeFollowing, WhoCanMentionMeNoOne:
+		return nil
+	default:
+		return fmt.Errorf("privacysetting: invalid enum value for who_can_mention_me field: %q", wcmm)
+	}
+}
+
 // OrderOption defines the ordering options for the PrivacySetting queries.
 type OrderOption func(*sql.Selector)
 
@@ -103,6 +165,16 @@ func ByPersonalizedAds(opts ...sql.OrderTermOption) OrderOption {
 // ByMarketing orders the results by the marketing field.
 func ByMarketing(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMarketing, opts...).ToFunc()
+}
+
+// ByWhoCanMessageMe orders the results by the who_can_message_me field.
+func ByWhoCanMessageMe(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWhoCanMessageMe, opts...).ToFunc()
+}
+
+// ByWhoCanMentionMe orders the results by the who_can_mention_me field.
+func ByWhoCanMentionMe(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWhoCanMentionMe, opts...).ToFunc()
 }
 
 // ByPolicyVersion orders the results by the policy_version field.
