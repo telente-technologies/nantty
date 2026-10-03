@@ -14,7 +14,7 @@
 }
 
 .nameLink:hover {
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .subtle {

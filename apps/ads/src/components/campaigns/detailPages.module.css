@@ -7,7 +7,7 @@
 }
 
 .backLink:hover {
-  color: var(--blue-500);
+  color: var(--color-brand);
   text-decoration: none;
 }
 
@@ -112,7 +112,7 @@
   padding: 0 9px;
   border-radius: var(--radius-pill);
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--brand-ink);
   font-size: var(--fs-12);
   font-weight: 550;
 }

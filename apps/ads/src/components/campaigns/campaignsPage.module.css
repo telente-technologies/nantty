@@ -31,7 +31,7 @@
 .bulkCount {
   padding: 0 8px;
   font-weight: 650;
-  color: var(--blue-800);
+  color: var(--brand-ink);
 }
 
 @media (max-width: 900px) {
