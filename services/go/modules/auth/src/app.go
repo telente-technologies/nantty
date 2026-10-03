@@ -129,16 +129,7 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.AuthSettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }

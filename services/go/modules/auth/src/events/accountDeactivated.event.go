@@ -12,6 +12,8 @@ type AccountEnforcementEventData struct {
 type OtpIssuedEventData struct {
 	Destination      string `json:"destination"`
 	Purpose          string `json:"purpose"`
-	Code             string `json:"code"`
+	CodeSealed       string `json:"codeSealed"`
+	KeyId            string `json:"keyId"`
+	ExpiresAt        string `json:"expiresAt"`
 	ExpiresInMinutes int    `json:"expiresInMinutes"`
 }

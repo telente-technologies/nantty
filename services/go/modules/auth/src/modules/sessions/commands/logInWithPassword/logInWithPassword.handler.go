@@ -35,6 +35,9 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	}
 	var session services.StartedSession
 	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if err := services.AnnounceNewDeviceInTransaction(ctx, application.Container, tx, existing.ID, command.Client); err != nil {
+			return err
+		}
 		if session, err = services.StartSessionWithFirstRefreshTokenInTransaction(ctx, application.Container, tx, existing.ID, command.Client); err != nil {
 			return err
 		}
