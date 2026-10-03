@@ -6,6 +6,7 @@ import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary, type MockPlatformUserRecord } from "@/mocks/seed/demoPlatformUsers.mock";
 import type { UserDetail } from "@/types/peopleUsers.type";
 
+import { blockSignupIdentifiers, clearSignupBlocks, notifyUser } from "./peopleUserActions.mock";
 import { asMutablePlatformUser, findPlatformUserForPeopleOrFail, readPeopleMockStore, readUserExtrasForPeople } from "./peopleStore.mock";
 
 export function buildUserDetailResponse(user: MockPlatformUserRecord): UserDetail {
@@ -89,7 +90,7 @@ export function registerPeopleUserMockHandlers(): void {
   });
 
   registerMockRoute("POST", "/admin/users/:userId/suspend", (request) => {
-    requireMockPermission(request, "users:moderate");
+    requireMockPermission(request, "users:suspend");
     return changeUserStatus(request, "user.suspended", (user, body, reason) => {
       if (user.status === "BANNED") throw new MockHttpError(409, "USER_BANNED", "This user is banned. Unban first.");
       const durationDays = readDurationInDays(body, false) ?? 1;
@@ -97,12 +98,13 @@ export function registerPeopleUserMockHandlers(): void {
       const extras = readUserExtrasForPeople(user.id);
       extras.restriction = { kind: "SUSPENSION", reason, startedAt: readIsoNow(), endsAt: readIsoTimeOffset(durationDays * 1440) };
       extras.sessions = [];
-      return { durationDays };
+      notifyUser(user, "Your account is suspended", `Your account is suspended for ${durationDays} days. Reason: ${reason}. You can appeal from the app.`);
+      return { durationDays, userNotified: true, deletionClock: "120 days (stops on reinstatement)" };
     });
   });
 
   registerMockRoute("POST", "/admin/users/:userId/reinstate", (request) => {
-    requireMockPermission(request, "users:moderate");
+    requireMockPermission(request, "users:suspend");
     return changeUserStatus(request, "user.reinstated", (user) => {
       if (user.status !== "SUSPENDED" && user.status !== "WARNED") throw new MockHttpError(409, "INVALID_STATUS", "Only suspended or warned users can be reinstated. Use unban for banned users.");
       asMutablePlatformUser(user).status = "ACTIVE";
@@ -121,7 +123,9 @@ export function registerPeopleUserMockHandlers(): void {
       const extras = readUserExtrasForPeople(user.id);
       extras.restriction = { kind: "BAN", reason, startedAt: readIsoNow(), endsAt: durationDays === null ? null : readIsoTimeOffset(durationDays * 1440) };
       extras.sessions = [];
-      return { duration: durationDays === null ? "PERMANENT" : `${durationDays} days` };
+      const blockedSignups = durationDays === null ? blockSignupIdentifiers(user) : [];
+      notifyUser(user, "Your account was closed", `Your account was banned. Reason: ${reason}.`);
+      return { duration: durationDays === null ? "PERMANENT" : `${durationDays} days`, blockedSignups, userNotified: true };
     });
   });
 
@@ -132,6 +136,7 @@ export function registerPeopleUserMockHandlers(): void {
       if (user.status !== "BANNED") throw new MockHttpError(409, "NOT_BANNED", "This user is not banned.");
       asMutablePlatformUser(user).status = "ACTIVE";
       readUserExtrasForPeople(user.id).restriction = null;
+      clearSignupBlocks(user.id);
       return {};
     });
   });

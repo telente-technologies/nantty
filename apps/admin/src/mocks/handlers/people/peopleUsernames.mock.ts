@@ -14,7 +14,7 @@ import { asMutablePlatformUser, findPlatformUserForPeopleOrFail, readPeopleMockS
 const reservedKinds: readonly ReservedUsernameKind[] = ["EXACT", "PREFIX", "PATTERN"];
 const reservedCategories: readonly ReservedUsernameCategory[] = ["BRAND", "GOVERNMENT", "SYSTEM", "OFFENSIVE", "PUBLIC_FIGURE"];
 
-function createUnusedReplacementUsername(): string {
+export function createUnusedReplacementUsername(): string {
   const takenUsernames = new Set(readMockDatabase().platformUsers.map((user) => user.username));
   let candidate = generateReplacementUsername();
   while (takenUsernames.has(candidate)) candidate = generateReplacementUsername();
