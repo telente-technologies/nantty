@@ -3,9 +3,12 @@ package ads
 import (
 	"context"
 
+	"zudomart/modules/ads/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewAdsModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "ads"}, nil
+type Module = src.Module
+
+func NewAdsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewAdsModule(ctx, dependencies)
 }

@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,9 @@ type AdsSettings struct {
 	DatabaseUrl            string
 	DatabaseSchema         string
 	UsersSchema            string
+	AdminSchema            string
+	PlatformSettingsTtl    time.Duration
+	CreatorShareBps        int64
 	DomainEventsTopicArn   string
 	AccessTokenJwksUrl     string
 	TokenIssuer            string
@@ -41,6 +45,15 @@ type AdsSettings struct {
 	BaselineCtrPpm         int64
 	AllowInMemoryFunding   bool
 	BoostMinimumDailyMinor map[string]int64
+	PopulationByCountry    map[string]int64
+	AssetsBucket           string
+	S3Endpoint             string
+	ReportQueueName        string
+	ContentSourcesUrl      string
+	ContentSourcesSecret   string
+	UploadUrlLifetime      time.Duration
+	ReportLinkLifetime     time.Duration
+	ReportSweepInterval    time.Duration
 }
 
 func (settings AdsSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -51,6 +64,9 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		DatabaseUrl:            reader.ReadRequiredString("ADS_DATABASE_URL"),
 		DatabaseSchema:         reader.ReadStringOrDefault("ADS_DATABASE_SCHEMA", "ads"),
 		UsersSchema:            reader.ReadStringOrDefault("USERS_DATABASE_SCHEMA", "users"),
+		AdminSchema:            reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
+		PlatformSettingsTtl:    reader.ReadDurationOrDefault("ADS_PLATFORM_SETTINGS_TTL", 30*time.Second),
+		CreatorShareBps:        int64(reader.ReadIntegerOrDefault("ADS_CREATOR_SHARE_BPS", 4000)),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		AccessTokenJwksUrl:     reader.ReadStringOrDefault("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
 		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
@@ -62,7 +78,7 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		AdTokenTimeToLive:      reader.ReadDurationOrDefault("ADS_TOKEN_TTL", 24*time.Hour),
 		IntelligenceUrl:        reader.ReadStringOrDefault("INTELLIGENCE_URL", ""),
 		IntelligenceSecret:     reader.ReadStringOrDefault("INTELLIGENCE_SHARED_SECRET", ""),
-		IntelligenceTimeout:    reader.ReadDurationOrDefault("ADS_INTELLIGENCE_TIMEOUT", 30*time.Millisecond),
+		IntelligenceTimeout:    reader.ReadDurationOrDefault("ADS_INTELLIGENCE_TIMEOUT", 80*time.Millisecond),
 		MediaBaseUrl:           reader.ReadStringOrDefault("ADS_MEDIA_URL", "https://cdn.zudomart.com/media"),
 		EnabledPlacements:      reader.ReadCommaSeparatedListOrDefault("ADS_ENABLED_PLACEMENTS", []string{"feed", "clips", "mart", "search"}),
 		CandidateRefresh:       reader.ReadDurationOrDefault("ADS_CANDIDATE_REFRESH", 10*time.Second),
@@ -76,12 +92,23 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		AutoBidMultiple:        int64(reader.ReadIntegerOrDefault("ADS_AUTO_BID_MULTIPLE", 2)),
 		BaselineCtrPpm:         int64(reader.ReadIntegerOrDefault("ADS_BASELINE_CTR_PPM", 15000)),
 		ReservePerMilleMinor:   map[string]int64{"NGN": 50_000, "GHS": 750, "KES": 7_500, "ZAR": 1_500, "GBP": 75, "EUR": 75, "USD": 75},
+		PopulationByCountry:    readPopulation(reader),
+		AssetsBucket:           reader.ReadStringOrDefault("ADS_ASSETS_BUCKET", ""),
+		S3Endpoint:             reader.ReadStringOrDefault("ADS_S3_ENDPOINT_URL", ""),
+		ReportQueueName:        reader.ReadStringOrDefault("ADS_REPORT_QUEUE_NAME", ""),
+		ContentSourcesUrl:      reader.ReadStringOrDefault("SOCIAL_INTERNAL_URL", ""),
+		ContentSourcesSecret:   reader.ReadStringOrDefault("SOCIAL_INTERNAL_SHARED_SECRET", ""),
+		UploadUrlLifetime:      reader.ReadDurationOrDefault("ADS_UPLOAD_URL_TTL", 30*time.Minute),
+		ReportLinkLifetime:     reader.ReadDurationOrDefault("ADS_REPORT_LINK_TTL", 7*24*time.Hour),
+		ReportSweepInterval:    reader.ReadDurationOrDefault("ADS_REPORT_SWEEP_INTERVAL", time.Minute),
 		BoostMinimumDailyMinor: map[string]int64{"NGN": 100_000, "GHS": 1_000, "KES": 10_000, "ZAR": 2_000, "GBP": 100, "EUR": 100, "USD": 100},
 	}
 	settings.AdTokenKeys = readAdTokenKeys(reader, settings.AdTokenActiveKeyId, settings.IsProduction())
 	settings.InternalSharedSecret = reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", "")
 	settings.AllowInMemoryFunding = !settings.IsProduction()
 	if settings.IsProduction() {
+		settings.AssetsBucket = reader.ReadRequiredString("ADS_ASSETS_BUCKET")
+		settings.ReportQueueName = reader.ReadRequiredString("ADS_REPORT_QUEUE_NAME")
 		reader.RequireMinimumLength("ADS_INTERNAL_SHARED_SECRET", settings.InternalSharedSecret, 32)
 		settings.RedisUrl = reader.ReadRequiredString("ADS_REDIS_URL")
 	}
@@ -106,4 +133,15 @@ func readAdTokenKeys(reader *platformconfig.EnvironmentReader, activeKeyId strin
 		reader.RequireMinimumLength("ADS_TOKEN_KEYS["+id+"]", secret, 32)
 	}
 	return keys
+}
+
+func readPopulation(reader *platformconfig.EnvironmentReader) map[string]int64 {
+	population := map[string]int64{"NG": 9_000_000, "GH": 1_500_000, "KE": 2_000_000, "ZA": 2_500_000, "GB": 1_000_000, "US": 1_000_000}
+	for _, entry := range reader.ReadCommaSeparatedListOrDefault("ADS_POPULATION_BY_COUNTRY", nil) {
+		country, count, found := strings.Cut(entry, ":")
+		if parsed, err := strconv.ParseInt(count, 10, 64); found && err == nil && parsed >= 0 {
+			population[strings.ToUpper(country)] = parsed
+		}
+	}
+	return population
 }
