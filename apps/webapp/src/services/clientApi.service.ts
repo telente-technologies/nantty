@@ -89,6 +89,11 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
   return (await response.json()) as Payload;
 }
 
+export async function sendListRequestToWebappServer<Item>(apiPath: string, options: WebappRequestOptions = {}): Promise<Item[]> {
+  const payload = await sendRequestToWebappServer<Item[] | { readonly data?: readonly Item[] }>(apiPath, options);
+  return Array.isArray(payload) ? payload : [...(payload?.data ?? [])];
+}
+
 export function createIdempotencyKey(prefix = "idem"): string {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, "")}`;
 }

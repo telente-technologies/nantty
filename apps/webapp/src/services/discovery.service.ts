@@ -1,6 +1,6 @@
 import type { Clip, Page, Post, SuggestedLive, TrendingTopic, UserSummary } from "@/types";
 
-import { sendRequestToWebappServer } from "./clientApi.service";
+import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clientApi.service";
 
 export const discoveryService = {
   fetchSuggestedAccounts: () => sendRequestToWebappServer<UserSummary[]>("/api/v1/users/suggested"),
@@ -9,5 +9,5 @@ export const discoveryService = {
     sendRequestToWebappServer<Page<Clip>>("/api/v1/clips", { query: { tab: tab === "following" ? "following" : undefined, cursor: cursor ?? undefined } }),
   fetchVideosPage: (cursor: string | null) => sendRequestToWebappServer<Page<Post>>("/api/v1/videos", { query: { cursor: cursor ?? undefined } }),
   fetchVideoById: (videoId: string) => sendRequestToWebappServer<Post>(`/api/v1/videos/${videoId}`),
-  fetchSuggestedLives: () => sendRequestToWebappServer<SuggestedLive[]>("/api/v1/lives/suggested"),
+  fetchSuggestedLives: () => sendListRequestToWebappServer<SuggestedLive>("/api/v1/lives/suggested"),
 };

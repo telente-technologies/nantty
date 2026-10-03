@@ -19,7 +19,8 @@ export type ShareReferenceKind = "post" | "clip" | "video" | "product" | "live" 
 
 export interface CoinPurchaseCheckout {
   readonly reference: string;
-  readonly checkoutUrl: string;
+  readonly accessCode: string;
+  readonly authorizationUrl: string;
 }
 
 export interface AccountEmailStatus {
