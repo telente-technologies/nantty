@@ -52,7 +52,8 @@ function mergeAppBuyersIntoCustomerRoster(): void {
       city: order.shippingAddress.city,
       tags: [],
       notes: [],
-      loyaltyPoints: 0,
+      storeCreditBalance: { amountMinor: 0, currency: database.settings.currency },
+      storeCreditExpiresAt: null,
       totalSpent: { amountMinor: 0, currency: database.settings.currency },
       averageOrderValue: null,
       purchasesCount: 0,
@@ -81,8 +82,13 @@ export function addPurchaseStatsToCustomer(customer: Customer): Customer {
   const purchasesCount = orders.length + (baseline?.purchasesCount ?? 0);
   const spentMinor = orders.reduce((sum, order) => sum + order.total.amountMinor, 0) + (baseline?.spentMinor ?? 0);
   const currency = customer.totalSpent.currency;
+  const rewards = readMockDatabase().settings.storeRewards;
+  const creditMinor = rewards.enabled && purchasesCount > 0 ? Math.min(Math.round((spentMinor * rewards.percentBackBasisPoints) / 10_000), rewards.maxPerOrder.amountMinor * purchasesCount) : 0;
+  const lastPurchaseMs = purchaseTimes.length > 0 ? Math.max(...purchaseTimes) : null;
   return {
     ...customer,
+    storeCreditBalance: { amountMinor: creditMinor, currency },
+    storeCreditExpiresAt: creditMinor > 0 && lastPurchaseMs ? new Date(lastPurchaseMs + rewards.expiryDays * millisecondsInOneDay).toISOString() : null,
     city: customer.city ?? orders[0]?.shippingAddress.city ?? null,
     totalSpent: { amountMinor: spentMinor, currency },
     averageOrderValue: purchasesCount > 0 ? { amountMinor: Math.round(spentMinor / purchasesCount), currency } : null,

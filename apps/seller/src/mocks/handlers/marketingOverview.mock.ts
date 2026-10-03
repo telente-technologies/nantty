@@ -1,4 +1,5 @@
 import { findMarketingProductOptionOrThrow, isMarketingFeatureAvailableForRequest, listMarketingProductOptions, readMarketingState, requireMarketingPlanFeature } from "@/mocks/handlers/marketingState.mock";
+import { listCustomersWithPurchaseStats } from "@/mocks/handlers/customerInsights.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, readJsonObjectBody, requireMockStorePrincipal, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
@@ -66,6 +67,13 @@ function readFeaturedItemsInput(request: MockRequest): { productId: string; plac
 }
 
 export function registerMarketingOverviewMockRoutes(): void {
+  registerMockRoute("GET", "/seller/marketing/rewards/summary", (request) => {
+    requireMockStorePrincipal(request);
+    const currency = readMockDatabase().settings.currency;
+    const holders = listCustomersWithPurchaseStats().filter((customer) => customer.storeCreditBalance.amountMinor > 0);
+    const outstanding = holders.reduce((sum, customer) => sum + customer.storeCreditBalance.amountMinor, 0);
+    return respondWithJson(200, { outstandingLiability: { amountMinor: outstanding, currency }, customersWithCredit: holders.length, issuedLast30Days: { amountMinor: Math.round(outstanding * 0.4), currency }, redeemedLast30Days: { amountMinor: Math.round(outstanding * 0.15), currency } });
+  });
   registerMockRoute("GET", "/seller/marketing/overview", (request) => {
     requireMockStorePrincipal(request);
     return respondWithJson(200, buildMarketingOverview(request));

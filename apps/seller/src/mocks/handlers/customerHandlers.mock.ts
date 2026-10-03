@@ -1,8 +1,6 @@
 import { listCustomerPurchasesFromAppOrders, listCustomersWithPurchaseStats, addPurchaseStatsToCustomer } from "@/mocks/handlers/customerInsights.mock";
 import { findSegmentRulesOrThrow, registerCustomerSummaryAndSegmentMockHandlers } from "@/mocks/handlers/customerSegments.mock";
-import { describeMockActor } from "@/mocks/handlers/settingsEntitlements.mock";
-import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.mock";
-import { runOnceForIdempotencyKey } from "@/mocks/mockIdempotency.mock";
+import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import {
   MockHttpError,
   createMockIdentifier,
@@ -122,27 +120,6 @@ function registerCustomerDetailHandlers(): void {
     return respondWithJson(201, addPurchaseStatsToCustomer(updated));
   });
 
-  registerMockRoute("POST", "/seller/customers/:customerId/loyalty-adjustments", (request) =>
-    runOnceForIdempotencyKey(request, () => {
-      const principal = requireMockStorePrincipal(request);
-      const database = readMockDatabase();
-      const customerIndex = findCustomerIndexOrThrow(request.params.customerId ?? "");
-      const customer = database.customers[customerIndex] as Customer;
-      const body = readJsonObjectBody(request);
-      const pointsDelta = body.pointsDelta;
-      const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-      const issues: { path: string; message: string }[] = [];
-      if (typeof pointsDelta !== "number" || !Number.isSafeInteger(pointsDelta) || pointsDelta === 0 || Math.abs(pointsDelta) > 1_000_000) issues.push({ path: "pointsDelta", message: "Enter a whole number of points other than zero." });
-      if (reason.length < 3 || reason.length > 200) issues.push({ path: "reason", message: "Give a reason (3–200 characters)." });
-      if (issues.length > 0) return respondWithValidationFailure(issues);
-      const nextPoints = customer.loyaltyPoints + (pointsDelta as number);
-      if (nextPoints < 0) throw new MockHttpError(422, "POINTS_BELOW_ZERO", `This customer only has ${customer.loyaltyPoints} points.`);
-      const updated: Customer = { ...customer, loyaltyPoints: nextPoints };
-      database.customers[customerIndex] = updated;
-      appendMockAuditLogEntry({ actor: describeMockActor(principal), action: "customer.loyalty_adjusted", targetType: "customer", targetId: customer.id, summary: `${(pointsDelta as number) > 0 ? "Added" : "Removed"} ${Math.abs(pointsDelta as number)} points for ${customer.name}: ${reason}` });
-      return respondWithJson(200, updated);
-    }),
-  );
 }
 
 export function registerCustomerMockHandlers(): void {
@@ -165,7 +142,8 @@ export function registerCustomerMockHandlers(): void {
       zudomartUsername: null,
       city: null,
       notes: [],
-      loyaltyPoints: 0,
+      storeCreditBalance: { amountMinor: 0, currency: readMockDatabase().settings.currency },
+      storeCreditExpiresAt: null,
       totalSpent: { amountMinor: 0, currency: readMockDatabase().settings.currency },
       averageOrderValue: null,
       purchasesCount: 0,
@@ -181,10 +159,10 @@ export function registerCustomerMockHandlers(): void {
   registerMockRoute("GET", "/seller/customers/export", (request) => {
     requireMockStorePrincipal(request);
     const rows = filterAndSortCustomers(request).map((customer) => [
-      customer.name, customer.phone, customer.email, customer.zudomartUsername, customer.city, customer.tags.join(" "), customer.loyaltyPoints,
+      customer.name, customer.phone, customer.email, customer.zudomartUsername, customer.city, customer.tags.join(" "),
       convertMinorUnitsToMajorInputText(customer.totalSpent.amountMinor, customer.totalSpent.currency), customer.averageOrderValue ? convertMinorUnitsToMajorInputText(customer.averageOrderValue.amountMinor, customer.averageOrderValue.currency) : "", customer.totalSpent.currency, customer.purchasesCount, customer.firstPurchaseAt, customer.lastPurchaseAt, customer.marketingOptIn ? "yes" : "no",
     ]);
-    const csvText = convertRowsToCsvText(["Name", "Phone", "Email", "Zudomart username", "City", "Tags", "Loyalty points", "Total spent", "Average order value", "Currency", "Orders", "First order", "Last order", "Marketing opt-in"], rows);
+    const csvText = convertRowsToCsvText(["Name", "Phone", "Email", "Zudomart username", "City", "Tags", "Total spent", "Average order value", "Currency", "Orders", "First order", "Last order", "Marketing opt-in"], rows);
     return respondWithCsv("customers.csv", csvText);
   });
 

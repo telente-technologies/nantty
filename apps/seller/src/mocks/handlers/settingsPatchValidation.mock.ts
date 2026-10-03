@@ -1,7 +1,7 @@
 import type { StoreSettings } from "@/types/store.type";
 import { fieldChecks, validateObjectAgainstChecks, type FieldCheck, type ValidationIssue } from "@/utils/formValidation.util";
 
-const editableTopLevelKeys = new Set(["name", "description", "phone", "email", "address", "taxes", "pricesIncludeTax", "policies", "loyalty", "notifications"]);
+const editableTopLevelKeys = new Set(["name", "description", "phone", "email", "address", "taxes", "pricesIncludeTax", "policies", "storeRewards", "notifications"]);
 const basisPointsCheck = (label: string) => fieldChecks.integer({ label, min: 0, max: 10_000 });
 
 function prefixIssues(prefix: string, issues: ValidationIssue[]): ValidationIssue[] {
@@ -34,22 +34,16 @@ function validateTaxRates(value: unknown, knownCategoryIds: ReadonlySet<string>)
   return issues;
 }
 
-function validateLoyaltyRules(value: unknown, storeCurrency: string): ValidationIssue[] {
-  const issues = validateNestedObject(value, "loyalty", {
-    enabled: fieldChecks.boolean("Loyalty"),
-    minimumPointsToRedeem: fieldChecks.integer({ label: "Minimum points", min: 0, max: 1_000_000 }),
+function validateStoreRewards(value: unknown, storeCurrency: string): ValidationIssue[] {
+  const issues = validateNestedObject(value, "storeRewards", {
+    enabled: fieldChecks.boolean("Store rewards"),
+    percentBackBasisPoints: fieldChecks.integer({ label: "Reward percentage", min: 0, max: 2_000 }),
+    expiryDays: fieldChecks.integer({ label: "Expiry", min: 7, max: 730 }),
   });
-  const redeemValue = (value as { redeemValuePerPoint?: { amountMinor?: unknown; currency?: unknown } } | null)?.redeemValuePerPoint;
-  if (!redeemValue || typeof redeemValue.amountMinor !== "number" || !Number.isSafeInteger(redeemValue.amountMinor) || redeemValue.amountMinor < 0 || redeemValue.amountMinor > 10_000_000) {
-    issues.push({ path: "loyalty.redeemValuePerPoint", message: "Enter a valid value for each point." });
-  } else if (redeemValue.currency !== storeCurrency) {
-    issues.push({ path: "loyalty.redeemValuePerPoint", message: `Point value must be in your store currency (${storeCurrency}).` });
-  }
-  const spendRequired = (value as { spendRequiredPerPoint?: { amountMinor?: unknown; currency?: unknown } } | null)?.spendRequiredPerPoint;
-  if (!spendRequired || typeof spendRequired.amountMinor !== "number" || !Number.isSafeInteger(spendRequired.amountMinor) || spendRequired.amountMinor < 1 || spendRequired.amountMinor > 100_000_000) {
-    issues.push({ path: "loyalty.spendRequiredPerPoint", message: "Enter how much a customer spends to earn one point." });
-  } else if (spendRequired.currency !== storeCurrency) {
-    issues.push({ path: "loyalty.spendRequiredPerPoint", message: `Spend per point must be in your store currency (${storeCurrency}).` });
+  for (const key of ["minimumOrder", "maxPerOrder"] as const) {
+    const money = (value as Record<string, { amountMinor?: unknown; currency?: unknown } | undefined> | null)?.[key];
+    if (!money || typeof money.amountMinor !== "number" || !Number.isSafeInteger(money.amountMinor) || money.amountMinor < 0 || money.amountMinor > 1_000_000_000) issues.push({ path: `storeRewards.${key}`, message: "Enter a valid amount." });
+    else if (money.currency !== storeCurrency) issues.push({ path: `storeRewards.${key}`, message: `Amount must be in your store currency (${storeCurrency}).` });
   }
   return issues;
 }
@@ -68,7 +62,7 @@ export function validateStoreSettingsPatch(body: Record<string, unknown>, curren
   if (has("pricesIncludeTax")) topLevelChecks.pricesIncludeTax = fieldChecks.boolean("Prices include tax");
   issues.push(...validateObjectAgainstChecks(body, topLevelChecks));
   if (has("taxes")) issues.push(...validateTaxRates(body.taxes, knownCategoryIds));
-  if (has("loyalty")) issues.push(...validateLoyaltyRules(body.loyalty, current.currency));
+  if (has("storeRewards")) issues.push(...validateStoreRewards(body.storeRewards, current.currency));
   if (has("policies")) {
     issues.push(...validateNestedObject(body.policies, "policies", {
       returns: (value) => (typeof value === "string" && value.length <= 2000 ? null : "Keep the returns policy under 2,000 characters."),
