@@ -13,6 +13,7 @@ type EscrowSettings struct {
 	InspectionPeriod         time.Duration
 	SellerResponseWindow     time.Duration
 	AutoReleaseSweepInterval time.Duration
+	SellerCreditHoldPeriod   time.Duration
 }
 
 func ReadEscrowSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) EscrowSettings {
@@ -22,6 +23,7 @@ func ReadEscrowSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		InspectionPeriod:         reader.ReadDurationOrDefault("ESCROW_INSPECTION_PERIOD", 72*time.Hour),
 		SellerResponseWindow:     reader.ReadDurationOrDefault("ESCROW_SELLER_RESPONSE_WINDOW", 48*time.Hour),
 		AutoReleaseSweepInterval: reader.ReadDurationOrDefault("ESCROW_AUTO_RELEASE_SWEEP_INTERVAL", time.Minute),
+		SellerCreditHoldPeriod:   reader.ReadDurationOrDefault("SELLER_CREDIT_HOLD_PERIOD", 24*time.Hour),
 	}
 	if settings.PlatformCommissionBps < 0 || settings.PlatformCommissionBps > 10_000 {
 		reader.ReadRequiredString("ESCROW_PLATFORM_COMMISSION_BPS_BETWEEN_0_AND_10000")
