@@ -48,7 +48,7 @@ function StockTransfersPanel({ isDialogOpen, onDialogClose }: { readonly isDialo
 
   const columns: DataTableColumn<StockTransfer>[] = [
     { key: "reference", header: "Transfer", render: (transfer) => <strong>{transfer.reference}</strong> },
-    { key: "route", header: "Route", render: (transfer) => `${locationName(transfer.fromLocationId)} → ${locationName(transfer.toLocationId)}` },
+    { key: "route", header: "Route", render: (transfer) => `${locationName(transfer.fromLocationId)} to ${locationName(transfer.toLocationId)}` },
     { key: "items", header: "Items", render: (transfer) => transfer.lines.map((line) => `${line.quantity} × ${line.productName}${line.variantTitle !== "Default" ? ` (${line.variantTitle})` : ""}`).join(", ") },
     { key: "sent", header: "Sent", hideBelowTablet: true, render: (transfer) => `${formatDateTimeForDisplay(transfer.createdAt)} · ${transfer.createdBy.name}` },
     { key: "status", header: "Status", render: (transfer) => <StatusBadge tone={transferStatusTone[transfer.status]}>{transferStatusLabel[transfer.status]}</StatusBadge> },

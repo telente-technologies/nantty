@@ -66,7 +66,7 @@ export function InventoryLocationsView() {
           isLoading={locationsQuery.isLoading}
           errorMessage={locationsQuery.errorMessage}
           onRetry={locationsQuery.reload}
-          emptyState={<EmptyState iconName="mapPin24" title="No locations yet" description="Add your shop or warehouse in Settings → Locations." />}
+          emptyState={<EmptyState iconName="mapPin24" title="No locations yet" description="Add your shop or warehouse in Settings › Locations." />}
         />
       </Panel>
     </PageStack>
