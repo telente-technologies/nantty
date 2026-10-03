@@ -5,27 +5,30 @@ export interface LegalDocumentSection {
   readonly id: string;
   readonly heading: string;
   readonly paragraphs: readonly string[];
+  readonly bullets?: readonly string[];
+  readonly table?: { readonly columns: readonly string[]; readonly rows: readonly (readonly string[])[] };
 }
 
 interface LegalDocumentProps {
   readonly title: string;
   readonly summary: string;
-  readonly lastUpdatedLabel: string;
+  readonly versionLabel: string;
+  readonly effectiveDateLabel: string;
   readonly sections: readonly LegalDocumentSection[];
 }
 
-export function PlaceholderLegalDocument({ title, summary, lastUpdatedLabel, sections }: LegalDocumentProps) {
+export function PlaceholderLegalDocument({ title, summary, versionLabel, effectiveDateLabel, sections }: LegalDocumentProps) {
   return (
     <article className={`pageContainer ${styles.document}`}>
       <header className={styles.header}>
         <p className="eyebrowLabel">Legal</p>
         <h1 className={styles.title}>{title}</h1>
         <p className={styles.summary}>{summary}</p>
-        <p className={styles.updated}>{lastUpdatedLabel}</p>
+        <p className={styles.updated}>Version: {versionLabel} · Effective date: {effectiveDateLabel}</p>
         <p className={styles.placeholderNotice} role="note">
           <FigmaIconTintedWithCurrentColor name="warning20" size={20} />
           <span>
-            <strong>Draft placeholder.</strong> This text is a starting outline and has not been reviewed by a lawyer. The Zudomart team must replace it with approved legal copy before launch.
+            <strong>Draft — pending review by qualified legal counsel.</strong> This text is a working draft designed to support Nigeria&apos;s NDPA 2023 and, where it applies, the GDPR. It does not claim compliance with either and is not legal advice. It is not in effect until approved.
           </span>
         </p>
       </header>
@@ -51,6 +54,35 @@ export function PlaceholderLegalDocument({ title, summary, lastUpdatedLabel, sec
                   {paragraph}
                 </p>
               ))}
+              {documentSection.bullets ? (
+                <ul className={styles.bulletList}>
+                  {documentSection.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {documentSection.table ? (
+                <div className={styles.tableScroller}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        {documentSection.table.columns.map((column) => (
+                          <th key={column} scope="col">{column}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {documentSection.table.rows.map((row) => (
+                        <tr key={row[0]}>
+                          {row.map((cell, cellIndex) => (
+                            <td key={`${row[0]}-${cellIndex}`}>{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
             </section>
           ))}
         </div>
