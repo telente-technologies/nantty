@@ -6,6 +6,7 @@ import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup"
 import { SettingsPage } from "@/components/settings/settingsPage";
 import {
   BellRinging24Icon,
+  BookmarkSimple24Icon,
   BuildingStore20Icon,
   CaretRight24Icon,
   CreditCard24Icon,
@@ -25,7 +26,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { HeaderAction } from "@/components/ui/header";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { authService } from "@/services/auth.service";
@@ -33,6 +34,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { data: profile } = useMyProfileQuery();
   const creatorEntry = useCreatorEntry();
   const refreshToken = useAuthStore((s) => s.refreshToken);
@@ -84,7 +87,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
       </Pressable>
 
       <SettingsGroup>
-        <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.black} />} onPress={() => navigation.navigate("SettingsAccount")} />
+        <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.text} />} onPress={() => navigation.navigate("SettingsAccount")} />
         <SettingsRow label="Security & Password" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
         <SettingsRow label="Privacy" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} />
         <SettingsRow label="Privacy & Data" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacyData")} />
@@ -95,6 +98,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         <SettingsRow label="App Preference" icon={<SquaresFour24Icon />} onPress={() => navigation.navigate("SettingsAppPreference")} />
         <SettingsRow label="Payment Methods" icon={<CreditCard24Icon />} onPress={() => navigation.navigate("SettingsPaymentMethods")} />
         <SettingsRow label="Shipping Address" icon={<Truck24Icon />} onPress={() => navigation.navigate("ShippingAddresses")} />
+        <SettingsRow label="Saved" icon={<BookmarkSimple24Icon />} onPress={() => navigation.navigate("Saved")} />
       </SettingsGroup>
 
       <SettingsGroup>
@@ -106,7 +110,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => {
           if (!creatorEntry.isLoading) navigation.navigate(creatorEntry.route);
         }} />
-        <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.black} />} onPress={() => navigation.navigate("Verification")} />
+        <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.text} />} onPress={() => navigation.navigate("Verification")} />
         <SettingsRow label="Create business profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBusinessProfile")} />
         <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
         <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />
@@ -127,10 +131,10 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   profileCard: {
     height: 80,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     flexDirection: "row",
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   logOut: {
     height: 48,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     flexDirection: "row",
@@ -151,4 +155,4 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 6,
   },
-});
+}));

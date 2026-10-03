@@ -7,11 +7,12 @@ import { SettingsPage } from "@/components/settings/settingsPage";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 
 export function ChangePasswordScreen({ navigation }: MainScreenProps<"ChangePassword">) {
+  const { colors } = useTheme();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");

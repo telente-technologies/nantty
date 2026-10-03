@@ -3,9 +3,10 @@ import { Linking } from "react-native";
 
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export function SettingsAboutScreen() {
+  const { colors } = useTheme();
   return (
     <SettingsPage title="About">
       <SettingsGroup>

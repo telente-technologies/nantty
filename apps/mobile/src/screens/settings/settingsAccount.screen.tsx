@@ -5,13 +5,14 @@ import { PhoneNumberSheet } from "@/components/settings/phoneNumberSheet";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsAccount">) {
+  const { colors } = useTheme();
   const { data: profile } = useMyProfileQuery();
   const { data: settings } = useAccountSettingsQuery();
   const updateSettings = useUpdateAccountSettingsMutation();

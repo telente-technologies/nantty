@@ -5,12 +5,13 @@ import { ConnectionRow } from "@/components/profile/connectionRow";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { followsService } from "@/services/follows.service";
 
 const BLOCKED_USERS_QUERY_KEY = ["users", "me", "blocked"] as const;
 
 export function BlockedUsersScreen() {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const { data: blockedUsers = [], isLoading } = useQuery({ queryKey: BLOCKED_USERS_QUERY_KEY, queryFn: followsService.listMyBlockedUsers });
   const unblockUser = useMutation({
@@ -19,7 +20,7 @@ export function BlockedUsersScreen() {
   });
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title="Blocked users" />
       <FlatList
         data={blockedUsers}
