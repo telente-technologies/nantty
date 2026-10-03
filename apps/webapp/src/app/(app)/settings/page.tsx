@@ -12,6 +12,7 @@ const settingsLinks = [
   { href: "/verify-email", label: "Email", description: "Verify the email used for receipts and payments", icon: <MailIcon size={20} /> },
   { href: "/me", label: "Profile", description: "Your public profile, posts and followers", icon: <UserIcon size={20} /> },
   { href: "/saved", label: "Saved items", description: "Posts, videos, clips and products you bookmarked", icon: <BookmarkIcon size={20} /> },
+  { href: "/settings/reports", label: "Your reports", description: "Status of chats, messages and accounts you reported", icon: <LockIcon size={20} /> },
   { href: "/orders", label: "Orders", description: "Tracking, escrow and receipts", icon: <OrdersIcon size={20} /> },
 ];
 
