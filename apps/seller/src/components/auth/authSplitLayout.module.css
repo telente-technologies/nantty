@@ -11,15 +11,15 @@
   gap: 32px;
   padding: 40px clamp(32px, 5vw, 64px) 0;
   overflow: hidden;
-  color: #fff;
+  color: var(--color-on-brand);
   background:
-    radial-gradient(90% 60% at 100% 0%, rgb(245 227 32 / 0.18), transparent 60%),
+    radial-gradient(90% 60% at 100% 0%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 60%),
     radial-gradient(120% 80% at 0% 100%, var(--blue-400), transparent 65%),
     linear-gradient(160deg, var(--blue-600), var(--blue-900));
 }
 
 .brandLink {
-  color: #fff;
+  color: var(--color-on-brand);
   align-self: flex-start;
 }
 
@@ -50,8 +50,8 @@
 .syncList li {
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: rgb(255 255 255 / 0.12);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-on-brand) 18%, transparent);
   font-size: 13px;
   font-weight: 600;
 }
@@ -71,7 +71,7 @@
   max-width: none;
   height: auto;
   border-radius: 14px 14px 0 0;
-  box-shadow: 0 -2px 0 rgb(255 255 255 / 0.2), 0 30px 80px -20px rgb(0 0 0 / 0.6);
+  box-shadow: 0 -2px 0 color-mix(in srgb, var(--color-on-brand) 20%, transparent), 0 30px 80px -20px rgb(0 0 0 / 0.6);
 }
 
 .caption {
@@ -84,7 +84,7 @@
   max-width: 360px;
   padding: 10px 14px 10px 10px;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-elevated);
   color: var(--ink-strong);
   box-shadow: var(--shadow-float);
   font-size: 13px;

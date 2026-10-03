@@ -54,7 +54,7 @@ export function LoginForm({ nextPath, initialIdentifier, getTheAppUrl }: { reado
           Sign in
         </Button>
       </form>
-      <p className={styles.syncNote}>Your products, stock, orders, customers and wallet are the same here as in the app. A sale at your counter updates the app straight away.</p>
+      <p className={styles.syncNote}>Your products, stock, orders, customers and wallet are the same here as in the app. Changes here show in the app straight away.</p>
       <p className={styles.footnote}>
         New to Zudomart? <a href={getTheAppUrl}>Get the app</a> to create your account and verify your business.
       </p>

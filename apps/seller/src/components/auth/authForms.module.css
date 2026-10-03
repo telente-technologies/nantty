@@ -34,7 +34,7 @@
   padding: 12px 14px;
   border-radius: var(--radius-medium);
   background: var(--blue-tint);
-  color: var(--blue-900);
+  color: var(--ink-strong);
   font-size: 13px;
 }
 
@@ -53,7 +53,7 @@
   align-self: center;
   border: 0;
   background: none;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .primaryLink {
@@ -62,13 +62,13 @@
   justify-content: center;
   height: 52px;
   border-radius: var(--radius-small);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 650;
 }
 
 .primaryLink:hover {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
   text-decoration: none;
 }
 
