@@ -13,7 +13,7 @@
   font-size: var(--text-3xl);
   font-weight: 800;
   letter-spacing: var(--tracking-display);
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .title {
@@ -23,5 +23,5 @@
 .link {
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
