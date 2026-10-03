@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { ActivityIndicator, Linking, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
@@ -17,6 +17,8 @@ import { brandsService } from "@/services/brands.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { BrandDetail } from "@/types/brand.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 export function BrandProfileScreen({ navigation, route }: MainScreenProps<"BrandProfile">) {
   const { brandId } = route.params;
@@ -35,7 +37,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
     return (
       <Screen>
         <Header title="Brand" />
-        {brand.isError ? <Text align="center" style={styles.state}>Couldn't load this brand.</Text> : <ActivityIndicator style={styles.state} color={colors.primary} />}
+        {brand.isError ? <ErrorState message="Couldn't load this brand." onRetry={() => brand.refetch()} /> : <ListSkeleton />}
       </Screen>
     );
   }
@@ -107,7 +109,6 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  state: { marginTop: 64 },
   content: { paddingBottom: 40, gap: 12 },
   cover: { marginHorizontal: 12, height: 110, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
   identity: { paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 12 },
