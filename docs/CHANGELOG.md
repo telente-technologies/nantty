@@ -273,6 +273,15 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 
 ## apps/webapp
 
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/components/privacy/consentBannerHost.tsx`, `src/components/providers/appProviders.tsx` | **New.** Mounts the shared `CookieConsentBanner`; signed-in choices POST to the app's mock consents endpoint. |
+| `src/mocks/privacy.mock.ts`, `src/mocks/index.ts` | **New.** `POST /api/v1/consents` (banner) plus `GET/PUT /users/me/consents`, data-export status/request and deletion, mirroring mobile. |
+| `src/app/(app)/settings/page.tsx`, `settings/privacy/page.tsx`, `src/components/settings/*`, `src/services/privacy.service.ts`, `src/types/privacy.type.ts`, `src/config/legalLinks.config.ts` | **New.** Settings hub and Privacy & Data: personalization, personalized ads, analytics and marketing toggles, Download my data, Delete account explanation with DELETE confirmation, policy links. |
+| `src/components/profile/profileView.tsx` | Settings icon link restored (the Edit profile button stays hidden). |
+
 Auth was rebuilt to mirror `apps/mobile` exactly — no invented forms, copy, icons or behaviour. The desktop layout now carries the `apps/web` landing-page look.
 
 ### Assets (copied, not drawn)
@@ -373,6 +382,13 @@ Verified headless (Chrome CDP): `/welcome` label `Use email` in login mode → `
 
 ## apps/studio
 
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/components/privacy/consentBannerHost.tsx`, `src/components/providers/appProviders.tsx` | **New.** Mounts the shared cookie consent banner. |
+| `src/mocks/consents.mock.ts`, `src/mocks/index.ts` | **New.** `POST/GET /api/v1/consents` mock. |
+
 New app: **`studio.zudomart.com`** (local port **3600**, package `@zudomart/studio`). Creator-facing broadcast control room, mock-driven exactly like the mobile app and the webapp (`STUDIO_USE_MOCKS`, on by default).
 
 ### Scaffold
@@ -448,6 +464,18 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 
 ## apps/seller
 
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/types/shipping.type.ts`, `src/utils/shippingCalculation.util.ts`, `src/utils/shippingDestinationSelection.util.ts`, `src/constants/nigeriaGeo.constant.ts` | **New.** ShippingProfile / Zone / Rule / Destination shapes (`Money` amounts); most-specific-wins resolution (LGA over state over country; free rule, then free threshold, then flat fee); 36 states + FCT with LGAs for Lagos, Ogun, Oyo, FCT, Rivers, Kano, Kaduna, Enugu, Anambra, Edo and Delta. |
+| `src/components/delivery/shipping/*`, `src/app/(workspace)/delivery/shipping`, `src/app/(workspace)/settings/shipping` | **New.** Shipping rules page (Delivery tab and Settings tab): rules DataTable with per-rule active toggle, destination tree (Country, State, LGA with select-all at each level), free-shipping threshold, live preview ("A customer in Ogun ordering ₦30,000 pays ₦2,000 shipping"), per-order-group notice. |
+| `src/components/orders/orderShippingSnapshotPanel.tsx`, `orderDetailView.tsx` | Order detail shows the shipping calculation snapshot (destination, rule applied, fee or free). |
+| `src/mocks/handlers/shippingHandlers.mock.ts`, `src/mocks/seed/demoShippingProfile.mock.ts`, `src/config/rolePermissions.config.ts` | **New.** `/seller/shipping/*` and `/seller/orders/:id/shipping-snapshot` mocks; gateway permissions (`delivery:manage`). |
+| `src/config/planFeatures.config.ts` | `shipping_rules` feature, minimum plan Free (never gated). |
+| `src/components/privacy/consentBannerHost.tsx`, `src/app/layout.tsx`, `src/mocks/handlers/consentsHandlers.mock.ts`, `next.config.ts`, `package.json` | **New.** Cookie consent banner, `POST /seller/consents` mock, `@zudomart/web-kit` dependency. |
+| `apiContract.md` | New "Shipping configuration" section. |
+
 ### Seller operating system (dashboard.zudomart.com) — mock mode
 
 **ZudoMart App = sell from anywhere. ZudoMart Dashboard = run your business.** Free for every approved seller; Pro and Business unlock extra tools. Details and status in [plans.md §19](./plans.md).
@@ -474,6 +502,15 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/web
 
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/app/privacy/page.tsx`, `src/content/privacyPolicy.content.ts` | Rewritten as a full DRAFT: data collected, purposes, legal basis, sharing (Paystack, Flutterwave, hosting, analytics, advertising), transfers, retention (no invented periods), security, rights, contact, updates. |
+| `src/app/cookies/page.tsx`, `src/content/cookiePolicy.content.ts`, `src/app/sitemap.ts` | **New.** Cookie Policy: essential, analytics, personalization, advertising. |
+| `src/components/legal/legalDocument.tsx` + css | "Draft — pending review by qualified legal counsel" notice, version and effective date placeholders, bullet lists and tables. `/terms` uses the same notice. |
+| `src/components/layout/siteFooter.tsx`, `cookieSettingsButton.tsx`, `src/app/layout.tsx`, `next.config.ts`, `package.json` | Footer Cookie policy link and Cookie settings button; banner mounted; `@zudomart/web-kit` dependency. |
+
 ### Creator (non-selling) live copy
 
 | File | Change |
@@ -486,9 +523,37 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/admin
 
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/components/privacy/consentBannerHost.tsx`, `src/app/layout.tsx` | **New.** Mounts the cookie consent banner. |
+| `src/mocks/handlers/platform/consents.mock.ts`, `src/config/apiAccess.config.ts` | **New.** `POST /admin/consents` mock; any signed-in admin may call it. |
+
 | File | Change |
 | --- | --- |
 | `src/components/auth/authCard.module.css` | Removed the decorative `4px solid var(--yellow-500)` accent bars on the sign-in brand panel (`border-right` on desktop, `border-bottom` under 900px), per the "no arbitrary decorative bars" rule. |
+
+---
+
+## apps/ads
+
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/components/privacy/consentBannerHost.tsx`, `src/app/layout.tsx` | **New.** Mounts the cookie consent banner. |
+| `src/mocks/handlers/consents.mock.ts`, `src/mocks/mockHandlerRegistry.mock.ts`, `src/config/rolePermissions.config.ts` | **New.** `POST /ads/consents` mock; signed-in-only path. |
+
+---
+
+## packages/webKit
+
+### Shipping config & web privacy (§23)
+
+| File | Change |
+| --- | --- |
+| `src/consent/*`, `src/index.ts` | **New.** `CookieConsentBanner` (Accept all, Reject optional, Manage with per-category toggles), `useConsent(category)`, `ConsentGuard`, `openCookieSettings`. Choice stored in the first-party `zudomart_consent` cookie with the policy version; optional scripts must be wrapped in `ConsentGuard`. |
 
 ---
 

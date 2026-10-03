@@ -828,3 +828,24 @@ Contracts: backendPlan §4.6 and §4.7. Mock mode only; `services/**` untouched.
 
 - Differences from backendPlan: the plan has no consents GET/PUT, no export-status GET and no city level in geo, so the mock uses `GET/PUT /users/me/consents`, `GET /privacy/exports/latest` and `GET /geo/admin-areas/:id/cities`. Cart groups use flat `storeName` and no `fees`/`taxes`/`badge`; the grand total is `itemsTotal`/`shipping`/`total` on `Cart` (no `grandTotal`/`currency`); quotes add `isFree`, `freeThreshold`, `amountToFreeShipping`. Consent keys are `essential` omitted (not toggleable), `analytics`, `personalization`, `advertising`, `marketing`.
 - **[LATER]** Real geo dataset (all LGAs, cities), carrier rates, per-item weight rules, stored shipping on orders, real data-export job and deletion grace-period cancel.
+
+## 23. Shipping config & web privacy **[DONE: mock]**
+
+Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship themselves; ZudoMart validates and calculates. Shipping is priced per order group, never per item.
+
+| # | Feature | Scope | Marker |
+| --- | --- | --- | --- |
+| 1 | Seller shipping rules | Delivery > Shipping rules (also Settings > Shipping): destination tree Country > State > LGA with select-all at each level, flat fee or free per destination group, free-shipping threshold, per-rule active toggle, live preview, per-order-group notice. Free plan (`shipping_rules`, minimum plan free) | **[DONE]** |
+| 2 | Order shipping snapshot | Order detail shows destination, rule applied, and fee or free | **[DONE]** |
+| 3 | Seller API contract | `apiContract.md` "Shipping configuration": ShippingProfile / ShippingZone / ShippingRule / ShippingDestination, `/seller/shipping/*`, `/seller/orders/:id/shipping-snapshot` | **[DONE]** |
+| 4 | Marketing legal pages | `/privacy` and `/cookies` rewritten or added as DRAFTS with a "pending review by qualified legal counsel" notice and version and effective-date placeholders; `/terms` carries the same notice; footer links | **[DONE]** |
+| 5 | Cookie consent | `@zudomart/web-kit` banner, `useConsent(category)`, `ConsentGuard`; first-party cookie with policy version; signed-in choices POST to a mock consents endpoint; mounted in web, webapp, studio, seller, ads, admin | **[DONE]** |
+| 6 | Webapp Privacy & Data | `/settings` hub and `/settings/privacy` mirroring mobile; settings link restored on the profile | **[DONE]** |
+
+### 23.1 Notes
+
+- Resolution order: the most specific matching active rule wins (LGA, then state, then country); a free rule gives free shipping; otherwise a free threshold at or above the order group subtotal gives free shipping; otherwise the flat fee. No match means the address cannot check out.
+- The consents endpoint is `POST /bff/api/v1/consents` in webapp and studio. The seller, ads and admin gateways only allow their own namespaces, so those apps use `/bff/seller/consents`, `/bff/ads/consents` and `/bff/admin/consents`.
+- Policy text is a draft and makes no compliance claim. Retention periods, the processor list, the cookie inventory and the legal entity details are marked for the team and counsel to fill in.
+- **[LATER]** LGAs for the remaining states, carrier rates, per-item weight rules, snapshot stored on the order at checkout by the real backend, optional scripts (analytics and advertising SDKs) wrapped in `ConsentGuard` once chosen, real consent storage and audit trail.
+
