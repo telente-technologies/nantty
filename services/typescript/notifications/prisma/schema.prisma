@@ -1,0 +1,135 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Notification {
+  id         String    @id @default(uuid())
+  userId     String
+  dedupeKey  String    @unique
+  category   String
+  kind       String?
+  templateKey String?
+  title      String
+  body       String
+  actor      Json?
+  data       Json      @default("{}")
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt(sort: Desc), id])
+  @@index([userId, readAt])
+  @@index([userId, kind, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model Delivery {
+  id                String   @id @default(uuid())
+  dedupeKey         String   @unique
+  eventId           String
+  userId            String?
+  channel           String
+  templateKey       String?
+  mailKind          String?
+  status            String
+  skipReason        String?
+  providerMessageId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId, channel, mailKind, status, createdAt])
+  @@index([eventId])
+  @@index([providerMessageId])
+  @@map("deliveries")
+}
+
+model NotificationPreference {
+  id        String   @id @default(uuid())
+  userId    String
+  category  String
+  push      Boolean  @default(true)
+  email     Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, category])
+  @@map("notification_preferences")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model EmailSuppression {
+  email     String   @id
+  reason    String
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([reason])
+  @@map("email_suppressions")
+}
+
+model BulkCampaign {
+  id                       String    @id @default(uuid())
+  kind                     String
+  status                   String
+  subject                  String
+  payload                  Json
+  audienceKind             String
+  audienceLabel            String
+  audienceRef              String
+  mailKind                 String
+  recipientCount           Int       @default(0)
+  sentCount                Int       @default(0)
+  skippedNoMarketingConsent Int      @default(0)
+  skippedHardBounces       Int       @default(0)
+  skippedSuppressed        Int       @default(0)
+  failedCount              Int       @default(0)
+  batchSize                Int
+  ratePerSecond            Int
+  batchesTotal             Int       @default(0)
+  batchesDone              Int       @default(0)
+  nextCursor               String?
+  reason                   String?
+  queuedById               String
+  queuedByName             String
+  versionId                String?
+  createdAt                DateTime  @default(now())
+  completedAt              DateTime?
+
+  @@index([kind, createdAt(sort: Desc)])
+  @@index([versionId, status])
+  @@map("bulk_campaigns")
+}
+
+model NoticeDraft {
+  versionId     String   @id
+  documentKey   String
+  documentTitle String
+  versionNumber Int      @default(1)
+  subject       String
+  summaryText   String
+  whatChanged   Json     @default("[]")
+  effectiveAt   DateTime
+  reacceptNote  String?
+  documentUrl   String
+  requiresReacceptance Boolean @default(false)
+  updatedByName String?
+  updatedAt     DateTime @default(now()) @updatedAt
+  testSends     Json     @default("[]")
+
+  @@map("notice_drafts")
+}
