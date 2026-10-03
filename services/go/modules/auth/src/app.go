@@ -84,6 +84,9 @@ func StartAuthModuleWithSettings(ctx context.Context, settings configs.AuthSetti
 		Delivery: integrations.DevelopmentLogDelivery{Logger: logger}, Social: social, Keys: keys, Logger: logger, Now: time.Now,
 		AccessVerifier: jwtauth.NewAccessTokenVerifierFromKeySetProvider(keys.PublishedPublicKeySet, settings.TokenIssuer, settings.TokenAudience),
 	}
+	if settings.OneTimeCodeDeliveryMode == "event" {
+		authContainer.Delivery = integrations.EventDelivery{ExpiresIn: settings.OneTimeCodeTimeToLive, Write: services.WriteOneTimeCodeEvent(authContainer)}
+	}
 	identityports.Default.RegisterAccountDirectory(services.AccountDirectoryService{Container: authContainer})
 	identityports.Default.RegisterAccountEnforcement(services.AccountEnforcementService{Container: authContainer})
 	identityports.Default.RegisterStaffTokenService(signingkeyservices.StaffTokenService{Issuer: tokenIssuer, Keys: keys, TimeToLive: settings.StaffAccessTokenTimeToLive})
