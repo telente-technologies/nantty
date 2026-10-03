@@ -41,14 +41,14 @@ function readStore(): AccountsAdminStore {
   return readMockAreaStore<AccountsAdminStore>("people:accountsAdmin", () => ({ profileTypes: new Map(), created: [], grants: [] }));
 }
 
-const colorByProfileType: Record<ProfileType, VerificationColor> = { PERSONAL: "BLUE", CREATOR: "BLUE", BUSINESS: "GOLD", BRAND: "GOLD", GOVERNMENT: "BLACK" };
+const colorByProfileType: Record<ProfileType, VerificationColor> = { PERSONAL: "BLUE", BUSINESS: "GOLD", BRAND: "GOLD", GOVERNMENT: "BLACK" };
 
 export function readProfileTypeForUser(user: MockPlatformUserRecord): ProfileType {
   const stored = readStore().profileTypes.get(user.id);
   if (stored) return stored;
   if (user.verification?.color === "BLACK") return "GOVERNMENT";
   if (user.isSeller) return "BUSINESS";
-  return user.isCreator ? "CREATOR" : "PERSONAL";
+  return "PERSONAL";
 }
 
 function presentGrant(record: GrantRecord): CheckmarkGrant {
@@ -83,7 +83,7 @@ export function registerPeopleAccountsAdminMockHandlers(): void {
     const email = readRequiredTrimmedString(body, "email", 120, 5).toLowerCase();
     const password = readRequiredTrimmedString(body, "password", 128, 12);
     const country = readEnumValue(body, "country", countries);
-    const profileType = readEnumValue(body, "profileType", ["PERSONAL", "CREATOR", "BUSINESS", "BRAND", "GOVERNMENT"] as const);
+    const profileType = readEnumValue(body, "profileType", ["PERSONAL", "BUSINESS", "BRAND", "GOVERNMENT"] as const);
     const reason = readRequiredReason(body);
     if (!isValidUsernameShape(username)) failValidation("username", "Use 3–30 lowercase letters, numbers, dots or underscores.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) failValidation("email", "Enter a valid email address.");
