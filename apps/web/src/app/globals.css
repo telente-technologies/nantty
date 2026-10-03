@@ -11,6 +11,48 @@
   --ink-faint: var(--color-text-subtle);
   --divider: var(--color-border-strong);
 
+  --ink-accent: var(--blue-600);
+  --icon-brand: var(--blue-500);
+  --fill-brand: var(--color-brand-solid);
+  --fill-brand-hover: var(--color-brand-solid-hover);
+  --ink-on-fill: var(--color-on-brand);
+  --surface-tint-blue: var(--blue-50);
+  --surface-tint-blue-soft: var(--color-brand-tint);
+  --surface-tint-blue-disc: var(--blue-200);
+  --ink-on-tint-blue: var(--blue-700);
+  --surface-night: var(--blue-900);
+  --surface-night-glow: rgb(32 67 245 / 0.45);
+  --surface-night-chip: rgb(255 255 255 / 0.08);
+  --ink-on-night: #ffffff;
+  --ink-on-night-muted: var(--blue-100);
+  --ink-on-night-subtle: var(--blue-200);
+  --line-on-night: rgb(181 193 252 / 0.22);
+  --surface-brand-band: var(--blue-500);
+  --surface-brand-glow: var(--blue-400);
+  --surface-sunshine: var(--yellow-500);
+  --surface-sunshine-soft: var(--yellow-50);
+  --surface-sunshine-muted: var(--yellow-100);
+  --ink-on-sunshine: #2b2806;
+  --ink-on-sunshine-accent: var(--yellow-900);
+  --badge-gold: #7d6f00;
+  --surface-paper: var(--color-surface);
+  --surface-glass: rgb(255 255 255 / 0.82);
+  --surface-glass-strong: rgb(255 255 255 / 0.94);
+  --line-hairline: rgb(11 23 82 / 0.08);
+  --surface-inverse: #0a0a14;
+  --ink-on-inverse: #ffffff;
+  --shadow-lift: 0 30px 60px -24px rgb(11 23 82 / 0.4);
+  --shadow-receipt: 0 40px 80px -30px rgb(0 0 0 / 0.55);
+  --device-body: linear-gradient(145deg, #1d1f2b, #05060b 60%, #22242f);
+  --device-edge: rgb(255 255 255 / 0.12);
+  --device-shadow: 0 2px 4px rgb(11 23 82 / 0.12), 0 30px 60px -24px rgb(11 23 82 / 0.45);
+  --live-pulse: rgb(239 68 68 / 0.6);
+  --live-pulse-faded: rgb(239 68 68 / 0);
+  --coin-inset: rgb(82 76 11 / 0.25);
+  --error-scene-backdrop: radial-gradient(120% 80% at 50% 110%, #4563f7 0%, rgb(69 99 247 / 0) 60%), linear-gradient(160deg, #10227a 0%, #1b39cc 55%, #2043f5 100%);
+  --error-scene-shade: linear-gradient(to bottom, rgb(11 23 82 / 0.1) 0%, rgb(11 23 82 / 0) 35%, rgb(11 23 82 / 0.78) 100%);
+  --error-scene-shade-compact: linear-gradient(to bottom, rgb(11 23 82 / 0.05) 0%, rgb(11 23 82 / 0.35) 40%, rgb(11 23 82 / 0.85) 100%);
+
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --tracking-tight: -0.02em;
   --tracking-display: -0.045em;
@@ -23,7 +65,85 @@
   --content-width: 1200px;
   --section-space: clamp(72px, 10vw, 136px);
 
-  --focus-ring: 0 0 0 3px var(--surface-app), 0 0 0 5px var(--blue-500);
+  --focus-ring: 0 0 0 3px var(--surface-app), 0 0 0 5px var(--color-focus);
+}
+
+:root[data-theme="dark"] {
+  --ink-accent: var(--color-brand);
+  --icon-brand: var(--color-brand);
+  --surface-tint-blue: var(--color-brand-tint);
+  --surface-tint-blue-disc: #26307a;
+  --ink-on-tint-blue: var(--blue-100);
+  --surface-night: #0f1641;
+  --surface-night-glow: rgb(69 99 247 / 0.3);
+  --surface-brand-band: #1c31ad;
+  --surface-brand-glow: #3650e6;
+  --surface-sunshine-soft: #1e1c0d;
+  --surface-sunshine-muted: #24210c;
+  --badge-gold: var(--yellow-500);
+  --surface-paper: var(--color-elevated);
+  --surface-glass: rgb(20 23 38 / 0.9);
+  --surface-glass-strong: rgb(20 23 38 / 0.96);
+  --line-hairline: var(--color-border);
+  --surface-inverse: var(--color-elevated);
+  --shadow-lift: 0 0 0 1px var(--color-border), 0 30px 60px -24px rgb(0 0 0 / 0.7);
+  --shadow-receipt: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
+  --device-edge: rgb(255 255 255 / 0.16);
+  --device-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 30px 60px -24px rgb(0 0 0 / 0.75);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink-accent: var(--color-brand);
+    --icon-brand: var(--color-brand);
+    --surface-tint-blue: var(--color-brand-tint);
+    --surface-tint-blue-disc: #26307a;
+    --ink-on-tint-blue: var(--blue-100);
+    --surface-night: #0f1641;
+    --surface-night-glow: rgb(69 99 247 / 0.3);
+    --surface-brand-band: #1c31ad;
+    --surface-brand-glow: #3650e6;
+    --surface-sunshine-soft: #1e1c0d;
+    --surface-sunshine-muted: #24210c;
+    --badge-gold: var(--yellow-500);
+    --surface-paper: var(--color-elevated);
+    --surface-glass: rgb(20 23 38 / 0.9);
+    --surface-glass-strong: rgb(20 23 38 / 0.96);
+    --line-hairline: var(--color-border);
+    --surface-inverse: var(--color-elevated);
+    --shadow-lift: 0 0 0 1px var(--color-border), 0 30px 60px -24px rgb(0 0 0 / 0.7);
+    --shadow-receipt: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
+    --device-edge: rgb(255 255 255 / 0.16);
+    --device-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 30px 60px -24px rgb(0 0 0 / 0.75);
+  }
+}
+
+.lightIsland {
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-text: #0a0a14;
+  --color-text-muted: #5b5b6b;
+  --color-text-subtle: #68687b;
+  --color-border: #e4e6f2;
+  --color-border-strong: #cdd1e6;
+  --color-focus: #0a0a14;
+  --surface-card: var(--color-surface);
+  --surface-paper: var(--color-surface);
+  --ink-strong: var(--color-text);
+  --ink-muted: var(--color-text-muted);
+  --ink-faint: var(--color-text-subtle);
+  --divider: var(--color-border-strong);
+  --ink-accent: var(--blue-700);
+  --icon-brand: var(--blue-500);
+  --fill-brand: var(--blue-500);
+  --fill-brand-hover: var(--blue-600);
+  --surface-tint-blue: var(--blue-50);
+  --ink-on-tint-blue: var(--blue-700);
+  --line-hairline: rgb(11 23 82 / 0.08);
+  --shadow-lift: 0 30px 60px -24px rgb(11 23 82 / 0.4);
+  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 12px 32px -12px rgb(11 23 82 / 0.22);
+  --focus-ring: 0 0 0 3px var(--surface-sunshine), 0 0 0 5px #0a0a14;
+  color: var(--ink-strong);
 }
 
 *,
@@ -40,6 +160,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--surface-app);
   color: var(--ink-strong);
   font-family: var(--font-sans);
@@ -132,8 +253,8 @@ textarea {
   z-index: 100;
   padding: 12px 18px;
   border-radius: var(--radius-pill);
-  background: var(--ink-strong);
-  color: #fff;
+  background: var(--fill-brand);
+  color: var(--ink-on-fill);
   font-weight: 600;
   text-decoration: none;
 }
@@ -150,7 +271,7 @@ textarea {
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--blue-600);
+  color: var(--ink-accent);
 }
 
 .tabularFigure {

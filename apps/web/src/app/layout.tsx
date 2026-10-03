@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
-import { CookieConsentBanner } from "@zudomart/web-kit";
+import { CookieConsentBanner, ThemeInitScript, themeViewport } from "@zudomart/web-kit";
 
 import { LaunchAnnouncementBar } from "@/components/layout/announcementBar";
 import { SiteFooterWithGiantWordmark } from "@/components/layout/siteFooter";
 import { SiteHeaderWithFloatingNavigation } from "@/components/layout/siteHeader";
+import { SiteThemeProvider } from "@/components/layout/siteThemeProvider";
 import { siteConfig } from "@/lib/siteConfig.config";
 
 import "./globals.css";
@@ -40,15 +41,19 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2043F5",
+  ...themeViewport,
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en-NG" className={interFont.variable}>
+    <html lang="en-NG" className={interFont.variable} suppressHydrationWarning>
+      <head>
+        <ThemeInitScript />
+      </head>
       <body>
+        <SiteThemeProvider>
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
@@ -59,6 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         </main>
         <SiteFooterWithGiantWordmark />
         <CookieConsentBanner />
+        </SiteThemeProvider>
       </body>
     </html>
   );
