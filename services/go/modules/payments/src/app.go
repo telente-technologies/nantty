@@ -16,7 +16,9 @@ import (
 	connectedaccountroutes "zudomart/modules/payments/src/modules/connectedAccounts/routes"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/services"
+	payoutonboardingroutes "zudomart/modules/payments/src/modules/payoutOnboarding/routes"
 	reconciliationroutes "zudomart/modules/payments/src/modules/reconciliation/routes"
+	savedcardroutes "zudomart/modules/payments/src/modules/savedCards/routes"
 	webhookroutes "zudomart/modules/payments/src/modules/webhooks/routes"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/servicemodule"
@@ -36,6 +38,16 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		return nil, err
 	}
 	services.PublishSharedPaymentGateway(module.Application.Gateway)
+	gateway := module.Application.Gateway
+	loaders.RegisterMoneyDomainEventHandler("creatorApplication.approved", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var data struct {
+			AccountId string `json:"accountId"`
+		}
+		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		return gateway.HandleCreatorApproved(ctx, data.AccountId)
+	})
 	ledgerjobs.RegisterProviderMirrorReconciler(module.Application.Gateway)
 	return module, nil
 }
@@ -61,6 +73,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	connectedaccountroutes.MountConnectedAccountsRoutes(mux, module.Application)
 	bankroutes.MountBanksRoutes(mux, module.Application)
 	reconciliationroutes.MountReconciliationRoutes(mux, module.Application)
+	savedcardroutes.MountSavedCardsRoutes(mux, module.Application)
+	payoutonboardingroutes.MountPayoutOnboardingRoutes(mux, module.Application)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -68,7 +82,16 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	gateway := module.Application.Gateway
 	go runEveryIntervalUntilContextDone(ctx, 5*time.Minute, func(ctx context.Context) {
 		gateway.RetryPendingRefunds(ctx, 100)
+		gateway.RetryUnprocessedWebhooks(ctx, 100)
 		_, _ = gateway.CancelPendingIntentsThatNeverOpenedACheckout(ctx, 30*time.Minute)
+	})
+	go runEveryIntervalUntilContextDone(ctx, 30*time.Second, func(ctx context.Context) {
+		gateway.ProcessDueConnectedAccountJobs(ctx, 50)
+	})
+	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
+		if _, err := gateway.ReconcileStuckConnectedAccounts(ctx, 24*time.Hour); err != nil && ctx.Err() == nil {
+			container.Resources.Logger.WarnContext(ctx, "payout account reconciliation failed", "error", err)
+		}
 	})
 	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
 		if _, err := gateway.PollOpenProviderDisputes(ctx); err != nil && ctx.Err() == nil {

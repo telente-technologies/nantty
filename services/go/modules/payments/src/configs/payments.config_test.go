@@ -6,37 +6,31 @@ import (
 	"zudomart/modules/ledger/src/loaders"
 )
 
-func TestBachsKeysAndBaseUrlMustMatchTheEnvironment(t *testing.T) {
+func TestPaystackKeyAndFeeSettingsMustMatchTheEnvironment(t *testing.T) {
 	cases := []struct {
-		environment string
-		key         string
-		baseUrl     string
-		secrets     []string
-		problems    int
+		environment, key, mode string
+		fee, business          int64
+		problems               int
 	}{
-		{"production", "sk_live_x", BachsProductionBaseUrl, []string{"whsec"}, 0},
-		{"production", "sk_sandbox_x", BachsProductionBaseUrl, []string{"whsec"}, 1},
-		{"production", "sk_live_x", BachsSandboxBaseUrl, []string{"whsec"}, 1},
-		{"development", "sk_sandbox_x", BachsSandboxBaseUrl, []string{"whsec"}, 0},
-		{"development", "sk_live_x", BachsProductionBaseUrl, []string{"whsec"}, 2},
-		{"development", "sk_sandbox_x", BachsSandboxBaseUrl, nil, 1},
-		{"development", "", BachsSandboxBaseUrl, nil, 0},
+		{"production", "sk_live_x", "e2", 150, 100, 0},
+		{"production", "sk_test_x", "e2", 150, 100, 1},
+		{"production", "", "e2", 150, 100, 1},
+		{"development", "sk_test_x", "e1", 150, 100, 0},
+		{"development", "sk_live_x", "e2", 150, 100, 1},
+		{"development", "", "e2", 150, 200, 1},
+		{"development", "", "e3", 150, 100, 1},
 	}
 	for _, testCase := range cases {
-		settings := PaymentsSettings{Money: loaders.MoneyModuleSettings{Environment: testCase.environment}, BachsSecretKey: testCase.key, BachsBaseUrl: testCase.baseUrl, BachsWebhookSigningSecrets: testCase.secrets, PlatformCommissionBps: 500}
+		settings := PaymentsSettings{Money: loaders.MoneyModuleSettings{Environment: testCase.environment}, Paystack: PaystackSettings{SecretKey: testCase.key}, EscrowFeeBps: testCase.fee, BusinessEscrowFeeBps: testCase.business, EscrowMode: testCase.mode}
 		if got := ProviderKeyEnvironmentMismatches(settings); len(got) != testCase.problems {
 			t.Errorf("%+v: problems %v", testCase, got)
 		}
 	}
 }
 
-func TestPayoutFeeOverridesAndPlanProductsIgnoreMalformedEntries(t *testing.T) {
-	overrides := parseCurrencyAmountOverrides("ngn:5000, usd:250,bad,KES:-1,GHS:x")
-	if len(overrides) != 2 || overrides["NGN"] != 5000 || overrides["USD"] != 250 {
-		t.Fatalf("overrides = %v", overrides)
-	}
-	plans := parsePlanProducts("premium_web:prod_1, business_gold:prod_2,broken")
-	if len(plans) != 2 || plans["business_gold"] != "prod_2" {
+func TestPlanCodesIgnoreMalformedEntries(t *testing.T) {
+	plans := parsePlanProducts("premium_web:PLN_1, business_gold:PLN_2,broken")
+	if len(plans) != 2 || plans["business_gold"] != "PLN_2" {
 		t.Fatalf("plans = %v", plans)
 	}
 }

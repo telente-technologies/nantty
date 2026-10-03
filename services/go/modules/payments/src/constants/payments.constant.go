@@ -7,25 +7,24 @@ const (
 	PurposeCreatorSubscription = "creator_subscription"
 	PurposeWithdrawal          = "withdrawal"
 	PurposeCreatorEarnings     = "creator_earnings"
+	PurposeAdBalanceTopUp      = "ad_balance_top_up"
+	PurposeRefundBankPayout    = "refund_bank_payout"
+	PurposeSubscription        = "subscription"
+	PurposeCardVerification    = "card_verification"
 
-	ProviderBachs   = "bachs"
-	StoreAppleIap   = "apple_iap"
-	StoreGooglePlay = "google_play"
+	ProviderPaystack = "paystack"
+	StoreAppleIap    = "apple_iap"
+	StoreGooglePlay  = "google_play"
 
 	ConnectedAccountRoleSeller  = "seller"
 	ConnectedAccountRoleCreator = "creator"
-
-	CapabilityPayouts          = "payouts"
-	CapabilityTransfers        = "transfers"
-	CapabilityNairaCardCharges = "ngn_card_collection"
-	CapabilityBankTransfers    = "bank_transfer"
-	CapabilityVirtualAccounts  = "virtual_accounts"
-	CapabilityStatusActive     = "active"
 )
 
 var ReferencePrefixByPurpose = map[string]string{
-	PurposeOrderCheckout:       "zmpay_",
-	PurposeCoinPurchase:        "zmcoin_",
-	PurposeWalletTopUp:         "zmtop_",
-	PurposeCreatorSubscription: "zmcsub_",
+	PurposeOrderCheckout:       "chk-",
+	PurposeCoinPurchase:        "coin-",
+	PurposeWalletTopUp:         "top-",
+	PurposeCreatorSubscription: "csub-",
+	PurposeAdBalanceTopUp:      "ads-",
+	PurposeCardVerification:    "card-",
 }

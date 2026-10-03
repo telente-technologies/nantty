@@ -23,7 +23,7 @@ import (
 type Container struct {
 	Resources      loaders.MoneyModuleResources
 	Settings       configs.PaymentsSettings
-	Providers      map[string]interfaces.ConnectProvider
+	Providers      map[string]interfaces.FullPaymentProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
@@ -35,16 +35,17 @@ type Container struct {
 }
 
 type Overrides struct {
-	Providers      map[string]interfaces.ConnectProvider
+	Providers      map[string]interfaces.FullPaymentProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
 }
 
-func NewBachsProviderFromSettings(settings configs.PaymentsSettings) *integrations.BachsConnectProvider {
-	return integrations.NewBachsConnectProvider(integrations.BachsConnectSettings{
-		BaseUrl: settings.BachsBaseUrl, SecretKey: settings.BachsSecretKey, WebhookSigningSecrets: settings.BachsWebhookSigningSecrets,
-		PayoutFeeMinorByCurrency: settings.BachsPayoutFeeOverrides, PayoutFeeRules: integrations.ParsePayoutFeeRules(settings.BachsPayoutFeeSchedule), MaximumAttempts: settings.BachsMaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
+func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integrations.PaystackProvider {
+	paystack := settings.Paystack
+	return integrations.NewPaystackProvider(integrations.PaystackSettings{
+		BaseUrl: paystack.BaseUrl, SecretKey: paystack.SecretKey, PreviousSecretKey: paystack.PreviousSecretKey, Channels: paystack.Channels,
+		TransferFeeBands: integrations.ParseTransferFeeBands(paystack.TransferFeeBands), MaximumAttempts: paystack.MaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
 	})
 }
 
@@ -52,7 +53,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 	schema := settings.Money.DatabaseSchema
 	providers := overrides.Providers
 	if providers == nil {
-		providers = map[string]interfaces.ConnectProvider{constants.ProviderBachs: NewBachsProviderFromSettings(settings)}
+		providers = map[string]interfaces.FullPaymentProvider{constants.ProviderPaystack: NewPaystackProviderFromSettings(settings)}
 	}
 	storeVerifiers := overrides.StoreVerifiers
 	if storeVerifiers == nil {
@@ -70,7 +71,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		cardHandoffs = utils.NewMemorySavedCardHandoffStore(15 * time.Minute)
 	}
 	if settings.DefaultProvider == "" {
-		settings.DefaultProvider = constants.ProviderBachs
+		settings.DefaultProvider = constants.ProviderPaystack
 	}
 	return &Container{
 		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs,
@@ -80,7 +81,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
 			BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
-			PaymentIntent: schema, PaymentRefund: schema, PayoutTransfer: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema,
+			PaymentIntent: schema, PaymentRefund: schema, PayoutOnboarding: schema, PayoutTransfer: schema, ConnectedAccountJob: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema,
 			StorePurchase: schema, WebhookEvent: schema,
 		},
 	}, nil
@@ -90,7 +91,7 @@ func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Clie
 	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(executor)), ent.AlternateSchema(container.schemaConfig))
 }
 
-func (container *Container) Provider(name string) (interfaces.ConnectProvider, error) {
+func (container *Container) Provider(name string) (interfaces.FullPaymentProvider, error) {
 	provider, found := container.Providers[name]
 	if !found {
 		return nil, httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_PROVIDER_NOT_SUPPORTED", "This payment provider is not supported.")
@@ -98,7 +99,7 @@ func (container *Container) Provider(name string) (interfaces.ConnectProvider, e
 	return provider, nil
 }
 
-func (container *Container) DefaultProvider() (interfaces.ConnectProvider, error) {
+func (container *Container) DefaultProvider() (interfaces.FullPaymentProvider, error) {
 	return container.Provider(container.Settings.DefaultProvider)
 }
 
