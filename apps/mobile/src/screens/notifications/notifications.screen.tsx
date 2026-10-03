@@ -1,3 +1,4 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
@@ -74,7 +75,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
             <View style={styles.text}>
               <Text size={13} lineHeight={16.9}>
                 <Text size={13} weight={600} lineHeight={16.9}>{item.title} </Text>
-                {item.body}
+                <MentionText text={item.body} size={13} lineHeight={16.9} />
               </Text>
               <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatTimeSincePosted(item.createdAt)} ago</Text>
             </View>
