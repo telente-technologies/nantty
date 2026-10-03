@@ -38,12 +38,12 @@
 }
 
 .filter:hover {
-  border-color: var(--blue-300);
+  border-color: var(--color-border-strong);
 }
 
 .filterActive {
-  border-color: var(--blue-500);
-  background: var(--blue-500);
+  border-color: var(--color-brand);
+  background: var(--color-brand-solid);
   color: var(--ink-inverse);
 }
 
@@ -111,7 +111,7 @@
 }
 
 .rowLink:hover {
-  border-color: var(--blue-300);
+  border-color: var(--color-border-strong);
   box-shadow: var(--shadow-card);
 }
 
