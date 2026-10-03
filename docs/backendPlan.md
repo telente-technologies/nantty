@@ -205,7 +205,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
 | GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
 | GET /store-rewards/me (per-store credit balances), GET /seller/marketing/rewards/summary | M S | ✅ | **New, seller-funded** (§ Store rewards below). Per-store credit ledger in go-commerce, not go-money cash. Referral and platform loyalty/cashback endpoints removed |
-| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications |
+| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from SQS and sends SES email through `@zudomart/email-templates` |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
 | POST /waitlist | L | ✅ | ts.campaigns |
 
@@ -270,6 +270,19 @@ Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. apps/api h
 ### 2.12 Intelligence (internal) — owner **py.intelligence**
 
 Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by services, never by frontends. Endpoints: `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/*`, `/v1/audio/*`. The `apps/api` client only calls events, feed/clips rank, ads select, product recs, rerank and trending. **Risk scoring is not wired**, and it must score `gift`, `coin_purchase`, `coin_transfer` and `payout` before those go live. Error envelope `{error:{code}}` stays internal (the gateway never exposes it). The JSON `python` block lacks an `intelligence` entry; the foundation agent should add it, mapping to `apps/intelligence`.
+
+| Intelligence endpoint or consumer | Status | Notes |
+|---|---|---|
+| `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/recommendations/*`, `/v1/search/rerank`, `/v1/social-proof/select`, `/v1/trending`, `/v1/experiments/*`, `/v1/audio/*` | ✅ done | Candidate filter → ranking → diversity, with popularity/recency fallbacks; callers keep deterministic fallbacks |
+| `/v1/ads/select`, `/v1/ads/predicted-ctr` | ✅ done (B7 added pCTR) | `personalized:false` for opted-out viewers |
+| `/v1/risk/score` (order, payout, account_event, coin, gift, referral_reward, cashback) | ✅ done | Go/TS decide; callers use timeout + fallback, never inline in a payment |
+| `/v1/risk/score-extended` (account, payment, ad_click, referral_removed, refund, marketplace) | ✅ done (B7) | Rule scores, noisy-OR |
+| `/v1/chat/spam-score` | ✅ done (B7) | Sender behaviour metadata only; contract rejects content fields |
+| `/v1/moderation/classify` | ✅ done (B7) | Text heuristics + pluggable `ModerationModel`; suggestions only |
+| `/v1/creators/real-followers` | ✅ done (B7) | Estimate and lower bound; goCreator/goTrust decide eligibility |
+| Domain-event SQS consumer (`INTELLIGENCE_DOMAIN_EVENTS_QUEUE_URL`) | ✅ done (B7) | Idempotent by `eventId`, consent gating (`consent.granted/withdrawn`, `account.deletionRequested/Executed` per published contracts); needs outbox → SNS → SQS wiring in infra |
+| Suspension suggestions → goTrust advisory queue (`INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`) | ✅ producer done (B7) | goTrust must consume `suspension.suggested`; advisory only |
+| Caller wiring (circuit breakers in go/ts services) | ✗ open | Each calling service owns its client |
 
 ### 2.13 Cross-app mismatch list (to fix during wiring)
 
