@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { LocationFormDialog } from "@/components/settings/locationFormDialog";
-import { LocationRegistersList } from "@/components/settings/locationRegistersList";
 import { useCanEditStoreSettings } from "@/components/settings/settingsFormFrame";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { Callout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
@@ -21,16 +21,17 @@ import styles from "./settings.module.css";
 
 export function LocationsSettingsView() {
   const canEdit = useCanEditStoreSettings();
-  const { sessionView, can } = useSellerSession();
+  const { can } = useSellerSession();
   const { reloadStoreContext } = useStoreContext();
   const { showToast } = useToast();
   const locationsQuery = useSellerQuery<CursorPage<StoreLocation>>("/seller/locations");
   const [editingLocation, setEditingLocation] = useState<StoreLocation | "new" | null>(null);
   const [busyLocationId, setBusyLocationId] = useState<string | null>(null);
   const locations = locationsQuery.data?.data ?? [];
-  const maximumLocations = sessionView?.access.entitlements?.maxLocations ?? 0;
+  const { limits } = usePlanFeatures();
+  const maximumLocations = limits.maxLocations;
   const activeLocationCount = locations.filter((location) => location.active).length;
-  const isAtLocationLimit = sessionView?.access.entitlements?.maxLocations !== null && activeLocationCount >= maximumLocations;
+  const isAtLocationLimit = activeLocationCount >= maximumLocations;
 
   function refreshLocations() {
     locationsQuery.reload();
@@ -50,17 +51,17 @@ export function LocationsSettingsView() {
     }
   }
 
-  const locationUsageText = sessionView?.access.entitlements?.maxLocations === null ? `${activeLocationCount} active · unlimited on your plan` : `${activeLocationCount} of ${maximumLocations} locations in use`;
+  const locationUsageText = `${activeLocationCount} of ${maximumLocations} locations in use`;
 
   return (
     <Panel
-      title="Locations & registers"
+      title="Locations & warehouses"
       description={locationUsageText}
       actions={canEdit ? <Button variant="primary" iconName="plus16" disabled={isAtLocationLimit} onClick={() => setEditingLocation("new")}>Add location</Button> : null}
     >
       <div className={styles.formStack}>
         {canEdit && isAtLocationLimit ? (
-          <Callout tone="caution" title="You have used every location on your Gold plan" action={can("billing:manage") ? <ButtonLink href="/settings/billing" size="small">See plans</ButtonLink> : null}>
+          <Callout tone="caution" title="You have used every location on your plan" action={can("billing:manage") ? <ButtonLink href="/settings/billing" size="small">See plans</ButtonLink> : null}>
             Deactivate a location or move to a bigger plan to add another.
           </Callout>
         ) : null}
@@ -102,7 +103,7 @@ export function LocationsSettingsView() {
                 {location.address}, {location.city}, {location.state}
                 {location.phone ? ` · ${location.phone}` : ""}
               </p>
-              {location.kind === "store" ? <LocationRegistersList locationId={location.id} canEdit={canEdit && location.active} /> : <p className={styles.mutedText}>Warehouses hold stock for online orders and transfers. They have no registers.</p>}
+              <p className={styles.mutedText}>{location.kind === "store" ? "Shop or pickup point. Stock here can fulfil online orders." : "Holds stock for online orders and transfers."}</p>
             </li>
           ))}
         </ul>
