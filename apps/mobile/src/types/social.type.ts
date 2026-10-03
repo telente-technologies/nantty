@@ -1,4 +1,7 @@
+import type { LiveGiftSentEvent } from "./liveGift.type";
 import type { Comment, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, UserSummary } from "./models.type";
+import type { Money } from "./money.type";
+import type { LiveAdSettings } from "./socialGraph.type";
 
 export type ConversationFilter = "all" | "direct";
 export type ClipsFeedTab = "forYou" | "following";
@@ -47,12 +50,17 @@ export interface NewCommentInput {
 }
 
 export type LiveSource = "camera" | "screen" | "external";
+export type LiveCategory = "justChatting" | "gaming" | "music" | "irl" | "education" | "shopping";
 
 export interface LiveSessionDetails extends LiveSession {
+  readonly category?: LiveCategory;
   readonly isFollowingHost: boolean;
   readonly startedAt: string;
   readonly ingestUrl?: string | null;
   readonly streamKey?: string | null;
+  readonly liveAdSettings?: LiveAdSettings | null;
+  readonly acceptedLiveAdTermsVersion?: string | null;
+  readonly sponsorshipLine?: string | null;
 }
 
 export interface SuggestedLive {
@@ -68,68 +76,7 @@ export interface NewPostInput {
   readonly audience: PostAudience;
   readonly kind?: "post" | "clip";
   readonly soundId?: ID;
-}
-
-export type MediaUploadPurpose =
-  | "post"
-  | "clip"
-  | "story"
-  | "avatar"
-  | "banner"
-  | "product"
-  | "chat"
-  | "voice"
-  | "dispute_evidence"
-  | "identity_document"
-  | "verification_document";
-export type MediaUploadStatus = "uploading" | "processing" | "ready" | "failed";
-export type MediaVariantFormat = "avif" | "webp" | "jpeg" | "mp4" | "hls";
-
-export interface MediaVariant {
-  readonly url: string;
-  readonly width: number;
-  readonly height: number;
-  readonly format: MediaVariantFormat;
-  readonly bitrateKbps?: number;
-}
-
-export interface MediaAsset {
-  readonly id: ID;
-  readonly type: "image" | "video" | "audio";
-  readonly status: "processing" | "ready" | "failed";
-  readonly width: number;
-  readonly height: number;
-  readonly durationSeconds?: number;
-  readonly blurhash?: string;
-  readonly posterUrl?: string;
-  readonly hlsUrl?: string;
-  readonly variants: readonly MediaVariant[];
-}
-
-export interface CreateUploadSessionRequest {
-  readonly fileName: string;
-  readonly mimeType: string;
-  readonly sizeBytes: number;
-  readonly purpose: MediaUploadPurpose;
-  readonly sha256?: string;
-}
-
-export interface UploadSession {
-  readonly uploadId: ID;
-  readonly chunkSizeBytes: number;
-  readonly totalChunks: number;
-  readonly uploadedChunks: readonly number[];
-}
-
-export interface UploadSessionStatus {
-  readonly status: MediaUploadStatus;
-  readonly uploadedChunks: readonly number[];
-  readonly media?: MediaAsset;
-}
-
-export interface CompletedUpload {
-  readonly mediaId: ID;
-  readonly status: "processing";
+  readonly isAiGenerated?: boolean;
 }
 
 export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live";
@@ -155,25 +102,6 @@ export interface CreatorStatus {
   readonly tier?: string;
 }
 
-export interface LiveGift {
-  readonly id: ID;
-  readonly name: string;
-  readonly emoji: string;
-  readonly imageUrl?: string | null;
-  readonly priceCoins: number;
-}
-
-export interface SendLiveGiftInput {
-  readonly giftId: ID;
-  readonly quantity: number;
-}
-
-export interface SentLiveGiftReceipt {
-  readonly giftId: ID;
-  readonly quantity: number;
-  readonly coinBalance: number;
-}
-
 export interface LiveSessionDetails {
   readonly coverUrl?: string | null;
   readonly playbackUrl?: string | null;
@@ -189,9 +117,9 @@ export interface CoinBalance {
 
 export interface CoinConversionReceipt {
   readonly coins: number;
-  readonly cash: import("./money.type").Money;
+  readonly cash: Money;
   readonly earnedCoinsRemaining: number;
-  readonly minimumPayout: import("./money.type").Money;
+  readonly minimumPayout: Money;
 }
 
 export interface CoinActivityEntry {
@@ -207,7 +135,7 @@ export interface CoinPackage {
   readonly id: ID;
   readonly coins: number;
   readonly bonusCoins?: number;
-  readonly price: import("./money.type").Money;
+  readonly price: Money;
 }
 
 export type CoinPurchaseChannel = "web_checkout" | "store_iap";
@@ -297,6 +225,7 @@ export type RealtimeServerEvent =
       readonly messageId: ID;
       readonly reactions: readonly MessageReactionSummary[];
     }
+  | LiveGiftSentEvent
   | { readonly type: "pong" };
 
 export interface UpdateSoundInput {
@@ -319,3 +248,5 @@ export interface CopyrightClaimReceipt {
   readonly claimId: ID;
   readonly status: "received";
 }
+
+export * from "./mediaUpload.type";

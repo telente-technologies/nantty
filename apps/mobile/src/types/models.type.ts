@@ -1,4 +1,6 @@
 import type { Money } from "./money.type";
+import type { Order } from "./cartOrder.type";
+import type { FollowState } from "./socialGraph.type";
 
 export type ID = string;
 export type ISODate = string;
@@ -16,6 +18,11 @@ export interface Verification {
   readonly badgeVisible: boolean;
 }
 
+export interface CreatorLiveStatus {
+  readonly liveId: ID;
+  readonly startedAt: ISODate;
+}
+
 export interface UserSummary {
   readonly id: ID;
   readonly name: string;
@@ -24,6 +31,7 @@ export interface UserSummary {
   readonly verified: boolean;
   readonly isCreator?: boolean;
   readonly verification?: Verification | null;
+  readonly live?: CreatorLiveStatus | null;
 }
 
 export interface User extends UserSummary {
@@ -36,6 +44,8 @@ export interface User extends UserSummary {
   readonly posts: number;
   readonly joinedAt: ISODate;
   readonly isFollowing?: boolean;
+  readonly isPrivate?: boolean;
+  readonly followState?: FollowState;
   readonly isSeller?: boolean;
   readonly storeId?: ID | null;
 }
@@ -126,6 +136,7 @@ export interface Post {
   readonly subscriberOnly?: boolean;
   readonly viewerHasAccess?: boolean;
   readonly resharedFrom?: Post | null;
+  readonly isAiGenerated?: boolean;
 }
 
 export interface PostAnalyticsDaily {
@@ -158,88 +169,6 @@ export interface Comment {
   readonly liked: boolean;
   readonly replyCount: number;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
-}
-
-export interface CartItem {
-  readonly id: ID;
-  readonly product: ProductSummary;
-  readonly quantity: number;
-  readonly variant: string | null;
-}
-
-export interface Cart {
-  readonly items: readonly CartItem[];
-  readonly itemsTotal: Money;
-  readonly shopDiscount: Money;
-  readonly shipping: Money;
-  readonly total: Money;
-}
-
-export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
-
-export interface Order {
-  readonly id: ID;
-  readonly reference: string;
-  readonly status: OrderStatus;
-  readonly items: readonly CartItem[];
-  readonly total: Money;
-  readonly buyer: UserSummary;
-  readonly store: StoreSummary;
-  readonly createdAt: ISODate;
-  readonly escrowReleaseAt: ISODate | null;
-}
-
-export interface Address {
-  readonly id: ID;
-  readonly fullName: string;
-  readonly phone: string;
-  readonly line1: string;
-  readonly city: string;
-  readonly state: string;
-  readonly isDefault: boolean;
-}
-
-export interface Conversation {
-  readonly id: ID;
-  readonly peer: UserSummary;
-  readonly lastMessage: string;
-  readonly lastMessageAt: ISODate;
-  readonly unread: number;
-  readonly isFriend: boolean;
-  readonly kind?: "direct" | "group" | "channel" | "business";
-  readonly title?: string | null;
-  readonly photoUrl?: string | null;
-  readonly memberCount?: number;
-  readonly subscriberCount?: number;
-  readonly myRole?: "owner" | "admin" | "member" | "subscriber";
-  readonly disappearingMessagesSeconds?: number | null;
-  readonly store?: { readonly id: ID; readonly name: string } | null;
-}
-
-export interface MessageReactionSummary {
-  readonly emoji: string;
-  readonly count: number;
-  readonly reactedByMe: boolean;
-}
-
-export interface MessageAttachedMedia {
-  readonly id: ID;
-  readonly type: "voice" | "image" | "video";
-  readonly url: string | null;
-  readonly durationSeconds?: number;
-}
-
-export interface Message {
-  readonly id: ID;
-  readonly conversationId: ID;
-  readonly senderId: ID;
-  readonly text: string;
-  readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "system";
-  readonly sender?: UserSummary;
-  readonly media?: MessageAttachedMedia | null;
-  readonly reactions?: readonly MessageReactionSummary[];
-  readonly expiresAt?: ISODate | null;
 }
 
 export interface Story {
@@ -315,3 +244,6 @@ export interface AuthSession {
   readonly refreshToken: string;
   readonly user: User;
 }
+
+export * from "./cartOrder.type";
+export * from "./messaging.type";
