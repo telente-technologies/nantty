@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"zudomart/modules/ledger/src/databases"
+	"zudomart/modules/ledger/src/loaders"
 	"zudomart/platform/postgres"
 )
 
@@ -50,4 +51,23 @@ func CreateFreshSchemaWithMigrations(t *testing.T, database *sql.DB, prefix stri
 		t.Fatalf("apply migrations to %s: %v", schema, err)
 	}
 	return schema
+}
+
+func CreateEmptySchema(t *testing.T, database *sql.DB, prefix string) string {
+	t.Helper()
+	schema := fmt.Sprintf("money_test_%s_%d_%d", strings.ToLower(prefix), time.Now().UnixNano(), schemaCounter.Add(1))
+	if err := postgres.CreateSchemaIfMissingForTestsAndLocalTooling(context.Background(), database, schema); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_, _ = database.Exec("DROP SCHEMA " + pgx.Identifier{schema}.Sanitize() + " CASCADE")
+	})
+	return schema
+}
+
+func MoneyModuleSettingsForTests(moduleName, schema, ledgerSchema string) loaders.MoneyModuleSettings {
+	return loaders.MoneyModuleSettings{
+		ModuleName: moduleName, Environment: "test", DatabaseUrl: TestDatabaseUrl(), DatabaseSchema: schema, LedgerSchema: ledgerSchema,
+		TokenIssuer: TestTokenIssuer, TokenAudience: TestTokenAudience,
+	}
 }
