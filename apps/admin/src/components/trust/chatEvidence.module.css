@@ -1,0 +1,14 @@
+.transcript { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--divider); border-radius: var(--radius-medium); background: var(--surface-app); }
+.transcriptNotice { margin: 0; font-size: 12px; color: var(--ink-muted); }
+.messageRow { display: flex; flex-direction: column; gap: 2px; max-width: 82%; }
+.messageRowReported { align-self: flex-start; }
+.messageRowOther { align-self: flex-end; align-items: flex-end; }
+.bubble { padding: 8px 12px; border-radius: 14px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.bubbleReported { background: var(--surface-sunken); border: 1px solid var(--divider); }
+.bubbleOther { background: var(--surface-card); border: 1px solid var(--divider); }
+.messageMeta { font-size: 11px; color: var(--ink-muted); }
+.submittedLabel { font-size: 11px; font-weight: 600; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.attachment { margin-top: 4px; font-size: 12px; color: var(--ink-muted); }
+.legalTag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; background: var(--surface-sunken); color: var(--ink-strong); border: 1px solid var(--divider); }
+.retentionRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.hash { font-family: var(--font-mono, monospace); font-size: 12px; overflow-wrap: anywhere; }
