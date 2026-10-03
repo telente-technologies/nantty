@@ -14,7 +14,8 @@
     "db:generate": "prisma generate && prisma generate --schema prisma/identityRead",
     "db:validate": "prisma validate",
     "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:migrate:deploy": "prisma migrate deploy",
+    "lint": "eslint -c ../../../packages/eslintConfig/node.config.mjs src"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "3.1144.0",
@@ -23,10 +24,13 @@
     "@zudojs/http": "^1.5.0",
     "@zudojs/logger": "^1.5.0",
     "@zudojs/schema": "^1.3.0",
+    "amqplib": "^2.2.0",
     "prisma": "^7.10.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "@zudomart/eslint-config": "workspace:*",
+    "eslint": "^10.12.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3"
