@@ -4,6 +4,7 @@ import { ApiError } from "@/services/apiClient.service";
 import { liveGuestsService } from "@/services/liveGuests.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CreateLiveBattleInput, LiveStage } from "@/types/liveStage.type";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const STAGE_POLL_INTERVAL_MS = 1_000;
 
@@ -42,7 +43,7 @@ export function useLiveStageWithActions(liveId: string, isWatching: boolean) {
     inviteViewerToStage: (userId: string) => run(() => liveGuestsService.inviteViewerToStage(liveId, userId)),
     acceptStageInvitation: (slotId: string) => run(() => liveGuestsService.respondToStageInvitation(liveId, slotId, "accept")),
     declineStageInvitation: (slotId: string) => run(() => liveGuestsService.respondToStageInvitation(liveId, slotId, "decline")),
-    requestToJoinStage: () => run(() => liveGuestsService.requestToJoinStage(liveId)),
+    requestToJoinStage: () => requireAuthThen(() => run(() => liveGuestsService.requestToJoinStage(liveId)), undefined, "join the live as a guest"),
     approveJoinRequest: (requestId: string) => run(() => liveGuestsService.decideStageJoinRequest(liveId, requestId, "approve")),
     declineJoinRequest: (requestId: string) => run(() => liveGuestsService.decideStageJoinRequest(liveId, requestId, "decline")),
     removeGuestFromStage: (userId: string) => run(() => liveGuestsService.removeGuestFromStage(liveId, userId)),

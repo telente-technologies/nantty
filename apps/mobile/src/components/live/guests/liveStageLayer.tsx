@@ -18,6 +18,7 @@ import type { LiveStageController } from "./liveStage.hook";
 import { LiveStageInvitePrompt } from "./liveStageInvitePrompt";
 import { buildAudienceStageRailButtons, buildHostStageRailButtons } from "./liveStageRailButtons.util";
 import { stageGridHeightForWidth } from "./stageGridLayout.util";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const HEADER_CLEARANCE = 64;
 const GRID_MAXIMUM_SCREEN_SHARE = 0.52;
@@ -54,7 +55,7 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
 
   const pressStreamerTile = (streamer: LiveStageStreamer) => {
     if (isHostView) return setIsGuestsSheetOpen(true);
-    if (streamer.user.id !== controller.signedInUserId && canGiftStreamers) setGiftRecipient(streamer);
+    if (streamer.user.id !== controller.signedInUserId && canGiftStreamers) requireAuthThen(() => setGiftRecipient(streamer), undefined, "send gifts");
   };
 
   const railButtons = isHostView
