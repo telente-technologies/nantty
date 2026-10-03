@@ -1,0 +1,36 @@
+package errors
+
+import (
+	"net/http"
+
+	"zudomart/platform/httpserver"
+)
+
+func Api(status int, code, message string) *httpserver.ApiError {
+	return httpserver.NewApiError(status, code, message)
+}
+
+var (
+	AccountNotFound          = Api(http.StatusNotFound, "AD_ACCOUNT_NOT_FOUND", "Ad account not found.")
+	AccountNotActive         = Api(http.StatusConflict, "AD_ACCOUNT_NOT_ACTIVE", "This ad account is not active.")
+	NotFound                 = Api(http.StatusNotFound, "NOT_FOUND", "Not found.")
+	OwnerRoleLocked          = Api(http.StatusConflict, "OWNER_ROLE_LOCKED", "The owner's role cannot be changed.")
+	OwnerCannotBeRemoved     = Api(http.StatusConflict, "OWNER_CANNOT_BE_REMOVED", "The owner cannot be removed.")
+	InviteNotFound           = Api(http.StatusNotFound, "INVITE_NOT_FOUND", "Invite not found.")
+	InviteForAnotherUser     = Api(http.StatusForbidden, "INVITE_USER_MISMATCH", "This invite was sent to someone else.")
+	StatusChangeNotAllowed   = Api(http.StatusConflict, "STATUS_CHANGE_NOT_ALLOWED", "That status change is not allowed.")
+	OnlyDraftsCanBeDeleted   = Api(http.StatusConflict, "ONLY_DRAFTS_CAN_BE_DELETED", "Only drafts can be deleted.")
+	NothingToSubmit          = Api(http.StatusConflict, "NOTHING_TO_SUBMIT", "There is nothing to submit for review.")
+	NotRejected              = Api(http.StatusConflict, "NOT_REJECTED", "Only rejected ads can be appealed.")
+	AlreadyAppealed          = Api(http.StatusConflict, "ALREADY_APPEALED", "This decision was already appealed.")
+	InsufficientBalance      = Api(http.StatusPaymentRequired, "INSUFFICIENT_BALANCE", "Add funds to your ad account to run this campaign.")
+	AdAlreadyReviewed        = Api(http.StatusConflict, "AD_ALREADY_REVIEWED", "This ad was already reviewed.")
+	AdvertiserSuspended      = Api(http.StatusConflict, "ADVERTISER_SUSPENDED", "The advertiser is suspended.")
+	CriticalFlagUnresolved   = Api(http.StatusConflict, "CRITICAL_FLAG_UNRESOLVED", "A critical automatic check flagged this ad.")
+	AdvertiserStateUnchanged = Api(http.StatusConflict, "ADVERTISER_STATE_UNCHANGED", "The advertiser is already in that state.")
+	PolicyExists             = Api(http.StatusConflict, "POLICY_EXISTS", "A policy with that name exists.")
+	IdempotencyKeyRequired   = Api(http.StatusBadRequest, "IDEMPOTENCY_KEY_REQUIRED", "Send an Idempotency-Key header of 8-128 letters, digits, - or _.")
+	IdempotencyKeyReused     = Api(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "That Idempotency-Key was used with a different request.")
+	UpstreamUnavailable      = Api(http.StatusServiceUnavailable, "UPSTREAM_UNAVAILABLE", "A required service is unavailable.")
+	InvalidAdToken           = Api(http.StatusUnprocessableEntity, "INVALID_AD_TOKEN", "The ad token is not valid.")
+)
