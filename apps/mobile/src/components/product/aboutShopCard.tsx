@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { Star16Icon } from "@/components/icons";
+import { EarnBackLine } from "@/components/store/earnBackLine";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -52,6 +53,7 @@ export function AboutShopCard({ store, following, onToggleFollow, onViewShop }: 
           </View>
         </View>
       </View>
+      <EarnBackLine basisPoints={store.earnBackBasisPoints} />
       <View style={styles.buttons}>
         <Button variant="neutral" title={following ? "Following" : "Follow"} onPress={onToggleFollow} style={styles.button} />
         <Button title="View Shop" onPress={onViewShop} style={styles.button} />
