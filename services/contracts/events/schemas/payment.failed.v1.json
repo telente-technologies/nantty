@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/payment.failed.v1.json",
+  "title": "PaymentFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paymentId",
+    "reference",
+    "purpose",
+    "subjectId",
+    "ownerUserId",
+    "provider",
+    "status",
+    "amount"
+  ],
+  "properties": {
+    "paymentId": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "order_checkout",
+        "coin_purchase",
+        "wallet_top_up",
+        "creator_subscription"
+      ]
+    },
+    "subjectId": {
+      "type": "string"
+    },
+    "ownerUserId": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/payoutTransfer.succeeded.v1.json",
+  "title": "PayoutTransferSucceeded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transferId",
+    "reference",
+    "purpose",
+    "subjectId",
+    "amount"
+  ],
+  "properties": {
+    "transferId": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "subjectId": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}
