@@ -49,7 +49,7 @@
 }
 
 .info::before {
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
 }
 
 .caution::before {

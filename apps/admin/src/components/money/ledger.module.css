@@ -60,7 +60,7 @@
 
 .accountButtonActive {
   background: var(--color-brand-tint);
-  box-shadow: inset 3px 0 0 var(--blue-500);
+  box-shadow: inset 3px 0 0 var(--color-brand);
 }
 
 @media (max-width: 1000px) {

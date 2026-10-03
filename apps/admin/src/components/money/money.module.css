@@ -196,13 +196,13 @@
 }
 
 .outcomeOption:has(input:checked) {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--color-brand-tint);
 }
 
 .outcomeOption input {
   margin-top: 2px;
-  accent-color: var(--blue-500);
+  accent-color: var(--color-brand);
 }
 
 .meter {
