@@ -9,7 +9,9 @@ import { formatVideoDuration } from "@/components/feed/postCardMedia";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import { HeartIcon, ShareIcon } from "@/components/ui/icons";
+import { HeartIcon } from "@/components/ui/icons";
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { discoveryService } from "@/services/discovery.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -69,10 +71,9 @@ function VideoDetails({ video }: { readonly video: Post }) {
           <span className={styles.stat}>
             <HeartIcon size={18} /> {formatCountWithThousandsSuffix(video.likes)}
           </span>
-          <span className={styles.stat}>
-            <ShareIcon size={18} /> {formatCountWithThousandsSuffix(video.reposts)}
-          </span>
+          <ShareToChatButton kind="video" referenceId={video.id} className={styles.stat} label={formatCountWithThousandsSuffix(video.reposts)} />
           <SaveToggleButton targetType="video" targetId={video.id} initiallySaved={video.bookmarked} appearance="pill" showLabel />
+          <ContentActionsMenu shareKind={null} reportTargetType="post" targetId={video.id} canonicalPath={`/watch/${video.id}`} />
         </div>
       </div>
       <CommentsPanel postId={video.id} totalComments={video.comments} />

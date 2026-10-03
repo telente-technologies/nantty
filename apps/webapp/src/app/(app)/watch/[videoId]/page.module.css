@@ -71,6 +71,7 @@
 }
 
 .stat {
+  border: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -157,4 +158,9 @@
     position: sticky;
     top: calc(60px + var(--space-5));
   }
+}
+
+button.stat:hover {
+  background: var(--color-surface-hover);
+  color: var(--ink-strong);
 }
