@@ -14,6 +14,7 @@ export interface ProfileDetailsUpdate {
 export const usersService = {
   fetchMyProfile: () => api.get<User>("/api/v1/users/me"),
   fetchUserProfileById: (userId: string) => api.get<User>(`/api/v1/users/${encodeURIComponent(userId)}`),
+  fetchUserIdByUsername: (username: string) => api.get<{ id: string }>(`/api/v1/users/by-username/${encodeURIComponent(username)}`),
   fetchPostsByUserId: (userId: string, cursor?: string) =>
     api.get<Page<Post>>(`/api/v1/users/${encodeURIComponent(userId)}/posts`, { cursor }),
   updateMyProfileDetails: (update: ProfileDetailsUpdate) => api.patch<User>("/api/v1/users/me", update),
