@@ -4,3 +4,4 @@ GRANT SELECT ("account_id", "features", "ends_at", "lifted_at") ON "account_rest
 GRANT SELECT ("account_id", "lifted_at", "ends_at") ON "account_bans" TO zudomart_readers;
 GRANT SELECT ("id", "document_key", "version_number", "status", "effective_at", "is_material_change", "published_at") ON "legal_versions" TO zudomart_readers;
 GRANT SELECT ("profile_type", "creator_status") ON "profiles" TO zudomart_readers;
+GRANT SELECT ("account_id", "who_can_message_me", "who_can_mention_me") ON "privacy_settings" TO zudomart_readers;
