@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { escrowQueryKeys, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
 import { EscrowSummaryCard } from "@/components/escrow/escrowSummaryCard";
@@ -19,6 +19,7 @@ import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
 import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"SellerOrderDetail">) {
   const { orderId } = route.params;
@@ -44,7 +45,7 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
     return (
       <Screen>
         <Header title="Order" />
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -107,7 +108,6 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   heldNotice: { backgroundColor: palette.caution[50], borderRadius: 12, padding: 12, gap: 4 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 16 },

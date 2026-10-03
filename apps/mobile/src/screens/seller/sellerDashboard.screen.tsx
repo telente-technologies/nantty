@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { InventoryCard } from "@/components/seller/inventoryCard";
@@ -16,6 +16,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import type { SellerDashboardPeriod } from "@/types/account.type";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 
 export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDashboard">) {
@@ -37,7 +38,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
       />
       <PeriodChips value={period} onChange={setPeriod} />
       {isLoading || !dashboard || !totalSales ? (
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.total} accessibilityLabel={`Total sales ${totalSales.symbol}${totalSales.amount}, ${dashboard.orders} orders`}>
@@ -106,7 +107,6 @@ function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: 
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 12, paddingBottom: 40, gap: 16 },
   total: { alignItems: "center", gap: 8, marginTop: 12, marginBottom: 9 },
   amount: { flexDirection: "row", alignItems: "center" },

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ApplicationIdentityStep } from "@/components/seller/applicationIdentityStep";
 import { ApplicationPayoutStep } from "@/components/seller/applicationPayoutStep";
@@ -17,6 +17,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { sellerService } from "@/services/seller.service";
 import type { SellerApplicationDraft, SellerApplicationInput } from "@/types/account.type";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const EMPTY_DRAFT: SellerApplicationDraft = {
   storeName: "", categoryId: "", description: "", phone: "", addressLine: "", city: "", state: "",
@@ -74,7 +75,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
     return (
       <Screen>
         <Header title="Start selling" />
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -106,7 +107,6 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 24 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
 });

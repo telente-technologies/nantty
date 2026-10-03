@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -14,6 +14,7 @@ import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const STATUS_COPY = {
   pending: { title: "Application under review", tone: "caution" as const, label: "Under review", body: "We're checking your details and ID. This usually takes up to 2 working days — we'll notify you as soon as it's done." },
@@ -30,7 +31,7 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
     <Screen>
       <Header title="Seller application" onBack={() => navigation.popToTop()} />
       {!details ? (
-        application.isLoading ? <ActivityIndicator style={styles.state} color={colors.primary} /> : (
+        application.isLoading ? <ListSkeleton /> : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>
             <Button title="Start selling on Zudomart" onPress={() => navigation.replace("SellerApplication")} />
@@ -68,7 +69,6 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 80 },
   empty: { padding: 32, gap: 16 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 20 },
   hero: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
