@@ -1,11 +1,13 @@
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+
+import { liveAccent, liveGlass } from "../liveSurface.constant";
 
 export interface LiveStageRailButton {
   readonly key: string;
-  readonly glyph: string;
+  readonly glyph: ReactNode;
   readonly label: string;
   readonly badgeCount?: number;
   readonly isDisabled?: boolean;
@@ -23,17 +25,17 @@ export function LiveStageControlRail({ buttons }: { buttons: readonly LiveStageR
           accessibilityState={{ disabled: !!button.isDisabled }}
           disabled={button.isDisabled}
           onPress={button.onPress}
-          style={[styles.button, button.isDisabled ? styles.disabled : null]}
+          style={({ pressed }) => [styles.button, button.isDisabled ? styles.disabled : null, pressed ? styles.pressed : null]}
         >
-          <Text size={18} lineHeight={22}>
+          <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             {button.glyph}
-          </Text>
-          <Text size={10} weight={600} lineHeight={12} color={colors.white} numberOfLines={1}>
+          </View>
+          <Text size={10} weight={600} lineHeight={12} color={liveGlass.ink} numberOfLines={1}>
             {button.label}
           </Text>
           {button.badgeCount ? (
             <View style={styles.badge}>
-              <Text size={10} weight={700} lineHeight={12} color={colors.white}>
+              <Text size={10} weight={700} lineHeight={12} color="#FFFFFF">
                 {button.badgeCount}
               </Text>
             </View>
@@ -45,9 +47,10 @@ export function LiveStageControlRail({ buttons }: { buttons: readonly LiveStageR
 }
 
 const styles = StyleSheet.create({
-  rail: { gap: 10, alignItems: "center" },
-  button: { width: 56, paddingVertical: 6, borderRadius: 14, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", gap: 2 },
+  rail: { gap: 8, alignItems: "center" },
+  button: { width: 58, paddingVertical: 7, borderRadius: 16, backgroundColor: liveGlass.background, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border, alignItems: "center", gap: 2 },
   disabled: { opacity: 0.5 },
+  pressed: { backgroundColor: liveGlass.backgroundStrong },
   badge: {
     position: "absolute",
     top: -4,
@@ -55,7 +58,7 @@ const styles = StyleSheet.create({
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: colors.live,
+    backgroundColor: liveAccent.red,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,

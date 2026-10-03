@@ -1,60 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { liveGuestsService } from "@/services/liveGuests.service";
-import type { UserSummary } from "@/types";
 import { MAXIMUM_STREAMERS_ON_STAGE } from "@/types/liveStage.type";
 
+import { LiveSheetActionButton as SmallActionButton, LiveSheetPersonRow as PersonRow, LiveSheetSectionTitle as SectionTitle } from "../liveSheetParts";
 import type { LiveStageController } from "./liveStage.hook";
 
-function SmallActionButton({ label, onPress, tone = "neutral", disabled }: { label: string; onPress: () => void; tone?: "neutral" | "primary" | "danger"; disabled?: boolean }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={[styles.action, tone === "primary" ? styles.actionPrimary : tone === "danger" ? styles.actionDanger : null, disabled ? styles.actionDisabled : null]}
-    >
-      <Text size={12} weight={600} lineHeight={15} color={tone === "neutral" ? colors.text : colors.white}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function PersonRow({ user, caption, children }: { user: UserSummary; caption?: string; children: ReactNode }) {
-  return (
-    <View style={styles.row}>
-      <Avatar uri={user.avatarUrl} size={36} />
-      <View style={styles.flex}>
-        <Text size={14} weight={500} lineHeight={17} numberOfLines={1}>
-          {user.name}
-        </Text>
-        <Text size={12} lineHeight={15} color={colors.textMuted} numberOfLines={1}>
-          {caption ?? `@${user.username}`}
-        </Text>
-      </View>
-      <View style={styles.actions}>{children}</View>
-    </View>
-  );
-}
-
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <Text size={14} weight={600} lineHeight={17} style={styles.sectionTitle}>
-      {children}
-    </Text>
-  );
-}
-
 export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { liveId: string; visible: boolean; controller: LiveStageController; onClose: () => void }) {
+  const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
   const stage = controller.stage;
   const viewers = useQuery({
@@ -69,8 +29,8 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
   const latestInviteStatusFor = (userId: string) => [...stage.invitations].reverse().find((slot) => slot.user.id === userId)?.state;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={`Guests · ${stage.streamers.length}/${MAXIMUM_STREAMERS_ON_STAGE} on stage`}>
-      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+    <BottomSheet visible={visible} onClose={onClose} title="Guests" subtitle={`${stage.streamers.length} of ${MAXIMUM_STREAMERS_ON_STAGE} seats on stage`} scrollable>
+      <View style={styles.body}>
         {controller.actionErrorMessage ? (
           <Text size={12} lineHeight={16} color={colors.error} accessibilityLiveRegion="polite">
             {controller.actionErrorMessage}
@@ -87,7 +47,16 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
               label={streamer.videoMuted ? "Cam on" : "Cam off"}
               onPress={() => controller.setStreamerVideoMuted(streamer.user.id, !streamer.videoMuted)}
             />
-            {streamer.role === "guest" ? <SmallActionButton label="Remove" tone="danger" onPress={() => controller.removeGuestFromStage(streamer.user.id)} /> : null}
+            {streamer.role === "guest" ? <SmallActionButton
+                label="Remove"
+                tone="danger"
+                onPress={() =>
+                  showAlertWithButtons(`Remove ${streamer.user.name} from the stage?`, "Their camera and mic stop showing right away. They go back to watching.", [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Remove", style: "destructive", onPress: () => controller.removeGuestFromStage(streamer.user.id) },
+                  ])
+                }
+              /> : null}
           </PersonRow>
         ))}
         {stage.joinRequests.length > 0 ? <SectionTitle>{`Requests to join (${stage.joinRequests.length})`}</SectionTitle> : null}
@@ -121,19 +90,11 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
             </PersonRow>
           );
         })}
-      </ScrollView>
+      </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
-  sectionTitle: { marginTop: 6 },
-  row: { flexDirection: "row", alignItems: "center", gap: 10 },
-  flex: { flex: 1 },
-  actions: { flexDirection: "row", gap: 6 },
-  action: { borderRadius: 14, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 10, paddingVertical: 5 },
-  actionPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  actionDanger: { backgroundColor: colors.error, borderColor: colors.error },
-  actionDisabled: { opacity: 0.45 },
+  body: { gap: 10 },
 });

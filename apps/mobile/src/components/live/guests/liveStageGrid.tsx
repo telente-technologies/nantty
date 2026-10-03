@@ -3,10 +3,10 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Plus16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveSessionDetails } from "@/types";
 import type { LiveStage, LiveStageStreamer } from "@/types/liveStage.type";
 
+import { liveGlass } from "../liveSurface.constant";
 import { buildBattleBadgeForStreamer } from "../battle/battleStandings.util";
 import { LiveStageTile } from "./liveStageTile";
 import { computeStageTileFramesForStreamerCount, stageGridHeightForWidth } from "./stageGridLayout.util";
@@ -57,8 +57,8 @@ export function LiveStageGrid(props: LiveStageGridProps) {
               onPress={props.onPressEmptySeat}
               style={[styles.emptySeat, { left: frame.left, top: frame.top, width: frame.width, height: frame.height }]}
             >
-              {props.onPressEmptySeat ? <Plus16Icon color={colors.white} /> : null}
-              <Text size={10} lineHeight={12} color="rgba(255,255,255,0.7)">
+              {props.onPressEmptySeat ? <Plus16Icon color={liveGlass.ink} /> : null}
+              <Text size={10} lineHeight={12} color={liveGlass.inkMuted}>
                 {props.onPressEmptySeat ? "Invite" : "Empty seat"}
               </Text>
             </Pressable>
@@ -73,8 +73,11 @@ const styles = StyleSheet.create({
   grid: { width: "100%", position: "relative" },
   emptySeat: {
     position: "absolute",
-    borderRadius: 6,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderStyle: "dashed",
+    borderColor: liveGlass.border,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
     alignItems: "center",
     justifyContent: "center",
     gap: 4,

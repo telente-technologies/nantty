@@ -2,11 +2,13 @@ import { StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Button } from "@/components/ui/button";
+import { ModalActionStack } from "@/components/ui/modalActions";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { UserSummary } from "@/types";
 import type { GuestSlot } from "@/types/liveStage.type";
+
+import { LiveAvatarRing } from "../liveAvatarRing";
 
 export interface LiveStageInvitePromptProps {
   readonly invite: GuestSlot | null;
@@ -17,27 +19,33 @@ export interface LiveStageInvitePromptProps {
 }
 
 export function LiveStageInvitePrompt({ invite, host, isResponding, onAccept, onDecline }: LiveStageInvitePromptProps) {
+  const { colors } = useTheme();
   return (
     <BottomSheet visible={invite !== null} onClose={() => invite && onDecline(invite.id)} floating>
       <View style={styles.body}>
-        <Avatar uri={host.avatarUrl} size={56} />
-        <Text size={16} weight={600} lineHeight={20} align="center">
+        <LiveAvatarRing size={64}>
+          <Avatar uri={host.avatarUrl} size={64} />
+        </LiveAvatarRing>
+        <Text size={18} weight={600} lineHeight={24} align="center" accessibilityRole="header" style={styles.title}>
           {host.name} invited you to join the LIVE
         </Text>
-        <Text size={13} lineHeight={18} color={colors.textMuted} align="center">
+        <Text size={14} lineHeight={20} color={colors.textMuted} align="center">
           Your camera and mic will be shown to everyone watching. You can leave the stage anytime.
         </Text>
-        <View style={styles.buttons}>
-          <Button title="Decline" variant="outline" style={styles.flex} onPress={() => invite && onDecline(invite.id)} />
-          <Button title="Join stage" style={styles.flex} loading={isResponding} onPress={() => invite && onAccept(invite.id)} />
-        </View>
+        <ModalActionStack
+          style={styles.actions}
+          actions={[
+            { label: "Join stage", style: "primary", loading: isResponding, onPress: () => invite && onAccept(invite.id) },
+            { label: "Not now", style: "secondary", disabled: isResponding, onPress: () => invite && onDecline(invite.id) },
+          ]}
+        />
       </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 20, gap: 10, alignItems: "center" },
-  buttons: { flexDirection: "row", gap: 10, alignSelf: "stretch", marginTop: 6 },
-  flex: { flex: 1 },
+  body: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 20, gap: 8, alignItems: "center" },
+  title: { marginTop: 8 },
+  actions: { alignSelf: "stretch", marginTop: 12 },
 });
