@@ -4,6 +4,9 @@ import "zudomart/modules/admin/src/types"
 
 type Query struct {
 	Cursor string
+	Search string
+	Status string
+	Role   string
 }
 
 type Result struct {
