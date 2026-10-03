@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package zudomart.money.v1;
+
+import "google/protobuf/timestamp.proto";
+import "zudomart/common/v1/money.proto";
+
+// Internal only (go-commerce -> go-money). Amounts are always computed by go-commerce on the server.
+service CheckoutMoneyService {
+  rpc RegisterCheckoutPayables(RegisterCheckoutPayablesRequest) returns (RegisterCheckoutPayablesResponse);
+  rpc RecordOrderFulfilment(RecordOrderFulfilmentRequest) returns (RecordOrderFulfilmentResponse);
+  rpc ConfirmOrderReceipt(ConfirmOrderReceiptRequest) returns (ConfirmOrderReceiptResponse);
+  rpc GetOrderEscrow(GetOrderEscrowRequest) returns (GetOrderEscrowResponse);
+}
+
+enum OrderPaymentMode {
+  ORDER_PAYMENT_MODE_UNSPECIFIED = 0;
+  ORDER_PAYMENT_MODE_ESCROW = 1;
+  // Rejected with FAILED_PRECONDITION DIRECT_PAYMENT_NOT_ALLOWED unless store_verified is true.
+  ORDER_PAYMENT_MODE_DIRECT = 2;
+}
+
+message OrderPayable {
+  string order_id = 1;
+  string order_reference = 2;
+  string store_id = 3;
+  string seller_user_id = 4;
+  zudomart.common.v1.Money amount = 5;
+  string product_summary = 6;
+  OrderPaymentMode payment_mode = 7;
+  bool store_verified = 8;
+}
+
+message RegisterCheckoutPayablesRequest {
+  string checkout_id = 1;
+  string buyer_user_id = 2;
+  repeated OrderPayable orders = 3;
+}
+
+message RegisterCheckoutPayablesResponse {
+  int32 registered_order_count = 1;
+}
+
+enum FulfilmentStage {
+  FULFILMENT_STAGE_UNSPECIFIED = 0;
+  FULFILMENT_STAGE_SHIPPED = 1;
+  // Starts the escrow inspection timer that auto-releases funds.
+  FULFILMENT_STAGE_DELIVERED = 2;
+}
+
+message RecordOrderFulfilmentRequest {
+  string order_id = 1;
+  FulfilmentStage stage = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+  string courier_name = 4;
+  string tracking_number = 5;
+  string tracking_url = 6;
+  optional google.protobuf.Timestamp estimated_delivery_at = 7;
+}
+
+message ConfirmOrderReceiptRequest {
+  string order_id = 1;
+  string buyer_user_id = 2;
+}
+
+message GetOrderEscrowRequest {
+  string order_id = 1;
+}
+
+message OrderEscrow {
+  string escrow_id = 1;
+  string order_id = 2;
+  string status = 3;
+  OrderPaymentMode payment_mode = 4;
+  zudomart.common.v1.Money held_amount = 5;
+  zudomart.common.v1.Money platform_fee = 6;
+  zudomart.common.v1.Money seller_amount = 7;
+  zudomart.common.v1.Money refunded_amount = 8;
+  optional google.protobuf.Timestamp auto_release_at = 9;
+  optional google.protobuf.Timestamp released_at = 10;
+  optional google.protobuf.Timestamp refunded_at = 11;
+}
+
+message RecordOrderFulfilmentResponse {
+  OrderEscrow escrow = 1;
+}
+
+message ConfirmOrderReceiptResponse {
+  OrderEscrow escrow = 1;
+}
+
+message GetOrderEscrowResponse {
+  OrderEscrow escrow = 1;
+}
