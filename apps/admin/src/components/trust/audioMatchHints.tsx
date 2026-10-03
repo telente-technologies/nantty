@@ -21,7 +21,7 @@ export function AudioMatchHints({ matches }: { readonly matches: readonly AudioM
           <ul className={styles.segmentList}>
             {match.segments.map((segment) => (
               <li key={`${segment.targetStartSeconds}-${segment.referenceStartSeconds}`} className="mono">
-                Upload {formatSecondsAsClock(segment.targetStartSeconds)}–{formatSecondsAsClock(segment.targetEndSeconds)} ↔ reference from {formatSecondsAsClock(segment.referenceStartSeconds)}
+                Upload {formatSecondsAsClock(segment.targetStartSeconds)}–{formatSecondsAsClock(segment.targetEndSeconds)} matches reference from {formatSecondsAsClock(segment.referenceStartSeconds)}
               </li>
             ))}
           </ul>

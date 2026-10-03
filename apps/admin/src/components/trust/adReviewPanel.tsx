@@ -93,7 +93,7 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
             <KeyValueList columns={2} items={[
               { label: "Daily budget", value: formatMoneyForDisplay(ad.dailyBudget) },
               { label: "Total budget", value: ad.totalBudget ? formatMoneyForDisplay(ad.totalBudget) : "No cap" },
-              { label: "Schedule", value: `${formatDateOnly(ad.schedule.startsAt)} → ${ad.schedule.endsAt ? formatDateOnly(ad.schedule.endsAt) : "ongoing"}` },
+              { label: "Schedule", value: `${formatDateOnly(ad.schedule.startsAt)} to ${ad.schedule.endsAt ? formatDateOnly(ad.schedule.endsAt) : "ongoing"}` },
               { label: "Countries", value: ad.targeting.countries.join(", ") },
               { label: "Ages", value: ad.targeting.ageRange },
               { label: "Placements", value: ad.targeting.placements.join(", ") },

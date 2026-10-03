@@ -20,7 +20,7 @@ import styles from "./copyrightClaim.module.css";
 function describeDecisionConsequences(claim: CopyrightClaimDetail, decision: CopyrightClaimDecision): string[] {
   const nextStrikeCount = claim.infringerStrikeCount + 1;
   if (decision === "uphold") {
-    const consequences = ["The target is taken down everywhere, including clips that reuse it.", `@${claim.infringer.username} gets a copyright strike (${claim.infringerStrikeCount} → ${nextStrikeCount}) and can file a counter-notice.`];
+    const consequences = ["The target is taken down everywhere, including clips that reuse it.", `@${claim.infringer.username} gets a copyright strike (${claim.infringerStrikeCount} to ${nextStrikeCount}) and can file a counter-notice.`];
     if (nextStrikeCount >= claim.repeatInfringerThreshold) consequences.push(`This makes @${claim.infringer.username} a repeat infringer (${claim.repeatInfringerThreshold}+ strikes). Policy is to ban the account — do that from their profile.`);
     return consequences;
   }

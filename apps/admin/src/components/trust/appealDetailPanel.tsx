@@ -26,7 +26,7 @@ type AppealOutcome = "UPHELD" | "OVERTURNED";
 function describeOverturnConsequences(appeal: AppealDetail): string[] {
   const consequences = ["The content becomes visible again.", `@${appeal.appellant.username} is notified that the decision was reversed.`];
   if (appeal.decisionType === "SUSPENSION") consequences.push("The suspension is lifted immediately.");
-  if (appeal.decisionType === "STRIKE" || appeal.decisionType === "SUSPENSION") consequences.push(`One strike is removed (${appeal.appellant.strikeCount} → ${Math.max(0, appeal.appellant.strikeCount - 1)}).`);
+  if (appeal.decisionType === "STRIKE" || appeal.decisionType === "SUSPENSION") consequences.push(`One strike is removed (${appeal.appellant.strikeCount} to ${Math.max(0, appeal.appellant.strikeCount - 1)}).`);
   return consequences;
 }
 
