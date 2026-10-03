@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/guest.invited.v1.json",
+  "title": "GuestInvited",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "userId",
+    "slotId",
+    "live",
+    "expiresAt"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "userId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "slotId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "live": {
+      "type": "object"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

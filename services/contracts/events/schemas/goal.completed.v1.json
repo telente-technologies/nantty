@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/goal.completed.v1.json",
+  "title": "GoalCompleted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "goalId",
+    "title",
+    "targetCoins",
+    "progressCoins",
+    "topContributors",
+    "completedAt"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "goalId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "targetCoins": {
+      "type": "integer"
+    },
+    "progressCoins": {
+      "type": "integer"
+    },
+    "topContributors": {
+      "type": "array",
+      "maxItems": 3
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
