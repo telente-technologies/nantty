@@ -82,6 +82,7 @@ require (
 	google.golang.org/grpc v1.83.2 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	zudomart/contracts v0.0.0
 )
 
 replace zudomart/platform => ../../platform
@@ -90,3 +91,4 @@ replace zudomart/modules/ledger => ../ledger
 
 replace zudomart/modules/payments => ../payments
 
+replace zudomart/contracts => ../../../contracts
