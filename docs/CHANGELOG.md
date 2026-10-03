@@ -8,6 +8,10 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ## apps/mobile
 
+### Creator = personal account upgrade (owner, 2026-10-03)
+
+- `ActingProfile.kind` no longer has `creator`; the Personal profile carries `creatorStatus` (`none|pending|approved|rejected|suspended`). Profile switcher lists Personal, Business, Brand, Store only. `useCreatorEntry` reads the personal account's creator status; Settings row reads "Switch to creator account" / "Creator application status" / "Creator tools". Blue stays on the Personal profile, creator-enabled or not.
+
 ### Reply to comments with video (§35, 3 Oct) — not tested on a device
 
 - `components/clips/videoReply/*`: draggable/pinch sticker, create-flow stage, playback overlay, "Replying to" link, "Replied with video" chip. Comment row, thread, sheet, controller, `ClipPage`, `ClipDetails`, create screen and composer panel wired in (author only).
@@ -459,6 +463,10 @@ Plan: [plans.md §29](./plans.md). Mock mode only. Verified with `tsc --noEmit`.
 
 ## apps/webapp
 
+### Creator = personal account upgrade (owner, 2026-10-03)
+
+- `ActingProfile.creatorStatus` on the personal profile mock; "Creator dashboard" links read "Creator tools".
+
 ### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
 
 | File | Change |
@@ -804,6 +812,10 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/admin
 
+### Creator = personal account upgrade (owner, 2026-10-03)
+
+- Admin `ProfileType` is `PERSONAL|BUSINESS|BRAND|GOVERNMENT`; lifetime checkmark grants and verification copy say "Personal (incl. creators) = Blue". `apiContract.md` updated.
+
 ### Email templates gallery and policy email preview (§34, 2026-10-03) — not tested in a browser
 
 | File | Change |
@@ -909,6 +921,10 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | `feedback.module.css`, `zudomartWordmark.module.css`, `consent/cookieConsent.module.css` | Fully tokenised. The banner sits on `--color-elevated` and has hover states. The hex fallbacks were removed |
 
 ## docs
+
+### Creator = personal account upgrade (owner, 2026-10-03)
+
+- backendPlan §4.5/§4.8, plans §21/§29/§30, architecture/database.md, database/domains.md and schema.md: creator is `creatorStatus` on the Personal profile, not a profile type. users module: `profiles.creator_status`, `kind` is `personal|business`, `POST /users/me/creator-application`, migration `20261003120000_move_creator_to_personal_profile_status`.
 
 ### Referral and purchase loyalty/cashback removed (owner, 2026-10-03)
 
