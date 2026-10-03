@@ -1,0 +1,148 @@
+package controllers
+
+import (
+	"net/http"
+
+	"zudomart/modules/admin/src/container"
+	adminerrors "zudomart/modules/admin/src/errors"
+	"zudomart/modules/admin/src/middlewares"
+	acceptstaffinvitation "zudomart/modules/admin/src/modules/staffAuth/commands/acceptStaffInvitation"
+	completemfalogin "zudomart/modules/admin/src/modules/staffAuth/commands/completeMfaLogin"
+	confirmtotpenrollment "zudomart/modules/admin/src/modules/staffAuth/commands/confirmTotpEnrollment"
+	grantstepup "zudomart/modules/admin/src/modules/staffAuth/commands/grantStepUp"
+	loginstaff "zudomart/modules/admin/src/modules/staffAuth/commands/logInStaff"
+	logoutstaffsession "zudomart/modules/admin/src/modules/staffAuth/commands/logOutStaffSession"
+	rotatestaffrefreshtoken "zudomart/modules/admin/src/modules/staffAuth/commands/rotateStaffRefreshToken"
+	starttotpenrollment "zudomart/modules/admin/src/modules/staffAuth/commands/startTotpEnrollment"
+	getcurrentstaff "zudomart/modules/admin/src/modules/staffAuth/queries/getCurrentStaff"
+	"zudomart/modules/admin/src/modules/staffAuth/validators"
+	httprequests "zudomart/modules/admin/src/utils/httpRequests"
+	"zudomart/platform/httpserver"
+	"zudomart/platform/staffauth"
+)
+
+type StaffAuthController struct {
+	Container *container.Container
+}
+
+func (controller StaffAuthController) fail(writer http.ResponseWriter, request *http.Request, err error) {
+	httprequests.RespondWithError(writer, request, controller.Container.Logger, err)
+}
+
+func (controller StaffAuthController) refuseWhenRateLimited(writer http.ResponseWriter, request *http.Request, parts ...string) bool {
+	key := middlewares.ClientIpAddress(request)
+	for _, part := range parts {
+		key += "|" + part
+	}
+	if controller.Container.Limiter.Allow(request.URL.Path + "|" + key) {
+		return false
+	}
+	controller.fail(writer, request, adminerrors.TooManyRequests)
+	return true
+}
+
+func (controller StaffAuthController) LogIn(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateLogInRequest)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	if controller.refuseWhenRateLimited(writer, request, body.Email) {
+		return
+	}
+	result, err := loginstaff.Handler{Container: controller.Container}.Execute(request.Context(), loginstaff.Command{Email: body.Email, Password: body.Password})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) StartTotpEnrollment(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateChallengeRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := starttotpenrollment.Handler{Container: controller.Container}.Execute(request.Context(), starttotpenrollment.Command{ChallengeToken: body.ChallengeToken})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) ConfirmTotpEnrollment(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateChallengeCodeRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := confirmtotpenrollment.Handler{Container: controller.Container}.Execute(request.Context(), confirmtotpenrollment.Command{ChallengeToken: body.ChallengeToken, Code: body.Code})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) VerifyMfa(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateChallengeCodeRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := completemfalogin.Handler{Container: controller.Container}.Execute(request.Context(), completemfalogin.Command{ChallengeToken: body.ChallengeToken, Code: body.Code})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) Refresh(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateRefreshRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := rotatestaffrefreshtoken.Handler{Container: controller.Container}.Execute(request.Context(), rotatestaffrefreshtoken.Command{RefreshToken: body.RefreshToken})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) AcceptInvitation(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateAcceptInvitationRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	err = acceptstaffinvitation.Handler{Container: controller.Container}.Execute(request.Context(), acceptstaffinvitation.Command{InvitationToken: body.Token, Password: body.Password})
+	httprequests.RespondNoContentOrError(writer, request, controller.Container.Logger, err)
+}
+
+func (controller StaffAuthController) LogOut(writer http.ResponseWriter, request *http.Request) {
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	err := logoutstaffsession.Handler{Container: controller.Container}.Execute(request.Context(), logoutstaffsession.Command{StaffId: staff.Id, SessionId: staff.SessionId})
+	httprequests.RespondNoContentOrError(writer, request, controller.Container.Logger, err)
+}
+
+func (controller StaffAuthController) Me(writer http.ResponseWriter, request *http.Request) {
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	result, err := getcurrentstaff.Handler{Container: controller.Container}.Execute(request.Context(), getcurrentstaff.Query{StaffId: staff.Id, SessionId: staff.SessionId})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) StepUp(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateStepUpRequest)
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	if err != nil || controller.refuseWhenRateLimited(writer, request, staff.Id) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := grantstepup.Handler{Container: controller.Container}.Execute(request.Context(), grantstepup.Command{StaffId: staff.Id, SessionId: staff.SessionId, Code: body.Code})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) respond(writer http.ResponseWriter, request *http.Request, status int, result any, err error) {
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, status, result)
+}
