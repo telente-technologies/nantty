@@ -22,7 +22,10 @@ export default function MePage() {
       <ProfileView user={profileQuery.data} isSelf />
       <div className={styles.footer}>
         <Link href="/creator" className={styles.creatorLink}>
-          Creator dashboard
+          Creator tools
+        </Link>
+        <Link href="/store-rewards" className={styles.creatorLink}>
+          Store rewards
         </Link>
         <SignOutButton />
       </div>
