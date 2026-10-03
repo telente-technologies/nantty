@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -8,6 +8,7 @@ import { PaperPlaneTilt24Icon } from "@/components/icons";
 import { SupportRecordingNotice } from "@/components/support/supportRecordingNotice";
 import { TICKET_STATUS_APPEARANCE } from "@/components/settings/supportAppearance.util";
 import { Header } from "@/components/ui/header";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -25,6 +26,11 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
   const { ticketId } = route.params;
   const ticket = useQuery({ queryKey: ["support", "tickets", ticketId], queryFn: () => supportService.fetchSupportTicket(ticketId), refetchInterval: LIVE_CHAT_POLL_MS });
   const [draft, setDraft] = useState("");
+  const scrollRef = useRef<ScrollView>(null);
+  const isComposing = useRef(false);
+  const keepLatestMessageVisible = () => {
+    if (isComposing.current) scrollRef.current?.scrollToEnd({ animated: false });
+  };
   const reply = useMutation({
     mutationFn: (text: string) => supportService.replyToSupportTicket(ticketId, text, generateIdempotencyKey()),
     onSuccess: () => {
@@ -46,8 +52,8 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
   return (
     <Screen>
       <Header title="Support" />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.flex}>
+        <ScrollView ref={scrollRef} onLayout={keepLatestMessageVisible} keyboardDismissMode="interactive" contentContainerStyle={styles.content}>
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>{details.subject}</Text>
             <StatusPill label={TICKET_STATUS_APPEARANCE[details.status].label} tone={TICKET_STATUS_APPEARANCE[details.status].tone} />
@@ -67,19 +73,21 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
         </ScrollView>
         {closed ? null : (
           <View style={styles.composer}>
-            <TextInput value={draft} onChangeText={setDraft} placeholder="Message Zudomart Support…" placeholderTextColor={colors.textSubtle} multiline accessibilityLabel="Reply" style={styles.input} />
+            <TextInput value={draft} onChangeText={setDraft} onFocus={() => { isComposing.current = true; }} onBlur={() => { isComposing.current = false; }} placeholder="Message Zudomart Support…" placeholderTextColor={colors.textSubtle} multiline accessibilityLabel="Reply" style={styles.input} />
             <Pressable accessibilityRole="button" accessibilityLabel="Send reply" disabled={!draft.trim() || reply.isPending} onPress={() => reply.mutate(draft.trim())} style={[styles.send, !draft.trim() && styles.sendDisabled]}>
               <PaperPlaneTilt24Icon size={20} color={colors.white} />
             </Pressable>
           </View>
         )}
-      </KeyboardAvoidingView>
+        <KeyboardSpacer style={styles.keyboardArea} />
+      </View>
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
+  keyboardArea: { backgroundColor: colors.surface },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 14 },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   bubbleWrap: { maxWidth: "85%", gap: 4 },
