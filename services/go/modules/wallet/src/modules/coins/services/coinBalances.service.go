@@ -1,0 +1,113 @@
+package services
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/google/uuid"
+
+	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
+	"zudomart/modules/wallet/src/container"
+	"zudomart/modules/wallet/src/modules/coins/dtos"
+	"zudomart/modules/wallet/src/modules/coins/models"
+	"zudomart/platform/httpserver"
+)
+
+type CoinBalances struct {
+	Container *container.Container
+}
+
+func (balances CoinBalances) ReadCoinBalance(ctx context.Context, userId string) (dtos.CoinBalanceDto, error) {
+	spendable, earned := ledgermodels.UserSpendableCoinsAccount(userId), ledgermodels.CreatorEarnedCoinsAccount(userId)
+	values, err := balances.Container.Ledger.ReadAccountBalances(ctx, balances.Container.Resources.Database, []ledgermodels.AccountRef{spendable, earned})
+	if err != nil {
+		return dtos.CoinBalanceDto{}, err
+	}
+	return dtos.CoinBalanceDto{Coins: values[spendable.Key()], EarnedCoins: values[earned.Key()]}, nil
+}
+
+func (balances CoinBalances) ListCoinActivity(ctx context.Context, userId string, afterLineId *uuid.UUID, limit int) (httpserver.CursorPage[dtos.CoinActivityEntryDto], error) {
+	lines, next, err := balances.Container.Ledger.ListStatementLinesNewestFirst(ctx, balances.Container.Resources.Database, ledgerservices.StatementPageRequest{
+		Accounts: []ledgermodels.AccountRef{ledgermodels.UserSpendableCoinsAccount(userId)}, AfterLineId: afterLineId, Limit: limit,
+	})
+	if err != nil {
+		return httpserver.CursorPage[dtos.CoinActivityEntryDto]{}, err
+	}
+	entries := make([]dtos.CoinActivityEntryDto, len(lines))
+	for index, line := range lines {
+		entryType := "debit"
+		if line.IncreasesBalance {
+			entryType = "credit"
+		}
+		entries[index] = dtos.CoinActivityEntryDto{
+			Id: line.LineId.String(), TransactionId: line.EntryId.String(), Type: entryType, Kind: line.EntryKind,
+			Coins: line.AmountMinor, BalanceAfter: line.BalanceAfterMinor, CreatedAt: line.CreatedAt,
+		}
+	}
+	nextCursor := ""
+	if next != nil {
+		nextCursor = next.String()
+	}
+	return httpserver.NewCursorPage(entries, nextCursor), nil
+}
+
+type EarnedCoinConversionInput struct {
+	UserId         string
+	Coins          int64
+	Currency       string
+	IdempotencyKey string
+}
+
+func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.Context, transaction *sql.Tx, input EarnedCoinConversionInput) (dtos.CoinConversionReceiptDto, error) {
+	settings := balances.Container.Settings
+	valuePerCoin, supported := settings.CoinCashValueMinorByCurrency[input.Currency]
+	minimum := settings.MinimumPayoutMinorByCurrency[input.Currency]
+	if !supported {
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "Earned coins cannot be converted to this currency yet.")
+	}
+	cash, err := models.ConvertCoinsToCashMinor(input.Coins, valuePerCoin)
+	if err != nil {
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "coins", Message: "is out of range"}})
+	}
+	if cash < minimum {
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusUnprocessableEntity, "BELOW_MINIMUM_PAYOUT",
+			fmt.Sprintf("Convert at least %d minor units of %s; %d coins are worth %d.", minimum, input.Currency, input.Coins, cash))
+	}
+	client := balances.Container.Client(transaction)
+	conversion, err := client.CoinConversion.Create().SetUserID(input.UserId).SetCoins(input.Coins).SetCashMinor(cash).SetCurrency(input.Currency).
+		SetCoinCashValueMinor(valuePerCoin).SetCreatedAt(balances.Container.Now().UTC()).Save(ctx)
+	if err != nil {
+		return dtos.CoinConversionReceiptDto{}, err
+	}
+	earned := ledgermodels.CreatorEarnedCoinsAccount(input.UserId)
+	posted, err := balances.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+		Reference: "creator-coin-conversion:" + input.UserId + ":" + input.IdempotencyKey, Kind: "coins.convertedToCash",
+		Description: "Earned coins converted to cash", Metadata: map[string]any{"coinConversionId": conversion.ID.String()},
+		Lines: []ledgermodels.JournalLineRequest{
+			{Account: earned, Direction: ledgermodels.Debit, AmountMinor: input.Coins},
+			{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: input.Coins},
+			{Account: ledgermodels.CreatorCoinPayoutExpenseAccount(input.Currency), Direction: ledgermodels.Debit, AmountMinor: cash},
+			{Account: ledgermodels.SellerAvailableAccount(input.UserId, input.Currency), Direction: ledgermodels.Credit, AmountMinor: cash},
+		},
+	})
+	if errors.Is(err, ledgermodels.ErrInsufficientBalance) {
+		return dtos.CoinConversionReceiptDto{}, ErrInsufficientEarnedCoins
+	}
+	if err != nil {
+		return dtos.CoinConversionReceiptDto{}, err
+	}
+	remaining, _ := posted.BalanceAfter(earned)
+	if err := balances.Container.Outbox.EnqueueInTransaction(ctx, transaction, "earnedCoins.converted", conversion.ID.String(), conversion.CreatedAt, map[string]any{
+		"coinConversionId": conversion.ID.String(), "userId": input.UserId, "coins": input.Coins, "cash": map[string]any{"amountMinor": cash, "currency": input.Currency},
+	}); err != nil {
+		return dtos.CoinConversionReceiptDto{}, err
+	}
+	return dtos.CoinConversionReceiptDto{
+		Coins: input.Coins, Cash: dtos.MoneyDto{AmountMinor: cash, Currency: input.Currency}, EarnedCoinsRemaining: remaining,
+		MinimumPayout: dtos.MoneyDto{AmountMinor: minimum, Currency: input.Currency},
+	}, nil
+}
