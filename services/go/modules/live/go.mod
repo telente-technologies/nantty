@@ -7,8 +7,8 @@ require (
 	entgo.io/ent v0.14.6
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
-	github.com/lestrrat-go/jwx/v3 v3.3.0
-	golang.org/x/crypto v0.57.0
+	github.com/lestrrat-go/jwx/v3 v3.3.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
 )
 
 require (
@@ -44,6 +44,7 @@ require (
 	github.com/gammazero/deque v1.2.1 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/google/cel-go v0.29.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
@@ -53,7 +54,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
 	github.com/livekit/mageutil v0.0.0-20250511045019-0f1ff63f7731 // indirect
-	github.com/livekit/protocol v1.52.1 // indirect
 	github.com/livekit/psrpc v0.8.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/petermattis/goid v0.0.0-20260820044319-269ab09b5261 // indirect
@@ -78,8 +78,6 @@ require (
 	github.com/prometheus/common v0.70.1 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/puzpuzpuz/xsync/v4 v4.5.0 // indirect
-	github.com/redis/go-redis/v9 v9.22.0 // indirect
-	github.com/twitchtv/twirp v8.1.3+incompatible // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -101,8 +99,6 @@ require (
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
@@ -140,6 +136,13 @@ require (
 
 replace zudomart/platform => ../../platform
 
-require zudomart/contracts v0.0.0
+require (
+	github.com/livekit/protocol v1.52.1
+	github.com/redis/go-redis/v9 v9.22.0
+	github.com/twitchtv/twirp v8.1.3+incompatible
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc
+	google.golang.org/grpc v1.84.0
+	zudomart/contracts v0.0.0
+)
 
 replace zudomart/contracts => ../../../contracts
