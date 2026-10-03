@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
-import { ChatIcon, HeartIcon, PlayIcon, ShareIcon } from "@/components/ui/icons";
+import { ChatIcon, HeartIcon, PlayIcon } from "@/components/ui/icons";
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import type { Clip } from "@/types";
@@ -87,10 +89,11 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
           Save
         </span>
         <span className={styles.actionItem}>
-          <span className={styles.actionCircle}>
-            <ShareIcon size={22} />
-          </span>
+          <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} iconSize={22} iconOnly />
           {formatCountWithThousandsSuffix(clip.reposts)}
+        </span>
+        <span className={styles.actionItem}>
+          <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} />
         </span>
       </div>
     </article>
