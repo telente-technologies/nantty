@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/media.held.v1.json",
+  "title": "MediaHeld",
+  "description": "The moderation score put the upload in the human review queue; nothing is published until staff approve it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mediaId", "ownerId", "purpose", "kind"],
+  "properties": {
+    "mediaId": { "type": "string", "format": "uuid" },
+    "ownerId": { "type": "string", "format": "uuid" },
+    "purpose": { "enum": ["post", "clip", "story", "avatar", "banner", "product", "chat", "voice", "document", "kyc", "adCreative", "dispute_evidence", "identity_document", "verification_document"] },
+    "kind": { "enum": ["image", "video", "audio", "document"] },
+    "score": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "category": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/overlayScene.unpublished.v1.json",
+  "title": "OverlaySceneUnpublished",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "sceneId",
+    "revision"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sceneId": {
+      "type": "string",
+      "pattern": "^scn_[A-Za-z0-9_-]{24}$"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  }
+}

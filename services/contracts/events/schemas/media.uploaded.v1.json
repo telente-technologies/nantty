@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/media.uploaded.v1.json",
+  "title": "MediaUploaded",
+  "description": "A client finished uploading an original file to the quarantine bucket; processing is queued.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mediaId", "ownerId", "purpose", "kind", "mimeType", "sizeBytes", "isPrivate"],
+  "properties": {
+    "mediaId": { "type": "string", "format": "uuid" },
+    "ownerId": { "type": "string", "format": "uuid" },
+    "purpose": { "enum": ["post", "clip", "story", "avatar", "banner", "product", "chat", "voice", "document", "kyc", "adCreative", "dispute_evidence", "identity_document", "verification_document"] },
+    "kind": { "enum": ["image", "video", "audio", "document"] },
+    "mimeType": { "type": "string" },
+    "sizeBytes": { "type": "integer", "minimum": 1 },
+    "isPrivate": { "type": "boolean" }
+  }
+}

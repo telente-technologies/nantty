@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/sound.updated.v1.json",
+  "title": "SoundUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "soundId"
+  ],
+  "properties": {
+    "soundId": {
+      "type": "string"
+    }
+  }
+}

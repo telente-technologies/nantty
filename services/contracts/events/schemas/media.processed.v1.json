@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/media.processed.v1.json",
+  "title": "MediaProcessed",
+  "description": "Scanning, moderation and processing passed; derivatives are published and the asset is ready. Private assets (chat, voice, documents, KYC) are served only through signed URLs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mediaId", "ownerId", "purpose", "kind", "status", "isPrivate", "width", "height", "variants"],
+  "properties": {
+    "mediaId": { "type": "string", "format": "uuid" },
+    "ownerId": { "type": "string", "format": "uuid" },
+    "purpose": { "enum": ["post", "clip", "story", "avatar", "banner", "product", "chat", "voice", "document", "kyc", "adCreative", "dispute_evidence", "identity_document", "verification_document"] },
+    "kind": { "enum": ["image", "video", "audio", "document"] },
+    "status": { "const": "ready" },
+    "isPrivate": { "type": "boolean" },
+    "width": { "type": "integer", "minimum": 0 },
+    "height": { "type": "integer", "minimum": 0 },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "pageCount": { "type": "integer", "minimum": 1 },
+    "posterKey": { "type": "string" },
+    "hlsKey": { "type": "string" },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["format", "width", "height", "key"],
+        "properties": {
+          "format": { "type": "string" },
+          "width": { "type": "integer", "minimum": 0 },
+          "height": { "type": "integer", "minimum": 0 },
+          "key": { "type": "string" }
+        }
+      }
+    }
+  }
+}
