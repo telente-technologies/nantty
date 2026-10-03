@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
+import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
 import { ToastProvider } from "@/components/ui/toastProvider";
 import { adsManagerProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
@@ -30,14 +31,16 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
+  const sessionView = buildSessionViewFromCookies(cookieStore);
   return (
     <html lang="en-NG" className={interFont.variable}>
       <body>
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
-        <AdsSessionProvider initialSessionView={buildSessionViewFromCookies(cookieStore)} csrfToken={readCsrfTokenForCookies(cookieStore)}>
+        <AdsSessionProvider initialSessionView={sessionView} csrfToken={readCsrfTokenForCookies(cookieStore)}>
           <ToastProvider>{children}</ToastProvider>
+          <ConsentBannerHost isSignedIn={sessionView !== null} />
         </AdsSessionProvider>
       </body>
     </html>
