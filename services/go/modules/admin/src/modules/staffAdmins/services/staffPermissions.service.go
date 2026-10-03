@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"regexp"
 	"slices"
 	"strings"
 
@@ -11,24 +10,23 @@ import (
 	adminerrors "zudomart/modules/admin/src/errors"
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/platform/staffauth"
 )
 
-const maximumPermissionsPerStaff = 40
-
-var permissionPattern = regexp.MustCompile(`^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){1,3}$`)
+const maximumPermissionsPerStaff = 200
 
 func NormalizePermissions(raw []string) ([]string, error) {
 	unique := map[string]bool{}
 	for _, permission := range raw {
 		trimmed := strings.TrimSpace(permission)
-		if !permissionPattern.MatchString(trimmed) {
-			return nil, adminerrors.Unprocessable("Permissions look like admin.config.read.")
+		if !staffauth.IsGrantablePermission(trimmed) {
+			return nil, adminerrors.ValidationFailedFor("permissions", "contains an unknown permission key")
 		}
 		unique[trimmed] = true
 	}
 	if len(unique) > maximumPermissionsPerStaff {
-		return nil, adminerrors.Unprocessable("Too many permissions.")
+		return nil, adminerrors.ValidationFailedFor("permissions", "has too many entries")
 	}
 	normalized := make([]string, 0, len(unique))
 	for permission := range unique {
@@ -48,4 +46,37 @@ func RequireActiveSuperadminInTransaction(ctx context.Context, tx *ent.Tx, actor
 		return nil, adminerrors.SuperadminRequired
 	}
 	return found, err
+}
+
+func EffectivePermissionsOf(ctx context.Context, client *ent.Client, staff *ent.StaffAccount) ([]string, error) {
+	if staff.Role == staffaccount.RoleSuperadmin {
+		return slices.Clone(staffauth.AllPermissionKeys), nil
+	}
+	union := map[string]bool{}
+	for _, permission := range staff.Permissions {
+		union[permission] = true
+	}
+	roleIds := make([]uuid.UUID, 0, len(staff.RoleIds))
+	for _, raw := range staff.RoleIds {
+		if parsed, err := uuid.Parse(raw); err == nil {
+			roleIds = append(roleIds, parsed)
+		}
+	}
+	if len(roleIds) > 0 {
+		roles, err := client.StaffRole.Query().Where(staffrole.IDIn(roleIds...)).All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, role := range roles {
+			for _, permission := range role.Permissions {
+				union[permission] = true
+			}
+		}
+	}
+	effective := make([]string, 0, len(union))
+	for permission := range union {
+		effective = append(effective, permission)
+	}
+	slices.Sort(effective)
+	return effective, nil
 }
