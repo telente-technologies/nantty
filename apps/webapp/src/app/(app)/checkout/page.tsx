@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -86,9 +85,7 @@ export default function CheckoutPage() {
             ) : (addressesQuery.data ?? []).length === 0 ? (
               <div className={styles.emptyAddress}>
                 <p>You have no saved addresses yet.</p>
-                <Link href="/settings" className={styles.link}>
-                  Add one in Settings
-                </Link>
+                <p>Add one in the Zudomart mobile app.</p>
               </div>
             ) : (
               <ul className={styles.optionList}>
