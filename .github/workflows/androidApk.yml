@@ -19,6 +19,10 @@ concurrency:
 
 jobs:
   build-android-apk:
+    # Skip the APK build entirely until it is wanted: nothing builds while
+    # the ENABLE_APK_BUILD repository variable is unset. Set it to "true"
+    # (Settings > Secrets and variables > Actions > Variables) to build again.
+    if: ${{ vars.ENABLE_APK_BUILD == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
