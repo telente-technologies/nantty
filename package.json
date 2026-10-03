@@ -12,9 +12,22 @@
     "test": "pnpm -r --parallel run test",
     "lint": "pnpm -r --parallel run lint",
     "typecheck": "pnpm -r --parallel run typecheck",
-    "audit": "pnpm audit --audit-level=high"
+    "audit": "pnpm audit --audit-level=high",
+    "lint:styles": "stylelint \"apps/*/src/**/*.module.css\" \"packages/webKit/src/**/*.css\" --allow-empty-input",
+    "backend:up": "docker compose -f infra/local/docker-compose.yml up -d --wait",
+    "backend:down": "docker compose -f infra/local/docker-compose.yml down",
+    "backend:reset": "docker compose -f infra/local/docker-compose.yml down -v",
+    "backend:logs": "docker compose -f infra/local/docker-compose.yml logs -f",
+    "backend:dev:identity": "cd services/go && set -a && . ./.env.example && set +a && go run ./deployables/go-identity",
+    "backend:dev:live": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8102 go run ./deployables/go-live",
+    "backend:dev:gateway": "cd services/typescript/gateway && set -a && . ./.env.example && set +a && pnpm dev",
+    "backend:test:go": "bash services/scripts/test-go-workspace.sh",
+    "backend:test:gateway": "pnpm --filter @zudomart/gateway test",
+    "backend:test:realtime": "bash services/scripts/test-realtime-in-docker.sh",
+    "backend:check": "bash services/scripts/check-backend-file-lengths.sh && bash services/scripts/check-no-raw-sql-in-typescript.sh"
   },
   "devDependencies": {
+    "stylelint": "^17.16.0",
     "typescript": "~7.0.2"
   }
 }

@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "services/typescript/*"
 
 # Dependencies allowed to run install scripts (pnpm 10).
 onlyBuiltDependencies:
