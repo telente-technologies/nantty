@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/session"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/session"
 )
 
 const sessionPageSize = 20

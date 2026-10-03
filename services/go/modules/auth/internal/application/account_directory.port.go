@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
-	"zudomart/modules/auth/internal/ent/session"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/session"
 	"zudomart/platform/identityports"
 )
 
@@ -32,6 +32,10 @@ func (application *AuthApplication) FindAccountSummary(ctx context.Context, acco
 		ID: found.ID, Username: found.Username, Name: found.Name, Email: found.Email, Birthday: found.Birthday, Roles: found.Roles,
 		EmailVerified: found.EmailVerifiedAt != nil, Active: found.Status == account.StatusActive, CreatedAt: found.CreatedAt,
 	}, true, nil
+}
+
+func (application *AuthApplication) IsUsernameTaken(ctx context.Context, username string, excludingAccountId uuid.UUID) (bool, error) {
+	return application.Client.Account.Query().Where(account.Username(username), account.IDNEQ(excludingAccountId)).Exist(ctx)
 }
 
 func (application *AuthApplication) RenameAccountUsername(ctx context.Context, accountId uuid.UUID, username string) error {

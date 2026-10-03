@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
 )
 
 type LogInWithPasswordInput struct {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
 )
 
 type ChangePasswordInput struct {

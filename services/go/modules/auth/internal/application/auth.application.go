@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/auth/internal/config"
-	"zudomart/modules/auth/internal/credentials"
-	"zudomart/modules/auth/internal/ent"
+	"zudomart/modules/auth/src/configs"
+	"zudomart/modules/auth/src/utils"
+	"zudomart/modules/auth/src/generated/ent"
 	"zudomart/modules/auth/internal/signingkeys"
 	"zudomart/modules/auth/internal/socialidentity"
 	"zudomart/platform/httpserver"
