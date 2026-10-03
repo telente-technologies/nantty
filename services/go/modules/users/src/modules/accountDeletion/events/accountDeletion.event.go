@@ -25,6 +25,8 @@ type AccountDeletionExecutedData struct {
 	ExecutedAt      string                           `json:"executedAt"`
 	RetentionPolicy []retentionmodels.PolicySnapshot `json:"retentionPolicy"`
 	AppliedSteps    []AppliedStep                    `json:"appliedSteps"`
+	FinalEmail      string                           `json:"finalEmail,omitempty"`
+	ReferenceId     string                           `json:"referenceId,omitempty"`
 }
 
 type AppliedStep struct {
