@@ -13,7 +13,6 @@ var (
 	DisputesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "escrow_id", Type: field.TypeUUID},
 		{Name: "order_id", Type: field.TypeString, Size: 80},
 		{Name: "opened_by_user_id", Type: field.TypeString, Size: 80},
 		{Name: "reason", Type: field.TypeEnum, Enums: []string{"not_received", "not_as_described", "damaged", "wrong_item", "other"}},
@@ -27,32 +26,41 @@ var (
 		{Name: "resolved_at", Type: field.TypeTime, Nullable: true},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "escrow_id", Type: field.TypeUUID},
 	}
 	// DisputesTable holds the schema information for the "disputes" table.
 	DisputesTable = &schema.Table{
 		Name:       "disputes",
 		Columns:    DisputesColumns,
 		PrimaryKey: []*schema.Column{DisputesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "disputes_escrows_disputes",
+				Columns:    []*schema.Column{DisputesColumns[15]},
+				RefColumns: []*schema.Column{EscrowsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "dispute_escrow_id",
 				Unique:  false,
-				Columns: []*schema.Column{DisputesColumns[2]},
+				Columns: []*schema.Column{DisputesColumns[15]},
 			},
 			{
 				Name:    "dispute_order_id",
 				Unique:  false,
-				Columns: []*schema.Column{DisputesColumns[3]},
+				Columns: []*schema.Column{DisputesColumns[2]},
 			},
 			{
 				Name:    "dispute_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DisputesColumns[8], DisputesColumns[1]},
+				Columns: []*schema.Column{DisputesColumns[7], DisputesColumns[1]},
 			},
 			{
 				Name:    "dispute_opened_by_user_id_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DisputesColumns[4], DisputesColumns[1]},
+				Columns: []*schema.Column{DisputesColumns[3], DisputesColumns[1]},
 			},
 		},
 	}
@@ -253,6 +261,7 @@ var (
 )
 
 func init() {
+	DisputesTable.ForeignKeys[0].RefTable = EscrowsTable
 	EscrowsTable.Annotation = &entsql.Annotation{}
 	EscrowsTable.Annotation.Checks = map[string]string{
 		"escrows_amount_positive":         "amount_minor > 0",
