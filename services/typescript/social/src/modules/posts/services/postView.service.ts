@@ -4,6 +4,8 @@ import { followRepository } from "../../follows/repositories/follow.repository.j
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 import { savedItemRepository } from "../../saves/repositories/savedItem.repository.js";
 import type { MediaView, PostView, ReplyToComment, StickerLayout } from "../models/post.model.js";
+import type { SoundView } from "../../sounds/models/sound.model.js";
+import { buildSoundViews } from "../../sounds/services/soundView.service.js";
 import { postRepository, type PostRow } from "../repositories/post.repository.js";
 
 type MediaRow = PostRow["media"][number];
@@ -38,6 +40,9 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
     viewerId === undefined ? new Set<string>() : savedItemRepository.savedTargetIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : followRepository.followedAccountIds(db, viewerId, authorIds),
   ]);
+  const soundIds = [...new Set(rows.flatMap((row) => (row.soundId === null ? [] : [row.soundId])))];
+  const soundRows = soundIds.length === 0 ? [] : await db.sound.findMany({ where: { id: { in: soundIds } } });
+  const sounds = new Map((await buildSoundViews(context, viewerId, soundRows)).map((sound) => [sound.id, sound]));
   const subscribed = new Map<string, boolean>();
   for (const row of everyRow) {
     if (row.visibility === "subscribers" && viewerId !== undefined && viewerId !== row.authorId && !subscribed.has(row.authorId)) {
@@ -70,6 +75,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       viewerHasAccess: hasAccess,
       resharedFrom: original === undefined ? null : toView(original, true),
       isAiGenerated: row.isAiGenerated,
+      ...(row.soundId === null || sounds.get(row.soundId) === undefined ? {} : { sound: sounds.get(row.soundId) as SoundView }),
       mentions: row.mentions as unknown as MentionEntity[],
       ...(row.replyToCommentId === null || row.replyToClipId === null || row.replyToCommenterId === null
         ? {}

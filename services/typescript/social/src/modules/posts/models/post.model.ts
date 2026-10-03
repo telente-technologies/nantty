@@ -1,4 +1,5 @@
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
+import type { SoundView } from "../../sounds/models/sound.model.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 
 export interface MediaView {
@@ -48,6 +49,7 @@ export interface PostView {
   readonly viewerHasAccess: boolean;
   readonly resharedFrom: PostView | null;
   readonly isAiGenerated: boolean;
+  readonly sound?: SoundView;
   readonly mentions: readonly MentionEntity[];
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: StickerLayout;
