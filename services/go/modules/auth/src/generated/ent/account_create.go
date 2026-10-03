@@ -133,6 +133,48 @@ func (_c *AccountCreate) SetNillableStatus(v *account.Status) *AccountCreate {
 	return _c
 }
 
+// SetPhoneHash sets the "phone_hash" field.
+func (_c *AccountCreate) SetPhoneHash(v string) *AccountCreate {
+	_c.mutation.SetPhoneHash(v)
+	return _c
+}
+
+// SetNillablePhoneHash sets the "phone_hash" field if the given value is not nil.
+func (_c *AccountCreate) SetNillablePhoneHash(v *string) *AccountCreate {
+	if v != nil {
+		_c.SetPhoneHash(*v)
+	}
+	return _c
+}
+
+// SetPhoneVerifiedAt sets the "phone_verified_at" field.
+func (_c *AccountCreate) SetPhoneVerifiedAt(v time.Time) *AccountCreate {
+	_c.mutation.SetPhoneVerifiedAt(v)
+	return _c
+}
+
+// SetNillablePhoneVerifiedAt sets the "phone_verified_at" field if the given value is not nil.
+func (_c *AccountCreate) SetNillablePhoneVerifiedAt(v *time.Time) *AccountCreate {
+	if v != nil {
+		_c.SetPhoneVerifiedAt(*v)
+	}
+	return _c
+}
+
+// SetMustChangePassword sets the "must_change_password" field.
+func (_c *AccountCreate) SetMustChangePassword(v bool) *AccountCreate {
+	_c.mutation.SetMustChangePassword(v)
+	return _c
+}
+
+// SetNillableMustChangePassword sets the "must_change_password" field if the given value is not nil.
+func (_c *AccountCreate) SetNillableMustChangePassword(v *bool) *AccountCreate {
+	if v != nil {
+		_c.SetMustChangePassword(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *AccountCreate) SetUpdatedAt(v time.Time) *AccountCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -242,6 +284,10 @@ func (_c *AccountCreate) defaults() {
 		v := account.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.MustChangePassword(); !ok {
+		v := account.DefaultMustChangePassword
+		_c.mutation.SetMustChangePassword(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := account.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -288,6 +334,14 @@ func (_c *AccountCreate) check() error {
 		if err := account.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
 		}
+	}
+	if v, ok := _c.mutation.PhoneHash(); ok {
+		if err := account.PhoneHashValidator(v); err != nil {
+			return &ValidationError{Name: "phone_hash", err: fmt.Errorf(`ent: validator failed for field "Account.phone_hash": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.MustChangePassword(); !ok {
+		return &ValidationError{Name: "must_change_password", err: errors.New(`ent: missing required field "Account.must_change_password"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Account.updated_at"`)}
@@ -362,6 +416,18 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(account.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.PhoneHash(); ok {
+		_spec.SetField(account.FieldPhoneHash, field.TypeString, value)
+		_node.PhoneHash = &value
+	}
+	if value, ok := _c.mutation.PhoneVerifiedAt(); ok {
+		_spec.SetField(account.FieldPhoneVerifiedAt, field.TypeTime, value)
+		_node.PhoneVerifiedAt = &value
+	}
+	if value, ok := _c.mutation.MustChangePassword(); ok {
+		_spec.SetField(account.FieldMustChangePassword, field.TypeBool, value)
+		_node.MustChangePassword = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)

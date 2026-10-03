@@ -37,6 +37,12 @@ type Account struct {
 	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty"`
 	// Status holds the value of the "status" field.
 	Status account.Status `json:"status,omitempty"`
+	// PhoneHash holds the value of the "phone_hash" field.
+	PhoneHash *string `json:"phone_hash,omitempty"`
+	// PhoneVerifiedAt holds the value of the "phone_verified_at" field.
+	PhoneVerifiedAt *time.Time `json:"phone_verified_at,omitempty"`
+	// MustChangePassword holds the value of the "must_change_password" field.
+	MustChangePassword bool `json:"must_change_password,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -81,9 +87,11 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case account.FieldRoles:
 			values[i] = new([]byte)
-		case account.FieldEmail, account.FieldUsername, account.FieldPasswordHash, account.FieldName, account.FieldStatus:
+		case account.FieldMustChangePassword:
+			values[i] = new(sql.NullBool)
+		case account.FieldEmail, account.FieldUsername, account.FieldPasswordHash, account.FieldName, account.FieldStatus, account.FieldPhoneHash:
 			values[i] = new(sql.NullString)
-		case account.FieldCreatedAt, account.FieldBirthday, account.FieldEmailVerifiedAt, account.FieldUpdatedAt:
+		case account.FieldCreatedAt, account.FieldBirthday, account.FieldEmailVerifiedAt, account.FieldPhoneVerifiedAt, account.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case account.FieldID:
 			values[i] = new(uuid.UUID)
@@ -168,6 +176,26 @@ func (_m *Account) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Status = account.Status(value.String)
 			}
+		case account.FieldPhoneHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_hash", values[i])
+			} else if value.Valid {
+				_m.PhoneHash = new(string)
+				*_m.PhoneHash = value.String
+			}
+		case account.FieldPhoneVerifiedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_verified_at", values[i])
+			} else if value.Valid {
+				_m.PhoneVerifiedAt = new(time.Time)
+				*_m.PhoneVerifiedAt = value.Time
+			}
+		case account.FieldMustChangePassword:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field must_change_password", values[i])
+			} else if value.Valid {
+				_m.MustChangePassword = value.Bool
+			}
 		case account.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -251,6 +279,19 @@ func (_m *Account) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	if v := _m.PhoneHash; v != nil {
+		builder.WriteString("phone_hash=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.PhoneVerifiedAt; v != nil {
+		builder.WriteString("phone_verified_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("must_change_password=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MustChangePassword))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

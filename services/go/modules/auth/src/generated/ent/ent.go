@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
+	"zudomart/modules/auth/src/generated/ent/registrationblock"
 	"zudomart/modules/auth/src/generated/ent/session"
 	"zudomart/modules/auth/src/generated/ent/signingkey"
 	"zudomart/modules/auth/src/generated/ent/socialidentity"
@@ -79,13 +80,14 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			account.Table:        account.ValidColumn,
-			onetimecode.Table:    onetimecode.ValidColumn,
-			outboxevent.Table:    outboxevent.ValidColumn,
-			refreshtoken.Table:   refreshtoken.ValidColumn,
-			session.Table:        session.ValidColumn,
-			signingkey.Table:     signingkey.ValidColumn,
-			socialidentity.Table: socialidentity.ValidColumn,
+			account.Table:           account.ValidColumn,
+			onetimecode.Table:       onetimecode.ValidColumn,
+			outboxevent.Table:       outboxevent.ValidColumn,
+			refreshtoken.Table:      refreshtoken.ValidColumn,
+			registrationblock.Table: registrationblock.ValidColumn,
+			session.Table:           session.ValidColumn,
+			signingkey.Table:        signingkey.ValidColumn,
+			socialidentity.Table:    socialidentity.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

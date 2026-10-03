@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
+	"zudomart/modules/auth/src/generated/ent/registrationblock"
 	"zudomart/modules/auth/src/generated/ent/session"
 	"zudomart/modules/auth/src/generated/ent/signingkey"
 	"zudomart/modules/auth/src/generated/ent/socialidentity"
@@ -41,6 +42,8 @@ type Client struct {
 	OutboxEvent *OutboxEventClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// RegistrationBlock is the client for interacting with the RegistrationBlock builders.
+	RegistrationBlock *RegistrationBlockClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// SigningKey is the client for interacting with the SigningKey builders.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.OneTimeCode = NewOneTimeCodeClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
+	c.RegistrationBlock = NewRegistrationBlockClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.SigningKey = NewSigningKeyClient(c.config)
 	c.SocialIdentity = NewSocialIdentityClient(c.config)
@@ -155,15 +159,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Account:        NewAccountClient(cfg),
-		OneTimeCode:    NewOneTimeCodeClient(cfg),
-		OutboxEvent:    NewOutboxEventClient(cfg),
-		RefreshToken:   NewRefreshTokenClient(cfg),
-		Session:        NewSessionClient(cfg),
-		SigningKey:     NewSigningKeyClient(cfg),
-		SocialIdentity: NewSocialIdentityClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		Account:           NewAccountClient(cfg),
+		OneTimeCode:       NewOneTimeCodeClient(cfg),
+		OutboxEvent:       NewOutboxEventClient(cfg),
+		RefreshToken:      NewRefreshTokenClient(cfg),
+		RegistrationBlock: NewRegistrationBlockClient(cfg),
+		Session:           NewSessionClient(cfg),
+		SigningKey:        NewSigningKeyClient(cfg),
+		SocialIdentity:    NewSocialIdentityClient(cfg),
 	}, nil
 }
 
@@ -181,15 +186,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Account:        NewAccountClient(cfg),
-		OneTimeCode:    NewOneTimeCodeClient(cfg),
-		OutboxEvent:    NewOutboxEventClient(cfg),
-		RefreshToken:   NewRefreshTokenClient(cfg),
-		Session:        NewSessionClient(cfg),
-		SigningKey:     NewSigningKeyClient(cfg),
-		SocialIdentity: NewSocialIdentityClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		Account:           NewAccountClient(cfg),
+		OneTimeCode:       NewOneTimeCodeClient(cfg),
+		OutboxEvent:       NewOutboxEventClient(cfg),
+		RefreshToken:      NewRefreshTokenClient(cfg),
+		RegistrationBlock: NewRegistrationBlockClient(cfg),
+		Session:           NewSessionClient(cfg),
+		SigningKey:        NewSigningKeyClient(cfg),
+		SocialIdentity:    NewSocialIdentityClient(cfg),
 	}, nil
 }
 
@@ -219,8 +225,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.Session,
-		c.SigningKey, c.SocialIdentity,
+		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock,
+		c.Session, c.SigningKey, c.SocialIdentity,
 	} {
 		n.Use(hooks...)
 	}
@@ -230,8 +236,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.Session,
-		c.SigningKey, c.SocialIdentity,
+		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock,
+		c.Session, c.SigningKey, c.SocialIdentity,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -248,6 +254,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OutboxEvent.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
+	case *RegistrationBlockMutation:
+		return c.RegistrationBlock.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *SigningKeyMutation:
@@ -839,6 +847,139 @@ func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation
 	}
 }
 
+// RegistrationBlockClient is a client for the RegistrationBlock schema.
+type RegistrationBlockClient struct {
+	config
+}
+
+// NewRegistrationBlockClient returns a client for the RegistrationBlock from the given config.
+func NewRegistrationBlockClient(c config) *RegistrationBlockClient {
+	return &RegistrationBlockClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `registrationblock.Hooks(f(g(h())))`.
+func (c *RegistrationBlockClient) Use(hooks ...Hook) {
+	c.hooks.RegistrationBlock = append(c.hooks.RegistrationBlock, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `registrationblock.Intercept(f(g(h())))`.
+func (c *RegistrationBlockClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RegistrationBlock = append(c.inters.RegistrationBlock, interceptors...)
+}
+
+// Create returns a builder for creating a RegistrationBlock entity.
+func (c *RegistrationBlockClient) Create() *RegistrationBlockCreate {
+	mutation := newRegistrationBlockMutation(c.config, OpCreate)
+	return &RegistrationBlockCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RegistrationBlock entities.
+func (c *RegistrationBlockClient) CreateBulk(builders ...*RegistrationBlockCreate) *RegistrationBlockCreateBulk {
+	return &RegistrationBlockCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RegistrationBlockClient) MapCreateBulk(slice any, setFunc func(*RegistrationBlockCreate, int)) *RegistrationBlockCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RegistrationBlockCreateBulk{err: fmt.Errorf("calling to RegistrationBlockClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RegistrationBlockCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RegistrationBlockCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RegistrationBlock.
+func (c *RegistrationBlockClient) Update() *RegistrationBlockUpdate {
+	mutation := newRegistrationBlockMutation(c.config, OpUpdate)
+	return &RegistrationBlockUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RegistrationBlockClient) UpdateOne(_m *RegistrationBlock) *RegistrationBlockUpdateOne {
+	mutation := newRegistrationBlockMutation(c.config, OpUpdateOne, withRegistrationBlock(_m))
+	return &RegistrationBlockUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RegistrationBlockClient) UpdateOneID(id uuid.UUID) *RegistrationBlockUpdateOne {
+	mutation := newRegistrationBlockMutation(c.config, OpUpdateOne, withRegistrationBlockID(id))
+	return &RegistrationBlockUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RegistrationBlock.
+func (c *RegistrationBlockClient) Delete() *RegistrationBlockDelete {
+	mutation := newRegistrationBlockMutation(c.config, OpDelete)
+	return &RegistrationBlockDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RegistrationBlockClient) DeleteOne(_m *RegistrationBlock) *RegistrationBlockDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RegistrationBlockClient) DeleteOneID(id uuid.UUID) *RegistrationBlockDeleteOne {
+	builder := c.Delete().Where(registrationblock.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RegistrationBlockDeleteOne{builder}
+}
+
+// Query returns a query builder for RegistrationBlock.
+func (c *RegistrationBlockClient) Query() *RegistrationBlockQuery {
+	return &RegistrationBlockQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRegistrationBlock},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RegistrationBlock entity by its id.
+func (c *RegistrationBlockClient) Get(ctx context.Context, id uuid.UUID) (*RegistrationBlock, error) {
+	return c.Query().Where(registrationblock.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RegistrationBlockClient) GetX(ctx context.Context, id uuid.UUID) *RegistrationBlock {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RegistrationBlockClient) Hooks() []Hook {
+	return c.hooks.RegistrationBlock
+}
+
+// Interceptors returns the client interceptors.
+func (c *RegistrationBlockClient) Interceptors() []Interceptor {
+	return c.inters.RegistrationBlock
+}
+
+func (c *RegistrationBlockClient) mutate(ctx context.Context, m *RegistrationBlockMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RegistrationBlockCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RegistrationBlockUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RegistrationBlockUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RegistrationBlockDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RegistrationBlock mutation op: %q", m.Op())
+	}
+}
+
 // SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
@@ -1289,12 +1430,12 @@ func (c *SocialIdentityClient) mutate(ctx context.Context, m *SocialIdentityMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, OneTimeCode, OutboxEvent, RefreshToken, Session, SigningKey,
-		SocialIdentity []ent.Hook
+		Account, OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session,
+		SigningKey, SocialIdentity []ent.Hook
 	}
 	inters struct {
-		Account, OneTimeCode, OutboxEvent, RefreshToken, Session, SigningKey,
-		SocialIdentity []ent.Interceptor
+		Account, OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session,
+		SigningKey, SocialIdentity []ent.Interceptor
 	}
 )
 

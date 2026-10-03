@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/predicate"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
+	"zudomart/modules/auth/src/generated/ent/registrationblock"
 	"zudomart/modules/auth/src/generated/ent/session"
 	"zudomart/modules/auth/src/generated/ent/signingkey"
 	"zudomart/modules/auth/src/generated/ent/socialidentity"
@@ -31,13 +32,14 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount        = "Account"
-	TypeOneTimeCode    = "OneTimeCode"
-	TypeOutboxEvent    = "OutboxEvent"
-	TypeRefreshToken   = "RefreshToken"
-	TypeSession        = "Session"
-	TypeSigningKey     = "SigningKey"
-	TypeSocialIdentity = "SocialIdentity"
+	TypeAccount           = "Account"
+	TypeOneTimeCode       = "OneTimeCode"
+	TypeOutboxEvent       = "OutboxEvent"
+	TypeRefreshToken      = "RefreshToken"
+	TypeRegistrationBlock = "RegistrationBlock"
+	TypeSession           = "Session"
+	TypeSigningKey        = "SigningKey"
+	TypeSocialIdentity    = "SocialIdentity"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
@@ -56,6 +58,9 @@ type AccountMutation struct {
 	appendroles              []string
 	email_verified_at        *time.Time
 	status                   *account.Status
+	phone_hash               *string
+	phone_verified_at        *time.Time
+	must_change_password     *bool
 	updated_at               *time.Time
 	clearedFields            map[string]struct{}
 	sessions                 map[uuid.UUID]struct{}
@@ -564,6 +569,140 @@ func (m *AccountMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetPhoneHash sets the "phone_hash" field.
+func (m *AccountMutation) SetPhoneHash(s string) {
+	m.phone_hash = &s
+}
+
+// PhoneHash returns the value of the "phone_hash" field in the mutation.
+func (m *AccountMutation) PhoneHash() (r string, exists bool) {
+	v := m.phone_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhoneHash returns the old "phone_hash" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldPhoneHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhoneHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhoneHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhoneHash: %w", err)
+	}
+	return oldValue.PhoneHash, nil
+}
+
+// ClearPhoneHash clears the value of the "phone_hash" field.
+func (m *AccountMutation) ClearPhoneHash() {
+	m.phone_hash = nil
+	m.clearedFields[account.FieldPhoneHash] = struct{}{}
+}
+
+// PhoneHashCleared returns if the "phone_hash" field was cleared in this mutation.
+func (m *AccountMutation) PhoneHashCleared() bool {
+	_, ok := m.clearedFields[account.FieldPhoneHash]
+	return ok
+}
+
+// ResetPhoneHash resets all changes to the "phone_hash" field.
+func (m *AccountMutation) ResetPhoneHash() {
+	m.phone_hash = nil
+	delete(m.clearedFields, account.FieldPhoneHash)
+}
+
+// SetPhoneVerifiedAt sets the "phone_verified_at" field.
+func (m *AccountMutation) SetPhoneVerifiedAt(t time.Time) {
+	m.phone_verified_at = &t
+}
+
+// PhoneVerifiedAt returns the value of the "phone_verified_at" field in the mutation.
+func (m *AccountMutation) PhoneVerifiedAt() (r time.Time, exists bool) {
+	v := m.phone_verified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhoneVerifiedAt returns the old "phone_verified_at" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldPhoneVerifiedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhoneVerifiedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhoneVerifiedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhoneVerifiedAt: %w", err)
+	}
+	return oldValue.PhoneVerifiedAt, nil
+}
+
+// ClearPhoneVerifiedAt clears the value of the "phone_verified_at" field.
+func (m *AccountMutation) ClearPhoneVerifiedAt() {
+	m.phone_verified_at = nil
+	m.clearedFields[account.FieldPhoneVerifiedAt] = struct{}{}
+}
+
+// PhoneVerifiedAtCleared returns if the "phone_verified_at" field was cleared in this mutation.
+func (m *AccountMutation) PhoneVerifiedAtCleared() bool {
+	_, ok := m.clearedFields[account.FieldPhoneVerifiedAt]
+	return ok
+}
+
+// ResetPhoneVerifiedAt resets all changes to the "phone_verified_at" field.
+func (m *AccountMutation) ResetPhoneVerifiedAt() {
+	m.phone_verified_at = nil
+	delete(m.clearedFields, account.FieldPhoneVerifiedAt)
+}
+
+// SetMustChangePassword sets the "must_change_password" field.
+func (m *AccountMutation) SetMustChangePassword(b bool) {
+	m.must_change_password = &b
+}
+
+// MustChangePassword returns the value of the "must_change_password" field in the mutation.
+func (m *AccountMutation) MustChangePassword() (r bool, exists bool) {
+	v := m.must_change_password
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMustChangePassword returns the old "must_change_password" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldMustChangePassword(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMustChangePassword is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMustChangePassword requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMustChangePassword: %w", err)
+	}
+	return oldValue.MustChangePassword, nil
+}
+
+// ResetMustChangePassword resets all changes to the "must_change_password" field.
+func (m *AccountMutation) ResetMustChangePassword() {
+	m.must_change_password = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *AccountMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -742,7 +881,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, account.FieldCreatedAt)
 	}
@@ -769,6 +908,15 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, account.FieldStatus)
+	}
+	if m.phone_hash != nil {
+		fields = append(fields, account.FieldPhoneHash)
+	}
+	if m.phone_verified_at != nil {
+		fields = append(fields, account.FieldPhoneVerifiedAt)
+	}
+	if m.must_change_password != nil {
+		fields = append(fields, account.FieldMustChangePassword)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, account.FieldUpdatedAt)
@@ -799,6 +947,12 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.EmailVerifiedAt()
 	case account.FieldStatus:
 		return m.Status()
+	case account.FieldPhoneHash:
+		return m.PhoneHash()
+	case account.FieldPhoneVerifiedAt:
+		return m.PhoneVerifiedAt()
+	case account.FieldMustChangePassword:
+		return m.MustChangePassword()
 	case account.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -828,6 +982,12 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldEmailVerifiedAt(ctx)
 	case account.FieldStatus:
 		return m.OldStatus(ctx)
+	case account.FieldPhoneHash:
+		return m.OldPhoneHash(ctx)
+	case account.FieldPhoneVerifiedAt:
+		return m.OldPhoneVerifiedAt(ctx)
+	case account.FieldMustChangePassword:
+		return m.OldMustChangePassword(ctx)
 	case account.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -902,6 +1062,27 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case account.FieldPhoneHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhoneHash(v)
+		return nil
+	case account.FieldPhoneVerifiedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhoneVerifiedAt(v)
+		return nil
+	case account.FieldMustChangePassword:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMustChangePassword(v)
+		return nil
 	case account.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -951,6 +1132,12 @@ func (m *AccountMutation) ClearedFields() []string {
 	if m.FieldCleared(account.FieldEmailVerifiedAt) {
 		fields = append(fields, account.FieldEmailVerifiedAt)
 	}
+	if m.FieldCleared(account.FieldPhoneHash) {
+		fields = append(fields, account.FieldPhoneHash)
+	}
+	if m.FieldCleared(account.FieldPhoneVerifiedAt) {
+		fields = append(fields, account.FieldPhoneVerifiedAt)
+	}
 	return fields
 }
 
@@ -976,6 +1163,12 @@ func (m *AccountMutation) ClearField(name string) error {
 		return nil
 	case account.FieldEmailVerifiedAt:
 		m.ClearEmailVerifiedAt()
+		return nil
+	case account.FieldPhoneHash:
+		m.ClearPhoneHash()
+		return nil
+	case account.FieldPhoneVerifiedAt:
+		m.ClearPhoneVerifiedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
@@ -1011,6 +1204,15 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case account.FieldPhoneHash:
+		m.ResetPhoneHash()
+		return nil
+	case account.FieldPhoneVerifiedAt:
+		m.ResetPhoneVerifiedAt()
+		return nil
+	case account.FieldMustChangePassword:
+		m.ResetMustChangePassword()
 		return nil
 	case account.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -3110,6 +3312,684 @@ func (m *RefreshTokenMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown RefreshToken edge %s", name)
 }
 
+// RegistrationBlockMutation represents an operation that mutates the RegistrationBlock nodes in the graph.
+type RegistrationBlockMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	kind          *registrationblock.Kind
+	value_hash    *string
+	account_id    *uuid.UUID
+	reason        *string
+	created_by    *string
+	lifted_at     *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*RegistrationBlock, error)
+	predicates    []predicate.RegistrationBlock
+}
+
+var _ ent.Mutation = (*RegistrationBlockMutation)(nil)
+
+// registrationblockOption allows management of the mutation configuration using functional options.
+type registrationblockOption func(*RegistrationBlockMutation)
+
+// newRegistrationBlockMutation creates new mutation for the RegistrationBlock entity.
+func newRegistrationBlockMutation(c config, op Op, opts ...registrationblockOption) *RegistrationBlockMutation {
+	m := &RegistrationBlockMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRegistrationBlock,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRegistrationBlockID sets the ID field of the mutation.
+func withRegistrationBlockID(id uuid.UUID) registrationblockOption {
+	return func(m *RegistrationBlockMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *RegistrationBlock
+		)
+		m.oldValue = func(ctx context.Context) (*RegistrationBlock, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().RegistrationBlock.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRegistrationBlock sets the old RegistrationBlock of the mutation.
+func withRegistrationBlock(node *RegistrationBlock) registrationblockOption {
+	return func(m *RegistrationBlockMutation) {
+		m.oldValue = func(context.Context) (*RegistrationBlock, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RegistrationBlockMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RegistrationBlockMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of RegistrationBlock entities.
+func (m *RegistrationBlockMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RegistrationBlockMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RegistrationBlockMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().RegistrationBlock.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *RegistrationBlockMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *RegistrationBlockMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *RegistrationBlockMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *RegistrationBlockMutation) SetKind(r registrationblock.Kind) {
+	m.kind = &r
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *RegistrationBlockMutation) Kind() (r registrationblock.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldKind(ctx context.Context) (v registrationblock.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *RegistrationBlockMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetValueHash sets the "value_hash" field.
+func (m *RegistrationBlockMutation) SetValueHash(s string) {
+	m.value_hash = &s
+}
+
+// ValueHash returns the value of the "value_hash" field in the mutation.
+func (m *RegistrationBlockMutation) ValueHash() (r string, exists bool) {
+	v := m.value_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValueHash returns the old "value_hash" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldValueHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValueHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValueHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValueHash: %w", err)
+	}
+	return oldValue.ValueHash, nil
+}
+
+// ResetValueHash resets all changes to the "value_hash" field.
+func (m *RegistrationBlockMutation) ResetValueHash() {
+	m.value_hash = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *RegistrationBlockMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *RegistrationBlockMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *RegistrationBlockMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *RegistrationBlockMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *RegistrationBlockMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *RegistrationBlockMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *RegistrationBlockMutation) SetCreatedBy(s string) {
+	m.created_by = &s
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *RegistrationBlockMutation) CreatedBy() (r string, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldCreatedBy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *RegistrationBlockMutation) ResetCreatedBy() {
+	m.created_by = nil
+}
+
+// SetLiftedAt sets the "lifted_at" field.
+func (m *RegistrationBlockMutation) SetLiftedAt(t time.Time) {
+	m.lifted_at = &t
+}
+
+// LiftedAt returns the value of the "lifted_at" field in the mutation.
+func (m *RegistrationBlockMutation) LiftedAt() (r time.Time, exists bool) {
+	v := m.lifted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiftedAt returns the old "lifted_at" field's value of the RegistrationBlock entity.
+// If the RegistrationBlock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegistrationBlockMutation) OldLiftedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiftedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiftedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiftedAt: %w", err)
+	}
+	return oldValue.LiftedAt, nil
+}
+
+// ClearLiftedAt clears the value of the "lifted_at" field.
+func (m *RegistrationBlockMutation) ClearLiftedAt() {
+	m.lifted_at = nil
+	m.clearedFields[registrationblock.FieldLiftedAt] = struct{}{}
+}
+
+// LiftedAtCleared returns if the "lifted_at" field was cleared in this mutation.
+func (m *RegistrationBlockMutation) LiftedAtCleared() bool {
+	_, ok := m.clearedFields[registrationblock.FieldLiftedAt]
+	return ok
+}
+
+// ResetLiftedAt resets all changes to the "lifted_at" field.
+func (m *RegistrationBlockMutation) ResetLiftedAt() {
+	m.lifted_at = nil
+	delete(m.clearedFields, registrationblock.FieldLiftedAt)
+}
+
+// Where appends a list predicates to the RegistrationBlockMutation builder.
+func (m *RegistrationBlockMutation) Where(ps ...predicate.RegistrationBlock) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RegistrationBlockMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RegistrationBlockMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.RegistrationBlock, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RegistrationBlockMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RegistrationBlockMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (RegistrationBlock).
+func (m *RegistrationBlockMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RegistrationBlockMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, registrationblock.FieldCreatedAt)
+	}
+	if m.kind != nil {
+		fields = append(fields, registrationblock.FieldKind)
+	}
+	if m.value_hash != nil {
+		fields = append(fields, registrationblock.FieldValueHash)
+	}
+	if m.account_id != nil {
+		fields = append(fields, registrationblock.FieldAccountID)
+	}
+	if m.reason != nil {
+		fields = append(fields, registrationblock.FieldReason)
+	}
+	if m.created_by != nil {
+		fields = append(fields, registrationblock.FieldCreatedBy)
+	}
+	if m.lifted_at != nil {
+		fields = append(fields, registrationblock.FieldLiftedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RegistrationBlockMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case registrationblock.FieldCreatedAt:
+		return m.CreatedAt()
+	case registrationblock.FieldKind:
+		return m.Kind()
+	case registrationblock.FieldValueHash:
+		return m.ValueHash()
+	case registrationblock.FieldAccountID:
+		return m.AccountID()
+	case registrationblock.FieldReason:
+		return m.Reason()
+	case registrationblock.FieldCreatedBy:
+		return m.CreatedBy()
+	case registrationblock.FieldLiftedAt:
+		return m.LiftedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RegistrationBlockMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case registrationblock.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case registrationblock.FieldKind:
+		return m.OldKind(ctx)
+	case registrationblock.FieldValueHash:
+		return m.OldValueHash(ctx)
+	case registrationblock.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case registrationblock.FieldReason:
+		return m.OldReason(ctx)
+	case registrationblock.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case registrationblock.FieldLiftedAt:
+		return m.OldLiftedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown RegistrationBlock field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RegistrationBlockMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case registrationblock.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case registrationblock.FieldKind:
+		v, ok := value.(registrationblock.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case registrationblock.FieldValueHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValueHash(v)
+		return nil
+	case registrationblock.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case registrationblock.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case registrationblock.FieldCreatedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case registrationblock.FieldLiftedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiftedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RegistrationBlock field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RegistrationBlockMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RegistrationBlockMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RegistrationBlockMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown RegistrationBlock numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RegistrationBlockMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(registrationblock.FieldLiftedAt) {
+		fields = append(fields, registrationblock.FieldLiftedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RegistrationBlockMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RegistrationBlockMutation) ClearField(name string) error {
+	switch name {
+	case registrationblock.FieldLiftedAt:
+		m.ClearLiftedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown RegistrationBlock nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RegistrationBlockMutation) ResetField(name string) error {
+	switch name {
+	case registrationblock.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case registrationblock.FieldKind:
+		m.ResetKind()
+		return nil
+	case registrationblock.FieldValueHash:
+		m.ResetValueHash()
+		return nil
+	case registrationblock.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case registrationblock.FieldReason:
+		m.ResetReason()
+		return nil
+	case registrationblock.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case registrationblock.FieldLiftedAt:
+		m.ResetLiftedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown RegistrationBlock field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RegistrationBlockMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RegistrationBlockMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RegistrationBlockMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RegistrationBlockMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RegistrationBlockMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RegistrationBlockMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RegistrationBlockMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown RegistrationBlock unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RegistrationBlockMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown RegistrationBlock edge %s", name)
+}
+
 // SessionMutation represents an operation that mutates the Session nodes in the graph.
 type SessionMutation struct {
 	config
@@ -3119,6 +3999,7 @@ type SessionMutation struct {
 	created_at            *time.Time
 	user_agent            *string
 	ip_address            *string
+	device_hash           *string
 	last_used_at          *time.Time
 	expires_at            *time.Time
 	revoked_at            *time.Time
@@ -3380,6 +4261,55 @@ func (m *SessionMutation) OldIPAddress(ctx context.Context) (v string, err error
 // ResetIPAddress resets all changes to the "ip_address" field.
 func (m *SessionMutation) ResetIPAddress() {
 	m.ip_address = nil
+}
+
+// SetDeviceHash sets the "device_hash" field.
+func (m *SessionMutation) SetDeviceHash(s string) {
+	m.device_hash = &s
+}
+
+// DeviceHash returns the value of the "device_hash" field in the mutation.
+func (m *SessionMutation) DeviceHash() (r string, exists bool) {
+	v := m.device_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceHash returns the old "device_hash" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldDeviceHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceHash: %w", err)
+	}
+	return oldValue.DeviceHash, nil
+}
+
+// ClearDeviceHash clears the value of the "device_hash" field.
+func (m *SessionMutation) ClearDeviceHash() {
+	m.device_hash = nil
+	m.clearedFields[session.FieldDeviceHash] = struct{}{}
+}
+
+// DeviceHashCleared returns if the "device_hash" field was cleared in this mutation.
+func (m *SessionMutation) DeviceHashCleared() bool {
+	_, ok := m.clearedFields[session.FieldDeviceHash]
+	return ok
+}
+
+// ResetDeviceHash resets all changes to the "device_hash" field.
+func (m *SessionMutation) ResetDeviceHash() {
+	m.device_hash = nil
+	delete(m.clearedFields, session.FieldDeviceHash)
 }
 
 // SetLastUsedAt sets the "last_used_at" field.
@@ -3667,7 +4597,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -3679,6 +4609,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.ip_address != nil {
 		fields = append(fields, session.FieldIPAddress)
+	}
+	if m.device_hash != nil {
+		fields = append(fields, session.FieldDeviceHash)
 	}
 	if m.last_used_at != nil {
 		fields = append(fields, session.FieldLastUsedAt)
@@ -3708,6 +4641,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.UserAgent()
 	case session.FieldIPAddress:
 		return m.IPAddress()
+	case session.FieldDeviceHash:
+		return m.DeviceHash()
 	case session.FieldLastUsedAt:
 		return m.LastUsedAt()
 	case session.FieldExpiresAt:
@@ -3733,6 +4668,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUserAgent(ctx)
 	case session.FieldIPAddress:
 		return m.OldIPAddress(ctx)
+	case session.FieldDeviceHash:
+		return m.OldDeviceHash(ctx)
 	case session.FieldLastUsedAt:
 		return m.OldLastUsedAt(ctx)
 	case session.FieldExpiresAt:
@@ -3777,6 +4714,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIPAddress(v)
+		return nil
+	case session.FieldDeviceHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceHash(v)
 		return nil
 	case session.FieldLastUsedAt:
 		v, ok := value.(time.Time)
@@ -3836,6 +4780,9 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *SessionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(session.FieldDeviceHash) {
+		fields = append(fields, session.FieldDeviceHash)
+	}
 	if m.FieldCleared(session.FieldRevokedAt) {
 		fields = append(fields, session.FieldRevokedAt)
 	}
@@ -3856,6 +4803,9 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
 	switch name {
+	case session.FieldDeviceHash:
+		m.ClearDeviceHash()
+		return nil
 	case session.FieldRevokedAt:
 		m.ClearRevokedAt()
 		return nil
@@ -3881,6 +4831,9 @@ func (m *SessionMutation) ResetField(name string) error {
 		return nil
 	case session.FieldIPAddress:
 		m.ResetIPAddress()
+		return nil
+	case session.FieldDeviceHash:
+		m.ResetDeviceHash()
 		return nil
 	case session.FieldLastUsedAt:
 		m.ResetLastUsedAt()

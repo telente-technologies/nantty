@@ -166,6 +166,60 @@ func (_u *AccountUpdate) SetNillableStatus(v *account.Status) *AccountUpdate {
 	return _u
 }
 
+// SetPhoneHash sets the "phone_hash" field.
+func (_u *AccountUpdate) SetPhoneHash(v string) *AccountUpdate {
+	_u.mutation.SetPhoneHash(v)
+	return _u
+}
+
+// SetNillablePhoneHash sets the "phone_hash" field if the given value is not nil.
+func (_u *AccountUpdate) SetNillablePhoneHash(v *string) *AccountUpdate {
+	if v != nil {
+		_u.SetPhoneHash(*v)
+	}
+	return _u
+}
+
+// ClearPhoneHash clears the value of the "phone_hash" field.
+func (_u *AccountUpdate) ClearPhoneHash() *AccountUpdate {
+	_u.mutation.ClearPhoneHash()
+	return _u
+}
+
+// SetPhoneVerifiedAt sets the "phone_verified_at" field.
+func (_u *AccountUpdate) SetPhoneVerifiedAt(v time.Time) *AccountUpdate {
+	_u.mutation.SetPhoneVerifiedAt(v)
+	return _u
+}
+
+// SetNillablePhoneVerifiedAt sets the "phone_verified_at" field if the given value is not nil.
+func (_u *AccountUpdate) SetNillablePhoneVerifiedAt(v *time.Time) *AccountUpdate {
+	if v != nil {
+		_u.SetPhoneVerifiedAt(*v)
+	}
+	return _u
+}
+
+// ClearPhoneVerifiedAt clears the value of the "phone_verified_at" field.
+func (_u *AccountUpdate) ClearPhoneVerifiedAt() *AccountUpdate {
+	_u.mutation.ClearPhoneVerifiedAt()
+	return _u
+}
+
+// SetMustChangePassword sets the "must_change_password" field.
+func (_u *AccountUpdate) SetMustChangePassword(v bool) *AccountUpdate {
+	_u.mutation.SetMustChangePassword(v)
+	return _u
+}
+
+// SetNillableMustChangePassword sets the "must_change_password" field if the given value is not nil.
+func (_u *AccountUpdate) SetNillableMustChangePassword(v *bool) *AccountUpdate {
+	if v != nil {
+		_u.SetMustChangePassword(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AccountUpdate) SetUpdatedAt(v time.Time) *AccountUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -307,6 +361,11 @@ func (_u *AccountUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.PhoneHash(); ok {
+		if err := account.PhoneHashValidator(v); err != nil {
+			return &ValidationError{Name: "phone_hash", err: fmt.Errorf(`ent: validator failed for field "Account.phone_hash": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -362,6 +421,21 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(account.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PhoneHash(); ok {
+		_spec.SetField(account.FieldPhoneHash, field.TypeString, value)
+	}
+	if _u.mutation.PhoneHashCleared() {
+		_spec.ClearField(account.FieldPhoneHash, field.TypeString)
+	}
+	if value, ok := _u.mutation.PhoneVerifiedAt(); ok {
+		_spec.SetField(account.FieldPhoneVerifiedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PhoneVerifiedAtCleared() {
+		_spec.ClearField(account.FieldPhoneVerifiedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.MustChangePassword(); ok {
+		_spec.SetField(account.FieldMustChangePassword, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
@@ -610,6 +684,60 @@ func (_u *AccountUpdateOne) SetNillableStatus(v *account.Status) *AccountUpdateO
 	return _u
 }
 
+// SetPhoneHash sets the "phone_hash" field.
+func (_u *AccountUpdateOne) SetPhoneHash(v string) *AccountUpdateOne {
+	_u.mutation.SetPhoneHash(v)
+	return _u
+}
+
+// SetNillablePhoneHash sets the "phone_hash" field if the given value is not nil.
+func (_u *AccountUpdateOne) SetNillablePhoneHash(v *string) *AccountUpdateOne {
+	if v != nil {
+		_u.SetPhoneHash(*v)
+	}
+	return _u
+}
+
+// ClearPhoneHash clears the value of the "phone_hash" field.
+func (_u *AccountUpdateOne) ClearPhoneHash() *AccountUpdateOne {
+	_u.mutation.ClearPhoneHash()
+	return _u
+}
+
+// SetPhoneVerifiedAt sets the "phone_verified_at" field.
+func (_u *AccountUpdateOne) SetPhoneVerifiedAt(v time.Time) *AccountUpdateOne {
+	_u.mutation.SetPhoneVerifiedAt(v)
+	return _u
+}
+
+// SetNillablePhoneVerifiedAt sets the "phone_verified_at" field if the given value is not nil.
+func (_u *AccountUpdateOne) SetNillablePhoneVerifiedAt(v *time.Time) *AccountUpdateOne {
+	if v != nil {
+		_u.SetPhoneVerifiedAt(*v)
+	}
+	return _u
+}
+
+// ClearPhoneVerifiedAt clears the value of the "phone_verified_at" field.
+func (_u *AccountUpdateOne) ClearPhoneVerifiedAt() *AccountUpdateOne {
+	_u.mutation.ClearPhoneVerifiedAt()
+	return _u
+}
+
+// SetMustChangePassword sets the "must_change_password" field.
+func (_u *AccountUpdateOne) SetMustChangePassword(v bool) *AccountUpdateOne {
+	_u.mutation.SetMustChangePassword(v)
+	return _u
+}
+
+// SetNillableMustChangePassword sets the "must_change_password" field if the given value is not nil.
+func (_u *AccountUpdateOne) SetNillableMustChangePassword(v *bool) *AccountUpdateOne {
+	if v != nil {
+		_u.SetMustChangePassword(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AccountUpdateOne) SetUpdatedAt(v time.Time) *AccountUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -764,6 +892,11 @@ func (_u *AccountUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.PhoneHash(); ok {
+		if err := account.PhoneHashValidator(v); err != nil {
+			return &ValidationError{Name: "phone_hash", err: fmt.Errorf(`ent: validator failed for field "Account.phone_hash": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -836,6 +969,21 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(account.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PhoneHash(); ok {
+		_spec.SetField(account.FieldPhoneHash, field.TypeString, value)
+	}
+	if _u.mutation.PhoneHashCleared() {
+		_spec.ClearField(account.FieldPhoneHash, field.TypeString)
+	}
+	if value, ok := _u.mutation.PhoneVerifiedAt(); ok {
+		_spec.SetField(account.FieldPhoneVerifiedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PhoneVerifiedAtCleared() {
+		_spec.ClearField(account.FieldPhoneVerifiedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.MustChangePassword(); ok {
+		_spec.SetField(account.FieldMustChangePassword, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
