@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import { AuditHistoryList } from "@/components/audit/auditHistoryList";
@@ -15,7 +14,7 @@ import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchCatalogCategoryWithHistory, setCatalogCategoryActive } from "@/services/catalogApi.service";
 import type { CatalogCategory } from "@/types/catalog.type";
-import { formatBasisPointsAsPercent, formatDateTime, formatWholeNumber } from "@/utils/formatting.util";
+import { formatDateTime, formatWholeNumber } from "@/utils/formatting.util";
 
 interface CategoryDetailPanelProps {
   readonly category: CatalogCategory;
@@ -65,7 +64,6 @@ export function CategoryDetailPanel({ category, parentName, changeCounter, onClo
           { label: "Slug", value: category.slug, isMono: true },
           { label: "App icon", value: category.iconName ?? "—", isMono: true },
           { label: "Products", value: formatWholeNumber(category.productCount) },
-          { label: "Commission", value: <Link href="/config/revenue">{category.commissionOverrideBasisPoints === null ? "Platform default" : `${formatBasisPointsAsPercent(category.commissionOverrideBasisPoints)} override`}</Link> },
           { label: "Last changed", value: formatDateTime(category.updatedAt) },
         ]}
       />

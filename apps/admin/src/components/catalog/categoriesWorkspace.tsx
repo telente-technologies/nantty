@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState, type MouseEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { readErrorMessageForDisplay } from "@/services/adminApiClient.service";
 import { fetchCatalogCategories, moveCatalogCategory } from "@/services/catalogApi.service";
 import type { CatalogCategory } from "@/types/catalog.type";
-import { formatBasisPointsAsPercent, formatWholeNumber } from "@/utils/formatting.util";
+import { formatWholeNumber } from "@/utils/formatting.util";
 
 import { CatalogTabs } from "./catalogTabs";
 import styles from "./categoriesWorkspace.module.css";
@@ -69,11 +68,6 @@ export function CategoriesWorkspace() {
     },
     { key: "slug", header: "Slug", isMono: true, render: (row) => row.category.slug },
     { key: "products", header: "Products", align: "end", render: (row) => formatWholeNumber(row.category.productCount) },
-    {
-      key: "commission",
-      header: "Commission",
-      render: (row) => (row.category.commissionOverrideBasisPoints === null ? <span className={styles.muted}>Default</span> : <Link href="/config/revenue" onClick={(event) => event.stopPropagation()}>{formatBasisPointsAsPercent(row.category.commissionOverrideBasisPoints)}</Link>),
-    },
     { key: "status", header: "Status", render: (row) => <StatusBadge status={row.category.isActive ? "ACTIVE" : "DISABLED"} label={row.category.isActive ? "Active" : "Inactive"} /> },
     {
       key: "order",

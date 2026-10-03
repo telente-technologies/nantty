@@ -14,5 +14,5 @@ export function convertLocalDateTimeInputValueToIso(inputValue: string): string 
 }
 
 export function describeFeatureSchedule(startsAt: string, endsAt: string | null): string {
-  return endsAt ? `${formatDateTime(startsAt)} → ${formatDateTime(endsAt)}` : `From ${formatDateTime(startsAt)}, no end`;
+  return endsAt ? `${formatDateTime(startsAt)} to ${formatDateTime(endsAt)}` : `From ${formatDateTime(startsAt)}, no end`;
 }
