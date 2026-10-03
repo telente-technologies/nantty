@@ -31,6 +31,14 @@ const (
 	FieldAmountMinor = "amount_minor"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
+	// FieldConnectedAccountID holds the string denoting the connected_account_id field in the database.
+	FieldConnectedAccountID = "connected_account_id"
+	// FieldBeneficiaryUserID holds the string denoting the beneficiary_user_id field in the database.
+	FieldBeneficiaryUserID = "beneficiary_user_id"
+	// FieldPlatformFeeMinor holds the string denoting the platform_fee_minor field in the database.
+	FieldPlatformFeeMinor = "platform_fee_minor"
+	// FieldProviderCheckoutID holds the string denoting the provider_checkout_id field in the database.
+	FieldProviderCheckoutID = "provider_checkout_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldAuthorizationURL holds the string denoting the authorization_url field in the database.
@@ -68,6 +76,10 @@ var Columns = []string{
 	FieldProvider,
 	FieldAmountMinor,
 	FieldCurrency,
+	FieldConnectedAccountID,
+	FieldBeneficiaryUserID,
+	FieldPlatformFeeMinor,
+	FieldProviderCheckoutID,
 	FieldStatus,
 	FieldAuthorizationURL,
 	FieldProviderTransactionID,
@@ -104,6 +116,20 @@ var (
 	ProviderValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultConnectedAccountID holds the default value on creation for the "connected_account_id" field.
+	DefaultConnectedAccountID string
+	// ConnectedAccountIDValidator is a validator for the "connected_account_id" field. It is called by the builders before save.
+	ConnectedAccountIDValidator func(string) error
+	// DefaultBeneficiaryUserID holds the default value on creation for the "beneficiary_user_id" field.
+	DefaultBeneficiaryUserID string
+	// BeneficiaryUserIDValidator is a validator for the "beneficiary_user_id" field. It is called by the builders before save.
+	BeneficiaryUserIDValidator func(string) error
+	// DefaultPlatformFeeMinor holds the default value on creation for the "platform_fee_minor" field.
+	DefaultPlatformFeeMinor int64
+	// DefaultProviderCheckoutID holds the default value on creation for the "provider_checkout_id" field.
+	DefaultProviderCheckoutID string
+	// ProviderCheckoutIDValidator is a validator for the "provider_checkout_id" field. It is called by the builders before save.
+	ProviderCheckoutIDValidator func(string) error
 	// DefaultAuthorizationURL holds the default value on creation for the "authorization_url" field.
 	DefaultAuthorizationURL string
 	// AuthorizationURLValidator is a validator for the "authorization_url" field. It is called by the builders before save.
@@ -229,6 +255,26 @@ func ByAmountMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByCurrency orders the results by the currency field.
 func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
+}
+
+// ByConnectedAccountID orders the results by the connected_account_id field.
+func ByConnectedAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldConnectedAccountID, opts...).ToFunc()
+}
+
+// ByBeneficiaryUserID orders the results by the beneficiary_user_id field.
+func ByBeneficiaryUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBeneficiaryUserID, opts...).ToFunc()
+}
+
+// ByPlatformFeeMinor orders the results by the platform_fee_minor field.
+func ByPlatformFeeMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlatformFeeMinor, opts...).ToFunc()
+}
+
+// ByProviderCheckoutID orders the results by the provider_checkout_id field.
+func ByProviderCheckoutID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderCheckoutID, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

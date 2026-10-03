@@ -90,6 +90,26 @@ func Currency(v string) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldEQ(FieldCurrency, v))
 }
 
+// ConnectedAccountID applies equality check predicate on the "connected_account_id" field. It's identical to ConnectedAccountIDEQ.
+func ConnectedAccountID(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserID applies equality check predicate on the "beneficiary_user_id" field. It's identical to BeneficiaryUserIDEQ.
+func BeneficiaryUserID(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// PlatformFeeMinor applies equality check predicate on the "platform_fee_minor" field. It's identical to PlatformFeeMinorEQ.
+func PlatformFeeMinor(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldPlatformFeeMinor, v))
+}
+
+// ProviderCheckoutID applies equality check predicate on the "provider_checkout_id" field. It's identical to ProviderCheckoutIDEQ.
+func ProviderCheckoutID(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldProviderCheckoutID, v))
+}
+
 // AuthorizationURL applies equality check predicate on the "authorization_url" field. It's identical to AuthorizationURLEQ.
 func AuthorizationURL(v string) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldEQ(FieldAuthorizationURL, v))
@@ -563,6 +583,241 @@ func CurrencyEqualFold(v string) predicate.PaymentIntent {
 // CurrencyContainsFold applies the ContainsFold predicate on the "currency" field.
 func CurrencyContainsFold(v string) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldContainsFold(FieldCurrency, v))
+}
+
+// ConnectedAccountIDEQ applies the EQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDNEQ applies the NEQ predicate on the "connected_account_id" field.
+func ConnectedAccountIDNEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDIn applies the In predicate on the "connected_account_id" field.
+func ConnectedAccountIDIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDNotIn applies the NotIn predicate on the "connected_account_id" field.
+func ConnectedAccountIDNotIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldConnectedAccountID, vs...))
+}
+
+// ConnectedAccountIDGT applies the GT predicate on the "connected_account_id" field.
+func ConnectedAccountIDGT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDGTE applies the GTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDGTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLT applies the LT predicate on the "connected_account_id" field.
+func ConnectedAccountIDLT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDLTE applies the LTE predicate on the "connected_account_id" field.
+func ConnectedAccountIDLTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContains applies the Contains predicate on the "connected_account_id" field.
+func ConnectedAccountIDContains(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContains(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasPrefix applies the HasPrefix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasPrefix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasPrefix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDHasSuffix applies the HasSuffix predicate on the "connected_account_id" field.
+func ConnectedAccountIDHasSuffix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasSuffix(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDEqualFold applies the EqualFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDEqualFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEqualFold(FieldConnectedAccountID, v))
+}
+
+// ConnectedAccountIDContainsFold applies the ContainsFold predicate on the "connected_account_id" field.
+func ConnectedAccountIDContainsFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContainsFold(FieldConnectedAccountID, v))
+}
+
+// BeneficiaryUserIDEQ applies the EQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDNEQ applies the NEQ predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDIn applies the In predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDNotIn applies the NotIn predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDNotIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldBeneficiaryUserID, vs...))
+}
+
+// BeneficiaryUserIDGT applies the GT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDGTE applies the GTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDGTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLT applies the LT predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDLTE applies the LTE predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDLTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContains applies the Contains predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContains(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContains(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasPrefix applies the HasPrefix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasPrefix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasPrefix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDHasSuffix applies the HasSuffix predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDHasSuffix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasSuffix(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDEqualFold applies the EqualFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDEqualFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEqualFold(FieldBeneficiaryUserID, v))
+}
+
+// BeneficiaryUserIDContainsFold applies the ContainsFold predicate on the "beneficiary_user_id" field.
+func BeneficiaryUserIDContainsFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContainsFold(FieldBeneficiaryUserID, v))
+}
+
+// PlatformFeeMinorEQ applies the EQ predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorEQ(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldPlatformFeeMinor, v))
+}
+
+// PlatformFeeMinorNEQ applies the NEQ predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorNEQ(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldPlatformFeeMinor, v))
+}
+
+// PlatformFeeMinorIn applies the In predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorIn(vs ...int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldPlatformFeeMinor, vs...))
+}
+
+// PlatformFeeMinorNotIn applies the NotIn predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorNotIn(vs ...int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldPlatformFeeMinor, vs...))
+}
+
+// PlatformFeeMinorGT applies the GT predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorGT(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldPlatformFeeMinor, v))
+}
+
+// PlatformFeeMinorGTE applies the GTE predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorGTE(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldPlatformFeeMinor, v))
+}
+
+// PlatformFeeMinorLT applies the LT predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorLT(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldPlatformFeeMinor, v))
+}
+
+// PlatformFeeMinorLTE applies the LTE predicate on the "platform_fee_minor" field.
+func PlatformFeeMinorLTE(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldPlatformFeeMinor, v))
+}
+
+// ProviderCheckoutIDEQ applies the EQ predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDNEQ applies the NEQ predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDNEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDIn applies the In predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldProviderCheckoutID, vs...))
+}
+
+// ProviderCheckoutIDNotIn applies the NotIn predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDNotIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldProviderCheckoutID, vs...))
+}
+
+// ProviderCheckoutIDGT applies the GT predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDGT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDGTE applies the GTE predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDGTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDLT applies the LT predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDLT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDLTE applies the LTE predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDLTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDContains applies the Contains predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDContains(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContains(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDHasPrefix applies the HasPrefix predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDHasPrefix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasPrefix(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDHasSuffix applies the HasSuffix predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDHasSuffix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasSuffix(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDEqualFold applies the EqualFold predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDEqualFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEqualFold(FieldProviderCheckoutID, v))
+}
+
+// ProviderCheckoutIDContainsFold applies the ContainsFold predicate on the "provider_checkout_id" field.
+func ProviderCheckoutIDContainsFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContainsFold(FieldProviderCheckoutID, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
