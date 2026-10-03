@@ -30,6 +30,9 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	if err != nil || !matches {
 		return types.AuthenticationResult{}, authErrors.ErrInvalidCredentials
 	}
+	if existing.Status == account.StatusBanned {
+		return types.AuthenticationResult{}, authErrors.ErrAccountBanned
+	}
 	var session services.StartedSession
 	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		if session, err = services.StartSessionWithFirstRefreshTokenInTransaction(ctx, application.Container, tx, existing.ID, command.Client); err != nil {
@@ -52,7 +55,7 @@ func (application Handler) findActiveAccountByEmailOrUsername(ctx context.Contex
 	if strings.Contains(trimmed, "@") && !strings.HasPrefix(trimmed, "@") {
 		predicate = account.Email(trimmed)
 	}
-	found, err := application.Client.Account.Query().Where(predicate, account.StatusEQ(account.StatusActive)).Only(ctx)
+	found, err := application.Client.Account.Query().Where(predicate, account.StatusIn(account.StatusActive, account.StatusSuspended, account.StatusBanned)).Only(ctx)
 	if ent.IsNotFound(err) {
 		return nil, nil
 	}
