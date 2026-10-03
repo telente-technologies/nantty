@@ -57,6 +57,34 @@ func (_u *PaymentRefundUpdate) SetNillableStatus(v *paymentrefund.Status) *Payme
 	return _u
 }
 
+// SetRefundMethod sets the "refund_method" field.
+func (_u *PaymentRefundUpdate) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundUpdate {
+	_u.mutation.SetRefundMethod(v)
+	return _u
+}
+
+// SetNillableRefundMethod sets the "refund_method" field if the given value is not nil.
+func (_u *PaymentRefundUpdate) SetNillableRefundMethod(v *paymentrefund.RefundMethod) *PaymentRefundUpdate {
+	if v != nil {
+		_u.SetRefundMethod(*v)
+	}
+	return _u
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (_u *PaymentRefundUpdate) SetPayoutReference(v string) *PaymentRefundUpdate {
+	_u.mutation.SetPayoutReference(v)
+	return _u
+}
+
+// SetNillablePayoutReference sets the "payout_reference" field if the given value is not nil.
+func (_u *PaymentRefundUpdate) SetNillablePayoutReference(v *string) *PaymentRefundUpdate {
+	if v != nil {
+		_u.SetPayoutReference(*v)
+	}
+	return _u
+}
+
 // SetProviderRefundID sets the "provider_refund_id" field.
 func (_u *PaymentRefundUpdate) SetProviderRefundID(v string) *PaymentRefundUpdate {
 	_u.mutation.SetProviderRefundID(v)
@@ -185,6 +213,16 @@ func (_u *PaymentRefundUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RefundMethod(); ok {
+		if err := paymentrefund.RefundMethodValidator(v); err != nil {
+			return &ValidationError{Name: "refund_method", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.refund_method": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PayoutReference(); ok {
+		if err := paymentrefund.PayoutReferenceValidator(v); err != nil {
+			return &ValidationError{Name: "payout_reference", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.payout_reference": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProviderRefundID(); ok {
 		if err := paymentrefund.ProviderRefundIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_refund_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.provider_refund_id": %w`, err)}
@@ -215,6 +253,12 @@ func (_u *PaymentRefundUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RefundMethod(); ok {
+		_spec.SetField(paymentrefund.FieldRefundMethod, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PayoutReference(); ok {
+		_spec.SetField(paymentrefund.FieldPayoutReference, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProviderRefundID(); ok {
 		_spec.SetField(paymentrefund.FieldProviderRefundID, field.TypeString, value)
@@ -283,6 +327,34 @@ func (_u *PaymentRefundUpdateOne) SetStatus(v paymentrefund.Status) *PaymentRefu
 func (_u *PaymentRefundUpdateOne) SetNillableStatus(v *paymentrefund.Status) *PaymentRefundUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetRefundMethod sets the "refund_method" field.
+func (_u *PaymentRefundUpdateOne) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundUpdateOne {
+	_u.mutation.SetRefundMethod(v)
+	return _u
+}
+
+// SetNillableRefundMethod sets the "refund_method" field if the given value is not nil.
+func (_u *PaymentRefundUpdateOne) SetNillableRefundMethod(v *paymentrefund.RefundMethod) *PaymentRefundUpdateOne {
+	if v != nil {
+		_u.SetRefundMethod(*v)
+	}
+	return _u
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (_u *PaymentRefundUpdateOne) SetPayoutReference(v string) *PaymentRefundUpdateOne {
+	_u.mutation.SetPayoutReference(v)
+	return _u
+}
+
+// SetNillablePayoutReference sets the "payout_reference" field if the given value is not nil.
+func (_u *PaymentRefundUpdateOne) SetNillablePayoutReference(v *string) *PaymentRefundUpdateOne {
+	if v != nil {
+		_u.SetPayoutReference(*v)
 	}
 	return _u
 }
@@ -428,6 +500,16 @@ func (_u *PaymentRefundUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RefundMethod(); ok {
+		if err := paymentrefund.RefundMethodValidator(v); err != nil {
+			return &ValidationError{Name: "refund_method", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.refund_method": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PayoutReference(); ok {
+		if err := paymentrefund.PayoutReferenceValidator(v); err != nil {
+			return &ValidationError{Name: "payout_reference", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.payout_reference": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProviderRefundID(); ok {
 		if err := paymentrefund.ProviderRefundIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_refund_id", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.provider_refund_id": %w`, err)}
@@ -475,6 +557,12 @@ func (_u *PaymentRefundUpdateOne) sqlSave(ctx context.Context) (_node *PaymentRe
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RefundMethod(); ok {
+		_spec.SetField(paymentrefund.FieldRefundMethod, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PayoutReference(); ok {
+		_spec.SetField(paymentrefund.FieldPayoutReference, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProviderRefundID(); ok {
 		_spec.SetField(paymentrefund.FieldProviderRefundID, field.TypeString, value)

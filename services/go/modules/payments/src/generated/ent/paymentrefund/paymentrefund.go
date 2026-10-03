@@ -41,6 +41,10 @@ const (
 	FieldFeeTopUpTransferID = "fee_top_up_transfer_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldRefundMethod holds the string denoting the refund_method field in the database.
+	FieldRefundMethod = "refund_method"
+	// FieldPayoutReference holds the string denoting the payout_reference field in the database.
+	FieldPayoutReference = "payout_reference"
 	// FieldProviderRefundID holds the string denoting the provider_refund_id field in the database.
 	FieldProviderRefundID = "provider_refund_id"
 	// FieldFailureReason holds the string denoting the failure_reason field in the database.
@@ -71,6 +75,8 @@ var Columns = []string{
 	FieldFeeTopUpMinor,
 	FieldFeeTopUpTransferID,
 	FieldStatus,
+	FieldRefundMethod,
+	FieldPayoutReference,
 	FieldProviderRefundID,
 	FieldFailureReason,
 	FieldAttemptCount,
@@ -117,6 +123,10 @@ var (
 	DefaultFeeTopUpTransferID string
 	// FeeTopUpTransferIDValidator is a validator for the "fee_top_up_transfer_id" field. It is called by the builders before save.
 	FeeTopUpTransferIDValidator func(string) error
+	// DefaultPayoutReference holds the default value on creation for the "payout_reference" field.
+	DefaultPayoutReference string
+	// PayoutReferenceValidator is a validator for the "payout_reference" field. It is called by the builders before save.
+	PayoutReferenceValidator func(string) error
 	// DefaultProviderRefundID holds the default value on creation for the "provider_refund_id" field.
 	DefaultProviderRefundID string
 	// ProviderRefundIDValidator is a validator for the "provider_refund_id" field. It is called by the builders before save.
@@ -143,10 +153,11 @@ const DefaultStatus = StatusPending
 
 // Status values.
 const (
-	StatusPending    Status = "pending"
-	StatusProcessing Status = "processing"
-	StatusSucceeded  Status = "succeeded"
-	StatusFailed     Status = "failed"
+	StatusPending             Status = "pending"
+	StatusProcessing          Status = "processing"
+	StatusAwaitingBankDetails Status = "awaiting_bank_details"
+	StatusSucceeded           Status = "succeeded"
+	StatusFailed              Status = "failed"
 )
 
 func (s Status) String() string {
@@ -156,10 +167,36 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPending, StatusProcessing, StatusSucceeded, StatusFailed:
+	case StatusPending, StatusProcessing, StatusAwaitingBankDetails, StatusSucceeded, StatusFailed:
 		return nil
 	default:
 		return fmt.Errorf("paymentrefund: invalid enum value for status field: %q", s)
+	}
+}
+
+// RefundMethod defines the type for the "refund_method" enum field.
+type RefundMethod string
+
+// RefundMethodProviderRefund is the default value of the RefundMethod enum.
+const DefaultRefundMethod = RefundMethodProviderRefund
+
+// RefundMethod values.
+const (
+	RefundMethodProviderRefund RefundMethod = "provider_refund"
+	RefundMethodBankPayout     RefundMethod = "bank_payout"
+)
+
+func (rm RefundMethod) String() string {
+	return string(rm)
+}
+
+// RefundMethodValidator is a validator for the "refund_method" field enum values. It is called by the builders before save.
+func RefundMethodValidator(rm RefundMethod) error {
+	switch rm {
+	case RefundMethodProviderRefund, RefundMethodBankPayout:
+		return nil
+	default:
+		return fmt.Errorf("paymentrefund: invalid enum value for refund_method field: %q", rm)
 	}
 }
 
@@ -234,6 +271,16 @@ func ByFeeTopUpTransferID(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByRefundMethod orders the results by the refund_method field.
+func ByRefundMethod(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefundMethod, opts...).ToFunc()
+}
+
+// ByPayoutReference orders the results by the payout_reference field.
+func ByPayoutReference(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPayoutReference, opts...).ToFunc()
 }
 
 // ByProviderRefundID orders the results by the provider_refund_id field.

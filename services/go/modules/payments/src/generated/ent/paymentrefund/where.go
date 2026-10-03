@@ -115,6 +115,11 @@ func FeeTopUpTransferID(v string) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldEQ(FieldFeeTopUpTransferID, v))
 }
 
+// PayoutReference applies equality check predicate on the "payout_reference" field. It's identical to PayoutReferenceEQ.
+func PayoutReference(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldPayoutReference, v))
+}
+
 // ProviderRefundID applies equality check predicate on the "provider_refund_id" field. It's identical to ProviderRefundIDEQ.
 func ProviderRefundID(v string) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldEQ(FieldProviderRefundID, v))
@@ -783,6 +788,91 @@ func StatusIn(vs ...Status) predicate.PaymentRefund {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.PaymentRefund {
 	return predicate.PaymentRefund(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// RefundMethodEQ applies the EQ predicate on the "refund_method" field.
+func RefundMethodEQ(v RefundMethod) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldRefundMethod, v))
+}
+
+// RefundMethodNEQ applies the NEQ predicate on the "refund_method" field.
+func RefundMethodNEQ(v RefundMethod) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldRefundMethod, v))
+}
+
+// RefundMethodIn applies the In predicate on the "refund_method" field.
+func RefundMethodIn(vs ...RefundMethod) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldRefundMethod, vs...))
+}
+
+// RefundMethodNotIn applies the NotIn predicate on the "refund_method" field.
+func RefundMethodNotIn(vs ...RefundMethod) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldRefundMethod, vs...))
+}
+
+// PayoutReferenceEQ applies the EQ predicate on the "payout_reference" field.
+func PayoutReferenceEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEQ(FieldPayoutReference, v))
+}
+
+// PayoutReferenceNEQ applies the NEQ predicate on the "payout_reference" field.
+func PayoutReferenceNEQ(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNEQ(FieldPayoutReference, v))
+}
+
+// PayoutReferenceIn applies the In predicate on the "payout_reference" field.
+func PayoutReferenceIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldIn(FieldPayoutReference, vs...))
+}
+
+// PayoutReferenceNotIn applies the NotIn predicate on the "payout_reference" field.
+func PayoutReferenceNotIn(vs ...string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldNotIn(FieldPayoutReference, vs...))
+}
+
+// PayoutReferenceGT applies the GT predicate on the "payout_reference" field.
+func PayoutReferenceGT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGT(FieldPayoutReference, v))
+}
+
+// PayoutReferenceGTE applies the GTE predicate on the "payout_reference" field.
+func PayoutReferenceGTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldGTE(FieldPayoutReference, v))
+}
+
+// PayoutReferenceLT applies the LT predicate on the "payout_reference" field.
+func PayoutReferenceLT(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLT(FieldPayoutReference, v))
+}
+
+// PayoutReferenceLTE applies the LTE predicate on the "payout_reference" field.
+func PayoutReferenceLTE(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldLTE(FieldPayoutReference, v))
+}
+
+// PayoutReferenceContains applies the Contains predicate on the "payout_reference" field.
+func PayoutReferenceContains(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContains(FieldPayoutReference, v))
+}
+
+// PayoutReferenceHasPrefix applies the HasPrefix predicate on the "payout_reference" field.
+func PayoutReferenceHasPrefix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasPrefix(FieldPayoutReference, v))
+}
+
+// PayoutReferenceHasSuffix applies the HasSuffix predicate on the "payout_reference" field.
+func PayoutReferenceHasSuffix(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldHasSuffix(FieldPayoutReference, v))
+}
+
+// PayoutReferenceEqualFold applies the EqualFold predicate on the "payout_reference" field.
+func PayoutReferenceEqualFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldEqualFold(FieldPayoutReference, v))
+}
+
+// PayoutReferenceContainsFold applies the ContainsFold predicate on the "payout_reference" field.
+func PayoutReferenceContainsFold(v string) predicate.PaymentRefund {
+	return predicate.PaymentRefund(sql.FieldContainsFold(FieldPayoutReference, v))
 }
 
 // ProviderRefundIDEQ applies the EQ predicate on the "provider_refund_id" field.

@@ -44,6 +44,10 @@ type PaymentRefund struct {
 	FeeTopUpTransferID string `json:"fee_top_up_transfer_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status paymentrefund.Status `json:"status,omitempty"`
+	// RefundMethod holds the value of the "refund_method" field.
+	RefundMethod paymentrefund.RefundMethod `json:"refund_method,omitempty"`
+	// PayoutReference holds the value of the "payout_reference" field.
+	PayoutReference string `json:"payout_reference,omitempty"`
 	// ProviderRefundID holds the value of the "provider_refund_id" field.
 	ProviderRefundID string `json:"provider_refund_id,omitempty"`
 	// FailureReason holds the value of the "failure_reason" field.
@@ -66,7 +70,7 @@ func (*PaymentRefund) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case paymentrefund.FieldAmountMinor, paymentrefund.FieldFeeTopUpMinor, paymentrefund.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case paymentrefund.FieldReference, paymentrefund.FieldProvider, paymentrefund.FieldCurrency, paymentrefund.FieldReason, paymentrefund.FieldConnectedAccountID, paymentrefund.FieldBeneficiaryUserID, paymentrefund.FieldFeeTopUpTransferID, paymentrefund.FieldStatus, paymentrefund.FieldProviderRefundID, paymentrefund.FieldFailureReason:
+		case paymentrefund.FieldReference, paymentrefund.FieldProvider, paymentrefund.FieldCurrency, paymentrefund.FieldReason, paymentrefund.FieldConnectedAccountID, paymentrefund.FieldBeneficiaryUserID, paymentrefund.FieldFeeTopUpTransferID, paymentrefund.FieldStatus, paymentrefund.FieldRefundMethod, paymentrefund.FieldPayoutReference, paymentrefund.FieldProviderRefundID, paymentrefund.FieldFailureReason:
 			values[i] = new(sql.NullString)
 		case paymentrefund.FieldCreatedAt, paymentrefund.FieldCompletedAt, paymentrefund.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -170,6 +174,18 @@ func (_m *PaymentRefund) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = paymentrefund.Status(value.String)
+			}
+		case paymentrefund.FieldRefundMethod:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field refund_method", values[i])
+			} else if value.Valid {
+				_m.RefundMethod = paymentrefund.RefundMethod(value.String)
+			}
+		case paymentrefund.FieldPayoutReference:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payout_reference", values[i])
+			} else if value.Valid {
+				_m.PayoutReference = value.String
 			}
 		case paymentrefund.FieldProviderRefundID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -276,6 +292,12 @@ func (_m *PaymentRefund) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("refund_method=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RefundMethod))
+	builder.WriteString(", ")
+	builder.WriteString("payout_reference=")
+	builder.WriteString(_m.PayoutReference)
 	builder.WriteString(", ")
 	builder.WriteString("provider_refund_id=")
 	builder.WriteString(_m.ProviderRefundID)

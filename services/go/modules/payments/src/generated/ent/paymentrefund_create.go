@@ -166,6 +166,34 @@ func (_c *PaymentRefundCreate) SetNillableStatus(v *paymentrefund.Status) *Payme
 	return _c
 }
 
+// SetRefundMethod sets the "refund_method" field.
+func (_c *PaymentRefundCreate) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundCreate {
+	_c.mutation.SetRefundMethod(v)
+	return _c
+}
+
+// SetNillableRefundMethod sets the "refund_method" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillableRefundMethod(v *paymentrefund.RefundMethod) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetRefundMethod(*v)
+	}
+	return _c
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (_c *PaymentRefundCreate) SetPayoutReference(v string) *PaymentRefundCreate {
+	_c.mutation.SetPayoutReference(v)
+	return _c
+}
+
+// SetNillablePayoutReference sets the "payout_reference" field if the given value is not nil.
+func (_c *PaymentRefundCreate) SetNillablePayoutReference(v *string) *PaymentRefundCreate {
+	if v != nil {
+		_c.SetPayoutReference(*v)
+	}
+	return _c
+}
+
 // SetProviderRefundID sets the "provider_refund_id" field.
 func (_c *PaymentRefundCreate) SetProviderRefundID(v string) *PaymentRefundCreate {
 	_c.mutation.SetProviderRefundID(v)
@@ -317,6 +345,14 @@ func (_c *PaymentRefundCreate) defaults() {
 		v := paymentrefund.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.RefundMethod(); !ok {
+		v := paymentrefund.DefaultRefundMethod
+		_c.mutation.SetRefundMethod(v)
+	}
+	if _, ok := _c.mutation.PayoutReference(); !ok {
+		v := paymentrefund.DefaultPayoutReference
+		_c.mutation.SetPayoutReference(v)
+	}
 	if _, ok := _c.mutation.ProviderRefundID(); !ok {
 		v := paymentrefund.DefaultProviderRefundID
 		_c.mutation.SetProviderRefundID(v)
@@ -418,6 +454,22 @@ func (_c *PaymentRefundCreate) check() error {
 	if v, ok := _c.mutation.Status(); ok {
 		if err := paymentrefund.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.RefundMethod(); !ok {
+		return &ValidationError{Name: "refund_method", err: errors.New(`ent: missing required field "PaymentRefund.refund_method"`)}
+	}
+	if v, ok := _c.mutation.RefundMethod(); ok {
+		if err := paymentrefund.RefundMethodValidator(v); err != nil {
+			return &ValidationError{Name: "refund_method", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.refund_method": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PayoutReference(); !ok {
+		return &ValidationError{Name: "payout_reference", err: errors.New(`ent: missing required field "PaymentRefund.payout_reference"`)}
+	}
+	if v, ok := _c.mutation.PayoutReference(); ok {
+		if err := paymentrefund.PayoutReferenceValidator(v); err != nil {
+			return &ValidationError{Name: "payout_reference", err: fmt.Errorf(`ent: validator failed for field "PaymentRefund.payout_reference": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ProviderRefundID(); !ok {
@@ -531,6 +583,14 @@ func (_c *PaymentRefundCreate) createSpec() (*PaymentRefund, *sqlgraph.CreateSpe
 		_spec.SetField(paymentrefund.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
+	if value, ok := _c.mutation.RefundMethod(); ok {
+		_spec.SetField(paymentrefund.FieldRefundMethod, field.TypeEnum, value)
+		_node.RefundMethod = value
+	}
+	if value, ok := _c.mutation.PayoutReference(); ok {
+		_spec.SetField(paymentrefund.FieldPayoutReference, field.TypeString, value)
+		_node.PayoutReference = value
+	}
 	if value, ok := _c.mutation.ProviderRefundID(); ok {
 		_spec.SetField(paymentrefund.FieldProviderRefundID, field.TypeString, value)
 		_node.ProviderRefundID = value
@@ -624,6 +684,30 @@ func (u *PaymentRefundUpsert) SetStatus(v paymentrefund.Status) *PaymentRefundUp
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *PaymentRefundUpsert) UpdateStatus() *PaymentRefundUpsert {
 	u.SetExcluded(paymentrefund.FieldStatus)
+	return u
+}
+
+// SetRefundMethod sets the "refund_method" field.
+func (u *PaymentRefundUpsert) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundUpsert {
+	u.Set(paymentrefund.FieldRefundMethod, v)
+	return u
+}
+
+// UpdateRefundMethod sets the "refund_method" field to the value that was provided on create.
+func (u *PaymentRefundUpsert) UpdateRefundMethod() *PaymentRefundUpsert {
+	u.SetExcluded(paymentrefund.FieldRefundMethod)
+	return u
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (u *PaymentRefundUpsert) SetPayoutReference(v string) *PaymentRefundUpsert {
+	u.Set(paymentrefund.FieldPayoutReference, v)
+	return u
+}
+
+// UpdatePayoutReference sets the "payout_reference" field to the value that was provided on create.
+func (u *PaymentRefundUpsert) UpdatePayoutReference() *PaymentRefundUpsert {
+	u.SetExcluded(paymentrefund.FieldPayoutReference)
 	return u
 }
 
@@ -805,6 +889,34 @@ func (u *PaymentRefundUpsertOne) SetStatus(v paymentrefund.Status) *PaymentRefun
 func (u *PaymentRefundUpsertOne) UpdateStatus() *PaymentRefundUpsertOne {
 	return u.Update(func(s *PaymentRefundUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetRefundMethod sets the "refund_method" field.
+func (u *PaymentRefundUpsertOne) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetRefundMethod(v)
+	})
+}
+
+// UpdateRefundMethod sets the "refund_method" field to the value that was provided on create.
+func (u *PaymentRefundUpsertOne) UpdateRefundMethod() *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdateRefundMethod()
+	})
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (u *PaymentRefundUpsertOne) SetPayoutReference(v string) *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetPayoutReference(v)
+	})
+}
+
+// UpdatePayoutReference sets the "payout_reference" field to the value that was provided on create.
+func (u *PaymentRefundUpsertOne) UpdatePayoutReference() *PaymentRefundUpsertOne {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdatePayoutReference()
 	})
 }
 
@@ -1165,6 +1277,34 @@ func (u *PaymentRefundUpsertBulk) SetStatus(v paymentrefund.Status) *PaymentRefu
 func (u *PaymentRefundUpsertBulk) UpdateStatus() *PaymentRefundUpsertBulk {
 	return u.Update(func(s *PaymentRefundUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetRefundMethod sets the "refund_method" field.
+func (u *PaymentRefundUpsertBulk) SetRefundMethod(v paymentrefund.RefundMethod) *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetRefundMethod(v)
+	})
+}
+
+// UpdateRefundMethod sets the "refund_method" field to the value that was provided on create.
+func (u *PaymentRefundUpsertBulk) UpdateRefundMethod() *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdateRefundMethod()
+	})
+}
+
+// SetPayoutReference sets the "payout_reference" field.
+func (u *PaymentRefundUpsertBulk) SetPayoutReference(v string) *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.SetPayoutReference(v)
+	})
+}
+
+// UpdatePayoutReference sets the "payout_reference" field to the value that was provided on create.
+func (u *PaymentRefundUpsertBulk) UpdatePayoutReference() *PaymentRefundUpsertBulk {
+	return u.Update(func(s *PaymentRefundUpsert) {
+		s.UpdatePayoutReference()
 	})
 }
 
