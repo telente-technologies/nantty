@@ -877,42 +877,46 @@ func init() {
 	legalversionDescIsFlaggedForLegalReview := legalversionFields[7].Descriptor()
 	// legalversion.DefaultIsFlaggedForLegalReview holds the default value on creation for the is_flagged_for_legal_review field.
 	legalversion.DefaultIsFlaggedForLegalReview = legalversionDescIsFlaggedForLegalReview.Default.(bool)
+	// legalversionDescEffectiveAtIsDefault is the schema descriptor for effective_at_is_default field.
+	legalversionDescEffectiveAtIsDefault := legalversionFields[8].Descriptor()
+	// legalversion.DefaultEffectiveAtIsDefault holds the default value on creation for the effective_at_is_default field.
+	legalversion.DefaultEffectiveAtIsDefault = legalversionDescEffectiveAtIsDefault.Default.(bool)
 	// legalversionDescCreatedBy is the schema descriptor for created_by field.
-	legalversionDescCreatedBy := legalversionFields[8].Descriptor()
+	legalversionDescCreatedBy := legalversionFields[9].Descriptor()
 	// legalversion.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	legalversion.CreatedByValidator = legalversionDescCreatedBy.Validators[0].(func(string) error)
 	// legalversionDescCreatedByName is the schema descriptor for created_by_name field.
-	legalversionDescCreatedByName := legalversionFields[9].Descriptor()
+	legalversionDescCreatedByName := legalversionFields[10].Descriptor()
 	// legalversion.DefaultCreatedByName holds the default value on creation for the created_by_name field.
 	legalversion.DefaultCreatedByName = legalversionDescCreatedByName.Default.(string)
 	// legalversion.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
 	legalversion.CreatedByNameValidator = legalversionDescCreatedByName.Validators[0].(func(string) error)
 	// legalversionDescSubmittedBy is the schema descriptor for submitted_by field.
-	legalversionDescSubmittedBy := legalversionFields[10].Descriptor()
+	legalversionDescSubmittedBy := legalversionFields[11].Descriptor()
 	// legalversion.DefaultSubmittedBy holds the default value on creation for the submitted_by field.
 	legalversion.DefaultSubmittedBy = legalversionDescSubmittedBy.Default.(string)
 	// legalversion.SubmittedByValidator is a validator for the "submitted_by" field. It is called by the builders before save.
 	legalversion.SubmittedByValidator = legalversionDescSubmittedBy.Validators[0].(func(string) error)
 	// legalversionDescSubmittedByName is the schema descriptor for submitted_by_name field.
-	legalversionDescSubmittedByName := legalversionFields[11].Descriptor()
+	legalversionDescSubmittedByName := legalversionFields[12].Descriptor()
 	// legalversion.DefaultSubmittedByName holds the default value on creation for the submitted_by_name field.
 	legalversion.DefaultSubmittedByName = legalversionDescSubmittedByName.Default.(string)
 	// legalversion.SubmittedByNameValidator is a validator for the "submitted_by_name" field. It is called by the builders before save.
 	legalversion.SubmittedByNameValidator = legalversionDescSubmittedByName.Validators[0].(func(string) error)
 	// legalversionDescPublishedBy is the schema descriptor for published_by field.
-	legalversionDescPublishedBy := legalversionFields[13].Descriptor()
+	legalversionDescPublishedBy := legalversionFields[14].Descriptor()
 	// legalversion.DefaultPublishedBy holds the default value on creation for the published_by field.
 	legalversion.DefaultPublishedBy = legalversionDescPublishedBy.Default.(string)
 	// legalversion.PublishedByValidator is a validator for the "published_by" field. It is called by the builders before save.
 	legalversion.PublishedByValidator = legalversionDescPublishedBy.Validators[0].(func(string) error)
 	// legalversionDescPublishedByName is the schema descriptor for published_by_name field.
-	legalversionDescPublishedByName := legalversionFields[14].Descriptor()
+	legalversionDescPublishedByName := legalversionFields[15].Descriptor()
 	// legalversion.DefaultPublishedByName holds the default value on creation for the published_by_name field.
 	legalversion.DefaultPublishedByName = legalversionDescPublishedByName.Default.(string)
 	// legalversion.PublishedByNameValidator is a validator for the "published_by_name" field. It is called by the builders before save.
 	legalversion.PublishedByNameValidator = legalversionDescPublishedByName.Validators[0].(func(string) error)
 	// legalversionDescReturnedReason is the schema descriptor for returned_reason field.
-	legalversionDescReturnedReason := legalversionFields[16].Descriptor()
+	legalversionDescReturnedReason := legalversionFields[17].Descriptor()
 	// legalversion.DefaultReturnedReason holds the default value on creation for the returned_reason field.
 	legalversion.DefaultReturnedReason = legalversionDescReturnedReason.Default.(string)
 	// legalversion.ReturnedReasonValidator is a validator for the "returned_reason" field. It is called by the builders before save.
@@ -1220,13 +1224,13 @@ func init() {
 	// profilesignal.DefaultHasActiveStoreOrBrandPage holds the default value on creation for the has_active_store_or_brand_page field.
 	profilesignal.DefaultHasActiveStoreOrBrandPage = profilesignalDescHasActiveStoreOrBrandPage.Default.(bool)
 	// profilesignalDescSource is the schema descriptor for source field.
-	profilesignalDescSource := profilesignalFields[13].Descriptor()
+	profilesignalDescSource := profilesignalFields[14].Descriptor()
 	// profilesignal.DefaultSource holds the default value on creation for the source field.
 	profilesignal.DefaultSource = profilesignalDescSource.Default.(string)
 	// profilesignal.SourceValidator is a validator for the "source" field. It is called by the builders before save.
 	profilesignal.SourceValidator = profilesignalDescSource.Validators[0].(func(string) error)
 	// profilesignalDescUpdatedAt is the schema descriptor for updated_at field.
-	profilesignalDescUpdatedAt := profilesignalFields[14].Descriptor()
+	profilesignalDescUpdatedAt := profilesignalFields[15].Descriptor()
 	// profilesignal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profilesignal.DefaultUpdatedAt = profilesignalDescUpdatedAt.Default.(func() time.Time)
 	// profilesignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
