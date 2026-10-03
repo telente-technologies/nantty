@@ -18,8 +18,8 @@
 .slip {
   width: 100%;
   padding: 12mm;
-  background: #fff;
-  color: #000;
+  background: var(--paper);
+  color: var(--paper-ink);
   border: 1px solid var(--divider);
   box-shadow: var(--shadow-card);
   font-size: 13px;
@@ -38,7 +38,7 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #000;
+  border-bottom: 2px solid var(--paper-ink);
 }
 
 .storeName {
@@ -59,7 +59,7 @@
 
 .small {
   font-size: 11px;
-  color: #444;
+  color: var(--paper-ink-muted);
 }
 
 .addressBlock {
@@ -72,13 +72,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #444;
+  color: var(--paper-ink-muted);
 }
 
 .itemsTable th,
 .itemsTable td {
   padding: 8px 6px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--paper-rule);
   text-align: left;
   vertical-align: top;
 }
@@ -93,7 +93,7 @@
   display: inline-block;
   width: 14px;
   height: 14px;
-  border: 1.5px solid #000;
+  border: 1.5px solid var(--paper-ink);
 }
 
 .slipFooter {

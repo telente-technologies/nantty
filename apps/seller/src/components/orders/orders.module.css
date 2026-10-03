@@ -19,9 +19,9 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .chipCount {
@@ -127,8 +127,8 @@
 .message_zudomart {
   align-self: center;
   max-width: 92%;
-  background: var(--yellow-50);
-  border: 1px solid var(--yellow-100);
+  background: var(--color-warn-tint);
+  border: 1px solid color-mix(in srgb, var(--color-warn) 35%, transparent);
 }
 
 .messageMeta {
@@ -185,7 +185,7 @@
   height: 14px;
   margin-top: 2px;
   border-radius: 50%;
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
   box-shadow: 0 0 0 3px var(--blue-tint);
 }
 
@@ -197,8 +197,8 @@
 .noteItem {
   padding: 10px 12px;
   border-radius: var(--radius-medium);
-  background: var(--yellow-50);
-  border: 1px solid var(--yellow-100);
+  background: var(--color-warn-tint);
+  border: 1px solid color-mix(in srgb, var(--color-warn) 35%, transparent);
 }
 
 .noteList {
