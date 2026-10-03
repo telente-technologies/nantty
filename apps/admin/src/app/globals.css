@@ -1,35 +1,24 @@
+@import "@zudomart/design-tokens/tokens.css";
+
 :root {
-  --blue-50: #eef1fe;
-  --blue-100: #d2dafd;
-  --blue-200: #b5c1fc;
-  --blue-300: #8fa1fa;
-  --blue-400: #4563f7;
-  --blue-500: #2043f5;
-  --blue-600: #1b39cc;
-  --blue-700: #152da3;
-  --blue-800: #10227a;
-  --blue-900: #0b1752;
-  --yellow-100: #fbf4b5;
-  --yellow-500: #f5e320;
-  --yellow-900: #524c0b;
-  --success: #10b981;
-  --success-tint: #e7f8f1;
-  --success-ink: #067a55;
-  --caution: #f59e0b;
-  --caution-tint: #fef4e2;
-  --caution-ink: #8a5100;
-  --error: #ef4444;
-  --error-tint: #fdecec;
-  --error-ink: #b91c1c;
-  --surface-app: #f7f8fe;
-  --surface-card: #ffffff;
-  --surface-sunken: #f0f2fa;
+  --success: var(--color-success);
+  --success-tint: var(--color-success-tint);
+  --success-ink: var(--color-success-text);
+  --caution: var(--color-warn);
+  --caution-tint: var(--color-warn-tint);
+  --caution-ink: var(--color-warn-text);
+  --error: var(--color-danger);
+  --error-tint: var(--color-danger-tint);
+  --error-ink: var(--color-danger-text);
+  --surface-app: var(--color-bg);
+  --surface-card: var(--color-surface);
+  --surface-sunken: var(--color-sunken);
   --surface-hover: #f4f6fd;
-  --ink-strong: #000000;
-  --ink-muted: #5b5b5b;
-  --ink-faint: #909090;
-  --divider: #dfe2ee;
-  --divider-soft: #ebedf5;
+  --ink-strong: var(--color-text);
+  --ink-muted: var(--color-text-muted);
+  --ink-faint: var(--color-text-subtle);
+  --divider: var(--color-border-strong);
+  --divider-soft: var(--color-border);
 
   --console-night: #070b24;
   --console-night-raised: #10163a;
@@ -40,18 +29,12 @@
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --radius-small: 6px;
-  --radius-medium: 8px;
-  --radius-large: 12px;
-  --radius-pill: 999px;
+  --radius-small: var(--radius-sm);
+  --radius-medium: var(--radius-md);
+  --radius-large: var(--radius-lg);
 
   --sidebar-width: 232px;
   --topbar-height: 52px;
-  --shadow-card: 0 1px 2px rgb(11 23 82 / 0.05);
-  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 18px 48px -12px rgb(11 23 82 / 0.32);
-  --focus-ring: 0 0 0 2px var(--surface-card), 0 0 0 4px var(--blue-500);
-
-  color-scheme: light;
 }
 
 *,
