@@ -66,12 +66,12 @@ export function registerBillingMockHandlers(): void {
     if (!Number.isInteger(amount.amountMinor) || (amount.amountMinor as number) < limits.minimum || (amount.amountMinor as number) > limits.maximum) {
       failValidation("amount", `Enter between ${formatMoneyForDisplay(money(limits.minimum, account.currency))} and ${formatMoneyForDisplay(money(limits.maximum, account.currency))}.`);
     }
-    const provider = body.provider === "flutterwave" ? "flutterwave" : "paystack";
+    const provider = "paystack" as const;
     const reference = `ZDA-${randomBytes(6).toString("hex").toUpperCase()}`;
     const topUpId = createMockId("tup");
     readMockDatabase().topUps.unshift({ id: topUpId, accountId: account.id, reference, amount: money(amount.amountMinor as number, account.currency), status: "pending", provider, createdAt: readIsoNow(), completedAt: null, failureReason: null });
     const returnPath = readSafeReturnPath(body.returnPath, account.id);
-    return respondWithJson(201, { topUpId, reference, provider, authorizationUrl: `${returnPath}?reference=${reference}&demoCheckout=1` });
+    return respondWithJson(201, { topUpId, reference, provider, accessCode: "", authorizationUrl: `${returnPath}?reference=${reference}&demoCheckout=1` });
   });
 
   registerMockRoute("GET", "/ads/accounts/:accountId/billing/top-ups/:reference", (request) => {
@@ -139,8 +139,8 @@ export function registerBillingMockHandlers(): void {
     if (!request.headers.get("idempotency-key")) throw new MockHttpError(400, "IDEMPOTENCY_KEY_REQUIRED", "Payments need an Idempotency-Key header.");
     const body = readJsonObjectBody(request);
     const reference = `ZDC-${randomBytes(6).toString("hex").toUpperCase()}`;
-    account.paymentMethods.push({ id: createMockId("pm"), brand: "Verve", last4: String(1000 + Math.floor(Math.random() * 8999)), expMonth: 12, expYear: new Date().getUTCFullYear() + 3, isDefault: account.paymentMethods.length === 0, provider: body.provider === "flutterwave" ? "flutterwave" : "paystack" });
-    return respondWithJson(201, { topUpId: "", reference, provider: "paystack", authorizationUrl: `${readSafeReturnPath(body.returnPath, account.id)}?cardReference=${reference}&demoCheckout=1` });
+    account.paymentMethods.push({ id: createMockId("pm"), brand: "Verve", last4: String(1000 + Math.floor(Math.random() * 8999)), expMonth: 12, expYear: new Date().getUTCFullYear() + 3, isDefault: account.paymentMethods.length === 0, provider: "paystack" });
+    return respondWithJson(201, { topUpId: "", reference, provider: "paystack", accessCode: "", authorizationUrl: `${readSafeReturnPath(body.returnPath, account.id)}?cardReference=${reference}&demoCheckout=1` });
   });
 
   registerMockRoute("POST", "/ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default", (request) => {

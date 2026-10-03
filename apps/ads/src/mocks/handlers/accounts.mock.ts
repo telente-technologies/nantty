@@ -18,7 +18,7 @@ export function registerAccountMockHandlers(): void {
   registerMockRoute("GET", "/ads/memberships", (request) => {
     const principal = requirePrincipal(request);
     const items = readMockDatabase().members.filter((member) => member.userId === principal.userId).map((member) => ({ accountId: member.accountId, role: member.role }));
-    return respondWithJson(200, { items });
+    return respondWithJson(200, { data: items, nextCursor: null });
   });
 
   registerMockRoute("GET", "/ads/accounts", (request) => {

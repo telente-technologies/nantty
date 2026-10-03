@@ -73,7 +73,7 @@ export function buildDemoAccountRecords(): MockAdAccountRecord[] {
       monthlyCreditMinor: 50_000,
       spendLimitMinor: null,
       fundingMode: "card",
-      paymentMethods: [{ id: "pm_kente_mc", brand: "Mastercard", last4: "5512", expMonth: 3, expYear: 2027, isDefault: true, provider: "flutterwave" }],
+      paymentMethods: [{ id: "pm_kente_mc", brand: "Mastercard", last4: "5512", expMonth: 3, expYear: 2027, isDefault: true, provider: "paystack" }],
     },
   ];
 }
