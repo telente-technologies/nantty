@@ -1,0 +1,1487 @@
+[
+ {
+  "code": "GH",
+  "name": "Ghana",
+  "regionLabel": "Region",
+  "adminAreaLabel": null,
+  "postalCodeRequired": false,
+  "regions": [
+   {
+    "name": "Ahafo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Ashanti",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bono",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bono East",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Central",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Eastern",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Greater Accra",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North East",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Northern",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Oti",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Savannah",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Upper East",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Upper West",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Volta",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Western",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Western North",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "KE",
+  "name": "Kenya",
+  "regionLabel": "County",
+  "adminAreaLabel": null,
+  "postalCodeRequired": false,
+  "regions": [
+   {
+    "name": "Mombasa",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kwale",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kilifi",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Tana River",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Lamu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Taita-Taveta",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Garissa",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wajir",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Mandera",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Marsabit",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Isiolo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Meru",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Tharaka-Nithi",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Embu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kitui",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Machakos",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Makueni",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nyandarua",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nyeri",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kirinyaga",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Murang'a",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kiambu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Turkana",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "West Pokot",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Samburu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Trans-Nzoia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Uasin Gishu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Elgeyo-Marakwet",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nandi",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Baringo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Laikipia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nakuru",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Narok",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kajiado",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kericho",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bomet",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kakamega",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Vihiga",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bungoma",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Busia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Siaya",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kisumu",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Homa Bay",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Migori",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kisii",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nyamira",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nairobi",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "ZA",
+  "name": "South Africa",
+  "regionLabel": "Province",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Eastern Cape",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Free State",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Gauteng",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "KwaZulu-Natal",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Limpopo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Mpumalanga",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North West",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Northern Cape",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Western Cape",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "GB",
+  "name": "United Kingdom",
+  "regionLabel": "Nation",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "England",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Scotland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wales",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Northern Ireland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "US",
+  "name": "United States",
+  "regionLabel": "State",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Alabama",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Alaska",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Arizona",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Arkansas",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "California",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Colorado",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Connecticut",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Delaware",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "District of Columbia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Florida",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Georgia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Hawaii",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Idaho",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Illinois",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Indiana",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Iowa",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kansas",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kentucky",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Louisiana",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Maine",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Maryland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Massachusetts",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Michigan",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Minnesota",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Mississippi",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Missouri",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Montana",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nebraska",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nevada",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "New Hampshire",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "New Jersey",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "New Mexico",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "New York",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North Carolina",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North Dakota",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Ohio",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Oklahoma",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Oregon",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Pennsylvania",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Rhode Island",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "South Carolina",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "South Dakota",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Tennessee",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Texas",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Utah",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Vermont",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Virginia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Washington",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "West Virginia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wisconsin",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wyoming",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "DE",
+  "name": "Germany",
+  "regionLabel": "State",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Baden-Württemberg",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bavaria",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Berlin",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Brandenburg",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bremen",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Hamburg",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Hesse",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Lower Saxony",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Mecklenburg-Vorpommern",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North Rhine-Westphalia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Rhineland-Palatinate",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Saarland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Saxony",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Saxony-Anhalt",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Schleswig-Holstein",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Thuringia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "FR",
+  "name": "France",
+  "regionLabel": "Region",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Auvergne-Rhône-Alpes",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Bourgogne-Franche-Comté",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Brittany",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Centre-Val de Loire",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Corsica",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Grand Est",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Hauts-de-France",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Île-de-France",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Normandy",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Nouvelle-Aquitaine",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Occitanie",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Pays de la Loire",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Provence-Alpes-Côte d'Azur",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "IE",
+  "name": "Ireland",
+  "regionLabel": "County",
+  "adminAreaLabel": null,
+  "postalCodeRequired": false,
+  "regions": [
+   {
+    "name": "Carlow",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Cavan",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Clare",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Cork",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Donegal",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Dublin",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Galway",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kerry",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kildare",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Kilkenny",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Laois",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Leitrim",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Limerick",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Longford",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Louth",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Mayo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Meath",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Monaghan",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Offaly",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Roscommon",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Sligo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Tipperary",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Waterford",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Westmeath",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wexford",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Wicklow",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "NL",
+  "name": "Netherlands",
+  "regionLabel": "Province",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Drenthe",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Flevoland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Friesland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Gelderland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Groningen",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Limburg",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North Brabant",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "North Holland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Overijssel",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "South Holland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Utrecht",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Zeeland",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "ES",
+  "name": "Spain",
+  "regionLabel": "Autonomous community",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Andalusia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Aragon",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Asturias",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Balearic Islands",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Basque Country",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Canary Islands",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Cantabria",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Castile and León",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Castilla-La Mancha",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Catalonia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Extremadura",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Galicia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "La Rioja",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Madrid",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Murcia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Navarre",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Valencian Community",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ },
+ {
+  "code": "IT",
+  "name": "Italy",
+  "regionLabel": "Region",
+  "adminAreaLabel": null,
+  "postalCodeRequired": true,
+  "regions": [
+   {
+    "name": "Abruzzo",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Aosta Valley",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Apulia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Basilicata",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Calabria",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Campania",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Emilia-Romagna",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Friuli Venezia Giulia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Lazio",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Liguria",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Lombardy",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Marche",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Molise",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Piedmont",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Sardinia",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Sicily",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Trentino-South Tyrol",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Tuscany",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Umbria",
+    "code": null,
+    "areas": [],
+    "cities": []
+   },
+   {
+    "name": "Veneto",
+    "code": null,
+    "areas": [],
+    "cities": []
+   }
+  ]
+ }
+]
