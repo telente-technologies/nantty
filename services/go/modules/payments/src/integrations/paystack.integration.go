@@ -238,7 +238,7 @@ func (provider *PaystackProvider) VerifyWebhookSignatureAndParse(rawBody []byte,
 	}
 	return interfaces.WebhookNotification{
 		EventKey: payload.Event + ":" + identity, EventType: payload.Event, Kind: classifyWebhookEvent(payload.Event),
-		Reference: payload.Data.Reference, ProviderTransferCode: payload.Data.TransferCode,
+		Reference: payload.Data.Reference, ProviderTransferCode: payload.Data.TransferCode, ProviderRefundId: payload.Data.Id.String(),
 	}, nil
 }
 
