@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
-import { doesRoleHavePermission, type SellerPermission } from "@/config/rolePermissions.config";
+import { doesAccessGrantPermission, type SellerPermission } from "@/config/rolePermissions.config";
 import { rememberCsrfTokenForRequests, sendRequestToDashboardServer } from "@/services/clientApi.service";
 import type { SellerSessionView } from "@/types/sellerAccess.type";
 
@@ -30,7 +30,7 @@ export function SellerSessionProvider({ initialSessionView, csrfToken, children 
       sessionView,
       csrfToken,
       refreshSessionView,
-      can: (permission) => doesRoleHavePermission(sessionView?.effectiveRole ?? null, permission),
+      can: (permission) => doesAccessGrantPermission(sessionView?.access, permission),
     }),
     [sessionView, csrfToken, refreshSessionView],
   );
