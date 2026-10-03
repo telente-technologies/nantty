@@ -124,6 +124,16 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 | Step Functions | payout runs, dispute timelines only if real orchestration | avoid until needed | OPTIONAL FUTURE |
 | LiveKit | media plane (Cloud first, self-host later) | owner decision | PROPOSED |
 
+### 6.1 ALB routing and provider webhooks
+
+| Priority | Path | Target | Why |
+| --- | --- | --- | --- |
+| 10 | `/webhooks/*` | go-money target group | Paystack, Flutterwave and App Store notifications are signature-verified over the raw request body. The gateway re-serialises JSON, which breaks the signature, so these requests never pass through it. |
+| 20 | `/ws*` | realtime target group (idle timeout raised) | WebSocket |
+| default | everything else | gateway target group | auth, rate limit, upstream routing |
+
+go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notifications/{store}`; the gateway has no route for `/webhooks/*`, and the old `/api/v1/payments/webhooks/*` paths are no longer routed by it either. Configure the provider dashboards with `https://api.zudomart.com/webhooks/paystack` (and the equivalent per provider). The WAF still sits in front of the ALB, with a rate rule scoped to `/webhooks/*`.
+
 ## 7. NOT yet
 
 | Technology | Do not adopt until | Trigger metric |
