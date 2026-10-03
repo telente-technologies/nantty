@@ -9,6 +9,7 @@ import { staffRoleDescriptions, staffRoleLabels, staffRoles } from "@/constants/
 
 import tableStyles from "@/components/ui/dataTable.module.css";
 import styles from "./staff.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
 
 export function StaffRolesMatrixView() {
   return (
@@ -53,7 +54,7 @@ export function StaffRolesMatrixView() {
                     <td>{sellerPermissionLabels[permission]}</td>
                     {staffRoles.map((role) => (
                       <td key={role} style={{ textAlign: "center" }}>
-                        {permissionsByStaffRole[role].has(permission) ? <span className={styles.matrixCheck} aria-label="Included">✓</span> : <span className={styles.matrixDash} aria-label="Not included">—</span>}
+                        {permissionsByStaffRole[role].has(permission) ? <span className={styles.matrixCheck} aria-label="Included"><ZudoIcon name="check16" size={14} /></span> : <span className={styles.matrixDash} aria-label="Not included"><ZudoIcon name="minus16" size={14} /></span>}
                       </td>
                     ))}
                   </tr>
