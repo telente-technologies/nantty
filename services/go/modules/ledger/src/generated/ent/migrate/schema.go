@@ -217,6 +217,41 @@ var (
 			},
 		},
 	}
+	// SellerCreditMaturitiesColumns holds the columns for the "seller_credit_maturities" table.
+	SellerCreditMaturitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "source_reference", Type: field.TypeString, Size: 255},
+		{Name: "original_amount_minor", Type: field.TypeInt64},
+		{Name: "remaining_amount_minor", Type: field.TypeInt64},
+		{Name: "available_at", Type: field.TypeTime},
+		{Name: "matured_at", Type: field.TypeTime, Nullable: true},
+	}
+	// SellerCreditMaturitiesTable holds the schema information for the "seller_credit_maturities" table.
+	SellerCreditMaturitiesTable = &schema.Table{
+		Name:       "seller_credit_maturities",
+		Columns:    SellerCreditMaturitiesColumns,
+		PrimaryKey: []*schema.Column{SellerCreditMaturitiesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sellercreditmaturity_source_reference",
+				Unique:  true,
+				Columns: []*schema.Column{SellerCreditMaturitiesColumns[4]},
+			},
+			{
+				Name:    "sellercreditmaturity_matured_at_available_at",
+				Unique:  false,
+				Columns: []*schema.Column{SellerCreditMaturitiesColumns[8], SellerCreditMaturitiesColumns[7]},
+			},
+			{
+				Name:    "sellercreditmaturity_seller_user_id_currency_matured_at",
+				Unique:  false,
+				Columns: []*schema.Column{SellerCreditMaturitiesColumns[2], SellerCreditMaturitiesColumns[3], SellerCreditMaturitiesColumns[8]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		JournalEntriesTable,
@@ -225,6 +260,7 @@ var (
 		OutboxEventsTable,
 		ReconciliationBreaksTable,
 		ReconciliationRunsTable,
+		SellerCreditMaturitiesTable,
 	}
 )
 
@@ -241,4 +277,8 @@ func init() {
 		"ledger_accounts_totals_not_negative":                 "debits_total_minor >= 0 AND credits_total_minor >= 0",
 	}
 	ReconciliationBreaksTable.ForeignKeys[0].RefTable = ReconciliationRunsTable
+	SellerCreditMaturitiesTable.Annotation = &entsql.Annotation{}
+	SellerCreditMaturitiesTable.Annotation.Checks = map[string]string{
+		"seller_credit_maturities_remaining_within_original": "original_amount_minor > 0 AND remaining_amount_minor >= 0 AND remaining_amount_minor <= original_amount_minor",
+	}
 }
