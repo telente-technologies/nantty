@@ -2,9 +2,10 @@ import { StyleSheet, View } from "react-native";
 
 import { ChatsCircle48Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export function ChatsEmptyState() {
+  const { colors } = useTheme();
   return (
     <View style={styles.root}>
       <ChatsCircle48Icon />

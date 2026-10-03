@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
 import type { Message } from "@/types";
 
@@ -11,17 +11,23 @@ import { formatClockTime } from "@/utils/formatDate.util";
 import { MessageReactionsRow } from "./messageReactionsRow";
 import { VoiceNoteBubble } from "./voiceNoteBubble";
 import { useImagePreview } from "@/components/ui/previewableImage";
+import { LinkPreviewCard } from "@/components/chatSafety/linkPreviewCard";
+import { SharedContentCardView } from "@/components/chatSafety/sharedContentCardView";
+import { findFirstExternalUrl, findFirstInternalReference } from "./chatLinks.util";
 
 export interface ChatBubbleProps {
   readonly message: Message;
   readonly isMine: boolean;
   readonly deliveryStatus?: LocalMessageDeliveryStatus;
   readonly showSenderIdentity?: boolean;
+  readonly showReadReceipt?: boolean;
   readonly onLongPress?: () => void;
   readonly onToggleReaction?: (emoji: string, shouldReact: boolean) => void;
 }
 
 export function SystemNoticeRow({ text }: { text: string }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.systemRow} accessibilityRole="text">
       <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={colors.textMuted} align="center">
@@ -36,14 +42,22 @@ export function ChatBubble({
   isMine,
   deliveryStatus = "sent",
   showSenderIdentity = false,
+  showReadReceipt = false,
   onLongPress,
   onToggleReaction,
 }: ChatBubbleProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { openImagePreview, imagePreviewElement } = useImagePreview();
   if (message.kind === "system") return <SystemNoticeRow text={message.text} />;
-  const isVoiceNote = message.kind === "voice" && !!message.media;
-  const isPhoto = message.kind === "image" && !!message.media?.url;
-  const isShort = !isVoiceNote && !isPhoto && message.text.length <= 24 && !message.text.includes("\n");
+  const isMediaExpired = !!message.media && !!message.mediaExpiresAt && message.mediaExpiresAt <= new Date().toISOString();
+  const isVoiceNote = message.kind === "voice" && !!message.media && !isMediaExpired;
+  const isPhoto = message.kind === "image" && !!message.media?.url && !isMediaExpired;
+  const isShared = message.kind === "shared" && !!message.sharedContent;
+  const externalUrl = message.kind === "text" || !message.kind ? findFirstExternalUrl(message.text) : null;
+  const internalReference = isShared ? message.sharedContent!.reference : message.kind === "text" || !message.kind ? findFirstInternalReference(message.text) : null;
+  const hasBubble = !isShared || message.text.length > 0;
+  const isShort = !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
   return (
     <View style={[styles.row, isMine ? styles.mine : styles.theirs]}>
@@ -54,6 +68,7 @@ export function ChatBubble({
             {message.sender!.name}
           </Text>
         ) : null}
+        {hasBubble ? (
         <Pressable
           disabled={!onLongPress && !isPhoto}
           onPress={isPhoto ? () => openImagePreview([message.media!.url]) : undefined}
@@ -73,12 +88,19 @@ export function ChatBubble({
             <VoiceNoteBubble media={message.media!} isMine={isMine} deliveryStatus={deliveryStatus} />
           ) : isPhoto ? (
             <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo, tap to view full screen" />
+          ) : isMediaExpired ? (
+            <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.textMuted} accessibilityLabel="Media expired">
+              Media expired
+            </Text>
           ) : (
             <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.text}>
               {message.text}
             </Text>
           )}
         </Pressable>
+        ) : null}
+        {internalReference ? <SharedContentCardView reference={internalReference} snapshot={message.sharedContent} /> : null}
+        {externalUrl ? <LinkPreviewCard url={externalUrl} preview={message.linkPreview} /> : null}
         {onToggleReaction && message.reactions ? (
           <MessageReactionsRow reactions={message.reactions} onToggleReaction={onToggleReaction} alignEnd={isMine} />
         ) : null}
@@ -91,6 +113,11 @@ export function ChatBubble({
               · Not sent
             </Text>
           ) : null}
+          {showReadReceipt && isMine && message.readAt ? (
+            <Text size={11} lineHeight={15.4} letterSpacing={0} color={colors.textMuted}>
+              · Seen
+            </Text>
+          ) : null}
         </View>
       </View>
       {imagePreviewElement}
@@ -98,7 +125,7 @@ export function ChatBubble({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", paddingHorizontal: 20, gap: 8, alignItems: "flex-end" },
   mine: { justifyContent: "flex-end" },
   theirs: { justifyContent: "flex-start" },
@@ -110,9 +137,9 @@ const styles = StyleSheet.create({
   photoBubble: { padding: 4 },
   photo: { width: 200, height: 260, borderRadius: 8 },
   pendingBubble: { opacity: 0.6 },
-  bubbleMine: { backgroundColor: colors.primary },
+  bubbleMine: { backgroundColor: colors.primarySolid },
   bubbleTheirs: { backgroundColor: colors.skeleton },
   pill: { borderRadius: 999 },
   cornerMine: { borderTopLeftRadius: 12, borderTopRightRadius: 12, borderBottomRightRadius: 0, borderBottomLeftRadius: 12 },
   cornerTheirs: { borderTopLeftRadius: 12, borderTopRightRadius: 12, borderBottomRightRadius: 12, borderBottomLeftRadius: 0 },
-});
+}));

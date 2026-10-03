@@ -1,10 +1,11 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { ArrowLeft24Icon, DotsThreeVertical24Icon } from "@/components/icons";
+import { StreakBadge } from "@/components/chatSafety/streakBadge";
+import { ArrowLeft24Icon, Bell24Icon, DotsThreeVertical24Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import type { Conversation, UserSummary } from "@/types";
 
@@ -18,6 +19,8 @@ export interface ChatHeaderProps {
   readonly usersTyping: readonly UserSummary[];
   readonly onGoBack: () => void;
   readonly onOpenConversationInfo: () => void;
+  readonly onOpenStreak?: () => void;
+  readonly onOpenMute?: () => void;
 }
 
 const describeWhoIsTyping = (usersTyping: readonly UserSummary[], isGroupLike: boolean) => {
@@ -27,7 +30,8 @@ const describeWhoIsTyping = (usersTyping: readonly UserSummary[], isGroupLike: b
   return firstNames.length === 1 ? `${firstNames[0]} is typing…` : `${firstNames.length} people are typing…`;
 };
 
-export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, onOpenConversationInfo }: ChatHeaderProps) {
+export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, onOpenConversationInfo, onOpenStreak, onOpenMute }: ChatHeaderProps) {
+  const { colors } = useTheme();
   const display = conversation ? describeConversationForDisplay(conversation) : null;
   const isGroupLike = !!display && (display.isGroup || display.isChannel);
   const typingText = describeWhoIsTyping(usersTyping, isGroupLike);
@@ -55,6 +59,11 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
                 <VerificationBadge verification={conversation.peer.verification} legacyVerified={conversation.peer.verified} size={16} />
               ) : null}
               {display?.isBusiness ? <BusinessLabel /> : null}
+              {conversation?.streak && conversation.streak.state !== "none" ? (
+                <Pressable accessibilityRole="button" accessibilityLabel="Streak details" hitSlop={8} onPress={onOpenStreak}>
+                  <StreakBadge streak={conversation.streak} />
+                </Pressable>
+              ) : null}
             </View>
             {showTypingDots || subtitle ? (
               <View style={styles.subtitleRow}>
@@ -69,9 +78,16 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
           </View>
         </Pressable>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel="Conversation options" hitSlop={10} onPress={onOpenConversationInfo}>
-        <DotsThreeVertical24Icon />
-      </Pressable>
+      <View style={styles.actions}>
+        {conversation && onOpenMute ? (
+          <Pressable accessibilityRole="button" accessibilityLabel={conversation.mutedUntil ? "Chat muted, change mute" : "Mute chat"} hitSlop={10} onPress={onOpenMute} style={conversation.mutedUntil ? styles.muted : undefined}>
+            <Bell24Icon />
+          </Pressable>
+        ) : null}
+        <Pressable accessibilityRole="button" accessibilityLabel="Conversation options" hitSlop={10} onPress={onOpenConversationInfo}>
+          <DotsThreeVertical24Icon />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -84,4 +100,6 @@ const styles = StyleSheet.create({
   subtitleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   name: { flexShrink: 1 },
+  actions: { flexDirection: "row", alignItems: "center", gap: 12 },
+  muted: { opacity: 0.35 },
 });

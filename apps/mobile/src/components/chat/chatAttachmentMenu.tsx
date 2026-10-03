@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera24Icon, Document24Icon, ImageSquare24Icon, MapPin24Icon, Poll24Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export type ChatAttachmentOption = "photos" | "camera" | "location" | "documents" | "poll";
 
@@ -30,6 +30,7 @@ export interface ChatAttachmentMenuProps {
 }
 
 export function ChatAttachmentMenu({ visible, onClose, onSelect }: ChatAttachmentMenuProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   return (
     <FrameAwareModal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -56,10 +57,10 @@ export function ChatAttachmentMenu({ visible, onClose, onSelect }: ChatAttachmen
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   backdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: colors.overlay },
   sheet: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingTop: 8,
@@ -67,4 +68,4 @@ const styles = StyleSheet.create({
   },
   handle: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: colors.divider, marginBottom: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 14, paddingVertical: 14 },
-});
+}));

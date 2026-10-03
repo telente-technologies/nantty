@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { MagnifyingGlass20Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { messagesService } from "@/services/messages.service";
 import type { UserSummary } from "@/types";
@@ -18,6 +18,8 @@ export interface ChatSearchPanelProps {
 }
 
 export function ChatSearchPanel({ onOpenConversation, onOpenPerson }: ChatSearchPanelProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [query, setQuery] = useState("");
   const results = useQuery({
     queryKey: ["chat-search", query],
@@ -79,7 +81,7 @@ export function ChatSearchPanel({ onOpenConversation, onOpenPerson }: ChatSearch
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 12 },
   searchBox: {
     height: 44,
@@ -106,4 +108,4 @@ const styles = StyleSheet.create({
   divider: { height: 0.5, backgroundColor: colors.divider, marginHorizontal: -16, marginTop: 8 },
   peopleRow: { flexDirection: "row", justifyContent: "space-between", alignSelf: "stretch" },
   person: { width: 84, gap: 4, alignItems: "center" },
-});
+}));

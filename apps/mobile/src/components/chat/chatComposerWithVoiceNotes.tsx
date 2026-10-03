@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "@/components/create/pickMedia.util";
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
@@ -26,6 +26,8 @@ const COMING_SOON_MESSAGES: Record<Exclude<ChatAttachmentOption, "photos" | "cam
 };
 
 export function ChatComposerWithVoiceNotes({ onSendText, onSendVoiceNote, onSendImage, onTypingChange }: ChatComposerWithVoiceNotesProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const voiceRecorder = useVoiceNoteRecorder(onSendVoiceNote);
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
 
@@ -80,17 +82,17 @@ export function ChatComposerWithVoiceNotes({ onSendText, onSendVoiceNote, onSend
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: {
     height: 60,
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
   },
   status: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
   recordingDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.live },
-});
+}));
