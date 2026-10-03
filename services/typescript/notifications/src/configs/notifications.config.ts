@@ -14,6 +14,7 @@ export interface NotificationsConfig {
   readonly webBaseUrl: string;
   readonly marketingMaxPerWeek: number;
   readonly policyNotice: { readonly batchSize: number; readonly ratePerSecond: number; readonly autoSend: boolean };
+  readonly digestSource: { readonly baseUrl: string; readonly internalToken: string } | null;
   readonly pushProvider: "expo" | "log";
 }
 
@@ -55,6 +56,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
       ratePerSecond: Number(readOrDefault("POLICY_NOTICE_RATE_PER_SECOND", "14")),
       autoSend: readOrDefault("POLICY_NOTICE_AUTO_SEND", "false") === "true",
     },
+    digestSource: process.env["SOCIAL_INTERNAL_URL"]?.trim() ? { baseUrl: process.env["SOCIAL_INTERNAL_URL"].trim(), internalToken: process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "" } : null,
     pushProvider: readOrDefault("PUSH_PROVIDER", "log") === "expo" ? "expo" : "log",
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
