@@ -31,7 +31,7 @@ func (PaymentRefund) Fields() []ent.Field {
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
 		field.String("reason").MaxLen(300).Default("").Immutable(),
-		field.Enum("status").Values("pending", "succeeded", "failed").Default("pending"),
+		field.Enum("status").Values("pending", "processing", "succeeded", "failed").Default("pending"),
 		field.String("provider_refund_id").MaxLen(120).Default(""),
 		field.String("failure_reason").MaxLen(300).Default(""),
 		field.Int("attempt_count").Default(0),
