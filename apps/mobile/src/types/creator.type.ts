@@ -2,15 +2,19 @@ import type { ID, ISODate, ProductSummary, StoreSummary } from "./models.type";
 import type { Money } from "./money.type";
 
 export interface CreatorEligibilityRequirement {
-  readonly key: "followers" | "account_age" | "verified_phone" | "no_violations" | "posts";
+  readonly key: "followers" | "account_age" | "verified_phone" | "no_violations" | "original_posts";
   readonly label: string;
   readonly currentValue: number;
   readonly requiredValue: number;
   readonly met: boolean;
 }
 
+export type CreatorProgramDecision = "auto_approve" | "manual_review" | "not_eligible";
+
 export interface CreatorEligibility {
   readonly eligible: boolean;
+  readonly decision: CreatorProgramDecision;
+  readonly decisionNote: string;
   readonly requirements: readonly CreatorEligibilityRequirement[];
 }
 

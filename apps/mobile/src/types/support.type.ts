@@ -3,11 +3,18 @@ import type { ID, ISODate } from "./models.type";
 export type SupportTicketCategory = "order" | "payment" | "account" | "seller" | "safety" | "other";
 export type SupportTicketStatus = "open" | "awaiting_you" | "resolved" | "closed";
 
+export interface SupportLinkedReference {
+  readonly kind: "order" | "payment";
+  readonly id: ID;
+  readonly label: string;
+}
+
 export interface SupportTicketSummary {
   readonly id: ID;
   readonly subject: string;
   readonly category: SupportTicketCategory;
   readonly status: SupportTicketStatus;
+  readonly linkedReference: SupportLinkedReference | null;
   readonly lastMessagePreview: string;
   readonly createdAt: ISODate;
   readonly updatedAt: ISODate;
@@ -24,6 +31,7 @@ export interface SupportTicketMessage {
 
 export interface SupportTicketDetail extends SupportTicketSummary {
   readonly messages: readonly SupportTicketMessage[];
+  readonly agentTyping: boolean;
 }
 
 export interface NewSupportTicketInput {
@@ -31,6 +39,7 @@ export interface NewSupportTicketInput {
   readonly subject: string;
   readonly message: string;
   readonly attachmentUrls: readonly string[];
+  readonly linkedReference: SupportLinkedReference | null;
 }
 
 export type ContentReportStatus = "received" | "reviewing" | "action_taken" | "no_violation";

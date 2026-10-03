@@ -23,8 +23,15 @@ export interface CreatorLiveStatus {
   readonly startedAt: ISODate;
 }
 
+export type AccountStatus = "active" | "suspended" | "deactivated";
+
+export interface AccountInfo {
+  readonly status: AccountStatus;
+}
+
 export interface UserSummary {
   readonly id: ID;
+  readonly account?: AccountInfo;
   readonly name: string;
   readonly username: string;
   readonly avatarUrl: string | null;

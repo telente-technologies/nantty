@@ -125,6 +125,7 @@ export type UsernameUnavailableReason = "taken" | "reserved" | "invalid" | "rece
 export interface UsernameAvailability {
   readonly available: boolean;
   readonly reason?: UsernameUnavailableReason;
+  readonly message?: string;
 }
 
 export interface UsernamePolicy {
