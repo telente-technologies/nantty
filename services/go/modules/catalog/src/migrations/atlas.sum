@@ -1,2 +1,3 @@
-h1:yCnROo9PVac67ii4+OsAPxB5h4ZDBA9x0RtzG4VLiEY=
+h1:GnQu9p/wJ2Py/TMB6ULjYanQHO48FRvp74uoJJ4KdJQ=
 20261003160510_create_catalog_tables.up.sql h1:YLf+g7jHJk5YGohV4arjmbgMRA88qVyu7j7FRc3WnGk=
+20261003170100_grant_read_access_to_other_services.up.sql h1:E3fMyEwmkWBcCvWKWt91abTBjCqVzPwpMBdzBm5sAbk=
