@@ -760,6 +760,7 @@ type CoinPackageMutation struct {
 	bonus_coins      *int64
 	addbonus_coins   *int64
 	purchase_channel *coinpackage.PurchaseChannel
+	client_platform  *coinpackage.ClientPlatform
 	prices           *[]byte
 	store_product_id *string
 	active           *bool
@@ -1060,6 +1061,42 @@ func (m *CoinPackageMutation) ResetPurchaseChannel() {
 	m.purchase_channel = nil
 }
 
+// SetClientPlatform sets the "client_platform" field.
+func (m *CoinPackageMutation) SetClientPlatform(cp coinpackage.ClientPlatform) {
+	m.client_platform = &cp
+}
+
+// ClientPlatform returns the value of the "client_platform" field in the mutation.
+func (m *CoinPackageMutation) ClientPlatform() (r coinpackage.ClientPlatform, exists bool) {
+	v := m.client_platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClientPlatform returns the old "client_platform" field's value of the CoinPackage entity.
+// If the CoinPackage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPackageMutation) OldClientPlatform(ctx context.Context) (v coinpackage.ClientPlatform, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClientPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClientPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClientPlatform: %w", err)
+	}
+	return oldValue.ClientPlatform, nil
+}
+
+// ResetClientPlatform resets all changes to the "client_platform" field.
+func (m *CoinPackageMutation) ResetClientPlatform() {
+	m.client_platform = nil
+}
+
 // SetPrices sets the "prices" field.
 func (m *CoinPackageMutation) SetPrices(b []byte) {
 	m.prices = &b
@@ -1294,7 +1331,7 @@ func (m *CoinPackageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoinPackageMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.name != nil {
 		fields = append(fields, coinpackage.FieldName)
 	}
@@ -1306,6 +1343,9 @@ func (m *CoinPackageMutation) Fields() []string {
 	}
 	if m.purchase_channel != nil {
 		fields = append(fields, coinpackage.FieldPurchaseChannel)
+	}
+	if m.client_platform != nil {
+		fields = append(fields, coinpackage.FieldClientPlatform)
 	}
 	if m.prices != nil {
 		fields = append(fields, coinpackage.FieldPrices)
@@ -1338,6 +1378,8 @@ func (m *CoinPackageMutation) Field(name string) (ent.Value, bool) {
 		return m.BonusCoins()
 	case coinpackage.FieldPurchaseChannel:
 		return m.PurchaseChannel()
+	case coinpackage.FieldClientPlatform:
+		return m.ClientPlatform()
 	case coinpackage.FieldPrices:
 		return m.Prices()
 	case coinpackage.FieldStoreProductID:
@@ -1365,6 +1407,8 @@ func (m *CoinPackageMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldBonusCoins(ctx)
 	case coinpackage.FieldPurchaseChannel:
 		return m.OldPurchaseChannel(ctx)
+	case coinpackage.FieldClientPlatform:
+		return m.OldClientPlatform(ctx)
 	case coinpackage.FieldPrices:
 		return m.OldPrices(ctx)
 	case coinpackage.FieldStoreProductID:
@@ -1411,6 +1455,13 @@ func (m *CoinPackageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPurchaseChannel(v)
+		return nil
+	case coinpackage.FieldClientPlatform:
+		v, ok := value.(coinpackage.ClientPlatform)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClientPlatform(v)
 		return nil
 	case coinpackage.FieldPrices:
 		v, ok := value.([]byte)
@@ -1546,6 +1597,9 @@ func (m *CoinPackageMutation) ResetField(name string) error {
 		return nil
 	case coinpackage.FieldPurchaseChannel:
 		m.ResetPurchaseChannel()
+		return nil
+	case coinpackage.FieldClientPlatform:
+		m.ResetClientPlatform()
 		return nil
 	case coinpackage.FieldPrices:
 		m.ResetPrices()

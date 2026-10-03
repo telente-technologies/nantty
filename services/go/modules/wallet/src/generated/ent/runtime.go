@@ -96,21 +96,21 @@ func init() {
 	// coinpackage.DefaultBonusCoins holds the default value on creation for the bonus_coins field.
 	coinpackage.DefaultBonusCoins = coinpackageDescBonusCoins.Default.(int64)
 	// coinpackageDescStoreProductID is the schema descriptor for store_product_id field.
-	coinpackageDescStoreProductID := coinpackageFields[6].Descriptor()
+	coinpackageDescStoreProductID := coinpackageFields[7].Descriptor()
 	// coinpackage.DefaultStoreProductID holds the default value on creation for the store_product_id field.
 	coinpackage.DefaultStoreProductID = coinpackageDescStoreProductID.Default.(string)
 	// coinpackage.StoreProductIDValidator is a validator for the "store_product_id" field. It is called by the builders before save.
 	coinpackage.StoreProductIDValidator = coinpackageDescStoreProductID.Validators[0].(func(string) error)
 	// coinpackageDescActive is the schema descriptor for active field.
-	coinpackageDescActive := coinpackageFields[7].Descriptor()
+	coinpackageDescActive := coinpackageFields[8].Descriptor()
 	// coinpackage.DefaultActive holds the default value on creation for the active field.
 	coinpackage.DefaultActive = coinpackageDescActive.Default.(bool)
 	// coinpackageDescSortOrder is the schema descriptor for sort_order field.
-	coinpackageDescSortOrder := coinpackageFields[8].Descriptor()
+	coinpackageDescSortOrder := coinpackageFields[9].Descriptor()
 	// coinpackage.DefaultSortOrder holds the default value on creation for the sort_order field.
 	coinpackage.DefaultSortOrder = coinpackageDescSortOrder.Default.(int)
 	// coinpackageDescUpdatedAt is the schema descriptor for updated_at field.
-	coinpackageDescUpdatedAt := coinpackageFields[9].Descriptor()
+	coinpackageDescUpdatedAt := coinpackageFields[10].Descriptor()
 	// coinpackage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	coinpackage.DefaultUpdatedAt = coinpackageDescUpdatedAt.Default.(func() time.Time)
 	// coinpackage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

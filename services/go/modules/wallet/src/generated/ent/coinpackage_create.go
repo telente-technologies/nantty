@@ -55,6 +55,20 @@ func (_c *CoinPackageCreate) SetPurchaseChannel(v coinpackage.PurchaseChannel) *
 	return _c
 }
 
+// SetClientPlatform sets the "client_platform" field.
+func (_c *CoinPackageCreate) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageCreate {
+	_c.mutation.SetClientPlatform(v)
+	return _c
+}
+
+// SetNillableClientPlatform sets the "client_platform" field if the given value is not nil.
+func (_c *CoinPackageCreate) SetNillableClientPlatform(v *coinpackage.ClientPlatform) *CoinPackageCreate {
+	if v != nil {
+		_c.SetClientPlatform(*v)
+	}
+	return _c
+}
+
 // SetPrices sets the "prices" field.
 func (_c *CoinPackageCreate) SetPrices(v []byte) *CoinPackageCreate {
 	_c.mutation.SetPrices(v)
@@ -162,6 +176,10 @@ func (_c *CoinPackageCreate) defaults() {
 		v := coinpackage.DefaultBonusCoins
 		_c.mutation.SetBonusCoins(v)
 	}
+	if _, ok := _c.mutation.ClientPlatform(); !ok {
+		v := coinpackage.DefaultClientPlatform
+		_c.mutation.SetClientPlatform(v)
+	}
 	if _, ok := _c.mutation.StoreProductID(); !ok {
 		v := coinpackage.DefaultStoreProductID
 		_c.mutation.SetStoreProductID(v)
@@ -202,6 +220,14 @@ func (_c *CoinPackageCreate) check() error {
 	if v, ok := _c.mutation.PurchaseChannel(); ok {
 		if err := coinpackage.PurchaseChannelValidator(v); err != nil {
 			return &ValidationError{Name: "purchase_channel", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.purchase_channel": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ClientPlatform(); !ok {
+		return &ValidationError{Name: "client_platform", err: errors.New(`ent: missing required field "CoinPackage.client_platform"`)}
+	}
+	if v, ok := _c.mutation.ClientPlatform(); ok {
+		if err := coinpackage.ClientPlatformValidator(v); err != nil {
+			return &ValidationError{Name: "client_platform", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.client_platform": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Prices(); !ok {
@@ -281,6 +307,10 @@ func (_c *CoinPackageCreate) createSpec() (*CoinPackage, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PurchaseChannel(); ok {
 		_spec.SetField(coinpackage.FieldPurchaseChannel, field.TypeEnum, value)
 		_node.PurchaseChannel = value
+	}
+	if value, ok := _c.mutation.ClientPlatform(); ok {
+		_spec.SetField(coinpackage.FieldClientPlatform, field.TypeEnum, value)
+		_node.ClientPlatform = value
 	}
 	if value, ok := _c.mutation.Prices(); ok {
 		_spec.SetField(coinpackage.FieldPrices, field.TypeBytes, value)
@@ -411,6 +441,18 @@ func (u *CoinPackageUpsert) SetPurchaseChannel(v coinpackage.PurchaseChannel) *C
 // UpdatePurchaseChannel sets the "purchase_channel" field to the value that was provided on create.
 func (u *CoinPackageUpsert) UpdatePurchaseChannel() *CoinPackageUpsert {
 	u.SetExcluded(coinpackage.FieldPurchaseChannel)
+	return u
+}
+
+// SetClientPlatform sets the "client_platform" field.
+func (u *CoinPackageUpsert) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageUpsert {
+	u.Set(coinpackage.FieldClientPlatform, v)
+	return u
+}
+
+// UpdateClientPlatform sets the "client_platform" field to the value that was provided on create.
+func (u *CoinPackageUpsert) UpdateClientPlatform() *CoinPackageUpsert {
+	u.SetExcluded(coinpackage.FieldClientPlatform)
 	return u
 }
 
@@ -595,6 +637,20 @@ func (u *CoinPackageUpsertOne) SetPurchaseChannel(v coinpackage.PurchaseChannel)
 func (u *CoinPackageUpsertOne) UpdatePurchaseChannel() *CoinPackageUpsertOne {
 	return u.Update(func(s *CoinPackageUpsert) {
 		s.UpdatePurchaseChannel()
+	})
+}
+
+// SetClientPlatform sets the "client_platform" field.
+func (u *CoinPackageUpsertOne) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageUpsertOne {
+	return u.Update(func(s *CoinPackageUpsert) {
+		s.SetClientPlatform(v)
+	})
+}
+
+// UpdateClientPlatform sets the "client_platform" field to the value that was provided on create.
+func (u *CoinPackageUpsertOne) UpdateClientPlatform() *CoinPackageUpsertOne {
+	return u.Update(func(s *CoinPackageUpsert) {
+		s.UpdateClientPlatform()
 	})
 }
 
@@ -957,6 +1013,20 @@ func (u *CoinPackageUpsertBulk) SetPurchaseChannel(v coinpackage.PurchaseChannel
 func (u *CoinPackageUpsertBulk) UpdatePurchaseChannel() *CoinPackageUpsertBulk {
 	return u.Update(func(s *CoinPackageUpsert) {
 		s.UpdatePurchaseChannel()
+	})
+}
+
+// SetClientPlatform sets the "client_platform" field.
+func (u *CoinPackageUpsertBulk) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageUpsertBulk {
+	return u.Update(func(s *CoinPackageUpsert) {
+		s.SetClientPlatform(v)
+	})
+}
+
+// UpdateClientPlatform sets the "client_platform" field to the value that was provided on create.
+func (u *CoinPackageUpsertBulk) UpdateClientPlatform() *CoinPackageUpsertBulk {
+	return u.Update(func(s *CoinPackageUpsert) {
+		s.UpdateClientPlatform()
 	})
 }
 

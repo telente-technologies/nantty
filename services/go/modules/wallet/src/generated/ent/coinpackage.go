@@ -25,6 +25,8 @@ type CoinPackage struct {
 	BonusCoins int64 `json:"bonus_coins,omitempty"`
 	// PurchaseChannel holds the value of the "purchase_channel" field.
 	PurchaseChannel coinpackage.PurchaseChannel `json:"purchase_channel,omitempty"`
+	// ClientPlatform holds the value of the "client_platform" field.
+	ClientPlatform coinpackage.ClientPlatform `json:"client_platform,omitempty"`
 	// Prices holds the value of the "prices" field.
 	Prices []byte `json:"prices,omitempty"`
 	// StoreProductID holds the value of the "store_product_id" field.
@@ -49,7 +51,7 @@ func (*CoinPackage) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case coinpackage.FieldCoins, coinpackage.FieldBonusCoins, coinpackage.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case coinpackage.FieldID, coinpackage.FieldName, coinpackage.FieldPurchaseChannel, coinpackage.FieldStoreProductID:
+		case coinpackage.FieldID, coinpackage.FieldName, coinpackage.FieldPurchaseChannel, coinpackage.FieldClientPlatform, coinpackage.FieldStoreProductID:
 			values[i] = new(sql.NullString)
 		case coinpackage.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -97,6 +99,12 @@ func (_m *CoinPackage) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field purchase_channel", values[i])
 			} else if value.Valid {
 				_m.PurchaseChannel = coinpackage.PurchaseChannel(value.String)
+			}
+		case coinpackage.FieldClientPlatform:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client_platform", values[i])
+			} else if value.Valid {
+				_m.ClientPlatform = coinpackage.ClientPlatform(value.String)
 			}
 		case coinpackage.FieldPrices:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -175,6 +183,9 @@ func (_m *CoinPackage) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("purchase_channel=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PurchaseChannel))
+	builder.WriteString(", ")
+	builder.WriteString("client_platform=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClientPlatform))
 	builder.WriteString(", ")
 	builder.WriteString("prices=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Prices))

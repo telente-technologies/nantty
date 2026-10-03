@@ -99,6 +99,20 @@ func (_u *CoinPackageUpdate) SetNillablePurchaseChannel(v *coinpackage.PurchaseC
 	return _u
 }
 
+// SetClientPlatform sets the "client_platform" field.
+func (_u *CoinPackageUpdate) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageUpdate {
+	_u.mutation.SetClientPlatform(v)
+	return _u
+}
+
+// SetNillableClientPlatform sets the "client_platform" field if the given value is not nil.
+func (_u *CoinPackageUpdate) SetNillableClientPlatform(v *coinpackage.ClientPlatform) *CoinPackageUpdate {
+	if v != nil {
+		_u.SetClientPlatform(*v)
+	}
+	return _u
+}
+
 // SetPrices sets the "prices" field.
 func (_u *CoinPackageUpdate) SetPrices(v []byte) *CoinPackageUpdate {
 	_u.mutation.SetPrices(v)
@@ -213,6 +227,11 @@ func (_u *CoinPackageUpdate) check() error {
 			return &ValidationError{Name: "purchase_channel", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.purchase_channel": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ClientPlatform(); ok {
+		if err := coinpackage.ClientPlatformValidator(v); err != nil {
+			return &ValidationError{Name: "client_platform", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.client_platform": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.StoreProductID(); ok {
 		if err := coinpackage.StoreProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "store_product_id", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.store_product_id": %w`, err)}
@@ -250,6 +269,9 @@ func (_u *CoinPackageUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.PurchaseChannel(); ok {
 		_spec.SetField(coinpackage.FieldPurchaseChannel, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ClientPlatform(); ok {
+		_spec.SetField(coinpackage.FieldClientPlatform, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Prices(); ok {
 		_spec.SetField(coinpackage.FieldPrices, field.TypeBytes, value)
@@ -357,6 +379,20 @@ func (_u *CoinPackageUpdateOne) SetPurchaseChannel(v coinpackage.PurchaseChannel
 func (_u *CoinPackageUpdateOne) SetNillablePurchaseChannel(v *coinpackage.PurchaseChannel) *CoinPackageUpdateOne {
 	if v != nil {
 		_u.SetPurchaseChannel(*v)
+	}
+	return _u
+}
+
+// SetClientPlatform sets the "client_platform" field.
+func (_u *CoinPackageUpdateOne) SetClientPlatform(v coinpackage.ClientPlatform) *CoinPackageUpdateOne {
+	_u.mutation.SetClientPlatform(v)
+	return _u
+}
+
+// SetNillableClientPlatform sets the "client_platform" field if the given value is not nil.
+func (_u *CoinPackageUpdateOne) SetNillableClientPlatform(v *coinpackage.ClientPlatform) *CoinPackageUpdateOne {
+	if v != nil {
+		_u.SetClientPlatform(*v)
 	}
 	return _u
 }
@@ -488,6 +524,11 @@ func (_u *CoinPackageUpdateOne) check() error {
 			return &ValidationError{Name: "purchase_channel", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.purchase_channel": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ClientPlatform(); ok {
+		if err := coinpackage.ClientPlatformValidator(v); err != nil {
+			return &ValidationError{Name: "client_platform", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.client_platform": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.StoreProductID(); ok {
 		if err := coinpackage.StoreProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "store_product_id", err: fmt.Errorf(`ent: validator failed for field "CoinPackage.store_product_id": %w`, err)}
@@ -542,6 +583,9 @@ func (_u *CoinPackageUpdateOne) sqlSave(ctx context.Context) (_node *CoinPackage
 	}
 	if value, ok := _u.mutation.PurchaseChannel(); ok {
 		_spec.SetField(coinpackage.FieldPurchaseChannel, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ClientPlatform(); ok {
+		_spec.SetField(coinpackage.FieldClientPlatform, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Prices(); ok {
 		_spec.SetField(coinpackage.FieldPrices, field.TypeBytes, value)
