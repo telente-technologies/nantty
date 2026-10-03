@@ -1,0 +1,40 @@
+import type { HttpRouter } from "@zudojs/http";
+
+import { mountBlocksModule } from "../modules/blocks/blocks.module.js";
+import { mountChatSettingsModule } from "../modules/chatSettings/chatSettings.module.js";
+import { mountCommentsModule } from "../modules/comments/comments.module.js";
+import { mountConversationsModule } from "../modules/conversations/conversations.module.js";
+import { mountDigestsModule } from "../modules/digests/digests.module.js";
+import { mountFeedsModule } from "../modules/feeds/feeds.module.js";
+import { mountFollowsModule } from "../modules/follows/follows.module.js";
+import { mountMentionsModule } from "../modules/mentions/mentions.module.js";
+import { mountMessagesModule } from "../modules/messages/messages.module.js";
+import { mountPostsModule } from "../modules/posts/posts.module.js";
+import { mountReportsModule } from "../modules/reports/reports.module.js";
+import { mountSearchModule } from "../modules/search/search.module.js";
+import { mountSoundsModule } from "../modules/sounds/sounds.module.js";
+import { mountSavesModule } from "../modules/saves/saves.module.js";
+import { mountStreaksModule } from "../modules/streaks/streaks.module.js";
+import type { SocialDatabase } from "../databases/prisma.database.js";
+import type { HandlerContext } from "../types/handlerContext.type.js";
+import type { RouteFactory } from "../utils/route.util.js";
+import { registerHealthRoutes } from "./health.routes.js";
+
+export function registerRoutes(router: HttpRouter, route: RouteFactory, context: HandlerContext, database: SocialDatabase, internalToken: string): void {
+  registerHealthRoutes(router, database);
+  mountFollowsModule(router, route, context);
+  mountBlocksModule(router, route, context);
+  mountPostsModule(router, route, context);
+  mountCommentsModule(router, route, context);
+  mountSavesModule(router, route, context);
+  mountMentionsModule(router, route, context);
+  mountSearchModule(router, route, context);
+  mountSoundsModule(router, route, context);
+  mountFeedsModule(router, route, context);
+  mountConversationsModule(router, route, context);
+  mountMessagesModule(router, route, context);
+  mountChatSettingsModule(router, route, context);
+  mountStreaksModule(router, route, context);
+  mountReportsModule(router, route, context);
+  mountDigestsModule(router, route, context, internalToken);
+}
