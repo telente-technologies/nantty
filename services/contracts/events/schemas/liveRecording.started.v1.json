@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveRecording.started.v1.json",
+  "title": "LiveRecordingStarted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "recordingId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recordingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "hostId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

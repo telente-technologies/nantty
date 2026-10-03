@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveRecording.failed.v1.json",
+  "title": "LiveRecordingFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "recordingId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recordingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "hostId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}
