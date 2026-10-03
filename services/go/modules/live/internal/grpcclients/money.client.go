@@ -50,7 +50,7 @@ func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, reque
 		GiftTransactionId: transaction.GetGiftTransactionId(), CreditedUserId: transaction.GetCreditedUserId(), TotalCoins: transaction.GetTotalCoins(),
 		PlatformFeeCoins: transaction.GetPlatformFeeCoins(), CreatorAmountCoins: transaction.GetCreatorAmountCoins(),
 		Status: describeGiftStatus(transaction.GetStatus()), LedgerTransactionId: transaction.GetLedgerTransactionId(),
-		SenderCoinBalance: response.GetSenderCoinBalance(), CreatedAt: transaction.GetCreatedAt().AsTime(),
+		SenderCoinBalance: response.GetSenderCoinBalance(), CreatedAt: transaction.GetCreatedAt().AsTime(), Replayed: response.GetReplayed(),
 	}, nil
 }
 
@@ -97,4 +97,16 @@ func translateMoneyError(err error) error {
 		return errors.Join(ports.ErrMoneyRequestInvalid, err)
 	}
 	return err
+}
+
+func (client *MoneyClient) GetBattleGiftTotals(ctx context.Context, battleId string) ([]ports.BattleGiftTotal, error) {
+	response, err := client.service.GetBattleGiftTotals(ctx, &moneyv1.GetBattleGiftTotalsRequest{BattleId: battleId})
+	if err != nil {
+		return nil, translateMoneyError(err)
+	}
+	totals := make([]ports.BattleGiftTotal, 0, len(response.GetTotals()))
+	for _, total := range response.GetTotals() {
+		totals = append(totals, ports.BattleGiftTotal{ReceiverUserId: total.GetReceiverUserId(), GrossCoins: total.GetGrossCoins(), GiftCount: total.GetGiftCount()})
+	}
+	return totals, nil
 }
