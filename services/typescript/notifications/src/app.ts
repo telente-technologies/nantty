@@ -49,12 +49,12 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
   });
   const consumers = config.consumersEnabled
     ? [
-      new QueueConsumerJob("domainEvents", config.queues.domainEvents, container.queueClient, createDomainEventMessageHandler(container, logger), logger),
-      new QueueConsumerJob("jobs", config.queues.jobs, container.queueClient, createJobMessageHandler(container, logger), logger),
-      new QueueConsumerJob("sesFeedback", config.queues.sesFeedback, container.queueClient, createSesFeedbackMessageHandler(container, logger), logger),
+      container.broker.createConsumer("domainEvents", config.queues.domainEvents, createDomainEventMessageHandler(container, logger)),
+      container.broker.createConsumer("jobs", config.queues.jobs, createJobMessageHandler(container, logger)),
+      ...(container.sesFeedbackReader === null ? [] : [new QueueConsumerJob("sesFeedback", config.queues.sesFeedback, container.sesFeedbackReader, createSesFeedbackMessageHandler(container, logger), logger)]),
     ]
     : [];
-  const digestScheduler = config.consumersEnabled && container.runDigestBatch !== null ? new DigestSchedulerJob(container.queueClient, config.queues.jobs) : null;
+  const digestScheduler = config.consumersEnabled && container.runDigestBatch !== null ? new DigestSchedulerJob(container.broker, config.queues.jobs) : null;
   return {
     container,
     server,
@@ -68,6 +68,7 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
       digestScheduler?.stop();
       await Promise.all(consumers.map((consumer) => consumer.stop()));
       await server.stop();
+      await container.broker.close();
       await container.prisma.$disconnect();
     },
   };

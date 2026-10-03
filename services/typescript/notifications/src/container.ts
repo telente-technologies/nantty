@@ -7,11 +7,13 @@ import { IdentityHttpDirectory } from "./integrations/identityDirectory.integrat
 import { ExpoPushSender, LoggingPushSender } from "./integrations/expoPush.integration.js";
 import { SocialHttpDigestSource } from "./integrations/digestSource.integration.js";
 import { SesEmailSender } from "./integrations/sesEmail.integration.js";
-import { SqsQueueClient } from "./integrations/sqs.integration.js";
+import { RabbitMqMessageBroker } from "./integrations/rabbitMqBroker.integration.js";
+import { RabbitMqConnection } from "./integrations/rabbitMqConnection.integration.js";
+import { SqsMessageBroker, SqsQueueClient } from "./integrations/sqs.integration.js";
 import type { CampaignRepository, NoticeDraftRepository } from "./interfaces/campaignRepository.interface.js";
 import type { EmailSender } from "./interfaces/emailSender.interface.js";
 import type { IdentityDirectory } from "./interfaces/identityDirectory.interface.js";
-import type { JobQueue } from "./interfaces/jobQueue.interface.js";
+import type { JobQueue, MessageBroker, QueueReader } from "./interfaces/jobQueue.interface.js";
 import type { PushSender } from "./interfaces/pushSender.interface.js";
 import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository, SuppressionRepository } from "./interfaces/repositories.interface.js";
 import { StaffAuthenticator } from "./middlewares/staffAuth.middleware.js";
@@ -58,7 +60,8 @@ export interface ContainerOverrides {
   readonly emailSender?: EmailSender;
   readonly identity?: IdentityDirectory;
   readonly jobQueue?: JobQueue;
-  readonly queueClient?: SqsQueueClient;
+  readonly broker?: MessageBroker;
+  readonly sesFeedbackReader?: QueueReader | null;
   readonly pushSender?: PushSender;
   readonly staffAuthenticator?: StaffAuthenticator;
   readonly pause?: (milliseconds: number) => Promise<void>;
@@ -66,8 +69,9 @@ export interface ContainerOverrides {
 
 export function createContainer(config: NotificationsConfig, logger: Logger, overrides: ContainerOverrides = {}) {
   const prisma = overrides.prisma ?? createPrismaClient(config);
-  const queueClient = overrides.queueClient ?? new SqsQueueClient(config.aws.region, config.aws.endpoint);
-  const jobQueue: JobQueue = overrides.jobQueue ?? queueClient;
+  const broker = overrides.broker ?? createMessageBroker(config, logger);
+  const jobQueue: JobQueue = overrides.jobQueue ?? broker;
+  const sesFeedbackReader = overrides.sesFeedbackReader !== undefined ? overrides.sesFeedbackReader : config.queues.sesFeedback === "" ? null : new SqsQueueClient(config.aws.region, config.aws.endpoint);
   const identity: IdentityDirectory = overrides.identity ?? new IdentityHttpDirectory(config.identity.baseUrl, config.identity.internalToken);
   const emailSender: EmailSender = overrides.emailSender ?? new SesEmailSender({ region: config.aws.region, endpoint: config.aws.endpoint, fromAddress: config.email.fromAddress, configurationSet: config.email.configurationSet });
   const pushSender: PushSender = overrides.pushSender ?? (config.pushProvider === "expo" ? new ExpoPushSender() : new LoggingPushSender(logger));
@@ -94,7 +98,8 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
 
   return {
     prisma,
-    queueClient,
+    broker,
+    sesFeedbackReader,
     staffAuthenticator: overrides.staffAuthenticator ?? new StaffAuthenticator({ jwksUrl: config.auth.jwksUrl, issuer: config.auth.staffIssuer }),
     unsubscribeTokens,
     unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(unsubscribeTokens, identity),
@@ -116,7 +121,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     previewLegalNotice: new PreviewLegalNoticeHandler(drafts, legalAudience, batchSize, ratePerSecond),
     listLegalNotices: new ListLegalNoticesHandler(campaigns, drafts),
     queueLegalNotice,
-    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl }, logger),
+    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger),
     processBulkBatch: new ProcessBulkBatchHandler({ campaigns, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, pause: overrides.pause ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) }),
     deliverEmailIfStillUnread: new DeliverEmailIfStillUnreadHandler({ notifications, deliveries, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs }),
     runDigestBatch: config.digestSource === null ? null : new RunDigestBatchHandler({ source: new SocialHttpDigestSource(config.digestSource.baseUrl, config.digestSource.internalToken), identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize }),
@@ -125,3 +130,8 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
 }
 
 export type Container = ReturnType<typeof createContainer>;
+
+function createMessageBroker(config: NotificationsConfig, logger: Logger): MessageBroker {
+  if (config.messageBus === "sqs") return new SqsMessageBroker(new SqsQueueClient(config.aws.region, config.aws.endpoint), logger);
+  return new RabbitMqMessageBroker(new RabbitMqConnection(config.rabbitMq.url, "notifications", logger), config.rabbitMq.prefetch, logger);
+}

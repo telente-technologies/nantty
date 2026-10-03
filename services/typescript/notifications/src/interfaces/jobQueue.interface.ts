@@ -12,3 +12,13 @@ export interface QueueReader {
   receive(queueUrl: string, maxMessages: number, waitSeconds: number): Promise<readonly QueueMessage[]>;
   acknowledge(queueUrl: string, receiptHandle: string): Promise<void>;
 }
+
+export interface QueueConsumer {
+  start(): void;
+  stop(): Promise<void>;
+}
+
+export interface MessageBroker extends JobQueue {
+  createConsumer(name: string, queue: string, handleMessageBody: (body: string) => Promise<void>): QueueConsumer;
+  close(): Promise<void>;
+}
