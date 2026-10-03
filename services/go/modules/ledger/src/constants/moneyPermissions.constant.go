@@ -1,0 +1,12 @@
+package constants
+
+const (
+	PermissionReadLedger          = "money.ledger.read"
+	PermissionReverseJournalEntry = "money.ledger.reverse"
+	PermissionReconcileProviders  = "money.ledger.reconcile"
+	PermissionReadWithdrawals     = "money.withdrawals.read"
+	PermissionProcessWithdrawals  = "money.withdrawals.process"
+	PermissionResolveDisputes     = "money.disputes.resolve"
+	PermissionManageMonetization  = "money.monetization.manage"
+	PermissionManageCreators      = "money.creators.manage"
+)
