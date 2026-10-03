@@ -19,3 +19,6 @@ for service in $owning_services; do
   run_sql "$POSTGRES_DB" "REVOKE ALL ON SCHEMA ${service} FROM PUBLIC"
 done
 run_sql "$POSTGRES_DB" "REVOKE CREATE ON SCHEMA public FROM PUBLIC"
+
+run_sql "$POSTGRES_DB" "CREATE ROLE svc_money LOGIN PASSWORD 'svc_money_local_only' IN ROLE zudomart_readers"
+run_sql "$POSTGRES_DB" "GRANT svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators, svc_rewards TO svc_money"
