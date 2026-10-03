@@ -1055,3 +1055,17 @@ Preview rendering: the console shows a placeholder frame until the `policyUpdate
 | GET | `/api/v1/legal/policy-versions/current` | Public. `{ items: { policyVersionId, documentKey, title, versionLabel, summary, publishedAt, effectiveAt, isMaterialChange, documentUrl }[] }` |
 | GET | `/api/v1/users/me/policy-acceptances` | `{ acceptedPolicyVersionIds[] }` |
 | PUT | `/api/v1/users/me/consents` | Existing endpoint. Accepting a policy sends `policyVersionId` (webapp also keeps `policyVersion`) with `consents: {}`; the server stores an acceptance record. `422` when the version is not current. |
+
+## Chat reports
+
+Reporter side (mobile and webapp, see docs/plans.md §37): `POST /api/v1/reports` with `targetType` user, message, conversation or group, `conversationId`, `reportedUserId`, `reason`, `details`, `blockReportedUser`, `evidence[]` (`messageId`, `senderId`, `senderName`, `sentAt`, `text`, `attachments[]`), `evidenceSelection` and `evidenceHash` (SHA-256). `GET /api/v1/reports/me` lists the reporter's own reports.
+
+Permissions: `chat-reports:review` (queue, detail, dismiss, remove group), `chat-reports:legal` (escalate, retention), plus the existing `users:moderate`, `users:restrict`, `users:suspend`, `users:ban` for user actions.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/admin/chat-reports` | Query `status` (OPEN default, ALL), `targetType`, `reason`, `priority`, `search`, `page`. Child-safety first, then priority, then SLA |
+| GET | `/admin/chat-reports/:reportId` | Detail with `transcript[]` (only reporter-submitted messages, `isReportedUser`), `evidenceHash`, `isEvidenceHashVerified`, `evidenceRetainedUntil`, `spamScore { score, signals[], source }`, `decision`, `reporterOutcome`, `history` |
+| POST | `/admin/chat-reports/:reportId/actions` | `{ action: DISMISS \| WARN_USER \| RESTRICT_USER \| SUSPEND_USER \| BAN_USER \| REMOVE_GROUP \| ESCALATE_LEGAL, reason, durationDays? }`. Per-action permission, step-up for BAN_USER, REMOVE_GROUP and ESCALATE_LEGAL. 409 `REPORT_ALREADY_DECIDED`, `NO_REPORTED_USER`, `NOT_A_GROUP_REPORT`. Audited on the report and the user. Reporter is notified "We took action" or "No violation found" (not on escalation) |
+| GET | `/admin/chat-reports/retention` | `{ retentionDays, legalHoldDays, label: "LEGAL REVIEW" }` |
+| PUT | `/admin/chat-reports/retention` | `{ retentionDays (30 to 730), reason }`, `chat-reports:legal` and step-up, audited |
