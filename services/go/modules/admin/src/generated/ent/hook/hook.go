@@ -92,6 +92,18 @@ func (f StaffLoginChallengeFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffLoginChallengeMutation", m)
 }
 
+// The StaffRoleFunc type is an adapter to allow the use of ordinary
+// function as StaffRole mutator.
+type StaffRoleFunc func(context.Context, *ent.StaffRoleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StaffRoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StaffRoleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffRoleMutation", m)
+}
+
 // The StaffSessionFunc type is an adapter to allow the use of ordinary
 // function as StaffSession mutator.
 type StaffSessionFunc func(context.Context, *ent.StaffSessionMutation) (ent.Value, error)
