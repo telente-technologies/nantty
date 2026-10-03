@@ -41,6 +41,7 @@ type SettledPayment struct {
 	FailureReason         string
 	SettledAt             time.Time
 	OrderPayables         []OrderPayable
+	GroupAllocations      []SettledGroupAllocation
 	Authorization         *CardAuthorizationHandoff
 }
 

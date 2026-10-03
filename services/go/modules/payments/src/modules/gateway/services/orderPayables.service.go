@@ -73,7 +73,11 @@ func (gateway *PaymentGateway) FindCheckoutPayablesForOrder(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	siblings, err := client.OrderPayable.Query().Where(orderpayable.CheckoutID(payable.CheckoutID)).Order(ent.Asc(orderpayable.FieldCreatedAt)).All(ctx)
+	return gateway.FindPayablesForCheckout(ctx, executor, payable.CheckoutID)
+}
+
+func (gateway *PaymentGateway) FindPayablesForCheckout(ctx context.Context, executor databases.ExecutorQuerier, checkoutId string) ([]models.OrderPayable, error) {
+	siblings, err := gateway.Container.Client(executor).OrderPayable.Query().Where(orderpayable.CheckoutID(checkoutId)).Order(ent.Asc(orderpayable.FieldCreatedAt)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
