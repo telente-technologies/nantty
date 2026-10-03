@@ -2,11 +2,13 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CartItem } from "@/types";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 
 export function CartItemSummary({ item, onPress }: { item: CartItem; onPress?: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={item.product.name} onPress={onPress} style={styles.row}>
       <View style={styles.image}>
@@ -24,8 +26,8 @@ export function CartItemSummary({ item, onPress }: { item: CartItem; onPress?: (
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   image: { width: 48, height: 48, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
   text: { flex: 1, gap: 4 },
-});
+}));

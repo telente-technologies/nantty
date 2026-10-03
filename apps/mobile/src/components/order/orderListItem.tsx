@@ -2,13 +2,15 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Order } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { OrderStatusBadge } from "./orderStatusBadge";
 
 export function OrderListItem({ order, subtitle, onPress }: { order: Order; subtitle: string; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const firstItem = order.items[0];
   const extraItems = order.items.length - 1;
   return (
@@ -35,9 +37,9 @@ export function OrderListItem({ order, subtitle, onPress }: { order: Order; subt
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 8 },
   image: { width: 44, height: 44, borderRadius: 6, backgroundColor: colors.placeholder, overflow: "hidden" },
   middle: { flex: 1, gap: 4 },
   right: { alignItems: "flex-end", gap: 4 },
-});
+}));

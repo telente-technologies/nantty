@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors, palette } from "@/constants/colors.constant";
+import { darkStatusTones, useTheme, type StatusToneName } from "@/theme";
 import type { OrderStatus } from "@/types";
 
 const LOOKS: Record<OrderStatus, { label: string; background: string; text: string }> = {
@@ -14,8 +15,19 @@ const LOOKS: Record<OrderStatus, { label: string; background: string; text: stri
   disputed: { label: "Disputed", background: palette.error[50], text: colors.error },
 };
 
+const DARK_TONE_BY_STATUS: Record<OrderStatus, StatusToneName> = {
+  pending: "neutral",
+  paid: "primary",
+  shipped: "caution",
+  delivered: "success",
+  completed: "success",
+  cancelled: "error",
+  disputed: "error",
+};
+
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  const look = LOOKS[status];
+  const { isDark } = useTheme();
+  const look = { ...LOOKS[status], ...(isDark ? darkStatusTones[DARK_TONE_BY_STATUS[status]] : null) };
   return (
     <View style={[styles.badge, { backgroundColor: look.background }]}>
       <Text size={11} weight={500} lineHeight={15.4} color={look.text}>
