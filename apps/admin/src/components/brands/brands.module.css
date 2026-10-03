@@ -146,7 +146,7 @@
 
 .quote {
   padding: 10px 12px;
-  border-left: 3px solid var(--blue-300);
+  border-left: 3px solid var(--blue-200);
   background: var(--surface-sunken);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
 }
