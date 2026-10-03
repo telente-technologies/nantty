@@ -141,7 +141,8 @@ export function LineChart({ title, description, seriesLabel, points, comparisonL
       <p className="visuallyHidden" aria-live="polite">
         {activePoint ? `${activePoint.label}: ${seriesLabel} ${activePoint.formattedValue}${activeComparison ? `, ${comparisonLabel} ${activeComparison.formattedValue}` : ""}` : ""}
       </p>
-      <table className="visuallyHidden">
+      <div className="visuallyHidden">
+      <table>
         <caption>{title}</caption>
         <thead>
           <tr>
@@ -160,6 +161,7 @@ export function LineChart({ title, description, seriesLabel, points, comparisonL
           ))}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }
