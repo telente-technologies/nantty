@@ -1,0 +1,27 @@
+package models
+
+import "zudomart/modules/admin/src/types"
+
+type LoginChallengeResult struct {
+	Status         string `json:"status"`
+	ChallengeToken string `json:"challengeToken"`
+	ExpiresIn      int    `json:"expiresIn"`
+}
+
+type StaffSessionResult struct {
+	AccessToken  string          `json:"accessToken"`
+	RefreshToken string          `json:"refreshToken"`
+	ExpiresIn    int             `json:"expiresIn"`
+	TokenType    string          `json:"tokenType"`
+	Staff        types.StaffView `json:"staff"`
+}
+
+type StepUpResult struct {
+	StepUpToken string `json:"stepUpToken"`
+	ExpiresIn   int    `json:"expiresIn"`
+}
+
+type TotpEnrollment struct {
+	Secret     string `json:"secret"`
+	OtpauthUri string `json:"otpauthUri"`
+}
