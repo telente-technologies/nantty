@@ -34,10 +34,10 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     id: "live",
     tabLabel: "Live",
     icon: "videoCamera24",
-    headline: "Live shopping, like the market but from your couch",
-    description: "Join a seller's live stream, ask questions in the comments, and open the product they are showing while they talk.",
+    headline: "Live streams for shows, music, games and shopping",
+    description: "Watch creators talk, play, perform and teach, send gifts, and join the chat. When a seller is live, open the product they are showing without leaving the stream.",
     screen: "liveShoppingScreen",
-    screenAlt: "A live barber session promoted in Clips with a Watch live button and viewer count",
+    screenAlt: "A live session promoted in Clips with a Watch live button and viewer count",
   },
   {
     id: "stories",
