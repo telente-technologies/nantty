@@ -49,6 +49,6 @@ export const landingQuestions = [
   { question: "Are these the same orders as in the app?", answer: "Yes. Online orders are the marketplace orders customers place in the Zudomart app. Anything you do here shows up in the app straight away." },
   { question: "How do I add my team?", answer: "From Team, search a person's Zudomart username and pick a role. They accept in the app and sign in here with their own Zudomart account — there are no separate staff logins." },
   { question: "When do I get paid?", answer: "Buyers pay into escrow. The money moves to your available balance after the buyer confirms delivery, and you can withdraw it to your bank." },
-  { question: "How do I get the Official Store badge?", answer: "Register your brand in the Zudomart app with your trademark or CAC documents, keep your business Gold verified, then apply from Brand → Official Store in the dashboard." },
+  { question: "How do I get the Official Store badge?", answer: "Register your brand in the Zudomart app with your trademark or CAC documents, keep your business Gold verified, then apply from Brand › Official Store in the dashboard." },
   { question: "What happens if I cancel Pro or Business?", answer: "You move back to Free at the end of the period. Your products, orders and payouts keep working; only the paid tools lock until you upgrade again." },
 ];
