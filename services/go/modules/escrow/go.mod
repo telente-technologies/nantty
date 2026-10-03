@@ -7,6 +7,10 @@ require (
 	entgo.io/ent v0.14.6
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc
+	google.golang.org/grpc v1.83.2
+	google.golang.org/protobuf v1.36.12
+	zudomart/contracts v0.0.0-00010101000000-000000000000
 	zudomart/modules/ledger v0.0.0-00010101000000-000000000000
 	zudomart/modules/payments v0.0.0-00010101000000-000000000000
 	zudomart/platform v0.0.0
@@ -77,9 +81,6 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/grpc v1.83.2 // indirect
-	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -88,3 +89,5 @@ replace zudomart/platform => ../../platform
 replace zudomart/modules/ledger => ../ledger
 
 replace zudomart/modules/payments => ../payments
+
+replace zudomart/contracts => ../../../contracts
