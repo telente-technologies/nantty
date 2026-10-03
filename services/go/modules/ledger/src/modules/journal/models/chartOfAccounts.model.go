@@ -55,11 +55,11 @@ func (account AccountRef) Key() AccountKey {
 }
 
 func userOwnedLiability(code, currency, userId string) AccountRef {
-	return AccountRef{Code: code, Currency: currency, Kind: AccountKindLiability, OwnerType: "user", OwnerId: userId}
+	return AccountRef{Code: code, Currency: currency, Kind: AccountKindLiability, OwnerType: OwnerTypeUser, OwnerId: userId}
 }
 
 func platformAccount(code, currency string, kind AccountKind) AccountRef {
-	return AccountRef{Code: code, Currency: currency, Kind: kind, OwnerType: "platform", AllowNegativeBalance: true}
+	return AccountRef{Code: code, Currency: currency, Kind: kind, OwnerType: OwnerTypePlatform, AllowNegativeBalance: true}
 }
 
 func UserSpendableCoinsAccount(userId string) AccountRef {
@@ -90,36 +90,80 @@ func CoinsInCirculationAccount() AccountRef {
 	return platformAccount("platform:coinsInCirculation", CoinUnit, AccountKindAsset)
 }
 
+const (
+	OwnerTypePlatform                = "platform"
+	OwnerTypeUser                    = "user"
+	OwnerTypeProviderHeldSellerFunds = "sellerProviderHeld"
+)
+
+type AccountCustody string
+
+const (
+	CustodyProviderHeldSellerOwned AccountCustody = "providerHeldSellerOwned"
+	CustodyPlatformOwned           AccountCustody = "platformOwned"
+)
+
+func (account AccountRef) Custody() AccountCustody {
+	if account.OwnerType == OwnerTypeProviderHeldSellerFunds {
+		return CustodyProviderHeldSellerOwned
+	}
+	return CustodyPlatformOwned
+}
+
+func providerHeldSellerLiability(code, currency, sellerUserId string) AccountRef {
+	return AccountRef{Code: code, Currency: currency, Kind: AccountKindLiability, OwnerType: OwnerTypeProviderHeldSellerFunds, OwnerId: sellerUserId}
+}
+
+func SellerProviderHeldFundsAccount(sellerUserId, currency string) AccountRef {
+	return AccountRef{Code: fmt.Sprintf("seller:%s:providerHeld", sellerUserId), Currency: currency, Kind: AccountKindAsset, OwnerType: OwnerTypeProviderHeldSellerFunds, OwnerId: sellerUserId, AllowNegativeBalance: true}
+}
+
+func SellerProviderHeldFundsAccountCodeSuffix() string { return ":providerHeld" }
+
 func SellerAvailableAccount(userId, currency string) AccountRef {
-	return userOwnedLiability(fmt.Sprintf("seller:%s:available", userId), currency, userId)
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:available", userId), currency, userId)
 }
 
 func SellerPendingAccount(userId, currency string) AccountRef {
-	return userOwnedLiability(fmt.Sprintf("seller:%s:pending", userId), currency, userId)
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:pending", userId), currency, userId)
 }
 
 func SellerReservedPayoutAccount(userId, currency string) AccountRef {
-	return userOwnedLiability(fmt.Sprintf("seller:%s:reservedPayout", userId), currency, userId)
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:reservedPayout", userId), currency, userId)
+}
+
+func SellerRefundsInFlightAccount(userId, currency string) AccountRef {
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:refundsInFlight", userId), currency, userId)
 }
 
 func SellerDebtAccount(userId, currency string) AccountRef {
-	return AccountRef{Code: fmt.Sprintf("seller:%s:debt", userId), Currency: currency, Kind: AccountKindAsset, OwnerType: "user", OwnerId: userId}
+	return AccountRef{Code: fmt.Sprintf("seller:%s:debt", userId), Currency: currency, Kind: AccountKindAsset, OwnerType: OwnerTypeProviderHeldSellerFunds, OwnerId: userId}
 }
 
 func SellerEscrowAccount(sellerUserId, escrowId, currency string) AccountRef {
-	return userOwnedLiability(fmt.Sprintf("seller:%s:escrow:%s", sellerUserId, escrowId), currency, sellerUserId)
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:escrow:%s", sellerUserId, escrowId), currency, sellerUserId)
 }
 
 func SellerEscrowAccountCodePrefix(sellerUserId string) string {
 	return fmt.Sprintf("seller:%s:escrow:", sellerUserId)
 }
 
-func ProviderClearingAccount(provider, currency string) AccountRef {
-	return platformAccount(fmt.Sprintf("asset:providerClearing:%s", provider), currency, AccountKindAsset)
+func CreatorEarningsPayableAccount(userId, currency string) AccountRef {
+	return userOwnedLiability(fmt.Sprintf("creator:%s:earningsPayable", userId), currency, userId)
+}
+
+func CreatorEarningsPayableAccountCodeSuffix() string { return ":earningsPayable" }
+
+func PlatformProviderBalanceAccount(provider, currency string) AccountRef {
+	return platformAccount(fmt.Sprintf("asset:providerBalance:%s", provider), currency, AccountKindAsset)
 }
 
 func PlatformCommissionRevenueAccount(currency string) AccountRef {
 	return platformAccount("revenue:commission", currency, AccountKindRevenue)
+}
+
+func PlatformFeesUnearnedAccount(currency string) AccountRef {
+	return platformAccount("liability:platformFeesUnearned", currency, AccountKindLiability)
 }
 
 func CoinSalesRevenueAccount(currency string) AccountRef {
@@ -138,16 +182,16 @@ func PaymentProcessingFeeExpenseAccount(currency string) AccountRef {
 	return platformAccount("expense:paymentProcessingFees", currency, AccountKindExpense)
 }
 
+func RefundedProcessingFeesExpenseAccount(currency string) AccountRef {
+	return platformAccount("expense:refundedProcessingFees", currency, AccountKindExpense)
+}
+
 func RefundsPayableAccount(provider, currency string) AccountRef {
 	return platformAccount("liability:refundsPayable:"+provider, currency, AccountKindLiability)
 }
 
 func AppStoreFeeExpenseAccount(store, currency string) AccountRef {
 	return platformAccount("expense:appStoreFees:"+store, currency, AccountKindExpense)
-}
-
-func PayoutsInFlightAccount(provider, currency string) AccountRef {
-	return platformAccount("liability:payoutsInFlight:"+provider, currency, AccountKindLiability)
 }
 
 func CreatorSubscriptionRevenueAccount(currency string) AccountRef {
