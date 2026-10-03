@@ -30,7 +30,11 @@ type SettledPayment struct {
 	SubjectId             string
 	Provider              string
 	AmountMinor           int64
+	AppliedAmountMinor    int64
 	Currency              string
+	ConnectedAccountId    string
+	BeneficiaryUserId     string
+	PlatformFeeMinor      int64
 	ProviderFeeMinor      int64
 	ProviderTransactionId string
 	FailureReason         string
@@ -45,11 +49,14 @@ type PaymentPurposeHandler interface {
 
 type FinishedTransfer struct {
 	TransferId           uuid.UUID
+	Kind                 string
 	Reference            string
 	Purpose              string
 	SubjectId            string
 	Provider             string
+	BeneficiaryUserId    string
 	AmountMinor          int64
+	FeeMinor             int64
 	Currency             string
 	ProviderTransferCode string
 	FailureReason        string
@@ -84,8 +91,8 @@ type PaymentIntentView struct {
 	Provider         string     `json:"provider"`
 	Amount           MoneyView  `json:"amount"`
 	Status           string     `json:"status"`
+	CheckoutUrl      *string    `json:"checkoutUrl"`
 	AuthorizationUrl *string    `json:"authorizationUrl"`
-	AccessCode       string     `json:"accessCode,omitempty"`
 	CallbackUrl      string     `json:"callbackUrl,omitempty"`
 	RefundedAmount   MoneyView  `json:"refundedAmount"`
 	PaidAt           *time.Time `json:"paidAt"`
@@ -98,15 +105,16 @@ type MoneyView struct {
 }
 
 type CreatePaymentIntentRequest struct {
-	Purpose     string
-	OwnerUserId string
-	SubjectId   string
-	Provider    string
-	AmountMinor int64
-	Currency    string
-	Email       string
-	ReturnTo    string
-	Metadata    map[string]string
+	Purpose           string
+	OwnerUserId       string
+	SubjectId         string
+	Provider          string
+	AmountMinor       int64
+	Currency          string
+	BeneficiaryUserId string
+	PlatformFeeMinor  int64
+	ReturnTo          string
+	Metadata          map[string]string
 }
 
 type RefundRequest struct {
@@ -115,19 +123,48 @@ type RefundRequest struct {
 	Currency        string
 	Reference       string
 	Reason          string
+	FeeTopUpMinor   int64
 }
 
-type PayoutTransferInstruction struct {
-	Purpose       string
-	SubjectId     string
-	Provider      string
-	Reference     string
-	AmountMinor   int64
-	Currency      string
-	BankCode      string
-	AccountNumber string
-	AccountName   string
-	Narration     string
+type SellerPayoutInstruction struct {
+	Purpose           string
+	SubjectId         string
+	BeneficiaryUserId string
+	Reference         string
+	AmountMinor       int64
+	FeeMinor          int64
+	Currency          string
+	BankCode          string
+	AccountNumber     string
+}
+
+type PlatformTransferInstruction struct {
+	Purpose           string
+	SubjectId         string
+	BeneficiaryUserId string
+	Reference         string
+	AmountMinor       int64
+	Currency          string
+	TransferGroup     string
+	Description       string
+}
+
+type ProviderDisputeNotice struct {
+	PaymentIntentId   uuid.UUID
+	Purpose           string
+	SubjectId         string
+	BeneficiaryUserId string
+	ProviderDisputeId string
+	Status            string
+	Reason            string
+	AmountMinor       int64
+	Currency          string
+	Opened            bool
+	OccurredAt        time.Time
+}
+
+type ProviderDisputeHandler interface {
+	HandleProviderDispute(ctx context.Context, transaction *sql.Tx, notice ProviderDisputeNotice) error
 }
 
 type VerifiedStorePurchaseRecord struct {
