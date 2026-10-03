@@ -3,15 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { PlanGate } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StaffLocationChecklist } from "@/components/staff/staffLocationChecklist";
 import { ZudomartUserPicker } from "@/components/staff/zudomartUserPicker";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout } from "@/components/ui/feedback";
 import { FormErrorSummary, SelectField } from "@/components/ui/formFields";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { useToast } from "@/components/ui/toastProvider";
-import { staffRoleLabels } from "@/constants/roles.constant";
+import { staffRoleDescriptions, staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest, SellerApiRequestError } from "@/services/clientApi.service";
 import type { StaffRole } from "@/types/sellerAccess.type";
@@ -21,14 +21,6 @@ import { listRolesActorMayAssign } from "@/utils/staffEditingRules.util";
 
 import styles from "./staff.module.css";
 
-const roleDescriptions: Record<StaffRole, string> = {
-  owner: "",
-  admin: "Everything except billing and withdrawals.",
-  manager: "Runs the shop floor: register, refunds, discounts, stock, orders, customers, reports.",
-  cashier: "Register and their own shift only.",
-  inventory: "Products, stock counts and transfers.",
-  support: "Online orders, returns, disputes and customers.",
-};
 
 export function StaffInviteForm() {
   const router = useRouter();
@@ -36,7 +28,7 @@ export function StaffInviteForm() {
   const { locations, selectedLocationId } = useStoreContext();
   const { showToast } = useToast();
   const assignableRoles = listRolesActorMayAssign(sessionView?.effectiveRole ?? null);
-  const [role, setRole] = useState<StaffRole>("cashier");
+  const [role, setRole] = useState<StaffRole>("sales");
   const [selectedUser, setSelectedUser] = useState<ZudomartUserCandidate | null>(null);
   const [locationIds, setLocationIds] = useState<string[]>(selectedLocationId ? [selectedLocationId] : []);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -64,21 +56,22 @@ export function StaffInviteForm() {
   return (
     <PageStack>
       <PageHeader
-        title="Add staff"
-        description="Staff are people who already use the Zudomart app. They accept your request in the app and sign in here with their own Zudomart account."
-        actions={<ButtonLink href="/staff">Back to staff</ButtonLink>}
+        title="Add team member"
+        description="Team members are people who already use the Zudomart app. Search their username, pick a role, and they accept your request in the app. They sign in here with their own Zudomart account — no new passwords."
+        actions={<ButtonLink href="/staff">Back to team</ButtonLink>}
       />
+      <PlanGate feature="team">
       <form onSubmit={addZudomartUserToTeam} noValidate>
         <Panel title="New team member" actions={<Button type="submit" variant="primary" isBusy={isSubmitting}>Send team request</Button>}>
           <div className={styles.stack}>
             <FormErrorSummary messages={Object.values(fieldErrors)} />
             <ZudomartUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} searchApiPath="/seller/staff/candidates" />
-            <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as StaffRole)} options={assignableRoles.map((assignableRole) => ({ value: assignableRole, label: staffRoleLabels[assignableRole] }))} errorMessage={fieldErrors.role} hint={roleDescriptions[role]} />
+            <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as StaffRole)} options={assignableRoles.map((assignableRole) => ({ value: assignableRole, label: staffRoleLabels[assignableRole] }))} errorMessage={fieldErrors.role} hint={staffRoleDescriptions[role]} />
             <StaffLocationChecklist locations={locations} selectedLocationIds={locationIds} onChange={setLocationIds} errorMessage={fieldErrors.locationIds} />
-            {role === "cashier" ? <Callout tone="info">After they accept, set a register PIN for them from the staff list so they can unlock shared tills.</Callout> : null}
           </div>
         </Panel>
       </form>
+      </PlanGate>
     </PageStack>
   );
 }

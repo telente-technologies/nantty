@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StaffLocationChecklist } from "@/components/staff/staffLocationChecklist";
-import { StaffPinForm } from "@/components/staff/staffPinForm";
+import { StaffPermissionEditor } from "@/components/staff/staffPermissionEditor";
 import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
 import { SelectField } from "@/components/ui/formFields";
@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
+import type { SellerPermission } from "@/config/rolePermissions.config";
 import type { StaffRole } from "@/types/sellerAccess.type";
 import type { StaffMember } from "@/types/staff.type";
 import { canActorManageStaffMember, isStaffMemberTheSignedInActor, listRolesActorMayAssign } from "@/utils/staffEditingRules.util";
@@ -33,6 +34,7 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
   const [member, setMember] = useState(initialMember);
   const [role, setRole] = useState<StaffRole>(initialMember.role);
   const [locationIds, setLocationIds] = useState<string[]>(initialMember.locationIds);
+  const [customPermissions, setCustomPermissions] = useState<SellerPermission[] | null>(initialMember.permissions);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<"save" | "status" | "remove" | null>(null);
   const [isConfirmingRemoval, setIsConfirmingRemoval] = useState(false);
@@ -62,13 +64,14 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
       return;
     }
     setLocationError(null);
-    const body = { role, locationIds };
+    const havePermissionsChanged = JSON.stringify(customPermissions) !== JSON.stringify(member.permissions);
+    const body = havePermissionsChanged ? { role, locationIds, permissions: customPermissions } : { role, locationIds };
     await sendStaffChange("save", () => sendSellerApiRequest<StaffMember>(`/seller/staff/${encodeURIComponent(member.id)}`, { method: "PATCH", body }), `Saved ${member.name}.`);
   }
 
   async function toggleSuspension() {
     const nextStatus = member.status === "suspended" ? "active" : "suspended";
-    await sendStaffChange("status", () => sendSellerApiRequest<StaffMember>(`/seller/staff/${encodeURIComponent(member.id)}`, { method: "PATCH", body: { status: nextStatus } }), nextStatus === "suspended" ? `${member.name} is suspended and signed out of registers.` : `${member.name} can work again.`);
+    await sendStaffChange("status", () => sendSellerApiRequest<StaffMember>(`/seller/staff/${encodeURIComponent(member.id)}`, { method: "PATCH", body: { status: nextStatus } }), nextStatus === "suspended" ? `${member.name} is suspended.` : `${member.name} can work again.`);
   }
 
   async function removeStaffMember() {
@@ -85,7 +88,7 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
     <ModalDialog
       isOpen
       onClose={onClose}
-      width="medium"
+      width="large"
       title={member.name}
       description={`@${member.username}`}
       footer={
@@ -98,21 +101,15 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
       }
     >
       <div className={styles.stack}>
-        {member.role === "owner" ? <Callout tone="info">The owner&apos;s role and access cannot be changed. You can still set their register PIN.</Callout> : null}
+        {member.role === "owner" ? <Callout tone="info">The owner&apos;s role and access cannot be changed.</Callout> : null}
         {isSelf && member.role !== "owner" ? <Callout tone="info">You cannot change your own role or status. Ask the store owner.</Callout> : null}
-        {!canManage && !isSelf && member.role !== "owner" ? <Callout tone="info">Only the store owner can change an admin.</Callout> : null}
+        {!canManage && !isSelf && member.role !== "owner" ? <Callout tone="info">Only the store owner can change a manager.</Callout> : null}
         <div className={styles.twoColumns}>
           <SelectField label="Role" value={role} disabled={!canManage} onChange={(event) => setRole(event.target.value as StaffRole)} options={roleOptions} />
         </div>
         <StaffLocationChecklist locations={locations} selectedLocationIds={locationIds} onChange={setLocationIds} errorMessage={locationError} />
         <hr className={styles.divider} />
-        <StaffPinForm
-          member={member}
-          onChanged={(updated) => {
-            setMember(updated);
-            onMemberChanged();
-          }}
-        />
+        <StaffPermissionEditor role={role} customPermissions={customPermissions} canManageMember={canManage} onCustomPermissionsChange={setCustomPermissions} />
         {canManage ? (
           <>
             <hr className={styles.divider} />

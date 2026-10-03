@@ -20,12 +20,14 @@ import { buildDateRangeEndingToday, formatDateTimeForDisplay } from "@/utils/dat
 
 const actionAreaOptions = [
   { value: "", label: "All activity" },
-  { value: "pos.", label: "Register" },
   { value: "inventory.", label: "Stock" },
-  { value: "staff.", label: "Staff" },
+  { value: "staff.", label: "Team" },
   { value: "settings.", label: "Settings" },
   { value: "location.", label: "Locations" },
-  { value: "register.", label: "Registers" },
+  { value: "storefront.", label: "Storefront" },
+  { value: "developer.", label: "API & webhooks" },
+  { value: "security.", label: "Security" },
+  { value: "integration.", label: "Integrations" },
   { value: "order.", label: "Orders" },
   { value: "payout.", label: "Payouts" },
   { value: "subscription.", label: "Billing" },
