@@ -39,7 +39,7 @@ export function useUsernameAvailability(username: string, currentUsername?: stri
           : availability.data?.available
             ? `@${debouncedUsername} is available`
             : availability.data?.reason
-              ? USERNAME_UNAVAILABLE_MESSAGES[availability.data.reason]
+              ? availability.data.message ?? USERNAME_UNAVAILABLE_MESSAGES[availability.data.reason]
               : null;
   return { isAvailable: settled && formatIsValid && !unchanged && availability.data?.available === true, message, checking: !settled };
 }
