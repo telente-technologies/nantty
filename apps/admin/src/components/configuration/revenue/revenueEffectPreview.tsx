@@ -30,7 +30,7 @@ export function RevenueEffectPreview({ rules }: { readonly rules: RevenueRulesCo
   const creatorGiftMinor = applyBasisPointsToMinorAmount(giftValueMinor, rules.giftCreatorShareBasisPoints);
   const transferFeeCoins = Math.ceil((giftCoins * rules.coinTransferFeeBasisPoints) / 10_000);
   const effectiveOrderTotal = orderTotal && orderTotal.currency === currency ? orderTotal : moneyOf((coinValue?.amountMinor ?? 100) * 5_000, currency);
-  const commissionMinor = applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.marketplaceCommission.defaultBasisPoints);
+  const escrowFeeMinor = applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.escrowFee.defaultBasisPoints);
 
   return (
     <Card title="Effect preview (unsaved values included)">
@@ -46,8 +46,8 @@ export function RevenueEffectPreview({ rules }: { readonly rules: RevenueRulesCo
           { label: `Creator receives (${formatBasisPointsAsPercent(rules.giftCreatorShareBasisPoints)})`, value: formatMoneyForDisplay(moneyOf(creatorGiftMinor, currency)) },
           { label: "Zudomart keeps from the gift", value: formatMoneyForDisplay(moneyOf(giftValueMinor - creatorGiftMinor, currency)) },
           { label: `Fee if these coins are transferred (${formatBasisPointsAsPercent(rules.coinTransferFeeBasisPoints)})`, value: `${formatWholeNumber(transferFeeCoins)} coins` },
-          { label: `Commission on this order (${formatBasisPointsAsPercent(rules.marketplaceCommission.defaultBasisPoints)} default)`, value: formatMoneyForDisplay(moneyOf(commissionMinor, currency)) },
-          { label: "Seller receives before withdrawal fee", value: formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor - commissionMinor, currency)) },
+          { label: `Escrow fee on this order (${formatBasisPointsAsPercent(rules.escrowFee.defaultBasisPoints)}, no commission)`, value: formatMoneyForDisplay(moneyOf(escrowFeeMinor, currency)) },
+          { label: "Seller receives before withdrawal fee", value: formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor - escrowFeeMinor, currency)) },
           { label: `Creator share of ${formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor, currency))} ad revenue`, value: formatMoneyForDisplay(moneyOf(applyBasisPointsToMinorAmount(effectiveOrderTotal.amountMinor, rules.creatorAdShareBasisPoints), currency)) },
         ]}
       />

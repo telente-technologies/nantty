@@ -5,7 +5,6 @@ import type { RevenueRulesConfiguration } from "@/types/platformConfiguration.ty
 import { formatBasisPointsAsPercent } from "@/utils/formatting.util";
 
 import { BasisPointsField, MoneyPerCurrencyEditor } from "../shared/configurationFields";
-import { CommissionOverridesEditor } from "./commissionOverridesEditor";
 import { RevenueEffectPreview } from "./revenueEffectPreview";
 import styles from "./revenueRules.module.css";
 
@@ -29,11 +28,12 @@ export function RevenueRulesEditor({ rules, canWrite, onChange }: RevenueRulesEd
           </div>
           <MoneyPerCurrencyEditor label="Value of one coin" amounts={rules.coinUnitValues} supportedCurrencies={currencies} isDisabled={isDisabled} onChange={(coinUnitValues) => onChange((current) => ({ ...current, coinUnitValues }))} />
         </Card>
-        <Card title="Marketplace commission">
+        <Card title="Escrow fee">
           <div className={styles.grid}>
-            <BasisPointsField label="Default commission" basisPoints={rules.marketplaceCommission.defaultBasisPoints} maximumBasisPoints={3000} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, marketplaceCommission: { ...current.marketplaceCommission, defaultBasisPoints: value } }))} />
+            <BasisPointsField label="Escrow fee (Free and Pro)" hint="Paid by the seller on escrow orders, including shipping. Zudomart takes no commission on products." basisPoints={rules.escrowFee.defaultBasisPoints} maximumBasisPoints={500} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, escrowFee: { ...current.escrowFee, defaultBasisPoints: value } }))} />
+            <BasisPointsField label="Escrow fee (Business plan)" basisPoints={rules.escrowFee.businessPlanBasisPoints} maximumBasisPoints={500} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, escrowFee: { ...current.escrowFee, businessPlanBasisPoints: value } }))} />
           </div>
-          <CommissionOverridesEditor overrides={rules.marketplaceCommission.categoryOverrides} canWrite={canWrite} onChange={(categoryOverrides) => onChange((current) => ({ ...current, marketplaceCommission: { ...current.marketplaceCommission, categoryOverrides } }))} />
+          <NoticeBanner tone="info">Direct payments from verified stores carry no Zudomart fee. The seller covers only Paystack's processing fee.</NoticeBanner>
         </Card>
         <Card title="Withdrawal fee">
           <SelectField label="How the fee is set" value={rules.withdrawalFee.mode} disabled options={[{ value: "PASS_THROUGH", label: "Pass through the payment provider's fee" }]} />
