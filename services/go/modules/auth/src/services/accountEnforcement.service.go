@@ -22,14 +22,14 @@ type AccountEnforcementService struct {
 }
 
 func (service AccountEnforcementService) SuspendAccountAndRevokeSessions(ctx context.Context, accountId uuid.UUID) error {
-	return service.changeStatusAndRevokeSessions(ctx, accountId, account.StatusSuspended, "account.suspended", true)
+	return service.changeStatusAndRevokeSessions(ctx, accountId, account.StatusSuspended, "suspended", true)
 }
 
 func (service AccountEnforcementService) ReinstateAccount(ctx context.Context, accountId uuid.UUID) error {
-	return service.changeStatusAndRevokeSessions(ctx, accountId, account.StatusActive, "account.reinstated", false)
+	return service.changeStatusAndRevokeSessions(ctx, accountId, account.StatusActive, "active", false)
 }
 
-func (service AccountEnforcementService) changeStatusAndRevokeSessions(ctx context.Context, accountId uuid.UUID, status account.Status, eventType string, revoke bool) error {
+func (service AccountEnforcementService) changeStatusAndRevokeSessions(ctx context.Context, accountId uuid.UUID, status account.Status, newStatus string, revoke bool) error {
 	return service.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := service.Container.Now()
 		if err := tx.Account.UpdateOneID(accountId).SetStatus(status).Exec(ctx); err != nil {
@@ -40,7 +40,7 @@ func (service AccountEnforcementService) changeStatusAndRevokeSessions(ctx conte
 				return err
 			}
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String()})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "accountStatus.changed", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String(), Status: newStatus})
 	})
 }
 
@@ -59,7 +59,7 @@ func (service AccountEnforcementService) BanAccountAndRevokeSessions(ctx context
 		if err := revokeAllActiveSessionsInTransaction(ctx, tx, accountId, now); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.banned", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String()})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "accountStatus.changed", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String(), Status: "banned"})
 	})
 }
 
@@ -103,7 +103,7 @@ func (service AccountEnforcementService) LiftBan(ctx context.Context, accountId 
 		if _, err := tx.RegistrationBlock.Update().Where(registrationblock.AccountID(accountId), registrationblock.LiftedAtIsNil()).SetLiftedAt(now).Save(ctx); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.unbanned", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String()})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "accountStatus.changed", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String(), Status: "active"})
 	})
 }
 
@@ -142,7 +142,7 @@ func (service AccountEnforcementService) MarkAccountDeleted(ctx context.Context,
 		if err := revokeAllActiveSessionsInTransaction(ctx, tx, accountId, now); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.deleted", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String()})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "accountStatus.changed", accountId.String(), now, events.AccountEnforcementEventData{AccountId: accountId.String(), Status: "deleted"})
 	})
 }
 
