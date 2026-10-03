@@ -47,6 +47,8 @@ export const adminPermissionGroups = [
     permissions: [
       { key: "moderation:reports", label: "Work the reports queue" },
       { key: "moderation:appeals", label: "Decide appeals" },
+      { key: "chat-reports:review", label: "Review chat reports and the messages reporters submit" },
+      { key: "chat-reports:legal", label: "Escalate chat reports to legal and change evidence retention" },
       { key: "copyright:review", label: "Decide copyright claims and counter-notices" },
     ],
   },
