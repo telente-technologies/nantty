@@ -12,8 +12,14 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/migrate"
 
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
+	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
+	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
+	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
+	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
 
 	"entgo.io/ent"
@@ -31,10 +37,22 @@ type Client struct {
 	Schema *migrate.Schema
 	// ChatReport is the client for interacting with the ChatReport builders.
 	ChatReport *ChatReportClient
+	// ContentReport is the client for interacting with the ContentReport builders.
+	ContentReport *ContentReportClient
+	// ContentReportEntry is the client for interacting with the ContentReportEntry builders.
+	ContentReportEntry *ContentReportEntryClient
+	// CopyrightClaim is the client for interacting with the CopyrightClaim builders.
+	CopyrightClaim *CopyrightClaimClient
+	// CounterNotice is the client for interacting with the CounterNotice builders.
+	CounterNotice *CounterNoticeClient
 	// EvidenceRetentionSetting is the client for interacting with the EvidenceRetentionSetting builders.
 	EvidenceRetentionSetting *EvidenceRetentionSettingClient
+	// IpClaim is the client for interacting with the IpClaim builders.
+	IpClaim *IpClaimClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// Strike is the client for interacting with the Strike builders.
+	Strike *StrikeClient
 	// SuspensionCase is the client for interacting with the SuspensionCase builders.
 	SuspensionCase *SuspensionCaseClient
 }
@@ -49,8 +67,14 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.ChatReport = NewChatReportClient(c.config)
+	c.ContentReport = NewContentReportClient(c.config)
+	c.ContentReportEntry = NewContentReportEntryClient(c.config)
+	c.CopyrightClaim = NewCopyrightClaimClient(c.config)
+	c.CounterNotice = NewCounterNoticeClient(c.config)
 	c.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(c.config)
+	c.IpClaim = NewIpClaimClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
+	c.Strike = NewStrikeClient(c.config)
 	c.SuspensionCase = NewSuspensionCaseClient(c.config)
 }
 
@@ -145,8 +169,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                      ctx,
 		config:                   cfg,
 		ChatReport:               NewChatReportClient(cfg),
+		ContentReport:            NewContentReportClient(cfg),
+		ContentReportEntry:       NewContentReportEntryClient(cfg),
+		CopyrightClaim:           NewCopyrightClaimClient(cfg),
+		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
+		IpClaim:                  NewIpClaimClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
+		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
 	}, nil
 }
@@ -168,8 +198,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                      ctx,
 		config:                   cfg,
 		ChatReport:               NewChatReportClient(cfg),
+		ContentReport:            NewContentReportClient(cfg),
+		ContentReportEntry:       NewContentReportEntryClient(cfg),
+		CopyrightClaim:           NewCopyrightClaimClient(cfg),
+		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
+		IpClaim:                  NewIpClaimClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
+		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
 	}, nil
 }
@@ -199,19 +235,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.ChatReport.Use(hooks...)
-	c.EvidenceRetentionSetting.Use(hooks...)
-	c.OutboxEvent.Use(hooks...)
-	c.SuspensionCase.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
+		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.OutboxEvent,
+		c.Strike, c.SuspensionCase,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.ChatReport.Intercept(interceptors...)
-	c.EvidenceRetentionSetting.Intercept(interceptors...)
-	c.OutboxEvent.Intercept(interceptors...)
-	c.SuspensionCase.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
+		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.OutboxEvent,
+		c.Strike, c.SuspensionCase,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -219,10 +261,22 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ChatReportMutation:
 		return c.ChatReport.mutate(ctx, m)
+	case *ContentReportMutation:
+		return c.ContentReport.mutate(ctx, m)
+	case *ContentReportEntryMutation:
+		return c.ContentReportEntry.mutate(ctx, m)
+	case *CopyrightClaimMutation:
+		return c.CopyrightClaim.mutate(ctx, m)
+	case *CounterNoticeMutation:
+		return c.CounterNotice.mutate(ctx, m)
 	case *EvidenceRetentionSettingMutation:
 		return c.EvidenceRetentionSetting.mutate(ctx, m)
+	case *IpClaimMutation:
+		return c.IpClaim.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
+	case *StrikeMutation:
+		return c.Strike.mutate(ctx, m)
 	case *SuspensionCaseMutation:
 		return c.SuspensionCase.mutate(ctx, m)
 	default:
@@ -363,6 +417,538 @@ func (c *ChatReportClient) mutate(ctx context.Context, m *ChatReportMutation) (V
 	}
 }
 
+// ContentReportClient is a client for the ContentReport schema.
+type ContentReportClient struct {
+	config
+}
+
+// NewContentReportClient returns a client for the ContentReport from the given config.
+func NewContentReportClient(c config) *ContentReportClient {
+	return &ContentReportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `contentreport.Hooks(f(g(h())))`.
+func (c *ContentReportClient) Use(hooks ...Hook) {
+	c.hooks.ContentReport = append(c.hooks.ContentReport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `contentreport.Intercept(f(g(h())))`.
+func (c *ContentReportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ContentReport = append(c.inters.ContentReport, interceptors...)
+}
+
+// Create returns a builder for creating a ContentReport entity.
+func (c *ContentReportClient) Create() *ContentReportCreate {
+	mutation := newContentReportMutation(c.config, OpCreate)
+	return &ContentReportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ContentReport entities.
+func (c *ContentReportClient) CreateBulk(builders ...*ContentReportCreate) *ContentReportCreateBulk {
+	return &ContentReportCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ContentReportClient) MapCreateBulk(slice any, setFunc func(*ContentReportCreate, int)) *ContentReportCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ContentReportCreateBulk{err: fmt.Errorf("calling to ContentReportClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ContentReportCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ContentReportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ContentReport.
+func (c *ContentReportClient) Update() *ContentReportUpdate {
+	mutation := newContentReportMutation(c.config, OpUpdate)
+	return &ContentReportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ContentReportClient) UpdateOne(_m *ContentReport) *ContentReportUpdateOne {
+	mutation := newContentReportMutation(c.config, OpUpdateOne, withContentReport(_m))
+	return &ContentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ContentReportClient) UpdateOneID(id uuid.UUID) *ContentReportUpdateOne {
+	mutation := newContentReportMutation(c.config, OpUpdateOne, withContentReportID(id))
+	return &ContentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ContentReport.
+func (c *ContentReportClient) Delete() *ContentReportDelete {
+	mutation := newContentReportMutation(c.config, OpDelete)
+	return &ContentReportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ContentReportClient) DeleteOne(_m *ContentReport) *ContentReportDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ContentReportClient) DeleteOneID(id uuid.UUID) *ContentReportDeleteOne {
+	builder := c.Delete().Where(contentreport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ContentReportDeleteOne{builder}
+}
+
+// Query returns a query builder for ContentReport.
+func (c *ContentReportClient) Query() *ContentReportQuery {
+	return &ContentReportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeContentReport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ContentReport entity by its id.
+func (c *ContentReportClient) Get(ctx context.Context, id uuid.UUID) (*ContentReport, error) {
+	return c.Query().Where(contentreport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ContentReportClient) GetX(ctx context.Context, id uuid.UUID) *ContentReport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ContentReportClient) Hooks() []Hook {
+	return c.hooks.ContentReport
+}
+
+// Interceptors returns the client interceptors.
+func (c *ContentReportClient) Interceptors() []Interceptor {
+	return c.inters.ContentReport
+}
+
+func (c *ContentReportClient) mutate(ctx context.Context, m *ContentReportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ContentReportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ContentReportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ContentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ContentReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ContentReport mutation op: %q", m.Op())
+	}
+}
+
+// ContentReportEntryClient is a client for the ContentReportEntry schema.
+type ContentReportEntryClient struct {
+	config
+}
+
+// NewContentReportEntryClient returns a client for the ContentReportEntry from the given config.
+func NewContentReportEntryClient(c config) *ContentReportEntryClient {
+	return &ContentReportEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `contentreportentry.Hooks(f(g(h())))`.
+func (c *ContentReportEntryClient) Use(hooks ...Hook) {
+	c.hooks.ContentReportEntry = append(c.hooks.ContentReportEntry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `contentreportentry.Intercept(f(g(h())))`.
+func (c *ContentReportEntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ContentReportEntry = append(c.inters.ContentReportEntry, interceptors...)
+}
+
+// Create returns a builder for creating a ContentReportEntry entity.
+func (c *ContentReportEntryClient) Create() *ContentReportEntryCreate {
+	mutation := newContentReportEntryMutation(c.config, OpCreate)
+	return &ContentReportEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ContentReportEntry entities.
+func (c *ContentReportEntryClient) CreateBulk(builders ...*ContentReportEntryCreate) *ContentReportEntryCreateBulk {
+	return &ContentReportEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ContentReportEntryClient) MapCreateBulk(slice any, setFunc func(*ContentReportEntryCreate, int)) *ContentReportEntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ContentReportEntryCreateBulk{err: fmt.Errorf("calling to ContentReportEntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ContentReportEntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ContentReportEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ContentReportEntry.
+func (c *ContentReportEntryClient) Update() *ContentReportEntryUpdate {
+	mutation := newContentReportEntryMutation(c.config, OpUpdate)
+	return &ContentReportEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ContentReportEntryClient) UpdateOne(_m *ContentReportEntry) *ContentReportEntryUpdateOne {
+	mutation := newContentReportEntryMutation(c.config, OpUpdateOne, withContentReportEntry(_m))
+	return &ContentReportEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ContentReportEntryClient) UpdateOneID(id uuid.UUID) *ContentReportEntryUpdateOne {
+	mutation := newContentReportEntryMutation(c.config, OpUpdateOne, withContentReportEntryID(id))
+	return &ContentReportEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ContentReportEntry.
+func (c *ContentReportEntryClient) Delete() *ContentReportEntryDelete {
+	mutation := newContentReportEntryMutation(c.config, OpDelete)
+	return &ContentReportEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ContentReportEntryClient) DeleteOne(_m *ContentReportEntry) *ContentReportEntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ContentReportEntryClient) DeleteOneID(id uuid.UUID) *ContentReportEntryDeleteOne {
+	builder := c.Delete().Where(contentreportentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ContentReportEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for ContentReportEntry.
+func (c *ContentReportEntryClient) Query() *ContentReportEntryQuery {
+	return &ContentReportEntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeContentReportEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ContentReportEntry entity by its id.
+func (c *ContentReportEntryClient) Get(ctx context.Context, id uuid.UUID) (*ContentReportEntry, error) {
+	return c.Query().Where(contentreportentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ContentReportEntryClient) GetX(ctx context.Context, id uuid.UUID) *ContentReportEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ContentReportEntryClient) Hooks() []Hook {
+	return c.hooks.ContentReportEntry
+}
+
+// Interceptors returns the client interceptors.
+func (c *ContentReportEntryClient) Interceptors() []Interceptor {
+	return c.inters.ContentReportEntry
+}
+
+func (c *ContentReportEntryClient) mutate(ctx context.Context, m *ContentReportEntryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ContentReportEntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ContentReportEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ContentReportEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ContentReportEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ContentReportEntry mutation op: %q", m.Op())
+	}
+}
+
+// CopyrightClaimClient is a client for the CopyrightClaim schema.
+type CopyrightClaimClient struct {
+	config
+}
+
+// NewCopyrightClaimClient returns a client for the CopyrightClaim from the given config.
+func NewCopyrightClaimClient(c config) *CopyrightClaimClient {
+	return &CopyrightClaimClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `copyrightclaim.Hooks(f(g(h())))`.
+func (c *CopyrightClaimClient) Use(hooks ...Hook) {
+	c.hooks.CopyrightClaim = append(c.hooks.CopyrightClaim, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `copyrightclaim.Intercept(f(g(h())))`.
+func (c *CopyrightClaimClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CopyrightClaim = append(c.inters.CopyrightClaim, interceptors...)
+}
+
+// Create returns a builder for creating a CopyrightClaim entity.
+func (c *CopyrightClaimClient) Create() *CopyrightClaimCreate {
+	mutation := newCopyrightClaimMutation(c.config, OpCreate)
+	return &CopyrightClaimCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CopyrightClaim entities.
+func (c *CopyrightClaimClient) CreateBulk(builders ...*CopyrightClaimCreate) *CopyrightClaimCreateBulk {
+	return &CopyrightClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CopyrightClaimClient) MapCreateBulk(slice any, setFunc func(*CopyrightClaimCreate, int)) *CopyrightClaimCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CopyrightClaimCreateBulk{err: fmt.Errorf("calling to CopyrightClaimClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CopyrightClaimCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CopyrightClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CopyrightClaim.
+func (c *CopyrightClaimClient) Update() *CopyrightClaimUpdate {
+	mutation := newCopyrightClaimMutation(c.config, OpUpdate)
+	return &CopyrightClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CopyrightClaimClient) UpdateOne(_m *CopyrightClaim) *CopyrightClaimUpdateOne {
+	mutation := newCopyrightClaimMutation(c.config, OpUpdateOne, withCopyrightClaim(_m))
+	return &CopyrightClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CopyrightClaimClient) UpdateOneID(id uuid.UUID) *CopyrightClaimUpdateOne {
+	mutation := newCopyrightClaimMutation(c.config, OpUpdateOne, withCopyrightClaimID(id))
+	return &CopyrightClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CopyrightClaim.
+func (c *CopyrightClaimClient) Delete() *CopyrightClaimDelete {
+	mutation := newCopyrightClaimMutation(c.config, OpDelete)
+	return &CopyrightClaimDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CopyrightClaimClient) DeleteOne(_m *CopyrightClaim) *CopyrightClaimDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CopyrightClaimClient) DeleteOneID(id uuid.UUID) *CopyrightClaimDeleteOne {
+	builder := c.Delete().Where(copyrightclaim.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CopyrightClaimDeleteOne{builder}
+}
+
+// Query returns a query builder for CopyrightClaim.
+func (c *CopyrightClaimClient) Query() *CopyrightClaimQuery {
+	return &CopyrightClaimQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCopyrightClaim},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CopyrightClaim entity by its id.
+func (c *CopyrightClaimClient) Get(ctx context.Context, id uuid.UUID) (*CopyrightClaim, error) {
+	return c.Query().Where(copyrightclaim.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CopyrightClaimClient) GetX(ctx context.Context, id uuid.UUID) *CopyrightClaim {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CopyrightClaimClient) Hooks() []Hook {
+	return c.hooks.CopyrightClaim
+}
+
+// Interceptors returns the client interceptors.
+func (c *CopyrightClaimClient) Interceptors() []Interceptor {
+	return c.inters.CopyrightClaim
+}
+
+func (c *CopyrightClaimClient) mutate(ctx context.Context, m *CopyrightClaimMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CopyrightClaimCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CopyrightClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CopyrightClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CopyrightClaimDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CopyrightClaim mutation op: %q", m.Op())
+	}
+}
+
+// CounterNoticeClient is a client for the CounterNotice schema.
+type CounterNoticeClient struct {
+	config
+}
+
+// NewCounterNoticeClient returns a client for the CounterNotice from the given config.
+func NewCounterNoticeClient(c config) *CounterNoticeClient {
+	return &CounterNoticeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `counternotice.Hooks(f(g(h())))`.
+func (c *CounterNoticeClient) Use(hooks ...Hook) {
+	c.hooks.CounterNotice = append(c.hooks.CounterNotice, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `counternotice.Intercept(f(g(h())))`.
+func (c *CounterNoticeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CounterNotice = append(c.inters.CounterNotice, interceptors...)
+}
+
+// Create returns a builder for creating a CounterNotice entity.
+func (c *CounterNoticeClient) Create() *CounterNoticeCreate {
+	mutation := newCounterNoticeMutation(c.config, OpCreate)
+	return &CounterNoticeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CounterNotice entities.
+func (c *CounterNoticeClient) CreateBulk(builders ...*CounterNoticeCreate) *CounterNoticeCreateBulk {
+	return &CounterNoticeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CounterNoticeClient) MapCreateBulk(slice any, setFunc func(*CounterNoticeCreate, int)) *CounterNoticeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CounterNoticeCreateBulk{err: fmt.Errorf("calling to CounterNoticeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CounterNoticeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CounterNoticeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CounterNotice.
+func (c *CounterNoticeClient) Update() *CounterNoticeUpdate {
+	mutation := newCounterNoticeMutation(c.config, OpUpdate)
+	return &CounterNoticeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CounterNoticeClient) UpdateOne(_m *CounterNotice) *CounterNoticeUpdateOne {
+	mutation := newCounterNoticeMutation(c.config, OpUpdateOne, withCounterNotice(_m))
+	return &CounterNoticeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CounterNoticeClient) UpdateOneID(id uuid.UUID) *CounterNoticeUpdateOne {
+	mutation := newCounterNoticeMutation(c.config, OpUpdateOne, withCounterNoticeID(id))
+	return &CounterNoticeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CounterNotice.
+func (c *CounterNoticeClient) Delete() *CounterNoticeDelete {
+	mutation := newCounterNoticeMutation(c.config, OpDelete)
+	return &CounterNoticeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CounterNoticeClient) DeleteOne(_m *CounterNotice) *CounterNoticeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CounterNoticeClient) DeleteOneID(id uuid.UUID) *CounterNoticeDeleteOne {
+	builder := c.Delete().Where(counternotice.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CounterNoticeDeleteOne{builder}
+}
+
+// Query returns a query builder for CounterNotice.
+func (c *CounterNoticeClient) Query() *CounterNoticeQuery {
+	return &CounterNoticeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCounterNotice},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CounterNotice entity by its id.
+func (c *CounterNoticeClient) Get(ctx context.Context, id uuid.UUID) (*CounterNotice, error) {
+	return c.Query().Where(counternotice.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CounterNoticeClient) GetX(ctx context.Context, id uuid.UUID) *CounterNotice {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CounterNoticeClient) Hooks() []Hook {
+	return c.hooks.CounterNotice
+}
+
+// Interceptors returns the client interceptors.
+func (c *CounterNoticeClient) Interceptors() []Interceptor {
+	return c.inters.CounterNotice
+}
+
+func (c *CounterNoticeClient) mutate(ctx context.Context, m *CounterNoticeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CounterNoticeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CounterNoticeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CounterNoticeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CounterNoticeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CounterNotice mutation op: %q", m.Op())
+	}
+}
+
 // EvidenceRetentionSettingClient is a client for the EvidenceRetentionSetting schema.
 type EvidenceRetentionSettingClient struct {
 	config
@@ -496,6 +1082,139 @@ func (c *EvidenceRetentionSettingClient) mutate(ctx context.Context, m *Evidence
 	}
 }
 
+// IpClaimClient is a client for the IpClaim schema.
+type IpClaimClient struct {
+	config
+}
+
+// NewIpClaimClient returns a client for the IpClaim from the given config.
+func NewIpClaimClient(c config) *IpClaimClient {
+	return &IpClaimClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ipclaim.Hooks(f(g(h())))`.
+func (c *IpClaimClient) Use(hooks ...Hook) {
+	c.hooks.IpClaim = append(c.hooks.IpClaim, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ipclaim.Intercept(f(g(h())))`.
+func (c *IpClaimClient) Intercept(interceptors ...Interceptor) {
+	c.inters.IpClaim = append(c.inters.IpClaim, interceptors...)
+}
+
+// Create returns a builder for creating a IpClaim entity.
+func (c *IpClaimClient) Create() *IpClaimCreate {
+	mutation := newIpClaimMutation(c.config, OpCreate)
+	return &IpClaimCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of IpClaim entities.
+func (c *IpClaimClient) CreateBulk(builders ...*IpClaimCreate) *IpClaimCreateBulk {
+	return &IpClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *IpClaimClient) MapCreateBulk(slice any, setFunc func(*IpClaimCreate, int)) *IpClaimCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &IpClaimCreateBulk{err: fmt.Errorf("calling to IpClaimClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*IpClaimCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &IpClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for IpClaim.
+func (c *IpClaimClient) Update() *IpClaimUpdate {
+	mutation := newIpClaimMutation(c.config, OpUpdate)
+	return &IpClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IpClaimClient) UpdateOne(_m *IpClaim) *IpClaimUpdateOne {
+	mutation := newIpClaimMutation(c.config, OpUpdateOne, withIpClaim(_m))
+	return &IpClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IpClaimClient) UpdateOneID(id uuid.UUID) *IpClaimUpdateOne {
+	mutation := newIpClaimMutation(c.config, OpUpdateOne, withIpClaimID(id))
+	return &IpClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for IpClaim.
+func (c *IpClaimClient) Delete() *IpClaimDelete {
+	mutation := newIpClaimMutation(c.config, OpDelete)
+	return &IpClaimDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IpClaimClient) DeleteOne(_m *IpClaim) *IpClaimDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *IpClaimClient) DeleteOneID(id uuid.UUID) *IpClaimDeleteOne {
+	builder := c.Delete().Where(ipclaim.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IpClaimDeleteOne{builder}
+}
+
+// Query returns a query builder for IpClaim.
+func (c *IpClaimClient) Query() *IpClaimQuery {
+	return &IpClaimQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeIpClaim},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a IpClaim entity by its id.
+func (c *IpClaimClient) Get(ctx context.Context, id uuid.UUID) (*IpClaim, error) {
+	return c.Query().Where(ipclaim.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IpClaimClient) GetX(ctx context.Context, id uuid.UUID) *IpClaim {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *IpClaimClient) Hooks() []Hook {
+	return c.hooks.IpClaim
+}
+
+// Interceptors returns the client interceptors.
+func (c *IpClaimClient) Interceptors() []Interceptor {
+	return c.inters.IpClaim
+}
+
+func (c *IpClaimClient) mutate(ctx context.Context, m *IpClaimMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IpClaimCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IpClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IpClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IpClaimDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown IpClaim mutation op: %q", m.Op())
+	}
+}
+
 // OutboxEventClient is a client for the OutboxEvent schema.
 type OutboxEventClient struct {
 	config
@@ -626,6 +1345,139 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 		return (&OutboxEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown OutboxEvent mutation op: %q", m.Op())
+	}
+}
+
+// StrikeClient is a client for the Strike schema.
+type StrikeClient struct {
+	config
+}
+
+// NewStrikeClient returns a client for the Strike from the given config.
+func NewStrikeClient(c config) *StrikeClient {
+	return &StrikeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `strike.Hooks(f(g(h())))`.
+func (c *StrikeClient) Use(hooks ...Hook) {
+	c.hooks.Strike = append(c.hooks.Strike, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `strike.Intercept(f(g(h())))`.
+func (c *StrikeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Strike = append(c.inters.Strike, interceptors...)
+}
+
+// Create returns a builder for creating a Strike entity.
+func (c *StrikeClient) Create() *StrikeCreate {
+	mutation := newStrikeMutation(c.config, OpCreate)
+	return &StrikeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Strike entities.
+func (c *StrikeClient) CreateBulk(builders ...*StrikeCreate) *StrikeCreateBulk {
+	return &StrikeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StrikeClient) MapCreateBulk(slice any, setFunc func(*StrikeCreate, int)) *StrikeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StrikeCreateBulk{err: fmt.Errorf("calling to StrikeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StrikeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StrikeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Strike.
+func (c *StrikeClient) Update() *StrikeUpdate {
+	mutation := newStrikeMutation(c.config, OpUpdate)
+	return &StrikeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StrikeClient) UpdateOne(_m *Strike) *StrikeUpdateOne {
+	mutation := newStrikeMutation(c.config, OpUpdateOne, withStrike(_m))
+	return &StrikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StrikeClient) UpdateOneID(id uuid.UUID) *StrikeUpdateOne {
+	mutation := newStrikeMutation(c.config, OpUpdateOne, withStrikeID(id))
+	return &StrikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Strike.
+func (c *StrikeClient) Delete() *StrikeDelete {
+	mutation := newStrikeMutation(c.config, OpDelete)
+	return &StrikeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StrikeClient) DeleteOne(_m *Strike) *StrikeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StrikeClient) DeleteOneID(id uuid.UUID) *StrikeDeleteOne {
+	builder := c.Delete().Where(strike.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StrikeDeleteOne{builder}
+}
+
+// Query returns a query builder for Strike.
+func (c *StrikeClient) Query() *StrikeQuery {
+	return &StrikeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStrike},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Strike entity by its id.
+func (c *StrikeClient) Get(ctx context.Context, id uuid.UUID) (*Strike, error) {
+	return c.Query().Where(strike.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StrikeClient) GetX(ctx context.Context, id uuid.UUID) *Strike {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StrikeClient) Hooks() []Hook {
+	return c.hooks.Strike
+}
+
+// Interceptors returns the client interceptors.
+func (c *StrikeClient) Interceptors() []Interceptor {
+	return c.inters.Strike
+}
+
+func (c *StrikeClient) mutate(ctx context.Context, m *StrikeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StrikeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StrikeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StrikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StrikeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Strike mutation op: %q", m.Op())
 	}
 }
 
@@ -765,10 +1617,13 @@ func (c *SuspensionCaseClient) mutate(ctx context.Context, m *SuspensionCaseMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ChatReport, EvidenceRetentionSetting, OutboxEvent, SuspensionCase []ent.Hook
+		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
+		EvidenceRetentionSetting, IpClaim, OutboxEvent, Strike,
+		SuspensionCase []ent.Hook
 	}
 	inters struct {
-		ChatReport, EvidenceRetentionSetting, OutboxEvent,
+		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
+		EvidenceRetentionSetting, IpClaim, OutboxEvent, Strike,
 		SuspensionCase []ent.Interceptor
 	}
 )
