@@ -21,7 +21,7 @@ export default async function DemoHostedCheckoutPage({ searchParams }: { readonl
           <ButtonLink variant="primary" href={`/billing-checkout/callback?reference=${safeReference}`}>
             Pay and return to the dashboard
           </ButtonLink>
-          <ButtonLink href="/access/billing">Cancel</ButtonLink>
+          <ButtonLink href="/settings/billing">Cancel</ButtonLink>
         </div>
       </Panel>
     </>
