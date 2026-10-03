@@ -70,6 +70,11 @@ func TermsVersion(v string) predicate.TermsAcceptance {
 	return predicate.TermsAcceptance(sql.FieldEQ(FieldTermsVersion, v))
 }
 
+// PolicyVersionID applies equality check predicate on the "policy_version_id" field. It's identical to PolicyVersionIDEQ.
+func PolicyVersionID(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldEQ(FieldPolicyVersionID, v))
+}
+
 // AcceptedAt applies equality check predicate on the "accepted_at" field. It's identical to AcceptedAtEQ.
 func AcceptedAt(v time.Time) predicate.TermsAcceptance {
 	return predicate.TermsAcceptance(sql.FieldEQ(FieldAcceptedAt, v))
@@ -228,6 +233,56 @@ func TermsVersionEqualFold(v string) predicate.TermsAcceptance {
 // TermsVersionContainsFold applies the ContainsFold predicate on the "terms_version" field.
 func TermsVersionContainsFold(v string) predicate.TermsAcceptance {
 	return predicate.TermsAcceptance(sql.FieldContainsFold(FieldTermsVersion, v))
+}
+
+// PolicyVersionIDEQ applies the EQ predicate on the "policy_version_id" field.
+func PolicyVersionIDEQ(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldEQ(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDNEQ applies the NEQ predicate on the "policy_version_id" field.
+func PolicyVersionIDNEQ(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldNEQ(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDIn applies the In predicate on the "policy_version_id" field.
+func PolicyVersionIDIn(vs ...uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldIn(FieldPolicyVersionID, vs...))
+}
+
+// PolicyVersionIDNotIn applies the NotIn predicate on the "policy_version_id" field.
+func PolicyVersionIDNotIn(vs ...uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldNotIn(FieldPolicyVersionID, vs...))
+}
+
+// PolicyVersionIDGT applies the GT predicate on the "policy_version_id" field.
+func PolicyVersionIDGT(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldGT(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDGTE applies the GTE predicate on the "policy_version_id" field.
+func PolicyVersionIDGTE(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldGTE(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDLT applies the LT predicate on the "policy_version_id" field.
+func PolicyVersionIDLT(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldLT(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDLTE applies the LTE predicate on the "policy_version_id" field.
+func PolicyVersionIDLTE(v uuid.UUID) predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldLTE(FieldPolicyVersionID, v))
+}
+
+// PolicyVersionIDIsNil applies the IsNil predicate on the "policy_version_id" field.
+func PolicyVersionIDIsNil() predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldIsNull(FieldPolicyVersionID))
+}
+
+// PolicyVersionIDNotNil applies the NotNil predicate on the "policy_version_id" field.
+func PolicyVersionIDNotNil() predicate.TermsAcceptance {
+	return predicate.TermsAcceptance(sql.FieldNotNull(FieldPolicyVersionID))
 }
 
 // AcceptedAtEQ applies the EQ predicate on the "accepted_at" field.

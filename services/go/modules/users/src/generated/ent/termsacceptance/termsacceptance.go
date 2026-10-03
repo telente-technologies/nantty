@@ -20,6 +20,8 @@ const (
 	FieldAccountID = "account_id"
 	// FieldTermsVersion holds the string denoting the terms_version field in the database.
 	FieldTermsVersion = "terms_version"
+	// FieldPolicyVersionID holds the string denoting the policy_version_id field in the database.
+	FieldPolicyVersionID = "policy_version_id"
 	// FieldAcceptedAt holds the string denoting the accepted_at field in the database.
 	FieldAcceptedAt = "accepted_at"
 	// FieldIPAddress holds the string denoting the ip_address field in the database.
@@ -36,6 +38,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldAccountID,
 	FieldTermsVersion,
+	FieldPolicyVersionID,
 	FieldAcceptedAt,
 	FieldIPAddress,
 	FieldUserAgent,
@@ -89,6 +92,11 @@ func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
 // ByTermsVersion orders the results by the terms_version field.
 func ByTermsVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTermsVersion, opts...).ToFunc()
+}
+
+// ByPolicyVersionID orders the results by the policy_version_id field.
+func ByPolicyVersionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPolicyVersionID, opts...).ToFunc()
 }
 
 // ByAcceptedAt orders the results by the accepted_at field.
