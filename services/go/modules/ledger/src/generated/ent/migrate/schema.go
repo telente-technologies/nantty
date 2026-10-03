@@ -41,6 +41,14 @@ var (
 				Name:    "journalentry_external_reference",
 				Unique:  false,
 				Columns: []*schema.Column{JournalEntriesColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "external_reference <> ''",
+				},
+			},
+			{
+				Name:    "journalentry_posted_at",
+				Unique:  false,
+				Columns: []*schema.Column{JournalEntriesColumns[8]},
 			},
 			{
 				Name:    "journalentry_kind_posted_at",
@@ -82,9 +90,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "journalline_account_id_created_at",
+				Name:    "journalline_account_id_id",
 				Unique:  false,
-				Columns: []*schema.Column{JournalLinesColumns[8], JournalLinesColumns[1]},
+				Columns: []*schema.Column{JournalLinesColumns[8], JournalLinesColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						JournalLinesColumns[0].Name: true,
+					},
+				},
 			},
 			{
 				Name:    "journalline_entry_id_line_number",
@@ -120,6 +133,14 @@ var (
 				Name:    "ledgeraccount_code_currency",
 				Unique:  true,
 				Columns: []*schema.Column{LedgerAccountsColumns[2], LedgerAccountsColumns[3]},
+			},
+			{
+				Name:    "ledgeraccount_code_pattern",
+				Unique:  false,
+				Columns: []*schema.Column{LedgerAccountsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "varchar_pattern_ops",
+				},
 			},
 			{
 				Name:    "ledgeraccount_owner_type_owner_id",
