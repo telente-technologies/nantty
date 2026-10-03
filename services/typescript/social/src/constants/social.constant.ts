@@ -1,0 +1,14 @@
+export const maximumMentionsPerContent = 20;
+export const maximumMediaPerPost = 10;
+export const maximumClipDurationSeconds = 180;
+export const defaultPageSize = 20;
+export const maximumPageSize = 100;
+export const savesPageSize = 12;
+export const chatMediaRetentionDays = 30;
+export const storyLifetimeHours = 24;
+export const reportsPerHourLimit = 5;
+export const maximumShareConversations = 20;
+export const maximumGroupMembers = 256;
+export const accountIdHeaderName = "x-zudomart-account-id";
+export const popularFeedCandidateWindowDays = 14;
+export const popularFeedCandidateLimit = 300;
