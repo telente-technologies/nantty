@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
@@ -20,6 +21,7 @@ import (
 	"zudomart/modules/payments/src/container"
 	"zudomart/modules/payments/src/integrations"
 	"zudomart/modules/payments/src/interfaces"
+	"zudomart/modules/payments/src/repositories"
 	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/servicemodule"
@@ -30,7 +32,8 @@ type MoneyHarness struct {
 	Database     *sql.DB
 	LedgerSchema string
 	Ledger       *ledgerservices.Ledger
-	Paystack     *FakePaystack
+	Bachs        *FakeBachs
+	Directory    *PermissiveAccountDirectory
 	Tokens       *moneytesting.TestTokenAuthority
 	Publisher    *events.RecordingPublisher
 	Payments     *paymentsrc.Module
@@ -45,16 +48,22 @@ func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]inter
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	harness := &MoneyHarness{
 		T: t, Database: database, LedgerSchema: ledgerSchema, Ledger: ledgerservices.NewLedgerInSchema(ledgerSchema),
-		Paystack: StartFakePaystack(t), Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
+		Bachs: StartFakeBachs(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
 		Mux:          http.NewServeMux(),
 		Dependencies: servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("money-test")},
 	}
 	settings := configs.PaymentsSettings{
 		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
-		AllowedReturnUrls: []string{"zudomart://payments/return"}, CustomerEmailDomain: "customers.zudomart.test",
+		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "bachs",
+		PlatformCommissionBps: 500, CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG",
+		OnboardingReturnUrl: "https://zudomart.test/seller/verification/return", OnboardingRefreshUrl: "https://zudomart.test/seller/verification/refresh",
+		WebSubscriptionPlanProducts: map[string]string{"premium_web": "prod_premium_web"},
 	}
-	providers := map[string]interfaces.PaymentProvider{"paystack": integrations.NewPaystackProvider(harness.Paystack.Server.URL, FakePaystackSecretKey, nil)}
-	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers})
+	bachs := integrations.NewBachsConnectProvider(integrations.BachsConnectSettings{
+		BaseUrl: harness.Bachs.Server.URL, SecretKey: FakeBachsSecretKey, WebhookSigningSecrets: []string{FakeBachsSigningSecret}, MaximumAttempts: 3,
+	})
+	providers := map[string]interfaces.ConnectProvider{"bachs": bachs}
+	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +73,23 @@ func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]inter
 	harness.Server = httptest.NewServer(harness.Mux)
 	t.Cleanup(harness.Server.Close)
 	return harness
+}
+
+type PermissiveAccountDirectory struct {
+	mutex      sync.Mutex
+	Unverified map[string]bool
+}
+
+func (directory *PermissiveAccountDirectory) FindAccountContact(_ context.Context, accountId string) (repositories.VerifiedAccountContact, bool, error) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	return repositories.VerifiedAccountContact{Email: "user-" + accountId[:min(len(accountId), 8)] + "@zudomart.test", Name: "Test User", EmailVerified: !directory.Unverified[accountId]}, true, nil
+}
+
+func (directory *PermissiveAccountDirectory) MarkUnverified(accountId string) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	directory.Unverified[accountId] = true
 }
 
 func (harness *MoneyHarness) Overrides() loaders.MoneyModuleOverrides {
