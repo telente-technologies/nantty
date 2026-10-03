@@ -56,6 +56,7 @@ func StartEscrowModuleWithSettings(ctx context.Context, settings configs.EscrowS
 	}
 	application := escrows.NewEscrowApplication(container.NewEscrowContainer(resources, settings, payments))
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeOrderCheckout, application.Escrows)
+	payments.RegisterProviderDisputeHandler(paymentconstants.PurposeOrderCheckout, application.Escrows)
 	return &Module{Application: application}, nil
 }
 
