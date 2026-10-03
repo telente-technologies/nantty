@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/businessDocument.reviewed.v1.json",
+  "title": "BusinessDocumentReviewed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "documentId",
+    "kind"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "documentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

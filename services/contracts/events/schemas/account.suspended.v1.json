@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.suspended.v1.json",
+  "title": "AccountSuspended",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "caseId",
+    "reason",
+    "reasonCode",
+    "policy",
+    "policyUrl",
+    "appealUrl",
+    "appealBy",
+    "deletionAt",
+    "until"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "caseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "reasonCode": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "string"
+    },
+    "policyUrl": {
+      "type": "string"
+    },
+    "appealUrl": {
+      "type": "string"
+    },
+    "appealBy": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deletionAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "until": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  }
+}

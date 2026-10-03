@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.restricted.v1.json",
+  "title": "AccountRestricted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "caseId",
+    "reason",
+    "policy",
+    "policyUrl",
+    "appealUrl",
+    "restrictions",
+    "until"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "caseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "string"
+    },
+    "policyUrl": {
+      "type": "string"
+    },
+    "appealUrl": {
+      "type": "string"
+    },
+    "restrictions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

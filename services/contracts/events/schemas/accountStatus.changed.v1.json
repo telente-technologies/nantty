@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/accountStatus.changed.v1.json",
+  "title": "AccountStatusChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "status"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "suspended",
+        "banned",
+        "deactivated",
+        "deleted"
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adMedia.uploaded.v1.json",
+  "title": "AdMediaUploaded",
+  "description": "An advertiser finished uploading a creative file to S3. The media pipeline transcodes it and reports back with POST /internal/v1/ads/media/{mediaId}/processed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mediaId", "accountId", "objectKey", "mimeType", "kind", "sizeBytes"],
+  "properties": {
+    "mediaId": { "type": "string", "format": "uuid" },
+    "accountId": { "type": "string", "format": "uuid" },
+    "objectKey": { "type": "string" },
+    "mimeType": { "type": "string" },
+    "kind": { "enum": ["image", "video"] },
+    "sizeBytes": { "type": "integer", "minimum": 1 }
+  }
+}

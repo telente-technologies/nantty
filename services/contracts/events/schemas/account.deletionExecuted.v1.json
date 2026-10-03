@@ -87,6 +87,12 @@
           }
         }
       }
+    },
+    "finalEmail": {
+      "type": "string"
+    },
+    "referenceId": {
+      "type": "string"
     }
   }
 }

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adReport.ready.v1.json",
+  "title": "AdReportReady",
+  "description": "A scheduled Ads Manager report was generated. Notifications emails every recipient a summary and the expiring CSV and PDF links.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scheduledReportId", "accountId", "reportName", "recipients", "frequency", "periodFrom", "periodTo", "currency", "spendMinor", "impressions", "clicks"],
+  "properties": {
+    "scheduledReportId": { "type": "string", "format": "uuid" },
+    "accountId": { "type": "string", "format": "uuid" },
+    "reportName": { "type": "string" },
+    "recipients": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "type": "string", "format": "email" } },
+    "frequency": { "enum": ["daily", "weekly", "monthly"] },
+    "periodFrom": { "type": "string", "format": "date" },
+    "periodTo": { "type": "string", "format": "date" },
+    "currency": { "type": "string" },
+    "spendMinor": { "type": "integer" },
+    "impressions": { "type": "integer" },
+    "clicks": { "type": "integer" },
+    "csvUrl": { "type": "string", "format": "uri" },
+    "pdfUrl": { "type": "string", "format": "uri" },
+    "urlsExpireAt": { "type": "string", "format": "date-time" }
+  }
+}
