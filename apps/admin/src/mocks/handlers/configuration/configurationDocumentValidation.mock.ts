@@ -61,13 +61,10 @@ export function validateRevenueRules(rawContent: unknown, currentContent: Revenu
   const content = readObjectAtPath(rawContent, "content");
   const supportedCurrencies = readCurrencyCodeList(content, "supportedCurrencies", "content");
   const ceiling = currentContent.giftCreatorShareCeilingBasisPoints;
-  const commission = readObjectAtPath(content.marketplaceCommission, "content.marketplaceCommission");
-  const overrides = readArrayAtPath(commission.categoryOverrides, "content.marketplaceCommission.categoryOverrides", 100).map((rawOverride, index) => {
-    const override = readObjectAtPath(rawOverride, `content.marketplaceCommission.categoryOverrides.${index}`);
-    const path = `content.marketplaceCommission.categoryOverrides.${index}`;
-    return { categorySlug: readTextValue(override, "categorySlug", path, 60, 2), categoryName: readTextValue(override, "categoryName", path, 80, 2), basisPoints: readBasisPoints(override, "basisPoints", path, 3000) };
-  });
-  if (new Set(overrides.map((override) => override.categorySlug)).size !== overrides.length) failValidation("content.marketplaceCommission.categoryOverrides", "Each category can have only one override.");
+  const escrowFee = readObjectAtPath(content.escrowFee, "content.escrowFee");
+  const escrowFeeDefaultBasisPoints = readBasisPoints(escrowFee, "defaultBasisPoints", "content.escrowFee", 500);
+  const escrowFeeBusinessBasisPoints = readBasisPoints(escrowFee, "businessPlanBasisPoints", "content.escrowFee", 500);
+  if (escrowFeeBusinessBasisPoints > escrowFeeDefaultBasisPoints) failValidation("content.escrowFee.businessPlanBasisPoints", "The Business plan escrow fee can't be higher than the default.");
   const withdrawalFee = readObjectAtPath(content.withdrawalFee, "content.withdrawalFee");
   return {
     supportedCurrencies,
@@ -77,7 +74,7 @@ export function validateRevenueRules(rawContent: unknown, currentContent: Revenu
     coinTransferFeeBasisPoints: readBasisPoints(content, "coinTransferFeeBasisPoints", "content", 5000),
     coinUnitValues: readMoneyPerCurrencyList(content, "coinUnitValues", "content", supportedCurrencies),
     withdrawalFee: { mode: readEnumFromObject(withdrawalFee, "mode", "content.withdrawalFee", ["PASS_THROUGH"] as const), note: readTextValue(withdrawalFee, "note", "content.withdrawalFee", 300, 5) },
-    marketplaceCommission: { defaultBasisPoints: readBasisPoints(commission, "defaultBasisPoints", "content.marketplaceCommission", 3000), categoryOverrides: overrides },
+    escrowFee: { defaultBasisPoints: escrowFeeDefaultBasisPoints, businessPlanBasisPoints: escrowFeeBusinessBasisPoints },
   };
 }
 

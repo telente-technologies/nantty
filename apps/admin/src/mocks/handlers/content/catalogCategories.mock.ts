@@ -71,7 +71,7 @@ export function registerCatalogCategoryMockHandlers(): void {
     const slug = readSlugOrDeriveFromName(body, name, null);
     const parentId = readParentIdOrFail(body, null);
     const reason = readRequiredReason(body);
-    const category: CatalogCategory = { id: createMockId("cat"), parentId, name, slug, iconName: readIconNameOrNull(body), isActive: true, sortOrder: listSiblings(parentId).length, productCount: 0, commissionOverrideBasisPoints: null, updatedAt: readIsoNow() };
+    const category: CatalogCategory = { id: createMockId("cat"), parentId, name, slug, iconName: readIconNameOrNull(body), isActive: true, sortOrder: listSiblings(parentId).length, productCount: 0, updatedAt: readIsoNow() };
     readCatalogMockStore().categories.push(category);
     recordMockAuditEntry(request, { action: "catalog.category_created", area: "catalog", target: auditTargetForCategory(category), reason, before: null, after: category });
     return respondWithJson(201, { item: category });

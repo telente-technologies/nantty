@@ -65,12 +65,14 @@ export function validateTrialRules(rawContent: unknown): TrialRules {
 
 export function validateCheckmarkPricing(rawContent: unknown): CheckmarkPricingRules {
   const content = readObjectAtPath(rawContent, "content");
+  const blueMonthlyPrice = readMoneyValue(content.blueMonthlyPrice, "content.blueMonthlyPrice", ["NGN"], "NGN");
   const goldOnlyMonthlyPrice = readMoneyValue(content.goldOnlyMonthlyPrice, "content.goldOnlyMonthlyPrice", ["NGN"], "NGN");
   const blackMonthlyPrice = readMoneyValue(content.blackMonthlyPrice, "content.blackMonthlyPrice", ["NGN"], "NGN");
   if (goldOnlyMonthlyPrice.amountMinor >= 500_000) failValidation("content.goldOnlyMonthlyPrice", "Gold-only must stay cheaper than seller Pro (NGN 5,000).");
   return {
     bundleDiscountPercent: readIntegerBetween(content, "bundleDiscountPercent", "content", 0, 50),
     bundleMaximumBusinesses: readIntegerBetween(content, "bundleMaximumBusinesses", "content", 1, 20),
+    blueMonthlyPrice,
     goldOnlyMonthlyPrice,
     blackMonthlyPrice,
     blackGraceDays: readIntegerBetween(content, "blackGraceDays", "content", 0, 90),

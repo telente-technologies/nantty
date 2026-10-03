@@ -34,7 +34,7 @@ function describeLedgerAccount(accountId: string): Omit<MockLedgerAccountRecord,
   const definitions: Record<string, { name: string; kind: LedgerAccountKind }> = {
     provider_clearing: { name: "Payment provider clearing", kind: "ASSET" },
     escrow_holding: { name: "Escrow holding", kind: "LIABILITY" },
-    platform_commission: { name: "Marketplace commission", kind: "REVENUE" },
+    platform_commission: { name: "Escrow fees", kind: "REVENUE" },
     coin_float: { name: "Coins in circulation", kind: "LIABILITY" },
     coin_fees: { name: "Coin transfer and gift fees", kind: "REVENUE" },
   };
