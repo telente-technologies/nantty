@@ -69,6 +69,50 @@ channels:
         $ref: '#/components/messages/staffInvited'
       platformSettingChanged:
         $ref: '#/components/messages/platformSettingChanged'
+      liveStarted:
+        $ref: '#/components/messages/liveStarted'
+      liveEnded:
+        $ref: '#/components/messages/liveEnded'
+      liveTopSupporterSelected:
+        $ref: '#/components/messages/liveTopSupporterSelected'
+      liveViewerCountChanged:
+        $ref: '#/components/messages/liveViewerCountChanged'
+      giftSent:
+        $ref: '#/components/messages/giftSent'
+      goalProgressed:
+        $ref: '#/components/messages/goalProgressed'
+      goalCompleted:
+        $ref: '#/components/messages/goalCompleted'
+      leaderboardUpdated:
+        $ref: '#/components/messages/leaderboardUpdated'
+      guestInvited:
+        $ref: '#/components/messages/guestInvited'
+      stageUpdated:
+        $ref: '#/components/messages/stageUpdated'
+      battleCreated:
+        $ref: '#/components/messages/battleCreated'
+      battleStarted:
+        $ref: '#/components/messages/battleStarted'
+      battleScoreUpdated:
+        $ref: '#/components/messages/battleScoreUpdated'
+      battleEnded:
+        $ref: '#/components/messages/battleEnded'
+      battleWinnerCelebrated:
+        $ref: '#/components/messages/battleWinnerCelebrated'
+      battleSettled:
+        $ref: '#/components/messages/battleSettled'
+      battleCancelled:
+        $ref: '#/components/messages/battleCancelled'
+      guestJoined:
+        $ref: '#/components/messages/guestJoined'
+      guestLeft:
+        $ref: '#/components/messages/guestLeft'
+      guestRemoved:
+        $ref: '#/components/messages/guestRemoved'
+      guestMuted:
+        $ref: '#/components/messages/guestMuted'
+      guestReconnecting:
+        $ref: '#/components/messages/guestReconnecting'
 operations:
   publishAuthEvents:
     action: send
@@ -115,6 +159,33 @@ operations:
     messages:
       - $ref: '#/channels/domainEvents/messages/staffInvited'
       - $ref: '#/channels/domainEvents/messages/platformSettingChanged'
+  publishLiveEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/liveStarted'
+      - $ref: '#/channels/domainEvents/messages/liveEnded'
+      - $ref: '#/channels/domainEvents/messages/liveTopSupporterSelected'
+      - $ref: '#/channels/domainEvents/messages/liveViewerCountChanged'
+      - $ref: '#/channels/domainEvents/messages/giftSent'
+      - $ref: '#/channels/domainEvents/messages/goalProgressed'
+      - $ref: '#/channels/domainEvents/messages/goalCompleted'
+      - $ref: '#/channels/domainEvents/messages/leaderboardUpdated'
+      - $ref: '#/channels/domainEvents/messages/guestInvited'
+      - $ref: '#/channels/domainEvents/messages/stageUpdated'
+      - $ref: '#/channels/domainEvents/messages/battleCreated'
+      - $ref: '#/channels/domainEvents/messages/battleStarted'
+      - $ref: '#/channels/domainEvents/messages/battleScoreUpdated'
+      - $ref: '#/channels/domainEvents/messages/battleEnded'
+      - $ref: '#/channels/domainEvents/messages/battleWinnerCelebrated'
+      - $ref: '#/channels/domainEvents/messages/battleSettled'
+      - $ref: '#/channels/domainEvents/messages/battleCancelled'
+      - $ref: '#/channels/domainEvents/messages/guestJoined'
+      - $ref: '#/channels/domainEvents/messages/guestLeft'
+      - $ref: '#/channels/domainEvents/messages/guestRemoved'
+      - $ref: '#/channels/domainEvents/messages/guestMuted'
+      - $ref: '#/channels/domainEvents/messages/guestReconnecting'
 components:
   messages:
     accountRegistered:
@@ -292,3 +363,157 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/platformSetting.changed.v1.json' } }
+    liveStarted:
+      name: live.started
+      headers: { type: object, properties: { eventType: { const: live.started } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.started.v1.json' } }
+    liveEnded:
+      name: live.ended
+      headers: { type: object, properties: { eventType: { const: live.ended } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.ended.v1.json' } }
+    liveTopSupporterSelected:
+      name: live.topSupporterSelected
+      headers: { type: object, properties: { eventType: { const: live.topSupporterSelected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.topSupporterSelected.v1.json' } }
+    liveViewerCountChanged:
+      name: live.viewerCountChanged
+      headers: { type: object, properties: { eventType: { const: live.viewerCountChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.viewerCountChanged.v1.json' } }
+    giftSent:
+      name: gift.sent
+      headers: { type: object, properties: { eventType: { const: gift.sent } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/gift.sent.v1.json' } }
+    goalProgressed:
+      name: goal.progressed
+      headers: { type: object, properties: { eventType: { const: goal.progressed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/goal.progressed.v1.json' } }
+    goalCompleted:
+      name: goal.completed
+      headers: { type: object, properties: { eventType: { const: goal.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/goal.completed.v1.json' } }
+    leaderboardUpdated:
+      name: leaderboard.updated
+      headers: { type: object, properties: { eventType: { const: leaderboard.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/leaderboard.updated.v1.json' } }
+    guestInvited:
+      name: guest.invited
+      headers: { type: object, properties: { eventType: { const: guest.invited } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.invited.v1.json' } }
+    stageUpdated:
+      name: stage.updated
+      headers: { type: object, properties: { eventType: { const: stage.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/stage.updated.v1.json' } }
+    battleCreated:
+      name: battle.created
+      headers: { type: object, properties: { eventType: { const: battle.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.created.v1.json' } }
+    battleStarted:
+      name: battle.started
+      headers: { type: object, properties: { eventType: { const: battle.started } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.started.v1.json' } }
+    battleScoreUpdated:
+      name: battle.scoreUpdated
+      headers: { type: object, properties: { eventType: { const: battle.scoreUpdated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.scoreUpdated.v1.json' } }
+    battleEnded:
+      name: battle.ended
+      headers: { type: object, properties: { eventType: { const: battle.ended } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.ended.v1.json' } }
+    battleWinnerCelebrated:
+      name: battle.winnerCelebrated
+      headers: { type: object, properties: { eventType: { const: battle.winnerCelebrated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.winnerCelebrated.v1.json' } }
+    battleSettled:
+      name: battle.settled
+      headers: { type: object, properties: { eventType: { const: battle.settled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.settled.v1.json' } }
+    battleCancelled:
+      name: battle.cancelled
+      headers: { type: object, properties: { eventType: { const: battle.cancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battle.cancelled.v1.json' } }
+    guestJoined:
+      name: guest.joined
+      headers: { type: object, properties: { eventType: { const: guest.joined } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.joined.v1.json' } }
+    guestLeft:
+      name: guest.left
+      headers: { type: object, properties: { eventType: { const: guest.left } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.left.v1.json' } }
+    guestRemoved:
+      name: guest.removed
+      headers: { type: object, properties: { eventType: { const: guest.removed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.removed.v1.json' } }
+    guestMuted:
+      name: guest.muted
+      headers: { type: object, properties: { eventType: { const: guest.muted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.muted.v1.json' } }
+    guestReconnecting:
+      name: guest.reconnecting
+      headers: { type: object, properties: { eventType: { const: guest.reconnecting } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/guest.reconnecting.v1.json' } }
