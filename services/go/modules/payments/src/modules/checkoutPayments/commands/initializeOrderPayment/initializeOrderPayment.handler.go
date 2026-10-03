@@ -10,7 +10,7 @@ import (
 	"zudomart/modules/payments/src/modules/checkoutPayments/dtos"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/utils"
+	"zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/platform/httpserver"
 )
 
@@ -36,10 +36,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 			if !found || payable.BuyerUserId != command.BuyerUserId {
 				return dtos.PaymentInitializationDto{}, httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
 			}
+			direct := payable.PaymentMode == "direct"
+			escrowFee := int64(0)
+			if !direct {
+				escrowFee = services.EscrowFeeForAmount(payable.AmountMinor, application.Gateway.EscrowFeeBpsForSeller(ctx, payable.SellerUserId))
+			}
 			payment, err := application.Gateway.CreatePendingPaymentIntentInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
 				Purpose: constants.PurposeOrderCheckout, OwnerUserId: command.BuyerUserId, SubjectId: payable.OrderId,
 				Provider: command.Provider, AmountMinor: payable.AmountMinor, Currency: payable.Currency, ReturnTo: command.ReturnTo,
-				BeneficiaryUserId: payable.SellerUserId, PlatformFeeMinor: utils.PlatformFeeForAmount(payable.AmountMinor, application.Container.Settings.PlatformCommissionBps),
+				BeneficiaryUserId: payable.SellerUserId, PlatformFeeMinor: escrowFee, SettleToSellerSubaccount: direct,
 				Metadata: map[string]string{"checkoutId": payable.CheckoutId, "orderId": payable.OrderId, "paymentMode": payable.PaymentMode},
 			})
 			if err != nil {

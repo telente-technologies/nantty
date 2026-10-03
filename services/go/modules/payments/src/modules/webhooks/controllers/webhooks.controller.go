@@ -3,8 +3,12 @@ package controllers
 import (
 	"errors"
 	"io"
+	"net"
 	"net/http"
+	"slices"
+	"strings"
 
+	"zudomart/modules/payments/src/integrations"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/platform/httpserver"
 )
@@ -24,7 +28,23 @@ func (controller WebhooksController) readRawBody(writer http.ResponseWriter, req
 	return body, err
 }
 
+func (controller WebhooksController) sourceAllowed(request *http.Request) bool {
+	allowlist := controller.Application.Container.Settings.Paystack.WebhookIpAllowlist
+	if len(allowlist) == 0 {
+		return true
+	}
+	source := strings.TrimSpace(strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0])
+	if source == "" {
+		source, _, _ = net.SplitHostPort(request.RemoteAddr)
+	}
+	return slices.Contains(allowlist, source)
+}
+
 func (controller WebhooksController) ReceiveProviderWebhook(writer http.ResponseWriter, request *http.Request) {
+	if !controller.sourceAllowed(request) {
+		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, httpserver.ErrForbidden)
+		return
+	}
 	body, err := controller.readRawBody(writer, request)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
@@ -43,6 +63,9 @@ func (controller WebhooksController) ReceiveStoreRefundNotification(writer http.
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
 		return
+	}
+	if token := request.URL.Query().Get("token"); token != "" {
+		request.Header.Set(integrations.GooglePlayPushTokenHeader, token)
 	}
 	if err := controller.Application.Gateway.HandleSignedStoreRefundNotification(request.Context(), request.PathValue("store"), body, request.Header); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)

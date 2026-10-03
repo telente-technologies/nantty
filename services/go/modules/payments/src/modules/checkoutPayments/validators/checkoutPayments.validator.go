@@ -9,7 +9,7 @@ func ValidateInitializeOrderPaymentRequest(request dtos.InitializeOrderPaymentRe
 	collector := &ledgerutils.IssueCollector{}
 	collector.RequireLength("orderId", request.OrderId, 1, 80)
 	if request.Provider != "" {
-		collector.RequireOneOf("provider", request.Provider, "bachs")
+		collector.RequireOneOf("provider", request.Provider, "paystack")
 	}
 	collector.RequireLength("returnTo", request.ReturnTo, 0, 300)
 	return collector.Result()

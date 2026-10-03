@@ -1,0 +1,18 @@
+package routes
+
+import (
+	"net/http"
+
+	"zudomart/modules/ledger/src/middlewares"
+	"zudomart/modules/payments/src/modules/gateway"
+	"zudomart/modules/payments/src/modules/savedCards/controllers"
+)
+
+func MountSavedCardsRoutes(mux *http.ServeMux, application *gateway.Application) {
+	controller := controllers.SavedCardsController{Application: application}
+	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
+	mux.Handle("POST /api/v1/payments/saved-cards/setups", requireUser(http.HandlerFunc(controller.StartSavedCardSetup)))
+	mux.Handle("POST /api/v1/payments/saved-cards/setups/{reference}/complete", requireUser(http.HandlerFunc(controller.CompleteSavedCardSetup)))
+	mux.Handle("POST /api/v1/payments/saved-cards/charges", requireUser(http.HandlerFunc(controller.ChargeSavedCard)))
+	mux.Handle("POST /api/v1/payments/refunds/{refundId}/bank-destination", requireUser(http.HandlerFunc(controller.SubmitRefundBankDestination)))
+}
