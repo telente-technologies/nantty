@@ -94,6 +94,7 @@ type moderationHarness struct {
 	users     *fakeUsers
 	audit     *fakeAudit
 	publisher *events.RecordingPublisher
+	targets   *fakeTargets
 	database  *sql.DB
 	schema    string
 }
@@ -124,9 +125,9 @@ func startModerationAgainstFreshSchema(t *testing.T) *moderationHarness {
 	staffVerifiers := middlewares.StaffTokenVerifiers{Access: verifier(staffauth.AccessAudience), StepUp: verifier(staffauth.StepUpAudience)}
 	accessVerifier := verifier(identitytest.FakeAccountAudience)
 	settings := configs.ModerationSettings{Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, ReportsPerHour: 5, IntakeToken: strings.Repeat("m", 32)}
-	harness := &moderationHarness{t: t, tokens: tokens, users: &fakeUsers{}, audit: &fakeAudit{}, publisher: &events.RecordingPublisher{}, schema: schema}
+	harness := &moderationHarness{t: t, tokens: tokens, users: &fakeUsers{}, audit: &fakeAudit{}, publisher: &events.RecordingPublisher{}, targets: &fakeTargets{owners: map[string]string{}}, schema: schema}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), Health: health.NewRegistryForService("moderation-test")}
-	module, err := src.StartModerationModuleWithSettings(ctx, settings, harness.publisher, dependencies, src.Overrides{AccessVerifier: accessVerifier, StaffVerifiers: &staffVerifiers, Users: harness.users, Audit: harness.audit})
+	module, err := src.StartModerationModuleWithSettings(ctx, settings, harness.publisher, dependencies, src.Overrides{AccessVerifier: accessVerifier, StaffVerifiers: &staffVerifiers, Users: harness.users, Audit: harness.audit, Targets: harness.targets})
 	if err != nil {
 		t.Fatal(err)
 	}
