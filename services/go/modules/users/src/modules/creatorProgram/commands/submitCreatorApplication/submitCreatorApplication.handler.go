@@ -114,7 +114,10 @@ func (handler Handler) store(ctx context.Context, command Command, personal *ent
 		if err := tx.Profile.UpdateOne(personal).SetCreatorStatus(creatorStatus).Exec(ctx); err != nil {
 			return err
 		}
-		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, "creatorApplication.submitted", personal.AccountID.String(), now, usersevents.CreatorApplicationSubmittedEventData{AccountId: personal.AccountID.String(), ProfileId: personal.ID.String()}); err != nil {
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, "creatorApplication.submitted", personal.AccountID.String(), now, usersevents.CreatorApplicationSubmittedEventData{AccountId: personal.AccountID.String(), ApplicationId: created.ID.String(), DecisionWithinDays: 2}); err != nil {
+			return err
+		}
+		if err := services.EnqueueCreatorNoticeInTransaction(ctx, tx, now, created, personal, eligibility.Requirements); err != nil {
 			return err
 		}
 		if status == creatorapplication.StatusPending {
