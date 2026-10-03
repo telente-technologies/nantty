@@ -80,6 +80,18 @@ func (f ReconciliationRunFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReconciliationRunMutation", m)
 }
 
+// The SellerCreditMaturityFunc type is an adapter to allow the use of ordinary
+// function as SellerCreditMaturity mutator.
+type SellerCreditMaturityFunc func(context.Context, *ent.SellerCreditMaturityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerCreditMaturityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerCreditMaturityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerCreditMaturityMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 
