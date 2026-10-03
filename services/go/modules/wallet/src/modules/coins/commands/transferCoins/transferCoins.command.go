@@ -1,0 +1,7 @@
+package transfercoins
+
+import "zudomart/modules/wallet/src/modules/coins/services"
+
+type Command struct {
+	Input services.CoinTransferInput
+}
