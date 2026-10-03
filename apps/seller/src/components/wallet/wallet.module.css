@@ -140,3 +140,95 @@
   flex-direction: column;
   gap: 14px;
 }
+
+.panelLink {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.releaseList {
+  display: flex;
+  flex-direction: column;
+}
+
+.releaseRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.releaseRow:last-child {
+  border-bottom: 0;
+}
+
+.releaseMain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.titleWithBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sideStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.primaryCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--blue-500);
+  background: var(--blue-tint);
+  color: var(--blue-800);
+  font-weight: 600;
+}
+
+.chipCount {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1000px) {
+  .overviewGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

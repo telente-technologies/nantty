@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 
+import { payoutStatusPresentation } from "@/components/wallet/walletPresentation.constant";
 import { WalletTabs } from "@/components/wallet/walletTabs";
 import { WithdrawConfirmationDialog } from "@/components/wallet/withdrawConfirmationDialog";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
@@ -23,7 +24,6 @@ import { convertMinorUnitsToMajorInputText } from "@/utils/money.util";
 
 import styles from "./wallet.module.css";
 
-const payoutStatusTone = { processing: "info", paid: "success", failed: "error" } as const;
 
 export function WithdrawView() {
   const { can } = useSellerSession();
@@ -32,7 +32,7 @@ export function WithdrawView() {
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const settingsQuery = useSellerQuery<WalletPayoutSettings>("/seller/wallet/payout-settings");
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
-  const payoutsQuery = useSellerQuery<CursorPage<Payout>>("/seller/wallet/payouts", { limit: 10 });
+  const payoutsQuery = useSellerQuery<CursorPage<Payout>>("/seller/wallet/payouts", { limit: 50 });
   const [amountText, setAmountText] = useState("");
   const [amountMinor, setAmountMinor] = useState<number | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState("");
@@ -53,7 +53,7 @@ export function WithdrawView() {
     const errorMessage = balancesQuery.errorMessage ?? settingsQuery.errorMessage ?? accountsQuery.errorMessage;
     return (
       <PageStack>
-        <PageHeader title="Withdraw" />
+        <PageHeader title="Withdraw & payouts" />
         <WalletTabs />
         {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : <LoadingBlock />}
       </PageStack>
@@ -101,7 +101,7 @@ export function WithdrawView() {
 
   return (
     <PageStack>
-      <PageHeader title="Withdraw" description={payoutSettings.schedule} />
+      <PageHeader title="Withdraw & payouts" description={payoutSettings.schedule} actions={<ButtonLink href="/settings/payouts">Payout preferences</ButtonLink>} />
       <WalletTabs />
       {!canWithdraw ? <Callout tone="info" title="Only the store owner can withdraw">You can see payouts here, but moving money out needs the owner.</Callout> : null}
       {canWithdraw && accounts.length === 0 ? (
@@ -130,9 +130,9 @@ export function WithdrawView() {
       {isConfirming && selectedAccount && amountMinor !== null ? (
         <WithdrawConfirmationDialog isOpen amount={{ amountMinor, currency: balances.available.currency }} fee={payoutSettings.fee} account={selectedAccount} isSubmitting={isSubmitting} errorMessage={submitError} onCancel={() => setIsConfirming(false)} onConfirm={() => void submitConfirmedWithdrawal()} />
       ) : null}
-      <Panel padded={false} title="Recent payouts">
+      <Panel padded={false} title="Payout history">
         <DataTable
-          caption="Recent payouts"
+          caption="Payout history"
           rows={payoutsQuery.data?.data ?? null}
           readRowKey={(payout) => payout.id}
           isLoading={payoutsQuery.isLoading}
@@ -141,7 +141,8 @@ export function WithdrawView() {
             { key: "requested", header: "Requested", render: (payout) => formatDateTimeForDisplay(payout.requestedAt) },
             { key: "account", header: "To", render: (payout) => payout.accountSummary },
             { key: "reference", header: "Reference", hideBelowTablet: true, render: (payout) => <span className={styles.muted}>{payout.reference}</span> },
-            { key: "status", header: "Status", render: (payout) => <StatusBadge tone={payoutStatusTone[payout.status]}>{payout.status === "paid" ? "Paid" : payout.status === "processing" ? "Processing" : "Failed"}</StatusBadge> },
+            { key: "status", header: "Status", render: (payout) => <StatusBadge tone={payoutStatusPresentation[payout.status].tone}>{payoutStatusPresentation[payout.status].label}</StatusBadge> },
+            { key: "fee", header: "Fee", align: "end", hideBelowTablet: true, render: (payout) => formatMoney(payout.fee) },
             { key: "amount", header: "Amount", align: "end", render: (payout) => formatMoney(payout.amount) },
           ]}
         />

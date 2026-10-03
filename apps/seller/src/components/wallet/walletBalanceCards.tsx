@@ -14,14 +14,14 @@ export function WalletBalanceCards({ balances }: { readonly balances: WalletBala
         <p className={styles.balanceLabel}>In escrow</p>
         <p className={styles.balanceAmount}>{formatMoney(balances.escrow)}</p>
         <p className={styles.balanceExplanation}>
-          Buyers paid for these online orders. Zudomart holds the money until the buyer confirms delivery
+          Buyers paid for these app orders. Zudomart holds the money until the buyer confirms delivery
           {balances.nextEscrowReleaseAt ? `; the next release is due ${formatDateTimeForDisplay(balances.nextEscrowReleaseAt)}` : ""}.
         </p>
       </section>
       <section className={styles.balanceCard} aria-label="Pending balance">
-        <p className={styles.balanceLabel}>Pending</p>
+        <p className={styles.balanceLabel}>Pending settlement</p>
         <p className={styles.balanceAmount}>{formatMoney(balances.pending)}</p>
-        <p className={styles.balanceExplanation}>Released from escrow or settled from the register, and clearing before you can withdraw it.</p>
+        <p className={styles.balanceExplanation}>Released from escrow and clearing before you can withdraw it.</p>
       </section>
       <section className={`${styles.balanceCard} ${styles.balanceCardAvailable}`} aria-label="Available balance">
         <p className={styles.balanceLabel}>Available</p>
