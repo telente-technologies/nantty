@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@zudomart/design-tokens": "workspace:*",
+    "@zudomart/email-templates": "workspace:*",
     "@zudomart/web-kit": "workspace:*",
     "next": "^16.3.6",
     "react": "^19.3.0",

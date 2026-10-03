@@ -665,9 +665,6 @@ interface RevenueRulesConfiguration {
   coinUnitValues: Money[];                      // value of one coin per currency (one entry per currency)
   withdrawalFee: { mode: "PASS_THROUGH"; note: string }; // provider fee passed through, no margin
   marketplaceCommission: { defaultBasisPoints: number; categoryOverrides: { categorySlug: string; categoryName: string; basisPoints: number }[] }; // max 3000, unique slugs
-  loyalty: { isEnabled: boolean; pointsPerMajorUnitSpent: number; pointExpiryDays: number };   // 0–100, 30–1095
-  cashback: { isEnabled: boolean; rateBasisPoints: number; capsPerOrder: Money[]; expiryDays: number }; // ≤2000, 7–365
-  referral: { isEnabled: boolean; referrerRewards: Money[]; refereeRewards: Money[]; qualifyingOrderMinimums: Money[]; maximumReferralsPerMonth: number };
 }
 ```
 
@@ -874,3 +871,187 @@ Read: `support:tickets` or `support:assign`. Write: `support:assign`. Allowed va
 | DELETE | `/api/v1/admin/support/macros/{macroId}` | — | `204` | `support.macro_deleted` |
 
 Errors: `400 VALIDATION_FAILED` (unknown variable, lengths, category), `403 FORBIDDEN`, `404 NOT_FOUND`.
+
+## Suspensions (trust & safety)
+
+Permission: `users:moderate`. **Every write needs step-up** (`X-Admin-Step-Up`) and writes an audit entry. The intelligence service only suggests; no endpoint lets it suspend. Deletion policy: 120 days after suspension the profile, posts, media and messages are deleted and order/payment records are anonymised and kept for the legal period. Reinstating before then stops the clock.
+
+`SuspensionCaseSummary`: `{ id, user: PlatformUserSummary, source: "PYTHON_SUGGESTION"|"USER_REPORTS", status: "PENDING"|"ESCALATED"|"SUSPENDED"|"DISMISSED", riskScore (0-100), topSignals[], reportCount, createdAt }`. `SuspensionCaseDetail` adds `signals[{label,weight,detail}]`, `evidence[{label,href}]`, `reports[{id,reason,excerpt,reportedAt}]`, `modelVersion`, `decision`, `history`. `SuspendedAccount`: `{ caseId, user, reasonCode, note, suspendedAt, suspendedByName, deletionDueAt, daysUntilDeletion, appeal: { id, status: "PENDING"|"UPHELD"|"OVERTURNED", message, submittedAt, decisionNote }|null }`. Reason codes: `FRAUD|SCAM|COUNTERFEIT|HARASSMENT|IMPERSONATION|SPAM_NETWORK|OTHER`.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/suspensions/cases` | `status=OPEN|DECIDED|ALL|<status>`, `source?`, `search?`, `page` | `PagedList<SuspensionCaseSummary>` by risk score | — |
+| GET | `/api/v1/admin/suspensions/cases/{caseId}` | — | `SuspensionCaseDetail` | — |
+| POST | `/api/v1/admin/suspensions/cases/{caseId}/approve` | `{ reasonCode, reason (note, 5–1000) }` | `SuspensionCaseDetail`; user becomes SUSPENDED, deletion clock starts | `suspension.approved` |
+| POST | `/api/v1/admin/suspensions/cases/{caseId}/dismiss` | `{ reason }` | `SuspensionCaseDetail` | `suspension.dismissed` |
+| POST | `/api/v1/admin/suspensions/cases/{caseId}/escalate` | `{ reason }` | `SuspensionCaseDetail` (stays open, flagged) | `suspension.escalated` |
+| GET | `/api/v1/admin/suspensions/accounts` | `appeal=PENDING?` (appeal queue), `search?`, `page` | `PagedList<SuspendedAccount>` soonest deletion first | — |
+| POST | `/api/v1/admin/suspensions/accounts/{caseId}/reinstate` | `{ reason }` | `{ reinstated: true }` | `suspension.reinstated` |
+| POST | `/api/v1/admin/suspensions/accounts/{caseId}/appeal/decide` | `{ outcome: "UPHELD"|"OVERTURNED", reason }` | `{ outcome }`; OVERTURNED reinstates | `suspension.appeal_upheld` / `suspension.appeal_overturned` |
+
+Errors: `403 STEP_UP_REQUIRED`, `409 CASE_ALREADY_DECIDED`, `409 NOT_SUSPENDED`, `409 NO_PENDING_APPEAL`.
+
+## Accounts and lifetime checkmarks
+
+`POST /accounts` is **superadmin only**. Grants need `verification:review`; revoke needs `verification:revoke`. All writes need step-up. Profile types: `PERSONAL|CREATOR|BUSINESS|BRAND|GOVERNMENT`. A grant must match the profile type: Blue for personal/creator, Gold for business/brand, Black for government; anything else is `400 VALIDATION_FAILED` on `color`. Black can only be granted or revoked by a superadmin. Grants bypass billing but never the profile-type rule.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/accounts/created` | `page` | `PagedList<AdminCreatedAccount>` `{ id, user, profileType, createdAt, createdByName, reason, mustChangePassword, bypassedReservedEntries[] }` | — |
+| POST | `/api/v1/admin/accounts` | `{ username, displayName, email, password (≥12, mixed), country, profileType, reason }` | `201 AdminCreatedAccount`. Skips the reserved-name check (matches are recorded), forces a password change at first login, never logs the password. | `account.created_by_admin` |
+| GET | `/api/v1/admin/checkmark-grants` | `status=ACTIVE|REVOKED|ALL`, `page` | `PagedList<CheckmarkGrant>` `{ id, user, color, reason, grantedByName, grantedAt, revokedAt, revokedByName, revokedReason }` | — |
+| POST | `/api/v1/admin/checkmark-grants` | `{ username, color, reason }` | `201 CheckmarkGrant` | `checkmark.lifetime_granted` |
+| POST | `/api/v1/admin/checkmark-grants/{grantId}/revoke` | `{ reason }` | `CheckmarkGrant`; the earlier verification is restored | `checkmark.lifetime_revoked` |
+
+Errors: `403 BLACK_ADMIN_ONLY`, `409 USERNAME_TAKEN|EMAIL_TAKEN|ALREADY_GRANTED|ALREADY_REVOKED`. Reserved usernames (exact, prefix, pattern, confusables, test box) are unchanged: `/admin/reserved-usernames`, `/admin/usernames/confusables`.
+
+## Business documents review
+
+Permission: `verification:review` (opening a file needs `verification:documents`). `BusinessDocumentSubmission`: `{ id, user, storeName, plan: "FREE"|"PRO"|"BUSINESS", overallStatus: "PENDING"|"APPROVED"|"REJECTED", submittedAt, documents: [{ id, kind: "CAC_CERTIFICATE"|"ID"|"PROOF_OF_ADDRESS", fileName, uploadedAt, status, rejectionReason, reviewedByName, reviewedAt }], goldCheckmark: "GRANTED"|"WAITING_FOR_PLAN"|"NOT_YET" }`. When all three are approved and the store is on Pro/Business, Gold is granted; on Free it waits for a plan.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/business-documents` | `status=PENDING|REJECTED|APPROVED|ALL`, `search?`, `page` | `PagedList<BusinessDocumentSubmission>` | — |
+| GET | `/api/v1/admin/business-documents/{id}/documents/{documentId}/access` | — | `{ documentId, fileName, viewUrl (2 min), expiresAt, watermarkText }` | `business_document.viewed` |
+| POST | `.../documents/{documentId}/approve` | `{ reason }` | `BusinessDocumentSubmission` | `business_document.approved` |
+| POST | `.../documents/{documentId}/reject` | `{ reason }` (shown to the seller) | `BusinessDocumentSubmission` | `business_document.rejected` |
+
+## Black applications (maker-checker)
+
+Permission: `verification:review` (revoke: `verification:revoke`). Approve, reject and revoke need step-up. Vetting checklist keys: `LETTERHEAD_LETTER`, `OFFICIAL_CHANNEL`, `REPRESENTATIVE` (ID + BVN/NIN + role), `ENTITY_PROOF`. Approval needs the whole checklist and **two different admins**: the first approval moves the application to `AWAITING_SECOND_APPROVAL`; a second approval by another admin makes it `APPROVED`, grants Black, **reserves the handle** and sets `reverificationDueAt` (+1 year). Revoking keeps the handle reserved.
+
+`BlackApplication`: `{ id, user, agencyName, handle, representativeName, representativeRole, status: "IN_REVIEW"|"AWAITING_SECOND_APPROVAL"|"APPROVED"|"REJECTED"|"REVOKED", submittedAt, checklist[{key,label,detail,isVerified,note,verifiedByName}], firstApproval, secondApproval, decisionReason, reverificationDueAt, reverificationRemindedAt, handleReserved }`.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/black-applications` | `status=OPEN|REVERIFY|ALL|<status>`, `search?`, `page` | `PagedList<BlackApplication>` | — |
+| POST | `/api/v1/admin/black-applications/{id}/checklist` | `{ key, isVerified, note? }` | `BlackApplication` | `black_application.checklist_updated` |
+| POST | `/api/v1/admin/black-applications/{id}/approve` | `{ reason }` | `BlackApplication` | `black_application.first_approval` / `.approved` |
+| POST | `/api/v1/admin/black-applications/{id}/reject` | `{ reason }` | `BlackApplication` | `black_application.rejected` |
+| POST | `/api/v1/admin/black-applications/{id}/revoke` | `{ reason }` | `BlackApplication` | `black_application.revoked` |
+| POST | `/api/v1/admin/black-applications/{id}/reverification-reminder` | — | `BlackApplication` | `black_application.reverification_reminder_sent` |
+
+Errors: `409 CHECKLIST_INCOMPLETE`, `409 SAME_ADMIN`, `409 NOT_OPEN|NOT_APPROVED`.
+
+## Rules config documents (added)
+
+Same versioned endpoints as the other documents (`GET /admin/config`, `PUT /admin/config/{key}` with `{ expectedVersion, reason, content }`). Write permission `config:rules` except `checkmark-pricing` (`config:plans`).
+
+| Key | Content (defaults) |
+|---|---|
+| `checkmark-suggestions` | `blue { requiresIdVerified, minimumAccountAgeDays 90, minimumRealFollowers 1000, noViolationsInDays 90 }`, `gold { requiresBusinessVerification (CAC/KYB), requiresActiveStoreOrBrandPage, minimumCompletedOrders 20, minimumSuccessRatePercent 90 }` (20 orders AND 90% success). Black is never suggested. |
+| `creator-thresholds` | `autoApprove { minimumAccountAgeDays 30, requiresVerifiedEmail, requiresVerifiedPhone, minimumRealFollowers 1000, minimumOriginalPostsInLast60Days 10, noViolationsInDays 90, maximumFraudScore 30 }`, `manualReview { minimumRealFollowers 500, allowsPastViolation, allowsBorderlineOrAiHeavyContent, maximumRiskScore 60 }`. Below manual review is not eligible. |
+| `trial-rules` | `trialLength "DAYS_7"|"MONTH_1"`, `yearlyDiscountPercent 20` (admin-editable), `minimumAccountAgeDays 7`, `requiresVerifiedEmail`, `onePerPerson/Card/Device/Phone`, `maximumRiskScore 50`, `minimumCompletedOrders 0`. |
+| `checkmark-pricing` | `bundleDiscountPercent 15`, `bundleMaximumBusinesses 3`, `goldOnlyMonthlyPrice NGN 3,000`, `blackMonthlyPrice NGN 50,000`, `blackGraceDays 14`. The bundle never stacks with the yearly discount (the bigger wins) and never applies to Black. |
+
+## Support: live chat and email
+
+Permission: `support:tickets`. Chats are recorded and **not end-to-end encrypted**; opening a transcript is audited. Email goes through AWS SES (mocked), to the person's verified account address (never shown to the admin). Marketing emails reach only people with marketing consent, always include an unsubscribe link, and need step-up; segment sends also need step-up.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/support/chats` | `status=OPEN|WAITING|ACTIVE|ENDED|ALL`, `search?`, `page` | `PagedList<LiveChatSummary>` | — |
+| GET | `/api/v1/admin/support/chats/{chatId}` | — | `{ chat, messages: SupportMessage[], isRecorded: true, isEndToEndEncrypted: false, history }` | `support.chat_opened` |
+| POST | `/api/v1/admin/support/chats/{chatId}/claim` | — | detail | `support.chat_claimed` |
+| POST | `/api/v1/admin/support/chats/{chatId}/messages` | `{ body (≤2000) }` | detail | `support.chat_message_sent` |
+| POST | `/api/v1/admin/support/chats/{chatId}/end` | — | detail | `support.chat_ended` |
+| GET | `/api/v1/admin/support/email/templates` | — | `{ items: { id, name, kind: "TRANSACTIONAL"|"MARKETING", subject, body }[] }` | — |
+| GET | `/api/v1/admin/support/email/segments` | — | `{ items: { id, label, description, recipientCount, marketingConsentCount }[] }` | — |
+| GET | `/api/v1/admin/support/email/sends` | — | `{ items: EmailSendRecord[] }` | — |
+| POST | `/api/v1/admin/support/email/preview` | `{ kind, subject, body, audience: { type: "USER", username } | { type: "SEGMENT", segmentId } }` | `{ recipientCount, skippedNoMarketingConsent, includesUnsubscribeLink, renderedSubject, renderedBody, provider }` | — |
+| POST | `/api/v1/admin/support/email/send` | preview body + `reason` | `201 EmailSendRecord` | `support.email_sent` |
+
+Errors: `409 CHAT_ENDED|CHAT_CLAIMED|NOT_ASSIGNED`, `400 VALIDATION_FAILED` (no eligible recipients).
+
+## Staff, departments and permissions
+
+The first superadmin comes only from the backend CLI bootstrap. After that, superadmins create superadmins and admins from the UI; people with `staff:manage` can create and edit **non-superadmin** admins but can only grant permissions they hold. **Admins can never create or edit superadmins** (`403 ADMINS_CANNOT_CREATE_SUPERADMINS`, `403 ADMINS_CANNOT_EDIT_SUPERADMINS`). Every write needs step-up. The mock BFF enforces permissions with `403 FORBIDDEN`; the console hides or disables pages and buttons by the same keys.
+
+Permission keys are `area:action`. Added: `users:restrict`, `users:suspend`, `users:delete`, `usernames:reassign`, `verification:grant`, `support:chat`, `support:email`, `marketing:campaigns`, `marketing:email`, `sales:leads`, `content:review`, `finance:reports`, `settings:edit`, `staff:manage` (existing: `users:read`, `users:ban`, `verification:review`, `moderation:*`, `payouts:approve`, `refunds:issue`, `ads:review`, `audit:read`, `audit:export` and the rest). Suspension endpoints now need `users:suspend`, checkmark grants `verification:grant`, live chat `support:chat`, email `support:email`.
+
+Department templates (`GET /admin/roles`, `isTemplate: true`): Support, Marketing, Sales, Finance, Trust & Safety, Verification, Content, Ads, Engineering (read-only). Admins can hold several roles plus custom roles; effective permissions are the union.
+
+`AdminAccountSummary` adds `roleIds[]`, `roleNames[]`, `approvedByName`; `status` adds `SUSPENDED`, `REVOKED`, `PENDING_APPROVAL`.
+
+| Method | Path | Body | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/roles` | — | `{ items: { id, name, department, permissions[], isTemplate }[] }` | — |
+| POST | `/api/v1/admin/roles` | `{ name, permissions[], reason }` | `201 role` (custom) | `role.created` |
+| POST | `/api/v1/admin/admins` | `{ email, name, role: "ADMIN"|"SUPPORT"|"SUPERADMIN", roleIds?, permissions?, reason }` | `201`. A `SUPERADMIN` is created as `PENDING_APPROVAL` when the setting is on. | `admin.created` |
+| PUT | `/api/v1/admin/admins/{id}/permissions` | `{ role, roleIds?, permissions?, reason }` | `{ admin }` | `admin.permissions_changed` |
+| GET / PUT | `/api/v1/admin/staff-settings` | PUT `{ requireSecondSuperadminApproval, reason }` (superadmin) | `{ requireSecondSuperadminApproval }` (default `true`) | `staff_settings.changed` |
+| POST | `/api/v1/admin/admins/{id}/approve` | `{ reason }` (a different superadmin) | `{ admin }` status `INVITED` | `admin.superadmin_approved` |
+| POST | `/api/v1/admin/admins/{id}/suspend` | `{ reason }` | `{ admin }`; all sessions killed now, reversible with `enable` | `admin.access_suspended` |
+| POST | `/api/v1/admin/admins/{id}/revoke` | `{ reason }` | `{ admin }`; sessions killed, permanent | `admin.access_revoked` |
+
+`GET /admin/admins/{id}` also returns `lastActions[]` (the last 15 audit entries by that admin). Errors: `409 SAME_SUPERADMIN`, `409 NOT_PENDING`, `409 LAST_SUPERADMIN`, `409 ACCESS_REVOKED`, `403 CANNOT_GRANT_UNHELD_PERMISSION`.
+
+## Audit entries (extended)
+
+Every admin action records: admin name, staff id (`actor.id`), departments/roles (`actor.departments[]`), action, target, before, after, reason, IP, request id and timestamp. The viewer has filters (search, area, admin, target, dates) and CSV export (`audit:export`, columns add `staffId` and `departments`; the export is itself audited).
+
+## User actions
+
+| Method | Path | Permission | Body | Notes | Audit action |
+|---|---|---|---|---|---|
+| POST | `/admin/users/{id}/restrict` | `users:restrict` | `{ features: ("POSTING"|"COMMENTING"|"MESSAGING"|"SELLING"|"GOING_LIVE")[], durationDays (1–90), reason }` | Limits only those features; user notified. | `user.restricted` |
+| POST | `/admin/users/{id}/suspend` | `users:suspend` | `{ durationDays, reason }` | Signs out, notifies, starts the 120-day deletion clock (see Suspensions). Reinstate also `users:suspend`. | `user.suspended` |
+| POST | `/admin/users/{id}/ban` | `users:ban`, step-up | `{ durationDays|null, reason }` | Permanent ban blocks re-signup by email, phone and device fingerprint (stored hashed); unban clears the blocks. User notified. | `user.banned` |
+| POST | `/admin/users/{id}/delete` | `users:delete`, step-up | `{ confirmUsername, reason }` | Deletes profile, posts, media and messages now; anonymises and retains order/payment/ledger records for 7 years. `409 PENDING_WITHDRAWALS`. Response adds `deletion { removed, anonymizedRecords, retainedUntil }`. | `user.deleted` |
+| POST | `/admin/users/{id}/username/reassign` | `usernames:reassign`, step-up | `{ recipientUserId, reason }` | The owner gets an auto-generated username and a notification; the recipient gets the name and a notification; history kept (`REASSIGNED_AWAY` / `REASSIGNED_TO`). | `username.reassigned_between_accounts` |
+
+All require a reason (5–1000 characters). User statuses add `DELETED`.
+
+## Username 120-day hold
+
+A username a person gives up (including the earlier username of an account that receives a reassigned one) is held for 120 days before anyone else can claim it.
+
+| Method | Path | Permission | Body / query | Response | Audit action |
+|---|---|---|---|---|---|
+| GET | `/admin/usernames/held` | `usernames:reassign` or `reserved-usernames:manage` | — | `{ items: { username, releasedAt, availableAt, isHeld }[] }` (shown in the reserved-usernames manager) | — |
+| GET | `/admin/usernames/hold` | same | `username` | `{ username, releasedAt, availableAt, isHeld }` (nulls when never held) | — |
+| POST | `/admin/users/{id}/username/assign-held` | `usernames:reassign`, step-up | `{ username, reason, bypassHold? }` | `UserDetail`. While `isHeld`, `409 USERNAME_HELD` unless `bypassHold: true`. The account's old username is held. | `username.assigned` / `username.assigned_hold_bypassed` (flagged) |
+
+## Legal documents and policy versioning
+
+Permissions: `legal.documents.view`, `legal.documents.edit`, `legal.documents.publish`, `legal.notices.send`. Superadmins implicitly hold every permission. The "Legal" role template carries all four. Documents: `terms`, `privacy`, `cookies`, `community-guidelines`, `seller-terms`, `creator-terms`, `ads-policy`, `refund-escrow-policy`.
+
+`LegalVersion`: `{ id, documentKey, versionNumber, status: "DRAFT"|"IN_REVIEW"|"PUBLISHED"|"SUPERSEDED", bodyMarkdown, changeSummary, effectiveAt, isMaterialChange, isFlaggedForLegalReview, createdByName, createdAt, submittedByName, submittedAt, publishedByName, publishedAt, returnedReason, rolledBackFromVersionNumber, noticeId }`. One open (DRAFT or IN_REVIEW) version per document; versions are never edited after publish.
+
+| Method | Path | Permission | Body / response | Audit action |
+|---|---|---|---|---|
+| GET | `/admin/legal/documents` | view | `{ items: { key, title, publicPath, currentVersion, openVersion, versionCount }[] }` | — |
+| GET | `/admin/legal/documents/{key}` | view | `{ document, versions[] }` newest first | — |
+| POST | `/admin/legal/documents/{key}/versions` | edit | `{ bodyMarkdown, changeSummary, effectiveAt, isMaterialChange }` → `201 LegalVersion` (DRAFT). `409 OPEN_VERSION_EXISTS`. | `legal_version.created` |
+| PUT | `/admin/legal/versions/{id}` | edit | same body, DRAFT only. `409 NOT_DRAFT`. | `legal_version.updated` |
+| POST | `/admin/legal/versions/{id}/submit` | edit | → IN_REVIEW | `legal_version.submitted_for_review` |
+| POST | `/admin/legal/versions/{id}/return` | publish | `{ reason }` → DRAFT with `returnedReason` | `legal_version.returned_to_draft` |
+| POST | `/admin/legal/versions/{id}/publish` | publish, **step-up** | `{ reason, acknowledgeShortNotice? }` → `{ version, noticeId|null }`. Maker-checker: `409 SAME_ADMIN` when the publisher wrote or submitted it. `409 SHORT_NOTICE` for a material change with under 30 days unless `acknowledgeShortNotice`. Previous published version becomes SUPERSEDED. | `legal_version.published` |
+| POST | `/admin/legal/documents/{key}/rollback` | edit | `{ fromVersionId, reason }` → `201` new DRAFT with the old text (material, effective in 30 days). Never rewrites history; must be reviewed and published. | `legal_version.rolled_back` |
+| GET | `/admin/legal/versions/{id}` | view | `LegalVersion` | — |
+| GET | `/admin/legal/versions/{id}/acceptance` | view | `{ requiredCount, acceptedCount, mustAcceptBy }` (material changes only) | — |
+
+Material change: the effective date defaults to now + 30 days (editable), and the version is flagged `LEGAL REVIEW`. Side-by-side diffs are computed by the client from `bodyMarkdown`.
+
+### Policy updated emails
+
+Queued automatically on publish for `terms` and `privacy` and for any material change on other documents. The Legal admin drafts the email first, previews it, and sends tests to themselves.
+
+| Method | Path | Permission | Body / response | Audit action |
+|---|---|---|---|---|
+| GET | `/admin/legal/versions/{id}/notice-draft` | view | `LegalNoticeDraft { versionId, documentTitle, subject, summaryText, whatChanged[], effectiveAt, reacceptNote, documentUrl, updatedByName, updatedAt, testSends[] }`. `whatChanged` is generated from the diff against the previous version. | — |
+| PUT | `/admin/legal/versions/{id}/notice-draft` | edit or notices.send | `{ subject, summaryText, whatChanged[], reacceptNote }` | `legal_notice_draft.updated` |
+| POST | `/admin/legal/versions/{id}/notice-draft/test-send` | notices.send or edit | sends the rendered email to the calling admin's own address; returns the draft with `testSends` | `legal_notice_draft.test_sent` |
+| GET | `/admin/legal/versions/{id}/notice-preview` | view | `{ draft, subject, totalUsers, excludedHardBounces, excludedSuppressed, recipientCount, batchSize, ratePerSecond, batchesTotal, estimatedMinutes, sendsWithoutMarketingConsent: true }` | — |
+| GET | `/admin/legal/notices`, `/admin/legal/notices/{id}` | view | `LegalNoticeProgress { id, documentKey, documentTitle, versionId, versionNumber, subject, status: "QUEUED"|"SENDING"|"COMPLETED", recipientCount, sentCount, excludedHardBounces, excludedSuppressed, batchSize, ratePerSecond, batchesTotal, batchesDone, queuedAt, queuedByName, estimatedCompletionAt, provider }`. The console polls every 3 seconds while sending. | — |
+| POST | `/admin/legal/notices` | notices.send, **step-up** | `{ versionId, reason }` (resend a published version) → `201 LegalNoticeProgress`. `409 NOT_PUBLISHED`, `409 NOTICE_IN_PROGRESS`. | `legal_notice.queued` |
+
+Preview rendering: the console shows a placeholder frame until the `policyUpdated` template from `@zudomart/email-templates` exists (`apps/admin/src/components/legal/legalNoticeEmailFrame.tsx` is the one place to wire it; props are the `LegalNoticeDraft` fields).
+
+### User-facing endpoints (mocked in apps/webapp and apps/mobile)
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/v1/legal/policy-versions/current` | Public. `{ items: { policyVersionId, documentKey, title, versionLabel, summary, publishedAt, effectiveAt, isMaterialChange, documentUrl }[] }` |
+| GET | `/api/v1/users/me/policy-acceptances` | `{ acceptedPolicyVersionIds[] }` |
+| PUT | `/api/v1/users/me/consents` | Existing endpoint. Accepting a policy sends `policyVersionId` (webapp also keeps `policyVersion`) with `consents: {}`; the server stores an acceptance record. `422` when the version is not current. |
