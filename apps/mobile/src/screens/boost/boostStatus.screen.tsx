@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill, type StatusTone } from "@/components/escrow/statusPill";
@@ -13,6 +13,7 @@ import { boostsService } from "@/services/boosts.service";
 import type { Boost } from "@/types/boost.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const STATUS_APPEARANCE: Record<Boost["status"], { label: string; tone: StatusTone }> = {
   pending_payment: { label: "Waiting for payment", tone: "neutral" },
@@ -28,7 +29,7 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
     return (
       <Screen>
         <Header title="Boost" />
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -68,7 +69,6 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

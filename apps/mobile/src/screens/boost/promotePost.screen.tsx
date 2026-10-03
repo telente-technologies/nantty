@@ -21,6 +21,7 @@ import { useLocaleStore } from "@/store/locale.store";
 import type { BoostAudience, BoostGoal } from "@/types/boost.type";
 import type { Money } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const GOALS: readonly { readonly id: BoostGoal; readonly label: string; readonly hint: string }[] = [
   { id: "views", label: "More views", hint: "Show your post to more people" },
@@ -64,7 +65,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
     return (
       <Screen>
         <Header title="Promote post" />
-        <ActivityIndicator style={styles.loading} color={colors.primary} />
+        <ListSkeleton />
       </Screen>
     );
   }
@@ -128,7 +129,6 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
   sectionTitle: { marginTop: 12 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
