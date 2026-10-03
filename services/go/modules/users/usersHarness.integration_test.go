@@ -82,7 +82,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 	identityports.Default.RegisterPlatformSettings(harness.settings)
 	settings := configs.UsersSettings{
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TokenIssuer: identitytest.FakeIssuer, TokenAudience: identitytest.FakeAccountAudience,
-		UsernameChangeCooldown: 30 * 24 * time.Hour, UsernameMaximumChangesYear: 3, UsernameQuarantine: 30 * 24 * time.Hour,
+		UsernameChangeCooldown: 30 * 24 * time.Hour, UsernameMaximumChangesYear: 3, UsernameQuarantine: 120 * 24 * time.Hour,
 		MediaPublicBaseUrl: "https://media.zudomart.test", MediaUploadBaseUrl: "https://upload.zudomart.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
 		Privacy: configs.PrivacySettings{
 			ExportBucket: "users-test-exports", ExportRegion: "eu-west-1", ExportDownloadLinkTtl: time.Minute, ExportArchiveTtl: time.Hour,
