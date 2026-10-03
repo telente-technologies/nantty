@@ -23,7 +23,7 @@ func LoadActiveAccountSummary(ctx context.Context, accountId uuid.UUID) (identit
 	if err != nil {
 		return identityports.AccountSummary{}, err
 	}
-	if !found || !summary.Active {
+	if !found || (!summary.Active && summary.Status != "suspended") {
 		return identityports.AccountSummary{}, usersErrors.ErrAccountUnavailable
 	}
 	return summary, nil
