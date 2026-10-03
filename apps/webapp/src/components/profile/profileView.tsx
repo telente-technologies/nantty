@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProfileContentTabs } from "./profileContentTabs";
+import { ProfileVisitorActions } from "./profileVisitorActions";
 import { Button } from "@/components/ui/button";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { BellIcon, BookmarkIcon, LogOutIcon, OrdersIcon, SettingsIcon } from "@/components/ui/icons";
@@ -98,6 +99,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
               <Button size="sm" variant="secondary" busy={startChat.isPending} onClick={() => requireAuthThen(() => startChat.mutate(), `Sign in to message ${user.name}.`)}>
                 Message
               </Button>
+              <ProfileVisitorActions user={user} />
             </>
           )}
         </div>
