@@ -1,0 +1,55 @@
+package applybillingevent
+
+import (
+	"context"
+	"time"
+
+	"zudomart/modules/users/src/container"
+	usersErrors "zudomart/modules/users/src/errors"
+	"zudomart/modules/users/src/generated/ent"
+	"zudomart/modules/users/src/generated/ent/profilecheckmark"
+	"zudomart/modules/users/src/modules/checkmarks/services"
+)
+
+type Handler struct {
+	Container *container.Container
+}
+
+func (handler Handler) Execute(ctx context.Context, command Command) error {
+	if command.Event != "lapsed" && command.Event != "restored" && command.Event != "ended" {
+		return usersErrors.ValidationFailedFor("event", "must be lapsed, restored or ended")
+	}
+	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		row, err := tx.ProfileCheckmark.Query().Where(profilecheckmark.ProfileID(command.ProfileId)).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) {
+			return usersErrors.NotFound("That profile has no checkmark.")
+		}
+		if err != nil {
+			return err
+		}
+		if row.Source == profilecheckmark.SourceLifetimeGrant || row.Status == profilecheckmark.StatusRevoked || row.Status == profilecheckmark.StatusSuspended {
+			return nil
+		}
+		profile, err := tx.Profile.Get(ctx, row.ProfileID)
+		if err != nil {
+			return err
+		}
+		change := services.CheckmarkChange{Profile: profile, Color: row.Color, Source: row.Source, SourceId: row.SourceID, CurrentPeriodEnd: command.PeriodEnd, ReverificationDueAt: row.ReverificationDueAt}
+		now := handler.Container.Now()
+		switch {
+		case command.Event == "restored":
+			change.Status = profilecheckmark.StatusVerified
+		case row.Color == profilecheckmark.ColorBlack && command.Event == "lapsed":
+			change.Status, change.GraceEndsAt = profilecheckmark.StatusGrace, graceEnd(ctx, now)
+		default:
+			change.Status = profilecheckmark.StatusExpired
+		}
+		_, err = services.SetProfileCheckmarkInTransaction(ctx, tx, now, change)
+		return err
+	})
+}
+
+func graceEnd(ctx context.Context, now time.Time) *time.Time {
+	end := now.AddDate(0, 0, services.LoadPricingRules(ctx).BlackGraceDays)
+	return &end
+}
