@@ -5,6 +5,7 @@
   aspect-ratio: 393 / 852;
   padding: 3.2%;
   border-radius: 13% / 6%;
+  /* stylelint-disable-next-line color-no-hex -- device artwork stays the same in both themes */
   background: linear-gradient(145deg, #1d1f2b, #05060b 60%, #22242f);
   box-shadow:
     inset 0 0 0 1.5px rgb(255 255 255 / 0.12),
