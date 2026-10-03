@@ -113,6 +113,20 @@ func (_u *LegalVersionUpdate) SetNillableIsFlaggedForLegalReview(v *bool) *Legal
 	return _u
 }
 
+// SetEffectiveAtIsDefault sets the "effective_at_is_default" field.
+func (_u *LegalVersionUpdate) SetEffectiveAtIsDefault(v bool) *LegalVersionUpdate {
+	_u.mutation.SetEffectiveAtIsDefault(v)
+	return _u
+}
+
+// SetNillableEffectiveAtIsDefault sets the "effective_at_is_default" field if the given value is not nil.
+func (_u *LegalVersionUpdate) SetNillableEffectiveAtIsDefault(v *bool) *LegalVersionUpdate {
+	if v != nil {
+		_u.SetEffectiveAtIsDefault(*v)
+	}
+	return _u
+}
+
 // SetCreatedByName sets the "created_by_name" field.
 func (_u *LegalVersionUpdate) SetCreatedByName(v string) *LegalVersionUpdate {
 	_u.mutation.SetCreatedByName(v)
@@ -391,6 +405,9 @@ func (_u *LegalVersionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.IsFlaggedForLegalReview(); ok {
 		_spec.SetField(legalversion.FieldIsFlaggedForLegalReview, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.EffectiveAtIsDefault(); ok {
+		_spec.SetField(legalversion.FieldEffectiveAtIsDefault, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CreatedByName(); ok {
 		_spec.SetField(legalversion.FieldCreatedByName, field.TypeString, value)
 	}
@@ -536,6 +553,20 @@ func (_u *LegalVersionUpdateOne) SetIsFlaggedForLegalReview(v bool) *LegalVersio
 func (_u *LegalVersionUpdateOne) SetNillableIsFlaggedForLegalReview(v *bool) *LegalVersionUpdateOne {
 	if v != nil {
 		_u.SetIsFlaggedForLegalReview(*v)
+	}
+	return _u
+}
+
+// SetEffectiveAtIsDefault sets the "effective_at_is_default" field.
+func (_u *LegalVersionUpdateOne) SetEffectiveAtIsDefault(v bool) *LegalVersionUpdateOne {
+	_u.mutation.SetEffectiveAtIsDefault(v)
+	return _u
+}
+
+// SetNillableEffectiveAtIsDefault sets the "effective_at_is_default" field if the given value is not nil.
+func (_u *LegalVersionUpdateOne) SetNillableEffectiveAtIsDefault(v *bool) *LegalVersionUpdateOne {
+	if v != nil {
+		_u.SetEffectiveAtIsDefault(*v)
 	}
 	return _u
 }
@@ -847,6 +878,9 @@ func (_u *LegalVersionUpdateOne) sqlSave(ctx context.Context) (_node *LegalVersi
 	}
 	if value, ok := _u.mutation.IsFlaggedForLegalReview(); ok {
 		_spec.SetField(legalversion.FieldIsFlaggedForLegalReview, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.EffectiveAtIsDefault(); ok {
+		_spec.SetField(legalversion.FieldEffectiveAtIsDefault, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.CreatedByName(); ok {
 		_spec.SetField(legalversion.FieldCreatedByName, field.TypeString, value)

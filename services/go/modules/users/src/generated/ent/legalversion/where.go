@@ -95,6 +95,11 @@ func IsFlaggedForLegalReview(v bool) predicate.LegalVersion {
 	return predicate.LegalVersion(sql.FieldEQ(FieldIsFlaggedForLegalReview, v))
 }
 
+// EffectiveAtIsDefault applies equality check predicate on the "effective_at_is_default" field. It's identical to EffectiveAtIsDefaultEQ.
+func EffectiveAtIsDefault(v bool) predicate.LegalVersion {
+	return predicate.LegalVersion(sql.FieldEQ(FieldEffectiveAtIsDefault, v))
+}
+
 // CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
 func CreatedBy(v string) predicate.LegalVersion {
 	return predicate.LegalVersion(sql.FieldEQ(FieldCreatedBy, v))
@@ -503,6 +508,16 @@ func IsFlaggedForLegalReviewEQ(v bool) predicate.LegalVersion {
 // IsFlaggedForLegalReviewNEQ applies the NEQ predicate on the "is_flagged_for_legal_review" field.
 func IsFlaggedForLegalReviewNEQ(v bool) predicate.LegalVersion {
 	return predicate.LegalVersion(sql.FieldNEQ(FieldIsFlaggedForLegalReview, v))
+}
+
+// EffectiveAtIsDefaultEQ applies the EQ predicate on the "effective_at_is_default" field.
+func EffectiveAtIsDefaultEQ(v bool) predicate.LegalVersion {
+	return predicate.LegalVersion(sql.FieldEQ(FieldEffectiveAtIsDefault, v))
+}
+
+// EffectiveAtIsDefaultNEQ applies the NEQ predicate on the "effective_at_is_default" field.
+func EffectiveAtIsDefaultNEQ(v bool) predicate.LegalVersion {
+	return predicate.LegalVersion(sql.FieldNEQ(FieldEffectiveAtIsDefault, v))
 }
 
 // CreatedByEQ applies the EQ predicate on the "created_by" field.

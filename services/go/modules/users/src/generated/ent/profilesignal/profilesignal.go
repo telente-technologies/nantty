@@ -40,6 +40,8 @@ const (
 	FieldHasActiveStoreOrBrandPage = "has_active_store_or_brand_page"
 	// FieldSellerPlan holds the string denoting the seller_plan field in the database.
 	FieldSellerPlan = "seller_plan"
+	// FieldCheckmarkSuggestedAt holds the string denoting the checkmark_suggested_at field in the database.
+	FieldCheckmarkSuggestedAt = "checkmark_suggested_at"
 	// FieldSource holds the string denoting the source field in the database.
 	FieldSource = "source"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -64,6 +66,7 @@ var Columns = []string{
 	FieldSuccessRatePercent,
 	FieldHasActiveStoreOrBrandPage,
 	FieldSellerPlan,
+	FieldCheckmarkSuggestedAt,
 	FieldSource,
 	FieldUpdatedAt,
 }
@@ -221,6 +224,11 @@ func ByHasActiveStoreOrBrandPage(opts ...sql.OrderTermOption) OrderOption {
 // BySellerPlan orders the results by the seller_plan field.
 func BySellerPlan(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSellerPlan, opts...).ToFunc()
+}
+
+// ByCheckmarkSuggestedAt orders the results by the checkmark_suggested_at field.
+func ByCheckmarkSuggestedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckmarkSuggestedAt, opts...).ToFunc()
 }
 
 // BySource orders the results by the source field.

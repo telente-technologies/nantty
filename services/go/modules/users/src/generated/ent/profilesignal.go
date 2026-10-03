@@ -44,6 +44,8 @@ type ProfileSignal struct {
 	HasActiveStoreOrBrandPage bool `json:"has_active_store_or_brand_page,omitempty"`
 	// SellerPlan holds the value of the "seller_plan" field.
 	SellerPlan profilesignal.SellerPlan `json:"seller_plan,omitempty"`
+	// CheckmarkSuggestedAt holds the value of the "checkmark_suggested_at" field.
+	CheckmarkSuggestedAt *time.Time `json:"checkmark_suggested_at,omitempty"`
 	// Source holds the value of the "source" field.
 	Source string `json:"source,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -62,7 +64,7 @@ func (*ProfileSignal) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case profilesignal.FieldSellerPlan, profilesignal.FieldSource:
 			values[i] = new(sql.NullString)
-		case profilesignal.FieldUpdatedAt:
+		case profilesignal.FieldCheckmarkSuggestedAt, profilesignal.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case profilesignal.FieldProfileID, profilesignal.FieldAccountID:
 			values[i] = new(uuid.UUID)
@@ -165,6 +167,13 @@ func (_m *ProfileSignal) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SellerPlan = profilesignal.SellerPlan(value.String)
 			}
+		case profilesignal.FieldCheckmarkSuggestedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field checkmark_suggested_at", values[i])
+			} else if value.Valid {
+				_m.CheckmarkSuggestedAt = new(time.Time)
+				*_m.CheckmarkSuggestedAt = value.Time
+			}
 		case profilesignal.FieldSource:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field source", values[i])
@@ -251,6 +260,11 @@ func (_m *ProfileSignal) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("seller_plan=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SellerPlan))
+	builder.WriteString(", ")
+	if v := _m.CheckmarkSuggestedAt; v != nil {
+		builder.WriteString("checkmark_suggested_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("source=")
 	builder.WriteString(_m.Source)

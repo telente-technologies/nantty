@@ -33,6 +33,8 @@ const (
 	FieldIsMaterialChange = "is_material_change"
 	// FieldIsFlaggedForLegalReview holds the string denoting the is_flagged_for_legal_review field in the database.
 	FieldIsFlaggedForLegalReview = "is_flagged_for_legal_review"
+	// FieldEffectiveAtIsDefault holds the string denoting the effective_at_is_default field in the database.
+	FieldEffectiveAtIsDefault = "effective_at_is_default"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldCreatedByName holds the string denoting the created_by_name field in the database.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldEffectiveAt,
 	FieldIsMaterialChange,
 	FieldIsFlaggedForLegalReview,
+	FieldEffectiveAtIsDefault,
 	FieldCreatedBy,
 	FieldCreatedByName,
 	FieldSubmittedBy,
@@ -107,6 +110,8 @@ var (
 	DefaultIsMaterialChange bool
 	// DefaultIsFlaggedForLegalReview holds the default value on creation for the "is_flagged_for_legal_review" field.
 	DefaultIsFlaggedForLegalReview bool
+	// DefaultEffectiveAtIsDefault holds the default value on creation for the "effective_at_is_default" field.
+	DefaultEffectiveAtIsDefault bool
 	// CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	CreatedByValidator func(string) error
 	// DefaultCreatedByName holds the default value on creation for the "created_by_name" field.
@@ -216,6 +221,11 @@ func ByIsMaterialChange(opts ...sql.OrderTermOption) OrderOption {
 // ByIsFlaggedForLegalReview orders the results by the is_flagged_for_legal_review field.
 func ByIsFlaggedForLegalReview(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsFlaggedForLegalReview, opts...).ToFunc()
+}
+
+// ByEffectiveAtIsDefault orders the results by the effective_at_is_default field.
+func ByEffectiveAtIsDefault(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEffectiveAtIsDefault, opts...).ToFunc()
 }
 
 // ByCreatedBy orders the results by the created_by field.

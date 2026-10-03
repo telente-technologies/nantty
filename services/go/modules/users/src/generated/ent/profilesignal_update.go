@@ -231,6 +231,26 @@ func (_u *ProfileSignalUpdate) SetNillableSellerPlan(v *profilesignal.SellerPlan
 	return _u
 }
 
+// SetCheckmarkSuggestedAt sets the "checkmark_suggested_at" field.
+func (_u *ProfileSignalUpdate) SetCheckmarkSuggestedAt(v time.Time) *ProfileSignalUpdate {
+	_u.mutation.SetCheckmarkSuggestedAt(v)
+	return _u
+}
+
+// SetNillableCheckmarkSuggestedAt sets the "checkmark_suggested_at" field if the given value is not nil.
+func (_u *ProfileSignalUpdate) SetNillableCheckmarkSuggestedAt(v *time.Time) *ProfileSignalUpdate {
+	if v != nil {
+		_u.SetCheckmarkSuggestedAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckmarkSuggestedAt clears the value of the "checkmark_suggested_at" field.
+func (_u *ProfileSignalUpdate) ClearCheckmarkSuggestedAt() *ProfileSignalUpdate {
+	_u.mutation.ClearCheckmarkSuggestedAt()
+	return _u
+}
+
 // SetSource sets the "source" field.
 func (_u *ProfileSignalUpdate) SetSource(v string) *ProfileSignalUpdate {
 	_u.mutation.SetSource(v)
@@ -407,6 +427,12 @@ func (_u *ProfileSignalUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if value, ok := _u.mutation.SellerPlan(); ok {
 		_spec.SetField(profilesignal.FieldSellerPlan, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CheckmarkSuggestedAt(); ok {
+		_spec.SetField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckmarkSuggestedAtCleared() {
+		_spec.ClearField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)
@@ -637,6 +663,26 @@ func (_u *ProfileSignalUpdateOne) SetNillableSellerPlan(v *profilesignal.SellerP
 	return _u
 }
 
+// SetCheckmarkSuggestedAt sets the "checkmark_suggested_at" field.
+func (_u *ProfileSignalUpdateOne) SetCheckmarkSuggestedAt(v time.Time) *ProfileSignalUpdateOne {
+	_u.mutation.SetCheckmarkSuggestedAt(v)
+	return _u
+}
+
+// SetNillableCheckmarkSuggestedAt sets the "checkmark_suggested_at" field if the given value is not nil.
+func (_u *ProfileSignalUpdateOne) SetNillableCheckmarkSuggestedAt(v *time.Time) *ProfileSignalUpdateOne {
+	if v != nil {
+		_u.SetCheckmarkSuggestedAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckmarkSuggestedAt clears the value of the "checkmark_suggested_at" field.
+func (_u *ProfileSignalUpdateOne) ClearCheckmarkSuggestedAt() *ProfileSignalUpdateOne {
+	_u.mutation.ClearCheckmarkSuggestedAt()
+	return _u
+}
+
 // SetSource sets the "source" field.
 func (_u *ProfileSignalUpdateOne) SetSource(v string) *ProfileSignalUpdateOne {
 	_u.mutation.SetSource(v)
@@ -843,6 +889,12 @@ func (_u *ProfileSignalUpdateOne) sqlSave(ctx context.Context) (_node *ProfileSi
 	}
 	if value, ok := _u.mutation.SellerPlan(); ok {
 		_spec.SetField(profilesignal.FieldSellerPlan, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CheckmarkSuggestedAt(); ok {
+		_spec.SetField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckmarkSuggestedAtCleared() {
+		_spec.ClearField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)

@@ -16487,6 +16487,7 @@ type LegalVersionMutation struct {
 	effective_at                       *time.Time
 	is_material_change                 *bool
 	is_flagged_for_legal_review        *bool
+	effective_at_is_default            *bool
 	created_by                         *string
 	created_by_name                    *string
 	submitted_by                       *string
@@ -16951,6 +16952,42 @@ func (m *LegalVersionMutation) OldIsFlaggedForLegalReview(ctx context.Context) (
 // ResetIsFlaggedForLegalReview resets all changes to the "is_flagged_for_legal_review" field.
 func (m *LegalVersionMutation) ResetIsFlaggedForLegalReview() {
 	m.is_flagged_for_legal_review = nil
+}
+
+// SetEffectiveAtIsDefault sets the "effective_at_is_default" field.
+func (m *LegalVersionMutation) SetEffectiveAtIsDefault(b bool) {
+	m.effective_at_is_default = &b
+}
+
+// EffectiveAtIsDefault returns the value of the "effective_at_is_default" field in the mutation.
+func (m *LegalVersionMutation) EffectiveAtIsDefault() (r bool, exists bool) {
+	v := m.effective_at_is_default
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEffectiveAtIsDefault returns the old "effective_at_is_default" field's value of the LegalVersion entity.
+// If the LegalVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalVersionMutation) OldEffectiveAtIsDefault(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEffectiveAtIsDefault is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEffectiveAtIsDefault requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEffectiveAtIsDefault: %w", err)
+	}
+	return oldValue.EffectiveAtIsDefault, nil
+}
+
+// ResetEffectiveAtIsDefault resets all changes to the "effective_at_is_default" field.
+func (m *LegalVersionMutation) ResetEffectiveAtIsDefault() {
+	m.effective_at_is_default = nil
 }
 
 // SetCreatedBy sets the "created_by" field.
@@ -17456,7 +17493,7 @@ func (m *LegalVersionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LegalVersionMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, legalversion.FieldCreatedAt)
 	}
@@ -17483,6 +17520,9 @@ func (m *LegalVersionMutation) Fields() []string {
 	}
 	if m.is_flagged_for_legal_review != nil {
 		fields = append(fields, legalversion.FieldIsFlaggedForLegalReview)
+	}
+	if m.effective_at_is_default != nil {
+		fields = append(fields, legalversion.FieldEffectiveAtIsDefault)
 	}
 	if m.created_by != nil {
 		fields = append(fields, legalversion.FieldCreatedBy)
@@ -17543,6 +17583,8 @@ func (m *LegalVersionMutation) Field(name string) (ent.Value, bool) {
 		return m.IsMaterialChange()
 	case legalversion.FieldIsFlaggedForLegalReview:
 		return m.IsFlaggedForLegalReview()
+	case legalversion.FieldEffectiveAtIsDefault:
+		return m.EffectiveAtIsDefault()
 	case legalversion.FieldCreatedBy:
 		return m.CreatedBy()
 	case legalversion.FieldCreatedByName:
@@ -17592,6 +17634,8 @@ func (m *LegalVersionMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldIsMaterialChange(ctx)
 	case legalversion.FieldIsFlaggedForLegalReview:
 		return m.OldIsFlaggedForLegalReview(ctx)
+	case legalversion.FieldEffectiveAtIsDefault:
+		return m.OldEffectiveAtIsDefault(ctx)
 	case legalversion.FieldCreatedBy:
 		return m.OldCreatedBy(ctx)
 	case legalversion.FieldCreatedByName:
@@ -17685,6 +17729,13 @@ func (m *LegalVersionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsFlaggedForLegalReview(v)
+		return nil
+	case legalversion.FieldEffectiveAtIsDefault:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEffectiveAtIsDefault(v)
 		return nil
 	case legalversion.FieldCreatedBy:
 		v, ok := value.(string)
@@ -17892,6 +17943,9 @@ func (m *LegalVersionMutation) ResetField(name string) error {
 		return nil
 	case legalversion.FieldIsFlaggedForLegalReview:
 		m.ResetIsFlaggedForLegalReview()
+		return nil
+	case legalversion.FieldEffectiveAtIsDefault:
+		m.ResetEffectiveAtIsDefault()
 		return nil
 	case legalversion.FieldCreatedBy:
 		m.ResetCreatedBy()
@@ -22453,6 +22507,7 @@ type ProfileSignalMutation struct {
 	addsuccess_rate_percent        *int
 	has_active_store_or_brand_page *bool
 	seller_plan                    *profilesignal.SellerPlan
+	checkmark_suggested_at         *time.Time
 	source                         *string
 	updated_at                     *time.Time
 	clearedFields                  map[string]struct{}
@@ -23167,6 +23222,55 @@ func (m *ProfileSignalMutation) ResetSellerPlan() {
 	m.seller_plan = nil
 }
 
+// SetCheckmarkSuggestedAt sets the "checkmark_suggested_at" field.
+func (m *ProfileSignalMutation) SetCheckmarkSuggestedAt(t time.Time) {
+	m.checkmark_suggested_at = &t
+}
+
+// CheckmarkSuggestedAt returns the value of the "checkmark_suggested_at" field in the mutation.
+func (m *ProfileSignalMutation) CheckmarkSuggestedAt() (r time.Time, exists bool) {
+	v := m.checkmark_suggested_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCheckmarkSuggestedAt returns the old "checkmark_suggested_at" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCheckmarkSuggestedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCheckmarkSuggestedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCheckmarkSuggestedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCheckmarkSuggestedAt: %w", err)
+	}
+	return oldValue.CheckmarkSuggestedAt, nil
+}
+
+// ClearCheckmarkSuggestedAt clears the value of the "checkmark_suggested_at" field.
+func (m *ProfileSignalMutation) ClearCheckmarkSuggestedAt() {
+	m.checkmark_suggested_at = nil
+	m.clearedFields[profilesignal.FieldCheckmarkSuggestedAt] = struct{}{}
+}
+
+// CheckmarkSuggestedAtCleared returns if the "checkmark_suggested_at" field was cleared in this mutation.
+func (m *ProfileSignalMutation) CheckmarkSuggestedAtCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldCheckmarkSuggestedAt]
+	return ok
+}
+
+// ResetCheckmarkSuggestedAt resets all changes to the "checkmark_suggested_at" field.
+func (m *ProfileSignalMutation) ResetCheckmarkSuggestedAt() {
+	m.checkmark_suggested_at = nil
+	delete(m.clearedFields, profilesignal.FieldCheckmarkSuggestedAt)
+}
+
 // SetSource sets the "source" field.
 func (m *ProfileSignalMutation) SetSource(s string) {
 	m.source = &s
@@ -23273,7 +23377,7 @@ func (m *ProfileSignalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileSignalMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.profile_id != nil {
 		fields = append(fields, profilesignal.FieldProfileID)
 	}
@@ -23312,6 +23416,9 @@ func (m *ProfileSignalMutation) Fields() []string {
 	}
 	if m.seller_plan != nil {
 		fields = append(fields, profilesignal.FieldSellerPlan)
+	}
+	if m.checkmark_suggested_at != nil {
+		fields = append(fields, profilesignal.FieldCheckmarkSuggestedAt)
 	}
 	if m.source != nil {
 		fields = append(fields, profilesignal.FieldSource)
@@ -23353,6 +23460,8 @@ func (m *ProfileSignalMutation) Field(name string) (ent.Value, bool) {
 		return m.HasActiveStoreOrBrandPage()
 	case profilesignal.FieldSellerPlan:
 		return m.SellerPlan()
+	case profilesignal.FieldCheckmarkSuggestedAt:
+		return m.CheckmarkSuggestedAt()
 	case profilesignal.FieldSource:
 		return m.Source()
 	case profilesignal.FieldUpdatedAt:
@@ -23392,6 +23501,8 @@ func (m *ProfileSignalMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldHasActiveStoreOrBrandPage(ctx)
 	case profilesignal.FieldSellerPlan:
 		return m.OldSellerPlan(ctx)
+	case profilesignal.FieldCheckmarkSuggestedAt:
+		return m.OldCheckmarkSuggestedAt(ctx)
 	case profilesignal.FieldSource:
 		return m.OldSource(ctx)
 	case profilesignal.FieldUpdatedAt:
@@ -23495,6 +23606,13 @@ func (m *ProfileSignalMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSellerPlan(v)
+		return nil
+	case profilesignal.FieldCheckmarkSuggestedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCheckmarkSuggestedAt(v)
 		return nil
 	case profilesignal.FieldSource:
 		v, ok := value.(string)
@@ -23626,7 +23744,11 @@ func (m *ProfileSignalMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ProfileSignalMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(profilesignal.FieldCheckmarkSuggestedAt) {
+		fields = append(fields, profilesignal.FieldCheckmarkSuggestedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -23639,6 +23761,11 @@ func (m *ProfileSignalMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ProfileSignalMutation) ClearField(name string) error {
+	switch name {
+	case profilesignal.FieldCheckmarkSuggestedAt:
+		m.ClearCheckmarkSuggestedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown ProfileSignal nullable field %s", name)
 }
 
@@ -23684,6 +23811,9 @@ func (m *ProfileSignalMutation) ResetField(name string) error {
 		return nil
 	case profilesignal.FieldSellerPlan:
 		m.ResetSellerPlan()
+		return nil
+	case profilesignal.FieldCheckmarkSuggestedAt:
+		m.ResetCheckmarkSuggestedAt()
 		return nil
 	case profilesignal.FieldSource:
 		m.ResetSource()

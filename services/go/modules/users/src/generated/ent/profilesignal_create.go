@@ -187,6 +187,20 @@ func (_c *ProfileSignalCreate) SetNillableSellerPlan(v *profilesignal.SellerPlan
 	return _c
 }
 
+// SetCheckmarkSuggestedAt sets the "checkmark_suggested_at" field.
+func (_c *ProfileSignalCreate) SetCheckmarkSuggestedAt(v time.Time) *ProfileSignalCreate {
+	_c.mutation.SetCheckmarkSuggestedAt(v)
+	return _c
+}
+
+// SetNillableCheckmarkSuggestedAt sets the "checkmark_suggested_at" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCheckmarkSuggestedAt(v *time.Time) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCheckmarkSuggestedAt(*v)
+	}
+	return _c
+}
+
 // SetSource sets the "source" field.
 func (_c *ProfileSignalCreate) SetSource(v string) *ProfileSignalCreate {
 	_c.mutation.SetSource(v)
@@ -473,6 +487,10 @@ func (_c *ProfileSignalCreate) createSpec() (*ProfileSignal, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.SellerPlan(); ok {
 		_spec.SetField(profilesignal.FieldSellerPlan, field.TypeEnum, value)
 		_node.SellerPlan = value
+	}
+	if value, ok := _c.mutation.CheckmarkSuggestedAt(); ok {
+		_spec.SetField(profilesignal.FieldCheckmarkSuggestedAt, field.TypeTime, value)
+		_node.CheckmarkSuggestedAt = &value
 	}
 	if value, ok := _c.mutation.Source(); ok {
 		_spec.SetField(profilesignal.FieldSource, field.TypeString, value)

@@ -36,6 +36,8 @@ type LegalVersion struct {
 	IsMaterialChange bool `json:"is_material_change,omitempty"`
 	// IsFlaggedForLegalReview holds the value of the "is_flagged_for_legal_review" field.
 	IsFlaggedForLegalReview bool `json:"is_flagged_for_legal_review,omitempty"`
+	// EffectiveAtIsDefault holds the value of the "effective_at_is_default" field.
+	EffectiveAtIsDefault bool `json:"effective_at_is_default,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy string `json:"created_by,omitempty"`
 	// CreatedByName holds the value of the "created_by_name" field.
@@ -68,7 +70,7 @@ func (*LegalVersion) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case legalversion.FieldNoticeID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case legalversion.FieldIsMaterialChange, legalversion.FieldIsFlaggedForLegalReview:
+		case legalversion.FieldIsMaterialChange, legalversion.FieldIsFlaggedForLegalReview, legalversion.FieldEffectiveAtIsDefault:
 			values[i] = new(sql.NullBool)
 		case legalversion.FieldVersionNumber, legalversion.FieldRolledBackFromVersionNumber:
 			values[i] = new(sql.NullInt64)
@@ -152,6 +154,12 @@ func (_m *LegalVersion) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field is_flagged_for_legal_review", values[i])
 			} else if value.Valid {
 				_m.IsFlaggedForLegalReview = value.Bool
+			}
+		case legalversion.FieldEffectiveAtIsDefault:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field effective_at_is_default", values[i])
+			} else if value.Valid {
+				_m.EffectiveAtIsDefault = value.Bool
 			}
 		case legalversion.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -285,6 +293,9 @@ func (_m *LegalVersion) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_flagged_for_legal_review=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsFlaggedForLegalReview))
+	builder.WriteString(", ")
+	builder.WriteString("effective_at_is_default=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EffectiveAtIsDefault))
 	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(_m.CreatedBy)

@@ -605,6 +605,7 @@ var (
 		{Name: "effective_at", Type: field.TypeTime},
 		{Name: "is_material_change", Type: field.TypeBool, Default: false},
 		{Name: "is_flagged_for_legal_review", Type: field.TypeBool, Default: false},
+		{Name: "effective_at_is_default", Type: field.TypeBool, Default: false},
 		{Name: "created_by", Type: field.TypeString, Size: 64},
 		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "submitted_by", Type: field.TypeString, Size: 64, Default: ""},
@@ -639,7 +640,7 @@ var (
 			{
 				Name:    "legalversion_status_published_at",
 				Unique:  false,
-				Columns: []*schema.Column{LegalVersionsColumns[4], LegalVersionsColumns[17]},
+				Columns: []*schema.Column{LegalVersionsColumns[4], LegalVersionsColumns[18]},
 			},
 		},
 	}
@@ -823,6 +824,7 @@ var (
 		{Name: "success_rate_percent", Type: field.TypeInt, Default: 0},
 		{Name: "has_active_store_or_brand_page", Type: field.TypeBool, Default: false},
 		{Name: "seller_plan", Type: field.TypeEnum, Enums: []string{"FREE", "PRO", "BUSINESS"}, Default: "FREE"},
+		{Name: "checkmark_suggested_at", Type: field.TypeTime, Nullable: true},
 		{Name: "source", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

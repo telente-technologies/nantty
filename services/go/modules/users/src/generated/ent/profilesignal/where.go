@@ -115,6 +115,11 @@ func HasActiveStoreOrBrandPage(v bool) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldHasActiveStoreOrBrandPage, v))
 }
 
+// CheckmarkSuggestedAt applies equality check predicate on the "checkmark_suggested_at" field. It's identical to CheckmarkSuggestedAtEQ.
+func CheckmarkSuggestedAt(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCheckmarkSuggestedAt, v))
+}
+
 // Source applies equality check predicate on the "source" field. It's identical to SourceEQ.
 func Source(v string) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldSource, v))
@@ -533,6 +538,56 @@ func SellerPlanIn(vs ...SellerPlan) predicate.ProfileSignal {
 // SellerPlanNotIn applies the NotIn predicate on the "seller_plan" field.
 func SellerPlanNotIn(vs ...SellerPlan) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldNotIn(FieldSellerPlan, vs...))
+}
+
+// CheckmarkSuggestedAtEQ applies the EQ predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtNEQ applies the NEQ predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtNEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtIn applies the In predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCheckmarkSuggestedAt, vs...))
+}
+
+// CheckmarkSuggestedAtNotIn applies the NotIn predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtNotIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCheckmarkSuggestedAt, vs...))
+}
+
+// CheckmarkSuggestedAtGT applies the GT predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtGT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtGTE applies the GTE predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtGTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtLT applies the LT predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtLT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtLTE applies the LTE predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtLTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCheckmarkSuggestedAt, v))
+}
+
+// CheckmarkSuggestedAtIsNil applies the IsNil predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldCheckmarkSuggestedAt))
+}
+
+// CheckmarkSuggestedAtNotNil applies the NotNil predicate on the "checkmark_suggested_at" field.
+func CheckmarkSuggestedAtNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldCheckmarkSuggestedAt))
 }
 
 // SourceEQ applies the EQ predicate on the "source" field.

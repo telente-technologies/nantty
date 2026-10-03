@@ -115,6 +115,20 @@ func (_c *LegalVersionCreate) SetNillableIsFlaggedForLegalReview(v *bool) *Legal
 	return _c
 }
 
+// SetEffectiveAtIsDefault sets the "effective_at_is_default" field.
+func (_c *LegalVersionCreate) SetEffectiveAtIsDefault(v bool) *LegalVersionCreate {
+	_c.mutation.SetEffectiveAtIsDefault(v)
+	return _c
+}
+
+// SetNillableEffectiveAtIsDefault sets the "effective_at_is_default" field if the given value is not nil.
+func (_c *LegalVersionCreate) SetNillableEffectiveAtIsDefault(v *bool) *LegalVersionCreate {
+	if v != nil {
+		_c.SetEffectiveAtIsDefault(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *LegalVersionCreate) SetCreatedBy(v string) *LegalVersionCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -330,6 +344,10 @@ func (_c *LegalVersionCreate) defaults() {
 		v := legalversion.DefaultIsFlaggedForLegalReview
 		_c.mutation.SetIsFlaggedForLegalReview(v)
 	}
+	if _, ok := _c.mutation.EffectiveAtIsDefault(); !ok {
+		v := legalversion.DefaultEffectiveAtIsDefault
+		_c.mutation.SetEffectiveAtIsDefault(v)
+	}
 	if _, ok := _c.mutation.CreatedByName(); !ok {
 		v := legalversion.DefaultCreatedByName
 		_c.mutation.SetCreatedByName(v)
@@ -403,6 +421,9 @@ func (_c *LegalVersionCreate) check() error {
 	}
 	if _, ok := _c.mutation.IsFlaggedForLegalReview(); !ok {
 		return &ValidationError{Name: "is_flagged_for_legal_review", err: errors.New(`ent: missing required field "LegalVersion.is_flagged_for_legal_review"`)}
+	}
+	if _, ok := _c.mutation.EffectiveAtIsDefault(); !ok {
+		return &ValidationError{Name: "effective_at_is_default", err: errors.New(`ent: missing required field "LegalVersion.effective_at_is_default"`)}
 	}
 	if _, ok := _c.mutation.CreatedBy(); !ok {
 		return &ValidationError{Name: "created_by", err: errors.New(`ent: missing required field "LegalVersion.created_by"`)}
@@ -530,6 +551,10 @@ func (_c *LegalVersionCreate) createSpec() (*LegalVersion, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.IsFlaggedForLegalReview(); ok {
 		_spec.SetField(legalversion.FieldIsFlaggedForLegalReview, field.TypeBool, value)
 		_node.IsFlaggedForLegalReview = value
+	}
+	if value, ok := _c.mutation.EffectiveAtIsDefault(); ok {
+		_spec.SetField(legalversion.FieldEffectiveAtIsDefault, field.TypeBool, value)
+		_node.EffectiveAtIsDefault = value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(legalversion.FieldCreatedBy, field.TypeString, value)
