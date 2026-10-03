@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/follow.removed.v1.json",
+  "title": "FollowRemoved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "followerId",
+    "followeeId"
+  ],
+  "properties": {
+    "followerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followeeId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}
