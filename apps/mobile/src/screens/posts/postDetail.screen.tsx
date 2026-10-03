@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Share, StyleSheet, View, type TextInput } from "react-native";
+import { Share, StyleSheet, View, type TextInput } from "react-native";
 
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { CommentComposer } from "@/components/clips/commentComposer";
@@ -47,7 +47,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   return (
     <Screen background={colors.surface}>
       <CommentThreadContext.Provider value={commentThread}>
-        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <View style={styles.flex}>
           <Header title="Post" />
           <ThreadedCommentList
             commentHorizontalPadding={16}
@@ -89,7 +89,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
           />
           <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
           {sendInChatElement}
-        </KeyboardAvoidingView>
+        </View>
       </CommentThreadContext.Provider>
     </Screen>
   );
