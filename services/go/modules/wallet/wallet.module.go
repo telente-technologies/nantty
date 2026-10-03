@@ -3,9 +3,12 @@ package wallet
 import (
 	"context"
 
+	"zudomart/modules/wallet/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewWalletModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "wallet"}, nil
+type Module = src.Module
+
+func NewWalletModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewWalletModule(ctx, dependencies)
 }
