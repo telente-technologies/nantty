@@ -5,21 +5,20 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
-import { StatusBadge, convertSnakeCaseToLabel, type StatusTone } from "@/components/ui/statusBadge";
+import { StatusBadge } from "@/components/ui/statusBadge";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import type { DashboardSummary } from "@/types/dashboard.type";
 import type { OnlineOrderStatus } from "@/types/order.type";
-import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./dashboard.module.css";
 
-const orderStatusLabels: Record<OnlineOrderStatus, string> = { paid: "To pack", processing: "Processing", shipped: "Shipped", delivered: "Delivered", completed: "Completed", disputed: "Disputed", cancelled: "Cancelled", refunded: "Refunded" };
+const orderStatusLabels: Record<OnlineOrderStatus, string> = { new: "New", processing: "Processing", ready: "Ready", shipped: "Shipped", delivered: "Delivered", completed: "Completed", disputed: "Disputed", cancelled: "Cancelled", returned: "Returned", refunded: "Refunded" };
 
 export function DashboardOrdersByStatusPanel({ summary }: { readonly summary: DashboardSummary }) {
-  const openOrdersCount = summary.ordersByStatus.filter((entry) => entry.status === "paid" || entry.status === "processing").reduce((sum, entry) => sum + entry.count, 0);
+  const openOrdersCount = summary.ordersByStatus.filter((entry) => entry.status === "new" || entry.status === "processing" || entry.status === "ready").reduce((sum, entry) => sum + entry.count, 0);
   return (
-    <Panel title="Online orders" description={openOrdersCount > 0 ? `${openOrdersCount} waiting to be shipped` : "Nothing waiting to ship"} actions={<ButtonLink href="/orders" size="small">View orders</ButtonLink>}>
+    <Panel title="Orders by status" description={openOrdersCount > 0 ? `${openOrdersCount} to accept, pack or hand over` : "Nothing waiting on you"} actions={<ButtonLink href="/orders" size="small">View orders</ButtonLink>}>
       <div className={styles.statusGrid}>
         {summary.ordersByStatus.map((entry) => (
           <Link key={entry.status} href={`/orders?status=${entry.status}`} className={styles.statusCell}>
@@ -79,65 +78,6 @@ export function DashboardLowStockPanel({ summary }: { readonly summary: Dashboar
                 </span>
               </span>
               <StatusBadge tone={alert.available === 0 ? "error" : "caution"}>{alert.available === 0 ? "Out of stock" : `${alert.available} left`}</StatusBadge>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
-  );
-}
-
-export function DashboardBalancesPanel({ summary }: { readonly summary: DashboardSummary }) {
-  const { formatMoney } = useMoneyFormatter();
-  if (!summary.balances) return null;
-  const { escrow, pending, available, nextEscrowReleaseAt } = summary.balances;
-  return (
-    <Panel title="Wallet" actions={<ButtonLink href="/wallet" size="small">Open wallet</ButtonLink>}>
-      <div className={styles.balanceRows}>
-        <div className={styles.balanceRow}>
-          <span>
-            <span>In escrow</span>
-            <span className={`${styles.rowMeta} ${styles.subtle}`} style={{ display: "block" }}>
-              Released when buyers confirm delivery{nextEscrowReleaseAt ? ` · next ${formatRelativeTimeFromNow(nextEscrowReleaseAt)}` : ""}
-            </span>
-          </span>
-          <span className={styles.balanceAmount}>{formatMoney(escrow)}</span>
-        </div>
-        <div className={styles.balanceRow}>
-          <span>Pending</span>
-          <span className={styles.balanceAmount}>{formatMoney(pending)}</span>
-        </div>
-        <div className={styles.balanceRow}>
-          <span>Available to withdraw</span>
-          <span className={`${styles.balanceAmount} ${styles.availableAmount}`}>{formatMoney(available)}</span>
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
-const activityStatusTone: Record<string, StatusTone> = { completed: "success", paid: "info", processing: "info", shipped: "info", delivered: "success", disputed: "error", refunded: "neutral", partially_refunded: "caution", cancelled: "neutral", voided: "neutral" };
-
-export function DashboardRecentActivityPanel({ summary }: { readonly summary: DashboardSummary }) {
-  const { formatMoney } = useMoneyFormatter();
-  return (
-    <Panel title="Recent activity">
-      {summary.recentActivity.length === 0 ? (
-        <EmptyState title="No activity yet" />
-      ) : (
-        <ul className={styles.listRows}>
-          {summary.recentActivity.map((activity) => (
-            <li key={`${activity.kind}-${activity.id}`} className={styles.listRow}>
-              <span className={styles.rowMain}>
-                <Link href={activity.kind === "pos_sale" ? `/sales/${activity.id}` : `/orders/${activity.id}`} className={styles.rowTitle}>
-                  {activity.kind === "pos_sale" ? "In-store sale" : "Online order"} {activity.reference}
-                </Link>
-                <span className={styles.rowMeta} title={formatDateTimeForDisplay(activity.createdAt)}>
-                  {activity.customerName ?? "Walk-in customer"} · {formatRelativeTimeFromNow(activity.createdAt)}
-                </span>
-              </span>
-              <StatusBadge tone={activityStatusTone[activity.status] ?? "neutral"}>{convertSnakeCaseToLabel(activity.status)}</StatusBadge>
-              <span className={styles.rowValue}>{formatMoney(activity.total)}</span>
             </li>
           ))}
         </ul>

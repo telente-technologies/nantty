@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
-
-import { DashboardBalancesPanel, DashboardLowStockPanel, DashboardOrdersByStatusPanel, DashboardRecentActivityPanel, DashboardTopProductsPanel } from "@/components/dashboard/dashboardOperationsPanels";
-import { DashboardChannelSplitPanel, DashboardRevenueChartPanel, DashboardSalesKpiRow } from "@/components/dashboard/dashboardSalesPanels";
+import { DashboardActivityFeedPanel, DashboardAlertsPanel, DashboardRecentOrdersPanel } from "@/components/dashboard/dashboardActivityPanels";
+import { DashboardInsightTiles } from "@/components/dashboard/dashboardInsightTiles";
+import { DashboardLowStockPanel, DashboardOrdersByStatusPanel, DashboardTopProductsPanel } from "@/components/dashboard/dashboardOperationsPanels";
+import { DashboardRevenueChartPanel, DashboardSalesKpiRow } from "@/components/dashboard/dashboardSalesPanels";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout, LoadingBlock } from "@/components/ui/feedback";
-import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { PageStack } from "@/components/ui/panel";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
@@ -24,12 +23,9 @@ function readGreetingForHour(hour: number): string {
 
 export function DashboardView() {
   const { sessionView, can } = useSellerSession();
-  const { selectedLocationId, locations, settings } = useStoreContext();
-  const [scope, setScope] = useState<"all" | "location">("all");
-  const scopedLocationId = scope === "location" && selectedLocationId ? selectedLocationId : "all";
-  const summaryQuery = useSellerQuery<DashboardSummary>("/seller/dashboard", { locationId: scopedLocationId });
-  const selectedLocationName = locations.find((location) => location.id === selectedLocationId)?.name;
-  const firstName = (sessionView?.operator?.name ?? sessionView?.user.name ?? "").split(" ")[0];
+  const { settings } = useStoreContext();
+  const summaryQuery = useSellerQuery<DashboardSummary>("/seller/dashboard");
+  const firstName = (sessionView?.user.name ?? "").split(" ")[0];
   const storeHour = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: settings?.timezone ?? "Africa/Lagos" }).format(new Date()));
   const summary = summaryQuery.data;
 
@@ -47,23 +43,12 @@ export function DashboardView() {
           </p>
         </div>
         <div className={styles.headerActions}>
-          {selectedLocationName ? (
-            <SegmentedControl
-              label="Dashboard scope"
-              value={scope}
-              onValueChange={setScope}
-              options={[
-                { value: "all", label: "All locations" },
-                { value: "location", label: selectedLocationName },
-              ]}
-            />
-          ) : null}
           <Button size="small" variant="ghost" iconName="refresh20" onClick={summaryQuery.reload} isBusy={summaryQuery.isLoading && Boolean(summary)}>
             Refresh
           </Button>
-          {can("pos:sell") ? (
-            <ButtonLink href="/pos" variant="primary" iconName="shoppingCart24">
-              Open register
+          {can("orders:view") ? (
+            <ButtonLink href="/orders?status=new" variant="primary" iconName="shoppingCart24">
+              New orders
             </ButtonLink>
           ) : null}
           {can("products:manage") ? (
@@ -73,9 +58,8 @@ export function DashboardView() {
           ) : null}
         </div>
       </header>
-      {scope === "location" ? <Callout tone="info">Online orders are not tied to a shop, so they still count in this view. Register sales and stock are for {selectedLocationName} only.</Callout> : null}
       {summaryQuery.errorMessage && !summary ? (
-        <Callout tone="error" title="The dashboard could not load" action={<Button size="small" onClick={summaryQuery.reload}>Try again</Button>}>
+        <Callout tone="error" title="The overview could not load" action={<Button size="small" onClick={summaryQuery.reload}>Try again</Button>}>
           {summaryQuery.errorMessage}
         </Callout>
       ) : null}
@@ -83,15 +67,16 @@ export function DashboardView() {
       {summary ? (
         <>
           <DashboardSalesKpiRow summary={summary} />
+          <DashboardInsightTiles summary={summary} />
           <div className={styles.mainGrid}>
             <div className={styles.mainStack}>
               <DashboardRevenueChartPanel summary={summary} />
               <DashboardOrdersByStatusPanel summary={summary} />
-              <DashboardRecentActivityPanel summary={summary} />
+              <DashboardRecentOrdersPanel summary={summary} />
+              <DashboardActivityFeedPanel summary={summary} />
             </div>
             <div className={styles.sideStack}>
-              {can("wallet:view") ? <DashboardBalancesPanel summary={summary} /> : null}
-              <DashboardChannelSplitPanel summary={summary} />
+              <DashboardAlertsPanel summary={summary} />
               <DashboardTopProductsPanel summary={summary} />
               <DashboardLowStockPanel summary={summary} />
             </div>
