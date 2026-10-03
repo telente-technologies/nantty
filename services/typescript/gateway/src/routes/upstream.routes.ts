@@ -49,6 +49,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/payouts/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/creator-tiers", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/creators/", upstream: "money", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/coins/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
 
