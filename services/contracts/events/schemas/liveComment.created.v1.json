@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveComment.created.v1.json",
+  "title": "LiveCommentCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "comment",
+    "mentionedUserIds"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "comment": {
+      "type": "object",
+      "required": [
+        "id",
+        "liveId",
+        "author",
+        "text",
+        "kind",
+        "createdAt",
+        "mentions",
+        "replyToId",
+        "pinned"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "liveId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "author": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "username"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "isCreator": {
+              "type": "boolean"
+            }
+          }
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "kind": {
+          "const": "comment"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "userId",
+              "username",
+              "start",
+              "length"
+            ],
+            "properties": {
+              "userId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "username": {
+                "type": "string"
+              },
+              "start": {
+                "type": "integer"
+              },
+              "length": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "replyToId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "pinned": {
+          "type": "boolean"
+        }
+      }
+    },
+    "mentionedUserIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

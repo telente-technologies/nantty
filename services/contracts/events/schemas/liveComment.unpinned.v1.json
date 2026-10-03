@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveComment.unpinned.v1.json",
+  "title": "LiveCommentUnpinned",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "commentId",
+    "actorId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "commentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actorId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

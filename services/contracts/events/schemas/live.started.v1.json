@@ -8,7 +8,17 @@
     "liveId",
     "hostId",
     "title",
-    "category"
+    "category",
+    "visibility",
+    "notifyAudience",
+    "startedAt",
+    "host",
+    "hostName",
+    "hostHandle",
+    "isShopping",
+    "viewerCount",
+    "notifyUserIds",
+    "notifyTruncated"
   ],
   "properties": {
     "liveId": {
@@ -24,6 +34,86 @@
     },
     "category": {
       "type": "string"
+    },
+    "visibility": {
+      "enum": [
+        "public",
+        "followers",
+        "subscribers"
+      ]
+    },
+    "notifyAudience": {
+      "enum": [
+        "followers",
+        "subscribers"
+      ],
+      "description": "who may be alerted; recipients are already resolved in notifyUserIds for followers"
+    },
+    "coverUrl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "username"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "isCreator": {
+          "type": "boolean"
+        }
+      }
+    },
+    "hostName": {
+      "type": "string"
+    },
+    "hostHandle": {
+      "type": "string"
+    },
+    "isShopping": {
+      "type": "boolean"
+    },
+    "viewerCount": {
+      "type": "integer"
+    },
+    "notifyUserIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "maxItems": 1000,
+      "description": "followers who follow the host, are not blocked either way and did not turn off both push and email for the live category"
+    },
+    "notifyTruncated": {
+      "type": "boolean",
+      "description": "true when the host has more than 1000 eligible followers"
     }
   }
 }

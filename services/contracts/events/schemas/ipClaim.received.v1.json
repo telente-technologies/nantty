@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ipClaim.received.v1.json",
+  "title": "IpClaimReceived",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "kind",
+    "accusedSellerId",
+    "listingId"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "trademark",
+        "counterfeit"
+      ]
+    },
+    "accusedSellerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "listingId": {
+      "type": "string"
+    }
+  }
+}

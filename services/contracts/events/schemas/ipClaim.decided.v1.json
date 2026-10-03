@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ipClaim.decided.v1.json",
+  "title": "IpClaimDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "outcome",
+    "kind",
+    "accusedSellerId",
+    "listingId",
+    "reason",
+    "strikeAdded"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "enum": [
+        "upheld",
+        "rejected",
+        "needs_info"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "trademark",
+        "counterfeit"
+      ]
+    },
+    "claimantUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accusedSellerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "listingId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "strikeAdded": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveRecording.completed.v1.json",
+  "title": "LiveRecordingCompleted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "recordingId"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recordingId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "durationSeconds": {
+      "type": "integer"
+    },
+    "sizeBytes": {
+      "type": "integer"
+    },
+    "hostId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}
