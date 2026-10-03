@@ -9,7 +9,8 @@
     "go-live": { "publishesEvents": true },
     "go-money": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-payouts", "money-domain-events"] },
     "go-ads": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-ads-reports"] },
-    "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory"] },
+    "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory", "intelligence-trust-content-scores", "trust-domain-events"] },
+    "search": { "consumes": ["search-domain-events"] },
     "social": { "publishesEvents": true },
     "media": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["media-domain-events", "jobs-media"] },
     "notifications": { "enqueuesJobs": true, "consumes": ["notifications-domain-events", "jobs-email"] },
@@ -17,6 +18,14 @@
     "intelligence": { "enqueuesJobs": true, "consumes": ["intelligence-domain-events"] }
   },
   "eventQueues": {
+    "trust-domain-events": ["report.created"],
+    "search-domain-events": [
+      "profile.updated", "username.changed", "creatorProfile.created", "profileCheckmark.changed", "checkmark.approved", "checkmark.revoked",
+      "accountStatus.changed", "account.suspended", "account.banned", "user.unbanned", "suspension.ended", "account.deactivated", "account.deletionExecuted",
+      "profile.visibilityChanged", "product.created", "product.updated", "product.published", "product.unpublished", "product.archived", "store.created", "store.updated",
+      "brand.updated", "category.updated", "sound.updated", "post.created", "post.deleted", "block.created", "block.removed", "follow.created", "follow.removed",
+      "consent.granted", "consent.withdrawn"
+    ],
     "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched"],
     "commerce-domain-events": [
       "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
@@ -43,6 +52,6 @@
   },
   "jobQueues": [
     "jobs-email", "jobs-media", "jobs-reports", "jobs-payouts", "jobs-search-indexing", "jobs-ads-reports",
-    "intelligence-trust-advisory"
+    "intelligence-trust-advisory", "intelligence-trust-content-scores"
   ]
 }
