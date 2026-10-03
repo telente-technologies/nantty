@@ -62,9 +62,7 @@ export async function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   await config.load();
 
   return Object.freeze({
-    // NODE_ENV is read here, once, the way the framework reads it: `prod`
-    // and `Production` are production, an unknown value warns once. app.ts
-    // and server.ts take the resolved value from this object.
+    // Normalises `prod`/`Production`; app.ts and server.ts use this resolved value.
     nodeEnv: resolveEnvironment({ NODE_ENV: text(config, "node_env", "development") }),
     host: text(config, "host", "0.0.0.0"),
     port: port(config),
