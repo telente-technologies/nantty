@@ -30,6 +30,8 @@ type AccountSummary struct {
 
 type AccountDirectory interface {
 	FindAccountSummary(ctx context.Context, accountId uuid.UUID) (AccountSummary, bool, error)
+	FindAccountSummaryByUsername(ctx context.Context, username string) (AccountSummary, bool, error)
+	IsUsernameTaken(ctx context.Context, username string, excludingAccountId uuid.UUID) (bool, error)
 	RenameAccountUsername(ctx context.Context, accountId uuid.UUID, username string) error
 	DeactivateAccountAndRevokeSessions(ctx context.Context, accountId uuid.UUID) error
 }
