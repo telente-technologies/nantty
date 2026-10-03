@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
 	"zudomart/modules/admin/src/types"
 )
 
@@ -35,5 +36,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.StaffVie
 	if err != nil {
 		return types.StaffView{}, err
 	}
-	return types.ConvertStaffToView(staff), nil
+	return staffadminservices.BuildSingleStaffView(ctx, handler.Container, staff)
 }
