@@ -140,7 +140,7 @@ func (service EscrowService) LockEscrowForOrder(ctx context.Context, client *ent
 
 func escrowEventData(held *ent.Escrow) map[string]any {
 	return map[string]any{
-		"escrowId": held.ID.String(), "orderId": held.OrderID, "checkoutId": held.CheckoutID, "storeId": held.StoreID,
+		"escrowId": held.ID.String(), "orderId": held.OrderID, "orderNumber": held.OrderReference, "checkoutId": held.CheckoutID, "storeId": held.StoreID,
 		"buyerUserId": held.BuyerUserID, "sellerUserId": held.SellerUserID, "status": string(held.Status),
 		"amount":           map[string]any{"amountMinor": held.AmountMinor, "currency": held.Currency},
 		"processingFee":    map[string]any{"amountMinor": held.ProcessingFeeMinor, "currency": held.Currency},
