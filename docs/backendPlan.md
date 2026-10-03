@@ -35,7 +35,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 **Data:** one primary **Aurora PostgreSQL + PostGIS** cluster. Each owning service has **its own schema** (`accounts`, `ledger`, `payments`, `marketplace`, `orders`, `social`, `realtime`, `ads`, `points`, …). Only the owner writes; other services get **read-only grants** for joins and read models. Writes across ownership boundaries go through the owner's API or an event, never a direct cross-schema write. ClickHouse/OpenSearch are added later, fed from events.
 
-**Events (no Kafka on day one):** every owner writes a transactional **outbox** row with its business change. A publisher relays it to **SNS / EventBridge** (domain events, fan-out) and **SQS** (work queues: jobs, retries, DLQs). The code depends on one `DomainEventPublisher` / `JobQueue` interface per language, so MSK can replace SNS/SQS later without touching business code. Phoenix consumes its own SQS queue subscribed to the live/chat topics.
+**Events (no Kafka on day one; RabbitMQ adopted, owner, 2026-10-03):** every owner writes a transactional **outbox** row with its business change. A relay publishes it with publisher confirms to the RabbitMQ topic exchange **`zudomart.events`** (routing key = event name); each consumer service owns a durable quorum queue bound to the keys it needs. Work goes through the direct exchange **`zudomart.jobs`** (one quorum queue per job type). Every queue has retry queues (30 s, 2 m, 10 m, 30 m) and a `.dlq` after 5 attempts. Locally RabbitMQ runs in Docker; in AWS it is Amazon MQ for RabbitMQ (cluster deployment, private subnets). The code depends on one `DomainEventPublisher` / `JobQueue` / `QueueConsumer` interface per language, so the broker can change again without touching business code (the SNS/SQS adapters remain behind `EVENT_BUS=sqs` until the cut-over is proven). Phoenix consumes its own queue bound to the live/chat routing keys.
 
 **Compute:** **ECS on Fargate** first (one service per deployable, autoscaling on CPU/queue depth). EKS only if ECS limits are hit. **Media:** S3 + CloudFront (signed URLs), LiveKit for live.
 
@@ -43,7 +43,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 ### 1.1 Role of `apps/api`
 
-`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by Bachs Connect in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
+`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by the Paystack adapter in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
 
 | `apps/api` module | Ports to | Reuse |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ The JSON lists about 17 Go services. Running 17 separately deployed Go binaries,
 | `go-ads` | ads | Separate scaling and billing cadence |
 | `go-trust` | moderation | Async, queue-driven |
 
-Cross-deployable calls go over gRPC/HTTP (sync) or outbox → SNS/SQS (async). Deployables share the cluster but own separate schemas, so splitting one out later is a deploy change, not a rewrite.
+Cross-deployable calls go over gRPC/HTTP (sync) or outbox → RabbitMQ (async). Deployables share the cluster but own separate schemas, so splitting one out later is a deploy change, not a rewrite.
 
 ### 1.3 Request path
 
@@ -81,7 +81,7 @@ mobile / webapp BFF / studio BFF / seller BFF / ads BFF / admin BFF
   ts.gateway (Zudojs)                 Phoenix realtime
   - JWT verify (JWKS), rate limits    - auth via access token or ticket
   - idempotency fast path, currency   - topics user:*, conversation:*, live:*
-        │ gRPC/HTTP                           ▲ SQS (subscribed to SNS/EventBridge)
+        │ gRPC/HTTP                           ▲ RabbitMQ queue (bound to zudomart.events)
         ▼                                     │
   go-* / ts-* services ──outbox──► publisher ─┘   python intelligence (HMAC, internal; scores only)
         └──────── one Aurora cluster, schema per owner, read-only grants ────────┘
@@ -120,8 +120,8 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /users/me/username-policy, PATCH /users/me/username | M W | ◐ | Prisma models `UsernameChange/Hold/ReservedUsername` exist, but no routes **✅ built (go-identity).** |
 | GET /users/me/profiles, GET/PUT /users/me/acting-profile | M | ✗ | go.users.actingProfiles **✅ built (go-identity).** |
 | GET/POST /brands, /brands/:id[/products,/follow] | M | ✗ | go.users.brands + go.catalog.listBrandProducts |
-| POST/DELETE /users/:id/follow, /stores/:id/follow; GET followers/following/follow-status/connections | M W | ✅ | Offline queue sends `Idempotency-Key` on follow and the online path does not, so the key must be **optional** here |
-| POST/DELETE /users/:id/block, GET /users/me/blocked | M W | ✅ | |
+| POST/DELETE /users/:id/follow, /stores/:id/follow; GET followers/following/follow-status/connections | M W | ✅ | Offline queue sends `Idempotency-Key` on follow and the online path does not, so the key must be **optional** here | **✅ built (ts-social)** for users (follow states, requests inbox, searchable lists, `GET /users/:id/follow-status`); store follows stay in go-catalog.
+| POST/DELETE /users/:id/block, GET /users/me/blocked | M W | ✅ | | **✅ built (ts-social).**
 | GET /search/people | M W | ✅ | → ts.search |
 | GET /locale, /locale/countries, /currencies | M W L | ✅ | → go.currency **✅ built (go-identity).** |
 | GET /verification/plans, /verification/me, POST /verification/applications, /verification/subscription/cancel | M | ◐ | Server has `/verification/apply` + `/verification/me`. Rename to the mobile paths, and add plans (go.subscriptions) |
@@ -130,15 +130,15 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 | Endpoint | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| GET /feeds/for-you, /feeds/following, /feeds/suggested-clips, /clips?tab | M W | ✅ | **Envelope mismatch** (§5.1): server pages are `{data,nextCursor}` and mobile `apiClient.service.ts:65` unwraps `payload.data`, so mobile loses `nextCursor` |
-| POST /feeds/feedback, /feeds/interactions | M | ✅ | |
-| POST /posts `{text,mediaIds,audience,kind,soundId,visibility?}` | M | ✅ | **`audience: "followers"` is rejected**: server is `schema.enum(["everyone"])` (`apps/api/src/modules/posts/validators/posts.validator.ts:22`), mobile sends `everyone\|followers` (`apps/mobile/src/components/create/postToolbar.tsx`). Decision §3.3 |
-| GET/DELETE /posts/:id, like/unlike, share, /posts/:id/products | M W | ✅ | |
-| POST /posts/:id/repost `{text?}` | M W | ✅ | Server must create a new post with `resharedFrom` (plans §7). Confirm `RepostBodySchema` accepts `text` |
+| GET /feeds/for-you, /feeds/following, /feeds/suggested-clips, /clips?tab | M W | ✅ | **Envelope mismatch** (§5.1): server pages are `{data,nextCursor}` and mobile `apiClient.service.ts:65` unwraps `payload.data`, so mobile loses `nextCursor` | **✅ built (ts-social)** plus `GET /feeds/popular` (guest fallback), honours personalization consent; `/clips?tab=`.
+| POST /feeds/feedback, /feeds/interactions | M | ✅ | | **✅ feedback built (ts-social).**
+| POST /posts `{text,mediaIds,audience,kind,soundId,visibility?}` | M | ✅ | **`audience: "followers"` is rejected**: server is `schema.enum(["everyone"])` (`apps/api/src/modules/posts/validators/posts.validator.ts:22`), mobile sends `everyone\|followers` (`apps/mobile/src/components/create/postToolbar.tsx`). Decision §3.3 | **✅ built (ts-social):** `audience everyone|followers`, `visibility`, `kind post|clip|story`, `isAiGenerated`, `replyToComment`+`stickerLayout`; media descriptors are read from the request body until ts.media exists.
+| GET/DELETE /posts/:id, like/unlike, share, /posts/:id/products | M W | ✅ | | **✅ built (ts-social).**
+| POST /posts/:id/repost `{text?}` | M W | ✅ | Server must create a new post with `resharedFrom` (plans §7). Confirm `RepostBodySchema` accepts `text` | **✅ built (ts-social).**
 | GET /posts/:id/analytics | M W | ✗ | Owner-only, `403 NOT_POST_OWNER` (plans §11). Read model from ClickHouse via ts.feed |
-| GET/POST /posts/:id/comments, /comments/:id/replies, comment like, DELETE /comments/:id | M | ✅ | |
-| GET /users/:id/posts, /stores/:id/posts | M W | ✅ | |
-| Stories: /stories/tray, /users/:id/stories, POST /stories, seen, replies | M | ✅ | Mobile sends both `mediaId` and a full `media` object: server reads `mediaId` only |
+| GET/POST /posts/:id/comments, /comments/:id/replies, comment like, DELETE /comments/:id | M | ✅ | | **✅ built (ts-social)** (tree: `/comments/:id/replies` returns direct children).
+| GET /users/:id/posts, /stores/:id/posts | M W | ✅ | | **✅ built (ts-social)** (users only).
+| Stories: /stories/tray, /users/:id/stories, POST /stories, seen, replies | M | ✅ | Mobile sends both `mediaId` and a full `media` object: server reads `mediaId` only | **✅ tray, user stories, publish, seen built (ts-social); story replies not built.**
 | Sounds: GET /sounds, /sounds/trending, /saved, /:id, /:id/clips; PATCH /sounds/:id; POST/DELETE /sounds/:id/save | M | ✗ | ts.social.sounds |
 | POST /posts/:id/gifts, POST /tips `{targetType,targetId,coins}` | M | ✅ | → go.creators. Tip balance field is `balance`, live gift receipt is `coinBalance`: unify on `coinBalance` |
 
@@ -155,9 +155,9 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 | Endpoint / event | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| GET/POST /conversations, GET/PATCH /conversations/:id, /search | M W | ✅ | |
-| GET/POST /conversations/:id/messages (`{text}`, `{kind:"voice",mediaId,durationSeconds,text:""}`, `{kind:"image",mediaId,text:""}`) | M W | ✅ | No client message id in the body. Use `Idempotency-Key` as the dedupe key and echo it as `clientMessageId` in `message.created` so the optimistic bubble reconciles |
-| POST /conversations/:id/read, GET /messages/unread-count, reactions | M | ✅ | |
+| GET/POST /conversations, GET/PATCH /conversations/:id, /search | M W | ✅ | | **✅ built (ts-social)** (metadata only; messages are ciphertext envelopes).
+| GET/POST /conversations/:id/messages (`{text}`, `{kind:"voice",mediaId,durationSeconds,text:""}`, `{kind:"image",mediaId,text:""}`) | M W | ✅ | No client message id in the body. Use `Idempotency-Key` as the dedupe key and echo it as `clientMessageId` in `message.created` so the optimistic bubble reconciles | **✅ built (ts-social):** `encryption {deviceId, ciphertext, protocol}` replaces `text`; `Idempotency-Key` is the `clientMessageId`.
+| POST /conversations/:id/read, GET /messages/unread-count, reactions | M | ✅ | | **✅ read, reactions built (ts-social).**
 | Groups: /conversations/groups, members, admins, leave; Channels: /channels, subscribe | M | ✅ | |
 | POST /stores/:storeId/conversations, GET /seller/conversations | M SD | ✅ | Seller inbox shares the same conversations (§4.3) |
 | POST /realtime/tickets | — | ✅ | Short-lived socket ticket for browsers (BFF cookies cannot reach the socket) |
@@ -201,11 +201,11 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | POST /orders/checkout `{addressId}` → `{orderGroups,payableCheckoutId,total}` | M W | ✅ | One `Checkout`, **one order group per seller** (§4.6). Mobile reads `orders`/`payableOrderId` today; rename during wiring |
 | GET /orders?status, /orders/:id, cancel, confirm-receipt | M W | ✅ | Mobile `GET /orders` expects a bare array, which needs a page envelope; `status` filter values must match §4.3.5 |
 | GET /orders/:id/escrow, POST /orders/:id/disputes, GET /disputes, /disputes/:id, messages | M W | ✅ (GET /disputes list ✗) | **✅ built (go-money).** |
-| POST /payments/initialize `{orderId}` (Bachs hosted checkout, one per seller group), POST /payments/orders/:id/verify, POST /webhooks/bachs | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built (go-money).** |
+| POST /payments/initialize `{checkoutId}` (Paystack transaction, one per checkout, dynamic split for direct groups), POST /payments/orders/:id/verify, POST /webhooks/paystack | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built on Paystack (go-money): one transaction per seller order (one per checkout is a later step), subaccount split for direct orders.** |
 | GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
 | GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
 | GET /store-rewards/me (per-store credit balances), GET /seller/marketing/rewards/summary | M S | ✅ | **New, seller-funded** (§ Store rewards below). Per-store credit ledger in go-commerce, not go-money cash. Referral and platform loyalty/cashback endpoints removed |
-| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from SQS and sends SES email through `@zudomart/email-templates` |
+| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from RabbitMQ (`notifications-domain-events`, jobs on `jobs-email`) and sends SES email through `@zudomart/email-templates` |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
 | POST /waitlist | L | ✅ | ts.campaigns |
 
@@ -255,11 +255,11 @@ Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. apps/api h
 | Endpoint group | Ref | Notes |
 | --- | --- | --- |
 | /admin/auth/* (login, TOTP, WebAuthn, step-up, refresh, me, logout), /admin/account/*, /admin/admins/* | ◐ | Separate token audience; SUPERADMIN via CLI only |
-| /admin/audit (+facets, export) | ✅ | |
+| /admin/audit (+facets, export) | ✅ built (B1) | Filters search/area/actor/target/dates, CSV export (formula-safe, audited), `actor.departments`, `stepUpVerified` |
 | /admin/metrics/overview | ✗ | ClickHouse + ledger per-currency sums |
-| /admin/users/* (warn/suspend/ban/force-logout/personal-data), usernames, reserved usernames | ◐ | |
-| /admin/verification/* | ◐ | Approving KYB on a Pro/Business store turns on the Gold check; it **no longer** turns on dashboard access (contract text must change) |
-| /admin/applications/sellers, /creators | ✅ | Seller approval is what grants dashboard access |
+| /admin/users (list, detail, restrict, suspend, reinstate, ban, unban, delete, username reassign / assign-held), /admin/usernames/held\|hold, /admin/suspensions/accounts (+reinstate, appeal decide), /admin/suspensions/cases (go-trust) | ✅ built (B1) | warn, force-logout, personal-data reveal are not built | |
+| /admin/verifications, /admin/checkmark-grants, /admin/accounts(/created), /admin/black-applications, /admin/business-documents | ✅ built (B1) | Approving KYB on a Pro/Business store turns on the Gold check; it **no longer** turns on dashboard access (contract text must change) |
+| /admin/applications/creators | ✅ built (B1) | Sellers still ✅ elsewhere. | Seller approval is what grants dashboard access |
 | Moderation reports/appeals/copyright, ads review, advertisers, ad policies, brands, IP claims | ◐ | |
 | Orders, escrows, disputes resolve, refunds, payouts (approve/hold/reject), coins review/reverse, ledger read | ✅ mostly | Add **live gift / battle** review: GET /admin/lives/:id/gifts, /admin/battles/:id |
 | /admin/config/plans | ◐ | `PlansConfiguration` must split **verification plans** (BLUE_*, GOLD_*, BLACK_OFFICIAL) from **seller plans** (FREE/PRO/BUSINESS with `dashboardEntitlements`) |
@@ -280,8 +280,8 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 | `/v1/chat/spam-score` | ✅ done (B7) | Sender behaviour metadata only; contract rejects content fields |
 | `/v1/moderation/classify` | ✅ done (B7) | Text heuristics + pluggable `ModerationModel`; suggestions only |
 | `/v1/creators/real-followers` | ✅ done (B7) | Estimate and lower bound; goCreator/goTrust decide eligibility |
-| Domain-event SQS consumer (`INTELLIGENCE_DOMAIN_EVENTS_QUEUE_URL`) | ✅ done (B7) | Idempotent by `eventId`, consent gating (`consent.granted/withdrawn`, `account.deletionRequested/Executed` per published contracts); needs outbox → SNS → SQS wiring in infra |
-| Suspension suggestions → goTrust advisory queue (`INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`) | ✅ producer done (B7) | goTrust must consume `suspension.suggested`; advisory only |
+| Domain-event consumer (RabbitMQ `intelligence-domain-events`, aio-pika; `EVENT_BUS=sqs` keeps the old SQS poller) | ✅ done (B7) | Idempotent by `eventId`, consent gating (`consent.granted/withdrawn`, `account.deletionRequested/Executed` per published contracts); poison → `.dlq`, failures → retry tiers |
+| Suspension suggestions → goTrust advisory queue (RabbitMQ job queue `intelligence-trust-advisory`) | ✅ producer done (B7) | goTrust must consume `suspension.suggested`; advisory only |
 | Caller wiring (circuit breakers in go/ts services) | ✗ open | Each calling service owns its client |
 
 ### 2.13 Cross-app mismatch list (to fix during wiring)
@@ -333,22 +333,71 @@ Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`
 
 ### 2.15 Built so far: go-money (ledger, payments, escrow, wallet, creators)
 
-Done and covered by integration tests (real Postgres, Bachs faked at the HTTP layer): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
+Done and covered by integration tests (real Postgres, Paystack faked at the HTTP layer by `paymentsTesting/fakePaystack*.util.go`): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
 
 - Internal gRPC for go-live (`LiveMoneyService`: gift charge with tier split / host fallback / battle holdings, battle settlement, battle gift totals, coin balance) and go-commerce (`CheckoutMoneyService`: register checkout payables with escrow/direct mode, record shipped/delivered, confirm receipt, get escrow). See `services/README.md`.
-- **Bachs Connect (3 Oct, done):** the old provider adapters, clearing accounts and platform-held settlement are gone. Each seller and creator has a Bachs connected account; marketplace orders are direct charges on the seller account (`X-Account-Id`, `platform_fee`), escrow and the 24h lock stay inside the seller account (manual payout schedule, payouts only from go-money), refunds return the platform fee first, creator shares move by transfer then payout, and the ledger is a mirror of provider-held seller funds reconciled daily against Bachs balances (mismatch freezes payouts). See `docs/checkoutPaymentFlowPlan.md` §11.
+- **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** The Bachs Connect code is removed; the Paystack implementation is live in go-money (status in `docs/integrations/paystack.md` §12). Target: one Paystack transaction per checkout; direct groups split to seller subaccounts (T+1 settlement, Zudomart never holds that money); escrow in Zudomart's Paystack balance (E2) released after delivery + 24h lock by Paystack transfer, or manual-settlement subaccounts (E1) if Paystack confirms; creator shares paid by transfer; refunds through the Refund API with seller debt for settled direct shares; daily reconciliation against Paystack transactions, balance, settlements and transfers. Full list: `docs/checkoutPaymentFlowPlan.md` §12.
 - Seller balances per the checkout plan: in escrow → locked 24h → available → payout requested → paid, with debt recovery instead of negative balances; daily payout run; `GET /wallets/me` adds `locked`, `inEscrow`, `payoutRequested`, `negativeBalance`, `nextAvailableAt`.
 - `POST /disputes/:id/close` (buyer withdraws), `POST /wallets/me/withdrawals/:id/cancel`, `GET /wallets/me/withdrawals`.
 - Admin: ledger integrity and statements, journal reversal (step-up), provider reconciliation, dispute queue and resolution (release / refund / partial, step-up), escrow refunds, withdrawal review, payout run, creator tiers and membership.
 
 Changes the clients must make: lists are `{data,nextCursor}` (`/coins/packages`, `/banks`, `/wallets/me/transactions`, `/wallets/me/payout-accounts`, `/wallets/me/escrow-holds`, `/disputes`); the coin purchase body is `{packageId}` and app clients get `purchaseChannel: "store_iap"` (they must buy through IAP); `POST /wallets/me/withdrawals` returns a `WalletTransaction` plus `fee`, `netAmount`, `withdrawalStatus`; `EscrowDetail.buyer`/`store` carry only `id` until the gateway composes profiles.
 
+### 2.17 Built in batch B1: identity, admin and trust
+
+Done with integration tests against compose (`pnpm backend:test:go`, `pnpm backend:test:gateway`):
+
+- **Guest browsing** (gateway): anonymous GET on public routes (feeds, clips, posts, explore, products, stores, lives, public profiles incl. `GET /users/by-username/{username}`, `GET /legal/policy-versions/current`), per IP + `X-Device-Id` rate limits (`GUEST_RATE_LIMIT_PER_MINUTE` 120, `GUEST_SENSITIVE_RATE_LIMIT_PER_MINUTE` 30 on feeds/explore/search/products/stores/clips, 429 + `Retry-After`), `x-zudomart-viewer: anonymous` upstream, private routes answer `401 UNAUTHENTICATED`. `POST /reports` goes to go-trust when the body has a `conversationId` or a chat `targetType`.
+- **RBAC** (admin): permission catalogue and ten department templates (`staffauth.DepartmentRoleTemplates`), custom roles, several roles per admin (effective permissions are the union and are put in the token with legacy aliases), superadmin implicit, second-superadmin approval (`GET/PUT /admin/staff-settings`, default on), suspend / revoke / enable / reset-mfa with session killing (a session checker also rejects live access tokens at once), "cannot grant what you do not hold", every write audited with staff name, id, departments, target, before/after, reason, IP, request id and step-up flag.
+- **User actions** (users, with auth `AccountEnforcement` port): restrict (features + days), suspend (120-day deletion clock, worker deletes profile and users-owned data and emits `account.deletionExecuted` so owners anonymise financial/order records, retained 7 years), ban (permanent bans block email / phone / device re-signup by HMAC hash), delete, username reassign and assign-held (hold bypass flag, audited as `username.assigned_hold_bypassed`), suspension appeals. Python suggestions are advisory `suspension_cases` in go-trust (`POST /internal/suspension-cases` and the `INTELLIGENCE_TRUST_ADVISORY_QUEUE` RabbitMQ consumer); only an admin approval calls the users service.
+- **Creator Program**: `GET /creators/eligibility` (checklist + decision), `POST /creators/applications`, `GET /creators/applications/me`, admin review queue; thresholds from the `creator-thresholds` setting; signals (followers, original posts, violations, fraud/risk scores, ID, orders, plan) are written by social / Python / commerce through `PUT /internal/profiles/{profileId}/signals`.
+- **Checkmarks v2**: profile-type rule (Personal blue, Business/Brand gold, Government black), suggestions + dismiss, applications, admin transitions, lifetime grants (Black superadmin only), admin-created accounts (superadmin), Black vetting with maker-checker and handle reservation (`reserved_official` hold), yearly re-verification worker, billing hook `POST /internal/checkmarks/{profileId}/billing-events` (`lapsed|restored|ended`) for go-money, state event `profileCheckmark.changed`.
+- **Business documents**: presigned S3 PUT intents, confirm, review queue, signed 2-minute view links with watermark; approval of all three grants Gold eligibility and the check when the store plan is paid.
+- **Legal**: versioned documents with maker-checker, material-change flag and 30-day notice, rollback, notice drafts, previews, progress, `policy.published` (carries the email draft) and `policyVersion.published` events, acceptance records linked through `policyVersionId` on `PUT /users/me/consents`.
+- **Privacy**: `GET/PUT /users/me/mention-privacy`, `/users/me/message-privacy`, internal `GET /internal/accounts/{id}/contact-privacy`; private profile stays on `PATCH /users/me`.
+- **Chat reports** (go-trust, port 8106): `POST /reports` (evidence + SHA-256 hash verified over the compacted array as sent, 5 per hour, idempotency key), `GET /reports/me`, admin queue (child safety first), detail with transcript, actions wired to the user actions (per-action permission, step-up for ban / remove group / legal), `report.closed` outcome event, evidence retention (default 180 / legal hold 730 days, purge job).
+- **Notification directory** (users): internal recipient, audience, count and marketing-unsubscribe endpoints; `otp.issued` (delivery mode `AUTH_OTP_DELIVERY=event`), `signIn.newDeviceDetected`, `account.deletionExecuted.finalEmail`.
+
+Differences from `apps/admin/apiContract.md` and the mobile mocks (the BFF must adapt):
+
+1. Lists are `{data, nextCursor}` (some also carry `items`), not `{items,page,pageSize,total}`; user lists in go-trust and users use cursors.
+2. Staff ids, role ids and case ids are UUIDs (templates have stable UUIDs plus `isTemplate`), not `tpl_*`.
+3. Step-up header is `X-Step-Up-Token` (the console sends `X-Admin-Step-Up`); the BFF or gateway must map it.
+4. `GET /admin/admins` and the writes need `staff:manage` (not only superadmin); config writes take `value` or `content` and return `{key, value, content, version, ...}` (no `versions` / `restore` endpoints).
+5. Staff auth login still answers `{status, challengeToken}` (pre-existing), not `{mfaToken, enrollmentRequired}`; passkeys, `/admin/account/*`, warn, force-logout and PII reveal are not built.
+6. `UserDetail`: wallet is empty, strikes empty, `followerCount` is the Python real-follower signal, currency and phoneMasked are null; `status` filter on `GET /admin/users` is not implemented; checkmark document previews and `checks[]` on `/admin/verifications` are empty; `grantsDashboardAccess` is always false.
+7. Admin-created BUSINESS / BRAND / GOVERNMENT accounts are single-profile accounts typed by `profileType`.
+8. `GET /reports/me` lists chat reports only (envelope); content reports stay in social. `POST /verification/applications` returns `checkoutUrl: null` (billing is go-money).
+9. Not done: `428 POLICY_ACCEPTANCE_REQUIRED` enforcement (needs a gateway or shared middleware), `PENDING_WITHDRAWALS` check on delete (interface `PendingWithdrawalChecker` exists, no go-money client yet), email-domain allow-list is empty unless `ADMIN_ALLOWED_EMAIL_DOMAINS` is set, `checkmark.suggested` emails (no scheduler), enforcement of restrictions inside other services (they read `users.account_restrictions`).
+10. The old hand-written `20261003120000_move_creator_to_personal_profile_status` migration was replaced by the Atlas migration `add_creator_status_to_profiles` plus the hand-written data move; databases that applied the old version must be reset (`pnpm backend:reset`).
+
+### 2.17 Built so far: go-commerce (catalog, inventory, orders)
+
+Done (unit tests, plus integration tests that skip without Postgres): everything below. Lists are `{data,nextCursor}`; seller routes read `X-Seller-Store` and enforce the role permissions from `rolePermissions.config.ts`.
+
+- **catalog**: `POST /stores` (linked to a business profile), `GET /stores/{id}`, `/seller/access`, `/seller/stores/mine`, `PATCH /seller/store`; flexible category tree (platform) plus per-store categories; brands; products with variants, SKUs, attributes, videos, visibility, drafts and scheduled publishing (sweep); seller products CRUD, publish/unpublish, usage, bulk, duplicate, barcodes, CSV export; buyer mart (`/mart/home`, `/products`, `/products/featured`, `/products/{id}`, likes, bookmarks, `/categories`, `/brands`, store products); reviews (verified purchases only), ratings, seller replies and reports; `POST /analytics/product-interactions` (consent honoured, outbox events `product.*`); internal `GET /internal/share-cards/{kind}/{id}`.
+- **inventory**: locations, levels, summary, movements, adjustments, transfers, suppliers, reorder levels; reservations with expiry (reserve, confirm, fulfil, release, restock) behind the in-process `commerceports` ports.
+- **orders**: seller-grouped cart with shipping quotes, one-transaction checkout (orders + order groups + stock reservation) then `RegisterCheckoutPayables`, order group state machine with timeline and seller notes, buyer orders, cancel and confirm-receipt, seller orders/fulfilment/delivery, shipping profiles/zones/destinations/rules (geo ids from go-identity) recomputed at order creation with an immutable snapshot, seller-funded store credit (earn on completion, reverse on refund, redeem at checkout, liability summary), promotions (coupon, automatic, scheduled sale) applied at checkout, returns, customers read model, report JSON/CSV and export jobs. Money events (`escrow.held`, `escrow.released`, `escrow.refunded`, `dispute.opened|closed`, `directPayment.received`) arrive on the `commerce-domain-events` queue (`ORDERS_EVENTS_QUEUE`).
+- **Plan gating**: Pro/Business features answer `402 PLAN_FEATURE_REQUIRED {requiredPlan}` using go-money `GET /api/v1/internal/entitlements/{ownerAccountId}` (expects `{ "sellerPlan": "free|pro|business" }`, header `x-internal-token`; fails closed to Free). Active product and location caps return 409.
+- **Not built yet**: seller disputes (they belong to go-money's escrow disputes), flash sales, bundles, featured products, customer segments, CSV product import, media upload sessions, ClickHouse analytics module.
+- **Needs go-money**: a refund RPC or consumer for `orderGroup.refundRequested` (payload documented in `services/contracts/events/schemas/orderGroup.refundRequested.v1.json`).
+
 ### 2.16 Consolidation notes (go-live, go-money, gateway)
 
 - **go-live money**: go-live calls go-money's `LiveMoneyService` over internal gRPC (`LIVE_MONEY_GRPC_ADDRESS`, bearer `LIVE_MONEY_GRPC_TOKEN`, per-attempt timeout `LIVE_MONEY_CALL_TIMEOUT`, retry on `UNAVAILABLE` only for idempotent calls). The in-memory fake exists only outside production; production refuses to start without the addresses and 32+ character tokens. Names and creator-program roles come from go-identity's `AccountDirectoryService` (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`, served by auth on `AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS`).
 - **Mobile change (go-live lists)**: `GET /lives/suggested` and `GET /lives/:id/viewers` now return `{data, nextCursor}` instead of a bare array. `live.service.ts` `fetchSuggestedLives` and `liveGuests.service.ts` `searchLiveViewersToInvite` (and their mocks in `live.mock.ts` / `liveGuests.mock.ts`) must read `.data`; `nextCursor` is always `null` for now.
-- **Gateway**: `GET /orders/{id}/escrow`, `POST /orders/{id}/disputes` and the staff `GET /admin/orders/{id}/escrow`, `POST /admin/orders/{id}/escrow/refund` are routed to go-money (the route table accepts `*` for one path segment). Payment provider webhooks bypass the gateway: the ALB sends `/webhooks/*` straight to go-money (`docs/architecture/devops.md`).
+- **Gateway**: `GET /orders/{id}/escrow`, `POST /orders/{id}/disputes` and the staff `GET /admin/orders/{id}/escrow`, `POST /admin/orders/{id}/escrow/refund` are routed to go-money (the route table accepts `*` for one path segment). Payment provider webhooks go through the gateway's raw-body passthrough route to go-money only (`docs/architecture/devops.md` 6.1).
 - **Money settings**: go-money reads `gift.shareTiers` and the new `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from the admin settings store through the read-only grant on `admin.platform_settings`, cached for `MONEY_PLATFORM_SETTINGS_TTL` (30 s). Env (`ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD`) and the creator-tier table remain the fallback when the store is unreachable or the row is missing. The gift share is the higher of the creator's staff-granted tier and the admin tier reached by the creator's gift coins this month, capped at 7000 bps. `sellerReserveBps` is read and editable but nothing applies a reserve yet.
+
+### 2.18 Built so far: go-commerce (catalog, inventory, orders)
+
+Built in `services/go/modules/{catalog,inventory,orders}` (ent + Atlas, schemas `catalog`, `inventory`, `orders`), mounted by `deployables/goCommerce` (`pnpm backend:dev:commerce`, :8107). Modules talk through `platform/commerceports` (in-process ports), never each other's packages. Checkout is a saga, not one transaction: price and group server-side, reserve stock per order group (idempotent by group id, expiry), persist checkout + groups, register payables over `CheckoutMoneyService`, release on failure or expiry. Commerce is provider-neutral: it only knows go-money.
+
+- **Done (**✅ built, go-commerce**):** GET /mart/home, /products (+featured, :id), like/bookmark, /categories, /brands, /stores/:id[/products|/reviews], reviews (GET/POST, rating-summary, store reviews), POST /analytics/product-interactions (consent-gated outbox), cart (GET/DELETE, items CRUD, shipping-quote), POST /orders/checkout, GET /orders[/:id], cancel, confirm-receipt, GET /store-rewards/me, internal GET /internal/share-cards/{product|store}/{id}.
+- **Seller:** access, store create/update, categories, products (CRUD, publish, bulk, duplicate, barcodes, usage, export), inventory (levels, summary, locations, movements, reorder, adjustments, transfers), suppliers, locations, orders (accept/reject/status/fulfilment/cancel/notes/shipping-snapshot), delivery (summary, shipments, attempts), shipping profile/rules/preview, customers (list, summary, detail, purchases, notes, export), reviews, store rewards (summary, settings), reports (6 kinds, CSV, export jobs).
+- **Differences from the mocks:** lists are `{data,nextCursor}` (featured too); `Order` adds `fulfilmentStatus` and `checkoutId`, buyer `status` collapses new/processing/ready to `paid` and refunded/returned to `cancelled`; checkout returns `orderGroups` and `orders`; ids replace size/color on cart add (size+color still accepted); levels sort supports id/onHand/reserved only; adjustments never allow negative on hand; inventory emits `order_released` movements; reorder-levels returns the three fields, not the variant; plan gating (402) is not enforced here; product import, returns/disputes seller endpoints, promotions, segments, manual customers, delivery areas, tax and finance reports are not built.
+- **Gap for go-money:** seller reject/cancel of a paid order records `orderGroup.refundRequested` (outbox) because `CheckoutMoneyService` has no refund RPC. go-money must consume it (or add a RefundOrderEscrow RPC).
+- **Events:** consumes `escrow.held`, `directPayment.received`, `escrow.released`, `escrow.refunded`, `escrow.partiallyRefunded`, `dispute.opened`, `dispute.closed` from RabbitMQ queue `commerce-domain-events` (`ORDERS_EVENTS_QUEUE`). Publishes the new `product.*`, `store.*`, `review.*`, `order.*`, `orderGroup.*`, `storeCredit.*`, `stock.*`, `reservation.*`, `transfer.*` events (schemas in `contracts/events`).
 
 ## 3. Wiring order
 
@@ -360,8 +409,8 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 ### Phase 0 — Foundation (the foundation agent is doing this now)
 
-- **Infra:** ECS/Fargate cluster, one Aurora PostgreSQL + PostGIS cluster (schema per owner, read-only grants), ElastiCache Redis, SNS/EventBridge + SQS (with DLQs), S3 + CloudFront, Secrets Manager/KMS, SES, ECR, GitHub Actions deploys, OpenTelemetry collector.
-- **Services:** `ts.gateway` with a route table, JWKS verification, rate limiting, idempotency store (Redis + Postgres), request id, and region/currency headers. A shared transactional outbox + `DomainEventPublisher`/`JobQueue` interface per language (SNS/SQS adapters now, MSK adapter later). Event naming: `<domain>.<entity>.<event>.v1`.
+- **Infra:** ECS/Fargate cluster, one Aurora PostgreSQL + PostGIS cluster (schema per owner, read-only grants), ElastiCache Redis, Amazon MQ for RabbitMQ (cluster, private subnets; quorum queues with retry queues and DLQs), S3 + CloudFront, Secrets Manager/KMS, SES, ECR, GitHub Actions deploys, OpenTelemetry collector.
+- **Services:** `ts.gateway` with a route table, JWKS verification, rate limiting, idempotency store (Redis + Postgres), request id, and region/currency headers. A shared transactional outbox + `DomainEventPublisher`/`JobQueue` interface per language (RabbitMQ adapters now, SNS/SQS kept behind `EVENT_BUS=sqs` for rollback). Event naming: `<domain>.<entity>.<event>.v1`.
 - **Acceptance:** `GET /health` through the gateway, an end-to-end trace visible across gateway → stub service, and a CI pipeline that enforces the 300-line limit (`scripts/checkFileLength`) and a no-raw-SQL lint.
 
 ### Phase 1 — Auth and session
@@ -385,7 +434,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Endpoints:** §2.3, §2.4.
 - **Decision for the audience debt:** extend the server enum to `audience: everyone | followers` (followers-only posts are a real feature and cheap with the follow graph), and keep `visibility: public | subscribers` as the separate subscriber gate (plans §5.4). Mobile then ships the Subscribers chip by sending `visibility: "subscribers"`. **[CONFIRM]**
 - **Models:** `Post` (`kind post|clip|story`, `resharedFrom`, `audience`, `visibility`, `isAiGenerated`), `Comment` (threaded), `Reaction`, `Sound`, `Story`, `MediaAsset`, `UploadSession`, `UploadChunk`, `FeedTimeline` (Redis), `PostImpressionDaily` (ClickHouse).
-- **Infra:** S3 multipart, MediaConvert or FFmpeg workers on Fargate (SQS-driven) (HLS H.264, AVIF/WebP, poster frames, thumbnail job per plans §5.5), CloudFront signed URLs, py.intelligence `/v1/feed/rank` with a deterministic fallback, SNS `social.post.created.v1` → SQS fan-out worker.
+- **Infra:** S3 multipart, MediaConvert or FFmpeg workers on Fargate (driven by the `jobs-media` queue) (HLS H.264, AVIF/WebP, poster frames, thumbnail job per plans §5.5), CloudFront signed URLs, py.intelligence `/v1/feed/rank` with a deterministic fallback, `post.created` on `zudomart.events` → fan-out worker queue.
 - **Frontend switch:** `/api/v1/feeds`, `/api/v1/posts`, `/api/v1/comments`, `/api/v1/clips`, `/api/v1/stories`, `/api/v1/sounds`, `/api/v1/media`. Fix the mobile list unwrap before enabling.
 - **Acceptance:** a clip needs exactly one video (`assertMediaFitsPostKind`); up to 10 media per post; a reshare creates a post that embeds the original; analytics return 403 for non-owners; an upload resumes after app kill; the following feed shows only followed authors.
 
@@ -393,7 +442,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 - **Endpoints:** §2.5, plus `POST /realtime/tickets`.
 - **Models:** `Conversation`, `ConversationMember`, `Message` (+`clientMessageId`), `MessageReaction`, `Channel`, `ChannelSubscription`, `DeviceToken`, `Notification`.
-- **Infra:** Phoenix on Fargate (libcluster via ECS service discovery), Redis-backed presence, SQS consumers, APNs/FCM via ts.notifications.
+- **Infra:** Phoenix on Fargate (libcluster via ECS service discovery), Redis-backed presence, RabbitMQ consumer, APNs/FCM via ts.notifications.
 - **Frontend switch:** `/api/v1/conversations`, `/api/v1/messages`, `/api/v1/channels`, `/api/v1/notifications`, plus the real `/ws` (turn off `realtimeMockEmitter.service.ts`).
 - **Acceptance:** message delivered over socket in < 300 ms p95 in-region; typing expires after 3 s; reconnect with backoff replays missed messages via `GET …/messages?after=`; offline queue replays with the same `Idempotency-Key` without duplicates.
 
@@ -409,7 +458,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 - **Endpoints:** §2.8.
 - **Models:** `Store`, `Product`, `ProductVariant` (SKU, options), `StockLevel`, `StockReservation`, `Cart`, `Checkout`, `Order`, `OrderItem`, `OrderEvent` (timeline), `Payment`, `WebhookEvent`, `Escrow`, `Dispute`, `DisputeMessage`, `PayoutAccount` (encrypted, masked), `Withdrawal`, ledger accounts.
-- **Infra:** Bachs only (https://docs.bachs.io) behind one provider interface: per-seller connected accounts, direct-charge checkout with `platform_fee`, refunds, transfers, payouts, balances, disputes, webhooks with `X-Bachs-Signature-V2` verification. Zudomart holds no one's money; escrow funds stay locked in the seller account and the ledger is a mirror. Details: `docs/checkoutPaymentFlowPlan.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); per-seller mirror reconciliation against Bachs balances; py.intelligence `/v1/risk/score` for orders and payouts.
+- **Infra:** Paystack only (https://paystack.com/docs; Bachs and Anchor dropped, owner 2026-10-03) behind provider interfaces: checkout (card, bank transfer, USSD) with dynamic split, subaccounts, transfer recipients, transfers, refunds, disputes, plans and subscriptions, webhooks verified with `x-paystack-signature` (HMAC-SHA512). Zudomart holds as little as possible: direct shares never touch Zudomart; escrow is the only money held (E2) until Paystack confirms E1. Details: `docs/checkoutPaymentFlowPlan.md`, `docs/integrations/paystack.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); daily reconciliation against Paystack; py.intelligence `/v1/risk/score` for orders and payouts.
 - **Checkout transaction (inside `go-commerce` + `go-money`):** recompute prices, seller grouping, shipping (§4.6), discounts and eligibility on the server → reserve stock (TTL 15 min) → create Checkout/Orders with a locked exchange rate → initialise payment → on verified webhook: mark paid, hold in escrow, commit the reservation → seller fulfils → buyer confirms or auto-release after N days → release escrow minus commission → seller wallet.
 - **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`.
 - **Acceptance:** client-sent prices ignored; double-submitting checkout with the same key returns the same orders; webhook replay is processed once; concurrent withdrawals cannot overdraw (row lock + version); ledger trial balance = 0 per currency after the e2e suite; escrow release, refunds and payouts are written to the audit log.
@@ -425,6 +474,11 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Endpoints:** §2.10.
 - **Infra:** Ad Decision Engine + attribution pipeline (§4.4), spend counters in Redis with periodic ledger postings, py pCTR/fraud scores, creator pool revenue share.
 - **Acceptance:** charge price never exceeds the bid; per-currency budgets; spend order is credits → prepaid → card; creator share credited per impression batch.
+
+#### Phase 8 status (go-ads)
+Built in `services/go/modules/ads`: accounts/members/invites/activity, campaigns/ad sets/ads/bulk/appeal, admin review + advertisers + frequency policies, boosts (wallet debit via the `AdsMoneyService` contract in `services/contracts/proto/zudomart/money/v1/ads_money.proto`, refund on failed save, in-memory fake refused in production), decide + signed-token events, settlement and creator pools, reports + CSV + server-rendered PDF, scheduled reports (due sweep -> `jobs-ads-reports` RabbitMQ job -> CSV/PDF in S3 -> `adReport.ready` event for notifications to email), saved audiences (hashed email lists matched in go-auth data, only matched user ids stored, lookalikes, ranges only), audience estimates, content sources (social internal API), creative media upload intents (S3 presigned, `adMedia.uploaded` event, `/internal/v1/ads/media/:id/processed` callback), billing overview and internal funds credit (`POST /internal/v1/ads/accounts/:id/funds`).
+Creator revenue multipliers are read from the admin `monetization.policy` setting (AI-generated default 0.30 of the normal creator share); go-ads has no policy table of its own. Python is called on `/v1/ads/predicted-ctr` and `/v1/risk/score-extended` (`ad_click`) with a timeout and deterministic fallback.
+Open items: phone-hash customer lists (needs go-auth hashing details), engagement/store/follower audience sources (social/commerce membership APIs; audiences end `failed` until wired), social `ad-content-sources` endpoint, go-money implementing `AdsMoneyService`, media pipeline consuming `adMedia.uploaded`, notifications template for `adReport.ready`, conversion-event/experiment/rule tools, invoices/receipts, top-up checkout.
 
 ### Phase 9 — Admin
 
@@ -462,7 +516,7 @@ Mock-mode frontends for these are being built in parallel. The contracts below a
 client ─POST /api/v1/live/gifts─► ts.gateway ─► go-money (go.creators.gifts)
    validate: live is active (gRPC go-live), recipient on stage, gift isActive, wallet balance
    one DB transaction: debit sender coins → balanced ledger entry → GiftTransaction row → outbox row
-outbox publisher ─► SNS/EventBridge `money.gift.sent.v1` ─► SQS queues (FIFO, message group = liveId)
+outbox publisher ─► RabbitMQ `zudomart.events` key `gift.sent` ─► consumer quorum queues
    ├─► ex.realtime: fan-out over WebSocket to streamer + all viewers (combos, goals, leaderboards)
    └─► python analytics (Postgres read model now, ClickHouse later), py.intelligence (risk, ranking signals)
 ```
@@ -556,7 +610,7 @@ Gift of 100 coins to a creator with a 70% share, no battle:
 | `live.viewerCount` | `viewers` | Throttled to 1 per 2 s |
 | `live.comment.created` | `LiveComment` (kind `comment\|joined\|gift\|system`) | Replaces polling `GET /comments` |
 
-Order within one sender's stream is preserved by SQS FIFO with `MessageGroupId = liveId` on the realtime queue.
+Transport order is not relied on (retries and redeliveries reorder): the producer stamps `comboCount`/`aggregateVersion` and Phoenix stamps `seq` per topic (see `docs/architecture/events.md` 4.1).
 
 **4.1.8 Gift goals, leaderboards, Top Supporter**
 
@@ -748,8 +802,9 @@ Prices live in a `SellerPlanPrice { planKey, countryCode, currency, interval, am
 | Customers CRM (notes, segments, export) | view | ✓ | ✓ + segments |
 | Storefront customisation | theme | + sections, custom domain later | + multiple storefronts |
 | API keys and webhooks | — | — | ✓ |
-| Marketplace commission | base | −0.5 pp | −1 pp |
-| Monthly ad credit | — | small | larger |
+| Commission on products | 0% | 0% | 0% |
+| Escrow fee (seller pays, on escrow orders incl. shipping) | 1.5% | 1.5% | 1% |
+| Monthly ad credit | — | ₦1,000 | ₦5,000 |
 
 Entitlement keys are strings (`products.max`, `staff.seats`, `locations.max`, `reports.formats`, `marketing.flashSales`, `api.access`, …) stored per plan (`SellerPlanEntitlement`) and edited in admin `/admin/config/plans` under the **seller plans** group.
 
@@ -813,7 +868,7 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 
 **4.3.15 Settings, API keys, webhooks** — store profile, currency (fixed after first sale), taxes, policies, notifications, locations. API keys (Business): `POST /seller/api-keys {name, scopes[]}` returns the secret once, stored as a hash; `DELETE` revokes. Webhooks: `POST /seller/webhooks {url, events[]}`, HMAC-SHA256 signature header `X-Zudomart-Signature`, retries with exponential backoff for 24 h, delivery log `GET /seller/webhooks/:id/deliveries`. Events: `order.created|paid|cancelled|shipped|delivered|completed|refunded`, `inventory.lowStock`, `product.updated`, `payout.paid`, `review.created`.
 
-**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Bachs hosted checkout on Zudomart's own account, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
+**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Paystack checkout and Paystack Plans on Zudomart's main account, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
 
 **4.3.17 Acceptance**
 
@@ -882,7 +937,7 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 - **Points are not money.** They are never withdrawable, transferable or convertible to coins or cash, and they live outside the money ledger in their own append-only `PointsEntry { userId, type: engagement|support|stream|community|achievement, amount, sourceType, sourceId, streamId?, categoryId?, idempotencyKey, createdAt }`.
 - **Sources:** money actions (gifts, coin purchases, subscriptions, orders) award `support` points proportional to coins or amount via the `PointsRule` table. Engagement actions also earn points: double-tap like, share, follow, watch time, challenges, goals.
 - **Per-user rate limits:** e.g. at most **10 qualifying like-points per minute**. Visual likes stay unlimited; only the points stop. Daily caps per action and dedupe (unlike/re-like earns nothing) are set in `PointsRule { action, points, perMinuteCap, perDayCap, active }`.
-- Points are awarded by consuming domain events (SQS), so they never slow the action itself.
+- Points are awarded by consuming domain events (RabbitMQ), so they never slow the action itself.
 - **Leaderboards:** each stream has a supporter board by points (Redis during the live, stored in Postgres at `live.ended` and **kept for history**). There are global, country and category rankings for streamers, supporters, creators and engagement, rebuilt hourly from `PointsEntry`. `GET /api/v1/rankings?board=streamer|supporter|creator|engagement&scope=global|country|category&countryCode&categoryId&period=day|week|month|all`.
 - **Categories** form an admin-managed, multi-level taxonomy (`Category { id, parentId, kind, name, slug, active }`) shared by lives, creators and businesses.
 
@@ -935,7 +990,7 @@ Cart { groups: [{ storeId, store{name,badge}, items[], subtotal, shipping: { sta
 
 **4.6.3 Product interaction events and ranking**
 
-- Events use the `<entity>.<pastTense>` naming: `product.viewed|searched|clicked|liked|shared|saved|addedToCart|removedFromCart|purchased`, `seller.viewed`, `category.viewed`, `search.performed`. Each carries actor, product/seller/category, session, surface and `occurredAt`, and goes through the outbox to SQS, then Python (and analytics).
+- Events use the `<entity>.<pastTense>` naming: `product.viewed|searched|clicked|liked|shared|saved|addedToCart|removedFromCart|purchased`, `seller.viewed`, `category.viewed`, `search.performed`. Each carries actor, product/seller/category, session, surface and `occurredAt`, and goes through the outbox to RabbitMQ, then Python (and analytics).
 - The **MVP uses deterministic ranking** for mart, search and related products: `relevance + recency + popularity + availability (in stock, ships to the viewer) + the viewer's own interactions`, with weights in config. It sits behind a `ProductRankingStrategy` interface that the Python ranker can replace later (with a fallback to deterministic).
 - **Personalization consent is honoured:** without `personalization` consent (§4.7), ranking ignores the viewer's interaction history and events are kept only in aggregated, non-personal form.
 
@@ -974,7 +1029,7 @@ Built to support **GDPR where it applies and Nigeria's NDPA 2023**. The plan **n
 - Integer minor units + ISO currency everywhere (`int64` in Go, `BigInt` in Prisma, `integer` in Ecto). Coins are integer `COIN`. The two units are never mixed in one ledger transaction except in the conversion and purchase postings, which use a stored rate.
 - The server resolves viewer currency: profile country → IP → `X-Client-Region` → USD for unsupported countries (NGN, GHS, KES, ZAR, GBP, EUR, USD supported). Display prices may be converted. **Checkout locks the rate** (`lockOrderExchangeRate`) and charges in a provider-supported currency. Seller stores have one settlement currency.
 - Rounding: banker's rounding is never used. Shares round **down** for the payee, and remainders go to the platform, so a split is always exact.
-- Balances change only through ledger postings in one DB transaction with row locks + version columns. A nightly trial balance job asserts `Σ debits = Σ credits` per currency and per unit, and reconciliation compares each seller's ledger mirror with the balances Bachs holds. Bachs is the source of truth for balances; Zudomart holds no seller money.
+- Balances change only through ledger postings in one DB transaction with row locks + version columns. A nightly trial balance job asserts `Σ debits = Σ credits` per currency and per unit, and reconciliation compares the ledger with Paystack transactions, balance, settlements and transfers. The ledger is the source of truth for what money means; Paystack figures are evidence, and a mismatch freezes the affected payouts.
 
 ### 5.3 Idempotency
 
@@ -1016,19 +1071,19 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 
 ### 5.8 Webhooks
 
-- **Inbound** (Bachs, couriers, LiveKit, App Store/Play): signature verified before parsing, stored in `WebhookEvent` with a unique provider event id, processed at most once, and acknowledged quickly with processing async.
+- **Inbound** (Paystack, couriers, LiveKit, App Store/Play): signature verified before parsing, stored in `WebhookEvent` with a unique provider event id, processed at most once, and acknowledged quickly with processing async.
 - **Outbound** (seller webhooks, partner APIs): ts.integrations, HMAC-signed, retry with backoff, dead-letter after 24 h, replay from the dashboard.
 
 ### 5.9 Background jobs
 
-- **Go:** an outbox publisher to SNS/EventBridge + SQS, plus scheduled jobs (escrow auto-release, battle timers, stock reservation expiry, subscription renewals, payout processing, reconciliation, trial balance) through a Postgres-backed scheduler with leader election.
+- **Go:** an outbox publisher to RabbitMQ (`platform/events` `RabbitPublisher`, publisher confirms), plus scheduled jobs (escrow auto-release, battle timers, stock reservation expiry, subscription renewals, payout processing, reconciliation, trial balance) through a Postgres-backed scheduler with leader election.
 - **TS:** media processing queue, notification fan-out, search indexing.
 - **Python:** ClickHouse loading, reports and exports, thumbnails, moderation classifiers.
 - Every consumer is idempotent on the event id. Poison messages go to a DLQ topic with alerting.
 
 ### 5.10 Observability
 
-- OpenTelemetry traces from BFF → gateway → services → SNS/SQS → consumers, keyed by `X-Request-Id`.
+- OpenTelemetry traces from BFF → gateway → services → RabbitMQ (`traceparent` header) → consumers, keyed by `X-Request-Id`.
 - Structured JSON logs passed through redaction (no tokens, OTPs, card or bank data).
 - Metrics in Prometheus/Grafana (or CloudWatch).
 - **SLOs:** auth p99 < 300 ms; feed p95 < 400 ms; gift send p99 < 300 ms and fan-out p95 < 500 ms; checkout availability 99.95%.
@@ -1038,7 +1093,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 
 - **Unit:** pure domain functions (splits, pricing, state machines) with table tests. Property tests for the ledger: random postings always balance and never go negative.
 - **Contract:** each frontend's mock handlers (`apps/*/src/mocks`) are the consumer fixtures. Generate OpenAPI from each service and run a contract check in CI that every mock route has a matching operation with compatible request/response schemas. That turns the §2.13 list into failing checks until it is fixed.
-- **Integration:** per service against real Postgres/Redis (Testcontainers) and LocalStack SNS/SQS, including Bachs sandbox webhooks (`sk_sandbox_` keys) and a LiveKit dev server.
+- **Integration:** per service against real Postgres/Redis (Testcontainers) and RabbitMQ (Docker, `infra/local/rabbitmq/definitions.json`), including Paystack test-mode webhooks (`sk_test_` keys) and a LiveKit dev server.
 - **End-to-end:** staging scripts for signup → post → follow → chat → buy coins → gift → battle with WTA → checkout → fulfil → confirm → payout, asserting trial balance = 0 at the end.
 - **Load:** k6 for checkout and gift bursts; LiveKit load tester for 10 publishers + 1,000 subscribers.
 - **Security:** the existing `apps/api/tests/security` cases ported (enumeration, refresh reuse, webhook signature, idempotency conflicts, IDOR on store resources), plus `pnpm audit` / `govulncheck` / `pip-audit` in CI.
@@ -1068,10 +1123,11 @@ Still open:
 
 | Profile type | Checkmark | Billing | Where sold |
 |---|---|---|---|
-| Personal (incl. creator accounts) | Blue only | Personal subscription tied to the person | App (Apple/Google IAP) or web (Bachs) |
-| Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Bachs) |
-| Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Bachs) |
+| Personal (incl. creator accounts) | Blue only | Personal subscription tied to the person | App (Apple/Google IAP) or web (Paystack) |
+| Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Paystack) |
+| Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Paystack) |
 
+- **Prices (docs/pricing.md, 2026-10-03; all admin-editable):** Blue Essential ₦1,000, Blue Verified (the checkmark, `checkmark-pricing.blueMonthlyPrice`) ₦2,500 web / ₦2,900 in app, Blue Premium (the Premium user subscription) ₦4,500 web / ₦5,500 in app; seller Free ₦0, Pro ₦5,000, Business ₦15,000; Gold-only ₦3,000; Black ₦50,000. Yearly = 20% off (12 × monthly × 0.8). **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller and deducted from the payout (`ESCROW_PLATFORM_COMMISSION_BPS=150`); direct payments carry no Zudomart fee, only Paystack processing paid by the seller; buyers pay no fee. Pro ad credit ₦1,000/mo, Business ₦5,000/mo.
 - Blue and Gold never cross profile types. Gold requires business verification (CAC/KYB) before it shows. Seller Pro (₦5,000) and Business (₦15,000) include Gold.
 - **Gold-only plan** for brands and businesses that don't sell: its own lower admin-set price (proposed ₦3,000/month), with the checkmark and brand-page features but no seller dashboard tools.
 - **Blue + Gold bundle:** 15% off a Gold subscription when the same verified identity has an active Blue. It doesn't stack with the yearly discount (the bigger one wins), applies to at most 3 businesses per person, and lapses at the business's next renewal if Blue ends. It never applies to Black. The percentage and cap are admin settings.
@@ -1082,7 +1138,7 @@ Still open:
   - proof the entity exists (official site or gazette).
 
   Approval needs two different admins with step-up auth, and is audited. Black is re-verified yearly and whenever the representative changes, and revoked immediately on misuse. The handle stays reserved even if the subscription lapses.
-- **Web billing on Bachs (implemented in go-money):** `POST /payments/subscriptions/checkout` starts a Bachs subscription checkout for a plan mapped in `BACHS_SUBSCRIPTION_PLAN_PRODUCTS` (dashboard plans, Premium web, Gold/Black business billing); refused from the apps. Trials use Bachs product `trial_period` (beta): the card is saved at checkout and charged at trial end; Bachs retries failed renewals 1, 3 and 5 days apart, then cancels (or marks unpaid). go-money records `billing_subscriptions` and emits `billingSubscription.downgraded` when recovery runs out. A refunded verification charge is not part of Bachs trials (UNCONFIRMED — ask Bachs).
+- **Web billing on Paystack (Bachs and Anchor dropped; Paystack adopted, owner 2026-10-03):** `POST /payments/subscriptions/checkout` starts a Paystack checkout with a plan code (`PAYSTACK_PLAN_CODES`: dashboard plans, Premium web, Gold/Black business billing); refused from the apps. Trials: a small verification charge (refunded at once) creates the card authorization, then `POST /subscription` with `start_date` = trial end (Paystack documents `start_date` for a free period). Renewals use the authorization Paystack holds; a failed renewal sets status `attention` and `invoice.payment_failed`; the manage link lets the customer update the card. go-money records `billing_subscriptions` and emits `billingSubscription.downgraded` when recovery runs out. **✅ built:** `modules/subscriptions` (plans, per-country price table, trials, reminders, bundle vs yearly, Black grace, IAP, `GET /api/v1/internal/entitlements/{userId}`).
 - **Lapsed payment:** Blue and Gold drop at period end. Black gets a 14-day grace period with reminders (admin-editable) before the badge is removed.
 - **Admin-granted lifetime checkmarks** bypass billing but still respect the profile-type rule.
 
@@ -1098,3 +1154,11 @@ Still open:
 - Earn only when the order completes (after escrow release: consume `order.completed` / `escrow.released`); reverse on `refund.completed`.
 - Redeem only at the issuing store as a discount line on a later order (the seller absorbs it; payout is computed on the discounted subtotal). Never withdrawable, never cross-store, never convertible to cash.
 - Seller sees outstanding liability (`GET /seller/marketing/rewards/summary`); buyers see balances per store (`GET /store-rewards/me`).
+
+### ts-media status (3 Oct 2026)
+
+Built in `services/typescript/media` (port 8108, Prisma schema `media`, `pnpm backend:dev:media`): `POST/GET/DELETE /api/v1/media/uploads*` (S3 multipart into a quarantine bucket; chunks either proxied with `PUT .../chunks/:i` (raw bytes, `X-Chunk-Sha256`) or sent straight to S3 with `GET .../chunks/:i/url`; resume via `ListParts`), `POST /api/v1/media/uploads/:id/complete` and `POST /api/v1/media/:mediaId/complete`, `GET /api/v1/media/:mediaId`, per-purpose type/size allowlists, magic-byte sniffing, optional ClamAV, moderation gate (Python `/v1/moderation/classify` advisory score, policy allow/hold/reject, `held` assets resolved by `POST /internal/v1/media/:id/review`), sharp AVIF/WebP/JPEG variants with EXIF stripped, ffmpeg H.264 MP4 + HLS + posters (auto-detected, `FFMPEG_MODE`), voice notes to AAC, PDF page counts, private KMS bucket with 60 s signed GETs and an access log for KYC, CloudFront signing, the 30-day chat media deletion (`chatMedia.expired` from social plus an `expiresAt` sweep), events `media.uploaded|processed|rejected|held|deleted`, and `POST /internal/v1/media/intents` for goIdentity avatar and banner intents. Jobs run on a Postgres-backed `JobQueue` (`processing_jobs`) until the RabbitMQ job adapter replaces it. Not built: blurhash, HEIC decoding (prebuilt sharp has no HEVC), live recording and gift animation purposes, audio fingerprinting, image classification on the Python side (the endpoint is text only today).
+
+### ts-social status (3 Oct 2026)
+
+Built in `services/typescript/social` (port 8105, Prisma schema `social`): follows and requests, blocks, posts/clips/stories, reshares, threaded comments, likes, shares, saves and collections (`/saves*`), mentions (`/mentions/candidates|resolve`, 20 cap, `@all`), video replies, feeds (following, for-you, popular, clips), conversations (direct, groups), message requests and spam folder, chat settings, mute/restrict/block, E2EE message envelopes, polls, locations, documents, reactions, shares to chats, streaks (`/conversations/:id/streak/*`), 30-day chat media expiry job, report intake (`POST /reports`, event `report.created` to goTrust) and the notifications digest source (`GET /api/v1/internal/digests/{weekly|followRequests|messageRequests}`, `x-internal-token`). Open items: reading `who_can_mention_me` needs `GRANT SELECT (who_can_mention_me)` on `users.privacy_settings` for `zudomart_readers` (until then mentions default to `everyone`); `GET /link-previews/resolve` is not built because previews are made on the sender's device; story replies, channels, sounds, post analytics and `/search/people` are not built; product, live and store share cards report `unavailable`.

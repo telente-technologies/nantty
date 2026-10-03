@@ -6,7 +6,64 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## go-money on Paystack (3 Oct) — Go tests with Postgres
+
+| Area | Change |
+| --- | --- |
+| Provider | Bachs adapter, fake, fixtures, config and env removed; Paystack adapter behind `FullPaymentProvider` (transactions, splits, transfers, recipients, subaccounts, refunds, disputes, plans, subscriptions, saved cards, settlements), webhook HMAC-SHA512, fake Paystack API and recorded fixtures |
+| Fees | escrow fee 1.5% (1% Business) + Paystack fee paid by the seller, separate ledger lines; no commission; direct orders pass only Paystack's fee to the seller |
+| Payout accounts | queued recipient/subaccount jobs with retries, dead letter, "Try again", reconciliation; plans §38 routes and `GET /payments/payout-fees`; withdrawals refused until verified; `payoutAccount.*` events and schemas |
+| Subscriptions | new module: per-country price table, trials with eligibility and reminders, bundle vs yearly, Black grace, IAP, internal entitlements endpoint |
+| Wallet | prepaid ad balances (top-ups, spend batches, boost debit/refund), seller reserve %, creator earnings paid by transfer after verification |
+| Escrow | commerce refunds (`orderGroup.refundRequested` on `money-domain-events` and an internal endpoint); escrow events carry `orderNumber` |
+| Messaging | money publisher on the RabbitMQ factory; `money-domain-events` queue in the topology |
+
+---
+
+## Paystack frontend migration (3 Oct) — verified with tsc per app, mock mode only
+
+| App | Change |
+| --- | --- |
+| apps/webapp | `@paystack/inline-js` loaded dynamically on checkout, coin and creator-subscription flows with redirect fallback (`utils/paystackCheckout.util.ts`); checkout lists server channels instead of a provider picker; provider is Paystack only; return pages say "Confirming payment…"; mocks return `authorizationUrl`, `accessCode`, `reference`, plus `GET /payments/channels`. |
+| apps/seller | Plan and trial checkout opens the Paystack Popup; provider union is `"paystack"`; order payment panel shows "Payment processing fee" and "Escrow fee (1.5%)" (direct orders: processing only); plan cards say "1.5% escrow fee" / "1% escrow fee on Business"; demo order payouts no longer apply a 5% cut; apiContract updated. |
+| apps/ads | Top-ups and card setup open the Paystack Popup, Flutterwave removed, allowed checkout host is `checkout.paystack.com`; mocks return `accessCode`. |
+| apps/mobile | Checkout shows server channels, optional "save card on this device", saved card paid after a biometric prompt (`authorization_code` and brand/last4/expiry in SecureStore, sent only at charge time), "Saved on this device" with remove under Payment Methods; payment screen confirms server-side ("Confirming payment…"); payout onboarding copy has no provider names and the ID step is conditional (`requiresDocumentStep`). |
+| apps/mobile | Media uploads: chunks go straight to S3 via `GET .../chunks/:i/url` presigned PUT (no gateway, no auth header), resume from the service chunk list, abort on cancel; images re-encoded to JPEG (HEIC/HEIF included, EXIF dropped) up to 4096px; types add `document`, `mediaId`, `pageCount`, `failureReason`, blurhash; mocks serve the url and delete routes. tsc clean, not on a device. |
+| apps/studio | "Get paid" mirrors the mobile onboarding changes (conditional ID step, neutral copy). |
+| apps/admin | Trial copy says Paystack. |
+
+---
+
 ## apps/mobile
+
+### Per-domain real API switch, list envelopes, identity contract (3 Oct) — verified with tsc and jest, not on a device
+
+| File | Change |
+| --- | --- |
+| `config/api.config.ts`, `types/env.d.ts`, `.env.example`, `app.json` | `EXPO_PUBLIC_REAL_API_PREFIXES` (comma list) sends matching paths to the gateway while mocks stay on; default API URL is the gateway `:8080`. |
+| `services/apiClient.service.ts`, `payments`, `media`, `mediaUploadTransport`, `realtime` services, live gift hooks | Mock branch decided per path (`shouldUseMockForPath`). Page envelopes keep `nextCursor`; new `api.getPage` and `api.getList`. |
+| `users`, `orders`, `brands`, `geo`, `live`, `liveGuests`, `messages`, `notifications`, `disputes`, `coins`, `banks`, `wallets` services | List reads use `getList` (bare array or `{data,nextCursor}`). Mocks for profiles, addresses, countries, geo, suggested lives and viewers return `{data,nextCursor}`. |
+| `services/profileImageUpload.service.ts`, `screens/profile/editProfile.screen.tsx`, `mocks/users.mock.ts` | Avatar and banner go through `POST /users/me/media/upload-intents` and are saved as `avatarMediaId`/`bannerMediaId`. |
+| `services/auth.service.ts`, `mocks/username.mock.ts`, `mocks/auth.mock.ts`, `types/account.type.ts`, `types/cartOrder.type.ts`, `types/geo.type.ts` | `SOCIAL_SIGN_IN_NOT_CONFIGURED` maps to the not-configured error; username codes (`USERNAME_TAKEN`, `USERNAME_INVALID`, `USERNAME_UNAVAILABLE`, `USERNAME_CHANGE_TOO_SOON`) and policy fields; address `countryCode`; geo country `code`; empty `name` falls back to `username`. |
+| `mocks/index.ts` | `GET /lives/suggested` registered before the creators `/lives/:liveId` route that shadowed it. |
+| `contracts/*`, `package.json`, `tsconfig.json` | Dependency-free contract schemas and a jest test that validates mock responses (`npx jest`, 24 tests pass). |
+
+
+### Payout onboarding "Get paid" (§38, 3 Oct) — not tested on a device
+
+| File | Change |
+| --- | --- |
+| `screens/wallet/payoutSetup.screen.tsx`, `components/payoutOnboarding/*` | **New.** Four-step flow (identity with BVN or NIN, business, bank with live name match, secure ID verification), per-step sync badges, account setup and retry panel, Pending review, Action needed and Verified status, resume, shared seller and creator account. |
+| `services/payoutOnboarding.service.ts`, `types/payoutOnboarding.type.ts`, `mocks/payoutOnboarding.mock.ts`, `mocks/banks.mock.ts`, `mocks/index.ts` | Contract and mocks for onboarding, retry, fresh document link, payout fees. |
+| `screens/wallet/withdraw.screen.tsx` | Locked until verified ("Finish payout setup"), published flat fee and arrival estimate from the fees endpoint, fee counted in the balance check. |
+| `screens/creator/creatorDashboard.screen.tsx`, `screens/wallet/wallet.screen.tsx`, `screens/seller/sellerDashboard.screen.tsx`, `navigation/*` | Entry card (verify-to-withdraw amount, 24h lock countdown for sellers), `PayoutSetup` route. |
+
+### Emojis replaced with vector icons (owner, 3 Oct) — not tested on a device
+
+| File | Change |
+| --- | --- |
+| `components/icons/custom/*` (flame, heartBroken, bellSlash, trophy, medal, crown, handshake, lightning, flag, swords, users, microphoneSlash, signOut, hand, hourglass), `components/ui/iconRow.tsx`, `bulletLine.tsx` | New Lucide-geometry icons (24px grid, 1.5 stroke, themed ink) and two layout helpers. |
+| `chatSafety/streak*.tsx`, `chat/conversationRow.tsx`, `screens/messages/conversationInfo.screen.tsx`, `live/battle/*`, `live/guests/*`, `live/gifts/liveGiftGoalBar.tsx`, `store/storeProfileHeader.tsx`, bullet lists in settings, creator and sheets | Streak flame and broken heart, mute bell, lock, battle trophy, draw, MVP star, coin, crown, stage rail glyphs, ratings, ticks and list bullets are icons. Chat emoji panel, reaction pickers and live reaction rail stay emoji (content). |
 
 ### Modal & dialog system, policy update redesign, live polish (§36, 3 Oct) — not tested on a device
 
@@ -483,6 +540,30 @@ Plan: [plans.md §29](./plans.md). Mock mode only. Verified with `tsc --noEmit`.
 
 ## apps/webapp
 
+### Structured addresses with geo pickers (3 Oct) — verified with tsc, not in a browser
+
+| File | Change |
+| --- | --- |
+| `components/ui/combobox.tsx`, `components/address/*` | Accessible searchable combobox (keyboard, aria) and address form: Country, State/Region, LGA, City driven by each country's levels, plus street, postal code, details, recipient, phone; stores geo ids and `countryCode`. |
+| `settings/addresses`, `checkout`, `cart`, `sellerGroupedSummary` | Address book page; checkout add and select address with shipping quote recomputed on change; seller-grouped cart shows per-seller shipping (FREE, add-X-more, not shipped). |
+| `services/geo.service.ts`, `mocks/geo*.mock.ts`, `shippingEngine.mock.ts`, `cart.mock.ts` | `/geo/*` and `POST /cart/shipping-quote` mocks mirroring mobile (36 states + FCT). Address types extended. |
+
+### Per-domain real API switch and contract test (3 Oct) — verified with tsc and `pnpm test:contracts`
+
+| File | Change |
+| --- | --- |
+| `config/*Environment.config.ts`, `server/*ransport.service.ts`, `.env.example` | `WEBAPP_REAL_API_PREFIXES` routes matching paths to the gateway (default `http://localhost:8080`) while mocks stay on. |
+| `src/contracts/*`, `package.json` | Contract schemas and `test:contracts` (tsx). |
+| Other | Lists read through `sendListRequestToWebappServer`; countries, addresses and suggested lives mocks return `{data,nextCursor}`; username error codes and policy fields; `avatarMediaId`/`bannerMediaId` update type; empty name falls back to username. The address form still needs geo pickers before real addresses work. |
+
+
+### Emojis replaced with vector icons (owner, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `public/icons/sparkle24, searchOff24, shoppingBag24, package24, note24, arrowUp24, arrowDown24, musicNotes24.svg`, `components/ui/appIcon.tsx` | New 24px stroke SVGs added to the `AppIcon` set; new `IconLabel` helper. |
+| `app/(app)/*`, `components/commerce/*`, `messages/*`, `orders/*`, `profile/*`, `settings/*`, `feed/postCard.tsx`, `mentions/mentionAutocompleteInput.tsx`, `actions/paymentReturnStatus.tsx` | Empty-state art, star ratings, verified ticks, clip step buttons, sound note and "back" arrows use `AppIcon`. |
+
 ### Modal & dialog system and policy update redesign (§36, 3 Oct)
 
 | File | Change |
@@ -662,6 +743,21 @@ Verified headless (Chrome CDP): `/welcome` label `Use email` in login mode → `
 
 ## apps/studio
 
+### Per-domain real API switch and contract test (3 Oct) — verified with tsc and `pnpm test:contracts`
+
+| File | Change |
+| --- | --- |
+| `config/*Environment.config.ts`, `server/*ransport.service.ts`, `.env.example` | `STUDIO_REAL_API_PREFIXES` routes matching paths to the gateway (default `http://localhost:8080`) while mocks stay on. |
+| `src/contracts/*`, `package.json` | Contract schemas and `test:contracts` (tsx). |
+| Other | Social sign-in mock routes added; live comments read `Page<{author}>` and map to `authorName`; lists accept bare arrays or pages. |
+
+
+### Overlay editor split (owner, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `app/(studio)/lives/[liveId]/overlay/page.tsx`, `overlayCanvas.tsx`, `overlayInspector.tsx`, `overlayLayers.util.ts` | 327-line page split into canvas, inspector and layer helpers; all files are under 300 lines. No behaviour change. |
+
 ### Shipping config & web privacy (§23)
 
 | File | Change |
@@ -753,6 +849,22 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 | Landing | Token type scale, buttons and radii. Real app screens in `public/screens/`. Responsive from 360 to 1440. Keeps the creator (non-selling) live copy |
 
 ## apps/seller
+
+### Per-domain real API switch and contract test (3 Oct) — verified with tsc and `pnpm test:contracts`
+
+| File | Change |
+| --- | --- |
+| `config/*Environment.config.ts`, `server/*ransport.service.ts`, `.env.example` | `SELLER_REAL_API_PREFIXES` routes matching paths to the gateway (default `http://localhost:8080`) while mocks stay on. |
+| `src/contracts/*`, `package.json` | Contract schemas and `test:contracts` (tsx). |
+| Other | Gateway default `:8080` (also in the CSP origin in `next.config.ts`). |
+
+
+### Emojis replaced with vector icons (owner, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `public/icons/arrowRight24, arrowUp24, arrowDown24, caretUp24, caretUpDown24.svg`, `components/ui/zudoIcon.tsx` | New 24px stroke SVGs in the existing mask set; `IconLabel` helper. |
+| `ui/dataTable.tsx`, `reviews/reviewCard.tsx` (`StarRating`), `reviewsSummaryPanel.tsx`, `storefront/*`, `landing/*`, `billing/gateFrame.tsx`, `staff/staffRolesMatrixView.tsx`, `brand/brandOfficialStoreView.tsx`, `settings/accountSettingsView.tsx` | Sort arrows, star ratings, tick marks, move up/down, and back/forward arrows are icons. Dashboard change text is signed (+/-) instead of triangles. Prose arrows are now "›". |
 
 ### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
 
@@ -851,6 +963,22 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/admin
 
+### Per-domain real API switch and contract test (3 Oct) — verified with tsc and `pnpm test:contracts`
+
+| File | Change |
+| --- | --- |
+| `config/*Environment.config.ts`, `server/*ransport.service.ts`, `.env.example` | `ADMIN_REAL_API_PREFIXES` routes matching paths to the gateway (default `http://localhost:8080`) while mocks stay on. |
+| `src/contracts/*`, `package.json` | Contract schemas and `test:contracts` (tsx). |
+| Other | `adaptListEnvelope` turns `{data,nextCursor}` and `{data,page,pageSize,total}` into `{items,...}`; mock tables are emitted as `{data,...}`. |
+
+
+### Emojis replaced with vector icons (owner, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `components/ui/zudoIcon.tsx` + `.module.css`, `people/programApplicationPanel.tsx`, `people/verificationDetailWorkspace.tsx`, `support/ticketDetailWorkspace.tsx` | New `IconLabel`. Eligibility and check results use `check16`, `cancel20`, `warning20` icons; "All tickets" back link uses `arrowLeft24`. |
+| `trust/*`, `brands/ipClaimDecisionPanel.tsx`, `catalog/featureScheduleText.util.ts`, `configuration/automation/automationWorkspace.tsx`, `people/userUsernamePanel.tsx` | Inline arrows in consequence and range text now read "to" / "matches". |
+
 ### Chat reports moderation (§37, 3 Oct)
 
 - `/moderation/chat-reports`: queue (child safety first, filters), detail with read-only "Submitted by reporter" transcript, hash check, spam score, actions (dismiss, warn, restrict, suspend, ban, remove group, escalate to legal) with reason, step-up and audit, evidence retention card tagged LEGAL REVIEW. New permissions `chat-reports:review` and `chat-reports:legal`; Trust & Safety template and demo admins updated. Contract in `apiContract.md` ("Chat reports").
@@ -910,6 +1038,15 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | `apiContract.md` | Legal documents, notices and user-facing endpoints. |
 
 ## apps/ads
+
+### Per-domain real API switch and contract test (3 Oct) — verified with tsc and `pnpm test:contracts`
+
+| File | Change |
+| --- | --- |
+| `config/*Environment.config.ts`, `server/*ransport.service.ts`, `.env.example` | `ADS_REAL_API_PREFIXES` routes matching paths to the gateway (default `http://localhost:8080`) while mocks stay on. |
+| `src/contracts/*`, `package.json` | Contract schemas and `test:contracts` (tsx). |
+| Other | `adaptListEnvelope` turns `{data,nextCursor,total}` into the internal `{items,...}` page; memberships mock and BFF read `data`; mock lists are emitted as `{data,...}`. |
+
 
 ### Shipping config & web privacy (§23)
 
@@ -1096,3 +1233,13 @@ Plan: [docs/plans.md §30](../../docs/plans.md). Verified with `tsc --noEmit` an
 | `mobile: utils/usernameTags.util.ts`, `utils/__tests__/usernameTags.util.test.ts`, `components/mentions/mentionText.tsx`, `hooks/useOpenUserByUsername.hook.ts`, `services/users.service.ts` | `MentionText` now also parses plain `@username` tokens (not emails, URLs or `@all`), memoised; entities win. Tag is brand-coloured, weight 600, link role; tap resolves `GET /users/by-username/:username` then opens the profile ("User not found" toast on 404). Wired into bios, store and brand descriptions, product info, reviews, notifications, live comments and video-reply stickers. First jest test file (excluded from tsc as `@types/jest` is not installed). |
 | `mobile: mocks/users.mock.ts`, `guestAccess.mock.ts`, `username.mock.ts`, `mentions.mock.ts`, `types/mention.type.ts`; `components/mentions/mentionComposer.hook.ts`, `mentionSuggestionList.tsx` | By-username mock route (guest-readable); `all` reserved exactly; "@" shows following, then followers, then recent, then everyone else under a "More people on Zudomart" divider; exact match first; 150 ms debounce (none for the empty query). |
 | `webapp: utils/usernameTags.util.ts`, `components/mentions/mentionText.tsx`, `app/(app)/u/[username]/page.tsx`, `services/users.service.ts`, `mocks/users.mock.ts`, `username.mock.ts`, `mentions.mock.ts`, `mentionAutocompleteInput.tsx`, `mentions.module.css` | Same behaviour with `<Link href="/u/username">` (client navigation); `/u/[username]` resolves and redirects to `/user/:id`. Autocomplete gets the same ranking, divider, verified tick and debounce. No vitest in webapp, so no web test file. |
+
+## apps/seller and apps/studio
+
+### Payout onboarding (§38, 3 Oct) — not tested in a browser
+
+| File | Change |
+| --- | --- |
+| `apps/seller`: `components/payouts/*`, `mocks/handlers/payoutOnboarding.mock.ts`, `types/payoutOnboarding.type.ts`, `utils/payoutName.util.ts` | **New.** Full flow in Settings, Payouts; popup verification with return signal; banner on Wallet overview and Withdraw. |
+| `apps/seller`: `components/wallet/withdrawView.tsx` | Locked until verified, "Finish payout setup", fee from the fees endpoint plus arrival estimate. |
+| `apps/studio`: `components/payouts/*`, `app/(studio)/earnings/*`, `services/payoutOnboarding.service.ts`, `mocks/payoutOnboarding.mock.ts`, `components/shell/studioShell.*`, `lives/page.tsx` | **New.** Earnings page with the flow and payout fee, header link, Lives banner. |

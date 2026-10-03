@@ -1,295 +1,277 @@
-# Checkout, payment and payout flow plan (Bachs)
+# Checkout, payment and payout flow plan (Paystack)
 
-Owner direction, 2026-10-03 (fixed): **Zudomart does not hold anyone's money.** Payments run on Bachs only (https://docs.bachs.io). Paystack and Flutterwave are dropped. Every seller gets a Bachs connected account. Buyer payments are credited directly to the seller's account, and Zudomart's fee goes to Zudomart's own Bachs account. Escrow stays locked inside the seller's account until release.
+> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** Paystack (https://paystack.com/docs) is the single payment provider: cards, bank transfer and USSD at checkout, Dedicated Virtual Accounts, transfers and payouts with account resolution, split payments with subaccounts, and multi-currency where Paystack supports it. Everything about Bachs is removed (section 12 lists the code). The short Anchor evaluation of the same day is abandoned and left no files.
 
-Every Bachs claim cites its doc page. Anything the docs do not confirm is marked **UNCONFIRMED — ask Bachs**. This plan is not legal advice. See section 9.
+Owner direction (fixed): **Zudomart holds as little user money as possible.** Prefer subaccount splits so seller money goes from Paystack to the seller's bank without passing through Zudomart. The escrow design is to be confirmed with Paystack (section 4).
 
-Full Bachs documentation review (control model, fees, go-live checklist, saved cards, open questions): [`docs/integrations/bachs.md`](integrations/bachs.md).
+Paystack facts, quotes, fees, go-live checklist and the open questions for Paystack: [`docs/integrations/paystack.md`](integrations/paystack.md). Claims cite that file's source keys (for example API-SUBACCOUNT). Anything Paystack does not document is **UNCONFIRMED — ask Paystack**. Not legal advice.
 
 ## 1. Rules
 
 | Rule | Detail |
 |---|---|
 | Unverified store | Escrow is the only payment mode. |
-| Verified store | The buyer picks Escrow or Pay directly. Verified means the gold business checkmark after Zudomart KYB (admin-configurable). This is Zudomart's badge, separate from Bachs onboarding. |
+| Verified store | The buyer picks Escrow or Pay directly. Verified = gold business checkmark after Zudomart KYB (admin-configurable). Zudomart's badge; Paystack does not verify sellers. |
 | Success rate | completed ÷ (completed + seller-cancelled + seller-fault refunds + lost disputes), rolling 90 days, shown from 20 orders (admin setting). Server-computed. |
-| Escrow | The money sits in the **seller's** Bachs account, not withdrawable until release. Release: buyer confirms delivery, or auto-release 3 days after delivery (admin-configurable). A dispute pauses the timer. |
-| Direct | Same Bachs charge. In the ledger the money goes straight to the 24h lock. |
-| 24-hour lock | Also lives in the seller's Bachs account. Only credits older than 24h are withdrawable. |
-| Payout run | Withdrawals are queued and paid in a daily batch. Zudomart is the only party that calls the payout API. |
-| Provider | Bachs only. The adapter interface leaves room for another provider later (one line, no active work). |
-| Client UX | Hosted Bachs checkout. In the apps, it opens in an in-app browser with a deep-link return. Web uses the overlay or redirect (section 6). |
-| Visibility | Sellers see balances and payouts only. Buyers see "Pay" only. No provider names in UI copy. |
-| Digital goods | Coins, gifts, premium and boosts follow `architecture/payments.md` (IAP in the apps, Bachs on the web). Their money is Zudomart revenue and goes to Zudomart's own account. |
+| Escrow | Release when the buyer confirms delivery, or automatically 3 days after delivery (admin-configurable). A dispute pauses the timer. |
+| Direct | The seller's share is split to the seller's Paystack subaccount at charge time and settles to the seller's bank on Paystack's T+1 schedule. |
+| 24-hour lock | Escrow releases are paid out only 24h after release. For direct payments, Paystack's T+1 settlement is the lock (Zudomart never holds that money). |
+| Payout run | Escrow payouts and creator payouts are Paystack transfers in a daily batch, one transfer per payee per run. Only go-money calls the transfer API. |
+| Provider | Paystack only, behind the `PaymentProvider` interfaces so another provider can be added later (no active work). |
+| Client UX | Paystack checkout: Popup on web, the `authorization_url` in an in-app browser on mobile (section 7). Native SDKs later if needed. |
+| Visibility | Sellers see balances and payouts. Buyers see "Pay". No provider names in UI copy. |
+| Receipts | The account's verified email is sent to Paystack on every transaction; checkout never asks for an email (section 13). |
+| Digital goods | Coins, gifts, premium, boosts and creator subscriptions: IAP in the apps, Paystack on the web (`architecture/payments.md`). Zudomart revenue in Zudomart's main account. |
+| Saved cards | The device stores the Paystack `authorization_code` only (never card data). Subscriptions use authorizations Paystack holds (section 6.4). |
+| Onboarding | Asynchronous: queued jobs with idempotent lookups, retries, dead letter, "Try again" (section 3). |
 
-## 2. Bachs setup
+## 2. Paystack setup
 
-### 2.1 Charge type: direct charge
+### 2.1 Accounts
 
-The seller account is the merchant of record. `X-Account-Id: acct_...` on `POST /v1/checkout-sessions` designates a direct charge (https://docs.bachs.io/connect/split-payments/direct). On direct charges:
+- **Zudomart main account** (the Paystack integration). Receives escrow fees, escrow (launch path E2), digital-goods revenue, subscription revenue and ads payments. Source of all transfers ("Only balance for now", API-TRANSFER).
+- **Seller settlement subaccount** (`ACCT_`), one per seller with a verified bank account: `business_name`, `bank_code`, `account_number`, `settlement_schedule: auto` (T+1) (API-SUBACCOUNT). Receives direct-mode shares only.
+- **Seller escrow subaccount** (option E1, only if Paystack confirms): same bank account, `settlement_schedule: manual` ("payout to the subaccount should only be made when requested", API-SUBACCOUNT).
+- **Transfer recipient** (`RCP_`, type `nuban`) for every seller and creator (RECIPIENTS). Receives escrow payouts (E2) and creator payouts.
+- No buyer DVA or wallet at launch (paystack.md section 8; owner decision).
 
-- "The account is the merchant of record, the sale lands in its balance." Zudomart's `platform_fee` is deducted from the account's proceeds and settles to Zudomart's balance as its own record (direct).
-- The account bears refunds and disputes: "A refund debits the account's balance." A lost dispute drains the account's available balance, then its pending balance (direct; https://docs.bachs.io/connect/disputes).
-- Sending `X-Account-Id` and `transfer_data` together is an error (direct).
+### 2.2 Who pays the Paystack fee
 
-Why not a destination charge: the charge lands in the **platform's** balance, the platform is the merchant, and the platform bears all refunds and lost disputes (https://docs.bachs.io/connect/split-payments/destination). That is exactly the "Zudomart holds the money" model the owner rejected.
+**Fee policy (owner, 2026-10-03; docs/pricing.md §3.3): 0% commission on products.** Escrow groups pay an escrow fee of 1.5% of the group total including shipping (1% for Business-plan sellers), deducted from the seller payout at release; no fee on refunded amounts. Direct groups pay no Zudomart fee; the seller covers only Paystack's processing fee. Buyers pay nothing extra. Dynamic split with `bearer_type: account`: Zudomart pays Paystack, so each direct group's flat share is `groupTotal − allocatedPaystackFee` (the fee allocated across groups pro rata), which keeps the seller's share exact (MSPLIT). On escrow groups the allocated Paystack fee is also deducted from the payout (assumption, owner to confirm), and the escrow fee comes on top. Finance may switch to `all-proportional`. Fees: local 1.5% + NGN 100 (waived under NGN 2,500, capped NGN 2,000), international 3.9% + NGN 100, transfers NGN 10 / 25 / 50 by amount band (PRICING).
 
-**Caveat to raise with the owner.** Bachs recommends the opposite for most marketplaces: "Most marketplaces should collect" (https://docs.bachs.io/connect/choose-your-integration). Direct charges mean the account "needs a payment-accepting capability, which lengthens its requirements" (same page), so seller onboarding is heavier.
+## 3. Seller and creator onboarding ("Get paid", plans.md §38)
 
-### 2.2 Seller account
+Becoming a seller or creator unlocks everything that does not need Paystack. Direct payments and withdrawals wait for the payout account. Escrow sales are allowed before onboarding finishes; released money waits as "pending transfer".
 
-`POST /v1/accounts` with `contact_email`, `entity_type` (`individual` or `company`), `configuration` and `responsibilities` (https://docs.bachs.io/connect/accounts).
+1. **Who you are**: legal name, DOB, address, BVN or NIN; sellers choose "registered business". Stored by go-money; only the last 4 digits of the id are kept.
+2. **Business** (registered sellers): CAC number, business type. Reviewed by Zudomart admin KYB for the verified badge.
+3. **Bank**: bank list `GET /bank?currency=NGN`, live name with `GET /bank/resolve` (RESOLVE). The resolved name must match the legal name (`NAME_MISMATCH`).
+4. **Verify your ID**: Paystack has no hosted ID check for payees. The step becomes an in-app document upload (media service) reviewed by Zudomart or a KYC vendor. It is needed for the verified badge and higher payout limits, not for the Paystack account.
 
-- Personas: `merchant` (collection capabilities) and `recipient` (`payouts`, `transfers`, `conversions`). A seller needs **both** (accounts).
-- Merchant capabilities needed for Nigeria: `ngn_card_collection` (Nigerian cards in NGN) and `bank_transfer`. `card_collection` alone does not enable naira cards (https://docs.bachs.io/connect/capabilities).
-- Capabilities are requested at creation or update and enabled on review. In production a request lands `restricted` until a reviewer enables it (https://docs.bachs.io/connect/go-live). Gate on `status == "active"` (capabilities).
-- `responsibilities.fees.collector` is immutable after creation: `bachs` (default, net settlement) or `platform` (gross settlement) (accounts). **Recommendation:** `bachs`. Separately, `fee_handling` / `customer_bears_fee` decide whether the seller or the buyer pays the processing fee (https://docs.bachs.io/connect/processing-fees).
-- Connected accounts have no API keys or logins of their own. One platform key plus `X-Account-Id` decides whose behalf a call is on (https://docs.bachs.io/connect/acting-as-an-account). This is what makes the escrow lock enforceable (section 4). It is also why section 9 matters.
-- Platform prerequisite: Zudomart must hold an active `connect` capability on its own live account, with business registration, ownership documents and a business bank account (https://docs.bachs.io/connect/become-a-platform, go-live).
+Jobs (go-money, outbox → `jobs-payments` queue), each idempotent:
 
-### 2.3 Onboarding
+| Job | Paystack calls | Idempotency |
+|---|---|---|
+| `createRecipient` | `POST /transferrecipient` (nuban, metadata `zudomartUserId`) | look up the stored `recipient_code`, else list recipients and match account + metadata (Paystack documents no idempotency header) |
+| `createSettlementSubaccount` (sellers) | `GET /subaccount` match, else `POST /subaccount`, then `PUT /subaccount/{code}` `settlement_schedule: auto` | match on `account_number` + `metadata.zudomartUserId` |
+| `createEscrowSubaccount` (E1 only) | as above with `manual` | same |
+| `validateBvn` (optional, if Paystack allows for payees) | `POST /customer/{code}/identification` | wait for `customeridentification.success` or `failed` |
+| `movePendingTransfers` | none (queues payouts) | ledger references |
 
-- Use **hosted onboarding**: `POST /v1/accounts/{id}/account-links` with `type` (`onboarding` or `update`), `refresh_url`, `return_url`. Links expire after one hour, and creating a new link invalidates the previous one (https://docs.bachs.io/connect/guides/hosted-onboarding).
-- Create a link only when the seller taps "Continue verification", never on page render (onboarding page).
-- The return redirect fires even if the seller abandoned the flow. Unlock selling only on the `capability.updated` webhook with `status: "active"` (hosted-onboarding, https://docs.bachs.io/connect/onboarding).
-- API onboarding (own UI) is possible but needs maintenance as requirements change (https://docs.bachs.io/connect/guides/api-onboarding). Not recommended at launch.
-- Mobile behaviour of hosted onboarding links: UNCONFIRMED — ask Bachs. Plan: open in the in-app browser (section 6).
+Five attempts with exponential backoff, then dead letter: `accountStatus = failed`, the user sees "Try again" (`POST payout-onboarding/me/retry`). States stay as in §38 (`pending_creation | documentsRequired | underReview | failed | actionRequired | verified`).
 
-### 2.4 KYC (answer e)
+## 4. Where the money is (ledger mapping)
 
-- Individuals: name, date of birth, address, email, phone and a government ID number (NIN, passport or **BVN** for Nigeria). Registered businesses: registration number, structure and country filings (KYB). Merchants also need a business profile (product description, support email, category). A payout destination (bank account for NGN) is required (https://docs.bachs.io/connect/requirements).
-- A reviewer verifies the person's ID document: pending, passed or failed. A passing person does not by itself enable a capability (https://docs.bachs.io/connect/guides/identity-verification).
-- Each outstanding field lists `restricts_capabilities` and a deadline. Surface `current_deadline` as a banner (requirements).
-- Creators: a recipient-only account has short requirements: "identity and a payout destination, little else" (api-onboarding).
-- An NGN virtual account needs the representative's BVN submitted as a person entry plus a capability approval (https://docs.bachs.io/for-you/virtual-accounts). Optional for Zudomart (section 7).
-- UNCONFIRMED — ask Bachs: whether an `individual` seller (no CAC registration) can hold the merchant capabilities, and whether Bachs or Zudomart is the party responsible for KYC of connected accounts (become-a-platform does not say).
-
-Zudomart's own tiers (unverified / verified, payout limits) sit on top of Bachs's pass/fail.
-
-## 3. Balance states: Bachs balance mapped to the Zudomart ledger
-
-**Bachs holds the money. The Zudomart ledger is a mirror and record, not custody.** Bachs exposes only `pending_balance` (charged, awaiting settlement, cannot be moved) and `available_balance`, per currency, with `pending_settlements_by_day` (https://docs.bachs.io/connect/balances). There is no reserve or held field (balances), so every Zudomart state below is a ledger label over those two Bachs numbers.
+**The Zudomart ledger is the source of truth for what money means. Paystack numbers are evidence for reconciliation and are never shown as a wallet.**
 
 | Zudomart state | Where the money is | Rule |
 |---|---|---|
-| Awaiting settlement | Seller account `pending_balance` | Not movable (balances). Webhook `collection.succeeded` marks the order paid. |
-| In escrow | Seller account, settled | Ledger-locked. No payout is ever created for it. |
-| Locked 24h | Seller account | Escrow released or direct payment settled. `availableAt = release + 24h`. |
-| Available | Seller account | Withdrawable. Capped by `min(ledger available, Bachs available_balance)`. |
-| Payout requested | Seller account | Ledger reservation before `POST /v1/payouts`. |
-| Payout in flight | Bachs payout `pending` | Resolved by `payout.paid` or `payout.failed` webhook. |
-| Paid out | Seller's bank | `payout.paid`. |
-| Debt | Seller account negative | Lost dispute or unfunded refund. Blocks every payout for that account, in every currency (https://docs.bachs.io/connect/payouts, disputes). |
+| Checkout pending | Nowhere yet | Paystack transaction initialized; stock reserved for the payment session timeout. |
+| In escrow (E2) | Zudomart main balance | `charge.success` verified. Liability `seller:<id>:escrow:<escrowId>`. |
+| In escrow (E1) | Seller escrow subaccount, unsettled at Paystack | Mirror only. Released by a settlement request (UNCONFIRMED). |
+| Locked 24h | Main balance (E2) | Released; `availableAt = release + 24h`. |
+| Pending transfer | Main balance | Released but the seller has no recipient yet. |
+| Payout queued / in flight | Main balance → Paystack transfer `pending` | Resolved only by `transfer.success` or `transfer.failed`. |
+| Paid out | Seller's bank | `transfer.success`. |
+| Settling by Paystack (direct) | Seller settlement subaccount | Mirror only. `settled` when `GET /settlement?subaccount=` shows it (API-SETTLEMENT). |
+| Seller debt | — | Refund or chargeback after the seller was paid. Recovered from later escrow payouts; direct mode is switched off while debt is open. |
+| Escrow fee (escrow groups only) | Main balance, then Zudomart's bank (T+1) | Zudomart revenue. No commission exists. |
 
-Release itself moves no money. It is a ledger transition, because the funds are already in the seller account. The only thing that can pull money out is a payout call, and only Zudomart can make it.
+Ledger accounts: `platform:paystack:mainBalance` (asset, must equal escrow + locked + pending transfer + payouts in flight + creator payables + refunds in flight + unsettled Zudomart revenue), `revenue:escrowFees`, `expense:paystackFees`, `seller:<id>:processingFeesRecoverable`, `seller:<id>:escrow:*`, `seller:<id>:locked`, `seller:<id>:pendingTransfer`, `seller:<id>:reservedPayout`, `seller:<id>:debt`, memo `seller:<id>:settlingByPaystack`, `creator:<id>:earningsPayable`.
 
-**Mirror integrity.**
+## 5. Escrow mechanics
 
-- Zudomart's own revenue (platform fees, coin sales, ads, subscriptions) is in Zudomart's own Bachs account, so it owes nobody.
-- Per seller: `Σ seller ledger states = Bachs pending + available ± in-flight payouts`. A nightly job compares via `GET /v1/balances` with `X-Account-Id` (https://docs.bachs.io/connect/walkthroughs/marketplace).
-- On mismatch: freeze that seller's payouts and alert. Bachs's balance wins.
-- Platform fee: `platform_fee` is a fee-first record queryable at `GET /v1/platform_fees` (https://docs.bachs.io/connect/platform-fees). Reconcile it against the `platform:fees` ledger account.
+Paystack documents no escrow product. Two designs:
 
-## 4. Escrow lock mechanics (answer b)
+- **E2 (launch path, documented, high confidence):** escrow groups are left out of the split, so their money stays in Zudomart's main balance. Release is a ledger move; after the 24h lock the payout run sends a transfer (`POST /transfer`, reference `po-<uuid>`) to the seller's recipient (TRANSFERS). Cost: one transfer fee per seller per run. Exposure: Zudomart controls escrowed money in its Paystack balance. Needs Paystack to keep a float in the balance instead of settling everything T+1 to Zudomart's bank (**UNCONFIRMED**, paystack.md Q3).
+- **E1 (preferred if confirmed, low confidence today):** escrow groups split to the seller's escrow subaccount with `settlement_schedule: manual`. Paystack holds the money; release asks Paystack to settle. Blocked on: how a manual settlement is requested, whether it can be per order or amount, and how refunds work on unsettled subaccount funds (paystack.md Q1, Q4).
 
-Bachs has no documented "hold" feature. The documented levers are:
+Rules either way: unverified stores always escrow; 3-day auto-release after delivery (`escrow.policy`); buyer disputes and `charge.dispute.create` pause the timer and freeze the group; 24h lock before payout; a rolling reserve for risky sellers is a ledger hold on payouts (E2) — not possible for direct splits, so risky sellers lose direct mode.
 
-1. **Payout schedule `manual`**: "No automation; requires explicit Create Payout calls" (https://docs.bachs.io/guides/payouts/payout-schedules). The platform sets schedules per account via `X-Account-Id` at onboarding (payout-schedules).
-2. **Platform-only API access**: accounts have no keys (https://docs.bachs.io/connect/acting-as-an-account). Combined with manual schedules, funds leave only when Zudomart calls `POST /v1/payouts` with `X-Account-Id` (https://docs.bachs.io/guides/payouts/payout-using-api).
-3. Production keys scoped narrowly: `connected_accounts:write`, `transfers:write`, `payouts:write` (go-live). Keep the payout key in go-money only.
-4. An account's first payout is held for a one-time review and completes a few minutes later (https://docs.bachs.io/connect/money-movement).
+## 6. Flows
 
-Open risks, all **UNCONFIRMED — ask Bachs**:
+### 6.1 Checkout (one transaction per checkout)
 
-- payout-schedules says "Account holders may later adjust their own settings from their dashboard", while acting-as says accounts have no logins. Does a connected account ever get a dashboard that could change its schedule or withdraw?
-- A `balance_settings` page does not exist at `/api-reference/balance-settings/object` (404). Is there any balance or payout setting that can lock funds at Bachs's side (reserve, hold, minimum)?
-- Can Zudomart leave the `payouts` capability inactive on a seller until release, as an extra lock? Capability changes need review, so this is probably too slow.
+1. `POST /checkout` (go-commerce): recompute each seller group (items, shipping, escrow fee for escrow groups; no commission). Unverified stores force `paymentMode=escrow`; direct for an unverified store is a 422. Verified stores need an active settlement subaccount for direct.
+2. `POST /payments/intents` (go-money) with an idempotency key. Intent written first (tx1), then `POST /transaction/initialize` after commit (ACCEPT):
+   - `email` = buyer's verified account email; `label` may show the username instead of the email (ACCEPT)
+   - `amount` = checkout total in kobo (our int64 minor units, no conversion)
+   - `reference` = `chk-<uuid>` (only `- . =` and alphanumerics)
+   - `channels` = `card`, `bank`, `ussd`, `bank_transfer` (admin-configurable)
+   - `callback_url` = universal link (section 7)
+   - `metadata` = checkout id, order group ids and modes
+   - `split` (only when at least one direct group): `{ type: "flat", bearer_type: "account", subaccounts: [{ subaccount: ACCT_seller, share: sellerNetKobo }] }`. `sellerNetKobo` = group total minus the allocated Paystack fee (no Zudomart fee on direct). Escrow groups are the remainder that stays with the main account (MSPLIT).
+   Store `authorization_url`, `access_code` and the Paystack transaction id on the intent (tx2).
+3. The buyer pays. **Confirmation only from a signature-verified `charge.success` webhook plus `GET /transaction/verify/{reference}`**; redirects and popup callbacks only trigger a status check (ACCEPT, VERIFY).
+4. Checks before marking paid: `data.status = success`, amount, currency, reference, and the `split` object match the intent. Mismatch → `amount_mismatch`, no fulfilment, automatic refund of what was paid.
+5. One ledger transaction: escrow groups → `escrow`; direct groups → `settlingByPaystack`; the escrow fee is booked to `revenue:escrowFees` at release (not at payment), so refunds before release never earn a fee; Paystack fee (`data.fees`) → `expense:paystackFees`; outbox `payment.succeeded`.
+6. **Multi-seller cart = one payment.** A cart with escrow and direct groups is still one transaction; only direct groups appear in the split. This replaces the Bachs "one payment per seller" UX.
+7. Stock reservation = payment session timeout (`PUT /integration/payment_session_timeout`, default 30 minutes). A success for an expired checkout is fulfilled if stock can still be reserved, else refunded.
+8. Bank transfer at checkout: a wrong amount raises `bank.transfer.rejected` (PAYCH): intent `transfer_rejected`, buyer told the bank will be refunded, retry allowed. Refund timing for rejected transfers is **UNCONFIRMED — ask Paystack**. The transfer account lives 15 minutes to 8 hours; set it equal to the payment session timeout.
 
-**Rolling reserve.** There is no native reserve. Zudomart keeps a configurable percentage of a risky seller's balance un-withdrawable in the ledger (the withdrawable cap in section 3).
+### 6.2 Escrow release and payout run
 
-## 5. Checkout flows
+- Release (buyer confirms, or 3 days after delivery, no open dispute): ledger `escrow → locked24h` minus the escrow fee (1.5%, or 1% on Business, of the released amount incl. shipping) to `revenue:escrowFees` (E2), or settlement request (E1). Idempotent on the escrow id.
+- Maturing job (every 5 minutes): `locked24h → payout queued` when `availableAt ≤ now` and the seller has a recipient, else `pendingTransfer`.
+- Daily payout run: check `GET /balance` covers all queued payouts; one `POST /transfer` per seller (sum of matured releases), `reference = po-<uuid>` (lowercase, 16–100 characters), `source: balance`. Response `pending`; **paid only on `transfer.success`**; `transfer.failed` returns the amount to the queue with the reason; `transfer.reversed` reopens it and alerts ops (TRANSFERS). After a timeout, retry with the same reference or `GET /transfer/verify/{reference}`.
+- OTP for transfers disabled on the dashboard; if a response still says `otp`, alert and stop the run (never auto-finalize).
+- The transfer fee band (NGN 10 / 25 / 50) is shown in `GET payout-fees` and charged to Zudomart or deducted from the payout (finance decision; default deducted and shown).
 
-### 5.1 Paying for an order group
+### 6.3 Refunds
 
-Bachs direct charges are per account (`X-Account-Id` selects one). The docs show no way to charge one checkout across several accounts. **A multi-seller cart therefore becomes one Bachs checkout per seller group**, and the buyer pays once per group (sequentially or one after another in the in-app browser). **UNCONFIRMED — ask Bachs:** is there any way to charge once and split across sellers without the platform collecting (that would be a destination charge, which Zudomart rejects)? Product impact: the "one payment, split per group" UX from the old plan is gone. The cart screen must show N payments for N sellers, or cap checkouts to one seller at a time.
+- `POST /refund` with the transaction reference and `amount` (partial allowed, never above the original; REFUNDS, API-REFUND). Events `refund.pending`, `refund.processing`, `refund.processed`, `refund.failed` ("Your account is credited with refund amount"). Processed refunds can take up to 10 business days to reach the buyer.
+- Bank-transfer payments may need the buyer's account: a `needs-attention` refund is retried with `POST /refund/retry_with_customer_details/{id}` after the buyer enters an account in the app (never by email) (OPENAPI).
+- Source of funds: the refund debits Zudomart's balance. Escrow groups: the escrow liability covers it. Direct groups: if the seller share already settled, book `seller:<id>:debt` and recover it from later escrow payouts; switch the store to escrow-only while debt is open. Whether Paystack reverses the subaccount share is **UNCONFIRMED** (paystack.md Q4).
+- Whether Paystack returns its fee on refund: **UNCONFIRMED**. Which fees Zudomart absorbs is a finance decision.
 
-1. `POST /checkout` (go-commerce): recompute each group including shipping and commission. Unverified stores force `paymentMode=escrow`. Direct for an unverified store is a 422.
-2. `POST /payments/intents` (go-money), per group, with an idempotency key and the server-computed amount. The adapter calls `POST /v1/checkout-sessions` with:
-   - `X-Account-Id` = the seller's account
-   - `platform_fee` = Zudomart commission in the sale's currency (decimal string at currency precision, between zero and the gross amount; https://docs.bachs.io/connect/platform-fees)
-   - `reference` = the order group id (max 128 chars, unique per org; https://docs.bachs.io/guides/checkout/checkout-sessions)
-   - `metadata` (up to 20 pairs): checkout id, order group id, payment mode
-   - `expires_in_minutes`: match the 15-minute stock reservation
-   - `success_url` / `cancel_url`: universal links (section 6)
-   - Money is a decimal string, never minor units (https://docs.bachs.io/connect/marketplaces/accept-a-payment). The adapter converts at the boundary.
-3. The buyer pays on the hosted page. **Confirmation only from a signature-verified `collection.succeeded` webhook** (section 8). Redirects and overlay events are never trusted (checkout-sessions, https://docs.bachs.io/guides/checkout/overlay-checkout).
-4. On confirmation, in one ledger transaction per group:
-   - Escrow group: mirror `awaiting settlement → in escrow`.
-   - Direct group: mirror `→ locked 24h`.
-   - The `platform_fee` is recorded as a receivable to `platform:fees` and reconciled when the platform fee record settles.
-5. **Escrow release**: delivered and buyer confirms, or the timer ends 3 days after delivery. Dispute pauses it. The ledger moves `in escrow → locked 24h`. No Bachs call.
-6. **Maturing job** (every 5 minutes): `locked → available` when `availableAt ≤ now` and the Bachs balance covers it. A seller's first release also waits for settlement: charges stay `pending_balance` until settled (balances).
-7. **`POST /withdrawals`**: limited to available, verified payout destination, KYC tier.
-8. **Daily payout run** (section 5.3).
+### 6.4 Saved cards and subscriptions
 
-### 5.2 Fees
+- Saved card: after a card `charge.success` with `authorization.reusable = true`, go-money returns `authorization_code`, brand, last4 and expiry to the app once; the app stores them in Keychain or Keystore behind biometrics. The server keeps only `authorization.signature` (dedupe) and never persists the code (RECUR).
+- Pay with a saved card: app unlocks the code, server calls `POST /transaction/charge_authorization` with the **account email** ("only the email used to create an authorization can be used to charge it", RECUR), amount, reference and the same split rules. `paused: true` → open the returned `authorization_url` for 2FA.
+- If the account email changes, saved cards stop working; the app deletes them.
+- Subscriptions (seller plans, Premium web, creator subscriptions, Gold and Black billing): Paystack Plans; `POST /subscription` with the Paystack-held authorization; trials = NGN 50–100 verification charge refunded at once, then `start_date` = trial end ("a free period", SUBS). Dunning from `invoice.payment_failed`, card update by manage link, cancellation by `POST /subscription/disable`. Web only; apps use IAP.
 
-- Bachs processing fee rates (https://docs.bachs.io/for-you/fees): NGN bank transfer at checkout 1.5% capped at NGN 2,000, local cards 2%, virtual account deposit 1.5% capped at NGN 300. NGN payout NGN 50 flat. Dispute fee USD 15 per dispute. Refunds have no Bachs fee. Rates "can be set per account" (https://docs.bachs.io/connect/processing-fees), so ask for custom pricing.
-- Who pays the processing fee is a product decision: seller (`account_pays_fee`) or buyer (`customer_bears_fee`). Default recommendation: seller pays, inside the commission quote shown to sellers.
-- A platform fee is not reversed on refund (platform-fees). This drives the refund top-up in 5.4.
+### 6.5 Disputes and chargebacks
 
-### 5.3 Payout run (answers b and the "daily batch")
+- `charge.dispute.create`, `charge.dispute.remind`, `charge.dispute.resolve` (WEBHOOKS); daily `GET /dispute` poll as a backstop.
+- On create: freeze the order group's escrow and pause the timer. Evidence through `POST /dispute/{id}/evidence` and the upload URL; decision through `PUT /dispute/{id}/resolve` (`merchant-accepted` with `refund_amount`, or `declined`) (OPENAPI).
+- Zudomart's main account is presumably liable on every transaction, split or not (**UNCONFIRMED**, paystack.md Q5). A lost dispute on a settled direct group becomes seller debt.
+- Zudomart's own buyer-seller disputes (item not as described) stay in Zudomart's flow and end in a refund or a release.
 
-- Daily at a configured UTC hour, go-money selects each seller's `available` ledger amount, capped by `Bachs available_balance`.
-- `POST /v1/payouts` with `X-Account-Id`, `destination` (`pd_...`), `amount`, `reference` and `Idempotency-Key` derived from our payout id (https://docs.bachs.io/guides/payouts/payout-using-api). Amount is what the seller **receives** and the fee is charged on top, so the account balance must cover amount + fee. The run pays `available − fee` and deducts the NGN 50 fee from the seller's withdrawal in the quote.
-- `201` is not completion. The ledger resolves on `payout.paid` or `payout.failed`: success books paid-out, failure returns the amount to `available` and notifies the seller (payout-using-api, https://docs.bachs.io/connect/payouts).
-- There is no cancel after creation (connect/payouts). Check balance and risk policy before calling.
-- Use the first-payout review delay in seller copy ("your first payout can take a few extra minutes").
-- Payout destination (bank account) is verified with `POST /v1/misc/bank-accounts/resolve` (api-onboarding).
+## 7. Clients
 
-### 5.4 Refunds (answer c)
+- **Web (webapp, seller dashboard, ads, Studio web):** Paystack Popup with the server-created `access_code`, or redirect to `authorization_url`. The client never sees the secret key (ACCEPT).
+- **Mobile (Expo):** open `authorization_url` in an in-app browser (`expo-web-browser` `openAuthSessionAsync`), `callback_url` = universal link `https://zudomart.com/pay/return?ref=...`. Native Paystack SDKs (Android `paystack-ui`, iOS Swift Package, both driven by `access_code`, ACCEPT) need a dev client; evaluate later. Show "Confirming payment…" until the server confirms (realtime or push, polling fallback).
+- **Checkout UI per seller group:** unverified: fixed escrow line; verified: Escrow (recommended) or Pay directly. One Pay button for the whole cart.
+- **Seller area:** Available, Locked (with time), In escrow, Pending transfer, Settling to your bank (direct), Debt. Withdraw shows the next payout run and the transfer fee band.
+- **Admin:** hold period, auto-release days, success-rate minimum, verification rules, reserve percentages, payout run monitor, reconciliation breaks, manual hold or release, audit log.
 
-- `POST /v1/refunds`, partial supported with `amount` in the settlement currency. One refund per payment. Statuses `processing`, `success`, `failed`; `refund.paid` does not mean the buyer sees the money yet. Card refunds take 5 to 7 working days, mobile money and bank transfer 1 to 7 (https://docs.bachs.io/guides/refunds).
-- **NGN bank-transfer payments cannot be refunded** (refunds). For those, Zudomart pays the buyer back with a payout from the seller account (`X-Account-Id`) to the buyer's bank destination, with the buyer's bank details collected at refund time. **UNCONFIRMED — ask Bachs:** is that payout-as-refund acceptable, and what is the refund path for bank transfers.
-- On a direct charge the refund debits the **seller account** for the full amount the buyer paid, even though the seller received it net of platform fee. Platform and processing fees are not reversed (https://docs.bachs.io/connect/refunds). If the account lacks funds the refund is rejected, with no overdraft (connect/refunds).
-- Zudomart's rule: before refunding, transfer the platform fee (and per policy the processing fee) back to the seller account with `POST /v1/transfers` (platform to account, `transfer_group` = order group id), so the full refund can be debited from escrow. The fee refund is a Zudomart revenue reversal. Which fees Zudomart absorbs is a finance decision.
-- `refund.created`, `refund.paid`, `refund.failed` drive the ledger. Escrow refund: `in escrow → refunded`.
-- If funds were already paid out, the refund draws on the account's remaining balance and fails if it is short. Fallback: a ledger debt on the seller, recovered from future settlements (section 5.5).
-- A transfer cannot be reversed: "cannot be cancelled or reversed", recovery needs a transfer back in the opposite direction (https://docs.bachs.io/connect/transfers). A transfer back works only while the account still holds the money (https://docs.bachs.io/connect/money-movement).
+## 8. Platform revenue and creator money
 
-### 5.5 Disputes and chargebacks (answer c)
+### 8.1 Ads billing
 
-- `dispute.created` and `dispute.updated` webhooks (events list). Poll **List Disputes** as well; email alone is not enough (https://docs.bachs.io/connect/marketplaces/refunds-and-disputes).
-- On a direct charge the account is liable. A lost dispute drains the account's available then pending balance and can leave it negative. Negative in any currency freezes every transfer and withdrawal for that account (connect/disputes). Escrow funds still in the account act as the buffer.
-- The dispute fee (USD 15) debits when the dispute opens and is not refunded on a win (connect/disputes). Early dispute warnings cost USD 29 per payment (https://docs.bachs.io/for-you/fees).
-- On direct charges with a platform fee, a lost dispute leaves the account short by more than it was credited (connect/disputes). Decision for finance: absorb the fee share or recover from the seller.
-- Zudomart submits evidence on the seller's behalf using the dispute API with `X-Account-Id` (https://docs.bachs.io/guides/disputes/overview; connect/disputes).
-- When a dispute opens on an order group: freeze its escrow ledger entry and pause the auto-release timer. Card chargebacks can land after payout, so the rolling reserve (section 4) and debt recovery apply.
-- **Zudomart's own buyer-seller disputes** (item not as described) stay in Zudomart's dispute flow and end in a Bachs refund or a release.
+Advertisers pay by Paystack checkout on the main account (web `ads.` app). Prefer postpaid or small top-ups; prepaid credit is money not yet earned (lawyer).
 
-## 6. Clients (answer g)
+### 8.2 Coins
 
-Native SDK: the docs describe none. There is an overlay JS SDK (`bachs.js`, `@bachs/js`) that loads the hosted checkout in an iframe modal. It is documented for web only, and webview compatibility is not stated (https://docs.bachs.io/guides/checkout/overlay-checkout). The payment-method page says nothing on mobile SDKs, webviews or 3DS (https://docs.bachs.io/guides/payments/payment-method-support). **Plan: hosted checkout everywhere, no native Bachs SDK.** Confidence that no native mobile SDK exists in the docs: high. Confidence that hosted checkout works in an in-app browser: medium, UNCONFIRMED — ask Bachs (3DS, bank-transfer app switching).
+- Web coin packs: Paystack checkout on the main account. Apps: Apple and Google IAP; that money reaches Zudomart's bank through the stores.
+- **Per-channel pricing (1 coin is not NGN 1):**
+  1. Finance sets the target **net value per coin** `n` (illustration: NGN 10).
+  2. For each channel pick the price tier `P`; `coins = floor(P × (1 − fee_c) ÷ n)`.
+  3. `fee_c`: app_ios and app_android = store cut (15% small-business programmes, 30% standard; re-check), web = Paystack 1.5% + NGN 100 (waived under NGN 2,500, capped NGN 2,000) (PRICING).
+  4. Illustration at `n = 10`, `P = 1,500`: 105 coins at 30%, 127 at 15%, 147 on web (fee 1.5% = NGN 22.50, NGN 100 waived).
+  5. `CoinPack` has `channel` (`app_ios`, `app_android`, `web`) with its own price and coin count.
+- **Steering:** in the apps never link to or mention the cheaper web price where store rules forbid it. Re-check Apple 3.1, Google Play payments policy and regional anti-steering rules before launch and each major release. Default: no steering anywhere.
 
-- **Mobile (apps/mobile).**
-  - Open `checkout_url` in an in-app browser (`expo-web-browser`, `openAuthSessionAsync`).
-  - `success_url` and `cancel_url` are HTTPS universal links (for example `https://zudomart.com/pay/return?group=...`) that the app claims, so the browser closes and returns to the app. UNCONFIRMED — ask Bachs: do they accept custom URL schemes?
-  - The return only says "go and look". Show "Confirming payment…" until the server confirms via the `collection.succeeded` webhook (realtime or push, polling fallback).
-  - Seller onboarding opens `account-links` the same way, with a deep-link `return_url` and a `refresh_url` handler that issues a fresh link (hosted-onboarding).
-- **Webapp.** Overlay (`bachs.js`) with the hosted redirect as fallback. Confirmation is server-side.
-- **Product and store pages.** Verified stores show a badge and "98% success rate · 1.2k orders". Unverified stores show "Protected by Zudomart Escrow".
-- **Checkout per seller group.** Unverified: fixed escrow line. Verified: radio between Escrow (recommended) and Pay directly. With N sellers, show N payment steps.
-- **Seller area.** Balance cards: Available, Locked (with available-at), In escrow, Awaiting settlement, Payout requested, Debt. Withdraw with the next run time and the first-payout note. A verification card shows Bachs onboarding progress and the Zudomart verified-store path.
-- **Admin.** Settings (hold period, auto-release days, success-rate minimum, verification rules, reserve percentages), payout run monitor, mirror mismatches, manual hold or release, audit log.
+### 8.3 Creator gift earnings
 
-## 7. Platform revenue and creator money
+- Gifts are bought with coins, so the cash is Zudomart revenue; the creator share is `creator:<id>:earningsPayable`.
+- Creators need only a transfer recipient (no subaccount; they do not sell).
+- Payout run (daily or weekly, minimum per creator): `POST /transfer` from the main balance to the creator's recipient, `reference = cr-<uuid>`; resolved by `transfer.success` / `transfer.failed`.
+- Funding gap: IAP proceeds land in Zudomart's bank. Treasury keeps the Paystack balance funded for payouts (top-up method **UNCONFIRMED**). Pay creators on a short cycle to limit how long Zudomart owes them.
 
-Everything here uses **Zudomart's own Bachs account**, with no `X-Account-Id` (collections land in the platform balance; https://docs.bachs.io/connect/money-movement). It is Zudomart's own revenue, so it owes nobody except the creator shares below.
+## 9. Webhooks and idempotency
 
-### 7.1 Ads billing
+- Endpoint `POST /webhooks/paystack` (go-money, not re-serialised by the gateway). Allowlist 52.31.139.75, 52.49.173.169, 52.214.14.220 (WEBHOOKS).
+- Verify `x-paystack-signature` = hex HMAC-SHA512 of the raw body with the **secret key**, constant-time compare, before parsing. During a secret-key rotation accept old and new keys briefly.
+- Dedupe: no event id is documented, so `event_key = event + data.id + data.status` (transfers and refunds use `data.reference` / `data.id` + status). Unique `(provider, event_key)` in `webhook_events`.
+- Persist raw, return 200 immediately, process in a job, re-fetch (`/transaction/verify`, `/transfer/verify`, `/refund/{id}`), post ledger and outbox in one transaction. Retries: live every 3 minutes ×4 then hourly for 72 hours; test hourly for 10 hours (WEBHOOKS).
+- Subscribed events: `charge.success`, `bank.transfer.rejected`, `transfer.success|failed|reversed`, `refund.pending|processing|processed|failed`, `charge.dispute.create|remind|resolve`, `subscription.create|disable|not_renew|expiring_cards`, `invoice.create|update|payment_failed`, `customeridentification.success|failed`.
+- Idempotency to Paystack: the transaction and transfer `reference` are the keys; retry with the same reference, verify by reference after timeouts. Formats `chk-`, `po-`, `cr-`, `rf-`, `sub-` + uuid. Postgres `idempotent_requests` remains the long-term guard.
 
-- Advertiser pays by Bachs hosted checkout on the platform account (web `ads.` app), or by NGN deposit to a Zudomart virtual account (platform virtual accounts are supported; https://docs.bachs.io/for-you/virtual-accounts). Each deposit becomes a payment on the receiving account.
-- Spend is recognised as consumed. **Risk flag:** prepaid ad credit is money the advertiser has paid and Zudomart has not yet earned. Prefer postpaid or low-threshold top-ups, or write the credit as non-refundable service credit. Needs a lawyer (section 9).
-- Ads revenue share to creators follows 7.3.
+## 10. Open questions
 
-### 7.2 Coins, subscriptions
+**For the owner:**
 
-- Web coin packs, seller plans and creator subscriptions are sold by Bachs checkout on the platform account. Bachs offers subscriptions with cards only, NGN card availability limited, and bank transfer or mobile money for one-time only (https://docs.bachs.io/guides/payments/payment-method-support). Seller plans: monthly one-time renewals, or cards only. Subscription billing adds 0.5% on billing volume ("coming soon" in https://docs.bachs.io/for-you/fees).
-- In the apps, coins use Apple and Google in-app purchase. That money reaches Zudomart through the stores, not Bachs.
-- **Coin pricing (1 coin is not NGN 1).** Per-channel coin pack table, built like this:
-  1. Finance sets the target **net value per coin** `n` (net NGN per coin after all channel costs), for example NGN 10 (illustrative only).
-  2. For each channel, pick the price tier `P` the channel sells at, then `coins = floor(P × (1 − fee_c) ÷ n)`.
-  3. `fee_c`: app_ios and app_android use the store cut (15% for small business programs, 30% standard; re-check each programme and the store's tax treatment), web uses the Bachs processing rate (about 2% for local cards, 1.5% capped for bank transfer; https://docs.bachs.io/for-you/fees).
-  4. Illustration at `n = 10`: P = 1,500 gives 105 coins at 30% (1,500 × 0.70 ÷ 10), 119 at 15% (1,500 × 0.85 ÷ 10), and about 147 on web (1,500 × 0.98 ÷ 10). The web buyer gets more coins per naira and Zudomart nets the same per coin.
-  5. `CoinPack` has `channel` (`app_ios`, `app_android`, `web`) and per-channel price and coin amount. A pack is a coins count by channel; tiers are the store's price points.
-- **Steering rule.** In-app, never link to, name or hint at the cheaper web price in any region where the store forbids it. US and EU anti-steering rules may allow it. **Flag: re-check Apple 3.1 and Google Play payments policy, regional programmes, and each region's current anti-steering rules before launch and each major release.** Default is no steering anywhere.
+1. Buyer wallet funded by DVA: recommendation **no** at launch (coins only, refunds to source).
+2. E2 (escrow in Zudomart's Paystack balance) at launch, moving to E1 if Paystack confirms manual settlement per order?
+3. Who bears the Paystack fee on splits (default Zudomart) and the transfer fee on payouts (default deducted and shown).
+4. Direct mode for sellers with open debt: off until repaid (recommended).
 
-### 7.3 Creator gift earnings (answer d)
+**For a Nigerian fintech lawyer:** whether E2 escrow (buyer money in Zudomart's Paystack balance until release) needs a licence or specific terms; prepaid ad credit and unspent coins as stored value; seller terms allowing debt recovery.
 
-- Gifts are digital and bought with coins, so the cash is Zudomart revenue (7.2). The creator's share is a payable Zudomart owes the creator.
-- Creator account: Bachs `recipient` configuration with `transfers` and `payouts` active, identity and bank destination only (https://docs.bachs.io/connect/payout-networks; api-onboarding). A seller who is also a creator keeps one account with both personas.
-- Pay from Zudomart's balance:
-  1. Creator requests cash-out (minimum payout enforced) or an accrual job runs.
-  2. `POST /v1/transfers` (platform to creator account), decimal string amount, one transfer per creator because "there is no batch endpoint", all tagged with one `transfer_group` for the run (payout-networks, https://docs.bachs.io/connect/transfers).
-  3. Then `POST /v1/payouts` with `X-Account-Id` to the creator's bank destination.
-  4. The `transfer.created` and `payout.paid` webhooks close the ledger entries.
-- Transfers draw only on the platform's `available_balance` and fail with `INSUFFICIENT_BALANCE` otherwise. Check the balance before a run (payout-networks, https://docs.bachs.io/connect/balances).
-- **Funding gap.** IAP proceeds arrive from Apple and Google into Zudomart's bank, not into Bachs. Creator payouts need Zudomart's Bachs balance funded, by NGN virtual-account deposit. Treasury process needed. UNCONFIRMED — ask Bachs: platform top-up methods and limits.
-- **Accrued creator earnings are money Zudomart owes**. To limit holding time, transfer creator shares to creator accounts on a short cycle (daily or weekly) rather than only at cash-out. Unspent coins are stored-value risk: flag to the lawyer.
-- Payout networks: the docs give NGN examples only and list no rails or countries for creators. UNCONFIRMED — ask Bachs: supported payout countries and currencies (https://docs.bachs.io/connect/payout-networks).
+**For Paystack:** paystack.md section 11 (manual settlement API, escrow approval, balance float, refunds and disputes on splits, bank-transfer mismatches, KYC duties, limits, webhook event ids, mobile path, currencies).
 
-## 8. Webhooks and idempotency (answer f)
+## 11. Edge cases
 
-**Webhook verification** (https://docs.bachs.io/guides/webhooks/overview):
+- Webhook and callback both arrive: idempotent on reference and event key.
+- Buyer pays twice for one checkout: refund the second transaction.
+- Chargeback after a direct share settled: seller debt, store forced to escrow-only, recovered from later payouts.
+- Store loses verification: new checkouts escrow-only; existing orders keep their mode.
+- Subaccount deactivated or bank changed: direct mode off until the new subaccount is active; payouts wait for a new recipient.
+- Paystack outage: hide Pay, keep browse and cart; sweepers verify pending intents and transfers by reference afterwards.
+- Amount mismatch: no fulfilment, refund, admin notice.
 
-- Headers `X-Bachs-Signature-V2` (preferred) and `X-Bachs-Signature` (legacy). Algorithm: HMAC-SHA256 hex digest of `{timestamp}.{raw_body}` with the signing secret.
-- Read the **raw body** before parsing. Default tolerance 300 seconds. Compare in constant time.
-- Delivery is at-least-once. Deduplicate on the event `id` (`evt_...`). No ordering guarantee is documented, so every handler must be a conditional state transition and treat events as hints to re-fetch (`GET` the payment, transfer or payout) before posting to the ledger.
-- Event shape: `id`, `type`, `created_at`, `organization_id`, `data`. For Connect events the endpoint needs `event_source` set to `connect` or `all`; `organization_id` is then the connected account and a top-level `account` field carries the same id (webhooks overview).
-- `collection.succeeded` carries `reference`, `checkout_id`, `charge_id`, `status` (`SUCCEEDED`, `ACCEPTED`, `OVERPAID`), `amount`, `settlement_amount`, `processing_fee`, `fee_bearer`, `metadata` (https://docs.bachs.io/guides/webhooks/events/collection-succeeded). Verify amount, currency and `reference` against the pending payment before marking paid. Handle `collection.failed` and `collection.underpaid` (events list).
-- Webhooks to subscribe to: `checkout.completed`, `checkout.expired`, `collection.succeeded|failed|underpaid`, `refund.created|paid|failed`, `payout.created|paid|failed`, `dispute.created|updated`, `account.updated`, `capability.updated`, `transfer.created`.
-- UNCONFIRMED — ask Bachs: the name of the timestamp header, signing-secret rotation, and the retry schedule.
-- Signing secrets differ between sandbox and production (go-live). The gateway must not re-serialise webhook JSON; keep `/webhooks/*` off the gateway (existing devops decision).
+## 12. Code changes needed
 
-**Idempotency** (https://docs.bachs.io/guides/idempotency):
+Status 2026-10-03: implemented in go-money (see `docs/integrations/paystack.md` §12 for what is built and what stays open). The previous Paystack adapter can be read from git (`git show 3f200f96:services/go/modules/payments/src/integrations/paystack.integration.go`) as a starting point, but it predates splits, transfers and the current interfaces.
 
-- `Idempotency-Key` header on every POST to `/v1/`. Same key and same body returns the cached 2xx response for 24 hours. Same key with a different body returns `409 IDEMPOTENCY_CONFLICT`. 4xx and 5xx are not cached.
-- Derive keys from our own ids, never random per attempt: `chk:{orderGroupId}`, `refund:{refundId}`, `fee-topup:{refundId}`, `payout:{payoutId}`, `creator:{runId}:{creatorId}`.
-- Do not treat a network or 5xx error on a transfer as not created: GET the transfer before retrying (transfers).
-- Bachs's cache lasts 24 hours, so go-money's own durable idempotency record (Postgres) remains the long-term guard, plus the unique checkout `reference`.
+### 12.1 Remove (every Bachs file and reference)
 
-## 9. Open questions
+**go-money integrations (delete):**
+- `services/go/modules/payments/src/integrations/bachsConnect.integration.go`, `bachsConnect.integration_test.go`
+- `bachsConnectAccounts.integration.go`, `bachsConnectCheckout.integration.go`, `bachsConnectDisputesAndSubscriptions.integration.go`, `bachsConnectHttpClient.integration.go`, `bachsConnectMoneyMovement.integration.go`
+- `bachsConnectSavedCards.integration.go`, `bachsConnectSavedCards.integration_test.go`
+- `bachsConnectWebhooks.integration.go`, `bachsConnectWebhooks.integration_test.go`
+- `bachsPayoutFeeSchedule.integration.go`, `bachsPayoutFeeSchedule.integration_test.go`
+- `paymentsTesting/fakeBachs.util.go`, `fakeBachsMoney.util.go`, `fakeBachsRoutes.util.go`
+- `testdata/bachs/` (all 13 fixtures: `createAccount`, `createCharge`, `createCheckoutSession`, `createCustomer`, `createPayout`, `createRefund`, `createTransfer`, `getBalances`, `getCheckoutSession.completed`, `insufficientBalance.error`, `listAccounts.empty`, `paymentMethodUnusable.error`, `savedPaymentMethodNotFound.error`)
+- `services/go/modules/wallet/src/integrations/bachsManualPayoutSettlement.integration.go`
 
-**For the owner and a Nigerian fintech lawyer (before launch):**
+**go-money edits:**
+- `payments/src/integrations/paymentsTesting/paymentsHarness.util.go`, `paymentsHarnessConnect.util.go`: wire the fake Paystack instead.
+- `payments/src/integrations/appleAppStore.integration.go`: rename `maximumBachsResponseBytes`.
+- `payments/src/configs/payments.config.go` and `payments.config_test.go`: drop `BACHS_*` settings and the `sk_live_`/`sk_sandbox_` check; add `PAYSTACK_*` (section 12.2).
+- `payments/src/constants/payments.constant.go`: `ProviderBachs` → `ProviderPaystack = "paystack"`.
+- `payments/src/container/payments.container.go`: `NewBachsProviderFromSettings` → Paystack provider.
+- `payments/src/modules/checkoutPayments/validators/checkoutPayments.validator.go`, `wallet/src/modules/coins/validators/coins.validator.go`: provider `paystack`.
+- `payments/src/modules/gateway/services/webhookProcessing.service.go`: saved-payment-method notification and provider constant.
+- `payments/src/modules/gateway/models/payoutOnboarding.model_test.go`, `gateway/services/connectedAccountVerification.service_test.go`: Bachs requirement wording and states.
+- `payments/payments.connectedAccounts_integration_test.go`, `payments.payoutOnboarding_integration_test.go`: rewrite for recipients and subaccounts.
+- `wallet/src/configs/wallet.config.go`, `wallet/src/container/wallet.container.go`: `WALLET_SELLER_SETTLEMENT_ADAPTER` default `bachsManualPayout` → `paystackTransfer`.
+- `wallet/wallet.creatorPayouts_integration_test.go`, `wallet.module_integration_test.go`: creator payouts by transfer from the main balance.
+- `escrow/escrow.chargebacks_integration_test.go`, `escrow.checkoutModes_integration_test.go`, `escrow.harness_integration_test.go`, `escrow.module_integration_test.go`: escrow in main balance; direct via split.
+- `ledger/src/modules/journal/services/ledgerPosting.service_integration_test.go`, `ledger/src/modules/journal/validators/journalEntry.validator_test.go`: account codes.
+- `orders/src/services/sellerOrderPresenter.service.go`: provider wording.
+- Migrations: the `*_bachs_connect_mirror` migrations in `payments`, `escrow`, `ledger`, `wallet` (`src/migrations`, listed in each `atlas.sum`) are already applied in dev. Do **not** edit them; add new forward migrations (section 12.2) and regenerate `atlas.sum` with Atlas.
+- `services/go/.env.example`: remove `PAYMENTS_DEFAULT_PROVIDER=bachs`, `BACHS_API_BASE_URL`, `BACHS_SECRET_KEY`, `BACHS_WEBHOOK_SIGNING_SECRETS`, `BACHS_PAYOUT_FEE_OVERRIDES`, `BACHS_PAYOUT_FEE_SCHEDULE`, `BACHS_MAXIMUM_ATTEMPTS`, `BACHS_SUBSCRIPTION_PLAN_PRODUCTS`, `WALLET_SELLER_SETTLEMENT_ADAPTER=bachsManualPayout`.
 
-1. **Control of funds.** Under Connect, the docs say "Your platform holds and controls all funds" and that connected accounts are "kept separate from yours but controlled by you" (https://docs.bachs.io/connect/overview). Even with direct charges, Zudomart alone decides when escrowed money leaves a seller account. A regulator could still treat Zudomart as controlling or escrowing the funds. This design reduces exposure and does not remove it. The docs contain no licensing statement (overview, become-a-platform, choose-your-integration). Get Bachs's written licensing position and confirm the escrow-in-seller-account model with counsel.
-2. Prepaid ad credit and unspent coins as stored value.
-3. Who bears the platform fee and processing fee on refunds and lost disputes.
-4. Escrow auto-release period (default 3 days) and whether direct-payment refunds need seller approval.
-5. Multi-seller cart UX with one payment per seller.
+**TypeScript services:**
+- `services/typescript/gateway/tests/upstreamRoutes.routes.test.ts`: `/webhooks/bachs` and `/api/v1/payments/webhooks/bachs` → `/webhooks/paystack`; update the gateway route table to match.
+- `services/typescript/notifications/tests/fixtures/eventFixtures.fixture.ts`: `provider: "bachs"` → `"paystack"`; drop the `wallet_top_up` example if the buyer wallet stays out.
 
-**Questions to send Bachs:**
+**Frontends (copy and mocks):**
+- `apps/webapp/src/app/(app)/coins/return/page.tsx`, `subscriptions/return/page.tsx`: "waiting for Bachs" → neutral copy ("Confirming your payment…"; no provider names).
+- `apps/webapp/src/components/live/coinPurchaseDialog.tsx`, `components/actions/subscribeToCreatorDialog.tsx`: remove "Checkout opens on Bachs".
+- `apps/webapp/src/mocks/coins.mock.ts`, `mocks/creatorSubscriptions.mock.ts`: `provider: "paystack"`, rename `MOCK_BACHS_RETURN_PATH`.
+- `apps/seller/src/types/subscription.type.ts`: provider union → `"paystack" | null`.
+- `apps/seller/src/components/settings/billingSettingsView.tsx`, `app/billing-checkout/demo/page.tsx`, `mocks/handlers/billingOffer.mock.ts`: provider label and demo copy.
+- `apps/seller/apiContract.md` (free trials section): Paystack plan + verification charge + `start_date`.
+- `apps/admin/src/components/configuration/rules/trustRulesEditors.tsx`: trial copy ("card saved on the web through Bachs").
+- `apps/api/src/generated/prisma/internal/class.ts`: generated from the reference monolith schema; regenerate if the schema enum mentions Bachs (the monolith is never deployed).
+- Mobile and Studio "Get paid" (plans.md §38): replace the hosted `document-link` step with in-app upload; payout fee from `GET payout-fees` (Paystack bands).
 
-1. Is the escrow design (manual schedule, platform-only payouts) supported? Is there any hold, reserve or `balance_settings` control? Can a connected account ever log in or change its schedule?
-2. Can one buyer payment be charged once and split to several seller accounts without the platform collecting?
-3. Can an `individual` seller hold `ngn_card_collection` and `bank_transfer`? Who is responsible for KYC of connected accounts? BVN-only versus CAC for small sellers?
-4. Refund path for NGN bank transfers, and whether refunds return the processing fee. Is a payout to the buyer from the seller account acceptable?
-5. Does the platform fee on direct charges settle to Zudomart on settlement of the charge or on the account's payout schedule?
-6. Hosted checkout and onboarding in an in-app browser: custom-scheme `success_url`, 3DS, bank-transfer app switching. Any native SDK plans?
-7. Webhook timestamp header name, secret rotation, retry schedule. Custom pricing and platform virtual accounts.
-8. Creator payout rails and countries. Platform balance top-up methods and limits.
-9. Written regulatory position (licence, settlement bank) for Connect marketplaces in Nigeria.
+**Docs:** `services/README.md` (money section, dev command note), `services/zudojsStructure.md` (`bachsConnect` example), `docs/plans.md` (§38 title and wording, coin and subscription rows, billing bullets), `docs/CHANGELOG.md` (add an entry; keep history). Done in this change: `docs/integrations/bachs.md` deleted, `docs/integrations/paystack.md` added, this plan, `docs/architecture/{payments,marketplace,system,security,privacy,backend,devops,disaster-recovery}.md`, `docs/database/{schema,domains,transactions}.md`, `docs/backendPlan.md`.
 
-## 10. Edge cases
+### 12.2 Build
 
-- Webhook and client callback both arrive: idempotent on `reference` and event id.
-- Buyer pays twice for one group: refund the second payment.
-- Chargeback after payout: seller account negative, all payouts blocked, debt recovered from future settlements, rolling reserve applies.
-- Store loses verification: new checkouts forced to escrow, existing orders keep their mode.
-- Seller account capability goes `restricted`: stop new checkouts for the store, existing escrow keeps running to release and payout subject to Bachs.
-- Checkout session expires (`checkout.expired`): release the stock reservation.
-- Payment `underpaid`/`overpaid`: hold the group, notify, resolve by admin.
+- **Paystack adapter** `payments/src/integrations/paystack*.integration.go` (files ≤ 300 lines each): HTTP client (bearer secret key, 15 s timeout, retries only on GET and on reference-keyed POSTs, JSON `status/message/data` envelope); `InitializeTransaction` (email, amount, reference, channels, callback, metadata, dynamic split), `VerifyTransaction`, `ChargeAuthorization`, `CreateRefund`, `RetryRefundWithCustomerDetails`, `ListBanks`, `ResolveAccount`, `CreateTransferRecipient`, `InitiateTransfer`, `VerifyTransfer`, `FetchBalance`, `CreateSubaccount`, `UpdateSubaccount` (settlement schedule), `ListSettlements`, `ListSettlementTransactions`, disputes (list, evidence, upload URL, resolve), plans and subscriptions (create, disable, manage link), `ValidateCustomer`, `UpdatePaymentSessionTimeout`.
+- **Interfaces:** replace `ConnectedAccountProvider` (accounts, onboarding links, persons, manual schedule) with `PayeeProvider` (recipient, subaccount, resolve, validate); keep `PaymentProvider`, `MoneyMovementProvider` (transfers, balance), `DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider` (charge authorization). No Paystack types leak into services.
+- **Webhook** `POST /webhooks/paystack`: raw body, HMAC-SHA512 with the secret key (old + new during rotation), IP allowlist at the edge, `event_key` dedupe, store raw, 200 fast, job processing, re-fetch before posting.
+- **Fake Paystack API and fixtures** for integration tests (`paymentsTesting/fakePaystack*.util.go`, `testdata/paystack/`), including split, transfer, refund `needs-attention`, dispute and subscription cases.
+- **Schema (new forward migrations):** `payout_accounts` (user, role, `paystack_recipient_code`, `paystack_settlement_subaccount_code`, `paystack_escrow_subaccount_code`, bank summary, status, internal step, attempts, last error); drop use of `connected_accounts` Bachs columns (`capabilities`, `requirements`, `manual_schedule_confirmed`, `virtual_account`); `payment_intents` add `paystack_access_code`, `authorization_url`, `split_snapshot jsonb`; `withdrawals`/`payout_transfers` add `paystack_transfer_code`; `saved_card_signatures` (user, signature, brand, last4) without the authorization code.
+- **Ledger:** replace the provider-held mirror (`sellerProviderHeld`, `providerHeld`) with section 4 accounts; per-subaccount settlement memo; main-balance reconciliation against `GET /balance` and `/balance/ledger`.
+- **Escrow:** release → `locked24h` → payout queue (E2); E1 behind a feature flag once Paystack confirms.
+- **Payout run** (`wallet`, `SellerSettlementAdapter = paystackTransfer`): one transfer per seller per run, balance check first, `transfer.*` resolution, reversal handling. Creator run reuses it.
+- **Checkout:** one intent per checkout (resolves `schema.md` G6: `subject_id` = checkout id), split built from direct groups, session timeout aligned with stock reservation, verified account email.
+- **Refunds:** refund API, `needs-attention` retry with buyer-entered account, seller debt for settled direct shares.
+- **Disputes:** webhooks + daily poll, escrow freeze, evidence and resolve endpoints for admin.
+- **Subscriptions and trials:** plans per product, verification charge + refund + `start_date`, dunning.
+- **Saved cards:** return the authorization once, charge-authorization endpoint, signature dedupe.
+- **Onboarding jobs:** section 3, with DLQ and retry endpoint.
+- **Config:** `PAYSTACK_API_BASE_URL` (`https://api.paystack.co`), `PAYSTACK_SECRET_KEY` (must start `sk_test_` outside production and `sk_live_` in production), `PAYSTACK_PUBLIC_KEY`, `PAYSTACK_PREVIOUS_SECRET_KEY` (rotation window), `PAYSTACK_WEBHOOK_IP_ALLOWLIST`, `PAYSTACK_PAYMENT_SESSION_TIMEOUT_SECONDS` (1800), `PAYSTACK_TRANSFER_FEE_BANDS` (`5000:1000;50000:2500;*:5000` in kobo), `PAYSTACK_CHECKOUT_CHANNELS`, `PAYSTACK_SPLIT_BEARER` (`account`), `ESCROW_MODE` (`e2` or `e1`), `PAYSTACK_PLAN_CODES`.
+- **CI:** `.github/workflows/backend.yml` env names.
 
-## 11. Changes needed in services/go money modules
+## 13. Customer email (owner, 2026-10-03)
 
-Status 2026-10-03 (implemented in `services/go`, tests against compose Postgres with Bachs faked at the HTTP layer).
-
-- [x] `services/go/modules/payments/src/integrations/bachsConnect*.integration.go` implements the provider interfaces (`PaymentProvider`, `ConnectedAccountProvider`, `MoneyMovementProvider`, `DisputeProvider`, `SubscriptionProvider`): create account, account link, persons/BVN, manual payout schedule, virtual account, checkout session (`X-Account-Id`, `platform_fee`, `reference`, `metadata`, verified customer email), get checkout, refunds, transfers, payout destinations, payouts, balances, bank resolve, banks, disputes (list, evidence, submit), recurring plans and subscription checkouts. HTTP client: 15 s timeout, `Idempotency-Key` required on every mutation, retries only on GETs and keyed mutations.
-- [x] Fake Bachs API (`paymentsTesting/fakeBachs*.util.go`) and recorded fixtures (`integrations/testdata/bachs`). Paystack and Flutterwave adapters, the fake and their config, constants and validators are deleted.
-- [x] `wallet/src/integrations/bachsManualPayoutSettlement.integration.go` replaces the transfer settlement; it is the only code path that triggers a Bachs payout.
-- [x] `POST /webhooks/bachs`: raw-body HMAC-SHA256 of `{timestamp}.{raw_body}` (`X-Bachs-Signature-V2`, legacy header accepted), 300 s tolerance, unique event id in `webhook_events`, re-fetch before ledger posting; collection, checkout, refund, payout, transfer, dispute, account, capability, subscription and invoice events routed.
-- [x] Seller and creator account lifecycle in go-money: `connected_accounts` (capabilities, requirements, deadline, manual schedule confirmed, payouts frozen, virtual account), `POST /payments/connected-accounts/me`, onboarding link on tap, `capability.updated` / `account.updated` refresh, checkout gated on active merchant capabilities. Creating it automatically at store creation (go-commerce call) is still open.
-- [x] Checkout: one Bachs checkout per seller order, commission as `platform_fee`, expiry from `CHECKOUT_SESSION_EXPIRY_MINUTES` (15), success and cancel return URLs. The intent and outbox row commit first and the Bachs call happens after commit. The go-commerce/client N-payment-step UX is still open.
-- [x] Ledger: seller accounts are provider-held, seller-owned (`sellerProviderHeld` owner type: `providerHeld`, `escrow`, `pending`, `available`, `reservedPayout`, `refundsInFlight`, `debt`); Zudomart's own accounts are `platform`. Postings come from webhooks. Per-seller mirror reconciliation against `GET /v1/balances` runs in the daily integrity job and freezes payouts on mismatch. Clearing accounts are gone (`asset:providerBalance:bachs`, `liability:platformFeesUnearned`, `revenue:commission`, `expense:refundedProcessingFees`).
-- [x] Escrow: release is a ledger transition only; auto-release 3 days after delivery (`escrow.policy`), paused by buyer disputes and chargebacks; 24h lock job; withdrawable cap `min(ledger available, Bachs available − unsent withdrawals)`.
-- [x] Payout run: per-seller `POST /v1/payouts` (`X-Account-Id`, key `payout:<reference>`), fee on top (NGN 50 quote), resolved only on `payout.paid` / `payout.failed`. Debt blocks payouts through Bachs (`ORGANIZATION_IN_DEBT`) and the mirror freeze. First-payout delay copy is a client task.
-- [ ] Refunds: fee top-up transfer (platform to seller account, key `fee-topup:<refundId>`) then `POST /v1/refunds` (key `refund:<refundId>`), unfunded refunds stay pending and are retried every 5 minutes. **Open:** the NGN bank-transfer payout-to-buyer path (bank transfers cannot be refunded).
-- [x] Disputes: `dispute.created|updated` and a daily List Disputes poll, escrow frozen, lost chargebacks taken from escrow or seller balance (shortfall to debt), evidence submission with `X-Account-Id` (`POST /admin/payments/disputes/{id}/evidence`).
-- [x] Creator payouts: coin conversion credits `creator:{id}:earningsPayable`; the daily run transfers it (`POST /v1/transfers`, one `transfer_group` per run) to the creator's recipient-only account, then normal payouts.
-- [ ] Platform revenue: web coin packs and web subscriptions/trials use platform-account checkouts; `CoinPackage.client_platform` with per-channel coins and an admin price table (`/admin/coins/price-table`). **Open:** ads top-ups, IAP verifiers (StoreKit 2, Play Developer API + RTDN).
-- [x] Config: `BACHS_API_BASE_URL` (sandbox default), `sk_sandbox_` / `sk_live_` checked against the environment, `BACHS_WEBHOOK_SIGNING_SECRETS` (rotation), payout fee overrides, plan products.
-- [ ] `services/go/.env.example` and the architecture docs updated. **Open:** `.github/workflows/backend.yml` (outside this change).
-
-## Customer email (owner, 2026-10-03)
-
-Checkout never asks for an email. go-money sends the account's verified email (from go-identity) to Bachs as the customer email when creating the checkout session, and every receipt, refund notice and payment email goes to that address. If the account has no verified email, checkout is blocked with "Verify your email to continue". Clients never send an email field; the server ignores one if sent.
+Checkout never asks for an email. go-money sends the account's verified email (from go-identity) to Paystack on every transaction, and every receipt, refund notice and payment email goes to that address. If the account has no verified email, checkout is blocked with "Verify your email to continue". Clients never send an email field; the server ignores one if sent. Saved-card charges must use the same email that created the authorization.
