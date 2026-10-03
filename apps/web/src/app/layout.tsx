@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { CookieConsentBanner } from "@zudomart/web-kit";
+
 import { LaunchAnnouncementBar } from "@/components/layout/announcementBar";
 import { SiteFooterWithGiantWordmark } from "@/components/layout/siteFooter";
 import { SiteHeaderWithFloatingNavigation } from "@/components/layout/siteHeader";
@@ -19,7 +21,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  keywords: ["Zudomart", "Nigeria marketplace", "social commerce", "live shopping", "escrow", "buy online Nigeria", "sell online Nigeria"],
+  keywords: ["Zudomart", "Nigeria marketplace", "social commerce", "live shopping", "live streaming", "creator gifts", "escrow", "buy online Nigeria", "sell online Nigeria"],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -56,6 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           {children}
         </main>
         <SiteFooterWithGiantWordmark />
+        <CookieConsentBanner />
       </body>
     </html>
   );

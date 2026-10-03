@@ -1,28 +1,15 @@
+@import "@zudomart/design-tokens/tokens.css";
+
 :root {
-  --blue-50: #d2dafd;
-  --blue-100: #b5c1fc;
-  --blue-200: #8fa1fa;
-  --blue-300: #6a82f8;
-  --blue-400: #4563f7;
-  --blue-500: #2043f5;
-  --blue-600: #1b39cc;
-  --blue-700: #152da3;
-  --blue-800: #10227a;
-  --blue-900: #0b1752;
-  --yellow-50: #fdf9d2;
-  --yellow-100: #fbf4b5;
-  --yellow-500: #f5e320;
-  --yellow-600: #ccbd1b;
-  --yellow-900: #524c0b;
-  --success: #10b981;
-  --caution: #f59e0b;
-  --error: #ef4444;
-  --surface-app: #f7f8fe;
-  --surface-card: #ffffff;
-  --ink-strong: #000000;
-  --ink-muted: #5b5b5b;
-  --ink-faint: #909090;
-  --divider: #d9d9d9;
+  --success: var(--color-success);
+  --caution: var(--color-warn);
+  --error: var(--color-danger);
+  --surface-app: var(--color-bg);
+  --surface-card: var(--color-surface);
+  --ink-strong: var(--color-text);
+  --ink-muted: var(--color-text-muted);
+  --ink-faint: var(--color-text-subtle);
+  --divider: var(--color-border-strong);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --tracking-tight: -0.02em;
@@ -31,16 +18,12 @@
   --radius-small: 10px;
   --radius-medium: 18px;
   --radius-large: 28px;
-  --radius-pill: 999px;
 
   --gutter: clamp(16px, 4vw, 40px);
   --content-width: 1200px;
   --section-space: clamp(72px, 10vw, 136px);
 
-  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 12px 32px -12px rgb(11 23 82 / 0.22);
   --focus-ring: 0 0 0 3px var(--surface-app), 0 0 0 5px var(--blue-500);
-
-  color-scheme: light;
 }
 
 *,
