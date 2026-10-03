@@ -48,7 +48,7 @@ func (controller CheckmarksController) BillingEvent(writer http.ResponseWriter, 
 			periodEnd = &parsed
 		}
 		if err == nil {
-			err = applybillingevent.Handler{Container: controller.Container}.Execute(context.WithoutCancel(request.Context()), applybillingevent.Command{ProfileId: profileId, Event: body.Event, PeriodEnd: periodEnd})
+			err = applybillingevent.Handler{Container: controller.Container}.Execute(context.WithoutCancel(request.Context()), applybillingevent.Command{ProfileId: profileId, Event: body.Event, PeriodEnd: periodEnd, Price: priceOf(body.Price)})
 		}
 	}
 	if err != nil {
@@ -56,4 +56,14 @@ func (controller CheckmarksController) BillingEvent(writer http.ResponseWriter, 
 		return
 	}
 	httpserver.WriteNoContentResponse(writer)
+}
+
+func priceOf(price *struct {
+	AmountMinor int64  `json:"amountMinor"`
+	Currency    string `json:"currency"`
+}) *services.Price {
+	if price == nil {
+		return nil
+	}
+	return &services.Price{AmountMinor: price.AmountMinor, Currency: price.Currency}
 }

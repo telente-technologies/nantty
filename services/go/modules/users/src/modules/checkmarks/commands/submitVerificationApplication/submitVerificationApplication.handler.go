@@ -55,6 +55,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		if created, err = tx.VerificationApplication.Create().SetProfileID(acting.ID).SetAccountID(owner).SetColor(verificationapplication.Color(color)).SetPlanID(command.PlanId).SetApplicant(applicant).SetDocumentKeys(nonEmpty(documents)).Save(ctx); err != nil {
 			return err
 		}
+		notice := services.NoticeBase(acting, color)
+		notice.ApplicationId, notice.ReviewWithinDays = created.ID.String(), 3
+		if err := services.EnqueueCheckmarkNoticeInTransaction(ctx, tx, handler.Container.Now(), "checkmark.applicationSubmitted", notice); err != nil {
+			return err
+		}
 		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, checkmarkevents.VerificationApplicationSubmittedType, acting.ID.String(), handler.Container.Now(), checkmarkevents.ApplicationEventData{
 			ApplicationId: created.ID.String(), ProfileId: acting.ID.String(), AccountId: owner.String(), Color: color,
 		})

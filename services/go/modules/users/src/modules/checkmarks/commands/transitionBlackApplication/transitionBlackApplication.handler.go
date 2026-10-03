@@ -150,6 +150,11 @@ func (handler Handler) grantBlack(ctx context.Context, tx *ent.Tx, row *ent.Blac
 	if err := tx.UsernameHold.Create().SetUsername(row.Handle).SetKind(usernamehold.KindReservedOfficial).SetHeldForAccountID(row.AccountID).SetReason("official handle").Exec(ctx); err != nil {
 		return err
 	}
+	notice := services.NoticeBase(profile, "black")
+	notice.RenewsAt = due.UTC().Format(time.RFC3339)
+	if err := services.EnqueueCheckmarkNoticeInTransaction(ctx, tx, now, "checkmark.approved", notice); err != nil {
+		return err
+	}
 	return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, checkmarkevents.BlackApplicationDecidedType, row.ProfileID.String(), now, checkmarkevents.ApplicationEventData{ApplicationId: row.ID.String(), ProfileId: row.ProfileID.String(), AccountId: row.AccountID.String(), Color: "black", Status: "approved"})
 }
 
@@ -165,6 +170,11 @@ func (handler Handler) revoke(ctx context.Context, tx *ent.Tx, row *ent.BlackApp
 		return "", nil, err
 	}
 	if _, err := services.SetProfileCheckmarkInTransaction(ctx, tx, now, services.CheckmarkChange{Profile: profile, Color: profilecheckmark.ColorBlack, Status: profilecheckmark.StatusRevoked, Source: profilecheckmark.SourceBlackVetting, SourceId: &row.ID}); err != nil {
+		return "", nil, err
+	}
+	revoked := services.NoticeBase(profile, "black")
+	revoked.Reason, revoked.AppealUrl = reason, services.AppealUrl()
+	if err := services.EnqueueCheckmarkNoticeInTransaction(ctx, tx, now, "checkmark.revoked", revoked); err != nil {
 		return "", nil, err
 	}
 	err = usersevents.EnqueueOutboxEventInTransaction(ctx, tx, checkmarkevents.BlackApplicationDecidedType, row.ProfileID.String(), now, checkmarkevents.ApplicationEventData{ApplicationId: row.ID.String(), ProfileId: row.ProfileID.String(), AccountId: row.AccountID.String(), Color: "black", Status: "revoked", Reason: reason})

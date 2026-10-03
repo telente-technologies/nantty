@@ -53,4 +53,8 @@ type CreateAccountRequest struct {
 type BillingEventRequest struct {
 	Event     string  `json:"event"`
 	PeriodEnd *string `json:"currentPeriodEnd"`
+	Price     *struct {
+		AmountMinor int64  `json:"amountMinor"`
+		Currency    string `json:"currency"`
+	} `json:"price"`
 }

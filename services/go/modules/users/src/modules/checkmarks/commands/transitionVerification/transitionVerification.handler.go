@@ -66,6 +66,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 				return err
 			}
 		}
+		if err := handler.notify(ctx, tx, application, command.Action, reason, now); err != nil {
+			return err
+		}
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, checkmarkevents.VerificationApplicationDecidedType, application.ProfileID.String(), now, checkmarkevents.ApplicationEventData{
 			ApplicationId: application.ID.String(), ProfileId: application.ProfileID.String(), AccountId: application.AccountID.String(), Color: string(application.Color), Status: string(rule.to), Reason: reason,
 		}); err != nil {
@@ -100,4 +103,24 @@ func contains(statuses []verificationapplication.Status, wanted verificationappl
 
 func pastTense(action string) string {
 	return map[string]string{ActionApprove: "approved", ActionReject: "rejected", ActionSuspend: "suspended", ActionRevoke: "revoked", ActionReinstate: "reinstated"}[action]
+}
+
+func (handler Handler) notify(ctx context.Context, tx *ent.Tx, application *ent.VerificationApplication, action, reason string, now time.Time) error {
+	profile, err := tx.Profile.Get(ctx, application.ProfileID)
+	if err != nil {
+		return err
+	}
+	notice := services.NoticeBase(profile, string(application.Color))
+	eventType := ""
+	switch action {
+	case ActionApprove, ActionReinstate:
+		eventType, notice.RenewsAt = "checkmark.approved", services.OneYearFrom(now)
+	case ActionReject:
+		eventType, notice.Reasons, notice.ReapplyFrom = "checkmark.rejected", []string{reason}, now.AddDate(0, 0, 30).UTC().Format(time.RFC3339)
+	case ActionRevoke, ActionSuspend:
+		eventType, notice.Reason, notice.AppealUrl = "checkmark.revoked", reason, services.AppealUrl()
+	default:
+		return nil
+	}
+	return services.EnqueueCheckmarkNoticeInTransaction(ctx, tx, now, eventType, notice)
 }

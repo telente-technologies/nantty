@@ -44,8 +44,16 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		default:
 			change.Status = profilecheckmark.StatusExpired
 		}
-		_, err = services.SetProfileCheckmarkInTransaction(ctx, tx, now, change)
-		return err
+		if _, err = services.SetProfileCheckmarkInTransaction(ctx, tx, now, change); err != nil || command.Event != "lapsed" || command.Price == nil {
+			return err
+		}
+		notice := services.NoticeBase(profile, string(row.Color))
+		notice.Price, notice.FailedAt = command.Price, now.UTC().Format(time.RFC3339)
+		notice.GraceEndsAt = now.AddDate(0, 0, 7).UTC().Format(time.RFC3339)
+		if change.GraceEndsAt != nil {
+			notice.GraceEndsAt = change.GraceEndsAt.UTC().Format(time.RFC3339)
+		}
+		return services.EnqueueCheckmarkNoticeInTransaction(ctx, tx, now, "checkmark.renewalFailed", notice)
 	})
 }
 

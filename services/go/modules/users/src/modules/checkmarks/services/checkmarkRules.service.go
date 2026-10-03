@@ -22,8 +22,15 @@ type SuggestionRules struct {
 	} `json:"gold"`
 }
 
+type MoneyAmount struct {
+	AmountMinor int64  `json:"amountMinor"`
+	Currency    string `json:"currency"`
+}
+
 type PricingRules struct {
-	BlackGraceDays int `json:"blackGraceDays"`
+	BlackGraceDays       int         `json:"blackGraceDays"`
+	BlueMonthlyPrice     MoneyAmount `json:"blueMonthlyPrice"`
+	GoldOnlyMonthlyPrice MoneyAmount `json:"goldOnlyMonthlyPrice"`
 }
 
 func LoadSuggestionRules(ctx context.Context) SuggestionRules {
@@ -35,7 +42,7 @@ func LoadSuggestionRules(ctx context.Context) SuggestionRules {
 }
 
 func LoadPricingRules(ctx context.Context) PricingRules {
-	rules := PricingRules{BlackGraceDays: 14}
+	rules := PricingRules{BlackGraceDays: 14, BlueMonthlyPrice: MoneyAmount{AmountMinor: 250000, Currency: "NGN"}, GoldOnlyMonthlyPrice: MoneyAmount{AmountMinor: 300000, Currency: "NGN"}}
 	readSetting(ctx, "checkmark-pricing", &rules)
 	return rules
 }
