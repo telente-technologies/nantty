@@ -58,3 +58,36 @@
     display: none;
   }
 }
+
+.reportLinkLocked {
+  background: var(--surface-sunken);
+}
+
+.reportLinkTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.printOnly {
+  display: none;
+}
+
+@media print {
+  .exportActions {
+    display: none;
+  }
+
+  .printOnly {
+    display: block;
+    color: var(--ink-muted);
+    font-size: 12px;
+  }
+}
