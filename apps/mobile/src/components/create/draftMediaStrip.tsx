@@ -2,9 +2,11 @@ import { Image } from "expo-image";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon, Play24Icon } from "@/components/icons";
+import { UploadProgressRing } from "@/components/media/uploadProgressRing";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { useUploadJobLocalPreview } from "@/store/uploadQueue.store";
 import type { ID } from "@/types";
 
 import type { PostDraftMediaItem } from "./postDraftUploads.hook";
@@ -13,6 +15,19 @@ export interface DraftMediaStripProps {
   readonly items: readonly PostDraftMediaItem[];
   readonly maximumItems: number;
   readonly onRemoveItem: (jobId: ID) => void;
+}
+
+function DraftThumbnailImage({ jobId, uri }: { jobId: ID; uri: string }) {
+  const blurhash = useUploadJobLocalPreview(jobId);
+  return (
+    <Image
+      source={{ uri }}
+      style={StyleSheet.absoluteFill}
+      contentFit="cover"
+      cachePolicy="memory"
+      placeholder={blurhash ? { blurhash } : undefined}
+    />
+  );
 }
 
 export function DraftMediaStrip({ items, maximumItems, onRemoveItem }: DraftMediaStripProps) {
@@ -24,7 +39,8 @@ export function DraftMediaStrip({ items, maximumItems, onRemoveItem }: DraftMedi
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
         {items.map((item, index) => (
           <View key={item.jobId} style={styles.thumb} accessibilityLabel={`${item.mediaType === "video" ? "Video" : "Photo"} ${index + 1} of ${items.length}`}>
-            <Image source={{ uri: item.previewUri }} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory" />
+            <DraftThumbnailImage jobId={item.jobId} uri={item.previewUri} />
+            <UploadProgressRing jobId={item.jobId} />
             {item.mediaType === "video" ? (
               <View style={styles.videoBadge} pointerEvents="none">
                 <Play24Icon size={14} color={colors.white} />

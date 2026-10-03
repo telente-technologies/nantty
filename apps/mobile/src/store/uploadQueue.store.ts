@@ -19,6 +19,8 @@ export interface UploadJob {
   readonly height: number | null;
   readonly durationSeconds: number | null;
   readonly uploadId: ID | null;
+  readonly reservedMediaId?: ID | null;
+  readonly uploadMode?: "single" | "multipart" | null;
   readonly chunkSizeBytes: number | null;
   readonly totalChunks: number | null;
   readonly uploadedChunks: readonly number[];
@@ -84,6 +86,10 @@ export function useUploadJobProgress(jobId: ID | null) {
   const job = useUploadQueueStore((state) => (jobId ? state.jobsById[jobId] : undefined));
   const inFlightBytes = useUploadQueueStore((state) => (jobId ? state.inFlightBytesByJobId[jobId] ?? 0 : 0));
   return { job: job ?? null, uploadedFraction: job ? calculateUploadedFractionForJob(job, inFlightBytes) : 0 };
+}
+
+export function useUploadJobLocalPreview(jobId: ID) {
+  return useUploadQueueStore((state) => state.jobsById[jobId]?.media?.blurhash ?? null);
 }
 
 export function useCombinedUploadProgress(jobIds: readonly ID[]) {

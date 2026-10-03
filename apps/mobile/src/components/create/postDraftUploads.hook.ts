@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { MediaValidationError } from "@/services/mediaPreparation.service";
-import { cancelAndRemoveUpload, enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
+import { cancelAndRemoveUpload, enqueueLocalMediaForUpload, waitForReservedMediaId } from "@/services/mediaUploadQueue.service";
 import { useCombinedUploadProgress } from "@/store/uploadQueue.store";
 import type { ID, Media, MediaUploadPurpose, Post } from "@/types";
 
@@ -58,7 +58,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
   }, [setDraftMediaItems]);
 
   const waitForAllDraftMediaIds = useCallback(
-    () => Promise.all(draftMediaItems.map((item) => waitForUploadedMediaId(item.jobId))),
+    () => Promise.all(draftMediaItems.map((item) => waitForReservedMediaId(item.jobId))),
     [draftMediaItems],
   );
 
