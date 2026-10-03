@@ -100,7 +100,7 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     plan.subscriberCount += 1;
     const viewerId = getSignedInMockUser().id;
     subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
-    return { subscriptionId, provider: "bachs", checkoutUrl: `/subscriptions/return?subscriptionId=${subscriptionId}` };
+    return { subscriptionId, reference: subscriptionId, provider: "paystack", accessCode: "", authorizationUrl: `/subscriptions/return?subscriptionId=${subscriptionId}` };
   }),
   createMockRoute("GET", "/api/v1/subscriptions/:subscriptionId", ({ params }) => {
     const state = subscriptionStates.get(params.subscriptionId!);

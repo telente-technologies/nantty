@@ -5,7 +5,7 @@ import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const COIN_TRANSFER_FEE_PERCENT = 25;
-const MOCK_BACHS_RETURN_PATH = "/coins/return";
+const MOCK_PAYSTACK_RETURN_PATH = "/coins/return";
 
 const mockCoinWallet = { balance: 250 };
 
@@ -48,8 +48,8 @@ export const coinsMocks: MockRoute[] = [
     if (!seed) throw new ApiError(404, "Coin package not found");
     const reference = `cp_${Date.now().toString(36)}`;
     pendingPurchasesByReference.set(reference, { coins: seed.coins + (seed.bonusCoins ?? 0), credited: false });
-    const returnUrl = `${MOCK_BACHS_RETURN_PATH}?reference=${reference}`;
-    return { reference, provider: "bachs", purchaseChannel: "web_checkout", checkoutUrl: returnUrl, authorizationUrl: returnUrl };
+    const returnUrl = `${MOCK_PAYSTACK_RETURN_PATH}?reference=${reference}`;
+    return { reference, provider: "paystack", purchaseChannel: "web_checkout", accessCode: "", authorizationUrl: returnUrl };
   }),
   createMockRoute("POST", "/api/v1/coins/purchases/:reference/verify", ({ params }) => {
     const purchase = pendingPurchasesByReference.get(params.reference!);

@@ -1,6 +1,9 @@
 import { ApiError } from "@/errors/api.error";
 
 import { describeVariant, mockCartState, summariseMockCart } from "./commerceFixtures.mock";
+import { findSignedInAddress } from "./settings.mock";
+import { quoteSellerShipping } from "./shippingEngine.mock";
+import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 import { findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -13,6 +16,19 @@ interface AddToCartBody {
 
 export const cartMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/cart", () => summariseMockCart()),
+  createMockRoute("POST", "/api/v1/cart/shipping-quote", ({ body }) => {
+    const address = findSignedInAddress((body as { addressId: string }).addressId);
+    if (!address) throw new ApiError(404, "Address not found");
+    const cart = summariseMockCart();
+    const destination = { countryId: address.countryId, stateId: address.stateId, lgaId: address.lgaId, cityId: address.cityId };
+    const groups = groupCartItemsByStore(cart.items).map((group) => quoteSellerShipping(group.storeId, group.subtotal, destination));
+    const reachable = new Set(groups.filter((group) => group.status === "calculated").map((group) => group.storeId));
+    const shippedItems = cart.items.filter((item) => reachable.has(item.store?.id ?? "unknown"));
+    const sum = (amounts: readonly number[]) => amounts.reduce((total, amount) => total + amount, 0);
+    const shipping = { ...cart.shipping, amountMinor: sum(groups.map((group) => group.fee?.amountMinor ?? 0)) };
+    const itemsMinor = sum(shippedItems.map((item) => item.product.price.amountMinor * item.quantity));
+    return { groups, shipping, total: { ...cart.total, amountMinor: itemsMinor + shipping.amountMinor } };
+  }),
   createMockRoute("POST", "/api/v1/cart/items", ({ body }) => {
     const { productId, quantity, size, color } = body as AddToCartBody;
     if (!findCatalogSeedByProductId(productId)) throw new ApiError(404, "This product is no longer available");

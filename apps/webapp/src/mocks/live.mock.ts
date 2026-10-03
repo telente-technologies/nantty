@@ -61,14 +61,15 @@ const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOr
 const hostedLives = new Map<string, LiveSessionDetails>();
 
 export const liveMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/lives/suggested", () =>
-    SUGGESTED_LIVE_SEEDS.map(([userId, title, productKey], index) => ({
+  createMockRoute("GET", "/api/v1/lives/suggested", () => ({
+    data: SUGGESTED_LIVE_SEEDS.map(([userId, title, productKey], index) => ({
       id: `live_s${index}`,
       host: summariseUser(findDirectoryUserById(userId)!),
       title,
       coverUrl: productImageUrlsForProduct(productKey)[0] ?? null,
     })),
-  ),
+    nextCursor: null,
+  })),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
     const session = {
