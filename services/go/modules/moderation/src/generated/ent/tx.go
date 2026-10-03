@@ -16,10 +16,22 @@ type Tx struct {
 	config
 	// ChatReport is the client for interacting with the ChatReport builders.
 	ChatReport *ChatReportClient
+	// ContentReport is the client for interacting with the ContentReport builders.
+	ContentReport *ContentReportClient
+	// ContentReportEntry is the client for interacting with the ContentReportEntry builders.
+	ContentReportEntry *ContentReportEntryClient
+	// CopyrightClaim is the client for interacting with the CopyrightClaim builders.
+	CopyrightClaim *CopyrightClaimClient
+	// CounterNotice is the client for interacting with the CounterNotice builders.
+	CounterNotice *CounterNoticeClient
 	// EvidenceRetentionSetting is the client for interacting with the EvidenceRetentionSetting builders.
 	EvidenceRetentionSetting *EvidenceRetentionSettingClient
+	// IpClaim is the client for interacting with the IpClaim builders.
+	IpClaim *IpClaimClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// Strike is the client for interacting with the Strike builders.
+	Strike *StrikeClient
 	// SuspensionCase is the client for interacting with the SuspensionCase builders.
 	SuspensionCase *SuspensionCaseClient
 
@@ -154,8 +166,14 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.ChatReport = NewChatReportClient(tx.config)
+	tx.ContentReport = NewContentReportClient(tx.config)
+	tx.ContentReportEntry = NewContentReportEntryClient(tx.config)
+	tx.CopyrightClaim = NewCopyrightClaimClient(tx.config)
+	tx.CounterNotice = NewCounterNoticeClient(tx.config)
 	tx.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(tx.config)
+	tx.IpClaim = NewIpClaimClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.Strike = NewStrikeClient(tx.config)
 	tx.SuspensionCase = NewSuspensionCaseClient(tx.config)
 }
 
