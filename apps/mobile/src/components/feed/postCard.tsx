@@ -17,6 +17,7 @@ import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/f
 import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { MediaPager } from "./mediaPager";
 import { ResharedPostBlock } from "./resharedPostBlock";
+import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
 import { LikeBurst } from "@/components/clips/likeBurst";
 
@@ -134,6 +135,11 @@ export function PostCard(props: PostCardProps) {
         accessibilityLabel={props.onPress ? "Open post" : "Like post by double tap"}
         accessibilityHint="Double tap to like"
       >
+        {post.isAiGenerated ? (
+          <View style={styles.body}>
+            <AiGeneratedLabel />
+          </View>
+        ) : null}
         {post.text ? (
           <View style={styles.body}>
             <Text size={14} lineHeight={16.8}>
