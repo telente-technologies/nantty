@@ -13,6 +13,11 @@ func (UnconfiguredFundingGateway) ChargeUserWalletForBoost(context.Context, stri
 	return adserrors.UpstreamUnavailable
 }
 
+func (UnconfiguredFundingGateway) RefundBoostCharge(context.Context, string, string, int64, string, string) error {
+	return adserrors.UpstreamUnavailable
+}
+
+// InMemoryFundingGateway moves no real money and is refused in production.
 type InMemoryFundingGateway struct {
 	mutex   sync.Mutex
 	charged map[string]int64
@@ -29,4 +34,18 @@ func (gateway *InMemoryFundingGateway) ChargeUserWalletForBoost(_ context.Contex
 		gateway.charged[userId+idempotencyKey] = amountMinor
 	}
 	return nil
+}
+
+func (gateway *InMemoryFundingGateway) RefundBoostCharge(_ context.Context, userId, _ string, _ int64, _, debitIdempotencyKey string) error {
+	gateway.mutex.Lock()
+	defer gateway.mutex.Unlock()
+	delete(gateway.charged, userId+debitIdempotencyKey)
+	return nil
+}
+
+func (gateway *InMemoryFundingGateway) ChargedAmount(userId, idempotencyKey string) (int64, bool) {
+	gateway.mutex.Lock()
+	defer gateway.mutex.Unlock()
+	amount, found := gateway.charged[userId+idempotencyKey]
+	return amount, found
 }

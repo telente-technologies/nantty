@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"sync"
 	"time"
@@ -119,36 +120,91 @@ type PctrWithFallbackScorer struct {
 	Fallback DeterministicPctrScorer
 }
 
+var (
+	mediaTypeByFormat   = map[string]string{"feed_post": "image", "clip": "video", "product": "product_tile", "store": "image", "story": "image", "live": "live_stream"}
+	aspectRatioByFormat = map[string]string{"clip": "9:16", "story": "9:16", "live": "9:16"}
+	pythonAgeBracket    = regexp.MustCompile(`^(13-17|18-24|25-34|35-44|45-54|55-64|65\+)$`)
+)
+
 func (scorer PctrWithFallbackScorer) ScorePredictedClickRatesInPpm(ctx context.Context, request types.PctrRequest) (map[string]int64, error) {
 	fallback, _ := scorer.Fallback.ScorePredictedClickRatesInPpm(ctx, request)
-	var response struct {
-		Scores []struct {
-			AdId string  `json:"adId"`
-			Pctr float64 `json:"pctr"`
-		} `json:"scores"`
-	}
-	payload := map[string]any{"placement": request.Placement, "slotKind": request.SlotKind, "viewer": map[string]any{"userId": request.Viewer.UserId, "country": request.Viewer.Country, "ageBracket": request.Viewer.AgeBand}, "candidates": request.Candidates}
-	if err := scorer.Client.post(ctx, "/v1/ads/pctr", payload, &response); err != nil {
+	if len(request.Candidates) == 0 || len(request.Candidates) > 300 {
 		return fallback, nil
 	}
-	for _, score := range response.Scores {
-		if ppm := int64(score.Pctr * 1_000_000); ppm > 0 && ppm < 1_000_000 {
-			if _, known := fallback[score.AdId]; known {
-				fallback[score.AdId] = ppm
+	var response struct {
+		Predictions []struct {
+			AdId               string  `json:"adId"`
+			PredictedClickRate float64 `json:"predictedClickRate"`
+		} `json:"predictions"`
+	}
+	if err := scorer.Client.post(ctx, "/v1/ads/predicted-ctr", predictedCtrPayload(request), &response); err != nil {
+		return fallback, nil
+	}
+	for _, prediction := range response.Predictions {
+		if ppm := int64(prediction.PredictedClickRate * 1_000_000); ppm > 0 && ppm < 1_000_000 {
+			if _, known := fallback[prediction.AdId]; known {
+				fallback[prediction.AdId] = ppm
 			}
 		}
 	}
 	return fallback, nil
 }
 
+func predictedCtrPayload(request types.PctrRequest) map[string]any {
+	viewer := map[string]any{"userId": request.Viewer.UserId}
+	if request.Viewer.Country != "" {
+		viewer["country"] = request.Viewer.Country
+	}
+	if pythonAgeBracket.MatchString(request.Viewer.AgeBand) {
+		viewer["ageBracket"] = request.Viewer.AgeBand
+	}
+	candidates := make([]map[string]any, 0, len(request.Candidates))
+	for _, candidate := range request.Candidates {
+		bidType := "cpm"
+		if candidate.BidType == "cpc" {
+			bidType = "cpc"
+		}
+		money := func(minor int64) map[string]any {
+			return map[string]any{"amountMinor": max(minor, 0), "currency": candidate.Currency}
+		}
+		aspect := aspectRatioByFormat[candidate.Format]
+		if aspect == "" {
+			aspect = "4:5"
+		}
+		mediaType := mediaTypeByFormat[candidate.Format]
+		if mediaType == "" {
+			mediaType = "image"
+		}
+		placements := candidate.Placements
+		if len(placements) == 0 {
+			placements = []string{request.Placement}
+		}
+		candidates = append(candidates, map[string]any{
+			"adId": candidate.AdId, "campaignId": candidate.CampaignId, "advertiserId": candidate.AccountId, "status": "active", "bidType": bidType,
+			"bid": money(candidate.BidMinor), "dailyBudget": money(candidate.DailyBudgetMinor), "spentToday": money(0), "spentTotal": money(0),
+			"placements": placements, "creative": map[string]any{"mediaType": mediaType, "aspectRatio": aspect},
+			"lifetimeImpressions": candidate.HistoricalImpressions, "lifetimeClicks": candidate.HistoricalClicks,
+		})
+	}
+	return map[string]any{"placement": request.Placement, "viewer": viewer, "candidates": candidates}
+}
+
 type IntelligenceFraudScorer struct{ Client *IntelligenceClient }
 
-func (scorer IntelligenceFraudScorer) ScoreAdEvent(ctx context.Context, impressionId, userId, eventKind string) (*float64, error) {
+// ScoreAdEvent scores clicks through /v1/risk/score-extended (subject ad_click); other event kinds are not risk-scored.
+func (scorer IntelligenceFraudScorer) ScoreAdEvent(ctx context.Context, impressionId, userId, eventKind string, signals types.AdClickSignals) (*float64, error) {
+	if eventKind != "click" {
+		return nil, nil
+	}
 	var response struct {
 		Score float64 `json:"score"`
 	}
-	payload := map[string]any{"subjectType": "ad_event", "subjectId": impressionId, "actorId": userId, "adEvent": map[string]any{"eventKind": eventKind}}
-	if err := scorer.Client.post(ctx, "/v1/risk/score", payload, &response); err != nil {
+	adClick := map[string]any{"clicksByActorLastHour": max(signals.ClicksByActorLastMinute, 0)}
+	if signals.MillisecondsFromImpression >= 0 && signals.MillisecondsFromImpression <= 86_400_000 {
+		adClick["millisecondsFromImpressionToClick"] = signals.MillisecondsFromImpression
+	}
+	payload := map[string]any{"subjectType": "ad_click", "subjectId": impressionId, "actorId": userId, "adClick": adClick}
+	if err := scorer.Client.post(ctx, "/v1/risk/score-extended", payload, &response); err != nil {
 		return nil, nil
 	}
 	return &response.Score, nil
@@ -156,6 +212,6 @@ func (scorer IntelligenceFraudScorer) ScoreAdEvent(ctx context.Context, impressi
 
 type NoFraudModel struct{}
 
-func (NoFraudModel) ScoreAdEvent(context.Context, string, string, string) (*float64, error) {
+func (NoFraudModel) ScoreAdEvent(context.Context, string, string, string, types.AdClickSignals) (*float64, error) {
 	return nil, nil
 }
