@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { findFirstPageAllowedForRole } from "@/config/rolePermissions.config";
+import { findFirstPageAllowedForAccess } from "@/config/rolePermissions.config";
 import { respondWithBffError } from "@/server/bffGateway.service";
 import { applyRotatedTokensToResponse, callBackendAsSignedInSeller } from "@/server/authenticatedBackendCall.service";
 import { isMutationProtectedAgainstCsrf } from "@/server/requestOriginGuard.service";
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   });
   if (!renewed) return respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
   const destination = decideSellerAccessDestination(renewed.cachedAccess.access);
-  const redirectTo = destination === "app" ? findFirstPageAllowedForRole(renewed.cachedAccess.access.role) : gatePagePathByDestination[destination];
+  const redirectTo = destination === "app" ? findFirstPageAllowedForAccess(renewed.cachedAccess.access) : gatePagePathByDestination[destination];
   const response = NextResponse.json({ storeId, redirectTo }, { headers: { "Cache-Control": "no-store" } });
   clearStoreScopedCookies(response);
   writeSelectedStoreCookie(response, sessionId, storeId);
