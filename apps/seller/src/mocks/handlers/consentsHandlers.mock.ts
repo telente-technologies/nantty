@@ -10,4 +10,11 @@ export function registerConsentsMockHandlers(): void {
     }
     return respondWithJson(200, { policyVersion, decidedAt, categories, recordedAt: new Date().toISOString() });
   });
+
+  registerMockRoute("PATCH", "/seller/users/me/preferences", (request) => {
+    if (!request.principal) throw new MockHttpError(401, "UNAUTHENTICATED", "Sign in to continue.");
+    const { theme } = readJsonObjectBody(request);
+    if (theme !== "light" && theme !== "dark" && theme !== "system") return respondWithValidationFailure([{ path: "theme", message: "theme must be light, dark or system." }]);
+    return respondWithJson(200, { theme, updatedAt: new Date().toISOString() });
+  });
 }
