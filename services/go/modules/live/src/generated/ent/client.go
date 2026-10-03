@@ -21,11 +21,18 @@ import (
 	"zudomart/modules/live/src/generated/ent/goalcontribution"
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
+	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
+	"zudomart/modules/live/src/generated/ent/livemoderator"
 	"zudomart/modules/live/src/generated/ent/liveproduct"
+	"zudomart/modules/live/src/generated/ent/liverecording"
+	"zudomart/modules/live/src/generated/ent/liverestriction"
+	"zudomart/modules/live/src/generated/ent/liveroomsetting"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
+	"zudomart/modules/live/src/generated/ent/overlayscene"
 	"zudomart/modules/live/src/generated/ent/pointsentry"
 	"zudomart/modules/live/src/generated/ent/pointsrule"
 	"zudomart/modules/live/src/generated/ent/processedgift"
@@ -63,16 +70,30 @@ type Client struct {
 	GuestSlot *GuestSlotClient
 	// JoinRequest is the client for interacting with the JoinRequest builders.
 	JoinRequest *JoinRequestClient
+	// LiveComment is the client for interacting with the LiveComment builders.
+	LiveComment *LiveCommentClient
+	// LiveIngress is the client for interacting with the LiveIngress builders.
+	LiveIngress *LiveIngressClient
 	// LiveLeaderboardEntry is the client for interacting with the LiveLeaderboardEntry builders.
 	LiveLeaderboardEntry *LiveLeaderboardEntryClient
+	// LiveModerator is the client for interacting with the LiveModerator builders.
+	LiveModerator *LiveModeratorClient
 	// LiveProduct is the client for interacting with the LiveProduct builders.
 	LiveProduct *LiveProductClient
+	// LiveRecording is the client for interacting with the LiveRecording builders.
+	LiveRecording *LiveRecordingClient
+	// LiveRestriction is the client for interacting with the LiveRestriction builders.
+	LiveRestriction *LiveRestrictionClient
+	// LiveRoomSetting is the client for interacting with the LiveRoomSetting builders.
+	LiveRoomSetting *LiveRoomSettingClient
 	// LiveSession is the client for interacting with the LiveSession builders.
 	LiveSession *LiveSessionClient
 	// LiveViewer is the client for interacting with the LiveViewer builders.
 	LiveViewer *LiveViewerClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// OverlayScene is the client for interacting with the OverlayScene builders.
+	OverlayScene *OverlaySceneClient
 	// PointsEntry is the client for interacting with the PointsEntry builders.
 	PointsEntry *PointsEntryClient
 	// PointsRule is the client for interacting with the PointsRule builders.
@@ -100,11 +121,18 @@ func (c *Client) init() {
 	c.GoalContribution = NewGoalContributionClient(c.config)
 	c.GuestSlot = NewGuestSlotClient(c.config)
 	c.JoinRequest = NewJoinRequestClient(c.config)
+	c.LiveComment = NewLiveCommentClient(c.config)
+	c.LiveIngress = NewLiveIngressClient(c.config)
 	c.LiveLeaderboardEntry = NewLiveLeaderboardEntryClient(c.config)
+	c.LiveModerator = NewLiveModeratorClient(c.config)
 	c.LiveProduct = NewLiveProductClient(c.config)
+	c.LiveRecording = NewLiveRecordingClient(c.config)
+	c.LiveRestriction = NewLiveRestrictionClient(c.config)
+	c.LiveRoomSetting = NewLiveRoomSettingClient(c.config)
 	c.LiveSession = NewLiveSessionClient(c.config)
 	c.LiveViewer = NewLiveViewerClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
+	c.OverlayScene = NewOverlaySceneClient(c.config)
 	c.PointsEntry = NewPointsEntryClient(c.config)
 	c.PointsRule = NewPointsRuleClient(c.config)
 	c.ProcessedGift = NewProcessedGiftClient(c.config)
@@ -210,11 +238,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GoalContribution:     NewGoalContributionClient(cfg),
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
+		LiveComment:          NewLiveCommentClient(cfg),
+		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
+		LiveModerator:        NewLiveModeratorClient(cfg),
 		LiveProduct:          NewLiveProductClient(cfg),
+		LiveRecording:        NewLiveRecordingClient(cfg),
+		LiveRestriction:      NewLiveRestrictionClient(cfg),
+		LiveRoomSetting:      NewLiveRoomSettingClient(cfg),
 		LiveSession:          NewLiveSessionClient(cfg),
 		LiveViewer:           NewLiveViewerClient(cfg),
 		OutboxEvent:          NewOutboxEventClient(cfg),
+		OverlayScene:         NewOverlaySceneClient(cfg),
 		PointsEntry:          NewPointsEntryClient(cfg),
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
@@ -247,11 +282,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GoalContribution:     NewGoalContributionClient(cfg),
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
+		LiveComment:          NewLiveCommentClient(cfg),
+		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
+		LiveModerator:        NewLiveModeratorClient(cfg),
 		LiveProduct:          NewLiveProductClient(cfg),
+		LiveRecording:        NewLiveRecordingClient(cfg),
+		LiveRestriction:      NewLiveRestrictionClient(cfg),
+		LiveRoomSetting:      NewLiveRoomSettingClient(cfg),
 		LiveSession:          NewLiveSessionClient(cfg),
 		LiveViewer:           NewLiveViewerClient(cfg),
 		OutboxEvent:          NewOutboxEventClient(cfg),
+		OverlayScene:         NewOverlaySceneClient(cfg),
 		PointsEntry:          NewPointsEntryClient(cfg),
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
@@ -286,8 +328,10 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveLeaderboardEntry, c.LiveProduct, c.LiveSession, c.LiveViewer,
-		c.OutboxEvent, c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
+		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
+		c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry,
+		c.PointsRule, c.ProcessedGift,
 	} {
 		n.Use(hooks...)
 	}
@@ -299,8 +343,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveLeaderboardEntry, c.LiveProduct, c.LiveSession, c.LiveViewer,
-		c.OutboxEvent, c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
+		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
+		c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry,
+		c.PointsRule, c.ProcessedGift,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -329,16 +375,30 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GuestSlot.mutate(ctx, m)
 	case *JoinRequestMutation:
 		return c.JoinRequest.mutate(ctx, m)
+	case *LiveCommentMutation:
+		return c.LiveComment.mutate(ctx, m)
+	case *LiveIngressMutation:
+		return c.LiveIngress.mutate(ctx, m)
 	case *LiveLeaderboardEntryMutation:
 		return c.LiveLeaderboardEntry.mutate(ctx, m)
+	case *LiveModeratorMutation:
+		return c.LiveModerator.mutate(ctx, m)
 	case *LiveProductMutation:
 		return c.LiveProduct.mutate(ctx, m)
+	case *LiveRecordingMutation:
+		return c.LiveRecording.mutate(ctx, m)
+	case *LiveRestrictionMutation:
+		return c.LiveRestriction.mutate(ctx, m)
+	case *LiveRoomSettingMutation:
+		return c.LiveRoomSetting.mutate(ctx, m)
 	case *LiveSessionMutation:
 		return c.LiveSession.mutate(ctx, m)
 	case *LiveViewerMutation:
 		return c.LiveViewer.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
+	case *OverlaySceneMutation:
+		return c.OverlayScene.mutate(ctx, m)
 	case *PointsEntryMutation:
 		return c.PointsEntry.mutate(ctx, m)
 	case *PointsRuleMutation:
@@ -1680,6 +1740,272 @@ func (c *JoinRequestClient) mutate(ctx context.Context, m *JoinRequestMutation) 
 	}
 }
 
+// LiveCommentClient is a client for the LiveComment schema.
+type LiveCommentClient struct {
+	config
+}
+
+// NewLiveCommentClient returns a client for the LiveComment from the given config.
+func NewLiveCommentClient(c config) *LiveCommentClient {
+	return &LiveCommentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livecomment.Hooks(f(g(h())))`.
+func (c *LiveCommentClient) Use(hooks ...Hook) {
+	c.hooks.LiveComment = append(c.hooks.LiveComment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livecomment.Intercept(f(g(h())))`.
+func (c *LiveCommentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveComment = append(c.inters.LiveComment, interceptors...)
+}
+
+// Create returns a builder for creating a LiveComment entity.
+func (c *LiveCommentClient) Create() *LiveCommentCreate {
+	mutation := newLiveCommentMutation(c.config, OpCreate)
+	return &LiveCommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveComment entities.
+func (c *LiveCommentClient) CreateBulk(builders ...*LiveCommentCreate) *LiveCommentCreateBulk {
+	return &LiveCommentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveCommentClient) MapCreateBulk(slice any, setFunc func(*LiveCommentCreate, int)) *LiveCommentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveCommentCreateBulk{err: fmt.Errorf("calling to LiveCommentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveCommentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveCommentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveComment.
+func (c *LiveCommentClient) Update() *LiveCommentUpdate {
+	mutation := newLiveCommentMutation(c.config, OpUpdate)
+	return &LiveCommentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveCommentClient) UpdateOne(_m *LiveComment) *LiveCommentUpdateOne {
+	mutation := newLiveCommentMutation(c.config, OpUpdateOne, withLiveComment(_m))
+	return &LiveCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveCommentClient) UpdateOneID(id uuid.UUID) *LiveCommentUpdateOne {
+	mutation := newLiveCommentMutation(c.config, OpUpdateOne, withLiveCommentID(id))
+	return &LiveCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveComment.
+func (c *LiveCommentClient) Delete() *LiveCommentDelete {
+	mutation := newLiveCommentMutation(c.config, OpDelete)
+	return &LiveCommentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveCommentClient) DeleteOne(_m *LiveComment) *LiveCommentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveCommentClient) DeleteOneID(id uuid.UUID) *LiveCommentDeleteOne {
+	builder := c.Delete().Where(livecomment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveCommentDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveComment.
+func (c *LiveCommentClient) Query() *LiveCommentQuery {
+	return &LiveCommentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveComment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveComment entity by its id.
+func (c *LiveCommentClient) Get(ctx context.Context, id uuid.UUID) (*LiveComment, error) {
+	return c.Query().Where(livecomment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveCommentClient) GetX(ctx context.Context, id uuid.UUID) *LiveComment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveCommentClient) Hooks() []Hook {
+	return c.hooks.LiveComment
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveCommentClient) Interceptors() []Interceptor {
+	return c.inters.LiveComment
+}
+
+func (c *LiveCommentClient) mutate(ctx context.Context, m *LiveCommentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveCommentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveCommentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveCommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveCommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveComment mutation op: %q", m.Op())
+	}
+}
+
+// LiveIngressClient is a client for the LiveIngress schema.
+type LiveIngressClient struct {
+	config
+}
+
+// NewLiveIngressClient returns a client for the LiveIngress from the given config.
+func NewLiveIngressClient(c config) *LiveIngressClient {
+	return &LiveIngressClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `liveingress.Hooks(f(g(h())))`.
+func (c *LiveIngressClient) Use(hooks ...Hook) {
+	c.hooks.LiveIngress = append(c.hooks.LiveIngress, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `liveingress.Intercept(f(g(h())))`.
+func (c *LiveIngressClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveIngress = append(c.inters.LiveIngress, interceptors...)
+}
+
+// Create returns a builder for creating a LiveIngress entity.
+func (c *LiveIngressClient) Create() *LiveIngressCreate {
+	mutation := newLiveIngressMutation(c.config, OpCreate)
+	return &LiveIngressCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveIngress entities.
+func (c *LiveIngressClient) CreateBulk(builders ...*LiveIngressCreate) *LiveIngressCreateBulk {
+	return &LiveIngressCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveIngressClient) MapCreateBulk(slice any, setFunc func(*LiveIngressCreate, int)) *LiveIngressCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveIngressCreateBulk{err: fmt.Errorf("calling to LiveIngressClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveIngressCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveIngressCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveIngress.
+func (c *LiveIngressClient) Update() *LiveIngressUpdate {
+	mutation := newLiveIngressMutation(c.config, OpUpdate)
+	return &LiveIngressUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveIngressClient) UpdateOne(_m *LiveIngress) *LiveIngressUpdateOne {
+	mutation := newLiveIngressMutation(c.config, OpUpdateOne, withLiveIngress(_m))
+	return &LiveIngressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveIngressClient) UpdateOneID(id uuid.UUID) *LiveIngressUpdateOne {
+	mutation := newLiveIngressMutation(c.config, OpUpdateOne, withLiveIngressID(id))
+	return &LiveIngressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveIngress.
+func (c *LiveIngressClient) Delete() *LiveIngressDelete {
+	mutation := newLiveIngressMutation(c.config, OpDelete)
+	return &LiveIngressDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveIngressClient) DeleteOne(_m *LiveIngress) *LiveIngressDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveIngressClient) DeleteOneID(id uuid.UUID) *LiveIngressDeleteOne {
+	builder := c.Delete().Where(liveingress.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveIngressDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveIngress.
+func (c *LiveIngressClient) Query() *LiveIngressQuery {
+	return &LiveIngressQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveIngress},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveIngress entity by its id.
+func (c *LiveIngressClient) Get(ctx context.Context, id uuid.UUID) (*LiveIngress, error) {
+	return c.Query().Where(liveingress.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveIngressClient) GetX(ctx context.Context, id uuid.UUID) *LiveIngress {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveIngressClient) Hooks() []Hook {
+	return c.hooks.LiveIngress
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveIngressClient) Interceptors() []Interceptor {
+	return c.inters.LiveIngress
+}
+
+func (c *LiveIngressClient) mutate(ctx context.Context, m *LiveIngressMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveIngressCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveIngressUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveIngressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveIngressDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveIngress mutation op: %q", m.Op())
+	}
+}
+
 // LiveLeaderboardEntryClient is a client for the LiveLeaderboardEntry schema.
 type LiveLeaderboardEntryClient struct {
 	config
@@ -1813,6 +2139,139 @@ func (c *LiveLeaderboardEntryClient) mutate(ctx context.Context, m *LiveLeaderbo
 	}
 }
 
+// LiveModeratorClient is a client for the LiveModerator schema.
+type LiveModeratorClient struct {
+	config
+}
+
+// NewLiveModeratorClient returns a client for the LiveModerator from the given config.
+func NewLiveModeratorClient(c config) *LiveModeratorClient {
+	return &LiveModeratorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livemoderator.Hooks(f(g(h())))`.
+func (c *LiveModeratorClient) Use(hooks ...Hook) {
+	c.hooks.LiveModerator = append(c.hooks.LiveModerator, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livemoderator.Intercept(f(g(h())))`.
+func (c *LiveModeratorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveModerator = append(c.inters.LiveModerator, interceptors...)
+}
+
+// Create returns a builder for creating a LiveModerator entity.
+func (c *LiveModeratorClient) Create() *LiveModeratorCreate {
+	mutation := newLiveModeratorMutation(c.config, OpCreate)
+	return &LiveModeratorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveModerator entities.
+func (c *LiveModeratorClient) CreateBulk(builders ...*LiveModeratorCreate) *LiveModeratorCreateBulk {
+	return &LiveModeratorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveModeratorClient) MapCreateBulk(slice any, setFunc func(*LiveModeratorCreate, int)) *LiveModeratorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveModeratorCreateBulk{err: fmt.Errorf("calling to LiveModeratorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveModeratorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveModeratorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveModerator.
+func (c *LiveModeratorClient) Update() *LiveModeratorUpdate {
+	mutation := newLiveModeratorMutation(c.config, OpUpdate)
+	return &LiveModeratorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveModeratorClient) UpdateOne(_m *LiveModerator) *LiveModeratorUpdateOne {
+	mutation := newLiveModeratorMutation(c.config, OpUpdateOne, withLiveModerator(_m))
+	return &LiveModeratorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveModeratorClient) UpdateOneID(id uuid.UUID) *LiveModeratorUpdateOne {
+	mutation := newLiveModeratorMutation(c.config, OpUpdateOne, withLiveModeratorID(id))
+	return &LiveModeratorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveModerator.
+func (c *LiveModeratorClient) Delete() *LiveModeratorDelete {
+	mutation := newLiveModeratorMutation(c.config, OpDelete)
+	return &LiveModeratorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveModeratorClient) DeleteOne(_m *LiveModerator) *LiveModeratorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveModeratorClient) DeleteOneID(id uuid.UUID) *LiveModeratorDeleteOne {
+	builder := c.Delete().Where(livemoderator.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveModeratorDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveModerator.
+func (c *LiveModeratorClient) Query() *LiveModeratorQuery {
+	return &LiveModeratorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveModerator},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveModerator entity by its id.
+func (c *LiveModeratorClient) Get(ctx context.Context, id uuid.UUID) (*LiveModerator, error) {
+	return c.Query().Where(livemoderator.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveModeratorClient) GetX(ctx context.Context, id uuid.UUID) *LiveModerator {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveModeratorClient) Hooks() []Hook {
+	return c.hooks.LiveModerator
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveModeratorClient) Interceptors() []Interceptor {
+	return c.inters.LiveModerator
+}
+
+func (c *LiveModeratorClient) mutate(ctx context.Context, m *LiveModeratorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveModeratorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveModeratorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveModeratorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveModeratorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveModerator mutation op: %q", m.Op())
+	}
+}
+
 // LiveProductClient is a client for the LiveProduct schema.
 type LiveProductClient struct {
 	config
@@ -1943,6 +2402,405 @@ func (c *LiveProductClient) mutate(ctx context.Context, m *LiveProductMutation) 
 		return (&LiveProductDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown LiveProduct mutation op: %q", m.Op())
+	}
+}
+
+// LiveRecordingClient is a client for the LiveRecording schema.
+type LiveRecordingClient struct {
+	config
+}
+
+// NewLiveRecordingClient returns a client for the LiveRecording from the given config.
+func NewLiveRecordingClient(c config) *LiveRecordingClient {
+	return &LiveRecordingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `liverecording.Hooks(f(g(h())))`.
+func (c *LiveRecordingClient) Use(hooks ...Hook) {
+	c.hooks.LiveRecording = append(c.hooks.LiveRecording, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `liverecording.Intercept(f(g(h())))`.
+func (c *LiveRecordingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveRecording = append(c.inters.LiveRecording, interceptors...)
+}
+
+// Create returns a builder for creating a LiveRecording entity.
+func (c *LiveRecordingClient) Create() *LiveRecordingCreate {
+	mutation := newLiveRecordingMutation(c.config, OpCreate)
+	return &LiveRecordingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveRecording entities.
+func (c *LiveRecordingClient) CreateBulk(builders ...*LiveRecordingCreate) *LiveRecordingCreateBulk {
+	return &LiveRecordingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveRecordingClient) MapCreateBulk(slice any, setFunc func(*LiveRecordingCreate, int)) *LiveRecordingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveRecordingCreateBulk{err: fmt.Errorf("calling to LiveRecordingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveRecordingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveRecordingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveRecording.
+func (c *LiveRecordingClient) Update() *LiveRecordingUpdate {
+	mutation := newLiveRecordingMutation(c.config, OpUpdate)
+	return &LiveRecordingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveRecordingClient) UpdateOne(_m *LiveRecording) *LiveRecordingUpdateOne {
+	mutation := newLiveRecordingMutation(c.config, OpUpdateOne, withLiveRecording(_m))
+	return &LiveRecordingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveRecordingClient) UpdateOneID(id uuid.UUID) *LiveRecordingUpdateOne {
+	mutation := newLiveRecordingMutation(c.config, OpUpdateOne, withLiveRecordingID(id))
+	return &LiveRecordingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveRecording.
+func (c *LiveRecordingClient) Delete() *LiveRecordingDelete {
+	mutation := newLiveRecordingMutation(c.config, OpDelete)
+	return &LiveRecordingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveRecordingClient) DeleteOne(_m *LiveRecording) *LiveRecordingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveRecordingClient) DeleteOneID(id uuid.UUID) *LiveRecordingDeleteOne {
+	builder := c.Delete().Where(liverecording.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveRecordingDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveRecording.
+func (c *LiveRecordingClient) Query() *LiveRecordingQuery {
+	return &LiveRecordingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveRecording},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveRecording entity by its id.
+func (c *LiveRecordingClient) Get(ctx context.Context, id uuid.UUID) (*LiveRecording, error) {
+	return c.Query().Where(liverecording.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveRecordingClient) GetX(ctx context.Context, id uuid.UUID) *LiveRecording {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveRecordingClient) Hooks() []Hook {
+	return c.hooks.LiveRecording
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveRecordingClient) Interceptors() []Interceptor {
+	return c.inters.LiveRecording
+}
+
+func (c *LiveRecordingClient) mutate(ctx context.Context, m *LiveRecordingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveRecordingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveRecordingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveRecordingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveRecordingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveRecording mutation op: %q", m.Op())
+	}
+}
+
+// LiveRestrictionClient is a client for the LiveRestriction schema.
+type LiveRestrictionClient struct {
+	config
+}
+
+// NewLiveRestrictionClient returns a client for the LiveRestriction from the given config.
+func NewLiveRestrictionClient(c config) *LiveRestrictionClient {
+	return &LiveRestrictionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `liverestriction.Hooks(f(g(h())))`.
+func (c *LiveRestrictionClient) Use(hooks ...Hook) {
+	c.hooks.LiveRestriction = append(c.hooks.LiveRestriction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `liverestriction.Intercept(f(g(h())))`.
+func (c *LiveRestrictionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveRestriction = append(c.inters.LiveRestriction, interceptors...)
+}
+
+// Create returns a builder for creating a LiveRestriction entity.
+func (c *LiveRestrictionClient) Create() *LiveRestrictionCreate {
+	mutation := newLiveRestrictionMutation(c.config, OpCreate)
+	return &LiveRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveRestriction entities.
+func (c *LiveRestrictionClient) CreateBulk(builders ...*LiveRestrictionCreate) *LiveRestrictionCreateBulk {
+	return &LiveRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveRestrictionClient) MapCreateBulk(slice any, setFunc func(*LiveRestrictionCreate, int)) *LiveRestrictionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveRestrictionCreateBulk{err: fmt.Errorf("calling to LiveRestrictionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveRestrictionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveRestriction.
+func (c *LiveRestrictionClient) Update() *LiveRestrictionUpdate {
+	mutation := newLiveRestrictionMutation(c.config, OpUpdate)
+	return &LiveRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveRestrictionClient) UpdateOne(_m *LiveRestriction) *LiveRestrictionUpdateOne {
+	mutation := newLiveRestrictionMutation(c.config, OpUpdateOne, withLiveRestriction(_m))
+	return &LiveRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveRestrictionClient) UpdateOneID(id uuid.UUID) *LiveRestrictionUpdateOne {
+	mutation := newLiveRestrictionMutation(c.config, OpUpdateOne, withLiveRestrictionID(id))
+	return &LiveRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveRestriction.
+func (c *LiveRestrictionClient) Delete() *LiveRestrictionDelete {
+	mutation := newLiveRestrictionMutation(c.config, OpDelete)
+	return &LiveRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveRestrictionClient) DeleteOne(_m *LiveRestriction) *LiveRestrictionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveRestrictionClient) DeleteOneID(id uuid.UUID) *LiveRestrictionDeleteOne {
+	builder := c.Delete().Where(liverestriction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveRestrictionDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveRestriction.
+func (c *LiveRestrictionClient) Query() *LiveRestrictionQuery {
+	return &LiveRestrictionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveRestriction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveRestriction entity by its id.
+func (c *LiveRestrictionClient) Get(ctx context.Context, id uuid.UUID) (*LiveRestriction, error) {
+	return c.Query().Where(liverestriction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveRestrictionClient) GetX(ctx context.Context, id uuid.UUID) *LiveRestriction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveRestrictionClient) Hooks() []Hook {
+	return c.hooks.LiveRestriction
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveRestrictionClient) Interceptors() []Interceptor {
+	return c.inters.LiveRestriction
+}
+
+func (c *LiveRestrictionClient) mutate(ctx context.Context, m *LiveRestrictionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveRestriction mutation op: %q", m.Op())
+	}
+}
+
+// LiveRoomSettingClient is a client for the LiveRoomSetting schema.
+type LiveRoomSettingClient struct {
+	config
+}
+
+// NewLiveRoomSettingClient returns a client for the LiveRoomSetting from the given config.
+func NewLiveRoomSettingClient(c config) *LiveRoomSettingClient {
+	return &LiveRoomSettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `liveroomsetting.Hooks(f(g(h())))`.
+func (c *LiveRoomSettingClient) Use(hooks ...Hook) {
+	c.hooks.LiveRoomSetting = append(c.hooks.LiveRoomSetting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `liveroomsetting.Intercept(f(g(h())))`.
+func (c *LiveRoomSettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveRoomSetting = append(c.inters.LiveRoomSetting, interceptors...)
+}
+
+// Create returns a builder for creating a LiveRoomSetting entity.
+func (c *LiveRoomSettingClient) Create() *LiveRoomSettingCreate {
+	mutation := newLiveRoomSettingMutation(c.config, OpCreate)
+	return &LiveRoomSettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveRoomSetting entities.
+func (c *LiveRoomSettingClient) CreateBulk(builders ...*LiveRoomSettingCreate) *LiveRoomSettingCreateBulk {
+	return &LiveRoomSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveRoomSettingClient) MapCreateBulk(slice any, setFunc func(*LiveRoomSettingCreate, int)) *LiveRoomSettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveRoomSettingCreateBulk{err: fmt.Errorf("calling to LiveRoomSettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveRoomSettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveRoomSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveRoomSetting.
+func (c *LiveRoomSettingClient) Update() *LiveRoomSettingUpdate {
+	mutation := newLiveRoomSettingMutation(c.config, OpUpdate)
+	return &LiveRoomSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveRoomSettingClient) UpdateOne(_m *LiveRoomSetting) *LiveRoomSettingUpdateOne {
+	mutation := newLiveRoomSettingMutation(c.config, OpUpdateOne, withLiveRoomSetting(_m))
+	return &LiveRoomSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveRoomSettingClient) UpdateOneID(id uuid.UUID) *LiveRoomSettingUpdateOne {
+	mutation := newLiveRoomSettingMutation(c.config, OpUpdateOne, withLiveRoomSettingID(id))
+	return &LiveRoomSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveRoomSetting.
+func (c *LiveRoomSettingClient) Delete() *LiveRoomSettingDelete {
+	mutation := newLiveRoomSettingMutation(c.config, OpDelete)
+	return &LiveRoomSettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveRoomSettingClient) DeleteOne(_m *LiveRoomSetting) *LiveRoomSettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveRoomSettingClient) DeleteOneID(id uuid.UUID) *LiveRoomSettingDeleteOne {
+	builder := c.Delete().Where(liveroomsetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveRoomSettingDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveRoomSetting.
+func (c *LiveRoomSettingClient) Query() *LiveRoomSettingQuery {
+	return &LiveRoomSettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveRoomSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveRoomSetting entity by its id.
+func (c *LiveRoomSettingClient) Get(ctx context.Context, id uuid.UUID) (*LiveRoomSetting, error) {
+	return c.Query().Where(liveroomsetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveRoomSettingClient) GetX(ctx context.Context, id uuid.UUID) *LiveRoomSetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveRoomSettingClient) Hooks() []Hook {
+	return c.hooks.LiveRoomSetting
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveRoomSettingClient) Interceptors() []Interceptor {
+	return c.inters.LiveRoomSetting
+}
+
+func (c *LiveRoomSettingClient) mutate(ctx context.Context, m *LiveRoomSettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveRoomSettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveRoomSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveRoomSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveRoomSettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveRoomSetting mutation op: %q", m.Op())
 	}
 }
 
@@ -2342,6 +3200,139 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 		return (&OutboxEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown OutboxEvent mutation op: %q", m.Op())
+	}
+}
+
+// OverlaySceneClient is a client for the OverlayScene schema.
+type OverlaySceneClient struct {
+	config
+}
+
+// NewOverlaySceneClient returns a client for the OverlayScene from the given config.
+func NewOverlaySceneClient(c config) *OverlaySceneClient {
+	return &OverlaySceneClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `overlayscene.Hooks(f(g(h())))`.
+func (c *OverlaySceneClient) Use(hooks ...Hook) {
+	c.hooks.OverlayScene = append(c.hooks.OverlayScene, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `overlayscene.Intercept(f(g(h())))`.
+func (c *OverlaySceneClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OverlayScene = append(c.inters.OverlayScene, interceptors...)
+}
+
+// Create returns a builder for creating a OverlayScene entity.
+func (c *OverlaySceneClient) Create() *OverlaySceneCreate {
+	mutation := newOverlaySceneMutation(c.config, OpCreate)
+	return &OverlaySceneCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OverlayScene entities.
+func (c *OverlaySceneClient) CreateBulk(builders ...*OverlaySceneCreate) *OverlaySceneCreateBulk {
+	return &OverlaySceneCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OverlaySceneClient) MapCreateBulk(slice any, setFunc func(*OverlaySceneCreate, int)) *OverlaySceneCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OverlaySceneCreateBulk{err: fmt.Errorf("calling to OverlaySceneClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OverlaySceneCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OverlaySceneCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OverlayScene.
+func (c *OverlaySceneClient) Update() *OverlaySceneUpdate {
+	mutation := newOverlaySceneMutation(c.config, OpUpdate)
+	return &OverlaySceneUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OverlaySceneClient) UpdateOne(_m *OverlayScene) *OverlaySceneUpdateOne {
+	mutation := newOverlaySceneMutation(c.config, OpUpdateOne, withOverlayScene(_m))
+	return &OverlaySceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OverlaySceneClient) UpdateOneID(id string) *OverlaySceneUpdateOne {
+	mutation := newOverlaySceneMutation(c.config, OpUpdateOne, withOverlaySceneID(id))
+	return &OverlaySceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OverlayScene.
+func (c *OverlaySceneClient) Delete() *OverlaySceneDelete {
+	mutation := newOverlaySceneMutation(c.config, OpDelete)
+	return &OverlaySceneDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OverlaySceneClient) DeleteOne(_m *OverlayScene) *OverlaySceneDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OverlaySceneClient) DeleteOneID(id string) *OverlaySceneDeleteOne {
+	builder := c.Delete().Where(overlayscene.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OverlaySceneDeleteOne{builder}
+}
+
+// Query returns a query builder for OverlayScene.
+func (c *OverlaySceneClient) Query() *OverlaySceneQuery {
+	return &OverlaySceneQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOverlayScene},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OverlayScene entity by its id.
+func (c *OverlaySceneClient) Get(ctx context.Context, id string) (*OverlayScene, error) {
+	return c.Query().Where(overlayscene.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OverlaySceneClient) GetX(ctx context.Context, id string) *OverlayScene {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OverlaySceneClient) Hooks() []Hook {
+	return c.hooks.OverlayScene
+}
+
+// Interceptors returns the client interceptors.
+func (c *OverlaySceneClient) Interceptors() []Interceptor {
+	return c.inters.OverlayScene
+}
+
+func (c *OverlaySceneClient) mutate(ctx context.Context, m *OverlaySceneMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OverlaySceneCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OverlaySceneUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OverlaySceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OverlaySceneDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OverlayScene mutation op: %q", m.Op())
 	}
 }
 
@@ -2748,15 +3739,17 @@ func (c *ProcessedGiftClient) mutate(ctx context.Context, m *ProcessedGiftMutati
 type (
 	hooks struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
-		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveLeaderboardEntry,
-		LiveProduct, LiveSession, LiveViewer, OutboxEvent, PointsEntry, PointsRule,
-		ProcessedGift []ent.Hook
+		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
+		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
+		LiveRestriction, LiveRoomSetting, LiveSession, LiveViewer, OutboxEvent,
+		OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
-		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveLeaderboardEntry,
-		LiveProduct, LiveSession, LiveViewer, OutboxEvent, PointsEntry, PointsRule,
-		ProcessedGift []ent.Interceptor
+		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
+		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
+		LiveRestriction, LiveRoomSetting, LiveSession, LiveViewer, OutboxEvent,
+		OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Interceptor
 	}
 )
 

@@ -128,6 +128,30 @@ func (f JoinRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JoinRequestMutation", m)
 }
 
+// The LiveCommentFunc type is an adapter to allow the use of ordinary
+// function as LiveComment mutator.
+type LiveCommentFunc func(context.Context, *ent.LiveCommentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveCommentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveCommentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveCommentMutation", m)
+}
+
+// The LiveIngressFunc type is an adapter to allow the use of ordinary
+// function as LiveIngress mutator.
+type LiveIngressFunc func(context.Context, *ent.LiveIngressMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveIngressFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveIngressMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveIngressMutation", m)
+}
+
 // The LiveLeaderboardEntryFunc type is an adapter to allow the use of ordinary
 // function as LiveLeaderboardEntry mutator.
 type LiveLeaderboardEntryFunc func(context.Context, *ent.LiveLeaderboardEntryMutation) (ent.Value, error)
@@ -140,6 +164,18 @@ func (f LiveLeaderboardEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveLeaderboardEntryMutation", m)
 }
 
+// The LiveModeratorFunc type is an adapter to allow the use of ordinary
+// function as LiveModerator mutator.
+type LiveModeratorFunc func(context.Context, *ent.LiveModeratorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveModeratorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveModeratorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveModeratorMutation", m)
+}
+
 // The LiveProductFunc type is an adapter to allow the use of ordinary
 // function as LiveProduct mutator.
 type LiveProductFunc func(context.Context, *ent.LiveProductMutation) (ent.Value, error)
@@ -150,6 +186,42 @@ func (f LiveProductFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveProductMutation", m)
+}
+
+// The LiveRecordingFunc type is an adapter to allow the use of ordinary
+// function as LiveRecording mutator.
+type LiveRecordingFunc func(context.Context, *ent.LiveRecordingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveRecordingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveRecordingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveRecordingMutation", m)
+}
+
+// The LiveRestrictionFunc type is an adapter to allow the use of ordinary
+// function as LiveRestriction mutator.
+type LiveRestrictionFunc func(context.Context, *ent.LiveRestrictionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveRestrictionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveRestrictionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveRestrictionMutation", m)
+}
+
+// The LiveRoomSettingFunc type is an adapter to allow the use of ordinary
+// function as LiveRoomSetting mutator.
+type LiveRoomSettingFunc func(context.Context, *ent.LiveRoomSettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveRoomSettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveRoomSettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveRoomSettingMutation", m)
 }
 
 // The LiveSessionFunc type is an adapter to allow the use of ordinary
@@ -186,6 +258,18 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
+}
+
+// The OverlaySceneFunc type is an adapter to allow the use of ordinary
+// function as OverlayScene mutator.
+type OverlaySceneFunc func(context.Context, *ent.OverlaySceneMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OverlaySceneFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.OverlaySceneMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OverlaySceneMutation", m)
 }
 
 // The PointsEntryFunc type is an adapter to allow the use of ordinary

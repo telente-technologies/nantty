@@ -18,11 +18,18 @@ import (
 	"zudomart/modules/live/src/generated/ent/goalcontribution"
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
+	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
+	"zudomart/modules/live/src/generated/ent/livemoderator"
 	"zudomart/modules/live/src/generated/ent/liveproduct"
+	"zudomart/modules/live/src/generated/ent/liverecording"
+	"zudomart/modules/live/src/generated/ent/liverestriction"
+	"zudomart/modules/live/src/generated/ent/liveroomsetting"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
+	"zudomart/modules/live/src/generated/ent/overlayscene"
 	"zudomart/modules/live/src/generated/ent/pointsentry"
 	"zudomart/modules/live/src/generated/ent/pointsrule"
 	"zudomart/modules/live/src/generated/ent/processedgift"
@@ -100,11 +107,18 @@ func checkColumn(t, c string) error {
 			goalcontribution.Table:     goalcontribution.ValidColumn,
 			guestslot.Table:            guestslot.ValidColumn,
 			joinrequest.Table:          joinrequest.ValidColumn,
+			livecomment.Table:          livecomment.ValidColumn,
+			liveingress.Table:          liveingress.ValidColumn,
 			liveleaderboardentry.Table: liveleaderboardentry.ValidColumn,
+			livemoderator.Table:        livemoderator.ValidColumn,
 			liveproduct.Table:          liveproduct.ValidColumn,
+			liverecording.Table:        liverecording.ValidColumn,
+			liverestriction.Table:      liverestriction.ValidColumn,
+			liveroomsetting.Table:      liveroomsetting.ValidColumn,
 			livesession.Table:          livesession.ValidColumn,
 			liveviewer.Table:           liveviewer.ValidColumn,
 			outboxevent.Table:          outboxevent.ValidColumn,
+			overlayscene.Table:         overlayscene.ValidColumn,
 			pointsentry.Table:          pointsentry.ValidColumn,
 			pointsrule.Table:           pointsrule.ValidColumn,
 			processedgift.Table:        processedgift.ValidColumn,
