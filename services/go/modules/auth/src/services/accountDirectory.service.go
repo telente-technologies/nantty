@@ -36,15 +36,11 @@ func (application AccountDirectoryService) IsUsernameTaken(ctx context.Context, 
 }
 
 func (application AccountDirectoryService) RenameAccountUsername(ctx context.Context, accountId uuid.UUID, username string) error {
-	return application.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		if err := tx.Account.UpdateOneID(accountId).SetUsername(username).Exec(ctx); err != nil {
-			if ent.IsConstraintError(err) {
-				return identityports.ErrUsernameAlreadyTaken
-			}
-			return err
-		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.usernameChanged", accountId.String(), application.Container.Now(), events.UsernameChangedEventData{AccountId: accountId.String(), Username: username})
-	})
+	err := application.Container.Client.Account.UpdateOneID(accountId).SetUsername(username).Exec(ctx)
+	if ent.IsConstraintError(err) {
+		return identityports.ErrUsernameAlreadyTaken
+	}
+	return err
 }
 
 func (application AccountDirectoryService) DeactivateAccountAndRevokeSessions(ctx context.Context, accountId uuid.UUID) error {
