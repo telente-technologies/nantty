@@ -13,6 +13,7 @@ type Registry struct {
 	enforcement AccountEnforcement
 	sessions    StaffSessionChecker
 	history     AuditHistoryReader
+	currencies  CurrencyResolver
 }
 
 var Default = &Registry{}
@@ -115,4 +116,14 @@ func (registry *Registry) RegisterAuditHistoryReader(port AuditHistoryReader) {
 
 func (registry *Registry) AuditHistoryReader() (AuditHistoryReader, error) {
 	return readPort(registry, func() AuditHistoryReader { return registry.history })
+}
+
+func (registry *Registry) RegisterCurrencyResolver(port CurrencyResolver) {
+	registry.mutex.Lock()
+	registry.currencies = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) CurrencyResolver() (CurrencyResolver, error) {
+	return readPort(registry, func() CurrencyResolver { return registry.currencies })
 }

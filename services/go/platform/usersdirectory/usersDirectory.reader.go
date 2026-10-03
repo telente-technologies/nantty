@@ -164,3 +164,44 @@ func (reader Reader) PrivacyChoicesOf(ctx context.Context, accountId uuid.UUID) 
 	}
 	return choices, err == nil, err
 }
+
+func (reader Reader) DescribeRegions(ctx context.Context, regionIds []uuid.UUID) (map[uuid.UUID]GeoRegion, error) {
+	result := map[uuid.UUID]GeoRegion{}
+	if len(regionIds) == 0 {
+		return result, nil
+	}
+	rows, err := reader.Database.QueryContext(ctx, "SELECT id, country_code, COALESCE(code, ''), name FROM "+reader.table("geo_regions")+" WHERE id = ANY($1)", regionIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var region GeoRegion
+		if err := rows.Scan(&region.Id, &region.CountryCode, &region.Code, &region.Name); err != nil {
+			return nil, err
+		}
+		result[region.Id] = region
+	}
+	return result, rows.Err()
+}
+
+func (reader Reader) DescribeAdminAreas(ctx context.Context, adminAreaIds []uuid.UUID) (map[uuid.UUID]string, error) {
+	result := map[uuid.UUID]string{}
+	if len(adminAreaIds) == 0 {
+		return result, nil
+	}
+	rows, err := reader.Database.QueryContext(ctx, "SELECT id, name FROM "+reader.table("geo_admin_areas")+" WHERE id = ANY($1)", adminAreaIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var identifier uuid.UUID
+		var name string
+		if err := rows.Scan(&identifier, &name); err != nil {
+			return nil, err
+		}
+		result[identifier] = name
+	}
+	return result, rows.Err()
+}

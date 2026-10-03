@@ -2,6 +2,7 @@ package commerceports
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -92,6 +93,7 @@ type VariantReference struct {
 }
 
 type CatalogReader interface {
+	ListVariantsOfProduct(ctx context.Context, productId uuid.UUID) ([]ProductSnapshot, error)
 	ListStoreVariants(ctx context.Context, storeId uuid.UUID) ([]VariantReference, error)
 	SearchStoreVariantIds(ctx context.Context, storeId uuid.UUID, text string, limit int) ([]uuid.UUID, error)
 	DetachSupplierFromProducts(ctx context.Context, storeId, supplierId uuid.UUID) error
@@ -159,6 +161,7 @@ type VariantStockLevel struct {
 type InventoryStock interface {
 	StockLevelsForVariants(ctx context.Context, storeId uuid.UUID, variantIds []uuid.UUID) (map[uuid.UUID][]VariantStockLevel, error)
 	Reserve(ctx context.Context, request ReserveStockRequest) error
+	ReserveWithin(ctx context.Context, transaction *sql.Tx, callerSchema string, request ReserveStockRequest) error
 	Release(ctx context.Context, reference string) error
 	Confirm(ctx context.Context, reference string) error
 	Fulfil(ctx context.Context, request FulfilStockRequest) error

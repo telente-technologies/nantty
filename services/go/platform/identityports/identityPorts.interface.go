@@ -125,6 +125,10 @@ type CreateAccountRequest struct {
 	Password string
 }
 
+type CurrencyResolver interface {
+	CurrencyForCountry(countryCode string) (string, bool)
+}
+
 type StaffSessionChecker interface {
 	IsStaffSessionActive(ctx context.Context, staffId, sessionId string) (bool, error)
 }
