@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { isGuestBrowsablePage } from "@/config/guestBrowsing.config";
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
@@ -23,7 +24,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!sessionId) return redirectTo(request, "/welcome", pathname === "/" ? undefined : { next: requestedPathWithQuery });
+  if (!sessionId) {
+    if (isGuestBrowsablePage(pathname)) return NextResponse.next();
+    return redirectTo(request, "/login", { next: requestedPathWithQuery });
+  }
   if (!readCachedViewerFromCookies(request.cookies) || !readApiTokensFromCookies(request.cookies).accessToken) {
     return redirectTo(request, "/bff/auth/access-refresh", { next: requestedPathWithQuery });
   }
