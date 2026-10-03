@@ -2,12 +2,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { Pressable, Share, StyleSheet, View } from "react-native";
+import { Share } from "react-native";
 
 import { ArrowUpRight24Icon, EyeClosed20Icon, Share24Icon, Warning20Icon } from "@/components/icons";
-import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Text } from "@/components/ui/text";
-import { useTheme } from "@/theme";
+import { ActionSheet } from "@/components/ui/actionSheet";
 import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feedFeedback.service";
 import type { ReportTargetType } from "@/services/reports.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -90,49 +88,24 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
 
   return (
     <>
-      <BottomSheet visible={!!target} onClose={onClose} floating>
-        <View style={styles.options}>
-          {additionalActions.map((action) => (
-            <OptionRow
-              key={action.label}
-              icon={action.icon}
-              label={action.label}
-              onPress={() => {
-                onClose();
-                action.onPress();
-              }}
-            />
-          ))}
-          {canPromote ? <OptionRow icon={<ArrowUpRight24Icon />} label="Promote post" onPress={promoteOwnPost} /> : null}
-          {canGiveFeedFeedback ? (
-            <>
-              <OptionRow icon={<EyeClosed20Icon />} label={`Hide ${noun}`} onPress={() => hideContentAndSendFeedback("hide")} />
-              <OptionRow icon={<EyeClosed20Icon />} label="Not interested" onPress={() => hideContentAndSendFeedback("not_interested")} />
-            </>
-          ) : null}
-          {target?.shareUrl ? <OptionRow icon={<Share24Icon />} label="Copy or share link" onPress={shareLinkToContent} /> : null}
-          {!isOwnContent ? <OptionRow icon={<Warning20Icon />} label="Report" destructive onPress={openReportSheetForTarget} /> : null}
-        </View>
-      </BottomSheet>
+      <ActionSheet
+        visible={!!target}
+        onClose={onClose}
+        closeBeforeSelect={false}
+        options={[
+          ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, onPress: () => { onClose(); action.onPress(); } })),
+          ...(canPromote ? [{ label: "Promote post", icon: <ArrowUpRight24Icon />, onPress: promoteOwnPost }] : []),
+          ...(canGiveFeedFeedback
+            ? [
+                { label: `Hide ${noun}`, icon: <EyeClosed20Icon />, onPress: () => hideContentAndSendFeedback("hide") },
+                { label: "Not interested", icon: <EyeClosed20Icon />, onPress: () => hideContentAndSendFeedback("not_interested") },
+              ]
+            : []),
+          ...(target?.shareUrl ? [{ label: "Copy or share link", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
+          ...(!isOwnContent ? [{ label: "Report", icon: <Warning20Icon />, destructive: true, onPress: openReportSheetForTarget }] : []),
+        ]}
+      />
       <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
     </>
   );
 }
-
-function OptionRow({ icon, label, onPress, destructive = false }: { icon: ReactNode; label: string; onPress: () => void; destructive?: boolean }) {
-  const { colors } = useTheme();
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.optionRow}>
-      <View style={styles.optionIcon}>{icon}</View>
-      <Text size={15} weight={500} lineHeight={18} color={destructive ? colors.error : colors.text}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-const styles = StyleSheet.create({
-  options: { paddingVertical: 8 },
-  optionRow: { minHeight: 52, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 14 },
-  optionIcon: { width: 24, alignItems: "center" },
-});
