@@ -13,5 +13,5 @@ func ReadClientDetails(request *http.Request) types.ClientDetails {
 	if ipAddress == "" {
 		ipAddress, _, _ = net.SplitHostPort(request.RemoteAddr)
 	}
-	return types.ClientDetails{UserAgent: request.UserAgent(), IpAddress: ipAddress}
+	return types.ClientDetails{UserAgent: request.UserAgent(), IpAddress: ipAddress, DeviceId: TruncateToLength(strings.TrimSpace(request.Header.Get("X-Device-Id")), 128)}
 }
