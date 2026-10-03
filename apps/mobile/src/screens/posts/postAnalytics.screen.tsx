@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { Analytics24Icon } from "@/components/icons";
 import { Header } from "@/components/ui/header";
@@ -9,6 +9,8 @@ import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/posts.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 const DAY_LABELS: readonly string[] = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -23,11 +25,9 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
       <Screen>
         <Header title="Post analytics" />
         {analytics.isError ? (
-          <View style={styles.state}>
-            <Text align="center" color={colors.textSubtle}>{analytics.error.message}</Text>
-          </View>
+          <ErrorState message={analytics.error.message} onRetry={() => analytics.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.loading} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -96,8 +96,6 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
 }
 
 const styles = StyleSheet.create({
-  loading: { marginTop: 80 },
-  state: { paddingHorizontal: 24, paddingTop: 60 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   ownerNote: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 2 },
   ownerNoteText: { flex: 1 },
