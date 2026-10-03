@@ -85,6 +85,7 @@ func StartAuthModuleWithSettings(ctx context.Context, settings configs.AuthSetti
 		AccessVerifier: jwtauth.NewAccessTokenVerifierFromKeySetProvider(keys.PublishedPublicKeySet, settings.TokenIssuer, settings.TokenAudience),
 	}
 	identityports.Default.RegisterAccountDirectory(services.AccountDirectoryService{Container: authContainer})
+	identityports.Default.RegisterAccountEnforcement(services.AccountEnforcementService{Container: authContainer})
 	identityports.Default.RegisterStaffTokenService(signingkeyservices.StaffTokenService{Issuer: tokenIssuer, Keys: keys, TimeToLive: settings.StaffAccessTokenTimeToLive})
 	dependencies.Health.AddReadinessCheck("auth-postgres", postgres.ReadinessCheckForDatabase(database))
 	return &Module{container: authContainer, publisher: publisher}, nil
