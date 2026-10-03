@@ -34,6 +34,12 @@ const (
 	FieldEmailVerifiedAt = "email_verified_at"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldPhoneHash holds the string denoting the phone_hash field in the database.
+	FieldPhoneHash = "phone_hash"
+	// FieldPhoneVerifiedAt holds the string denoting the phone_verified_at field in the database.
+	FieldPhoneVerifiedAt = "phone_verified_at"
+	// FieldMustChangePassword holds the string denoting the must_change_password field in the database.
+	FieldMustChangePassword = "must_change_password"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
@@ -70,6 +76,9 @@ var Columns = []string{
 	FieldRoles,
 	FieldEmailVerifiedAt,
 	FieldStatus,
+	FieldPhoneHash,
+	FieldPhoneVerifiedAt,
+	FieldMustChangePassword,
 	FieldUpdatedAt,
 }
 
@@ -96,6 +105,10 @@ var (
 	NameValidator func(string) error
 	// DefaultRoles holds the default value on creation for the "roles" field.
 	DefaultRoles []string
+	// PhoneHashValidator is a validator for the "phone_hash" field. It is called by the builders before save.
+	PhoneHashValidator func(string) error
+	// DefaultMustChangePassword holds the default value on creation for the "must_change_password" field.
+	DefaultMustChangePassword bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -114,6 +127,9 @@ const DefaultStatus = StatusActive
 const (
 	StatusActive      Status = "active"
 	StatusDeactivated Status = "deactivated"
+	StatusSuspended   Status = "suspended"
+	StatusBanned      Status = "banned"
+	StatusDeleted     Status = "deleted"
 )
 
 func (s Status) String() string {
@@ -123,7 +139,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusActive, StatusDeactivated:
+	case StatusActive, StatusDeactivated, StatusSuspended, StatusBanned, StatusDeleted:
 		return nil
 	default:
 		return fmt.Errorf("account: invalid enum value for status field: %q", s)
@@ -176,6 +192,21 @@ func ByEmailVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByPhoneHash orders the results by the phone_hash field.
+func ByPhoneHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhoneHash, opts...).ToFunc()
+}
+
+// ByPhoneVerifiedAt orders the results by the phone_verified_at field.
+func ByPhoneVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhoneVerifiedAt, opts...).ToFunc()
+}
+
+// ByMustChangePassword orders the results by the must_change_password field.
+func ByMustChangePassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMustChangePassword, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
