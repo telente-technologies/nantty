@@ -41,7 +41,7 @@ export function IpClaimDecisionPanel({ claim, onDecided }: { readonly claim: IpC
     onDecided(result.claim);
   }
 
-  const upholdConsequences = [`Listing "${claim.listing.title}" is delisted immediately.`, shouldAddStrike ? `@${claim.accusedSeller.username} gets a strike (${claim.priorStrikeCount} → ${strikesAfterUphold}).` : "No strike is added.", "The claimant and the seller are notified with your reason."];
+  const upholdConsequences = [`Listing "${claim.listing.title}" is delisted immediately.`, shouldAddStrike ? `@${claim.accusedSeller.username} gets a strike (${claim.priorStrikeCount} to ${strikesAfterUphold}).` : "No strike is added.", "The claimant and the seller are notified with your reason."];
   return (
     <Card title="Decision">
       <div className={styles.layoutStack}>
