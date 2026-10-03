@@ -22,6 +22,7 @@ let upstream: Server;
 let gateway: ReturnType<typeof createGatewayServer>;
 let gatewayUrl: string;
 let signingKey: CryptoKey;
+let sharedPublicJwk: Awaited<ReturnType<typeof exportJWK>>;
 
 async function signAccessToken(expiresIn: string): Promise<string> {
   return new SignJWT({ sid: "session-1", roles: ["buyer"] })
@@ -38,7 +39,9 @@ function buildConfig(upstreamUrl: string): GatewayConfig {
     rateLimitMaxPerMinute: 0,
     upstreamTimeoutMs: 2_000,
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience },
-    upstreams: { identity: upstreamUrl, live: upstreamUrl },
+    policyGate: null,
+    guestRateLimits: { perMinute: 120, sensitivePerMinute: 3 },
+    upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl },
   };
 }
 
@@ -46,6 +49,7 @@ beforeAll(async () => {
   const keyPair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
   signingKey = keyPair.privateKey;
   const publicJwk = { ...(await exportJWK(keyPair.publicKey)), kid: "test-key", alg: "EdDSA" };
+  sharedPublicJwk = publicJwk;
   upstream = createServer((request, response) => {
     let body = "";
     request.on("data", (chunk: Buffer) => { body += chunk.toString(); });
@@ -119,6 +123,51 @@ describe("gateway upstream dispatch", () => {
   });
 });
 
+describe("guest browsing", () => {
+  it("serves public GET routes without a token and marks the viewer anonymous", async () => {
+    const response = await fetch(`${gatewayUrl}/api/v1/lives`, { headers: { "x-device-id": "device-guest-0001" } });
+    expect(response.status).toBe(200);
+    expect(recorded.at(-1)?.headers["x-zudomart-viewer"]).toBe("anonymous");
+    expect(recorded.at(-1)?.headers["x-device-id"]).toBe("device-guest-0001");
+    expect(recorded.at(-1)?.headers["x-zudomart-account-id"]).toBeUndefined();
+  });
+
+  it("answers 401 UNAUTHENTICATED on private routes and for guest writes to live rooms", async () => {
+    const before = recorded.length;
+    const wallet = await fetch(`${gatewayUrl}/api/v1/wallets/me`);
+    const gift = await fetch(`${gatewayUrl}/api/v1/lives/l1/gifts`, { method: "POST", body: "{}" });
+    expect(wallet.status).toBe(401);
+    expect(await wallet.json()).toMatchObject({ code: "UNAUTHENTICATED" });
+    expect(gift.status).toBe(401);
+    expect(recorded.length).toBe(before);
+  });
+
+  it("rate limits anonymous callers per ip and device with a stricter limit on feeds", async () => {
+    const statuses: number[] = [];
+    for (let attempt = 0; attempt < 5; attempt += 1) statuses.push((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-limited-1" } })).status);
+    expect(statuses.slice(0, 3)).toEqual([200, 200, 200]);
+    const refused = await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-limited-1" } });
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get("retry-after")).toBeTruthy();
+    expect((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-other-2" } })).status).toBe(200);
+  });
+
+  it("does not rate limit signed-in callers with the guest limiter", async () => {
+    const token = await signAccessToken("5m");
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      expect((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { authorization: `Bearer ${token}` } })).status).toBe(200);
+    }
+  });
+
+  it("sends chat report submissions to goTrust and content reports to social", async () => {
+    await fetch(`${gatewayUrl}/api/v1/reports/me`, { headers: { authorization: `Bearer ${await signAccessToken("5m")}` } });
+    expect(recorded.at(-1)?.url).toBe("/api/v1/reports/me");
+    const headers = { authorization: `Bearer ${await signAccessToken("5m")}`, "content-type": "application/json" };
+    expect((await fetch(`${gatewayUrl}/api/v1/reports`, { method: "POST", headers, body: JSON.stringify({ targetType: "conversation", conversationId: "c1" }) })).status).toBe(200);
+    expect((await fetch(`${gatewayUrl}/api/v1/reports`, { method: "POST", headers, body: JSON.stringify({ targetType: "post", targetId: "p1" }) })).status).toBe(200);
+  });
+});
+
 describe("gateway upstream failures", () => {
   it("answers 502 when the upstream is unreachable", async () => {
     const unreachable = createGatewayServer({
@@ -130,5 +179,41 @@ describe("gateway upstream failures", () => {
     await unreachable.stop();
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({ code: "UPSTREAM_UNAVAILABLE" });
+  });
+});
+
+describe("policy acceptance gate", () => {
+  it("answers 428 for writes until the policies are accepted, and exempts auth, legal, export and deletion", async () => {
+    const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
+    const gated = createGatewayServer({
+      config: { ...buildConfig(upstreamUrl), port: 0 },
+      verifier: new AccessTokenVerifier(buildConfig(upstreamUrl).accessToken, createLocalJWKSet({ keys: [sharedPublicJwk] })),
+      policyGate: { readGate: async () => ({ acceptanceRequired: true, documentKeys: ["terms"] }) },
+    });
+    await gated.start();
+    const base = `http://127.0.0.1:${gated.address?.port}`;
+    const headers = { authorization: `Bearer ${await signAccessToken("5m")}`, "content-type": "application/json" };
+    const blocked = await fetch(`${base}/api/v1/posts`, { method: "POST", headers, body: "{}" });
+    expect(blocked.status).toBe(428);
+    expect(await blocked.json()).toMatchObject({ code: "POLICY_ACCEPTANCE_REQUIRED", documentKeys: ["terms"] });
+    expect((await fetch(`${base}/api/v1/feeds/popular`, { headers })).status).toBe(200);
+    expect((await fetch(`${base}/api/v1/users/me/deletion-request`, { method: "POST", headers, body: "{}" })).status).toBe(200);
+    expect((await fetch(`${base}/api/v1/users/me/data-exports`, { method: "POST", headers, body: "{}" })).status).toBe(200);
+    expect((await fetch(`${base}/api/v1/users/me/consents`, { method: "PUT", headers, body: "{}" })).status).toBe(200);
+    expect((await fetch(`${base}/api/v1/auth/logout`, { method: "POST", headers, body: "{}" })).status).toBe(200);
+    await gated.stop();
+  });
+
+  it("fails open when the policy lookup is unavailable", async () => {
+    const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
+    const gated = createGatewayServer({
+      config: { ...buildConfig(upstreamUrl), port: 0 },
+      verifier: new AccessTokenVerifier(buildConfig(upstreamUrl).accessToken, createLocalJWKSet({ keys: [sharedPublicJwk] })),
+      policyGate: { readGate: async () => { throw new Error("down"); } },
+    });
+    await gated.start();
+    const response = await fetch(`http://127.0.0.1:${gated.address?.port}/api/v1/posts`, { method: "POST", headers: { authorization: `Bearer ${await signAccessToken("5m")}`, "content-type": "application/json" }, body: "{}" });
+    await gated.stop();
+    expect(response.status).toBe(200);
   });
 });

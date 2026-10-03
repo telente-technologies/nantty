@@ -64,17 +64,22 @@ describe("money routes", () => {
     ["GET", "/api/v1/orders//escrow"],
     ["GET", "/api/v1/orders/ord_1/escrow/extra"],
     ["GET", "/api/v1/orders/ord_1/disputes"],
-  ])("%s %s is not routed", (method, path) => {
-    expect(resolveUpstreamRouteForRequest(method, path)).toBeUndefined();
+  ])("%s %s is not routed to go-money", (method, path) => {
+    expect(resolveUpstreamRouteForRequest(method, path)?.upstream).not.toBe("money");
   });
 
   it.each([
-    ["POST", "/webhooks/bachs"],
+    ["POST", "/webhooks/paystack"],
     ["POST", "/webhooks/store-notifications/apple_iap"],
-    ["POST", "/api/v1/payments/webhooks/bachs"],
-  ])("provider webhooks never pass through the gateway: %s %s", (method, path) => {
+  ])("provider webhooks go raw to go-money only: %s %s", (method, path) => {
     const route = resolveUpstreamRouteForRequest(method, path);
-    expect(route === undefined || route.authentication === "required").toBe(true);
+    expect(route?.upstream).toBe("money");
+    expect(route?.rawBodyPassthrough).toBe(true);
+  });
+
+  it("does not route webhooks over GET or the legacy payments path without authentication", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/webhooks/paystack")).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/payments/webhooks/paystack")?.authentication).toBe("required");
   });
 });
 
@@ -86,5 +91,46 @@ describe("admin escrow routes", () => {
     const route = resolveUpstreamRouteForRequest(method, path);
     expect(route?.upstream).toBe("money");
     expect(route?.authentication).toBe("optional");
+  });
+});
+
+describe("social routes", () => {
+  it.each([
+    ["POST", "/api/v1/users/u_1/follow", "required"],
+    ["GET", "/api/v1/users/u_1/followers", "optional"],
+    ["GET", "/api/v1/users/me/follow-requests", "required"],
+    ["GET", "/api/v1/users/me/blocked", "required"],
+    ["GET", "/api/v1/posts/p_1/comments", "optional"],
+    ["GET", "/api/v1/feeds/popular", "optional"],
+    ["GET", "/api/v1/saves/collections", "required"],
+    ["POST", "/api/v1/conversations/c_1/messages", "required"],
+    ["POST", "/api/v1/reports", "required"],
+  ])("%s %s goes to social (%s authentication)", (method, path, authentication) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("social");
+    expect(route?.authentication).toBe(authentication);
+  });
+
+  it("keeps mention privacy and other user routes on identity", () => {
+    expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/users/me/mention-privacy")?.upstream).toBe("identity");
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/u_1")?.upstream).toBe("identity");
+  });
+});
+
+describe("media routes", () => {
+  it.each([
+    ["POST", "/api/v1/media/uploads"],
+    ["PUT", "/api/v1/media/uploads/up_1/chunks/0"],
+    ["GET", "/api/v1/media/uploads/up_1/chunks/0/url"],
+    ["POST", "/api/v1/media/uploads/up_1/complete"],
+    ["GET", "/api/v1/media/med_1"],
+  ])("%s %s goes to ts.media and requires a token", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("media");
+    expect(route?.authentication).toBe("required");
+  });
+
+  it("never exposes the internal media api", () => {
+    expect(resolveUpstreamRouteForRequest("POST", "/internal/v1/media/intents")).toBeUndefined();
   });
 });
