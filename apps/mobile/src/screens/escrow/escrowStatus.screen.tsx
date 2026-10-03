@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -20,6 +20,8 @@ const STAGES_BUYER_CAN_CONFIRM = new Set(["shipped", "delivered"]);
 const STAGES_BUYER_CAN_DISPUTE = new Set(["seller_preparing", "paid_into_escrow", "shipped", "delivered"]);
 
 export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"EscrowStatus">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { orderId } = route.params;
   const signedInUserId = useAuthStore((state) => state.user?.id);
   const escrowQuery = useEscrowForOrderQuery(orderId);
@@ -97,8 +99,8 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 16 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 16 },
   actions: { gap: 12 },
-});
+}));
