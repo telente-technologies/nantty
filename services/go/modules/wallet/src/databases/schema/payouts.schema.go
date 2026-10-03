@@ -73,5 +73,10 @@ func (Withdrawal) Fields() []ent.Field {
 }
 
 func (Withdrawal) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("reference").Unique(), index.Fields("user_id", "created_at"), index.Fields("status", "created_at")}
+	return []ent.Index{
+		index.Fields("reference").Unique(),
+		index.Fields("user_id", "id").Annotations(entsql.DescColumns("id")),
+		index.Fields("status", "id").Annotations(entsql.DescColumns("id")),
+		index.Fields("created_at").Annotations(entsql.IndexWhere("status = 'queued'")).StorageKey("withdrawal_queued_created_at"),
+	}
 }

@@ -27,6 +27,7 @@ func (CoinPackage) Fields() []ent.Field {
 		field.Int64("coins"),
 		field.Int64("bonus_coins").Default(0),
 		field.Enum("purchase_channel").Values("web_checkout", "store_iap"),
+		field.Enum("client_platform").Values("web", "ios", "android").Default("web"),
 		field.Bytes("prices").SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.String("store_product_id").MaxLen(200).Default(""),
 		field.Bool("active").Default(true),
@@ -36,7 +37,7 @@ func (CoinPackage) Fields() []ent.Field {
 }
 
 func (CoinPackage) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("purchase_channel", "active", "sort_order"), index.Fields("store_product_id")}
+	return []ent.Index{index.Fields("purchase_channel", "active", "sort_order"), index.Fields("client_platform", "active", "sort_order"), index.Fields("store_product_id")}
 }
 
 type CoinPurchase struct {
