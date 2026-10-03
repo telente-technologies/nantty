@@ -14,6 +14,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AdBalanceTopUp is the client for interacting with the AdBalanceTopUp builders.
+	AdBalanceTopUp *AdBalanceTopUpClient
+	// AdSpendDebit is the client for interacting with the AdSpendDebit builders.
+	AdSpendDebit *AdSpendDebitClient
 	// CoinConversion is the client for interacting with the CoinConversion builders.
 	CoinConversion *CoinConversionClient
 	// CoinPackage is the client for interacting with the CoinPackage builders.
@@ -28,6 +32,8 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
 	PayoutAccount *PayoutAccountClient
+	// SellerReserveFlag is the client for interacting with the SellerReserveFlag builders.
+	SellerReserveFlag *SellerReserveFlagClient
 	// WalletRiskFlag is the client for interacting with the WalletRiskFlag builders.
 	WalletRiskFlag *WalletRiskFlagClient
 	// Withdrawal is the client for interacting with the Withdrawal builders.
@@ -163,6 +169,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AdBalanceTopUp = NewAdBalanceTopUpClient(tx.config)
+	tx.AdSpendDebit = NewAdSpendDebitClient(tx.config)
 	tx.CoinConversion = NewCoinConversionClient(tx.config)
 	tx.CoinPackage = NewCoinPackageClient(tx.config)
 	tx.CoinPurchase = NewCoinPurchaseClient(tx.config)
@@ -170,6 +178,7 @@ func (tx *Tx) init() {
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PayoutAccount = NewPayoutAccountClient(tx.config)
+	tx.SellerReserveFlag = NewSellerReserveFlagClient(tx.config)
 	tx.WalletRiskFlag = NewWalletRiskFlagClient(tx.config)
 	tx.Withdrawal = NewWithdrawalClient(tx.config)
 }
@@ -181,7 +190,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: CoinConversion.QueryXXX(), the query will be executed
+// applies a query, for example: AdBalanceTopUp.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
