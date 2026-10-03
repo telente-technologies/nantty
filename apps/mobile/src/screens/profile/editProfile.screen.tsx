@@ -13,7 +13,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { mediaService } from "@/services/media.service";
+import { uploadProfileImageAndReturnMediaId } from "@/services/profileImageUpload.service";
 
 const KEYBOARD_BOTTOM_OFFSET = 24;
 
@@ -39,9 +39,9 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
     setError(null);
     setUploading(true);
     try {
-      const bannerUrl = banner ? await mediaService.uploadLocalImageAndReturnPublicUrl(banner.uri, banner.contentType, "banner") : undefined;
-      const avatarUrl = avatar ? await mediaService.uploadLocalImageAndReturnPublicUrl(avatar.uri, avatar.contentType, "avatar") : undefined;
-      await saveProfile.mutateAsync({ name: name.trim(), bio: bio.trim(), ...(bannerUrl ? { bannerUrl } : {}), ...(avatarUrl ? { avatarUrl } : {}) });
+      const bannerMediaId = banner ? await uploadProfileImageAndReturnMediaId(banner.uri, banner.contentType, "banner") : undefined;
+      const avatarMediaId = avatar ? await uploadProfileImageAndReturnMediaId(avatar.uri, avatar.contentType, "avatar") : undefined;
+      await saveProfile.mutateAsync({ name: name.trim(), bio: bio.trim(), ...(bannerMediaId ? { bannerMediaId } : {}), ...(avatarMediaId ? { avatarMediaId } : {}) });
       navigation.goBack();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't save your profile");

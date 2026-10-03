@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNudge";
 import { InventoryCard } from "@/components/seller/inventoryCard";
+import { PayoutSetupCard } from "@/components/payoutOnboarding/payoutSetupCard";
 import { PeriodChips } from "@/components/seller/periodChips";
 import { SalesChart } from "@/components/seller/salesChart";
 import { SellerWebAppNote } from "@/components/seller/sellerWebAppNote";
@@ -59,6 +60,8 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
               {dashboard.orders} {dashboard.orders === 1 ? "order" : "orders"}
             </Text>
           </View>
+
+          <PayoutSetupCard context="seller" />
 
           <View style={styles.quickLinks}>
             <Button variant="subtle" title="Orders" height={38} style={styles.quickLink} onPress={() => navigation.navigate("SellerOrders")} />

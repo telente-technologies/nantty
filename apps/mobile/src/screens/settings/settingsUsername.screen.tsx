@@ -14,6 +14,7 @@ import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/users.service";
 import { useAuthStore } from "@/store/auth.store";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 const POLICY_NOTES = [
   "Some usernames are reserved for Zudomart and can't be used.",
@@ -71,10 +72,10 @@ export function SettingsUsernameScreen({ navigation }: MainScreenProps<"Settings
       <Button title="Save username" disabled={!canChange || !isAvailable} loading={changeUsername.isPending} onPress={() => changeUsername.mutate()} />
       <View style={styles.card}>
         {(policy.data?.rules ?? []).map((rule) => (
-          <Text key={rule} size={12} lineHeight={16.8} color={colors.textMuted}>• {rule}</Text>
+          <BulletLine key={rule} size={12} lineHeight={16.8}>{rule}</BulletLine>
         ))}
         {POLICY_NOTES.map((note) => (
-          <Text key={note} size={12} lineHeight={16.8} color={colors.textMuted}>• {note}</Text>
+          <BulletLine key={note} size={12} lineHeight={16.8}>{note}</BulletLine>
         ))}
       </View>
     </SettingsPage>
