@@ -1,0 +1,70 @@
+import { StyleSheet } from "react-native";
+
+import { Text, type TextProps } from "@/components/ui/text";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { makeThemedStyles, useTheme } from "@/theme";
+import { showToast } from "@/store/toast.store";
+import type { MentionEntity, MentionTargetsByUserId } from "@/types/mention.type";
+import { isAllMention, splitTextByMentions } from "@/utils/mentions.util";
+
+import { useMentionTargets } from "./mentionTargets.hook";
+
+export interface MentionTextProps extends Omit<TextProps, "children"> {
+  readonly text: string;
+  readonly mentions?: readonly MentionEntity[];
+  readonly mentionColor?: string;
+}
+
+const USER_NOT_FOUND_MESSAGE = "User not found";
+const NON_BREAKING_SPACE = " ";
+
+const describeSegment = (segmentText: string, mention: MentionEntity, targets: MentionTargetsByUserId | undefined) => {
+  if (isAllMention(mention)) return { kind: "everyone" as const, label: `${NON_BREAKING_SPACE}${segmentText}${NON_BREAKING_SPACE}` };
+  const target = targets?.[mention.userId];
+  if (target?.status === "suspended") return { kind: "plain" as const, label: segmentText };
+  return { kind: "user" as const, label: target?.username ? `@${target.username}` : segmentText };
+};
+
+export function MentionText({ text, mentions, mentionColor, ...textProps }: MentionTextProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const openUserProfile = useOpenUserProfile();
+  const targets = useMentionTargets(mentions);
+  if (!mentions?.length) return <Text {...textProps}>{text}</Text>;
+  const highlightColor = mentionColor ?? colors.primary;
+
+  const openMention = (mention: MentionEntity) => {
+    if (isAllMention(mention)) return;
+    if (targets?.[mention.userId]?.status === "deleted") showToast(USER_NOT_FOUND_MESSAGE);
+    else openUserProfile(mention.userId);
+  };
+
+  return (
+    <Text {...textProps}>
+      {splitTextByMentions(text, mentions).map((segment, index) => {
+        if (!segment.mention) return segment.text;
+        const description = describeSegment(segment.text, segment.mention, targets);
+        if (description.kind === "plain") return segment.text;
+        const mention = segment.mention;
+        return (
+          <Text
+            key={`${mention.start}_${index}`}
+            {...textProps}
+            weight={600}
+            color={highlightColor}
+            underline={mentionColor !== undefined}
+            style={description.kind === "everyone" ? styles.everyonePill : undefined}
+            accessibilityRole={description.kind === "everyone" ? "text" : "link"}
+            onPress={description.kind === "everyone" ? undefined : () => openMention(mention)}
+          >
+            {description.label}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+}
+
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  everyonePill: { backgroundColor: colors.primaryTint },
+}));
