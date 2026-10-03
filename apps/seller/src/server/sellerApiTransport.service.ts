@@ -1,4 +1,4 @@
-import { isMockBackendEnabled, readSellerApiBaseUrl } from "@/config/sellerEnvironment.config";
+import { shouldUseRealBackend, readSellerApiBaseUrl } from "@/config/sellerEnvironment.config";
 import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
 import type { ApiErrorBody } from "@/types/pagination.type";
 
@@ -71,7 +71,7 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
 
 export async function callSellerBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return isMockBackendEnabled() ? callMockBackend(call, headers) : callRealBackend(call, headers);
+  return shouldUseRealBackend(`/api/v1${call.path}`) ? callRealBackend(call, headers) : callMockBackend(call, headers);
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {
