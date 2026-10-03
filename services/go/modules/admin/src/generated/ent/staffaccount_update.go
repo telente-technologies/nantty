@@ -61,6 +61,32 @@ func (_u *StaffAccountUpdate) SetNillableDisplayName(v *string) *StaffAccountUpd
 	return _u
 }
 
+// SetRole sets the "role" field.
+func (_u *StaffAccountUpdate) SetRole(v staffaccount.Role) *StaffAccountUpdate {
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *StaffAccountUpdate) SetNillableRole(v *staffaccount.Role) *StaffAccountUpdate {
+	if v != nil {
+		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// SetRoleIds sets the "role_ids" field.
+func (_u *StaffAccountUpdate) SetRoleIds(v []string) *StaffAccountUpdate {
+	_u.mutation.SetRoleIds(v)
+	return _u
+}
+
+// AppendRoleIds appends value to the "role_ids" field.
+func (_u *StaffAccountUpdate) AppendRoleIds(v []string) *StaffAccountUpdate {
+	_u.mutation.AppendRoleIds(v)
+	return _u
+}
+
 // SetPermissions sets the "permissions" field.
 func (_u *StaffAccountUpdate) SetPermissions(v []string) *StaffAccountUpdate {
 	_u.mutation.SetPermissions(v)
@@ -198,6 +224,46 @@ func (_u *StaffAccountUpdate) SetNillableLockedUntil(v *time.Time) *StaffAccount
 // ClearLockedUntil clears the value of the "locked_until" field.
 func (_u *StaffAccountUpdate) ClearLockedUntil() *StaffAccountUpdate {
 	_u.mutation.ClearLockedUntil()
+	return _u
+}
+
+// SetApprovedBy sets the "approved_by" field.
+func (_u *StaffAccountUpdate) SetApprovedBy(v uuid.UUID) *StaffAccountUpdate {
+	_u.mutation.SetApprovedBy(v)
+	return _u
+}
+
+// SetNillableApprovedBy sets the "approved_by" field if the given value is not nil.
+func (_u *StaffAccountUpdate) SetNillableApprovedBy(v *uuid.UUID) *StaffAccountUpdate {
+	if v != nil {
+		_u.SetApprovedBy(*v)
+	}
+	return _u
+}
+
+// ClearApprovedBy clears the value of the "approved_by" field.
+func (_u *StaffAccountUpdate) ClearApprovedBy() *StaffAccountUpdate {
+	_u.mutation.ClearApprovedBy()
+	return _u
+}
+
+// SetApprovedAt sets the "approved_at" field.
+func (_u *StaffAccountUpdate) SetApprovedAt(v time.Time) *StaffAccountUpdate {
+	_u.mutation.SetApprovedAt(v)
+	return _u
+}
+
+// SetNillableApprovedAt sets the "approved_at" field if the given value is not nil.
+func (_u *StaffAccountUpdate) SetNillableApprovedAt(v *time.Time) *StaffAccountUpdate {
+	if v != nil {
+		_u.SetApprovedAt(*v)
+	}
+	return _u
+}
+
+// ClearApprovedAt clears the value of the "approved_at" field.
+func (_u *StaffAccountUpdate) ClearApprovedAt() *StaffAccountUpdate {
+	_u.mutation.ClearApprovedAt()
 	return _u
 }
 
@@ -368,6 +434,11 @@ func (_u *StaffAccountUpdate) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.display_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Role(); ok {
+		if err := staffaccount.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.role": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := staffaccount.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.status": %w`, err)}
@@ -398,6 +469,17 @@ func (_u *StaffAccountUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(staffaccount.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(staffaccount.FieldRole, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RoleIds(); ok {
+		_spec.SetField(staffaccount.FieldRoleIds, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoleIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldRoleIds, value)
+		})
 	}
 	if value, ok := _u.mutation.Permissions(); ok {
 		_spec.SetField(staffaccount.FieldPermissions, field.TypeJSON, value)
@@ -448,6 +530,18 @@ func (_u *StaffAccountUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.CreatedByCleared() {
 		_spec.ClearField(staffaccount.FieldCreatedBy, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.ApprovedBy(); ok {
+		_spec.SetField(staffaccount.FieldApprovedBy, field.TypeUUID, value)
+	}
+	if _u.mutation.ApprovedByCleared() {
+		_spec.ClearField(staffaccount.FieldApprovedBy, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.ApprovedAt(); ok {
+		_spec.SetField(staffaccount.FieldApprovedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ApprovedAtCleared() {
+		_spec.ClearField(staffaccount.FieldApprovedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(staffaccount.FieldUpdatedAt, field.TypeTime, value)
@@ -635,6 +729,32 @@ func (_u *StaffAccountUpdateOne) SetNillableDisplayName(v *string) *StaffAccount
 	return _u
 }
 
+// SetRole sets the "role" field.
+func (_u *StaffAccountUpdateOne) SetRole(v staffaccount.Role) *StaffAccountUpdateOne {
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *StaffAccountUpdateOne) SetNillableRole(v *staffaccount.Role) *StaffAccountUpdateOne {
+	if v != nil {
+		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// SetRoleIds sets the "role_ids" field.
+func (_u *StaffAccountUpdateOne) SetRoleIds(v []string) *StaffAccountUpdateOne {
+	_u.mutation.SetRoleIds(v)
+	return _u
+}
+
+// AppendRoleIds appends value to the "role_ids" field.
+func (_u *StaffAccountUpdateOne) AppendRoleIds(v []string) *StaffAccountUpdateOne {
+	_u.mutation.AppendRoleIds(v)
+	return _u
+}
+
 // SetPermissions sets the "permissions" field.
 func (_u *StaffAccountUpdateOne) SetPermissions(v []string) *StaffAccountUpdateOne {
 	_u.mutation.SetPermissions(v)
@@ -772,6 +892,46 @@ func (_u *StaffAccountUpdateOne) SetNillableLockedUntil(v *time.Time) *StaffAcco
 // ClearLockedUntil clears the value of the "locked_until" field.
 func (_u *StaffAccountUpdateOne) ClearLockedUntil() *StaffAccountUpdateOne {
 	_u.mutation.ClearLockedUntil()
+	return _u
+}
+
+// SetApprovedBy sets the "approved_by" field.
+func (_u *StaffAccountUpdateOne) SetApprovedBy(v uuid.UUID) *StaffAccountUpdateOne {
+	_u.mutation.SetApprovedBy(v)
+	return _u
+}
+
+// SetNillableApprovedBy sets the "approved_by" field if the given value is not nil.
+func (_u *StaffAccountUpdateOne) SetNillableApprovedBy(v *uuid.UUID) *StaffAccountUpdateOne {
+	if v != nil {
+		_u.SetApprovedBy(*v)
+	}
+	return _u
+}
+
+// ClearApprovedBy clears the value of the "approved_by" field.
+func (_u *StaffAccountUpdateOne) ClearApprovedBy() *StaffAccountUpdateOne {
+	_u.mutation.ClearApprovedBy()
+	return _u
+}
+
+// SetApprovedAt sets the "approved_at" field.
+func (_u *StaffAccountUpdateOne) SetApprovedAt(v time.Time) *StaffAccountUpdateOne {
+	_u.mutation.SetApprovedAt(v)
+	return _u
+}
+
+// SetNillableApprovedAt sets the "approved_at" field if the given value is not nil.
+func (_u *StaffAccountUpdateOne) SetNillableApprovedAt(v *time.Time) *StaffAccountUpdateOne {
+	if v != nil {
+		_u.SetApprovedAt(*v)
+	}
+	return _u
+}
+
+// ClearApprovedAt clears the value of the "approved_at" field.
+func (_u *StaffAccountUpdateOne) ClearApprovedAt() *StaffAccountUpdateOne {
+	_u.mutation.ClearApprovedAt()
 	return _u
 }
 
@@ -955,6 +1115,11 @@ func (_u *StaffAccountUpdateOne) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.display_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Role(); ok {
+		if err := staffaccount.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.role": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := staffaccount.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.status": %w`, err)}
@@ -1002,6 +1167,17 @@ func (_u *StaffAccountUpdateOne) sqlSave(ctx context.Context) (_node *StaffAccou
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(staffaccount.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(staffaccount.FieldRole, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RoleIds(); ok {
+		_spec.SetField(staffaccount.FieldRoleIds, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoleIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldRoleIds, value)
+		})
 	}
 	if value, ok := _u.mutation.Permissions(); ok {
 		_spec.SetField(staffaccount.FieldPermissions, field.TypeJSON, value)
@@ -1052,6 +1228,18 @@ func (_u *StaffAccountUpdateOne) sqlSave(ctx context.Context) (_node *StaffAccou
 	}
 	if _u.mutation.CreatedByCleared() {
 		_spec.ClearField(staffaccount.FieldCreatedBy, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.ApprovedBy(); ok {
+		_spec.SetField(staffaccount.FieldApprovedBy, field.TypeUUID, value)
+	}
+	if _u.mutation.ApprovedByCleared() {
+		_spec.ClearField(staffaccount.FieldApprovedBy, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.ApprovedAt(); ok {
+		_spec.SetField(staffaccount.FieldApprovedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ApprovedAtCleared() {
+		_spec.ClearField(staffaccount.FieldApprovedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(staffaccount.FieldUpdatedAt, field.TypeTime, value)

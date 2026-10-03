@@ -28,6 +28,8 @@ type Tx struct {
 	StaffInvitation *StaffInvitationClient
 	// StaffLoginChallenge is the client for interacting with the StaffLoginChallenge builders.
 	StaffLoginChallenge *StaffLoginChallengeClient
+	// StaffRole is the client for interacting with the StaffRole builders.
+	StaffRole *StaffRoleClient
 	// StaffSession is the client for interacting with the StaffSession builders.
 	StaffSession *StaffSessionClient
 
@@ -168,6 +170,7 @@ func (tx *Tx) init() {
 	tx.StaffAccount = NewStaffAccountClient(tx.config)
 	tx.StaffInvitation = NewStaffInvitationClient(tx.config)
 	tx.StaffLoginChallenge = NewStaffLoginChallengeClient(tx.config)
+	tx.StaffRole = NewStaffRoleClient(tx.config)
 	tx.StaffSession = NewStaffSessionClient(tx.config)
 }
 
