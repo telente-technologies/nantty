@@ -38,7 +38,7 @@ const FILTERS: readonly { readonly key: OrderFilterKey; readonly label: string }
 ];
 
 const describeOrderForList = (order: Order) =>
-  `${order.store.name} • ${order.reference} • ${formatTimeSincePosted(order.createdAt)} ago`;
+  `${order.store.name} · ${order.reference} · ${formatTimeSincePosted(order.createdAt)} ago`;
 
 export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
   const { colors } = useTheme();

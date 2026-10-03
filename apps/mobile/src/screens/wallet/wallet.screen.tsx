@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { BuyCoinsSheet } from "@/components/coins/buyCoinsSheet";
 import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
+import { PayoutSetupCard } from "@/components/payoutOnboarding/payoutSetupCard";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -35,6 +36,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => queryClient.invalidateQueries({ queryKey: ["wallet"] })} tintColor={colors.primary} />}
       >
+        <PayoutSetupCard />
         <WalletBalanceCards wallet={wallet} />
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>
           Pending money is held in escrow until buyers confirm delivery (or 3 days after delivery). It then moves to your available balance.

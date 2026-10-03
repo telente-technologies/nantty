@@ -9,6 +9,7 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { paymentsService } from "@/services/payments.service";
+import { saveCardOnThisDevice } from "@/utils/savedCard.util";
 
 type PaymentStatus = "opening" | "checking" | "waiting" | "failed";
 
@@ -28,6 +29,7 @@ export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">)
       try {
         const result = await paymentsService.verifyOrderPayment(orderId);
         if (result.status === "paid") {
+          if (result.savedCard) await saveCardOnThisDevice(result.savedCard).catch(() => undefined);
           navigation.replace("OrderSuccess", { orderId });
           return;
         }
@@ -45,7 +47,7 @@ export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">)
 
   const openCheckoutThenVerify = useCallback(async () => {
     if (!authorizationUrl) {
-      setStatus("waiting");
+      await verifyWithServerUntilSettled();
       return;
     }
     setStatus("opening");
@@ -66,12 +68,12 @@ export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">)
       <View style={styles.body}>
         {busy ? <ActivityIndicator color={colors.primary} /> : <Shield24Icon color={status === "failed" ? colors.error : colors.primary} />}
         <Text size={16} weight={500} lineHeight={19.2} align="center" accessibilityRole="header">
-          {status === "failed" ? "Payment didn't go through" : status === "checking" ? "Confirming your payment…" : status === "opening" ? "Opening secure checkout…" : "Waiting for your payment"}
+          {status === "failed" ? "Payment didn't go through" : status === "checking" ? "Confirming payment…" : status === "opening" ? "Opening secure payment…" : "Waiting for your payment"}
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textSubtle} align="center">
           {status === "failed"
             ? "No money was taken. You can try again or choose another method."
-            : "Your money goes into Zudomart escrow, not to the seller. We confirm every payment with the provider before your order is placed."}
+            : "Your money goes into Zudomart escrow, not to the seller. We confirm every payment on our servers before your order is placed."}
         </Text>
       </View>
       <View style={styles.footer}>
