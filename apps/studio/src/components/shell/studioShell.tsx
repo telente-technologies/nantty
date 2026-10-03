@@ -46,6 +46,10 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
         <Link href="/lives" className={styles.brand} aria-label="Zudomart Studio home">
           <ZudomartWordmark productLabel="Studio" />
         </Link>
+        <nav className={styles.navLinks} aria-label="Studio sections">
+          <Link href="/lives" className={styles.navLink}>Lives</Link>
+          <Link href="/earnings" className={styles.navLink}>Earnings</Link>
+        </nav>
         <div className={styles.account}>
           <ThemeSwitcher iconOnly className={styles.themeSwitcher} />
           <span className={styles.avatar}>
