@@ -1,10 +1,13 @@
 package src
 
 import (
+	"google.golang.org/grpc"
+
 	"context"
 	"log/slog"
 	"net/http"
 	"time"
+	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
 	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	adbalancecontrollers "zudomart/modules/wallet/src/modules/adBalances/controllers"
 	adbalancedtos "zudomart/modules/wallet/src/modules/adBalances/dtos"
@@ -44,7 +47,16 @@ func NewWalletModule(ctx context.Context, dependencies servicemodule.Dependencie
 	if err != nil {
 		return nil, err
 	}
-	return StartWalletModuleWithSettings(ctx, settings, dependencies, loaders.MoneyModuleOverrides{}, payments)
+	module, err := StartWalletModuleWithSettings(ctx, settings, dependencies, loaders.MoneyModuleOverrides{}, payments)
+	if err != nil {
+		return nil, err
+	}
+	loaders.RegisterMoneyGrpcService(module.RegisterGrpcServices)
+	return module, nil
+}
+
+func (module *Module) RegisterGrpcServices(server *grpc.Server) {
+	moneyv1.RegisterAdsMoneyServiceServer(server, adbalancecontrollers.AdsMoneyGrpcController{Balances: module.AdBalances, Logger: module.Coins.Container.Resources.Logger})
 }
 
 func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletSettings, dependencies servicemodule.Dependencies, overrides loaders.MoneyModuleOverrides, payments *paymentservices.PaymentGateway) (*Module, error) {
