@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -11,6 +12,7 @@ import { MapPinIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
 import { ordersService } from "@/services/orders.service";
+import { emailVerificationService } from "@/services/webActions.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { CheckoutResult, PaymentInitialization, PaymentProvider } from "@/types/commerce.type";
@@ -24,6 +26,7 @@ const providers: readonly { readonly id: PaymentProvider; readonly name: string;
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const accountEmailQuery = useQuery({ queryKey: ["account", "email"], queryFn: emailVerificationService.fetchAccountEmailStatus, retry: false });
   const cartQuery = useQuery({ queryKey: ["cart"], queryFn: cartsService.fetchMyCart, retry: false });
   const addressesQuery = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses, retry: false });
 
@@ -39,7 +42,7 @@ export default function CheckoutPage() {
       if (!addressId) throw new Error("Choose a shipping address first.");
       const result = await sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", {
         method: "POST",
-        body: { addressId, redeemLoyaltyPoints: false },
+        body: { addressId },
         idempotencyKey: checkoutKey.current,
       });
       const payment = await sendRequestToWebappServer<PaymentInitialization>("/api/v1/payments/initialize", {
@@ -169,14 +172,26 @@ export default function CheckoutPage() {
             <span>Shipping</span>
             <span>{cart.shipping.amountMinor > 0 ? formatMoneyForDisplay(cart.shipping) : "Calculated at checkout"}</span>
           </div>
+          {cart.storeCredit.amountMinor > 0 ? (
+            <div className={styles.moneyRow}>
+              <span>Store credit</span>
+              <span>−{formatMoneyForDisplay(cart.storeCredit)}</span>
+            </div>
+          ) : null}
           <div className={styles.divider} />
           <div className={styles.moneyRowTotal}>
             <span>Total</span>
             <span>{formatMoneyForDisplay(cart.total)}</span>
           </div>
-          <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId} onClick={() => placeOrder.mutate()}>
-            {addressId ? `Pay with ${providers.find((option) => option.id === provider)?.name}` : "Choose an address"}
-          </Button>
+          {accountEmailQuery.data?.emailVerified === false ? (
+            <p className={styles.verifyEmailNotice} role="status">
+              Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
+            </p>
+          ) : (
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId} onClick={() => placeOrder.mutate()}>
+              {addressId ? `Pay with ${providers.find((option) => option.id === provider)?.name}` : "Choose an address"}
+            </Button>
+          )}
           <p className={styles.terms}>Payment is held in escrow until you confirm delivery.</p>
         </aside>
       </div>

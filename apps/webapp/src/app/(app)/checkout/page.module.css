@@ -198,3 +198,16 @@
     top: calc(var(--space-5) + 64px);
   }
 }
+
+.verifyEmailNotice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-medium);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.verifyEmailNotice a {
+  text-decoration: underline;
+}
