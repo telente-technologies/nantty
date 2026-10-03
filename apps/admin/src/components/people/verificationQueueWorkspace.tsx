@@ -52,7 +52,7 @@ export function VerificationQueueWorkspace() {
 
   return (
     <>
-      <PageHeader area="People" title="Verification reviews" description="Blue is personal, Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
+      <PageHeader area="People" title="Verification reviews" description="Blue is personal (including creator accounts), Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
       <LinkTabs label="Verification views" items={[{ href: "/verification", label: "Verification requests" }, { href: "/verification/business-documents", label: "Business documents" }, { href: "/verification/black", label: "Black applications" }]} />
       <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setPage(1); }} />
       <Toolbar>
