@@ -13,6 +13,12 @@ if config_env() != :test do
 end
 
 if config_env() != :test do
+  config :realtime, :live_internal,
+    url: System.get_env("LIVE_INTERNAL_URL", "http://localhost:8110"),
+    token: System.get_env("LIVE_INTERNAL_API_TOKEN", "")
+end
+
+if config_env() != :test do
   local_rabbitmq_url = "amqp://realtime:realtime-local-only@localhost:5672/zudomart"
 
   config :realtime, :amqp,

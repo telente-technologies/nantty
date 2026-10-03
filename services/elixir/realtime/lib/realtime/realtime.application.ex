@@ -10,6 +10,7 @@ defmodule Realtime.Application do
         {DNSCluster, query: Application.get_env(:realtime, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: Realtime.PubSub},
         Realtime.Presence,
+        Realtime.Presence.LivePresenceForwarder,
         {Realtime.Auth.JwksKeyCache, Application.fetch_env!(:realtime, :access_token)},
         Realtime.Events.Throttle,
         RealtimeWeb.Endpoint
