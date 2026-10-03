@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { connection } from "next/server";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
+
+import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
+import { buildAdminSessionViewFromCookies } from "@/server/adminSessionView.service";
 
 import { adminProductName } from "@/config/siteMetadata.config";
 
@@ -28,9 +32,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   await connection();
+  const isSignedIn = buildAdminSessionViewFromCookies(await cookies()) !== null;
   return (
     <html lang="en-NG" className={`${interFont.variable} ${monoFont.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ConsentBannerHost isSignedIn={isSignedIn} />
+      </body>
     </html>
   );
 }
