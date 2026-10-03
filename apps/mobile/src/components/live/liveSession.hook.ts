@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { liveService } from "@/services/live.service";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function useLiveSessionWithActions(liveId: string, hasJoined: boolean) {
   const queryClient = useQueryClient();
@@ -20,11 +21,12 @@ export function useLiveSessionWithActions(liveId: string, hasJoined: boolean) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["live-comments", liveId] }),
   });
 
-  const followHost = () => {
-    if (!session.data) return;
-    setIsFollowingHost(true);
-    liveService.followLiveHost(session.data.host.id).catch(() => setIsFollowingHost(false));
-  };
+  const followHost = () =>
+    requireAuthThen(() => {
+      if (!session.data) return;
+      setIsFollowingHost(true);
+      liveService.followLiveHost(session.data.host.id).catch(() => setIsFollowingHost(false));
+    }, undefined, "follow creators");
 
   return {
     session,
@@ -32,6 +34,6 @@ export function useLiveSessionWithActions(liveId: string, hasJoined: boolean) {
     sendComment,
     followHost,
     isFollowingHost: isFollowingHost ?? session.data?.isFollowingHost ?? false,
-    sendReaction: (emoji: string) => liveService.sendReactionToLive(liveId, emoji).catch(() => undefined),
+    sendReaction: (emoji: string) => requireAuthThen(() => liveService.sendReactionToLive(liveId, emoji).then(() => undefined, () => undefined), undefined, "react to lives"),
   };
 }
