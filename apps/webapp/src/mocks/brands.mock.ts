@@ -1,4 +1,5 @@
 import { ApiError } from "@/errors/api.error";
+import { resolveMockCreatorStatusForSignedInUser } from "./creators.mock";
 import type { ActingProfile, BrandProducts, NewBrandInput } from "@/types/brand.type";
 
 import { BRAND_ID_BY_PRODUCT_KEY, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
@@ -19,7 +20,7 @@ const findBrandOrThrow = (brandId: string) => {
 
 function listProfilesOfSignedInUser(): ActingProfile[] {
   const user = getSignedInMockUser();
-  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: user.verification ?? null };
+  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: user.verification ?? null, creatorStatus: resolveMockCreatorStatusForSignedInUser().status };
   const store = user.storeId ? findDirectoryStoreById(user.storeId) : null;
   const storeProfile: ActingProfile[] = store
     ? [{ kind: "store", id: store.id, name: store.name, handle: store.handle, avatarUrl: user.avatarUrl, verification: user.verification ?? null }]

@@ -5,6 +5,7 @@ import type { User } from "@/types";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
 import { listPostsByAuthor, mockPostsState, withCurrentProductPrices } from "./postCatalog.mock";
+import { isMockEmailVerifiedForUser } from "./webActions.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { blockedUserIds, followedUserIds, followerUserIds } from "./socialGraph.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
@@ -19,7 +20,7 @@ export const applyProfileEditForSignedInUser = (patch: Partial<User>) => {
 
 export const signedInProfile = (): User => {
   const base = getSignedInMockUser();
-  return { ...base, ...profileEditsByUserId.get(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
+  return { ...base, ...profileEditsByUserId.get(base.id), emailVerified: isMockEmailVerifiedForUser(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
 };
 
 const toConnectionEntry = (user: User): ConnectionEntry => ({ ...summariseUser(user), isFollowing: followedUserIds.has(user.id) });
