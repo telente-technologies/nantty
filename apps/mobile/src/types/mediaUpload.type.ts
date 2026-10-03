@@ -9,6 +9,7 @@ export type MediaUploadPurpose =
   | "product"
   | "chat"
   | "voice"
+  | "document"
   | "dispute_evidence"
   | "identity_document"
   | "verification_document";
@@ -25,8 +26,11 @@ export interface MediaVariant {
 
 export interface MediaAsset {
   readonly id: ID;
-  readonly type: "image" | "video" | "audio";
+  readonly type: "image" | "video" | "audio" | "document";
   readonly status: "processing" | "ready" | "failed";
+  readonly purpose?: MediaUploadPurpose;
+  readonly pageCount?: number;
+  readonly failureReason?: string;
   readonly width: number;
   readonly height: number;
   readonly durationSeconds?: number;
@@ -46,6 +50,10 @@ export interface CreateUploadSessionRequest {
 
 export interface UploadSession {
   readonly uploadId: ID;
+  readonly mediaId: ID;
+  readonly mode?: UploadMode;
+  readonly partSizeBytes?: number;
+  readonly partCount?: number;
   readonly chunkSizeBytes: number;
   readonly totalChunks: number;
   readonly uploadedChunks: readonly number[];
@@ -60,4 +68,17 @@ export interface UploadSessionStatus {
 export interface CompletedUpload {
   readonly mediaId: ID;
   readonly status: "processing";
+}
+
+export type UploadMode = "single" | "multipart";
+
+export interface BatchChunkUploadUrls {
+  readonly urls: readonly (ChunkUploadUrl & { readonly chunkIndex: number })[];
+}
+
+export interface ChunkUploadUrl {
+  readonly url: string;
+  readonly method: "PUT";
+  readonly expectedBytes: number;
+  readonly expiresAt: string;
 }
