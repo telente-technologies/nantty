@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { coinsService } from "@/services/coins.service";
 import type { ID, TipTargetType } from "@/types";
@@ -25,6 +25,8 @@ export interface TipTarget {
 }
 
 export function TipSheet({ target, onClose }: { target: TipTarget | null; onClose: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const [selectedPresetCoins, setSelectedPresetCoins] = useState<number | null>(PRESET_TIP_AMOUNTS[1]);
   const [customCoins, setCustomCoins] = useState("");
@@ -114,7 +116,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   presets: { flexDirection: "row", gap: 8 },
   preset: {
@@ -127,4 +129,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   presetSelected: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
-});
+}));

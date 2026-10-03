@@ -1,12 +1,14 @@
 import { Pressable, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useCoinBalance } from "./coinWallet.hook";
 import { CoinAmountWithIcon } from "./coinAmount";
 
 export function CoinBalanceChip({ onPress }: { onPress?: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const balance = useCoinBalance();
   const coins = balance.data?.coins;
   return (
@@ -27,7 +29,7 @@ export function CoinBalanceChip({ onPress }: { onPress?: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   chip: {
     alignSelf: "flex-start",
     height: 28,
@@ -38,4 +40,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-});
+}));

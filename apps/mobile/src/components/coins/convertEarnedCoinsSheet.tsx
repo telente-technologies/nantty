@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { coinsService } from "@/services/coins.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -19,6 +19,7 @@ export interface ConvertEarnedCoinsSheetProps {
 }
 
 export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoinsSheetProps) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [typedCoins, setTypedCoins] = useState("");
   const pendingIdempotencyKey = useRef<string | null>(null);

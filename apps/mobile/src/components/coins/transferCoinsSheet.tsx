@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { coinsService } from "@/services/coins.service";
 import type { UserSummary } from "@/types";
@@ -21,6 +21,8 @@ export interface TransferCoinsSheetProps {
 }
 
 export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoinsSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const [typedCoins, setTypedCoins] = useState("");
   const [isConfirming, setIsConfirming] = useState(false);
@@ -106,7 +108,7 @@ export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoin
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   quote: { gap: 4, padding: 12, borderRadius: 8, backgroundColor: colors.background },
-});
+}));

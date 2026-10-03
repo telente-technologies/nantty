@@ -3,16 +3,17 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { ID } from "@/types";
 import { LockSimpleFill24Icon } from "@/components/icons";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 type NavigationThatCanOpenCreatorSubscribe = {
   navigate: (routeName: "CreatorSubscribe", params: { creatorId: ID }) => void;
 };
 
 export function openCreatorSubscriptionPage(navigation: unknown, creatorId: ID) {
-  (navigation as NavigationThatCanOpenCreatorSubscribe).navigate("CreatorSubscribe", { creatorId });
+  requireAuthThen(() => (navigation as NavigationThatCanOpenCreatorSubscribe).navigate("CreatorSubscribe", { creatorId }), undefined, "subscribe to creators");
 }
 
 export const isContentLockedForViewer = (content: { subscriberOnly?: boolean; viewerHasAccess?: boolean }) =>
@@ -25,6 +26,8 @@ export interface SubscriberOnlyLockProps {
 }
 
 export function SubscriberOnlyLock({ creatorId, creatorName, blurredPreviewUrl }: SubscriberOnlyLockProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   return (
     <View style={styles.cover}>
@@ -50,7 +53,7 @@ export function SubscriberOnlyLock({ creatorId, creatorName, blurredPreviewUrl }
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   cover: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.media,
@@ -60,5 +63,5 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   dim: { ...StyleSheet.absoluteFill, backgroundColor: colors.overlay },
-  button: { height: 36, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primary, justifyContent: "center" },
-});
+  button: { height: 36, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primarySolid, justifyContent: "center" },
+}));

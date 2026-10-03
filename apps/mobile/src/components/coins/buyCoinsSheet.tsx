@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { CoinBalanceChip } from "./coinBalanceChip";
@@ -17,6 +17,8 @@ const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
 };
 
 export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { coinPackages, buyCoinPackage, lastOutcome } = useBuyCoinsWithInAppBrowser();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating>
@@ -65,7 +67,7 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   packageRow: {
     minHeight: 56,
@@ -78,4 +80,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-});
+}));
