@@ -1,12 +1,14 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { cartsService, type AddProductToCartInput } from "@/services/carts.service";
+import { useAuthStore } from "@/store/auth.store";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 
 export const cartQueryKey = ["cart"] as const;
 
 export function useMyCart(addressId: string | null = null) {
-  return useQuery({ queryKey: [...cartQueryKey, addressId], queryFn: () => cartsService.fetchMyCart(addressId), placeholderData: keepPreviousData });
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  return useQuery({ queryKey: [...cartQueryKey, addressId], queryFn: () => cartsService.fetchMyCart(addressId), placeholderData: keepPreviousData, enabled: isSignedIn });
 }
 
 export function useCartActions() {

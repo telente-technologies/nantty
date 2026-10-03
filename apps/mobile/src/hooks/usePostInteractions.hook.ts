@@ -2,6 +2,7 @@ import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { Share } from "react-native";
 
 import { postsService } from "@/services/posts.service";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { Page, Post } from "@/types";
 
 export const feedQueryKeyPrefix = ["feed"] as const;
@@ -17,7 +18,7 @@ export function usePostInteractions() {
     );
   };
 
-  const togglePostLike = async (post: Post) => {
+  const applyPostLikeToggle = async (post: Post) => {
     const likeNow = !post.liked;
     updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, liked: likeNow, likes: p.likes + (likeNow ? 1 : -1) }));
     try {
@@ -27,7 +28,7 @@ export function usePostInteractions() {
     }
   };
 
-  const followPostAuthor = async (post: Post) => {
+  const applyFollowPostAuthor = async (post: Post) => {
     updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, isFollowingAuthor: true }));
     try {
       await postsService.followPostAuthor(post.author.id);
@@ -59,6 +60,9 @@ export function usePostInteractions() {
     const result = await Share.share({ message: `${post.author.name} on Zudomart: https://zudomart.com/p/${post.id}` }).catch(() => null);
     if (result?.action === Share.sharedAction) postsService.recordPostShare(post.id).catch(() => undefined);
   };
+
+  const togglePostLike = (post: Post) => requireAuthThen(() => applyPostLikeToggle(post), undefined, "like posts");
+  const followPostAuthor = (post: Post) => requireAuthThen(() => applyFollowPostAuthor(post), undefined, "follow creators");
 
   return { togglePostLike, followPostAuthor, resharePost, sharePost };
 }
