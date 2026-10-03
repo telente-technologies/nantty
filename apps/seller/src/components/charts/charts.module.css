@@ -3,9 +3,9 @@
   flex-direction: column;
   gap: 8px;
   margin: 0;
-  --chart-series-primary: var(--blue-500);
-  --chart-series-secondary: var(--blue-200);
-  --chart-series-accent: var(--yellow-500);
+  --chart-series-primary: var(--chart-1);
+  --chart-series-secondary: var(--chart-4);
+  --chart-series-accent: var(--chart-2);
 }
 
 .legend {
@@ -63,7 +63,7 @@
 }
 
 .barGroup:focus-visible .hoverBand {
-  stroke: var(--blue-500);
+  stroke: var(--chart-1);
   stroke-width: 2;
 }
 
@@ -82,8 +82,8 @@
   min-width: 170px;
   padding: 8px 10px;
   border-radius: var(--radius-small);
-  background: var(--blue-900);
-  color: #fff;
+  background: var(--deep-surface);
+  color: var(--rail-ink-strong);
   font-size: 12px;
   pointer-events: none;
   box-shadow: var(--shadow-float);

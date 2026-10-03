@@ -1,4 +1,4 @@
-export function Sparkline({ values, label, colorVariable = "--blue-500", width = 96, height = 28 }: { readonly values: readonly number[]; readonly label: string; readonly colorVariable?: string; readonly width?: number; readonly height?: number }) {
+export function Sparkline({ values, label, colorVariable = "--chart-1", width = 96, height = 28 }: { readonly values: readonly number[]; readonly label: string; readonly colorVariable?: string; readonly width?: number; readonly height?: number }) {
   if (values.length < 2) return null;
   const largestValue = Math.max(...values);
   const smallestValue = Math.min(...values);

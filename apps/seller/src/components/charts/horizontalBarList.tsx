@@ -8,7 +8,7 @@ export interface HorizontalBarItem {
   readonly detail?: string;
 }
 
-export function HorizontalBarList({ title, items, colorVariable = "--blue-500", emptyText = "No data for this period." }: { readonly title: string; readonly items: readonly HorizontalBarItem[]; readonly colorVariable?: string; readonly emptyText?: string }) {
+export function HorizontalBarList({ title, items, colorVariable = "--chart-1", emptyText = "No data for this period." }: { readonly title: string; readonly items: readonly HorizontalBarItem[]; readonly colorVariable?: string; readonly emptyText?: string }) {
   const largestValue = Math.max(0, ...items.map((item) => item.value));
   if (items.length === 0) return <p className={styles.empty}>{emptyText}</p>;
   return (
