@@ -23,6 +23,13 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/currencies", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/currency/", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/platform-config/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/gifts", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/lives", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/battles/", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/live/", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/gifts", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/rankings", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/creators/me/analytics/gifts/", upstream: "live", authentication: "required" },
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
 
