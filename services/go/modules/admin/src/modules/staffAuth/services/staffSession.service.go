@@ -8,6 +8,8 @@ import (
 
 	"zudomart/modules/admin/src/container"
 	"zudomart/modules/admin/src/generated/ent"
+	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
 	"zudomart/modules/admin/src/modules/staffAuth/models"
 	"zudomart/modules/admin/src/types"
 	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
@@ -39,14 +41,27 @@ func (service StaffAuthService) StartSessionInTransaction(ctx context.Context, t
 	return created.ID, refreshToken, err
 }
 
-func (service StaffAuthService) BuildSessionResult(staff *ent.StaffAccount, sessionId uuid.UUID, refreshToken string) (models.StaffSessionResult, error) {
+func (service StaffAuthService) BuildSessionResult(ctx context.Context, staff *ent.StaffAccount, sessionId uuid.UUID, refreshToken string) (models.StaffSessionResult, error) {
 	tokens, err := service.Container.Tokens()
 	if err != nil {
 		return models.StaffSessionResult{}, err
 	}
-	accessToken, expiresIn, err := tokens.SignStaffAccessToken(ClaimsForStaff(staff, sessionId))
+	view, err := staffadminservices.BuildSingleStaffView(ctx, service.Container, staff)
 	if err != nil {
 		return models.StaffSessionResult{}, err
 	}
-	return models.StaffSessionResult{AccessToken: accessToken, RefreshToken: refreshToken, ExpiresIn: expiresIn, TokenType: "Bearer", Staff: types.ConvertStaffToView(staff)}, nil
+	displayName := view.Name
+	if displayName == "" {
+		displayName = staff.Email
+	}
+	claims := ClaimsForStaff(staff, sessionId)
+	claims.Roles = staffauth.RolesClaimForNamedStaff(displayName, string(staff.Role), staffauth.ExpandPermissionsWithAliases(view.Permissions))
+	if staff.Role == staffaccount.RoleSuperadmin {
+		claims.Roles = staffauth.RolesClaimForNamedStaff(displayName, string(staff.Role), nil)
+	}
+	accessToken, expiresIn, err := tokens.SignStaffAccessToken(claims)
+	if err != nil {
+		return models.StaffSessionResult{}, err
+	}
+	return models.StaffSessionResult{AccessToken: accessToken, RefreshToken: refreshToken, ExpiresIn: expiresIn, TokenType: "Bearer", Staff: view}, nil
 }

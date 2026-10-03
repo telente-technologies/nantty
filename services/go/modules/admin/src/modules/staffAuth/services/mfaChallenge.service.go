@@ -75,7 +75,7 @@ func (service StaffAuthService) CompleteMfaChallenge(ctx context.Context, challe
 	if rejection != nil {
 		return models.StaffSessionResult{}, rejection
 	}
-	return service.BuildSessionResult(staff, sessionId, refreshToken)
+	return service.BuildSessionResult(ctx, staff, sessionId, refreshToken)
 }
 
 func (service StaffAuthService) registerFailedChallengeAttemptInTransaction(ctx context.Context, tx *ent.Tx, challenge *ent.StaffLoginChallenge, rejection *error) error {
