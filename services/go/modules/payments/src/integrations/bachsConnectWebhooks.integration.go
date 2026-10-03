@@ -110,6 +110,14 @@ type bachsWebhookEnvelope struct {
 		Subscription *struct {
 			SubscriptionId string `json:"subscription_id"`
 		} `json:"subscription"`
+		PaymentMethodId string `json:"payment_method_id"`
+		CardBrand       string `json:"card_brand"`
+		CardLast4       string `json:"card_last4"`
+		CardExpMonth    int    `json:"card_exp_month"`
+		CardExpYear     int    `json:"card_exp_year"`
+		Fingerprint     string `json:"fingerprint"`
+		IsDefault       bool   `json:"is_default"`
+		CustomerId      string `json:"customer_id"`
 	} `json:"data"`
 }
 
@@ -135,7 +143,18 @@ func parseBachsWebhookEnvelope(rawBody []byte) (interfaces.WebhookNotification, 
 		}
 	}
 	currency := strings.ToUpper(data.Currency)
+	notification.Currency, notification.AmountMinor = currency, minorAmount(data.Amount, currency)
 	switch notification.Kind {
+	case interfaces.WebhookKindPaymentMethod:
+		saved := &interfaces.SavedPaymentMethod{
+			PaymentMethodId: data.PaymentMethodId, ProviderCustomerId: data.CustomerId, Brand: data.CardBrand, Last4: data.CardLast4,
+			ExpiryMonth: data.CardExpMonth, ExpiryYear: data.CardExpYear, ProviderFingerprint: data.Fingerprint, IsDefault: data.IsDefault,
+		}
+		if data.Customer != nil && saved.ProviderCustomerId == "" {
+			saved.ProviderCustomerId = data.Customer.CustomerId
+		}
+		notification.SavedPaymentMethod = saved
+		notification.ProviderObjectId = saved.ProviderCustomerId
 	case interfaces.WebhookKindDispute:
 		notification.Dispute = &interfaces.ProviderDispute{
 			ProviderDisputeId: data.DisputeId, ProviderChargeId: notification.ProviderChargeId, ConnectedAccountId: envelope.Account,
@@ -165,6 +184,7 @@ func classifyBachsEvent(eventType string) interfaces.WebhookKind {
 		{"payout.", interfaces.WebhookKindPayout}, {"transfer.", interfaces.WebhookKindTransfer}, {"dispute.", interfaces.WebhookKindDispute},
 		{"account.", interfaces.WebhookKindAccount}, {"capability.", interfaces.WebhookKindCapability},
 		{"customer.subscription.", interfaces.WebhookKindSubscription}, {"invoice.", interfaces.WebhookKindInvoice},
+		{"payment_method.", interfaces.WebhookKindPaymentMethod},
 	}
 	for _, candidate := range prefixes {
 		if strings.HasPrefix(eventType, candidate.prefix) {

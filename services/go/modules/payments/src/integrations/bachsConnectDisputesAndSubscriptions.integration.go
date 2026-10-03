@@ -88,6 +88,9 @@ func (provider *BachsConnectProvider) CreateSubscriptionCheckout(ctx context.Con
 		"success_url":  request.SuccessUrl, "cancel_url": request.CancelUrl, "reference": request.Reference, "metadata": request.Metadata,
 		"payment_method_types": []string{"USD_CARD", "NGN_CARD"},
 	}
+	if request.ProviderCustomerId != "" {
+		body["customer"] = map[string]any{"customer_id": request.ProviderCustomerId}
+	}
 	var response bachsCheckoutSessionResponse
 	if err := provider.http.send(ctx, bachsRequest{method: http.MethodPost, path: "/v1/checkout-sessions", body: body, idempotencyKey: request.IdempotencyKey}, &response); err != nil {
 		return interfaces.ChargeSession{}, err
@@ -100,4 +103,18 @@ func (provider *BachsConnectProvider) CreateSubscriptionCheckout(ctx context.Con
 
 func (provider *BachsConnectProvider) CancelSubscription(ctx context.Context, providerSubscriptionId, idempotencyKey string) error {
 	return provider.http.send(ctx, bachsRequest{method: http.MethodDelete, path: "/v1/subscriptions/" + url.PathEscape(providerSubscriptionId), idempotencyKey: idempotencyKey}, nil)
+}
+
+func (provider *BachsConnectProvider) ScheduleSubscriptionCancellation(ctx context.Context, request interfaces.SubscriptionCancellationRequest) error {
+	body := map[string]any{"cancel_at_period_end": request.AtPeriodEnd, "reason": truncate(request.Reason, 255)}
+	return provider.http.send(ctx, bachsRequest{method: http.MethodDelete, path: "/v1/subscriptions/" + url.PathEscape(request.ProviderSubscriptionId), body: body, idempotencyKey: request.IdempotencyKey}, nil)
+}
+
+func (provider *BachsConnectProvider) ChangeSubscriptionProduct(ctx context.Context, request interfaces.SubscriptionProductChange) error {
+	proration := request.ProrationBehavior
+	if proration == "" {
+		proration = "none"
+	}
+	body := map[string]any{"product_id": request.ProviderProductId, "proration_behavior": proration}
+	return provider.http.send(ctx, bachsRequest{method: http.MethodPatch, path: "/v1/subscriptions/" + url.PathEscape(request.ProviderSubscriptionId), body: body, idempotencyKey: request.IdempotencyKey}, nil)
 }
