@@ -105,6 +105,11 @@ func ProductSummary(v string) predicate.OrderPayable {
 	return predicate.OrderPayable(sql.FieldEQ(FieldProductSummary, v))
 }
 
+// StoreVerified applies equality check predicate on the "store_verified" field. It's identical to StoreVerifiedEQ.
+func StoreVerified(v bool) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldEQ(FieldStoreVerified, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrderPayable {
 	return predicate.OrderPayable(sql.FieldEQ(FieldCreatedAt, v))
@@ -703,6 +708,36 @@ func ProductSummaryEqualFold(v string) predicate.OrderPayable {
 // ProductSummaryContainsFold applies the ContainsFold predicate on the "product_summary" field.
 func ProductSummaryContainsFold(v string) predicate.OrderPayable {
 	return predicate.OrderPayable(sql.FieldContainsFold(FieldProductSummary, v))
+}
+
+// PaymentModeEQ applies the EQ predicate on the "payment_mode" field.
+func PaymentModeEQ(v PaymentMode) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeNEQ applies the NEQ predicate on the "payment_mode" field.
+func PaymentModeNEQ(v PaymentMode) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldNEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeIn applies the In predicate on the "payment_mode" field.
+func PaymentModeIn(vs ...PaymentMode) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldIn(FieldPaymentMode, vs...))
+}
+
+// PaymentModeNotIn applies the NotIn predicate on the "payment_mode" field.
+func PaymentModeNotIn(vs ...PaymentMode) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldNotIn(FieldPaymentMode, vs...))
+}
+
+// StoreVerifiedEQ applies the EQ predicate on the "store_verified" field.
+func StoreVerifiedEQ(v bool) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldEQ(FieldStoreVerified, v))
+}
+
+// StoreVerifiedNEQ applies the NEQ predicate on the "store_verified" field.
+func StoreVerifiedNEQ(v bool) predicate.OrderPayable {
+	return predicate.OrderPayable(sql.FieldNEQ(FieldStoreVerified, v))
 }
 
 // And groups predicates with the AND operator between them.

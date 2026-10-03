@@ -3,6 +3,7 @@
 package orderpayable
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,10 @@ const (
 	FieldCurrency = "currency"
 	// FieldProductSummary holds the string denoting the product_summary field in the database.
 	FieldProductSummary = "product_summary"
+	// FieldPaymentMode holds the string denoting the payment_mode field in the database.
+	FieldPaymentMode = "payment_mode"
+	// FieldStoreVerified holds the string denoting the store_verified field in the database.
+	FieldStoreVerified = "store_verified"
 	// Table holds the table name of the orderpayable in the database.
 	Table = "order_payables"
 )
@@ -51,6 +56,8 @@ var Columns = []string{
 	FieldAmountMinor,
 	FieldCurrency,
 	FieldProductSummary,
+	FieldPaymentMode,
+	FieldStoreVerified,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -84,9 +91,37 @@ var (
 	DefaultProductSummary string
 	// ProductSummaryValidator is a validator for the "product_summary" field. It is called by the builders before save.
 	ProductSummaryValidator func(string) error
+	// DefaultStoreVerified holds the default value on creation for the "store_verified" field.
+	DefaultStoreVerified bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// PaymentMode defines the type for the "payment_mode" enum field.
+type PaymentMode string
+
+// PaymentModeEscrow is the default value of the PaymentMode enum.
+const DefaultPaymentMode = PaymentModeEscrow
+
+// PaymentMode values.
+const (
+	PaymentModeEscrow PaymentMode = "escrow"
+	PaymentModeDirect PaymentMode = "direct"
+)
+
+func (pm PaymentMode) String() string {
+	return string(pm)
+}
+
+// PaymentModeValidator is a validator for the "payment_mode" field enum values. It is called by the builders before save.
+func PaymentModeValidator(pm PaymentMode) error {
+	switch pm {
+	case PaymentModeEscrow, PaymentModeDirect:
+		return nil
+	default:
+		return fmt.Errorf("orderpayable: invalid enum value for payment_mode field: %q", pm)
+	}
+}
 
 // OrderOption defines the ordering options for the OrderPayable queries.
 type OrderOption func(*sql.Selector)
@@ -144,4 +179,14 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByProductSummary orders the results by the product_summary field.
 func ByProductSummary(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProductSummary, opts...).ToFunc()
+}
+
+// ByPaymentMode orders the results by the payment_mode field.
+func ByPaymentMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPaymentMode, opts...).ToFunc()
+}
+
+// ByStoreVerified orders the results by the store_verified field.
+func ByStoreVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStoreVerified, opts...).ToFunc()
 }
