@@ -40,6 +40,8 @@ type Escrow struct {
 	SellerUserID string `json:"seller_user_id,omitempty"`
 	// ProductSummary holds the value of the "product_summary" field.
 	ProductSummary string `json:"product_summary,omitempty"`
+	// PaymentMode holds the value of the "payment_mode" field.
+	PaymentMode escrow.PaymentMode `json:"payment_mode,omitempty"`
 	// AmountMinor holds the value of the "amount_minor" field.
 	AmountMinor int64 `json:"amount_minor,omitempty"`
 	// Currency holds the value of the "currency" field.
@@ -70,6 +72,8 @@ type Escrow struct {
 	DeliveredAt *time.Time `json:"delivered_at,omitempty"`
 	// AutoReleaseAt holds the value of the "auto_release_at" field.
 	AutoReleaseAt *time.Time `json:"auto_release_at,omitempty"`
+	// PausedReleaseRemainingSeconds holds the value of the "paused_release_remaining_seconds" field.
+	PausedReleaseRemainingSeconds *int64 `json:"paused_release_remaining_seconds,omitempty"`
 	// BuyerConfirmedAt holds the value of the "buyer_confirmed_at" field.
 	BuyerConfirmedAt *time.Time `json:"buyer_confirmed_at,omitempty"`
 	// ReleasedAt holds the value of the "released_at" field.
@@ -111,9 +115,9 @@ func (*Escrow) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldVersion:
+		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldPausedReleaseRemainingSeconds, escrow.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger:
+		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldPaymentMode, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger:
 			values[i] = new(sql.NullString)
 		case escrow.FieldCreatedAt, escrow.FieldShippedAt, escrow.FieldEstimatedDeliveryAt, escrow.FieldDeliveredAt, escrow.FieldAutoReleaseAt, escrow.FieldBuyerConfirmedAt, escrow.FieldReleasedAt, escrow.FieldRefundedAt, escrow.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -205,6 +209,12 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field product_summary", values[i])
 			} else if value.Valid {
 				_m.ProductSummary = value.String
+			}
+		case escrow.FieldPaymentMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_mode", values[i])
+			} else if value.Valid {
+				_m.PaymentMode = escrow.PaymentMode(value.String)
 			}
 		case escrow.FieldAmountMinor:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -299,6 +309,13 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AutoReleaseAt = new(time.Time)
 				*_m.AutoReleaseAt = value.Time
+			}
+		case escrow.FieldPausedReleaseRemainingSeconds:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field paused_release_remaining_seconds", values[i])
+			} else if value.Valid {
+				_m.PausedReleaseRemainingSeconds = new(int64)
+				*_m.PausedReleaseRemainingSeconds = value.Int64
 			}
 		case escrow.FieldBuyerConfirmedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -413,6 +430,9 @@ func (_m *Escrow) String() string {
 	builder.WriteString("product_summary=")
 	builder.WriteString(_m.ProductSummary)
 	builder.WriteString(", ")
+	builder.WriteString("payment_mode=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PaymentMode))
+	builder.WriteString(", ")
 	builder.WriteString("amount_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AmountMinor))
 	builder.WriteString(", ")
@@ -464,6 +484,11 @@ func (_m *Escrow) String() string {
 	if v := _m.AutoReleaseAt; v != nil {
 		builder.WriteString("auto_release_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.PausedReleaseRemainingSeconds; v != nil {
+		builder.WriteString("paused_release_remaining_seconds=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	if v := _m.BuyerConfirmedAt; v != nil {

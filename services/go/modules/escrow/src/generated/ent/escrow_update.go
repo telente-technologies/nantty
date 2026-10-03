@@ -209,6 +209,33 @@ func (_u *EscrowUpdate) ClearAutoReleaseAt() *EscrowUpdate {
 	return _u
 }
 
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdate) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpdate {
+	_u.mutation.ResetPausedReleaseRemainingSeconds()
+	_u.mutation.SetPausedReleaseRemainingSeconds(v)
+	return _u
+}
+
+// SetNillablePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field if the given value is not nil.
+func (_u *EscrowUpdate) SetNillablePausedReleaseRemainingSeconds(v *int64) *EscrowUpdate {
+	if v != nil {
+		_u.SetPausedReleaseRemainingSeconds(*v)
+	}
+	return _u
+}
+
+// AddPausedReleaseRemainingSeconds adds value to the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdate) AddPausedReleaseRemainingSeconds(v int64) *EscrowUpdate {
+	_u.mutation.AddPausedReleaseRemainingSeconds(v)
+	return _u
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdate) ClearPausedReleaseRemainingSeconds() *EscrowUpdate {
+	_u.mutation.ClearPausedReleaseRemainingSeconds()
+	return _u
+}
+
 // SetBuyerConfirmedAt sets the "buyer_confirmed_at" field.
 func (_u *EscrowUpdate) SetBuyerConfirmedAt(v time.Time) *EscrowUpdate {
 	_u.mutation.SetBuyerConfirmedAt(v)
@@ -476,6 +503,15 @@ func (_u *EscrowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AutoReleaseAtCleared() {
 		_spec.ClearField(escrow.FieldAutoReleaseAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PausedReleaseRemainingSeconds(); ok {
+		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPausedReleaseRemainingSeconds(); ok {
+		_spec.AddField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
+	}
+	if _u.mutation.PausedReleaseRemainingSecondsCleared() {
+		_spec.ClearField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.BuyerConfirmedAt(); ok {
 		_spec.SetField(escrow.FieldBuyerConfirmedAt, field.TypeTime, value)
@@ -752,6 +788,33 @@ func (_u *EscrowUpdateOne) SetNillableAutoReleaseAt(v *time.Time) *EscrowUpdateO
 // ClearAutoReleaseAt clears the value of the "auto_release_at" field.
 func (_u *EscrowUpdateOne) ClearAutoReleaseAt() *EscrowUpdateOne {
 	_u.mutation.ClearAutoReleaseAt()
+	return _u
+}
+
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdateOne) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpdateOne {
+	_u.mutation.ResetPausedReleaseRemainingSeconds()
+	_u.mutation.SetPausedReleaseRemainingSeconds(v)
+	return _u
+}
+
+// SetNillablePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field if the given value is not nil.
+func (_u *EscrowUpdateOne) SetNillablePausedReleaseRemainingSeconds(v *int64) *EscrowUpdateOne {
+	if v != nil {
+		_u.SetPausedReleaseRemainingSeconds(*v)
+	}
+	return _u
+}
+
+// AddPausedReleaseRemainingSeconds adds value to the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdateOne) AddPausedReleaseRemainingSeconds(v int64) *EscrowUpdateOne {
+	_u.mutation.AddPausedReleaseRemainingSeconds(v)
+	return _u
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (_u *EscrowUpdateOne) ClearPausedReleaseRemainingSeconds() *EscrowUpdateOne {
+	_u.mutation.ClearPausedReleaseRemainingSeconds()
 	return _u
 }
 
@@ -1052,6 +1115,15 @@ func (_u *EscrowUpdateOne) sqlSave(ctx context.Context) (_node *Escrow, err erro
 	}
 	if _u.mutation.AutoReleaseAtCleared() {
 		_spec.ClearField(escrow.FieldAutoReleaseAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PausedReleaseRemainingSeconds(); ok {
+		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPausedReleaseRemainingSeconds(); ok {
+		_spec.AddField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
+	}
+	if _u.mutation.PausedReleaseRemainingSecondsCleared() {
+		_spec.ClearField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.BuyerConfirmedAt(); ok {
 		_spec.SetField(escrow.FieldBuyerConfirmedAt, field.TypeTime, value)

@@ -107,6 +107,20 @@ func (_c *EscrowCreate) SetNillableProductSummary(v *string) *EscrowCreate {
 	return _c
 }
 
+// SetPaymentMode sets the "payment_mode" field.
+func (_c *EscrowCreate) SetPaymentMode(v escrow.PaymentMode) *EscrowCreate {
+	_c.mutation.SetPaymentMode(v)
+	return _c
+}
+
+// SetNillablePaymentMode sets the "payment_mode" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillablePaymentMode(v *escrow.PaymentMode) *EscrowCreate {
+	if v != nil {
+		_c.SetPaymentMode(*v)
+	}
+	return _c
+}
+
 // SetAmountMinor sets the "amount_minor" field.
 func (_c *EscrowCreate) SetAmountMinor(v int64) *EscrowCreate {
 	_c.mutation.SetAmountMinor(v)
@@ -277,6 +291,20 @@ func (_c *EscrowCreate) SetNillableAutoReleaseAt(v *time.Time) *EscrowCreate {
 	return _c
 }
 
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (_c *EscrowCreate) SetPausedReleaseRemainingSeconds(v int64) *EscrowCreate {
+	_c.mutation.SetPausedReleaseRemainingSeconds(v)
+	return _c
+}
+
+// SetNillablePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillablePausedReleaseRemainingSeconds(v *int64) *EscrowCreate {
+	if v != nil {
+		_c.SetPausedReleaseRemainingSeconds(*v)
+	}
+	return _c
+}
+
 // SetBuyerConfirmedAt sets the "buyer_confirmed_at" field.
 func (_c *EscrowCreate) SetBuyerConfirmedAt(v time.Time) *EscrowCreate {
 	_c.mutation.SetBuyerConfirmedAt(v)
@@ -433,6 +461,10 @@ func (_c *EscrowCreate) defaults() {
 		v := escrow.DefaultProductSummary
 		_c.mutation.SetProductSummary(v)
 	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		v := escrow.DefaultPaymentMode
+		_c.mutation.SetPaymentMode(v)
+	}
 	if _, ok := _c.mutation.RefundedMinor(); !ok {
 		v := escrow.DefaultRefundedMinor
 		_c.mutation.SetRefundedMinor(v)
@@ -553,6 +585,14 @@ func (_c *EscrowCreate) check() error {
 	if v, ok := _c.mutation.ProductSummary(); ok {
 		if err := escrow.ProductSummaryValidator(v); err != nil {
 			return &ValidationError{Name: "product_summary", err: fmt.Errorf(`ent: validator failed for field "Escrow.product_summary": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		return &ValidationError{Name: "payment_mode", err: errors.New(`ent: missing required field "Escrow.payment_mode"`)}
+	}
+	if v, ok := _c.mutation.PaymentMode(); ok {
+		if err := escrow.PaymentModeValidator(v); err != nil {
+			return &ValidationError{Name: "payment_mode", err: fmt.Errorf(`ent: validator failed for field "Escrow.payment_mode": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.AmountMinor(); !ok {
@@ -708,6 +748,10 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 		_spec.SetField(escrow.FieldProductSummary, field.TypeString, value)
 		_node.ProductSummary = value
 	}
+	if value, ok := _c.mutation.PaymentMode(); ok {
+		_spec.SetField(escrow.FieldPaymentMode, field.TypeEnum, value)
+		_node.PaymentMode = value
+	}
 	if value, ok := _c.mutation.AmountMinor(); ok {
 		_spec.SetField(escrow.FieldAmountMinor, field.TypeInt64, value)
 		_node.AmountMinor = value
@@ -767,6 +811,10 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AutoReleaseAt(); ok {
 		_spec.SetField(escrow.FieldAutoReleaseAt, field.TypeTime, value)
 		_node.AutoReleaseAt = &value
+	}
+	if value, ok := _c.mutation.PausedReleaseRemainingSeconds(); ok {
+		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
+		_node.PausedReleaseRemainingSeconds = &value
 	}
 	if value, ok := _c.mutation.BuyerConfirmedAt(); ok {
 		_spec.SetField(escrow.FieldBuyerConfirmedAt, field.TypeTime, value)
@@ -1017,6 +1065,30 @@ func (u *EscrowUpsert) ClearAutoReleaseAt() *EscrowUpsert {
 	return u
 }
 
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsert) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpsert {
+	u.Set(escrow.FieldPausedReleaseRemainingSeconds, v)
+	return u
+}
+
+// UpdatePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdatePausedReleaseRemainingSeconds() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldPausedReleaseRemainingSeconds)
+	return u
+}
+
+// AddPausedReleaseRemainingSeconds adds v to the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsert) AddPausedReleaseRemainingSeconds(v int64) *EscrowUpsert {
+	u.Add(escrow.FieldPausedReleaseRemainingSeconds, v)
+	return u
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsert) ClearPausedReleaseRemainingSeconds() *EscrowUpsert {
+	u.SetNull(escrow.FieldPausedReleaseRemainingSeconds)
+	return u
+}
+
 // SetBuyerConfirmedAt sets the "buyer_confirmed_at" field.
 func (u *EscrowUpsert) SetBuyerConfirmedAt(v time.Time) *EscrowUpsert {
 	u.Set(escrow.FieldBuyerConfirmedAt, v)
@@ -1162,6 +1234,9 @@ func (u *EscrowUpsertOne) UpdateNewValues() *EscrowUpsertOne {
 		}
 		if _, exists := u.create.mutation.ProductSummary(); exists {
 			s.SetIgnore(escrow.FieldProductSummary)
+		}
+		if _, exists := u.create.mutation.PaymentMode(); exists {
+			s.SetIgnore(escrow.FieldPaymentMode)
 		}
 		if _, exists := u.create.mutation.AmountMinor(); exists {
 			s.SetIgnore(escrow.FieldAmountMinor)
@@ -1388,6 +1463,34 @@ func (u *EscrowUpsertOne) UpdateAutoReleaseAt() *EscrowUpsertOne {
 func (u *EscrowUpsertOne) ClearAutoReleaseAt() *EscrowUpsertOne {
 	return u.Update(func(s *EscrowUpsert) {
 		s.ClearAutoReleaseAt()
+	})
+}
+
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertOne) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetPausedReleaseRemainingSeconds(v)
+	})
+}
+
+// AddPausedReleaseRemainingSeconds adds v to the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertOne) AddPausedReleaseRemainingSeconds(v int64) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.AddPausedReleaseRemainingSeconds(v)
+	})
+}
+
+// UpdatePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdatePausedReleaseRemainingSeconds() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdatePausedReleaseRemainingSeconds()
+	})
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertOne) ClearPausedReleaseRemainingSeconds() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearPausedReleaseRemainingSeconds()
 	})
 }
 
@@ -1719,6 +1822,9 @@ func (u *EscrowUpsertBulk) UpdateNewValues() *EscrowUpsertBulk {
 			if _, exists := b.mutation.ProductSummary(); exists {
 				s.SetIgnore(escrow.FieldProductSummary)
 			}
+			if _, exists := b.mutation.PaymentMode(); exists {
+				s.SetIgnore(escrow.FieldPaymentMode)
+			}
 			if _, exists := b.mutation.AmountMinor(); exists {
 				s.SetIgnore(escrow.FieldAmountMinor)
 			}
@@ -1945,6 +2051,34 @@ func (u *EscrowUpsertBulk) UpdateAutoReleaseAt() *EscrowUpsertBulk {
 func (u *EscrowUpsertBulk) ClearAutoReleaseAt() *EscrowUpsertBulk {
 	return u.Update(func(s *EscrowUpsert) {
 		s.ClearAutoReleaseAt()
+	})
+}
+
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertBulk) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetPausedReleaseRemainingSeconds(v)
+	})
+}
+
+// AddPausedReleaseRemainingSeconds adds v to the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertBulk) AddPausedReleaseRemainingSeconds(v int64) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.AddPausedReleaseRemainingSeconds(v)
+	})
+}
+
+// UpdatePausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdatePausedReleaseRemainingSeconds() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdatePausedReleaseRemainingSeconds()
+	})
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (u *EscrowUpsertBulk) ClearPausedReleaseRemainingSeconds() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearPausedReleaseRemainingSeconds()
 	})
 }
 

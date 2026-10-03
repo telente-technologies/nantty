@@ -2391,55 +2391,58 @@ func (m *DisputeStatusEventMutation) ResetEdge(name string) error {
 // EscrowMutation represents an operation that mutates the Escrow nodes in the graph.
 type EscrowMutation struct {
 	config
-	op                          Op
-	typ                         string
-	id                          *uuid.UUID
-	created_at                  *time.Time
-	order_id                    *string
-	order_reference             *string
-	checkout_id                 *string
-	payment_intent_id           *uuid.UUID
-	payment_reference           *string
-	provider                    *string
-	buyer_user_id               *string
-	store_id                    *string
-	seller_user_id              *string
-	product_summary             *string
-	amount_minor                *int64
-	addamount_minor             *int64
-	currency                    *string
-	commission_bps              *int64
-	addcommission_bps           *int64
-	commission_minor            *int64
-	addcommission_minor         *int64
-	seller_amount_minor         *int64
-	addseller_amount_minor      *int64
-	refunded_minor              *int64
-	addrefunded_minor           *int64
-	released_to_seller_minor    *int64
-	addreleased_to_seller_minor *int64
-	status                      *escrow.Status
-	shipped_at                  *time.Time
-	estimated_delivery_at       *time.Time
-	courier_name                *string
-	tracking_number             *string
-	tracking_url                *string
-	delivered_at                *time.Time
-	auto_release_at             *time.Time
-	buyer_confirmed_at          *time.Time
-	released_at                 *time.Time
-	refunded_at                 *time.Time
-	release_trigger             *string
-	version                     *int64
-	addversion                  *int64
-	updated_at                  *time.Time
-	clearedFields               map[string]struct{}
-	disputes                    map[uuid.UUID]struct{}
-	removeddisputes             map[uuid.UUID]struct{}
-	cleareddisputes             bool
-	done                        bool
-	oldValue                    func(context.Context) (*Escrow, error)
-	predicates                  []predicate.Escrow
+	op                                  Op
+	typ                                 string
+	id                                  *uuid.UUID
+	created_at                          *time.Time
+	order_id                            *string
+	order_reference                     *string
+	checkout_id                         *string
+	payment_intent_id                   *uuid.UUID
+	payment_reference                   *string
+	provider                            *string
+	buyer_user_id                       *string
+	store_id                            *string
+	seller_user_id                      *string
+	product_summary                     *string
+	payment_mode                        *escrow.PaymentMode
+	amount_minor                        *int64
+	addamount_minor                     *int64
+	currency                            *string
+	commission_bps                      *int64
+	addcommission_bps                   *int64
+	commission_minor                    *int64
+	addcommission_minor                 *int64
+	seller_amount_minor                 *int64
+	addseller_amount_minor              *int64
+	refunded_minor                      *int64
+	addrefunded_minor                   *int64
+	released_to_seller_minor            *int64
+	addreleased_to_seller_minor         *int64
+	status                              *escrow.Status
+	shipped_at                          *time.Time
+	estimated_delivery_at               *time.Time
+	courier_name                        *string
+	tracking_number                     *string
+	tracking_url                        *string
+	delivered_at                        *time.Time
+	auto_release_at                     *time.Time
+	paused_release_remaining_seconds    *int64
+	addpaused_release_remaining_seconds *int64
+	buyer_confirmed_at                  *time.Time
+	released_at                         *time.Time
+	refunded_at                         *time.Time
+	release_trigger                     *string
+	version                             *int64
+	addversion                          *int64
+	updated_at                          *time.Time
+	clearedFields                       map[string]struct{}
+	disputes                            map[uuid.UUID]struct{}
+	removeddisputes                     map[uuid.UUID]struct{}
+	cleareddisputes                     bool
+	done                                bool
+	oldValue                            func(context.Context) (*Escrow, error)
+	predicates                          []predicate.Escrow
 }
 
 var _ ent.Mutation = (*EscrowMutation)(nil)
@@ -2940,6 +2943,42 @@ func (m *EscrowMutation) OldProductSummary(ctx context.Context) (v string, err e
 // ResetProductSummary resets all changes to the "product_summary" field.
 func (m *EscrowMutation) ResetProductSummary() {
 	m.product_summary = nil
+}
+
+// SetPaymentMode sets the "payment_mode" field.
+func (m *EscrowMutation) SetPaymentMode(em escrow.PaymentMode) {
+	m.payment_mode = &em
+}
+
+// PaymentMode returns the value of the "payment_mode" field in the mutation.
+func (m *EscrowMutation) PaymentMode() (r escrow.PaymentMode, exists bool) {
+	v := m.payment_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentMode returns the old "payment_mode" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldPaymentMode(ctx context.Context) (v escrow.PaymentMode, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentMode: %w", err)
+	}
+	return oldValue.PaymentMode, nil
+}
+
+// ResetPaymentMode resets all changes to the "payment_mode" field.
+func (m *EscrowMutation) ResetPaymentMode() {
+	m.payment_mode = nil
 }
 
 // SetAmountMinor sets the "amount_minor" field.
@@ -3654,6 +3693,76 @@ func (m *EscrowMutation) ResetAutoReleaseAt() {
 	delete(m.clearedFields, escrow.FieldAutoReleaseAt)
 }
 
+// SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
+func (m *EscrowMutation) SetPausedReleaseRemainingSeconds(i int64) {
+	m.paused_release_remaining_seconds = &i
+	m.addpaused_release_remaining_seconds = nil
+}
+
+// PausedReleaseRemainingSeconds returns the value of the "paused_release_remaining_seconds" field in the mutation.
+func (m *EscrowMutation) PausedReleaseRemainingSeconds() (r int64, exists bool) {
+	v := m.paused_release_remaining_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPausedReleaseRemainingSeconds returns the old "paused_release_remaining_seconds" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldPausedReleaseRemainingSeconds(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPausedReleaseRemainingSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPausedReleaseRemainingSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPausedReleaseRemainingSeconds: %w", err)
+	}
+	return oldValue.PausedReleaseRemainingSeconds, nil
+}
+
+// AddPausedReleaseRemainingSeconds adds i to the "paused_release_remaining_seconds" field.
+func (m *EscrowMutation) AddPausedReleaseRemainingSeconds(i int64) {
+	if m.addpaused_release_remaining_seconds != nil {
+		*m.addpaused_release_remaining_seconds += i
+	} else {
+		m.addpaused_release_remaining_seconds = &i
+	}
+}
+
+// AddedPausedReleaseRemainingSeconds returns the value that was added to the "paused_release_remaining_seconds" field in this mutation.
+func (m *EscrowMutation) AddedPausedReleaseRemainingSeconds() (r int64, exists bool) {
+	v := m.addpaused_release_remaining_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPausedReleaseRemainingSeconds clears the value of the "paused_release_remaining_seconds" field.
+func (m *EscrowMutation) ClearPausedReleaseRemainingSeconds() {
+	m.paused_release_remaining_seconds = nil
+	m.addpaused_release_remaining_seconds = nil
+	m.clearedFields[escrow.FieldPausedReleaseRemainingSeconds] = struct{}{}
+}
+
+// PausedReleaseRemainingSecondsCleared returns if the "paused_release_remaining_seconds" field was cleared in this mutation.
+func (m *EscrowMutation) PausedReleaseRemainingSecondsCleared() bool {
+	_, ok := m.clearedFields[escrow.FieldPausedReleaseRemainingSeconds]
+	return ok
+}
+
+// ResetPausedReleaseRemainingSeconds resets all changes to the "paused_release_remaining_seconds" field.
+func (m *EscrowMutation) ResetPausedReleaseRemainingSeconds() {
+	m.paused_release_remaining_seconds = nil
+	m.addpaused_release_remaining_seconds = nil
+	delete(m.clearedFields, escrow.FieldPausedReleaseRemainingSeconds)
+}
+
 // SetBuyerConfirmedAt sets the "buyer_confirmed_at" field.
 func (m *EscrowMutation) SetBuyerConfirmedAt(t time.Time) {
 	m.buyer_confirmed_at = &t
@@ -4017,7 +4126,7 @@ func (m *EscrowMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EscrowMutation) Fields() []string {
-	fields := make([]string, 0, 32)
+	fields := make([]string, 0, 34)
 	if m.created_at != nil {
 		fields = append(fields, escrow.FieldCreatedAt)
 	}
@@ -4050,6 +4159,9 @@ func (m *EscrowMutation) Fields() []string {
 	}
 	if m.product_summary != nil {
 		fields = append(fields, escrow.FieldProductSummary)
+	}
+	if m.payment_mode != nil {
+		fields = append(fields, escrow.FieldPaymentMode)
 	}
 	if m.amount_minor != nil {
 		fields = append(fields, escrow.FieldAmountMinor)
@@ -4095,6 +4207,9 @@ func (m *EscrowMutation) Fields() []string {
 	}
 	if m.auto_release_at != nil {
 		fields = append(fields, escrow.FieldAutoReleaseAt)
+	}
+	if m.paused_release_remaining_seconds != nil {
+		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
 	}
 	if m.buyer_confirmed_at != nil {
 		fields = append(fields, escrow.FieldBuyerConfirmedAt)
@@ -4144,6 +4259,8 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.SellerUserID()
 	case escrow.FieldProductSummary:
 		return m.ProductSummary()
+	case escrow.FieldPaymentMode:
+		return m.PaymentMode()
 	case escrow.FieldAmountMinor:
 		return m.AmountMinor()
 	case escrow.FieldCurrency:
@@ -4174,6 +4291,8 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.DeliveredAt()
 	case escrow.FieldAutoReleaseAt:
 		return m.AutoReleaseAt()
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		return m.PausedReleaseRemainingSeconds()
 	case escrow.FieldBuyerConfirmedAt:
 		return m.BuyerConfirmedAt()
 	case escrow.FieldReleasedAt:
@@ -4217,6 +4336,8 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldSellerUserID(ctx)
 	case escrow.FieldProductSummary:
 		return m.OldProductSummary(ctx)
+	case escrow.FieldPaymentMode:
+		return m.OldPaymentMode(ctx)
 	case escrow.FieldAmountMinor:
 		return m.OldAmountMinor(ctx)
 	case escrow.FieldCurrency:
@@ -4247,6 +4368,8 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldDeliveredAt(ctx)
 	case escrow.FieldAutoReleaseAt:
 		return m.OldAutoReleaseAt(ctx)
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		return m.OldPausedReleaseRemainingSeconds(ctx)
 	case escrow.FieldBuyerConfirmedAt:
 		return m.OldBuyerConfirmedAt(ctx)
 	case escrow.FieldReleasedAt:
@@ -4344,6 +4467,13 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProductSummary(v)
+		return nil
+	case escrow.FieldPaymentMode:
+		v, ok := value.(escrow.PaymentMode)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentMode(v)
 		return nil
 	case escrow.FieldAmountMinor:
 		v, ok := value.(int64)
@@ -4450,6 +4580,13 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAutoReleaseAt(v)
 		return nil
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPausedReleaseRemainingSeconds(v)
+		return nil
 	case escrow.FieldBuyerConfirmedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -4518,6 +4655,9 @@ func (m *EscrowMutation) AddedFields() []string {
 	if m.addreleased_to_seller_minor != nil {
 		fields = append(fields, escrow.FieldReleasedToSellerMinor)
 	}
+	if m.addpaused_release_remaining_seconds != nil {
+		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
+	}
 	if m.addversion != nil {
 		fields = append(fields, escrow.FieldVersion)
 	}
@@ -4541,6 +4681,8 @@ func (m *EscrowMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedRefundedMinor()
 	case escrow.FieldReleasedToSellerMinor:
 		return m.AddedReleasedToSellerMinor()
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		return m.AddedPausedReleaseRemainingSeconds()
 	case escrow.FieldVersion:
 		return m.AddedVersion()
 	}
@@ -4594,6 +4736,13 @@ func (m *EscrowMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddReleasedToSellerMinor(v)
 		return nil
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPausedReleaseRemainingSeconds(v)
+		return nil
 	case escrow.FieldVersion:
 		v, ok := value.(int64)
 		if !ok {
@@ -4620,6 +4769,9 @@ func (m *EscrowMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(escrow.FieldAutoReleaseAt) {
 		fields = append(fields, escrow.FieldAutoReleaseAt)
+	}
+	if m.FieldCleared(escrow.FieldPausedReleaseRemainingSeconds) {
+		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
 	}
 	if m.FieldCleared(escrow.FieldBuyerConfirmedAt) {
 		fields = append(fields, escrow.FieldBuyerConfirmedAt)
@@ -4655,6 +4807,9 @@ func (m *EscrowMutation) ClearField(name string) error {
 		return nil
 	case escrow.FieldAutoReleaseAt:
 		m.ClearAutoReleaseAt()
+		return nil
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		m.ClearPausedReleaseRemainingSeconds()
 		return nil
 	case escrow.FieldBuyerConfirmedAt:
 		m.ClearBuyerConfirmedAt()
@@ -4706,6 +4861,9 @@ func (m *EscrowMutation) ResetField(name string) error {
 	case escrow.FieldProductSummary:
 		m.ResetProductSummary()
 		return nil
+	case escrow.FieldPaymentMode:
+		m.ResetPaymentMode()
+		return nil
 	case escrow.FieldAmountMinor:
 		m.ResetAmountMinor()
 		return nil
@@ -4750,6 +4908,9 @@ func (m *EscrowMutation) ResetField(name string) error {
 		return nil
 	case escrow.FieldAutoReleaseAt:
 		m.ResetAutoReleaseAt()
+		return nil
+	case escrow.FieldPausedReleaseRemainingSeconds:
+		m.ResetPausedReleaseRemainingSeconds()
 		return nil
 	case escrow.FieldBuyerConfirmedAt:
 		m.ResetBuyerConfirmedAt()
