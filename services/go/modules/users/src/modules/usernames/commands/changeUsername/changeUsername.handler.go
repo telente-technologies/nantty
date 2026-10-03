@@ -68,9 +68,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.User
 		}
 		return types.UserView{}, err
 	}
-	isCreator, err := services.HasActiveCreatorProfile(ctx, handler.Container, owner)
 	summary.Username = username
-	return types.BuildUserView(updated, summary, isCreator, true), err
+	return types.BuildUserView(updated, summary, true), err
 }
 
 func (handler Handler) recordChange(ctx context.Context, profileId, owner uuid.UUID, previous, username string) (*ent.Profile, error) {
