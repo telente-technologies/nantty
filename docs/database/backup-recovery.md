@@ -8,7 +8,7 @@ As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE. Nothing below exists
 | --- | --- |
 | One Aurora PostgreSQL + PostGIS cluster, schema per service (fixed owner decision) | `infra/local/postgres/create-databases.sh` (local model) |
 | Money truth lives in `ledger` (a mirror of provider-held funds; Zudomart holds no money, `checkoutPaymentFlowPlan.md`) plus `payments`, `wallet`, `escrow` | `docs/architecture/payments.md` |
-| Domain events leave through per-schema outbox to SNS/SQS; SQS/SNS have no backup, so **unpublished outbox rows are the replay source** | `platform/events/outbox.relay.go`, `events.md` |
+| Domain events leave through per-schema outbox to RabbitMQ (RabbitMQ adopted, owner, 2026-10-03); broker messages have no backup, so **unpublished outbox rows are the replay source** | `platform/events/outbox.relay.go`, `events.md` |
 | Idempotency for HTTP lives in Valkey (cache, rebuildable) and in per-schema tables for money | `platform/idempotency`, `modules/*/idempotentRequest.schema.go` |
 | Signing keys are stored in `auth.signing_keys` (encrypted) | `modules/auth/.../signingKey.schema.go` |
 
@@ -44,7 +44,7 @@ Aligned with `disaster-recovery.md` section 2 and extended with the data classes
 | Config (Terraform, platform settings, feature flags) | 0 (git) for IaC; platform settings are in `admin.platform_settings` so they ride with the DB | 1 h for IaC re-apply | git + versioned state bucket replicated; `platform_settings` in DB backups | `terraform plan` clean in DR region monthly |
 | Secrets (Secrets Manager, KMS keys, JWT signing keys) | 0 for static secrets (replica secrets); signing keys: as DB Tier 0 | 30 min (replica secrets), keys restored with auth schema | multi-region secrets and keys | DR drill: services start in DR with replica secrets |
 | Critical event data: unpublished outbox | covered by DB RPO (rows are in the same cluster) | replay after restore, no manual work | outbox rows with `published_at IS NULL` replay automatically; for already-published events replay by id range (`published_at = NULL` reset, `events.md` line 63) | drill: restore at T, verify consumers dedupe |
-| Critical event data: SQS/SNS | none (not a store) | DLQ redrive after fix | idempotent consumers | drill |
+| Critical event data: RabbitMQ (Amazon MQ) | none (not a store; quorum queues replicated across 3 AZs, topology in `definitions.json`) | move `<queue>.dlq` back after fix; outbox replay by id range | idempotent consumers | drill |
 | Critical event data: analytics events (ClickHouse) | rebuildable: S3 raw Parquet + outbox replay | 24 h to rebuild | S3 raw retained with versioning; CH backups optional (`clickhouse-backup` to S3) | rebuild test |
 | Valkey | none | warm-up | rebuildable; nothing money-critical only here (EXISTING idempotency in PG for money tables) | cold-start test |
 
@@ -75,7 +75,7 @@ Restore drills run with masked data outside the production account when possible
 | R6 | Credential compromise | Rotate secrets (multi-user rotation), revoke sessions, invalidate JWT signing key via the key-rotation procedure, review `pgaudit` and CloudTrail, restore if tampering found |
 | R7 | Backup failure alarm | Check AWS Backup job, KMS permissions, vault lock; take manual snapshot; escalate if > 26 h without a valid snapshot |
 | R8 | Failed migration | Abort per PR plan; if schema changed partially, restore from the pre-migration manual snapshot **only** if data was altered; otherwise fix forward; `migrations.md` s3 |
-| R9 | Outbox/event pipeline stuck | Check relay logs, SNS permissions, publish timeouts; do not delete unpublished rows; replay after fix; DLQ redrive |
+| R9 | Outbox/event pipeline stuck | Check relay logs, RabbitMQ user permissions (`write` on `zudomart.events`), broker memory/disk alarms, publish confirm timeouts; do not delete unpublished rows; replay after fix; move DLQ messages back |
 
 ## 6. Gaps and actions
 
