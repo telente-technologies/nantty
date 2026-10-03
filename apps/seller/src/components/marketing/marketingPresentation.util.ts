@@ -18,6 +18,7 @@ export const marketingSectionTabs = [
   { href: "/marketing/discounts", label: "Discount codes & product discounts" },
   { href: "/marketing/flash-sales", label: "Flash sales" },
   { href: "/marketing/bundles", label: "Bundles" },
+  { href: "/marketing/rewards", label: "Store rewards" },
   { href: "/marketing/featured", label: "Featured products" },
 ] as const;
 
