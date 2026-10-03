@@ -97,13 +97,13 @@ func SharedPaymentGateway() (*PaymentGateway, error) {
 }
 
 var (
-	ErrPaymentNotFound          = httpserver.NewApiError(http.StatusNotFound, "PAYMENT_NOT_FOUND", "Payment was not found.")
-	ErrPaymentAmountMismatch    = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_AMOUNT_MISMATCH", "The amount paid does not match this payment.")
-	ErrCurrencyNotSupported     = httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "This payment provider cannot charge in this currency. Choose another provider.")
-	ErrProviderUnavailable      = httpserver.NewApiError(http.StatusBadGateway, "PAYMENT_PROVIDER_UNAVAILABLE", "The payment provider could not complete the request. Try again shortly.")
-	ErrRefundExceedsPayment     = httpserver.NewApiError(http.StatusConflict, "REFUND_EXCEEDS_PAYMENT", "This payment has already been refunded.")
-	ErrPaymentNotRefundable     = httpserver.NewApiError(http.StatusConflict, "PAYMENT_NOT_REFUNDABLE", "Only a completed payment can be refunded.")
+	ErrPaymentNotFound             = httpserver.NewApiError(http.StatusNotFound, "PAYMENT_NOT_FOUND", "Payment was not found.")
+	ErrPaymentAmountMismatch       = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_AMOUNT_MISMATCH", "The amount paid does not match this payment.")
+	ErrCurrencyNotSupported        = httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "This payment provider cannot charge in this currency. Choose another provider.")
+	ErrProviderUnavailable         = httpserver.NewApiError(http.StatusBadGateway, "PAYMENT_PROVIDER_UNAVAILABLE", "The payment provider could not complete the request. Try again shortly.")
+	ErrRefundExceedsPayment        = httpserver.NewApiError(http.StatusConflict, "REFUND_EXCEEDS_PAYMENT", "This payment has already been refunded.")
+	ErrPaymentNotRefundable        = httpserver.NewApiError(http.StatusConflict, "PAYMENT_NOT_REFUNDABLE", "Only a completed payment can be refunded.")
 	ErrStoreReceiptRedeemedByOther = httpserver.NewApiError(http.StatusConflict, "STORE_RECEIPT_ALREADY_REDEEMED", "This purchase receipt was already redeemed by another account.")
-	ErrStoreReceiptInvalid      = httpserver.NewApiError(http.StatusUnprocessableEntity, "STORE_RECEIPT_INVALID", "This purchase receipt could not be verified.")
-	ErrStoreNotConfigured       = httpserver.NewApiError(http.StatusNotImplemented, "IAP_NOT_CONFIGURED", "In-app purchases are not configured yet.")
+	ErrStoreReceiptInvalid         = httpserver.NewApiError(http.StatusUnprocessableEntity, "STORE_RECEIPT_INVALID", "This purchase receipt could not be verified.")
+	ErrStoreNotConfigured          = httpserver.NewApiError(http.StatusNotImplemented, "IAP_NOT_CONFIGURED", "In-app purchases are not configured yet.")
 )
