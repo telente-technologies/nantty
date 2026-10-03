@@ -1,9 +1,11 @@
 import { View } from "react-native";
 
 import { SealCheck20Icon } from "@/components/icons";
+import { Text } from "@/components/ui/text";
 import { colors, palette } from "@/constants/colors.constant";
 import { useTheme } from "@/theme";
 import type { Verification, VerificationColor } from "@/types";
+import { isColorAllowedForProfileType, isInBlackGracePeriod } from "@/utils/verificationProfile.util";
 
 export const VERIFICATION_BADGE_COLORS: Record<VerificationColor, string> = {
   blue: colors.primary,
@@ -21,20 +23,26 @@ export interface VerificationBadgeProps {
   readonly verification?: Verification | null;
   readonly legacyVerified?: boolean;
   readonly size?: number;
+  readonly viewerIsStaff?: boolean;
 }
 
-export const isVerificationBadgeVisible = (verification?: Verification | null) =>
-  !!verification && verification.badgeVisible && verification.status === "active" && verification.tier !== "ESSENTIAL";
+export const isVerificationBadgeVisible = (verification?: Verification | null) => {
+  if (!verification || !verification.badgeVisible || verification.tier === "ESSENTIAL") return false;
+  if (!isColorAllowedForProfileType(verification.type, verification.color)) return false;
+  return verification.status === "active" || isInBlackGracePeriod(verification);
+};
 
-export function VerificationBadge({ verification, legacyVerified = false, size = 16 }: VerificationBadgeProps) {
+export function VerificationBadge({ verification, legacyVerified = false, size = 16, viewerIsStaff = false }: VerificationBadgeProps) {
   const theme = useTheme();
   const visible = verification ? isVerificationBadgeVisible(verification) : legacyVerified;
   if (!visible) return null;
   const badgeColorName = verification?.color ?? "blue";
   const badgeColor = theme.isDark && badgeColorName !== "gold" ? theme.colors[badgeColorName === "black" ? "text" : "primary"] : VERIFICATION_BADGE_COLORS[badgeColorName];
+  const renewalDue = viewerIsStaff && isInBlackGracePeriod(verification);
   return (
-    <View accessible accessibilityLabel={ACCESSIBILITY_LABELS[verification?.color ?? "blue"]} style={{ flexShrink: 0 }}>
+    <View accessible accessibilityLabel={`${ACCESSIBILITY_LABELS[badgeColorName]}${renewalDue ? ", renewal due" : ""}`} style={{ flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 4 }}>
       <SealCheck20Icon size={size} color={badgeColor} />
+      {renewalDue ? <Text size={11} weight={500} color={theme.colors.error}>Renewal due</Text> : null}
     </View>
   );
 }

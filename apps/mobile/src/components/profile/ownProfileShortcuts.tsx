@@ -10,7 +10,7 @@ import { CheckmarkSuggestionCards } from "./checkmarkSuggestionCards";
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
 
-type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Referral" | "Settings" | "FollowRequests" | "Rankings" | "Saved";
+type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Settings" | "FollowRequests" | "Rankings" | "Saved";
 
 export function OwnProfileShortcuts({ profile }: { profile: User }) {
   const { colors } = useTheme();
@@ -26,7 +26,6 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
     { label: "My orders", route: "Orders" },
     { label: "Wallet", route: "Wallet" },
     { label: profile.verification?.badgeVisible ? "Verification" : "Get verified", route: "Verification" },
-    { label: "Invite friends", route: "Referral" },
     { label: "Settings", route: "Settings" },
   ];
   return (

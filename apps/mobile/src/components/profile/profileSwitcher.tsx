@@ -15,9 +15,11 @@ import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
+import { verificationForProfileKind } from "@/utils/verificationProfile.util";
+
 import { VerificationBadge } from "./verificationBadge";
 
-const KIND_LABELS = { person: "Personal", creator: "Creator", business: "Business", brand: "Brand", store: "Store" } as const;
+const KIND_LABELS = { person: "Personal", creator: "Creator", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
 
 function useActingProfileWithServerFallback() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
@@ -75,7 +77,7 @@ export function ProfileSwitcherSheet() {
             <View style={styles.texts}>
               <View style={styles.nameRow}>
                 <Text size={14} weight={500} lineHeight={16.8}>{profile.name}</Text>
-                <VerificationBadge verification={profile.verification} size={14} />
+                <VerificationBadge verification={verificationForProfileKind(profile.verification, profile.kind)} size={14} />
               </View>
               <Text size={12} lineHeight={16} color={colors.textSubtle}>@{profile.handle} · {KIND_LABELS[profile.kind]}</Text>
             </View>
