@@ -4,9 +4,11 @@ import { StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export const CameraBackdrop = forwardRef<CameraView, { active: boolean }>(function CameraBackdrop({ active }, ref) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [permission, requestPermission] = useCameraPermissions();
   if (!active) return <View style={styles.fill} />;
   if (permission?.granted) return <CameraView ref={ref} style={StyleSheet.absoluteFill} facing="back" />;
@@ -23,8 +25,8 @@ export const CameraBackdrop = forwardRef<CameraView, { active: boolean }>(functi
   );
 });
 
-const styles = StyleSheet.create({
-  fill: { ...StyleSheet.absoluteFill, backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  fill: { ...StyleSheet.absoluteFill, backgroundColor: colors.surface },
   center: { alignItems: "center", justifyContent: "center", paddingHorizontal: 40, paddingBottom: 160 },
   allow: { width: 160 },
-});
+}));

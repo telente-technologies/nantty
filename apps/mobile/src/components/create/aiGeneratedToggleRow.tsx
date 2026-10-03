@@ -1,9 +1,10 @@
 import { StyleSheet, Switch, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export function AiGeneratedToggleRow({ value, onChange }: { value: boolean; onChange: (value: boolean) => void }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.row}>
       <View style={styles.texts}>

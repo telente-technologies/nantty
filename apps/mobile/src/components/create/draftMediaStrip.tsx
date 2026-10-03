@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Cancel20Icon, Play24Icon } from "@/components/icons";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { ID } from "@/types";
 
 import type { PostDraftMediaItem } from "./postDraftUploads.hook";
@@ -16,6 +16,8 @@ export interface DraftMediaStripProps {
 }
 
 export function DraftMediaStrip({ items, maximumItems, onRemoveItem }: DraftMediaStripProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   if (items.length === 0) return null;
   return (
     <View style={styles.root}>
@@ -50,7 +52,7 @@ export function DraftMediaStrip({ items, maximumItems, onRemoveItem }: DraftMedi
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 8 },
   thumbs: { gap: 8 },
   thumb: { width: 96, height: 96, borderRadius: 12, backgroundColor: colors.placeholder, overflow: "hidden" },
@@ -77,4 +79,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   progress: { position: "absolute", left: 6, right: 6, bottom: 6 },
-});
+}));

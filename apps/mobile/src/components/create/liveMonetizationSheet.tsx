@@ -4,7 +4,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { LiveAdPlacement } from "@/types/socialGraph.type";
 
 import {
@@ -24,6 +24,8 @@ export interface LiveMonetizationSheetProps {
 }
 
 function SwitchRow({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (value: boolean) => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.switchRow}>
       <View style={styles.flex}>
@@ -36,6 +38,8 @@ function SwitchRow({ label, hint, value, onChange }: { label: string; hint?: str
 }
 
 export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }: LiveMonetizationSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const togglePlacement = (placement: LiveAdPlacement) =>
     onChangeDraft({
       ...draft,
@@ -102,11 +106,11 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   body: { paddingHorizontal: 16, paddingBottom: 24, gap: 14 },
   switchRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   terms: { gap: 8, padding: 12, borderRadius: 8, backgroundColor: colors.background },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));

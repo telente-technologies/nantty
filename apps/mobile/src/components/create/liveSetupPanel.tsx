@@ -5,7 +5,7 @@ import { Pressable, ScrollView, Share, StyleSheet, TextInput, View } from "react
 import { ArrowsOutSimple24Icon, TextIndent24Icon, VideoCamera24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode, LiveCategory, LiveSource } from "@/types";
@@ -44,6 +44,8 @@ export interface LiveSetupPanelProps {
 }
 
 export function LiveSetupPanel(props: LiveSetupPanelProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const cameraRef = useRef<CameraView>(null);
   const [draftTitle, setDraftTitle] = useState(props.title);
   const [isMonetizationOpen, setIsMonetizationOpen] = useState(false);
@@ -84,14 +86,14 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
                     <Text size={11} lineHeight={14} color={colors.textMuted}>
                       SERVER URL
                     </Text>
-                    <Text size={13} lineHeight={17} weight={600} color={colors.black}>
+                    <Text size={13} lineHeight={17} weight={600} color={colors.text}>
                       {credentials.ingestUrl}
                     </Text>
                     <View style={styles.credentialDivider} />
                     <Text size={11} lineHeight={14} color={colors.textMuted}>
                       STREAM KEY
                     </Text>
-                    <Text size={13} lineHeight={17} weight={600} color={colors.black}>
+                    <Text size={13} lineHeight={17} weight={600} color={colors.text}>
                       {credentials.streamKey}
                     </Text>
                   </View>
@@ -122,7 +124,7 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
             value={draftTitle}
             onChangeText={setDraftTitle}
             placeholder="Title..."
-            placeholderTextColor={colors.placeholder}
+            placeholderTextColor={colors.inputPlaceholderText}
             selectionColor={colors.primary}
             cursorColor={colors.primary}
             autoFocus
@@ -226,7 +228,7 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   stage: { ...StyleSheet.absoluteFill, backgroundColor: "#101018", alignItems: "center", justifyContent: "center", paddingHorizontal: 40 },
   stageBody: { alignItems: "center", gap: 12, maxWidth: 320 },
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   credentialDivider: { height: 1, backgroundColor: "#E4E6F2", marginVertical: 6 },
   shareButton: { width: 200 },
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 999,
   },
-  sourceItemSelected: { backgroundColor: colors.white },
+  sourceItemSelected: { backgroundColor: colors.surface },
   categoryRow: { gap: 8, paddingHorizontal: 16 },
   categoryChip: {
     paddingHorizontal: 12,
@@ -281,4 +283,4 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.24)",
   },
   openRoomButton: { width: 200 },
-});
+}));

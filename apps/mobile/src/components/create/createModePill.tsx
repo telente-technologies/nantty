@@ -1,13 +1,15 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { CreateMode } from "@/types";
 
 const MODES: readonly CreateMode[] = ["story", "post", "clip", "product", "live"];
 
 export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onChangeMode: (mode: CreateMode) => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
   const isLiveModeLocked = !canGoLive && !isCreatorStatusLoading;
   return (
@@ -36,7 +38,7 @@ export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onCha
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   pill: {
     alignSelf: "center",
     height: 33,
@@ -49,4 +51,4 @@ const styles = StyleSheet.create({
   },
   modeItem: { flexDirection: "row", alignItems: "center", gap: 3 },
   lockedModeDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.textMuted },
-});
+}));
