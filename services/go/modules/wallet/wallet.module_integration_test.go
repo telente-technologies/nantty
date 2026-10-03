@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"strings"
 	"bytes"
 	"context"
 	"database/sql"
@@ -58,6 +59,7 @@ func startWalletHarness(t *testing.T, requireReview bool) *walletHarness {
 		CreatorTransferMinimum:      configs.ParseCurrencyAmounts("NGN:10000"),
 		CoinNetValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		CoinChannelFeeBps:           configs.ParseChannelFees("web:200,ios:3000,android:1500"),
+		InternalApiToken:            strings.Repeat("w", 32), AdPrepaidRefundsEnabled: true, SellerReserveHoldDays: 90,
 	}
 	module, err := src.StartWalletModuleWithSettings(context.Background(), settings, money.Dependencies, money.Overrides(), money.Payments.Application.Gateway)
 	if err != nil {
@@ -123,7 +125,7 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 		t.Fatalf("balance: %v", balance.Body)
 	}
 	if harness.balance(ledgermodels.CoinSalesRevenueAccount("NGN")) != 1_500_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 2_000 ||
-		harness.balance(ledgermodels.PlatformProviderBalanceAccount("bachs", "NGN")) != harness.Bachs.BalanceOf("", "NGN") {
+		harness.balance(ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN")) != harness.Paystack.PlatformBalanceOf("NGN") {
 		t.Fatal("coin sale revenue, processing fee or platform balance not mirrored")
 	}
 	harness.AssertLedgerHealthy()

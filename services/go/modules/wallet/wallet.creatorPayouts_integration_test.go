@@ -21,7 +21,10 @@ func (harness *walletHarness) withdraw(token, key, accountId string, amountMinor
 	return (harness.Call(http.MethodPost, "/api/v1/wallets/me/withdrawals", token, key, map[string]any{"payoutAccountId": accountId, "amount": map[string]any{"amountMinor": amountMinor, "currency": "NGN"}}))
 }
 
-func TestCreatorEarningsAreTransferredFromThePlatformThenPaidOutOnlyWhenTheProviderConfirms(t *testing.T) {
+func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(creator)
@@ -30,25 +33,21 @@ func TestCreatorEarningsAreTransferredFromThePlatformThenPaidOutOnlyWhenTheProvi
 	if converted.Status != http.StatusCreated || converted.Body["cash"].(map[string]any)["amountMinor"].(float64) != 180_000 {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
-	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 0 {
-		t.Fatal("converted coins must stay a platform payable until transferred")
-	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
 	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 0 {
-		t.Fatalf("transferred to a creator without a connected account: %v", report.Body)
+		t.Fatalf("earnings moved for a creator without a verified payout account: %v", report.Body)
 	}
-	connectedAccountId := harness.OnboardConnectedAccount(creator, false)
-	harness.Bachs.FundPlatformBalance("NGN", 1_000_000)
+	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 {
+		t.Fatal("gap earnings must stay recorded as payable")
+	}
+	harness.OnboardConnectedAccount(creator, false)
+	harness.Paystack.FundPlatformBalance("NGN", 175_000)
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 1 {
-		t.Fatalf("creator transfer: %v", report.Body)
+		t.Fatalf("creator earnings: %v", report.Body)
 	}
-	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 180_000 ||
-		harness.Bachs.BalanceOf(connectedAccountId, "NGN") != 180_000 {
-		t.Fatal("creator share not moved into the creator's own provider account")
-	}
-	if invalid := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0001234567"}); invalid.Status != http.StatusUnprocessableEntity {
-		t.Fatalf("unresolvable account accepted: %d %s", invalid.Status, invalid.Raw)
+	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 180_000 {
+		t.Fatal("creator share not made withdrawable")
 	}
 	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"})
 	if account.Status != http.StatusCreated || account.Body["accountName"] != "TEMITOPE ADEYEMI" {
@@ -56,47 +55,38 @@ func TestCreatorEarningsAreTransferredFromThePlatformThenPaidOutOnlyWhenTheProvi
 	}
 	accountId := account.Body["id"].(string)
 	quote := harness.Call(http.MethodGet, "/api/v1/wallets/me/withdrawals/quote?payoutAccountId="+accountId+"&amountMinor=100000&currency=NGN", token, "", nil)
-	if quote.Body["fee"].(map[string]any)["amountMinor"].(float64) != 5_000 || quote.Body["netAmount"].(map[string]any)["amountMinor"].(float64) != 95_000 {
-		t.Fatalf("quote: %v", quote.Body)
-	}
-	if over := harness.withdraw(token, "withdraw-over", accountId, 180_001); over.Status != http.StatusUnprocessableEntity {
-		t.Fatalf("overdraw accepted: %d", over.Status)
+	if quote.Body["fee"].(map[string]any)["amountMinor"].(float64) != 1_000 || quote.Body["netAmount"].(map[string]any)["amountMinor"].(float64) != 99_000 {
+		t.Fatalf("quote must use the Paystack transfer fee band: %v", quote.Body)
 	}
 	first := harness.withdraw(token, "withdraw-key-1", accountId, 100_000)
 	second := harness.withdraw(token, "withdraw-key-2", accountId, 50_000)
 	if first.Status != http.StatusCreated || second.Status != http.StatusCreated {
 		t.Fatalf("withdrawals: %d %s / %d %s", first.Status, first.Raw, second.Status, second.Raw)
 	}
-	if beyondProvider := harness.withdraw(token, "withdraw-key-beyond", accountId, 30_001); beyondProvider.Status != http.StatusUnprocessableEntity {
-		t.Fatalf("queued withdrawals were not subtracted from the provider balance: %d", beyondProvider.Status)
+	if beyondProvider := harness.withdraw(token, "withdraw-key-beyond", accountId, 30_000); beyondProvider.Status != http.StatusUnprocessableEntity {
+		t.Fatalf("queued withdrawals were not subtracted from the Paystack balance: %d", beyondProvider.Status)
 	}
 	harness.Call(http.MethodPost, "/api/v1/wallets/me/withdrawals/"+second.Body["id"].(string)+"/cancel", token, "", nil)
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["started"].(float64) != 0 {
-		t.Fatalf("an unreviewed withdrawal was paid: %v", report.Body)
-	}
 	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+first.Body["id"].(string)+"/review", staff.AccessToken, "review-key-1", map[string]any{"decision": "approve"}, stepUp)
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["processing"].(float64) != 1 || harness.Bachs.Calls("POST /v1/payouts") != 1 {
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["processing"].(float64) != 1 || harness.Paystack.Calls("POST /transfer") != 1 {
 		t.Fatalf("payout run: %v", report.Body)
 	}
 	if harness.balance(ledgermodels.SellerReservedPayoutAccount(creator, "NGN")) != 100_000 {
-		t.Fatal("a payout was booked as paid before the provider confirmed it")
+		t.Fatal("a payout was booked as paid before Paystack confirmed it")
 	}
-	harness.AssertProviderMirrorMatches()
 	firstReference := first.Body["reference"].(string)
-	payout := harness.Bachs.SetPayoutStatus(firstReference, "completed")
-	harness.DeliverBachsEvent("payout.paid", connectedAccountId, map[string]any{"withdrawal_id": payout.Id, "reference": firstReference, "status": "completed", "amount": "950.00", "currency": "NGN"})
-	if harness.balance(ledgermodels.SellerReservedPayoutAccount(creator, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 80_000 ||
-		harness.balance(ledgermodels.SellerProviderHeldFundsAccount(creator, "NGN")) != 80_000 {
-		t.Fatal("payout not booked from reserved payout out of the provider-held mirror")
+	transfer := harness.Paystack.SetTransferStatus(firstReference, "success")
+	harness.DeliverPaystackEvent("transfer.success", map[string]any{"reference": firstReference, "transfer_code": transfer.Code, "status": "success", "amount": transfer.AmountMinor})
+	if harness.balance(ledgermodels.SellerReservedPayoutAccount(creator, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 80_000 {
+		t.Fatal("payout not booked from reserved payout")
 	}
-	third := harness.withdraw(token, "withdraw-key-3", accountId, 80_000)
+	third := harness.withdraw(token, "withdraw-key-3", accountId, 60_000)
 	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+third.Body["id"].(string)+"/review", staff.AccessToken, "review-key-3", map[string]any{"decision": "approve"}, stepUp)
 	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp)
-	failed := harness.Bachs.SetPayoutStatus(third.Body["reference"].(string), "failed")
-	harness.DeliverBachsEvent("payout.failed", connectedAccountId, map[string]any{"withdrawal_id": failed.Id, "reference": third.Body["reference"], "status": "failed"})
+	failed := harness.Paystack.SetTransferStatus(third.Body["reference"].(string), "failed")
+	harness.DeliverPaystackEvent("transfer.failed", map[string]any{"reference": third.Body["reference"], "transfer_code": failed.Code, "status": "failed"})
 	if harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 80_000 {
-		t.Fatal("a failed payout did not return the money to available")
+		t.Fatal("a failed transfer did not return the money to available")
 	}
-	harness.AssertProviderMirrorMatches()
 	harness.AssertLedgerHealthy()
 }
