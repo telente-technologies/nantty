@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/earnedCoins.converted.v1.json",
+  "title": "EarnedCoinsConverted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coinConversionId",
+    "userId",
+    "coins",
+    "cash"
+  ],
+  "properties": {
+    "coinConversionId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "coins": {
+      "type": "integer"
+    },
+    "cash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}

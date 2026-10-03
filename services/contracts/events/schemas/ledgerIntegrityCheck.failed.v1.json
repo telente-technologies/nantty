@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ledgerIntegrityCheck.failed.v1.json",
+  "title": "LedgerIntegrityCheckFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "currencies",
+    "accountsWithDriftedBalances",
+    "everyCurrencyBalanced",
+    "everyCachedBalanceMatchesLines"
+  ],
+  "properties": {
+    "currencies": {
+      "type": "array"
+    },
+    "accountsWithDriftedBalances": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "everyCurrencyBalanced": {
+      "type": "boolean"
+    },
+    "everyCachedBalanceMatchesLines": {
+      "type": "boolean"
+    }
+  }
+}

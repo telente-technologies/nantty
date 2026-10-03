@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/journalEntry.reversed.v1.json",
+  "title": "JournalEntryReversed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "journalEntryId",
+    "reversesEntryId",
+    "reference",
+    "kind",
+    "reason"
+  ],
+  "properties": {
+    "journalEntryId": {
+      "type": "string"
+    },
+    "reversesEntryId": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}
