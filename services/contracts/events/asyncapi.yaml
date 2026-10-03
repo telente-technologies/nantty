@@ -113,6 +113,74 @@ channels:
         $ref: '#/components/messages/guestMuted'
       guestReconnecting:
         $ref: '#/components/messages/guestReconnecting'
+      paymentSucceeded:
+        $ref: '#/components/messages/paymentSucceeded'
+      paymentFailed:
+        $ref: '#/components/messages/paymentFailed'
+      paymentAmountMismatchDetected:
+        $ref: '#/components/messages/paymentAmountMismatchDetected'
+      paymentDuplicateRefunded:
+        $ref: '#/components/messages/paymentDuplicateRefunded'
+      paymentRefundSucceeded:
+        $ref: '#/components/messages/paymentRefundSucceeded'
+      paymentRefundFailed:
+        $ref: '#/components/messages/paymentRefundFailed'
+      payoutTransferSucceeded:
+        $ref: '#/components/messages/payoutTransferSucceeded'
+      payoutTransferFailed:
+        $ref: '#/components/messages/payoutTransferFailed'
+      storePurchaseRefunded:
+        $ref: '#/components/messages/storePurchaseRefunded'
+      escrowHeld:
+        $ref: '#/components/messages/escrowHeld'
+      escrowReleased:
+        $ref: '#/components/messages/escrowReleased'
+      escrowRefunded:
+        $ref: '#/components/messages/escrowRefunded'
+      escrowPartiallyRefunded:
+        $ref: '#/components/messages/escrowPartiallyRefunded'
+      directPaymentReceived:
+        $ref: '#/components/messages/directPaymentReceived'
+      disputeOpened:
+        $ref: '#/components/messages/disputeOpened'
+      disputeResolved:
+        $ref: '#/components/messages/disputeResolved'
+      disputeClosed:
+        $ref: '#/components/messages/disputeClosed'
+      disputeMessagePosted:
+        $ref: '#/components/messages/disputeMessagePosted'
+      coinPurchaseCompleted:
+        $ref: '#/components/messages/coinPurchaseCompleted'
+      coinPurchaseRefunded:
+        $ref: '#/components/messages/coinPurchaseRefunded'
+      coinTransferCompleted:
+        $ref: '#/components/messages/coinTransferCompleted'
+      earnedCoinsConverted:
+        $ref: '#/components/messages/earnedCoinsConverted'
+      withdrawalRequested:
+        $ref: '#/components/messages/withdrawalRequested'
+      withdrawalApproved:
+        $ref: '#/components/messages/withdrawalApproved'
+      withdrawalCancelled:
+        $ref: '#/components/messages/withdrawalCancelled'
+      withdrawalFailed:
+        $ref: '#/components/messages/withdrawalFailed'
+      payoutCompleted:
+        $ref: '#/components/messages/payoutCompleted'
+      payoutFailed:
+        $ref: '#/components/messages/payoutFailed'
+      sellerCreditMatured:
+        $ref: '#/components/messages/sellerCreditMatured'
+      journalEntryReversed:
+        $ref: '#/components/messages/journalEntryReversed'
+      reconciliationBreakFound:
+        $ref: '#/components/messages/reconciliationBreakFound'
+      ledgerIntegrityCheckFailed:
+        $ref: '#/components/messages/ledgerIntegrityCheckFailed'
+      giftTransactionCommitted:
+        $ref: '#/components/messages/giftTransactionCommitted'
+      battleSettlementCompleted:
+        $ref: '#/components/messages/battleSettlementCompleted'
 operations:
   publishAuthEvents:
     action: send
@@ -186,6 +254,45 @@ operations:
       - $ref: '#/channels/domainEvents/messages/guestRemoved'
       - $ref: '#/channels/domainEvents/messages/guestMuted'
       - $ref: '#/channels/domainEvents/messages/guestReconnecting'
+  publishMoneyEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/paymentSucceeded'
+      - $ref: '#/channels/domainEvents/messages/paymentFailed'
+      - $ref: '#/channels/domainEvents/messages/paymentAmountMismatchDetected'
+      - $ref: '#/channels/domainEvents/messages/paymentDuplicateRefunded'
+      - $ref: '#/channels/domainEvents/messages/paymentRefundSucceeded'
+      - $ref: '#/channels/domainEvents/messages/paymentRefundFailed'
+      - $ref: '#/channels/domainEvents/messages/payoutTransferSucceeded'
+      - $ref: '#/channels/domainEvents/messages/payoutTransferFailed'
+      - $ref: '#/channels/domainEvents/messages/storePurchaseRefunded'
+      - $ref: '#/channels/domainEvents/messages/escrowHeld'
+      - $ref: '#/channels/domainEvents/messages/escrowReleased'
+      - $ref: '#/channels/domainEvents/messages/escrowRefunded'
+      - $ref: '#/channels/domainEvents/messages/escrowPartiallyRefunded'
+      - $ref: '#/channels/domainEvents/messages/directPaymentReceived'
+      - $ref: '#/channels/domainEvents/messages/disputeOpened'
+      - $ref: '#/channels/domainEvents/messages/disputeResolved'
+      - $ref: '#/channels/domainEvents/messages/disputeClosed'
+      - $ref: '#/channels/domainEvents/messages/disputeMessagePosted'
+      - $ref: '#/channels/domainEvents/messages/coinPurchaseCompleted'
+      - $ref: '#/channels/domainEvents/messages/coinPurchaseRefunded'
+      - $ref: '#/channels/domainEvents/messages/coinTransferCompleted'
+      - $ref: '#/channels/domainEvents/messages/earnedCoinsConverted'
+      - $ref: '#/channels/domainEvents/messages/withdrawalRequested'
+      - $ref: '#/channels/domainEvents/messages/withdrawalApproved'
+      - $ref: '#/channels/domainEvents/messages/withdrawalCancelled'
+      - $ref: '#/channels/domainEvents/messages/withdrawalFailed'
+      - $ref: '#/channels/domainEvents/messages/payoutCompleted'
+      - $ref: '#/channels/domainEvents/messages/payoutFailed'
+      - $ref: '#/channels/domainEvents/messages/sellerCreditMatured'
+      - $ref: '#/channels/domainEvents/messages/journalEntryReversed'
+      - $ref: '#/channels/domainEvents/messages/reconciliationBreakFound'
+      - $ref: '#/channels/domainEvents/messages/ledgerIntegrityCheckFailed'
+      - $ref: '#/channels/domainEvents/messages/giftTransactionCommitted'
+      - $ref: '#/channels/domainEvents/messages/battleSettlementCompleted'
 components:
   messages:
     accountRegistered:
@@ -517,3 +624,241 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/guest.reconnecting.v1.json' } }
+    paymentSucceeded:
+      name: payment.succeeded
+      headers: { type: object, properties: { eventType: { const: payment.succeeded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payment.succeeded.v1.json' } }
+    paymentFailed:
+      name: payment.failed
+      headers: { type: object, properties: { eventType: { const: payment.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payment.failed.v1.json' } }
+    paymentAmountMismatchDetected:
+      name: paymentAmountMismatch.detected
+      headers: { type: object, properties: { eventType: { const: paymentAmountMismatch.detected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/paymentAmountMismatch.detected.v1.json' } }
+    paymentDuplicateRefunded:
+      name: payment.duplicateRefunded
+      headers: { type: object, properties: { eventType: { const: payment.duplicateRefunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payment.duplicateRefunded.v1.json' } }
+    paymentRefundSucceeded:
+      name: paymentRefund.succeeded
+      headers: { type: object, properties: { eventType: { const: paymentRefund.succeeded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/paymentRefund.succeeded.v1.json' } }
+    paymentRefundFailed:
+      name: paymentRefund.failed
+      headers: { type: object, properties: { eventType: { const: paymentRefund.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/paymentRefund.failed.v1.json' } }
+    payoutTransferSucceeded:
+      name: payoutTransfer.succeeded
+      headers: { type: object, properties: { eventType: { const: payoutTransfer.succeeded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payoutTransfer.succeeded.v1.json' } }
+    payoutTransferFailed:
+      name: payoutTransfer.failed
+      headers: { type: object, properties: { eventType: { const: payoutTransfer.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payoutTransfer.failed.v1.json' } }
+    storePurchaseRefunded:
+      name: storePurchase.refunded
+      headers: { type: object, properties: { eventType: { const: storePurchase.refunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storePurchase.refunded.v1.json' } }
+    escrowHeld:
+      name: escrow.held
+      headers: { type: object, properties: { eventType: { const: escrow.held } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.held.v1.json' } }
+    escrowReleased:
+      name: escrow.released
+      headers: { type: object, properties: { eventType: { const: escrow.released } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.released.v1.json' } }
+    escrowRefunded:
+      name: escrow.refunded
+      headers: { type: object, properties: { eventType: { const: escrow.refunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.refunded.v1.json' } }
+    escrowPartiallyRefunded:
+      name: escrow.partiallyRefunded
+      headers: { type: object, properties: { eventType: { const: escrow.partiallyRefunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.partiallyRefunded.v1.json' } }
+    directPaymentReceived:
+      name: directPayment.received
+      headers: { type: object, properties: { eventType: { const: directPayment.received } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/directPayment.received.v1.json' } }
+    disputeOpened:
+      name: dispute.opened
+      headers: { type: object, properties: { eventType: { const: dispute.opened } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dispute.opened.v1.json' } }
+    disputeResolved:
+      name: dispute.resolved
+      headers: { type: object, properties: { eventType: { const: dispute.resolved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dispute.resolved.v1.json' } }
+    disputeClosed:
+      name: dispute.closed
+      headers: { type: object, properties: { eventType: { const: dispute.closed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dispute.closed.v1.json' } }
+    disputeMessagePosted:
+      name: disputeMessage.posted
+      headers: { type: object, properties: { eventType: { const: disputeMessage.posted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/disputeMessage.posted.v1.json' } }
+    coinPurchaseCompleted:
+      name: coinPurchase.completed
+      headers: { type: object, properties: { eventType: { const: coinPurchase.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/coinPurchase.completed.v1.json' } }
+    coinPurchaseRefunded:
+      name: coinPurchase.refunded
+      headers: { type: object, properties: { eventType: { const: coinPurchase.refunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/coinPurchase.refunded.v1.json' } }
+    coinTransferCompleted:
+      name: coinTransfer.completed
+      headers: { type: object, properties: { eventType: { const: coinTransfer.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/coinTransfer.completed.v1.json' } }
+    earnedCoinsConverted:
+      name: earnedCoins.converted
+      headers: { type: object, properties: { eventType: { const: earnedCoins.converted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/earnedCoins.converted.v1.json' } }
+    withdrawalRequested:
+      name: withdrawal.requested
+      headers: { type: object, properties: { eventType: { const: withdrawal.requested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/withdrawal.requested.v1.json' } }
+    withdrawalApproved:
+      name: withdrawal.approved
+      headers: { type: object, properties: { eventType: { const: withdrawal.approved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/withdrawal.approved.v1.json' } }
+    withdrawalCancelled:
+      name: withdrawal.cancelled
+      headers: { type: object, properties: { eventType: { const: withdrawal.cancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/withdrawal.cancelled.v1.json' } }
+    withdrawalFailed:
+      name: withdrawal.failed
+      headers: { type: object, properties: { eventType: { const: withdrawal.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/withdrawal.failed.v1.json' } }
+    payoutCompleted:
+      name: payout.completed
+      headers: { type: object, properties: { eventType: { const: payout.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payout.completed.v1.json' } }
+    payoutFailed:
+      name: payout.failed
+      headers: { type: object, properties: { eventType: { const: payout.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payout.failed.v1.json' } }
+    sellerCreditMatured:
+      name: sellerCredit.matured
+      headers: { type: object, properties: { eventType: { const: sellerCredit.matured } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/sellerCredit.matured.v1.json' } }
+    journalEntryReversed:
+      name: journalEntry.reversed
+      headers: { type: object, properties: { eventType: { const: journalEntry.reversed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/journalEntry.reversed.v1.json' } }
+    reconciliationBreakFound:
+      name: reconciliationBreak.found
+      headers: { type: object, properties: { eventType: { const: reconciliationBreak.found } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reconciliationBreak.found.v1.json' } }
+    ledgerIntegrityCheckFailed:
+      name: ledgerIntegrityCheck.failed
+      headers: { type: object, properties: { eventType: { const: ledgerIntegrityCheck.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ledgerIntegrityCheck.failed.v1.json' } }
+    giftTransactionCommitted:
+      name: giftTransaction.committed
+      headers: { type: object, properties: { eventType: { const: giftTransaction.committed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/giftTransaction.committed.v1.json' } }
+    battleSettlementCompleted:
+      name: battleSettlement.completed
+      headers: { type: object, properties: { eventType: { const: battleSettlement.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/battleSettlement.completed.v1.json' } }
