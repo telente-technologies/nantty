@@ -22,7 +22,7 @@ func (LiveSession) Fields() []ent.Field {
 		field.UUID("host_id", uuid.UUID{}).Immutable(),
 		field.String("title").NotEmpty().MaxLen(140),
 		field.Enum("category").Values("justChatting", "gaming", "music", "irl", "education", "shopping").Default("justChatting"),
-		field.Enum("visibility").Values("public", "followers").Default("public"),
+		field.Enum("visibility").Values("public", "followers", "subscribers").Default("public"),
 		field.Enum("state").Values("idle", "connecting", "live", "ended").Default("idle"),
 		field.Time("started_at").Optional().Nillable(),
 		field.Time("ended_at").Optional().Nillable(),
