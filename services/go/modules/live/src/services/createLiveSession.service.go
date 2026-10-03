@@ -1,0 +1,123 @@
+package services
+
+import (
+	"context"
+	"slices"
+	"strings"
+	liveerrors "zudomart/modules/live/src/errors"
+	"zudomart/modules/live/src/events"
+	"zudomart/modules/live/src/types"
+
+	"zudomart/modules/live/src/databases/schema"
+	"zudomart/modules/live/src/generated/ent"
+	"zudomart/modules/live/src/generated/ent/livesession"
+)
+
+var liveAdPlacements = []string{"beforeJoin", "naturalBreak", "betweenSegments", "overlay", "end"}
+
+func (service *LiveService) buildLiveAdSettingsRecord(input types.LiveMonetizationInput) (map[string]any, *string, error) {
+	if input.LiveAdSettings == nil {
+		return nil, nil, nil
+	}
+	settings := input.LiveAdSettings
+	if settings.AllowAds && input.AcceptedLiveAdTermsVersion == "" {
+		return nil, nil, liveerrors.LiveAdTermsRequired
+	}
+	if input.AcceptedLiveAdTermsVersion != "" && input.AcceptedLiveAdTermsVersion != service.Settings.LiveAdTermsCurrentVersion {
+		return nil, nil, liveerrors.LiveAdTermsOutdated
+	}
+	if settings.MaxInterruptions < 0 || settings.MaxInterruptions > 3 || settings.MinIntervalMinutes < 0 {
+		return nil, nil, liveerrors.Unprocessable("LIVE_AD_SETTINGS_INVALID", "Allow 0 to 3 interruptions and a non-negative interval.")
+	}
+	for _, placement := range settings.Placements {
+		if !slices.Contains(liveAdPlacements, placement) {
+			return nil, nil, liveerrors.Unprocessable("LIVE_AD_SETTINGS_INVALID", "Unknown ad placement "+placement+".")
+		}
+	}
+	now := formatTime(service.Now())
+	record := map[string]any{
+		"allowAds": settings.AllowAds, "placements": append([]string{}, settings.Placements...), "maxInterruptions": settings.MaxInterruptions,
+		"minIntervalMinutes": settings.MinIntervalMinutes, "showAdIndicator": settings.ShowAdIndicator,
+		"acceptedTermsVersion": nil, "acceptedAt": nil,
+	}
+	var version *string
+	if input.AcceptedLiveAdTermsVersion != "" {
+		accepted := input.AcceptedLiveAdTermsVersion
+		version = &accepted
+		record["acceptedTermsVersion"], record["acceptedAt"] = accepted, now
+	}
+	return record, version, nil
+}
+
+func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.Actor, input types.CreateLiveSessionInput) (types.LiveSessionView, error) {
+	if service.Settings.RequireCreatorProgramToHost && !actor.HasRole("creator") && !actor.HasRole("admin") {
+		return types.LiveSessionView{}, liveerrors.CreatorProgramNeeded
+	}
+	isSeller := actor.HasRole("seller")
+	if input.Category == "shopping" && !isSeller {
+		return types.LiveSessionView{}, liveerrors.ShoppingNeedsStore
+	}
+	if len(input.ProductIds) > 0 {
+		if err := service.PinPolicy.CanPinProducts(ctx, actor.UserId, actor.Roles, input.ProductIds); err != nil {
+			return types.LiveSessionView{}, err
+		}
+	}
+	adSettings, termsVersion, err := service.buildLiveAdSettingsRecord(input.Monetization)
+	if err != nil {
+		return types.LiveSessionView{}, err
+	}
+	now := service.Now()
+	var created *ent.LiveSession
+	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		running, err := tx.LiveSession.Query().Where(livesession.HostID(actor.UserId), livesession.StateIn(livesession.StateLive, livesession.StateConnecting)).Exist(ctx)
+		if err != nil || running {
+			return orLiveAlreadyRunning(err)
+		}
+		identifier := schema.NewTimeOrderedUuid()
+		builder := tx.LiveSession.Create().SetID(identifier).SetHostID(actor.UserId).SetTitle(strings.TrimSpace(input.Title)).
+			SetCategory(livesession.Category(input.Category)).SetVisibility(livesession.Visibility(input.Visibility)).
+			SetLivekitRoom("live-" + identifier.String()).SetHostIsCreator(actor.HasRole("creator")).SetCountryCode(input.CountryCode).
+			SetNillableStoreID(input.StoreId)
+		if adSettings != nil {
+			builder.SetLiveAdSettings(adSettings).SetNillableAcceptedLiveAdTermsVersion(termsVersion)
+			if termsVersion != nil {
+				builder.SetAcceptedLiveAdTermsAt(now)
+			}
+		}
+		if input.Monetization.SponsorshipLine != "" {
+			builder.SetSponsorshipLine(input.Monetization.SponsorshipLine)
+		}
+		if input.StartNow {
+			builder.SetState(livesession.StateLive).SetStartedAt(now)
+		}
+		if created, err = builder.Save(ctx); err != nil {
+			return err
+		}
+		for _, productId := range input.ProductIds {
+			if err := tx.LiveProduct.Create().SetLiveID(identifier).SetProductID(productId).Exec(ctx); err != nil {
+				return err
+			}
+		}
+		if err := tx.GuestSlot.Create().SetLiveID(identifier).SetUserID(actor.UserId).SetRole("host").SetState("onStage").
+			SetExpiresAt(now).SetJoinedAt(now).Exec(ctx); err != nil {
+			return err
+		}
+		if !input.StartNow {
+			return nil
+		}
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveStarted, identifier.String(), now, events.LiveStartedEventData{
+			LiveId: identifier.String(), HostId: actor.UserId.String(), Title: created.Title, Category: string(created.Category),
+		})
+	})
+	if err != nil {
+		return types.LiveSessionView{}, err
+	}
+	return service.presentLiveSession(ctx, created)
+}
+
+func orLiveAlreadyRunning(err error) error {
+	if err != nil {
+		return err
+	}
+	return liveerrors.LiveAlreadyRunning
+}
