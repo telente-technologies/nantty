@@ -11,13 +11,14 @@ import styles from "@/components/auth/authForms.module.css";
 export const metadata: Metadata = { title: "Sign in" };
 
 const demoAccounts = [
-  { identifier: "adaeze@ifelifestyle.ng", description: "Owner · Gold Premium store" },
+  { identifier: "adaeze@ifelifestyle.ng", description: "Owner · Business plan" },
   { identifier: "tunde@ifelifestyle.ng", description: "Manager" },
-  { identifier: "blessing@ifelifestyle.ng", description: "Cashier (register only)" },
-  { identifier: "ibrahim@ifelifestyle.ng", description: "Inventory" },
-  { identifier: "ngozi@ifelifestyle.ng", description: "Support" },
-  { identifier: "kelechi@kelechikicks.ng", description: "Verification pending" },
-  { identifier: "funmi@funmibakes.ng", description: "Verified, no Gold plan yet" },
+  { identifier: "blessing@ifelifestyle.ng", description: "Sales staff" },
+  { identifier: "ibrahim@ifelifestyle.ng", description: "Inventory staff" },
+  { identifier: "ngozi@ifelifestyle.ng", description: "Sales staff" },
+  { identifier: "amina.bello@example.com", description: "Accountant" },
+  { identifier: "kelechi@kelechikicks.ng", description: "Free plan · verification pending" },
+  { identifier: "funmi@funmibakes.ng", description: "Free plan" },
   { identifier: "dayo@gmail.com", description: "Buyer account, not a seller" },
 ];
 
