@@ -9,7 +9,7 @@ import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { pointsService } from "@/services/points.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { RankingBoard, RankingScope } from "@/types/socialGraph.type";
@@ -36,6 +36,7 @@ const CATEGORIES = [
 ] as const;
 
 export function RankingsScreen() {
+  const { colors } = useTheme();
   const [scope, setScope] = useState<RankingScope>("global");
   const [board, setBoard] = useState<RankingBoard>("supporter");
   const [categoryId, setCategoryId] = useState<string>(CATEGORIES[0].id);
