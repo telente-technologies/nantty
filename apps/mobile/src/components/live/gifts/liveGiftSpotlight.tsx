@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, useWindowDimensions, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
@@ -10,6 +9,7 @@ import { findLiveGiftArtworkPreset } from "./liveGiftArtworkPresets.constant";
 import type { LiveGiftAnimationEntry } from "./liveGiftOverlayQueues.hook";
 import { LiveGiftStaticCard } from "./liveGiftStaticCard";
 import { LiveGiftLightRays, LiveGiftOrbitRing, LiveGiftParticleBurst } from "./liveGiftParticles";
+import { liveGlass } from "../liveSurface.constant";
 
 export interface LiveGiftSpotlightProps {
   readonly entry: LiveGiftAnimationEntry;
@@ -77,7 +77,7 @@ function AnimatedLiveGiftSpotlight({ entry, streamerUsername, onFinished }: Live
         </Animated.View>
       </Animated.View>
       <Animated.View style={[styles.caption, { opacity }]}>
-        <Text size={isGlobal ? 18 : 16} weight={700} lineHeight={22} color={colors.white} align="center" numberOfLines={1} style={styles.shadow}>
+        <Text size={isGlobal ? 18 : 16} weight={700} lineHeight={22} color={liveGlass.ink} align="center" numberOfLines={1} style={styles.shadow}>
           {event.sender.name}
         </Text>
         <Text size={13} weight={600} lineHeight={17} color="#FFE14D" align="center" style={styles.shadow}>
@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center" },
   largeDim: { backgroundColor: "rgba(10,0,30,0.35)" },
   globalTint: { backgroundColor: "rgba(60,0,90,0.12)" },
-  marquee: { position: "absolute", top: 120, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.45)" },
+  marquee: { position: "absolute", top: 120, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 999, backgroundColor: liveGlass.background, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border },
   layer: { position: "absolute" },
-  caption: { marginTop: 28, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.42)", maxWidth: "84%" },
+  caption: { marginTop: 28, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 999, backgroundColor: liveGlass.background, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border, maxWidth: "84%" },
   shadow: { textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 4 },
 });

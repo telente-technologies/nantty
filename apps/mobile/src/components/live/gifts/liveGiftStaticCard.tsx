@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 import type { LiveGiftAnimationEntry } from "./liveGiftOverlayQueues.hook";
+import { liveGlass } from "../liveSurface.constant";
 
 export interface LiveGiftStaticCardProps {
   readonly entry: LiveGiftAnimationEntry;
@@ -25,7 +25,7 @@ export function LiveGiftStaticCard({ entry, streamerUsername, onFinished }: Live
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
       <View accessible accessibilityLiveRegion="polite" accessibilityLabel={`${event.sender.name} sent ${entry.giftName}`} style={styles.card}>
         <LiveGiftArtwork assetKey={event.animationAssetKey} size={96} />
-        <Text size={16} weight={700} lineHeight={22} color={colors.white} align="center" numberOfLines={1}>{event.sender.name}</Text>
+        <Text size={16} weight={700} lineHeight={22} color={liveGlass.ink} align="center" numberOfLines={1}>{event.sender.name}</Text>
         <Text size={13} weight={600} lineHeight={17} color="#FFE14D" align="center">{`sent ${entry.giftName}${comboSuffix}${recipientSuffix}`}</Text>
       </View>
     </View>
@@ -34,5 +34,5 @@ export function LiveGiftStaticCard({ entry, streamerUsername, onFinished }: Live
 
 const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center" },
-  card: { alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 14, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.6)", maxWidth: "84%" },
+  card: { alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 14, borderRadius: 16, backgroundColor: liveGlass.backgroundStrong, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border, maxWidth: "84%" },
 });

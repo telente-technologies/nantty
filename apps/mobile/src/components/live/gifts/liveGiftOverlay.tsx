@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Gift24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { UserSummary } from "@/types";
 
 import { LiveViewerPointsPill } from "@/components/live/points/liveViewerPointsPill";
@@ -19,6 +18,7 @@ import { useLiveGiftOverlayQueues } from "./liveGiftOverlayQueues.hook";
 import { LiveGiftSpotlight } from "./liveGiftSpotlight";
 import { useLiveGiftGoal } from "./liveGiftStats.hook";
 import { LiveTopGiftersChip } from "./liveTopGiftersChip";
+import { liveGlass } from "../liveSurface.constant";
 
 export interface LiveGiftOverlayProps {
   readonly liveId: string;
@@ -48,8 +48,8 @@ export function LiveGiftOverlay({ liveId, streamer, isHost, topOffset }: LiveGif
         {goal ? <LiveGiftGoalBar goal={goal} onPress={isHost ? () => setOpenSheet("goalEditor") : undefined} /> : null}
         {isHost ? (
           <Pressable accessibilityRole="button" accessibilityLabel="Open gift dashboard" onPress={() => setOpenSheet("hostDashboard")} style={styles.hostChip}>
-            <Gift24Icon size={16} color={colors.white} />
-            <Text size={11} weight={600} lineHeight={14} color={colors.white}>
+            <Gift24Icon size={16} color={liveGlass.ink} />
+            <Text size={11} weight={600} lineHeight={14} color={liveGlass.ink}>
               {queues.sessionTotalCoins ? `${queues.sessionTotalCoins.toLocaleString("en-US")} coins received` : goal ? "Gift dashboard" : "Set a gift goal"}
             </Text>
           </Pressable>
@@ -81,6 +81,6 @@ export function LiveGiftOverlay({ liveId, streamer, isHost, topOffset }: LiveGif
 
 const styles = StyleSheet.create({
   topStack: { position: "absolute", left: 16, gap: 6, alignItems: "flex-start" },
-  hostChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.4)" },
+  hostChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: liveGlass.background, borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border },
   bannerArea: { position: "absolute", left: 8, right: 60, bottom: 300 },
 });

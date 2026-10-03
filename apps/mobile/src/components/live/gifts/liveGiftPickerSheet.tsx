@@ -6,8 +6,8 @@ import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
 import { useCoinBalance } from "@/components/coins/coinWallet.hook";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveGift } from "@/types";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { type LiveGiftPanelSection, useLiveGiftCatalog } from "./liveGiftCatalog.hook";
 import { LiveGiftComboButton } from "./liveGiftComboButton";
@@ -29,6 +29,8 @@ export interface LiveGiftPickerSheetProps {
 }
 
 export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose }: LiveGiftPickerSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [section, setSection] = useState<LiveGiftPanelSection>("popular");
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedGiftId, setSelectedGiftId] = useState<string | null>(null);
@@ -53,12 +55,12 @@ export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose 
 
   return (
     <>
-      <BottomSheet visible={visible && !isBuyCoinsOpen} onClose={onClose} title="Send a gift" floating>
+      <BottomSheet visible={visible && !isBuyCoinsOpen} onClose={onClose} title="Send a gift" subtitle="Your gift appears on screen for everyone" floating>
         <View style={styles.body}>
           <View style={styles.balanceRow}>
             <CoinBalanceChip onPress={() => setIsBuyCoinsOpen(true)} />
             <Pressable accessibilityRole="button" accessibilityLabel="Recharge coins" hitSlop={8} onPress={() => setIsBuyCoinsOpen(true)} style={styles.recharge}>
-              <Text size={13} weight={600} lineHeight={16} color={colors.white}>
+              <Text size={13} weight={600} lineHeight={16} color={colors.onPrimary}>
                 Recharge
               </Text>
             </Pressable>
@@ -90,7 +92,7 @@ export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose 
                   onPress={() => setQuantity(option)}
                   style={[styles.quantityChip, quantity === option ? styles.quantityChipSelected : null]}
                 >
-                  <Text size={13} weight={600} lineHeight={16} color={quantity === option ? colors.white : colors.text}>
+                  <Text size={13} weight={600} lineHeight={16} color={quantity === option ? colors.onPrimary : colors.text}>
                     ×{option}
                   </Text>
                 </Pressable>
@@ -115,15 +117,15 @@ export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   balanceRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  recharge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.primary },
+  recharge: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySolid },
   tabs: { flexDirection: "row", gap: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider },
   tab: { paddingBottom: 8 },
   tabUnderline: { position: "absolute", left: 0, right: 0, bottom: -1, height: 2, borderRadius: 1, backgroundColor: colors.primary },
   grid: { flexDirection: "row", flexWrap: "wrap", columnGap: "2%", rowGap: 6, minHeight: 180 },
   quantityRow: { flexDirection: "row", gap: 8 },
   quantityChip: { flex: 1, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: colors.divider, alignItems: "center" },
-  quantityChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-});
+  quantityChipSelected: { backgroundColor: colors.primarySolid, borderColor: colors.primarySolid },
+}));

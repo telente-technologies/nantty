@@ -3,8 +3,8 @@ import { Pressable, StyleSheet } from "react-native";
 
 import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveGift } from "@/types";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 
@@ -17,6 +17,7 @@ export interface LiveGiftPickerTileProps {
 }
 
 export function LiveGiftPickerTile({ gift, isSelected, onSendOnce }: LiveGiftPickerTileProps) {
+  const styles = useStyles();
   const holdTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopContinuousSending = () => {
     if (holdTimer.current) clearInterval(holdTimer.current);
@@ -52,8 +53,8 @@ export function LiveGiftPickerTile({ gift, isSelected, onSendOnce }: LiveGiftPic
   );
 }
 
-const styles = StyleSheet.create({
-  tile: { width: "23.5%", paddingVertical: 8, borderRadius: 10, borderWidth: 1.5, borderColor: "transparent", alignItems: "center", gap: 3 },
-  selected: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  tile: { width: "23.5%", paddingVertical: 8, borderRadius: 12, borderWidth: 1.5, borderColor: "transparent", alignItems: "center", gap: 3 },
+  selected: { borderColor: colors.primarySolid, backgroundColor: colors.primaryTint },
   pressed: { transform: [{ scale: 0.94 }] },
-});
+}));
