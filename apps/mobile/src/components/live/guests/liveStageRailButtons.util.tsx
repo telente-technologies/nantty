@@ -4,6 +4,10 @@ import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 import type { LiveStageRailButton } from "./liveStageControlRail";
 import type { LiveStageController } from "./liveStage.hook";
+import { Camera24Icon, Flag24Icon, Hand24Icon, Hourglass24Icon, Microphone24Icon, MicrophoneSlash24Icon, SignOut24Icon, Swords24Icon, Users24Icon, VideoCamera24Icon } from "@/components/icons";
+import { liveGlass } from "../liveSurface.constant";
+
+const RAIL_INK = liveGlass.ink;
 
 const confirmEndingBattleEarly = (stage: LiveStage, controller: LiveStageController) =>
   showAlertWithButtons("End battle now?", "Scores are final as they are right now, and the battle is settled immediately.", [
@@ -32,27 +36,27 @@ export function buildHostStageRailButtons(
   actions: { openGuests: () => void; openBattleSetup: () => void; openBattleProposal: () => void },
 ): LiveStageRailButton[] {
   const battleButton: LiveStageRailButton = stage.battleProposal
-    ? { key: "battle", glyph: "⏳", label: "Pending", onPress: actions.openBattleProposal }
+    ? { key: "battle", glyph: <Hourglass24Icon size={20} color={RAIL_INK} />, label: "Pending", onPress: actions.openBattleProposal }
     : isBattleStillRunning(stage.activeBattle)
-      ? { key: "battle", glyph: "🏁", label: "End battle", onPress: () => confirmEndingBattleEarly(stage, controller) }
-      : { key: "battle", glyph: "⚔️", label: "Battle", isDisabled: stage.streamers.length < 2 || stage.activeBattle !== null, onPress: actions.openBattleSetup };
-  return [{ key: "guests", glyph: "👥", label: "Guests", badgeCount: stage.joinRequests.length, onPress: actions.openGuests }, battleButton];
+      ? { key: "battle", glyph: <Flag24Icon size={20} color={RAIL_INK} />, label: "End battle", onPress: () => confirmEndingBattleEarly(stage, controller) }
+      : { key: "battle", glyph: <Swords24Icon size={20} color={RAIL_INK} />, label: "Battle", isDisabled: stage.streamers.length < 2 || stage.activeBattle !== null, onPress: actions.openBattleSetup };
+  return [{ key: "guests", glyph: <Users24Icon size={20} color={RAIL_INK} />, label: "Guests", badgeCount: stage.joinRequests.length, onPress: actions.openGuests }, battleButton];
 }
 
 export function buildAudienceStageRailButtons(stage: LiveStage, controller: LiveStageController): LiveStageRailButton[] {
   const me = stage.streamers.find((streamer) => streamer.user.id === controller.signedInUserId);
   if (stage.myRole === "guest" && me) {
     return [
-      { key: "mic", glyph: me.audioMuted ? "🔇" : "🎙️", label: me.audioMuted ? "Unmute" : "Mute", onPress: () => controller.setStreamerAudioMuted("me", !me.audioMuted) },
-      { key: "camera", glyph: "📷", label: me.videoMuted ? "Cam on" : "Cam off", onPress: () => controller.setStreamerVideoMuted("me", !me.videoMuted) },
-      { key: "leave", glyph: "🚪", label: "Leave", onPress: () => confirmLeavingStage(stage, controller) },
+      { key: "mic", glyph: me.audioMuted ? <MicrophoneSlash24Icon size={20} color={RAIL_INK} /> : <Microphone24Icon size={20} color={RAIL_INK} />, label: me.audioMuted ? "Unmute" : "Mute", onPress: () => controller.setStreamerAudioMuted("me", !me.audioMuted) },
+      { key: "camera", glyph: me.videoMuted ? <Camera24Icon size={20} color={RAIL_INK} /> : <VideoCamera24Icon size={20} color={RAIL_INK} />, label: me.videoMuted ? "Cam on" : "Cam off", onPress: () => controller.setStreamerVideoMuted("me", !me.videoMuted) },
+      { key: "leave", glyph: <SignOut24Icon size={20} color={RAIL_INK} />, label: "Leave", onPress: () => confirmLeavingStage(stage, controller) },
     ];
   }
   const isRequestPending = stage.myJoinRequest?.state === "pending";
   return [
     {
       key: "join",
-      glyph: "🙋",
+      glyph: <Hand24Icon size={20} color={RAIL_INK} />,
       label: isRequestPending ? "Requested" : "Join",
       isDisabled: isRequestPending || controller.isActionPending,
       onPress: controller.requestToJoinStage,

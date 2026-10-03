@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import { apiConfig } from "@/config/api.config";
+import { shouldUseMockForPath } from "@/config/api.config";
 import { startMockLiveGiftEmitter } from "@/services/liveGiftMockEmitter.service";
 import { realtimeService } from "@/services/realtime.service";
 import type { LiveGiftSentEvent } from "@/types";
@@ -24,7 +24,7 @@ const deliverGiftEventToChannelOnce = (channel: LiveGiftChannel, event: LiveGift
 };
 
 const startGiftTransportForLive = (liveId: string, streamerUserId: string, channel: LiveGiftChannel) => {
-  if (apiConfig.useMocks) return startMockLiveGiftEmitter(liveId, streamerUserId, (event) => deliverGiftEventToChannelOnce(channel, event));
+  if (shouldUseMockForPath("/ws")) return startMockLiveGiftEmitter(liveId, streamerUserId, (event) => deliverGiftEventToChannelOnce(channel, event));
   return realtimeService.subscribeToRealtimeEvents((event) => {
     if (event.type === "gift.sent" && event.liveId === liveId) deliverGiftEventToChannelOnce(channel, event);
   });
