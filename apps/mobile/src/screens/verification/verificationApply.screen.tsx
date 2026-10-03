@@ -12,7 +12,7 @@ import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { paymentsService } from "@/services/payments.service";
@@ -21,6 +21,7 @@ import type { IdentityDocumentType } from "@/types/account.type";
 import type { VerificationApplicationInput } from "@/types/verification.type";
 
 export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"VerificationApply">) {
+  const { colors } = useTheme();
   const { color } = route.params;
   const queryClient = useQueryClient();
   const plans = useVerificationPlansQuery();

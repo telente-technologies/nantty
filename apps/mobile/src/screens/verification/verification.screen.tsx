@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { buildContactMailtoUrl } from "@/constants/contactEmails.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
@@ -24,6 +24,8 @@ const COLOUR_SECTIONS = [
 ];
 
 export function VerificationScreen({ navigation }: MainScreenProps<"Verification">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const plans = useVerificationPlansQuery();
   const mine = useMyVerificationQuery();
@@ -105,9 +107,9 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 20 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   section: { gap: 10 },
-});
+}));
