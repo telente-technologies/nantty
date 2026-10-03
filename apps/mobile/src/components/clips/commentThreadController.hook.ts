@@ -44,12 +44,14 @@ export interface VideoReplyOptions {
 export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void, videoReply?: VideoReplyOptions) {
   const signedInUser = useAuthStore((s) => s.user);
   const [isPickingVideoReplyComment, setIsPickingVideoReplyComment] = useState(false);
+  const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
   const signedInAuthor: UserSummary = signedInUser ?? FALLBACK_SIGNED_IN_AUTHOR;
   const [threadState, setThreadState] = useState<CommentThreadLocalState>(EMPTY_THREAD_STATE);
 
   useEffect(() => {
     setThreadState(EMPTY_THREAD_STATE);
     setIsPickingVideoReplyComment(false);
+    setHighlightedCommentId(null);
   }, [postId]);
 
   const canReplyWithVideoTo = (comment: Comment) => !!videoReply && canReplyWithVideo(comment, videoReply.clipAuthorId, signedInUser?.id ?? null);
@@ -169,6 +171,8 @@ export function useCommentThreadController(postId: string | null, closeContainin
     startVideoReplyTo,
     isPickingVideoReplyComment,
     setIsPickingVideoReplyComment,
+    highlightedCommentId,
+    setHighlightedCommentId,
     replyTarget: threadState.replyTarget,
     applyLocalOverridesToComment,
     toggleLikeOnComment,

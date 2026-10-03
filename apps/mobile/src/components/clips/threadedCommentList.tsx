@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useEffect, useRef, type ReactElement } from "react";
 import { ActivityIndicator, FlatList, Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Text } from "@/components/ui/text";
@@ -23,12 +23,30 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
   const locallyPostedTopLevel = thread
     .locallyPostedCommentsFor(TOP_LEVEL_PARENT_KEY)
     .map((comment): CommentWithReplies => ({ ...comment, previewReplies: [] }));
+  const listRef = useRef<FlatList<CommentWithReplies>>(null);
+  const scrolledToCommentId = useRef<string | null>(null);
   const visibleTopLevelComments = mergeServerAndLocalComments(topLevelComments, locallyPostedTopLevel, true).filter(
     (comment) => !thread.isCommentDeleted(comment.id),
   );
 
+  const highlightedCommentId = thread.highlightedCommentId;
+  const highlightedIndex = highlightedCommentId
+    ? visibleTopLevelComments.findIndex((c) => c.id === highlightedCommentId || c.previewReplies.some((r) => r.id === highlightedCommentId))
+    : -1;
+  useEffect(() => {
+    if (!highlightedCommentId || scrolledToCommentId.current === highlightedCommentId) return;
+    if (highlightedIndex === -1) {
+      if (!query.isLoading) loadNextPageOfTopLevelComments();
+      return;
+    }
+    scrolledToCommentId.current = highlightedCommentId;
+    listRef.current?.scrollToIndex({ index: highlightedIndex, viewPosition: 0.2, animated: false });
+  }, [highlightedCommentId, highlightedIndex, query.isLoading, topLevelComments.length]);
+
   return (
     <FlatList
+      ref={listRef}
+      onScrollToIndexFailed={({ averageItemLength, index }) => listRef.current?.scrollToOffset({ offset: averageItemLength * index, animated: false })}
       style={styles.flex}
       data={visibleTopLevelComments}
       keyExtractor={(comment) => comment.id}

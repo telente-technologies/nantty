@@ -26,6 +26,7 @@ export interface CommentRowProps {
   readonly onDelete?: () => void;
   readonly onReplyWithVideo?: () => void;
   readonly isPickingForVideoReply?: boolean;
+  readonly isHighlighted?: boolean;
 }
 
 const TOP_LEVEL_AVATAR_SIZE = 36;
@@ -42,6 +43,7 @@ export function CommentRow({
   onDelete,
   onReplyWithVideo,
   isPickingForVideoReply,
+  isHighlighted,
 }: CommentRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
@@ -75,7 +77,7 @@ export function CommentRow({
         if (event.nativeEvent.actionName === "replyWithVideo") onReplyWithVideo?.();
         if (event.nativeEvent.actionName === "report") requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report");
       }}
-      style={[styles.row, isPending && styles.pending, isPickingForVideoReply && onReplyWithVideo && styles.pickable]}
+      style={[styles.row, isPending && styles.pending, (isHighlighted || (isPickingForVideoReply && onReplyWithVideo)) && styles.pickable]}
     >
       <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
         <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />

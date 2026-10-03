@@ -24,10 +24,11 @@ export interface ClipCommentsSheetProps {
   readonly postId: string | null;
   readonly myAvatarUrl: string | null;
   readonly clip?: Clip | null;
+  readonly highlightCommentId?: string | null;
   readonly onClose: () => void;
 }
 
-export function ClipCommentsSheet({ postId, myAvatarUrl, clip, onClose }: ClipCommentsSheetProps) {
+export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentId, onClose }: ClipCommentsSheetProps) {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
@@ -41,6 +42,14 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, onClose }: ClipCo
   });
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const isClipAuthor = !!clip && !!signedInUserId && clip.author.id === signedInUserId;
+
+  const { setHighlightedCommentId } = commentThread;
+  useEffect(() => {
+    if (!postId || !highlightCommentId) return;
+    setHighlightedCommentId(highlightCommentId);
+    const timer = setTimeout(() => setHighlightedCommentId(null), 6000);
+    return () => clearTimeout(timer);
+  }, [postId, highlightCommentId, setHighlightedCommentId]);
 
   useEffect(() => navigation.addListener("blur", onClose), [navigation, onClose]);
 

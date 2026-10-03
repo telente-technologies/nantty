@@ -67,6 +67,7 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
           onDelete={() => thread.deleteOwnComment(comment)}
           onReplyWithVideo={thread.canReplyWithVideoTo(comment) ? () => thread.startVideoReplyTo(comment) : undefined}
           isPickingForVideoReply={thread.isPickingVideoReplyComment}
+          isHighlighted={thread.highlightedCommentId === comment.id}
         />
       </View>
       {visibleReplies.map((reply) => (
