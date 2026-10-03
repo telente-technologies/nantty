@@ -85,8 +85,9 @@ func (handler Handler) recordSuspension(ctx context.Context, command Command, ta
 		if err != nil {
 			return err
 		}
-		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.SuspensionStartedType, target.Account.ID.String(), now, accountevents.SuspensionStartedData{
-			AccountId: target.Account.ID.String(), SuspensionId: created.ID.String(), ReasonCode: reasonCode, Reason: reason, EndsAt: endsAt, DeletionDueAt: created.DeletionDueAt.UTC().Format(time.RFC3339),
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.AccountSuspendedType, target.Account.ID.String(), now, accountevents.AccountSuspendedData{
+			AccountId: target.Account.ID.String(), CaseId: created.ID.String(), Reason: reason, ReasonCode: reasonCode, Policy: "Community Guidelines", PolicyUrl: accountevents.CommunityGuidelinesUrl, AppealUrl: accountevents.AppealUrl,
+			AppealBy: created.DeletionDueAt.UTC().Format(time.RFC3339), DeletionAt: created.DeletionDueAt.UTC().Format(time.RFC3339), Until: endsAt,
 		}); err != nil {
 			return err
 		}
