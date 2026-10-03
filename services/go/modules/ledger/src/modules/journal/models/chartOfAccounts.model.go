@@ -113,3 +113,31 @@ func CoinSalesRevenueAccount(currency string) AccountRef {
 func CreatorCoinPayoutExpenseAccount(currency string) AccountRef {
 	return platformAccount("expense:creatorCoinPayouts", currency, AccountKindExpense)
 }
+
+func PaymentsAwaitingApplicationAccount(currency string) AccountRef {
+	return platformAccount("liability:paymentsAwaitingApplication", currency, AccountKindLiability)
+}
+
+func PaymentProcessingFeeExpenseAccount(currency string) AccountRef {
+	return platformAccount("expense:paymentProcessingFees", currency, AccountKindExpense)
+}
+
+func RefundsPayableAccount(provider, currency string) AccountRef {
+	return platformAccount("liability:refundsPayable:"+provider, currency, AccountKindLiability)
+}
+
+func AppStoreFeeExpenseAccount(store, currency string) AccountRef {
+	return platformAccount("expense:appStoreFees:"+store, currency, AccountKindExpense)
+}
+
+func PayoutsInFlightAccount(provider, currency string) AccountRef {
+	return platformAccount("liability:payoutsInFlight:"+provider, currency, AccountKindLiability)
+}
+
+func CreatorSubscriptionRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:creatorSubscriptions", currency, AccountKindRevenue)
+}
+
+func UserCoinDebtAccount(userId string) AccountRef {
+	return AccountRef{Code: "user:" + userId + ":coinDebt", Currency: CoinUnit, Kind: AccountKindAsset, OwnerType: "user", OwnerId: userId, AllowNegativeBalance: false}
+}
