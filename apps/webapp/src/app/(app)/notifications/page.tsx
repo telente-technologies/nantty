@@ -1,5 +1,6 @@
 "use client";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { RetryButton } from "@/components/ui/controls";
@@ -67,7 +68,7 @@ export default function NotificationsPage() {
                 onClick={() => (notification.read ? undefined : markOneAsReadMutation.mutate(notification.id))}
               >
                 <span className={styles.itemTitle}>{notification.title}</span>
-                <span className={styles.itemBody}>{notification.body}</span>
+                <span className={styles.itemBody}><MentionText text={notification.body} /></span>
                 <span className={styles.itemTime}>{formatTimeSincePosted(notification.createdAt)}</span>
               </button>
             </li>
