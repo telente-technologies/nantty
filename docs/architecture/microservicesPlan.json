@@ -1,4 +1,32 @@
 {
+  "platform": {
+    "database": "One primary Aurora PostgreSQL cluster with PostGIS (one database). Each service owns one schema and is the only writer of its tables; every other service gets read-only access through the shared zudomart_readers role, granted per table/column in the owner's migrations. One login role per service (svc_<service>).",
+    "ownership": {
+      "go": "accounts/users, wallet/ledger, payments, marketplace (catalog, inventory), orders",
+      "typescript": "social orchestration (posts, feed, notifications, media metadata)",
+      "elixir": "realtime (sockets, presence, chat delivery)",
+      "python": "AI/ML and analytics",
+      "opensearch": "search indexes (later, fed from events)",
+      "redis": "cache and ephemeral realtime state"
+    },
+    "events": "No Kafka on day one. Business write + outbox row commit in one Postgres transaction; a relay publishes to the DomainEventPublisher interface (AWS: SNS topic zudomart-domain-events, fan-out to per-consumer SQS queues with eventType filter policies; EventBridge when cross-account/rule routing is needed). Kafka/MSK can replace the publisher later without touching business code.",
+    "jobs": "Background jobs (email, media processing, thumbnails, reports, payouts, search indexing) go through the JobQueue interface (AWS: SQS with dead-letter queues). Consumers are idempotent on the job/event id.",
+    "domainEventExamples": [
+      "order.created",
+      "payment.completed",
+      "gift.sent",
+      "stream.started",
+      "post.created",
+      "user.followed",
+      "content.reported",
+      "account.registered"
+    ],
+    "compute": "ECS on Fargate first (not EKS). Step Functions only for real multi-step orchestration (payout runs, dispute timelines). Go services ship as 6 deployables: go-identity (auth, users, currency, admin), go-commerce (catalog, inventory, orders, analytics), go-money (payments, wallet, ledger, escrow, subscriptions, creators, rewards), go-live (live), go-ads (ads), go-trust (moderation).",
+    "media": "Media bytes live in S3 behind CloudFront; Postgres stores only metadata and keys. LiveKit carries live video.",
+    "later": "OpenSearch (search) and ClickHouse (seller/creator analytics) come later, fed from domain events.",
+    "decisions": "Python returns scores (ranking, fraud risk, moderation classification) and never makes the final financial or moderation call; Go/TS apply a deterministic policy (allow / hold / review / reject) and record it. Feed and clip ranking runs a safety/integrity filter before ranking.",
+    "local": "infra/local/docker-compose.yml: Postgres 17 + PostGIS, Valkey, LocalStack 4.9 (SNS/SQS), SeaweedFS (S3), LiveKit, OTel collector + Jaeger; OpenSearch and ClickHouse behind compose profiles."
+  },
   "go": {
     "auth": {
       "registration": { "commands": ["registerAccount", "generateUsernameForNewAccount"], "queries": ["checkUsernameAvailability"], "events": ["accountRegistered"] },
@@ -21,18 +49,22 @@
     },
     "catalog": {
       "stores": { "commands": ["createStore", "updateStore", "suspendStore", "linkStoreToBrand"], "queries": ["getStore", "listStores"], "events": ["storeCreated", "storeSuspended", "officialStoreStatusChanged"] },
-      "storeMembers": { "commands": ["inviteStoreMember", "changeStoreMemberRole", "removeStoreMember"], "queries": ["listStoreMembers"], "events": [] },
+      "storeMembers": { "commands": ["inviteStoreMemberByUsername", "acceptStoreInvitation", "changeStoreMemberRole", "removeStoreMember", "leaveStore"], "queries": ["listStoreMembers", "listMyStoreMemberships"], "events": ["storeMemberJoined", "storeMemberRemoved"], "stack": "Go catalog + Postgres", "why": "Staff are existing Zudomart users invited by username; membership is per store, so one person can work for several sellers with the same account." },
       "sellerApplications": { "commands": ["submitSellerApplication", "reviewSellerApplication"], "queries": ["getMySellerApplication", "listSellerApplications"], "events": ["sellerApplicationSubmitted", "sellerApplicationReviewed"] },
       "products": { "commands": ["createProduct", "updateProduct", "publishProduct", "unpublishProduct", "deleteProduct", "tagProductWithBrand"], "queries": ["getProductDetail", "listProducts", "listStoreProducts", "listBrandProducts"], "events": ["productPublished", "productUpdated", "productUnpublished"] },
       "productVariants": { "commands": ["addProductVariant", "updateProductVariant"], "queries": [], "events": [] },
       "categories": { "commands": ["createCategory", "updateCategory", "deleteCategory"], "queries": ["listCategories", "getCategory"], "events": [] },
       "martHome": { "commands": ["updateMartHomeSections"], "queries": ["getMartHome"], "events": [] },
-      "productEngagement": { "commands": ["likeProduct", "unlikeProduct", "bookmarkProduct"], "queries": [], "events": ["productLiked"] }
+      "productEngagement": { "commands": ["likeProduct", "unlikeProduct", "bookmarkProduct"], "queries": [], "events": ["productLiked"] },
+      "storeRoles": { "commands": ["createStoreRole", "updateStoreRolePermissions", "deleteStoreRole"], "queries": ["listStoreRoles", "getMyStorePermissions"], "events": ["storeRolePermissionsChanged"], "stack": "Go catalog + Postgres; permissions copied into a short-lived store-scoped claim set cached in Redis", "why": "Owner/manager/staff presets plus custom roles; every seller endpoint checks a named permission (products.write, orders.fulfil, inventory.adjust, reports.export, team.manage, apiKeys.manage) denied by default." }
     },
     "inventory": {
       "stock": { "commands": ["adjustStockLevel", "reserveStockForCheckout", "releaseStockReservation", "commitStockReservation"], "queries": ["getStockLevels", "listLowStockItems"], "events": ["stockAdjusted", "stockReserved", "lowStockDetected", "oversellFlagged"] },
-      "locations": { "commands": ["createStockLocation", "updateStockLocation"], "queries": ["listStockLocations"], "events": [] },
-      "transfers": { "commands": ["createStockTransfer", "receiveStockTransfer"], "queries": ["listStockTransfers"], "events": ["stockTransferred"] }
+      "locations": { "commands": ["createStockLocation", "updateStockLocation", "archiveStockLocation", "setDefaultFulfilmentLocation"], "queries": ["listStockLocations", "getStockLocation"], "events": [], "stack": "Go inventory + Postgres", "why": "Locations cover warehouses, shops used only as pickup points, and third-party fulfilment centres; stock is per variant per location." },
+      "transfers": { "commands": ["createStockTransfer", "receiveStockTransfer"], "queries": ["listStockTransfers"], "events": ["stockTransferred"] },
+      "suppliers": { "commands": ["createSupplier", "updateSupplier", "archiveSupplier", "createPurchaseOrder", "receivePurchaseOrderItems", "cancelPurchaseOrder"], "queries": ["listSuppliers", "listPurchaseOrders", "getPurchaseOrder"], "events": ["purchaseOrderReceived"], "stack": "Go inventory + Postgres", "why": "Suppliers and purchase orders write stock movements, so they share the transaction boundary with stock levels." },
+      "stockMovements": { "commands": [], "queries": ["listStockMovements", "exportStockMovements"], "events": ["stockMovementRecorded"], "stack": "Go inventory + Postgres (append-only movement table)", "why": "Every stock change (sale, return, transfer, receipt, manual adjustment) is an immutable movement row; levels are a projection, which makes audits and reports exact." },
+      "reorder": { "commands": ["setReorderRule", "removeReorderRule", "generateReorderSuggestions"], "queries": ["listReorderSuggestions"], "events": ["reorderPointReached"], "stack": "Go inventory + Postgres; demand input from python dataPipelines.forecastProductDemand", "why": "Reorder points are simple rules evaluated on movement; the forecast only refines suggested quantities." }
     },
     "orders": {
       "carts": { "commands": ["addItemToCart", "changeCartItemQuantity", "removeCartItem", "clearCart", "mergeGuestCart"], "queries": ["getMyCart"], "events": [] },
@@ -50,7 +82,7 @@
     },
     "wallet": {
       "wallets": { "commands": ["openWallet", "freezeWallet"], "queries": ["getMyWallet", "listWalletTransactions", "listEscrowHolds"], "events": ["walletOpened"] },
-      "coins": { "commands": ["purchaseCoins", "transferCoinsToUser", "convertEarnedCoinsToCash"], "queries": ["listCoinPackages", "getCoinBalance"], "events": ["coinsPurchased", "coinsTransferred"] },
+      "coins": { "commands": ["purchaseCoins", "transferCoinsToUser", "convertEarnedCoinsToCash", "spendCoinsOnGift"], "queries": ["listCoinPackages", "getCoinBalance"], "events": ["coinsPurchased", "coinsTransferred"] },
       "payoutAccounts": { "commands": ["addPayoutAccount", "removePayoutAccount"], "queries": ["listPayoutAccounts"], "events": [] },
       "withdrawals": { "commands": ["requestWithdrawal", "approveWithdrawal", "processWithdrawal"], "queries": ["listWithdrawals", "quoteWithdrawalProviderFee"], "events": ["withdrawalRequested", "withdrawalProcessed"] }
     },
@@ -67,7 +99,8 @@
       "plans": { "commands": ["createPlan", "updatePlanPerks", "updatePlanPrices"], "queries": ["listVerificationPlans", "listGoldPlans", "getPlanEntitlements"], "events": ["planUpdated"] },
       "profileSubscriptions": { "commands": ["startSubscription", "cancelSubscription", "resumeSubscription", "markSubscriptionPastDue", "expireSubscription"], "queries": ["getMySubscription", "getSellerAccess"], "events": ["subscriptionStarted", "subscriptionCancelled", "subscriptionPastDue", "subscriptionExpired"] },
       "creatorSubscriptions": { "commands": ["createCreatorPlan", "subscribeToCreator", "cancelCreatorSubscription"], "queries": ["listCreatorPlans", "listCreatorSubscribers"], "events": ["creatorSubscriptionStarted"] },
-      "billing": { "commands": ["chargeRenewal", "handleBillingWebhook"], "queries": [], "events": ["renewalCharged", "renewalFailed"] }
+      "billing": { "commands": ["chargeRenewal", "handleBillingWebhook"], "queries": [], "events": ["renewalCharged", "renewalFailed"] },
+      "sellerPlans": { "commands": ["changeSellerPlan", "scheduleSellerPlanDowngrade"], "queries": ["getSellerPlanEntitlements", "listSellerPlans", "checkSellerFeatureAccess"], "events": ["sellerPlanChanged"], "stack": "Go subscriptions + Postgres; entitlements cached in Redis and enforced by the gateway and each owning service", "why": "Free / Pro / Business. Free sellers get the full dashboard with limits (product count, locations, team seats, report history, API keys); Pro/Business raise limits and unlock exports, webhooks, multi-location and advanced analytics. Entitlements are data, not code branches." }
     },
     "ads": {
       "adAccounts": { "commands": ["createAdAccount", "inviteAdAccountMember"], "queries": ["listMyAdAccounts"], "events": [] },
@@ -83,21 +116,14 @@
     },
     "creators": {
       "creatorProgram": { "commands": ["applyToCreatorProgram", "reviewCreatorApplication", "suspendCreator"], "queries": ["getMyCreatorStatus", "checkCreatorEligibility"], "events": ["creatorApproved"] },
-      "earnings": { "commands": ["creditGiftEarnings", "creditAffiliateCommission", "creditAdRevenueShare"], "queries": ["getCreatorDashboard", "listCreatorEarnings", "getRevenueRules"], "events": ["creatorEarningsCredited"] },
+      "earnings": { "commands": ["creditGiftEarnings", "creditAffiliateCommission", "creditAdRevenueShare", "creditBattleSettlement"], "queries": ["getCreatorDashboard", "listCreatorEarnings", "getRevenueRules"], "events": ["creatorEarningsCredited"] },
       "affiliations": { "commands": ["requestAffiliation", "approveAffiliation", "setAffiliateCommissionRate"], "queries": ["listAffiliations"], "events": [] },
-      "gifts": { "commands": ["sendGiftDuringLive", "sendTip"], "queries": ["listGiftCatalog"], "events": ["giftSent", "tipSent"] }
+      "tips": { "commands": ["sendTip"], "queries": [], "events": ["tipSent"] }
     },
     "rewards": {
       "loyalty": { "commands": ["awardLoyaltyPoints", "redeemLoyaltyPoints"], "queries": ["getLoyaltySummary"], "events": ["loyaltyPointsAwarded"] },
       "cashback": { "commands": ["creditCashbackOnEscrowRelease"], "queries": ["listCashbackCredits"], "events": [] },
       "referralRewards": { "commands": ["rewardSuccessfulReferral"], "queries": ["getReferralRewards"], "events": ["referralRewarded"] }
-    },
-    "pos": {
-      "registers": { "commands": ["createRegister", "updateRegister"], "queries": ["listRegisters"], "events": [] },
-      "shifts": { "commands": ["openShift", "recordCashPayInOrOut", "closeShiftWithCountedCash"], "queries": ["getShiftReport"], "events": ["shiftClosed"] },
-      "sales": { "commands": ["recordPointOfSaleSale", "syncOfflineSales", "parkSale"], "queries": ["getSaleReceipt", "listSales"], "events": ["posSaleRecorded"] },
-      "refunds": { "commands": ["refundPointOfSaleSale", "exchangeSaleItems"], "queries": [], "events": [] },
-      "staffPins": { "commands": ["setStaffPin", "verifyStaffPin"], "queries": [], "events": [] }
     },
     "moderation": {
       "reports": { "commands": ["submitReport", "actOnReport"], "queries": ["listReportQueue", "listMyReports"], "events": ["contentReported", "moderationActionTaken"] },
@@ -108,9 +134,13 @@
       "automationRules": { "commands": ["createAutomationRule", "evaluateAutomationRules"], "queries": ["listAutomationRules"], "events": [] }
     },
     "live": {
-      "liveSessions": { "commands": ["startLiveSession", "endLiveSession", "joinLiveSession", "leaveLiveSession"], "queries": ["getLiveSession", "listSuggestedLives"], "events": ["liveStarted", "liveEnded"] },
-      "liveKitAccess": { "commands": ["issueLiveKitHostToken", "issueLiveKitViewerToken"], "queries": [], "events": [] },
-      "liveProducts": { "commands": ["pinProductToLive", "unpinProductFromLive"], "queries": ["listLiveProducts"], "events": [] }
+      "liveSessions": { "commands": ["startLiveSession", "endLiveSession", "joinLiveSession", "leaveLiveSession", "setLiveSessionCategory"], "queries": ["getLiveSession", "listSuggestedLives", "listLivesByCategory"], "events": ["liveStarted", "liveEnded"] },
+      "liveKitAccess": { "commands": ["issueLiveKitHostToken", "issueLiveKitViewerToken", "issueLiveKitGuestToken", "revokeLiveKitParticipant", "muteLiveKitTrack"], "queries": [], "events": [] },
+      "liveProducts": { "commands": ["pinProductToLive", "unpinProductFromLive"], "queries": ["listLiveProducts"], "events": [], "why": "Products are optional: a session with zero pinned products is a non-selling creator stream." },
+      "categories": { "commands": ["createLiveCategory", "updateLiveCategory", "archiveLiveCategory"], "queries": ["listLiveCategories"], "events": ["liveCategoryChanged"], "stack": "Go live service + Postgres", "why": "Categories (shopping, music, gaming, talk, education) drive discovery and let creators stream without selling; listing is cache-friendly and owned next to the session it labels." },
+      "gifts": { "commands": ["sendGiftWithIdempotencyKey", "extendGiftCombo", "createGift", "updateGift", "retireGift"], "queries": ["listGiftCatalog", "listTopGiftersForSession", "listTopGiftersForCreator"], "events": ["giftSent", "giftComboExtended", "topGiftersChanged"], "stack": "Go live + wallet/ledger (coins debited via postBalancedJournalEntry), fan-out via Elixir realtime", "why": "Gifting is money movement at chat speed: Go gives a cheap synchronous path to the ledger with an Idempotency-Key per tap, combos are a short Redis window keyed by sender+gift+session, top gifters are a Redis sorted set rebuilt from ledger events; Phoenix PubSub fans the animation out to every viewer without touching Go." },
+      "guests": { "commands": ["inviteGuestToLive", "requestToJoinLive", "acceptGuestInvitation", "declineGuestInvitation", "removeGuestFromLive", "muteGuestAudio", "unmuteGuestAudio", "disableGuestVideo", "changeGuestLayoutSlot"], "queries": ["listLiveGuests"], "events": ["liveGuestJoined", "liveGuestRemoved", "liveGuestMuted"], "stack": "Go live (state machine, max 10 publishers) + LiveKit SFU (publish grants via issueLiveKitGuestToken) + Elixir presence", "why": "The guest seat list is authoritative state with a hard cap of 10 streamers, so it lives in Postgres behind Go with a row lock per session; LiveKit already does SFU media, Go only mints/revokes publish grants and mutes tracks through the LiveKit server API; Elixir broadcasts stage changes." },
+      "battles": { "commands": ["startLiveBattle", "acceptLiveBattleInvitation", "recordBattleScoreFromGift", "endLiveBattle", "settleLiveBattle", "forfeitLiveBattle"], "queries": ["getLiveBattle", "getBattleScoreboard", "listBattleHistory"], "events": ["liveBattleStarted", "battleScoreChanged", "liveBattleEnded", "liveBattleSettled"], "stack": "Go live (battle state machine + settlement through ledger journal entries, optional winner-takes-all) + LiveKit for the split-screen media + Elixir for realtime score events", "why": "Scores come from gifts, so the authoritative score must be derived from the same idempotent gift writes; Go settles once with a balanced journal entry (normal split or winnerTakesAll moving the loser's battle earnings to the winner); Elixir pushes battleScoreChanged at sub-second latency to all viewers of both rooms." }
     },
     "currency": {
       "exchangeRates": { "commands": ["refreshExchangeRates"], "queries": ["getExchangeRate", "convertMoney"], "events": ["exchangeRatesRefreshed"] },
@@ -122,6 +152,10 @@
       "auditLog": { "commands": ["recordAuditEvent"], "queries": ["searchAuditLog", "exportAuditLog"], "events": [] },
       "platformConfig": { "commands": ["updateRevenueRules", "updateFeatureFlags", "updateUsernameRules", "updateCreatorEligibilityRules"], "queries": ["getPlatformConfig"], "events": ["revenueRulesChanged"] },
       "platformMetrics": { "commands": [], "queries": ["getPlatformOverview"], "events": [] }
+    },
+    "analytics": {
+      "sellerAnalytics": { "commands": [], "queries": ["getSellerOverview", "getSalesTimeSeries", "getTopProducts", "getTrafficSources", "getLiveSalesBreakdown", "getInventoryTurnover", "getCustomerCohorts"], "events": [], "stack": "Go analytics module (go-commerce deployable) querying an Aurora read replica now and ClickHouse (clickhouse-go v2) later; ClickHouse (added later) fed from domain events by python dataPipelines.eventIngestion; until then reads go to Aurora read replicas", "why": "Day one: an Aurora read replica, because the single cluster already holds every schema and the read-only grants make cross-schema rollups possible without touching the writer. Later: ClickHouse fed from domain events, once dashboards need wide time-bucketed aggregations over views, clicks and live events at volumes where GROUP BYs on OLTP storage get slow; the query API stays the same." },
+      "reportExports": { "commands": ["requestReportExport", "cancelReportExport"], "queries": ["listReportExports", "getReportExportDownloadUrl"], "events": ["reportExportReady"], "stack": "Go analytics + ClickHouse + S3 signed URLs; async job on the SQS JobQueue", "why": "Exports (CSV/XLSX) run off the request path, stream from ClickHouse to S3 and are gated by seller plan history limits." }
     }
   },
   "typescript": {
@@ -173,7 +207,9 @@
     "integrations": {
       "webhooks": { "commands": ["deliverOutboundWebhook", "retryFailedWebhook"], "queries": ["listWebhookDeliveries"], "events": [] },
       "couriers": { "commands": ["createCourierShipment", "syncCourierTracking"], "queries": ["listCouriers"], "events": ["trackingUpdated"] },
-      "partnerApis": { "commands": ["issuePartnerApiKey", "revokePartnerApiKey"], "queries": [], "events": [] }
+      "partnerApis": { "commands": ["issuePartnerApiKey", "revokePartnerApiKey"], "queries": [], "events": [] },
+      "sellerApiKeys": { "commands": ["createSellerApiKey", "revokeSellerApiKey", "rotateSellerApiKey"], "queries": ["listSellerApiKeys", "verifySellerApiKey"], "events": ["sellerApiKeyRevoked"], "stack": "TypeScript integrations (Zudojs + Prisma); keys stored as SHA-256 hashes with a visible prefix; gateway verifies via cached lookup", "why": "API keys are an edge concern checked on every partner request, so they sit next to the gateway in the same runtime; scopes reuse store role permission names." },
+      "sellerWebhooks": { "commands": ["createWebhookEndpoint", "updateWebhookEndpoint", "deleteWebhookEndpoint", "rotateWebhookSigningSecret", "redeliverWebhookEvent"], "queries": ["listWebhookEndpoints", "listWebhookDeliveries"], "events": ["webhookDeliveryFailed"], "stack": "TypeScript integrations consuming domain events from its SQS queue; HMAC-SHA256 signed deliveries with retries and backoff", "why": "Delivery is I/O-bound fan-out from the event bus with per-endpoint retry queues, a good fit for Node; Pro/Business only via sellerPlans entitlements." }
     },
     "campaigns": {
       "marketingCampaigns": { "commands": ["createMarketingCampaign", "sendMarketingCampaign"], "queries": ["listMarketingCampaigns"], "events": [] },
@@ -188,13 +224,24 @@
       "channels": { "commands": ["createBroadcastChannel", "postToChannel", "subscribeToChannel"], "queries": ["listChannelPosts"], "events": [] },
       "presence": { "commands": ["trackUserPresence"], "queries": ["listOnlineContacts"], "events": [] },
       "typing": { "commands": ["broadcastTypingIndicator"], "queries": [], "events": [] },
-      "liveActivity": { "commands": ["postLiveComment", "broadcastLiveReaction", "broadcastGiftAnimation", "updateViewerCount"], "queries": ["listRecentLiveComments"], "events": [] },
+      "liveActivity": { "commands": ["postLiveComment", "broadcastLiveReaction", "broadcastGiftAnimation", "updateViewerCount", "broadcastGiftCombo", "broadcastTopGiftersUpdate"], "queries": ["listRecentLiveComments"], "events": [] },
       "feedEvents": { "commands": ["broadcastCounterUpdate", "broadcastNewPostAvailable"], "queries": [], "events": [] },
       "notificationStream": { "commands": ["pushInAppNotification"], "queries": [], "events": [] },
-      "encryptionKeys": { "commands": ["publishDeviceKeyBundle"], "queries": ["fetchRecipientKeyBundles"], "events": [] }
+      "encryptionKeys": { "commands": ["publishDeviceKeyBundle"], "queries": ["fetchRecipientKeyBundles"], "events": [] },
+      "liveStage": { "commands": ["broadcastGuestStageChange", "trackLiveGuestPresence"], "queries": ["listLiveStage"], "events": [], "stack": "Elixir Phoenix channels + Presence", "why": "One topic per live room; Presence tracks guest seats and viewers across nodes with CRDTs." },
+      "battleScoreboard": { "commands": ["broadcastBattleScore", "broadcastBattleCountdown", "broadcastBattleResult"], "queries": [], "events": [], "stack": "Elixir Phoenix topics fed by battle.scoreChanged domain events from the realtime SQS queue", "why": "A battle spans two rooms; a dedicated topic joins both audiences and coalesces score bursts to ~5 updates/second." }
     }
   },
   "python": {
+    "intelligence": {
+      "eventsIngestion": { "commands": ["ingestEvents"], "queries": [], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built: the signed event envelope stored as Parquet and folded into online features in Redis." },
+      "feedRanking": { "commands": [], "queries": ["rankFeed", "rankClips", "selectSocialProof"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built; callers fall back to deterministic ordering when it is slow or down." },
+      "ads": { "commands": [], "queries": ["selectAds"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built: targeting, auction, pacing and ad load; go.ads owns campaigns and billing." },
+      "recommendations": { "commands": [], "queries": ["recommendProducts", "recommendAccounts", "recommendClips", "listTrending", "rerankSearchResults"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built." },
+      "risk": { "commands": [], "queries": ["scoreRisk"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built: fraud and abuse scoring used by orders, payments, wallet and live gifts." },
+      "experiments": { "commands": ["assignExperimentVariant"], "queries": ["getExperimentMetrics"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built." },
+      "audio": { "commands": ["registerSoundFingerprint", "updateSoundCopyrightStatus"], "queries": ["matchAudioExcerpt"], "events": [], "stack": "Python (FastAPI) in apps/intelligence, internal only, HMAC-signed requests; contract in apps/intelligence/apiContract.md", "why": "Already built: sound ownership and copyright matching for clips." }
+    },
     "dataPipelines": {
       "eventIngestion": { "commands": ["loadEventsIntoClickhouse"], "queries": [], "events": [] },
       "featureBuilding": { "commands": ["buildUserFeatures", "buildItemFeatures"], "queries": [], "events": [] },
