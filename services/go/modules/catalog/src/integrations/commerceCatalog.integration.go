@@ -36,6 +36,22 @@ func (catalog CommerceCatalog) ListStoreVariants(ctx context.Context, storeId uu
 	return references, nil
 }
 
+func (catalog CommerceCatalog) ListVariantsOfProduct(ctx context.Context, productId uuid.UUID) ([]commerceports.ProductSnapshot, error) {
+	identifiers, err := catalog.Container.Client.ProductVariant.Query().Where(productvariant.ProductID(productId)).Order(ent.Asc(productvariant.FieldPosition)).IDs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resolved, err := catalog.ResolveProductsForCheckout(ctx, identifiers)
+	if err != nil {
+		return nil, err
+	}
+	snapshots := make([]commerceports.ProductSnapshot, 0, len(identifiers))
+	for _, identifier := range identifiers {
+		snapshots = append(snapshots, resolved[identifier])
+	}
+	return snapshots, nil
+}
+
 func (catalog CommerceCatalog) SearchStoreVariantIds(ctx context.Context, storeId uuid.UUID, text string, limit int) ([]uuid.UUID, error) {
 	productIds, err := catalog.Container.Client.Product.Query().Where(product.StoreID(storeId), product.NameContainsFold(text)).IDs(ctx)
 	if err != nil {

@@ -11,6 +11,7 @@ func Api(status int, code, message string) *httpserver.ApiError {
 }
 
 var (
+	ProductLimitReached    = Api(http.StatusConflict, "PRODUCT_LIMIT_REACHED", "Your plan has reached its active product limit.")
 	StoreNotFound          = Api(http.StatusNotFound, "STORE_NOT_FOUND", "That store could not be found.")
 	StoreAlreadyExists     = Api(http.StatusConflict, "STORE_ALREADY_EXISTS", "That business profile already has a store.")
 	BusinessProfileInvalid = Api(http.StatusUnprocessableEntity, "BUSINESS_PROFILE_INVALID", "Choose one of your active business profiles.")

@@ -18,6 +18,7 @@ type CatalogSettings struct {
 	MediaPublicBaseUrl     string
 	ScheduledPublishPeriod time.Duration
 	OutboxBatchSize        int
+	InternalApiToken       string
 }
 
 func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -33,6 +34,7 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
 		RedisUrl:               reader.ReadStringOrDefault("CATALOG_REDIS_URL", ""),
 		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media"),
+		InternalApiToken:       reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		ScheduledPublishPeriod: reader.ReadDurationOrDefault("CATALOG_SCHEDULED_PUBLISH_INTERVAL", 30*time.Second),
 	}
 }

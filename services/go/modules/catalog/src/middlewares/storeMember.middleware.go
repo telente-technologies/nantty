@@ -10,6 +10,7 @@ import (
 	"zudomart/platform/commerceports"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/jwtauth"
+	"zudomart/platform/sellerplans"
 )
 
 type storeAccessContextKey struct{}
@@ -69,4 +70,24 @@ func resolveStoreAccess(deployed *container.Container, request *http.Request, pe
 		return commerceports.StoreAccess{}, errMissingPermission
 	}
 	return access, nil
+}
+
+func StoreMemberFeature(deployed *container.Container, permission, feature string, requireKey bool) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		authenticate := Authenticated(deployed)
+		if requireKey {
+			authenticate = Idempotent(deployed)
+		}
+		return authenticate(func(writer http.ResponseWriter, request *http.Request) {
+			access, err := resolveStoreAccess(deployed, request, permission)
+			if err != nil {
+				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
+				return
+			}
+			if !sellerplans.Default.RequireFeature(writer, request, access.OwnerAccountId, feature) {
+				return
+			}
+			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+		})
+	}
 }
