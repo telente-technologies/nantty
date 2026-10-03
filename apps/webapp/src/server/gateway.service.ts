@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { exchangeRefreshTokenForNewTokenPair, renewViewerSession, writeRenewedSessionCookies } from "@/server/authentication.service";
 import { callWebappBackend, type BackendResult } from "@/server/apiTransport.service";
+import { isPublicApiRead } from "@/config/guestBrowsing.config";
+import { resetViewerFieldsForAnonymousResult } from "@/server/anonymousViewerFields.service";
 import { isMutationProtectedAgainstCsrf, isRequestFromWebappOrigin, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies, writeApiTokenCookies } from "@/server/session.service";
 
@@ -53,8 +55,9 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
   if (!isAllowedApiPath(apiPath)) return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
 
-  const isPublicRoute = isPublicApiRequest(request.method, apiPath);
   const sessionId = readSessionIdFromCookies(request.cookies);
+  const isAnonymousPublicRead = !sessionId && isPublicApiRead(request.method, apiPath);
+  const isPublicRoute = isPublicApiRequest(request.method, apiPath) || isAnonymousPublicRead;
   if (!isPublicRoute && !sessionId) return respondWithBffError(401, "UNAUTHENTICATED", "Sign in to continue.");
   if (!isSafeHttpMethod(request.method)) {
     const requestIsVerified = isPublicRoute ? isRequestFromWebappOrigin(request) : isMutationProtectedAgainstCsrf(request);
@@ -107,7 +110,7 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
     }
   }
 
-  const response = convertBackendResultToResponse(backendResult);
+  const response = convertBackendResultToResponse(isAnonymousPublicRead ? resetViewerFieldsForAnonymousResult(backendResult) : backendResult);
   if (renewedSession) writeRenewedSessionCookies(response, renewedSession);
   if (rotatedTokens) writeApiTokenCookies(response, rotatedTokens);
   if (backendResult.status === 401 && !rotatedTokens) clearEverySessionCookie(response);
