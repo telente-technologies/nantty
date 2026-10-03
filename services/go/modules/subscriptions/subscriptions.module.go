@@ -3,9 +3,12 @@ package subscriptions
 import (
 	"context"
 
+	"zudomart/modules/subscriptions/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewSubscriptionsModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "subscriptions"}, nil
+type Module = src.Module
+
+func NewSubscriptionsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewSubscriptionsModule(ctx, dependencies)
 }

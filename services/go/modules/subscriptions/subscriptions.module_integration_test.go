@@ -1,0 +1,146 @@
+package subscriptions
+
+import (
+	"context"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+
+	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
+	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	"zudomart/modules/subscriptions/src"
+	"zudomart/modules/subscriptions/src/configs"
+	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/repositories"
+)
+
+type subscriptionsHarness struct {
+	*paymentstesting.MoneyHarness
+	module *src.Module
+	clock  time.Time
+}
+
+func startSubscriptionsHarness(t *testing.T, identity repositories.StaticIdentityDirectory) *subscriptionsHarness {
+	t.Helper()
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
+	money := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
+	settings := configs.SubscriptionsSettings{
+		Money:            moneytesting.MoneyModuleSettingsForTests("subscriptions", moneytesting.CreateEmptySchema(t, money.Database, "subscriptions"), money.LedgerSchema),
+		InternalApiToken: strings.Repeat("s", 32), DefaultCountry: "NG", FingerprintKey: "trial-key",
+	}
+	module, err := src.StartSubscriptionsModuleWithSettings(context.Background(), settings, money.Dependencies, money.Overrides(), money.Payments.Application.Gateway, identity)
+	if err != nil {
+		t.Fatal(err)
+	}
+	money.MountModule(module)
+	harness := &subscriptionsHarness{MoneyHarness: money, module: module, clock: time.Now().UTC()}
+	module.Billing.Container.Now = func() time.Time { return harness.clock }
+	return harness
+}
+
+func TestSellerTrialSavesTheCardStartsOnPaystackAndGrantsTheSellerPlan(t *testing.T) {
+	owner, profileId := uuid.NewString(), uuid.NewString()
+	identity := repositories.StaticIdentityDirectory{
+		Profiles: map[string]repositories.BillingProfile{profileId: {ProfileId: profileId, OwnerUserId: owner, ProfileType: "business", DisplayName: "Ada Fabrics", CountryCode: "NG"}},
+		Accounts: map[string]repositories.AccountSignals{owner: {CreatedAt: time.Now().Add(-60 * 24 * time.Hour), EmailVerified: true}},
+	}
+	harness := startSubscriptionsHarness(t, identity)
+	token := harness.Tokens.UserAccessToken(owner)
+	body := map[string]any{"profileId": profileId, "planId": "seller_pro_monthly"}
+	if mobile := harness.Call(http.MethodPost, "/api/v1/seller/subscription/trial/checkout", token, "", body, http.Header{"X-Client-Platform": {"ios"}}); mobile.Status != http.StatusUnprocessableEntity {
+		t.Fatalf("a trial started in the app: %d", mobile.Status)
+	}
+	started := harness.Call(http.MethodPost, "/api/v1/seller/subscription/trial/checkout", token, "", body, http.Header{"X-Client-Platform": {"web"}, "X-Device-Id": {"device-1"}})
+	if started.Status != http.StatusCreated || started.Body["authorizationUrl"] == "" || started.Body["trial"] != true {
+		t.Fatalf("trial checkout: %d %s", started.Status, started.Raw)
+	}
+	if again := harness.Call(http.MethodPost, "/api/v1/seller/subscription/trial/checkout", token, "", body, http.Header{"X-Device-Id": {"device-1"}}); again.Status != http.StatusConflict || again.Body["code"] != "TRIAL_NOT_AVAILABLE" {
+		t.Fatalf("second trial: %d %s", again.Status, again.Raw)
+	}
+	harness.PayCheckout(started.Body["reference"].(string), 75, "card")
+	report := harness.module.Billing.RunDueJobs(context.Background())
+	if report.TrialsActivated != 1 || len(harness.Paystack.Subscriptions) != 1 {
+		t.Fatalf("trial activation: %+v subscriptions %d", report, len(harness.Paystack.Subscriptions))
+	}
+	internal := http.Header{"X-Internal-Token": {strings.Repeat("s", 32)}}
+	entitlements := harness.Call(http.MethodGet, "/api/v1/internal/entitlements/"+owner, "", "", nil, internal)
+	if entitlements.Status != http.StatusOK || entitlements.Body["sellerPlan"] != "pro" || entitlements.Body["trial"] == nil || len(entitlements.Body["gold"].([]any)) != 1 {
+		t.Fatalf("entitlements: %d %s", entitlements.Status, entitlements.Raw)
+	}
+	if denied := harness.Call(http.MethodGet, "/api/v1/internal/entitlements/"+owner, "", "", nil); denied.Status != http.StatusUnauthorized {
+		t.Fatalf("entitlements without the token: %d", denied.Status)
+	}
+	if bps := harness.Payments.Application.Gateway.EscrowFeeBpsForSeller(context.Background(), owner); bps != 150 {
+		t.Fatalf("a Pro seller pays the standard escrow fee: %d", bps)
+	}
+	var code string
+	for code = range harness.Paystack.Subscriptions {
+	}
+	harness.clock = harness.clock.Add(5 * 24 * time.Hour)
+	if sent := harness.module.Billing.SendDueReminders(context.Background(), 10); sent != 1 {
+		t.Fatalf("the 3-day reminder must go out: %d", sent)
+	}
+	harness.DeliverPaystackEvent("invoice.update", map[string]any{"id": 501, "status": "success", "paid": true, "subscription": map[string]any{"subscription_code": code, "status": "active", "next_payment_date": "2030-01-01T00:00:00.000Z"}})
+	row, err := harness.module.Billing.Container.Client(harness.Database).Subscription.Query().Where(subscription.ProfileID(profileId), subscription.StatusEQ(subscription.StatusActive)).Only(context.Background())
+	if err != nil || row.CurrentPeriodEndsAt == nil {
+		t.Fatalf("the trial must convert on the first paid invoice: %v", err)
+	}
+	cancelled := harness.Call(http.MethodPost, "/api/v1/subscriptions/"+row.ID.String()+"/cancel", token, "", nil)
+	if cancelled.Status != http.StatusOK || cancelled.Body["cancelAtPeriodEnd"] != true || harness.Paystack.Subscriptions[code]["status"] != "non-renewing" {
+		t.Fatalf("cancel: %d %s", cancelled.Status, cancelled.Raw)
+	}
+	harness.AssertLedgerHealthy()
+}
+
+func TestBlackKeepsItsBadgeForTheGracePeriodAndGoldGetsTheBundle(t *testing.T) {
+	owner, personal, brand, agency := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+	identity := repositories.StaticIdentityDirectory{
+		Profiles: map[string]repositories.BillingProfile{
+			personal: {ProfileId: personal, OwnerUserId: owner, ProfileType: "personal"}, brand: {ProfileId: brand, OwnerUserId: owner, ProfileType: "brand"},
+			agency: {ProfileId: agency, OwnerUserId: owner, ProfileType: "government", DisplayName: "Ministry"},
+		},
+		Accounts: map[string]repositories.AccountSignals{owner: {CreatedAt: time.Now().Add(-400 * 24 * time.Hour), EmailVerified: true}},
+	}
+	harness := startSubscriptionsHarness(t, identity)
+	client := harness.module.Billing.Container.Client(harness.Database)
+	ctx := context.Background()
+	client.Subscription.Create().SetProfileID(personal).SetProfileType("personal").SetOwnerUserID(owner).SetPlanCode("blue").SetInterval("month").SetChannel("apple_iap").
+		SetStatus("active").SetListAmountMinor(290_000).SetAmountMinor(290_000).SetCurrency("NGN").SetCreatedAt(time.Now()).ExecX(ctx)
+	quote, _, err := harness.module.Billing.QuoteForOwner(ctx, client, owner, "gold_only", "NG", "month")
+	if err != nil || quote.AmountMinor != 255_000 || quote.DiscountKind != "bundle" {
+		t.Fatalf("gold with blue: %+v %v", quote, err)
+	}
+	if blackQuote, _, _ := harness.module.Billing.QuoteForOwner(ctx, client, owner, "black", "NG", "month"); blackQuote.DiscountKind != "none" || blackQuote.AmountMinor != 5_000_000 {
+		t.Fatalf("black never gets the bundle: %+v", blackQuote)
+	}
+	if blocked := harness.Call(http.MethodPost, "/api/v1/subscriptions/checkout", harness.Tokens.UserAccessToken(owner), "", map[string]any{"profileId": agency, "planCode": "black"}); blocked.Status != http.StatusForbidden {
+		t.Fatalf("black is invitation only: %d", blocked.Status)
+	}
+	black := client.Subscription.Create().SetProfileID(agency).SetProfileType("government").SetOwnerUserID(owner).SetPlanCode("black").SetInterval("month").SetChannel("web_paystack").
+		SetStatus("active").SetListAmountMinor(5_000_000).SetAmountMinor(5_000_000).SetCurrency("NGN").SetBillingReference("sub-black-1").SetCreatedAt(time.Now()).SaveX(ctx)
+	harness.DeliverPaystackEvent("subscription.create", map[string]any{"id": 9, "subscription_code": "SUB_black", "status": "active", "customer": map[string]any{"customer_code": "CUS_x"}, "plan": map[string]any{"plan_code": "PLN_x"}})
+	mustNotify := func(status string) {
+		t.Helper()
+		if err := harness.module.Billing.HandleBillingSubscriptionChangedForTest(ctx, black.BillingReference, status); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mustNotify("canceled")
+	row := client.Subscription.GetX(ctx, black.ID)
+	if row.Status != subscription.StatusGrace || row.GraceEndsAt == nil {
+		t.Fatalf("black must enter the 14-day grace period: %s", row.Status)
+	}
+	harness.clock = harness.clock.Add(13 * 24 * time.Hour)
+	if expired := harness.module.Billing.ExpireGracePeriods(ctx, 10); expired != 0 {
+		t.Fatal("grace ended early")
+	}
+	harness.clock = harness.clock.Add(2 * 24 * time.Hour)
+	if expired := harness.module.Billing.ExpireGracePeriods(ctx, 10); expired != 1 || client.Subscription.GetX(ctx, black.ID).Status != subscription.StatusExpired {
+		t.Fatal("black must expire after the grace period")
+	}
+}
