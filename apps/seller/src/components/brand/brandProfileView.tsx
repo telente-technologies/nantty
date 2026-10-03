@@ -130,7 +130,7 @@ export function BrandProfileView() {
         />
         {brand.registration.note ? <div style={{ marginTop: 12 }}><Callout tone={brand.registration.status === "rejected" ? "error" : "info"}>{brand.registration.note}</Callout></div> : null}
         {brand.registration.status !== "registered" ? (
-          <p className={styles.muted} style={{ marginTop: 12 }}>Register your brand in the Zudomart app (Profile → Your brand → Register) with your trademark certificate or CAC registration. Registration unlocks the Official Store badge and brand protection.</p>
+          <p className={styles.muted} style={{ marginTop: 12 }}>Register your brand in the Zudomart app (Profile › Your brand › Register) with your trademark certificate or CAC registration. Registration unlocks the Official Store badge and brand protection.</p>
         ) : null}
       </Panel>
     </div>

@@ -14,6 +14,7 @@ import type { OfficialStoreDetails } from "@/types/brand.type";
 import { officialStoreLabels } from "@/utils/brandPresentation.util";
 
 import styles from "./brand.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
 
 const officialStoreBenefits = [
   "An Official Store badge on your store, products and brand page",
@@ -63,7 +64,7 @@ export function BrandOfficialStoreView() {
         <ul className={styles.checklist} style={{ marginTop: 12 }}>
           {details.requirements.map((requirement) => (
             <li key={requirement.key} className={styles.checkItem}>
-              <span className={`${styles.checkMark} ${requirement.met ? styles.checkMarkMet : ""}`} aria-hidden="true">{requirement.met ? "✓" : ""}</span>
+              <span className={`${styles.checkMark} ${requirement.met ? styles.checkMarkMet : ""}`} aria-hidden="true">{requirement.met ? <ZudoIcon name="check16" size={14} /> : null}</span>
               <div>
                 <p className={styles.checkLabel}>
                   {requirement.label} <span className="visuallyHidden">{requirement.met ? "(done)" : "(not done yet)"}</span>
@@ -87,7 +88,7 @@ export function BrandOfficialStoreView() {
         <ul className={styles.checklist}>
           {officialStoreBenefits.map((benefit) => (
             <li key={benefit} className={styles.checkItem}>
-              <span className={`${styles.checkMark} ${styles.checkMarkMet}`} aria-hidden="true">✓</span>
+              <span className={`${styles.checkMark} ${styles.checkMarkMet}`} aria-hidden="true"><ZudoIcon name="check16" size={14} /></span>
               <p>{benefit}</p>
             </li>
           ))}
