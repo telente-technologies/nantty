@@ -344,6 +344,10 @@ func (_c *AdCreate) defaults() {
 		v := ad.DefaultAppealResolutionNote
 		_c.mutation.SetAppealResolutionNote(v)
 	}
+	if _, ok := _c.mutation.AutoCheckFlags(); !ok {
+		v := ad.DefaultAutoCheckFlags()
+		_c.mutation.SetAutoCheckFlags(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := ad.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)

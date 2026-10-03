@@ -5,6 +5,7 @@ package ad
 import (
 	"fmt"
 	"time"
+	"zudomart/modules/ads/src/types"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -124,6 +125,8 @@ var (
 	AppealResolutionNoteValidator func(string) error
 	// FormatValidator is a validator for the "format" field. It is called by the builders before save.
 	FormatValidator func(string) error
+	// DefaultAutoCheckFlags holds the default value on creation for the "auto_check_flags" field.
+	DefaultAutoCheckFlags func() []types.AutoCheckFlag
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
