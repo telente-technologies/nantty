@@ -1,4 +1,5 @@
 import { forbidden, notFound, unprocessable } from "../../../../errors/social.error.js";
+import { resolveEventActor } from "../../../../events/actor.event.js";
 import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
 import { socialEventTypes } from "../../../../events/eventTypes.event.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
@@ -24,10 +25,13 @@ export function createFollowUserHandler(context: HandlerContext): Handler<Follow
     if (decision.outcome === "refused") throw forbidden("FOLLOW_NOT_ALLOWED", "You can't follow this account");
     if (decision.outcome === "unchanged") return { state: decision.state };
     const now = context.clock.now();
+    const actor = await resolveEventActor(context.directory, followerId);
     await context.database.transaction(async (transaction) => {
       const follow = await followRepository.upsertState(transaction, followerId, targetId, decision.state);
-      const eventType = decision.state === "requested" ? socialEventTypes.followRequested : socialEventTypes.followAccepted;
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.followCreated, subject: follow.id, occurredAt: now, data: { followId: follow.id, followerId, followeeId: targetId, state: decision.state } }, { eventType, subject: follow.id, occurredAt: now, data: { followId: follow.id, followerId, followeeId: targetId, automatic: decision.state === "accepted" } }]);
+      const base = { followId: follow.id, followerId, followeeId: targetId, recipientUserId: targetId, actor, url: `/user/${followerId}` };
+      await appendDomainEventsToOutbox(transaction, [decision.state === "requested"
+        ? { eventType: socialEventTypes.followRequestCreated, subject: follow.id, occurredAt: now, data: base }
+        : { eventType: socialEventTypes.followCreated, subject: follow.id, occurredAt: now, data: { ...base, state: "accepted" } }]);
     });
     return { state: decision.state };
   };
