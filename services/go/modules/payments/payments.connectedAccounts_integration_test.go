@@ -46,12 +46,12 @@ func TestDirectCheckoutSplitsToTheSellerSubaccountAndEscrowStaysOnTheMainBalance
 		t.Fatalf("checkout: %d %s", started.Status, started.Raw)
 	}
 	transaction := harness.Paystack.Transactions[started.Body["reference"].(string)]
-	if transaction.Subaccount != subaccount || transaction.Bearer != "subaccount" || transaction.Email != "user-"+buyer[:8]+"@zudomart.test" {
-		t.Fatalf("direct charge must split to the seller subaccount with the seller bearing the fee: %+v", transaction)
+	if transaction.SplitShares[subaccount] != 250_000-13_750 || len(transaction.SplitShares) != 1 || transaction.Email != "user-"+buyer[:8]+"@zudomart.test" {
+		t.Fatalf("direct charge must split the seller share, net of the allocated Paystack fee, to the seller subaccount: %+v", transaction)
 	}
 	escrowOrder := registerOrder(t, harness, buyer, seller, 100_000, "escrow", false)
 	escrowStarted := initialize(escrowOrder, "escrow-order")
-	if escrowTransaction := harness.Paystack.Transactions[escrowStarted.Body["reference"].(string)]; escrowTransaction.Subaccount != "" {
+	if escrowTransaction := harness.Paystack.Transactions[escrowStarted.Body["reference"].(string)]; escrowTransaction.Subaccount != "" || len(escrowTransaction.SplitShares) != 0 {
 		t.Fatalf("an escrow order must stay on the main balance: %+v", escrowTransaction)
 	}
 }
