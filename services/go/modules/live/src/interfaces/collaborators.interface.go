@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,4 +27,55 @@ type MediaRoomController interface {
 
 type ProductPinPolicy interface {
 	CanPinProducts(ctx context.Context, hostId uuid.UUID, roles []string, productIds []uuid.UUID) error
+}
+
+type IngressProtocol string
+
+const (
+	IngressRtmp IngressProtocol = "rtmp"
+	IngressWhip IngressProtocol = "whip"
+)
+
+type IngressRequest struct {
+	Room            string
+	ParticipantId   string
+	ParticipantName string
+	Protocol        IngressProtocol
+}
+
+type IngressCredentials struct {
+	IngressId string
+	Url       string
+	StreamKey string
+}
+
+type IngressController interface {
+	CreateIngress(ctx context.Context, request IngressRequest) (IngressCredentials, error)
+	GetIngress(ctx context.Context, ingressId string) (IngressCredentials, error)
+	DeleteIngress(ctx context.Context, ingressId string) error
+}
+
+type RecordingController interface {
+	StartRoomRecording(ctx context.Context, room, objectKey string) (egressId string, err error)
+	StopRecording(ctx context.Context, egressId string) error
+}
+
+type RecordingStorage interface {
+	PresignDownload(ctx context.Context, objectKey string, timeToLive time.Duration) (string, error)
+}
+
+type MentionPrivacy string
+
+const (
+	MentionEveryone  MentionPrivacy = "everyone"
+	MentionFollowing MentionPrivacy = "following"
+	MentionNobody    MentionPrivacy = "no_one"
+)
+
+type SocialRelations interface {
+	BlockedEitherWay(ctx context.Context, userId uuid.UUID, others []uuid.UUID) (map[uuid.UUID]bool, error)
+	IsFollowing(ctx context.Context, followerId, followeeId uuid.UUID) (bool, error)
+	IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error)
+	MentionPrivacyOf(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]MentionPrivacy, error)
+	ListLiveAlertRecipients(ctx context.Context, hostId uuid.UUID, limit int) (recipients []uuid.UUID, truncated bool, err error)
 }

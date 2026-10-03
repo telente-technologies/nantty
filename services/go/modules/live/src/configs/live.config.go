@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"strings"
 	"time"
 
 	platformconfig "zudomart/platform/config"
@@ -34,6 +35,15 @@ type LiveSettings struct {
 	RequireCreatorProgramToHost     bool
 	LiveAdTermsCurrentVersion       string
 	GiftPlatformBurstLimitPerSecond int
+	InternalApiToken                string
+	PlatformBlockedWords            []string
+	RecordingBucket                 string
+	RecordingRegion                 string
+	RecordingEndpoint               string
+	RecordingAccessKey              string
+	RecordingSecret                 string
+	RecordingDownloadTimeToLive     time.Duration
+	LiveKitWebhookEnabled           bool
 }
 
 func (settings LiveSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -66,6 +76,15 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		RequireCreatorProgramToHost:     reader.ReadStringOrDefault("LIVE_REQUIRE_CREATOR_PROGRAM_TO_HOST", "true") == "true",
 		LiveAdTermsCurrentVersion:       reader.ReadStringOrDefault("LIVE_AD_TERMS_VERSION", "2026-10"),
 		GiftPlatformBurstLimitPerSecond: reader.ReadIntegerOrDefault("LIVE_GIFT_BURST_LIMIT_PER_SECOND", 10),
+		InternalApiToken:                reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
+		PlatformBlockedWords:            splitCommaSeparatedWords(reader.ReadStringOrDefault("LIVE_PLATFORM_BLOCKED_WORDS", "")),
+		RecordingBucket:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_BUCKET", ""),
+		RecordingRegion:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_REGION", "us-east-1"),
+		RecordingEndpoint:               reader.ReadStringOrDefault("LIVE_RECORDING_S3_ENDPOINT", ""),
+		RecordingAccessKey:              reader.ReadStringOrDefault("LIVE_RECORDING_S3_ACCESS_KEY", ""),
+		RecordingSecret:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_SECRET", ""),
+		RecordingDownloadTimeToLive:     reader.ReadDurationOrDefault("LIVE_RECORDING_DOWNLOAD_TTL", time.Hour),
+		LiveKitWebhookEnabled:           reader.ReadStringOrDefault("LIVE_LIVEKIT_WEBHOOK_ENABLED", "true") == "true",
 	}
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {
@@ -79,4 +98,14 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		}
 	}
 	return settings
+}
+
+func splitCommaSeparatedWords(raw string) []string {
+	var words []string
+	for _, word := range strings.Split(raw, ",") {
+		if trimmed := strings.ToLower(strings.TrimSpace(word)); trimmed != "" {
+			words = append(words, trimmed)
+		}
+	}
+	return words
 }

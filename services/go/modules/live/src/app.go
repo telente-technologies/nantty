@@ -22,10 +22,14 @@ import (
 	"zudomart/modules/live/src/jobs"
 	"zudomart/modules/live/src/migrations"
 	"zudomart/modules/live/src/modules/battles"
+	"zudomart/modules/live/src/modules/comments"
 	"zudomart/modules/live/src/modules/gifts"
+	internalapi "zudomart/modules/live/src/modules/internalApi"
+	"zudomart/modules/live/src/modules/overlays"
 	"zudomart/modules/live/src/modules/points"
 	"zudomart/modules/live/src/modules/sessions"
 	"zudomart/modules/live/src/modules/stage"
+	"zudomart/modules/live/src/modules/studio"
 	"zudomart/modules/live/src/services"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
@@ -40,6 +44,11 @@ type Collaborators struct {
 	Media     interfaces.MediaRoomController
 	Verifier  *jwtauth.AccessTokenVerifier
 	Publisher platformevents.DomainEventPublisher
+
+	Ingress          interfaces.IngressController
+	Recorder         interfaces.RecordingController
+	RecordingStorage interfaces.RecordingStorage
+	Relations        interfaces.SocialRelations
 }
 
 type Module struct {
@@ -79,7 +88,7 @@ func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSetti
 	}
 	module := &Module{publisher: collaborators.Publisher, closers: []func() error{database.Close}}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
-	if err := module.completeCollaborators(&collaborators, settings, database, logger); err != nil {
+	if err := module.completeCollaborators(ctx, &collaborators, settings, database, logger); err != nil {
 		_ = database.Close()
 		return nil, err
 	}
@@ -88,6 +97,7 @@ func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSetti
 		Tokens:    &integrations.TokenIssuer{ApiKey: settings.LiveKitApiKey, ApiSecret: settings.LiveKitApiSecret, PublicUrl: settings.LiveKitPublicUrl},
 		PinPolicy: integrations.RolesProductPinPolicy{}, Logger: logger, Now: time.Now, AccessVerifier: collaborators.Verifier,
 		IdempotencyStore: module.openIdempotencyStore(settings, logger),
+		Ingress:          collaborators.Ingress, Recorder: collaborators.Recorder, RecordingStorage: collaborators.RecordingStorage, Relations: collaborators.Relations,
 	}
 	if err := services.NewLiveService(module.Container).SeedDefaultCatalogAndPointsRules(ctx); err != nil {
 		_ = database.Close()
@@ -111,7 +121,10 @@ func (module *Module) openIdempotencyStore(settings configs.LiveSettings, logger
 	return idempotency.NewRedisStore(client, "live:idempotency")
 }
 
-func (module *Module) completeCollaborators(collaborators *Collaborators, settings configs.LiveSettings, database *sql.DB, logger *slog.Logger) error {
+func (module *Module) completeCollaborators(ctx context.Context, collaborators *Collaborators, settings configs.LiveSettings, database *sql.DB, logger *slog.Logger) error {
+	if err := completeMediaAndSocialCollaborators(ctx, collaborators, settings, database, logger); err != nil {
+		return err
+	}
 	if collaborators.Media == nil {
 		collaborators.Media = integrations.NewLiveKitRoomController(settings.LiveKitUrl, settings.LiveKitApiKey, settings.LiveKitApiSecret)
 	}
@@ -162,6 +175,10 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	battles.Mount(mux, module.Container)
 	gifts.Mount(mux, module.Container)
 	points.Mount(mux, module.Container)
+	comments.Mount(mux, module.Container)
+	studio.Mount(mux, module.Container)
+	overlays.Mount(mux, module.Container)
+	internalapi.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -182,16 +199,7 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.LiveSettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }

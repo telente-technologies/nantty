@@ -27,6 +27,10 @@ type Container struct {
 	Now              func() time.Time
 	AccessVerifier   *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
+	Ingress          interfaces.IngressController
+	Recorder         interfaces.RecordingController
+	RecordingStorage interfaces.RecordingStorage
+	Relations        interfaces.SocialRelations
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {
