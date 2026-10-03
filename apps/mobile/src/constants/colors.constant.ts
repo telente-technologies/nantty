@@ -80,6 +80,7 @@ export const colors = {
   text: "#000000",
   textMuted: "#5B5B5B",
   textSubtle: "#909090",
+  textFaint: "#6E6E80",
 
   placeholder: "#D9D9D9",
   divider: "#D9D9D9",
