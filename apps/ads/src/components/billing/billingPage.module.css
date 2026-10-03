@@ -56,7 +56,7 @@
 
 .meterFill {
   height: 100%;
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
   border-radius: inherit;
 }
 
@@ -88,9 +88,9 @@
 }
 
 .amountChipSelected {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
-  color: var(--blue-700);
+  color: var(--brand-ink);
 }
 
 .cardList {
