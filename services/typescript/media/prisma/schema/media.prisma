@@ -1,0 +1,148 @@
+enum MediaPurpose {
+  post
+  clip
+  story
+  avatar
+  banner
+  product
+  chat
+  voice
+  document
+  kyc
+  adCreative
+  dispute_evidence
+  identity_document
+  verification_document
+}
+
+enum MediaKind {
+  image
+  video
+  audio
+  document
+}
+
+enum MediaStatus {
+  uploading
+  uploaded
+  processing
+  held
+  ready
+  rejected
+  deleted
+}
+
+enum UploadSessionStatus {
+  uploading
+  completed
+  aborted
+  expired
+}
+
+model UploadSession {
+  id             String              @id @default(uuid(7)) @db.Uuid
+  ownerId        String              @db.Uuid
+  mediaId        String              @unique @db.Uuid
+  purpose        MediaPurpose
+  fileName       String
+  mimeType       String
+  sizeBytes      BigInt
+  sha256         String?
+  idempotencyKey String?
+  mode           String              @default("multipart")
+  objectKey      String
+  bucket         String
+  s3UploadId     String?
+  chunkSizeBytes Int
+  totalChunks    Int
+  status         UploadSessionStatus @default(uploading)
+  expiresAt      DateTime
+  createdAt      DateTime            @default(now())
+  completedAt    DateTime?
+
+  @@unique([ownerId, idempotencyKey])
+  @@index([status, expiresAt])
+  @@map("upload_sessions")
+}
+
+model MediaAsset {
+  id                 String           @id @db.Uuid
+  ownerId            String           @db.Uuid
+  purpose            MediaPurpose
+  kind               MediaKind
+  status             MediaStatus      @default(uploading)
+  isPrivate          Boolean          @default(false)
+  declaredMimeType   String
+  sniffedMimeType    String?
+  sizeBytes          BigInt
+  sha256             String?
+  quarantineBucket   String
+  quarantineKey      String
+  width              Int              @default(0)
+  height             Int              @default(0)
+  durationSeconds    Float?
+  pageCount          Int?
+  blurhash           String?
+  posterKey          String?
+  hlsKey             String?
+  scanResult         String?
+  moderationScore    Float?
+  moderationDecision String?
+  rejectionReason    String?
+  expiresAt          DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  processedAt        DateTime?
+  variants           MediaVariant[]
+  accessLogs         MediaAccessLog[]
+
+  @@index([ownerId, createdAt])
+  @@index([status, updatedAt])
+  @@index([expiresAt])
+  @@map("media_assets")
+}
+
+model MediaVariant {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  assetId     String     @db.Uuid
+  bucket      String
+  key         String
+  format      String
+  width       Int
+  height      Int
+  bitrateKbps Int?
+  sizeBytes   BigInt
+  asset       MediaAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, key])
+  @@map("media_variants")
+}
+
+model MediaAccessLog {
+  id        String     @id @default(uuid(7)) @db.Uuid
+  mediaId   String     @db.Uuid
+  actorId   String
+  reason    String
+  expiresAt DateTime
+  createdAt DateTime   @default(now())
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([mediaId, createdAt])
+  @@map("media_access_logs")
+}
+
+model OutboxEvent {
+  id          String    @id @db.Uuid
+  eventType   String
+  subject     String
+  payload     Json
+  createdAt   DateTime  @default(now())
+  lockedUntil DateTime?
+  lockToken   String?
+  attempts    Int       @default(0)
+  publishedAt DateTime?
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
