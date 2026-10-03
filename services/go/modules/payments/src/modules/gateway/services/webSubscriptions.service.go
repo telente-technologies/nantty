@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -12,14 +13,15 @@ import (
 	"zudomart/modules/payments/src/generated/ent"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/interfaces"
+	"zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/platform/httpserver"
 )
 
 var (
-	ErrWebBillingOnly      = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_BILLING_ONLY", "Subscriptions and trials can only be started on the web.")
-	ErrPlanNotAvailable    = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAN_NOT_AVAILABLE", "This plan is not available yet.")
-	downgradingStatuses    = map[string]bool{"canceled": true, "unpaid": true}
-	subscriptionEventTypes = map[string]string{"invoice.payment_failed": "past_due", "invoice.paid": "active"}
+	ErrWebBillingOnly   = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_BILLING_ONLY", "Subscriptions and trials can only be started on the web.")
+	ErrPlanNotAvailable = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAN_NOT_AVAILABLE", "This plan is not available yet.")
+	paystackStatuses    = map[string]string{"active": "active", "non-renewing": "non_renewing", "attention": "past_due", "cancelled": "canceled", "complete": "canceled", "completed": "canceled"}
+	downgradingStatuses = map[string]bool{"canceled": true}
 )
 
 type WebSubscriptionCheckout struct {
@@ -29,100 +31,122 @@ type WebSubscriptionCheckout struct {
 }
 
 func (gateway *PaymentGateway) StartWebSubscriptionCheckout(ctx context.Context, userId, planCode, returnTo, clientPlatform string) (WebSubscriptionCheckout, error) {
-	if clientPlatform == "ios" || clientPlatform == "android" {
-		return WebSubscriptionCheckout{}, ErrWebBillingOnly
-	}
-	productId, found := gateway.Container.Settings.WebSubscriptionPlanProducts[planCode]
+	providerPlan, found := gateway.Container.Settings.WebSubscriptionPlanProducts[planCode]
 	if !found {
 		return WebSubscriptionCheckout{}, ErrPlanNotAvailable
 	}
-	contact, err := gateway.requireVerifiedContact(ctx, userId)
+	started, err := gateway.StartSubscriptionCheckoutForProduct(ctx, models.SubscriptionCheckoutStart{
+		OwnerUserId: userId, PlanCode: planCode, ProviderPlanId: providerPlan, AmountMinor: 100, Currency: "NGN", ReturnTo: returnTo, ClientPlatform: clientPlatform,
+	})
+	return WebSubscriptionCheckout{Reference: started.Reference, PlanCode: started.PlanCode, CheckoutUrl: started.CheckoutUrl}, err
+}
+
+func (gateway *PaymentGateway) StartSubscriptionCheckoutForProduct(ctx context.Context, start models.SubscriptionCheckoutStart) (models.StartedSubscriptionCheckout, error) {
+	if start.ClientPlatform == "ios" || start.ClientPlatform == "android" {
+		return models.StartedSubscriptionCheckout{}, ErrWebBillingOnly
+	}
+	contact, err := gateway.requireVerifiedContact(ctx, start.OwnerUserId)
 	if err != nil {
-		return WebSubscriptionCheckout{}, err
+		return models.StartedSubscriptionCheckout{}, err
 	}
 	provider, err := gateway.Container.DefaultProvider()
 	if err != nil {
-		return WebSubscriptionCheckout{}, err
+		return models.StartedSubscriptionCheckout{}, err
 	}
-	reference := "zmsub_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	reference := "sub-" + strings.ReplaceAll(uuid.NewString(), "-", "")
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
-	row, err := client.BillingSubscription.Create().SetOwnerUserID(userId).SetPlanCode(planCode).SetProvider(provider.Name()).
-		SetReference(reference).SetProviderProductID(productId).SetCreatedAt(gateway.Container.Now()).Save(ctx)
+	row, err := client.BillingSubscription.Create().SetOwnerUserID(start.OwnerUserId).SetPlanCode(start.PlanCode).SetProvider(provider.Name()).
+		SetReference(reference).SetProviderProductID(start.ProviderPlanId).SetCreatedAt(gateway.Container.Now()).Save(ctx)
 	if err != nil {
-		return WebSubscriptionCheckout{}, err
+		return models.StartedSubscriptionCheckout{}, err
 	}
-	callbackUrl := gateway.buildCallbackUrl(returnTo, reference)
-	session, err := provider.CreateSubscriptionCheckout(ctx, interfaces.SubscriptionCheckoutRequest{
-		ProviderProductId: productId, Reference: reference, CustomerEmail: contact.Email, CustomerName: customerDisplayName(contact),
-		SuccessUrl: callbackUrl, CancelUrl: callbackUrl + "&status=cancelled", IdempotencyKey: "subscription-checkout:" + reference,
-		Metadata: map[string]string{"billingSubscriptionReference": reference, "planCode": planCode, "ownerUserId": userId},
+	metadata := map[string]string{"billingSubscriptionReference": reference, "planCode": start.PlanCode, "ownerUserId": start.OwnerUserId}
+	for key, value := range start.Metadata {
+		metadata[key] = value
+	}
+	session, err := provider.InitializeCharge(ctx, interfaces.ChargeRequest{
+		Reference: reference, AmountMinor: max(start.AmountMinor, 100), Currency: firstNonEmpty(start.Currency, "NGN"), CustomerEmail: contact.Email,
+		CustomerLabel: customerDisplayName(contact), SuccessUrl: gateway.buildCallbackUrl(start.ReturnTo, reference), Channels: []string{"card"},
+		PlanCode: start.ProviderPlanId, Metadata: metadata,
 	})
 	if err != nil {
-		return WebSubscriptionCheckout{}, convertProviderError(err)
+		return models.StartedSubscriptionCheckout{}, convertProviderError(err)
 	}
 	if err := row.Update().SetProviderCheckoutID(session.ProviderCheckoutId).Exec(ctx); err != nil {
-		return WebSubscriptionCheckout{}, err
+		return models.StartedSubscriptionCheckout{}, err
 	}
-	return WebSubscriptionCheckout{Reference: reference, PlanCode: planCode, CheckoutUrl: session.CheckoutUrl}, nil
+	return models.StartedSubscriptionCheckout{Reference: reference, PlanCode: start.PlanCode, CheckoutUrl: session.CheckoutUrl}, nil
 }
 
-func (gateway *PaymentGateway) HandleSubscriptionNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
-	update := notification.Subscription
-	if update == nil {
-		return nil
+type TrialBillingRequest struct {
+	OwnerUserId        string
+	PlanCode           string
+	ProviderPlanId     string
+	ProviderCustomerId string
+	TrialEndsAt        time.Time
+	Metadata           map[string]string
+}
+
+func (gateway *PaymentGateway) StartTrialBillingSubscription(ctx context.Context, request TrialBillingRequest) (string, error) {
+	provider, err := gateway.Container.DefaultProvider()
+	if err != nil {
+		return "", err
 	}
-	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		client := gateway.Container.Client(transaction)
-		row, err := findBillingSubscription(ctx, client, update)
-		if ent.IsNotFound(err) {
-			return nil
-		}
+	subscription, err := provider.CreateSubscription(ctx, interfaces.SubscriptionRequest{ProviderCustomerId: request.ProviderCustomerId, PlanCode: request.ProviderPlanId, StartDate: &request.TrialEndsAt})
+	if err != nil {
+		return "", convertProviderError(err)
+	}
+	reference := "sub-" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	trialEnds := request.TrialEndsAt.UTC()
+	return reference, databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		row, err := gateway.Container.Client(transaction).BillingSubscription.Create().SetOwnerUserID(request.OwnerUserId).SetPlanCode(request.PlanCode).SetProvider(provider.Name()).
+			SetReference(reference).SetProviderProductID(request.ProviderPlanId).SetProviderSubscriptionID(subscription.SubscriptionCode).
+			SetProviderCustomerID(request.ProviderCustomerId).SetEmailToken(subscription.EmailToken).SetStatus("trialing").SetTrialEndsAt(trialEnds).
+			SetCurrentPeriodEndsAt(trialEnds).SetCreatedAt(gateway.Container.Now()).Save(ctx)
 		if err != nil {
 			return err
 		}
-		status := update.Status
-		if mapped, isInvoice := subscriptionEventTypes[notification.EventType]; isInvoice {
-			status = mapped
-		}
-		if notification.EventType == "customer.subscription.deleted" {
-			status = "canceled"
-		}
-		now := gateway.Container.Now().UTC()
-		change := row.Update().SetStatus(truncate(status, 40))
-		if update.ProviderSubscriptionId != "" && row.ProviderSubscriptionID == "" {
-			change.SetProviderSubscriptionID(update.ProviderSubscriptionId)
-		}
-		if update.TrialEndsAt != nil {
-			change.SetTrialEndsAt(*update.TrialEndsAt)
-		}
-		if update.CurrentPeriodEndsAt != nil {
-			change.SetCurrentPeriodEndsAt(*update.CurrentPeriodEndsAt)
-		}
-		eventType := "billingSubscription." + status
-		if downgradingStatuses[status] && row.DowngradedAt == nil {
-			change.SetDowngradedAt(now)
-			eventType = "billingSubscription.downgraded"
-		}
-		if err := change.Exec(ctx); err != nil {
-			return err
-		}
-		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, eventType, row.ID.String(), now, map[string]any{
-			"billingSubscriptionId": row.ID.String(), "ownerUserId": row.OwnerUserID, "planCode": row.PlanCode, "status": status,
-			"trialEndsAt": update.TrialEndsAt, "currentPeriodEndsAt": update.CurrentPeriodEndsAt,
+		return gateway.notifyBillingObservers(ctx, transaction, models.BillingSubscriptionChange{
+			BillingSubscriptionId: row.ID.String(), Reference: reference, ProviderSubscriptionId: subscription.SubscriptionCode, PlanCode: request.PlanCode,
+			OwnerUserId: request.OwnerUserId, EventType: "trial.started", Status: "trialing", TrialEndsAt: &trialEnds, CurrentPeriodEndsAt: &trialEnds,
+			OccurredAt: gateway.Container.Now().UTC(), Metadata: request.Metadata,
 		})
 	})
 }
 
-func findBillingSubscription(ctx context.Context, client *ent.Client, update *interfaces.ProviderSubscriptionUpdate) (*ent.BillingSubscription, error) {
-	if update.ProviderSubscriptionId != "" {
-		row, err := client.BillingSubscription.Query().Where(billingsubscription.ProviderSubscriptionID(update.ProviderSubscriptionId)).ForUpdate().Only(ctx)
-		if !ent.IsNotFound(err) {
-			return row, err
-		}
+func (gateway *PaymentGateway) CancelBillingSubscription(ctx context.Context, reference string) error {
+	row, err := gateway.Container.Client(gateway.Container.Resources.Database).BillingSubscription.Query().Where(billingsubscription.Reference(reference)).Only(ctx)
+	if ent.IsNotFound(err) {
+		return ErrPaymentNotFound
 	}
-	reference := update.Metadata["billingSubscriptionReference"]
-	if reference == "" {
-		return nil, &ent.NotFoundError{}
+	if err != nil || row.ProviderSubscriptionID == "" {
+		return err
 	}
-	return client.BillingSubscription.Query().Where(billingsubscription.Reference(reference)).ForUpdate().Only(ctx)
+	return gateway.DisableProviderSubscription(ctx, row.ProviderSubscriptionID, row.EmailToken)
+}
+
+func (gateway *PaymentGateway) HandleSubscriptionChargeNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
+	if !strings.HasPrefix(notification.Reference, "sub-") {
+		return nil
+	}
+	provider, err := gateway.Container.DefaultProvider()
+	if err != nil {
+		return err
+	}
+	verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: notification.Reference})
+	if err != nil || verification.Outcome != interfaces.OutcomeSucceeded {
+		return convertProviderError(err)
+	}
+	client := gateway.Container.Client(gateway.Container.Resources.Database)
+	row, err := client.BillingSubscription.Query().Where(billingsubscription.Reference(notification.Reference)).Only(ctx)
+	if ent.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if err := gateway.recordProviderCustomerInTransaction(ctx, client, row.OwnerUserID, row.Provider, verification.ProviderCustomerId); err != nil {
+		return err
+	}
+	return row.Update().SetProviderCustomerID(verification.ProviderCustomerId).Exec(ctx)
 }

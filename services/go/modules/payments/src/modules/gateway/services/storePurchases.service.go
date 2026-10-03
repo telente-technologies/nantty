@@ -94,13 +94,35 @@ func (gateway *PaymentGateway) HandleSignedStoreRefundNotification(ctx context.C
 	if err != nil {
 		return ErrInvalidWebhookSignature
 	}
+	if !notification.IsRefund() {
+		return gateway.ApplyVerifiedStoreSubscriptionNotice(ctx, store, notification)
+	}
 	return gateway.ApplyVerifiedStoreRefund(ctx, store, notification)
+}
+
+func (gateway *PaymentGateway) ApplyVerifiedStoreSubscriptionNotice(ctx context.Context, store string, notification interfaces.StoreRefundNotification) error {
+	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		client := gateway.Container.Client(transaction)
+		eventKey := string(notification.Kind) + ":" + notification.NotificationId
+		claimed, err := gateway.claimWebhookEventInTransaction(ctx, client, store, eventKey, string(notification.Kind), notification.OriginalTransactionId, nil, nil)
+		if err != nil || !claimed {
+			return err
+		}
+		now := gateway.Container.Now().UTC()
+		if err := client.WebhookEvent.Update().Where(webhookevent.Provider(store), webhookevent.EventKey(truncate(eventKey, 255))).SetProcessedAt(now).AddAttemptCount(1).Exec(ctx); err != nil {
+			return err
+		}
+		return gateway.notifyStoreSubscriptionHandlers(ctx, transaction, models.StoreSubscriptionNotice{
+			Store: store, Kind: string(notification.Kind), StoreTransactionId: notification.StoreTransactionId, OriginalTransactionId: notification.OriginalTransactionId,
+			ProductId: notification.ProductId, ExpiresAt: notification.ExpiresAt, OccurredAt: now,
+		})
+	})
 }
 
 func (gateway *PaymentGateway) ApplyVerifiedStoreRefund(ctx context.Context, store string, notification interfaces.StoreRefundNotification) error {
 	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		client := gateway.Container.Client(transaction)
-		claimed, err := gateway.claimWebhookEventInTransaction(ctx, client, store, "refund:"+notification.NotificationId, "refund", notification.StoreTransactionId, nil)
+		claimed, err := gateway.claimWebhookEventInTransaction(ctx, client, store, "refund:"+notification.NotificationId, "refund", notification.StoreTransactionId, nil, nil)
 		if err != nil || !claimed {
 			return err
 		}
@@ -109,6 +131,10 @@ func (gateway *PaymentGateway) ApplyVerifiedStoreRefund(ctx context.Context, sto
 			return err
 		}
 		purchase, err := client.StorePurchase.Query().Where(storepurchase.StoreEQ(storepurchase.Store(store)), storepurchase.StoreTransactionID(notification.StoreTransactionId)).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) && notification.OriginalTransactionId != "" {
+			purchase, err = client.StorePurchase.Query().Where(storepurchase.StoreEQ(storepurchase.Store(store)), storepurchase.OriginalTransactionID(notification.OriginalTransactionId)).
+				Order(ent.Desc(storepurchase.FieldCreatedAt)).ForUpdate().First(ctx)
+		}
 		if ent.IsNotFound(err) {
 			return nil
 		}

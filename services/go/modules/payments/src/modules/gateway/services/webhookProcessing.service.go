@@ -8,11 +8,11 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/platform/httpserver"
@@ -44,7 +44,7 @@ func (gateway *PaymentGateway) HandleProviderWebhook(ctx context.Context, provid
 	var claimed bool
 	err = databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		var claimError error
-		claimed, claimError = gateway.claimWebhookEventInTransaction(ctx, gateway.Container.Client(transaction), providerName, notification.EventKey, notification.EventType, notification.Reference, digest[:])
+		claimed, claimError = gateway.claimWebhookEventInTransaction(ctx, gateway.Container.Client(transaction), providerName, notification.EventKey, notification.EventType, notification.Reference, digest[:], rawBody)
 		return claimError
 	})
 	if err != nil {
@@ -52,6 +52,10 @@ func (gateway *PaymentGateway) HandleProviderWebhook(ctx context.Context, provid
 	}
 	if !claimed {
 		return WebhookReceipt{Received: true, Duplicate: true}, nil
+	}
+	if gateway.Container.Settings.ProcessWebhooksInBackground {
+		go gateway.processAndRecordWebhook(context.WithoutCancel(ctx), providerName, notification)
+		return WebhookReceipt{Received: true}, nil
 	}
 	processingError := gateway.processVerifiedWebhook(ctx, notification)
 	if recordError := gateway.recordWebhookProcessing(ctx, providerName, notification.EventKey, processingError); recordError != nil {
@@ -65,21 +69,14 @@ func (gateway *PaymentGateway) HandleProviderWebhook(ctx context.Context, provid
 
 func (gateway *PaymentGateway) processVerifiedWebhook(ctx context.Context, notification interfaces.WebhookNotification) error {
 	switch notification.Kind {
-	case interfaces.WebhookKindCharge, interfaces.WebhookKindCheckout:
+	case interfaces.WebhookKindCharge, interfaces.WebhookKindChargeRejected:
 		return gateway.settleFromChargeNotification(ctx, notification)
 	case interfaces.WebhookKindRefund:
-		return gateway.HandleRefundNotification(ctx, notification.ProviderObjectId, notification.Reference, notification.EventType)
-	case interfaces.WebhookKindPayout:
-		return gateway.HandlePayoutNotification(ctx, notification)
+		return gateway.HandleRefundNotification(ctx, notification)
 	case interfaces.WebhookKindTransfer:
-		return gateway.HandleTransferNotification(ctx, notification.ProviderObjectId)
+		return gateway.HandleTransferNotification(ctx, notification)
 	case interfaces.WebhookKindDispute:
 		return gateway.HandleProviderDisputeNotification(ctx, notification)
-	case interfaces.WebhookKindAccount, interfaces.WebhookKindCapability:
-		if notification.ConnectedAccountId == "" {
-			return nil
-		}
-		return gateway.RefreshConnectedAccountFromProvider(ctx, notification.ConnectedAccountId, notification.Capability, notification.Status)
 	case interfaces.WebhookKindSubscription, interfaces.WebhookKindInvoice:
 		return gateway.HandleSubscriptionNotification(ctx, notification)
 	}
@@ -87,22 +84,13 @@ func (gateway *PaymentGateway) processVerifiedWebhook(ctx context.Context, notif
 }
 
 func (gateway *PaymentGateway) settleFromChargeNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
-	reference := notification.Reference
-	if !hasOwnPaymentReferencePrefix(reference) && notification.ProviderCheckoutId != "" {
-		intent, err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentIntent.Query().
-			Where(paymentintent.ProviderCheckoutID(notification.ProviderCheckoutId)).Only(ctx)
-		if ent.IsNotFound(err) {
-			return nil
+	if !hasOwnPaymentReferencePrefix(notification.Reference) {
+		if notification.Subscription == nil && notification.Kind == interfaces.WebhookKindCharge {
+			return gateway.HandleSubscriptionChargeNotification(ctx, notification)
 		}
-		if err != nil {
-			return err
-		}
-		reference = intent.Reference
-	}
-	if !hasOwnPaymentReferencePrefix(reference) {
 		return nil
 	}
-	_, err := gateway.verifyAndSettlePaymentIntent(ctx, reference, notification.ProviderChargeId)
+	_, err := gateway.verifyAndSettlePaymentIntent(ctx, notification.Reference, notification.ProviderChargeId)
 	if errors.Is(err, ErrPaymentNotFound) || errors.Is(err, ErrPaymentAmountMismatch) {
 		return nil
 	}
@@ -118,8 +106,12 @@ func hasOwnPaymentReferencePrefix(reference string) bool {
 	return false
 }
 
-func (gateway *PaymentGateway) claimWebhookEventInTransaction(ctx context.Context, client *ent.Client, provider, eventKey, eventType, reference string, digest []byte) (bool, error) {
-	err := client.WebhookEvent.Create().
+func (gateway *PaymentGateway) claimWebhookEventInTransaction(ctx context.Context, client *ent.Client, provider, eventKey, eventType, reference string, digest, rawBody []byte) (bool, error) {
+	create := client.WebhookEvent.Create()
+	if rawBody != nil {
+		create.SetRawPayload(rawBody)
+	}
+	err := create.
 		SetProvider(provider).SetEventKey(truncate(eventKey, 255)).SetEventType(truncate(eventType, 120)).SetReference(truncate(reference, 255)).
 		SetPayloadSha256(hex.EncodeToString(digest)).SetCreatedAt(gateway.Container.Now()).
 		OnConflictColumns(webhookevent.FieldProvider, webhookevent.FieldEventKey).DoNothing().Exec(ctx)
@@ -147,4 +139,34 @@ func truncate(value string, maximum int) string {
 		return value
 	}
 	return value[:maximum]
+}
+
+func (gateway *PaymentGateway) processAndRecordWebhook(ctx context.Context, providerName string, notification interfaces.WebhookNotification) {
+	processingError := gateway.processVerifiedWebhook(ctx, notification)
+	if err := gateway.recordWebhookProcessing(ctx, providerName, notification.EventKey, processingError); err != nil || processingError != nil {
+		gateway.Container.Resources.Logger.WarnContext(ctx, "webhook processing failed; the sweeper retries it", "eventKey", notification.EventKey, "error", errors.Join(processingError, err))
+	}
+}
+
+func (gateway *PaymentGateway) RetryUnprocessedWebhooks(ctx context.Context, limit int) int {
+	pending, err := gateway.Container.Client(gateway.Container.Resources.Database).WebhookEvent.Query().
+		Where(webhookevent.ProcessedAtIsNil(), webhookevent.RawPayloadNotNil(), webhookevent.AttemptCountLT(20), webhookevent.CreatedAtLT(gateway.Container.Now().Add(-time.Minute))).
+		Order(ent.Asc(webhookevent.FieldCreatedAt)).Limit(limit).All(ctx)
+	if err != nil {
+		return 0
+	}
+	retried := 0
+	for _, event := range pending {
+		provider, found := gateway.Container.Providers[event.Provider]
+		if !found || event.RawPayload == nil {
+			continue
+		}
+		notification, err := provider.ParseVerifiedWebhookPayload(*event.RawPayload)
+		if err != nil {
+			continue
+		}
+		gateway.processAndRecordWebhook(ctx, event.Provider, notification)
+		retried++
+	}
+	return retried
 }
