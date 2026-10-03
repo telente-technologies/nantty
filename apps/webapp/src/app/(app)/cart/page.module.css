@@ -15,6 +15,39 @@
   align-items: start;
 }
 
+.storeGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.storeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.storeHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.storeName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-weight: 800;
+}
+
+.storeSubtotal {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .itemList {
   display: flex;
   flex-direction: column;
@@ -57,7 +90,8 @@
 }
 
 .itemName:hover {
-  color: var(--blue-600);
+  color: var(--color-brand);
+  text-decoration: underline;
 }
 
 .itemVariant {
@@ -82,14 +116,14 @@
 .quantity {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--divider-strong);
+  border: 1px solid var(--color-border-control);
   border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .quantityButton {
-  width: 36px;
-  height: 36px;
+  width: var(--control-md);
+  height: var(--control-md);
   border: 0;
   background: var(--surface-sunken);
   font-size: var(--text-md);
@@ -97,7 +131,7 @@
 }
 
 .quantityButton:hover:not(:disabled) {
-  background: var(--divider);
+  background: var(--color-surface-hover);
 }
 
 .quantityButton:disabled {
@@ -169,7 +203,7 @@
   text-align: center;
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 @media (min-width: 900px) {

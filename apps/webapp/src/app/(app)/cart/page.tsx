@@ -3,18 +3,30 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
-import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
-import { MediaImage } from "@/components/ui/media";
-import { CloseIcon } from "@/components/ui/icons";
+import { Avatar, MediaImage } from "@/components/ui/media";
+import { CloseIcon, StoreIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
+import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 
 import styles from "./page.module.css";
 
-function MoneyRow({ label, value, strong = false, muted = false }: { readonly label: string; readonly value: string; readonly strong?: boolean; readonly muted?: boolean }) {
+function MoneyRow({
+  label,
+  value,
+  strong = false,
+  muted = false,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly strong?: boolean;
+  readonly muted?: boolean;
+}) {
   return (
     <div className={[styles.moneyRow, strong ? styles.moneyRowStrong : "", muted ? styles.moneyRowMuted : ""].filter(Boolean).join(" ")}>
       <span>{label}</span>
@@ -27,7 +39,11 @@ export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const cartQuery = useQuery({ queryKey: ["cart"], queryFn: cartsService.fetchMyCart, retry: false });
+  const cartQuery = useQuery({
+    queryKey: ["cart"],
+    queryFn: cartsService.fetchMyCart,
+    retry: false,
+  });
 
   const invalidateCart = async () => {
     await queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -45,7 +61,17 @@ export default function CartPage() {
     onSettled: invalidateCart,
   });
 
-  if (cartQuery.isLoading) return <Spinner label="Loading your cart" />;
+  if (cartQuery.isLoading) {
+    return (
+      <div className={styles.page} role="status" aria-label="Loading your cart">
+        <Skeleton width={120} height={32} />
+        <div className={styles.layout}>
+          <Skeleton height={320} />
+          <Skeleton height={280} />
+        </div>
+      </div>
+    );
+  }
   if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." action={<RetryButton onRetry={() => cartQuery.refetch()} />} />;
 
   const cart = cartQuery.data;
@@ -55,9 +81,7 @@ export default function CartPage() {
         icon="🛒"
         title="Your cart is empty"
         description="Browse the mart and add something you love."
-        action={
-          <Button onClick={() => router.push("/")}>Start shopping</Button>
-        }
+        action={<Button onClick={() => router.push("/mart")}>Start shopping</Button>}
       />
     );
   }
@@ -69,60 +93,84 @@ export default function CartPage() {
       <h1 className={styles.title}>Cart</h1>
 
       <div className={styles.layout}>
-        <ul className={styles.itemList}>
-          {cart.items.map((item) => (
-            <li key={item.id} className={styles.item}>
-              <Link href={`/product/${item.product.id}`} className={styles.itemThumb}>
-                <MediaImage src={item.product.imageUrl} alt={item.product.name} sizes="96px" />
-              </Link>
+        <div className={styles.storeGroups}>
+          {groupCartItemsByStore(cart.items).map((group) => (
+            <section key={group.storeId} className={styles.storeGroup} aria-label={`Items from ${group.store?.name ?? "this seller"}`}>
+              <header className={styles.storeHeader}>
+                <Avatar name={group.store?.name ?? "Seller"} src={group.store?.logoUrl ?? null} size="sm" />
+                <span className={styles.storeName}>
+                  <StoreIcon size={15} /> {group.store?.name ?? "Seller"}
+                </span>
+                <span className={styles.storeSubtotal}>{formatMoneyForDisplay(group.subtotal)}</span>
+              </header>
+              <ul className={styles.itemList}>
+                {group.items.map((item) => (
+                  <li key={item.id} className={styles.item}>
+                    <Link href={`/product/${item.product.id}`} className={styles.itemThumb}>
+                      <MediaImage src={item.product.imageUrl} alt={item.product.name} sizes="96px" />
+                    </Link>
 
-              <div className={styles.itemBody}>
-                <Link href={`/product/${item.product.id}`} className={styles.itemName}>
-                  {item.product.name}
-                </Link>
-                {item.variant ? <p className={styles.itemVariant}>{item.variant}</p> : null}
-                <p className={styles.itemPrice}>{formatMoneyForDisplay(multiplyMoneyByQuantity(item.product.price, item.quantity))}</p>
+                    <div className={styles.itemBody}>
+                      <Link href={`/product/${item.product.id}`} className={styles.itemName}>
+                        {item.product.name}
+                      </Link>
+                      {item.variant ? <p className={styles.itemVariant}>{item.variant}</p> : null}
+                      <p className={styles.itemPrice}>{formatMoneyForDisplay(multiplyMoneyByQuantity(item.product.price, item.quantity))}</p>
 
-                <div className={styles.itemControls}>
-                  <div className={styles.quantity}>
-                    <button
-                      type="button"
-                      className={styles.quantityButton}
-                      aria-label={`Decrease quantity of ${item.product.name}`}
-                      onClick={() => updateQuantity.mutate({ cartItemId: item.id, quantity: Math.max(1, item.quantity - 1) })}
-                      disabled={item.quantity <= 1 || updateQuantity.isPending}
-                    >
-                      −
-                    </button>
-                    <span className={styles.quantityValue}>{item.quantity}</span>
-                    <button
-                      type="button"
-                      className={styles.quantityButton}
-                      aria-label={`Increase quantity of ${item.product.name}`}
-                      onClick={() => updateQuantity.mutate({ cartItemId: item.id, quantity: Math.min(99, item.quantity + 1) })}
-                      disabled={updateQuantity.isPending}
-                    >
-                      +
-                    </button>
-                  </div>
+                      <div className={styles.itemControls}>
+                        <div className={styles.quantity}>
+                          <button
+                            type="button"
+                            className={styles.quantityButton}
+                            aria-label={`Decrease quantity of ${item.product.name}`}
+                            onClick={() =>
+                              updateQuantity.mutate({
+                                cartItemId: item.id,
+                                quantity: Math.max(1, item.quantity - 1),
+                              })
+                            }
+                            disabled={item.quantity <= 1 || updateQuantity.isPending}
+                          >
+                            −
+                          </button>
+                          <span className={styles.quantityValue}>{item.quantity}</span>
+                          <button
+                            type="button"
+                            className={styles.quantityButton}
+                            aria-label={`Increase quantity of ${item.product.name}`}
+                            onClick={() =>
+                              updateQuantity.mutate({
+                                cartItemId: item.id,
+                                quantity: Math.min(99, item.quantity + 1),
+                              })
+                            }
+                            disabled={updateQuantity.isPending}
+                          >
+                            +
+                          </button>
+                        </div>
 
-                  <button
-                    type="button"
-                    className={styles.removeButton}
-                    aria-label={`Remove ${item.product.name} from cart`}
-                    onClick={() => removeItem.mutate(item.id)}
-                    disabled={removeItem.isPending}
-                  >
-                    <CloseIcon size={16} /> Remove
-                  </button>
-                </div>
-              </div>
-            </li>
+                        <button
+                          type="button"
+                          className={styles.removeButton}
+                          aria-label={`Remove ${item.product.name} from cart`}
+                          onClick={() => removeItem.mutate(item.id)}
+                          disabled={removeItem.isPending}
+                        >
+                          <CloseIcon size={16} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
 
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>Summary</h2>
+          <SellerGroupedSummary items={cart.items} />
           <MoneyRow label="Items total" value={formatMoneyForDisplay(cart.itemsTotal)} />
           {hasDiscount ? <MoneyRow label="Discount" value={`−${formatMoneyForDisplay(cart.shopDiscount)}`} muted /> : null}
           <MoneyRow label="Shipping" value={cart.shipping.amountMinor > 0 ? formatMoneyForDisplay(cart.shipping) : "Calculated at checkout"} muted />
@@ -131,7 +179,7 @@ export default function CartPage() {
           <Button size="lg" fullWidth onClick={() => router.push("/checkout")}>
             Proceed to checkout
           </Button>
-          <Link href="/" className={styles.continueLink}>
+          <Link href="/mart" className={styles.continueLink}>
             Continue shopping
           </Link>
         </aside>
