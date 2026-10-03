@@ -11,6 +11,8 @@ const (
 	AdCreatorEarningsPosted = "adCreatorEarnings.posted"
 	AdPremiumPoolAllocated  = "adPremiumPool.allocated"
 	AdBoostCreated          = "adBoost.created"
+	AdMediaUploaded         = "adMedia.uploaded"
+	AdReportReady           = "adReport.ready"
 )
 
 type AdImpressionRecordedEventData struct {
@@ -82,4 +84,30 @@ type AdBoostCreatedEventData struct {
 	TotalBudgetMinor int64  `json:"totalBudgetMinor"`
 	Currency         string `json:"currency"`
 	PaymentMethod    string `json:"paymentMethod"`
+}
+
+type AdMediaUploadedEventData struct {
+	MediaId   string `json:"mediaId"`
+	AccountId string `json:"accountId"`
+	ObjectKey string `json:"objectKey"`
+	MimeType  string `json:"mimeType"`
+	Kind      string `json:"kind"`
+	SizeBytes int64  `json:"sizeBytes"`
+}
+
+type AdReportReadyEventData struct {
+	ScheduledReportId string   `json:"scheduledReportId"`
+	AccountId         string   `json:"accountId"`
+	ReportName        string   `json:"reportName"`
+	Recipients        []string `json:"recipients"`
+	Frequency         string   `json:"frequency"`
+	PeriodFrom        string   `json:"periodFrom"`
+	PeriodTo          string   `json:"periodTo"`
+	Currency          string   `json:"currency"`
+	SpendMinor        int64    `json:"spendMinor"`
+	Impressions       int64    `json:"impressions"`
+	Clicks            int64    `json:"clicks"`
+	CsvUrl            string   `json:"csvUrl,omitempty"`
+	PdfUrl            string   `json:"pdfUrl,omitempty"`
+	UrlsExpireAt      string   `json:"urlsExpireAt,omitempty"`
 }

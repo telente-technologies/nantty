@@ -2,24 +2,31 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
-	"zudomart/modules/ads/src/generated/ent/admonetizationpolicy"
 	"zudomart/modules/ads/src/generated/ent/predicate"
 )
 
 const policyCacheLifetime = 30 * time.Second
 
+type PlatformSettingReader interface {
+	ReadValue(ctx context.Context, key string) (json.RawMessage, bool)
+}
+
+const MonetizationSettingKey = "monetization.policy"
+
 type PolicySource struct {
-	Client *ent.Client
-	Now    func() time.Time
-	mutex  sync.Mutex
-	loaded time.Time
-	rows   []MonetizationPolicyRow
-	freq   map[string]FrequencyPolicy
+	Client   *ent.Client
+	Now      func() time.Time
+	Settings PlatformSettingReader
+	ShareBps int64
+	mutex    sync.Mutex
+	loaded   time.Time
+	freq     map[string]FrequencyPolicy
 }
 
 func DefaultFrequencyPolicies() map[string]FrequencyPolicy {
@@ -48,35 +55,46 @@ func (source *PolicySource) SeedDefaultsWhenMissing(ctx context.Context) error {
 			return err
 		}
 	}
-	return source.seedMonetizationDefaults(ctx)
-}
-
-func (source *PolicySource) seedMonetizationDefaults(ctx context.Context) error {
-	defaults := []struct {
-		key, contentType string
-		multiplier       int
-	}{{"ads.original", ContentTypeOriginal, int(DefaultOriginalMultiplier)}, {"ads.ai_generated", ContentTypeAiGenerated, int(DefaultAiMultiplierBps)}}
-	for _, entry := range defaults {
-		exists, err := source.Client.AdMonetizationPolicy.Query().Where(adMonetizationKeyEquals(entry.key)).Exist(ctx)
-		if err != nil || exists {
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		if err := source.Client.AdMonetizationPolicy.Create().SetKey(entry.key).SetContentType(entry.contentType).SetCreatorShareBps(int(DefaultCreatorShareBps)).
-			SetMultiplierBps(entry.multiplier).SetEffectiveFrom(source.Now().Add(-time.Hour)).Exec(ctx); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
+// MonetizationRows reads the admin monetization.policy setting (cached by the reader); a missing setting falls back to the built-in defaults.
 func (source *PolicySource) MonetizationRows(ctx context.Context) ([]MonetizationPolicyRow, error) {
-	if err := source.refreshWhenStale(ctx); err != nil {
-		return nil, err
+	if source.Settings == nil {
+		return nil, nil
 	}
-	return source.rows, nil
+	raw, found := source.Settings.ReadValue(ctx, MonetizationSettingKey)
+	if !found {
+		return nil, nil
+	}
+	return ParseMonetizationSetting(raw, source.shareBps()), nil
+}
+
+func (source *PolicySource) shareBps() int64 {
+	if source.ShareBps > 0 {
+		return source.ShareBps
+	}
+	return DefaultCreatorShareBps
+}
+
+func ParseMonetizationSetting(raw json.RawMessage, shareBps int64) []MonetizationPolicyRow {
+	var setting struct {
+		Rows []struct {
+			Id            string `json:"id"`
+			MultiplierBps int64  `json:"multiplierBps"`
+			Active        bool   `json:"active"`
+		} `json:"rows"`
+	}
+	if json.Unmarshal(raw, &setting) != nil {
+		return nil
+	}
+	rows := make([]MonetizationPolicyRow, 0, len(setting.Rows))
+	for _, row := range setting.Rows {
+		if row.Active {
+			rows = append(rows, MonetizationPolicyRow{ContentType: row.Id, CreatorShareBps: shareBps, MultiplierBps: row.MultiplierBps})
+		}
+	}
+	return rows
 }
 
 func (source *PolicySource) FrequencyPolicies(ctx context.Context) (map[string]FrequencyPolicy, error) {
@@ -98,14 +116,6 @@ func (source *PolicySource) refreshWhenStale(ctx context.Context) error {
 	if source.freq != nil && source.Now().Sub(source.loaded) < policyCacheLifetime {
 		return nil
 	}
-	policies, err := source.Client.AdMonetizationPolicy.Query().All(ctx)
-	if err != nil {
-		return err
-	}
-	rows := make([]MonetizationPolicyRow, 0, len(policies))
-	for _, policy := range policies {
-		rows = append(rows, MonetizationPolicyRow{ContentType: policy.ContentType, CreatorShareBps: int64(policy.CreatorShareBps), MultiplierBps: int64(policy.MultiplierBps), EffectiveFrom: policy.EffectiveFrom, EffectiveTo: policy.EffectiveTo})
-	}
 	stored, err := source.Client.AdFrequencyPolicy.Query().All(ctx)
 	if err != nil {
 		return err
@@ -118,14 +128,10 @@ func (source *PolicySource) refreshWhenStale(ctx context.Context) error {
 		}
 		frequency[policy.Format] = FrequencyPolicy{Format: policy.Format, SessionCap: policy.SessionCap, HourCap: policy.HourCap, DayCap: policy.DayCap, AdvertiserDayCap: policy.AdvertiserDayCap, MinGapSlots: policy.MinGapSlots, CooldownSecondsAfterSkip: policy.CooldownSecondsAfterSkip}
 	}
-	source.rows, source.freq, source.loaded = rows, frequency, source.Now()
+	source.freq, source.loaded = frequency, source.Now()
 	return nil
 }
 
 func adFrequencyFormatEquals(format string) predicate.AdFrequencyPolicy {
 	return adfrequencypolicy.Format(format)
-}
-
-func adMonetizationKeyEquals(key string) predicate.AdMonetizationPolicy {
-	return admonetizationpolicy.Key(key)
 }

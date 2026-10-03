@@ -52,9 +52,21 @@ type DecisionSlot struct {
 	SlotsSinceLastAd    *int
 }
 
+type AdClickSignals struct {
+	ClicksByActorLastMinute    int
+	MillisecondsFromImpression int64
+}
+
 type PctrCandidate struct {
 	AdId                  string
+	CampaignId            string
+	AccountId             string
 	Format                string
+	BidType               string
+	BidMinor              int64
+	DailyBudgetMinor      int64
+	Currency              string
+	Placements            []string
 	HistoricalImpressions int64
 	HistoricalClicks      int64
 }
