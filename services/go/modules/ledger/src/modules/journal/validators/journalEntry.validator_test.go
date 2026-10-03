@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"testing"
+
 	"zudomart/modules/ledger/src/modules/journal/models"
 )
 
@@ -11,7 +12,7 @@ func TestValidateJournalEntryRequestRejectsEveryMalformedEntry(t *testing.T) {
 	sender := models.UserSpendableCoinsAccount("sender")
 	creator := models.CreatorEarnedCoinsAccount("creator")
 	platform := models.PlatformGiftRevenueCoinsAccount()
-	wallet := models.UserWalletAccount("seller", "NGN")
+	wallet := models.SellerAvailableAccount("seller", "NGN")
 	clearing := models.ProviderClearingAccount("paystack", "NGN")
 	line := func(account models.AccountRef, direction models.Direction, amount int64) models.JournalLineRequest {
 		return models.JournalLineRequest{Account: account, Direction: direction, AmountMinor: amount}
@@ -30,7 +31,7 @@ func TestValidateJournalEntryRequestRejectsEveryMalformedEntry(t *testing.T) {
 		{"negative amount", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(sender, models.Debit, -5), line(creator, models.Credit, -5)}}, models.ErrInvalidJournalEntry},
 		{"missing reference", models.JournalEntryRequest{Kind: "x", Lines: []models.JournalLineRequest{line(sender, models.Debit, 5), line(creator, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
 		{"missing kind", models.JournalEntryRequest{Reference: "r", Lines: []models.JournalLineRequest{line(sender, models.Debit, 5), line(creator, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
-		{"lowercase currency", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(models.UserWalletAccount("u", "ngn"), models.Debit, 5), line(wallet, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
+		{"lowercase currency", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(models.SellerAvailableAccount("u", "ngn"), models.Debit, 5), line(wallet, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
 		{"bad direction", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(sender, "sideways", 5), line(creator, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
 		{"account redefined in one entry", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(sender, models.Debit, 5), line(models.AccountRef{Code: sender.Code, Currency: models.CoinUnit, Kind: models.AccountKindAsset}, models.Credit, 5)}}, models.ErrInvalidJournalEntry},
 		{"overflowing totals", models.JournalEntryRequest{Reference: "r", Kind: "x", Lines: []models.JournalLineRequest{line(sender, models.Debit, math.MaxInt64), line(sender, models.Debit, 1), line(creator, models.Credit, 1)}}, models.ErrInvalidJournalEntry},
