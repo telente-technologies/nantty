@@ -50,7 +50,7 @@ func (purchases CoinPurchases) StartWebCoinPurchaseInTransaction(ctx context.Con
 		return dtos.StartedCoinPurchaseDto{}, err
 	}
 	purchaseId := uuid.Must(uuid.NewV7())
-	intent, err := purchases.Container.Payments.CreatePaymentIntentAndInitializeChargeInTransaction(ctx, transaction, paymentmodels.CreatePaymentIntentRequest{
+	intent, err := purchases.Container.Payments.CreatePendingPaymentIntentInTransaction(ctx, transaction, paymentmodels.CreatePaymentIntentRequest{
 		Purpose: paymentconstants.PurposeCoinPurchase, OwnerUserId: input.UserId, SubjectId: purchaseId.String(), Provider: input.Provider,
 		AmountMinor: price.AmountMinor, Currency: price.Currency, ReturnTo: input.ReturnTo,
 		Metadata: map[string]string{"packageId": pack.ID, "coinPurchaseId": purchaseId.String()},
@@ -68,9 +68,21 @@ func (purchases CoinPurchases) StartWebCoinPurchaseInTransaction(ctx context.Con
 	converted := ConvertCoinPurchase(purchase)
 	callbackUrl := intent.CallbackUrl
 	return dtos.StartedCoinPurchaseDto{
-		Reference: purchase.Reference, PurchaseChannel: string(purchase.Channel), AuthorizationUrl: intent.AuthorizationUrl,
-		CallbackUrl: &callbackUrl, Purchase: &converted,
+		Reference: purchase.Reference, PurchaseChannel: string(purchase.Channel), CallbackUrl: &callbackUrl, Purchase: &converted, PaymentIntentId: intent.Id.String(),
 	}, nil
+}
+
+func (purchases CoinPurchases) OpenCheckoutForStartedPurchase(ctx context.Context, started dtos.StartedCoinPurchaseDto) (dtos.StartedCoinPurchaseDto, error) {
+	intentId, err := uuid.Parse(started.PaymentIntentId)
+	if err != nil {
+		return started, nil
+	}
+	opened, err := purchases.Container.Payments.OpenProviderCheckoutForIntent(ctx, intentId)
+	if err != nil {
+		return started, err
+	}
+	started.AuthorizationUrl = opened.CheckoutUrl
+	return started, nil
 }
 
 func (purchases CoinPurchases) HandleSucceededPayment(ctx context.Context, transaction *sql.Tx, payment paymentmodels.SettledPayment) error {

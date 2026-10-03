@@ -51,7 +51,7 @@ func (purchases CoinPurchases) RedeemVerifiedStorePurchaseInTransaction(ctx cont
 		{Account: ledgermodels.UserSpendableCoinsAccount(userId), Direction: ledgermodels.Credit, AmountMinor: purchase.Coins},
 	}
 	if net := purchase.AmountMinor - purchase.StoreFeeMinor; net > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.ProviderClearingAccount(store, purchase.Currency), Direction: ledgermodels.Debit, AmountMinor: net})
+		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformProviderBalanceAccount(store, purchase.Currency), Direction: ledgermodels.Debit, AmountMinor: net})
 	}
 	if purchase.StoreFeeMinor > 0 {
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.AppStoreFeeExpenseAccount(store, purchase.Currency), Direction: ledgermodels.Debit, AmountMinor: purchase.StoreFeeMinor})
@@ -94,7 +94,7 @@ func (purchases CoinPurchases) HandleStorePurchaseRefunded(ctx context.Context, 
 		{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: purchase.Coins},
 	}
 	if net := purchase.AmountMinor - purchase.StoreFeeMinor; net > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.ProviderClearingAccount(purchase.Provider, purchase.Currency), Direction: ledgermodels.Credit, AmountMinor: net})
+		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformProviderBalanceAccount(purchase.Provider, purchase.Currency), Direction: ledgermodels.Credit, AmountMinor: net})
 	}
 	if purchase.StoreFeeMinor > 0 {
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.AppStoreFeeExpenseAccount(purchase.Provider, purchase.Currency), Direction: ledgermodels.Credit, AmountMinor: purchase.StoreFeeMinor})

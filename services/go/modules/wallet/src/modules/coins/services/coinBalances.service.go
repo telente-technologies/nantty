@@ -91,7 +91,7 @@ func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.C
 			{Account: earned, Direction: ledgermodels.Debit, AmountMinor: input.Coins},
 			{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: input.Coins},
 			{Account: ledgermodels.CreatorCoinPayoutExpenseAccount(input.Currency), Direction: ledgermodels.Debit, AmountMinor: cash},
-			{Account: ledgermodels.SellerAvailableAccount(input.UserId, input.Currency), Direction: ledgermodels.Credit, AmountMinor: cash},
+			{Account: ledgermodels.CreatorEarningsPayableAccount(input.UserId, input.Currency), Direction: ledgermodels.Credit, AmountMinor: cash},
 		},
 	})
 	if errors.Is(err, ledgermodels.ErrInsufficientBalance) {
