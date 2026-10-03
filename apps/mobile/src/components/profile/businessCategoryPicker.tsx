@@ -7,6 +7,8 @@ import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { BusinessCategory, BusinessCategorySelection } from "@/types/socialGraph.type";
+import { Cancel20Icon } from "@/components/icons";
+import { IconRow } from "@/components/ui/iconRow";
 
 export interface BusinessCategoryPickerProps {
   readonly categories: readonly BusinessCategory[];
@@ -50,7 +52,7 @@ export function BusinessCategoryPicker({ categories, value, onChange }: Business
               onPress={() => onChange(value.filter((_, selectionIndex) => selectionIndex !== index))}
               style={styles.selected}
             >
-              <Text size={12} weight={500} lineHeight={16} color={colors.white}>{describeSelection(selection, categories)}  ✕</Text>
+              <IconRow icon={<Cancel20Icon size={12} color={colors.white} />}><Text size={12} weight={500} lineHeight={16} color={colors.white}>{describeSelection(selection, categories)}</Text></IconRow>
             </Pressable>
           ))}
         </View>

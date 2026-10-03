@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { sellerWebAppConfig } from "@/config/sellerWebApp.config";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 const WEB_ONLY_TOOLS = ["Point of sale for your physical shop", "Advanced inventory and variants", "Staff accounts and roles", "Sales and tax reports"];
 
@@ -21,9 +22,9 @@ export function SellerWebAppNote() {
         The Zudomart Dashboard is available to verified sellers with a subscription:
       </Text>
       {WEB_ONLY_TOOLS.map((tool) => (
-        <Text key={tool} size={13} lineHeight={17.5} color={colors.textMuted}>
-          • {tool}
-        </Text>
+        <BulletLine key={tool} size={13} lineHeight={17.5}>
+          {tool}
+        </BulletLine>
       ))}
       <Button
         variant="subtle"
