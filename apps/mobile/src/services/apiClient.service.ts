@@ -2,6 +2,7 @@ import { apiConfig } from "@/config/api.config";
 import { resolveMockApiRequest } from "@/mocks";
 import { useAuthStore } from "@/store/auth.store";
 import { useLocaleStore } from "@/store/locale.store";
+import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";
 
 import { ApiError } from "@/errors/api.error";
 
@@ -42,7 +43,7 @@ async function refreshAccessTokenWithRefreshToken(): Promise<boolean> {
 
 async function sendHttpRequest<T>(method: Method, path: string, options: RequestOptions = {}): Promise<T> {
   const url = appendQueryStringToPath(path, options.query);
-  if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey);
+  if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey, !useAuthStore.getState().accessToken);
 
   const headers: Record<string, string> = { Accept: "application/json", ...getAuthorizedRequestHeaders(options.auth !== false) };
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
@@ -89,6 +90,10 @@ async function sendRequestWithTokenRefresh<T>(method: Method, path: string, opti
     return await sendHttpRequest<T>(method, path, options);
   } catch (error) {
     if (!(error instanceof ApiError) || error.status !== 401 || options?.auth === false) throw error;
+    if (!useAuthStore.getState().accessToken) {
+      if (method !== "GET") usePendingAuthIntentStore.getState().openSignInPrompt("continue");
+      throw error;
+    }
     if (!(await refreshSessionAfterUnauthorizedResponse())) throw error;
     return sendHttpRequest<T>(method, path, options);
   }

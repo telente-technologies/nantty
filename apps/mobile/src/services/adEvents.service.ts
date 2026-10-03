@@ -4,6 +4,9 @@ import type { ViewToken } from "react-native";
 
 import type { AdEvent, AdPlacement, ID, SponsoredPlacement } from "@/types";
 
+import { useAuthStore } from "@/store/auth.store";
+import { useGuestSessionStore } from "@/store/guestSession.store";
+
 import { api } from "./apiClient.service";
 
 const PENDING_AD_EVENTS_STORAGE_KEY = "zm.pendingAdEvents";
@@ -68,6 +71,8 @@ function scheduleAdEventsFlush() {
 }
 
 function queueAdEventForBatchedDelivery(event: AdEvent) {
+  const isSignedIn = useAuthStore.getState().status === "signedIn";
+  if (!isSignedIn && !useGuestSessionStore.getState().hasAcceptedGuestAnalytics) return;
   pendingAdEvents = [...pendingAdEvents, { ...event, occurredAt: new Date().toISOString() }].slice(-MAXIMUM_PENDING_EVENTS_KEPT);
   savePendingAdEventsToStorage().catch(() => undefined);
   scheduleAdEventsFlush();

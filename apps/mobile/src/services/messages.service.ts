@@ -4,6 +4,8 @@ import type {
   ConversationFilter,
   Conversation,
   ConversationSettingsUpdate,
+  InboxFolder,
+  LinkPreview,
   Message,
   MessageReactionSummary,
   OutgoingVoiceNote,
@@ -18,6 +20,7 @@ export interface OutgoingMessageDraft {
   readonly senderId: string;
   readonly text: string;
   readonly localMessageId: string;
+  readonly linkPreview?: LinkPreview | null;
 }
 
 export const buildLocalPendingMessageFromDraft = (draft: OutgoingMessageDraft): Message => ({
@@ -25,20 +28,26 @@ export const buildLocalPendingMessageFromDraft = (draft: OutgoingMessageDraft): 
   conversationId: draft.conversationId,
   senderId: draft.senderId,
   text: draft.text,
+  linkPreview: draft.linkPreview ?? null,
   createdAt: new Date().toISOString(),
 });
 
 export const messagesService = {
   fetchConversationList: (filter: ConversationFilter) => api.get<Conversation[]>("/api/v1/conversations", { filter }),
+  fetchInboxFolder: (folder: InboxFolder) => api.get<Conversation[]>("/api/v1/conversations", { folder }),
+  acceptMessageRequest: (conversationId: string) => api.post<Conversation>(`/api/v1/conversations/${conversationId}/accept`),
+  deleteMessageRequest: (conversationId: string) => api.delete<void>(`/api/v1/conversations/${conversationId}`),
+  blockConversationPeer: (conversationId: string) => api.post<void>(`/api/v1/conversations/${conversationId}/block`),
+  markConversationNotSpam: (conversationId: string) => api.post<Conversation>(`/api/v1/conversations/${conversationId}/not-spam`),
   fetchConversationById: (conversationId: string) => api.get<Conversation>(`/api/v1/conversations/${conversationId}`),
   fetchMessagesInConversation: (conversationId: string, options: { readonly cursor?: string; readonly after?: string } = {}) =>
     api.get<Page<Message>>(`/api/v1/conversations/${conversationId}/messages`, { cursor: options.cursor, after: options.after }),
   startConversationWithUser: (userId: string) => api.post<Conversation>("/api/v1/conversations", { userId }),
   sendChatMessageOrQueueWhenOffline: async (draft: OutgoingMessageDraft): Promise<{ readonly message: Message; readonly delivered: boolean }> => {
     const deliveredMessage = await runNowOrQueueWhenOffline(
-      { kind: "sendMessage", payload: { conversationId: draft.conversationId, text: draft.text, localMessageId: draft.localMessageId } },
+      { kind: "sendMessage", payload: { conversationId: draft.conversationId, text: draft.text, localMessageId: draft.localMessageId, linkPreview: draft.linkPreview ?? null } },
       (idempotencyKey) =>
-        api.post<Message>(`/api/v1/conversations/${draft.conversationId}/messages`, { text: draft.text }, { idempotencyKey }),
+        api.post<Message>(`/api/v1/conversations/${draft.conversationId}/messages`, { text: draft.text, linkPreview: draft.linkPreview ?? null }, { idempotencyKey }),
     );
     return deliveredMessage
       ? { message: deliveredMessage, delivered: true }

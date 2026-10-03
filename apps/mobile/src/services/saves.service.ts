@@ -1,0 +1,10 @@
+import type { Page, SavedItem, SavedItemFilter, SaveTarget } from "@/types";
+
+import { api } from "./apiClient.service";
+
+export const savesService = {
+  saveItem: (target: SaveTarget) => api.post<void>("/api/v1/saves", target),
+  unsaveItem: (target: SaveTarget) => api.delete<void>("/api/v1/saves", { query: { type: target.type, targetId: target.targetId } }),
+  fetchSavedItemsPage: (filter: SavedItemFilter, cursor: string | null) =>
+    api.get<Page<SavedItem>>("/api/v1/saves", { type: filter === "all" ? undefined : filter, cursor: cursor ?? undefined }),
+};

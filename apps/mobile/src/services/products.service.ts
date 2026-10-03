@@ -14,5 +14,4 @@ export const productsService = {
   fetchFeaturedProducts: () => api.get<ProductSummary[]>("/api/v1/products/featured"),
   likeProduct: (productId: string) => api.post<void>(`/api/v1/products/${productId}/like`),
   unlikeProduct: (productId: string) => api.delete<void>(`/api/v1/products/${productId}/like`),
-  bookmarkProduct: (productId: string) => api.post<void>(`/api/v1/products/${productId}/bookmark`),
 };

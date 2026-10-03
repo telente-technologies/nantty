@@ -20,6 +20,7 @@ export const usersService = {
   fetchMyAccountSettings: () => api.get<AccountSettings>("/api/v1/users/me/settings"),
   updateMyAccountSettings: (update: Partial<AccountSettings>) => api.patch<AccountSettings>("/api/v1/users/me/settings", update),
   updateMyCountryPreference: (countryCode: string) => api.patch<void>("/api/v1/users/me/preferences", { countryCode }),
+  updateMyThemePreference: (theme: AccountSettings["theme"]) => api.patch<void>("/api/v1/users/me/preferences", { theme }),
   listSupportedCountries: () => api.get<CountryOption[]>("/api/v1/locale/countries"),
   deactivateMyAccount: () => api.post<void>("/api/v1/users/me/deactivate"),
   changeMyPassword: (currentPassword: string, newPassword: string) =>

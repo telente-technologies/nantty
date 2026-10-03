@@ -1,5 +1,8 @@
 import type { ConsentChoices, ProductInteractionEvent, ProductInteractionRecord } from "@/types";
 
+import { useAuthStore } from "@/store/auth.store";
+import { useGuestSessionStore } from "@/store/guestSession.store";
+
 import { consentsService } from "./consents.service";
 
 const FLUSH_DELAY_MS = 5000;
@@ -18,7 +21,12 @@ let pendingEvents: ProductInteractionRecord[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let consentsRequest: Promise<ConsentChoices> | null = null;
 
-const loadConsents = () => consentsService.fetchMyConsents().then((record) => record.consents, () => NO_CONSENT);
+const loadGuestConsents = (): ConsentChoices => ({ ...NO_CONSENT, analytics: useGuestSessionStore.getState().hasAcceptedGuestAnalytics });
+
+const loadConsents = (): Promise<ConsentChoices> =>
+  useAuthStore.getState().status === "signedIn"
+    ? consentsService.fetchMyConsents().then((record) => record.consents, () => NO_CONSENT)
+    : Promise.resolve(loadGuestConsents());
 
 export const refreshTrackingConsents = () => {
   consentsRequest = loadConsents();
