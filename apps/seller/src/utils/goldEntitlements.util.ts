@@ -1,7 +1,7 @@
-import type { GoldEntitlements } from "@/types/sellerAccess.type";
+import type { PlanEntitlements } from "@/types/sellerAccess.type";
 import { formatMoneyForDisplay, isSupportedCurrencyCode } from "@/utils/money.util";
 
-export function describeGoldEntitlements(entitlements: GoldEntitlements, locale = "en-NG"): string[] {
+export function describePlanEntitlements(entitlements: PlanEntitlements, locale = "en-NG"): string[] {
   const descriptions = [
     entitlements.maxStaffSeats === null ? "Unlimited staff seats" : `${entitlements.maxStaffSeats} staff seats`,
     entitlements.maxLocations === null ? "Unlimited locations" : `${entitlements.maxLocations} ${entitlements.maxLocations === 1 ? "location" : "locations"}`,
