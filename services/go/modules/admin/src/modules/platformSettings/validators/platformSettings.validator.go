@@ -7,7 +7,7 @@ import (
 
 func ValidateUpdateSettingRequest(request dtos.UpdateSettingRequest) error {
 	collector := &validation.Collector{}
-	collector.RequireTrue("value", len(request.Value) > 0, "is required")
+	collector.RequireTrue("value", len(request.EffectiveValue()) > 0, "is required")
 	collector.RequireTrue("expectedVersion", request.ExpectedVersion > 0, "must be a positive integer")
 	collector.RequireLength("reason", request.Reason, 5, 500)
 	return collector.Result()
