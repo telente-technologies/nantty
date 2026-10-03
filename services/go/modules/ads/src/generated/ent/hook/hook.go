@@ -68,6 +68,18 @@ func (f AdActivityEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdActivityEntryMutation", m)
 }
 
+// The AdAudienceMemberFunc type is an adapter to allow the use of ordinary
+// function as AdAudienceMember mutator.
+type AdAudienceMemberFunc func(context.Context, *ent.AdAudienceMemberMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdAudienceMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdAudienceMemberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdAudienceMemberMutation", m)
+}
+
 // The AdBoostFunc type is an adapter to allow the use of ordinary
 // function as AdBoost mutator.
 type AdBoostFunc func(context.Context, *ent.AdBoostMutation) (ent.Value, error)
@@ -104,6 +116,18 @@ func (f AdContentSignalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdContentSignalMutation", m)
 }
 
+// The AdConversionFunc type is an adapter to allow the use of ordinary
+// function as AdConversion mutator.
+type AdConversionFunc func(context.Context, *ent.AdConversionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdConversionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdConversionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdConversionMutation", m)
+}
+
 // The AdCreatorEarningFunc type is an adapter to allow the use of ordinary
 // function as AdCreatorEarning mutator.
 type AdCreatorEarningFunc func(context.Context, *ent.AdCreatorEarningMutation) (ent.Value, error)
@@ -114,6 +138,18 @@ func (f AdCreatorEarningFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCreatorEarningMutation", m)
+}
+
+// The AdCustomAudienceFunc type is an adapter to allow the use of ordinary
+// function as AdCustomAudience mutator.
+type AdCustomAudienceFunc func(context.Context, *ent.AdCustomAudienceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdCustomAudienceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdCustomAudienceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCustomAudienceMutation", m)
 }
 
 // The AdFrequencyPolicyFunc type is an adapter to allow the use of ordinary
@@ -164,16 +200,16 @@ func (f AdImpressionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdImpressionMutation", m)
 }
 
-// The AdMonetizationPolicyFunc type is an adapter to allow the use of ordinary
-// function as AdMonetizationPolicy mutator.
-type AdMonetizationPolicyFunc func(context.Context, *ent.AdMonetizationPolicyMutation) (ent.Value, error)
+// The AdMediaFunc type is an adapter to allow the use of ordinary
+// function as AdMedia mutator.
+type AdMediaFunc func(context.Context, *ent.AdMediaMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f AdMonetizationPolicyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AdMonetizationPolicyMutation); ok {
+func (f AdMediaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdMediaMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdMonetizationPolicyMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdMediaMutation", m)
 }
 
 // The AdPolicyCategoryFunc type is an adapter to allow the use of ordinary
@@ -198,6 +234,18 @@ func (f AdPoolDailyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdPoolDailyMutation", m)
+}
+
+// The AdScheduledReportFunc type is an adapter to allow the use of ordinary
+// function as AdScheduledReport mutator.
+type AdScheduledReportFunc func(context.Context, *ent.AdScheduledReportMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdScheduledReportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdScheduledReportMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdScheduledReportMutation", m)
 }
 
 // The AdSpendBatchFunc type is an adapter to allow the use of ordinary

@@ -16,17 +16,21 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
+	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
+	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/admonetizationpolicy"
+	"zudomart/modules/ads/src/generated/ent/admedia"
 	"zudomart/modules/ads/src/generated/ent/adpolicycategory"
 	"zudomart/modules/ads/src/generated/ent/adpooldaily"
+	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
 	"zudomart/modules/ads/src/generated/ent/adspendbatch"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/outboxevent"
@@ -54,14 +58,20 @@ type Client struct {
 	AdAccountMember *AdAccountMemberClient
 	// AdActivityEntry is the client for interacting with the AdActivityEntry builders.
 	AdActivityEntry *AdActivityEntryClient
+	// AdAudienceMember is the client for interacting with the AdAudienceMember builders.
+	AdAudienceMember *AdAudienceMemberClient
 	// AdBoost is the client for interacting with the AdBoost builders.
 	AdBoost *AdBoostClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
+	// AdConversion is the client for interacting with the AdConversion builders.
+	AdConversion *AdConversionClient
 	// AdCreatorEarning is the client for interacting with the AdCreatorEarning builders.
 	AdCreatorEarning *AdCreatorEarningClient
+	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
+	AdCustomAudience *AdCustomAudienceClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
 	AdFrequencyPolicy *AdFrequencyPolicyClient
 	// AdFundsTransaction is the client for interacting with the AdFundsTransaction builders.
@@ -70,12 +80,14 @@ type Client struct {
 	AdGroup *AdGroupClient
 	// AdImpression is the client for interacting with the AdImpression builders.
 	AdImpression *AdImpressionClient
-	// AdMonetizationPolicy is the client for interacting with the AdMonetizationPolicy builders.
-	AdMonetizationPolicy *AdMonetizationPolicyClient
+	// AdMedia is the client for interacting with the AdMedia builders.
+	AdMedia *AdMediaClient
 	// AdPolicyCategory is the client for interacting with the AdPolicyCategory builders.
 	AdPolicyCategory *AdPolicyCategoryClient
 	// AdPoolDaily is the client for interacting with the AdPoolDaily builders.
 	AdPoolDaily *AdPoolDailyClient
+	// AdScheduledReport is the client for interacting with the AdScheduledReport builders.
+	AdScheduledReport *AdScheduledReportClient
 	// AdSpendBatch is the client for interacting with the AdSpendBatch builders.
 	AdSpendBatch *AdSpendBatchClient
 	// AdStatsDaily is the client for interacting with the AdStatsDaily builders.
@@ -98,17 +110,21 @@ func (c *Client) init() {
 	c.AdAccountInvite = NewAdAccountInviteClient(c.config)
 	c.AdAccountMember = NewAdAccountMemberClient(c.config)
 	c.AdActivityEntry = NewAdActivityEntryClient(c.config)
+	c.AdAudienceMember = NewAdAudienceMemberClient(c.config)
 	c.AdBoost = NewAdBoostClient(c.config)
 	c.AdCampaign = NewAdCampaignClient(c.config)
 	c.AdContentSignal = NewAdContentSignalClient(c.config)
+	c.AdConversion = NewAdConversionClient(c.config)
 	c.AdCreatorEarning = NewAdCreatorEarningClient(c.config)
+	c.AdCustomAudience = NewAdCustomAudienceClient(c.config)
 	c.AdFrequencyPolicy = NewAdFrequencyPolicyClient(c.config)
 	c.AdFundsTransaction = NewAdFundsTransactionClient(c.config)
 	c.AdGroup = NewAdGroupClient(c.config)
 	c.AdImpression = NewAdImpressionClient(c.config)
-	c.AdMonetizationPolicy = NewAdMonetizationPolicyClient(c.config)
+	c.AdMedia = NewAdMediaClient(c.config)
 	c.AdPolicyCategory = NewAdPolicyCategoryClient(c.config)
 	c.AdPoolDaily = NewAdPoolDailyClient(c.config)
+	c.AdScheduledReport = NewAdScheduledReportClient(c.config)
 	c.AdSpendBatch = NewAdSpendBatchClient(c.config)
 	c.AdStatsDaily = NewAdStatsDailyClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
@@ -202,27 +218,31 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		Ad:                   NewAdClient(cfg),
-		AdAccount:            NewAdAccountClient(cfg),
-		AdAccountInvite:      NewAdAccountInviteClient(cfg),
-		AdAccountMember:      NewAdAccountMemberClient(cfg),
-		AdActivityEntry:      NewAdActivityEntryClient(cfg),
-		AdBoost:              NewAdBoostClient(cfg),
-		AdCampaign:           NewAdCampaignClient(cfg),
-		AdContentSignal:      NewAdContentSignalClient(cfg),
-		AdCreatorEarning:     NewAdCreatorEarningClient(cfg),
-		AdFrequencyPolicy:    NewAdFrequencyPolicyClient(cfg),
-		AdFundsTransaction:   NewAdFundsTransactionClient(cfg),
-		AdGroup:              NewAdGroupClient(cfg),
-		AdImpression:         NewAdImpressionClient(cfg),
-		AdMonetizationPolicy: NewAdMonetizationPolicyClient(cfg),
-		AdPolicyCategory:     NewAdPolicyCategoryClient(cfg),
-		AdPoolDaily:          NewAdPoolDailyClient(cfg),
-		AdSpendBatch:         NewAdSpendBatchClient(cfg),
-		AdStatsDaily:         NewAdStatsDailyClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		Ad:                 NewAdClient(cfg),
+		AdAccount:          NewAdAccountClient(cfg),
+		AdAccountInvite:    NewAdAccountInviteClient(cfg),
+		AdAccountMember:    NewAdAccountMemberClient(cfg),
+		AdActivityEntry:    NewAdActivityEntryClient(cfg),
+		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
+		AdBoost:            NewAdBoostClient(cfg),
+		AdCampaign:         NewAdCampaignClient(cfg),
+		AdContentSignal:    NewAdContentSignalClient(cfg),
+		AdConversion:       NewAdConversionClient(cfg),
+		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
+		AdCustomAudience:   NewAdCustomAudienceClient(cfg),
+		AdFrequencyPolicy:  NewAdFrequencyPolicyClient(cfg),
+		AdFundsTransaction: NewAdFundsTransactionClient(cfg),
+		AdGroup:            NewAdGroupClient(cfg),
+		AdImpression:       NewAdImpressionClient(cfg),
+		AdMedia:            NewAdMediaClient(cfg),
+		AdPolicyCategory:   NewAdPolicyCategoryClient(cfg),
+		AdPoolDaily:        NewAdPoolDailyClient(cfg),
+		AdScheduledReport:  NewAdScheduledReportClient(cfg),
+		AdSpendBatch:       NewAdSpendBatchClient(cfg),
+		AdStatsDaily:       NewAdStatsDailyClient(cfg),
+		OutboxEvent:        NewOutboxEventClient(cfg),
 	}, nil
 }
 
@@ -240,27 +260,31 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		Ad:                   NewAdClient(cfg),
-		AdAccount:            NewAdAccountClient(cfg),
-		AdAccountInvite:      NewAdAccountInviteClient(cfg),
-		AdAccountMember:      NewAdAccountMemberClient(cfg),
-		AdActivityEntry:      NewAdActivityEntryClient(cfg),
-		AdBoost:              NewAdBoostClient(cfg),
-		AdCampaign:           NewAdCampaignClient(cfg),
-		AdContentSignal:      NewAdContentSignalClient(cfg),
-		AdCreatorEarning:     NewAdCreatorEarningClient(cfg),
-		AdFrequencyPolicy:    NewAdFrequencyPolicyClient(cfg),
-		AdFundsTransaction:   NewAdFundsTransactionClient(cfg),
-		AdGroup:              NewAdGroupClient(cfg),
-		AdImpression:         NewAdImpressionClient(cfg),
-		AdMonetizationPolicy: NewAdMonetizationPolicyClient(cfg),
-		AdPolicyCategory:     NewAdPolicyCategoryClient(cfg),
-		AdPoolDaily:          NewAdPoolDailyClient(cfg),
-		AdSpendBatch:         NewAdSpendBatchClient(cfg),
-		AdStatsDaily:         NewAdStatsDailyClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		Ad:                 NewAdClient(cfg),
+		AdAccount:          NewAdAccountClient(cfg),
+		AdAccountInvite:    NewAdAccountInviteClient(cfg),
+		AdAccountMember:    NewAdAccountMemberClient(cfg),
+		AdActivityEntry:    NewAdActivityEntryClient(cfg),
+		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
+		AdBoost:            NewAdBoostClient(cfg),
+		AdCampaign:         NewAdCampaignClient(cfg),
+		AdContentSignal:    NewAdContentSignalClient(cfg),
+		AdConversion:       NewAdConversionClient(cfg),
+		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
+		AdCustomAudience:   NewAdCustomAudienceClient(cfg),
+		AdFrequencyPolicy:  NewAdFrequencyPolicyClient(cfg),
+		AdFundsTransaction: NewAdFundsTransactionClient(cfg),
+		AdGroup:            NewAdGroupClient(cfg),
+		AdImpression:       NewAdImpressionClient(cfg),
+		AdMedia:            NewAdMediaClient(cfg),
+		AdPolicyCategory:   NewAdPolicyCategoryClient(cfg),
+		AdPoolDaily:        NewAdPoolDailyClient(cfg),
+		AdScheduledReport:  NewAdScheduledReportClient(cfg),
+		AdSpendBatch:       NewAdSpendBatchClient(cfg),
+		AdStatsDaily:       NewAdStatsDailyClient(cfg),
+		OutboxEvent:        NewOutboxEventClient(cfg),
 	}, nil
 }
 
@@ -291,10 +315,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdCreatorEarning,
-		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
-		c.AdMonetizationPolicy, c.AdPolicyCategory, c.AdPoolDaily, c.AdSpendBatch,
-		c.AdStatsDaily, c.OutboxEvent,
+		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdConversion,
+		c.AdCreatorEarning, c.AdCustomAudience, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
+		c.OutboxEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -305,10 +330,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdCreatorEarning,
-		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
-		c.AdMonetizationPolicy, c.AdPolicyCategory, c.AdPoolDaily, c.AdSpendBatch,
-		c.AdStatsDaily, c.OutboxEvent,
+		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdConversion,
+		c.AdCreatorEarning, c.AdCustomAudience, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
+		c.OutboxEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -327,14 +353,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdAccountMember.mutate(ctx, m)
 	case *AdActivityEntryMutation:
 		return c.AdActivityEntry.mutate(ctx, m)
+	case *AdAudienceMemberMutation:
+		return c.AdAudienceMember.mutate(ctx, m)
 	case *AdBoostMutation:
 		return c.AdBoost.mutate(ctx, m)
 	case *AdCampaignMutation:
 		return c.AdCampaign.mutate(ctx, m)
 	case *AdContentSignalMutation:
 		return c.AdContentSignal.mutate(ctx, m)
+	case *AdConversionMutation:
+		return c.AdConversion.mutate(ctx, m)
 	case *AdCreatorEarningMutation:
 		return c.AdCreatorEarning.mutate(ctx, m)
+	case *AdCustomAudienceMutation:
+		return c.AdCustomAudience.mutate(ctx, m)
 	case *AdFrequencyPolicyMutation:
 		return c.AdFrequencyPolicy.mutate(ctx, m)
 	case *AdFundsTransactionMutation:
@@ -343,12 +375,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdGroup.mutate(ctx, m)
 	case *AdImpressionMutation:
 		return c.AdImpression.mutate(ctx, m)
-	case *AdMonetizationPolicyMutation:
-		return c.AdMonetizationPolicy.mutate(ctx, m)
+	case *AdMediaMutation:
+		return c.AdMedia.mutate(ctx, m)
 	case *AdPolicyCategoryMutation:
 		return c.AdPolicyCategory.mutate(ctx, m)
 	case *AdPoolDailyMutation:
 		return c.AdPoolDaily.mutate(ctx, m)
+	case *AdScheduledReportMutation:
+		return c.AdScheduledReport.mutate(ctx, m)
 	case *AdSpendBatchMutation:
 		return c.AdSpendBatch.mutate(ctx, m)
 	case *AdStatsDailyMutation:
@@ -1025,6 +1059,139 @@ func (c *AdActivityEntryClient) mutate(ctx context.Context, m *AdActivityEntryMu
 	}
 }
 
+// AdAudienceMemberClient is a client for the AdAudienceMember schema.
+type AdAudienceMemberClient struct {
+	config
+}
+
+// NewAdAudienceMemberClient returns a client for the AdAudienceMember from the given config.
+func NewAdAudienceMemberClient(c config) *AdAudienceMemberClient {
+	return &AdAudienceMemberClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adaudiencemember.Hooks(f(g(h())))`.
+func (c *AdAudienceMemberClient) Use(hooks ...Hook) {
+	c.hooks.AdAudienceMember = append(c.hooks.AdAudienceMember, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adaudiencemember.Intercept(f(g(h())))`.
+func (c *AdAudienceMemberClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdAudienceMember = append(c.inters.AdAudienceMember, interceptors...)
+}
+
+// Create returns a builder for creating a AdAudienceMember entity.
+func (c *AdAudienceMemberClient) Create() *AdAudienceMemberCreate {
+	mutation := newAdAudienceMemberMutation(c.config, OpCreate)
+	return &AdAudienceMemberCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdAudienceMember entities.
+func (c *AdAudienceMemberClient) CreateBulk(builders ...*AdAudienceMemberCreate) *AdAudienceMemberCreateBulk {
+	return &AdAudienceMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdAudienceMemberClient) MapCreateBulk(slice any, setFunc func(*AdAudienceMemberCreate, int)) *AdAudienceMemberCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdAudienceMemberCreateBulk{err: fmt.Errorf("calling to AdAudienceMemberClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdAudienceMemberCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdAudienceMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdAudienceMember.
+func (c *AdAudienceMemberClient) Update() *AdAudienceMemberUpdate {
+	mutation := newAdAudienceMemberMutation(c.config, OpUpdate)
+	return &AdAudienceMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdAudienceMemberClient) UpdateOne(_m *AdAudienceMember) *AdAudienceMemberUpdateOne {
+	mutation := newAdAudienceMemberMutation(c.config, OpUpdateOne, withAdAudienceMember(_m))
+	return &AdAudienceMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdAudienceMemberClient) UpdateOneID(id int) *AdAudienceMemberUpdateOne {
+	mutation := newAdAudienceMemberMutation(c.config, OpUpdateOne, withAdAudienceMemberID(id))
+	return &AdAudienceMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdAudienceMember.
+func (c *AdAudienceMemberClient) Delete() *AdAudienceMemberDelete {
+	mutation := newAdAudienceMemberMutation(c.config, OpDelete)
+	return &AdAudienceMemberDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdAudienceMemberClient) DeleteOne(_m *AdAudienceMember) *AdAudienceMemberDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdAudienceMemberClient) DeleteOneID(id int) *AdAudienceMemberDeleteOne {
+	builder := c.Delete().Where(adaudiencemember.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdAudienceMemberDeleteOne{builder}
+}
+
+// Query returns a query builder for AdAudienceMember.
+func (c *AdAudienceMemberClient) Query() *AdAudienceMemberQuery {
+	return &AdAudienceMemberQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdAudienceMember},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdAudienceMember entity by its id.
+func (c *AdAudienceMemberClient) Get(ctx context.Context, id int) (*AdAudienceMember, error) {
+	return c.Query().Where(adaudiencemember.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdAudienceMemberClient) GetX(ctx context.Context, id int) *AdAudienceMember {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdAudienceMemberClient) Hooks() []Hook {
+	return c.hooks.AdAudienceMember
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdAudienceMemberClient) Interceptors() []Interceptor {
+	return c.inters.AdAudienceMember
+}
+
+func (c *AdAudienceMemberClient) mutate(ctx context.Context, m *AdAudienceMemberMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdAudienceMemberCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdAudienceMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdAudienceMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdAudienceMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdAudienceMember mutation op: %q", m.Op())
+	}
+}
+
 // AdBoostClient is a client for the AdBoost schema.
 type AdBoostClient struct {
 	config
@@ -1424,6 +1591,139 @@ func (c *AdContentSignalClient) mutate(ctx context.Context, m *AdContentSignalMu
 	}
 }
 
+// AdConversionClient is a client for the AdConversion schema.
+type AdConversionClient struct {
+	config
+}
+
+// NewAdConversionClient returns a client for the AdConversion from the given config.
+func NewAdConversionClient(c config) *AdConversionClient {
+	return &AdConversionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adconversion.Hooks(f(g(h())))`.
+func (c *AdConversionClient) Use(hooks ...Hook) {
+	c.hooks.AdConversion = append(c.hooks.AdConversion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adconversion.Intercept(f(g(h())))`.
+func (c *AdConversionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdConversion = append(c.inters.AdConversion, interceptors...)
+}
+
+// Create returns a builder for creating a AdConversion entity.
+func (c *AdConversionClient) Create() *AdConversionCreate {
+	mutation := newAdConversionMutation(c.config, OpCreate)
+	return &AdConversionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdConversion entities.
+func (c *AdConversionClient) CreateBulk(builders ...*AdConversionCreate) *AdConversionCreateBulk {
+	return &AdConversionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdConversionClient) MapCreateBulk(slice any, setFunc func(*AdConversionCreate, int)) *AdConversionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdConversionCreateBulk{err: fmt.Errorf("calling to AdConversionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdConversionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdConversionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdConversion.
+func (c *AdConversionClient) Update() *AdConversionUpdate {
+	mutation := newAdConversionMutation(c.config, OpUpdate)
+	return &AdConversionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdConversionClient) UpdateOne(_m *AdConversion) *AdConversionUpdateOne {
+	mutation := newAdConversionMutation(c.config, OpUpdateOne, withAdConversion(_m))
+	return &AdConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdConversionClient) UpdateOneID(id uuid.UUID) *AdConversionUpdateOne {
+	mutation := newAdConversionMutation(c.config, OpUpdateOne, withAdConversionID(id))
+	return &AdConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdConversion.
+func (c *AdConversionClient) Delete() *AdConversionDelete {
+	mutation := newAdConversionMutation(c.config, OpDelete)
+	return &AdConversionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdConversionClient) DeleteOne(_m *AdConversion) *AdConversionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdConversionClient) DeleteOneID(id uuid.UUID) *AdConversionDeleteOne {
+	builder := c.Delete().Where(adconversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdConversionDeleteOne{builder}
+}
+
+// Query returns a query builder for AdConversion.
+func (c *AdConversionClient) Query() *AdConversionQuery {
+	return &AdConversionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdConversion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdConversion entity by its id.
+func (c *AdConversionClient) Get(ctx context.Context, id uuid.UUID) (*AdConversion, error) {
+	return c.Query().Where(adconversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdConversionClient) GetX(ctx context.Context, id uuid.UUID) *AdConversion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdConversionClient) Hooks() []Hook {
+	return c.hooks.AdConversion
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdConversionClient) Interceptors() []Interceptor {
+	return c.inters.AdConversion
+}
+
+func (c *AdConversionClient) mutate(ctx context.Context, m *AdConversionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdConversionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdConversionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdConversionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdConversion mutation op: %q", m.Op())
+	}
+}
+
 // AdCreatorEarningClient is a client for the AdCreatorEarning schema.
 type AdCreatorEarningClient struct {
 	config
@@ -1554,6 +1854,139 @@ func (c *AdCreatorEarningClient) mutate(ctx context.Context, m *AdCreatorEarning
 		return (&AdCreatorEarningDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdCreatorEarning mutation op: %q", m.Op())
+	}
+}
+
+// AdCustomAudienceClient is a client for the AdCustomAudience schema.
+type AdCustomAudienceClient struct {
+	config
+}
+
+// NewAdCustomAudienceClient returns a client for the AdCustomAudience from the given config.
+func NewAdCustomAudienceClient(c config) *AdCustomAudienceClient {
+	return &AdCustomAudienceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcustomaudience.Hooks(f(g(h())))`.
+func (c *AdCustomAudienceClient) Use(hooks ...Hook) {
+	c.hooks.AdCustomAudience = append(c.hooks.AdCustomAudience, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcustomaudience.Intercept(f(g(h())))`.
+func (c *AdCustomAudienceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCustomAudience = append(c.inters.AdCustomAudience, interceptors...)
+}
+
+// Create returns a builder for creating a AdCustomAudience entity.
+func (c *AdCustomAudienceClient) Create() *AdCustomAudienceCreate {
+	mutation := newAdCustomAudienceMutation(c.config, OpCreate)
+	return &AdCustomAudienceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCustomAudience entities.
+func (c *AdCustomAudienceClient) CreateBulk(builders ...*AdCustomAudienceCreate) *AdCustomAudienceCreateBulk {
+	return &AdCustomAudienceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCustomAudienceClient) MapCreateBulk(slice any, setFunc func(*AdCustomAudienceCreate, int)) *AdCustomAudienceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCustomAudienceCreateBulk{err: fmt.Errorf("calling to AdCustomAudienceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCustomAudienceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCustomAudienceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCustomAudience.
+func (c *AdCustomAudienceClient) Update() *AdCustomAudienceUpdate {
+	mutation := newAdCustomAudienceMutation(c.config, OpUpdate)
+	return &AdCustomAudienceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCustomAudienceClient) UpdateOne(_m *AdCustomAudience) *AdCustomAudienceUpdateOne {
+	mutation := newAdCustomAudienceMutation(c.config, OpUpdateOne, withAdCustomAudience(_m))
+	return &AdCustomAudienceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCustomAudienceClient) UpdateOneID(id uuid.UUID) *AdCustomAudienceUpdateOne {
+	mutation := newAdCustomAudienceMutation(c.config, OpUpdateOne, withAdCustomAudienceID(id))
+	return &AdCustomAudienceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCustomAudience.
+func (c *AdCustomAudienceClient) Delete() *AdCustomAudienceDelete {
+	mutation := newAdCustomAudienceMutation(c.config, OpDelete)
+	return &AdCustomAudienceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCustomAudienceClient) DeleteOne(_m *AdCustomAudience) *AdCustomAudienceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCustomAudienceClient) DeleteOneID(id uuid.UUID) *AdCustomAudienceDeleteOne {
+	builder := c.Delete().Where(adcustomaudience.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCustomAudienceDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCustomAudience.
+func (c *AdCustomAudienceClient) Query() *AdCustomAudienceQuery {
+	return &AdCustomAudienceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCustomAudience},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCustomAudience entity by its id.
+func (c *AdCustomAudienceClient) Get(ctx context.Context, id uuid.UUID) (*AdCustomAudience, error) {
+	return c.Query().Where(adcustomaudience.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCustomAudienceClient) GetX(ctx context.Context, id uuid.UUID) *AdCustomAudience {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCustomAudienceClient) Hooks() []Hook {
+	return c.hooks.AdCustomAudience
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCustomAudienceClient) Interceptors() []Interceptor {
+	return c.inters.AdCustomAudience
+}
+
+func (c *AdCustomAudienceClient) mutate(ctx context.Context, m *AdCustomAudienceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCustomAudienceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCustomAudienceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCustomAudienceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCustomAudienceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCustomAudience mutation op: %q", m.Op())
 	}
 }
 
@@ -2089,107 +2522,107 @@ func (c *AdImpressionClient) mutate(ctx context.Context, m *AdImpressionMutation
 	}
 }
 
-// AdMonetizationPolicyClient is a client for the AdMonetizationPolicy schema.
-type AdMonetizationPolicyClient struct {
+// AdMediaClient is a client for the AdMedia schema.
+type AdMediaClient struct {
 	config
 }
 
-// NewAdMonetizationPolicyClient returns a client for the AdMonetizationPolicy from the given config.
-func NewAdMonetizationPolicyClient(c config) *AdMonetizationPolicyClient {
-	return &AdMonetizationPolicyClient{config: c}
+// NewAdMediaClient returns a client for the AdMedia from the given config.
+func NewAdMediaClient(c config) *AdMediaClient {
+	return &AdMediaClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `admonetizationpolicy.Hooks(f(g(h())))`.
-func (c *AdMonetizationPolicyClient) Use(hooks ...Hook) {
-	c.hooks.AdMonetizationPolicy = append(c.hooks.AdMonetizationPolicy, hooks...)
+// A call to `Use(f, g, h)` equals to `admedia.Hooks(f(g(h())))`.
+func (c *AdMediaClient) Use(hooks ...Hook) {
+	c.hooks.AdMedia = append(c.hooks.AdMedia, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `admonetizationpolicy.Intercept(f(g(h())))`.
-func (c *AdMonetizationPolicyClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AdMonetizationPolicy = append(c.inters.AdMonetizationPolicy, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `admedia.Intercept(f(g(h())))`.
+func (c *AdMediaClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdMedia = append(c.inters.AdMedia, interceptors...)
 }
 
-// Create returns a builder for creating a AdMonetizationPolicy entity.
-func (c *AdMonetizationPolicyClient) Create() *AdMonetizationPolicyCreate {
-	mutation := newAdMonetizationPolicyMutation(c.config, OpCreate)
-	return &AdMonetizationPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a AdMedia entity.
+func (c *AdMediaClient) Create() *AdMediaCreate {
+	mutation := newAdMediaMutation(c.config, OpCreate)
+	return &AdMediaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of AdMonetizationPolicy entities.
-func (c *AdMonetizationPolicyClient) CreateBulk(builders ...*AdMonetizationPolicyCreate) *AdMonetizationPolicyCreateBulk {
-	return &AdMonetizationPolicyCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of AdMedia entities.
+func (c *AdMediaClient) CreateBulk(builders ...*AdMediaCreate) *AdMediaCreateBulk {
+	return &AdMediaCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *AdMonetizationPolicyClient) MapCreateBulk(slice any, setFunc func(*AdMonetizationPolicyCreate, int)) *AdMonetizationPolicyCreateBulk {
+func (c *AdMediaClient) MapCreateBulk(slice any, setFunc func(*AdMediaCreate, int)) *AdMediaCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &AdMonetizationPolicyCreateBulk{err: fmt.Errorf("calling to AdMonetizationPolicyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &AdMediaCreateBulk{err: fmt.Errorf("calling to AdMediaClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*AdMonetizationPolicyCreate, rv.Len())
+	builders := make([]*AdMediaCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &AdMonetizationPolicyCreateBulk{config: c.config, builders: builders}
+	return &AdMediaCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for AdMonetizationPolicy.
-func (c *AdMonetizationPolicyClient) Update() *AdMonetizationPolicyUpdate {
-	mutation := newAdMonetizationPolicyMutation(c.config, OpUpdate)
-	return &AdMonetizationPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for AdMedia.
+func (c *AdMediaClient) Update() *AdMediaUpdate {
+	mutation := newAdMediaMutation(c.config, OpUpdate)
+	return &AdMediaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AdMonetizationPolicyClient) UpdateOne(_m *AdMonetizationPolicy) *AdMonetizationPolicyUpdateOne {
-	mutation := newAdMonetizationPolicyMutation(c.config, OpUpdateOne, withAdMonetizationPolicy(_m))
-	return &AdMonetizationPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AdMediaClient) UpdateOne(_m *AdMedia) *AdMediaUpdateOne {
+	mutation := newAdMediaMutation(c.config, OpUpdateOne, withAdMedia(_m))
+	return &AdMediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AdMonetizationPolicyClient) UpdateOneID(id uuid.UUID) *AdMonetizationPolicyUpdateOne {
-	mutation := newAdMonetizationPolicyMutation(c.config, OpUpdateOne, withAdMonetizationPolicyID(id))
-	return &AdMonetizationPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AdMediaClient) UpdateOneID(id uuid.UUID) *AdMediaUpdateOne {
+	mutation := newAdMediaMutation(c.config, OpUpdateOne, withAdMediaID(id))
+	return &AdMediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for AdMonetizationPolicy.
-func (c *AdMonetizationPolicyClient) Delete() *AdMonetizationPolicyDelete {
-	mutation := newAdMonetizationPolicyMutation(c.config, OpDelete)
-	return &AdMonetizationPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for AdMedia.
+func (c *AdMediaClient) Delete() *AdMediaDelete {
+	mutation := newAdMediaMutation(c.config, OpDelete)
+	return &AdMediaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AdMonetizationPolicyClient) DeleteOne(_m *AdMonetizationPolicy) *AdMonetizationPolicyDeleteOne {
+func (c *AdMediaClient) DeleteOne(_m *AdMedia) *AdMediaDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AdMonetizationPolicyClient) DeleteOneID(id uuid.UUID) *AdMonetizationPolicyDeleteOne {
-	builder := c.Delete().Where(admonetizationpolicy.ID(id))
+func (c *AdMediaClient) DeleteOneID(id uuid.UUID) *AdMediaDeleteOne {
+	builder := c.Delete().Where(admedia.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &AdMonetizationPolicyDeleteOne{builder}
+	return &AdMediaDeleteOne{builder}
 }
 
-// Query returns a query builder for AdMonetizationPolicy.
-func (c *AdMonetizationPolicyClient) Query() *AdMonetizationPolicyQuery {
-	return &AdMonetizationPolicyQuery{
+// Query returns a query builder for AdMedia.
+func (c *AdMediaClient) Query() *AdMediaQuery {
+	return &AdMediaQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeAdMonetizationPolicy},
+		ctx:    &QueryContext{Type: TypeAdMedia},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a AdMonetizationPolicy entity by its id.
-func (c *AdMonetizationPolicyClient) Get(ctx context.Context, id uuid.UUID) (*AdMonetizationPolicy, error) {
-	return c.Query().Where(admonetizationpolicy.ID(id)).Only(ctx)
+// Get returns a AdMedia entity by its id.
+func (c *AdMediaClient) Get(ctx context.Context, id uuid.UUID) (*AdMedia, error) {
+	return c.Query().Where(admedia.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AdMonetizationPolicyClient) GetX(ctx context.Context, id uuid.UUID) *AdMonetizationPolicy {
+func (c *AdMediaClient) GetX(ctx context.Context, id uuid.UUID) *AdMedia {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2198,27 +2631,27 @@ func (c *AdMonetizationPolicyClient) GetX(ctx context.Context, id uuid.UUID) *Ad
 }
 
 // Hooks returns the client hooks.
-func (c *AdMonetizationPolicyClient) Hooks() []Hook {
-	return c.hooks.AdMonetizationPolicy
+func (c *AdMediaClient) Hooks() []Hook {
+	return c.hooks.AdMedia
 }
 
 // Interceptors returns the client interceptors.
-func (c *AdMonetizationPolicyClient) Interceptors() []Interceptor {
-	return c.inters.AdMonetizationPolicy
+func (c *AdMediaClient) Interceptors() []Interceptor {
+	return c.inters.AdMedia
 }
 
-func (c *AdMonetizationPolicyClient) mutate(ctx context.Context, m *AdMonetizationPolicyMutation) (Value, error) {
+func (c *AdMediaClient) mutate(ctx context.Context, m *AdMediaMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&AdMonetizationPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AdMediaCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&AdMonetizationPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AdMediaUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&AdMonetizationPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AdMediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&AdMonetizationPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&AdMediaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown AdMonetizationPolicy mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown AdMedia mutation op: %q", m.Op())
 	}
 }
 
@@ -2485,6 +2918,139 @@ func (c *AdPoolDailyClient) mutate(ctx context.Context, m *AdPoolDailyMutation) 
 		return (&AdPoolDailyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdPoolDaily mutation op: %q", m.Op())
+	}
+}
+
+// AdScheduledReportClient is a client for the AdScheduledReport schema.
+type AdScheduledReportClient struct {
+	config
+}
+
+// NewAdScheduledReportClient returns a client for the AdScheduledReport from the given config.
+func NewAdScheduledReportClient(c config) *AdScheduledReportClient {
+	return &AdScheduledReportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adscheduledreport.Hooks(f(g(h())))`.
+func (c *AdScheduledReportClient) Use(hooks ...Hook) {
+	c.hooks.AdScheduledReport = append(c.hooks.AdScheduledReport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adscheduledreport.Intercept(f(g(h())))`.
+func (c *AdScheduledReportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdScheduledReport = append(c.inters.AdScheduledReport, interceptors...)
+}
+
+// Create returns a builder for creating a AdScheduledReport entity.
+func (c *AdScheduledReportClient) Create() *AdScheduledReportCreate {
+	mutation := newAdScheduledReportMutation(c.config, OpCreate)
+	return &AdScheduledReportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdScheduledReport entities.
+func (c *AdScheduledReportClient) CreateBulk(builders ...*AdScheduledReportCreate) *AdScheduledReportCreateBulk {
+	return &AdScheduledReportCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdScheduledReportClient) MapCreateBulk(slice any, setFunc func(*AdScheduledReportCreate, int)) *AdScheduledReportCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdScheduledReportCreateBulk{err: fmt.Errorf("calling to AdScheduledReportClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdScheduledReportCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdScheduledReportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdScheduledReport.
+func (c *AdScheduledReportClient) Update() *AdScheduledReportUpdate {
+	mutation := newAdScheduledReportMutation(c.config, OpUpdate)
+	return &AdScheduledReportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdScheduledReportClient) UpdateOne(_m *AdScheduledReport) *AdScheduledReportUpdateOne {
+	mutation := newAdScheduledReportMutation(c.config, OpUpdateOne, withAdScheduledReport(_m))
+	return &AdScheduledReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdScheduledReportClient) UpdateOneID(id uuid.UUID) *AdScheduledReportUpdateOne {
+	mutation := newAdScheduledReportMutation(c.config, OpUpdateOne, withAdScheduledReportID(id))
+	return &AdScheduledReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdScheduledReport.
+func (c *AdScheduledReportClient) Delete() *AdScheduledReportDelete {
+	mutation := newAdScheduledReportMutation(c.config, OpDelete)
+	return &AdScheduledReportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdScheduledReportClient) DeleteOne(_m *AdScheduledReport) *AdScheduledReportDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdScheduledReportClient) DeleteOneID(id uuid.UUID) *AdScheduledReportDeleteOne {
+	builder := c.Delete().Where(adscheduledreport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdScheduledReportDeleteOne{builder}
+}
+
+// Query returns a query builder for AdScheduledReport.
+func (c *AdScheduledReportClient) Query() *AdScheduledReportQuery {
+	return &AdScheduledReportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdScheduledReport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdScheduledReport entity by its id.
+func (c *AdScheduledReportClient) Get(ctx context.Context, id uuid.UUID) (*AdScheduledReport, error) {
+	return c.Query().Where(adscheduledreport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdScheduledReportClient) GetX(ctx context.Context, id uuid.UUID) *AdScheduledReport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdScheduledReportClient) Hooks() []Hook {
+	return c.hooks.AdScheduledReport
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdScheduledReportClient) Interceptors() []Interceptor {
+	return c.inters.AdScheduledReport
+}
+
+func (c *AdScheduledReportClient) mutate(ctx context.Context, m *AdScheduledReportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdScheduledReportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdScheduledReportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdScheduledReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdScheduledReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdScheduledReport mutation op: %q", m.Op())
 	}
 }
 
@@ -2890,18 +3456,18 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry, AdBoost,
-		AdCampaign, AdContentSignal, AdCreatorEarning, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMonetizationPolicy,
-		AdPolicyCategory, AdPoolDaily, AdSpendBatch, AdStatsDaily,
-		OutboxEvent []ent.Hook
+		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
+		AdAudienceMember, AdBoost, AdCampaign, AdContentSignal, AdConversion,
+		AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy, AdFundsTransaction,
+		AdGroup, AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily,
+		AdScheduledReport, AdSpendBatch, AdStatsDaily, OutboxEvent []ent.Hook
 	}
 	inters struct {
-		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry, AdBoost,
-		AdCampaign, AdContentSignal, AdCreatorEarning, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMonetizationPolicy,
-		AdPolicyCategory, AdPoolDaily, AdSpendBatch, AdStatsDaily,
-		OutboxEvent []ent.Interceptor
+		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
+		AdAudienceMember, AdBoost, AdCampaign, AdContentSignal, AdConversion,
+		AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy, AdFundsTransaction,
+		AdGroup, AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily,
+		AdScheduledReport, AdSpendBatch, AdStatsDaily, OutboxEvent []ent.Interceptor
 	}
 )
 

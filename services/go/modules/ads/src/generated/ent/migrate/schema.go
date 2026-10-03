@@ -210,6 +210,30 @@ var (
 			},
 		},
 	}
+	// AdAudienceMembersColumns holds the columns for the "ad_audience_members" table.
+	AdAudienceMembersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "audience_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// AdAudienceMembersTable holds the schema information for the "ad_audience_members" table.
+	AdAudienceMembersTable = &schema.Table{
+		Name:       "ad_audience_members",
+		Columns:    AdAudienceMembersColumns,
+		PrimaryKey: []*schema.Column{AdAudienceMembersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adaudiencemember_audience_id_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdAudienceMembersColumns[1], AdAudienceMembersColumns[2]},
+			},
+			{
+				Name:    "adaudiencemember_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdAudienceMembersColumns[2]},
+			},
+		},
+	}
 	// AdBoostsColumns holds the columns for the "ad_boosts" table.
 	AdBoostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -321,6 +345,38 @@ var (
 		Columns:    AdContentSignalsColumns,
 		PrimaryKey: []*schema.Column{AdContentSignalsColumns[0]},
 	}
+	// AdConversionsColumns holds the columns for the "ad_conversions" table.
+	AdConversionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "conversion_id", Type: field.TypeString, Size: 128},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "impression_id", Type: field.TypeUUID},
+		{Name: "ad_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "value_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "occurred_at", Type: field.TypeTime},
+	}
+	// AdConversionsTable holds the schema information for the "ad_conversions" table.
+	AdConversionsTable = &schema.Table{
+		Name:       "ad_conversions",
+		Columns:    AdConversionsColumns,
+		PrimaryKey: []*schema.Column{AdConversionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adconversion_conversion_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdConversionsColumns[2]},
+			},
+			{
+				Name:    "adconversion_account_id_occurred_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdConversionsColumns[7], AdConversionsColumns[10]},
+			},
+		},
+	}
 	// AdCreatorEarningsColumns holds the columns for the "ad_creator_earnings" table.
 	AdCreatorEarningsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -341,6 +397,45 @@ var (
 				Name:    "adcreatorearning_creator_user_id_currency",
 				Unique:  true,
 				Columns: []*schema.Column{AdCreatorEarningsColumns[2], AdCreatorEarningsColumns[3]},
+			},
+		},
+	}
+	// AdCustomAudiencesColumns holds the columns for the "ad_custom_audiences" table.
+	AdCustomAudiencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 120},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"store_customers", "engagers", "followers", "customer_list", "lookalike"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"building", "ready", "too_small", "failed"}, Default: "building"},
+		{Name: "matched_count", Type: field.TypeInt64, Default: 0},
+		{Name: "retention_days", Type: field.TypeInt, Nullable: true},
+		{Name: "description", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "params", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "lookalike_source_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "lookalike_country_code", Type: field.TypeString, Size: 2, Default: ""},
+		{Name: "lookalike_similarity_percent", Type: field.TypeInt, Default: 0},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdCustomAudiencesTable holds the schema information for the "ad_custom_audiences" table.
+	AdCustomAudiencesTable = &schema.Table{
+		Name:       "ad_custom_audiences",
+		Columns:    AdCustomAudiencesColumns,
+		PrimaryKey: []*schema.Column{AdCustomAudiencesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adcustomaudience_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdCustomAudiencesColumns[2], AdCustomAudiencesColumns[1]},
+			},
+			{
+				Name:    "adcustomaudience_account_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdCustomAudiencesColumns[2], AdCustomAudiencesColumns[13]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "idempotency_key <> ''",
+				},
 			},
 		},
 	}
@@ -500,6 +595,14 @@ var (
 				},
 			},
 			{
+				Name:    "adimpression_user_id_clicked_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdImpressionsColumns[6], AdImpressionsColumns[26]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "clicked_at IS NOT NULL",
+				},
+			},
+			{
 				Name:    "adimpression_fraud_status_served_at",
 				Unique:  false,
 				Columns: []*schema.Column{AdImpressionsColumns[30], AdImpressionsColumns[1]},
@@ -509,34 +612,38 @@ var (
 			},
 		},
 	}
-	// AdMonetizationPoliciesColumns holds the columns for the "ad_monetization_policies" table.
-	AdMonetizationPoliciesColumns = []*schema.Column{
+	// AdMediaColumns holds the columns for the "ad_media" table.
+	AdMediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "key", Type: field.TypeString, Size: 60},
-		{Name: "revenue_source", Type: field.TypeEnum, Enums: []string{"ads", "premium", "gifts", "subscriptions"}, Default: "ads"},
-		{Name: "content_type", Type: field.TypeString, Size: 40},
-		{Name: "creator_share_bps", Type: field.TypeInt},
-		{Name: "multiplier_bps", Type: field.TypeInt},
-		{Name: "effective_from", Type: field.TypeTime},
-		{Name: "effective_to", Type: field.TypeTime, Nullable: true},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "uploaded_by", Type: field.TypeUUID},
+		{Name: "file_name", Type: field.TypeString, Size: 200},
+		{Name: "mime_type", Type: field.TypeString, Size: 60},
+		{Name: "size_bytes", Type: field.TypeInt64},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"image", "video"}},
+		{Name: "object_key", Type: field.TypeString, Size: 300},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_upload", "processing", "ready", "failed"}, Default: "pending_upload"},
+		{Name: "width", Type: field.TypeInt, Default: 0},
+		{Name: "height", Type: field.TypeInt, Default: 0},
+		{Name: "duration_seconds", Type: field.TypeInt, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// AdMonetizationPoliciesTable holds the schema information for the "ad_monetization_policies" table.
-	AdMonetizationPoliciesTable = &schema.Table{
-		Name:       "ad_monetization_policies",
-		Columns:    AdMonetizationPoliciesColumns,
-		PrimaryKey: []*schema.Column{AdMonetizationPoliciesColumns[0]},
+	// AdMediaTable holds the schema information for the "ad_media" table.
+	AdMediaTable = &schema.Table{
+		Name:       "ad_media",
+		Columns:    AdMediaColumns,
+		PrimaryKey: []*schema.Column{AdMediaColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "admonetizationpolicy_key",
-				Unique:  true,
-				Columns: []*schema.Column{AdMonetizationPoliciesColumns[2]},
+				Name:    "admedia_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdMediaColumns[2], AdMediaColumns[1]},
 			},
 			{
-				Name:    "admonetizationpolicy_revenue_source_content_type",
+				Name:    "admedia_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{AdMonetizationPoliciesColumns[3], AdMonetizationPoliciesColumns[4]},
+				Columns: []*schema.Column{AdMediaColumns[9], AdMediaColumns[1]},
 			},
 		},
 	}
@@ -594,6 +701,39 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Type: "BTREE",
 				},
+			},
+		},
+	}
+	// AdScheduledReportsColumns holds the columns for the "ad_scheduled_reports" table.
+	AdScheduledReportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "created_by", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 120},
+		{Name: "recipients", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "frequency", Type: field.TypeEnum, Enums: []string{"daily", "weekly", "monthly"}},
+		{Name: "breakdown", Type: field.TypeString, Size: 20},
+		{Name: "metrics", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "next_send_at", Type: field.TypeTime},
+		{Name: "last_sent_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdScheduledReportsTable holds the schema information for the "ad_scheduled_reports" table.
+	AdScheduledReportsTable = &schema.Table{
+		Name:       "ad_scheduled_reports",
+		Columns:    AdScheduledReportsColumns,
+		PrimaryKey: []*schema.Column{AdScheduledReportsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adscheduledreport_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdScheduledReportsColumns[2], AdScheduledReportsColumns[1]},
+			},
+			{
+				Name:    "adscheduledreport_next_send_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdScheduledReportsColumns[9]},
 			},
 		},
 	}
@@ -702,17 +842,21 @@ var (
 		AdAccountInvitesTable,
 		AdAccountMembersTable,
 		AdActivityEntriesTable,
+		AdAudienceMembersTable,
 		AdBoostsTable,
 		AdCampaignsTable,
 		AdContentSignalsTable,
+		AdConversionsTable,
 		AdCreatorEarningsTable,
+		AdCustomAudiencesTable,
 		AdFrequencyPoliciesTable,
 		AdFundsTransactionsTable,
 		AdGroupsTable,
 		AdImpressionsTable,
-		AdMonetizationPoliciesTable,
+		AdMediaTable,
 		AdPolicyCategoriesTable,
 		AdPoolDailiesTable,
+		AdScheduledReportsTable,
 		AdSpendBatchesTable,
 		AdStatsDailiesTable,
 		OutboxEventsTable,
