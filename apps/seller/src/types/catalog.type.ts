@@ -2,6 +2,18 @@ import type { ProductBrandTag } from "@/types/brand.type";
 import type { Money } from "@/types/money.type";
 
 export type ProductStatus = "draft" | "active" | "archived";
+export type ProductVisibility = "public" | "store_only" | "link_only";
+
+export interface ProductAttribute {
+  readonly name: string;
+  readonly value: string;
+}
+
+export interface ProductVideo {
+  readonly id: string;
+  readonly url: string;
+  readonly title: string;
+}
 
 export interface ProductImage {
   readonly mediaId: string;
@@ -30,6 +42,8 @@ export interface ProductVariant {
   readonly compareAtPrice: Money | null;
   readonly costPrice: Money | null;
   readonly lowStockThreshold: number;
+  readonly reorderPoint: number;
+  readonly reorderQuantity: number;
   readonly stock: StockLevel[];
 }
 
@@ -48,6 +62,11 @@ export interface Product {
   readonly trackInventory: boolean;
   readonly tags: string[];
   readonly brand?: ProductBrandTag | null;
+  readonly visibility: ProductVisibility;
+  readonly publishAt: string | null;
+  readonly attributes: ProductAttribute[];
+  readonly videos: ProductVideo[];
+  readonly supplierId: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -55,6 +74,8 @@ export interface Product {
 export interface ProductCategory {
   readonly id: string;
   readonly name: string;
+  readonly description?: string;
+  readonly productCount?: number;
 }
 
 export type StockAdjustmentReason = "received" | "count" | "damaged" | "theft" | "returned" | "expired" | "other";
@@ -85,4 +106,36 @@ export interface StockTransfer {
   readonly createdBy: { readonly id: string; readonly name: string };
   readonly createdAt: string;
   readonly receivedAt: string | null;
+}
+
+export interface Supplier {
+  readonly id: string;
+  readonly name: string;
+  readonly contactName: string;
+  readonly phone: string;
+  readonly email: string | null;
+  readonly address: string;
+  readonly leadTimeDays: number;
+  readonly paymentTerms: string;
+  readonly notes: string | null;
+  readonly productCount: number;
+  readonly createdAt: string;
+}
+
+export type InventoryMovementKind = "adjustment" | "transfer_out" | "transfer_in" | "order_reserved" | "order_shipped" | "order_returned";
+
+export interface InventoryMovement {
+  readonly id: string;
+  readonly kind: InventoryMovementKind;
+  readonly variantId: string;
+  readonly productId: string;
+  readonly productName: string;
+  readonly variantTitle: string;
+  readonly sku: string;
+  readonly locationId: string;
+  readonly quantityDelta: number;
+  readonly reference: string;
+  readonly note: string | null;
+  readonly actorName: string;
+  readonly createdAt: string;
 }

@@ -1,5 +1,5 @@
 import type { Money } from "@/types/money.type";
-import type { GoldTier, StaffRole, SubscriptionStatus, VerificationStatus } from "@/types/sellerAccess.type";
+import type { GoldTier, StaffRole, SubscriptionPlanTier, SubscriptionStatus, VerificationStatus } from "@/types/sellerAccess.type";
 
 export type BrandRegistrationStatus = "unregistered" | "pending" | "registered" | "rejected";
 export type OfficialStoreStatus = "not_eligible" | "eligible" | "active" | "suspended";
@@ -125,6 +125,6 @@ export interface MyStoreEntry {
   readonly brandId: string | null;
   readonly role: StaffRole;
   readonly verification: { readonly status: VerificationStatus; readonly tier: GoldTier | null; readonly badgeVisible: boolean };
-  readonly subscription: { readonly status: SubscriptionStatus; readonly plan: GoldTier } | null;
+  readonly subscription: { readonly status: SubscriptionStatus; readonly plan: SubscriptionPlanTier } | null;
   readonly isCurrent: boolean;
 }

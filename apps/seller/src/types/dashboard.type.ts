@@ -6,13 +6,13 @@ export interface DashboardPeriodSales {
   readonly label: string;
   readonly current: Money;
   readonly previous: Money;
-  readonly transactionsCount: number;
+  readonly ordersCount: number;
 }
 
 export interface DashboardDailyRevenuePoint {
   readonly date: string;
-  readonly online: Money;
-  readonly pos: Money;
+  readonly revenue: Money;
+  readonly ordersCount: number;
 }
 
 export interface DashboardTopProduct {
@@ -34,14 +34,62 @@ export interface DashboardLowStockAlert {
   readonly lowStockThreshold: number;
 }
 
-export interface DashboardRecentActivity {
-  readonly kind: "pos_sale" | "online_order";
+export interface DashboardRecentOrder {
   readonly id: string;
-  readonly reference: string;
-  readonly customerName: string | null;
+  readonly orderNumber: string;
+  readonly customerName: string;
+  readonly customerUsername: string;
+  readonly itemsCount: number;
   readonly total: Money;
-  readonly status: string;
+  readonly status: OnlineOrderStatus;
   readonly createdAt: string;
+}
+
+export type DashboardActivityKind = "order_placed" | "order_shipped" | "order_delivered" | "dispute_opened" | "return_requested" | "team_action";
+
+export interface DashboardActivityEntry {
+  readonly id: string;
+  readonly kind: DashboardActivityKind;
+  readonly summary: string;
+  readonly actorName: string | null;
+  readonly href: string | null;
+  readonly createdAt: string;
+}
+
+export type DashboardAlertKind = "orders_to_accept" | "disputes_awaiting_response" | "returns_requested" | "out_of_stock" | "low_stock" | "unanswered_messages";
+
+export interface DashboardAlert {
+  readonly kind: DashboardAlertKind;
+  readonly severity: "info" | "caution" | "error";
+  readonly count: number;
+  readonly title: string;
+  readonly description: string;
+  readonly href: string;
+}
+
+export interface DashboardTrafficSummary {
+  readonly storeViews: number;
+  readonly previousStoreViews: number;
+  readonly visitors: number;
+  readonly conversionRateBasisPoints: number;
+  readonly previousConversionRateBasisPoints: number;
+  readonly dailyStoreViews: number[];
+}
+
+export interface DashboardCustomerGrowth {
+  readonly totalCustomers: number;
+  readonly newCustomers: number;
+  readonly previousNewCustomers: number;
+  readonly returningCustomers: number;
+  readonly dailyNewCustomers: number[];
+}
+
+export interface DashboardCatalogSummary {
+  readonly totalProducts: number;
+  readonly activeProducts: number;
+  readonly draftProducts: number;
+  readonly lowStockCount: number;
+  readonly outOfStockCount: number;
 }
 
 export interface DashboardSummary {
@@ -50,11 +98,16 @@ export interface DashboardSummary {
   readonly salesToday: DashboardPeriodSales;
   readonly salesThisWeek: DashboardPeriodSales;
   readonly salesThisMonth: DashboardPeriodSales;
+  readonly lifetimeSales: { readonly total: Money; readonly ordersCount: number };
   readonly ordersByStatus: { readonly status: OnlineOrderStatus; readonly count: number }[];
-  readonly channelSplit: { readonly online: Money; readonly pos: Money };
   readonly dailyRevenue: DashboardDailyRevenuePoint[];
   readonly topProducts: DashboardTopProduct[];
   readonly lowStockAlerts: DashboardLowStockAlert[];
+  readonly catalog: DashboardCatalogSummary;
+  readonly traffic: DashboardTrafficSummary;
+  readonly customerGrowth: DashboardCustomerGrowth;
   readonly balances: WalletBalances | null;
-  readonly recentActivity: DashboardRecentActivity[];
+  readonly recentOrders: DashboardRecentOrder[];
+  readonly activity: DashboardActivityEntry[];
+  readonly alerts: DashboardAlert[];
 }
