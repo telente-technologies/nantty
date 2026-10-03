@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 
+import { useAdminPermissions } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { ConfirmActionDialog } from "@/components/ui/confirmActionDialog";
 import { EmptyState, NoticeBanner } from "@/components/ui/feedback";
-import { SelectField, TextField } from "@/components/ui/formFields";
+import { CheckboxField, SelectField, TextField } from "@/components/ui/formFields";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
+import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
-import { reclaimWithheldUsername, withholdPlatformUsername } from "@/services/peopleApi.service";
+import { assignHeldUsername, fetchUsernameHold, reassignPlatformUsername, reclaimWithheldUsername, withholdPlatformUsername } from "@/services/peopleApi.service";
 import type { UserDetail, UsernameWithholdResult } from "@/types/peopleUsers.type";
 import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -27,13 +29,45 @@ interface UserUsernamePanelProps {
 
 export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onReload }: UserUsernamePanelProps) {
   const { showToast } = useToast();
+  const { can } = useAdminPermissions();
   const [isWithholdOpen, setIsWithholdOpen] = useState(false);
   const [isReclaimOpen, setIsReclaimOpen] = useState(false);
   const [reclaimMode, setReclaimMode] = useState<ReclaimMode>("RESTORE_TO_OWNER");
   const [claimantUserId, setClaimantUserId] = useState("");
+  const [isReassignOpen, setIsReassignOpen] = useState(false);
+  const [isAssignHeldOpen, setIsAssignHeldOpen] = useState(false);
+  const [heldCandidate, setHeldCandidate] = useState("");
+  const [bypassHold, setBypassHold] = useState(false);
+  const [recipientUserId, setRecipientUserId] = useState("");
   const [lastWithholdResult, setLastWithholdResult] = useState<UsernameWithholdResult | null>(null);
   const withholdMutation = useAdminMutation((reason: string) => withholdPlatformUsername(detail.user.id, reason));
   const reclaimMutation = useAdminMutation((reason: string) => reclaimWithheldUsername(detail.user.id, { reason, mode: reclaimMode, claimantUserId: reclaimMode === "ASSIGN_TO_CLAIMANT" ? claimantUserId.trim() : undefined }));
+
+  const reassignMutation = useAdminMutation((reason: string) => reassignPlatformUsername(detail.user.id, { reason, recipientUserId: recipientUserId.trim() }));
+
+  const holdLookup = useAdminQuery((signal) => fetchUsernameHold(heldCandidate.trim(), signal), heldCandidate.trim(), isAssignHeldOpen && heldCandidate.trim().length >= 3);
+  const assignHeldMutation = useAdminMutation((reason: string) => assignHeldUsername(detail.user.id, { username: heldCandidate.trim(), reason, bypassHold }));
+  const hold = holdLookup.data;
+  const isInHold = hold?.isHeld === true;
+
+  async function assignHeld(reason: string) {
+    const updated = await assignHeldMutation.run(reason);
+    if (!updated) return;
+    onUpdated(updated);
+    showToast(isInHold ? "Username assigned. Hold bypassed and flagged in the audit log." : "Username assigned.");
+    setIsAssignHeldOpen(false);
+    setHeldCandidate("");
+    setBypassHold(false);
+  }
+
+  async function reassignUsername(reason: string) {
+    const updated = await reassignMutation.run(reason);
+    if (!updated) return;
+    onUpdated(updated);
+    showToast(`Username moved. @${updated.user.username} now uses an auto-generated name, and both people were notified.`);
+    setIsReassignOpen(false);
+    setRecipientUserId("");
+  }
 
   async function withholdUsername(reason: string) {
     const result = await withholdMutation.run(reason);
@@ -59,13 +93,17 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
       <Card
         title="Username"
         actions={
-          canManageUsernames ? (
+          <>
+            {can("usernames:reassign") ? <Button size="small" onClick={() => setIsAssignHeldOpen(true)}>Assign a held username</Button> : null}
+            {can("usernames:reassign") ? <Button size="small" variant="quietDanger" iconName="shield24" onClick={() => setIsReassignOpen(true)}>Reassign @{detail.user.username}</Button> : null}
+          {canManageUsernames ? (
             withheld ? (
               <Button size="small" iconName="shield24" onClick={() => setIsReclaimOpen(true)}>Reclaim @{withheld.username}</Button>
             ) : (
               <Button size="small" variant="quietDanger" iconName="shield24" onClick={() => setIsWithholdOpen(true)}>Withhold @{detail.user.username}</Button>
             )
-          ) : null
+          ) : null}
+          </>
         }
       >
         <KeyValueList
@@ -77,6 +115,18 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
         />
         {withheld ? <p className={styles.faint}>Withheld {formatDateTime(withheld.withheldAt)} by {withheld.withheldByName}: “{withheld.reason}”</p> : null}
       </Card>
+      {isAssignHeldOpen ? (
+        <ConfirmActionDialog isOpen title={`Assign a username to @${detail.user.username}`} consequences={["Their current username is held for 120 days before anyone else can claim it.", "The person is notified and the username history is kept."]} confirmLabel={isInHold ? "Assign and bypass hold" : "Assign username"} tone={isInHold ? "danger" : "default"} requiresStepUp isConfirmDisabled={heldCandidate.trim().length < 3 || (isInHold && !bypassHold)} isBusy={assignHeldMutation.isRunning} errorMessage={assignHeldMutation.errorMessage} onConfirm={assignHeld} onClose={() => { assignHeldMutation.clearError(); setIsAssignHeldOpen(false); }}>
+          <TextField label="Username to assign" value={heldCandidate} onChange={(event) => { setHeldCandidate(event.target.value.toLowerCase().replace(/^@/, "")); setBypassHold(false); }} autoComplete="off" />
+          {hold && hold.releasedAt ? <NoticeBanner tone={isInHold ? "caution" : "info"} title={isInHold ? "In its 120-day hold" : "Hold has ended"}>{isInHold ? `Released ${formatDateTime(hold.releasedAt)}, available ${formatDateTime(hold.availableAt)}.` : `Available since ${formatDateTime(hold.availableAt)}.`}</NoticeBanner> : null}
+          {isInHold ? <CheckboxField label="Assign it anyway (hold bypassed)" description="Needs a reason and is flagged in the audit log." checked={bypassHold} onChange={(event) => setBypassHold(event.target.checked)} /> : null}
+        </ConfirmActionDialog>
+      ) : null}
+      {isReassignOpen ? (
+        <ConfirmActionDialog isOpen title={`Move @${detail.user.username} to another account`} consequences={["The other account takes this username and its earlier username is released.", "This account gets an auto-generated username and a notification.", "Both accounts keep the username history. Use this for verified brand claims."]} confirmLabel="Reassign username" tone="danger" requiresStepUp isConfirmDisabled={recipientUserId.trim().length < 4} isBusy={reassignMutation.isRunning} errorMessage={reassignMutation.errorMessage} onConfirm={reassignUsername} onClose={() => { reassignMutation.clearError(); setIsReassignOpen(false); }}>
+          <TextField label="Receiving account ID" placeholder="usr_0001" value={recipientUserId} onChange={(event) => setRecipientUserId(event.target.value)} autoComplete="off" />
+        </ConfirmActionDialog>
+      ) : null}
       {lastWithholdResult ? (
         <NoticeBanner tone="success" title="Notification sent to the user">
           <strong>{lastWithholdResult.notification.title}</strong> — {lastWithholdResult.notification.body}

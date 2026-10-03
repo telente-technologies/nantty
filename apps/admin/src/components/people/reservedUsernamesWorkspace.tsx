@@ -14,7 +14,7 @@ import { Card, Toolbar, TwoColumnLayout } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
-import { addReservedUsername, fetchReservedUsernames, fetchWithheldUsernames, removeReservedUsername } from "@/services/peopleApi.service";
+import { addReservedUsername, fetchHeldUsernames, fetchReservedUsernames, fetchWithheldUsernames, removeReservedUsername } from "@/services/peopleApi.service";
 import type { ReservedUsernameCategory, ReservedUsernameEntry, ReservedUsernameKind } from "@/types/usernames.type";
 import { formatDateOnly, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -36,6 +36,7 @@ export function ReservedUsernamesWorkspace() {
   const [newNote, setNewNote] = useState("");
   const filters = { search: search.trim() || undefined, kind: kindFilter || undefined };
   const reserved = useAdminQuery((signal) => fetchReservedUsernames(filters, signal), JSON.stringify(filters));
+  const held = useAdminQuery((signal) => fetchHeldUsernames(signal), "held");
   const withheld = useAdminQuery((signal) => fetchWithheldUsernames(signal), "withheld");
   const addMutation = useAdminMutation((reason: string) => addReservedUsername({ value: newValue, kind: newKind, category: newCategory, note: newNote, reason }));
   const removeMutation = useAdminMutation(({ entryId, reason }: { entryId: string; reason: string }) => removeReservedUsername(entryId, reason));
@@ -85,6 +86,20 @@ export function ReservedUsernamesWorkspace() {
         aside={
           <>
             <ConfusableUsernameChecker />
+            <Card title="Held usernames (120 days)">
+              {held.data && held.data.items.length > 0 ? (
+                <ul className={styles.list}>
+                  {held.data.items.map((entry) => (
+                    <li key={entry.username} className={styles.listItem}>
+                      <span className="mono">@{entry.username}</span>
+                      <span className={styles.faint}>{entry.isHeld ? `Released ${formatDateOnly(entry.releasedAt)}, available ${formatDateOnly(entry.availableAt)}` : `Available since ${formatDateOnly(entry.availableAt)}`}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={styles.faint}>No usernames are in their 120-day hold.</p>
+              )}
+            </Card>
             <Card title="Withheld usernames">
               {withheld.data && withheld.data.items.length > 0 ? (
                 <ul className={styles.list}>
