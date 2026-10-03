@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { creatorQueryKeys } from "@/components/creator/creatorQueries.hook";
@@ -19,6 +19,7 @@ import { creatorProgramService } from "@/services/creatorProgram.service";
 import { paymentsService } from "@/services/payments.service";
 import type { CreatorSubscriptionCheckout, CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const VERIFY_MAX_ATTEMPTS = 6;
 const VERIFY_RETRY_DELAY_MS = 1_500;
@@ -97,7 +98,7 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
             </View>
           </View>
         ) : null}
-        {plans.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
+        {plans.isLoading ? <ListSkeleton rows={3} /> : null}
         {plans.data?.length === 0 ? <Text color={colors.textSubtle}>This creator doesn't offer subscriptions yet.</Text> : null}
         {(plans.data ?? []).map((plan) => (
           <SelectableRow key={plan.id} selected={plan.id === planId} onPress={() => setChosenPlanId(plan.id)} accessibilityLabel={`${plan.name}, ${formatMoneyForDisplay(plan.price)} per ${plan.interval}`}>

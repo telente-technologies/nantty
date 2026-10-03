@@ -1,4 +1,4 @@
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { useCreatorApplicationQuery } from "@/components/creator/creatorQueries.hook";
 import { formatFriendlyDate, formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
@@ -9,6 +9,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const STATUS_COPY = {
   pending: { label: "Under review", tone: "caution" as const, title: "We're reviewing your application", body: "Reviews usually take 3–5 working days. We'll notify you when there's a decision." },
@@ -23,7 +24,7 @@ export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"
     return (
       <Screen>
         <Header title="Creator application" />
-        {application.isLoading ? <ActivityIndicator style={styles.state} color={colors.primary} /> : (
+        {application.isLoading ? <ListSkeleton /> : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>
             <Button title="See the Creator Program" onPress={() => navigation.replace("CreatorProgram")} />
@@ -55,7 +56,6 @@ export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"
 }
 
 const styles = StyleSheet.create({
-  state: { marginTop: 80 },
   empty: { padding: 32, gap: 16 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },

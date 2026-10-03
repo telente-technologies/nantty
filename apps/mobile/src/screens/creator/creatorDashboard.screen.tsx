@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { AffiliationsSection } from "@/components/creator/affiliationsSection";
 import { CreatorEarningsCard } from "@/components/creator/creatorEarningsCard";
@@ -21,6 +21,7 @@ import { creatorProgramService } from "@/services/creatorProgram.service";
 import type { CreatorDashboardPeriod } from "@/types/creator.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const PERIODS: readonly { readonly key: CreatorDashboardPeriod; readonly label: string }[] = [
   { key: "week", label: "This week" },
@@ -47,7 +48,7 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
             <Text align="center" color={colors.textSubtle}>{dashboard.error.message}</Text>
             <Button title="See the Creator Program" onPress={() => navigation.replace("CreatorProgram")} />
           </View>
-        ) : <ActivityIndicator style={styles.loading} color={colors.primary} />
+        ) : <ListSkeleton />
       ) : (
         <ScrollView
           contentContainerStyle={styles.content}
@@ -96,7 +97,6 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   periods: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
-  loading: { marginTop: 80 },
   state: { padding: 32, gap: 16 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
   card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },

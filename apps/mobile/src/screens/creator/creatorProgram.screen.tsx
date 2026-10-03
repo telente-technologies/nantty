@@ -1,4 +1,4 @@
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { EligibilityChecklist } from "@/components/creator/eligibilityChecklist";
 import { useCreatorApplicationQuery, useCreatorEligibilityQuery, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
@@ -11,6 +11,7 @@ import { Text } from "@/components/ui/text";
 import { colors, palette } from "@/constants/colors.constant";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 const BENEFITS = [
   { title: "Go live", body: "Host live shows, pin products and chat with your audience in real time." },
@@ -61,7 +62,7 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
         {!approved ? (
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>Eligibility</Text>
-            {eligibility.data ? <EligibilityChecklist requirements={eligibility.data.requirements} /> : <ActivityIndicator color={colors.primary} />}
+            {eligibility.data ? <EligibilityChecklist requirements={eligibility.data.requirements} /> : <ListSkeleton rows={3} />}
             {eligibility.data && !eligibility.data.eligible ? (
               <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Keep posting and growing — this list updates automatically.</Text>
             ) : null}
