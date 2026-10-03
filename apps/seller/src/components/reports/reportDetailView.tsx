@@ -20,11 +20,12 @@ import { buildDateRangeEndingToday, formatDateTimeForDisplay } from "@/utils/dat
 
 import { isMoneyCellValue } from "./reportCellFormatting.util";
 import styles from "./reports.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 function ReportBackLink() {
   return (
     <Link href="/reports" className={`${styles.backLink} noPrint`}>
-      ← All reports
+      <IconLabel name="arrowLeft24" size={16}>All reports</IconLabel>
     </Link>
   );
 }
