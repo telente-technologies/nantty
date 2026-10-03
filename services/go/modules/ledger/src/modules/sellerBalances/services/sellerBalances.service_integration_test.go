@@ -41,7 +41,7 @@ func TestLockedCreditsMatureRefundsDrainLockedThenAvailableThenDebtAndDebtIsRepa
 			var err error
 			taken, err = balances.TakeSellerFundsForRefundInTransaction(ctx, transaction, SellerRefundDebit{
 				SellerUserId: "seller", Currency: "NGN", AmountMinor: amount, Reference: reference, Description: "refund",
-				CreditAccount: models.RefundsPayableAccount("paystack", "NGN"),
+				CreditAccount: models.SellerRefundsInFlightAccount("seller", "NGN"),
 			})
 			return err
 		})
