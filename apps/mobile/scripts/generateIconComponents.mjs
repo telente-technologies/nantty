@@ -22,7 +22,7 @@ function findMostUsedFillColor(shapes) {
 }
 
 function renderShapeAsJsx({ tag, attributes }, inkColor) {
-  const fill = attributes.fill === inkColor ? `{color ?? ${JSON.stringify(inkColor)}}` : JSON.stringify(attributes.fill);
+  const fill = attributes.fill === inkColor ? "{color ?? ink}" : JSON.stringify(attributes.fill);
   const shared = [
     `transform=${JSON.stringify(attributes.transform)}`,
     `fill=${fill}`,
@@ -47,9 +47,12 @@ function generateIconComponentFile(svgFileName) {
     join(outputDirectory, `${baseName}.tsx`),
     `import Svg, { ${svgImports.join(", ")} } from "react-native-svg";
 
+import { useThemedIconInk } from "@/theme/makeThemedStyles.util";
+
 import type { IconProps } from "../icon.types";
 
 export function ${componentName}({ size, color, style }: IconProps) {
+  const ink = useThemedIconInk(${JSON.stringify(inkColor)});
   const scale = size === undefined ? 1 : size / ${width};
   return (
     <Svg width={${width} * scale} height={${height} * scale} viewBox="0 0 ${width} ${height}" fill="none" style={style}>
