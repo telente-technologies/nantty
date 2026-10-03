@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { PlaceholderLegalDocument } from "@/components/legal/legalDocument";
-import { cookiePolicySections } from "@/content/cookiePolicy.content";
+import { LegalPolicyPage } from "@/components/legal/legalPolicyPage";
+import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Cookie policy",
@@ -9,14 +9,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/cookies" },
 };
 
-export default function CookiePolicyPage() {
-  return (
-    <PlaceholderLegalDocument
-      title="Cookie policy"
-      summary="Which cookies Zudomart uses, why, and how you stay in control."
-      versionLabel="[version placeholder]"
-      effectiveDateLabel="[effective date placeholder]"
-      sections={cookiePolicySections}
-    />
-  );
+export default function CookiesPage() {
+  return <LegalPolicyPage policy={findLegalPolicyOrThrow("cookies")} />;
 }
