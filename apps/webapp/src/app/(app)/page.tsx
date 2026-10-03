@@ -15,6 +15,7 @@ import { feedsService } from "@/services/feeds.service";
 import type { Post } from "@/types";
 
 import styles from "./home.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 function removeDuplicatePosts(posts: readonly Post[]): Post[] {
   const seenPostIds = new Set<string>();
@@ -48,7 +49,7 @@ function FeedSection({ feedMode, topicId, isGuest }: { readonly feedMode: FeedMo
   if (feedQuery.isLoading) return <PostFeedSkeleton />;
   if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." action={<RetryButton onRetry={() => feedQuery.refetch()} />} />;
   if (posts.length === 0) {
-    return <EmptyState icon="✦" title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." />;
+    return <EmptyState icon={<AppIcon name="sparkle24" size={28} />} title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." />;
   }
 
   return (
