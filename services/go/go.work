@@ -1,0 +1,25 @@
+go 1.26.7
+
+use (
+	../contracts
+	./deployables
+	./modules/admin
+	./modules/ads
+	./modules/analytics
+	./modules/auth
+	./modules/catalog
+	./modules/creators
+	./modules/currency
+	./modules/escrow
+	./modules/inventory
+	./modules/ledger
+	./modules/live
+	./modules/moderation
+	./modules/orders
+	./modules/payments
+	./modules/rewards
+	./modules/subscriptions
+	./modules/users
+	./modules/wallet
+	./platform
+)
