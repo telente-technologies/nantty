@@ -1,0 +1,18 @@
+package retention
+
+import (
+	"context"
+	"net/http"
+
+	"zudomart/modules/users/src/container"
+	"zudomart/modules/users/src/modules/retention/routes"
+	"zudomart/modules/users/src/modules/retention/services"
+)
+
+func Mount(mux *http.ServeMux, c *container.Container) {
+	routes.MountRetentionRoutes(mux, c)
+}
+
+func SeedReferenceData(ctx context.Context, c *container.Container) error {
+	return services.SeedDefaultRetentionPoliciesIfMissing(ctx, c.Client)
+}
