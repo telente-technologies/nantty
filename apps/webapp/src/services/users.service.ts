@@ -13,6 +13,7 @@ export interface ProfileDetailsUpdate {
 export const usersService = {
   fetchMyProfile: () => sendRequestToWebappServer<User>("/api/v1/users/me"),
   fetchUserProfileById: (userId: string) => sendRequestToWebappServer<User>(`/api/v1/users/${userId}`),
+  fetchUserIdByUsername: (username: string) => sendRequestToWebappServer<{ id: string }>(`/api/v1/users/by-username/${encodeURIComponent(username)}`),
   fetchPostsByUserId: (userId: string, cursor?: string) =>
     sendRequestToWebappServer<Page<Post>>(`/api/v1/users/${userId}/posts`, { query: { cursor } }),
   updateMyProfileDetails: (update: ProfileDetailsUpdate) => sendRequestToWebappServer<User>("/api/v1/users/me", { method: "PATCH", body: update }),
