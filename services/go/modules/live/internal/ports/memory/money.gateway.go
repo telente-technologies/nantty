@@ -21,6 +21,7 @@ type MoneyGateway struct {
 	SettleCallCount  map[string]int
 	holdings         map[string]map[string]int64
 	GiftEarnedCoins  map[string]int64
+	battleGross      map[string]map[string]ports.BattleGiftTotal
 	FailSettlementOn bool
 }
 
@@ -29,7 +30,7 @@ func NewMoneyGateway() *MoneyGateway {
 		Balances: map[string]int64{}, DefaultBalance: 100_000, CreatorShareBps: 7000,
 		Charges: map[string]ports.ChargedGift{}, chargeRequests: map[string]ports.ChargeGiftRequest{},
 		Settlements: map[string]ports.BattleSettlement{}, SettleCallCount: map[string]int{},
-		holdings: map[string]map[string]int64{}, GiftEarnedCoins: map[string]int64{},
+		holdings: map[string]map[string]int64{}, GiftEarnedCoins: map[string]int64{}, battleGross: map[string]map[string]ports.BattleGiftTotal{},
 	}
 }
 
@@ -48,6 +49,7 @@ func (gateway *MoneyGateway) ChargeGiftAndCreditCreator(_ context.Context, reque
 		if gateway.chargeRequests[scopedKey] != request {
 			return ports.ChargedGift{}, ports.ErrIdempotencyKeyReused
 		}
+		earlier.Replayed = true
 		return earlier, nil
 	}
 	if request.SenderUserId == request.ReceiverUserId {
@@ -64,6 +66,11 @@ func (gateway *MoneyGateway) ChargeGiftAndCreditCreator(_ context.Context, reque
 			gateway.holdings[request.BattleId] = map[string]int64{}
 		}
 		gateway.holdings[request.BattleId][request.ReceiverUserId] += creator
+		if gateway.battleGross[request.BattleId] == nil {
+			gateway.battleGross[request.BattleId] = map[string]ports.BattleGiftTotal{}
+		}
+		total := gateway.battleGross[request.BattleId][request.ReceiverUserId]
+		gateway.battleGross[request.BattleId][request.ReceiverUserId] = ports.BattleGiftTotal{ReceiverUserId: request.ReceiverUserId, GrossCoins: total.GrossCoins + gateway.chargeTotal(request), GiftCount: total.GiftCount + 1}
 	} else {
 		gateway.GiftEarnedCoins[request.ReceiverUserId] += creator
 	}
@@ -81,4 +88,18 @@ func (gateway *MoneyGateway) GetCoinBalance(_ context.Context, userId string) (i
 	gateway.mutex.Lock()
 	defer gateway.mutex.Unlock()
 	return gateway.balanceLocked(userId), nil
+}
+
+func (gateway *MoneyGateway) chargeTotal(request ports.ChargeGiftRequest) int64 {
+	return request.UnitPriceCoins * int64(request.Quantity)
+}
+
+func (gateway *MoneyGateway) GetBattleGiftTotals(_ context.Context, battleId string) ([]ports.BattleGiftTotal, error) {
+	gateway.mutex.Lock()
+	defer gateway.mutex.Unlock()
+	totals := []ports.BattleGiftTotal{}
+	for _, total := range gateway.battleGross[battleId] {
+		totals = append(totals, total)
+	}
+	return totals, nil
 }
