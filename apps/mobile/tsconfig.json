@@ -10,5 +10,6 @@
         "../../packages/designTokens/native.ts"
       ]
     }
-  }
+  },
+  "exclude": ["node_modules", "src/**/__tests__/**"]
 }
