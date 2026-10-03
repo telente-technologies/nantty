@@ -3,10 +3,10 @@ package application
 import (
 	"context"
 
-	"zudomart/modules/auth/internal/credentials"
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
-	"zudomart/modules/auth/internal/ent/onetimecode"
+	"zudomart/modules/auth/src/utils"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/onetimecode"
 )
 
 type SendOneTimeCodeInput struct {

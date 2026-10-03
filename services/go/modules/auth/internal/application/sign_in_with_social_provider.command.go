@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strings"
 
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/account"
-	"zudomart/modules/auth/internal/ent/socialidentity"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/socialidentity"
 	identity "zudomart/modules/auth/internal/socialidentity"
 )
 

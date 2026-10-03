@@ -5,9 +5,9 @@ import (
 	"crypto/subtle"
 	"time"
 
-	"zudomart/modules/auth/internal/credentials"
-	"zudomart/modules/auth/internal/ent"
-	"zudomart/modules/auth/internal/ent/onetimecode"
+	"zudomart/modules/auth/src/utils"
+	"zudomart/modules/auth/src/generated/ent"
+	"zudomart/modules/auth/src/generated/ent/onetimecode"
 )
 
 type VerifyOneTimeCodeInput struct {
