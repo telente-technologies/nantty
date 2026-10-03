@@ -1,0 +1,1 @@
+{"kind":"androidpublisher#subscriptionPurchaseV2","regionCode":"NG","startTime":"2026-09-21T10:00:00Z","subscriptionState":"SUBSCRIPTION_STATE_ACTIVE","latestOrderId":"GPA.3301-5555-6666-77777..0","lineItems":[{"productId":"blue.monthly","expiryTime":"2026-10-21T10:00:00Z","autoRenewingPlan":{"autoRenewEnabled":true}}]}
