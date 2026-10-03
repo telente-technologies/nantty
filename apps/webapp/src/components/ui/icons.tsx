@@ -139,3 +139,38 @@ export const TrendingIcon = createIcon(() => (
     <path d="M15 7.5h5.5V13" />
   </>
 ));
+
+export const ShieldIcon = createIcon(() => (
+  <>
+    <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" />
+    <path d="m9 12 2.2 2.2L15.5 10" />
+  </>
+));
+
+export const DocumentIcon = createIcon(() => (
+  <>
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
+    <path d="M14 3v5h5M9 13h6M9 17h4" />
+  </>
+));
+
+export const AlertIcon = createIcon(() => (
+  <>
+    <path d="M10.3 4.2 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z" />
+    <path d="M12 9.5v4M12 17h.01" />
+  </>
+));
+
+export const ExternalLinkIcon = createIcon(() => (
+  <>
+    <path d="M14 4h6v6M20 4l-9 9" />
+    <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+  </>
+));
+
+export const DownloadIcon = createIcon(() => (
+  <>
+    <path d="M12 4v11M7 10.5l5 5 5-5" />
+    <path d="M5 19.5h14" />
+  </>
+));
