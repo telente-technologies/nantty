@@ -2,9 +2,10 @@ import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.
 import { assertLocationSlotAvailable, describeMockActor } from "@/mocks/handlers/settingsEntitlements.mock";
 import { normaliseStoreSettingsPatch, validateStoreSettingsPatch } from "@/mocks/handlers/settingsPatchValidation.mock";
 import { registerStaffTeamMockHandlers } from "@/mocks/handlers/staffTeam.mock";
+import { assertStorePlanIncludesFeature } from "@/mocks/handlers/workspaceDeveloperRoutes.mock";
 import { createMockIdentifier, MockHttpError, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithValidationFailure } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
-import type { PosRegister, StoreLocation } from "@/types/store.type";
+import type { StoreLocation } from "@/types/store.type";
 import { fieldChecks, validateObjectAgainstChecks, type FieldCheck } from "@/utils/formValidation.util";
 
 function buildLocationChecks(isPartial: boolean): Record<string, FieldCheck> {
@@ -40,6 +41,10 @@ function registerStoreSettingsHandlers(): void {
     const issues = validateStoreSettingsPatch(body, database.settings, new Set(database.categories.map((category) => category.id)));
     if (issues.length > 0) return respondWithValidationFailure(issues);
     const patch = normaliseStoreSettingsPatch(body);
+    const automatedAlertKeys = ["lowStockEmail", "lowStockSms", "dailySummaryEmail", "weeklyPerformanceEmail"] as const;
+    if (patch.notifications && automatedAlertKeys.some((key) => patch.notifications?.[key] && !database.settings.notifications[key])) {
+      assertStorePlanIncludesFeature(requireMockStorePrincipal(request).storeId, "automated_alerts", "Automated alerts");
+    }
     database.settings = { ...database.settings, ...patch };
     recordSettingsAudit(request, "settings.updated", "store", database.settings.storeId, `Updated store settings: ${Object.keys(patch).join(", ")}`);
     return respondWithJson(200, database.settings);
@@ -88,7 +93,6 @@ function registerLocationHandlers(): void {
     const issues = validateObjectAgainstChecks(body, { ...buildLocationChecks(true), active: fieldChecks.optional(fieldChecks.boolean("Active")), isDefault: fieldChecks.optional(fieldChecks.boolean("Default")) });
     if (issues.length > 0) return respondWithValidationFailure(issues);
     if (body.active === false && current.isDefault) throw new MockHttpError(409, "DEFAULT_LOCATION", "Make another location the default before deactivating this one.");
-    if (body.active === false && database.registers.some((register) => register.locationId === current.id && register.openShiftId)) throw new MockHttpError(409, "OPEN_SHIFT", "Close the open register shifts at this location first.");
     if (body.active === true && !current.active) assertLocationSlotAvailable(principal.storeId);
     if (body.isDefault === true && body.active === false) throw new MockHttpError(409, "DEFAULT_LOCATION", "The default location must stay active.");
     const updated: StoreLocation = {
@@ -109,41 +113,8 @@ function registerLocationHandlers(): void {
   });
 }
 
-function registerPosRegisterWriteHandlers(): void {
-  registerMockRoute("POST", "/seller/pos/registers", (request) => {
-    requireMockStorePrincipal(request);
-    const body = readJsonObjectBody(request);
-    const database = readMockDatabase();
-    const issues = validateObjectAgainstChecks(body, { name: fieldChecks.text({ label: "Register name", min: 2, max: 40 }), locationId: fieldChecks.text({ label: "Location", max: 64 }) });
-    const location = database.locations.find((candidate) => candidate.id === body.locationId);
-    if (!issues.some((issue) => issue.path === "locationId") && (!location || !location.active || location.kind !== "store")) issues.push({ path: "locationId", message: "Registers can only be added to an active store location." });
-    if (issues.length > 0) return respondWithValidationFailure(issues);
-    const register: PosRegister = { id: createMockIdentifier("reg"), locationId: String(body.locationId), name: String(body.name).trim(), openShiftId: null, active: true };
-    database.registers.push(register);
-    recordSettingsAudit(request, "register.created", "register", register.id, `Added register ${register.name} at ${location?.name ?? "a location"}`);
-    return respondWithJson(201, register);
-  });
-
-  registerMockRoute("PATCH", "/seller/pos/registers/:registerId", (request) => {
-    requireMockStorePrincipal(request);
-    const database = readMockDatabase();
-    const registerIndex = database.registers.findIndex((register) => register.id === request.params.registerId);
-    const current = database.registers[registerIndex];
-    if (!current) throw new MockHttpError(404, "REGISTER_NOT_FOUND", "That register no longer exists.");
-    const body = readJsonObjectBody(request);
-    const issues = validateObjectAgainstChecks(body, { name: fieldChecks.optional(fieldChecks.text({ label: "Register name", min: 2, max: 40 })), active: fieldChecks.optional(fieldChecks.boolean("Active")) });
-    if (issues.length > 0) return respondWithValidationFailure(issues);
-    if (body.active === false && current.openShiftId) throw new MockHttpError(409, "OPEN_SHIFT", "Close this register's open shift before deactivating it.");
-    const updated: PosRegister = { ...current, name: typeof body.name === "string" ? body.name.trim() : current.name, active: typeof body.active === "boolean" ? body.active : current.active };
-    database.registers[registerIndex] = updated;
-    recordSettingsAudit(request, "register.updated", "register", updated.id, `Updated register ${updated.name}`);
-    return respondWithJson(200, updated);
-  });
-}
-
 export function registerTeamAndSettingsMockHandlers(): void {
   registerStoreSettingsHandlers();
   registerLocationHandlers();
-  registerPosRegisterWriteHandlers();
   registerStaffTeamMockHandlers();
 }
