@@ -1,12 +1,13 @@
 import { ApiError } from "@/errors/api.error";
 import type { OrderStatus } from "@/types";
 
-import { mockCartState, storeIdForProduct, summariseMockCart } from "./commerceFixtures.mock";
+import { isGroupPayable, mockCartState, storeIdForProduct, summariseMockCart } from "./commerceFixtures.mock";
 import { buildEscrowDetailFromRecord, buildOrderFromRecord } from "./escrowBuilders.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, findOrderRecord, mockOrderRecords, type MockOrderRecord } from "./orderFixtures.mock";
 import { findCatalogSeedByProductId, reduceCatalogStock } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { findSignedInAddress } from "./settings.mock";
 
 const paymentAttempts = new Map<string, number>();
 
@@ -21,10 +22,9 @@ export const findOrderRecordVisibleToSignedInUser = (orderId: string) => {
   return record;
 };
 
-const createOrderRecordsFromCart = (): MockOrderRecord[] => {
+const createOrderRecordsFromCart = (payableStoreIds: readonly string[]): MockOrderRecord[] => {
   const checkoutGroupId = `chk_${Date.now()}`;
-  const storeIds = [...new Set(mockCartState.lines.map((cartLine) => storeIdForProduct(cartLine.productId)))];
-  return storeIds.map((storeId, index) => {
+  return payableStoreIds.map((storeId, index) => {
     const now = new Date().toISOString();
     const orderNumber = String(Date.now() + index).slice(-5);
     return {
@@ -63,12 +63,17 @@ const markCheckoutGroupAsPaid = (orderId: string) => {
 };
 
 export const ordersMocks: MockRoute[] = [
-  createMockRoute("POST", "/api/v1/orders/checkout", () => {
+  createMockRoute("POST", "/api/v1/orders/checkout", ({ body }) => {
+    const { addressId } = body as { addressId?: string };
+    const address = addressId ? findSignedInAddress(addressId) : undefined;
+    if (!address) throw new ApiError(422, "Choose a delivery address");
     if (mockCartState.lines.length === 0) throw new ApiError(422, "Your cart is empty");
-    const cart = summariseMockCart();
-    const records = createOrderRecordsFromCart();
+    const cart = summariseMockCart({ countryId: address.countryId, stateId: address.stateId, lgaId: address.lgaId, cityId: address.cityId }, address.id);
+    const payableStoreIds = cart.groups.filter(isGroupPayable).map((group) => group.storeId);
+    if (payableStoreIds.length === 0) throw new ApiError(422, "None of the sellers in your cart ship to this address");
+    const records = createOrderRecordsFromCart(payableStoreIds);
     mockOrderRecords.unshift(...records);
-    mockCartState.lines = [];
+    mockCartState.lines = mockCartState.lines.filter((line) => !payableStoreIds.includes(storeIdForProduct(line.productId)));
     return { orders: records.map(buildOrderFromRecord), payableOrderId: records[0]!.id, total: cart.total };
   }),
   createMockRoute("GET", "/api/v1/orders", ({ query }) => {

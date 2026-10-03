@@ -2,13 +2,16 @@ import { ApiError } from "@/errors/api.error";
 import type { Post, PostAnalytics, PostAnalyticsDaily } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
+import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 export { mockPostsState };
 
-export const findPostIncludingSponsored = (postId: string): Post | undefined =>
-  mockPostsState.get(postId) ?? sponsoredFeedPosts.find((post) => post.id === postId);
+export const findPostIncludingSponsored = (postId: string): Post | undefined => {
+  const post = mockPostsState.get(postId) ?? sponsoredFeedPosts.find((candidate) => candidate.id === postId);
+  return post && isAuthorContentVisibleToSignedInViewer(post.author.id) ? post : undefined;
+};
 
 const updateMockPost = (postId: string, change: (post: Post) => Post) => {
   const post = mockPostsState.get(postId);

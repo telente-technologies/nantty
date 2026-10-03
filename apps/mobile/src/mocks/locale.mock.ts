@@ -28,3 +28,8 @@ export const localeMocks: MockRoute[] = [
     return { countryCode, currency: currency ?? "USD", isCountrySupported: currency !== undefined };
   }),
 ];
+
+export function convertNairaMinorToViewerCurrency(nairaMinor: number): Money {
+  const currency = useLocaleStore.getState().currency;
+  return { amountMinor: Math.round((nairaMinor / UNITS_PER_US_DOLLAR.NGN) * UNITS_PER_US_DOLLAR[currency]), currency };
+}

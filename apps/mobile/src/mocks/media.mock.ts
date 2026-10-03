@@ -134,6 +134,7 @@ export const mediaMocks: MockRoute[] = [
       friendsLiked: null,
       products: [],
       sponsored: null,
+      isAiGenerated: input.isAiGenerated === true,
     };
     if (post.kind === "clip") {
       appendMockClip({ ...post, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
