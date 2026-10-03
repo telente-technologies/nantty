@@ -5,7 +5,7 @@
   padding: 16px;
   border-radius: var(--radius-large);
   background: var(--blue-900);
-  color: #fff;
+  color: var(--color-on-brand);
 }
 
 .estimateHeader {
@@ -79,7 +79,7 @@
   height: 16px;
   margin-left: -2px;
   border-radius: 2px;
-  background: #fff;
+  background: var(--color-on-brand);
   box-shadow: 0 0 0 2px var(--blue-900);
   transition: left 300ms ease;
 }
@@ -132,7 +132,7 @@
 
 .estimateError {
   font-size: var(--fs-12);
-  color: #fecaca;
+  color: var(--color-danger-text);
 }
 
 .estimateSkeleton {

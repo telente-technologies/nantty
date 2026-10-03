@@ -70,9 +70,9 @@
 }
 
 .stepCurrent .stepMarker {
-  border-color: var(--blue-500);
-  background: var(--blue-500);
-  color: #fff;
+  border-color: var(--color-brand);
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
 }
 
 .stepComplete .stepMarker {

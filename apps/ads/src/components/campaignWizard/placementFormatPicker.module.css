@@ -21,7 +21,7 @@
 }
 
 .cardOn {
-  border-color: var(--blue-300);
+  border-color: var(--brand-border);
   background: var(--blue-tint);
 }
 
@@ -36,7 +36,7 @@
 
 .guidance {
   font-size: var(--fs-12);
-  color: var(--blue-800);
+  color: var(--brand-ink);
   padding-left: 8px;
   border-left: 2px solid var(--yellow-500);
 }
