@@ -71,9 +71,12 @@ flowchart LR
   EV --> C4{marketing consent?}
   C4 -- yes --> NF[Marketing email / push]
   C4 -- no --> TX[Transactional only]
-  PAY2[go-money] --> PSP[Bachs Connect\nprocessor]
+  PAY2[go-money] --> PSP[Paystack\nprocessor]
   ID2[go-identity] --> EML[Email / SMS provider\nprocessor]
 ```
+
+Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03). Data sent to Paystack as processor: buyer account email (receipts, never asked at checkout), name, amount and order metadata (no item details beyond ids); sellers' and creators' bank account and legal name (subaccounts, transfer recipients, account resolve) and, if BVN validation is enabled, BVN with bank account. Card data is entered only on Paystack pages; the app keeps only the Paystack `authorization_code` in the device keystore. Retention and the processor agreement need legal review.
+
 
 Diagram 3, data subject requests.
 

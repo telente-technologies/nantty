@@ -51,7 +51,7 @@ Rule: Tier 0 is restored and verified before anything else starts.
 | S3 critical (uploads, KYB docs, exports) | versioning, MFA-delete optional, Object Lock (governance) for KYB and ledger exports, CRR to DR bucket, lifecycle for noncurrent versions | PROPOSED |
 | S3 regenerable (processed media, Parquet) | versioning only; rebuild from originals/events | PROPOSED |
 | Valkey | not a source of truth; snapshots optional for faster warm-up; nothing money-critical lives only here (idempotency keys also persisted for money endpoints) | PROPOSED |
-| SQS / SNS | no backup; durability from outbox: unpublished rows replay after restore; DLQ redrive after fix | PROPOSED, outbox EXISTING in auth/live |
+| RabbitMQ (Amazon MQ cluster) | quorum queues replicated across 3 AZ brokers; topology from `definitions.json` (re-importable); messages are not backed up, durability from the outbox: unpublished rows replay after restore, events lost in flight are re-published by outbox replay (`published_at = NULL` by id range); DLQ moved back after fix. RabbitMQ adopted (owner, 2026-10-03) | Amazon MQ PROPOSED, outbox EXISTING in auth/live |
 | Secrets | Secrets Manager replica secrets in DR region; KMS multi-region keys for signing-key encryption key | PROPOSED |
 | Infra | Terraform in git, state in versioned S3 + lock table, state bucket replicated | PROPOSED |
 | Images | ECR cross-region replication, immutable tags | PROPOSED |
@@ -67,7 +67,7 @@ Rule: Tier 0 is restored and verified before anything else starts.
 | 3 | Region loss | declare; `terraform apply envs/production-dr`; restore latest snapshot in DR region; restore secrets replicas; deploy images from replicated ECR; point Route 53; verify Tier 0 checks; open traffic in order: auth, read paths, checkout, money |
 | 4 | Credential or key compromise | rotate signing key (forces JWKS update, short access TTL bounds impact), revoke sessions, rotate secrets, review CloudTrail |
 | 5 | Payment provider outage | enable degraded mode (below), queue retries, no manual ledger edits |
-| 6 | Poison queue / DLQ growth | pause consumer, inspect, fix, redrive |
+| 6 | Poison queue / DLQ growth | pause consumer, inspect `<queue>.dlq` in the management UI (`x-zudomart-last-error` header), fix, move messages back to `<queue>` |
 | 7 | S3 object loss or malicious delete | restore previous version; CRR copy |
 | 8 | Restore drill | quarterly into an isolated account; validate trial balance 0, row counts, auth login; record achieved RPO/RTO |
 
@@ -82,10 +82,10 @@ Class: **Critical** (core flow stops or must fail safe), **Important** (degraded
 | Aurora writer | Critical | health, failover event | Multi-AZ failover under 5 min; reads from reader meanwhile; browse/catalog served from cache and CDN; writes return 503 with `Retry-After`; clients queue non-money actions (offline queue EXISTING in mobile) | accept writes into memory |
 | Aurora reader | Important | replica lag alarm | route reads to writer within limits; feeds degrade to cached pages | |
 | Valkey | Important (Critical for rate limit on auth) | connection errors | cache miss falls back to DB with request coalescing; rate limit fails **closed** on auth routes and open elsewhere; idempotency for money endpoints falls back to a DB unique key; presence and typing stop; Python nonce store fails closed (EXISTING 503) | skip idempotency on money routes |
-| SQS / SNS | Important | publish errors, queue age | outbox keeps rows, relay retries (EXISTING); business transaction already committed; jobs delayed; realtime loses live updates, clients poll REST (plan 5.6 recovery path) | drop events or publish before commit |
+| RabbitMQ | Important | publish confirm failures, connection loss, queue depth/age | outbox keeps rows, relay retries (EXISTING); clients reconnect with backoff; a single broker loss is absorbed by quorum queues (2 of 3); business transaction already committed; jobs delayed; realtime loses live updates, clients poll REST (plan 5.6 recovery path) | drop events or publish before commit |
 | Python intelligence | Optional | timeout (budget 100-200 ms), breaker | feed uses deterministic ranking (follow graph + recency + trending cache); ads deterministic eligibility, empty slot if engine fails; risk score unavailable means go-money applies conservative thresholds (hold, lower limits), never auto-approve high-value | block checkout on a missing score for low-risk amounts only if policy says so, otherwise hold |
 | Phoenix realtime | Important | `/healthz`, socket count | purchases, orders, REST unaffected; chat and live viewers fall back to polling `?after=`; gifts still settle in ledger, animations replay from state on reconnect | let Phoenix decide any money state |
-| Payment provider (Bachs) | Critical for payments | provider error rate, webhook lag | single provider at launch (the provider interface leaves room for a second one): hide the pay button with a message, keep browse and cart; pending payments reconciled by polling provider after recovery; wallet-funded purchases continue | mark paid without provider verification |
+| Payment provider (Paystack; Bachs and Anchor dropped, owner 2026-10-03) | Critical for payments | provider error rate, webhook lag | single provider at launch (the provider interface leaves room for a second one): hide the pay button with a message, keep browse and cart; pending payments reconciled by polling provider after recovery; coin purchases through IAP continue | mark paid without provider verification |
 | LiveKit | Important | room API errors | existing lives show reconnecting state, new lives disabled with banner; commerce unaffected | |
 | Search (Postgres FTS now, OpenSearch later) | Important | query errors | fall back to Postgres trigram/FTS; category browse and browse feed remain | |
 | Object storage (S3/CloudFront) | Important | 5xx on origin | CDN serves cached; CloudFront origin group fails over to replica; uploads queued client-side (upload queue EXISTING in mobile); text content continues | |
@@ -126,6 +126,6 @@ Core principle: the marketplace read path (browse, product pages, orders view) d
 
 ### DR5. Provider-agnostic payment interface with a second provider
 - **Problem:** one provider outage halts payments.
-- **Recommendation:** keep the Bachs adapter behind the provider interface with fixture and fake-API tests (done); add a second provider only if Bachs availability requires it.
+- **Recommendation:** keep the Paystack adapter behind the provider interfaces with fixture and fake-API tests (to build, `checkoutPaymentFlowPlan.md` §12); add a second provider only if Paystack availability requires it. Webhook retries last 72 hours in live mode, so a longer outage needs the sweepers (verify by reference).
 - **Complexity:** M. **Risk:** medium. **Priority: P2**, ship with one, design for two.
 - **Tag:** Near term.
