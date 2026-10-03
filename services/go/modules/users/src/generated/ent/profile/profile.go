@@ -46,6 +46,8 @@ const (
 	FieldCountryCode = "country_code"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
+	// FieldProfileType holds the string denoting the profile_type field in the database.
+	FieldProfileType = "profile_type"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -79,6 +81,7 @@ var Columns = []string{
 	FieldIsPrivate,
 	FieldCountryCode,
 	FieldVerified,
+	FieldProfileType,
 	FieldStatus,
 	FieldUpdatedAt,
 }
@@ -184,6 +187,34 @@ func CreatorStatusValidator(cs CreatorStatus) error {
 		return nil
 	default:
 		return fmt.Errorf("profile: invalid enum value for creator_status field: %q", cs)
+	}
+}
+
+// ProfileType defines the type for the "profile_type" enum field.
+type ProfileType string
+
+// ProfileTypePersonal is the default value of the ProfileType enum.
+const DefaultProfileType = ProfileTypePersonal
+
+// ProfileType values.
+const (
+	ProfileTypePersonal   ProfileType = "personal"
+	ProfileTypeBusiness   ProfileType = "business"
+	ProfileTypeBrand      ProfileType = "brand"
+	ProfileTypeGovernment ProfileType = "government"
+)
+
+func (pt ProfileType) String() string {
+	return string(pt)
+}
+
+// ProfileTypeValidator is a validator for the "profile_type" field enum values. It is called by the builders before save.
+func ProfileTypeValidator(pt ProfileType) error {
+	switch pt {
+	case ProfileTypePersonal, ProfileTypeBusiness, ProfileTypeBrand, ProfileTypeGovernment:
+		return nil
+	default:
+		return fmt.Errorf("profile: invalid enum value for profile_type field: %q", pt)
 	}
 }
 
@@ -294,6 +325,11 @@ func ByCountryCode(opts ...sql.OrderTermOption) OrderOption {
 // ByVerified orders the results by the verified field.
 func ByVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVerified, opts...).ToFunc()
+}
+
+// ByProfileType orders the results by the profile_type field.
+func ByProfileType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProfileType, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

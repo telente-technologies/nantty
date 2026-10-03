@@ -911,6 +911,26 @@ func VerifiedNEQ(v bool) predicate.Profile {
 	return predicate.Profile(sql.FieldNEQ(FieldVerified, v))
 }
 
+// ProfileTypeEQ applies the EQ predicate on the "profile_type" field.
+func ProfileTypeEQ(v ProfileType) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldProfileType, v))
+}
+
+// ProfileTypeNEQ applies the NEQ predicate on the "profile_type" field.
+func ProfileTypeNEQ(v ProfileType) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldProfileType, v))
+}
+
+// ProfileTypeIn applies the In predicate on the "profile_type" field.
+func ProfileTypeIn(vs ...ProfileType) predicate.Profile {
+	return predicate.Profile(sql.FieldIn(FieldProfileType, vs...))
+}
+
+// ProfileTypeNotIn applies the NotIn predicate on the "profile_type" field.
+func ProfileTypeNotIn(vs ...ProfileType) predicate.Profile {
+	return predicate.Profile(sql.FieldNotIn(FieldProfileType, vs...))
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v Status) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldStatus, v))
