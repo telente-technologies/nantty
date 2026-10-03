@@ -47,7 +47,7 @@ function OrderItemsCard({ order }: { readonly order: OrderDetail }) {
         <dd className={styles.grandTotal}>{formatMoneyForDisplay(order.total)}</dd>
         <dt>Refunded</dt>
         <dd>{formatMoneyForDisplay(order.refundedTotal)}</dd>
-        <dt>Commission ({formatBasisPointsAsPercent(order.commissionBasisPoints)})</dt>
+        <dt>Escrow fee ({formatBasisPointsAsPercent(order.commissionBasisPoints)})</dt>
         <dd>{formatMoneyForDisplay(order.commission)}</dd>
       </dl>
     </Card>

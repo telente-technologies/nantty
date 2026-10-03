@@ -55,7 +55,7 @@ export function DisputeDetailWorkspace({ disputeId }: { readonly disputeId: stri
           <>
             {resolution ? (
               <NoticeBanner tone="success" title={`Resolved: ${humanizeConstantName(resolution.outcome)}`}>
-                Buyer refunded {formatMoneyForDisplay(resolution.buyerRefund)}, seller received {formatMoneyForDisplay(resolution.sellerPayout)}, commission {formatMoneyForDisplay(resolution.commission)}. By {resolution.resolvedByName} on {formatDateTime(resolution.resolvedAt)}: “{resolution.reason}”
+                Buyer refunded {formatMoneyForDisplay(resolution.buyerRefund)}, seller received {formatMoneyForDisplay(resolution.sellerPayout)}, escrow fee {formatMoneyForDisplay(resolution.commission)}. By {resolution.resolvedByName} on {formatDateTime(resolution.resolvedAt)}: “{resolution.reason}”
               </NoticeBanner>
             ) : null}
             <DisputeCaseFile dispute={dispute} />

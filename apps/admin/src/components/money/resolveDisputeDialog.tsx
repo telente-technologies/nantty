@@ -92,7 +92,7 @@ export function ResolveDisputeDialog({ dispute, onClose, onResolved }: { readonl
           <strong>{formatMoneyForDisplay(split.sellerPayout)}</strong>
         </div>
         <div className={styles.splitCell}>
-          <span className={styles.muted}>Commission ({formatBasisPointsAsPercent(dispute.commissionBasisPoints)})</span>
+          <span className={styles.muted}>Escrow fee ({formatBasisPointsAsPercent(dispute.commissionBasisPoints)})</span>
           <strong>{formatMoneyForDisplay(split.commission)}</strong>
         </div>
       </div>
