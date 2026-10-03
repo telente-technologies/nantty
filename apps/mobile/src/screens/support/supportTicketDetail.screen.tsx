@@ -9,7 +9,7 @@ import { TICKET_STATUS_APPEARANCE } from "@/components/settings/supportAppearanc
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
@@ -17,6 +17,8 @@ import { supportService } from "@/services/support.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTicketDetail">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { ticketId } = route.params;
   const ticket = useQuery({ queryKey: ["support", "tickets", ticketId], queryFn: () => supportService.fetchSupportTicket(ticketId) });
   const [draft, setDraft] = useState("");
@@ -50,7 +52,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
           {details.messages.map((message) => (
             <View key={message.id} style={[styles.bubbleWrap, !message.fromSupport && styles.mine]}>
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{message.authorName}</Text>
-              <View style={[styles.bubble, { backgroundColor: message.fromSupport ? palette.success[50] : colors.primary }]}>
+              <View style={[styles.bubble, { backgroundColor: message.fromSupport ? colors.successTint : colors.primarySolid }]}>
                 <Text size={14} lineHeight={19} color={message.fromSupport ? colors.text : colors.white}>{message.text}</Text>
               </View>
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{formatFriendlyDateTime(message.createdAt)}</Text>
@@ -70,15 +72,15 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 14 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   bubbleWrap: { maxWidth: "85%", gap: 4 },
   mine: { alignSelf: "flex-end", alignItems: "flex-end" },
   bubble: { borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
-  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.divider },
+  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.divider },
   input: { flex: 1, minHeight: 40, maxHeight: 120, borderRadius: 20, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 14, paddingVertical: 10, fontFamily: fontFamily[400], fontSize: 14, color: colors.text },
-  send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
+  send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
   sendDisabled: { backgroundColor: colors.disabled },
-});
+}));

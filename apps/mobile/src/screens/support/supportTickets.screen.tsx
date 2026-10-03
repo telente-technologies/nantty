@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { supportService } from "@/services/support.service";
 import { ErrorState } from "@/components/ui/errorState";
@@ -17,6 +17,8 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 export const supportTicketsQueryKey = ["support", "tickets"] as const;
 
 export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTickets">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const tickets = useQuery({ queryKey: supportTicketsQueryKey, queryFn: supportService.listMySupportTickets });
   return (
     <Screen>
@@ -44,11 +46,11 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   list: { paddingHorizontal: 16, paddingBottom: 40 },
   header: { marginVertical: 16 },
   separator: { height: 8 },
-  row: { backgroundColor: colors.white, borderRadius: 12, padding: 14, gap: 4 },
+  row: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 4 },
   rowTop: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));

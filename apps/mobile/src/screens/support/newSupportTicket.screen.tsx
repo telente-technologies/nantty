@@ -10,7 +10,7 @@ import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { supportService } from "@/services/support.service";
@@ -19,6 +19,7 @@ import type { SupportTicketCategory } from "@/types/support.type";
 import { supportTicketsQueryKey } from "./supportTickets.screen";
 
 export function NewSupportTicketScreen({ navigation }: MainScreenProps<"NewSupportTicket">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [category, setCategory] = useState<SupportTicketCategory>("order");
   const [subject, setSubject] = useState("");

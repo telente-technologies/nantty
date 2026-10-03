@@ -7,12 +7,14 @@ import { REPORT_STATUS_APPEARANCE } from "@/components/settings/supportAppearanc
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { supportService } from "@/services/support.service";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 export function MyReportsScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const reports = useQuery({ queryKey: ["reports", "mine"], queryFn: supportService.listMyContentReports });
   return (
     <Screen>
@@ -39,10 +41,10 @@ export function MyReportsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
   separator: { height: 8 },
-  row: { backgroundColor: colors.white, borderRadius: 12, padding: 14, gap: 6 },
+  row: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 6 },
   top: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));
