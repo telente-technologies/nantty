@@ -1223,14 +1223,18 @@ func init() {
 	profilesignalDescHasActiveStoreOrBrandPage := profilesignalFields[11].Descriptor()
 	// profilesignal.DefaultHasActiveStoreOrBrandPage holds the default value on creation for the has_active_store_or_brand_page field.
 	profilesignal.DefaultHasActiveStoreOrBrandPage = profilesignalDescHasActiveStoreOrBrandPage.Default.(bool)
+	// profilesignalDescSellerPlanTrialing is the schema descriptor for seller_plan_trialing field.
+	profilesignalDescSellerPlanTrialing := profilesignalFields[16].Descriptor()
+	// profilesignal.DefaultSellerPlanTrialing holds the default value on creation for the seller_plan_trialing field.
+	profilesignal.DefaultSellerPlanTrialing = profilesignalDescSellerPlanTrialing.Default.(bool)
 	// profilesignalDescSource is the schema descriptor for source field.
-	profilesignalDescSource := profilesignalFields[14].Descriptor()
+	profilesignalDescSource := profilesignalFields[17].Descriptor()
 	// profilesignal.DefaultSource holds the default value on creation for the source field.
 	profilesignal.DefaultSource = profilesignalDescSource.Default.(string)
 	// profilesignal.SourceValidator is a validator for the "source" field. It is called by the builders before save.
 	profilesignal.SourceValidator = profilesignalDescSource.Validators[0].(func(string) error)
 	// profilesignalDescUpdatedAt is the schema descriptor for updated_at field.
-	profilesignalDescUpdatedAt := profilesignalFields[15].Descriptor()
+	profilesignalDescUpdatedAt := profilesignalFields[18].Descriptor()
 	// profilesignal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profilesignal.DefaultUpdatedAt = profilesignalDescUpdatedAt.Default.(func() time.Time)
 	// profilesignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
