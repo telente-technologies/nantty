@@ -119,11 +119,10 @@ func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context
 	}
 	metadata["purpose"], metadata["paymentIntentId"], metadata["subjectId"] = string(intent.Purpose), intent.ID.String(), intent.SubjectID
 	session, err := provider.InitializeCharge(ctx, interfaces.ChargeRequest{
-		Reference: intent.Reference, IdempotencyKey: "chk:" + intent.Reference, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
-		ConnectedAccountId: intent.ConnectedAccountID, PlatformFeeMinor: intent.PlatformFeeMinor,
-		CustomerEmail: contact.Email, CustomerName: customerDisplayName(contact),
-		SuccessUrl: callbackUrl, CancelUrl: callbackUrl + "&status=cancelled",
-		ExpiresInMinutes: gateway.Container.Settings.CheckoutExpiryMinutes, Metadata: metadata,
+		Reference: intent.Reference, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
+		SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee,
+		CustomerEmail: contact.Email, CustomerLabel: customerDisplayName(contact), SuccessUrl: callbackUrl, Channels: gateway.Container.Settings.Paystack.Channels,
+		PlanCode: metadata["paystackPlanCode"], ExpiresInMinutes: gateway.Container.Settings.CheckoutExpiryMinutes, Metadata: metadata,
 	})
 	if err != nil {
 		return models.PaymentIntentView{}, convertProviderError(err)
@@ -147,11 +146,11 @@ func (gateway *PaymentGateway) CancelPendingIntentsThatNeverOpenedACheckout(ctx 
 }
 
 func (gateway *PaymentGateway) connectedAccountReadyForCharges(ctx context.Context, transaction *sql.Tx, request models.CreatePaymentIntentRequest) (string, error) {
-	if request.BeneficiaryUserId == "" {
-		if request.PlatformFeeMinor > 0 {
-			return "", fmt.Errorf("a platform fee needs a beneficiary account")
-		}
+	if !request.SettleToSellerSubaccount {
 		return "", nil
+	}
+	if request.BeneficiaryUserId == "" || request.PlatformFeeMinor != 0 {
+		return "", fmt.Errorf("a direct payment needs a seller and carries no platform fee")
 	}
 	account, err := gateway.FindConnectedAccountForUser(ctx, transaction, request.BeneficiaryUserId)
 	if errors.Is(err, ErrConnectedAccountMissing) {
@@ -163,7 +162,7 @@ func (gateway *PaymentGateway) connectedAccountReadyForCharges(ctx context.Conte
 	if !ConnectedAccountCanAcceptPayments(account) {
 		return "", ErrSellerNotReadyForPayments
 	}
-	return account.ProviderAccountID, nil
+	return account.SettlementSubaccountCode, nil
 }
 
 func (gateway *PaymentGateway) requireVerifiedContact(ctx context.Context, userId string) (repositories.VerifiedAccountContact, error) {

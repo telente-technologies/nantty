@@ -53,13 +53,10 @@ func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, t
 	if err := intent.Update().AddRefundedMinor(request.AmountMinor).AddVersion(1).Exec(ctx); err != nil {
 		return RequestedRefund{}, err
 	}
-	if request.FeeTopUpMinor < 0 || (request.FeeTopUpMinor > 0 && !IsConnectedAccountCharge(intent)) {
-		return RequestedRefund{}, fmt.Errorf("a fee top-up only applies to a connected account charge")
-	}
 	refund, err := client.PaymentRefund.Create().
 		SetPaymentIntentID(intent.ID).SetReference(request.Reference).SetProvider(intent.Provider).
 		SetConnectedAccountID(intent.ConnectedAccountID).SetBeneficiaryUserID(intent.BeneficiaryUserID).
-		SetFullRefund(intent.RefundedMinor == 0 && request.AmountMinor == intent.AmountMinor).SetFeeTopUpMinor(request.FeeTopUpMinor).
+		SetFullRefund(intent.RefundedMinor == 0 && request.AmountMinor == intent.AmountMinor).
 		SetAmountMinor(request.AmountMinor).SetCurrency(intent.Currency).SetReason(truncateReason(request.Reason)).
 		SetCreatedAt(gateway.Container.Now()).Save(ctx)
 	if err != nil {
@@ -92,23 +89,16 @@ func (gateway *PaymentGateway) SendPendingRefundToProvider(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	if claimed.FeeTopUpMinor > 0 && claimed.FeeTopUpTransferID == "" {
-		transfer, err := provider.CreateTransfer(ctx, interfaces.TransferRequest{
-			ToConnectedAccountId: claimed.ConnectedAccountID, AmountMinor: claimed.FeeTopUpMinor, Currency: claimed.Currency,
-			TransferGroup: intent.Reference, Description: "Fee returned before refund " + claimed.Reference, IdempotencyKey: "fee-topup:" + claimed.ID.String(),
-			Metadata: map[string]string{"refundReference": claimed.Reference},
-		})
-		if err != nil {
-			return gateway.returnRefundToPendingQueue(ctx, claimed.ID, "fee top-up transfer failed: "+err.Error())
-		}
-		if err := gateway.Container.Client(database).PaymentRefund.UpdateOneID(claimed.ID).SetFeeTopUpTransferID(transfer.ProviderTransferId).Exec(ctx); err != nil {
-			return err
-		}
-	}
 	result, err := provider.RefundCharge(ctx, interfaces.RefundRequest{
-		ProviderChargeId: intent.ProviderTransactionID, ConnectedAccountId: claimed.ConnectedAccountID, RefundReference: claimed.Reference,
-		IdempotencyKey: "refund:" + claimed.ID.String(), AmountMinor: claimed.AmountMinor, Currency: claimed.Currency, FullRefund: claimed.FullRefund, Reason: claimed.Reason,
+		ProviderChargeId: intent.ProviderTransactionID, ChargeReference: intent.Reference, RefundReference: claimed.Reference,
+		AmountMinor: claimed.AmountMinor, Currency: claimed.Currency, FullRefund: claimed.FullRefund, Reason: claimed.Reason,
 	})
+	if err == nil && result.NeedsCustomerDetail {
+		if recordErr := gateway.Container.Client(database).PaymentRefund.UpdateOneID(claimed.ID).SetProviderRefundID(result.ProviderRefundId).Exec(ctx); recordErr != nil {
+			return recordErr
+		}
+		return gateway.markRefundAwaitingBankDetails(ctx, claimed.ID, "the bank needs the buyer's account to return this payment")
+	}
 	var requestError *integrations.ProviderRequestError
 	if errors.As(err, &requestError) && requestError.IsDefinitiveRejection() {
 		return gateway.recordRefundOutcome(ctx, claimed.ID, interfaces.RefundResult{Outcome: interfaces.OutcomeFailed, FailureReason: requestError.Error()})
@@ -137,29 +127,38 @@ func (gateway *PaymentGateway) RetryPendingRefunds(ctx context.Context, limit in
 	return len(pending)
 }
 
-func (gateway *PaymentGateway) HandleRefundNotification(ctx context.Context, providerRefundId, reference, eventType string) error {
+func (gateway *PaymentGateway) HandleRefundNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
-	query := client.PaymentRefund.Query().Where(paymentrefund.StatusIn(paymentrefund.StatusProcessing, paymentrefund.StatusPending))
-	if reference != "" {
-		query = query.Where(paymentrefund.Reference(reference))
-	} else {
-		query = query.Where(paymentrefund.ProviderRefundID(providerRefundId))
+	open := paymentrefund.StatusIn(paymentrefund.StatusProcessing, paymentrefund.StatusPending, paymentrefund.StatusAwaitingBankDetails)
+	refund, err := client.PaymentRefund.Query().Where(paymentrefund.ProviderRefundID(notification.ProviderObjectId), open).Only(ctx)
+	if ent.IsNotFound(err) && notification.Reference != "" {
+		intent, intentErr := client.PaymentIntent.Query().Where(paymentintent.Reference(notification.Reference)).Only(ctx)
+		if intentErr != nil {
+			return nil
+		}
+		refund, err = client.PaymentRefund.Query().Where(paymentrefund.PaymentIntentID(intent.ID), open).Order(ent.Desc(paymentrefund.FieldCreatedAt)).First(ctx)
 	}
-	refund, err := query.Only(ctx)
 	if ent.IsNotFound(err) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	switch eventType {
-	case "refund.paid":
-		return gateway.recordRefundOutcome(ctx, refund.ID, interfaces.RefundResult{ProviderRefundId: providerRefundId, Outcome: interfaces.OutcomeSucceeded})
-	case "refund.failed":
-		return gateway.recordRefundOutcome(ctx, refund.ID, interfaces.RefundResult{ProviderRefundId: providerRefundId, Outcome: interfaces.OutcomeFailed, FailureReason: "refund failed at the provider"})
+	switch {
+	case notification.EventType == "refund.processed" || notification.Status == "processed":
+		return gateway.recordRefundOutcome(ctx, refund.ID, interfaces.RefundResult{ProviderRefundId: notification.ProviderObjectId, Outcome: interfaces.OutcomeSucceeded})
+	case notification.EventType == "refund.failed" || notification.Status == "failed":
+		return gateway.recordRefundOutcome(ctx, refund.ID, interfaces.RefundResult{ProviderRefundId: notification.ProviderObjectId, Outcome: interfaces.OutcomeFailed, FailureReason: "refund failed at the provider"})
+	case notification.Status == "needs-attention":
+		if refund.ProviderRefundID == "" {
+			if err := refund.Update().SetProviderRefundID(notification.ProviderObjectId).Exec(ctx); err != nil {
+				return err
+			}
+		}
+		return gateway.markRefundAwaitingBankDetails(ctx, refund.ID, "the bank needs the buyer's account to return this payment")
 	}
-	if providerRefundId != "" && refund.ProviderRefundID == "" {
-		return refund.Update().SetProviderRefundID(providerRefundId).Exec(ctx)
+	if notification.ProviderObjectId != "" && refund.ProviderRefundID == "" {
+		return refund.Update().SetProviderRefundID(notification.ProviderObjectId).Exec(ctx)
 	}
 	return nil
 }
@@ -178,42 +177,42 @@ func (gateway *PaymentGateway) MarkRefundSucceededByProviderRefundId(ctx context
 
 func (gateway *PaymentGateway) recordRefundOutcome(ctx context.Context, refundId uuid.UUID, result interfaces.RefundResult) error {
 	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		client := gateway.Container.Client(transaction)
-		refund, err := client.PaymentRefund.Query().Where(paymentrefund.ID(refundId)).ForUpdate().Only(ctx)
-		if err != nil || (refund.Status != paymentrefund.StatusProcessing && refund.Status != paymentrefund.StatusPending) {
+		return gateway.recordRefundOutcomeInTransaction(ctx, transaction, refundId, result)
+	})
+}
+
+func (gateway *PaymentGateway) recordRefundOutcomeInTransaction(ctx context.Context, transaction *sql.Tx, refundId uuid.UUID, result interfaces.RefundResult) error {
+	client := gateway.Container.Client(transaction)
+	refund, err := client.PaymentRefund.Query().Where(paymentrefund.ID(refundId)).ForUpdate().Only(ctx)
+	if err != nil || (refund.Status != paymentrefund.StatusProcessing && refund.Status != paymentrefund.StatusPending) {
+		return err
+	}
+	update := refund.Update().SetFailureReason(truncateReason(result.FailureReason))
+	if result.ProviderRefundId != "" {
+		update.SetProviderRefundID(result.ProviderRefundId)
+	}
+	now := gateway.Container.Now().UTC()
+	switch result.Outcome {
+	case interfaces.OutcomeSucceeded:
+		if err := update.SetStatus(paymentrefund.StatusSucceeded).SetCompletedAt(now).Exec(ctx); err != nil {
 			return err
 		}
-		update := refund.Update().SetFailureReason(truncateReason(result.FailureReason))
-		if result.ProviderRefundId != "" {
-			update.SetProviderRefundID(result.ProviderRefundId)
+		if err := gateway.postRefundPaidOut(ctx, transaction, refund); err != nil {
+			return err
 		}
-		now := gateway.Container.Now().UTC()
-		switch result.Outcome {
-		case interfaces.OutcomeSucceeded:
-			if err := update.SetStatus(paymentrefund.StatusSucceeded).SetCompletedAt(now).Exec(ctx); err != nil {
-				return err
-			}
-			if err := gateway.postRefundPaidOut(ctx, transaction, refund); err != nil {
-				return err
-			}
-			return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.succeeded", refund.ID.String(), now, refundEventData(refund))
-		case interfaces.OutcomeFailed:
-			if err := update.SetStatus(paymentrefund.StatusFailed).SetCompletedAt(now).Exec(ctx); err != nil {
-				return err
-			}
-			return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.failed", refund.ID.String(), now, refundEventData(refund))
+		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.succeeded", refund.ID.String(), now, refundEventData(refund))
+	case interfaces.OutcomeFailed:
+		if err := update.SetStatus(paymentrefund.StatusFailed).SetCompletedAt(now).Exec(ctx); err != nil {
+			return err
 		}
-		return update.Exec(ctx)
-	})
+		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.failed", refund.ID.String(), now, refundEventData(refund))
+	}
+	return update.Exec(ctx)
 }
 
 func (gateway *PaymentGateway) postRefundPaidOut(ctx context.Context, transaction *sql.Tx, refund *ent.PaymentRefund) error {
 	debit := ledgermodels.RefundsPayableAccount(refund.Provider, refund.Currency)
 	credit := ledgermodels.PlatformProviderBalanceAccount(refund.Provider, refund.Currency)
-	if refund.ConnectedAccountID != "" && refund.BeneficiaryUserID != "" {
-		debit = ledgermodels.SellerRefundsInFlightAccount(refund.BeneficiaryUserID, refund.Currency)
-		credit = ledgermodels.SellerProviderHeldFundsAccount(refund.BeneficiaryUserID, refund.Currency)
-	}
 	_, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "refund-paid:" + refund.Reference, Kind: "payment.refundPaid", ExternalReference: refund.Reference,
 		Description: "Refund paid back to the buyer",

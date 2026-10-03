@@ -73,26 +73,24 @@ func (gateway *PaymentGateway) postConnectedAccountCollection(ctx context.Contex
 }
 
 func (gateway *PaymentGateway) refundDuplicatePaymentInTransaction(ctx context.Context, transaction *sql.Tx, intent *ent.PaymentIntent) (RequestedRefund, error) {
-	reference := "duplicate-refund:" + intent.Reference
-	topUp := int64(0)
-	lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.PaymentsAwaitingApplicationAccount(intent.Currency), Direction: ledgermodels.Debit, AmountMinor: AppliedCollectionAmount(intent)}}
+	reference := "duplicate-refund-" + intent.Reference
+	applied := AppliedCollectionAmount(intent)
+	lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.PaymentsAwaitingApplicationAccount(intent.Currency), Direction: ledgermodels.Debit, AmountMinor: applied}}
 	if IsConnectedAccountCharge(intent) {
-		topUp = intent.PlatformFeeMinor + intent.ProviderFeeMinor
 		lines = AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(intent.Currency), ledgermodels.Debit, intent.ProviderFeeMinor)
-		lines = AppendPositiveLine(lines, ledgermodels.SellerProviderHeldFundsAccount(intent.BeneficiaryUserID, intent.Currency), ledgermodels.Debit, topUp)
-		lines = AppendPositiveLine(lines, ledgermodels.PlatformProviderBalanceAccount(intent.Provider, intent.Currency), ledgermodels.Credit, topUp)
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.SellerRefundsInFlightAccount(intent.BeneficiaryUserID, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: intent.AmountMinor})
-	} else {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.RefundsPayableAccount(intent.Provider, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: intent.AmountMinor})
+		lines = append(lines,
+			ledgermodels.JournalLineRequest{Account: ledgermodels.SellerDebtAccount(intent.BeneficiaryUserID, intent.Currency), Direction: ledgermodels.Debit, AmountMinor: applied},
+			ledgermodels.JournalLineRequest{Account: ledgermodels.SellerProviderHeldFundsAccount(intent.BeneficiaryUserID, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: applied})
 	}
+	lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.RefundsPayableAccount(intent.Provider, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: intent.AmountMinor})
 	if _, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: reference, Kind: "payment.duplicateRefunded", Description: "Duplicate payment returned to the payer",
-		Metadata: map[string]any{"paymentIntentId": intent.ID.String(), "feeTopUpMinor": topUp}, Lines: lines,
+		Metadata: map[string]any{"paymentIntentId": intent.ID.String()}, Lines: lines,
 	}); err != nil {
 		return RequestedRefund{}, err
 	}
 	refund, err := gateway.RequestRefundInTransaction(ctx, transaction, models.RefundRequest{
-		PaymentIntentId: intent.ID, AmountMinor: intent.AmountMinor, Currency: intent.Currency, Reference: reference, Reason: "duplicate payment", FeeTopUpMinor: topUp,
+		PaymentIntentId: intent.ID, AmountMinor: intent.AmountMinor, Currency: intent.Currency, Reference: reference, Reason: "duplicate payment",
 	})
 	if err != nil {
 		return RequestedRefund{}, err

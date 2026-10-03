@@ -35,7 +35,7 @@ func (gateway *PaymentGateway) verifyAndSettlePaymentIntent(ctx context.Context,
 	if err != nil {
 		return models.PaymentIntentView{}, err
 	}
-	verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: reference, ProviderCheckoutId: intent.ProviderCheckoutID, ConnectedAccountId: intent.ConnectedAccountID})
+	verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: reference})
 	if err != nil {
 		return models.PaymentIntentView{}, convertProviderError(err)
 	}
@@ -150,6 +150,15 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 	}
 	settledPayment, err := gateway.buildSettledPayment(ctx, client, succeeded)
 	if err != nil {
+		return nil, false, err
+	}
+	settledPayment.ProviderCustomerId = verification.ProviderCustomerId
+	if card := verification.Authorization; card != nil {
+		settledPayment.Authorization = &models.CardAuthorizationHandoff{
+			AuthorizationCode: card.AuthorizationCode, Signature: card.Signature, Brand: card.Brand, Last4: card.Last4, ExpiryMonth: card.ExpiryMonth, ExpiryYear: card.ExpiryYear, Reusable: card.Reusable,
+		}
+	}
+	if err := gateway.recordProviderCustomerInTransaction(ctx, client, succeeded.OwnerUserID, succeeded.Provider, verification.ProviderCustomerId); err != nil {
 		return nil, false, err
 	}
 	if err := handler.HandleSucceededPayment(ctx, transaction, settledPayment); err != nil {

@@ -7,7 +7,6 @@ import (
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/interfaces"
@@ -33,13 +32,13 @@ func (gateway *PaymentGateway) recordProviderDispute(ctx context.Context, disput
 		if !opened && existing.Status == dispute.Status {
 			return nil
 		}
-		intent, err := client.PaymentIntent.Query().Where(paymentintent.ProviderTransactionID(dispute.ProviderChargeId)).First(ctx)
+		intent, err := client.PaymentIntent.Query().Where(paymentintent.Or(paymentintent.ProviderTransactionID(dispute.ProviderChargeId), paymentintent.Reference(dispute.ChargeReference))).First(ctx)
 		if err != nil && !ent.IsNotFound(err) {
 			return err
 		}
 		if opened {
 			create := client.ProviderDispute.Create().SetProvider(provider).SetProviderDisputeID(dispute.ProviderDisputeId).
-				SetProviderChargeID(dispute.ProviderChargeId).SetConnectedAccountID(dispute.ConnectedAccountId).SetAmountMinor(dispute.AmountMinor).
+				SetProviderChargeID(dispute.ProviderChargeId).SetAmountMinor(dispute.AmountMinor).
 				SetCurrency(dispute.Currency).SetStatus(dispute.Status).SetReason(truncate(dispute.Reason, 120)).
 				SetNillableResponseDeadlineAt(dispute.ResponseDeadlineAt).SetCreatedAt(gateway.Container.Now())
 			if intent != nil {
@@ -77,24 +76,16 @@ func (gateway *PaymentGateway) PollOpenProviderDisputes(ctx context.Context) (in
 	if err != nil {
 		return 0, err
 	}
-	accounts, err := gateway.Container.Client(gateway.Container.Resources.Database).ConnectedAccount.Query().
-		Where(connectedaccount.AcceptsPayments(true), connectedaccount.Provider(provider.Name())).All(ctx)
+	disputes, err := provider.ListOpenDisputes(ctx)
 	if err != nil {
-		return 0, err
+		return 0, convertProviderError(err)
 	}
 	seen := 0
 	var failures []error
-	for _, account := range accounts {
-		disputes, err := provider.ListOpenDisputes(ctx, account.ProviderAccountID)
-		if err != nil {
+	for _, dispute := range disputes {
+		seen++
+		if err := gateway.recordProviderDispute(ctx, dispute); err != nil {
 			failures = append(failures, err)
-			continue
-		}
-		for _, dispute := range disputes {
-			seen++
-			if err := gateway.recordProviderDispute(ctx, dispute); err != nil {
-				failures = append(failures, err)
-			}
 		}
 	}
 	return seen, errors.Join(failures...)
@@ -112,7 +103,6 @@ func (gateway *PaymentGateway) SubmitProviderDisputeEvidence(ctx context.Context
 	if err != nil {
 		return err
 	}
-	evidence.ConnectedAccountId, evidence.ProviderDisputeId = dispute.ConnectedAccountID, dispute.ProviderDisputeID
-	evidence.IdempotencyKey = "dispute-evidence:" + dispute.ProviderDisputeID
+	evidence.ProviderDisputeId = dispute.ProviderDisputeID
 	return convertProviderError(provider.SubmitDisputeEvidence(ctx, evidence))
 }

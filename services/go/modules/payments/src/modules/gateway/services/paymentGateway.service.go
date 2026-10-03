@@ -18,6 +18,7 @@ type PaymentGateway struct {
 	transferHandlers map[string]models.TransferOutcomeHandler
 	refundHandlers   map[string]models.StoreRefundHandler
 	disputeHandlers  map[string]models.ProviderDisputeHandler
+	observers        gatewayObservers
 }
 
 func NewPaymentGateway(container *container.Container) *PaymentGateway {
