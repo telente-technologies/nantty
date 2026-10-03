@@ -16,7 +16,7 @@ export interface ProxiedResponse {
   readonly body: Uint8Array;
 }
 
-const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-none-match", "user-agent", "x-client-region"];
+const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-none-match", "user-agent", "x-client-region", "x-device-id", "x-step-up-token"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
 export function buildUpstreamRequestHeaders(request: ProxiedRequest): Record<string, string> {
@@ -30,6 +30,7 @@ export function buildUpstreamRequestHeaders(request: ProxiedRequest): Record<str
     headers["x-real-ip"] = request.clientIp;
     headers["x-forwarded-for"] = request.clientIp;
   }
+  if (request.principal === undefined) headers["x-zudomart-viewer"] = "anonymous";
   if (request.principal !== undefined) {
     headers["x-zudomart-account-id"] = request.principal.accountId;
     headers["x-zudomart-session-id"] = request.principal.sessionId;
