@@ -49,6 +49,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  transpilePackages: ["@zudomart/web-kit"],
   poweredByHeader: false,
   agentRules: false,
   async headers() {
