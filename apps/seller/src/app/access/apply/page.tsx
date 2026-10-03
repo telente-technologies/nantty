@@ -11,7 +11,7 @@ export default function ApplyToSellPage() {
       <PageHeader eyebrow="Zudomart Dashboard" title="This account does not have a store yet" description="The dashboard is free for every approved Zudomart seller and their team. Here is how to get in." />
       <Panel title="Open a store in the Zudomart app">
         <ol>
-          <GateStep state="current" title="Apply to sell">Open the Zudomart app, go to Profile → Start selling and submit your business details, ID and payout bank account.</GateStep>
+          <GateStep state="current" title="Apply to sell">Open the Zudomart app, go to Profile › Start selling and submit your business details, ID and payout bank account.</GateStep>
           <GateStep state="todo" title="Get approved">Our team reviews your store, usually within 1–2 working days.</GateStep>
           <GateStep state="todo" title="Sign in here for free">Free for every Zudomart seller — upgrade to Pro or Business when you grow.</GateStep>
         </ol>
