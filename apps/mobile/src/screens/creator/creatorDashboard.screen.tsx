@@ -15,7 +15,7 @@ import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import type { CreatorDashboardPeriod } from "@/types/creator.type";
@@ -30,6 +30,8 @@ const PERIODS: readonly { readonly key: CreatorDashboardPeriod; readonly label: 
 ];
 
 export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorDashboard">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [period, setPeriod] = useState<CreatorDashboardPeriod>("month");
   const dashboard = useQuery({ queryKey: creatorQueryKeys.dashboard(period), queryFn: () => creatorProgramService.fetchCreatorDashboard(period) });
   const revenueRules = useCreatorRevenueRulesQuery();
@@ -94,13 +96,13 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   periods: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   state: { padding: 32, gap: 16 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   metrics: { flexDirection: "row", alignItems: "center", gap: 4 },
   thumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: colors.placeholder },
-});
+}));

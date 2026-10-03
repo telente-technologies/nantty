@@ -1,5 +1,6 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
+import { CreatorDecisionBanner } from "@/components/creator/creatorDecisionBanner";
 import { EligibilityChecklist } from "@/components/creator/eligibilityChecklist";
 import { useCreatorApplicationQuery, useCreatorEligibilityQuery, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
 import { RevenueRulesCard } from "@/components/creator/revenueRulesCard";
@@ -8,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -21,6 +23,8 @@ const BENEFITS = [
 ];
 
 export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorProgram">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { isApprovedCreator } = useCreatorStatus();
   const eligibility = useCreatorEligibilityQuery();
   const application = useCreatorApplicationQuery();
@@ -62,10 +66,8 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
         {!approved ? (
           <View style={styles.card}>
             <Text size={16} weight={600} lineHeight={19.2}>Eligibility</Text>
+            {eligibility.data ? <CreatorDecisionBanner decision={eligibility.data.decision} note={eligibility.data.decisionNote} /> : null}
             {eligibility.data ? <EligibilityChecklist requirements={eligibility.data.requirements} /> : <ListSkeleton rows={3} />}
-            {eligibility.data && !eligibility.data.eligible ? (
-              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Keep posting and growing — this list updates automatically.</Text>
-            ) : null}
           </View>
         ) : null}
 
@@ -78,10 +80,10 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
-  hero: { backgroundColor: colors.primary, borderRadius: 12, padding: 20, gap: 8 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 12 },
+  hero: { backgroundColor: colors.primarySolid, borderRadius: 12, padding: 20, gap: 8 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   benefit: { gap: 2 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
-});
+}));

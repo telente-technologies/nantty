@@ -12,7 +12,7 @@ import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { usePayoutAccountsQuery } from "@/components/wallet/walletQueries.hook";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { creatorProgramService } from "@/services/creatorProgram.service";
@@ -32,6 +32,7 @@ const SOCIAL_PLATFORMS: readonly { readonly platform: CreatorSocialLink["platfor
 const MAXIMUM_CATEGORIES = 3;
 
 export function CreatorApplicationScreen({ navigation }: MainScreenProps<"CreatorApplication">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const { data: payoutAccounts = [] } = usePayoutAccountsQuery();
   const [categories, setCategories] = useState<CreatorContentCategory[]>([]);

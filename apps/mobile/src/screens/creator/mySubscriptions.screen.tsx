@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import type { CreatorSubscriptionState } from "@/types/creator.type";
@@ -34,6 +34,8 @@ function formatDay(isoDate: string | null): string | null {
 }
 
 export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscriptions">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const { data: subscriptions = [], isLoading } = useMySubscriptionsQuery();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: creatorQueryKeys.mySubscriptions });
@@ -55,7 +57,7 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
   };
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title="Subscriptions" />
       <ScrollView contentContainerStyle={styles.content}>
         {subscriptions.length === 0 && !isLoading ? (
@@ -93,6 +95,8 @@ function SubscriptionCard({
   readonly onCancel: () => void;
   readonly onResume: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const creator = useUserProfileQuery(subscription.creatorId);
   const presentation = STATUS_PRESENTATION[subscription.status];
   const renewsOn = formatDay(subscription.renewsAt ?? subscription.currentPeriodEnd);
@@ -133,11 +137,11 @@ function SubscriptionCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 12 },
   empty: { marginTop: 80 },
   card: { borderWidth: 1, borderColor: colors.divider, borderRadius: 12, padding: 14, gap: 12 },
   identity: { flexDirection: "row", alignItems: "center", gap: 10 },
   names: { flex: 1, gap: 2 },
   detailRows: { gap: 2 },
-});
+}));

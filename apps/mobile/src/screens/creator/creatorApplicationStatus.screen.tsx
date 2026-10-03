@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
@@ -18,6 +18,8 @@ const STATUS_COPY = {
 };
 
 export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"CreatorApplicationStatus">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const application = useCreatorApplicationQuery();
   const details = application.data;
   if (!details) {
@@ -55,8 +57,8 @@ export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   empty: { padding: 32, gap: 16 },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 8 },
-});
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
+}));

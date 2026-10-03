@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { creatorProgramService } from "@/services/creatorProgram.service";
@@ -41,6 +41,7 @@ async function verifySubscriptionCheckoutUntilSettled(checkout: CreatorSubscript
 }
 
 export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"CreatorSubscribe">) {
+  const { colors } = useTheme();
   const { creatorId } = route.params;
   const queryClient = useQueryClient();
   const creator = useUserProfileQuery(creatorId);
