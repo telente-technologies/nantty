@@ -1,6 +1,6 @@
 # ts.notifications consumed events
 
-Queue `notifications-domain-events` (SNS `zudomart-domain-events`, envelope.v1). Handlers key on the exact `type`. R = required, O = optional (email skipped or default used when absent). Producers marked "published" use the schema in `../schemas`; "unpublished" lists the fields read until the owning agent publishes.
+Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.events`, envelope.v1; bindings in `infra/local/rabbitmq/topology.json`). Handlers key on the exact `type`. R = required, O = optional (email skipped or default used when absent). Producers marked "published" use the schema in `../schemas`; "unpublished" lists the fields read until the owning agent publishes.
 
 ## Published schemas (fields read)
 | Type | Producer | Fields |
@@ -24,11 +24,12 @@ Queue `notifications-domain-events` (SNS `zudomart-domain-events`, envelope.v1).
 | coinPurchase.completed | goMoney | R userId, coinPurchaseId, coins, source, amount; web email needs receiptNumber, balanceAfter; O packName, bonusCoins, paymentMethod, paidAt |
 | payout.completed / payout.failed | goMoney | R userId, withdrawalId, amount; completed needs reference for email; O payeeKind (seller\|creator), bankAccountLabel, sentAt, reason, retryAt |
 | withdrawal.requested/approved/failed/cancelled | goMoney | R userId, withdrawalId (in-app only) |
+| adReport.ready | goAds | R scheduledReportId, accountId, reportName, recipients[] (plain email addresses, email each one), frequency, periodFrom, periodTo, currency, spendMinor, impressions, clicks; O csvUrl, pdfUrl, urlsExpireAt (links expire, do not store) |
 | gift.sent | goLive | R receiverUserId, liveId; O quantity, totalCoins, sender{id,name,username,avatarUrl} |
-| live.started | goLive | R title, liveId; O hostName, hostHandle, notifyUserIds[], emailUserIds[], viewerCount, isShopping, liveUrl (recipients must be supplied by the producer) |
+| live.started | goLive | R title, liveId, hostName, hostHandle, host{id,name,username,avatarUrl}, notifyUserIds[] (opted-in unblocked followers, at most 1000; notifyTruncated marks more), isShopping, viewerCount, visibility, notifyAudience, startedAt; O emailUserIds[], liveUrl, coverUrl (schema `live.started.v1.json`) |
 
 ## Schemas added in `../schemas` (unpublished before)
-otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.suggested|applicationSubmitted|approved|rejected|revoked|renewalFailed, creatorApplication.submitted|approved|needsReview|ineligible, sellerDocuments.submitted|approved|rejected (goIdentity); planTrial.started|ending|converted, planInvoice.paymentFailed|paid, cardVerification.refunded (goMoney). Fields exactly as in each schema (R = schema `required`).
+otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.suggested|applicationSubmitted|approved|rejected|revoked|renewalFailed, creatorApplication.submitted|approved|needsReview|ineligible, sellerDocuments.submitted|approved|rejected (goIdentity); planTrial.started|ending|converted, planInvoice.paymentFailed|paid, cardVerification.refunded, payoutAccount.created|verified|creationFailed|actionRequired, paymentRefund.bankDetailsRequired (goMoney). Fields exactly as in each schema (R = schema `required`).
 
 ## Owned by other agents (not published here)
 | Type | Producer | Fields read |

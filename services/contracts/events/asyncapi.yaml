@@ -4,21 +4,48 @@ info:
   version: 1.0.0
   description: >
     Durable domain events. Each owning service writes the event to its Postgres outbox in the same
-    transaction as the business change; a relay publishes it to the SNS topic zudomart-domain-events
-    with the message attribute eventType. Consumers own an SQS queue subscribed with a filter policy
-    on eventType and must be idempotent on the envelope id.
+    transaction as the business change; a relay publishes it with publisher confirms to the RabbitMQ
+    topic exchange zudomart.events with routing key = event type (message_id = envelope id).
+    Each consumer owns a durable quorum queue bound to the routing keys it needs, with retry queues
+    and a dead-letter queue, and must be idempotent on the envelope id. RabbitMQ adopted (owner, 2026-10-03).
 defaultContentType: application/json
 servers:
   aws:
-    host: sns.eu-west-1.amazonaws.com
-    protocol: sns
+    host: zudomart-mq.eu-west-1.amazonaws.com:5671
+    protocol: amqps
+    description: Amazon MQ for RabbitMQ cluster deployment in private subnets, vhost zudomart
   local:
-    host: localhost:14566
-    protocol: sns
+    host: localhost:5672
+    protocol: amqp
+    description: infra/local docker compose, vhost zudomart
 channels:
   domainEvents:
-    address: zudomart-domain-events
+    address: zudomart.events
     messages:
+      followCreated:
+        $ref: '#/components/messages/followCreated'
+      followRequestCreated:
+        $ref: '#/components/messages/followRequestCreated'
+      followRejected:
+        $ref: '#/components/messages/followRejected'
+      blockCreated:
+        $ref: '#/components/messages/blockCreated'
+      postCreated:
+        $ref: '#/components/messages/postCreated'
+      mentionCreated:
+        $ref: '#/components/messages/mentionCreated'
+      commentCreated:
+        $ref: '#/components/messages/commentCreated'
+      videoReplyCreated:
+        $ref: '#/components/messages/videoReplyCreated'
+      messageRequestReceived:
+        $ref: '#/components/messages/messageRequestReceived'
+      messageSent:
+        $ref: '#/components/messages/messageSent'
+      messageCreated:
+        $ref: '#/components/messages/messageCreated'
+      reportCreated:
+        $ref: '#/components/messages/reportCreated'
       accountRegistered:
         $ref: '#/components/messages/accountRegistered'
       accountLoggedIn:
@@ -77,6 +104,34 @@ channels:
         $ref: '#/components/messages/liveTopSupporterSelected'
       liveViewerCountChanged:
         $ref: '#/components/messages/liveViewerCountChanged'
+      liveCommentCreated:
+        $ref: '#/components/messages/liveCommentCreated'
+      liveCommentDeleted:
+        $ref: '#/components/messages/liveCommentDeleted'
+      liveCommentPinned:
+        $ref: '#/components/messages/liveCommentPinned'
+      liveCommentUnpinned:
+        $ref: '#/components/messages/liveCommentUnpinned'
+      liveRoomSettingsUpdated:
+        $ref: '#/components/messages/liveRoomSettingsUpdated'
+      liveViewerMuted:
+        $ref: '#/components/messages/liveViewerMuted'
+      liveViewerUnmuted:
+        $ref: '#/components/messages/liveViewerUnmuted'
+      liveViewerBanned:
+        $ref: '#/components/messages/liveViewerBanned'
+      liveViewerUnbanned:
+        $ref: '#/components/messages/liveViewerUnbanned'
+      overlayScenePublished:
+        $ref: '#/components/messages/overlayScenePublished'
+      overlaySceneUnpublished:
+        $ref: '#/components/messages/overlaySceneUnpublished'
+      liveRecordingStarted:
+        $ref: '#/components/messages/liveRecordingStarted'
+      liveRecordingCompleted:
+        $ref: '#/components/messages/liveRecordingCompleted'
+      liveRecordingFailed:
+        $ref: '#/components/messages/liveRecordingFailed'
       giftSent:
         $ref: '#/components/messages/giftSent'
       adImpressionRecorded:
@@ -91,6 +146,10 @@ channels:
         $ref: '#/components/messages/adPremiumPoolAllocated'
       adBoostCreated:
         $ref: '#/components/messages/adBoostCreated'
+      adMediaUploaded:
+        $ref: '#/components/messages/adMediaUploaded'
+      adReportReady:
+        $ref: '#/components/messages/adReportReady'
       goalProgressed:
         $ref: '#/components/messages/goalProgressed'
       goalCompleted:
@@ -193,6 +252,100 @@ channels:
         $ref: '#/components/messages/giftTransactionCommitted'
       battleSettlementCompleted:
         $ref: '#/components/messages/battleSettlementCompleted'
+      productViewed:
+        $ref: '#/components/messages/productViewed'
+      productClicked:
+        $ref: '#/components/messages/productClicked'
+      productAddedToCart:
+        $ref: '#/components/messages/productAddedToCart'
+      productRemovedFromCart:
+        $ref: '#/components/messages/productRemovedFromCart'
+      productPurchased:
+        $ref: '#/components/messages/productPurchased'
+      searchPerformed:
+        $ref: '#/components/messages/searchPerformed'
+      sellerViewed:
+        $ref: '#/components/messages/sellerViewed'
+      categoryViewed:
+        $ref: '#/components/messages/categoryViewed'
+      productCreated:
+        $ref: '#/components/messages/productCreated'
+      productUpdated:
+        $ref: '#/components/messages/productUpdated'
+      productArchived:
+        $ref: '#/components/messages/productArchived'
+      productPublished:
+        $ref: '#/components/messages/productPublished'
+      productUnpublished:
+        $ref: '#/components/messages/productUnpublished'
+      productBulkUpdated:
+        $ref: '#/components/messages/productBulkUpdated'
+      storeCreated:
+        $ref: '#/components/messages/storeCreated'
+      storeUpdated:
+        $ref: '#/components/messages/storeUpdated'
+      reviewCreated:
+        $ref: '#/components/messages/reviewCreated'
+      reviewReplied:
+        $ref: '#/components/messages/reviewReplied'
+      reviewReported:
+        $ref: '#/components/messages/reviewReported'
+      orderCreated:
+        $ref: '#/components/messages/orderCreated'
+      orderCancelled:
+        $ref: '#/components/messages/orderCancelled'
+      orderGroupCreated:
+        $ref: '#/components/messages/orderGroupCreated'
+      orderGroupPaid:
+        $ref: '#/components/messages/orderGroupPaid'
+      orderGroupStatusChanged:
+        $ref: '#/components/messages/orderGroupStatusChanged'
+      orderGroupRefundRequested:
+        $ref: '#/components/messages/orderGroupRefundRequested'
+      returnDecided:
+        $ref: '#/components/messages/returnDecided'
+      returnRequested:
+        $ref: '#/components/messages/returnRequested'
+      storeCreditEarned:
+        $ref: '#/components/messages/storeCreditEarned'
+      storeCreditRedeemed:
+        $ref: '#/components/messages/storeCreditRedeemed'
+      storeCreditRestored:
+        $ref: '#/components/messages/storeCreditRestored'
+      storeCreditReversed:
+        $ref: '#/components/messages/storeCreditReversed'
+      storeCreditExpired:
+        $ref: '#/components/messages/storeCreditExpired'
+      storeRewardsConfigured:
+        $ref: '#/components/messages/storeRewardsConfigured'
+      stockAdjusted:
+        $ref: '#/components/messages/stockAdjusted'
+      stockFulfilled:
+        $ref: '#/components/messages/stockFulfilled'
+      reservationCreated:
+        $ref: '#/components/messages/reservationCreated'
+      reservationReleased:
+        $ref: '#/components/messages/reservationReleased'
+      reservationExpired:
+        $ref: '#/components/messages/reservationExpired'
+      transferCreated:
+        $ref: '#/components/messages/transferCreated'
+      transferReceived:
+        $ref: '#/components/messages/transferReceived'
+      transferCancelled:
+        $ref: '#/components/messages/transferCancelled'
+      reorderLevelChanged:
+        $ref: '#/components/messages/reorderLevelChanged'
+      mediaUploaded:
+        $ref: '#/components/messages/mediaUploaded'
+      mediaProcessed:
+        $ref: '#/components/messages/mediaProcessed'
+      mediaRejected:
+        $ref: '#/components/messages/mediaRejected'
+      mediaHeld:
+        $ref: '#/components/messages/mediaHeld'
+      mediaDeleted:
+        $ref: '#/components/messages/mediaDeleted'
 operations:
   publishAuthEvents:
     action: send
@@ -248,6 +401,20 @@ operations:
       - $ref: '#/channels/domainEvents/messages/liveEnded'
       - $ref: '#/channels/domainEvents/messages/liveTopSupporterSelected'
       - $ref: '#/channels/domainEvents/messages/liveViewerCountChanged'
+      - $ref: '#/channels/domainEvents/messages/liveCommentCreated'
+      - $ref: '#/channels/domainEvents/messages/liveCommentDeleted'
+      - $ref: '#/channels/domainEvents/messages/liveCommentPinned'
+      - $ref: '#/channels/domainEvents/messages/liveCommentUnpinned'
+      - $ref: '#/channels/domainEvents/messages/liveRoomSettingsUpdated'
+      - $ref: '#/channels/domainEvents/messages/liveViewerMuted'
+      - $ref: '#/channels/domainEvents/messages/liveViewerUnmuted'
+      - $ref: '#/channels/domainEvents/messages/liveViewerBanned'
+      - $ref: '#/channels/domainEvents/messages/liveViewerUnbanned'
+      - $ref: '#/channels/domainEvents/messages/overlayScenePublished'
+      - $ref: '#/channels/domainEvents/messages/overlaySceneUnpublished'
+      - $ref: '#/channels/domainEvents/messages/liveRecordingStarted'
+      - $ref: '#/channels/domainEvents/messages/liveRecordingCompleted'
+      - $ref: '#/channels/domainEvents/messages/liveRecordingFailed'
       - $ref: '#/channels/domainEvents/messages/giftSent'
       - $ref: '#/channels/domainEvents/messages/goalProgressed'
       - $ref: '#/channels/domainEvents/messages/goalCompleted'
@@ -316,6 +483,67 @@ operations:
       - $ref: '#/channels/domainEvents/messages/adCreatorEarningsPosted'
       - $ref: '#/channels/domainEvents/messages/adPremiumPoolAllocated'
       - $ref: '#/channels/domainEvents/messages/adBoostCreated'
+      - $ref: '#/channels/domainEvents/messages/adMediaUploaded'
+      - $ref: '#/channels/domainEvents/messages/adReportReady'
+
+  publishCommerceEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/productViewed'
+      - $ref: '#/channels/domainEvents/messages/productClicked'
+      - $ref: '#/channels/domainEvents/messages/productAddedToCart'
+      - $ref: '#/channels/domainEvents/messages/productRemovedFromCart'
+      - $ref: '#/channels/domainEvents/messages/productPurchased'
+      - $ref: '#/channels/domainEvents/messages/searchPerformed'
+      - $ref: '#/channels/domainEvents/messages/sellerViewed'
+      - $ref: '#/channels/domainEvents/messages/categoryViewed'
+      - $ref: '#/channels/domainEvents/messages/productCreated'
+      - $ref: '#/channels/domainEvents/messages/productUpdated'
+      - $ref: '#/channels/domainEvents/messages/productArchived'
+      - $ref: '#/channels/domainEvents/messages/productPublished'
+      - $ref: '#/channels/domainEvents/messages/productUnpublished'
+      - $ref: '#/channels/domainEvents/messages/productBulkUpdated'
+      - $ref: '#/channels/domainEvents/messages/storeCreated'
+      - $ref: '#/channels/domainEvents/messages/storeUpdated'
+      - $ref: '#/channels/domainEvents/messages/reviewCreated'
+      - $ref: '#/channels/domainEvents/messages/reviewReplied'
+      - $ref: '#/channels/domainEvents/messages/reviewReported'
+      - $ref: '#/channels/domainEvents/messages/orderCreated'
+      - $ref: '#/channels/domainEvents/messages/orderCancelled'
+      - $ref: '#/channels/domainEvents/messages/orderGroupCreated'
+      - $ref: '#/channels/domainEvents/messages/orderGroupPaid'
+      - $ref: '#/channels/domainEvents/messages/orderGroupStatusChanged'
+      - $ref: '#/channels/domainEvents/messages/orderGroupRefundRequested'
+      - $ref: '#/channels/domainEvents/messages/returnDecided'
+      - $ref: '#/channels/domainEvents/messages/returnRequested'
+      - $ref: '#/channels/domainEvents/messages/storeCreditEarned'
+      - $ref: '#/channels/domainEvents/messages/storeCreditRedeemed'
+      - $ref: '#/channels/domainEvents/messages/storeCreditRestored'
+      - $ref: '#/channels/domainEvents/messages/storeCreditReversed'
+      - $ref: '#/channels/domainEvents/messages/storeCreditExpired'
+      - $ref: '#/channels/domainEvents/messages/storeRewardsConfigured'
+      - $ref: '#/channels/domainEvents/messages/stockAdjusted'
+      - $ref: '#/channels/domainEvents/messages/stockFulfilled'
+      - $ref: '#/channels/domainEvents/messages/reservationCreated'
+      - $ref: '#/channels/domainEvents/messages/reservationReleased'
+      - $ref: '#/channels/domainEvents/messages/reservationExpired'
+      - $ref: '#/channels/domainEvents/messages/transferCreated'
+      - $ref: '#/channels/domainEvents/messages/transferReceived'
+      - $ref: '#/channels/domainEvents/messages/transferCancelled'
+      - $ref: '#/channels/domainEvents/messages/reorderLevelChanged'
+
+  publishMediaEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/mediaUploaded'
+      - $ref: '#/channels/domainEvents/messages/mediaProcessed'
+      - $ref: '#/channels/domainEvents/messages/mediaRejected'
+      - $ref: '#/channels/domainEvents/messages/mediaHeld'
+      - $ref: '#/channels/domainEvents/messages/mediaDeleted'
 
 components:
   messages:
@@ -522,6 +750,104 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/live.viewerCountChanged.v1.json' } }
+    liveCommentCreated:
+      name: liveComment.created
+      headers: { type: object, properties: { eventType: { const: liveComment.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveComment.created.v1.json' } }
+    liveCommentDeleted:
+      name: liveComment.deleted
+      headers: { type: object, properties: { eventType: { const: liveComment.deleted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveComment.deleted.v1.json' } }
+    liveCommentPinned:
+      name: liveComment.pinned
+      headers: { type: object, properties: { eventType: { const: liveComment.pinned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveComment.pinned.v1.json' } }
+    liveCommentUnpinned:
+      name: liveComment.unpinned
+      headers: { type: object, properties: { eventType: { const: liveComment.unpinned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveComment.unpinned.v1.json' } }
+    liveRoomSettingsUpdated:
+      name: liveRoomSettings.updated
+      headers: { type: object, properties: { eventType: { const: liveRoomSettings.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveRoomSettings.updated.v1.json' } }
+    liveViewerMuted:
+      name: liveViewer.muted
+      headers: { type: object, properties: { eventType: { const: liveViewer.muted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveViewer.muted.v1.json' } }
+    liveViewerUnmuted:
+      name: liveViewer.unmuted
+      headers: { type: object, properties: { eventType: { const: liveViewer.unmuted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveViewer.unmuted.v1.json' } }
+    liveViewerBanned:
+      name: liveViewer.banned
+      headers: { type: object, properties: { eventType: { const: liveViewer.banned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveViewer.banned.v1.json' } }
+    liveViewerUnbanned:
+      name: liveViewer.unbanned
+      headers: { type: object, properties: { eventType: { const: liveViewer.unbanned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveViewer.unbanned.v1.json' } }
+    overlayScenePublished:
+      name: overlayScene.published
+      headers: { type: object, properties: { eventType: { const: overlayScene.published } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/overlayScene.published.v1.json' } }
+    overlaySceneUnpublished:
+      name: overlayScene.unpublished
+      headers: { type: object, properties: { eventType: { const: overlayScene.unpublished } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/overlayScene.unpublished.v1.json' } }
+    liveRecordingStarted:
+      name: liveRecording.started
+      headers: { type: object, properties: { eventType: { const: liveRecording.started } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveRecording.started.v1.json' } }
+    liveRecordingCompleted:
+      name: liveRecording.completed
+      headers: { type: object, properties: { eventType: { const: liveRecording.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveRecording.completed.v1.json' } }
+    liveRecordingFailed:
+      name: liveRecording.failed
+      headers: { type: object, properties: { eventType: { const: liveRecording.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveRecording.failed.v1.json' } }
     giftSent:
       name: gift.sent
       headers: { type: object, properties: { eventType: { const: gift.sent } } }
@@ -928,3 +1254,430 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/adBoost.created.v1.json' } }
+    adMediaUploaded:
+      name: adMedia.uploaded
+      headers: { type: object, properties: { eventType: { const: adMedia.uploaded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adMedia.uploaded.v1.json' } }
+    adReportReady:
+      name: adReport.ready
+      headers: { type: object, properties: { eventType: { const: adReport.ready } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adReport.ready.v1.json' } }
+    followCreated:
+      name: follow.created
+      headers: { type: object, properties: { eventType: { const: follow.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/follow.created.v1.json' } }
+    followRequestCreated:
+      name: followRequest.created
+      headers: { type: object, properties: { eventType: { const: followRequest.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/followRequest.created.v1.json' } }
+    followRejected:
+      name: follow.rejected
+      headers: { type: object, properties: { eventType: { const: follow.rejected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/follow.rejected.v1.json' } }
+    blockCreated:
+      name: block.created
+      headers: { type: object, properties: { eventType: { const: block.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/block.created.v1.json' } }
+    postCreated:
+      name: post.created
+      headers: { type: object, properties: { eventType: { const: post.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.created.v1.json' } }
+    mentionCreated:
+      name: mention.created
+      headers: { type: object, properties: { eventType: { const: mention.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/mention.created.v1.json' } }
+    commentCreated:
+      name: comment.created
+      headers: { type: object, properties: { eventType: { const: comment.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/comment.created.v1.json' } }
+    videoReplyCreated:
+      name: videoReply.created
+      headers: { type: object, properties: { eventType: { const: videoReply.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/videoReply.created.v1.json' } }
+    messageRequestReceived:
+      name: messageRequest.received
+      headers: { type: object, properties: { eventType: { const: messageRequest.received } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/messageRequest.received.v1.json' } }
+    messageSent:
+      name: message.sent
+      headers: { type: object, properties: { eventType: { const: message.sent } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/message.sent.v1.json' } }
+    messageCreated:
+      name: message.created
+      headers: { type: object, properties: { eventType: { const: message.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/message.created.v1.json' } }
+    reportCreated:
+      name: report.created
+      headers: { type: object, properties: { eventType: { const: report.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/report.created.v1.json' } }
+    productViewed:
+      name: product.viewed
+      headers: { type: object, properties: { eventType: { const: product.viewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.viewed.v1.json' } }
+    productClicked:
+      name: product.clicked
+      headers: { type: object, properties: { eventType: { const: product.clicked } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.clicked.v1.json' } }
+    productAddedToCart:
+      name: product.addedToCart
+      headers: { type: object, properties: { eventType: { const: product.addedToCart } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.addedToCart.v1.json' } }
+    productRemovedFromCart:
+      name: product.removedFromCart
+      headers: { type: object, properties: { eventType: { const: product.removedFromCart } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.removedFromCart.v1.json' } }
+    productPurchased:
+      name: product.purchased
+      headers: { type: object, properties: { eventType: { const: product.purchased } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.purchased.v1.json' } }
+    searchPerformed:
+      name: search.performed
+      headers: { type: object, properties: { eventType: { const: search.performed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/search.performed.v1.json' } }
+    sellerViewed:
+      name: seller.viewed
+      headers: { type: object, properties: { eventType: { const: seller.viewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/seller.viewed.v1.json' } }
+    categoryViewed:
+      name: category.viewed
+      headers: { type: object, properties: { eventType: { const: category.viewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/category.viewed.v1.json' } }
+    productCreated:
+      name: product.created
+      headers: { type: object, properties: { eventType: { const: product.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.created.v1.json' } }
+    productUpdated:
+      name: product.updated
+      headers: { type: object, properties: { eventType: { const: product.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.updated.v1.json' } }
+    productArchived:
+      name: product.archived
+      headers: { type: object, properties: { eventType: { const: product.archived } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.archived.v1.json' } }
+    productPublished:
+      name: product.published
+      headers: { type: object, properties: { eventType: { const: product.published } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.published.v1.json' } }
+    productUnpublished:
+      name: product.unpublished
+      headers: { type: object, properties: { eventType: { const: product.unpublished } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.unpublished.v1.json' } }
+    productBulkUpdated:
+      name: product.bulkUpdated
+      headers: { type: object, properties: { eventType: { const: product.bulkUpdated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/product.bulkUpdated.v1.json' } }
+    storeCreated:
+      name: store.created
+      headers: { type: object, properties: { eventType: { const: store.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/store.created.v1.json' } }
+    storeUpdated:
+      name: store.updated
+      headers: { type: object, properties: { eventType: { const: store.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/store.updated.v1.json' } }
+    reviewCreated:
+      name: review.created
+      headers: { type: object, properties: { eventType: { const: review.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/review.created.v1.json' } }
+    reviewReplied:
+      name: review.replied
+      headers: { type: object, properties: { eventType: { const: review.replied } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/review.replied.v1.json' } }
+    reviewReported:
+      name: review.reported
+      headers: { type: object, properties: { eventType: { const: review.reported } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/review.reported.v1.json' } }
+    orderCreated:
+      name: order.created
+      headers: { type: object, properties: { eventType: { const: order.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/order.created.v1.json' } }
+    orderCancelled:
+      name: order.cancelled
+      headers: { type: object, properties: { eventType: { const: order.cancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/order.cancelled.v1.json' } }
+    orderGroupCreated:
+      name: orderGroup.created
+      headers: { type: object, properties: { eventType: { const: orderGroup.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.created.v1.json' } }
+    orderGroupPaid:
+      name: orderGroup.paid
+      headers: { type: object, properties: { eventType: { const: orderGroup.paid } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.paid.v1.json' } }
+    orderGroupStatusChanged:
+      name: orderGroup.statusChanged
+      headers: { type: object, properties: { eventType: { const: orderGroup.statusChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.statusChanged.v1.json' } }
+    orderGroupRefundRequested:
+      name: orderGroup.refundRequested
+      headers: { type: object, properties: { eventType: { const: orderGroup.refundRequested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.refundRequested.v1.json' } }
+    returnRequested:
+      name: return.requested
+      headers: { type: object, properties: { eventType: { const: return.requested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/return.requested.v1.json' } }
+    returnDecided:
+      name: return.decided
+      headers: { type: object, properties: { eventType: { const: return.decided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/return.decided.v1.json' } }
+    storeCreditEarned:
+      name: storeCredit.earned
+      headers: { type: object, properties: { eventType: { const: storeCredit.earned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeCredit.earned.v1.json' } }
+    storeCreditRedeemed:
+      name: storeCredit.redeemed
+      headers: { type: object, properties: { eventType: { const: storeCredit.redeemed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeCredit.redeemed.v1.json' } }
+    storeCreditRestored:
+      name: storeCredit.restored
+      headers: { type: object, properties: { eventType: { const: storeCredit.restored } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeCredit.restored.v1.json' } }
+    storeCreditReversed:
+      name: storeCredit.reversed
+      headers: { type: object, properties: { eventType: { const: storeCredit.reversed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeCredit.reversed.v1.json' } }
+    storeCreditExpired:
+      name: storeCredit.expired
+      headers: { type: object, properties: { eventType: { const: storeCredit.expired } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeCredit.expired.v1.json' } }
+    storeRewardsConfigured:
+      name: storeRewards.configured
+      headers: { type: object, properties: { eventType: { const: storeRewards.configured } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/storeRewards.configured.v1.json' } }
+    stockAdjusted:
+      name: stock.adjusted
+      headers: { type: object, properties: { eventType: { const: stock.adjusted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/stock.adjusted.v1.json' } }
+    stockFulfilled:
+      name: stock.fulfilled
+      headers: { type: object, properties: { eventType: { const: stock.fulfilled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/stock.fulfilled.v1.json' } }
+    reservationCreated:
+      name: reservation.created
+      headers: { type: object, properties: { eventType: { const: reservation.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reservation.created.v1.json' } }
+    reservationReleased:
+      name: reservation.released
+      headers: { type: object, properties: { eventType: { const: reservation.released } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reservation.released.v1.json' } }
+    reservationExpired:
+      name: reservation.expired
+      headers: { type: object, properties: { eventType: { const: reservation.expired } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reservation.expired.v1.json' } }
+    transferCreated:
+      name: transfer.created
+      headers: { type: object, properties: { eventType: { const: transfer.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/transfer.created.v1.json' } }
+    transferReceived:
+      name: transfer.received
+      headers: { type: object, properties: { eventType: { const: transfer.received } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/transfer.received.v1.json' } }
+    transferCancelled:
+      name: transfer.cancelled
+      headers: { type: object, properties: { eventType: { const: transfer.cancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/transfer.cancelled.v1.json' } }
+    reorderLevelChanged:
+      name: reorderLevel.changed
+      headers: { type: object, properties: { eventType: { const: reorderLevel.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reorderLevel.changed.v1.json' } }
+    mediaUploaded:
+      name: media.uploaded
+      headers: { type: object, properties: { eventType: { const: media.uploaded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.uploaded.v1.json' } }
+    mediaProcessed:
+      name: media.processed
+      headers: { type: object, properties: { eventType: { const: media.processed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.processed.v1.json' } }
+    mediaRejected:
+      name: media.rejected
+      headers: { type: object, properties: { eventType: { const: media.rejected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.rejected.v1.json' } }
+    mediaHeld:
+      name: media.held
+      headers: { type: object, properties: { eventType: { const: media.held } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.held.v1.json' } }
+    mediaDeleted:
+      name: media.deleted
+      headers: { type: object, properties: { eventType: { const: media.deleted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.deleted.v1.json' } }
