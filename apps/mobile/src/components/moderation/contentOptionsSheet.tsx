@@ -7,11 +7,12 @@ import { Pressable, Share, StyleSheet, View } from "react-native";
 import { ArrowUpRight24Icon, EyeClosed20Icon, Share24Icon, Warning20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feedFeedback.service";
 import type { ReportTargetType } from "@/services/reports.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ID } from "@/types";
+import { requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
 
 import { ReportSheet, type ReportTarget } from "./reportSheet";
 
@@ -69,8 +70,8 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
   const openReportSheetForTarget = () => {
     if (!target) return;
     const nextReportTarget = { targetType: target.targetType, targetId: target.targetId };
+    requireAuthAfterClosingModal(onClose, () => setReportTarget(nextReportTarget), "report");
     onClose();
-    setReportTarget(nextReportTarget);
   };
 
   const shareLinkToContent = () => {
@@ -119,6 +120,7 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
 }
 
 function OptionRow({ icon, label, onPress, destructive = false }: { icon: ReactNode; label: string; onPress: () => void; destructive?: boolean }) {
+  const { colors } = useTheme();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.optionRow}>
       <View style={styles.optionIcon}>{icon}</View>

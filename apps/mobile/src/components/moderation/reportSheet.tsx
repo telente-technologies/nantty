@@ -6,7 +6,7 @@ import { Check16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { isCopyrightClaimTargetType } from "@/services/copyrightClaims.service";
@@ -35,6 +35,8 @@ const describeReportTarget = (targetType: ReportTargetType) =>
   ({ post: "post", clip: "clip", comment: "comment", live: "live", user: "account", product: "product", message: "message", sound: "sound" })[targetType];
 
 export function ReportSheet({ target, onClose }: ReportSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState("");
   const idempotencyKeyForThisReport = useRef(generateIdempotencyKey());
@@ -136,7 +138,7 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
   reasonRow: {
     minHeight: 44,
@@ -158,4 +160,4 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(14),
     color: colors.text,
   },
-});
+}));

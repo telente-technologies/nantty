@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Check16Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import {
@@ -25,6 +25,8 @@ const describeClaimedContent = (targetType: CopyrightClaimTargetType, targetId: 
   `${{ clip: "Clip", sound: "Sound", post: "Post", live: "Live video" }[targetType]} · ${targetId}`;
 
 export function CopyrightClaimForm({ targetType, targetId, onSubmitted }: CopyrightClaimFormProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [workDescription, setWorkDescription] = useState("");
   const [ownershipStatement, setOwnershipStatement] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -115,6 +117,8 @@ export function CopyrightClaimForm({ targetType, targetId, onSubmitted }: Copyri
 }
 
 function LabelledTextArea(props: { label: string; placeholder: string; value: string; onChangeText: (text: string) => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.field}>
       <Text size={13} weight={500} lineHeight={16.9}>
@@ -135,7 +139,7 @@ function LabelledTextArea(props: { label: string; placeholder: string; value: st
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 12 },
   field: { gap: 6 },
   input: {
@@ -163,6 +167,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
+  checkboxChecked: { backgroundColor: colors.primarySolid, borderColor: colors.primary },
   declarationText: { flex: 1 },
-});
+}));
