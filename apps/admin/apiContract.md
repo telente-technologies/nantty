@@ -893,7 +893,7 @@ Errors: `403 STEP_UP_REQUIRED`, `409 CASE_ALREADY_DECIDED`, `409 NOT_SUSPENDED`,
 
 ## Accounts and lifetime checkmarks
 
-`POST /accounts` is **superadmin only**. Grants need `verification:review`; revoke needs `verification:revoke`. All writes need step-up. Profile types: `PERSONAL|CREATOR|BUSINESS|BRAND|GOVERNMENT`. A grant must match the profile type: Blue for personal/creator, Gold for business/brand, Black for government; anything else is `400 VALIDATION_FAILED` on `color`. Black can only be granted or revoked by a superadmin. Grants bypass billing but never the profile-type rule.
+`POST /accounts` is **superadmin only**. Grants need `verification:review`; revoke needs `verification:revoke`. All writes need step-up. Profile types: `PERSONAL|BUSINESS|BRAND|GOVERNMENT` (a creator account is a personal account with an approved Creator Program status, not a profile type). A grant must match the profile type: Blue for personal (incl. creators), Gold for business/brand, Black for government; anything else is `400 VALIDATION_FAILED` on `color`. Black can only be granted or revoked by a superadmin. Grants bypass billing but never the profile-type rule.
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
