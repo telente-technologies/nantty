@@ -35,6 +35,8 @@ const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
 
 export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const requestedStartClipId = route.params?.startId;
+  const requestedCommentId = route.params?.commentId;
+  const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
@@ -78,8 +80,12 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     }
     setActiveClipIndex(requestedClipIndex);
     setClipIndexToOpenListAt(requestedClipIndex);
-    navigation.setParams({ startId: undefined });
-  }, [requestedStartClipId, pageHeight, clips, tab, clipsFeed, navigation]);
+    if (requestedCommentId) {
+      setHighlightedCommentId(requestedCommentId);
+      setCommentsForClipId(requestedStartClipId);
+    }
+    navigation.setParams({ startId: undefined, commentId: undefined });
+  }, [requestedStartClipId, requestedCommentId, pageHeight, clips, tab, clipsFeed, navigation]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => setIsAppInForeground(state === "active"));
@@ -221,7 +227,10 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
         />
       </View>
       {showGestureTips && clipsFeed.isSuccess ? <GestureTipsOverlay onDismiss={dismissGestureTips} /> : null}
-      <ClipCommentsSheet postId={commentsForClipId} clip={clips.find((clip) => clip.id === commentsForClipId) ?? null} myAvatarUrl={myAvatarUrl} onClose={() => setCommentsForClipId(null)} />
+      <ClipCommentsSheet postId={commentsForClipId} clip={clips.find((clip) => clip.id === commentsForClipId) ?? null} highlightCommentId={highlightedCommentId} myAvatarUrl={myAvatarUrl} onClose={() => {
+        setCommentsForClipId(null);
+        setHighlightedCommentId(null);
+      }} />
     </View>
   );
 }
