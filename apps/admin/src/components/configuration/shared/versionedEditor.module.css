@@ -79,11 +79,11 @@
 }
 
 .historyItem:hover {
-  border-color: var(--blue-200);
+  border-color: var(--brand-line);
 }
 
 .historyItemSelected {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--color-brand-tint);
 }
 
