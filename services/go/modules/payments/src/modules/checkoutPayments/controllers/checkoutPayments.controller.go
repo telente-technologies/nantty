@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/modules/checkoutPayments/commands/initializeOrderPayment"
-	"zudomart/modules/payments/src/modules/checkoutPayments/commands/verifyOrderPayment"
+	initializeorderpayment "zudomart/modules/payments/src/modules/checkoutPayments/commands/initializeOrderPayment"
+	verifyorderpayment "zudomart/modules/payments/src/modules/checkoutPayments/commands/verifyOrderPayment"
 	"zudomart/modules/payments/src/modules/checkoutPayments/validators"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/platform/httpserver"
