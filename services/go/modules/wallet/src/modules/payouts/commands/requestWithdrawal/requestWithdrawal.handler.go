@@ -15,6 +15,9 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.WithdrawalDto, bool, error) {
 	application := handler.Application
+	if err := application.Container.Payments.RequirePayoutAccountVerified(ctx, command.UserId); err != nil {
+		return dtos.WithdrawalDto{}, false, err
+	}
 	providerAvailable, err := application.Container.Payments.ReadProviderAvailableBalanceForUser(ctx, command.UserId, command.Currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, false, err

@@ -3,15 +3,13 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
 
+	"zudomart/modules/ledger/src/databases"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/modules/wallet/src/container"
 )
 
@@ -40,43 +38,40 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				continue
 			}
 			userId := strings.TrimSuffix(strings.TrimPrefix(balance.Code, "creator:"), ledgermodels.CreatorEarningsPayableAccountCodeSuffix())
-			status, err := transfers.Container.Payments.TransferPlatformFundsToConnectedAccount(ctx, paymentmodels.PlatformTransferInstruction{
-				Purpose: paymentconstants.PurposeCreatorEarnings, SubjectId: userId, BeneficiaryUserId: userId,
-				Reference: fmt.Sprintf("creator-earnings:%s:%s:%s", runId, userId, currency), AmountMinor: balance.BalanceMinor, Currency: currency,
-				TransferGroup: "creator-run:" + runId, Description: "Creator earnings",
-			})
-			switch {
-			case errors.Is(err, paymentservices.ErrConnectedAccountMissing):
+			if transfers.Container.Payments.RequirePayoutAccountVerified(ctx, userId) != nil {
 				report.Skipped++
-			case err != nil:
-				transfers.Container.Resources.Logger.WarnContext(ctx, "creator earnings transfer failed", slog.String("userId", userId), slog.Any("error", err))
-				report.Failed++
-			case status.Status == "succeeded":
-				report.Transferred++
+				continue
 			}
+			if err := transfers.moveEarningsToWithdrawable(ctx, userId, currency, balance.BalanceMinor, fmt.Sprintf("creator-earnings-%s-%s-%s", runId, userId, currency)); err != nil {
+				transfers.Container.Resources.Logger.WarnContext(ctx, "creator earnings move failed", slog.String("userId", userId), slog.Any("error", err))
+				report.Failed++
+				continue
+			}
+			report.Transferred++
 		}
 	}
 	return report
 }
 
-func (transfers CreatorEarningsTransfers) HandleTransferSucceeded(ctx context.Context, transaction *sql.Tx, transfer paymentmodels.FinishedTransfer) error {
-	userId := transfer.BeneficiaryUserId
-	_, err := transfers.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: "creator-earnings-transferred:" + transfer.Reference, Kind: "creatorEarnings.transferred", ExternalReference: transfer.Reference,
-		Description: "Creator earnings moved to the creator's provider account",
-		Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.CreatorEarningsPayableAccount(userId, transfer.Currency), Direction: ledgermodels.Debit, AmountMinor: transfer.AmountMinor},
-			{Account: ledgermodels.PlatformProviderBalanceAccount(transfer.Provider, transfer.Currency), Direction: ledgermodels.Credit, AmountMinor: transfer.AmountMinor},
-			{Account: ledgermodels.SellerProviderHeldFundsAccount(userId, transfer.Currency), Direction: ledgermodels.Debit, AmountMinor: transfer.AmountMinor},
-			{Account: ledgermodels.SellerAvailableAccount(userId, transfer.Currency), Direction: ledgermodels.Credit, AmountMinor: transfer.AmountMinor},
-		},
+func (transfers CreatorEarningsTransfers) moveEarningsToWithdrawable(ctx context.Context, userId, currency string, amountMinor int64, reference string) error {
+	return databases.RunInMoneyTransaction(ctx, transfers.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		if _, err := transfers.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+			Reference: reference, Kind: "creatorEarnings.madeWithdrawable", Description: "Creator earnings ready to pay out",
+			Lines: []ledgermodels.JournalLineRequest{
+				{Account: ledgermodels.CreatorEarningsPayableAccount(userId, currency), Direction: ledgermodels.Debit, AmountMinor: amountMinor},
+				{Account: ledgermodels.SellerAvailableAccount(userId, currency), Direction: ledgermodels.Credit, AmountMinor: amountMinor},
+			},
+		}); err != nil {
+			return err
+		}
+		return transfers.Container.Outbox.EnqueueInTransaction(ctx, transaction, "creatorEarnings.transferred", userId, transfers.Container.Now().UTC(), map[string]any{
+			"userId": userId, "reference": reference, "amount": map[string]any{"amountMinor": amountMinor, "currency": currency},
+		})
 	})
-	if err != nil {
-		return err
-	}
-	return transfers.Container.Outbox.EnqueueInTransaction(ctx, transaction, "creatorEarnings.transferred", userId, transfer.FinishedAt, map[string]any{
-		"userId": userId, "reference": transfer.Reference, "amount": map[string]any{"amountMinor": transfer.AmountMinor, "currency": transfer.Currency},
-	})
+}
+
+func (transfers CreatorEarningsTransfers) HandleTransferSucceeded(context.Context, *sql.Tx, paymentmodels.FinishedTransfer) error {
+	return nil
 }
 
 func (transfers CreatorEarningsTransfers) HandleTransferFailed(context.Context, *sql.Tx, paymentmodels.FinishedTransfer) error {

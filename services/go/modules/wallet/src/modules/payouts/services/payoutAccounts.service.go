@@ -68,6 +68,9 @@ func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, cou
 	if err != nil {
 		return dtos.PayoutAccountDto{}, err
 	}
+	if err := accounts.Container.Payments.RequestPayoutAccountWhenMissing(ctx, userId); err != nil {
+		accounts.Container.Resources.Logger.WarnContext(ctx, "requesting the payout account failed", "error", err)
+	}
 	return ConvertPayoutAccount(created), nil
 }
 

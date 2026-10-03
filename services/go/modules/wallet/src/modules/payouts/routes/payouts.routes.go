@@ -16,6 +16,7 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
 	requireStaffRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReadWithdrawals, false)
 	requireStaffProcess := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionProcessWithdrawals, true)
+	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/deletion-blockers", controllers.InternalAccountsController{Application: application}.DeletionBlockers)
 	mux.Handle("GET /api/v1/wallets/me", requireUser(http.HandlerFunc(wallet.GetWalletSummary)))
 	mux.Handle("GET /api/v1/wallets/me/transactions", requireUser(http.HandlerFunc(wallet.ListWalletTransactions)))
 	mux.Handle("GET /api/v1/wallets/me/payout-accounts", requireUser(http.HandlerFunc(wallet.ListPayoutAccounts)))
@@ -28,4 +29,13 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	mux.Handle("GET /api/v1/admin/withdrawals", requireStaffRead(http.HandlerFunc(withdrawals.ListWithdrawalsForStaff)))
 	mux.Handle("POST /api/v1/admin/withdrawals/{withdrawalId}/review", requireStaffProcess(http.HandlerFunc(withdrawals.ReviewWithdrawal)))
 	mux.Handle("POST /api/v1/admin/payouts/run", requireStaffProcess(http.HandlerFunc(withdrawals.RunPayouts)))
+}
+
+func MountSellerReserveRoutes(mux *http.ServeMux, controller controllers.SellerReservesController) {
+	resources := controller.Application.Container.Resources
+	requireRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReadWithdrawals, false)
+	requireWrite := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionProcessWithdrawals, true)
+	mux.Handle("GET /api/v1/admin/wallet/seller-reserves", requireRead(http.HandlerFunc(controller.List)))
+	mux.Handle("PUT /api/v1/admin/wallet/seller-reserves/{sellerUserId}", requireWrite(http.HandlerFunc(controller.Flag)))
+	mux.Handle("DELETE /api/v1/admin/wallet/seller-reserves/{sellerUserId}", requireWrite(http.HandlerFunc(controller.Release)))
 }

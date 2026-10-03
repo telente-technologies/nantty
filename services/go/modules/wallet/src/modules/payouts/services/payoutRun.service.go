@@ -68,7 +68,7 @@ func (withdrawals Withdrawals) claimNextQueuedWithdrawal(ctx context.Context) (*
 	err := databases.RunInMoneyTransaction(ctx, withdrawals.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		claimed = nil
 		next, err := withdrawals.Container.Client(transaction).Withdrawal.Query().Where(withdrawal.StatusEQ(withdrawal.StatusQueued)).
-			Order(ent.Asc(withdrawal.FieldCreatedAt)).Limit(1).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).Only(ctx)
+			Order(ent.Asc(withdrawal.FieldCreatedAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 		if ent.IsNotFound(err) {
 			return nil
 		}
@@ -116,7 +116,7 @@ func (withdrawals Withdrawals) HandleTransferSucceeded(ctx context.Context, tran
 	}
 	lines := []ledgermodels.JournalLineRequest{
 		{Account: ledgermodels.SellerReservedPayoutAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
-		{Account: ledgermodels.SellerProviderHeldFundsAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
+		{Account: ledgermodels.PlatformProviderBalanceAccount(transfer.Provider, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
 	}
 	if _, err := withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "withdrawal-paid:" + locked.ID.String(), Kind: "withdrawal.paid", ExternalReference: locked.Reference,
