@@ -39,6 +39,7 @@ var (
 		{Name: "coins", Type: field.TypeInt64},
 		{Name: "bonus_coins", Type: field.TypeInt64, Default: 0},
 		{Name: "purchase_channel", Type: field.TypeEnum, Enums: []string{"web_checkout", "store_iap"}},
+		{Name: "client_platform", Type: field.TypeEnum, Enums: []string{"web", "ios", "android"}, Default: "web"},
 		{Name: "prices", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "store_product_id", Type: field.TypeString, Size: 200, Default: ""},
 		{Name: "active", Type: field.TypeBool, Default: true},
@@ -54,12 +55,17 @@ var (
 			{
 				Name:    "coinpackage_purchase_channel_active_sort_order",
 				Unique:  false,
-				Columns: []*schema.Column{CoinPackagesColumns[4], CoinPackagesColumns[7], CoinPackagesColumns[8]},
+				Columns: []*schema.Column{CoinPackagesColumns[4], CoinPackagesColumns[8], CoinPackagesColumns[9]},
+			},
+			{
+				Name:    "coinpackage_client_platform_active_sort_order",
+				Unique:  false,
+				Columns: []*schema.Column{CoinPackagesColumns[5], CoinPackagesColumns[8], CoinPackagesColumns[9]},
 			},
 			{
 				Name:    "coinpackage_store_product_id",
 				Unique:  false,
-				Columns: []*schema.Column{CoinPackagesColumns[6]},
+				Columns: []*schema.Column{CoinPackagesColumns[7]},
 			},
 		},
 	}
@@ -271,14 +277,32 @@ var (
 				Columns: []*schema.Column{WithdrawalsColumns[4]},
 			},
 			{
-				Name:    "withdrawal_user_id_created_at",
+				Name:    "withdrawal_user_id_id",
 				Unique:  false,
-				Columns: []*schema.Column{WithdrawalsColumns[2], WithdrawalsColumns[1]},
+				Columns: []*schema.Column{WithdrawalsColumns[2], WithdrawalsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						WithdrawalsColumns[0].Name: true,
+					},
+				},
 			},
 			{
-				Name:    "withdrawal_status_created_at",
+				Name:    "withdrawal_status_id",
 				Unique:  false,
-				Columns: []*schema.Column{WithdrawalsColumns[11], WithdrawalsColumns[1]},
+				Columns: []*schema.Column{WithdrawalsColumns[11], WithdrawalsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						WithdrawalsColumns[0].Name: true,
+					},
+				},
+			},
+			{
+				Name:    "withdrawal_queued_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WithdrawalsColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'queued'",
+				},
 			},
 		},
 	}
