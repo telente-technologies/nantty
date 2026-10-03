@@ -11,6 +11,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { deleteAllLocallySavedMessageHistory } from "@/cache/messageSync.util";
@@ -96,6 +97,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <SafeAreaProvider>
+        <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
         <DeviceFrame>
           <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
             <StatusBarFollowingTheme />
@@ -104,6 +106,7 @@ export default function App() {
             <OfflineIndicator />
           </PersistQueryClientProvider>
         </DeviceFrame>
+        </KeyboardProvider>
       </SafeAreaProvider>
     </ThemeProvider>
   );

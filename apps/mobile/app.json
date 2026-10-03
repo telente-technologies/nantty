@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.zudomart.app",
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptiveIconForeground.png",
         "backgroundColor": "#2043F5"
@@ -44,7 +45,12 @@
       "expo-audio",
       "expo-apple-authentication",
       "expo-web-browser",
-      ["expo-local-authentication", { "faceIDPermission": "Allow Zudomart to unlock your chats with Face ID." }],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Zudomart to unlock your chats with Face ID."
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -53,7 +59,15 @@
           "resizeMode": "contain",
           "backgroundColor": "#F7F8FE"
         }
-      ]
+      ],
+      "expo-sharing",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Zudomart to use your location when you choose to share it in a chat."
+        }
+      ],
+      "expo-document-picker"
     ],
     "owner": "oyinlola141"
   }
