@@ -97,7 +97,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)
 	handler := middlewares.AttachClientDetailsToContext(routes)
-	for _, prefix := range []string{"/api/v1/admin/", "/api/v1/platform-config/", "/api/v1/internal/platform-config/"} {
+	for _, prefix := range []string{"/api/v1/admin/", "/api/v1/platform-config/", "/api/v1/internal/platform-config/", "/api/v1/internal/audit/"} {
 		mux.Handle(prefix, handler)
 	}
 }
