@@ -1,60 +1,26 @@
 package interfaces
 
-import (
-	"context"
-	"errors"
-)
+import "context"
 
-type ProviderCustomerRequest struct {
-	Email          string
-	Name           string
-	IdempotencyKey string
-}
-
-type SaveCardCheckoutRequest struct {
-	ProviderCustomerId string
+type AuthorizationChargeRequest struct {
+	CustomerEmail      string
+	AuthorizationCode  string
 	Reference          string
-	SuccessUrl         string
-	CancelUrl          string
-	IdempotencyKey     string
+	AmountMinor        int64
+	Currency           string
+	SettlementAccount  string
+	SubaccountBearsFee bool
 	Metadata           map[string]string
 }
 
-type SavedCardChargeRequest struct {
-	ProviderCustomerId string
-	PaymentMethodId    string
-	ConnectedAccountId string
-	Reference          string
-	Description        string
-	AmountMinor        int64
-	Currency           string
-	IdempotencyKey     string
-}
-
-type SavedCardChargeResult struct {
-	ProviderChargeId       string
-	Outcome                ProviderOutcome
-	RequiresHostedCheckout bool
-	FailureReason          string
-}
-
-type SavedPaymentMethod struct {
-	PaymentMethodId     string
-	ProviderCustomerId  string
-	Brand               string
-	Last4               string
-	ExpiryMonth         int
-	ExpiryYear          int
-	ProviderFingerprint string
-	IsDefault           bool
+type AuthorizationChargeResult struct {
+	ProviderChargeId string
+	Outcome          ProviderOutcome
+	Paused           bool
+	AuthorizationUrl string
+	FailureReason    string
 }
 
 type SavedCardProvider interface {
-	CreateCustomer(ctx context.Context, request ProviderCustomerRequest) (string, error)
-	CreateSaveCardCheckout(ctx context.Context, request SaveCardCheckoutRequest) (ChargeSession, error)
-	ChargeSavedCard(ctx context.Context, request SavedCardChargeRequest) (SavedCardChargeResult, error)
+	ChargeAuthorization(ctx context.Context, request AuthorizationChargeRequest) (AuthorizationChargeResult, error)
 }
-
-var (
-	ErrSavedCardNotForCustomer = errors.New("the saved card does not belong to this customer")
-)

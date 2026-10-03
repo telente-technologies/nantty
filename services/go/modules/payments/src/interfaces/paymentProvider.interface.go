@@ -17,15 +17,16 @@ const (
 
 type ChargeRequest struct {
 	Reference          string
-	IdempotencyKey     string
 	AmountMinor        int64
 	Currency           string
-	ConnectedAccountId string
-	PlatformFeeMinor   int64
 	CustomerEmail      string
-	CustomerName       string
+	CustomerLabel      string
 	SuccessUrl         string
-	CancelUrl          string
+	Channels           []string
+	SettlementAccount  string
+	PlatformShareMinor int64
+	SubaccountBearsFee bool
+	PlanCode           string
 	ExpiresInMinutes   int
 	Metadata           map[string]string
 }
@@ -37,37 +38,50 @@ type ChargeSession struct {
 }
 
 type ChargeLookup struct {
-	Reference          string
-	ProviderCheckoutId string
-	ConnectedAccountId string
+	Reference string
+}
+
+type CardAuthorization struct {
+	AuthorizationCode string
+	Signature         string
+	Brand             string
+	Last4             string
+	ExpiryMonth       int
+	ExpiryYear        int
+	Reusable          bool
+	Channel           string
 }
 
 type ChargeVerification struct {
-	Reference        string
-	Outcome          ProviderOutcome
-	AmountMinor      int64
-	Currency         string
-	ProviderChargeId string
-	ProviderFeeMinor int64
-	PlatformFeeMinor int64
-	FailureReason    string
+	Reference          string
+	Outcome            ProviderOutcome
+	AmountMinor        int64
+	Currency           string
+	ProviderChargeId   string
+	ProviderFeeMinor   int64
+	SettlementAccount  string
+	ProviderCustomerId string
+	PlanCode           string
+	Channel            string
+	FailureReason      string
+	Authorization      *CardAuthorization
 }
 
 type RefundRequest struct {
-	ProviderChargeId   string
-	ConnectedAccountId string
-	RefundReference    string
-	IdempotencyKey     string
-	AmountMinor        int64
-	Currency           string
-	FullRefund         bool
-	Reason             string
+	ProviderChargeId string
+	ChargeReference  string
+	RefundReference  string
+	AmountMinor      int64
+	Currency         string
+	FullRefund       bool
+	Reason           string
 }
 
 type RefundResult struct {
-	ProviderRefundId string
-	Outcome          ProviderOutcome
-	FailureReason    string
+	ProviderRefundId    string
+	Outcome             ProviderOutcome
+	NeedsCustomerDetail bool
+	FailureReason       string
 }
 
 type Bank struct {
@@ -82,14 +96,16 @@ type PaymentProvider interface {
 	InitializeCharge(ctx context.Context, request ChargeRequest) (ChargeSession, error)
 	VerifyCharge(ctx context.Context, lookup ChargeLookup) (ChargeVerification, error)
 	RefundCharge(ctx context.Context, request RefundRequest) (RefundResult, error)
+	RetryRefundWithCustomerBankAccount(ctx context.Context, providerRefundId string, account PayeeBankAccount) error
 	ResolveBankAccountName(ctx context.Context, bankCode, accountNumber string) (string, error)
 	ListBanks(ctx context.Context, countryCode string) ([]Bank, error)
 	VerifyWebhookSignatureAndParse(rawBody []byte, headers http.Header) (WebhookNotification, error)
+	ParseVerifiedWebhookPayload(rawBody []byte) (WebhookNotification, error)
 }
 
-type ConnectProvider interface {
+type FullPaymentProvider interface {
 	PaymentProvider
-	ConnectedAccountProvider
+	PayeeProvider
 	MoneyMovementProvider
 	DisputeProvider
 	SubscriptionProvider
@@ -147,14 +163,14 @@ type StoreReceiptVerifier interface {
 
 var (
 	ErrInvalidWebhookSignature        = errors.New("invalid webhook signature")
-	ErrStaleWebhookTimestamp          = errors.New("webhook timestamp outside the allowed tolerance")
 	ErrMalformedWebhookPayload        = errors.New("malformed webhook payload")
 	ErrProviderUnavailable            = errors.New("payment provider unavailable")
 	ErrProviderNotConfigured          = errors.New("payment provider is not configured")
 	ErrCurrencyNotSupported           = errors.New("currency not supported by provider")
 	ErrBankAccountNotFound            = errors.New("bank account not found")
 	ErrInsufficientProviderBalance    = errors.New("provider balance is too low for this movement")
-	ErrConnectedAccountInDebt         = errors.New("connected account has a negative provider balance")
+	ErrTransferNeedsOtp               = errors.New("the provider asked for an OTP to finalize the transfer")
 	ErrStoreVerificationNotConfigured = errors.New("store receipt verification is not configured")
 	ErrStoreReceiptInvalid            = errors.New("store receipt could not be verified")
+	ErrSavedCardNotForCustomer        = errors.New("the saved card cannot be charged for this account")
 )
