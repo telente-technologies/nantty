@@ -1,0 +1,224 @@
+data "aws_caller_identity" "current" {}
+
+locals {
+  api_domain     = "api.${var.app_domain}"
+  media_domain   = "media.${var.app_domain}"
+  livekit_domain = "livekit.${var.app_domain}"
+  tags_prefix    = "zudomart-${var.environment}"
+  service_names  = keys(local.services)
+}
+
+module "kms" {
+  source      = "../kms"
+  environment = var.environment
+}
+
+module "kms_dr" {
+  source      = "../kms"
+  count       = var.enable_dr ? 1 : 0
+  environment = "${var.environment}-dr"
+  providers   = { aws = aws.dr }
+}
+
+module "storage" {
+  source                       = "../storage"
+  environment                  = var.environment
+  media_domain                 = local.media_domain
+  media_certificate_arn        = module.dns.media_certificate_arn
+  kyc_kms_key_arn              = module.kms.key_arns["kyc"]
+  kyc_dr_kms_key_arn           = var.enable_dr ? module.kms_dr[0].key_arns["kyc"] : null
+  enable_dr                    = var.enable_dr
+  upload_cors_origins          = values(var.app_origins)
+  media_signing_public_key_pem = var.media_signing_public_key_pem
+  providers                    = { aws = aws, aws.dr = aws.dr }
+}
+
+module "network" {
+  source              = "../network"
+  environment         = var.environment
+  vpc_cidr            = var.vpc_cidr
+  az_count            = var.az_count
+  nat_per_az          = var.nat_per_az
+  flow_log_bucket_arn = "${module.storage.logs_bucket.arn}/vpc-flow"
+}
+
+resource "aws_security_group" "tasks" {
+  name_prefix = "${local.tags_prefix}-tasks-"
+  description = "All ECS tasks; data stores only accept this group"
+  vpc_id      = module.network.vpc_id
+  ingress {
+    description = "Task to task (Erlang distribution, internal HTTP)"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    self        = true
+  }
+  egress {
+    description = "Outbound HTTPS to AWS endpoints, Paystack and push providers"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    description = "Inside the VPC"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+  lifecycle { create_before_destroy = true }
+}
+
+resource "aws_security_group_rule" "tasks_from_public_alb" {
+  type                     = "ingress"
+  description              = "Public ALB to tasks"
+  from_port                = 4000
+  to_port                  = 8109
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = module.edge.alb_security_group_id
+}
+
+resource "aws_security_group_rule" "tasks_from_internal_alb" {
+  type                     = "ingress"
+  description              = "Internal ALB to tasks"
+  from_port                = 4000
+  to_port                  = 8109
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = module.edge.internal_alb_security_group_id
+}
+
+module "dns" {
+  source                         = "../dns"
+  zone_name                      = var.zone_name
+  create_zone                    = var.create_zone
+  api_domain                     = local.api_domain
+  media_domain                   = local.media_domain
+  alb_dns_name                   = module.edge.alb_dns_name
+  alb_zone_id                    = module.edge.alb_zone_id
+  media_distribution_domain_name = module.storage.media_distribution_domain_name
+  media_distribution_zone_id     = module.storage.media_distribution_zone_id
+  providers                      = { aws = aws, aws.us_east_1 = aws.us_east_1 }
+}
+
+module "edge" {
+  source                  = "../edge"
+  environment             = var.environment
+  vpc_id                  = module.network.vpc_id
+  vpc_cidr                = var.vpc_cidr
+  public_subnet_ids       = module.network.public_subnet_ids
+  private_subnet_ids      = module.network.private_subnet_ids
+  certificate_arn         = module.dns.api_certificate_arn
+  logs_bucket_id          = module.storage.logs_bucket.id
+  logs_kms_key_arn        = module.kms.key_arns["logs"]
+  deletion_protection     = var.deletion_protection
+  paystack_webhook_ips    = var.paystack_webhook_ips
+  tasks_security_group_id = aws_security_group.tasks.id
+  internal_service_names  = local.internal_names
+  log_retention_days      = var.log_retention_days
+}
+
+module "ecr" {
+  source              = "../ecr"
+  repositories        = concat(local.service_names, ["migrate"])
+  kms_key_arn         = module.kms.key_arns["ecr"]
+  replicate_to_region = var.enable_dr ? var.dr_region : null
+  pull_account_ids    = var.ecr_pull_account_ids
+}
+
+module "cluster" {
+  source             = "../ecs-cluster"
+  environment        = var.environment
+  vpc_id             = module.network.vpc_id
+  logs_kms_key_arn   = module.kms.key_arns["logs"]
+  log_retention_days = var.log_retention_days
+}
+
+module "aurora" {
+  source                  = "../aurora"
+  environment             = var.environment
+  vpc_id                  = module.network.vpc_id
+  data_subnet_ids         = module.network.data_subnet_ids
+  tasks_security_group_id = aws_security_group.tasks.id
+  data_kms_key_arn        = module.kms.key_arns["data"]
+  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
+  backup_kms_key_arn      = module.kms.key_arns["backup"]
+  dr_backup_kms_key_arn   = var.enable_dr ? module.kms_dr[0].key_arns["backup"] : null
+  engine_version          = var.aurora.engine_version
+  instance_class          = var.aurora.instance_class
+  reader_count            = var.aurora.reader_count
+  backup_retention_days   = var.aurora.backup_retention_days
+  deletion_protection     = var.deletion_protection
+  enable_dr               = var.enable_dr
+  service_database_roles  = concat(values(local.database_roles), ["svc_migrator"])
+  providers               = { aws = aws, aws.dr = aws.dr }
+}
+
+module "valkey" {
+  source                  = "../valkey"
+  environment             = var.environment
+  vpc_id                  = module.network.vpc_id
+  data_subnet_ids         = module.network.data_subnet_ids
+  tasks_security_group_id = aws_security_group.tasks.id
+  data_kms_key_arn        = module.kms.key_arns["data"]
+  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
+  logs_kms_key_arn        = module.kms.key_arns["logs"]
+  node_type               = var.valkey.node_type
+  node_count              = var.valkey.node_count
+}
+
+module "messaging" {
+  source                  = "../messaging"
+  environment             = var.environment
+  vpc_id                  = module.network.vpc_id
+  private_subnet_ids      = module.network.private_subnet_ids
+  tasks_security_group_id = aws_security_group.tasks.id
+  data_kms_key_arn        = module.kms.key_arns["data"]
+  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
+  deployment_mode         = var.mq.deployment_mode
+  instance_type           = var.mq.instance_type
+  service_users           = local.rabbit_users
+}
+
+module "ses" {
+  source               = "../ses"
+  environment          = var.environment
+  region               = var.region
+  mail_domain          = var.mail_domain
+  zone_id              = module.dns.zone_id
+  sns_kms_key_id       = module.kms.key_ids["sns"]
+  dmarc_report_address = var.dmarc_report_address
+}
+
+module "livekit" {
+  source                = "../livekit"
+  environment           = var.environment
+  region                = var.region
+  mode                  = var.livekit_mode
+  vpc_id                = module.network.vpc_id
+  public_subnet_ids     = module.network.public_subnet_ids
+  cluster_arn           = module.cluster.cluster_arn
+  cluster_name          = module.cluster.cluster_name
+  listener_arn          = module.edge.https_listener_arn
+  alb_security_group_id = module.edge.alb_security_group_id
+  host                  = local.livekit_domain
+  secrets_kms_key_arn   = module.kms.key_arns["secrets"]
+  logs_kms_key_arn      = module.kms.key_arns["logs"]
+  valkey_endpoint       = module.valkey.primary_endpoint
+  valkey_auth_token     = module.valkey.auth_token
+  node_count            = var.livekit_node_count
+  log_retention_days    = var.log_retention_days
+}
+
+module "github_oidc" {
+  source              = "../github-oidc"
+  environment         = var.environment
+  repository          = var.github_repository
+  github_environment  = var.environment
+  create_provider     = var.create_github_oidc_provider
+  ecr_repository_arns = module.ecr.repository_arns
+
+  promotion_source_account_id = var.promotion_source_account_id
+}
