@@ -2,6 +2,7 @@ package changeadminpermissions
 
 import (
 	"context"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -29,29 +30,50 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Staf
 	if err != nil {
 		return types.StaffView{}, err
 	}
+	role := services.ParseStaffRole(command.Role)
 	var updated *ent.StaffAccount
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		changer, err := services.RequireActiveSuperadminInTransaction(ctx, tx, command.Actor)
+		acting, err := services.LoadActingStaffInTransaction(ctx, tx, command.Actor)
 		if err != nil {
 			return err
 		}
-		existing, err := tx.StaffAccount.Query().Where(staffaccount.ID(target), staffaccount.RoleEQ(staffaccount.RoleAdmin)).ForUpdate().Only(ctx)
+		if err := acting.RequireStaffManagement(); err != nil {
+			return err
+		}
+		existing, err := tx.StaffAccount.Query().Where(staffaccount.ID(target)).ForUpdate().Only(ctx)
 		if ent.IsNotFound(err) {
 			return adminerrors.StaffNotFound
 		}
 		if err != nil {
 			return err
 		}
-		if updated, err = existing.Update().SetPermissions(permissions).Save(ctx); err != nil {
+		if err := acting.AssertCanActOn(existing, true); err != nil {
+			return err
+		}
+		roleIds, roles, err := services.ResolveRoleIdentifiersInTransaction(ctx, tx, command.RoleIds)
+		if err != nil {
+			return err
+		}
+		previous, err := services.EffectivePermissionsOf(ctx, tx.Client(), existing)
+		if err != nil {
+			return err
+		}
+		next := services.EffectivePermissionsOfDraft(permissions, roles)
+		if err := acting.AssertGrantable(services.PermissionsAddedBy(next, previous)); err != nil {
+			return err
+		}
+		before := map[string]any{"role": existing.Role, "roleIds": existing.RoleIds, "permissions": existing.Permissions}
+		if updated, err = existing.Update().SetRole(role).SetRoleIds(roleIds).SetPermissions(permissions).Save(ctx); err != nil {
 			return err
 		}
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
-			ActorId: changer.ID.String(), ActorRole: string(changer.Role), Action: "staff.permissions_changed", SubjectType: "staff", SubjectId: target.String(),
-			Before: jsonencoding.MustMarshalJson(existing.Permissions), After: jsonencoding.MustMarshalJson(permissions),
+			ActorId: acting.Account.ID.String(), ActorRole: string(acting.Account.Role), Action: "admin.permissions_changed", SubjectType: "staff", SubjectId: target.String(), SubjectLabel: existing.Email,
+			Before: jsonencoding.MustMarshalJson(before), After: jsonencoding.MustMarshalJson(map[string]any{"role": role, "roleIds": roleIds, "permissions": permissions}),
+			Reason: strings.TrimSpace(command.Reason), StepUpVerified: command.Actor.SteppedUp,
 		})
 	})
 	if err != nil {
 		return types.StaffView{}, err
 	}
-	return types.ConvertStaffToView(updated), nil
+	return services.BuildSingleStaffView(ctx, handler.Container, updated)
 }
