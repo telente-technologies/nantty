@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MarkOrderShippedInput } from "@/types/commerce.type";
 
 const COMMON_COURIERS = ["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox", "Red Star Express", "Other"];
@@ -20,6 +20,7 @@ export interface MarkAsShippedSheetProps {
 }
 
 export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose, onSubmit }: MarkAsShippedSheetProps) {
+  const { colors } = useTheme();
   const [selectedCourier, setSelectedCourier] = useState<string | null>(null);
   const [otherCourierName, setOtherCourierName] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");

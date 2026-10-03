@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { colors, palette } from "@/constants/colors.constant";
+import { darkStatusTones, useTheme, type StatusToneName } from "@/theme";
 import type { OrderStatus } from "@/types";
 
 const STATUS_APPEARANCE: Record<OrderStatus, { label: string; text: string; background: string }> = {
@@ -14,10 +15,21 @@ const STATUS_APPEARANCE: Record<OrderStatus, { label: string; text: string; back
   disputed: { label: "Disputed", text: palette.error[500], background: palette.error[50] },
 };
 
+const DARK_TONE_BY_STATUS: Record<OrderStatus, StatusToneName> = {
+  pending: "neutral",
+  paid: "primary",
+  shipped: "caution",
+  delivered: "success",
+  completed: "success",
+  cancelled: "error",
+  disputed: "error",
+};
+
 export const orderStatusLabel = (status: OrderStatus) => STATUS_APPEARANCE[status].label;
 
 export function OrderStatusPill({ status }: { status: OrderStatus }) {
-  const appearance = STATUS_APPEARANCE[status];
+  const { isDark } = useTheme();
+  const appearance = { ...STATUS_APPEARANCE[status], ...(isDark ? darkStatusTones[DARK_TONE_BY_STATUS[status]] : null) };
   return (
     <View style={[styles.pill, { backgroundColor: appearance.background }]}>
       <Text size={13} weight={500} lineHeight={16.9} color={appearance.text}>

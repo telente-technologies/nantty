@@ -2,7 +2,8 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Line, Path } from "react-native-svg";
 
 import { Text } from "@/components/ui/text";
-import { colors, palette } from "@/constants/colors.constant";
+import { palette } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 const CHART_WIDTH = 369;
 const CHART_HEIGHT = 188;
@@ -20,6 +21,8 @@ const roundedTopBarPath = (x: number, width: number, height: number) => {
 };
 
 export function SalesChart({ values }: { values: readonly number[] }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const bucketWidth = PLOT_WIDTH / Math.max(values.length, 1);
   return (
     <View style={styles.card} accessibilityLabel={`Sales chart, ${values.reduce((a, b) => a + b, 0)} orders`}>
@@ -59,8 +62,8 @@ export function SalesChart({ values }: { values: readonly number[] }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { width: CHART_WIDTH, height: CHART_HEIGHT, alignSelf: "center", backgroundColor: colors.white, borderRadius: 12, overflow: "hidden" },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { width: CHART_WIDTH, height: CHART_HEIGHT, alignSelf: "center", backgroundColor: colors.surface, borderRadius: 12, overflow: "hidden" },
   yAxis: { position: "absolute", left: 0, top: 11, width: 20, gap: 24 },
   xAxis: { position: "absolute", left: 15, top: 172, flexDirection: "row", gap: 28 },
-});
+}));

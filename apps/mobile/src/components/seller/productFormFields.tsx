@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface ProductFormValues {
   readonly name: string;
@@ -20,6 +20,7 @@ export interface ProductFormFieldsProps {
 }
 
 export function ProductFormFields({ values, currency, onChange }: ProductFormFieldsProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.fields}>
       <TextField label="Product name" placeholder="e.g. Custom Mechanical Keyboard" value={values.name} onChangeText={(name) => onChange({ name })} maxLength={80} />

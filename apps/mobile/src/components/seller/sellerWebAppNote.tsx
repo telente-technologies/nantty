@@ -4,11 +4,13 @@ import { ArrowUpRight24Icon, BuildingStore20Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { sellerWebAppConfig } from "@/config/sellerWebApp.config";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 const WEB_ONLY_TOOLS = ["Point of sale for your physical shop", "Advanced inventory and variants", "Staff accounts and roles", "Sales and tax reports"];
 
 export function SellerWebAppNote() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.card}>
       <View style={styles.titleRow}>
@@ -34,8 +36,8 @@ export function SellerWebAppNote() {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderRadius: 12, padding: 16, gap: 6 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 6 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 2 },
   button: { marginTop: 8 },
-});
+}));

@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Order } from "@/types";
 
 import { OrderStatusPill } from "./orderStatusPill";
@@ -10,6 +10,8 @@ import { splitMoneyIntoSymbolAndAmount } from "./splitMoney.util";
 
 
 export function StoreOrderRow({ order, onPress }: { order: Order; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const firstItem = order.items[0];
   const total = splitMoneyIntoSymbolAndAmount(order.total);
   return (
@@ -43,10 +45,10 @@ export function StoreOrderRow({ order, onPress }: { order: Order; onPress: () =>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { height: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 24 },
   product: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   thumbnail: { width: 52, height: 52, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
   text: { flex: 1, gap: 8 },
   trailing: { alignItems: "flex-end", gap: 5 },
-});
+}));
