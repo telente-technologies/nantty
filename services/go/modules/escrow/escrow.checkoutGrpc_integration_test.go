@@ -63,10 +63,10 @@ func TestCommerceRegistersPayablesRecordsDeliveryAndConfirmsReceiptOverGrpc(t *t
 		t.Fatalf("another buyer confirmed receipt: %v", err)
 	}
 	released, err := client.ConfirmOrderReceipt(ctx, &moneyv1.ConfirmOrderReceiptRequest{OrderId: orderId, BuyerUserId: buyer})
-	if err != nil || released.Escrow.Status != "released" || released.Escrow.SellerAmount.AmountMinor != 374_000 {
+	if err != nil || released.Escrow.Status != "released" || released.Escrow.SellerAmount.AmountMinor != 388_000 {
 		t.Fatalf("confirm receipt: %+v %v", released, err)
 	}
-	if harness.balance(ledgermodels.SellerPendingAccount("seller-1", "NGN")) != 374_000 {
+	if harness.balance(ledgermodels.SellerPendingAccount("seller-1", "NGN")) != 388_000 {
 		t.Fatal("confirmed receipt did not lock the seller's share")
 	}
 	if view := harness.Call(http.MethodGet, "/api/v1/orders/"+orderId+"/escrow", harness.Tokens.UserAccessToken(buyer), "", nil); view.Body["stage"] != "released_to_seller" {

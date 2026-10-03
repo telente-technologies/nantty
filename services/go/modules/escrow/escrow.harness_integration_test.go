@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,9 +52,24 @@ func (harness *escrowHarness) initializePayment(buyer, orderId, key string) paym
 	return harness.Call(http.MethodPost, "/api/v1/payments/initialize", harness.Tokens.UserAccessToken(buyer), key, map[string]any{"orderId": orderId})
 }
 
-func (harness *escrowHarness) deliverRefundPaid(reference string) {
+func (harness *escrowHarness) deliverRefundProcessed(paymentReference string) {
 	harness.T.Helper()
-	harness.DeliverBachsEvent("refund.paid", "", map[string]any{"refund_id": "rfnd_" + reference, "reference": reference, "status": "success"})
+	for _, refund := range harness.Paystack.Refunds {
+		if refund["transaction_reference"] == paymentReference {
+			harness.DeliverPaystackEvent("refund.processed", map[string]any{"id": refund["id"], "status": "processed", "transaction_reference": paymentReference, "amount": refund["amount"], "currency": "NGN"})
+			return
+		}
+	}
+	harness.T.Fatalf("no refund for %s", paymentReference)
+}
+
+func (harness *escrowHarness) paymentReferenceForOrder(orderId string) string {
+	var reference string
+	schema := harness.Payments.Application.Container.Settings.Money.DatabaseSchema
+	if err := harness.Database.QueryRow(`SELECT reference FROM "`+schema+`".payment_intents WHERE subject_id = $1 AND status = 'succeeded' ORDER BY created_at LIMIT 1`, orderId).Scan(&reference); err != nil {
+		harness.T.Fatal(err)
+	}
+	return reference
 }
 
 func startEscrowHarness(t *testing.T) *escrowHarness {
@@ -61,15 +77,15 @@ func startEscrowHarness(t *testing.T) *escrowHarness {
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	settings := configs.EscrowSettings{
 		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateEmptySchema(t, money.Database, "escrow"), money.LedgerSchema),
-		PlatformCommissionBps: 500, InspectionPeriod: 72 * time.Hour, SellerResponseWindow: 48 * time.Hour, AutoReleaseSweepInterval: time.Hour,
-		SellerCreditHoldPeriod: 24 * time.Hour,
+		PlatformCommissionBps: 150, InspectionPeriod: 72 * time.Hour, SellerResponseWindow: 48 * time.Hour, AutoReleaseSweepInterval: time.Hour,
+		SellerCreditHoldPeriod: 24 * time.Hour, InternalApiToken: strings.Repeat("e", 32),
 	}
 	module, err := src.StartEscrowModuleWithSettings(context.Background(), settings, money.Dependencies, money.Overrides(), money.Payments.Application.Gateway)
 	if err != nil {
 		t.Fatal(err)
 	}
 	money.MountModule(module)
-	money.Bachs.FundPlatformBalance("NGN", 10_000_000)
+	money.Paystack.FundPlatformBalance("NGN", 10_000_000)
 	harness := &escrowHarness{MoneyHarness: money, escrow: module, clock: time.Now(), onboarded: map[string]string{}}
 	module.Application.Container.Now = func() time.Time { return harness.clock }
 	module.Application.Container.Sellers.Now = func() time.Time { return harness.clock }
