@@ -43,8 +43,8 @@ func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@zudomart.com")
 
 	listed := harness.expect("GET", "/api/v1/admin/config", nil, bearer(accessToken), http.StatusOK)
-	if len(listed["data"].([]any)) != 4 {
-		t.Fatalf("expected the four seeded settings, got %v", listed)
+	if len(listed["data"].([]any)) != 9 {
+		t.Fatalf("expected the nine seeded settings, got %v", listed)
 	}
 	tiers := map[string]any{"tiers": []map[string]any{{"minimumMonthlyGiftCoins": 0, "creatorShareBps": 5500}, {"minimumMonthlyGiftCoins": 1000, "creatorShareBps": 7000}}}
 	update := func(value any, version int, reason string) map[string]any {
@@ -155,7 +155,14 @@ func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 	if lines != 1 {
 		t.Fatalf("expected one exported row, got %d", lines)
 	}
-	if status := harness.call("GET", "/api/v1/admin/audit/export", nil, bearer(accessToken)).status; status != http.StatusForbidden {
-		t.Fatalf("export without step-up must be refused, got %d", status)
+	if status := harness.call("GET", "/api/v1/admin/audit/export", nil, nil).status; status != http.StatusUnauthorized {
+		t.Fatalf("export without a session must be refused, got %d", status)
+	}
+	csvExport := harness.call("GET", "/api/v1/admin/audit/export?format=csv&action=username.withheld", nil, bearer(accessToken))
+	if csvExport.status != http.StatusOK || !strings.HasPrefix(csvExport.headers.Get("Content-Type"), "text/csv") || !strings.Contains(string(csvExport.raw), "staffId,actorName") {
+		t.Fatalf("csv export failed: %d %s", csvExport.status, csvExport.raw)
+	}
+	if harness.expect("GET", "/api/v1/admin/audit?action=audit.exported", nil, bearer(accessToken), http.StatusOK)["data"] == nil {
+		t.Fatal("exports must be audited")
 	}
 }

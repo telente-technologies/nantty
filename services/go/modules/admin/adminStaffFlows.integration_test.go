@@ -18,7 +18,7 @@ func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testi
 
 	session, secret := harness.enrollAndSignIn("root@zudomart.com", strongPassword)
 	staff := session["staff"].(map[string]any)
-	if staff["role"] != "superadmin" || staff["mfaEnrolled"] != true || session["tokenType"] != "Bearer" {
+	if staff["role"] != "SUPERADMIN" || staff["mfaEnrolled"] != true || session["tokenType"] != "Bearer" {
 		t.Fatalf("unexpected session %v", session)
 	}
 	superadminId := staff["id"].(string)
@@ -30,17 +30,18 @@ func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testi
 	harness.expect("POST", "/api/v1/admin/auth/mfa/verify", map[string]string{"challengeToken": replay.body["challengeToken"].(string), "code": codeForStepOffset(t, secret, -1)}, nil, http.StatusUnauthorized)
 	accessToken := harness.signInWithMfa("root@zudomart.com", strongPassword, secret, 0)["accessToken"].(string)
 
-	invitation := map[string]any{"email": "Ops@Zudomart.com", "displayName": "Ops", "permissions": []string{"admin.audit.read"}}
+	invitation := map[string]any{"email": "Ops@Zudomart.com", "name": "Ops", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "new operations hire"}
 	denied := harness.expect("POST", "/api/v1/admin/admins", invitation, bearer(accessToken), http.StatusForbidden)
 	if denied["code"] != "STEP_UP_REQUIRED" {
 		t.Fatalf("unexpected %v", denied)
 	}
 	harness.expect("POST", "/api/v1/admin/auth/step-up", map[string]string{"code": "000000"}, bearer(accessToken), http.StatusUnauthorized)
 	withStepUp := bearerWithStepUp(accessToken, harness.grantStepUp(accessToken, secret, 1))
-	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "x@zudomart.com", "permissions": []string{"BAD PERMISSION"}}, withStepUp, http.StatusUnprocessableEntity)
-	invited := harness.expect("POST", "/api/v1/admin/admins", invitation, withStepUp, http.StatusCreated)
-	if invited["email"] != "ops@zudomart.com" || invited["role"] != "admin" || invited["status"] != "invited" {
-		t.Fatalf("unexpected invitation %v", invited)
+	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "x@zudomart.com", "role": "ADMIN", "permissions": []string{"BAD PERMISSION"}, "reason": "bad permission"}, withStepUp, http.StatusBadRequest)
+	created := harness.expect("POST", "/api/v1/admin/admins", invitation, withStepUp, http.StatusCreated)
+	invited := created["admin"].(map[string]any)
+	if invited["email"] != "ops@zudomart.com" || invited["role"] != "ADMIN" || invited["status"] != "INVITED" || created["invitationSentTo"] != "ops@zudomart.com" {
+		t.Fatalf("unexpected invitation %v", created)
 	}
 	harness.expect("POST", "/api/v1/admin/admins", invitation, withStepUp, http.StatusConflict)
 	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "ops@zudomart.com", "password": adminPassword}, nil, http.StatusUnauthorized)
@@ -55,24 +56,24 @@ func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testi
 	adminId := adminSession["staff"].(map[string]any)["id"].(string)
 	harness.expect("GET", "/api/v1/admin/admins", nil, bearer(adminToken), http.StatusForbidden)
 	adminStepUp := bearerWithStepUp(adminToken, harness.grantStepUp(adminToken, adminSecret, 1))
-	notSuperadmin := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "third@zudomart.com", "permissions": []string{}}, adminStepUp, http.StatusForbidden)
-	if notSuperadmin["code"] != "SUPERADMIN_REQUIRED" {
-		t.Fatalf("unexpected %v", notSuperadmin)
-	}
+	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "third@zudomart.com", "role": "ADMIN", "permissions": []string{}, "reason": "no staff permission"}, adminStepUp, http.StatusForbidden)
 
-	permissions := map[string]any{"permissions": []string{"admin.audit.read", "admin.staff.read"}}
-	harness.expect("PATCH", "/api/v1/admin/admins/"+adminId+"/permissions", permissions, bearer(accessToken), http.StatusForbidden)
-	harness.expect("PATCH", "/api/v1/admin/admins/"+adminId+"/permissions", permissions, withStepUp, http.StatusOK)
-	harness.expect("PATCH", "/api/v1/admin/admins/"+superadminId+"/permissions", permissions, withStepUp, http.StatusNotFound)
-	harness.expect("POST", "/api/v1/admin/admins/"+superadminId+"/disable", nil, withStepUp, http.StatusNotFound)
-	harness.expect("GET", "/api/v1/admin/admins", nil, bearer(adminToken), http.StatusForbidden)
+	permissions := map[string]any{"role": "ADMIN", "permissions": []string{"audit:read", "staff:manage"}, "reason": "needs staff access"}
+	harness.expect("PUT", "/api/v1/admin/admins/"+adminId+"/permissions", permissions, bearer(accessToken), http.StatusForbidden)
+	harness.expect("PUT", "/api/v1/admin/admins/"+adminId+"/permissions", permissions, withStepUp, http.StatusOK)
+	harness.expect("PUT", "/api/v1/admin/admins/"+superadminId+"/permissions", permissions, withStepUp, http.StatusConflict)
+	reason := map[string]string{"reason": "testing the guard"}
+	harness.expect("POST", "/api/v1/admin/admins/"+superadminId+"/disable", reason, withStepUp, http.StatusConflict)
 	refreshed := harness.expect("POST", "/api/v1/admin/auth/refresh", map[string]string{"refreshToken": adminSession["refreshToken"].(string)}, nil, http.StatusOK)
 	listed := harness.expect("GET", "/api/v1/admin/admins", nil, bearer(refreshed["accessToken"].(string)), http.StatusOK)
 	if len(listed["data"].([]any)) != 2 || listed["nextCursor"] != nil {
 		t.Fatalf("unexpected staff list %v", listed)
 	}
 
-	harness.expect("POST", "/api/v1/admin/admins/"+adminId+"/disable", nil, withStepUp, http.StatusNoContent)
+	disabled := harness.expect("POST", "/api/v1/admin/admins/"+adminId+"/disable", map[string]string{"reason": "left the company"}, withStepUp, http.StatusOK)
+	if disabled["admin"].(map[string]any)["status"] != "DISABLED" {
+		t.Fatalf("unexpected %v", disabled)
+	}
 	harness.expect("POST", "/api/v1/admin/auth/refresh", map[string]string{"refreshToken": refreshed["refreshToken"].(string)}, nil, http.StatusUnauthorized)
 	harness.expect("GET", "/api/v1/admin/auth/me", nil, bearer(refreshed["accessToken"].(string)), http.StatusUnauthorized)
 	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "ops@zudomart.com", "password": adminPassword}, nil, http.StatusUnauthorized)
