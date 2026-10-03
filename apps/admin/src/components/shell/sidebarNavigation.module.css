@@ -63,16 +63,16 @@
 .link:hover {
   text-decoration: none;
   background: var(--console-night-raised);
-  color: #fff;
+  color: var(--console-night-strong);
 }
 
 .link:focus-visible {
-  box-shadow: 0 0 0 2px var(--yellow-500);
+  box-shadow: 0 0 0 2px var(--console-night-accent);
 }
 
 .active {
   background: var(--console-night-raised);
-  color: #fff;
+  color: var(--console-night-strong);
 }
 
 .active::before {
@@ -83,11 +83,11 @@
   bottom: 6px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: var(--yellow-500);
+  background: var(--console-night-accent);
 }
 
 .active > span:first-child {
-  color: var(--blue-200);
+  color: var(--console-night-brand);
 }
 
 .linkLabel {
@@ -121,7 +121,7 @@
   flex-direction: column;
   padding: 8px;
   border-radius: var(--radius-small);
-  color: #fff;
+  color: var(--console-night-strong);
 }
 
 .account:hover {

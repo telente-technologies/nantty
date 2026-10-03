@@ -11,18 +11,18 @@
 }
 
 .production {
-  background: var(--error);
-  color: #fff;
+  background: var(--danger-solid);
+  color: var(--console-night-strong);
 }
 
 .staging {
   background: var(--caution);
-  color: #221400;
+  color: var(--on-caution);
 }
 
 .development {
-  background: var(--yellow-500);
-  color: var(--yellow-900);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .tape {
@@ -35,13 +35,13 @@
 }
 
 .productionTape {
-  background: repeating-linear-gradient(135deg, var(--error) 0 14px, #7f1010 14px 28px);
+  background: repeating-linear-gradient(135deg, var(--error) 0 14px, var(--tape-danger-dark) 14px 28px);
 }
 
 .stagingTape {
-  background: repeating-linear-gradient(135deg, var(--caution) 0 14px, #6b4200 14px 28px);
+  background: repeating-linear-gradient(135deg, var(--caution) 0 14px, var(--tape-caution-dark) 14px 28px);
 }
 
 .developmentTape {
-  background: repeating-linear-gradient(135deg, var(--yellow-500) 0 14px, var(--console-night) 14px 28px);
+  background: repeating-linear-gradient(135deg, var(--console-night-accent) 0 14px, var(--console-night) 14px 28px);
 }

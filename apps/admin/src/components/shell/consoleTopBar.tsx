@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { useAdminPermissions, useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { KeyboardKey } from "@/components/ui/surfaces";
@@ -59,6 +61,7 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
         <span className={styles.session} title={`Signed in as ${admin.email}. Session ends by ${sessionEndsAt.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })} at the latest.`}>
           {admin.email}
         </span>
+        <ThemeSwitcher iconOnly label="Colour theme" />
         <Button size="small" variant="ghost" onClick={signOut} isBusy={isSigningOut}>
           Sign out
         </Button>
