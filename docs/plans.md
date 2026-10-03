@@ -170,33 +170,35 @@ The happy path, as built:
 
 Requirement: a dedicated studio for users **accepted into the creator program**, covering coins, wallet/earnings, video uploads, and separate flows for clips (shorts/reels) vs normal videos, with audience selection and thumbnails (manual choice or Python-job-generated fallback).
 
-### 5.1 Gating **[DONE] / [NEXT]**
+### 5.1 Gating **[DONE — §16]**
 
 - Exists: `screens/creator/creatorProgram.screen.tsx` (apply), `creatorApplicationStatus.screen.tsx` (review states), `creatorProgramService.fetchMyCreatorEligibility / fetchMyCreatorApplication / submitCreatorApplication`, and `CreatorDashboardScreen` already degrades to "See the Creator Program" when the dashboard call fails.
-- **[NEXT]** Make the gate explicit at the entry point: Creator Studio is reachable only when eligibility is `eligible` or the application status is `approved`; pending → `CreatorApplicationStatus`; rejected → status screen with the reason. Do not surface Studio in navigation for ineligible accounts.
+- **[DONE — §16]** Gating is now explicit at the entry point via one shared helper: `useCreatorEntry()` in `hooks/useCreatorStatus.hook.ts` resolves `CreatorDashboard` (status or application `approved`) → `CreatorApplicationStatus` (`pending` / `rejected`) → `CreatorProgram` (otherwise, incl. ineligible — which already renders "Apply when you're eligible"). Applied at every entry: profile shortcuts (`ownProfileShortcuts.tsx`), Settings row, and `openCreatorProgramOrSettings(navigation, destination)` (create/live lock paths). Studio is never surfaced for ineligible accounts.
 
-### 5.2 Studio surface **[DONE] / [NEXT]**
+### 5.2 Studio surface **[DONE — §16]**
 
 Current `CreatorDashboardScreen` already provides: period chips (week/month/all-time), earnings card, "Withdraw earnings" → Wallet, top lives & posts with views + earnings, affiliations, subscription plans, revenue rules.
 
-**[NEXT]** restructure into a Studio home with the four required blocks, in this order:
+**[DONE — §16]** restructured into a Studio home with the four required blocks, in this order:
 
-1. **Coins** — balance, send/convert (`convertEarnedCoins`), link to coin activity.
+1. **Coins** — `StudioCoinsSection` (new): balance + earned coins from `GET /api/v1/coins/balance` (mobile `CoinBalance` type now carries `earnedCoins`, as the API already returns), **Convert earned coins** → `ConvertEarnedCoinsSheet` (new; `POST /api/v1/creators/earnings/convert` with `Idempotency-Key`, receipt shows cash received + earned remaining; 422 minimum-payout/insufficient-earned errors surface verbatim), **Coin activity** → `CoinActivityScreen` (new route): `GET /api/v1/coins/transactions` ledger rows (`+`/`−` coins, balance-after, date) with cursor "Load more". *Send coins* is intentionally **not** in this block: `TransferCoinsSheet` requires a resolved recipient, and sending stays where it already works (a creator's profile → More). Mocks mirror the real contracts (`earnedCoins` on balance, seeded ledger, conversion state machine) — no invented fields.
 2. **Wallet / earnings** — `CreatorEarningsCard` + withdraw → `screens/wallet/{wallet,transactions,withdraw,payoutAccounts}.screen.tsx`.
-3. **Content** — entry to the upload flows (§5.3).
-4. **Subscription plans** — existing `SubscriptionPlansSection` (§4.1).
+3. **Content** — card with **Create post or clip** → `CreatePost` (mode `post`), followed by the Top lives & posts list.
+4. **Subscription plans** — existing `SubscriptionPlansSection` (§4.1). Affiliations + revenue rules remain after as extras.
 
-### 5.3 Upload flows: clips vs normal videos **[NEXT]**
+Header renamed **"Creator Studio"** (shortcut + Settings row labels follow via `useCreatorEntry`).
+
+### 5.3 Upload flows: clips vs normal videos **[DONE — §16] / [LATER]**
 
 Requirement: two clearly separate upload paths — **clips** (short-form, vertical, feed of shorts) and **normal videos** (long-form, landscape/portrait, watch page).
 
-- Shared: media pick (`components/create/pickMedia.util.ts`), draft upload tracking (`postDraftUploads.hook.ts`), title/caption, **audience**, thumbnail, publish.
-- **Clips**: vertical-first editor, default duration cap, sound picker reuse from `soundPickerSheet.tsx`, lands in the clips feed.
-- **Normal videos**: full-screen preview with the new rotate affordance (§1.3), no duration cap, lands on the posts feed / watch.
-- `CreateModePill` / `createModeSheet` becomes the single chooser: **Clip** | **Video** | Photo | Live.
-- Today `createPost.screen.tsx` only publishes `storiesService.publishPost({ text, audience, mediaIds })` with `audience: everyone | followers` — video-specific fields are not sent yet. **[NEXT]** extend the composer draft with `kind: "clip" | "video" | "photo"` and thread it through the publish call.
+- Shared: media pick (`components/create/pickMedia.util.ts`), draft upload tracking (`postDraftUploads.hook.ts`), title/caption, **audience**, thumbnail, publish. **[DONE]** upload purpose is now `clip` in clip mode, `post` otherwise.
+- **Clips**: **[DONE]** own `CreateMode` entry + pill chip, draft `kind: "clip"`, exactly-one-video validation client-side (server's own rule — `assertMediaFitsPostKind`: "A clip needs exactly one video."), publish sends `kind: "clip"`, mock rejects mismatched clip media with the same message, **and the created clip is appended to the mock clips feed** (`appendMockClip`) so `GET /api/v1/clips` shows it — `["clips"]` invalidated on publish. Sound picker reuses the existing `soundId` thread. **[LATER]** vertical-first editor, default duration cap (server enforces a 180s cap, `maxClipSeconds`; the client mirrors it), dedicated clip composer preview layout.
+- **Normal videos**: **[DONE]** `kind: "video"` in the draft (media-derived: any video → `video`, else `photo`), wire kind maps `video`/`photo` → `kind: "post"`, lands on the posts feed/watch as before; viewer-side rotate affordance already exists (§1.3).
+- `CreateModePill` **[DONE]** is the single chooser; shipped as **Story | Post | Clip | Product | Live** — the required four (Clip | Video | Photo | Live) would remove the Story and Product entries, which other sections depend on; Video/Photo are draft kinds inside the Post composer rather than pill modes (the pill's copy is derived from `CreateMode`, uppercase — no invented labels).
+- Today `createPost.screen.tsx` publishes `storiesService.publishPost({ text, audience, mediaIds, kind, soundId })`. **[DONE]** composer draft carries `kind: "clip" | "video" | "photo"`, synced by mode + picked media, and threaded to the contract's `kind: "post" | "clip"` on publish.
 
-### 5.4 Audience selection **[NEXT]**
+### 5.4 Audience selection **[BLOCKED — contract verified, chip not shipped]**
 
 Existing `PostAudience` is `everyone | followers` (`postToolbar.tsx` toggle: "Everyone"/"Followers"). Requirement adds a subscriber tier:
 
@@ -204,6 +206,8 @@ Existing `PostAudience` is `everyone | followers` (`postToolbar.tsx` toggle: "Ev
 - `subscribers` is only offered when the author has ≥1 active plan **and** the viewer set is resolved server-side (already modelled by `subscriberOnly` / `viewerHasAccess` on posts and clips).
 - Toolbar chip cycles through the three values with the same 25px pill; keep `Everyone`/`Followers` copy exactly as-is and add `Subscribers`.
 - Server contract: confirm `storiesService.publishPost` accepts `audience: "subscribers"` before exposing the option — **do not ship the chip until that is verified** (no inventing API fields).
+- **[DONE — §16] Contract verification (the gate this item required): NOT supported as written.** `CreatePostBodySchema` (apps/api `posts.validator.ts`) is `audience: schema.enum(["everyone"]).optional()` — there is no `subscribers` value. The subscriber tier exists instead as a separate field: `visibility: schema.enum(["public", "subscribers"])`, guarded server-side by `assertApprovedCreator` (approved creators only). **The chip stays unshipped.** Ship in a deliberate follow-up as: approved creator + ≥1 active plan → chip offers "Subscribers" → publish sends `visibility: "subscribers"` (with `audience: "everyone"`), not `audience: "subscribers"`.
+  - **Debt flagged:** mobile already sends `audience: "followers"` today — invalid against the real API (mock casts the body, so it only works in mock). Needs a decision: extend the server enum, or drop/replace the client value.
 
 ### 5.5 Thumbnails **[LATER]**
 
@@ -238,8 +242,8 @@ Requirement: from splash → register → login, the web must behave and look li
 - `app/(auth)/signup/page.tsx` — replaced the invented `StepDots` wizard with the mobile step order: Contact (Phone/Email tabs) → OTP → Birthday → Password → Username → Personalization. **[DONE]**
 - New `app/(auth)/welcome/page.tsx` — `Onboarding` + splash on mobile viewports (splash first, then onboarding). **[DONE]**
 - Icons: source every glyph from `apps/mobile/assets/icons/*.svg` (same set already mirrored at `apps/web/public/icons/`) instead of the hand-drawn set in `components/ui/icons.tsx`, rendered by one `AppIcon` through `mask-image` so colour follows `currentColor`. **[DONE]**
-- Social buttons: **[DONE]** both render on the onboarding screen in mobile's exact order and copy (`Continue with Apple`, `Continue with Google`). **[NEXT] Wire them to the mock backend** — the webapp is a demo/mock product exactly like mobile, so a tap must actually sign the user in (mobile's `authService.signInWithSocialProvider` → `POST /api/v1/auth/google|apple` returns a session in mock mode; the webapp must do the same through `POST /bff/auth/social`).
-  - When mocks are on → tap signs in and lands on the feed. **No dead buttons.**
+- Social buttons: **[DONE]** both render on the onboarding screen in mobile's exact order and copy (`Continue with Apple`, `Continue with Google`). **[DONE — §15] Wired to the mock backend and verified end-to-end headless (fresh profile, `/welcome` → tap *Continue with Google* → 401 → signed in → lands on `/` with a real session cookie, `/bff/api/v1/users/me` returns the demo user)** — the webapp is a demo/mock product exactly like mobile, so a tap must actually sign the user in (mobile's `authService.signInWithSocialProvider` → `POST /api/v1/auth/google|apple` returns a session in mock mode; the webapp does the same through `POST /bff/auth/social`).
+  - When mocks are on → tap signs in and lands on the feed. **No dead buttons.** **[DONE]**
   - When mocks are off and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` / `NEXT_PUBLIC_APPLE_CLIENT_ID` are absent → show mobile's own `…sign-in isn't configured yet.` message (the `SocialSignInNotConfiguredError` text).
   - When mocks are off and client ids exist → PKCE popup flow against `POST /api/v1/auth/google|apple`. **[LATER]** (needs real client ids).
 - `src/proxy.ts`: `/welcome` is on the public allow-list, and static assets pass through so `public/screens` and `public/onboardingMarketPhoto.jpg` resolve. **[DONE]** Legal links (`Terms of Service`, `Privacy Policy`, `Learn more`) intentionally point at `NEXT_PUBLIC_MARKETING_SITE_URL`, i.e. the `apps/web` landing site — the webapp has no local `/terms` or `/privacy` and needs none while those are the only links.
@@ -535,3 +539,272 @@ Requirement: *social sign-in everywhere on the webapp without deviating from the
 - Live analytics screen (retention, top moments) for dashboard rows of kind `live` (extends §8.3.10).
 - Creator Program join flow on the webapp (dashboard shows the API's 403 message until then).
 - Real dashboard numbers once the backend lands (§9 mock contract).
+
+---
+
+## 20. Creator (non-selling) live
+
+Requirement: streamers who only make content (talk, music, gaming, IRL, education) can go live end-to-end and sell nothing.
+
+### 20.1 Rules
+
+- Only **Creator Program** members can go live (unchanged). They earn through **gifts, creator subscriptions and affiliate commissions**, never through a store.
+- Every live has a **category**: `justChatting` / `gaming` / `music` / `irl` / `education` / `shopping`. **Shopping** is offered only to accounts with a store (`hasStore` in Studio, `isSeller` on mobile).
+- **Products are optional.** Pinning, the products card and product counts appear only for accounts with a store. A live without products is a normal live.
+- Dashboard numbers lead with **coins, gifts, subscribers, viewers, top gifters and battle results**, never product counts.
+
+### 20.2 Status
+
+| Surface | Scope | Marker |
+| --- | --- | --- |
+| Studio landing | Copy and hero for all creators (OBS gaming, talk, music, battles, gifts); selling is one optional use case | **[DONE]** |
+| Studio create + dashboard | Category picker on create; earnings panel (coins, gifts, subscribers, viewers, top gifters, battles) on `/lives` and the control room; pinning hidden without a store | **[DONE]** |
+| Studio mock | `LiveSession.category` + `earnings`; `User.hasStore`; `POST /api/v1/lives` accepts `category` | **[DONE]** |
+| Web landing | Live described as creator streaming and shopping; creator program copy says no store is needed | **[DONE]** |
+| Mobile go-live | Category picker in `liveSetupPanel`; no product step in the create flow; `category` sent to `POST /api/v1/lives` | **[DONE]** |
+| Mobile live room | Products button and sheets only when the live has products (host: Creator + products or `shopping`); category chip in `LiveHeader` | **[DONE]** |
+| Webapp | No live pages exist yet; apply the same rules when the viewer lands (§8.3.9) | **[LATER]** |
+
+---
+
+## 17. Live gifts (TikTok-style) **[DONE — mock]**
+
+Gifting works on any live, including lives with no products: for content creators, gifts are the main way to earn. No gift UI assumes a store. The mock contract follows [backendPlan.md §4.1](./backendPlan.md) field for field. The deviations are listed in §17.6.
+
+### 17.1 Catalogue — `GET /api/v1/gifts` → `{ data: LiveGift[], nextCursor }`
+
+```
+LiveGift { id, name, description?, tier: basic|premium|legendary, priceCoins,
+           animationEngine: alphaVideo|lottie|pag|spriteSheet, animationAssetKey, previewAssetKey,
+           durationMs, displayLevel: micro|medium|large|global, sound?, haptic?: light|medium|heavy|pattern,
+           comboable, isActive, sortOrder, metadata? }
+```
+
+- 26 seeded gifts. **Quick** (basic/micro): Like, Clap, Fire, Heart, Star, Thumbs Up, Smile, Sparkle. **Fun** (basic/medium): Rose, Gift Box, Crown, Diamond, Rocket, Lightning, Fireworks, Money Rain. **Premium** (large): Golden Crown, Luxury Car, Private Jet, Treasure Chest, Diamond Shower, Golden Rain, Supernova. **Legendary** (global): Zudo Galaxy, Zudo King, Zudo Empire.
+- The client maps `animationAssetKey` to a local vector preset (`liveGiftArtworkPresets.constant.ts`). An unknown key falls back to a generic gift-box preset, so adding a gift is only a config change.
+- Panel sections: Popular = `basic`, Premium = `premium`, Legendary = `legendary`.
+
+### 17.2 Send — `POST /api/v1/live/gifts` (header `Idempotency-Key`)
+
+```
+→ { liveId, giftId, quantity: 1–100, receiverUserId?, comboId? }
+← 201 { giftTransactionId, giftId, quantity, totalCoins, receiverUserId, comboId, comboCount, coinBalance, battleId?, createdAt }
+```
+
+- Errors: `402` (not enough coins: the client rolls back the optimistic balance and opens Recharge), `422` (gifting yourself), `400` (quantity out of range). Replaying an `Idempotency-Key` returns the same receipt.
+- The client batches taps within 300 ms into one request and reuses `comboId` while taps continue inside the 3 s window. The server owns `comboCount`.
+- Amounts are always whole coins. Money appears only as `{ amountMinor, currency }`, taken from the server (stream stats `estimatedEarnings`). The client never hardcodes a currency.
+
+### 17.3 Realtime — `gift.sent` (topic `live:{liveId}`)
+
+```
+{ type: "gift.sent", liveId, giftTransactionId, giftId, animationAssetKey, displayLevel, quantity, totalCoins,
+  sender: { id, name, avatarUrl }, receiverUserId, comboId, comboCount, battleId? }
+```
+
+- Mock: `services/liveGiftMockEmitter.service.ts` simulates fake viewers sending gifts every 3–7 s (62% micro, 28% medium, ~8.5% large, ~1.5% global), with combos up to ×12.
+- Display: `micro` = aggregated side banner + float near the streamer. `medium` = banner + fly-in across part of the screen. `large` = queued full-screen spotlight with a dim. `global` = queued full-screen spotlight with the stream still visible, plus "to @streamer". Only large/global are exclusive.
+- Combo escalation thresholds are 1 / 5 / 10 / 50 / 100. Each threshold grows the float or flyer. Crossing 50 queues a large spotlight, and crossing 100 queues a global one.
+- Chat line: "Name sent Rocket ×10 to @creator". There is one line per combo, updated in place.
+
+### 17.4 Leaderboards, goals, host stats
+
+- `GET /api/v1/lives/:liveId/leaderboard?scope=session|recipient&receiverUserId=&limit=20` → `{ data: [{ rank, user{id,name,username,avatarUrl}, coins }], viewerRank? }`. Used by the top gifters sheet and the live-ended **Top Supporter** card.
+- `GET /api/v1/lives/:liveId/gift-goals` → `{ data: GiftGoal[], nextCursor }`. `POST …/gift-goals { title, targetCoins, giftId? }`, `PATCH …/gift-goals/:goalId { title?, targetCoins? }`, `DELETE …/gift-goals/:goalId`.
+  `GiftGoal { id, liveId, creatorId, title, targetCoins, giftId?, progressCoins, status: active|completed|cancelled, completedAt }`.
+- `GET /api/v1/creators/me/analytics/gifts/streams/:liveId` → `{ liveId, giftCount, totalCoins, creatorCoins, estimatedEarnings: Money|null, topSupporters[] }` (host dashboard). Recent gifts come from the `gift.sent` stream.
+
+### 17.5 Reusable API (for battles / multi-guest)
+
+```ts
+useSendLiveGift({ liveId, recipientUserId? }) → { sendLiveGift(gift, quantity?) → boolean, comboWindow, endComboWindow,
+                                                  isSendingGift, hasNotEnoughCoins, giftSendingErrorMessage, dismissGiftError }
+subscribeToLiveGiftSentEvents(liveId, listener, streamerUserId?) → unsubscribe
+useLiveGiftSentEvents(liveId, listener, streamerUserId?)
+<LiveGiftPickerSheet liveId recipientUserId? visible onClose />
+useLiveGiftCatalog(enabled?) → { catalog, giftsById, giftsBySection }
+```
+
+`recipientUserId` targets an on-stage streamer. A battle score can subscribe with `useLiveGiftSentEvents` and add `totalCoins` by `receiverUserId`.
+
+### 17.6 Deviations and later
+
+- **Art:** `animationEngine` is seeded as `lottie`, but the client draws every engine with built-in `react-native-svg` + `Animated` vector presets keyed by `animationAssetKey` (no Lottie/Skia dependency yet). Real Lottie/alpha-video assets can replace presets one key at a time. **[LATER]**
+- **Owner's mp4s** (`apps/gift/*.mp4`): 1280×720 H.264 with a **checkerboard baked into the pixels** (fake transparency) and no alpha. Overlaid, they show as a boxed clip, and they can't be keyed cleanly because the gold sparkles share the checker's greys. The new vector art keeps their idea (the object grows in, a gold orbit ring, a sparkle burst, a light-ray finale). They are not used.
+- **Quantity 100:** decided — requests allow 1–100 and the panel offers ×1/5/10/50/100 (backendPlan §4.1 updated). **[DONE]**
+- **Tiers:** the owner's four tiers (Quick/Fun/Premium/Legendary) map to the plan's `basic` + `displayLevel` (micro vs medium).
+- **Additions to the plan:** `GET …/gift-goals` (list), the host stream-stats endpoint shape, and `liveId` + `type` in the `gift.sent` envelope.
+- **Later:** `gift.combo.*` / `gift.goal.*` / `leaderboard.updated` events (the mock refetches on `gift.sent`, throttled to 1/s). Gift sounds. Platform-wide marquee for `global`. Per-stream ranking history beyond the live-ended card.
+
+---
+
+## 18. Multi-guest live & battles (mobile, mock mode) **[DONE (mock) / LATER (LiveKit + go-live)]**
+
+Requirement: TikTok-style multi-guest LIVE (host + up to 9 guests) and gift battles between on-stage streamers. Works on any live, with or without products. The backend contract is [backendPlan.md §4.2](./backendPlan.md); differences are listed in 18.7.
+
+### 18.1 Rules
+
+- **Stage:** host + up to **9 guests (10 streamers)**. The host invites from the viewer list (search) or approves viewers who request to join. Invites expire after **60 s**.
+- **Host controls:** remove a guest, mute their mic, turn off their camera. A guest can mute themselves, turn off their camera, or leave.
+- **Anyone invited can be a guest and battle.** Only **Creator Program** members get gift payouts. Gifts to a non-member guest still count toward their score but settle to the **host** (`LiveStageStreamer.isCreatorProgramMember`, `LiveBattlePayout.paidToUserId`). The gift picker says so.
+- **Battle:** the host picks 2–10 on-stage streamers, a duration (1 / 3 / 5 min; the API accepts 60–600 s) and the rule. Score = coins gifted to a streamer while the battle is `active`. Viewers tap a tile to gift that streamer.
+- **Default rule:** each streamer keeps the coins they received.
+- **Winner takes all (host toggle):** every guest in the battle must accept first. If anyone declines (or 15 s pass), the host either **runs a normal battle** or **cancels**. When it ends, coins gifted to the other participants move to the single winner.
+- **Tie (or every score 0):** no winner, and everyone keeps their own coins, whatever the rule.
+- Viewers are never refunded. A coin spend is final when the gift commits.
+
+### 18.2 State machine
+
+Stage `phase` (derived by the server, `LiveStage.phase`):
+
+```
+idle ─invite─► inviting ─accept─► onStage ─create(WTA)─► battlePending ─all accept─► battleCountdown(3 s) ─► battling ─timer/end/forfeit─► settling(2 s) ─► result(10 s) ─► onStage
+                                     └─create(default)─────────────────────────────►┘        declined ─► host: run normal │ cancel ─► onStage
+```
+
+Battle `state`: `countdown → active → settling → settled` (backendPlan's `pending` is the separate `battleProposal`). After the 10 s celebration the battle moves to `battleHistory` and a summary card shows under the grid until it is dismissed.
+
+### 18.3 Layout
+
+| Streamers | Layout |
+| --- | --- |
+| 1 | Full-screen video (existing `LiveVideoStage`) |
+| 2 | Side-by-side split, tug-of-war bar under the grid |
+| 3 | Host tall on the left, two stacked on the right |
+| 4 | 2 × 2 |
+| 5–6 | 3 × 2 |
+| 7–9 | 3 × 3 |
+| 10 | 4 × 3 |
+
+Empty seats show "Invite" for the host. Each tile shows name, mic state, HOST tag, and in a battle the score chip (plus a rank chip when there are 3+), a crown + MVP on the winner, dimmed losers and "Left · forfeited". The timer pill pulses red in the last 10 s, with a big countdown number. The result banner shows the winner, coins moved by winner takes all and the MVP supporter, with confetti. Animations use React Native `Animated` (Reanimated is not installed).
+
+### 18.4 Mock contract (paths match backendPlan §4.2 where it defines them)
+
+| Method + path | Who | Notes |
+| --- | --- | --- |
+| `GET /api/v1/lives/:id/stage` | anyone | `LiveStage` snapshot (polled every 1 s in mock; `stage.updated` in production) |
+| `GET /api/v1/lives/:id/viewers?q=` | host | Invite search (**addition**) |
+| `POST /api/v1/lives/:id/guests/invitations` | host | `{userId}`; 409 `STAGE_FULL` |
+| `POST /api/v1/lives/:id/guests/invitations/:slotId/accept\|decline` | invitee | |
+| `POST /api/v1/lives/:id/guests/requests` | viewer | Request to join (**addition**) |
+| `POST /api/v1/lives/:id/guests/requests/:requestId/approve\|decline` | host | (**addition**) |
+| `POST /api/v1/lives/:id/guests/:userId/remove` | host | Forfeits a battle participant; in WTA they keep their own coins (anti-abuse) |
+| `POST /api/v1/lives/:id/guests/:userId/mute` | host, or `me` | `{audio?, video?}` → `audioMuted` / `videoMuted` |
+| `POST /api/v1/lives/:id/guests/me/leave` | guest | Forfeits a running battle |
+| `POST /api/v1/lives/:id/battles` | host | `{participantUserIds, durationSeconds, winnerTakesAll}`, `Idempotency-Key` |
+| `POST /api/v1/battles/:id/accept\|decline` | participant | Winner-takes-all consent |
+| `POST /api/v1/battles/:id/start-without-winner-takes-all` | host | After a decline (**addition**) |
+| `POST /api/v1/battles/:id/cancel` | host | Pending proposal only |
+| `POST /api/v1/battles/:id/end` | host | Settles at current scores (`endReason: hostEnded`) |
+| `POST /api/v1/battles/:id/gifts` | viewer | **Mock only:** credits a score after `useSendLiveGift` succeeds. In production the gift itself carries the battle |
+
+Shapes (`src/types/liveStage.type.ts`): `LiveStage { layout, phase, myRole, streamers[], invitations: GuestSlot[], joinRequests[], invitationForMe, myJoinRequest, battleProposal, activeBattle, recentBattleGifts[], battleHistory[], serverNow }`; `LiveBattle { id, liveId, state, winnerTakesAll, durationSeconds, countdownStartedAt, startsAt, endsAt, settledAt, celebrationEndsAt, participants[{userId, user, score, rank, state, topGifters}], winnerUserIds, isTie, endReason, mvpGifter, transfers[{fromUserId,toUserId,coins}], payouts[{userId, score, earnedCoins, paidToUserId}] }`. Coins are integers; no money fields.
+
+Events the client expects in production (backendPlan §4.2.5): `stage.updated`, `guest.invited` (private), `battle.created`, `battle.started`, `battle.score.updated`, `battle.ended`, `battle.winner.celebrated`, `battle.settled`, `battle.cancelled`.
+
+### 18.5 Settlement
+
+- **Default:** `earnedCoins = score` for every participant.
+- **Winner takes all, single winner W:** each other participant P with `score > 0` yields a transfer `{fromUserId: P, toUserId: W, coins: score(P)}`; P earns 0 and W earns the total. A participant **removed by the host** keeps their own coins.
+- **Tie or all zero:** no transfers, everyone keeps their own.
+- `paidToUserId` is the participant if they are a Creator Program member, otherwise the host.
+
+### 18.6 Edge cases
+
+| Case | Behaviour |
+| --- | --- |
+| Guest leaves mid-battle | `state: forfeited`, cannot win; coins handled by the rule. Further gifts to them are ignored |
+| Host removes a participant | `state: left`; keeps their own coins even under WTA |
+| Only one active participant left | Battle ends early (`endReason: forfeit`); that participant wins if they scored |
+| Host ends early | Settles at current scores |
+| Stage full | Invite / approve return 409 `STAGE_FULL` |
+| A WTA participant leaves during the proposal | Counts as a decline |
+
+### 18.7 Mock demo script and differences from backendPlan §4.2
+
+- **Viewer:** open `live_s1` (6 streamers), `live_s2` (4) or any other live (2). A battle starts after 5 s and repeats; every second battle is winner takes all. In 4+ player battles the last guest drops halfway (forfeit). After 20 s the host invites you; accept to join the stage (then you get the WTA consent prompt). "Join" requests are auto-approved after 3 s.
+- **Host:** go live, open **Guests**, invite viewers (every 4th declines). Join requests arrive at 12 s, 40 s and 90 s. Start a **Battle**. With winner takes all on, about 1 in 5 guests declines, so the run-normal / cancel choice appears.
+- Differences: guest slot states `joining` / `reconnecting` are not simulated; there is no `DELETE` invitation (cancel); join requests, viewer search and `start-without-winner-takes-all` are additions; `Battle.state` `pending` is modelled as `battleProposal`; backendPlan's WTA-tie split is replaced by the owner's decision (a tie keeps own); `celebrationEndsAt`, `countdownStartedAt` and `payouts` are client-display additions.
+
+### 18.8 Later
+
+- Real media through LiveKit (one publisher per tile). Today the host tile plays the live stream or camera, and guest tiles show the guest's avatar.
+- Replace polling with `stage.updated` / `battle.score.updated` over `ex.realtime`.
+- Remove `POST /battles/:id/gifts` once `useSendLiveGift` sends `battleId` and the gift service credits scores.
+
+---
+
+## 19. Seller dashboard (dashboard.zudomart.com) **[DONE — mock]**
+
+**ZudoMart App = sell from anywhere. ZudoMart Dashboard = run your business.** `apps/seller` is the seller operating system. Contract: [apps/seller/apiContract.md](../apps/seller/apiContract.md).
+
+### 19.1 Rules
+
+- **Free for every approved Zudomart seller.** Access needs only a store membership — no Gold verification, no paid plan. Suspended or revoked stores see a restricted page.
+- **No in-store POS.** No register, cash drawer, shifts, offline sales or cashier PINs. Online orders are the marketplace orders customers place in the Zudomart app.
+- **Staff are Zudomart users.** Added by username search, they accept in the app and sign in with their own app credentials. Never separate staff accounts or email invites.
+- **Money** is always `{ amountMinor, currency }` from the API, formatted with `money.util`. Plan prices come from `GET /seller/subscription/plans` (Nigeria: Pro ₦5,000/mo, Business ₦15,000/mo). Pro and Business include the Gold business checkmark once the business is verified.
+- **Basic selling is never locked.** Locked features stay visible with an upgrade link; the API answers `402 PLAN_FEATURE_REQUIRED` with `requiredPlan`.
+
+### 19.2 Plans (`src/config/planFeatures.config.ts`)
+
+| Plan | Limits | Unlocks |
+| --- | --- | --- |
+| Free | 100 active products, 1 location, no team, 30 days of analytics | Orders, products, stock levels, adjustments, low-stock alerts, customers, messages, delivery, reviews, storefront, discount codes, payouts, core Sales/Inventory reports (CSV) |
+| Pro | 2,000 products, 3 locations, 5 seats, 365 days | Advanced inventory, bulk tools, advanced analytics and reports (Excel/PDF), segments, team, flash sales/bundles/Mart featuring, ad results, multiple warehouses, automated alerts, API keys and webhooks |
+| Business | Unlimited products, 10 locations, 25 seats, 730 days | Multiple stores, per-member permissions, accounting integrations |
+
+### 19.3 Roles
+
+Owner (everything), Manager (all but billing, withdrawals, developer), Inventory staff, Sales staff (orders, delivery, customers, messages, reviews), Accountant (money, reports, analytics, ads, read-only orders). Business stores can override a member's permissions.
+
+### 19.4 Sections
+
+| # | Section | Route(s) | Gating | Marker |
+| --- | --- | --- | --- | --- |
+| 1 | Overview | `/dashboard` | Free | **[DONE]** |
+| 2 | Products | `/products`, `/products/categories`, `/products/import` | Bulk tools Pro; product cap per plan | **[DONE]** |
+| 3 | Inventory | `/inventory`, `/adjustments`, `/movements`, `/transfers`, `/reorder`, `/suppliers`, `/locations` | Movements/transfers/reorder/suppliers Pro; second location Pro | **[DONE]** |
+| 4 | Orders | `/orders`, `/orders/[id]`, invoice/receipt, returns, disputes | Free | **[DONE]** |
+| 5 | Customers | `/customers`, `/customers/segments` | Segments Pro | **[DONE]** |
+| 6 | Sales & Analytics | `/analytics` | Breakdowns and >30 days Pro | **[DONE]** |
+| 7 | Marketing | `/marketing`, `/marketing/discounts`, flash sales, bundles, featured | Flash sales, bundles, Mart featuring Pro | **[DONE]** |
+| 8 | Ads | `/ads` (+ link to ads.zudomart.com) | Pro | **[DONE]** |
+| 9 | Payments & finance | `/wallet` (escrow, settlements, fees, refunds, withdraw, statements, accounts) | Free; accounting export Business | **[DONE]** |
+| 10 | Delivery | `/delivery`, `/delivery/settings` | Free | **[DONE]** |
+| 11 | Messages | `/messages` | Free | **[DONE]** |
+| 12 | Storefront | `/storefront` | Free | **[DONE]** |
+| 13 | Reviews | `/reviews` | Free | **[DONE]** |
+| 14 | Team | `/staff`, `/staff/roles`, `/staff/activity` | Team Pro; permission toggles Business | **[DONE]** |
+| 15 | Reports | `/reports`, `/reports/[kind]` | Core Sales/Inventory CSV free; rest + Excel/PDF Pro | **[DONE]** |
+| 16 | Settings | `/settings/*` (store, account, security, notifications, payouts, delivery, locations, taxes, loyalty, team, developers, integrations, billing, verification) | Alerts and API Pro; accounting Business | **[DONE]** |
+
+### 19.5 Later
+
+- **[LATER]** Backend implementation of the new contract sections (catalog extras, delivery, conversations, reviews, analytics, finance, storefront, developers, integrations).
+- **[LATER]** Multiple stores under one Business account is gated but has no create-store flow yet (store switcher only).
+- **[LATER]** Product video upload (links only today); real Ads Manager data shared between `/ads` and the ads report (each seeds its own).
+- **[LATER]** Landing screenshots are older captures; reshoot once the new pages are final.
+
+
+
+---
+
+## 21. Social graph, profiles & ZudoPoints (mobile) **[DONE — mock]**
+
+Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mock mode only; `services/**` untouched.
+
+| # | Feature | Mobile scope | Marker |
+| --- | --- | --- | --- |
+| 1 | Private profiles | Public/Private chips in Settings > Privacy (`PATCH /users/me { isPrivate }`); follow states `none/requested/accepted/rejected/blocked`; button reads Follow / Requested / Following; private profile hides posts and shows "This account is private"; Follow requests inbox (approve/decline) from the own-profile shortcuts and Privacy | **[DONE]** |
+| 2 | Followers / Following | Profile counts open a searchable list (`GET /users/:id/followers\|following?q=` returning `{ data, nextCursor }`); private lists return 403 for non-followers and render the private state | **[DONE]** |
+| 3 | Profile switching | Existing switcher sheet extended: Personal / Creator (only when `useCreatorEntry` resolves to approved) / Business; "Create business profile" form with category > subcategory, several allowed, plus custom (pending review); open to any organisation | **[DONE]** |
+| 4 | AI-generated label | "AI generated" switch in the composer sends `isAiGenerated: true`; label on posts and clips | **[DONE]** |
+| 5 | ZudoPoints on live | Supporter board ranks by points (gifts 1 coin = 1 point, like, share, follow, watch time); like-points capped at 10/min in the mock while visual likes stay unlimited; viewer's own points pill; leaderboard chip/sheet and live-ended Top Supporters use points; Rankings screen (Global / Country / Category x Streamers / Supporters / Creators). No cash-out or money display | **[DONE]** |
+| 6 | Live-ad settings | "Live monetization" sheet in go-live setup: allow ads (off by default), placements, max interruptions 0-3, minimum interval, ad indicator, live-ad terms (`acceptedLiveAdTermsVersion` stored with the session), free-text own sponsorship line | **[DONE]** |
+
+### 21.1 Notes
+
+- `isAiGenerated` is used on `NewPostInput` and `Post` (backendPlan names it `aiGenerated`; reconcile when wiring).
+- Posts from private profiles are hidden on the profile post list; feed and search filtering is **[LATER]**.
+- **[LATER]** Real points awards via domain events, hourly ranking rebuild, creator profile created server-side on approval, business verification (KYB), live-ad delivery, "who can see my followers" setting.
