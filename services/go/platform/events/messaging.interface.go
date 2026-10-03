@@ -3,8 +3,13 @@ package events
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"log/slog"
 	"sync"
+	"time"
 )
+
+var ErrPoisonMessage = errors.New("poison message")
 
 type DomainEventPublisher interface {
 	PublishDomainEvents(ctx context.Context, events []OutboxEvent) error
@@ -20,7 +25,16 @@ type JobQueue interface {
 	EnqueueJob(ctx context.Context, queueName string, job Job) error
 }
 
+type DelayedJobQueue interface {
+	JobQueue
+	EnqueueJobAfterDelay(ctx context.Context, queueName string, job Job, delay time.Duration) error
+}
+
 type MessageHandler func(ctx context.Context, body []byte) error
+
+type QueueConsumer interface {
+	ConsumeQueueUntilContextDone(ctx context.Context, queueName string, handler MessageHandler, logger *slog.Logger) error
+}
 
 type RecordingPublisher struct {
 	mutex     sync.Mutex
