@@ -18,11 +18,18 @@ import (
 	"zudomart/modules/live/src/generated/ent/goalcontribution"
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
+	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
+	"zudomart/modules/live/src/generated/ent/livemoderator"
 	"zudomart/modules/live/src/generated/ent/liveproduct"
+	"zudomart/modules/live/src/generated/ent/liverecording"
+	"zudomart/modules/live/src/generated/ent/liverestriction"
+	"zudomart/modules/live/src/generated/ent/liveroomsetting"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
+	"zudomart/modules/live/src/generated/ent/overlayscene"
 	"zudomart/modules/live/src/generated/ent/pointsentry"
 	"zudomart/modules/live/src/generated/ent/pointsrule"
 	"zudomart/modules/live/src/generated/ent/predicate"
@@ -52,11 +59,18 @@ const (
 	TypeGoalContribution     = "GoalContribution"
 	TypeGuestSlot            = "GuestSlot"
 	TypeJoinRequest          = "JoinRequest"
+	TypeLiveComment          = "LiveComment"
+	TypeLiveIngress          = "LiveIngress"
 	TypeLiveLeaderboardEntry = "LiveLeaderboardEntry"
+	TypeLiveModerator        = "LiveModerator"
 	TypeLiveProduct          = "LiveProduct"
+	TypeLiveRecording        = "LiveRecording"
+	TypeLiveRestriction      = "LiveRestriction"
+	TypeLiveRoomSetting      = "LiveRoomSetting"
 	TypeLiveSession          = "LiveSession"
 	TypeLiveViewer           = "LiveViewer"
 	TypeOutboxEvent          = "OutboxEvent"
+	TypeOverlayScene         = "OverlayScene"
 	TypePointsEntry          = "PointsEntry"
 	TypePointsRule           = "PointsRule"
 	TypeProcessedGift        = "ProcessedGift"
@@ -8838,6 +8852,1490 @@ func (m *JoinRequestMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown JoinRequest edge %s", name)
 }
 
+// LiveCommentMutation represents an operation that mutates the LiveComment nodes in the graph.
+type LiveCommentMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	live_id        *uuid.UUID
+	author_id      *uuid.UUID
+	body           *string
+	mentions       *[]map[string]interface{}
+	appendmentions []map[string]interface{}
+	reply_to_id    *uuid.UUID
+	deleted_at     *time.Time
+	deleted_by     *uuid.UUID
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*LiveComment, error)
+	predicates     []predicate.LiveComment
+}
+
+var _ ent.Mutation = (*LiveCommentMutation)(nil)
+
+// livecommentOption allows management of the mutation configuration using functional options.
+type livecommentOption func(*LiveCommentMutation)
+
+// newLiveCommentMutation creates new mutation for the LiveComment entity.
+func newLiveCommentMutation(c config, op Op, opts ...livecommentOption) *LiveCommentMutation {
+	m := &LiveCommentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveComment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveCommentID sets the ID field of the mutation.
+func withLiveCommentID(id uuid.UUID) livecommentOption {
+	return func(m *LiveCommentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveComment
+		)
+		m.oldValue = func(ctx context.Context) (*LiveComment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveComment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveComment sets the old LiveComment of the mutation.
+func withLiveComment(node *LiveComment) livecommentOption {
+	return func(m *LiveCommentMutation) {
+		m.oldValue = func(context.Context) (*LiveComment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveCommentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveCommentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveComment entities.
+func (m *LiveCommentMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveCommentMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveCommentMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveComment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveCommentMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveCommentMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveCommentMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveCommentMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveCommentMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveCommentMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetAuthorID sets the "author_id" field.
+func (m *LiveCommentMutation) SetAuthorID(u uuid.UUID) {
+	m.author_id = &u
+}
+
+// AuthorID returns the value of the "author_id" field in the mutation.
+func (m *LiveCommentMutation) AuthorID() (r uuid.UUID, exists bool) {
+	v := m.author_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthorID returns the old "author_id" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldAuthorID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthorID: %w", err)
+	}
+	return oldValue.AuthorID, nil
+}
+
+// ResetAuthorID resets all changes to the "author_id" field.
+func (m *LiveCommentMutation) ResetAuthorID() {
+	m.author_id = nil
+}
+
+// SetBody sets the "body" field.
+func (m *LiveCommentMutation) SetBody(s string) {
+	m.body = &s
+}
+
+// Body returns the value of the "body" field in the mutation.
+func (m *LiveCommentMutation) Body() (r string, exists bool) {
+	v := m.body
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBody returns the old "body" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldBody(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBody is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBody requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBody: %w", err)
+	}
+	return oldValue.Body, nil
+}
+
+// ResetBody resets all changes to the "body" field.
+func (m *LiveCommentMutation) ResetBody() {
+	m.body = nil
+}
+
+// SetMentions sets the "mentions" field.
+func (m *LiveCommentMutation) SetMentions(value []map[string]interface{}) {
+	m.mentions = &value
+	m.appendmentions = nil
+}
+
+// Mentions returns the value of the "mentions" field in the mutation.
+func (m *LiveCommentMutation) Mentions() (r []map[string]interface{}, exists bool) {
+	v := m.mentions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMentions returns the old "mentions" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldMentions(ctx context.Context) (v []map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMentions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMentions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMentions: %w", err)
+	}
+	return oldValue.Mentions, nil
+}
+
+// AppendMentions adds value to the "mentions" field.
+func (m *LiveCommentMutation) AppendMentions(value []map[string]interface{}) {
+	m.appendmentions = append(m.appendmentions, value...)
+}
+
+// AppendedMentions returns the list of values that were appended to the "mentions" field in this mutation.
+func (m *LiveCommentMutation) AppendedMentions() ([]map[string]interface{}, bool) {
+	if len(m.appendmentions) == 0 {
+		return nil, false
+	}
+	return m.appendmentions, true
+}
+
+// ClearMentions clears the value of the "mentions" field.
+func (m *LiveCommentMutation) ClearMentions() {
+	m.mentions = nil
+	m.appendmentions = nil
+	m.clearedFields[livecomment.FieldMentions] = struct{}{}
+}
+
+// MentionsCleared returns if the "mentions" field was cleared in this mutation.
+func (m *LiveCommentMutation) MentionsCleared() bool {
+	_, ok := m.clearedFields[livecomment.FieldMentions]
+	return ok
+}
+
+// ResetMentions resets all changes to the "mentions" field.
+func (m *LiveCommentMutation) ResetMentions() {
+	m.mentions = nil
+	m.appendmentions = nil
+	delete(m.clearedFields, livecomment.FieldMentions)
+}
+
+// SetReplyToID sets the "reply_to_id" field.
+func (m *LiveCommentMutation) SetReplyToID(u uuid.UUID) {
+	m.reply_to_id = &u
+}
+
+// ReplyToID returns the value of the "reply_to_id" field in the mutation.
+func (m *LiveCommentMutation) ReplyToID() (r uuid.UUID, exists bool) {
+	v := m.reply_to_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReplyToID returns the old "reply_to_id" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldReplyToID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReplyToID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReplyToID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReplyToID: %w", err)
+	}
+	return oldValue.ReplyToID, nil
+}
+
+// ClearReplyToID clears the value of the "reply_to_id" field.
+func (m *LiveCommentMutation) ClearReplyToID() {
+	m.reply_to_id = nil
+	m.clearedFields[livecomment.FieldReplyToID] = struct{}{}
+}
+
+// ReplyToIDCleared returns if the "reply_to_id" field was cleared in this mutation.
+func (m *LiveCommentMutation) ReplyToIDCleared() bool {
+	_, ok := m.clearedFields[livecomment.FieldReplyToID]
+	return ok
+}
+
+// ResetReplyToID resets all changes to the "reply_to_id" field.
+func (m *LiveCommentMutation) ResetReplyToID() {
+	m.reply_to_id = nil
+	delete(m.clearedFields, livecomment.FieldReplyToID)
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *LiveCommentMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *LiveCommentMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *LiveCommentMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[livecomment.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *LiveCommentMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[livecomment.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *LiveCommentMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, livecomment.FieldDeletedAt)
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (m *LiveCommentMutation) SetDeletedBy(u uuid.UUID) {
+	m.deleted_by = &u
+}
+
+// DeletedBy returns the value of the "deleted_by" field in the mutation.
+func (m *LiveCommentMutation) DeletedBy() (r uuid.UUID, exists bool) {
+	v := m.deleted_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedBy returns the old "deleted_by" field's value of the LiveComment entity.
+// If the LiveComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveCommentMutation) OldDeletedBy(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedBy: %w", err)
+	}
+	return oldValue.DeletedBy, nil
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (m *LiveCommentMutation) ClearDeletedBy() {
+	m.deleted_by = nil
+	m.clearedFields[livecomment.FieldDeletedBy] = struct{}{}
+}
+
+// DeletedByCleared returns if the "deleted_by" field was cleared in this mutation.
+func (m *LiveCommentMutation) DeletedByCleared() bool {
+	_, ok := m.clearedFields[livecomment.FieldDeletedBy]
+	return ok
+}
+
+// ResetDeletedBy resets all changes to the "deleted_by" field.
+func (m *LiveCommentMutation) ResetDeletedBy() {
+	m.deleted_by = nil
+	delete(m.clearedFields, livecomment.FieldDeletedBy)
+}
+
+// Where appends a list predicates to the LiveCommentMutation builder.
+func (m *LiveCommentMutation) Where(ps ...predicate.LiveComment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveCommentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveCommentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveComment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveCommentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveCommentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveComment).
+func (m *LiveCommentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveCommentMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, livecomment.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, livecomment.FieldLiveID)
+	}
+	if m.author_id != nil {
+		fields = append(fields, livecomment.FieldAuthorID)
+	}
+	if m.body != nil {
+		fields = append(fields, livecomment.FieldBody)
+	}
+	if m.mentions != nil {
+		fields = append(fields, livecomment.FieldMentions)
+	}
+	if m.reply_to_id != nil {
+		fields = append(fields, livecomment.FieldReplyToID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, livecomment.FieldDeletedAt)
+	}
+	if m.deleted_by != nil {
+		fields = append(fields, livecomment.FieldDeletedBy)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveCommentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case livecomment.FieldCreatedAt:
+		return m.CreatedAt()
+	case livecomment.FieldLiveID:
+		return m.LiveID()
+	case livecomment.FieldAuthorID:
+		return m.AuthorID()
+	case livecomment.FieldBody:
+		return m.Body()
+	case livecomment.FieldMentions:
+		return m.Mentions()
+	case livecomment.FieldReplyToID:
+		return m.ReplyToID()
+	case livecomment.FieldDeletedAt:
+		return m.DeletedAt()
+	case livecomment.FieldDeletedBy:
+		return m.DeletedBy()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveCommentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case livecomment.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case livecomment.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case livecomment.FieldAuthorID:
+		return m.OldAuthorID(ctx)
+	case livecomment.FieldBody:
+		return m.OldBody(ctx)
+	case livecomment.FieldMentions:
+		return m.OldMentions(ctx)
+	case livecomment.FieldReplyToID:
+		return m.OldReplyToID(ctx)
+	case livecomment.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case livecomment.FieldDeletedBy:
+		return m.OldDeletedBy(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveComment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveCommentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case livecomment.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case livecomment.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case livecomment.FieldAuthorID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthorID(v)
+		return nil
+	case livecomment.FieldBody:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBody(v)
+		return nil
+	case livecomment.FieldMentions:
+		v, ok := value.([]map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMentions(v)
+		return nil
+	case livecomment.FieldReplyToID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReplyToID(v)
+		return nil
+	case livecomment.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case livecomment.FieldDeletedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveComment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveCommentMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveCommentMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveCommentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LiveComment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveCommentMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(livecomment.FieldMentions) {
+		fields = append(fields, livecomment.FieldMentions)
+	}
+	if m.FieldCleared(livecomment.FieldReplyToID) {
+		fields = append(fields, livecomment.FieldReplyToID)
+	}
+	if m.FieldCleared(livecomment.FieldDeletedAt) {
+		fields = append(fields, livecomment.FieldDeletedAt)
+	}
+	if m.FieldCleared(livecomment.FieldDeletedBy) {
+		fields = append(fields, livecomment.FieldDeletedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveCommentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveCommentMutation) ClearField(name string) error {
+	switch name {
+	case livecomment.FieldMentions:
+		m.ClearMentions()
+		return nil
+	case livecomment.FieldReplyToID:
+		m.ClearReplyToID()
+		return nil
+	case livecomment.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case livecomment.FieldDeletedBy:
+		m.ClearDeletedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveComment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveCommentMutation) ResetField(name string) error {
+	switch name {
+	case livecomment.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case livecomment.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case livecomment.FieldAuthorID:
+		m.ResetAuthorID()
+		return nil
+	case livecomment.FieldBody:
+		m.ResetBody()
+		return nil
+	case livecomment.FieldMentions:
+		m.ResetMentions()
+		return nil
+	case livecomment.FieldReplyToID:
+		m.ResetReplyToID()
+		return nil
+	case livecomment.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case livecomment.FieldDeletedBy:
+		m.ResetDeletedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveComment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveCommentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveCommentMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveCommentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveCommentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveCommentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveCommentMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveCommentMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveComment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveCommentMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveComment edge %s", name)
+}
+
+// LiveIngressMutation represents an operation that mutates the LiveIngress nodes in the graph.
+type LiveIngressMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	created_at         *time.Time
+	live_id            *uuid.UUID
+	livekit_ingress_id *string
+	protocol           *liveingress.Protocol
+	stream_key_hint    *string
+	state              *liveingress.State
+	revoked_at         *time.Time
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*LiveIngress, error)
+	predicates         []predicate.LiveIngress
+}
+
+var _ ent.Mutation = (*LiveIngressMutation)(nil)
+
+// liveingressOption allows management of the mutation configuration using functional options.
+type liveingressOption func(*LiveIngressMutation)
+
+// newLiveIngressMutation creates new mutation for the LiveIngress entity.
+func newLiveIngressMutation(c config, op Op, opts ...liveingressOption) *LiveIngressMutation {
+	m := &LiveIngressMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveIngress,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveIngressID sets the ID field of the mutation.
+func withLiveIngressID(id uuid.UUID) liveingressOption {
+	return func(m *LiveIngressMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveIngress
+		)
+		m.oldValue = func(ctx context.Context) (*LiveIngress, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveIngress.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveIngress sets the old LiveIngress of the mutation.
+func withLiveIngress(node *LiveIngress) liveingressOption {
+	return func(m *LiveIngressMutation) {
+		m.oldValue = func(context.Context) (*LiveIngress, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveIngressMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveIngressMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveIngress entities.
+func (m *LiveIngressMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveIngressMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveIngressMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveIngress.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveIngressMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveIngressMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveIngressMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveIngressMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveIngressMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveIngressMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetLivekitIngressID sets the "livekit_ingress_id" field.
+func (m *LiveIngressMutation) SetLivekitIngressID(s string) {
+	m.livekit_ingress_id = &s
+}
+
+// LivekitIngressID returns the value of the "livekit_ingress_id" field in the mutation.
+func (m *LiveIngressMutation) LivekitIngressID() (r string, exists bool) {
+	v := m.livekit_ingress_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLivekitIngressID returns the old "livekit_ingress_id" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldLivekitIngressID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLivekitIngressID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLivekitIngressID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLivekitIngressID: %w", err)
+	}
+	return oldValue.LivekitIngressID, nil
+}
+
+// ResetLivekitIngressID resets all changes to the "livekit_ingress_id" field.
+func (m *LiveIngressMutation) ResetLivekitIngressID() {
+	m.livekit_ingress_id = nil
+}
+
+// SetProtocol sets the "protocol" field.
+func (m *LiveIngressMutation) SetProtocol(l liveingress.Protocol) {
+	m.protocol = &l
+}
+
+// Protocol returns the value of the "protocol" field in the mutation.
+func (m *LiveIngressMutation) Protocol() (r liveingress.Protocol, exists bool) {
+	v := m.protocol
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtocol returns the old "protocol" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldProtocol(ctx context.Context) (v liveingress.Protocol, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtocol is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtocol requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtocol: %w", err)
+	}
+	return oldValue.Protocol, nil
+}
+
+// ResetProtocol resets all changes to the "protocol" field.
+func (m *LiveIngressMutation) ResetProtocol() {
+	m.protocol = nil
+}
+
+// SetStreamKeyHint sets the "stream_key_hint" field.
+func (m *LiveIngressMutation) SetStreamKeyHint(s string) {
+	m.stream_key_hint = &s
+}
+
+// StreamKeyHint returns the value of the "stream_key_hint" field in the mutation.
+func (m *LiveIngressMutation) StreamKeyHint() (r string, exists bool) {
+	v := m.stream_key_hint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreamKeyHint returns the old "stream_key_hint" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldStreamKeyHint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreamKeyHint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreamKeyHint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreamKeyHint: %w", err)
+	}
+	return oldValue.StreamKeyHint, nil
+}
+
+// ResetStreamKeyHint resets all changes to the "stream_key_hint" field.
+func (m *LiveIngressMutation) ResetStreamKeyHint() {
+	m.stream_key_hint = nil
+}
+
+// SetState sets the "state" field.
+func (m *LiveIngressMutation) SetState(l liveingress.State) {
+	m.state = &l
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *LiveIngressMutation) State() (r liveingress.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldState(ctx context.Context) (v liveingress.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *LiveIngressMutation) ResetState() {
+	m.state = nil
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *LiveIngressMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *LiveIngressMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the LiveIngress entity.
+// If the LiveIngress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveIngressMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *LiveIngressMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[liveingress.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *LiveIngressMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[liveingress.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *LiveIngressMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, liveingress.FieldRevokedAt)
+}
+
+// Where appends a list predicates to the LiveIngressMutation builder.
+func (m *LiveIngressMutation) Where(ps ...predicate.LiveIngress) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveIngressMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveIngressMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveIngress, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveIngressMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveIngressMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveIngress).
+func (m *LiveIngressMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveIngressMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, liveingress.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, liveingress.FieldLiveID)
+	}
+	if m.livekit_ingress_id != nil {
+		fields = append(fields, liveingress.FieldLivekitIngressID)
+	}
+	if m.protocol != nil {
+		fields = append(fields, liveingress.FieldProtocol)
+	}
+	if m.stream_key_hint != nil {
+		fields = append(fields, liveingress.FieldStreamKeyHint)
+	}
+	if m.state != nil {
+		fields = append(fields, liveingress.FieldState)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, liveingress.FieldRevokedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveIngressMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case liveingress.FieldCreatedAt:
+		return m.CreatedAt()
+	case liveingress.FieldLiveID:
+		return m.LiveID()
+	case liveingress.FieldLivekitIngressID:
+		return m.LivekitIngressID()
+	case liveingress.FieldProtocol:
+		return m.Protocol()
+	case liveingress.FieldStreamKeyHint:
+		return m.StreamKeyHint()
+	case liveingress.FieldState:
+		return m.State()
+	case liveingress.FieldRevokedAt:
+		return m.RevokedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveIngressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case liveingress.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case liveingress.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case liveingress.FieldLivekitIngressID:
+		return m.OldLivekitIngressID(ctx)
+	case liveingress.FieldProtocol:
+		return m.OldProtocol(ctx)
+	case liveingress.FieldStreamKeyHint:
+		return m.OldStreamKeyHint(ctx)
+	case liveingress.FieldState:
+		return m.OldState(ctx)
+	case liveingress.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveIngress field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveIngressMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case liveingress.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case liveingress.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case liveingress.FieldLivekitIngressID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLivekitIngressID(v)
+		return nil
+	case liveingress.FieldProtocol:
+		v, ok := value.(liveingress.Protocol)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtocol(v)
+		return nil
+	case liveingress.FieldStreamKeyHint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreamKeyHint(v)
+		return nil
+	case liveingress.FieldState:
+		v, ok := value.(liveingress.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case liveingress.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveIngress field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveIngressMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveIngressMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveIngressMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LiveIngress numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveIngressMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(liveingress.FieldRevokedAt) {
+		fields = append(fields, liveingress.FieldRevokedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveIngressMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveIngressMutation) ClearField(name string) error {
+	switch name {
+	case liveingress.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveIngress nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveIngressMutation) ResetField(name string) error {
+	switch name {
+	case liveingress.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case liveingress.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case liveingress.FieldLivekitIngressID:
+		m.ResetLivekitIngressID()
+		return nil
+	case liveingress.FieldProtocol:
+		m.ResetProtocol()
+		return nil
+	case liveingress.FieldStreamKeyHint:
+		m.ResetStreamKeyHint()
+		return nil
+	case liveingress.FieldState:
+		m.ResetState()
+		return nil
+	case liveingress.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveIngress field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveIngressMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveIngressMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveIngressMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveIngressMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveIngressMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveIngressMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveIngressMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveIngress unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveIngressMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveIngress edge %s", name)
+}
+
 // LiveLeaderboardEntryMutation represents an operation that mutates the LiveLeaderboardEntry nodes in the graph.
 type LiveLeaderboardEntryMutation struct {
 	config
@@ -9542,6 +11040,500 @@ func (m *LiveLeaderboardEntryMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown LiveLeaderboardEntry edge %s", name)
 }
 
+// LiveModeratorMutation represents an operation that mutates the LiveModerator nodes in the graph.
+type LiveModeratorMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	live_id       *uuid.UUID
+	user_id       *uuid.UUID
+	granted_by    *uuid.UUID
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*LiveModerator, error)
+	predicates    []predicate.LiveModerator
+}
+
+var _ ent.Mutation = (*LiveModeratorMutation)(nil)
+
+// livemoderatorOption allows management of the mutation configuration using functional options.
+type livemoderatorOption func(*LiveModeratorMutation)
+
+// newLiveModeratorMutation creates new mutation for the LiveModerator entity.
+func newLiveModeratorMutation(c config, op Op, opts ...livemoderatorOption) *LiveModeratorMutation {
+	m := &LiveModeratorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveModerator,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveModeratorID sets the ID field of the mutation.
+func withLiveModeratorID(id uuid.UUID) livemoderatorOption {
+	return func(m *LiveModeratorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveModerator
+		)
+		m.oldValue = func(ctx context.Context) (*LiveModerator, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveModerator.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveModerator sets the old LiveModerator of the mutation.
+func withLiveModerator(node *LiveModerator) livemoderatorOption {
+	return func(m *LiveModeratorMutation) {
+		m.oldValue = func(context.Context) (*LiveModerator, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveModeratorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveModeratorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveModerator entities.
+func (m *LiveModeratorMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveModeratorMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveModeratorMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveModerator.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveModeratorMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveModeratorMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveModerator entity.
+// If the LiveModerator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveModeratorMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveModeratorMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveModeratorMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveModeratorMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveModerator entity.
+// If the LiveModerator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveModeratorMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveModeratorMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *LiveModeratorMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *LiveModeratorMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the LiveModerator entity.
+// If the LiveModerator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveModeratorMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *LiveModeratorMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetGrantedBy sets the "granted_by" field.
+func (m *LiveModeratorMutation) SetGrantedBy(u uuid.UUID) {
+	m.granted_by = &u
+}
+
+// GrantedBy returns the value of the "granted_by" field in the mutation.
+func (m *LiveModeratorMutation) GrantedBy() (r uuid.UUID, exists bool) {
+	v := m.granted_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGrantedBy returns the old "granted_by" field's value of the LiveModerator entity.
+// If the LiveModerator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveModeratorMutation) OldGrantedBy(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGrantedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGrantedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGrantedBy: %w", err)
+	}
+	return oldValue.GrantedBy, nil
+}
+
+// ResetGrantedBy resets all changes to the "granted_by" field.
+func (m *LiveModeratorMutation) ResetGrantedBy() {
+	m.granted_by = nil
+}
+
+// Where appends a list predicates to the LiveModeratorMutation builder.
+func (m *LiveModeratorMutation) Where(ps ...predicate.LiveModerator) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveModeratorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveModeratorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveModerator, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveModeratorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveModeratorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveModerator).
+func (m *LiveModeratorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveModeratorMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, livemoderator.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, livemoderator.FieldLiveID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, livemoderator.FieldUserID)
+	}
+	if m.granted_by != nil {
+		fields = append(fields, livemoderator.FieldGrantedBy)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveModeratorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case livemoderator.FieldCreatedAt:
+		return m.CreatedAt()
+	case livemoderator.FieldLiveID:
+		return m.LiveID()
+	case livemoderator.FieldUserID:
+		return m.UserID()
+	case livemoderator.FieldGrantedBy:
+		return m.GrantedBy()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveModeratorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case livemoderator.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case livemoderator.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case livemoderator.FieldUserID:
+		return m.OldUserID(ctx)
+	case livemoderator.FieldGrantedBy:
+		return m.OldGrantedBy(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveModerator field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveModeratorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case livemoderator.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case livemoderator.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case livemoderator.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case livemoderator.FieldGrantedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGrantedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveModerator field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveModeratorMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveModeratorMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveModeratorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LiveModerator numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveModeratorMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveModeratorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveModeratorMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown LiveModerator nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveModeratorMutation) ResetField(name string) error {
+	switch name {
+	case livemoderator.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case livemoderator.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case livemoderator.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case livemoderator.FieldGrantedBy:
+		m.ResetGrantedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveModerator field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveModeratorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveModeratorMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveModeratorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveModeratorMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveModeratorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveModeratorMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveModeratorMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveModerator unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveModeratorMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveModerator edge %s", name)
+}
+
 // LiveProductMutation represents an operation that mutates the LiveProduct nodes in the graph.
 type LiveProductMutation struct {
 	config
@@ -10110,6 +12102,2219 @@ func (m *LiveProductMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *LiveProductMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown LiveProduct edge %s", name)
+}
+
+// LiveRecordingMutation represents an operation that mutates the LiveRecording nodes in the graph.
+type LiveRecordingMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	live_id             *uuid.UUID
+	egress_id           *string
+	state               *liverecording.State
+	object_key          *string
+	duration_seconds    *int64
+	addduration_seconds *int64
+	size_bytes          *int64
+	addsize_bytes       *int64
+	failure_reason      *string
+	completed_at        *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*LiveRecording, error)
+	predicates          []predicate.LiveRecording
+}
+
+var _ ent.Mutation = (*LiveRecordingMutation)(nil)
+
+// liverecordingOption allows management of the mutation configuration using functional options.
+type liverecordingOption func(*LiveRecordingMutation)
+
+// newLiveRecordingMutation creates new mutation for the LiveRecording entity.
+func newLiveRecordingMutation(c config, op Op, opts ...liverecordingOption) *LiveRecordingMutation {
+	m := &LiveRecordingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveRecording,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveRecordingID sets the ID field of the mutation.
+func withLiveRecordingID(id uuid.UUID) liverecordingOption {
+	return func(m *LiveRecordingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveRecording
+		)
+		m.oldValue = func(ctx context.Context) (*LiveRecording, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveRecording.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveRecording sets the old LiveRecording of the mutation.
+func withLiveRecording(node *LiveRecording) liverecordingOption {
+	return func(m *LiveRecordingMutation) {
+		m.oldValue = func(context.Context) (*LiveRecording, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveRecordingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveRecordingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveRecording entities.
+func (m *LiveRecordingMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveRecordingMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveRecordingMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveRecording.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveRecordingMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveRecordingMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveRecordingMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveRecordingMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveRecordingMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveRecordingMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetEgressID sets the "egress_id" field.
+func (m *LiveRecordingMutation) SetEgressID(s string) {
+	m.egress_id = &s
+}
+
+// EgressID returns the value of the "egress_id" field in the mutation.
+func (m *LiveRecordingMutation) EgressID() (r string, exists bool) {
+	v := m.egress_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEgressID returns the old "egress_id" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldEgressID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEgressID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEgressID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEgressID: %w", err)
+	}
+	return oldValue.EgressID, nil
+}
+
+// ResetEgressID resets all changes to the "egress_id" field.
+func (m *LiveRecordingMutation) ResetEgressID() {
+	m.egress_id = nil
+}
+
+// SetState sets the "state" field.
+func (m *LiveRecordingMutation) SetState(l liverecording.State) {
+	m.state = &l
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *LiveRecordingMutation) State() (r liverecording.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldState(ctx context.Context) (v liverecording.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *LiveRecordingMutation) ResetState() {
+	m.state = nil
+}
+
+// SetObjectKey sets the "object_key" field.
+func (m *LiveRecordingMutation) SetObjectKey(s string) {
+	m.object_key = &s
+}
+
+// ObjectKey returns the value of the "object_key" field in the mutation.
+func (m *LiveRecordingMutation) ObjectKey() (r string, exists bool) {
+	v := m.object_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldObjectKey returns the old "object_key" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldObjectKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldObjectKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldObjectKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldObjectKey: %w", err)
+	}
+	return oldValue.ObjectKey, nil
+}
+
+// ResetObjectKey resets all changes to the "object_key" field.
+func (m *LiveRecordingMutation) ResetObjectKey() {
+	m.object_key = nil
+}
+
+// SetDurationSeconds sets the "duration_seconds" field.
+func (m *LiveRecordingMutation) SetDurationSeconds(i int64) {
+	m.duration_seconds = &i
+	m.addduration_seconds = nil
+}
+
+// DurationSeconds returns the value of the "duration_seconds" field in the mutation.
+func (m *LiveRecordingMutation) DurationSeconds() (r int64, exists bool) {
+	v := m.duration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDurationSeconds returns the old "duration_seconds" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldDurationSeconds(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDurationSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDurationSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDurationSeconds: %w", err)
+	}
+	return oldValue.DurationSeconds, nil
+}
+
+// AddDurationSeconds adds i to the "duration_seconds" field.
+func (m *LiveRecordingMutation) AddDurationSeconds(i int64) {
+	if m.addduration_seconds != nil {
+		*m.addduration_seconds += i
+	} else {
+		m.addduration_seconds = &i
+	}
+}
+
+// AddedDurationSeconds returns the value that was added to the "duration_seconds" field in this mutation.
+func (m *LiveRecordingMutation) AddedDurationSeconds() (r int64, exists bool) {
+	v := m.addduration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDurationSeconds resets all changes to the "duration_seconds" field.
+func (m *LiveRecordingMutation) ResetDurationSeconds() {
+	m.duration_seconds = nil
+	m.addduration_seconds = nil
+}
+
+// SetSizeBytes sets the "size_bytes" field.
+func (m *LiveRecordingMutation) SetSizeBytes(i int64) {
+	m.size_bytes = &i
+	m.addsize_bytes = nil
+}
+
+// SizeBytes returns the value of the "size_bytes" field in the mutation.
+func (m *LiveRecordingMutation) SizeBytes() (r int64, exists bool) {
+	v := m.size_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSizeBytes returns the old "size_bytes" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldSizeBytes(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSizeBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSizeBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSizeBytes: %w", err)
+	}
+	return oldValue.SizeBytes, nil
+}
+
+// AddSizeBytes adds i to the "size_bytes" field.
+func (m *LiveRecordingMutation) AddSizeBytes(i int64) {
+	if m.addsize_bytes != nil {
+		*m.addsize_bytes += i
+	} else {
+		m.addsize_bytes = &i
+	}
+}
+
+// AddedSizeBytes returns the value that was added to the "size_bytes" field in this mutation.
+func (m *LiveRecordingMutation) AddedSizeBytes() (r int64, exists bool) {
+	v := m.addsize_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSizeBytes resets all changes to the "size_bytes" field.
+func (m *LiveRecordingMutation) ResetSizeBytes() {
+	m.size_bytes = nil
+	m.addsize_bytes = nil
+}
+
+// SetFailureReason sets the "failure_reason" field.
+func (m *LiveRecordingMutation) SetFailureReason(s string) {
+	m.failure_reason = &s
+}
+
+// FailureReason returns the value of the "failure_reason" field in the mutation.
+func (m *LiveRecordingMutation) FailureReason() (r string, exists bool) {
+	v := m.failure_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailureReason returns the old "failure_reason" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldFailureReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailureReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailureReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailureReason: %w", err)
+	}
+	return oldValue.FailureReason, nil
+}
+
+// ClearFailureReason clears the value of the "failure_reason" field.
+func (m *LiveRecordingMutation) ClearFailureReason() {
+	m.failure_reason = nil
+	m.clearedFields[liverecording.FieldFailureReason] = struct{}{}
+}
+
+// FailureReasonCleared returns if the "failure_reason" field was cleared in this mutation.
+func (m *LiveRecordingMutation) FailureReasonCleared() bool {
+	_, ok := m.clearedFields[liverecording.FieldFailureReason]
+	return ok
+}
+
+// ResetFailureReason resets all changes to the "failure_reason" field.
+func (m *LiveRecordingMutation) ResetFailureReason() {
+	m.failure_reason = nil
+	delete(m.clearedFields, liverecording.FieldFailureReason)
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *LiveRecordingMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *LiveRecordingMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *LiveRecordingMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[liverecording.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *LiveRecordingMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[liverecording.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *LiveRecordingMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, liverecording.FieldCompletedAt)
+}
+
+// Where appends a list predicates to the LiveRecordingMutation builder.
+func (m *LiveRecordingMutation) Where(ps ...predicate.LiveRecording) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveRecordingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveRecordingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveRecording, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveRecordingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveRecordingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveRecording).
+func (m *LiveRecordingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveRecordingMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, liverecording.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, liverecording.FieldLiveID)
+	}
+	if m.egress_id != nil {
+		fields = append(fields, liverecording.FieldEgressID)
+	}
+	if m.state != nil {
+		fields = append(fields, liverecording.FieldState)
+	}
+	if m.object_key != nil {
+		fields = append(fields, liverecording.FieldObjectKey)
+	}
+	if m.duration_seconds != nil {
+		fields = append(fields, liverecording.FieldDurationSeconds)
+	}
+	if m.size_bytes != nil {
+		fields = append(fields, liverecording.FieldSizeBytes)
+	}
+	if m.failure_reason != nil {
+		fields = append(fields, liverecording.FieldFailureReason)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, liverecording.FieldCompletedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveRecordingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case liverecording.FieldCreatedAt:
+		return m.CreatedAt()
+	case liverecording.FieldLiveID:
+		return m.LiveID()
+	case liverecording.FieldEgressID:
+		return m.EgressID()
+	case liverecording.FieldState:
+		return m.State()
+	case liverecording.FieldObjectKey:
+		return m.ObjectKey()
+	case liverecording.FieldDurationSeconds:
+		return m.DurationSeconds()
+	case liverecording.FieldSizeBytes:
+		return m.SizeBytes()
+	case liverecording.FieldFailureReason:
+		return m.FailureReason()
+	case liverecording.FieldCompletedAt:
+		return m.CompletedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveRecordingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case liverecording.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case liverecording.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case liverecording.FieldEgressID:
+		return m.OldEgressID(ctx)
+	case liverecording.FieldState:
+		return m.OldState(ctx)
+	case liverecording.FieldObjectKey:
+		return m.OldObjectKey(ctx)
+	case liverecording.FieldDurationSeconds:
+		return m.OldDurationSeconds(ctx)
+	case liverecording.FieldSizeBytes:
+		return m.OldSizeBytes(ctx)
+	case liverecording.FieldFailureReason:
+		return m.OldFailureReason(ctx)
+	case liverecording.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveRecording field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRecordingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case liverecording.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case liverecording.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case liverecording.FieldEgressID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEgressID(v)
+		return nil
+	case liverecording.FieldState:
+		v, ok := value.(liverecording.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case liverecording.FieldObjectKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetObjectKey(v)
+		return nil
+	case liverecording.FieldDurationSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDurationSeconds(v)
+		return nil
+	case liverecording.FieldSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSizeBytes(v)
+		return nil
+	case liverecording.FieldFailureReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailureReason(v)
+		return nil
+	case liverecording.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRecording field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveRecordingMutation) AddedFields() []string {
+	var fields []string
+	if m.addduration_seconds != nil {
+		fields = append(fields, liverecording.FieldDurationSeconds)
+	}
+	if m.addsize_bytes != nil {
+		fields = append(fields, liverecording.FieldSizeBytes)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveRecordingMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case liverecording.FieldDurationSeconds:
+		return m.AddedDurationSeconds()
+	case liverecording.FieldSizeBytes:
+		return m.AddedSizeBytes()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRecordingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case liverecording.FieldDurationSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDurationSeconds(v)
+		return nil
+	case liverecording.FieldSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSizeBytes(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRecording numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveRecordingMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(liverecording.FieldFailureReason) {
+		fields = append(fields, liverecording.FieldFailureReason)
+	}
+	if m.FieldCleared(liverecording.FieldCompletedAt) {
+		fields = append(fields, liverecording.FieldCompletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveRecordingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveRecordingMutation) ClearField(name string) error {
+	switch name {
+	case liverecording.FieldFailureReason:
+		m.ClearFailureReason()
+		return nil
+	case liverecording.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRecording nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveRecordingMutation) ResetField(name string) error {
+	switch name {
+	case liverecording.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case liverecording.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case liverecording.FieldEgressID:
+		m.ResetEgressID()
+		return nil
+	case liverecording.FieldState:
+		m.ResetState()
+		return nil
+	case liverecording.FieldObjectKey:
+		m.ResetObjectKey()
+		return nil
+	case liverecording.FieldDurationSeconds:
+		m.ResetDurationSeconds()
+		return nil
+	case liverecording.FieldSizeBytes:
+		m.ResetSizeBytes()
+		return nil
+	case liverecording.FieldFailureReason:
+		m.ResetFailureReason()
+		return nil
+	case liverecording.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRecording field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveRecordingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveRecordingMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveRecordingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveRecordingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveRecordingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveRecordingMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveRecordingMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveRecording unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveRecordingMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveRecording edge %s", name)
+}
+
+// LiveRestrictionMutation represents an operation that mutates the LiveRestriction nodes in the graph.
+type LiveRestrictionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	live_id       *uuid.UUID
+	user_id       *uuid.UUID
+	kind          *liverestriction.Kind
+	imposed_by    *uuid.UUID
+	reason        *string
+	expires_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*LiveRestriction, error)
+	predicates    []predicate.LiveRestriction
+}
+
+var _ ent.Mutation = (*LiveRestrictionMutation)(nil)
+
+// liverestrictionOption allows management of the mutation configuration using functional options.
+type liverestrictionOption func(*LiveRestrictionMutation)
+
+// newLiveRestrictionMutation creates new mutation for the LiveRestriction entity.
+func newLiveRestrictionMutation(c config, op Op, opts ...liverestrictionOption) *LiveRestrictionMutation {
+	m := &LiveRestrictionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveRestriction,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveRestrictionID sets the ID field of the mutation.
+func withLiveRestrictionID(id uuid.UUID) liverestrictionOption {
+	return func(m *LiveRestrictionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveRestriction
+		)
+		m.oldValue = func(ctx context.Context) (*LiveRestriction, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveRestriction.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveRestriction sets the old LiveRestriction of the mutation.
+func withLiveRestriction(node *LiveRestriction) liverestrictionOption {
+	return func(m *LiveRestrictionMutation) {
+		m.oldValue = func(context.Context) (*LiveRestriction, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveRestrictionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveRestrictionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveRestriction entities.
+func (m *LiveRestrictionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveRestrictionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveRestrictionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveRestriction.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveRestrictionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveRestrictionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveRestrictionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveRestrictionMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveRestrictionMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveRestrictionMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *LiveRestrictionMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *LiveRestrictionMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *LiveRestrictionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *LiveRestrictionMutation) SetKind(l liverestriction.Kind) {
+	m.kind = &l
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *LiveRestrictionMutation) Kind() (r liverestriction.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldKind(ctx context.Context) (v liverestriction.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *LiveRestrictionMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetImposedBy sets the "imposed_by" field.
+func (m *LiveRestrictionMutation) SetImposedBy(u uuid.UUID) {
+	m.imposed_by = &u
+}
+
+// ImposedBy returns the value of the "imposed_by" field in the mutation.
+func (m *LiveRestrictionMutation) ImposedBy() (r uuid.UUID, exists bool) {
+	v := m.imposed_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImposedBy returns the old "imposed_by" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldImposedBy(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImposedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImposedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImposedBy: %w", err)
+	}
+	return oldValue.ImposedBy, nil
+}
+
+// ResetImposedBy resets all changes to the "imposed_by" field.
+func (m *LiveRestrictionMutation) ResetImposedBy() {
+	m.imposed_by = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *LiveRestrictionMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *LiveRestrictionMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ClearReason clears the value of the "reason" field.
+func (m *LiveRestrictionMutation) ClearReason() {
+	m.reason = nil
+	m.clearedFields[liverestriction.FieldReason] = struct{}{}
+}
+
+// ReasonCleared returns if the "reason" field was cleared in this mutation.
+func (m *LiveRestrictionMutation) ReasonCleared() bool {
+	_, ok := m.clearedFields[liverestriction.FieldReason]
+	return ok
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *LiveRestrictionMutation) ResetReason() {
+	m.reason = nil
+	delete(m.clearedFields, liverestriction.FieldReason)
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *LiveRestrictionMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *LiveRestrictionMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the LiveRestriction entity.
+// If the LiveRestriction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRestrictionMutation) OldExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *LiveRestrictionMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[liverestriction.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *LiveRestrictionMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[liverestriction.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *LiveRestrictionMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, liverestriction.FieldExpiresAt)
+}
+
+// Where appends a list predicates to the LiveRestrictionMutation builder.
+func (m *LiveRestrictionMutation) Where(ps ...predicate.LiveRestriction) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveRestrictionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveRestrictionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveRestriction, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveRestrictionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveRestrictionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveRestriction).
+func (m *LiveRestrictionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveRestrictionMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, liverestriction.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, liverestriction.FieldLiveID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, liverestriction.FieldUserID)
+	}
+	if m.kind != nil {
+		fields = append(fields, liverestriction.FieldKind)
+	}
+	if m.imposed_by != nil {
+		fields = append(fields, liverestriction.FieldImposedBy)
+	}
+	if m.reason != nil {
+		fields = append(fields, liverestriction.FieldReason)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, liverestriction.FieldExpiresAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveRestrictionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case liverestriction.FieldCreatedAt:
+		return m.CreatedAt()
+	case liverestriction.FieldLiveID:
+		return m.LiveID()
+	case liverestriction.FieldUserID:
+		return m.UserID()
+	case liverestriction.FieldKind:
+		return m.Kind()
+	case liverestriction.FieldImposedBy:
+		return m.ImposedBy()
+	case liverestriction.FieldReason:
+		return m.Reason()
+	case liverestriction.FieldExpiresAt:
+		return m.ExpiresAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveRestrictionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case liverestriction.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case liverestriction.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case liverestriction.FieldUserID:
+		return m.OldUserID(ctx)
+	case liverestriction.FieldKind:
+		return m.OldKind(ctx)
+	case liverestriction.FieldImposedBy:
+		return m.OldImposedBy(ctx)
+	case liverestriction.FieldReason:
+		return m.OldReason(ctx)
+	case liverestriction.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveRestriction field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRestrictionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case liverestriction.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case liverestriction.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case liverestriction.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case liverestriction.FieldKind:
+		v, ok := value.(liverestriction.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case liverestriction.FieldImposedBy:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImposedBy(v)
+		return nil
+	case liverestriction.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case liverestriction.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRestriction field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveRestrictionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveRestrictionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRestrictionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LiveRestriction numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveRestrictionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(liverestriction.FieldReason) {
+		fields = append(fields, liverestriction.FieldReason)
+	}
+	if m.FieldCleared(liverestriction.FieldExpiresAt) {
+		fields = append(fields, liverestriction.FieldExpiresAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveRestrictionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveRestrictionMutation) ClearField(name string) error {
+	switch name {
+	case liverestriction.FieldReason:
+		m.ClearReason()
+		return nil
+	case liverestriction.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRestriction nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveRestrictionMutation) ResetField(name string) error {
+	switch name {
+	case liverestriction.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case liverestriction.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case liverestriction.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case liverestriction.FieldKind:
+		m.ResetKind()
+		return nil
+	case liverestriction.FieldImposedBy:
+		m.ResetImposedBy()
+		return nil
+	case liverestriction.FieldReason:
+		m.ResetReason()
+		return nil
+	case liverestriction.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRestriction field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveRestrictionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveRestrictionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveRestrictionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveRestrictionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveRestrictionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveRestrictionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveRestrictionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveRestriction unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveRestrictionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveRestriction edge %s", name)
+}
+
+// LiveRoomSettingMutation represents an operation that mutates the LiveRoomSetting nodes in the graph.
+type LiveRoomSettingMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	comments_enabled     *bool
+	slow_mode_seconds    *int
+	addslow_mode_seconds *int
+	blocked_words        *[]string
+	appendblocked_words  []string
+	pinned_comment_id    *uuid.UUID
+	record_enabled       *bool
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*LiveRoomSetting, error)
+	predicates           []predicate.LiveRoomSetting
+}
+
+var _ ent.Mutation = (*LiveRoomSettingMutation)(nil)
+
+// liveroomsettingOption allows management of the mutation configuration using functional options.
+type liveroomsettingOption func(*LiveRoomSettingMutation)
+
+// newLiveRoomSettingMutation creates new mutation for the LiveRoomSetting entity.
+func newLiveRoomSettingMutation(c config, op Op, opts ...liveroomsettingOption) *LiveRoomSettingMutation {
+	m := &LiveRoomSettingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveRoomSetting,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveRoomSettingID sets the ID field of the mutation.
+func withLiveRoomSettingID(id uuid.UUID) liveroomsettingOption {
+	return func(m *LiveRoomSettingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveRoomSetting
+		)
+		m.oldValue = func(ctx context.Context) (*LiveRoomSetting, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveRoomSetting.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveRoomSetting sets the old LiveRoomSetting of the mutation.
+func withLiveRoomSetting(node *LiveRoomSetting) liveroomsettingOption {
+	return func(m *LiveRoomSettingMutation) {
+		m.oldValue = func(context.Context) (*LiveRoomSetting, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveRoomSettingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveRoomSettingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveRoomSetting entities.
+func (m *LiveRoomSettingMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveRoomSettingMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveRoomSettingMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveRoomSetting.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCommentsEnabled sets the "comments_enabled" field.
+func (m *LiveRoomSettingMutation) SetCommentsEnabled(b bool) {
+	m.comments_enabled = &b
+}
+
+// CommentsEnabled returns the value of the "comments_enabled" field in the mutation.
+func (m *LiveRoomSettingMutation) CommentsEnabled() (r bool, exists bool) {
+	v := m.comments_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommentsEnabled returns the old "comments_enabled" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldCommentsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommentsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommentsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommentsEnabled: %w", err)
+	}
+	return oldValue.CommentsEnabled, nil
+}
+
+// ResetCommentsEnabled resets all changes to the "comments_enabled" field.
+func (m *LiveRoomSettingMutation) ResetCommentsEnabled() {
+	m.comments_enabled = nil
+}
+
+// SetSlowModeSeconds sets the "slow_mode_seconds" field.
+func (m *LiveRoomSettingMutation) SetSlowModeSeconds(i int) {
+	m.slow_mode_seconds = &i
+	m.addslow_mode_seconds = nil
+}
+
+// SlowModeSeconds returns the value of the "slow_mode_seconds" field in the mutation.
+func (m *LiveRoomSettingMutation) SlowModeSeconds() (r int, exists bool) {
+	v := m.slow_mode_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlowModeSeconds returns the old "slow_mode_seconds" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldSlowModeSeconds(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlowModeSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlowModeSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlowModeSeconds: %w", err)
+	}
+	return oldValue.SlowModeSeconds, nil
+}
+
+// AddSlowModeSeconds adds i to the "slow_mode_seconds" field.
+func (m *LiveRoomSettingMutation) AddSlowModeSeconds(i int) {
+	if m.addslow_mode_seconds != nil {
+		*m.addslow_mode_seconds += i
+	} else {
+		m.addslow_mode_seconds = &i
+	}
+}
+
+// AddedSlowModeSeconds returns the value that was added to the "slow_mode_seconds" field in this mutation.
+func (m *LiveRoomSettingMutation) AddedSlowModeSeconds() (r int, exists bool) {
+	v := m.addslow_mode_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSlowModeSeconds resets all changes to the "slow_mode_seconds" field.
+func (m *LiveRoomSettingMutation) ResetSlowModeSeconds() {
+	m.slow_mode_seconds = nil
+	m.addslow_mode_seconds = nil
+}
+
+// SetBlockedWords sets the "blocked_words" field.
+func (m *LiveRoomSettingMutation) SetBlockedWords(s []string) {
+	m.blocked_words = &s
+	m.appendblocked_words = nil
+}
+
+// BlockedWords returns the value of the "blocked_words" field in the mutation.
+func (m *LiveRoomSettingMutation) BlockedWords() (r []string, exists bool) {
+	v := m.blocked_words
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockedWords returns the old "blocked_words" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldBlockedWords(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockedWords is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockedWords requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockedWords: %w", err)
+	}
+	return oldValue.BlockedWords, nil
+}
+
+// AppendBlockedWords adds s to the "blocked_words" field.
+func (m *LiveRoomSettingMutation) AppendBlockedWords(s []string) {
+	m.appendblocked_words = append(m.appendblocked_words, s...)
+}
+
+// AppendedBlockedWords returns the list of values that were appended to the "blocked_words" field in this mutation.
+func (m *LiveRoomSettingMutation) AppendedBlockedWords() ([]string, bool) {
+	if len(m.appendblocked_words) == 0 {
+		return nil, false
+	}
+	return m.appendblocked_words, true
+}
+
+// ClearBlockedWords clears the value of the "blocked_words" field.
+func (m *LiveRoomSettingMutation) ClearBlockedWords() {
+	m.blocked_words = nil
+	m.appendblocked_words = nil
+	m.clearedFields[liveroomsetting.FieldBlockedWords] = struct{}{}
+}
+
+// BlockedWordsCleared returns if the "blocked_words" field was cleared in this mutation.
+func (m *LiveRoomSettingMutation) BlockedWordsCleared() bool {
+	_, ok := m.clearedFields[liveroomsetting.FieldBlockedWords]
+	return ok
+}
+
+// ResetBlockedWords resets all changes to the "blocked_words" field.
+func (m *LiveRoomSettingMutation) ResetBlockedWords() {
+	m.blocked_words = nil
+	m.appendblocked_words = nil
+	delete(m.clearedFields, liveroomsetting.FieldBlockedWords)
+}
+
+// SetPinnedCommentID sets the "pinned_comment_id" field.
+func (m *LiveRoomSettingMutation) SetPinnedCommentID(u uuid.UUID) {
+	m.pinned_comment_id = &u
+}
+
+// PinnedCommentID returns the value of the "pinned_comment_id" field in the mutation.
+func (m *LiveRoomSettingMutation) PinnedCommentID() (r uuid.UUID, exists bool) {
+	v := m.pinned_comment_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPinnedCommentID returns the old "pinned_comment_id" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldPinnedCommentID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPinnedCommentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPinnedCommentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPinnedCommentID: %w", err)
+	}
+	return oldValue.PinnedCommentID, nil
+}
+
+// ClearPinnedCommentID clears the value of the "pinned_comment_id" field.
+func (m *LiveRoomSettingMutation) ClearPinnedCommentID() {
+	m.pinned_comment_id = nil
+	m.clearedFields[liveroomsetting.FieldPinnedCommentID] = struct{}{}
+}
+
+// PinnedCommentIDCleared returns if the "pinned_comment_id" field was cleared in this mutation.
+func (m *LiveRoomSettingMutation) PinnedCommentIDCleared() bool {
+	_, ok := m.clearedFields[liveroomsetting.FieldPinnedCommentID]
+	return ok
+}
+
+// ResetPinnedCommentID resets all changes to the "pinned_comment_id" field.
+func (m *LiveRoomSettingMutation) ResetPinnedCommentID() {
+	m.pinned_comment_id = nil
+	delete(m.clearedFields, liveroomsetting.FieldPinnedCommentID)
+}
+
+// SetRecordEnabled sets the "record_enabled" field.
+func (m *LiveRoomSettingMutation) SetRecordEnabled(b bool) {
+	m.record_enabled = &b
+}
+
+// RecordEnabled returns the value of the "record_enabled" field in the mutation.
+func (m *LiveRoomSettingMutation) RecordEnabled() (r bool, exists bool) {
+	v := m.record_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecordEnabled returns the old "record_enabled" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldRecordEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecordEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecordEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecordEnabled: %w", err)
+	}
+	return oldValue.RecordEnabled, nil
+}
+
+// ResetRecordEnabled resets all changes to the "record_enabled" field.
+func (m *LiveRoomSettingMutation) ResetRecordEnabled() {
+	m.record_enabled = nil
+}
+
+// Where appends a list predicates to the LiveRoomSettingMutation builder.
+func (m *LiveRoomSettingMutation) Where(ps ...predicate.LiveRoomSetting) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveRoomSettingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveRoomSettingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveRoomSetting, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveRoomSettingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveRoomSettingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveRoomSetting).
+func (m *LiveRoomSettingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveRoomSettingMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.comments_enabled != nil {
+		fields = append(fields, liveroomsetting.FieldCommentsEnabled)
+	}
+	if m.slow_mode_seconds != nil {
+		fields = append(fields, liveroomsetting.FieldSlowModeSeconds)
+	}
+	if m.blocked_words != nil {
+		fields = append(fields, liveroomsetting.FieldBlockedWords)
+	}
+	if m.pinned_comment_id != nil {
+		fields = append(fields, liveroomsetting.FieldPinnedCommentID)
+	}
+	if m.record_enabled != nil {
+		fields = append(fields, liveroomsetting.FieldRecordEnabled)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveRoomSettingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case liveroomsetting.FieldCommentsEnabled:
+		return m.CommentsEnabled()
+	case liveroomsetting.FieldSlowModeSeconds:
+		return m.SlowModeSeconds()
+	case liveroomsetting.FieldBlockedWords:
+		return m.BlockedWords()
+	case liveroomsetting.FieldPinnedCommentID:
+		return m.PinnedCommentID()
+	case liveroomsetting.FieldRecordEnabled:
+		return m.RecordEnabled()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveRoomSettingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case liveroomsetting.FieldCommentsEnabled:
+		return m.OldCommentsEnabled(ctx)
+	case liveroomsetting.FieldSlowModeSeconds:
+		return m.OldSlowModeSeconds(ctx)
+	case liveroomsetting.FieldBlockedWords:
+		return m.OldBlockedWords(ctx)
+	case liveroomsetting.FieldPinnedCommentID:
+		return m.OldPinnedCommentID(ctx)
+	case liveroomsetting.FieldRecordEnabled:
+		return m.OldRecordEnabled(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveRoomSetting field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRoomSettingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case liveroomsetting.FieldCommentsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommentsEnabled(v)
+		return nil
+	case liveroomsetting.FieldSlowModeSeconds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlowModeSeconds(v)
+		return nil
+	case liveroomsetting.FieldBlockedWords:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockedWords(v)
+		return nil
+	case liveroomsetting.FieldPinnedCommentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPinnedCommentID(v)
+		return nil
+	case liveroomsetting.FieldRecordEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecordEnabled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRoomSetting field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveRoomSettingMutation) AddedFields() []string {
+	var fields []string
+	if m.addslow_mode_seconds != nil {
+		fields = append(fields, liveroomsetting.FieldSlowModeSeconds)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveRoomSettingMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case liveroomsetting.FieldSlowModeSeconds:
+		return m.AddedSlowModeSeconds()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveRoomSettingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case liveroomsetting.FieldSlowModeSeconds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSlowModeSeconds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRoomSetting numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveRoomSettingMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(liveroomsetting.FieldBlockedWords) {
+		fields = append(fields, liveroomsetting.FieldBlockedWords)
+	}
+	if m.FieldCleared(liveroomsetting.FieldPinnedCommentID) {
+		fields = append(fields, liveroomsetting.FieldPinnedCommentID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveRoomSettingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveRoomSettingMutation) ClearField(name string) error {
+	switch name {
+	case liveroomsetting.FieldBlockedWords:
+		m.ClearBlockedWords()
+		return nil
+	case liveroomsetting.FieldPinnedCommentID:
+		m.ClearPinnedCommentID()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRoomSetting nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveRoomSettingMutation) ResetField(name string) error {
+	switch name {
+	case liveroomsetting.FieldCommentsEnabled:
+		m.ResetCommentsEnabled()
+		return nil
+	case liveroomsetting.FieldSlowModeSeconds:
+		m.ResetSlowModeSeconds()
+		return nil
+	case liveroomsetting.FieldBlockedWords:
+		m.ResetBlockedWords()
+		return nil
+	case liveroomsetting.FieldPinnedCommentID:
+		m.ResetPinnedCommentID()
+		return nil
+	case liveroomsetting.FieldRecordEnabled:
+		m.ResetRecordEnabled()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveRoomSetting field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveRoomSettingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveRoomSettingMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveRoomSettingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveRoomSettingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveRoomSettingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveRoomSettingMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveRoomSettingMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveRoomSetting unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveRoomSettingMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveRoomSetting edge %s", name)
 }
 
 // LiveSessionMutation represents an operation that mutates the LiveSession nodes in the graph.
@@ -13293,6 +17498,1007 @@ func (m *OutboxEventMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *OutboxEventMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown OutboxEvent edge %s", name)
+}
+
+// OverlaySceneMutation represents an operation that mutates the OverlayScene nodes in the graph.
+type OverlaySceneMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *string
+	created_at             *time.Time
+	updated_at             *time.Time
+	live_id                *uuid.UUID
+	owner_id               *uuid.UUID
+	name                   *string
+	is_main                *bool
+	layers                 *[]map[string]interface{}
+	appendlayers           []map[string]interface{}
+	published_layers       *[]map[string]interface{}
+	appendpublished_layers []map[string]interface{}
+	published_name         *string
+	published_at           *time.Time
+	revision               *int
+	addrevision            *int
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*OverlayScene, error)
+	predicates             []predicate.OverlayScene
+}
+
+var _ ent.Mutation = (*OverlaySceneMutation)(nil)
+
+// overlaysceneOption allows management of the mutation configuration using functional options.
+type overlaysceneOption func(*OverlaySceneMutation)
+
+// newOverlaySceneMutation creates new mutation for the OverlayScene entity.
+func newOverlaySceneMutation(c config, op Op, opts ...overlaysceneOption) *OverlaySceneMutation {
+	m := &OverlaySceneMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeOverlayScene,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withOverlaySceneID sets the ID field of the mutation.
+func withOverlaySceneID(id string) overlaysceneOption {
+	return func(m *OverlaySceneMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *OverlayScene
+		)
+		m.oldValue = func(ctx context.Context) (*OverlayScene, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().OverlayScene.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withOverlayScene sets the old OverlayScene of the mutation.
+func withOverlayScene(node *OverlayScene) overlaysceneOption {
+	return func(m *OverlaySceneMutation) {
+		m.oldValue = func(context.Context) (*OverlayScene, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m OverlaySceneMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m OverlaySceneMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of OverlayScene entities.
+func (m *OverlaySceneMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *OverlaySceneMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *OverlaySceneMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().OverlayScene.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *OverlaySceneMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OverlaySceneMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OverlaySceneMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *OverlaySceneMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *OverlaySceneMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *OverlaySceneMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *OverlaySceneMutation) SetLiveID(u uuid.UUID) {
+	m.live_id = &u
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *OverlaySceneMutation) LiveID() (r uuid.UUID, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldLiveID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *OverlaySceneMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (m *OverlaySceneMutation) SetOwnerID(u uuid.UUID) {
+	m.owner_id = &u
+}
+
+// OwnerID returns the value of the "owner_id" field in the mutation.
+func (m *OverlaySceneMutation) OwnerID() (r uuid.UUID, exists bool) {
+	v := m.owner_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerID returns the old "owner_id" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldOwnerID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerID: %w", err)
+	}
+	return oldValue.OwnerID, nil
+}
+
+// ResetOwnerID resets all changes to the "owner_id" field.
+func (m *OverlaySceneMutation) ResetOwnerID() {
+	m.owner_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *OverlaySceneMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *OverlaySceneMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *OverlaySceneMutation) ResetName() {
+	m.name = nil
+}
+
+// SetIsMain sets the "is_main" field.
+func (m *OverlaySceneMutation) SetIsMain(b bool) {
+	m.is_main = &b
+}
+
+// IsMain returns the value of the "is_main" field in the mutation.
+func (m *OverlaySceneMutation) IsMain() (r bool, exists bool) {
+	v := m.is_main
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsMain returns the old "is_main" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldIsMain(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsMain is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsMain requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsMain: %w", err)
+	}
+	return oldValue.IsMain, nil
+}
+
+// ResetIsMain resets all changes to the "is_main" field.
+func (m *OverlaySceneMutation) ResetIsMain() {
+	m.is_main = nil
+}
+
+// SetLayers sets the "layers" field.
+func (m *OverlaySceneMutation) SetLayers(value []map[string]interface{}) {
+	m.layers = &value
+	m.appendlayers = nil
+}
+
+// Layers returns the value of the "layers" field in the mutation.
+func (m *OverlaySceneMutation) Layers() (r []map[string]interface{}, exists bool) {
+	v := m.layers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLayers returns the old "layers" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldLayers(ctx context.Context) (v []map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLayers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLayers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLayers: %w", err)
+	}
+	return oldValue.Layers, nil
+}
+
+// AppendLayers adds value to the "layers" field.
+func (m *OverlaySceneMutation) AppendLayers(value []map[string]interface{}) {
+	m.appendlayers = append(m.appendlayers, value...)
+}
+
+// AppendedLayers returns the list of values that were appended to the "layers" field in this mutation.
+func (m *OverlaySceneMutation) AppendedLayers() ([]map[string]interface{}, bool) {
+	if len(m.appendlayers) == 0 {
+		return nil, false
+	}
+	return m.appendlayers, true
+}
+
+// ResetLayers resets all changes to the "layers" field.
+func (m *OverlaySceneMutation) ResetLayers() {
+	m.layers = nil
+	m.appendlayers = nil
+}
+
+// SetPublishedLayers sets the "published_layers" field.
+func (m *OverlaySceneMutation) SetPublishedLayers(value []map[string]interface{}) {
+	m.published_layers = &value
+	m.appendpublished_layers = nil
+}
+
+// PublishedLayers returns the value of the "published_layers" field in the mutation.
+func (m *OverlaySceneMutation) PublishedLayers() (r []map[string]interface{}, exists bool) {
+	v := m.published_layers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedLayers returns the old "published_layers" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldPublishedLayers(ctx context.Context) (v []map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedLayers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedLayers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedLayers: %w", err)
+	}
+	return oldValue.PublishedLayers, nil
+}
+
+// AppendPublishedLayers adds value to the "published_layers" field.
+func (m *OverlaySceneMutation) AppendPublishedLayers(value []map[string]interface{}) {
+	m.appendpublished_layers = append(m.appendpublished_layers, value...)
+}
+
+// AppendedPublishedLayers returns the list of values that were appended to the "published_layers" field in this mutation.
+func (m *OverlaySceneMutation) AppendedPublishedLayers() ([]map[string]interface{}, bool) {
+	if len(m.appendpublished_layers) == 0 {
+		return nil, false
+	}
+	return m.appendpublished_layers, true
+}
+
+// ClearPublishedLayers clears the value of the "published_layers" field.
+func (m *OverlaySceneMutation) ClearPublishedLayers() {
+	m.published_layers = nil
+	m.appendpublished_layers = nil
+	m.clearedFields[overlayscene.FieldPublishedLayers] = struct{}{}
+}
+
+// PublishedLayersCleared returns if the "published_layers" field was cleared in this mutation.
+func (m *OverlaySceneMutation) PublishedLayersCleared() bool {
+	_, ok := m.clearedFields[overlayscene.FieldPublishedLayers]
+	return ok
+}
+
+// ResetPublishedLayers resets all changes to the "published_layers" field.
+func (m *OverlaySceneMutation) ResetPublishedLayers() {
+	m.published_layers = nil
+	m.appendpublished_layers = nil
+	delete(m.clearedFields, overlayscene.FieldPublishedLayers)
+}
+
+// SetPublishedName sets the "published_name" field.
+func (m *OverlaySceneMutation) SetPublishedName(s string) {
+	m.published_name = &s
+}
+
+// PublishedName returns the value of the "published_name" field in the mutation.
+func (m *OverlaySceneMutation) PublishedName() (r string, exists bool) {
+	v := m.published_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedName returns the old "published_name" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldPublishedName(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedName: %w", err)
+	}
+	return oldValue.PublishedName, nil
+}
+
+// ClearPublishedName clears the value of the "published_name" field.
+func (m *OverlaySceneMutation) ClearPublishedName() {
+	m.published_name = nil
+	m.clearedFields[overlayscene.FieldPublishedName] = struct{}{}
+}
+
+// PublishedNameCleared returns if the "published_name" field was cleared in this mutation.
+func (m *OverlaySceneMutation) PublishedNameCleared() bool {
+	_, ok := m.clearedFields[overlayscene.FieldPublishedName]
+	return ok
+}
+
+// ResetPublishedName resets all changes to the "published_name" field.
+func (m *OverlaySceneMutation) ResetPublishedName() {
+	m.published_name = nil
+	delete(m.clearedFields, overlayscene.FieldPublishedName)
+}
+
+// SetPublishedAt sets the "published_at" field.
+func (m *OverlaySceneMutation) SetPublishedAt(t time.Time) {
+	m.published_at = &t
+}
+
+// PublishedAt returns the value of the "published_at" field in the mutation.
+func (m *OverlaySceneMutation) PublishedAt() (r time.Time, exists bool) {
+	v := m.published_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedAt returns the old "published_at" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldPublishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedAt: %w", err)
+	}
+	return oldValue.PublishedAt, nil
+}
+
+// ClearPublishedAt clears the value of the "published_at" field.
+func (m *OverlaySceneMutation) ClearPublishedAt() {
+	m.published_at = nil
+	m.clearedFields[overlayscene.FieldPublishedAt] = struct{}{}
+}
+
+// PublishedAtCleared returns if the "published_at" field was cleared in this mutation.
+func (m *OverlaySceneMutation) PublishedAtCleared() bool {
+	_, ok := m.clearedFields[overlayscene.FieldPublishedAt]
+	return ok
+}
+
+// ResetPublishedAt resets all changes to the "published_at" field.
+func (m *OverlaySceneMutation) ResetPublishedAt() {
+	m.published_at = nil
+	delete(m.clearedFields, overlayscene.FieldPublishedAt)
+}
+
+// SetRevision sets the "revision" field.
+func (m *OverlaySceneMutation) SetRevision(i int) {
+	m.revision = &i
+	m.addrevision = nil
+}
+
+// Revision returns the value of the "revision" field in the mutation.
+func (m *OverlaySceneMutation) Revision() (r int, exists bool) {
+	v := m.revision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevision returns the old "revision" field's value of the OverlayScene entity.
+// If the OverlayScene object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OverlaySceneMutation) OldRevision(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevision: %w", err)
+	}
+	return oldValue.Revision, nil
+}
+
+// AddRevision adds i to the "revision" field.
+func (m *OverlaySceneMutation) AddRevision(i int) {
+	if m.addrevision != nil {
+		*m.addrevision += i
+	} else {
+		m.addrevision = &i
+	}
+}
+
+// AddedRevision returns the value that was added to the "revision" field in this mutation.
+func (m *OverlaySceneMutation) AddedRevision() (r int, exists bool) {
+	v := m.addrevision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRevision resets all changes to the "revision" field.
+func (m *OverlaySceneMutation) ResetRevision() {
+	m.revision = nil
+	m.addrevision = nil
+}
+
+// Where appends a list predicates to the OverlaySceneMutation builder.
+func (m *OverlaySceneMutation) Where(ps ...predicate.OverlayScene) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the OverlaySceneMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *OverlaySceneMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.OverlayScene, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *OverlaySceneMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *OverlaySceneMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (OverlayScene).
+func (m *OverlaySceneMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *OverlaySceneMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, overlayscene.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, overlayscene.FieldUpdatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, overlayscene.FieldLiveID)
+	}
+	if m.owner_id != nil {
+		fields = append(fields, overlayscene.FieldOwnerID)
+	}
+	if m.name != nil {
+		fields = append(fields, overlayscene.FieldName)
+	}
+	if m.is_main != nil {
+		fields = append(fields, overlayscene.FieldIsMain)
+	}
+	if m.layers != nil {
+		fields = append(fields, overlayscene.FieldLayers)
+	}
+	if m.published_layers != nil {
+		fields = append(fields, overlayscene.FieldPublishedLayers)
+	}
+	if m.published_name != nil {
+		fields = append(fields, overlayscene.FieldPublishedName)
+	}
+	if m.published_at != nil {
+		fields = append(fields, overlayscene.FieldPublishedAt)
+	}
+	if m.revision != nil {
+		fields = append(fields, overlayscene.FieldRevision)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *OverlaySceneMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case overlayscene.FieldCreatedAt:
+		return m.CreatedAt()
+	case overlayscene.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case overlayscene.FieldLiveID:
+		return m.LiveID()
+	case overlayscene.FieldOwnerID:
+		return m.OwnerID()
+	case overlayscene.FieldName:
+		return m.Name()
+	case overlayscene.FieldIsMain:
+		return m.IsMain()
+	case overlayscene.FieldLayers:
+		return m.Layers()
+	case overlayscene.FieldPublishedLayers:
+		return m.PublishedLayers()
+	case overlayscene.FieldPublishedName:
+		return m.PublishedName()
+	case overlayscene.FieldPublishedAt:
+		return m.PublishedAt()
+	case overlayscene.FieldRevision:
+		return m.Revision()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *OverlaySceneMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case overlayscene.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case overlayscene.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case overlayscene.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case overlayscene.FieldOwnerID:
+		return m.OldOwnerID(ctx)
+	case overlayscene.FieldName:
+		return m.OldName(ctx)
+	case overlayscene.FieldIsMain:
+		return m.OldIsMain(ctx)
+	case overlayscene.FieldLayers:
+		return m.OldLayers(ctx)
+	case overlayscene.FieldPublishedLayers:
+		return m.OldPublishedLayers(ctx)
+	case overlayscene.FieldPublishedName:
+		return m.OldPublishedName(ctx)
+	case overlayscene.FieldPublishedAt:
+		return m.OldPublishedAt(ctx)
+	case overlayscene.FieldRevision:
+		return m.OldRevision(ctx)
+	}
+	return nil, fmt.Errorf("unknown OverlayScene field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OverlaySceneMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case overlayscene.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case overlayscene.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case overlayscene.FieldLiveID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case overlayscene.FieldOwnerID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerID(v)
+		return nil
+	case overlayscene.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case overlayscene.FieldIsMain:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsMain(v)
+		return nil
+	case overlayscene.FieldLayers:
+		v, ok := value.([]map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLayers(v)
+		return nil
+	case overlayscene.FieldPublishedLayers:
+		v, ok := value.([]map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedLayers(v)
+		return nil
+	case overlayscene.FieldPublishedName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedName(v)
+		return nil
+	case overlayscene.FieldPublishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedAt(v)
+		return nil
+	case overlayscene.FieldRevision:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevision(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OverlayScene field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *OverlaySceneMutation) AddedFields() []string {
+	var fields []string
+	if m.addrevision != nil {
+		fields = append(fields, overlayscene.FieldRevision)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *OverlaySceneMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case overlayscene.FieldRevision:
+		return m.AddedRevision()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OverlaySceneMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case overlayscene.FieldRevision:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRevision(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OverlayScene numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *OverlaySceneMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(overlayscene.FieldPublishedLayers) {
+		fields = append(fields, overlayscene.FieldPublishedLayers)
+	}
+	if m.FieldCleared(overlayscene.FieldPublishedName) {
+		fields = append(fields, overlayscene.FieldPublishedName)
+	}
+	if m.FieldCleared(overlayscene.FieldPublishedAt) {
+		fields = append(fields, overlayscene.FieldPublishedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *OverlaySceneMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *OverlaySceneMutation) ClearField(name string) error {
+	switch name {
+	case overlayscene.FieldPublishedLayers:
+		m.ClearPublishedLayers()
+		return nil
+	case overlayscene.FieldPublishedName:
+		m.ClearPublishedName()
+		return nil
+	case overlayscene.FieldPublishedAt:
+		m.ClearPublishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown OverlayScene nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *OverlaySceneMutation) ResetField(name string) error {
+	switch name {
+	case overlayscene.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case overlayscene.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case overlayscene.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case overlayscene.FieldOwnerID:
+		m.ResetOwnerID()
+		return nil
+	case overlayscene.FieldName:
+		m.ResetName()
+		return nil
+	case overlayscene.FieldIsMain:
+		m.ResetIsMain()
+		return nil
+	case overlayscene.FieldLayers:
+		m.ResetLayers()
+		return nil
+	case overlayscene.FieldPublishedLayers:
+		m.ResetPublishedLayers()
+		return nil
+	case overlayscene.FieldPublishedName:
+		m.ResetPublishedName()
+		return nil
+	case overlayscene.FieldPublishedAt:
+		m.ResetPublishedAt()
+		return nil
+	case overlayscene.FieldRevision:
+		m.ResetRevision()
+		return nil
+	}
+	return fmt.Errorf("unknown OverlayScene field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *OverlaySceneMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *OverlaySceneMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *OverlaySceneMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *OverlaySceneMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *OverlaySceneMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *OverlaySceneMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *OverlaySceneMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown OverlayScene unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *OverlaySceneMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown OverlayScene edge %s", name)
 }
 
 // PointsEntryMutation represents an operation that mutates the PointsEntry nodes in the graph.

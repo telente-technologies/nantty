@@ -185,8 +185,9 @@ const DefaultVisibility = VisibilityPublic
 
 // Visibility values.
 const (
-	VisibilityPublic    Visibility = "public"
-	VisibilityFollowers Visibility = "followers"
+	VisibilityPublic      Visibility = "public"
+	VisibilityFollowers   Visibility = "followers"
+	VisibilitySubscribers Visibility = "subscribers"
 )
 
 func (v Visibility) String() string {
@@ -196,7 +197,7 @@ func (v Visibility) String() string {
 // VisibilityValidator is a validator for the "visibility" field enum values. It is called by the builders before save.
 func VisibilityValidator(v Visibility) error {
 	switch v {
-	case VisibilityPublic, VisibilityFollowers:
+	case VisibilityPublic, VisibilityFollowers, VisibilitySubscribers:
 		return nil
 	default:
 		return fmt.Errorf("livesession: invalid enum value for visibility field: %q", v)

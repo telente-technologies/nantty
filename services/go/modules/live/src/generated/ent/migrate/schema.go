@@ -334,6 +334,68 @@ var (
 			},
 		},
 	}
+	// LiveCommentsColumns holds the columns for the "live_comments" table.
+	LiveCommentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "author_id", Type: field.TypeUUID},
+		{Name: "body", Type: field.TypeString, Size: 500},
+		{Name: "mentions", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "reply_to_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "deleted_by", Type: field.TypeUUID, Nullable: true},
+	}
+	// LiveCommentsTable holds the schema information for the "live_comments" table.
+	LiveCommentsTable = &schema.Table{
+		Name:       "live_comments",
+		Columns:    LiveCommentsColumns,
+		PrimaryKey: []*schema.Column{LiveCommentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livecomment_live_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveCommentsColumns[2], LiveCommentsColumns[0]},
+			},
+			{
+				Name:    "livecomment_live_id_author_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveCommentsColumns[2], LiveCommentsColumns[3], LiveCommentsColumns[0]},
+			},
+		},
+	}
+	// LiveIngressesColumns holds the columns for the "live_ingresses" table.
+	LiveIngressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "livekit_ingress_id", Type: field.TypeString},
+		{Name: "protocol", Type: field.TypeEnum, Enums: []string{"rtmp", "whip"}},
+		{Name: "stream_key_hint", Type: field.TypeString, Size: 8},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"active", "revoked"}, Default: "active"},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LiveIngressesTable holds the schema information for the "live_ingresses" table.
+	LiveIngressesTable = &schema.Table{
+		Name:       "live_ingresses",
+		Columns:    LiveIngressesColumns,
+		PrimaryKey: []*schema.Column{LiveIngressesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liveingress_live_id_protocol",
+				Unique:  true,
+				Columns: []*schema.Column{LiveIngressesColumns[2], LiveIngressesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "state = 'active'",
+				},
+			},
+			{
+				Name:    "liveingress_livekit_ingress_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveIngressesColumns[3]},
+			},
+		},
+	}
 	// LiveLeaderboardEntriesColumns holds the columns for the "live_leaderboard_entries" table.
 	LiveLeaderboardEntriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -362,6 +424,27 @@ var (
 			},
 		},
 	}
+	// LiveModeratorsColumns holds the columns for the "live_moderators" table.
+	LiveModeratorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "granted_by", Type: field.TypeUUID},
+	}
+	// LiveModeratorsTable holds the schema information for the "live_moderators" table.
+	LiveModeratorsTable = &schema.Table{
+		Name:       "live_moderators",
+		Columns:    LiveModeratorsColumns,
+		PrimaryKey: []*schema.Column{LiveModeratorsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livemoderator_live_id_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{LiveModeratorsColumns[2], LiveModeratorsColumns[3]},
+			},
+		},
+	}
 	// LiveProductsColumns holds the columns for the "live_products" table.
 	LiveProductsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -384,6 +467,76 @@ var (
 			},
 		},
 	}
+	// LiveRecordingsColumns holds the columns for the "live_recordings" table.
+	LiveRecordingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "egress_id", Type: field.TypeString},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"recording", "completed", "failed"}, Default: "recording"},
+		{Name: "object_key", Type: field.TypeString},
+		{Name: "duration_seconds", Type: field.TypeInt64, Default: 0},
+		{Name: "size_bytes", Type: field.TypeInt64, Default: 0},
+		{Name: "failure_reason", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LiveRecordingsTable holds the schema information for the "live_recordings" table.
+	LiveRecordingsTable = &schema.Table{
+		Name:       "live_recordings",
+		Columns:    LiveRecordingsColumns,
+		PrimaryKey: []*schema.Column{LiveRecordingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liverecording_live_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[2], LiveRecordingsColumns[0]},
+			},
+			{
+				Name:    "liverecording_egress_id",
+				Unique:  true,
+				Columns: []*schema.Column{LiveRecordingsColumns[3]},
+			},
+		},
+	}
+	// LiveRestrictionsColumns holds the columns for the "live_restrictions" table.
+	LiveRestrictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"muted", "banned"}},
+		{Name: "imposed_by", Type: field.TypeUUID},
+		{Name: "reason", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LiveRestrictionsTable holds the schema information for the "live_restrictions" table.
+	LiveRestrictionsTable = &schema.Table{
+		Name:       "live_restrictions",
+		Columns:    LiveRestrictionsColumns,
+		PrimaryKey: []*schema.Column{LiveRestrictionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liverestriction_live_id_user_id_kind",
+				Unique:  true,
+				Columns: []*schema.Column{LiveRestrictionsColumns[2], LiveRestrictionsColumns[3], LiveRestrictionsColumns[4]},
+			},
+		},
+	}
+	// LiveRoomSettingsColumns holds the columns for the "live_room_settings" table.
+	LiveRoomSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "comments_enabled", Type: field.TypeBool, Default: true},
+		{Name: "slow_mode_seconds", Type: field.TypeInt, Default: 0},
+		{Name: "blocked_words", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "pinned_comment_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "record_enabled", Type: field.TypeBool, Default: false},
+	}
+	// LiveRoomSettingsTable holds the schema information for the "live_room_settings" table.
+	LiveRoomSettingsTable = &schema.Table{
+		Name:       "live_room_settings",
+		Columns:    LiveRoomSettingsColumns,
+		PrimaryKey: []*schema.Column{LiveRoomSettingsColumns[0]},
+	}
 	// LiveSessionsColumns holds the columns for the "live_sessions" table.
 	LiveSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -391,7 +544,7 @@ var (
 		{Name: "host_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 140},
 		{Name: "category", Type: field.TypeEnum, Enums: []string{"justChatting", "gaming", "music", "irl", "education", "shopping"}, Default: "justChatting"},
-		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"public", "followers"}, Default: "public"},
+		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"public", "followers", "subscribers"}, Default: "public"},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"idle", "connecting", "live", "ended"}, Default: "idle"},
 		{Name: "started_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
@@ -478,6 +631,42 @@ var (
 				Name:    "outboxevent_published_at_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{OutboxEventsColumns[5], OutboxEventsColumns[1]},
+			},
+		},
+	}
+	// OverlayScenesColumns holds the columns for the "overlay_scenes" table.
+	OverlayScenesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 48},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "owner_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 80},
+		{Name: "is_main", Type: field.TypeBool, Default: false},
+		{Name: "layers", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "published_layers", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "published_name", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revision", Type: field.TypeInt, Default: 1},
+	}
+	// OverlayScenesTable holds the schema information for the "overlay_scenes" table.
+	OverlayScenesTable = &schema.Table{
+		Name:       "overlay_scenes",
+		Columns:    OverlayScenesColumns,
+		PrimaryKey: []*schema.Column{OverlayScenesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "overlayscene_live_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OverlayScenesColumns[3], OverlayScenesColumns[1]},
+			},
+			{
+				Name:    "overlayscene_live_id",
+				Unique:  true,
+				Columns: []*schema.Column{OverlayScenesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "is_main",
+				},
 			},
 		},
 	}
@@ -576,11 +765,18 @@ var (
 		GoalContributionsTable,
 		GuestSlotsTable,
 		JoinRequestsTable,
+		LiveCommentsTable,
+		LiveIngressesTable,
 		LiveLeaderboardEntriesTable,
+		LiveModeratorsTable,
 		LiveProductsTable,
+		LiveRecordingsTable,
+		LiveRestrictionsTable,
+		LiveRoomSettingsTable,
 		LiveSessionsTable,
 		LiveViewersTable,
 		OutboxEventsTable,
+		OverlayScenesTable,
 		PointsEntriesTable,
 		PointsRulesTable,
 		ProcessedGiftsTable,
