@@ -36,7 +36,7 @@
 }
 
 .sponsoredTile {
-  border-color: var(--blue-100);
+  border-color: var(--brand-border-soft);
 }
 
 .tileImageFrame {
@@ -57,7 +57,7 @@
   left: 6px;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgb(255 255 255 / 0.94);
+  background: var(--media-chip);
   color: var(--color-text);
   font-size: 10.5px;
   font-weight: 700;
@@ -194,7 +194,7 @@
 
 .sponsoredOnDark {
   font-size: 10.5px;
-  color: rgb(255 255 255 / 0.85);
+  color: var(--on-media-muted);
 }
 
 .liveCardBottom {
@@ -226,7 +226,7 @@
 
 .liveTime {
   font-size: 11px;
-  color: rgb(255 255 255 / 0.85);
+  color: var(--on-media-muted);
 }
 
 .liveButton {
