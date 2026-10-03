@@ -10,6 +10,7 @@ import {
   productSummaryByKey,
 } from "./productCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
+import { isTargetSavedByViewer } from "./saveState.mock";
 import { userSummaryById } from "./userDirectory.mock";
 
 type EngagementNumbers = readonly [likes: number, comments: number, reposts: number, views: number];
@@ -107,6 +108,7 @@ export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values
 
 export const withCurrentProductPrices = (post: Post): Post => ({
   ...post,
+  bookmarked: isTargetSavedByViewer("post", post.id),
   products: post.products.map((product) => {
     const seed = findCatalogSeedByProductId(product.id);
     return seed ? { ...buildCatalogProductSummary(seed), sponsored: product.sponsored ?? null } : product;

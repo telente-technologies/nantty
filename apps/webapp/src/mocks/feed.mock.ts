@@ -3,6 +3,7 @@ import type { Page, Post } from "@/types";
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { findMockVideoForFeedPage } from "./videos.mock";
 
 const TOPICS = ["For You", "Fashion", "Gadgets", "Food", "Beauty", "Home & Living", "Football", "Travel"];
 const POSTS_PER_PAGE = 7;
@@ -23,14 +24,17 @@ const pageOfPostsWithSponsoredSlot = (cursor: string | null, filter: (post: Post
   const pageOfOrganic = organic.slice(start, start + POSTS_PER_PAGE).map(withCurrentProductPrices);
   const sponsored = sponsoredFeedPosts[pageIndex % sponsoredFeedPosts.length];
   const sponsoredSlot = 3 + (pageIndex % 3);
-  const data = sponsored && pageOfOrganic.length >= sponsoredSlot
+  const withSponsored = sponsored && pageOfOrganic.length >= sponsoredSlot
     ? [...pageOfOrganic.slice(0, sponsoredSlot), withCurrentProductPrices(sponsored), ...pageOfOrganic.slice(sponsoredSlot)]
     : pageOfOrganic;
+  const video = findMockVideoForFeedPage(pageIndex);
+  const data = video && withSponsored.length > 2 ? [...withSponsored.slice(0, 2), video, ...withSponsored.slice(2)] : withSponsored;
   return { data, nextCursor: start + POSTS_PER_PAGE < organic.length ? String(start + POSTS_PER_PAGE) : null };
 };
 
 export const feedMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/feeds/for-you", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"))),
+  createMockRoute("GET", "/api/v1/feeds/popular", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"))),
   createMockRoute("GET", "/api/v1/feeds/following", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"), (p) => p.isFollowingAuthor)),
   createMockRoute("GET", "/api/v1/feeds/suggested-clips", listSuggestedClipsWithPosterThumbnails),
   createMockRoute("GET", "/api/v1/users/me/topics", () => TOPICS.slice(1).map((name, i) => ({ id: `t_${i + 1}`, name }))),

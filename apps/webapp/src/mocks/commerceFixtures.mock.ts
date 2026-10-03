@@ -44,7 +44,7 @@ export const describeVariant = (size?: string | null, color?: string | null) => 
 export const buildCartItemFromLine = (line: MockCartLine): CartItem => {
   const seed = findCatalogSeedByProductId(line.productId);
   const product = seed ? buildCatalogProductSummary(seed) : buildMockProductSummary(0);
-  return { id: line.id, product, quantity: line.quantity, variant: line.variant };
+  return { id: line.id, product, quantity: line.quantity, variant: line.variant, store: storeSummaryById(storeIdForProduct(line.productId)) };
 };
 
 export const storeIdForProduct = (productId: string) => findCatalogSeedByProductId(productId)?.storeId ?? "s_ada";
