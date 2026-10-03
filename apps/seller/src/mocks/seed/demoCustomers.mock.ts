@@ -4,7 +4,7 @@ import { buildStoreScopedRecordId, type DemoCustomerPlan } from "@/mocks/seed/de
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
 
 export function buildDemoCustomersFromPlan(plan: DemoCustomerPlan, recordKey: string | null, currency: CurrencyCode): Customer[] {
-  return plan.rows.map(([name, phone, email, username, tags, loyaltyPoints], index) => ({
+  return plan.rows.map(([name, phone, email, username, tags], index) => ({
     id: buildStoreScopedRecordId("cus", recordKey, String(index + 1).padStart(3, "0")),
     name,
     phone,
@@ -15,7 +15,8 @@ export function buildDemoCustomersFromPlan(plan: DemoCustomerPlan, recordKey: st
     notes: index === 0 && plan.firstCustomerNote
       ? [{ id: buildStoreScopedRecordId("note", recordKey, 1), body: plan.firstCustomerNote.body, author: { id: plan.firstCustomerNote.authorStaffId, name: plan.firstCustomerNote.authorName }, createdAt: buildIsoDateDaysAgo(20) }]
       : [],
-    loyaltyPoints,
+    storeCreditBalance: { amountMinor: 0, currency },
+    storeCreditExpiresAt: null,
     totalSpent: { amountMinor: 0, currency },
     averageOrderValue: null,
     purchasesCount: 0,

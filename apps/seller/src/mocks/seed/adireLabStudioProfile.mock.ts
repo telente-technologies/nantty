@@ -28,7 +28,6 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: null }],
       returnPolicy: "Exchanges within 5 days with proof of purchase. Custom and altered pieces cannot be returned.",
       shippingPolicy: "Lagos deliveries in 1–2 days. Custom pieces ship within 7 working days of your order.",
-      loyalty: { enabled: false, spendRequiredPerPointMinor: 100_000, redeemValuePerPointMinor: 1_000, minimumPointsToRedeem: 100 },
     }),
   buildLocations: () => [
     { id: "loc_adire_yaba", name: "Yaba studio", kind: "store", address: "21 Herbert Macaulay Way", city: "Yaba", state: "Lagos", country: "NG", phone: "+234 803 555 0268", isDefault: true, active: true },
@@ -70,12 +69,12 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
   },
   customers: {
     rows: [
-      ["Kemi Adekunle", "+2348031239901", "kemi.adekunle@gmail.com", "kemi.adekunle", ["vip"], 0],
-      ["Amaka Chukwu", "+2348091239902", "amaka@amakachukwu.tv", "amakachukwu", ["creator"], 0],
-      ["Olumide Johnson", "+2348021239903", null, "olumide.j", [], 0],
-      ["Ifeoma Nwankwo", "+2348171239904", "ifeoma.reads@gmail.com", "ifeoma.reads", [], 0],
-      ["Funke Adeoye", "+2348061239905", null, null, ["bridal"], 0],
-      ["Tayo Martins", "+2348151239906", "tayo.martins@outlook.com", null, [], 0],
+      ["Kemi Adekunle", "+2348031239901", "kemi.adekunle@gmail.com", "kemi.adekunle", ["vip"]],
+      ["Amaka Chukwu", "+2348091239902", "amaka@amakachukwu.tv", "amakachukwu", ["creator"]],
+      ["Olumide Johnson", "+2348021239903", null, "olumide.j", []],
+      ["Ifeoma Nwankwo", "+2348171239904", "ifeoma.reads@gmail.com", "ifeoma.reads", []],
+      ["Funke Adeoye", "+2348061239905", null, null, ["bridal"]],
+      ["Tayo Martins", "+2348151239906", "tayo.martins@outlook.com", null, []],
     ],
     firstCustomerNote: { body: "Ordered matching gele for her sister's wedding. Likes wine and gold.", authorStaffId: "stf_toyin_adire", authorName: "Toyin Afolabi" },
   },
@@ -112,6 +111,5 @@ export const adireLabStudioStoreProfile: DemoStoreProfile = {
     ["stf_adaeze_adire", "staff.invited", "staff", "Invited Zainab Yusuf as sales staff", 12],
     ["stf_toyin_adire", "inventory.adjusted", "variant", "Received 20 × Hand-dyed Indigo Adire from Abeokuta dye workshop", 2],
     ["stf_toyin_adire", "order.shipped", "order", "Marked ZM-58418 as shipped with GIG Logistics", 4],
-    ["stf_adaeze_adire", "settings.updated", "store", "Turned off loyalty points", 9],
   ],
 };

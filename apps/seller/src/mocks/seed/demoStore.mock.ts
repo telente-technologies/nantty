@@ -24,7 +24,7 @@ export function buildIfeLifestyleStoreSettings(): StoreSettings {
       shipping: "Lagos orders ship the same day if paid before 2pm. Abuja and other states take 2–4 working days.",
       privacy: "We only use your details to deliver your order and reply to your messages in the Zudomart app.",
     },
-    loyalty: { enabled: true, spendRequiredPerPoint: { amountMinor: 100_000, currency: "NGN" }, redeemValuePerPoint: { amountMinor: 1_000, currency: "NGN" }, minimumPointsToRedeem: 100 },
+    storeRewards: { enabled: true, percentBackBasisPoints: 500, minimumOrder: { amountMinor: 500_000, currency: "NGN" }, maxPerOrder: { amountMinor: 200_000, currency: "NGN" }, expiryDays: 180 },
     notifications: { newOrderEmail: true, newOrderSms: true, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: false, lowStockSms: false, reviewEmail: true, messageDigestEmail: true, weeklyPerformanceEmail: true },
   };
 }

@@ -31,8 +31,8 @@ export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
   return [
     { id: "pro_monthly", tier: "PRO", price: naira(500_000), interval: "month", entitlements: proPlanEntitlements, perks: proPerks },
     { id: "business_monthly", tier: "BUSINESS", price: naira(1_500_000), interval: "month", entitlements: businessPlanEntitlements, perks: premiumPerks },
-    { id: "pro_yearly", tier: "PRO", price: naira(5_000_000), interval: "year", entitlements: proPlanEntitlements, perks: proPerks },
-    { id: "business_yearly", tier: "BUSINESS", price: naira(15_000_000), interval: "year", entitlements: businessPlanEntitlements, perks: premiumPerks },
+    { id: "pro_yearly", tier: "PRO", price: naira(4_800_000), interval: "year", entitlements: proPlanEntitlements, perks: proPerks },
+    { id: "business_yearly", tier: "BUSINESS", price: naira(14_400_000), interval: "year", entitlements: businessPlanEntitlements, perks: premiumPerks },
   ];
 }
 

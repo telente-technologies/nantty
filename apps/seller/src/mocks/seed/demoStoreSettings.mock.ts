@@ -16,7 +16,6 @@ export interface DemoStoreSettingsBasics {
   readonly taxes: TaxRate[];
   readonly returnPolicy: string;
   readonly shippingPolicy: string;
-  readonly loyalty: { readonly enabled: boolean; readonly spendRequiredPerPointMinor: number; readonly redeemValuePerPointMinor: number; readonly minimumPointsToRedeem: number };
 }
 
 export function buildDemoStoreSettingsFromBasics(basics: DemoStoreSettingsBasics): StoreSettings {
@@ -41,12 +40,7 @@ export function buildDemoStoreSettingsFromBasics(basics: DemoStoreSettingsBasics
       shipping: basics.shippingPolicy,
       privacy: "We only use your details to deliver your order and reply to your messages in the Zudomart app.",
     },
-    loyalty: {
-      enabled: basics.loyalty.enabled,
-      spendRequiredPerPoint: { amountMinor: basics.loyalty.spendRequiredPerPointMinor, currency },
-      redeemValuePerPoint: { amountMinor: basics.loyalty.redeemValuePerPointMinor, currency },
-      minimumPointsToRedeem: basics.loyalty.minimumPointsToRedeem,
-    },
+    storeRewards: { enabled: true, percentBackBasisPoints: 500, minimumOrder: { amountMinor: 500_000, currency }, maxPerOrder: { amountMinor: 200_000, currency }, expiryDays: 180 },
     notifications: { newOrderEmail: true, newOrderSms: false, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: true, lowStockSms: false, reviewEmail: true, messageDigestEmail: true, weeklyPerformanceEmail: true },
   };
 }

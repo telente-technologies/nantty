@@ -26,7 +26,6 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: null }],
       returnPolicy: "Size exchanges within 7 days if the shoes are unworn and in the box.",
       shippingPolicy: "We ship from Aba nationwide in 2–5 working days. Abia and Enugu orders often arrive next day.",
-      loyalty: { enabled: true, spendRequiredPerPointMinor: 200_000, redeemValuePerPointMinor: 1_000, minimumPointsToRedeem: 50 },
     }),
   buildLocations: () => [
     { id: "loc_kicks_ariaria", name: "Ariaria shop", kind: "store", address: "Shop 14, Ariaria International Market", city: "Aba", state: "Abia", country: "NG", phone: "+234 807 555 0155", isDefault: true, active: true },
@@ -60,10 +59,10 @@ export const kelechiKicksStoreProfile: DemoStoreProfile = {
   },
   customers: {
     rows: [
-      ["Chinedu Okeke", "+2348031237701", "chinedu@okeke.dev", "chinedu.codes", [], 120],
-      ["Segun Afolabi", "+2348091237702", null, "segunfitness", ["runner"], 80],
-      ["Ugochi Nwafor", "+2348061237703", null, null, [], 40],
-      ["Obinna Eze", "+2348121237704", "obinna.eze@gmail.com", null, ["wholesale"], 300],
+      ["Chinedu Okeke", "+2348031237701", "chinedu@okeke.dev", "chinedu.codes", []],
+      ["Segun Afolabi", "+2348091237702", null, "segunfitness", ["runner"]],
+      ["Ugochi Nwafor", "+2348061237703", null, null, []],
+      ["Obinna Eze", "+2348121237704", "obinna.eze@gmail.com", null, ["wholesale"]],
     ],
     firstCustomerNote: null,
   },

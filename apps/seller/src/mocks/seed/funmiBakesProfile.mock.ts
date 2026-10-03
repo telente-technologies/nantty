@@ -26,7 +26,6 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
       taxes: [{ id: "tax_vat", name: "VAT", rateBasisPoints: 750, isDefault: true, appliesToCategoryIds: ["cat_gifts"] }],
       returnPolicy: "Food items cannot be returned. Tell us within 24 hours if anything is wrong with your order.",
       shippingPolicy: "Cakes are delivered within Lagos only, on the date you choose at checkout.",
-      loyalty: { enabled: true, spendRequiredPerPointMinor: 50_000, redeemValuePerPointMinor: 500, minimumPointsToRedeem: 40 },
     }),
   buildLocations: () => [
     { id: "loc_funmi_surulere", name: "Surulere bakery", kind: "store", address: "7 Adelabu Street", city: "Surulere", state: "Lagos", country: "NG", phone: "+234 814 555 0166", isDefault: true, active: true },
@@ -66,11 +65,11 @@ export const funmiBakesStoreProfile: DemoStoreProfile = {
   },
   customers: {
     rows: [
-      ["Bisola Ogunleye", "+2348031235501", "bisola@bisolaeats.ng", "bisola.eats", ["creator"], 420],
-      ["Kemi Adekunle", "+2348031235502", "kemi.adekunle@gmail.com", "kemi.adekunle", [], 180],
-      ["Mrs. Adeola Bankole", "+2348061235503", null, null, ["corporate"], 960],
-      ["Tunji Oyelaran", "+2348091235504", null, null, [], 60],
-      ["Grace Umoh", "+2348121235505", "grace.umoh@yahoo.com", null, ["birthday-club"], 250],
+      ["Bisola Ogunleye", "+2348031235501", "bisola@bisolaeats.ng", "bisola.eats", ["creator"]],
+      ["Kemi Adekunle", "+2348031235502", "kemi.adekunle@gmail.com", "kemi.adekunle", []],
+      ["Mrs. Adeola Bankole", "+2348061235503", null, null, ["corporate"]],
+      ["Tunji Oyelaran", "+2348091235504", null, null, []],
+      ["Grace Umoh", "+2348121235505", "grace.umoh@yahoo.com", null, ["birthday-club"]],
     ],
     firstCustomerNote: { body: "Orders a red velvet cake for her office every last Friday.", authorStaffId: "stf_funmi", authorName: "Funmilayo Adeyemi" },
   },
