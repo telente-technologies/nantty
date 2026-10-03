@@ -1,15 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { ArrowLeft24Icon, DotsThreeVertical24Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { ConnectionRow } from "@/components/profile/connectionRow";
+import { followButtonLabelForState, isFollowStateHighlighted, resolveFollowStateOfUser } from "@/components/profile/followState.util";
 import { profileQueryKeys } from "@/components/profile/profileQueries.hook";
 import { Chip } from "@/components/ui/chip";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { followsService } from "@/services/follows.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -30,28 +34,35 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
   const isMyConnections = useAuthStore((s) => s.user?.id) === userId;
   const visibleTabs = isMyConnections ? TABS : TABS.filter((t) => t.key !== "blocked" && t.key !== "shopped");
   const queryClient = useQueryClient();
-  const { data: entries = [], isLoading } = useQuery({
-    queryKey: profileQueryKeys.connections(userId, tab),
-    queryFn: () => followsService.listConnectionsOfUser(userId, tab),
+  const deferredSearch = useDeferredValue(search.trim());
+  const isSearchableListTab = tab === "followers" || tab === "following";
+  const { data: entries = [], isLoading, error, refetch } = useQuery({
+    queryKey: [...profileQueryKeys.connections(userId, tab), isSearchableListTab ? deferredSearch : ""],
+    queryFn: async () => {
+      if (tab === "followers") return (await followsService.listFollowersOfUser(userId, deferredSearch)).data;
+      if (tab === "following") return (await followsService.listFollowingOfUser(userId, deferredSearch)).data;
+      return followsService.listConnectionsOfUser(userId, tab);
+    },
+    retry: (failureCount, failure) => !(failure instanceof ApiError && failure.status === 403) && failureCount < 2,
   });
+  const isListHiddenBecausePrivate = error instanceof ApiError && error.status === 403;
 
   const changeRelationshipWithUser = useMutation({
-    mutationFn: (entry: ConnectionEntry) =>
-      tab === "blocked"
+    mutationFn: async (entry: ConnectionEntry) => {
+      await (tab === "blocked"
         ? followsService.unblockUser(entry.id)
-        : entry.isFollowing
+        : resolveFollowStateOfUser(entry) !== "none" && resolveFollowStateOfUser(entry) !== "rejected"
           ? followsService.unfollowUser(entry.id)
-          : followsService.followUser(entry.id),
+          : followsService.followUser(entry.id));
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users", userId, "connections"] }),
   });
 
-  const filteredEntries = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return entries;
-    return entries.filter((e) => e.name.toLowerCase().includes(term) || e.username.toLowerCase().includes(term));
-  }, [entries, search]);
+  const filteredEntries = isSearchableListTab
+    ? entries
+    : entries.filter((e) => !search.trim() || `${e.name} ${e.username}`.toLowerCase().includes(search.trim().toLowerCase()));
 
-  const actionLabelFor = (entry: ConnectionEntry) => (tab === "blocked" ? "Unblock" : entry.isFollowing ? "Unfollow" : "Follow");
+  const actionLabelFor = (entry: ConnectionEntry) => (tab === "blocked" ? "Unblock" : followButtonLabelForState(resolveFollowStateOfUser(entry)));
 
   return (
     <Screen background={colors.white}>
@@ -80,8 +91,15 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
       <Text size={14} weight={500} lineHeight={16.8} style={styles.sort}>
         Sort by Default
       </Text>
+      {isListHiddenBecausePrivate ? (
+        <ErrorState message="This account is private. Follow them to see their followers and following." />
+      ) : error ? (
+        <ErrorState message="Couldn't load this list." onRetry={() => refetch()} />
+      ) : isLoading ? (
+        <ListSkeleton />
+      ) : null}
       <FlatList
-        data={filteredEntries}
+        data={error || isLoading ? [] : filteredEntries}
         keyExtractor={(entry) => entry.id}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -89,14 +107,14 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
           <ConnectionRow
             user={item}
             actionLabel={item.id === useAuthStore.getState().user?.id ? undefined : actionLabelFor(item)}
-            actionHighlighted={tab !== "blocked" && !item.isFollowing}
+            actionHighlighted={tab !== "blocked" && isFollowStateHighlighted(resolveFollowStateOfUser(item))}
             onPressAction={() => changeRelationshipWithUser.mutate(item)}
             onPressUser={() => navigation.push("UserProfile", { userId: item.id })}
             onPressMore={() => undefined}
           />
         )}
         ListEmptyComponent={
-          isLoading ? null : (
+          isLoading || error ? null : (
             <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
               Nobody here yet
             </Text>

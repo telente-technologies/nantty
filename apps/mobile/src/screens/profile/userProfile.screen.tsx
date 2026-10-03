@@ -7,6 +7,7 @@ import { TransferCoinsSheet } from "@/components/coins/transferCoinsSheet";
 import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
 import { useToggleFollowMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { ProfileAction } from "@/components/profile/profileSummary";
+import { followButtonLabelForState, isFollowStateHighlighted, isProfileContentHiddenFromViewer, resolveFollowStateOfUser } from "@/components/profile/followState.util";
 import { ProfileView } from "@/components/profile/profileView";
 import { Screen } from "@/components/ui/screen";
 import { colors } from "@/constants/colors.constant";
@@ -32,7 +33,8 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
   const [isTransferCoinsSheetOpen, setIsTransferCoinsSheetOpen] = useState(false);
   const profile = profileQuery.data;
-  const isFollowing = profile?.isFollowing ?? false;
+  const followState = profile ? resolveFollowStateOfUser(profile) : "none";
+  const isContentHidden = profile ? isProfileContentHiddenFromViewer(profile) : false;
 
   useEffect(() => {
     if (viewingOwnProfile) navigation.replace("Tabs", { screen: "Me" });
@@ -40,7 +42,11 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
 
   const actions: ProfileAction[] = profile
     ? [
-        { label: isFollowing ? "Following" : "Follow", onPress: () => toggleFollow.mutate(isFollowing), highlighted: !isFollowing },
+        {
+          label: followButtonLabelForState(followState),
+          onPress: () => toggleFollow.mutate(followState === "accepted" || followState === "requested"),
+          highlighted: isFollowStateHighlighted(followState),
+        },
         { label: "Message", onPress: () => navigation.navigate("Chat", { userId, name: profile.name }) },
         ...(profile.isSeller && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
       ]
@@ -73,6 +79,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           ...(profile?.isSeller ? (["store"] as const) : []),
         ]}
         actions={actions}
+        isLocked={isContentHidden}
         identityAction={identityAction}
         loading={postsQuery.isLoading}
         refreshing={profileQuery.isRefetching || postsQuery.isRefetching}
