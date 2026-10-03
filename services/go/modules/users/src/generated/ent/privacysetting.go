@@ -28,6 +28,10 @@ type PrivacySetting struct {
 	PersonalizedAds bool `json:"personalized_ads,omitempty"`
 	// Marketing holds the value of the "marketing" field.
 	Marketing bool `json:"marketing,omitempty"`
+	// WhoCanMessageMe holds the value of the "who_can_message_me" field.
+	WhoCanMessageMe privacysetting.WhoCanMessageMe `json:"who_can_message_me,omitempty"`
+	// WhoCanMentionMe holds the value of the "who_can_mention_me" field.
+	WhoCanMentionMe privacysetting.WhoCanMentionMe `json:"who_can_mention_me,omitempty"`
 	// PolicyVersion holds the value of the "policy_version" field.
 	PolicyVersion string `json:"policy_version,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -44,7 +48,7 @@ func (*PrivacySetting) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case privacysetting.FieldID:
 			values[i] = new(sql.NullInt64)
-		case privacysetting.FieldPolicyVersion:
+		case privacysetting.FieldWhoCanMessageMe, privacysetting.FieldWhoCanMentionMe, privacysetting.FieldPolicyVersion:
 			values[i] = new(sql.NullString)
 		case privacysetting.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -100,6 +104,18 @@ func (_m *PrivacySetting) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field marketing", values[i])
 			} else if value.Valid {
 				_m.Marketing = value.Bool
+			}
+		case privacysetting.FieldWhoCanMessageMe:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field who_can_message_me", values[i])
+			} else if value.Valid {
+				_m.WhoCanMessageMe = privacysetting.WhoCanMessageMe(value.String)
+			}
+		case privacysetting.FieldWhoCanMentionMe:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field who_can_mention_me", values[i])
+			} else if value.Valid {
+				_m.WhoCanMentionMe = privacysetting.WhoCanMentionMe(value.String)
 			}
 		case privacysetting.FieldPolicyVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -163,6 +179,12 @@ func (_m *PrivacySetting) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("marketing=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Marketing))
+	builder.WriteString(", ")
+	builder.WriteString("who_can_message_me=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WhoCanMessageMe))
+	builder.WriteString(", ")
+	builder.WriteString("who_can_mention_me=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WhoCanMentionMe))
 	builder.WriteString(", ")
 	builder.WriteString("policy_version=")
 	builder.WriteString(_m.PolicyVersion)

@@ -83,6 +83,34 @@ func (_c *PrivacySettingCreate) SetNillableMarketing(v *bool) *PrivacySettingCre
 	return _c
 }
 
+// SetWhoCanMessageMe sets the "who_can_message_me" field.
+func (_c *PrivacySettingCreate) SetWhoCanMessageMe(v privacysetting.WhoCanMessageMe) *PrivacySettingCreate {
+	_c.mutation.SetWhoCanMessageMe(v)
+	return _c
+}
+
+// SetNillableWhoCanMessageMe sets the "who_can_message_me" field if the given value is not nil.
+func (_c *PrivacySettingCreate) SetNillableWhoCanMessageMe(v *privacysetting.WhoCanMessageMe) *PrivacySettingCreate {
+	if v != nil {
+		_c.SetWhoCanMessageMe(*v)
+	}
+	return _c
+}
+
+// SetWhoCanMentionMe sets the "who_can_mention_me" field.
+func (_c *PrivacySettingCreate) SetWhoCanMentionMe(v privacysetting.WhoCanMentionMe) *PrivacySettingCreate {
+	_c.mutation.SetWhoCanMentionMe(v)
+	return _c
+}
+
+// SetNillableWhoCanMentionMe sets the "who_can_mention_me" field if the given value is not nil.
+func (_c *PrivacySettingCreate) SetNillableWhoCanMentionMe(v *privacysetting.WhoCanMentionMe) *PrivacySettingCreate {
+	if v != nil {
+		_c.SetWhoCanMentionMe(*v)
+	}
+	return _c
+}
+
 // SetPolicyVersion sets the "policy_version" field.
 func (_c *PrivacySettingCreate) SetPolicyVersion(v string) *PrivacySettingCreate {
 	_c.mutation.SetPolicyVersion(v)
@@ -162,6 +190,14 @@ func (_c *PrivacySettingCreate) defaults() {
 		v := privacysetting.DefaultMarketing
 		_c.mutation.SetMarketing(v)
 	}
+	if _, ok := _c.mutation.WhoCanMessageMe(); !ok {
+		v := privacysetting.DefaultWhoCanMessageMe
+		_c.mutation.SetWhoCanMessageMe(v)
+	}
+	if _, ok := _c.mutation.WhoCanMentionMe(); !ok {
+		v := privacysetting.DefaultWhoCanMentionMe
+		_c.mutation.SetWhoCanMentionMe(v)
+	}
 	if _, ok := _c.mutation.PolicyVersion(); !ok {
 		v := privacysetting.DefaultPolicyVersion
 		_c.mutation.SetPolicyVersion(v)
@@ -188,6 +224,22 @@ func (_c *PrivacySettingCreate) check() error {
 	}
 	if _, ok := _c.mutation.Marketing(); !ok {
 		return &ValidationError{Name: "marketing", err: errors.New(`ent: missing required field "PrivacySetting.marketing"`)}
+	}
+	if _, ok := _c.mutation.WhoCanMessageMe(); !ok {
+		return &ValidationError{Name: "who_can_message_me", err: errors.New(`ent: missing required field "PrivacySetting.who_can_message_me"`)}
+	}
+	if v, ok := _c.mutation.WhoCanMessageMe(); ok {
+		if err := privacysetting.WhoCanMessageMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_message_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_message_me": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.WhoCanMentionMe(); !ok {
+		return &ValidationError{Name: "who_can_mention_me", err: errors.New(`ent: missing required field "PrivacySetting.who_can_mention_me"`)}
+	}
+	if v, ok := _c.mutation.WhoCanMentionMe(); ok {
+		if err := privacysetting.WhoCanMentionMeValidator(v); err != nil {
+			return &ValidationError{Name: "who_can_mention_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_mention_me": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.PolicyVersion(); !ok {
 		return &ValidationError{Name: "policy_version", err: errors.New(`ent: missing required field "PrivacySetting.policy_version"`)}
@@ -245,6 +297,14 @@ func (_c *PrivacySettingCreate) createSpec() (*PrivacySetting, *sqlgraph.CreateS
 	if value, ok := _c.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
 		_node.Marketing = value
+	}
+	if value, ok := _c.mutation.WhoCanMessageMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)
+		_node.WhoCanMessageMe = value
+	}
+	if value, ok := _c.mutation.WhoCanMentionMe(); ok {
+		_spec.SetField(privacysetting.FieldWhoCanMentionMe, field.TypeEnum, value)
+		_node.WhoCanMentionMe = value
 	}
 	if value, ok := _c.mutation.PolicyVersion(); ok {
 		_spec.SetField(privacysetting.FieldPolicyVersion, field.TypeString, value)
