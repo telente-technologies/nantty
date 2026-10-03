@@ -27,7 +27,7 @@ export interface MockAdminRecord {
 const operationsPermissions: AdminPermission[] = [
   "metrics:read", "users:read", "users:moderate", "usernames:manage", "reserved-usernames:manage",
   "verification:review", "verification:documents", "applications:sellers", "applications:creators",
-  "moderation:reports", "moderation:appeals", "copyright:review", "brands:review", "ip-claims:review", "orders:read", "disputes:resolve", "refunds:issue",
+  "moderation:reports", "moderation:appeals", "chat-reports:review", "copyright:review", "brands:review", "ip-claims:review", "orders:read", "disputes:resolve", "refunds:issue",
   "ads:review", "catalog:manage", "config:read", "audit:read",
   "users:restrict", "users:suspend", "verification:grant", "support:chat", "support:email",
 ];
