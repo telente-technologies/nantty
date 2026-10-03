@@ -11,18 +11,22 @@ import (
 	"zudomart/modules/live/src/generated/ent"
 	"zudomart/modules/live/src/integrations"
 	"zudomart/modules/live/src/interfaces"
+	"zudomart/platform/idempotency"
+	"zudomart/platform/jwtauth"
 )
 
 type Container struct {
-	Client    *ent.Client
-	Settings  configs.LiveSettings
-	Money     interfaces.MoneyGateway
-	Directory interfaces.ParticipantDirectory
-	Media     interfaces.MediaRoomController
-	Tokens    *integrations.TokenIssuer
-	PinPolicy interfaces.ProductPinPolicy
-	Logger    *slog.Logger
-	Now       func() time.Time
+	Client           *ent.Client
+	Settings         configs.LiveSettings
+	Money            interfaces.MoneyGateway
+	Directory        interfaces.ParticipantDirectory
+	Media            interfaces.MediaRoomController
+	Tokens           *integrations.TokenIssuer
+	PinPolicy        interfaces.ProductPinPolicy
+	Logger           *slog.Logger
+	Now              func() time.Time
+	AccessVerifier   *jwtauth.AccessTokenVerifier
+	IdempotencyStore *idempotency.RedisStore
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {
