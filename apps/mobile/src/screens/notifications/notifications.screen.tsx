@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { notificationsService } from "@/services/notifications.service";
 import type { CategorizedNotification } from "@/types/commerce.type";
@@ -16,6 +16,8 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 const notificationsQueryKey = ["notifications"] as const;
 
 export function NotificationsScreen({ navigation }: MainScreenProps<"Notifications">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const notifications = useQuery({ queryKey: notificationsQueryKey, queryFn: notificationsService.fetchMyNotifications });
   const refreshNotifications = () => queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
@@ -82,12 +84,12 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingVertical: 8 },
   row: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
-  unreadRow: { backgroundColor: colors.white },
+  unreadRow: { backgroundColor: colors.surface },
   iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
   text: { flex: 1, gap: 2 },
-  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primarySolid },
   state: { marginTop: 64 },
-});
+}));
