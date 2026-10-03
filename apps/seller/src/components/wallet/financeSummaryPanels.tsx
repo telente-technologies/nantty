@@ -58,7 +58,7 @@ export function AccountingExportPanel() {
   return (
     <Panel title={<span className={styles.titleWithBadge}>Export to accounting software <FeaturePlanBadge feature="accounting_integrations" /></span>} description="Send settlements, fees and payouts to QuickBooks, Xero or Zoho Books every day.">
       <div className={styles.statementRow}>
-        <Button iconName="export24" disabled={!canConnect} onClick={() => showToast("Connect your accounting software from Settings → Integrations.", "info")}>
+        <Button iconName="export24" disabled={!canConnect} onClick={() => showToast("Connect your accounting software from Settings › Integrations.", "info")}>
           Connect accounting software
         </Button>
         {!canConnect ? <span className={styles.muted}>Part of the Business plan. You can still download statements and reports any time.</span> : null}

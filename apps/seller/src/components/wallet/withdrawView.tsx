@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 
+import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { payoutStatusPresentation } from "@/components/wallet/walletPresentation.constant";
 import { WalletTabs } from "@/components/wallet/walletTabs";
 import { WithdrawConfirmationDialog } from "@/components/wallet/withdrawConfirmationDialog";
@@ -18,6 +19,7 @@ import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { Payout, PayoutAccount, WalletBalances } from "@/types/wallet.type";
+import type { PayoutFees, PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 import type { WalletPayoutSettings } from "@/types/walletExtra.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 import { convertMinorUnitsToMajorInputText } from "@/utils/money.util";
@@ -32,6 +34,8 @@ export function WithdrawView() {
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const settingsQuery = useSellerQuery<WalletPayoutSettings>("/seller/wallet/payout-settings");
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
+  const onboardingQuery = useSellerQuery<PayoutOnboardingState>("/seller/payout-onboarding");
+  const feesQuery = useSellerQuery<PayoutFees>("/seller/payout-onboarding/fees");
   const payoutsQuery = useSellerQuery<CursorPage<Payout>>("/seller/wallet/payouts", { limit: 50 });
   const [amountText, setAmountText] = useState("");
   const [amountMinor, setAmountMinor] = useState<number | null>(null);
@@ -48,6 +52,8 @@ export function WithdrawView() {
   const accountId = selectedAccountId || accounts.find((account) => account.isDefault)?.id || accounts[0]?.id || "";
   const selectedAccount = accounts.find((account) => account.id === accountId);
   const canWithdraw = can("wallet:withdraw");
+  const isPayoutLocked = !onboardingQuery.data?.withdrawalsEnabled;
+  const publishedFee = feesQuery.data?.fee ?? null;
 
   if (!balances || !payoutSettings || !accountsQuery.data) {
     const errorMessage = balancesQuery.errorMessage ?? settingsQuery.errorMessage ?? accountsQuery.errorMessage;
@@ -59,7 +65,8 @@ export function WithdrawView() {
       </PageStack>
     );
   }
-  const maximumWithdrawableMinor = Math.max(0, balances.available.amountMinor - payoutSettings.fee.amountMinor);
+  const feeToApply = publishedFee ?? payoutSettings.fee;
+  const maximumWithdrawableMinor = Math.max(0, balances.available.amountMinor - feeToApply.amountMinor);
 
   function validateWithdrawalForm(minimumPayout: WalletPayoutSettings["minimumPayout"], currency: WalletBalances["available"]["currency"]): boolean {
     const errors: { amount?: string; account?: string } = {};
@@ -103,6 +110,7 @@ export function WithdrawView() {
     <PageStack>
       <PageHeader title="Withdraw & payouts" description={payoutSettings.schedule} actions={<ButtonLink href="/settings/payouts">Payout preferences</ButtonLink>} />
       <WalletTabs />
+      {isPayoutLocked ? <PayoutSetupBanner /> : null}
       {!canWithdraw ? <Callout tone="info" title="Only the store owner can withdraw">You can see payouts here, but moving money out needs the owner.</Callout> : null}
       {canWithdraw && accounts.length === 0 ? (
         <Panel>
@@ -110,25 +118,29 @@ export function WithdrawView() {
         </Panel>
       ) : null}
       {canWithdraw && accounts.length > 0 ? (
-        <Panel title="Withdraw to your bank" description={`Available: ${formatMoney(balances.available)} · fee ${formatMoney(payoutSettings.fee)} · minimum ${formatMoney(payoutSettings.minimumPayout)}`}>
+        <Panel title="Withdraw to your bank" description={`Available: ${formatMoney(balances.available)} · fee ${formatMoney(feeToApply)} flat · minimum ${formatMoney(payoutSettings.minimumPayout)}${feesQuery.data ? ` · ${feesQuery.data.arrivalEstimate}` : ""}`}>
           <form onSubmit={openConfirmationStep} noValidate>
             <div className={styles.formGrid}>
               <MoneyField label="Amount" currency={balances.available.currency} valueText={amountText} onValueTextChange={setAmountText} onMinorAmountChange={setAmountMinor} errorMessage={fieldErrors.amount} hint={`Up to ${formatMoney({ amountMinor: maximumWithdrawableMinor, currency: balances.available.currency })}`} />
               <SelectField label="Payout account" value={accountId} onChange={(event) => setSelectedAccountId(event.target.value)} errorMessage={fieldErrors.account} options={accounts.map((account) => ({ value: account.id, label: `${account.bankName} ${account.accountNumberMasked}${account.isDefault ? " (default)" : ""}` }))} />
             </div>
             <div className={styles.formActions}>
-              <Button onClick={() => { setAmountText(convertMinorUnitsToMajorInputText(maximumWithdrawableMinor, balances.available.currency)); setAmountMinor(maximumWithdrawableMinor); }} disabled={maximumWithdrawableMinor < payoutSettings.minimumPayout.amountMinor}>
+              <Button onClick={() => { setAmountText(convertMinorUnitsToMajorInputText(maximumWithdrawableMinor, balances.available.currency)); setAmountMinor(maximumWithdrawableMinor); }} disabled={isPayoutLocked || maximumWithdrawableMinor < payoutSettings.minimumPayout.amountMinor}>
                 Withdraw everything
               </Button>
-              <Button type="submit" variant="primary">
-                Continue
-              </Button>
+              {isPayoutLocked ? (
+                <ButtonLink href="/settings/payouts" variant="primary">Finish payout setup</ButtonLink>
+              ) : (
+                <Button type="submit" variant="primary">
+                  Continue
+                </Button>
+              )}
             </div>
           </form>
         </Panel>
       ) : null}
       {isConfirming && selectedAccount && amountMinor !== null ? (
-        <WithdrawConfirmationDialog isOpen amount={{ amountMinor, currency: balances.available.currency }} fee={payoutSettings.fee} account={selectedAccount} isSubmitting={isSubmitting} errorMessage={submitError} onCancel={() => setIsConfirming(false)} onConfirm={() => void submitConfirmedWithdrawal()} />
+        <WithdrawConfirmationDialog isOpen amount={{ amountMinor, currency: balances.available.currency }} fee={feeToApply} account={selectedAccount} isSubmitting={isSubmitting} errorMessage={submitError} onCancel={() => setIsConfirming(false)} onConfirm={() => void submitConfirmedWithdrawal()} />
       ) : null}
       <Panel padded={false} title="Payout history">
         <DataTable

@@ -11,6 +11,7 @@ import type { StatementDetail } from "@/types/finance.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./statementDocument.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function StatementDocumentView({ month }: { readonly month: string }) {
   const { formatMoney, locale } = useMoneyFormatter();
@@ -19,7 +20,7 @@ export function StatementDocumentView({ month }: { readonly month: string }) {
   return (
     <div className={styles.page}>
       <div className={`${styles.toolbar} noPrint`}>
-        <Link href="/wallet/statements">← All statements</Link>
+        <Link href="/wallet/statements"><IconLabel name="arrowLeft24" size={16}>All statements</IconLabel></Link>
         <Button variant="primary" iconName="export24" onClick={() => window.print()} disabled={!statement}>
           Print or save as PDF
         </Button>

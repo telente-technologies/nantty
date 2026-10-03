@@ -18,7 +18,7 @@ import { formatBasisPointsAsPercent } from "@/utils/money.util";
 import styles from "./wallet.module.css";
 
 const feeColorVariables: Record<FinanceFeeKind, string> = {
-  marketplace_commission: "--chart-1",
+  escrow_fee: "--chart-1",
   payment_processing: "--chart-4",
   withdrawal: "--chart-2",
   ads: "--chart-compare",
@@ -38,7 +38,7 @@ export function FinanceFeesView() {
 
   return (
     <PageStack>
-      <PageHeader title="Fees" description="What you paid to sell on Zudomart. Marketplace commission and payment processing come out of each order before it reaches your wallet." />
+      <PageHeader title="Fees" description="What you paid to sell on Zudomart. The payment processing fee and, on escrow orders, the escrow fee come out of each order before it reaches your wallet." />
       <WalletTabs />
       <FilterBar>
         <DateRangeControl value={dateRange} onValueChange={setDateRange} />
@@ -80,7 +80,7 @@ export function FinanceFeesView() {
               )}
             </Panel>
           </div>
-          <Callout tone="info" title="Withdrawal fees">The withdrawal fee is the payment provider&apos;s own charge for sending money to your bank. Zudomart adds nothing on top.</Callout>
+          <Callout tone="info" title="Withdrawal fees">The withdrawal fee is the transfer charge for sending money to your bank. Zudomart adds nothing on top.</Callout>
         </>
       ) : null}
     </PageStack>

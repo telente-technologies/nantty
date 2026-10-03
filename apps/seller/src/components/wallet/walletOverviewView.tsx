@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AccountingExportPanel, FinanceSummarySection, UpcomingEscrowReleasesPanel } from "@/components/wallet/financeSummaryPanels";
 import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
 import { walletBalanceBucketLabels, walletTransactionKindLabels } from "@/components/wallet/walletPresentation.constant";
+import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { WalletTabs } from "@/components/wallet/walletTabs";
 import { useWalletCursorPages } from "@/components/wallet/useWalletCursorPages.hook";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
@@ -91,6 +92,7 @@ export function WalletOverviewView() {
         }
       />
       <WalletTabs />
+      <PayoutSetupBanner />
       {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <Callout tone="error">{balancesQuery.errorMessage}</Callout> : <LoadingBlock label="Loading balances" />}
       <FinanceSummarySection summary={summaryQuery.data} isLoading={summaryQuery.isLoading} errorMessage={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />
       <div className={styles.overviewGrid}>

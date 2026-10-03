@@ -14,6 +14,7 @@ import type { SettlementDetail } from "@/types/finance.type";
 import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./wallet.module.css";
+import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function SettlementDetailView({ settlementId }: { readonly settlementId: string }) {
   const { formatMoney } = useMoneyFormatter();
@@ -22,7 +23,7 @@ export function SettlementDetailView({ settlementId }: { readonly settlementId: 
   if (!detail) {
     return (
       <PageStack>
-        <Link href="/wallet/settlements" className={styles.panelLink}>← All settlements</Link>
+        <Link href="/wallet/settlements" className={styles.panelLink}><IconLabel name="arrowLeft24" size={16}>All settlements</IconLabel></Link>
         {detailQuery.errorMessage ? <Callout tone="error" action={<Button size="small" onClick={detailQuery.reload}>Try again</Button>}>{detailQuery.errorMessage}</Callout> : <LoadingBlock label="Loading settlement" />}
       </PageStack>
     );
@@ -30,7 +31,7 @@ export function SettlementDetailView({ settlementId }: { readonly settlementId: 
   const { settlement } = detail;
   return (
     <PageStack>
-      <Link href="/wallet/settlements" className={`${styles.panelLink} noPrint`}>← All settlements</Link>
+      <Link href="/wallet/settlements" className={`${styles.panelLink} noPrint`}><IconLabel name="arrowLeft24" size={16}>All settlements</IconLabel></Link>
       <PageHeader title={`Settlement ${settlement.reference}`} description={`${formatDateForDisplay(settlement.periodStart)} – ${formatDateForDisplay(settlement.periodEnd)}`} actions={<Button variant="ghost" onClick={() => window.print()}>Print</Button>} />
       <WalletTabs />
       <Panel title="Summary" actions={<StatusBadge tone={settlement.status === "settled" ? "success" : "info"}>{settlement.status === "settled" ? "Settled" : "Clearing"}</StatusBadge>}>
