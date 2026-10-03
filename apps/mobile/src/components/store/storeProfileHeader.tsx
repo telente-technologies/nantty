@@ -6,7 +6,7 @@ import { VerificationBadge } from "@/components/profile/verificationBadge";
 
 import { OfficialStoreBadge } from "./officialStoreBadge";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { StoreDetail } from "@/types/commerce.type";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 import { PreviewableImage } from "@/components/ui/previewableImage";
@@ -18,6 +18,7 @@ export interface StoreProfileHeaderProps {
 }
 
 function OutlineButton({ title, onPress }: { title: string; onPress: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.outlineButton}>
       <Text size={14} lineHeight={16.8}>{title}</Text>
@@ -26,6 +27,8 @@ function OutlineButton({ title, onPress }: { title: string; onPress: () => void 
 }
 
 export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StoreProfileHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View>
       <View style={styles.banner}>
@@ -75,8 +78,8 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
   );
 }
 
-const styles = StyleSheet.create({
-  banner: { marginHorizontal: 12, height: 100, borderRadius: 8, backgroundColor: "#C4C4C4", overflow: "hidden" },
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
+  banner: { marginHorizontal: 12, height: 100, borderRadius: 8, backgroundColor: scheme === "dark" ? colors.placeholder : "#C4C4C4", overflow: "hidden" },
   identity: { marginTop: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   logo: { width: 64, height: 64, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
   names: { flex: 1, gap: 4 },
@@ -94,4 +97,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));

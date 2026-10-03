@@ -3,13 +3,15 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { BrandSummary } from "@/types/brand.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 import { OfficialStoreBadge } from "./officialStoreBadge";
 
 export function BrandRow({ brand, onPress }: { brand: BrandSummary; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`Brand ${brand.name}`} onPress={onPress} style={styles.row}>
       <Image source={{ uri: brand.logoUrl ?? undefined }} style={styles.logo} contentFit="cover" />
@@ -25,9 +27,9 @@ export function BrandRow({ brand, onPress }: { brand: BrandSummary; onPress: () 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
   logo: { width: 44, height: 44, borderRadius: 8, backgroundColor: colors.placeholder },
   texts: { flex: 1, gap: 2 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-});
+}));
