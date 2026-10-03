@@ -22,6 +22,7 @@ type AdminSettings struct {
 	LockoutDuration        time.Duration
 	InternalApiToken       string
 	DeliveryMode           string
+	AllowedEmailDomains    []string
 }
 
 func (settings AdminSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -42,6 +43,7 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		LockoutDuration:        reader.ReadDurationOrDefault("ADMIN_LOCKOUT_DURATION", 15*time.Minute),
 		InternalApiToken:       reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 		DeliveryMode:           reader.ReadStringOrDefault("ADMIN_INVITATION_DELIVERY", "log"),
+		AllowedEmailDomains:    reader.ReadCommaSeparatedListOrDefault("ADMIN_ALLOWED_EMAIL_DOMAINS", nil),
 	}
 	reader.RequireMinimumLength("ADMIN_INTERNAL_API_TOKEN", settings.InternalApiToken, 32)
 	if settings.IsProduction() && settings.DeliveryMode == "log" {
