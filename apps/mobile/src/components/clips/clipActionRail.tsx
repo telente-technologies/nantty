@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Text } from "@/components/ui/text";
 import { ChatCircle24Icon, Coin24Icon, DotsThreeVertical24Icon, Heart24Icon, HeartFill72Icon, PaperPlaneTilt24Icon } from "@/components/icons";
+import type { SaveTarget } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 export interface ClipActionRailProps {
@@ -15,6 +17,8 @@ export interface ClipActionRailProps {
   readonly onShare: () => void;
   readonly onMore: () => void;
   readonly onTip?: () => void;
+  readonly saveTarget?: SaveTarget;
+  readonly savedAccordingToServer?: boolean;
   readonly foregroundColor?: string;
 }
 
@@ -54,6 +58,9 @@ export function ClipActionRail(props: ClipActionRailProps) {
       <RailButton label="Share" count={props.shares} onPress={props.onShare} foregroundColor={color}>
         <PaperPlaneTilt24Icon color={color} />
       </RailButton>
+      {props.saveTarget ? (
+        <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} showLabel />
+      ) : null}
       {props.onTip ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={8} onPress={props.onTip} style={styles.button}>
           <Coin24Icon color={color} />

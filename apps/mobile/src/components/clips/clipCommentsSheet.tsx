@@ -20,7 +20,7 @@ export interface ClipCommentsSheetProps {
 
 export function ClipCommentsSheet({ postId, myAvatarUrl, onClose }: ClipCommentsSheetProps) {
   const insets = useSafeAreaInsets();
-  const commentThread = useCommentThreadController(postId);
+  const commentThread = useCommentThreadController(postId, onClose);
   const navigation = useNavigation();
 
   useEffect(() => navigation.addListener("blur", onClose), [navigation, onClose]);

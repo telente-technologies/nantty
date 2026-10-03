@@ -171,6 +171,8 @@ function ClipPageComponent(props: ClipPageProps) {
           onShare={props.onShare}
           onMore={openClipOptions}
           onTip={canTipAuthor ? () => setIsTipSheetOpen(true) : undefined}
+          saveTarget={{ type: "clip", targetId: clip.id }}
+          savedAccordingToServer={clip.bookmarked}
           foregroundColor={FOREGROUND_ON_VIDEO}
         />
       </View>
@@ -202,6 +204,8 @@ function ClipPageComponent(props: ClipPageProps) {
       ) : null}
       <LandscapeVideoFullScreenModal
         media={isFullScreenPlayerOpen && video ? video : null}
+        saveTarget={{ type: "clip", targetId: clip.id }}
+        savedAccordingToServer={clip.bookmarked}
         isMuted={props.isMuted}
         onClose={() => setIsFullScreenPlayerOpen(false)}
       />

@@ -11,6 +11,7 @@ import { colors } from "@/constants/colors.constant";
 import type { Comment } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export interface CommentRowProps {
   readonly comment: Comment;
@@ -42,7 +43,7 @@ export function CommentRow({
   const offerToReportComment = () =>
     showAlertWithButtons("Comment options", undefined, [
       { text: "Cancel", style: "cancel" },
-      { text: "Report comment", style: "destructive", onPress: () => setIsReportSheetOpen(true) },
+      { text: "Report comment", style: "destructive", onPress: () => requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report") },
     ]);
   const confirmDeletingOwnComment = () => {
     if (!canDelete || !onDelete) return;
@@ -57,7 +58,7 @@ export function CommentRow({
       accessibilityHint={canDelete ? "Long press to delete your comment" : "Long press to report this comment"}
       accessibilityActions={canDelete || isPending ? undefined : [{ name: "report", label: "Report comment" }]}
       onAccessibilityAction={(event) => {
-        if (event.nativeEvent.actionName === "report") setIsReportSheetOpen(true);
+        if (event.nativeEvent.actionName === "report") requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report");
       }}
       style={[styles.row, isPending && styles.pending]}
     >

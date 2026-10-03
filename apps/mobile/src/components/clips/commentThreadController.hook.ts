@@ -4,6 +4,7 @@ import { postCommentsService } from "@/services/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment, UserSummary } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 export const TOP_LEVEL_PARENT_KEY = "root";
 export type ReplyThreadVisibility = "expanded" | "collapsed";
@@ -33,7 +34,7 @@ const FALLBACK_SIGNED_IN_AUTHOR: UserSummary = { id: "u_me", name: "You", userna
 
 export const isPendingComment = (comment: Comment) => comment.id.startsWith("pending_");
 
-export function useCommentThreadController(postId: string | null) {
+export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void) {
   const signedInUser = useAuthStore((s) => s.user);
   const signedInAuthor: UserSummary = signedInUser ?? FALLBACK_SIGNED_IN_AUTHOR;
   const [threadState, setThreadState] = useState<CommentThreadLocalState>(EMPTY_THREAD_STATE);
@@ -51,7 +52,7 @@ export function useCommentThreadController(postId: string | null) {
   const setLikeOverride = (commentId: string, override: LikeOverride) =>
     setThreadState((s) => ({ ...s, likeOverridesByCommentId: { ...s.likeOverridesByCommentId, [commentId]: override } }));
 
-  const toggleLikeOnComment = (comment: Comment) => {
+  const applyCommentLikeToggle = (comment: Comment) => {
     if (isPendingComment(comment)) return;
     const current = applyLocalOverridesToComment(comment);
     const previous = { liked: current.liked, likes: current.likes };
@@ -67,7 +68,7 @@ export function useCommentThreadController(postId: string | null) {
       return { ...s, locallyPostedCommentsByParentKey: { ...s.locallyPostedCommentsByParentKey, [parentKey]: updated } };
     });
 
-  const submitCommentOrReplyText = (text: string) => {
+  const applyCommentOrReplyText = (text: string) => {
     if (!postId || !text.trim()) return;
     const parent = threadState.replyTarget;
     const parentKey = parent?.id ?? TOP_LEVEL_PARENT_KEY;
@@ -101,6 +102,15 @@ export function useCommentThreadController(postId: string | null) {
         replaceLocallyPostedComment(parentKey, pendingComment.id, null);
         showAlertWithButtons("Comment not posted", "Please check your connection and try again.");
       });
+  };
+
+  const requireSignInFor = (action: () => void, reason: string) =>
+    closeContainingModal ? requireAuthAfterClosingModal(closeContainingModal, action, reason) : requireAuthThen(action, undefined, reason);
+
+  const toggleLikeOnComment = (comment: Comment) => requireSignInFor(() => applyCommentLikeToggle(comment), "like comments");
+  const submitCommentOrReplyText = (text: string) => {
+    if (!postId || !text.trim()) return;
+    requireSignInFor(() => applyCommentOrReplyText(text), "comment");
   };
 
   const setDeletedFlag = (commentId: string, deleted: boolean) =>
