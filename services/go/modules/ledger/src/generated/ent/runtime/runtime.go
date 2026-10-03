@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/outboxevent"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
+	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
 
 	"github.com/google/uuid"
 )
@@ -327,6 +328,73 @@ func init() {
 	reconciliationrunDescID := reconciliationrunMixinFields0[0].Descriptor()
 	// reconciliationrun.DefaultID holds the default value on creation for the id field.
 	reconciliationrun.DefaultID = reconciliationrunDescID.Default.(func() uuid.UUID)
+	sellercreditmaturityMixin := schema.SellerCreditMaturity{}.Mixin()
+	sellercreditmaturityMixinFields0 := sellercreditmaturityMixin[0].Fields()
+	_ = sellercreditmaturityMixinFields0
+	sellercreditmaturityFields := schema.SellerCreditMaturity{}.Fields()
+	_ = sellercreditmaturityFields
+	// sellercreditmaturityDescCreatedAt is the schema descriptor for created_at field.
+	sellercreditmaturityDescCreatedAt := sellercreditmaturityMixinFields0[1].Descriptor()
+	// sellercreditmaturity.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellercreditmaturity.DefaultCreatedAt = sellercreditmaturityDescCreatedAt.Default.(func() time.Time)
+	// sellercreditmaturityDescSellerUserID is the schema descriptor for seller_user_id field.
+	sellercreditmaturityDescSellerUserID := sellercreditmaturityFields[0].Descriptor()
+	// sellercreditmaturity.SellerUserIDValidator is a validator for the "seller_user_id" field. It is called by the builders before save.
+	sellercreditmaturity.SellerUserIDValidator = func() func(string) error {
+		validators := sellercreditmaturityDescSellerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(seller_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(seller_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellercreditmaturityDescCurrency is the schema descriptor for currency field.
+	sellercreditmaturityDescCurrency := sellercreditmaturityFields[1].Descriptor()
+	// sellercreditmaturity.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	sellercreditmaturity.CurrencyValidator = func() func(string) error {
+		validators := sellercreditmaturityDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellercreditmaturityDescSourceReference is the schema descriptor for source_reference field.
+	sellercreditmaturityDescSourceReference := sellercreditmaturityFields[2].Descriptor()
+	// sellercreditmaturity.SourceReferenceValidator is a validator for the "source_reference" field. It is called by the builders before save.
+	sellercreditmaturity.SourceReferenceValidator = func() func(string) error {
+		validators := sellercreditmaturityDescSourceReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(source_reference string) error {
+			for _, fn := range fns {
+				if err := fn(source_reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellercreditmaturityDescID is the schema descriptor for id field.
+	sellercreditmaturityDescID := sellercreditmaturityMixinFields0[0].Descriptor()
+	// sellercreditmaturity.DefaultID holds the default value on creation for the id field.
+	sellercreditmaturity.DefaultID = sellercreditmaturityDescID.Default.(func() uuid.UUID)
 }
 
 const (
