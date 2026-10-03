@@ -15,7 +15,7 @@ const interFont = Inter({ subsets: ["latin"], display: "swap", variable: "--font
 export const metadata: Metadata = {
   metadataBase: new URL(readPublicSiteUrl()),
   title: { default: "Zudomart Studio", template: "%s · Zudomart Studio" },
-  description: "Go live on Zudomart with OBS, overlays and analytics.",
+  description: "Go live on Zudomart: talk, music, gaming and more, with OBS, overlays, gifts and analytics.",
   applicationName: "Zudomart Studio",
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },
