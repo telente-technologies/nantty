@@ -2,7 +2,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-medium);
-  background: #d9dbe4;
+  background: var(--document-backdrop);
   padding: 24px;
   user-select: none;
   -webkit-user-select: none;
@@ -32,6 +32,6 @@
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
-  color: rgb(185 28 28 / 0.28);
+  color: var(--error-watermark);
   letter-spacing: 0.04em;
 }

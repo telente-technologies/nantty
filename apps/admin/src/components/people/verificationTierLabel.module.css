@@ -7,13 +7,13 @@
 }
 
 .blue {
-  color: var(--blue-600);
+  color: var(--verified-blue);
 }
 
 .gold {
-  color: #a57c00;
+  color: var(--verified-gold-text);
 }
 
 .black {
-  color: #000;
+  color: var(--verified-black);
 }
