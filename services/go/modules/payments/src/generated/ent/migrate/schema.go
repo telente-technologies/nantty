@@ -44,6 +44,8 @@ var (
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "product_summary", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "payment_mode", Type: field.TypeEnum, Enums: []string{"escrow", "direct"}, Default: "escrow"},
+		{Name: "store_verified", Type: field.TypeBool, Default: false},
 	}
 	// OrderPayablesTable holds the schema information for the "order_payables" table.
 	OrderPayablesTable = &schema.Table{
@@ -100,7 +102,7 @@ var (
 		{Name: "provider", Type: field.TypeString, Size: 40},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed"}, Default: "pending"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed", "cancelled"}, Default: "pending"},
 		{Name: "authorization_url", Type: field.TypeString, Size: 2000, Default: ""},
 		{Name: "provider_transaction_id", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "provider_fee_minor", Type: field.TypeInt64, Default: 0},
