@@ -132,7 +132,7 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 | 20 | `/ws*` | realtime target group (idle timeout raised) | WebSocket |
 | default | everything else | gateway target group | auth, rate limit, upstream routing |
 
-go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notifications/{store}`; the gateway has no route for `/webhooks/*`, and the old `/api/v1/payments/webhooks/*` paths are no longer routed by it either. Configure each provider dashboard with `https://api.zudomart.com/webhooks/{provider}`. The WAF still sits in front of the ALB, with a rate rule scoped to `/webhooks/*`.
+go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notifications/{store}`; the gateway has no route for `/webhooks/*`, and the old `/api/v1/payments/webhooks/*` paths are no longer routed by it either. The Bachs webhook endpoint is `https://api.zudomart.com/webhooks/bachs`, created with `event_source: all` so connected-account events (direct charges, disputes, capabilities, transfers) arrive; sandbox and production have separate signing secrets in `BACHS_WEBHOOK_SIGNING_SECRETS` (comma-separated during rotation). The WAF still sits in front of the ALB, with a rate rule scoped to `/webhooks/*`.
 
 ## 7. NOT yet
 
