@@ -4,9 +4,9 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { creatorsService } from "@/services/creators.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface LivePinProductsSheetProps {
   readonly visible: boolean;
@@ -16,6 +16,8 @@ export interface LivePinProductsSheetProps {
 }
 
 export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose }: LivePinProductsSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const affiliatedProducts = useQuery({
     queryKey: ["creator-affiliated-products"],
@@ -74,9 +76,9 @@ export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
   row: { height: 48, flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 1, borderBottomColor: colors.divider },
   thumb: { width: 40, height: 40, borderRadius: 4, overflow: "hidden", backgroundColor: colors.placeholder },
   name: { flex: 1 },
-});
+}));

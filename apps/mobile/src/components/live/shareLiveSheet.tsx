@@ -7,9 +7,9 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { liveService } from "@/services/live.service";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface ShareLiveSheetProps {
   readonly liveId: string;
@@ -19,6 +19,8 @@ export interface ShareLiveSheetProps {
 }
 
 export function ShareLiveSheet({ liveId, visible, onClose, onShared }: ShareLiveSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [query, setQuery] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<readonly string[]>([]);
   const people = useQuery({
@@ -95,7 +97,7 @@ export function ShareLiveSheet({ liveId, visible, onClose, onShared }: ShareLive
 }
 
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   sheet: { height: 442 },
   search: {
     marginHorizontal: 12,
@@ -114,6 +116,6 @@ const styles = StyleSheet.create({
   person: { height: 40, flexDirection: "row", alignItems: "center", gap: 8 },
   personText: { flex: 1 },
   check: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, borderColor: colors.divider },
-  checkOn: { borderColor: colors.primary, backgroundColor: colors.primary },
+  checkOn: { borderColor: colors.primarySolid, backgroundColor: colors.primarySolid },
   action: { padding: 16, paddingTop: 8 },
-});
+}));

@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface LiveProductsSheetProps {
   readonly visible: boolean;
@@ -15,6 +15,7 @@ export interface LiveProductsSheetProps {
 }
 
 export function LiveProductsSheet({ visible, products, onClose, onOpenProduct }: LiveProductsSheetProps) {
+  const styles = useStyles();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="In this live" floating>
       <View style={styles.list}>
@@ -39,11 +40,11 @@ export function LiveProductsSheet({ visible, products, onClose, onOpenProduct }:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
   item: { paddingHorizontal: 4, gap: 9 },
   row: { height: 40, flexDirection: "row", alignItems: "center", gap: 8 },
   thumb: { width: 40, height: 40, borderRadius: 4, overflow: "hidden", backgroundColor: colors.placeholder },
   name: { flex: 1 },
   divider: { height: 1, backgroundColor: colors.divider },
-});
+}));
