@@ -1,5 +1,6 @@
 "use client";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { ProfileVisitorActions } from "./profileVisitorActions";
 import { Button } from "@/components/ui/button";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { BellIcon, BookmarkIcon, LogOutIcon, OrdersIcon, SettingsIcon } from "@/components/ui/icons";
+import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { followsService } from "@/services/posts.service";
 import { sendRequestToWebappServer } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
@@ -18,6 +20,7 @@ import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/format
 import type { User } from "@/types";
 
 import styles from "./profileView.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 function Stat({ label, value }: { readonly label: string; readonly value: number }) {
   return (
@@ -66,10 +69,10 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
         <div className={styles.identity}>
           <div className={styles.nameRow}>
             <h1 className={styles.name}>{user.name}</h1>
-            {user.verified ? <span className={styles.verified} aria-label="Verified account">✓</span> : null}
+            {user.verified ? <span className={styles.verified} aria-label="Verified account"><AppIcon name="check16" size={12} /></span> : null}
           </div>
           <p className={styles.handle}>@{user.username}</p>
-          {user.bio ? <p className={styles.bio}>{user.bio}</p> : null}
+          {user.bio ? <p className={styles.bio}><MentionText text={user.bio} /></p> : null}
           <p className={styles.joined}>{formatJoinedDate(user.joinedAt)}</p>
         </div>
 
@@ -120,6 +123,19 @@ export async function signOut(): Promise<void> {
   await sendRequestToWebappServer<void>("/auth/logout", { method: "POST" });
 }
 
+export async function confirmThenSignOut(): Promise<boolean> {
+  const confirmed = await requestConfirmation({
+    title: "Sign out of Zudomart?",
+    description: "You'll need to sign in again to message, buy or post.",
+    confirmLabel: "Sign out",
+    icon: <LogOutIcon size={22} />,
+    tone: "brand",
+  });
+  if (!confirmed) return false;
+  await signOut().catch(() => undefined);
+  return true;
+}
+
 export function SignOutButton() {
   const router = useRouter();
   return (
@@ -127,7 +143,8 @@ export function SignOutButton() {
       type="button"
       className={styles.signOut}
       onClick={() => {
-        signOut().finally(() => {
+        void confirmThenSignOut().then((didSignOut) => {
+          if (!didSignOut) return;
           router.push("/login");
           router.refresh();
         });
