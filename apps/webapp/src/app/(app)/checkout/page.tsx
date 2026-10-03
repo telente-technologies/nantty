@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { AddressEditorDialog, addressesQueryKey } from "@/components/address/addressBook";
+import { formatAddressLocation } from "@/components/address/addressForm.util";
+import { useShippingQuote } from "@/components/address/shippingQuote.hook";
 import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
@@ -15,27 +18,36 @@ import { ordersService } from "@/services/orders.service";
 import { emailVerificationService } from "@/services/webActions.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
-import type { CheckoutResult, PaymentInitialization, PaymentProvider } from "@/types/commerce.type";
+import { paymentsService } from "@/services/payments.service";
+import type { CheckoutResult, PaymentChannel, PaymentInitialization } from "@/types/commerce.type";
+import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
 import styles from "./page.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
-const providers: readonly { readonly id: PaymentProvider; readonly name: string; readonly note: string }[] = [
-  { id: "paystack", name: "Paystack", note: "Card, bank transfer or USSD" },
-  { id: "flutterwave", name: "Flutterwave", note: "Card, bank transfer or mobile money" },
-];
+const channelLabels: Record<PaymentChannel, { readonly name: string; readonly note: string }> = {
+  card: { name: "Card", note: "Debit or credit card" },
+  bank_transfer: { name: "Bank transfer", note: "Pay from your bank app" },
+  ussd: { name: "USSD", note: "Pay with a code from your phone" },
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
   const accountEmailQuery = useQuery({ queryKey: ["account", "email"], queryFn: emailVerificationService.fetchAccountEmailStatus, retry: false });
   const cartQuery = useQuery({ queryKey: ["cart"], queryFn: cartsService.fetchMyCart, retry: false });
-  const addressesQuery = useQuery({ queryKey: ["addresses"], queryFn: ordersService.fetchMyShippingAddresses, retry: false });
+  const addressesQuery = useQuery({ queryKey: addressesQueryKey, queryFn: ordersService.fetchMyShippingAddresses, retry: false });
 
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
-  const [provider, setProvider] = useState<PaymentProvider>("paystack");
+  const channelsQuery = useQuery({ queryKey: ["payments", "channels"], queryFn: paymentsService.fetchPaymentChannels, retry: false });
   const [error, setError] = useState<string | null>(null);
   const checkoutKey = useRef(createIdempotencyKey("checkout"));
 
   const addressId = chosenAddressId ?? addressesQuery.data?.find((address) => address.isDefault)?.id ?? addressesQuery.data?.[0]?.id ?? null;
+
+  const [isAddingAddress, setAddingAddress] = useState(false);
+  const quoteQuery = useShippingQuote(addressId);
+  const quote = quoteQuery.data ?? null;
+  const hasShippableGroup = quote?.groups.some((group) => group.status === "calculated") ?? false;
 
   const placeOrder = useMutation({
     mutationFn: async () => {
@@ -47,17 +59,18 @@ export default function CheckoutPage() {
       });
       const payment = await sendRequestToWebappServer<PaymentInitialization>("/api/v1/payments/initialize", {
         method: "POST",
-        body: { orderId: result.payableOrderId, provider },
+        body: { orderId: result.payableOrderId, provider: "paystack" },
         idempotencyKey: `${checkoutKey.current}-pay`,
       });
       return payment;
     },
-    onSuccess: (payment) => {
+    onSuccess: async (payment) => {
       sessionStorage.setItem(
         "zd_pending_payment",
         JSON.stringify({ orderId: payment.orderId, authorizationUrl: payment.authorizationUrl, reference: payment.reference }),
       );
-      router.push(`/orders/${payment.orderId}`);
+      const outcome = await openPaystackCheckout(payment);
+      if (outcome !== "redirected") router.push(`/orders/${payment.orderId}`);
     },
     onError: (caught) => setError(readErrorMessageForDisplay(caught)),
   });
@@ -77,7 +90,7 @@ export default function CheckoutPage() {
 
   const cart = cartQuery.data;
   if (!cart || cart.items.length === 0) {
-    return <EmptyState icon="🛒" title="Nothing to check out" description="Add items to your cart first." action={<Button onClick={() => router.push("/")}>Browse the mart</Button>} />;
+    return <EmptyState icon={<AppIcon name="shoppingCart24" size={28} />} title="Nothing to check out" description="Add items to your cart first." action={<Button onClick={() => router.push("/")}>Browse the mart</Button>} />;
   }
 
   return (
@@ -99,7 +112,6 @@ export default function CheckoutPage() {
             ) : (addressesQuery.data ?? []).length === 0 ? (
               <div className={styles.emptyAddress}>
                 <p>You have no saved addresses yet.</p>
-                <p>Add one in the Zudomart mobile app.</p>
               </div>
             ) : (
               <ul className={styles.optionList}>
@@ -115,7 +127,7 @@ export default function CheckoutPage() {
                       <span className={styles.optionText}>
                         <span className={styles.optionName}>{address.fullName}</span>
                         <span className={styles.optionMeta}>
-                          {address.line1}, {address.city}, {address.state}
+                          {formatAddressLocation(address)}
                         </span>
                         <span className={styles.optionMeta}>{address.phone}</span>
                       </span>
@@ -125,27 +137,32 @@ export default function CheckoutPage() {
                 ))}
               </ul>
             )}
+            <Button variant="secondary" onClick={() => setAddingAddress(true)}>
+              Add a new address
+            </Button>
+            <AddressEditorDialog
+              address={null}
+              isOpen={isAddingAddress}
+              onClose={() => setAddingAddress(false)}
+              onSaved={(saved) => setChosenAddressId(saved.id)}
+            />
           </section>
 
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Payment method</h2>
             <ul className={styles.optionList}>
-              {providers.map((option) => (
-                <li key={option.id}>
-                  <button
-                    type="button"
-                    className={[styles.optionRow, provider === option.id ? styles.optionRowActive : ""].filter(Boolean).join(" ")}
-                    aria-pressed={provider === option.id}
-                    onClick={() => setProvider(option.id)}
-                  >
+              {(channelsQuery.data?.channels ?? []).map((channel) => (
+                <li key={channel}>
+                  <div className={styles.optionRow}>
                     <span className={styles.optionText}>
-                      <span className={styles.optionName}>{option.name}</span>
-                      <span className={styles.optionMeta}>{option.note}</span>
+                      <span className={styles.optionName}>{channelLabels[channel].name}</span>
+                      <span className={styles.optionMeta}>{channelLabels[channel].note}</span>
                     </span>
-                  </button>
+                  </div>
                 </li>
               ))}
             </ul>
+            <p className={styles.optionMeta}>You'll choose how to pay in the secure payment window. We never see your card details.</p>
           </section>
 
           <section className={styles.section}>
@@ -163,14 +180,14 @@ export default function CheckoutPage() {
 
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>Order summary</h2>
-          <SellerGroupedSummary items={cart.items} />
+          <SellerGroupedSummary items={cart.items} quote={quote} />
           <div className={styles.moneyRow}>
             <span>Items total</span>
             <span>{formatMoneyForDisplay(cart.itemsTotal)}</span>
           </div>
           <div className={styles.moneyRow}>
             <span>Shipping</span>
-            <span>{cart.shipping.amountMinor > 0 ? formatMoneyForDisplay(cart.shipping) : "Calculated at checkout"}</span>
+            <span>{quote ? formatMoneyForDisplay(quote.shipping) : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
           {cart.storeCredit.amountMinor > 0 ? (
             <div className={styles.moneyRow}>
@@ -181,15 +198,15 @@ export default function CheckoutPage() {
           <div className={styles.divider} />
           <div className={styles.moneyRowTotal}>
             <span>Total</span>
-            <span>{formatMoneyForDisplay(cart.total)}</span>
+            <span>{formatMoneyForDisplay(quote ? quote.total : cart.total)}</span>
           </div>
           {accountEmailQuery.data?.emailVerified === false ? (
             <p className={styles.verifyEmailNotice} role="status">
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>
           ) : (
-            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId} onClick={() => placeOrder.mutate()}>
-              {addressId ? `Pay with ${providers.find((option) => option.id === provider)?.name}` : "Choose an address"}
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup} onClick={() => placeOrder.mutate()}>
+              {addressId ? "Pay now" : "Choose an address"}
             </Button>
           )}
           <p className={styles.terms}>Payment is held in escrow until you confirm delivery.</p>
