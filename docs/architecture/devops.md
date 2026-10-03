@@ -10,7 +10,7 @@ As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUT
 | `androidApk.yml`: mobile APK build | EXISTING | `.github/workflows/androidApk.yml` |
 | Scripts | EXISTING | `services/scripts/{check-backend-file-lengths,check-no-raw-sql-in-typescript,test-go-workspace,test-realtime-in-docker}.sh` |
 | Dockerfiles: 6 Go (distroless nonroot), gateway, realtime, `apps/api`, `apps/intelligence` | EXISTING | `services/go/deployables/*/Dockerfile` |
-| Local stack: Postgres/PostGIS 17, Valkey 9, LocalStack, SeaweedFS, LiveKit, OTel collector, Jaeger; ports on 127.0.0.1 | EXISTING | `infra/local/docker-compose.yml` |
+| Local stack: Postgres/PostGIS 17, Valkey 9, RabbitMQ 4 (management UI 127.0.0.1:15672, definitions from `infra/local/rabbitmq`), LocalStack (SES only), SeaweedFS, LiveKit, OTel collector, Jaeger; ports on 127.0.0.1 | EXISTING | `infra/local/docker-compose.yml` |
 | Atlas migrations embedded and applied at service start | EXISTING | `platform/postgres` `ApplyPendingMigrationsFromEmbeddedDirectory` |
 | Terraform layout | PROPOSED, README only | `infra/aws/README.md` |
 | Not present | CI for 6 Next apps, mobile (lint/typecheck/build), `apps/api`, `apps/intelligence`; Dockerfiles for Next apps; deploy pipeline; `pnpm audit`, SAST, secret scan, container scan; E2E, contract, load tests; frontend tests (0) | `inventory.md` s6, s8 |
@@ -26,7 +26,7 @@ flowchart LR
   Q --> B[Build images]
   B --> ECR[(ECR per env account)]
   ECR --> DEP[Deploy to ECS Fargate]
-  TF[Terraform infra/aws] --> INF[VPC, Aurora, Valkey,\nSQS/SNS, S3, ALB, WAF]
+  TF[Terraform infra/aws] --> INF[VPC, Aurora, Valkey,\nAmazon MQ RabbitMQ, S3, ALB, WAF]
   INF --> DEP
   DEP --> MON[CloudWatch + OTel\nalarms and dashboards]
   MON -. alarm .-> RB[Auto rollback]
@@ -63,7 +63,7 @@ flowchart TD
 | Lint / format / typecheck | `golangci-lint`, `gofmt`, `go vet`; `tsc` + eslint + stylelint for every Next app and mobile; `ruff` + `mypy` for Python; `mix format --check` + credo. Path filters per app | Go vet only EXISTING; rest PROPOSED |
 | Conventions | file-length and no-raw-SQL | EXISTING |
 | Unit | `go test -race`, vitest, pytest, ExUnit, jest | Go/gateway/realtime/intelligence EXISTING, frontend none |
-| Integration | `docker compose up` Postgres, Valkey, LocalStack; per-service ent + Atlas against real DB | auth only EXISTING |
+| Integration | `docker compose up` Postgres, Valkey, RabbitMQ, LocalStack (SES); per-service ent + Atlas against real DB | auth only EXISTING |
 | SAST | `semgrep` (TS/Go/Python), `gosec` via golangci-lint, CodeQL | PROPOSED |
 | Dependencies | `govulncheck` EXISTING; `pnpm audit --prod`, `pip-audit`, `mix deps.audit`, Dependabot/Renovate | partly PROPOSED |
 | Secret scan | gitleaks on PR diff and full history weekly | PROPOSED |
@@ -78,7 +78,7 @@ flowchart TD
 
 | Concern | local | dev | staging | prod |
 | --- | --- | --- | --- | --- |
-| AWS account | none (LocalStack) | shared `zudomart-dev` | `zudomart-staging` | `zudomart-prod` (all in an AWS Organization) |
+| AWS account | none (Docker RabbitMQ, LocalStack SES) | shared `zudomart-dev` | `zudomart-staging` | `zudomart-prod` (all in an AWS Organization) |
 | Data | compose volumes, synthetic seed | synthetic | synthetic or masked, never prod copies | real |
 | Secrets | `.env` from `*.example`, throwaway keys | Secrets Manager (dev) | Secrets Manager (staging) | Secrets Manager (prod), separate KMS keys |
 | Payment providers | test/sandbox | sandbox | sandbox | live keys, only in prod account |
@@ -114,11 +114,11 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 | Aurora PostgreSQL + PostGIS | single cluster, schema per service | owner decision; PITR, Multi-AZ failover, read replica; one cluster keeps cost and ops low | PROPOSED |
 | ElastiCache Valkey | cache, rate limit, idempotency, nonces, presence | managed, Multi-AZ, cheaper than Redis OSS licensing | PROPOSED |
 | S3 | media, exports, KYB docs, Parquet, backups | durable, versioned, lifecycle rules | PROPOSED |
-| SQS | job queues and consumer queues with DLQ (`maxReceiveCount` 5) | at-least-once, no ops; matches existing platform code | queues EXISTING locally in LocalStack |
-| SNS / EventBridge | domain event fan-out | SNS EXISTING in platform publisher; EventBridge only if routing rules are needed | SNS PROPOSED, EventBridge OPTIONAL FUTURE |
+| Amazon MQ for RabbitMQ (RabbitMQ adopted, owner, 2026-10-03) | domain event fan-out (`zudomart.events`) and job queues (`zudomart.jobs`), quorum queues with retry queues and DLQs | **cluster deployment** (3 brokers across AZs, `mq.m7g.large` prod / single-instance `mq.m7g.medium` staging), **private subnets only**, no public accessibility, security group allows 5671 from ECS task SGs only; TLS (`amqps`), one user per service from Secrets Manager; definitions imported via the management API on deploy; same broker family as local Docker | RabbitMQ EXISTING locally, Amazon MQ PROPOSED |
+| SES feedback SNS → SQS | bounce/complaint feedback only | SES cannot publish to RabbitMQ; one small SQS queue `notifications-ses-feedback` | PROPOSED |
 | Secrets Manager + KMS | secrets, rotation, envelope keys | per-task injection, audited | PROPOSED |
 | IAM | task roles, OIDC deploy roles | least privilege per service | PROPOSED |
-| VPC, private subnets, NAT, endpoints | network isolation | private app/data subnets; start with one NAT per AZ for prod, one total for staging; add S3, SQS, SNS, ECR, Secrets Manager, KMS, Logs endpoints to cut NAT data cost | PROPOSED |
+| VPC, private subnets, NAT, endpoints | network isolation | private app/data subnets; start with one NAT per AZ for prod, one total for staging; add S3, SQS (SES feedback), ECR, Secrets Manager, KMS, Logs endpoints to cut NAT data cost; Amazon MQ sits inside the VPC | PROPOSED |
 | CloudTrail | API audit, org trail | forensic baseline | PROPOSED |
 | CloudWatch | logs, metrics, alarms, dashboards | zero extra ops; OTel collector sidecar exports traces to X-Ray (see `observability.md`) | PROPOSED |
 | Step Functions | payout runs, dispute timelines only if real orchestration | avoid until needed | OPTIONAL FUTURE |
@@ -128,17 +128,19 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 
 | Priority | Path | Target | Why |
 | --- | --- | --- | --- |
-| 10 | `/webhooks/*` | go-money target group | Payment provider and app-store notifications are signature-verified over the raw request body. The gateway re-serialises JSON, which breaks the signature, so these requests never pass through it. |
 | 20 | `/ws*` | realtime target group (idle timeout raised) | WebSocket |
-| default | everything else | gateway target group | auth, rate limit, upstream routing |
+| 100 | everything else | gateway target group | auth, rate limit, upstream routing |
 
-go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notifications/{store}`; the gateway has no route for `/webhooks/*`, and the old `/api/v1/payments/webhooks/*` paths are no longer routed by it either. The Bachs webhook endpoint is `https://api.zudomart.com/webhooks/bachs`, created with `event_source: all` so connected-account events (direct charges, disputes, capabilities, transfers) arrive; sandbox and production have separate signing secrets in `BACHS_WEBHOOK_SIGNING_SECRETS` (comma-separated during rotation). The WAF still sits in front of the ALB, with a rate rule scoped to `/webhooks/*`.
+Webhooks enter through the gateway. Its `/webhooks/` route sends only `POST` to go-money, forwards the request body as the exact received bytes (no JSON re-parse or re-serialisation) and passes `X-Paystack-Signature` through, so go-money verifies the signature over the raw body (pinned by the gateway test `webhook passthrough`). The gateway skips guest rate limits on these routes, and the WAF only lets Paystack's source IPs (52.31.139.75, 52.49.173.169, 52.214.14.220) reach `/webhooks/paystack` and blocks any `/internal` path.
+
+Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<env>.zudomart.internal`), which also gives the distroless Go images a health check. This design replaces the earlier ALB rule straight to go-money: go-money deploys with CodeDeploy blue/green, which swaps target groups on one listener, so a public rule on a second listener would keep pointing at the standby group after a swap. The old `/api/v1/payments/webhooks/*` paths are not routed. Paystack adopted (owner, 2026-10-03): the endpoint is `https://api.zudomart.com/webhooks/paystack`, set on the Paystack dashboard for live and test modes, and signed with `PAYSTACK_SECRET_KEY`.
+
 
 ## 7. NOT yet
 
 | Technology | Do not adopt until | Trigger metric |
 | --- | --- | --- |
-| MSK (Kafka) | outbox + SQS/SNS cannot meet needs | sustained > 5,000 events/s, or need for replay > 14 days of ordered per-key streams for 3+ consumers, or SQS fan-out cost/latency causing p95 delivery > 2 s |
+| MSK (Kafka) or RabbitMQ streams | outbox + RabbitMQ queues cannot meet needs | sustained > 5,000 events/s on one queue, or need for replay > 14 days of ordered per-key streams for 3+ consumers, or broker CPU/memory alarms despite scaling the instance size |
 | EKS / Kubernetes | Fargate limits hit | > 40 services, or need for daemonsets/GPUs/custom schedulers, or Fargate cost > 2x equivalent EC2 at steady load |
 | Service mesh | mTLS/traffic policy needed beyond SGs | compliance requires mTLS between services, or canary routing needed across > 10 services (try ECS Service Connect first) |
 | OpenSearch | Postgres FTS + trigram insufficient | search p95 > 300 ms at > 50 qps on catalog > 1M products, or ranking features needing BM25 + vectors |
@@ -152,7 +154,7 @@ go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notificati
 | --- | --- | --- | --- | --- |
 | Unit | pure domain: splits, pricing, state machines, money allocation | go test (table tests), vitest, pytest, ExUnit | PR | partial |
 | Property | ledger postings always balance, never negative | `rapid` or `testing/quick` | PR | PROPOSED |
-| Integration | service + Postgres + Valkey + LocalStack | compose / Testcontainers | PR | auth only |
+| Integration | service + Postgres + Valkey + RabbitMQ | compose / Testcontainers | PR | auth only |
 | API | HTTP black-box per service from OpenAPI | `go-http-handler-testing` style, schemathesis | PR | PROPOSED |
 | DB | constraints, grants, role permissions, migrations on a copy of prior schema | Atlas lint, SQL tests | PR | PROPOSED |
 | Contract | every frontend mock route (`apps/*/src/mocks`) matches a backend OpenAPI operation; events validated against `services/contracts/events/schemas` | custom runner using mocks as consumer fixtures | PR | PROPOSED |
@@ -161,7 +163,7 @@ go-money serves `POST /webhooks/{provider}` and `POST /webhooks/store-notificati
 | Load | checkout, gift bursts, feed, 1,000 live viewers | k6, LiveKit load tester | staging nightly | PROPOSED |
 | Security | IDOR, refresh reuse, webhook signature, idempotency conflict, enumeration; ZAP baseline | ported from `apps/api/tests/security`, OWASP ZAP | PR + nightly | PROPOSED |
 | Migration | apply all migrations to empty DB and to previous release snapshot, run expand-compat tests against N-1 image | Atlas + CI | PR | PROPOSED |
-| Failure / chaos | kill Redis, delay SQS, 500 from Python, payment provider timeout, DB failover | toxiproxy, AWS FIS in staging | staging weekly | PROPOSED |
+| Failure / chaos | kill Redis, reboot a RabbitMQ broker, 500 from Python, payment provider timeout, DB failover | toxiproxy, AWS FIS in staging | staging weekly | PROPOSED |
 
 ### Must pass before prod (financial flows)
 

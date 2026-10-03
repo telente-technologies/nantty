@@ -22,16 +22,16 @@ flowchart LR
   intel["apps/intelligence<br/>FastAPI, HMAC"]:::existing
   pg[("Postgres 17 + PostGIS<br/>schema per service")]:::existing
   valkey[("Valkey")]:::existing
-  sns["LocalStack SNS<br/>zudomart-domain-events"]:::existing
-  sqsRt["SQS realtime-domain-events"]:::existing
+  bus["RabbitMQ topic exchange<br/>zudomart.events"]:::existing
+  qRealtime["quorum queue realtime-domain-events"]:::existing
   legacy["apps/api monolith<br/>reference, never deployed"]:::ref
 
   nextApps -. "auth only when mocks off" .-> gateway
   mobile -. "auth only when mocks off" .-> gateway
   gateway --> identity
   identity --> pg
-  identity -- "outbox relay" --> sns
-  sns --> sqsRt --> realtime
+  identity -- "outbox relay" --> bus
+  bus --> qRealtime --> realtime
   mobile -. "wss /ws" .-> realtime
   intel --> valkey
   otherGo --> pg
@@ -41,8 +41,8 @@ flowchart LR
 | --- | --- |
 | Only auth is served end to end (8 routes) | `services/go/modules/auth/auth.routes.go`, `services/typescript/gateway/src/routes/upstream.routes.ts` |
 | Frontends default to in-process mocks; env examples point at `:3000` (legacy port), not the gateway `:8080` | `apps/*/.env.example`, `apps/mobile/src/config/api.config.ts` |
-| One SNS topic, 4 consumer queues, 5 job queues, each with DLQ (maxReceiveCount 5) | `infra/local/localstack/create-topics-and-queues.sh` |
-| Only Phoenix consumes SQS; no Go or Python consumer exists | `services/elixir/realtime/lib/realtime/events/sqs_consumer.ex` |
+| RabbitMQ adopted (owner, 2026-10-03): one topic exchange `zudomart.events`, 4 consumer queues, 7 job queues, each with 4 retry queues and a DLQ (5 attempts); one least-privilege user per service | `infra/local/rabbitmq/topology.json`, `definitions.json` |
+| Consumers: Phoenix (`realtime-domain-events`), notifications, intelligence, orders, goTrust advisory, goAds reports | `realtime/events/amqp.consumer.ex`, `platform/events/rabbitmq.consumer.go` |
 | Nothing is deployed to AWS | `infra/aws/README.md` ("Nothing here is applied") |
 
 ## 2. Recommended architecture
@@ -141,28 +141,30 @@ flowchart LR
 
   svc["Owning service tx<br/>business rows + outbox row"]:::existing
   relay["Outbox relay<br/>500 ms, batch 100, SKIP LOCKED"]:::existing
-  sns["SNS domain events"]:::existing
-  qRt["SQS realtime"]:::existing
-  qOwn["SQS per consumer<br/>notifications, points, search,<br/>analytics, intelligence, webhooks"]:::proposed
-  jobs["SQS job queues + DLQ"]:::existing
+  bus["RabbitMQ zudomart.events<br/>(Amazon MQ cluster)"]:::existing
+  qRt["queue realtime"]:::existing
+  qOwn["quorum queue per consumer<br/>notifications, points, search,<br/>analytics, intelligence, webhooks"]:::proposed
+  jobs["zudomart.jobs queues<br/>retry tiers + DLQ"]:::existing
   workers["Workers on ECS<br/>Go / TS / Python"]:::proposed
   rt["Phoenix fan-out"]:::existing
   os[("OpenSearch")]:::future
   ch[("ClickHouse")]:::future
-  bachs["Bachs Connect (seller and creator connected accounts)"]
+  paystack["Paystack (checkout, subaccount splits, transfers)"]
   iap["Apple / Google IAP"]:::proposed
   livekit["LiveKit SFU, Ingress, Egress"]:::existing
   comms["SES email, SMS, FCM/APNs push"]:::proposed
 
-  svc --> relay --> sns
-  sns --> qRt --> rt
-  sns --> qOwn --> workers
+  svc --> relay --> bus
+  bus --> qRt --> rt
+  bus --> qOwn --> workers
   svc -- "enqueue" --> jobs --> workers
   workers --> os & ch
   workers --> comms
-  bachs & iap -- "signed webhooks" --> svc
+  paystack & iap -- "signed webhooks" --> svc
   livekit -- "webhooks" --> svc
 ```
+
+Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03): Paystack is the only payment provider; its webhooks (`x-paystack-signature`, HMAC-SHA512) land on go-money (`docs/integrations/paystack.md`).
 
 LiveKit is EXISTING only as a local compose container (`infra/local/docker-compose.yml`); no token minting code exists.
 
@@ -175,11 +177,11 @@ LiveKit is EXISTING only as a local compose container (`infra/local/docker-compo
 | Gateway | Zudojs proxy, JWKS, CORS, 1 MiB body, 10 s upstream timeout | EXISTING | `services/typescript/gateway/src` |
 | Go | 6 deployables, platform libs | EXISTING (only auth routes) | `services/go/deployables/*`, `services/go/platform` |
 | TS services | social, feed, notifications, media, search, support, integrations, campaigns | PROPOSED (reference logic in `apps/api`) | `microservicesPlan.json` `typescript` |
-| Realtime | Phoenix raw WebSocket, SQS consumer, topic authorizer | EXISTING | `services/elixir/realtime` |
-| Intelligence | FastAPI scoring, 12 modules | EXISTING, no callers, no SQS consumer | `apps/intelligence` |
+| Realtime | Phoenix raw WebSocket, AMQP consumer, topic authorizer | EXISTING | `services/elixir/realtime` |
+| Intelligence | FastAPI scoring, 12 modules, AMQP domain event consumer + trust advisory producer | EXISTING, no callers | `apps/intelligence` |
 | DB | Postgres 17 + PostGIS locally; 29 schemas and roles | EXISTING (local); Aurora PROPOSED | `infra/local/postgres/create-databases.sh` |
 | Cache | Valkey 9 locally | EXISTING (local); ElastiCache PROPOSED | compose |
-| Messaging | SNS + SQS (LocalStack) | EXISTING (local) | `infra/local/localstack/*` |
+| Messaging | RabbitMQ 4 (RabbitMQ adopted, owner, 2026-10-03); Amazon MQ for RabbitMQ cluster in private subnets for AWS | EXISTING (local); Amazon MQ PROPOSED | `infra/local/rabbitmq/*` |
 | Media | SeaweedFS (S3 API) locally | EXISTING (local); S3 + CloudFront PROPOSED | compose |
 | Search / analytics | OpenSearch, ClickHouse compose profiles | OPTIONAL FUTURE | compose profiles `search`, `analytics` |
 | Observability | OTLP traces from Go, collector, Jaeger | EXISTING (local, opt-in) | `services/go/platform/telemetry`, `infra/local/otel` |

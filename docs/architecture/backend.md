@@ -89,7 +89,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | go-identity | auth, users, currency, admin | auth EXISTING (`services/go/deployables/go-identity`, renaming to `goIdentity`); others partial | CPU, p99 login latency | Aurora `auth/users/currency/admin`, Redis, SNS |
 | go-commerce | catalog, inventory, orders, analytics | PROPOSED (skeleton modules) | CPU, checkout p99 | Aurora `catalog/inventory/orders`, go-money gRPC |
-| go-money | payments, wallet, ledger, escrow, subscriptions, creators | ledger schema EXISTING (no routes); rest PROPOSED | CPU, DB lock wait | Aurora money schemas, Bachs Connect, IAP |
+| go-money | payments, wallet, ledger, escrow, subscriptions, creators | ledger schema EXISTING (no routes); rest PROPOSED | CPU, DB lock wait | Aurora money schemas, Paystack (Bachs and Anchor dropped, 2026-10-03), IAP |
 | go-live | live | schema + migrations EXISTING; no routes | CPU, active rooms | Aurora `live`, LiveKit API, Redis, go-money gRPC |
 | go-ads | ads | PROPOSED | decision QPS, p99 < 50 ms | Redis pacing/caps, Python pCTR, go-money |
 | go-trust | moderation | PROPOSED | SQS queue depth | Python moderation scores |
@@ -108,7 +108,7 @@ services/go/deployables/goMoney/            (one per deployable: goIdentity, goC
 └── src/
     ├── app.go  server.go  container.go
     ├── configs/goMoney.config.go
-    ├── integrations/bachsConnect.integration.go (+ Checkout, Accounts, MoneyMovement, Webhooks, DisputesAndSubscriptions)  sqs.integration.go
+    ├── integrations/paystack.integration.go (+ Checkout, Payees, Transfers, Webhooks, DisputesAndSubscriptions; replaces bachsConnect*)  sqs.integration.go
     ├── jobs/escrowAutoRelease.job.go  trialBalance.job.go
     ├── middlewares/requireIdempotencyKey.middleware.go
     ├── generated/ent/                       (ent codegen output)
