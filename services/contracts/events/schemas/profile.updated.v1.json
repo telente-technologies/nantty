@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/profile.updated.v1.json",
+  "title": "ProfileUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "profileId",
+    "changedFields"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "profileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "changedFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

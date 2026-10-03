@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/dataExport.requested.v1.json",
+  "title": "DataExportRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "exportId",
+    "requestedAt"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "exportId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

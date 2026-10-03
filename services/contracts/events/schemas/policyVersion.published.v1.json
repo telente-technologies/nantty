@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/policyVersion.published.v1.json",
+  "title": "PolicyVersionPublished",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "version",
+    "effectiveAt",
+    "publishedBy"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "privacy_policy",
+        "cookie_policy",
+        "terms"
+      ]
+    },
+    "version": {
+      "type": "string"
+    },
+    "effectiveAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publishedBy": {
+      "type": "string"
+    }
+  }
+}

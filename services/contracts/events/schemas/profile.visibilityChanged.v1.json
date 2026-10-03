@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/profile.visibilityChanged.v1.json",
+  "title": "ProfileVisibilityChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "profileId",
+    "isPrivate"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "profileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "isPrivate": {
+      "type": "boolean"
+    }
+  }
+}

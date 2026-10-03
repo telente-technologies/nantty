@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/username.changed.v1.json",
+  "title": "UsernameChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "profileId",
+    "previousUsername",
+    "username"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "profileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "previousUsername": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    }
+  }
+}

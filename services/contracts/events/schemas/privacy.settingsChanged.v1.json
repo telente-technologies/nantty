@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/privacy.settingsChanged.v1.json",
+  "title": "PrivacySettingsChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "personalization",
+    "personalizedAds",
+    "marketing",
+    "analytics",
+    "changedAt",
+    "policyVersion"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "personalization": {
+      "type": "boolean"
+    },
+    "personalizedAds": {
+      "type": "boolean"
+    },
+    "marketing": {
+      "type": "boolean"
+    },
+    "analytics": {
+      "type": "boolean"
+    },
+    "changedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policyVersion": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/retentionPolicy.updated.v1.json",
+  "title": "RetentionPolicyUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "category",
+    "action",
+    "retentionDays",
+    "needsLegalReview",
+    "version",
+    "updatedBy"
+  ],
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "delete",
+        "anonymize",
+        "retain"
+      ]
+    },
+    "retentionDays": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "needsLegalReview": {
+      "type": "boolean"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "updatedBy": {
+      "type": "string"
+    }
+  }
+}
