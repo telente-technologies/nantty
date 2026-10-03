@@ -26,3 +26,26 @@ func UnprocessableWithCode(code, message string) *httpserver.ApiError {
 func TooManyRequestsWithCode(code, message string) *httpserver.ApiError {
 	return httpserver.NewApiError(http.StatusTooManyRequests, code, message)
 }
+
+func Conflict(code, message string) *httpserver.ApiError {
+	return httpserver.NewApiError(http.StatusConflict, code, message)
+}
+
+func NotFound(message string) *httpserver.ApiError {
+	return httpserver.NewApiError(http.StatusNotFound, "NOT_FOUND", message)
+}
+
+func Forbidden(code, message string) *httpserver.ApiError {
+	return httpserver.NewApiError(http.StatusForbidden, code, message)
+}
+
+func ValidationFailedFor(path, message string) *httpserver.ApiError {
+	return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: path, Message: message}})
+}
+
+func OrConflict(err error, code, message string) error {
+	if err != nil {
+		return err
+	}
+	return Conflict(code, message)
+}
