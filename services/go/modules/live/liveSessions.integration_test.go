@@ -83,3 +83,18 @@ func TestLiveAdSettingsStoreAcceptedTermsVersion(t *testing.T) {
 		t.Fatalf("terms not stored: %v", created)
 	}
 }
+
+func TestSuggestedLivesAndViewerSearchAnswerWithTheListEnvelope(t *testing.T) {
+	harness := startLiveModuleAgainstFreshSchema(t)
+	host := harness.newUser("host", "creator")
+	liveId := harness.goLive(host, nil)
+	for _, path := range []string{"/api/v1/lives/suggested", "/api/v1/lives/" + liveId + "/viewers"} {
+		page := harness.expect("GET", path, &host, "", nil, http.StatusOK)
+		if _, hasData := page["data"].([]any); !hasData {
+			t.Fatalf("%s must answer {data, nextCursor}, got %v", path, page)
+		}
+		if cursor, hasCursor := page["nextCursor"]; !hasCursor || cursor != nil {
+			t.Fatalf("%s must carry a null nextCursor, got %v", path, page)
+		}
+	}
+}
