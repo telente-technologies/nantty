@@ -12,19 +12,22 @@ import styles from "./commandPalette.module.css";
 
 const quickActions: (NavigationItem & { readonly permission: SellerPermission })[] = [
   { label: "New product", href: "/products/new", iconName: "plus16", permission: "products:manage", keywords: "add create item" },
+  { label: "Import or export products", href: "/products/import", iconName: "export24", permission: "products:manage", keywords: "bulk upload spreadsheet csv" },
   { label: "Adjust stock", href: "/inventory/adjustments", iconName: "boxArrowDown24", permission: "inventory:manage", keywords: "count damaged received" },
-  { label: "Transfer stock between locations", href: "/inventory/transfers", iconName: "repeat24", permission: "inventory:manage", keywords: "move" },
-  { label: "Import products from CSV", href: "/products/import", iconName: "export24", permission: "products:manage", keywords: "bulk upload spreadsheet" },
-  { label: "Print barcode labels", href: "/products/labels", iconName: "tag24", permission: "products:manage", keywords: "sku sticker" },
-  { label: "New promotion or coupon", href: "/promotions/new", iconName: "star16", permission: "promotions:manage", keywords: "discount code sale" },
-  { label: "Invite a staff member", href: "/staff/invite", iconName: "shield24", permission: "staff:manage", keywords: "add cashier employee" },
-  { label: "Staff activity log", href: "/staff/activity", iconName: "textIndent24", permission: "audit:view", keywords: "audit history" },
-  { label: "Withdraw to bank", href: "/wallet/withdraw", iconName: "creditCard24", permission: "wallet:withdraw", keywords: "payout cash out" },
-  { label: "Shift and cash drawer", href: "/pos/shift", iconName: "creditCard24", permission: "pos:sell", keywords: "open close float drawer" },
+  { label: "Stock movements", href: "/inventory/movements", iconName: "repeat24", permission: "inventory:manage", keywords: "history ledger" },
+  { label: "Suppliers", href: "/inventory/suppliers", iconName: "buildingStore20", permission: "inventory:manage", keywords: "vendor purchase reorder" },
+  { label: "New orders", href: "/orders?status=new", iconName: "shoppingCart24", permission: "orders:view", keywords: "accept pending" },
   { label: "Returns", href: "/orders/returns", iconName: "repeat24", permission: "orders:view", keywords: "refund" },
   { label: "Disputes", href: "/orders/disputes", iconName: "warning20", permission: "orders:view", keywords: "complaint" },
-  { label: "Billing and Gold plan", href: "/settings/billing", iconName: "sealCheck20", permission: "billing:manage", keywords: "subscription invoice" },
-  { label: "Keyboard shortcuts for the register", href: "/pos/shortcuts", iconName: "question24", permission: "pos:sell", keywords: "help keys" },
+  { label: "Delivery areas and fees", href: "/delivery/settings", iconName: "mapPin24", permission: "delivery:manage", keywords: "shipping zones" },
+  { label: "Customer segments", href: "/customers/segments", iconName: "userCircle24", permission: "customers:view", keywords: "groups vip" },
+  { label: "New discount code", href: "/promotions/new", iconName: "star16", permission: "promotions:manage", keywords: "coupon sale promotion" },
+  { label: "Add a team member", href: "/staff/invite", iconName: "shield24", permission: "staff:manage", keywords: "staff employee username" },
+  { label: "Team activity log", href: "/staff/activity", iconName: "textIndent24", permission: "audit:view", keywords: "audit history" },
+  { label: "Withdraw to bank", href: "/wallet/withdraw", iconName: "creditCard24", permission: "wallet:withdraw", keywords: "payout cash out" },
+  { label: "Download statement", href: "/wallet/statements", iconName: "export24", permission: "wallet:view", keywords: "bank statement pdf" },
+  { label: "API keys and webhooks", href: "/settings/developers", iconName: "slidersHorizontal24", permission: "developer:manage", keywords: "developer integration" },
+  { label: "Plan and billing", href: "/settings/billing", iconName: "sealCheck20", permission: "billing:manage", keywords: "subscription upgrade pro business invoice" },
 ];
 
 export function CommandPalette({ isOpen, onClose, groups }: { readonly isOpen: boolean; readonly onClose: () => void; readonly groups: NavigationGroup[] }) {

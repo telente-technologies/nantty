@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { CompactWorkspaceSwitcher } from "@/components/layout/compactWorkspaceSwitcher";
 import { StoreSwitcher } from "@/components/layout/storeSwitcher";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { IconButton } from "@/components/ui/button";
@@ -16,7 +17,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
   const { sessionView } = useSellerSession();
   const { locations, selectedLocationId, selectLocation } = useStoreContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const displayName = sessionView?.operator?.name ?? sessionView?.user.name ?? sessionView?.user.username ?? "You";
+  const displayName = sessionView?.user.name ?? sessionView?.user.username ?? "You";
 
   async function signOutOfDashboard() {
     setIsSigningOut(true);
@@ -26,9 +27,14 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
   return (
     <header className={`${styles.topBar} noPrint`}>
       <IconButton iconName="textIndent24" label="Open navigation" className={styles.menuButton} onClick={onOpenNavigation} />
-      <StoreSwitcher />
+      <div className={styles.wideOnly}>
+        <StoreSwitcher />
+      </div>
+      <div className={styles.compactOnly}>
+        <CompactWorkspaceSwitcher />
+      </div>
       {locations.length > 0 ? (
-        <label className={styles.locationSwitcher}>
+        <label className={`${styles.locationSwitcher} ${styles.wideOnlyFlex}`}>
           <ZudoIcon name="mapPin24" size={16} />
           <span className="visuallyHidden">Current location</span>
           <select value={selectedLocationId ?? ""} onChange={(event) => void selectLocation(event.target.value)} className={styles.locationSelect}>

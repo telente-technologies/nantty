@@ -11,10 +11,10 @@ import { buildNavigationGroups } from "@/config/navigation.config";
 
 import styles from "./workspaceShell.module.css";
 
-export function WorkspaceShell({ adsManagerUrl, children }: { readonly adsManagerUrl: string; readonly children: ReactNode }) {
+export function WorkspaceShell({ children }: { readonly children: ReactNode }) {
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const navigationGroups = useMemo(() => buildNavigationGroups(adsManagerUrl), [adsManagerUrl]);
+  const navigationGroups = useMemo(() => buildNavigationGroups(), []);
   const { showToast } = useToast();
 
   useEffect(() => {

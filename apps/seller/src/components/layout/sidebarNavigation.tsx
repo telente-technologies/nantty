@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { FeaturePlanBadge } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import type { NavigationGroup } from "@/config/navigation.config";
@@ -53,6 +54,7 @@ export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: 
                       <Link href={item.href} className={styles.link} aria-current={isActive ? "page" : undefined} onClick={onNavigate}>
                         <ZudoIcon name={item.iconName} size={18} />
                         <span className={styles.linkLabel}>{item.label}</span>
+                        {item.feature ? <FeaturePlanBadge feature={item.feature} /> : null}
                       </Link>
                     )}
                   </li>

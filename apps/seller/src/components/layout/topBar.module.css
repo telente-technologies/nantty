@@ -16,6 +16,35 @@
   display: none;
 }
 
+.wideOnly {
+  display: contents;
+}
+
+.compactOnly {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .wideOnly,
+  .wideOnlyFlex {
+    display: none;
+  }
+
+  .compactOnly {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .commandButton {
+    margin-left: 0;
+  }
+
+  .topBar {
+    gap: 8px;
+  }
+}
+
 .locationSwitcher {
   display: inline-flex;
   align-items: center;

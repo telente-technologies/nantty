@@ -6,7 +6,9 @@ import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { sellerPlanLabels } from "@/config/planFeatures.config";
 import { staffRoleLabels } from "@/constants/roles.constant";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendRequestToDashboardServer } from "@/services/clientApi.service";
 import type { BrandSummary, MyStoreEntry } from "@/types/brand.type";
@@ -23,6 +25,7 @@ export function StoreSwitcher() {
   const [switchingStoreId, setSwitchingStoreId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const access = sessionView?.access;
+  const { plan } = usePlanFeatures();
   const stores = storesQuery.data?.data ?? [];
   const brands = brandsQuery.data?.data ?? [];
   const brandNameById = new Map(brands.map((brand) => [brand.id, brand.name]));
@@ -54,11 +57,11 @@ export function StoreSwitcher() {
     }
   }
 
-  const goldBadge = access?.verification.badgeVisible ? (
-    <StatusBadge tone="highlight">
-      <ZudoIcon name="sealCheck20" size={14} /> Gold {access.verification.tier === "PREMIUM" ? "Premium" : "Pro"}
+  const goldBadge = (
+    <StatusBadge tone={plan === "free" ? "neutral" : "highlight"}>
+      {access?.verification.badgeVisible ? <ZudoIcon name="sealCheck20" size={14} /> : null} {sellerPlanLabels[plan]}
     </StatusBadge>
-  ) : null;
+  );
 
   if (!canSwitch) {
     return (
@@ -89,7 +92,7 @@ export function StoreSwitcher() {
                 <span className={styles.menuItemMeta}>
                   {staffRoleLabels[store.role]}
                   {store.brandId && brandNameById.get(store.brandId) ? ` · ${brandNameById.get(store.brandId)}` : ""}
-                  {store.verification.badgeVisible ? ` · Gold ${store.verification.tier === "PREMIUM" ? "Premium" : "Pro"}` : ""}
+                  {store.subscription && (store.subscription.status === "active" || store.subscription.status === "trialing") ? ` · ${store.subscription.plan === "BUSINESS" ? "Business" : "Pro"}` : " · Free"}
                 </span>
               </span>
               {store.isCurrent ? <ZudoIcon name="check16" size={14} /> : switchingStoreId === store.storeId ? <span className={styles.menuItemMeta}>Switching…</span> : null}
