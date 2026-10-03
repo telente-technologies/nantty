@@ -1,0 +1,38 @@
+package configs
+
+import (
+	"time"
+
+	platformconfig "zudomart/platform/config"
+)
+
+type CatalogSettings struct {
+	Environment            string
+	DatabaseUrl            string
+	DatabaseSchema         string
+	DomainEventsTopicArn   string
+	AccessTokenJwksUrl     string
+	TokenIssuer            string
+	TokenAudience          string
+	RedisUrl               string
+	MediaPublicBaseUrl     string
+	ScheduledPublishPeriod time.Duration
+	OutboxBatchSize        int
+}
+
+func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
+
+func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) CatalogSettings {
+	return CatalogSettings{
+		Environment:            reader.ReadStringOrDefault("APP_ENV", "development"),
+		DatabaseUrl:            reader.ReadRequiredString("CATALOG_DATABASE_URL"),
+		DatabaseSchema:         reader.ReadStringOrDefault("CATALOG_DATABASE_SCHEMA", "catalog"),
+		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
+		AccessTokenJwksUrl:     reader.ReadStringOrDefault("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
+		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
+		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+		RedisUrl:               reader.ReadStringOrDefault("CATALOG_REDIS_URL", ""),
+		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media"),
+		ScheduledPublishPeriod: reader.ReadDurationOrDefault("CATALOG_SCHEDULED_PUBLISH_INTERVAL", 30*time.Second),
+	}
+}
