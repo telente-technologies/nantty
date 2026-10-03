@@ -1,4 +1,4 @@
-import { maximumSqsDelaySeconds, unreadEmailJobType } from "../../../../constants/delivery.constant.js";
+import { maximumJobDelaySeconds, unreadEmailJobType } from "../../../../constants/delivery.constant.js";
 import type { IdentityDirectory } from "../../../../interfaces/identityDirectory.interface.js";
 import type { JobQueue } from "../../../../interfaces/jobQueue.interface.js";
 import type { DeliveryRepository, NotificationRepository } from "../../../../interfaces/repositories.interface.js";
@@ -22,7 +22,7 @@ export class DeliverEmailIfStillUnreadHandler {
     const now = (this.deps.now ?? (() => new Date()))();
     const remainingSeconds = (Date.parse(command.notBefore) - now.getTime()) / 1000;
     if (remainingSeconds > 0) {
-      await this.deps.jobQueue.send(this.deps.jobsQueueUrl, { ...command, type: unreadEmailJobType }, Math.min(maximumSqsDelaySeconds, remainingSeconds));
+      await this.deps.jobQueue.send(this.deps.jobsQueueUrl, { ...command, type: unreadEmailJobType }, Math.min(maximumJobDelaySeconds, remainingSeconds));
       return "waiting";
     }
     const notification = await this.deps.notifications.findByDedupeKey(command.notificationKey);

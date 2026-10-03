@@ -7,6 +7,7 @@ import { EventDataReader } from "../../../utils/eventDataReader.util.js";
 export interface MappingContext {
   readonly webBaseUrl: string;
   readonly sellerDashboardUrl: string;
+  readonly otpEnvelopeKeys?: Readonly<Record<string, Buffer>>;
 }
 
 export type EventMapping = (event: DomainEventEnvelope, data: EventDataReader, context: MappingContext) => NotificationIntent[];

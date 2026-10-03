@@ -1,3 +1,5 @@
+import { createDecipheriv } from "node:crypto";
+
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { formatBytes, intentFor, plan, type EventMapping } from "./mappingHelpers.js";
 
@@ -13,13 +15,29 @@ export const accountRegistered: EventMapping = (event, data) => [
   }),
 ];
 
-export const otpIssued: EventMapping = (event, data) => {
+export function openSealedOtpCode(sealedBase64: string, key: Buffer): string | null {
+  const sealed = Buffer.from(sealedBase64, "base64");
+  if (sealed.length < 12 + 16) return null;
+  try {
+    const decipher = createDecipheriv("aes-256-gcm", key, sealed.subarray(0, 12));
+    decipher.setAuthTag(sealed.subarray(sealed.length - 16));
+    return Buffer.concat([decipher.update(sealed.subarray(12, sealed.length - 16)), decipher.final()]).toString("utf8");
+  } catch {
+    return null;
+  }
+}
+
+export const otpIssued: EventMapping = (event, data, context) => {
+  const key = context.otpEnvelopeKeys?.[data.text("keyId")];
+  const expiresAt = Date.parse(data.text("expiresAt"));
+  const code = key === undefined || !(expiresAt > Date.now()) ? null : openSealedOtpCode(data.text("codeSealed"), key);
+  if (code === null) return [];
   const accountId = data.optionalText("accountId") ?? `otp:${data.text("destination")}`;
   return [
     intentFor(event, accountId, {
       category: "auth",
       emailAddressOverride: data.text("destination"),
-      email: (recipient) => plan("emailOtp", { firstName: recipient.firstName, code: data.text("code"), expiresInMinutes: data.integer("expiresInMinutes", 5), purpose: data.text("purpose") }),
+      email: (recipient) => plan("emailOtp", { firstName: recipient.firstName, code, expiresInMinutes: data.integer("expiresInMinutes", 5), purpose: data.text("purpose") }),
     }),
   ];
 };
