@@ -101,8 +101,9 @@ export async function forwardBffRequestToStudioApi(request: NextRequest, pathSeg
 
   let backendResult = await sendToBackend();
   let rotatedTokens: Awaited<ReturnType<typeof exchangeRefreshTokenForNewTokenPair>> = null;
-  if (backendResult.status === 401 && tokens.refreshToken) {
-    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(tokens.refreshToken);
+  const refreshTokenToExchange = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
+  if (backendResult.status === 401 && refreshTokenToExchange) {
+    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshTokenToExchange);
     if (rotatedTokens) {
       accessToken = rotatedTokens.accessToken;
       backendResult = await sendToBackend();
