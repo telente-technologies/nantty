@@ -1,5 +1,7 @@
 # Schema ERDs
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 As of 2026-10-03. Source of truth for EXISTING tables: `services/go/modules/<m>/src/migrations/*.up.sql` (what the DB has) cross-checked against `<m>/src/databases/schema/*.schema.go` (what ent expects). PLANNED tables follow `docs/architecture/database.md` and the legacy spec `apps/api/prisma/schema/*.prisma`.
 
 Conventions:
@@ -68,8 +70,9 @@ erDiagram
   }
   PROFILES {
     uuid id PK
-    uuid account_id "partial UK per kind personal / creator"
-    varchar kind "personal|creator|business"
+    uuid account_id "partial UK one personal per account"
+    varchar kind "personal|business"
+    varchar creator_status "none|pending|approved|rejected"
     varchar handle UK
     bool verified
   }

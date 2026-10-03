@@ -1,5 +1,7 @@
 # Domain map and table ownership
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 As of 2026-10-03. Labels: **EXISTING** (path cited) · **PARTIAL** (some tables exist, plan not met) · **PLANNED** (owner plan / `docs/architecture/*`, no Go tables) · **FUTURE** (after a trigger). Paths are relative to `services/go/modules/` unless noted. Scale is described with size classes, not user numbers (section 3).
 
 ## 1. Domain map
@@ -8,8 +10,8 @@ As of 2026-10-03. Labels: **EXISTING** (path cited) · **PARTIAL** (some tables 
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Identity (accounts, sessions, OTP, social sign-in, signing keys) | EXISTING | `auth` | auth (goIdentity) | `auth/src/migrations/20261003094035_*`, `20261003100736_*` | Email/username normalised in app (`auth/src/utils/inputValidation.util.go`, `platform/usernames`) |
 | 2 | Users (account-level settings, acting profile, usernames) | EXISTING | `users` | users (goIdentity) | `users/src/migrations/20261003101347_*` | `username_changes`, `username_holds`, `reserved_username_rules` |
-| 3 | Profiles (personal / creator / business) | EXISTING | `users` | users | `profiles`, `profile_categories`, `business_categories` | Partial uniques: one personal and one creator profile per account |
-| 4 | Creators (program membership, tiers) | EXISTING | `creators` | creators (goMoney) | `creators/src/migrations/20261003112651_*` | Creator *profile* lives in `users.profiles` (kind=creator) |
+| 3 | Profiles (personal / business; creator = status on personal) | EXISTING | `users` | users | `profiles`, `profile_categories`, `business_categories` | Partial unique: one personal profile per account; `creator_status` on the personal profile |
+| 4 | Creators (program membership, tiers) | EXISTING | `creators` | creators (goMoney) | `creators/src/migrations/20261003112651_*` | Creator status lives on the personal row in `users.profiles` (`creator_status`) |
 | 5 | Businesses (business profile, KYB, verified checkmark) | PARTIAL | `users` (+ `payments.connected_accounts` in ent only) | users; payments | business profile = `profiles.kind`; KYB/checkmark PLANNED (`docs/checkoutPaymentFlowPlan.md` §1) | No KYB/verification table yet |
 | 6 | Social graph (follow, block, mute) | PLANNED | `social` | ts-social | `docs/architecture/database.md` §3; legacy `apps/api/prisma/schema/follows.prisma` | No `blocks` table exists anywhere yet |
 | 7 | Marketplace (stores, members) | PLANNED | `catalog` | catalog (goCommerce) | `catalog/catalog.module.go` stub; legacy `stores.prisma` | `escrow`/`payments` carry `store_id` as an unvalidated string |
@@ -97,7 +99,7 @@ flowchart LR
 | `auth.one_time_codes` | Identity | auth | OTP send/verify | owner | C3 | L | single-row | RANGE `created_at` (drop) | `destination` hash |
 | `auth.signing_keys` | Security | auth | key rotation | owner (JWKS via HTTP) | C2 | XS | single-row | none | none (global) |
 | `auth.social_identities` | Identity | auth | social sign-in | owner | C2 | M | single-row | none | `account_id` |
-| `users.profiles` | Profiles | users | profiles, creator/business profile commands | `id, account_id, kind, handle, display_name, avatar_*, is_private, verified, status, country_code` | C2 | M | single-row + with-outbox | none | `account_id` |
+| `users.profiles` | Profiles | users | profiles, creator-application/business profile commands | `id, account_id, kind, creator_status, handle, display_name, avatar_*, is_private, verified, status, country_code` | C2 | M | single-row + with-outbox | none | `account_id` |
 | `users.profile_categories` | Profiles | users | business profile | owner | C2 | M | single-row | none | `profile_id` |
 | `users.business_categories` | Categories | users | admin seed / users | all columns | C4 | XS | single-row | none | none (replicate) |
 | `users.acting_profiles` | Users | users | switchActingProfile | owner | C2 | M | single-row | none | `account_id` |
