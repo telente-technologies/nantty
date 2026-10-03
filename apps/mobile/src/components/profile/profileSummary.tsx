@@ -1,9 +1,12 @@
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { CalendarDots16Icon } from "@/components/icons";
+import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 
@@ -24,6 +27,24 @@ export interface ProfileSummaryProps {
   readonly onPressFollowing: () => void;
 }
 
+function ProfileAvatar({ profile, borderRadius }: { readonly profile: User; readonly borderRadius: number }) {
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const avatarImage = profile.avatarUrl ? <Image source={{ uri: profile.avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null;
+  if (!profile.live) return <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>;
+  const liveId = profile.live.liveId;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${profile.name} is live, open livestream`}
+      onPress={() => navigation.navigate("Live", { liveId })}
+    >
+      <LiveAvatarRing size={64} borderRadius={borderRadius}>
+        <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
+      </LiveAvatarRing>
+    </Pressable>
+  );
+}
+
 const formatJoinedMonthAndYear = (isoDate: string) => formatJoinedDate(isoDate).replace(/ (\d{4})$/, ", $1");
 
 export function ProfileSummary({ profile, variant, actions, identityAction, onPressFollowers, onPressFollowing }: ProfileSummaryProps) {
@@ -35,9 +56,7 @@ export function ProfileSummary({ profile, variant, actions, identityAction, onPr
       </View>
 
       <View style={styles.identity}>
-        <View style={[styles.avatar, { borderRadius: isOwn ? 32 : 8 }]}>
-          {profile.avatarUrl ? <Image source={{ uri: profile.avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
-        </View>
+        <ProfileAvatar profile={profile} borderRadius={isOwn ? 32 : 8} />
         <View style={styles.names}>
           <View style={styles.nameRow}>
             <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header" numberOfLines={1}>
