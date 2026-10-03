@@ -1,4 +1,4 @@
-import type { ID, LiveComment, LiveProduct, LiveSession, LiveState, OverlayLayer, OverlayScene } from "@/types";
+import type { ID, LiveCategory, LiveComment, LiveProduct, LiveSession, LiveState, OverlayLayer, OverlayScene } from "@/types";
 
 import { sendRequestToStudioServer } from "./clientApi.service";
 
@@ -13,7 +13,8 @@ export const livesService = {
   startLive: (liveId: ID) => sendRequestToStudioServer<LiveSession>(`/api/v1/lives/${liveId}/start`, { method: "POST" }),
   endLive: (liveId: ID) => sendRequestToStudioServer<LiveSession>(`/api/v1/lives/${liveId}/end`, { method: "POST" }),
   rotateStreamKey: (liveId: ID) => sendRequestToStudioServer<LiveSession>(`/api/v1/lives/${liveId}/stream-key`, { method: "POST" }),
-  createLive: (title: string) => sendRequestToStudioServer<LiveSession>("/api/v1/lives", { method: "POST", body: { title } }),
+  createLive: (title: string, category: LiveCategory) =>
+    sendRequestToStudioServer<LiveSession>("/api/v1/lives", { method: "POST", body: { title, category } }),
   listComments: (liveId: ID) => sendRequestToStudioServer<LiveComment[]>(`/api/v1/lives/${liveId}/comments`),
   postComment: (liveId: ID, text: string) => sendRequestToStudioServer<LiveComment>(`/api/v1/lives/${liveId}/comments`, { method: "POST", body: { text } }),
   listPinnedProducts: (liveId: ID) => sendRequestToStudioServer<LiveProduct[]>(`/api/v1/lives/${liveId}/products`),
