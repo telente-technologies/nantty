@@ -132,6 +132,10 @@ func SellerReservedPayoutAccount(userId, currency string) AccountRef {
 	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:reservedPayout", userId), currency, userId)
 }
 
+func SellerSettlingByPaystackAccount(userId, currency string) AccountRef {
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:settlingByPaystack", userId), currency, userId)
+}
+
 func SellerRefundsInFlightAccount(userId, currency string) AccountRef {
 	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:refundsInFlight", userId), currency, userId)
 }
@@ -160,6 +164,18 @@ func PlatformProviderBalanceAccount(provider, currency string) AccountRef {
 
 func PlatformCommissionRevenueAccount(currency string) AccountRef {
 	return platformAccount("revenue:commission", currency, AccountKindRevenue)
+}
+
+func PlatformEscrowFeeRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:escrowFees", currency, AccountKindRevenue)
+}
+
+func AdvertiserPrepaidBalanceAccount(adAccountId, currency string) AccountRef {
+	return AccountRef{Code: "advertiser:" + adAccountId + ":prepaidBalance", Currency: currency, Kind: AccountKindLiability, OwnerType: "advertiser", OwnerId: adAccountId}
+}
+
+func PlatformAdRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:ads", currency, AccountKindRevenue)
 }
 
 func PlatformFeesUnearnedAccount(currency string) AccountRef {

@@ -117,18 +117,9 @@ func PrepareMoneyModuleResources(ctx context.Context, settings MoneyModuleSettin
 }
 
 func createDomainEventPublisher(ctx context.Context, settings MoneyModuleSettings, logger *slog.Logger) (events.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return events.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := events.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return events.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return events.CreateDomainEventPublisherFromEnvironment(ctx, events.MessageBusSelection{
+		DeployableName: "go-money", Logger: logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }
 
 var (

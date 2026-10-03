@@ -57,7 +57,7 @@ func (balances SellerBalances) MatureDueCredits(ctx context.Context, database *s
 			client := balances.Ledger.EntClientForExecutorInLedgerSchema(transaction)
 			due, err := client.SellerCreditMaturity.Query().
 				Where(sellercreditmaturity.MaturedAtIsNil(), sellercreditmaturity.AvailableAtLTE(balances.Now().UTC())).
-				Order(ent.Asc(sellercreditmaturity.FieldAvailableAt)).Limit(1).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).Only(ctx)
+				Order(ent.Asc(sellercreditmaturity.FieldAvailableAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 			if ent.IsNotFound(err) {
 				return nil
 			}
@@ -88,21 +88,34 @@ func (balances SellerBalances) matureCreditInTransaction(ctx context.Context, tr
 		return err
 	}
 	repaid := min(debt, due.RemainingAmountMinor)
-	lines := []models.JournalLineRequest{{Account: models.SellerPendingAccount(due.SellerUserID, due.Currency), Direction: models.Debit, AmountMinor: due.RemainingAmountMinor}}
-	if repaid > 0 {
-		lines = append(lines, models.JournalLineRequest{Account: models.SellerDebtAccount(due.SellerUserID, due.Currency), Direction: models.Credit, AmountMinor: repaid})
-	}
-	if available := due.RemainingAmountMinor - repaid; available > 0 {
-		lines = append(lines, models.JournalLineRequest{Account: models.SellerAvailableAccount(due.SellerUserID, due.Currency), Direction: models.Credit, AmountMinor: available})
-	}
-	if _, err := balances.Ledger.PostBalancedJournalEntry(ctx, transaction, models.JournalEntryRequest{
-		Reference: "seller-credit-matured:" + due.ID.String(), Kind: "sellerCredit.matured", Description: "Funds are now available",
-		Metadata: map[string]any{"sourceReference": due.SourceReference, "debtRepaidMinor": repaid}, Lines: lines,
-	}); err != nil {
+	terms, reserved, err := balances.reserveForMaturity(ctx, transaction, due.SellerUserID, due.SourceReference, due.RemainingAmountMinor-repaid)
+	if err != nil {
 		return err
 	}
+	if released := due.RemainingAmountMinor - reserved; released > 0 {
+		lines := []models.JournalLineRequest{{Account: models.SellerPendingAccount(due.SellerUserID, due.Currency), Direction: models.Debit, AmountMinor: released}}
+		if repaid > 0 {
+			lines = append(lines, models.JournalLineRequest{Account: models.SellerDebtAccount(due.SellerUserID, due.Currency), Direction: models.Credit, AmountMinor: repaid})
+		}
+		if available := released - repaid; available > 0 {
+			lines = append(lines, models.JournalLineRequest{Account: models.SellerAvailableAccount(due.SellerUserID, due.Currency), Direction: models.Credit, AmountMinor: available})
+		}
+		if _, err := balances.Ledger.PostBalancedJournalEntry(ctx, transaction, models.JournalEntryRequest{
+			Reference: "seller-credit-matured:" + due.ID.String(), Kind: "sellerCredit.matured", Description: "Funds are now available",
+			Metadata: map[string]any{"sourceReference": due.SourceReference, "debtRepaidMinor": repaid, "reservedMinor": reserved}, Lines: lines,
+		}); err != nil {
+			return err
+		}
+	}
+	if reserved > 0 {
+		if err := balances.ScheduleLockedCreditInTransaction(ctx, transaction, LockedSellerCredit{
+			SellerUserId: due.SellerUserID, Currency: due.Currency, AmountMinor: reserved, SourceReference: sellerReserveSourcePrefix + due.ID.String(), AvailableAt: now.Add(terms.HoldFor),
+		}); err != nil {
+			return err
+		}
+	}
 	return balances.Outbox.EnqueueInTransaction(ctx, transaction, "sellerCredit.matured", due.SellerUserID, now, map[string]any{
-		"sellerUserId": due.SellerUserID, "sourceReference": due.SourceReference, "debtRepaidMinor": repaid,
+		"sellerUserId": due.SellerUserID, "sourceReference": due.SourceReference, "debtRepaidMinor": repaid, "reservedMinor": reserved,
 		"amount": map[string]any{"amountMinor": due.RemainingAmountMinor, "currency": due.Currency},
 	})
 }

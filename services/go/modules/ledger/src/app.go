@@ -61,6 +61,11 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go jobs.RunLedgerIntegrityCheckEveryIntervalUntilContextDone(ctx, module.Container, module.integrityCheckInterval)
 	go jobs.RunSellerCreditMaturingEveryIntervalUntilContextDone(ctx, module.Container, module.maturingInterval)
 	go func() {
+		if err := loaders.ConsumeMoneyDomainEventsUntilContextDone(ctx, module.Container.Settings.IsProduction(), module.Container.Resources.Logger); err != nil && ctx.Err() == nil {
+			module.Container.Resources.Logger.Error("money domain event consumer stopped", "error", err)
+		}
+	}()
+	go func() {
 		if err := loaders.ServeRegisteredMoneyGrpcServicesUntilContextDone(ctx, module.grpcAddress, module.grpcToken, module.Container.Resources.Logger); err != nil {
 			module.Container.Resources.Logger.Error("internal money gRPC stopped", "error", err)
 		}
