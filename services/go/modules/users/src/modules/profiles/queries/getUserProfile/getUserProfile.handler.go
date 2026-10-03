@@ -31,9 +31,5 @@ func ViewPublicProfileOfAccount(ctx context.Context, application *container.Cont
 	if err != nil {
 		return types.UserView{}, err
 	}
-	isCreator, err := services.HasActiveCreatorProfile(ctx, application, accountId)
-	if err != nil {
-		return types.UserView{}, err
-	}
-	return types.BuildUserView(row, summary, isCreator, false), nil
+	return types.BuildUserView(row, summary, false), nil
 }
