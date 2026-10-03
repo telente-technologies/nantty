@@ -11,7 +11,6 @@ import (
 
 	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 )
 
@@ -28,7 +27,7 @@ func TestUnverifiedStoresAreEscrowOnlyAndDirectPaymentsLockTheSellerCreditUntilR
 	harness.registerCheckoutWithMode(buyer, map[string]int64{orderId: 200_000}, "direct", true)
 	harness.payCheckoutThroughWebhook(buyer, orderId, 0)
 	sellerId := "seller-" + orderId[:4]
-	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 190_000 || harness.balance(ledgermodels.SellerEscrowAccount(sellerId, "x", "NGN")) != 0 {
+	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 187_000 || harness.balance(ledgermodels.SellerEscrowAccount(sellerId, "x", "NGN")) != 0 {
 		t.Fatal("direct payment did not credit the seller's locked balance")
 	}
 	view := harness.Call(http.MethodGet, "/api/v1/orders/"+orderId+"/escrow", harness.Tokens.UserAccessToken(buyer), "", nil)
@@ -40,9 +39,14 @@ func TestUnverifiedStoresAreEscrowOnlyAndDirectPaymentsLockTheSellerCreditUntilR
 	if refund.Status != http.StatusOK || refund.Body["status"] != "refunded" {
 		t.Fatalf("refund of a direct order: %d %s", refund.Status, refund.Raw)
 	}
-	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 0 || harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 0 || harness.Paystack.RefundCalls != 1 {
+	harness.deliverRefundPaid("escrow-refund:" + escrowIdForOrder(t, harness, orderId))
+	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 0 || harness.balance(ledgermodels.SellerRefundsInFlightAccount(sellerId, "NGN")) != 0 || harness.Bachs.Calls("POST /v1/refunds") != 1 {
 		t.Fatal("direct refund did not drain the locked credit and pay the buyer back")
 	}
+	if harness.balance(ledgermodels.PlatformCommissionRevenueAccount("NGN")) != 0 || harness.balance(ledgermodels.RefundedProcessingFeesExpenseAccount("NGN")) != 3_000 {
+		t.Fatal("the platform fee was not reversed before the refund")
+	}
+	harness.AssertProviderMirrorMatches()
 	harness.AssertLedgerHealthy()
 }
 
@@ -50,25 +54,23 @@ func TestOnlyOneLiveAttemptAndALateSuccessOnASupersededAttemptIsRefunded(t *test
 	harness := startEscrowHarness(t)
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
-	token := harness.Tokens.UserAccessToken(buyer)
-	first := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "attempt-key-1", map[string]any{"orderId": orderId, "provider": "paystack"})
-	second := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "attempt-key-2", map[string]any{"orderId": orderId, "provider": "paystack"})
+	first := harness.initializePayment(buyer, orderId, "attempt-key-1")
+	second := harness.initializePayment(buyer, orderId, "attempt-key-2")
 	if first.Status != http.StatusCreated || second.Status != http.StatusCreated || first.Body["reference"] == second.Body["reference"] {
 		t.Fatalf("attempts: %d %d", first.Status, second.Status)
 	}
 	for _, attempt := range []HarnessReference{{first.Body["reference"].(string)}, {second.Body["reference"].(string)}} {
-		harness.Paystack.MarkChargeAs(attempt.reference, "success", 0, 0)
-		body, headers := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": harness.Paystack.ChargeId(attempt.reference), "reference": attempt.reference})
-		if response := harness.Call(http.MethodPost, "/api/v1/payments/webhooks/paystack", "", "", body, headers); response.Status != http.StatusOK {
-			t.Fatalf("webhook: %d %s", response.Status, response.Raw)
-		}
+		harness.CompleteCheckoutThroughWebhook(attempt.reference, 0, processingFeeFor(300_000))
 	}
-	if harness.Paystack.RefundCalls != 1 || harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 0 || harness.balance(ledgermodels.PaymentsAwaitingApplicationAccount("NGN")) != 0 {
-		t.Fatalf("duplicate payment not refunded exactly once (refund calls %d)", harness.Paystack.RefundCalls)
+	sellerId := "seller-" + orderId[:4]
+	if harness.Bachs.Calls("POST /v1/refunds") != 1 || harness.balance(ledgermodels.PaymentsAwaitingApplicationAccount("NGN")) != 0 {
+		t.Fatalf("duplicate payment not refunded exactly once (refund calls %d)", harness.Bachs.Calls("POST /v1/refunds"))
 	}
-	if harness.balance(ledgermodels.SellerEscrowAccount("seller-"+orderId[:4], escrowIdForOrder(t, harness, orderId), "NGN")) != 300_000 {
+	harness.deliverRefundPaid("duplicate-refund:" + second.Body["reference"].(string))
+	if harness.balance(ledgermodels.SellerEscrowAccount(sellerId, escrowIdForOrder(t, harness, orderId), "NGN")) != 280_500 || harness.balance(ledgermodels.SellerRefundsInFlightAccount(sellerId, "NGN")) != 0 {
 		t.Fatal("the order was not held exactly once")
 	}
+	harness.AssertProviderMirrorMatches()
 	harness.AssertLedgerHealthy()
 }
 

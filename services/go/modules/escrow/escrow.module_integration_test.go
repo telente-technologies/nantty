@@ -1,6 +1,7 @@
 package escrow
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"net/http"
@@ -21,19 +22,22 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	harness.registerCheckout(buyer, map[string]int64{firstOrder: 600_000, secondOrder: 400_000})
 	token := harness.Tokens.UserAccessToken(buyer)
 
-	first := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "checkout-key-1", map[string]any{"orderId": firstOrder, "provider": "paystack"})
-	replay := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "checkout-key-1", map[string]any{"orderId": firstOrder, "provider": "paystack"})
-	reused := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "checkout-key-1", map[string]any{"orderId": secondOrder, "provider": "paystack"})
+	first := harness.initializePayment(buyer, firstOrder, "checkout-key-1")
+	replay := harness.initializePayment(buyer, firstOrder, "checkout-key-1")
+	reused := harness.initializePayment(buyer, secondOrder, "checkout-key-1")
 	if first.Status != http.StatusCreated || replay.Body["reference"] != first.Body["reference"] || replay.Headers.Get("Idempotent-Replayed") != "true" || reused.Status != http.StatusConflict {
 		t.Fatalf("initialize idempotency broken: %d %v / %v %v / %d", first.Status, first.Body, replay.Body, replay.Headers, reused.Status)
 	}
-	if amount := first.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64); amount != 1_000_000 {
-		t.Fatalf("checkout total = %v", amount)
+	if amount := first.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64); amount != 600_000 || first.Body["paymentsInCheckout"].(float64) != 2 || first.Body["checkoutUrl"] == "" {
+		t.Fatalf("one hosted checkout per seller order expected: %v", first.Body)
 	}
-	if missingKey := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "", map[string]any{"orderId": firstOrder, "provider": "paystack"}); missingKey.Status != http.StatusBadRequest {
+	if harness.Bachs.Calls("POST /v1/checkout-sessions") != 1 {
+		t.Fatalf("checkout sessions created = %d", harness.Bachs.Calls("POST /v1/checkout-sessions"))
+	}
+	if missingKey := harness.Call(http.MethodPost, "/api/v1/payments/initialize", token, "", map[string]any{"orderId": firstOrder}); missingKey.Status != http.StatusBadRequest {
 		t.Fatalf("missing key accepted: %d", missingKey.Status)
 	}
-	if stranger := harness.Call(http.MethodPost, "/api/v1/payments/initialize", harness.Tokens.UserAccessToken(uuid.NewString()), "stranger-key", map[string]any{"orderId": firstOrder, "provider": "paystack"}); stranger.Status != http.StatusNotFound {
+	if stranger := harness.initializePayment(uuid.NewString(), firstOrder, "stranger-key"); stranger.Status != http.StatusNotFound {
 		t.Fatalf("another user initialized the buyer's order: %d", stranger.Status)
 	}
 	if pending := harness.Call(http.MethodPost, "/api/v1/payments/orders/"+firstOrder+"/verify", token, "", nil); pending.Body["status"] != "pending" {
@@ -41,32 +45,40 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	}
 
 	reference := first.Body["reference"].(string)
-	harness.Paystack.MarkChargeAs(reference, "success", 0, 150)
-	body, headers := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": harness.Paystack.ChargeId(reference), "reference": reference})
-	forged, _ := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": 1, "reference": reference})
-	if response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", forged, http.Header{"X-Paystack-Signature": {"deadbeef"}}); response.Status != http.StatusUnauthorized {
-		t.Fatalf("forged webhook accepted: %d", response.Status)
+	checkout := harness.Bachs.CompleteCheckout(reference, 0, 9_000)
+	eventData := map[string]any{"charge_id": checkout.ChargeId, "checkout_id": checkout.Id, "reference": reference, "status": "SUCCEEDED", "amount": "6000.00", "currency": "NGN"}
+	body, headers := paymentstesting.SignedBachsWebhook("evt_release_test_1", "collection.succeeded", checkout.AccountId, eventData, time.Now())
+	tampered := bytes.Replace(body, []byte("6000.00"), []byte("9000.00"), 1)
+	if response := harness.Call(http.MethodPost, "/webhooks/bachs", "", "", tampered, headers); response.Status != http.StatusUnauthorized {
+		t.Fatalf("tampered webhook accepted: %d", response.Status)
+	}
+	stale, staleHeaders := paymentstesting.SignedBachsWebhook("evt_release_test_stale", "collection.succeeded", checkout.AccountId, eventData, time.Now().Add(-10*time.Minute))
+	if response := harness.Call(http.MethodPost, "/webhooks/bachs", "", "", stale, staleHeaders); response.Status != http.StatusUnauthorized {
+		t.Fatalf("replayed old webhook accepted: %d", response.Status)
 	}
 	var group sync.WaitGroup
 	for range 5 {
 		group.Add(1)
 		go func() {
 			defer group.Done()
-			if response := harness.Call(http.MethodPost, "/api/v1/payments/webhooks/paystack", "", "", body, headers); response.Status != http.StatusOK {
+			if response := harness.Call(http.MethodPost, "/api/v1/payments/webhooks/bachs", "", "", body, headers); response.Status != http.StatusOK {
 				t.Errorf("webhook delivery: %d %s", response.Status, response.Raw)
 			}
 		}()
 	}
 	group.Wait()
-	if duplicate := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers); duplicate.Body["duplicate"] != true {
+	if duplicate := harness.Call(http.MethodPost, "/webhooks/bachs", "", "", body, headers); duplicate.Body["duplicate"] != true {
 		t.Fatalf("replayed webhook not reported as duplicate: %v", duplicate.Body)
 	}
-	if paid := harness.Call(http.MethodPost, "/api/v1/payments/orders/"+secondOrder+"/verify", token, "", nil); paid.Body["status"] != "paid" {
+	if paid := harness.Call(http.MethodPost, "/api/v1/payments/orders/"+firstOrder+"/verify", token, "", nil); paid.Body["status"] != "paid" {
 		t.Fatalf("expected paid, got %v", paid.Body)
 	}
-	if harness.balance(ledgermodels.ProviderClearingAccount("paystack", "NGN")) != 1_000_000-150 || harness.balance(ledgermodels.PaymentsAwaitingApplicationAccount("NGN")) != 0 {
-		t.Fatalf("collection not booked exactly once")
+	sellerId := "seller-" + firstOrder[:4]
+	if harness.balance(ledgermodels.SellerProviderHeldFundsAccount(sellerId, "NGN")) != 561_000 || harness.balance(ledgermodels.PaymentsAwaitingApplicationAccount("NGN")) != 0 ||
+		harness.balance(ledgermodels.PlatformFeesUnearnedAccount("NGN")) != 30_000 {
+		t.Fatalf("collection not mirrored exactly once into the seller account")
 	}
+	harness.AssertProviderMirrorMatches()
 
 	escrowView := harness.Call(http.MethodGet, "/api/v1/orders/"+firstOrder+"/escrow", token, "", nil)
 	if escrowView.Status != http.StatusOK || escrowView.Body["stage"] != "seller_preparing" || escrowView.Body["platformFee"].(map[string]any)["amountMinor"].(float64) != 30_000 {
@@ -89,20 +101,21 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	if released, err := escrows.ReleaseEscrowsWhoseInspectionPeriodEnded(context.Background(), 10); err != nil || released != 1 {
 		t.Fatalf("auto-release released %d: %v", released, err)
 	}
-	sellerId := "seller-" + firstOrder[:4]
-	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 570_000 || harness.balance(ledgermodels.SellerAvailableAccount(sellerId, "NGN")) != 0 || harness.balance(ledgermodels.PlatformCommissionRevenueAccount("NGN")) != 30_000 {
-		t.Fatal("release did not lock 95% for the seller and book 5% commission")
+	if harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 561_000 || harness.balance(ledgermodels.SellerAvailableAccount(sellerId, "NGN")) != 0 || harness.balance(ledgermodels.PlatformCommissionRevenueAccount("NGN")) != 30_000 {
+		t.Fatal("release did not lock the seller's net and book the 5% platform fee as commission")
 	}
 	harness.clock = harness.clock.Add(25 * time.Hour)
 	if matured, err := harness.escrow.Application.Container.Sellers.MatureDueCredits(context.Background(), harness.Database, 10); err != nil || matured != 1 {
 		t.Fatalf("matured %d: %v", matured, err)
 	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(sellerId, "NGN")) != 570_000 || harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 0 {
+	if harness.balance(ledgermodels.SellerAvailableAccount(sellerId, "NGN")) != 561_000 || harness.balance(ledgermodels.SellerPendingAccount(sellerId, "NGN")) != 0 {
 		t.Fatal("matured credit did not become available")
 	}
+	harness.payCheckoutThroughWebhook(buyer, secondOrder, 0)
 	if holds := harness.Call(http.MethodGet, "/api/v1/wallets/me/escrow-holds", harness.Tokens.UserAccessToken("seller-"+secondOrder[:4]), "", nil); len(holds.Body["data"].([]any)) != 1 {
 		t.Fatalf("seller holds: %v", holds.Body)
 	}
+	harness.AssertProviderMirrorMatches()
 	harness.AssertLedgerHealthy()
 }
 
@@ -145,14 +158,19 @@ func TestDisputeFreezesEscrowAndPartialResolutionRefundsThroughTheProvider(t *te
 	if resolved.Status != http.StatusOK || resolved.Body["status"] != "resolved_refunded" || again.Headers.Get("Idempotent-Replayed") != "true" {
 		t.Fatalf("resolve: %d %v / %v", resolved.Status, resolved.Body, again.Headers)
 	}
-	if harness.Paystack.RefundCalls != 1 {
-		t.Fatalf("refund calls = %d", harness.Paystack.RefundCalls)
+	if harness.Bachs.Calls("POST /v1/refunds") != 1 || harness.Bachs.Calls("POST /v1/transfers") != 1 {
+		t.Fatalf("refund calls = %d, fee top-up transfers = %d", harness.Bachs.Calls("POST /v1/refunds"), harness.Bachs.Calls("POST /v1/transfers"))
 	}
-	if harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 0 ||
+	if harness.balance(ledgermodels.SellerRefundsInFlightAccount("seller-"+orderId[:4], "NGN")) != 250_000 {
+		t.Fatal("refund must stay in flight until the provider confirms it")
+	}
+	harness.deliverRefundPaid("escrow-partial-refund:" + escrowIdForOrder(t, harness, orderId))
+	if harness.balance(ledgermodels.SellerRefundsInFlightAccount("seller-"+orderId[:4], "NGN")) != 0 ||
 		harness.balance(ledgermodels.SellerPendingAccount("seller-"+orderId[:4], "NGN")) != 712_500 ||
 		harness.balance(ledgermodels.PlatformCommissionRevenueAccount("NGN")) != 37_500 {
 		t.Fatal("partial resolution not booked as 250000 refund / 712500 seller / 37500 commission")
 	}
+	harness.AssertProviderMirrorMatches()
 	if closedReply := harness.Call(http.MethodPost, "/api/v1/disputes/"+disputeId+"/messages", token, "late-reply-1", map[string]any{"text": "Thanks", "attachmentUrls": []string{}}); closedReply.Status != http.StatusConflict {
 		t.Fatalf("message on a resolved dispute: %d", closedReply.Status)
 	}

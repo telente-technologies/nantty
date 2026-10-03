@@ -20,8 +20,40 @@ import (
 
 type escrowHarness struct {
 	*paymentstesting.MoneyHarness
-	escrow *src.Module
-	clock  time.Time
+	escrow    *src.Module
+	clock     time.Time
+	onboarded map[string]string
+}
+
+func processingFeeFor(amountMinor int64) int64 { return amountMinor * 150 / 10_000 }
+
+func (harness *escrowHarness) ensureSellerOnboarded(orderId string) string {
+	harness.T.Helper()
+	payables, err := harness.Payments.Application.Gateway.FindCheckoutPayablesForOrder(context.Background(), harness.Database, orderId)
+	if err != nil {
+		harness.T.Fatal(err)
+	}
+	for _, payable := range payables {
+		if payable.OrderId == orderId {
+			if _, done := harness.onboarded[payable.SellerUserId]; !done {
+				harness.onboarded[payable.SellerUserId] = harness.OnboardConnectedAccount(payable.SellerUserId, true)
+			}
+			return harness.onboarded[payable.SellerUserId]
+		}
+	}
+	harness.T.Fatalf("order %s has no payable", orderId)
+	return ""
+}
+
+func (harness *escrowHarness) initializePayment(buyer, orderId, key string) paymentstesting.HarnessResponse {
+	harness.T.Helper()
+	harness.ensureSellerOnboarded(orderId)
+	return harness.Call(http.MethodPost, "/api/v1/payments/initialize", harness.Tokens.UserAccessToken(buyer), key, map[string]any{"orderId": orderId})
+}
+
+func (harness *escrowHarness) deliverRefundPaid(reference string) {
+	harness.T.Helper()
+	harness.DeliverBachsEvent("refund.paid", "", map[string]any{"refund_id": "rfnd_" + reference, "reference": reference, "status": "success"})
 }
 
 func startEscrowHarness(t *testing.T) *escrowHarness {
@@ -37,7 +69,8 @@ func startEscrowHarness(t *testing.T) *escrowHarness {
 		t.Fatal(err)
 	}
 	money.MountModule(module)
-	harness := &escrowHarness{MoneyHarness: money, escrow: module, clock: time.Now()}
+	money.Bachs.FundPlatformBalance("NGN", 10_000_000)
+	harness := &escrowHarness{MoneyHarness: money, escrow: module, clock: time.Now(), onboarded: map[string]string{}}
 	module.Application.Container.Now = func() time.Time { return harness.clock }
 	module.Application.Container.Sellers.Now = func() time.Time { return harness.clock }
 	return harness
@@ -66,16 +99,13 @@ func (harness *escrowHarness) registerCheckoutWithMode(buyer string, orders map[
 
 func (harness *escrowHarness) payCheckoutThroughWebhook(buyer, orderId string, providerAmount int64) string {
 	harness.T.Helper()
-	initialized := harness.Call(http.MethodPost, "/api/v1/payments/initialize", harness.Tokens.UserAccessToken(buyer), "init-"+orderId, map[string]any{"orderId": orderId, "provider": "paystack"})
+	initialized := harness.initializePayment(buyer, orderId, "init-"+orderId)
 	if initialized.Status != http.StatusCreated {
 		harness.T.Fatalf("initialize: %d %s", initialized.Status, initialized.Raw)
 	}
 	reference := initialized.Body["reference"].(string)
-	harness.Paystack.MarkChargeAs(reference, "success", providerAmount, 150)
-	body, headers := paymentstesting.SignedPaystackWebhook("charge.success", map[string]any{"id": harness.Paystack.ChargeId(reference), "reference": reference})
-	if response := harness.Call(http.MethodPost, "/api/v1/payments/webhooks/paystack", "", "", body, headers); response.Status != http.StatusOK {
-		harness.T.Fatalf("webhook: %d %s", response.Status, response.Raw)
-	}
+	amount := int64(initialized.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64))
+	harness.CompleteCheckoutThroughWebhook(reference, providerAmount, processingFeeFor(amount))
 	return reference
 }
 
