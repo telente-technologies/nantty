@@ -1,0 +1,138 @@
+package submitcreatorapplication
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+
+	"zudomart/modules/users/src/container"
+	usersErrors "zudomart/modules/users/src/errors"
+	usersevents "zudomart/modules/users/src/events"
+	"zudomart/modules/users/src/generated/ent"
+	"zudomart/modules/users/src/generated/ent/creatorapplication"
+	"zudomart/modules/users/src/generated/ent/profile"
+	creatorevents "zudomart/modules/users/src/modules/creatorProgram/events"
+	"zudomart/modules/users/src/modules/creatorProgram/services"
+	usersservices "zudomart/modules/users/src/services"
+)
+
+const reapplyCooldown = 30 * 24 * time.Hour
+
+type Handler struct {
+	Container *container.Container
+}
+
+func (handler Handler) Execute(ctx context.Context, command Command) (services.ApplicationView, error) {
+	owner, err := uuid.Parse(command.AccountId)
+	if err != nil {
+		return services.ApplicationView{}, usersErrors.ErrAccountUnavailable
+	}
+	if !command.Lenient {
+		if err := validateInput(command); err != nil {
+			return services.ApplicationView{}, err
+		}
+	}
+	personal, summary, err := usersservices.EnsurePersonalProfile(ctx, handler.Container, owner)
+	if err != nil {
+		return services.ApplicationView{}, err
+	}
+	if personal.CreatorStatus == profile.CreatorStatusApproved {
+		return services.ApplicationView{}, usersErrors.ErrCreatorApplicationExists
+	}
+	if existing, err := handler.latestApplication(ctx, owner); err != nil {
+		return services.ApplicationView{}, err
+	} else if existing != nil {
+		if existing.Status == creatorapplication.StatusPending {
+			return services.ApplicationView{}, usersErrors.ErrCreatorApplicationExists
+		}
+		if existing.ReapplyAvailableAt != nil && existing.ReapplyAvailableAt.After(handler.Container.Now()) {
+			return services.ApplicationView{}, usersErrors.Conflict("REAPPLY_NOT_AVAILABLE", fmt.Sprintf("You can apply again after %s.", existing.ReapplyAvailableAt.UTC().Format(time.RFC3339)))
+		}
+	}
+	eligibility, err := services.EvaluateCreatorEligibility(ctx, handler.Container, personal, summary)
+	if err != nil {
+		return services.ApplicationView{}, err
+	}
+	return handler.store(ctx, command, personal, eligibility)
+}
+
+func validateInput(command Command) error {
+	switch {
+	case len(command.Input.ContentCategories) == 0:
+		return usersErrors.Unprocessable("Pick at least one content category")
+	case command.Input.AcceptedCreatorTermsVersion == "":
+		return usersErrors.Unprocessable("Accept the Creator terms to continue")
+	case command.Input.PayoutAccountId == "":
+		return usersErrors.Unprocessable("Choose a payout account")
+	}
+	return nil
+}
+
+func (handler Handler) latestApplication(ctx context.Context, owner uuid.UUID) (*ent.CreatorApplication, error) {
+	row, err := handler.Container.Client.CreatorApplication.Query().Where(creatorapplication.AccountID(owner)).Order(ent.Desc(creatorapplication.FieldID)).First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+	return row, err
+}
+
+func (handler Handler) store(ctx context.Context, command Command, personal *ent.Profile, eligibility services.Eligibility) (services.ApplicationView, error) {
+	now := handler.Container.Now()
+	status, creatorStatus := creatorapplication.StatusPending, profile.CreatorStatusPending
+	reason := ""
+	var reapply *time.Time
+	switch eligibility.Decision {
+	case services.DecisionAutoApprove:
+		status, creatorStatus = creatorapplication.StatusApproved, profile.CreatorStatusApproved
+	case services.DecisionNotEligible:
+		status, creatorStatus = creatorapplication.StatusRejected, profile.CreatorStatusRejected
+		reason = notEligibleReason(eligibility)
+		next := now.Add(reapplyCooldown)
+		reapply = &next
+	}
+	requirements, _ := json.Marshal(eligibility.Requirements)
+	links, _ := json.Marshal(command.Input.SocialLinks)
+	var created *ent.CreatorApplication
+	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		create := tx.CreatorApplication.Create().SetAccountID(personal.AccountID).SetProfileID(personal.ID).SetStatus(status).SetDecision(creatorapplication.Decision(eligibility.Decision)).
+			SetDecisionNote(eligibility.DecisionNote).SetRequirements(requirements).SetContentCategories(command.Input.ContentCategories).SetSocialLinks(links).
+			SetSampleContentUrls(command.Input.SampleContentUrls).SetPayoutAccountID(command.Input.PayoutAccountId).SetAcceptedTermsVersion(command.Input.AcceptedCreatorTermsVersion).SetDecisionReason(reason)
+		if status != creatorapplication.StatusPending {
+			create.SetReviewedAt(now).SetReviewedBy("system").SetReviewedByName("Automatic review")
+		}
+		if reapply != nil {
+			create.SetReapplyAvailableAt(*reapply)
+		}
+		var err error
+		if created, err = create.Save(ctx); err != nil {
+			return err
+		}
+		if err := tx.Profile.UpdateOne(personal).SetCreatorStatus(creatorStatus).Exec(ctx); err != nil {
+			return err
+		}
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, "creatorApplication.submitted", personal.AccountID.String(), now, usersevents.CreatorApplicationSubmittedEventData{AccountId: personal.AccountID.String(), ProfileId: personal.ID.String()}); err != nil {
+			return err
+		}
+		if status == creatorapplication.StatusPending {
+			return nil
+		}
+		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, creatorevents.CreatorApplicationDecidedType, personal.AccountID.String(), now, creatorevents.DecidedData{
+			AccountId: personal.AccountID.String(), ApplicationId: created.ID.String(), Status: string(status), Decision: eligibility.Decision, Automatic: true,
+		})
+	})
+	return services.ConvertApplicationToView(created), err
+}
+
+func notEligibleReason(eligibility services.Eligibility) string {
+	missing := []string{}
+	for _, requirement := range eligibility.Requirements {
+		if !requirement.Met {
+			missing = append(missing, strings.ToLower(requirement.Label))
+		}
+	}
+	return "Not eligible yet: " + strings.Join(missing, ", ") + "."
+}
