@@ -4,17 +4,18 @@ import "zudomart/modules/payments/src/modules/gateway/models"
 
 type InitializeOrderPaymentRequestDto struct {
 	OrderId  string `json:"orderId"`
-	Provider string `json:"provider"`
+	Provider string `json:"provider,omitempty"`
 	ReturnTo string `json:"returnTo,omitempty"`
 }
 
 type PaymentInitializationDto struct {
-	OrderId          string                   `json:"orderId"`
-	Reference        string                   `json:"reference"`
-	AuthorizationUrl string                   `json:"authorizationUrl"`
-	AccessCode       string                   `json:"accessCode,omitempty"`
-	CallbackUrl      string                   `json:"callbackUrl"`
-	Payment          models.PaymentIntentView `json:"payment"`
+	OrderId                     string                   `json:"orderId"`
+	Reference                   string                   `json:"reference"`
+	CheckoutUrl                 string                   `json:"checkoutUrl"`
+	AuthorizationUrl            string                   `json:"authorizationUrl"`
+	CallbackUrl                 string                   `json:"callbackUrl"`
+	PaymentsRemainingInCheckout int                      `json:"paymentsInCheckout"`
+	Payment                     models.PaymentIntentView `json:"payment"`
 }
 
 type OrderPaymentStatusDto struct {
