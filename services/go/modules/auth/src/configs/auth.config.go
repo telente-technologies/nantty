@@ -1,0 +1,79 @@
+package configs
+
+import (
+	"encoding/base64"
+	"time"
+
+	platformconfig "zudomart/platform/config"
+)
+
+type AuthSettings struct {
+	Environment                 string
+	DatabaseUrl                 string
+	DatabaseSchema              string
+	DomainEventsTopicArn        string
+	TokenIssuer                 string
+	TokenAudience               string
+	AccessTokenTimeToLive       time.Duration
+	RefreshTokenTimeToLive      time.Duration
+	SessionMaximumLifetime      time.Duration
+	SigningKeyRotationInterval  time.Duration
+	SigningKeyEncryptionKey     []byte
+	OneTimeCodePepper           []byte
+	OneTimeCodeTimeToLive       time.Duration
+	OneTimeCodeMaximumAttempts  int
+	OneTimeCodeResendCooldown   time.Duration
+	VerifiedDestinationTokenTtl time.Duration
+	OneTimeCodeDeliveryMode     string
+	GoogleClientIds             []string
+	AppleClientIds              []string
+	GoogleJwksUrl               string
+	AppleJwksUrl                string
+	StaffAccessTokenTimeToLive  time.Duration
+}
+
+func (settings AuthSettings) IsProduction() bool { return settings.Environment == "production" }
+
+func ReadAuthSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) AuthSettings {
+	settings := AuthSettings{
+		Environment:                 reader.ReadStringOrDefault("APP_ENV", "development"),
+		DatabaseUrl:                 reader.ReadRequiredString("AUTH_DATABASE_URL"),
+		DatabaseSchema:              reader.ReadStringOrDefault("AUTH_DATABASE_SCHEMA", "auth"),
+		DomainEventsTopicArn:        reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
+		TokenIssuer:                 reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
+		TokenAudience:               reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+		AccessTokenTimeToLive:       reader.ReadDurationOrDefault("AUTH_ACCESS_TOKEN_TTL", 15*time.Minute),
+		RefreshTokenTimeToLive:      reader.ReadDurationOrDefault("AUTH_REFRESH_TOKEN_TTL", 30*24*time.Hour),
+		SessionMaximumLifetime:      reader.ReadDurationOrDefault("AUTH_SESSION_MAX_LIFETIME", 180*24*time.Hour),
+		SigningKeyRotationInterval:  reader.ReadDurationOrDefault("AUTH_SIGNING_KEY_ROTATION_INTERVAL", 30*24*time.Hour),
+		SigningKeyEncryptionKey:     readBase64Key(reader, "AUTH_SIGNING_KEY_ENCRYPTION_KEY", 32),
+		OneTimeCodePepper:           readBase64Key(reader, "AUTH_ONE_TIME_CODE_PEPPER", 32),
+		OneTimeCodeTimeToLive:       reader.ReadDurationOrDefault("AUTH_OTP_TTL", 5*time.Minute),
+		OneTimeCodeMaximumAttempts:  reader.ReadIntegerOrDefault("AUTH_OTP_MAX_ATTEMPTS", 5),
+		OneTimeCodeResendCooldown:   reader.ReadDurationOrDefault("AUTH_OTP_RESEND_COOLDOWN", time.Minute),
+		VerifiedDestinationTokenTtl: reader.ReadDurationOrDefault("AUTH_VERIFIED_DESTINATION_TOKEN_TTL", 15*time.Minute),
+		OneTimeCodeDeliveryMode:     reader.ReadStringOrDefault("AUTH_OTP_DELIVERY", "log"),
+		GoogleClientIds:             reader.ReadCommaSeparatedListOrDefault("AUTH_GOOGLE_CLIENT_IDS", nil),
+		AppleClientIds:              reader.ReadCommaSeparatedListOrDefault("AUTH_APPLE_CLIENT_IDS", nil),
+		GoogleJwksUrl:               reader.ReadStringOrDefault("AUTH_GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs"),
+		AppleJwksUrl:                reader.ReadStringOrDefault("AUTH_APPLE_JWKS_URL", "https://appleid.apple.com/auth/keys"),
+		StaffAccessTokenTimeToLive:  reader.ReadDurationOrDefault("AUTH_STAFF_ACCESS_TOKEN_TTL", 10*time.Minute),
+	}
+	if settings.IsProduction() && settings.OneTimeCodeDeliveryMode == "log" {
+		reader.ReadRequiredString("AUTH_OTP_DELIVERY_NOT_LOG_IN_PRODUCTION")
+	}
+	return settings
+}
+
+func readBase64Key(reader *platformconfig.EnvironmentReader, name string, length int) []byte {
+	encoded := reader.ReadRequiredString(name)
+	if encoded == "" {
+		return nil
+	}
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil || len(decoded) != length {
+		reader.ReadRequiredString(name + "_AS_BASE64_OF_32_BYTES")
+		return nil
+	}
+	return decoded
+}
