@@ -44,6 +44,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     title: "Trust & safety",
     items: [
       { label: "Reports", href: "/moderation/reports", icon: "warning20", requirement: "moderation:reports", goShortcutKey: "r" },
+      { label: "Chat reports", href: "/moderation/chat-reports", icon: "chatCircle24", requirement: "chat-reports:review" },
       { label: "Suspensions", href: "/moderation/suspensions", icon: "shield24", requirement: "users:suspend" },
       { label: "Appeals", href: "/moderation/appeals", icon: "refresh20", requirement: "moderation:appeals" },
       { label: "Copyright", href: "/moderation/copyright", icon: "speakerHigh24", requirement: "copyright:review", goShortcutKey: "c" },

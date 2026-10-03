@@ -24,6 +24,7 @@ const apiAreaRules: readonly ApiAreaRule[] = [
   { prefix: "/admin/brands", requirement: anyOf("brands:review", "brands:revoke", "ip-claims:review") },
   { prefix: "/admin/ip-claims", requirement: anyOf("ip-claims:review") },
   { prefix: "/admin/reports", requirement: anyOf("moderation:reports") },
+  { prefix: "/admin/chat-reports", requirement: anyOf("chat-reports:review", "chat-reports:legal") },
   { prefix: "/admin/appeals", requirement: anyOf("moderation:appeals") },
   { prefix: "/admin/copyright-claims", requirement: anyOf("copyright:review") },
   { prefix: "/admin/orders", requirement: anyOf("orders:read", "disputes:resolve", "refunds:issue", "support:tickets") },
