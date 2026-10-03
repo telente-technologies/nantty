@@ -33,10 +33,29 @@ const (
 )
 
 type LiveStartedEventData struct {
-	LiveId   string `json:"liveId"`
-	HostId   string `json:"hostId"`
-	Title    string `json:"title"`
-	Category string `json:"category"`
+	LiveId         string  `json:"liveId"`
+	HostId         string  `json:"hostId"`
+	Title          string  `json:"title"`
+	Category       string  `json:"category"`
+	Visibility     string  `json:"visibility"`
+	NotifyAudience string  `json:"notifyAudience"`
+	CoverUrl       *string `json:"coverUrl"`
+	StartedAt      string  `json:"startedAt"`
+
+	Host            types.UserSummary `json:"host"`
+	HostName        string            `json:"hostName"`
+	HostHandle      string            `json:"hostHandle"`
+	IsShopping      bool              `json:"isShopping"`
+	ViewerCount     int               `json:"viewerCount"`
+	NotifyUserIds   []string          `json:"notifyUserIds"`
+	NotifyTruncated bool              `json:"notifyTruncated"`
+}
+
+func NotifyAudienceForVisibility(visibility string) string {
+	if visibility == "subscribers" {
+		return "subscribers"
+	}
+	return "followers"
 }
 
 type LiveEndedEventData struct {
