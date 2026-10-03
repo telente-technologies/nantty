@@ -19,12 +19,7 @@ export function proxy(request: NextRequest) {
   if (staticAssetPattern.test(pathname)) return NextResponse.next();
 
   if (publicPagePaths.has(pathname)) {
-    if (pathname !== "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
-      return redirectTo(request, "/", undefined);
-    }
-    if (pathname === "/welcome" && sessionId && readCachedViewerFromCookies(request.cookies)) {
-      return redirectTo(request, "/", undefined);
-    }
+    if (sessionId && readCachedViewerFromCookies(request.cookies)) return redirectTo(request, "/", undefined);
     return NextResponse.next();
   }
 
