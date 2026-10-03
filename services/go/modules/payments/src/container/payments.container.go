@@ -41,7 +41,7 @@ type Overrides struct {
 func NewBachsProviderFromSettings(settings configs.PaymentsSettings) *integrations.BachsConnectProvider {
 	return integrations.NewBachsConnectProvider(integrations.BachsConnectSettings{
 		BaseUrl: settings.BachsBaseUrl, SecretKey: settings.BachsSecretKey, WebhookSigningSecrets: settings.BachsWebhookSigningSecrets,
-		PayoutFeeMinorByCurrency: settings.BachsPayoutFeeOverrides, MaximumAttempts: settings.BachsMaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
+		PayoutFeeMinorByCurrency: settings.BachsPayoutFeeOverrides, PayoutFeeRules: integrations.ParsePayoutFeeRules(settings.BachsPayoutFeeSchedule), MaximumAttempts: settings.BachsMaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
 	})
 }
 
