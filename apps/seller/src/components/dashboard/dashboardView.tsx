@@ -1,5 +1,6 @@
 "use client";
 
+import { BusinessDocumentsBanner } from "@/components/dashboard/businessDocumentsBanner";
 import { DashboardActivityFeedPanel, DashboardAlertsPanel, DashboardRecentOrdersPanel } from "@/components/dashboard/dashboardActivityPanels";
 import { DashboardInsightTiles } from "@/components/dashboard/dashboardInsightTiles";
 import { DashboardLowStockPanel, DashboardOrdersByStatusPanel, DashboardTopProductsPanel } from "@/components/dashboard/dashboardOperationsPanels";
@@ -58,6 +59,7 @@ export function DashboardView() {
           ) : null}
         </div>
       </header>
+      <BusinessDocumentsBanner />
       {summaryQuery.errorMessage && !summary ? (
         <Callout tone="error" title="The overview could not load" action={<Button size="small" onClick={summaryQuery.reload}>Try again</Button>}>
           {summaryQuery.errorMessage}
