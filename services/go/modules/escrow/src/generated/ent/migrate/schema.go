@@ -122,6 +122,7 @@ var (
 		{Name: "store_id", Type: field.TypeString, Size: 80},
 		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
 		{Name: "product_summary", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "payment_mode", Type: field.TypeEnum, Enums: []string{"escrow", "direct"}, Default: "escrow"},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "commission_bps", Type: field.TypeInt64},
@@ -137,6 +138,7 @@ var (
 		{Name: "tracking_url", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "delivered_at", Type: field.TypeTime, Nullable: true},
 		{Name: "auto_release_at", Type: field.TypeTime, Nullable: true},
+		{Name: "paused_release_remaining_seconds", Type: field.TypeInt64, Nullable: true},
 		{Name: "buyer_confirmed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "released_at", Type: field.TypeTime, Nullable: true},
 		{Name: "refunded_at", Type: field.TypeTime, Nullable: true},
@@ -158,12 +160,12 @@ var (
 			{
 				Name:    "escrow_status_auto_release_at",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[19], EscrowsColumns[26]},
+				Columns: []*schema.Column{EscrowsColumns[20], EscrowsColumns[27]},
 			},
 			{
 				Name:    "escrow_seller_user_id_status",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[19]},
+				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[20]},
 			},
 			{
 				Name:    "escrow_buyer_user_id_created_at",
