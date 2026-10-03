@@ -7,13 +7,15 @@ import { CustomerFormDialog } from "@/components/customers/customerFormDialog";
 import { CustomerLoyaltyPanel } from "@/components/customers/customerLoyaltyPanel";
 import { CustomerNotesPanel } from "@/components/customers/customerNotesPanel";
 import { CustomerPurchasesPanel } from "@/components/customers/customerPurchasesPanel";
-import { Button } from "@/components/ui/button";
+import { customerTypeLabels, customerTypeTones } from "@/components/customers/customerPresentation.util";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout, LoadingBlock, StatTile } from "@/components/ui/feedback";
 import { KeyValueList, PageHeader, PageStack, Panel, ResponsiveGrid } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { Customer } from "@/types/customer.type";
+import { deriveCustomerTypeFromPurchases } from "@/utils/customerSegmentRules.util";
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./customers.module.css";
@@ -27,21 +29,28 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
   if (customerQuery.isLoading && !customer) return <LoadingBlock label="Loading customer" />;
   if (!customer) return <Callout tone="error">{customerQuery.errorMessage ?? "This customer could not be loaded."}</Callout>;
   const replaceCustomer = (updated: Customer) => customerQuery.replaceData(() => updated);
-  const averageSpend = customer.purchasesCount > 0 ? { amountMinor: Math.round(customer.totalSpent.amountMinor / customer.purchasesCount), currency: customer.totalSpent.currency } : null;
+  const customerType = deriveCustomerTypeFromPurchases(customer);
 
   return (
     <PageStack>
       <PageHeader
         eyebrow={<Link href="/customers">← Customers</Link>}
         title={customer.name}
-        description={customer.zudomartUsername ? `@${customer.zudomartUsername} on Zudomart` : "Walk-in customer"}
-        actions={<Button iconName="slidersHorizontal24" onClick={() => setIsEditDialogOpen(true)}>Edit profile</Button>}
+        description={`${customer.zudomartUsername ? `@${customer.zudomartUsername} on Zudomart` : "No Zudomart username"}${customer.city ? ` · ${customer.city}` : ""}`}
+        actions={
+          <>
+            <StatusBadge tone={customerTypeTones[customerType]}>{customerTypeLabels[customerType]}</StatusBadge>
+            {customer.zudomartUsername ? <ButtonLink href={`/messages?customer=${encodeURIComponent(customer.zudomartUsername)}`} iconName="chatCircle24">Message</ButtonLink> : null}
+            <Button iconName="slidersHorizontal24" onClick={() => setIsEditDialogOpen(true)}>Edit profile</Button>
+          </>
+        }
       />
       <ResponsiveGrid minimumColumnWidth={180}>
         <StatTile label="Total spent" value={formatMoney(customer.totalSpent)} />
-        <StatTile label="Purchases" value={customer.purchasesCount} />
-        <StatTile label="Average spend" value={formatMoney(averageSpend)} />
-        <StatTile label="Last purchase" value={formatDateForDisplay(customer.lastPurchaseAt)} />
+        <StatTile label="Orders" value={customer.purchasesCount} />
+        <StatTile label="Average order value" value={formatMoney(customer.averageOrderValue)} />
+        <StatTile label="First order" value={formatDateForDisplay(customer.firstPurchaseAt)} />
+        <StatTile label="Last order" value={formatDateForDisplay(customer.lastPurchaseAt)} />
       </ResponsiveGrid>
       <div className={styles.detailGrid}>
         <div className={styles.stack}>

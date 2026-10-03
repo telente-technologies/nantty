@@ -1,0 +1,87 @@
+.segmentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+}
+
+.segmentCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-large);
+}
+
+.segmentHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.segmentName {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.segmentDescription {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.segmentStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmentStatLabel {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 11px;
+}
+
+.segmentStatValue {
+  font-weight: 700;
+}
+
+.ruleList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.segmentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.ruleRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.ruleWord {
+  align-self: center;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.ruleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .ruleRow {
+    grid-template-columns: 1fr auto;
+  }
+}
