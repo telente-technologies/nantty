@@ -26,7 +26,7 @@ export function useCreatorStatus() {
 export type CreatorEntryRoute = "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram";
 
 export function useCreatorEntry() {
-  const { isApprovedCreator } = useCreatorStatus();
+  const { isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
   const application = useCreatorApplicationQuery();
   const applicationStatus = application.data?.status ?? null;
   const route: CreatorEntryRoute =
@@ -36,7 +36,7 @@ export function useCreatorEntry() {
         ? "CreatorApplicationStatus"
         : "CreatorProgram";
   const label = route === "CreatorDashboard" ? "Creator Studio" : route === "CreatorApplicationStatus" ? "Application status" : "Join Creator Program";
-  return { route, label };
+  return { route, label, isLoading: isCreatorStatusLoading || application.isPending };
 }
 
 interface NavigationThatCanOpenCreatorProgram {

@@ -1,44 +1,38 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { cartsService, type AddProductToCartInput } from "@/services/carts.service";
-import type { Cart } from "@/types";
+import { trackProductInteraction } from "@/services/productInteractions.service";
 
 export const cartQueryKey = ["cart"] as const;
 
-export function useMyCart() {
-  return useQuery({ queryKey: cartQueryKey, queryFn: cartsService.fetchMyCart });
+export function useMyCart(addressId: string | null = null) {
+  return useQuery({ queryKey: [...cartQueryKey, addressId], queryFn: () => cartsService.fetchMyCart(addressId), placeholderData: keepPreviousData });
 }
 
 export function useCartActions() {
   const queryClient = useQueryClient();
-  const storeUpdatedCart = (cart: Cart) => queryClient.setQueryData(cartQueryKey, cart);
+  const refreshCart = () => queryClient.invalidateQueries({ queryKey: cartQueryKey });
 
   const addProductToCart = useMutation({
     mutationFn: (input: AddProductToCartInput) => cartsService.addProductToCart(input),
-    onSuccess: storeUpdatedCart,
+    onSuccess: (_cart, input) => {
+      refreshCart();
+      void trackProductInteraction("product.addedToCart", { productId: input.productId, quantity: input.quantity });
+    },
   });
 
   const changeCartItemQuantity = useMutation({
     mutationFn: ({ cartItemId, quantity }: { cartItemId: string; quantity: number }) =>
       cartsService.changeCartItemQuantity(cartItemId, quantity),
-    onMutate: async ({ cartItemId, quantity }) => {
-      await queryClient.cancelQueries({ queryKey: cartQueryKey });
-      const previousCart = queryClient.getQueryData<Cart>(cartQueryKey);
-      if (previousCart) {
-        storeUpdatedCart({
-          ...previousCart,
-          items: previousCart.items.map((item) => (item.id === cartItemId ? { ...item, quantity } : item)),
-        });
-      }
-      return { previousCart };
-    },
-    onError: (_error, _input, context) => context?.previousCart && storeUpdatedCart(context.previousCart),
-    onSuccess: storeUpdatedCart,
+    onSuccess: refreshCart,
   });
 
   const removeCartItem = useMutation({
     mutationFn: (cartItemId: string) => cartsService.removeCartItem(cartItemId),
-    onSuccess: storeUpdatedCart,
+    onSuccess: (_cart, cartItemId) => {
+      refreshCart();
+      void trackProductInteraction("product.removedFromCart", { cartItemId });
+    },
   });
 
   return { addProductToCart, changeCartItemQuantity, removeCartItem };
