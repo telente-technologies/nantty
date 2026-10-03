@@ -52,13 +52,21 @@ export function ProductVariantsTable({ variants, options, fieldErrors, isNewProd
     return margin === null ? "—" : formatBasisPointsAsPercent(margin);
   }
 
+  function describeDiscount(variant: VariantDraft): string {
+    if (!currency || !variant.compareAtText) return "—";
+    const priceMinor = convertMajorInputToMinorUnits(variant.priceText, currency);
+    const compareAtMinor = convertMajorInputToMinorUnits(variant.compareAtText, currency);
+    if (priceMinor === null || compareAtMinor === null || compareAtMinor <= priceMinor) return "—";
+    return `−${formatBasisPointsAsPercent(Math.round(((compareAtMinor - priceMinor) * 10_000) / compareAtMinor))}`;
+  }
+
   const variantsWithoutBarcode = variants.filter((variant) => variant.barcode.trim() === "");
   const invalid = (index: number, field: string) => (fieldErrors[`variants.${index}.${field}`] ? true : undefined);
 
   return (
     <Panel
       title={`Variants (${variants.length})`}
-      description={`Prices are in ${currency ?? "your store currency"}${settings?.pricesIncludeTax ? ", including tax" : ", before tax"}.`}
+      description={`Prices are in ${currency ?? "your store currency"}${settings?.pricesIncludeTax ? ", including tax" : ", before tax"}. Set a higher "was" price to show a discount in the app.`}
       actions={variantsWithoutBarcode.length > 0 ? <Button size="small" iconName="tag24" isBusy={isGeneratingBarcodes} onClick={() => void generateBarcodesForVariants(variantsWithoutBarcode)}>Generate {variantsWithoutBarcode.length} barcode{variantsWithoutBarcode.length === 1 ? "" : "s"}</Button> : null}
       padded={false}
     >
@@ -71,7 +79,8 @@ export function ProductVariantsTable({ variants, options, fieldErrors, isNewProd
               <th scope="col">SKU</th>
               <th scope="col">Barcode</th>
               <th scope="col">Price</th>
-              <th scope="col">Compare-at</th>
+              <th scope="col">Was (compare-at)</th>
+              <th scope="col">Discount</th>
               <th scope="col">Cost</th>
               <th scope="col">Margin</th>
               <th scope="col">Low-stock alert</th>
@@ -93,6 +102,7 @@ export function ProductVariantsTable({ variants, options, fieldErrors, isNewProd
                   </td>
                   <td><input className={styles.cellInput} aria-label={`${title} price`} inputMode="decimal" value={variant.priceText} aria-invalid={invalid(index, "priceMinor")} onChange={(event) => onVariantChange(variant.key, { priceText: sanitiseMoneyText(event.target.value) })} /></td>
                   <td><input className={styles.cellInput} aria-label={`${title} compare-at price`} inputMode="decimal" value={variant.compareAtText} aria-invalid={invalid(index, "compareAtPriceMinor")} onChange={(event) => onVariantChange(variant.key, { compareAtText: sanitiseMoneyText(event.target.value) })} /></td>
+                  <td>{describeDiscount(variant)}</td>
                   <td><input className={styles.cellInput} aria-label={`${title} cost price`} inputMode="decimal" value={variant.costText} aria-invalid={invalid(index, "costPriceMinor")} onChange={(event) => onVariantChange(variant.key, { costText: sanitiseMoneyText(event.target.value) })} /></td>
                   <td>{describeMargin(variant)}</td>
                   <td><input className={styles.cellInput} style={{ minWidth: 70 }} aria-label={`${title} low-stock alert`} inputMode="numeric" value={variant.lowStockThresholdText} aria-invalid={invalid(index, "lowStockThreshold")} onChange={(event) => onVariantChange(variant.key, { lowStockThresholdText: event.target.value.replace(/\D/g, "") })} /></td>
