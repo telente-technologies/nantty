@@ -12,12 +12,13 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { followsService } from "@/services/follows.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const TABS: { key: ConnectionTab; label: string }[] = [
   { key: "followers", label: "Followers" },
@@ -28,6 +29,7 @@ const TABS: { key: ConnectionTab; label: string }[] = [
 ];
 
 export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connections">) {
+  const { colors } = useTheme();
   const { userId } = route.params;
   const [tab, setTab] = useState<ConnectionTab>(route.params.tab ?? "followers");
   const [search, setSearch] = useState("");
@@ -65,7 +67,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
   const actionLabelFor = (entry: ConnectionEntry) => (tab === "blocked" ? "Unblock" : followButtonLabelForState(resolveFollowStateOfUser(entry)));
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={() => navigation.goBack()}>
           <ArrowLeft24Icon />
@@ -108,7 +110,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
             user={item}
             actionLabel={item.id === useAuthStore.getState().user?.id ? undefined : actionLabelFor(item)}
             actionHighlighted={tab !== "blocked" && isFollowStateHighlighted(resolveFollowStateOfUser(item))}
-            onPressAction={() => changeRelationshipWithUser.mutate(item)}
+            onPressAction={() => requireAuthThen(() => changeRelationshipWithUser.mutate(item), undefined, "follow people")}
             onPressUser={() => navigation.push("UserProfile", { userId: item.id })}
             onPressMore={() => undefined}
           />

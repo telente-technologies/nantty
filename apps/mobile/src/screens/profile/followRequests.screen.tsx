@@ -7,10 +7,11 @@ import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function FollowRequestsScreen({ navigation }: MainScreenProps<"FollowRequests">) {
+  const { colors } = useTheme();
   const requests = useFollowRequestsQuery();
   const settleRequest = useSettleFollowRequestMutation();
 

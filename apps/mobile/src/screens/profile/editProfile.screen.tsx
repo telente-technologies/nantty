@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { mediaService } from "@/services/media.service";
 
 export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { data: profile } = useMyProfileQuery();
   const saveProfile = useSaveProfileDetailsMutation();
   const [name, setName] = useState("");
@@ -49,7 +51,7 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
   const avatarUri = avatar?.uri ?? profile?.avatarUrl ?? null;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title="Profile" paddingHorizontal={12} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -107,7 +109,7 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: 12, paddingBottom: 24 },
   banner: { height: 123, marginTop: 1, borderRadius: 8, backgroundColor: colors.chip, overflow: "hidden", alignItems: "center", justifyContent: "center" },
@@ -123,11 +125,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     color: colors.text,
     fontFamily: fontFamily[400],
   },
   nameInput: { fontSize: 12, letterSpacing: -0.24 },
   bioInput: { fontSize: 13, letterSpacing: -0.26, textAlignVertical: "top" },
   footer: { paddingHorizontal: 12, paddingBottom: 12 },
-});
+}));

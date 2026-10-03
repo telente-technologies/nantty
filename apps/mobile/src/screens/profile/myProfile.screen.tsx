@@ -10,11 +10,13 @@ import { ProfileView } from "@/components/profile/profileView";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 
 export function MeScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const profileQuery = useMyProfileQuery();
   const profile = profileQuery.data;
@@ -72,7 +74,7 @@ export function MeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   menu: { paddingHorizontal: 16, paddingVertical: 8 },
   option: { minHeight: 50, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
-});
+}));

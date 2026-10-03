@@ -8,14 +8,17 @@ import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
 import { useToggleFollowMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { ProfileAction } from "@/components/profile/profileSummary";
 import { followButtonLabelForState, isFollowStateHighlighted, isProfileContentHiddenFromViewer, resolveFollowStateOfUser } from "@/components/profile/followState.util";
+import { SuspendedProfileState } from "@/components/profile/suspendedProfileState";
 import { ProfileView } from "@/components/profile/profileView";
 import { Screen } from "@/components/ui/screen";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import { useAuthStore } from "@/store/auth.store";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserProfile">) {
+  const { colors } = useTheme();
   const { userId } = route.params;
   const signedInUserId = useAuthStore((state) => state.user?.id);
   const viewingOwnProfile = userId === signedInUserId;
@@ -27,7 +30,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     queryFn: () => creatorProgramService.listSubscriptionPlansOfCreator(userId),
     enabled: !viewingOwnProfile,
   });
-  const mySubscriptions = useMySubscriptionsQuery(!viewingOwnProfile);
+  const mySubscriptions = useMySubscriptionsQuery(!viewingOwnProfile && !!signedInUserId);
   const hasActivePlans = (subscriptionPlans.data?.length ?? 0) > 0;
   const alreadySubscribed = (mySubscriptions.data ?? []).some((item) => item.creatorId === userId && item.status === "active");
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
@@ -44,10 +47,10 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     ? [
         {
           label: followButtonLabelForState(followState),
-          onPress: () => toggleFollow.mutate(followState === "accepted" || followState === "requested"),
+          onPress: () => requireAuthThen(() => toggleFollow.mutate(followState === "accepted" || followState === "requested"), undefined, "follow people"),
           highlighted: isFollowStateHighlighted(followState),
         },
-        { label: "Message", onPress: () => navigation.navigate("Chat", { userId, name: profile.name }) },
+        { label: "Message", onPress: () => requireAuthThen(() => navigation.navigate("Chat", { userId, name: profile.name }), undefined, "send messages") },
         ...(profile.isSeller && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
       ]
     : [];
@@ -56,17 +59,18 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     !viewingOwnProfile && hasActivePlans
       ? alreadySubscribed
         ? { label: "Subscribed", onPress: () => navigation.navigate("MySubscriptions") }
-        : { label: "Subscribe", onPress: () => navigation.navigate("CreatorSubscribe", { creatorId: userId }), highlighted: true }
+        : { label: "Subscribe", onPress: () => requireAuthThen(() => navigation.navigate("CreatorSubscribe", { creatorId: userId }), undefined, "subscribe to creators"), highlighted: true }
       : undefined;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <ProfileHeaderBar
         variant="other"
         onBack={() => navigation.goBack()}
         onSearch={() => navigation.navigate("Search", { scope: "all" })}
         onMore={() => setMoreSheetVisible(true)}
       />
+      {profile?.account?.status === "suspended" ? <SuspendedProfileState profile={profile} /> : (
       <ProfileView
         profile={viewingOwnProfile ? undefined : profile}
         posts={postsQuery.data?.data ?? []}
@@ -92,7 +96,8 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         onPressPost={(post) => navigation.navigate("PostDetail", { postId: post.id })}
         onOpenStoreTab={profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
       />
-      {profile ? (
+      )}
+      {profile && profile.account?.status !== "suspended" ? (
         <ProfileMoreSheet
           profile={profile}
           visible={moreSheetVisible}
