@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
@@ -11,8 +11,11 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { trackProductInteraction } from "@/services/productInteractions.service";
 import { storesService } from "@/services/stores.service";
 import type { StoreDetail } from "@/types/commerce.type";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const { storeId } = route.params;
@@ -20,6 +23,10 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const [activeTab, setActiveTab] = useState<StoreTab>("products");
   const store = useQuery({ queryKey: ["stores", storeId], queryFn: () => storesService.fetchStoreById(storeId) });
   const products = useQuery({ queryKey: ["products", "store", storeId], queryFn: () => storesService.fetchStoreProducts(storeId) });
+
+  useEffect(() => {
+    void trackProductInteraction("seller.viewed", { storeId });
+  }, [storeId]);
 
   const toggleStoreFollow = useMutation({
     mutationFn: (followNow: boolean) => (followNow ? storesService.followStore(storeId) : storesService.unfollowStore(storeId)),
@@ -51,9 +58,9 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
       <Screen background={colors.white}>
         {topBar}
         {store.isError ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>Couldn't load this store.</Text>
+          <ErrorState message="Couldn't load this store." onRetry={() => store.refetch()} />
         ) : (
-          <ActivityIndicator style={styles.state} color={colors.primary} />
+          <ListSkeleton />
         )}
       </Screen>
     );
@@ -89,5 +96,4 @@ const styles = StyleSheet.create({
   topActions: { flexDirection: "row", gap: 12 },
   content: { paddingTop: 8, paddingBottom: 24 },
   tabBody: { marginTop: 12 },
-  state: { marginTop: 64 },
 });
