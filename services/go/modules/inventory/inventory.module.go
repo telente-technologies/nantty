@@ -3,9 +3,12 @@ package inventory
 import (
 	"context"
 
+	"zudomart/modules/inventory/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewInventoryModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "inventory"}, nil
+type Module = src.Module
+
+func NewInventoryModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewInventoryModule(ctx, dependencies)
 }
