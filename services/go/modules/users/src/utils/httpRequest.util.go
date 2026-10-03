@@ -27,7 +27,7 @@ func ReadClientIpAddress(request *http.Request) string {
 func StaffActorFromRequest(request *http.Request) types.StaffActor {
 	staff, _ := staffauth.StaffFromContext(request.Context())
 	return types.StaffActor{
-		Id: staff.Id, Role: staff.Role, IpAddress: ReadClientIpAddress(request), UserAgent: request.UserAgent(),
+		Id: staff.Id, Name: staff.Name, StepUp: staff.SteppedUp, Role: staff.Role, IpAddress: ReadClientIpAddress(request), UserAgent: request.UserAgent(),
 		RequestId: httpserver.RequestIdFromContext(request.Context()),
 	}
 }
