@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
+import { CheckmarkSuggestionCards } from "@/components/profile/checkmarkSuggestionCards";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
@@ -85,6 +86,8 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         </View>
         <CaretRight24Icon />
       </Pressable>
+
+      <CheckmarkSuggestionCards />
 
       <SettingsGroup>
         <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.text} />} onPress={() => navigation.navigate("SettingsAccount")} />

@@ -9,6 +9,7 @@ export function SettingsSupportScreen({ navigation }: MainScreenProps<"SettingsS
   return (
     <SettingsPage title="Support">
       <SettingsGroup>
+        <SettingsRow label="Help centre" onPress={() => navigation.navigate("HelpCenter")} />
         <SettingsRow label="Contact support" onPress={() => navigation.navigate("NewSupportTicket")} />
         <SettingsRow label="My support requests" onPress={() => navigation.navigate("SupportTickets")} />
         <SettingsRow label="My reports" onPress={() => navigation.navigate("MyReports")} />
