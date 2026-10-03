@@ -1,9 +1,11 @@
 import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import { Animated, FlatList, PanResponder, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
+import { mediaGlass } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Media } from "@/types";
@@ -21,6 +23,7 @@ export function MediaLightbox({ images, initialIndex, onClose }: MediaLightboxPr
   const { colors } = useTheme();
   const styles = useStyles();
   const { width, height } = useWindowDimensions();
+  const safeAreaInsets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
 
@@ -52,7 +55,17 @@ export function MediaLightbox({ images, initialIndex, onClose }: MediaLightboxPr
             />
           )}
         />
-        <View style={styles.chrome} pointerEvents="box-none">
+        <View
+          style={[
+            styles.chrome,
+            {
+              paddingTop: safeAreaInsets.top + 16,
+              paddingLeft: Math.max(safeAreaInsets.left, 16),
+              paddingRight: Math.max(safeAreaInsets.right, 16),
+            },
+          ]}
+          pointerEvents="box-none"
+        >
           <Pressable accessibilityRole="button" accessibilityLabel="Close image viewer" hitSlop={12} onPress={onClose} style={styles.close}>
             <Cancel20Icon color={colors.white} />
           </Pressable>
@@ -197,17 +210,17 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    paddingTop: 24,
-    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   close: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.overlay,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: mediaGlass.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: mediaGlass.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -215,7 +228,9 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     paddingHorizontal: 10,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.overlay,
+    backgroundColor: mediaGlass.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: mediaGlass.border,
     alignItems: "center",
     justifyContent: "center",
   },
