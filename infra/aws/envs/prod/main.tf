@@ -1,0 +1,39 @@
+module "platform" {
+  source = "../../modules/platform"
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+    aws.dr        = aws.dr
+  }
+
+  environment                  = var.environment
+  region                       = var.region
+  dr_region                    = var.dr_region
+  enable_dr                    = var.enable_dr
+  zone_name                    = var.zone_name
+  create_zone                  = var.create_zone
+  app_domain                   = var.app_domain
+  mail_domain                  = var.mail_domain
+  vpc_cidr                     = var.vpc_cidr
+  nat_per_az                   = var.nat_per_az
+  alarm_email                  = var.alarm_email
+  dmarc_report_address         = var.dmarc_report_address
+  github_repository            = var.github_repository
+  create_github_oidc_provider  = var.create_github_oidc_provider
+  app_origins                  = var.app_origins
+  image_tag                    = var.image_tag
+  min_tasks                    = var.min_tasks
+  max_tasks_cap                = var.max_tasks_cap
+  service_overrides            = var.service_overrides
+  aurora                       = var.aurora
+  valkey                       = var.valkey
+  mq                           = var.mq
+  livekit_mode                 = var.livekit_mode
+  livekit_node_count           = var.livekit_node_count
+  deletion_protection          = var.deletion_protection
+  log_retention_days           = var.log_retention_days
+  enable_execute_command       = var.enable_execute_command
+  media_signing_public_key_pem = var.media_signing_public_key_pem
+  ecr_pull_account_ids         = var.ecr_pull_account_ids
+  promotion_source_account_id  = var.promotion_source_account_id
+}
