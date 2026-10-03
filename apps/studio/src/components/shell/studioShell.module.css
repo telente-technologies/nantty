@@ -30,6 +30,16 @@
   min-width: 0;
 }
 
+.themeSwitcher {
+  flex: none;
+  margin-right: var(--space-2);
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+}
+
 .accountText {
   display: flex;
   flex-direction: column;
@@ -61,6 +71,7 @@
   color: var(--color-text-muted);
   font-size: var(--fs-13);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .signOut:hover {
@@ -82,6 +93,20 @@
 
 @media (max-width: 640px) {
   .accountText {
+    display: none;
+  }
+
+  .account {
+    gap: var(--space-1);
+  }
+
+  .themeSwitcher {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .avatar {
     display: none;
   }
 

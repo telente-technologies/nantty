@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 
 import { CreatorProgramGate } from "@/components/shell/creatorProgramGate";
 import { useSession } from "@/components/providers/sessionProvider";
@@ -47,7 +47,10 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
           <ZudomartWordmark productLabel="Studio" />
         </Link>
         <div className={styles.account}>
-          <Avatar name={viewer?.name ?? "Creator"} src={viewer?.avatarUrl ?? null} size="sm" />
+          <ThemeSwitcher iconOnly className={styles.themeSwitcher} />
+          <span className={styles.avatar}>
+            <Avatar name={viewer?.name ?? "Creator"} src={viewer?.avatarUrl ?? null} size="sm" />
+          </span>
           <span className={styles.accountText}>
             <span className={styles.accountName}>{viewer?.name ?? "Creator"}</span>
             <span className={styles.accountHandle}>{viewer?.channelHandle ?? ""}</span>
