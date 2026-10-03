@@ -28,17 +28,17 @@ interface DirectoryUserSeed {
 }
 
 const VERIFICATION_BY_USER_ID: Partial<Record<DirectoryUserId, Verification>> = {
-  u_me: verification("gold", "PRO"),
-  u_1: verification("gold", "PREMIUM"),
-  u_2: verification("gold", "PRO"),
-  u_3: verification("gold", "PRO"),
-  u_6: verification("gold", "PRO"),
+  u_me: verification("blue", "VERIFIED"),
+  u_1: verification("blue", "PREMIUM"),
+  u_2: verification("blue", "VERIFIED"),
+  u_3: verification("blue", "VERIFIED"),
+  u_6: verification("blue", "VERIFIED"),
   u_9: verification("blue", "VERIFIED"),
   u_10: verification("blue", "VERIFIED"),
   u_12: verification("blue", "VERIFIED"),
   u_13: verification("blue", "PREMIUM"),
   u_15: verification("blue", "ESSENTIAL"),
-  u_25: verification("gold", "PREMIUM"),
+  u_25: verification("blue", "PREMIUM"),
   u_gov: verification("black", "OFFICIAL"),
 };
 

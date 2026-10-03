@@ -4,6 +4,7 @@ import type { ActingProfile, BrandProducts, NewBrandInput } from "@/types/brand.
 
 import { BRAND_ID_BY_PRODUCT_KEY, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
 import { mockBusinessProfiles } from "./businessProfiles.mock";
+import { resolveMockCreatorStatusForSignedInUser } from "./creators.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { buildCatalogProductSummary, catalogProductSeeds } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -21,7 +22,7 @@ const findBrandOrThrow = (brandId: string) => {
 
 function listProfilesOfSignedInUser(): ActingProfile[] {
   const user = getSignedInMockUser();
-  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: verificationForProfileKind(user.verification, "person") };
+  const person: ActingProfile = { kind: "person", id: user.id, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: verificationForProfileKind(user.verification, "person"), creatorStatus: resolveMockCreatorStatusForSignedInUser().status };
   const store = user.storeId ? findDirectoryStoreById(user.storeId) : null;
   const storeProfile: ActingProfile[] = store
     ? [{ kind: "store", id: store.id, name: store.name, handle: store.handle, avatarUrl: user.avatarUrl, verification: summariseStore(store).verification ?? null }]
@@ -29,8 +30,7 @@ function listProfilesOfSignedInUser(): ActingProfile[] {
   const brandProfiles: ActingProfile[] = mockBrandRecords
     .filter((brand) => brand.ownerUserKey === user.id)
     .map((brand) => ({ kind: "brand", id: brand.id, name: brand.name, handle: brand.handle, avatarUrl: brand.logoUrl, verification: brand.verification }));
-  const creatorProfile: ActingProfile = { kind: "creator", id: `creator_${user.id}`, name: user.name, handle: user.username, avatarUrl: user.avatarUrl, verification: verificationForProfileKind(user.verification, "creator") };
-  return [person, creatorProfile, ...mockBusinessProfiles, ...storeProfile, ...brandProfiles];
+  return [person, ...mockBusinessProfiles, ...storeProfile, ...brandProfiles];
 }
 
 export const brandsMocks: MockRoute[] = [

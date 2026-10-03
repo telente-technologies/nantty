@@ -66,7 +66,20 @@ const turnIntoPromotedLiveStream = (clip: Clip): Clip =>
         promotedLive: { liveSessionId: "live_olumide_cuts", title: "Friday fade specials", viewers: 1284 },
       };
 
-const allClips: Clip[] = clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream);
+const DEMO_OWN_CLIPS = [
+  { id: "clip_me_demo_1", sourceId: "clip_aisha_fitcheck", caption: "Quick fit check, drop your questions in the comments 👇" },
+  { id: "clip_me_demo_2", sourceId: "clip_kelechi_bts", caption: "Studio day. Ask me anything and I will reply with a video 🎥" },
+] as const;
+
+const buildOwnDemoClips = (): Clip[] =>
+  DEMO_OWN_CLIPS.flatMap(({ id, sourceId, caption }) => {
+    const seed = clipVideoSeeds.find((candidate) => candidate.id === sourceId);
+    if (!seed) return [];
+    const clip = buildClipFromVideoSeed({ ...seed, id, caption, hoursAgo: 1, likes: 120, comments: 10, views: 2_400 });
+    return [{ ...clip, author: userSummaryById("u_me"), isFollowingAuthor: false, subscriberOnly: false, viewerHasAccess: true }];
+  });
+
+const allClips: Clip[] = [...buildOwnDemoClips(), ...clipVideoSeeds.map(buildClipFromVideoSeed).map(turnIntoPromotedLiveStream)];
 
 export const appendMockClip = (clip: Clip) => {
   allClips.unshift(clip);

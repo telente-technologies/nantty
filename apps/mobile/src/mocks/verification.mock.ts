@@ -38,8 +38,8 @@ const defaultStateFor = (userId: string): MyVerification => {
   if (userId === "u_me") {
     return {
       current: user.verification ?? null,
-      subscription: { planId: "vp_gold_pro", status: "active", renewsAt: isoDateHoursAgo(-24 * 12), cancelAtPeriodEnd: false },
-      application: { id: "va_me", color: "gold", status: "approved", submittedAt: "2025-03-20T10:00:00.000Z", rejectionReason: null },
+      subscription: { planId: "vp_blue_verified", status: "active", renewsAt: isoDateHoursAgo(-24 * 12), cancelAtPeriodEnd: false },
+      application: { id: "va_me", color: "blue", status: "approved", submittedAt: "2025-03-20T10:00:00.000Z", rejectionReason: null },
     };
   }
   return { current: null, subscription: null, application: null };

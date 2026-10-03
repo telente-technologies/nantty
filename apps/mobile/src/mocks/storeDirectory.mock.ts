@@ -76,6 +76,8 @@ export const directoryStores: readonly DirectoryStore[] = [
 
 export const findDirectoryStoreById = (storeId: string): DirectoryStore => directoryStores.find((store) => store.id === storeId) ?? directoryStores[0]!;
 
+export const storeRewardPercentBackBasisPoints: Readonly<Record<string, number>> = { s_ada: 500, s_glow: 300 };
+
 export const summariseStore = (store: DirectoryStore): StoreSummary => ({
   id: store.id,
   name: store.name,
@@ -83,6 +85,7 @@ export const summariseStore = (store: DirectoryStore): StoreSummary => ({
   rating: store.rating,
   ratingCount: store.ratingCount,
   reviewCount: store.reviewCount,
+  earnBackBasisPoints: storeRewardPercentBackBasisPoints[store.id] ?? null,
   verification: store.verified
     ? { status: "active", type: "business", color: "gold", tier: store.followers > 40_000 ? "PREMIUM" : "PRO", badgeVisible: true }
     : null,

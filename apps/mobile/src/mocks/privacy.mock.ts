@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import { CURRENT_POLICY_VERSION } from "@/config/legalLinks.config";
 import type { ConsentRecord, DataExportRequest, ProductInteractionRecord, UpdateConsentsInput } from "@/types";
 
+import { recordMockPolicyAcceptance } from "./legal.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const PROCESSING_AFTER_MS = 3000;
@@ -37,6 +38,7 @@ export const privacyMocks: MockRoute[] = [
   createMockRoute("PUT", "/api/v1/users/me/consents", ({ body }) => {
     const { policyVersionId, consents } = body as UpdateConsentsInput;
     if (!policyVersionId) throw new ApiError(422, "policyVersionId is required");
+    recordMockPolicyAcceptance(policyVersionId);
     consentRecord = { policyVersionId, consents: { ...consentRecord.consents, ...consents }, updatedAt: new Date().toISOString() };
     return consentRecord;
   }),
