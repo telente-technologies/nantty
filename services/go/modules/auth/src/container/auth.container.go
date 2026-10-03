@@ -12,17 +12,20 @@ import (
 	"zudomart/modules/auth/src/integrations"
 	signingkeys "zudomart/modules/auth/src/modules/signingKeys/services"
 	"zudomart/modules/auth/src/utils"
+	"zudomart/platform/jwtauth"
 )
 
 type Container struct {
-	Client      *ent.Client
-	Settings    configs.AuthSettings
-	Passwords   *utils.PasswordHasher
-	TokenIssuer *signingkeys.AccessTokenIssuer
-	Delivery    integrations.OneTimeCodeDelivery
-	Social      *integrations.IdentityTokenVerifier
-	Logger      *slog.Logger
-	Now         func() time.Time
+	Client         *ent.Client
+	Settings       configs.AuthSettings
+	Passwords      *utils.PasswordHasher
+	TokenIssuer    *signingkeys.AccessTokenIssuer
+	Delivery       integrations.OneTimeCodeDelivery
+	Social         *integrations.IdentityTokenVerifier
+	Keys           *signingkeys.SigningKeyService
+	AccessVerifier *jwtauth.AccessTokenVerifier
+	Logger         *slog.Logger
+	Now            func() time.Time
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {
