@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log/slog"
 	"time"
 
@@ -18,11 +19,12 @@ import (
 )
 
 type PayoutRunReport struct {
-	Started    int `json:"started"`
-	Paid       int `json:"paid"`
-	Failed     int `json:"failed"`
-	Processing int `json:"processing"`
-	Errors     int `json:"errors"`
+	Started          int `json:"started"`
+	Paid             int `json:"paid"`
+	Failed           int `json:"failed"`
+	Processing       int `json:"processing"`
+	Errors           int `json:"errors"`
+	CreatorTransfers int `json:"creatorTransfers"`
 }
 
 func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) PayoutRunReport {
@@ -39,6 +41,11 @@ func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) 
 		}
 		report.Started++
 		status, err := withdrawals.sendWithdrawalToProvider(ctx, claimed)
+		if errors.Is(err, interfaces.ErrPayoutNotSentRetryLater) {
+			withdrawals.returnWithdrawalToQueue(ctx, claimed, err.Error())
+			report.Errors++
+			continue
+		}
 		if err != nil {
 			withdrawals.Container.Resources.Logger.WarnContext(ctx, "payout transfer could not be started", slog.String("withdrawalId", claimed.ID.String()), slog.Any("error", err))
 			report.Errors++
@@ -84,9 +91,18 @@ func (withdrawals Withdrawals) sendWithdrawalToProvider(ctx context.Context, cla
 		return "", err
 	}
 	return withdrawals.Container.Settlement.SettleSellerPayout(ctx, interfaces.SellerPayoutInstruction{
-		WithdrawalId: claimed.ID.String(), Reference: claimed.Reference, Provider: claimed.Provider, AmountMinor: claimed.NetMinor,
-		Currency: claimed.Currency, BankCode: account.BankCode, AccountNumber: accountNumber, AccountName: account.AccountName,
+		WithdrawalId: claimed.ID.String(), UserId: claimed.UserID, Reference: claimed.Reference, AmountMinor: claimed.NetMinor, FeeMinor: claimed.FeeMinor,
+		Currency: claimed.Currency, BankCode: account.BankCode, AccountNumber: accountNumber,
 	})
+}
+
+func (withdrawals Withdrawals) returnWithdrawalToQueue(ctx context.Context, claimed *ent.Withdrawal, reason string) {
+	err := withdrawals.Container.Client(withdrawals.Container.Resources.Database).Withdrawal.Update().
+		Where(withdrawal.ID(claimed.ID), withdrawal.StatusEQ(withdrawal.StatusProcessing)).
+		SetStatus(withdrawal.StatusQueued).SetFailureReason(truncate(reason, 300)).AddVersion(1).Exec(ctx)
+	if err != nil {
+		withdrawals.Container.Resources.Logger.WarnContext(ctx, "could not return a withdrawal to the queue", slog.String("withdrawalId", claimed.ID.String()), slog.Any("error", err))
+	}
 }
 
 func (withdrawals Withdrawals) HandleTransferSucceeded(ctx context.Context, transaction *sql.Tx, transfer paymentmodels.FinishedTransfer) error {
@@ -100,10 +116,7 @@ func (withdrawals Withdrawals) HandleTransferSucceeded(ctx context.Context, tran
 	}
 	lines := []ledgermodels.JournalLineRequest{
 		{Account: ledgermodels.SellerReservedPayoutAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
-		{Account: ledgermodels.ProviderClearingAccount(locked.Provider, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.NetMinor},
-	}
-	if locked.FeeMinor > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.ProviderClearingAccount(locked.Provider, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.FeeMinor})
+		{Account: ledgermodels.SellerProviderHeldFundsAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
 	}
 	if _, err := withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "withdrawal-paid:" + locked.ID.String(), Kind: "withdrawal.paid", ExternalReference: locked.Reference,

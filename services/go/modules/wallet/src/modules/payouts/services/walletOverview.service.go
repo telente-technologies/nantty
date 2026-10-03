@@ -24,9 +24,13 @@ func (overview WalletOverview) ReadWalletSummary(ctx context.Context, userId, cu
 	if err != nil {
 		return dtos.WalletSummaryDto{}, err
 	}
+	creatorEarnings, err := overview.Container.Ledger.ReadAccountBalance(ctx, overview.Container.Resources.Database, ledgermodels.CreatorEarningsPayableAccount(userId, currency))
+	if err != nil {
+		return dtos.WalletSummaryDto{}, err
+	}
 	money := func(amount int64) dtos.MoneyDto { return dtos.MoneyDto{AmountMinor: amount, Currency: currency} }
 	return dtos.WalletSummaryDto{
-		Available: money(view.WithdrawableMinor()), Pending: money(view.LockedMinor + view.InEscrowMinor), Locked: money(view.LockedMinor),
+		Available: money(view.WithdrawableMinor()), Pending: money(view.LockedMinor + view.InEscrowMinor + creatorEarnings), Locked: money(view.LockedMinor),
 		InEscrow: money(view.InEscrowMinor), PayoutRequested: money(view.PayoutRequestedMinor), NegativeBalance: money(view.DebtMinor),
 		NextAvailableAt: view.NextAvailableAt,
 	}, nil

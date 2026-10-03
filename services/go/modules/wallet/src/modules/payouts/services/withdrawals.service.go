@@ -41,7 +41,7 @@ func (withdrawals Withdrawals) QuoteWithdrawal(ctx context.Context, userId strin
 	if err != nil {
 		return dtos.WithdrawalQuoteDto{}, nil, err
 	}
-	fee, err := withdrawals.Container.Payments.QuoteTransferFee(withdrawals.Container.Settings.DefaultPayoutProvider, currency, amountMinor)
+	fee, err := withdrawals.Container.Payments.QuotePayoutFee(currency, amountMinor)
 	if err != nil {
 		return dtos.WithdrawalQuoteDto{}, nil, ErrWithdrawalCurrency
 	}
@@ -54,10 +54,17 @@ func (withdrawals Withdrawals) QuoteWithdrawal(ctx context.Context, userId strin
 	}, account, nil
 }
 
-func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string) (dtos.WithdrawalDto, error) {
+func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string, providerAvailableMinor int64) (dtos.WithdrawalDto, error) {
 	quote, account, err := withdrawals.QuoteWithdrawal(ctx, userId, accountId, amountMinor, currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
+	}
+	alreadyReserved, err := withdrawals.sumWithdrawalsNotYetSentToProvider(ctx, transaction, userId, currency)
+	if err != nil {
+		return dtos.WithdrawalDto{}, err
+	}
+	if providerAvailableMinor-alreadyReserved < amountMinor {
+		return dtos.WithdrawalDto{}, ErrInsufficientFunds
 	}
 	status := withdrawal.StatusQueued
 	if withdrawals.Container.Settings.WithdrawalsRequireReview {
@@ -66,7 +73,7 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	identifier := uuid.Must(uuid.NewV7())
 	created, err := withdrawals.Container.Client(transaction).Withdrawal.Create().SetID(identifier).SetUserID(userId).SetPayoutAccountID(account.ID).
 		SetReference("zmwd_" + identifier.String()[:8] + identifier.String()[24:]).SetAmountMinor(amountMinor).SetFeeMinor(quote.Fee.AmountMinor).
-		SetNetMinor(quote.NetAmount.AmountMinor).SetCurrency(currency).SetProvider(withdrawals.Container.Settings.DefaultPayoutProvider).
+		SetNetMinor(quote.NetAmount.AmountMinor).SetCurrency(currency).SetProvider(withdrawals.Container.Payments.Container.Settings.DefaultProvider).
 		SetDestinationLabel(fmt.Sprintf("Withdrawal to %s ••••%s", account.BankName, account.AccountNumberLast4)).SetStatus(status).
 		SetCreatedAt(withdrawals.Container.Now().UTC()).Save(ctx)
 	if err != nil {
@@ -189,4 +196,17 @@ func truncate(value string, maximum int) string {
 		return value
 	}
 	return value[:maximum]
+}
+
+func (withdrawals Withdrawals) sumWithdrawalsNotYetSentToProvider(ctx context.Context, transaction *sql.Tx, userId, currency string) (int64, error) {
+	var sums []struct {
+		Sum *int64 `json:"sum"`
+	}
+	err := withdrawals.Container.Client(transaction).Withdrawal.Query().
+		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(withdrawal.StatusPendingReview, withdrawal.StatusQueued)).
+		Aggregate(ent.Sum(withdrawal.FieldAmountMinor)).Scan(ctx, &sums)
+	if err != nil || len(sums) == 0 || sums[0].Sum == nil {
+		return 0, err
+	}
+	return *sums[0].Sum, nil
 }
