@@ -8,7 +8,9 @@ import (
 func ValidateInitializeOrderPaymentRequest(request dtos.InitializeOrderPaymentRequestDto) error {
 	collector := &ledgerutils.IssueCollector{}
 	collector.RequireLength("orderId", request.OrderId, 1, 80)
-	collector.RequireOneOf("provider", request.Provider, "paystack", "flutterwave")
+	if request.Provider != "" {
+		collector.RequireOneOf("provider", request.Provider, "bachs")
+	}
 	collector.RequireLength("returnTo", request.ReturnTo, 0, 300)
 	return collector.Result()
 }
