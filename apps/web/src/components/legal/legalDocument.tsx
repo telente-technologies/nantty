@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import styles from "./legalDocument.module.css";
 
@@ -15,9 +17,12 @@ interface LegalDocumentProps {
   readonly versionLabel: string;
   readonly effectiveDateLabel: string;
   readonly sections: readonly LegalDocumentSection[];
+  readonly isReviewedByLegal?: boolean;
+  readonly archiveNotice?: string;
+  readonly footer?: ReactNode;
 }
 
-export function PlaceholderLegalDocument({ title, summary, versionLabel, effectiveDateLabel, sections }: LegalDocumentProps) {
+export function PlaceholderLegalDocument({ title, summary, versionLabel, effectiveDateLabel, sections, isReviewedByLegal = false, archiveNotice, footer }: LegalDocumentProps) {
   return (
     <article className={`pageContainer ${styles.document}`}>
       <header className={styles.header}>
@@ -25,12 +30,15 @@ export function PlaceholderLegalDocument({ title, summary, versionLabel, effecti
         <h1 className={styles.title}>{title}</h1>
         <p className={styles.summary}>{summary}</p>
         <p className={styles.updated}>Version: {versionLabel} · Effective date: {effectiveDateLabel}</p>
-        <p className={styles.placeholderNotice} role="note">
+        {archiveNotice ? <p className={styles.placeholderNotice} role="note"><span><strong>{archiveNotice}</strong></span></p> : null}
+        {isReviewedByLegal ? null : (
+          <p className={styles.placeholderNotice} role="note">
           <FigmaIconTintedWithCurrentColor name="warning20" size={20} />
           <span>
             <strong>Draft — pending review by qualified legal counsel.</strong> This text is a working draft designed to support Nigeria&apos;s NDPA 2023 and, where it applies, the GDPR. It does not claim compliance with either and is not legal advice. It is not in effect until approved.
           </span>
         </p>
+        )}
       </header>
       <div className={styles.body}>
         <nav aria-label="On this page" className={styles.tableOfContents}>
@@ -87,6 +95,7 @@ export function PlaceholderLegalDocument({ title, summary, versionLabel, effecti
           ))}
         </div>
       </div>
+      {footer}
     </article>
   );
 }

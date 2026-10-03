@@ -124,3 +124,27 @@
     top: 120px;
   }
 }
+
+.versions {
+  display: grid;
+  gap: 12px;
+  max-width: 68ch;
+  margin-top: 56px;
+}
+
+.versionList {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.versionList a {
+  color: var(--ink-accent);
+  text-underline-offset: 3px;
+}
+
+.versionList span {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
