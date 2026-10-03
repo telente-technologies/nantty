@@ -24,7 +24,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--surface-card);
-  border: 2px solid var(--blue-500);
+  border: 2px solid var(--color-brand);
 }
 
 .headline {
@@ -61,7 +61,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--blue-500);
+  color: var(--color-brand);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
