@@ -13,3 +13,4 @@ export * from "./saves.type";
 export * from "./mention.type";
 export * from "./policyUpdate.type";
 export * from "./storeRewards.type";
+export * from "./chatReport.type";

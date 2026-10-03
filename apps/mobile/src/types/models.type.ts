@@ -228,7 +228,7 @@ export interface LiveComment {
   readonly id: ID;
   readonly author: UserSummary;
   readonly text: string;
-  readonly kind: "comment" | "joined" | "reply" | "gift";
+  readonly kind: "comment" | "joined" | "reply" | "gift" | "follow";
   readonly gift?: { readonly giftId: ID; readonly name: string; readonly emoji: string; readonly quantity: number };
 }
 
