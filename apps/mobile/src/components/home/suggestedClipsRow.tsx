@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { DotsThreeVertical24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { SuggestedClip } from "@/types/commerce.type";
 
 export interface SuggestedClipsRowProps {
@@ -13,6 +13,7 @@ export interface SuggestedClipsRowProps {
 }
 
 export function SuggestedClipsRow({ clips, onPressClip, onPressMore }: SuggestedClipsRowProps) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       <View style={styles.titleRow}>
@@ -40,9 +41,9 @@ export function SuggestedClipsRow({ clips, onPressClip, onPressMore }: Suggested
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   section: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.textSubtle,
@@ -52,4 +53,4 @@ const styles = StyleSheet.create({
   titleRow: { height: 24, paddingHorizontal: 16, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
   slider: { paddingHorizontal: 16, gap: 8 },
   clip: { width: 160, height: 230, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
-});
+}));

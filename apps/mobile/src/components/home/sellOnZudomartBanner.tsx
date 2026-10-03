@@ -3,10 +3,12 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { ArrowUpRight24Icon, BuildingStore20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
 
 export function SellOnZudomartBanner() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const signedInUserIsSeller = useAuthStore((state) => state.user?.isSeller ?? false);
   if (signedInUserIsSeller) return null;
@@ -22,7 +24,7 @@ export function SellOnZudomartBanner() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   banner: { marginHorizontal: 12, marginTop: 12, padding: 12, borderRadius: 8, backgroundColor: colors.primaryTint, flexDirection: "row", alignItems: "center", gap: 10 },
   texts: { flex: 1, gap: 2 },
-});
+}));

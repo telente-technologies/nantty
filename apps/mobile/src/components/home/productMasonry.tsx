@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { ProductCard } from "@/components/product/productCard";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import { useCartActions } from "@/hooks/useCart.hook";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import type { AdPlacement, ProductSummary } from "@/types";
@@ -31,7 +32,7 @@ export function ProductMasonry({ products, adPlacement = "mart" }: { products: r
                 void trackProductInteraction("product.clicked", { productId: product.id });
                 navigation.navigate("ProductDetail", { productId: product.id });
               }}
-              onAddToCart={() => addProductToCart.mutate({ productId: product.id, quantity: 1 })}
+              onAddToCart={() => requireAuthThen(() => addProductToCart.mutate({ productId: product.id, quantity: 1 }), undefined, "add to cart")}
             />
           ))}
         </View>

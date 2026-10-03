@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -17,6 +17,7 @@ export interface PostProductsSheetProps {
 }
 
 export function PostProductsSheet({ products, onClose, onPressProduct, onAddAllToCart, adding }: PostProductsSheetProps) {
+  const styles = useStyles();
   return (
     <BottomSheet visible={products !== null} onClose={onClose} title="In this post" floating>
       <View style={styles.list}>
@@ -54,7 +55,7 @@ export function PostProductsSheet({ products, onClose, onPressProduct, onAddAllT
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingHorizontal: 5, gap: 12 },
   item: { paddingHorizontal: 4, gap: 9 },
   row: { height: 40, flexDirection: "row", alignItems: "center", gap: 8 },
@@ -62,4 +63,4 @@ const styles = StyleSheet.create({
   name: { flex: 1 },
   divider: { height: 1, backgroundColor: colors.divider },
   button: { marginHorizontal: 5, marginTop: 16, marginBottom: 27 },
-});
+}));

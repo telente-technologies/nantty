@@ -6,7 +6,7 @@ import { Check16Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/chip";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { Topic } from "@/types";
 
 export type FeedMode = "for-you" | "following";
@@ -20,6 +20,7 @@ export interface TopicFilterRowProps {
 }
 
 export function TopicFilterRow({ topics, selectedTopicId, feedMode, onSelectTopic, onSelectMode }: TopicFilterRowProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
   const selectMode = (mode: FeedMode) => {
@@ -59,6 +60,7 @@ export function TopicFilterRow({ topics, selectedTopicId, feedMode, onSelectTopi
 }
 
 function ModeMenuItem({ label, selected, onPress }: { readonly label: string; readonly selected: boolean; readonly onPress: () => void }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="menuitem" accessibilityState={{ selected }} onPress={onPress} style={styles.menuItem}>
       <Text size={14} lineHeight={18} weight={selected ? 600 : 400}>
@@ -69,8 +71,8 @@ function ModeMenuItem({ label, selected, onPress }: { readonly label: string; re
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexGrow: 0, backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  row: { flexGrow: 0, backgroundColor: colors.surface },
   content: { paddingTop: 12, paddingBottom: 12, paddingLeft: 16, paddingRight: 16, gap: 8 },
   menuBackdrop: { flex: 1 },
   menu: {
@@ -78,10 +80,10 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     minWidth: 180,
     borderRadius: 8,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.divider,
     paddingVertical: 4,
   },
   menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, gap: 12 },
-});
+}));
