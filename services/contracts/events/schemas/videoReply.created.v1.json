@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/videoReply.created.v1.json",
+  "title": "VideoReplyCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipientUserId",
+    "actor",
+    "replyClipId",
+    "originalClipId",
+    "commentId"
+  ],
+  "properties": {
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "url": {
+      "type": "string"
+    },
+    "replyClipId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "originalClipId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "commentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "commenterId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

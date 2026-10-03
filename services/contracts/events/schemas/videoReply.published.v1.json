@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/videoReply.published.v1.json",
-  "title": "VideoReplyPublished",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["replyClipId","originalClipId","commentId","authorId","commenterId"],
-  "properties": { "replyClipId": { "type": "string", "format": "uuid" }, "originalClipId": { "type": "string", "format": "uuid" }, "commentId": { "type": "string", "format": "uuid" }, "authorId": { "type": "string", "format": "uuid" }, "commenterId": { "type": "string", "format": "uuid" } }
-}
