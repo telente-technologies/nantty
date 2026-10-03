@@ -165,6 +165,8 @@ const (
 	PurposeCoinPurchase        Purpose = "coin_purchase"
 	PurposeWalletTopUp         Purpose = "wallet_top_up"
 	PurposeCreatorSubscription Purpose = "creator_subscription"
+	PurposeAdBalanceTopUp      Purpose = "ad_balance_top_up"
+	PurposeCardVerification    Purpose = "card_verification"
 )
 
 func (pu Purpose) String() string {
@@ -174,7 +176,7 @@ func (pu Purpose) String() string {
 // PurposeValidator is a validator for the "purpose" field enum values. It is called by the builders before save.
 func PurposeValidator(pu Purpose) error {
 	switch pu {
-	case PurposeOrderCheckout, PurposeCoinPurchase, PurposeWalletTopUp, PurposeCreatorSubscription:
+	case PurposeOrderCheckout, PurposeCoinPurchase, PurposeWalletTopUp, PurposeCreatorSubscription, PurposeAdBalanceTopUp, PurposeCardVerification:
 		return nil
 	default:
 		return fmt.Errorf("paymentintent: invalid enum value for purpose field: %q", pu)

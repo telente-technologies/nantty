@@ -9,14 +9,18 @@ import "context"
 type SchemaConfig struct {
 	BillingSubscription       string // BillingSubscription table.
 	ConnectedAccount          string // ConnectedAccount table.
+	ConnectedAccountJob       string // ConnectedAccountJob table.
 	IdempotentRequest         string // IdempotentRequest table.
 	OrderPayable              string // OrderPayable table.
 	OutboxEvent               string // OutboxEvent table.
 	PaymentIntent             string // PaymentIntent table.
 	PaymentRefund             string // PaymentRefund table.
+	PayoutOnboarding          string // PayoutOnboarding table.
 	PayoutTransfer            string // PayoutTransfer table.
+	ProviderCustomer          string // ProviderCustomer table.
 	ProviderDispute           string // ProviderDispute table.
 	ProviderPayoutDestination string // ProviderPayoutDestination table.
+	SavedCardSetup            string // SavedCardSetup table.
 	StorePurchase             string // StorePurchase table.
 	WebhookEvent              string // WebhookEvent table.
 }

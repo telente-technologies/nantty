@@ -10,14 +10,18 @@ import (
 	"sync"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
+	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/paymentrefund"
+	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
+	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -86,14 +90,18 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			billingsubscription.Table:       billingsubscription.ValidColumn,
 			connectedaccount.Table:          connectedaccount.ValidColumn,
+			connectedaccountjob.Table:       connectedaccountjob.ValidColumn,
 			idempotentrequest.Table:         idempotentrequest.ValidColumn,
 			orderpayable.Table:              orderpayable.ValidColumn,
 			outboxevent.Table:               outboxevent.ValidColumn,
 			paymentintent.Table:             paymentintent.ValidColumn,
 			paymentrefund.Table:             paymentrefund.ValidColumn,
+			payoutonboarding.Table:          payoutonboarding.ValidColumn,
 			payouttransfer.Table:            payouttransfer.ValidColumn,
+			providercustomer.Table:          providercustomer.ValidColumn,
 			providerdispute.Table:           providerdispute.ValidColumn,
 			providerpayoutdestination.Table: providerpayoutdestination.ValidColumn,
+			savedcardsetup.Table:            savedcardsetup.ValidColumn,
 			storepurchase.Table:             storepurchase.ValidColumn,
 			webhookevent.Table:              webhookevent.ValidColumn,
 		})

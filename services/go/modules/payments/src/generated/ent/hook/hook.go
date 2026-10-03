@@ -32,6 +32,18 @@ func (f ConnectedAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectedAccountMutation", m)
 }
 
+// The ConnectedAccountJobFunc type is an adapter to allow the use of ordinary
+// function as ConnectedAccountJob mutator.
+type ConnectedAccountJobFunc func(context.Context, *ent.ConnectedAccountJobMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConnectedAccountJobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ConnectedAccountJobMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectedAccountJobMutation", m)
+}
+
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
 // function as IdempotentRequest mutator.
 type IdempotentRequestFunc func(context.Context, *ent.IdempotentRequestMutation) (ent.Value, error)
@@ -92,6 +104,18 @@ func (f PaymentRefundFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PaymentRefundMutation", m)
 }
 
+// The PayoutOnboardingFunc type is an adapter to allow the use of ordinary
+// function as PayoutOnboarding mutator.
+type PayoutOnboardingFunc func(context.Context, *ent.PayoutOnboardingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PayoutOnboardingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PayoutOnboardingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutOnboardingMutation", m)
+}
+
 // The PayoutTransferFunc type is an adapter to allow the use of ordinary
 // function as PayoutTransfer mutator.
 type PayoutTransferFunc func(context.Context, *ent.PayoutTransferMutation) (ent.Value, error)
@@ -102,6 +126,18 @@ func (f PayoutTransferFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutTransferMutation", m)
+}
+
+// The ProviderCustomerFunc type is an adapter to allow the use of ordinary
+// function as ProviderCustomer mutator.
+type ProviderCustomerFunc func(context.Context, *ent.ProviderCustomerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderCustomerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderCustomerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderCustomerMutation", m)
 }
 
 // The ProviderDisputeFunc type is an adapter to allow the use of ordinary
@@ -126,6 +162,18 @@ func (f ProviderPayoutDestinationFunc) Mutate(ctx context.Context, m ent.Mutatio
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderPayoutDestinationMutation", m)
+}
+
+// The SavedCardSetupFunc type is an adapter to allow the use of ordinary
+// function as SavedCardSetup mutator.
+type SavedCardSetupFunc func(context.Context, *ent.SavedCardSetupMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SavedCardSetupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SavedCardSetupMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SavedCardSetupMutation", m)
 }
 
 // The StorePurchaseFunc type is an adapter to allow the use of ordinary

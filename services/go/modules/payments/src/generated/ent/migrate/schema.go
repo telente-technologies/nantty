@@ -20,6 +20,8 @@ var (
 		{Name: "provider_product_id", Type: field.TypeString, Size: 120},
 		{Name: "provider_checkout_id", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "provider_subscription_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "provider_customer_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "email_token", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "status", Type: field.TypeString, Size: 40, Default: "pending_checkout"},
 		{Name: "trial_ends_at", Type: field.TypeTime, Nullable: true},
 		{Name: "current_period_ends_at", Type: field.TypeTime, Nullable: true},
@@ -47,6 +49,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{BillingSubscriptionsColumns[2], BillingSubscriptionsColumns[3]},
 			},
+			{
+				Name:    "billingsubscription_provider_customer_id_provider_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{BillingSubscriptionsColumns[9], BillingSubscriptionsColumns[6]},
+			},
 		},
 	}
 	// ConnectedAccountsColumns holds the columns for the "connected_accounts" table.
@@ -55,8 +62,21 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Size: 80},
 		{Name: "provider", Type: field.TypeString, Size: 40},
-		{Name: "provider_account_id", Type: field.TypeString, Size: 120},
+		{Name: "provider_account_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_creation", "created", "failed"}, Default: "created"},
+		{Name: "last_error", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "verification_status", Type: field.TypeEnum, Enums: []string{"not_started", "documentsRequired", "inProgress", "underReview", "actionNeeded", "verified"}, Default: "not_started"},
+		{Name: "verification_reasons", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "verification_status_changed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "verification_nudged_at", Type: field.TypeTime, Nullable: true},
 		{Name: "accepts_payments", Type: field.TypeBool, Default: false},
+		{Name: "roles", Type: field.TypeJSON, Nullable: true},
+		{Name: "recipient_code", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "settlement_subaccount_code", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "escrow_subaccount_code", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "account_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "account_name", Type: field.TypeString, Size: 160, Default: ""},
 		{Name: "capability_statuses", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "outstanding_requirements", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "requirements_deadline_at", Type: field.TypeTime, Nullable: true},
@@ -83,6 +103,63 @@ var (
 				Name:    "connectedaccount_provider_account_id",
 				Unique:  true,
 				Columns: []*schema.Column{ConnectedAccountsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "provider_account_id <> ''",
+				},
+			},
+			{
+				Name:    "connectedaccount_status_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{ConnectedAccountsColumns[5], ConnectedAccountsColumns[28]},
+			},
+		},
+	}
+	// ConnectedAccountJobsColumns holds the columns for the "connected_account_jobs" table.
+	ConnectedAccountJobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "step", Type: field.TypeEnum, Enums: []string{"createRecipient", "createSettlementSubaccount", "createEscrowSubaccount", "refreshStatus"}},
+		{Name: "version", Type: field.TypeInt},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 160},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "running", "succeeded", "failed"}, Default: "queued"},
+		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
+		{Name: "next_attempt_at", Type: field.TypeTime},
+		{Name: "last_attempt_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_error", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "sealed_payload", Type: field.TypeBytes, Nullable: true},
+		{Name: "sealed_result", Type: field.TypeBytes, Nullable: true},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ConnectedAccountJobsTable holds the schema information for the "connected_account_jobs" table.
+	ConnectedAccountJobsTable = &schema.Table{
+		Name:       "connected_account_jobs",
+		Columns:    ConnectedAccountJobsColumns,
+		PrimaryKey: []*schema.Column{ConnectedAccountJobsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "connectedaccountjob_user_id_step_version",
+				Unique:  true,
+				Columns: []*schema.Column{ConnectedAccountJobsColumns[2], ConnectedAccountJobsColumns[3], ConnectedAccountJobsColumns[4]},
+			},
+			{
+				Name:    "connectedaccountjob_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{ConnectedAccountJobsColumns[5]},
+			},
+			{
+				Name:    "connected_account_jobs_due",
+				Unique:  false,
+				Columns: []*schema.Column{ConnectedAccountJobsColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'queued'",
+				},
+			},
+			{
+				Name:    "connectedaccountjob_status_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{ConnectedAccountJobsColumns[6], ConnectedAccountJobsColumns[14]},
 			},
 		},
 	}
@@ -173,7 +250,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "reference", Type: field.TypeString, Size: 80},
-		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription"}},
+		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription", "ad_balance_top_up", "card_verification"}},
 		{Name: "owner_user_id", Type: field.TypeString, Size: 80},
 		{Name: "subject_id", Type: field.TypeString, Size: 80},
 		{Name: "provider", Type: field.TypeString, Size: 40},
@@ -248,7 +325,9 @@ var (
 		{Name: "full_refund", Type: field.TypeBool, Default: false},
 		{Name: "fee_top_up_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "fee_top_up_transfer_id", Type: field.TypeString, Size: 120, Default: ""},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "succeeded", "failed"}, Default: "pending"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "awaiting_bank_details", "succeeded", "failed"}, Default: "pending"},
+		{Name: "refund_method", Type: field.TypeEnum, Enums: []string{"provider_refund", "bank_payout"}, Default: "provider_refund"},
+		{Name: "payout_reference", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "provider_refund_id", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
@@ -279,7 +358,40 @@ var (
 			{
 				Name:    "paymentrefund_provider_refund_id",
 				Unique:  false,
-				Columns: []*schema.Column{PaymentRefundsColumns[14]},
+				Columns: []*schema.Column{PaymentRefundsColumns[16]},
+			},
+		},
+	}
+	// PayoutOnboardingsColumns holds the columns for the "payout_onboardings" table.
+	PayoutOnboardingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "role", Type: field.TypeString, Size: 20, Default: "creator"},
+		{Name: "legal_name", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "sealed_identity", Type: field.TypeBytes, Nullable: true},
+		{Name: "id_type", Type: field.TypeString, Size: 10, Default: ""},
+		{Name: "id_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "registered_business", Type: field.TypeBool, Default: false},
+		{Name: "cac_number", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "business_type", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "bank_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "account_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "resolved_account_name", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "completed_steps", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PayoutOnboardingsTable holds the schema information for the "payout_onboardings" table.
+	PayoutOnboardingsTable = &schema.Table{
+		Name:       "payout_onboardings",
+		Columns:    PayoutOnboardingsColumns,
+		PrimaryKey: []*schema.Column{PayoutOnboardingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payoutonboarding_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{PayoutOnboardingsColumns[2]},
 			},
 		},
 	}
@@ -337,6 +449,32 @@ var (
 				Name:    "payouttransfer_connected_account_id_status",
 				Unique:  false,
 				Columns: []*schema.Column{PayoutTransfersColumns[9], PayoutTransfersColumns[16]},
+			},
+		},
+	}
+	// ProviderCustomersColumns holds the columns for the "provider_customers" table.
+	ProviderCustomersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_customer_id", Type: field.TypeString, Size: 120},
+	}
+	// ProviderCustomersTable holds the schema information for the "provider_customers" table.
+	ProviderCustomersTable = &schema.Table{
+		Name:       "provider_customers",
+		Columns:    ProviderCustomersColumns,
+		PrimaryKey: []*schema.Column{ProviderCustomersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "providercustomer_user_id_provider",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderCustomersColumns[2], ProviderCustomersColumns[3]},
+			},
+			{
+				Name:    "providercustomer_provider_provider_customer_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderCustomersColumns[3], ProviderCustomersColumns[4]},
 			},
 		},
 	}
@@ -398,6 +536,48 @@ var (
 			},
 		},
 	}
+	// SavedCardSetupsColumns holds the columns for the "saved_card_setups" table.
+	SavedCardSetupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "reference", Type: field.TypeString, Size: 80},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_customer_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "provider_checkout_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "purpose", Type: field.TypeString, Size: 40, Default: "device"},
+		{Name: "subject_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "saved", "delivered", "expired"}, Default: "pending"},
+		{Name: "card_brand", Type: field.TypeString, Size: 30, Default: ""},
+		{Name: "card_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "card_expiry_month", Type: field.TypeInt, Default: 0},
+		{Name: "card_expiry_year", Type: field.TypeInt, Default: 0},
+		{Name: "card_fingerprint_hash", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "saved_at", Type: field.TypeTime, Nullable: true},
+	}
+	// SavedCardSetupsTable holds the schema information for the "saved_card_setups" table.
+	SavedCardSetupsTable = &schema.Table{
+		Name:       "saved_card_setups",
+		Columns:    SavedCardSetupsColumns,
+		PrimaryKey: []*schema.Column{SavedCardSetupsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "savedcardsetup_reference",
+				Unique:  true,
+				Columns: []*schema.Column{SavedCardSetupsColumns[2]},
+			},
+			{
+				Name:    "savedcardsetup_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SavedCardSetupsColumns[3], SavedCardSetupsColumns[1]},
+			},
+			{
+				Name:    "savedcardsetup_provider_customer_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{SavedCardSetupsColumns[5], SavedCardSetupsColumns[9]},
+			},
+		},
+	}
 	// StorePurchasesColumns holds the columns for the "store_purchases" table.
 	StorePurchasesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -443,6 +623,7 @@ var (
 		{Name: "event_type", Type: field.TypeString, Size: 120},
 		{Name: "reference", Type: field.TypeString, Size: 255},
 		{Name: "payload_sha256", Type: field.TypeString, Size: 64},
+		{Name: "raw_payload", Type: field.TypeBytes, Nullable: true},
 		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
 		{Name: "last_error", Type: field.TypeString, Size: 1000, Default: ""},
@@ -461,7 +642,7 @@ var (
 			{
 				Name:    "webhookevent_processed_at_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{WebhookEventsColumns[7], WebhookEventsColumns[1]},
+				Columns: []*schema.Column{WebhookEventsColumns[8], WebhookEventsColumns[1]},
 			},
 		},
 	}
@@ -469,14 +650,18 @@ var (
 	Tables = []*schema.Table{
 		BillingSubscriptionsTable,
 		ConnectedAccountsTable,
+		ConnectedAccountJobsTable,
 		IdempotentRequestsTable,
 		OrderPayablesTable,
 		OutboxEventsTable,
 		PaymentIntentsTable,
 		PaymentRefundsTable,
+		PayoutOnboardingsTable,
 		PayoutTransfersTable,
+		ProviderCustomersTable,
 		ProviderDisputesTable,
 		ProviderPayoutDestinationsTable,
+		SavedCardSetupsTable,
 		StorePurchasesTable,
 		WebhookEventsTable,
 	}
