@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/outboxevent"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
+	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -45,6 +46,8 @@ type Client struct {
 	ReconciliationBreak *ReconciliationBreakClient
 	// ReconciliationRun is the client for interacting with the ReconciliationRun builders.
 	ReconciliationRun *ReconciliationRunClient
+	// SellerCreditMaturity is the client for interacting with the SellerCreditMaturity builders.
+	SellerCreditMaturity *SellerCreditMaturityClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.ReconciliationBreak = NewReconciliationBreakClient(c.config)
 	c.ReconciliationRun = NewReconciliationRunClient(c.config)
+	c.SellerCreditMaturity = NewSellerCreditMaturityClient(c.config)
 }
 
 type (
@@ -154,14 +158,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		JournalEntry:        NewJournalEntryClient(cfg),
-		JournalLine:         NewJournalLineClient(cfg),
-		LedgerAccount:       NewLedgerAccountClient(cfg),
-		OutboxEvent:         NewOutboxEventClient(cfg),
-		ReconciliationBreak: NewReconciliationBreakClient(cfg),
-		ReconciliationRun:   NewReconciliationRunClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		JournalEntry:         NewJournalEntryClient(cfg),
+		JournalLine:          NewJournalLineClient(cfg),
+		LedgerAccount:        NewLedgerAccountClient(cfg),
+		OutboxEvent:          NewOutboxEventClient(cfg),
+		ReconciliationBreak:  NewReconciliationBreakClient(cfg),
+		ReconciliationRun:    NewReconciliationRunClient(cfg),
+		SellerCreditMaturity: NewSellerCreditMaturityClient(cfg),
 	}, nil
 }
 
@@ -179,14 +184,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		JournalEntry:        NewJournalEntryClient(cfg),
-		JournalLine:         NewJournalLineClient(cfg),
-		LedgerAccount:       NewLedgerAccountClient(cfg),
-		OutboxEvent:         NewOutboxEventClient(cfg),
-		ReconciliationBreak: NewReconciliationBreakClient(cfg),
-		ReconciliationRun:   NewReconciliationRunClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		JournalEntry:         NewJournalEntryClient(cfg),
+		JournalLine:          NewJournalLineClient(cfg),
+		LedgerAccount:        NewLedgerAccountClient(cfg),
+		OutboxEvent:          NewOutboxEventClient(cfg),
+		ReconciliationBreak:  NewReconciliationBreakClient(cfg),
+		ReconciliationRun:    NewReconciliationRunClient(cfg),
+		SellerCreditMaturity: NewSellerCreditMaturityClient(cfg),
 	}, nil
 }
 
@@ -217,7 +223,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.JournalEntry, c.JournalLine, c.LedgerAccount, c.OutboxEvent,
-		c.ReconciliationBreak, c.ReconciliationRun,
+		c.ReconciliationBreak, c.ReconciliationRun, c.SellerCreditMaturity,
 	} {
 		n.Use(hooks...)
 	}
@@ -228,7 +234,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.JournalEntry, c.JournalLine, c.LedgerAccount, c.OutboxEvent,
-		c.ReconciliationBreak, c.ReconciliationRun,
+		c.ReconciliationBreak, c.ReconciliationRun, c.SellerCreditMaturity,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -249,6 +255,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ReconciliationBreak.mutate(ctx, m)
 	case *ReconciliationRunMutation:
 		return c.ReconciliationRun.mutate(ctx, m)
+	case *SellerCreditMaturityMutation:
+		return c.SellerCreditMaturity.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1168,15 +1176,148 @@ func (c *ReconciliationRunClient) mutate(ctx context.Context, m *ReconciliationR
 	}
 }
 
+// SellerCreditMaturityClient is a client for the SellerCreditMaturity schema.
+type SellerCreditMaturityClient struct {
+	config
+}
+
+// NewSellerCreditMaturityClient returns a client for the SellerCreditMaturity from the given config.
+func NewSellerCreditMaturityClient(c config) *SellerCreditMaturityClient {
+	return &SellerCreditMaturityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellercreditmaturity.Hooks(f(g(h())))`.
+func (c *SellerCreditMaturityClient) Use(hooks ...Hook) {
+	c.hooks.SellerCreditMaturity = append(c.hooks.SellerCreditMaturity, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellercreditmaturity.Intercept(f(g(h())))`.
+func (c *SellerCreditMaturityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerCreditMaturity = append(c.inters.SellerCreditMaturity, interceptors...)
+}
+
+// Create returns a builder for creating a SellerCreditMaturity entity.
+func (c *SellerCreditMaturityClient) Create() *SellerCreditMaturityCreate {
+	mutation := newSellerCreditMaturityMutation(c.config, OpCreate)
+	return &SellerCreditMaturityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerCreditMaturity entities.
+func (c *SellerCreditMaturityClient) CreateBulk(builders ...*SellerCreditMaturityCreate) *SellerCreditMaturityCreateBulk {
+	return &SellerCreditMaturityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerCreditMaturityClient) MapCreateBulk(slice any, setFunc func(*SellerCreditMaturityCreate, int)) *SellerCreditMaturityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerCreditMaturityCreateBulk{err: fmt.Errorf("calling to SellerCreditMaturityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerCreditMaturityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerCreditMaturityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerCreditMaturity.
+func (c *SellerCreditMaturityClient) Update() *SellerCreditMaturityUpdate {
+	mutation := newSellerCreditMaturityMutation(c.config, OpUpdate)
+	return &SellerCreditMaturityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerCreditMaturityClient) UpdateOne(_m *SellerCreditMaturity) *SellerCreditMaturityUpdateOne {
+	mutation := newSellerCreditMaturityMutation(c.config, OpUpdateOne, withSellerCreditMaturity(_m))
+	return &SellerCreditMaturityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerCreditMaturityClient) UpdateOneID(id uuid.UUID) *SellerCreditMaturityUpdateOne {
+	mutation := newSellerCreditMaturityMutation(c.config, OpUpdateOne, withSellerCreditMaturityID(id))
+	return &SellerCreditMaturityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerCreditMaturity.
+func (c *SellerCreditMaturityClient) Delete() *SellerCreditMaturityDelete {
+	mutation := newSellerCreditMaturityMutation(c.config, OpDelete)
+	return &SellerCreditMaturityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerCreditMaturityClient) DeleteOne(_m *SellerCreditMaturity) *SellerCreditMaturityDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerCreditMaturityClient) DeleteOneID(id uuid.UUID) *SellerCreditMaturityDeleteOne {
+	builder := c.Delete().Where(sellercreditmaturity.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerCreditMaturityDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerCreditMaturity.
+func (c *SellerCreditMaturityClient) Query() *SellerCreditMaturityQuery {
+	return &SellerCreditMaturityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerCreditMaturity},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerCreditMaturity entity by its id.
+func (c *SellerCreditMaturityClient) Get(ctx context.Context, id uuid.UUID) (*SellerCreditMaturity, error) {
+	return c.Query().Where(sellercreditmaturity.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerCreditMaturityClient) GetX(ctx context.Context, id uuid.UUID) *SellerCreditMaturity {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SellerCreditMaturityClient) Hooks() []Hook {
+	return c.hooks.SellerCreditMaturity
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerCreditMaturityClient) Interceptors() []Interceptor {
+	return c.inters.SellerCreditMaturity
+}
+
+func (c *SellerCreditMaturityClient) mutate(ctx context.Context, m *SellerCreditMaturityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerCreditMaturityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerCreditMaturityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerCreditMaturityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerCreditMaturityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerCreditMaturity mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		JournalEntry, JournalLine, LedgerAccount, OutboxEvent, ReconciliationBreak,
-		ReconciliationRun []ent.Hook
+		ReconciliationRun, SellerCreditMaturity []ent.Hook
 	}
 	inters struct {
 		JournalEntry, JournalLine, LedgerAccount, OutboxEvent, ReconciliationBreak,
-		ReconciliationRun []ent.Interceptor
+		ReconciliationRun, SellerCreditMaturity []ent.Interceptor
 	}
 )
 

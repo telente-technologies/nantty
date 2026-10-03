@@ -26,6 +26,8 @@ type Tx struct {
 	ReconciliationBreak *ReconciliationBreakClient
 	// ReconciliationRun is the client for interacting with the ReconciliationRun builders.
 	ReconciliationRun *ReconciliationRunClient
+	// SellerCreditMaturity is the client for interacting with the SellerCreditMaturity builders.
+	SellerCreditMaturity *SellerCreditMaturityClient
 
 	// lazily loaded.
 	client     *Client
@@ -163,6 +165,7 @@ func (tx *Tx) init() {
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.ReconciliationBreak = NewReconciliationBreakClient(tx.config)
 	tx.ReconciliationRun = NewReconciliationRunClient(tx.config)
+	tx.SellerCreditMaturity = NewSellerCreditMaturityClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

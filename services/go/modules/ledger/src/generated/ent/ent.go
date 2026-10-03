@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/outboxevent"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
+	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -78,12 +79,13 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			journalentry.Table:        journalentry.ValidColumn,
-			journalline.Table:         journalline.ValidColumn,
-			ledgeraccount.Table:       ledgeraccount.ValidColumn,
-			outboxevent.Table:         outboxevent.ValidColumn,
-			reconciliationbreak.Table: reconciliationbreak.ValidColumn,
-			reconciliationrun.Table:   reconciliationrun.ValidColumn,
+			journalentry.Table:         journalentry.ValidColumn,
+			journalline.Table:          journalline.ValidColumn,
+			ledgeraccount.Table:        ledgeraccount.ValidColumn,
+			outboxevent.Table:          outboxevent.ValidColumn,
+			reconciliationbreak.Table:  reconciliationbreak.ValidColumn,
+			reconciliationrun.Table:    reconciliationrun.ValidColumn,
+			sellercreditmaturity.Table: sellercreditmaturity.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

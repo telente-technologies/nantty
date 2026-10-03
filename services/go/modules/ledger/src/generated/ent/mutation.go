@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/predicate"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
+	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -30,12 +31,13 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeJournalEntry        = "JournalEntry"
-	TypeJournalLine         = "JournalLine"
-	TypeLedgerAccount       = "LedgerAccount"
-	TypeOutboxEvent         = "OutboxEvent"
-	TypeReconciliationBreak = "ReconciliationBreak"
-	TypeReconciliationRun   = "ReconciliationRun"
+	TypeJournalEntry         = "JournalEntry"
+	TypeJournalLine          = "JournalLine"
+	TypeLedgerAccount        = "LedgerAccount"
+	TypeOutboxEvent          = "OutboxEvent"
+	TypeReconciliationBreak  = "ReconciliationBreak"
+	TypeReconciliationRun    = "ReconciliationRun"
+	TypeSellerCreditMaturity = "SellerCreditMaturity"
 )
 
 // JournalEntryMutation represents an operation that mutates the JournalEntry nodes in the graph.
@@ -5587,4 +5589,805 @@ func (m *ReconciliationRunMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown ReconciliationRun edge %s", name)
+}
+
+// SellerCreditMaturityMutation represents an operation that mutates the SellerCreditMaturity nodes in the graph.
+type SellerCreditMaturityMutation struct {
+	config
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	created_at                *time.Time
+	seller_user_id            *string
+	currency                  *string
+	source_reference          *string
+	original_amount_minor     *int64
+	addoriginal_amount_minor  *int64
+	remaining_amount_minor    *int64
+	addremaining_amount_minor *int64
+	available_at              *time.Time
+	matured_at                *time.Time
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*SellerCreditMaturity, error)
+	predicates                []predicate.SellerCreditMaturity
+}
+
+var _ ent.Mutation = (*SellerCreditMaturityMutation)(nil)
+
+// sellercreditmaturityOption allows management of the mutation configuration using functional options.
+type sellercreditmaturityOption func(*SellerCreditMaturityMutation)
+
+// newSellerCreditMaturityMutation creates new mutation for the SellerCreditMaturity entity.
+func newSellerCreditMaturityMutation(c config, op Op, opts ...sellercreditmaturityOption) *SellerCreditMaturityMutation {
+	m := &SellerCreditMaturityMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSellerCreditMaturity,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSellerCreditMaturityID sets the ID field of the mutation.
+func withSellerCreditMaturityID(id uuid.UUID) sellercreditmaturityOption {
+	return func(m *SellerCreditMaturityMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SellerCreditMaturity
+		)
+		m.oldValue = func(ctx context.Context) (*SellerCreditMaturity, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SellerCreditMaturity.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSellerCreditMaturity sets the old SellerCreditMaturity of the mutation.
+func withSellerCreditMaturity(node *SellerCreditMaturity) sellercreditmaturityOption {
+	return func(m *SellerCreditMaturityMutation) {
+		m.oldValue = func(context.Context) (*SellerCreditMaturity, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SellerCreditMaturityMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SellerCreditMaturityMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SellerCreditMaturity entities.
+func (m *SellerCreditMaturityMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SellerCreditMaturityMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SellerCreditMaturityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SellerCreditMaturity.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SellerCreditMaturityMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SellerCreditMaturityMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SellerCreditMaturityMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetSellerUserID sets the "seller_user_id" field.
+func (m *SellerCreditMaturityMutation) SetSellerUserID(s string) {
+	m.seller_user_id = &s
+}
+
+// SellerUserID returns the value of the "seller_user_id" field in the mutation.
+func (m *SellerCreditMaturityMutation) SellerUserID() (r string, exists bool) {
+	v := m.seller_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellerUserID returns the old "seller_user_id" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldSellerUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellerUserID: %w", err)
+	}
+	return oldValue.SellerUserID, nil
+}
+
+// ResetSellerUserID resets all changes to the "seller_user_id" field.
+func (m *SellerCreditMaturityMutation) ResetSellerUserID() {
+	m.seller_user_id = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *SellerCreditMaturityMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *SellerCreditMaturityMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *SellerCreditMaturityMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetSourceReference sets the "source_reference" field.
+func (m *SellerCreditMaturityMutation) SetSourceReference(s string) {
+	m.source_reference = &s
+}
+
+// SourceReference returns the value of the "source_reference" field in the mutation.
+func (m *SellerCreditMaturityMutation) SourceReference() (r string, exists bool) {
+	v := m.source_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceReference returns the old "source_reference" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldSourceReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceReference: %w", err)
+	}
+	return oldValue.SourceReference, nil
+}
+
+// ResetSourceReference resets all changes to the "source_reference" field.
+func (m *SellerCreditMaturityMutation) ResetSourceReference() {
+	m.source_reference = nil
+}
+
+// SetOriginalAmountMinor sets the "original_amount_minor" field.
+func (m *SellerCreditMaturityMutation) SetOriginalAmountMinor(i int64) {
+	m.original_amount_minor = &i
+	m.addoriginal_amount_minor = nil
+}
+
+// OriginalAmountMinor returns the value of the "original_amount_minor" field in the mutation.
+func (m *SellerCreditMaturityMutation) OriginalAmountMinor() (r int64, exists bool) {
+	v := m.original_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalAmountMinor returns the old "original_amount_minor" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldOriginalAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalAmountMinor: %w", err)
+	}
+	return oldValue.OriginalAmountMinor, nil
+}
+
+// AddOriginalAmountMinor adds i to the "original_amount_minor" field.
+func (m *SellerCreditMaturityMutation) AddOriginalAmountMinor(i int64) {
+	if m.addoriginal_amount_minor != nil {
+		*m.addoriginal_amount_minor += i
+	} else {
+		m.addoriginal_amount_minor = &i
+	}
+}
+
+// AddedOriginalAmountMinor returns the value that was added to the "original_amount_minor" field in this mutation.
+func (m *SellerCreditMaturityMutation) AddedOriginalAmountMinor() (r int64, exists bool) {
+	v := m.addoriginal_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOriginalAmountMinor resets all changes to the "original_amount_minor" field.
+func (m *SellerCreditMaturityMutation) ResetOriginalAmountMinor() {
+	m.original_amount_minor = nil
+	m.addoriginal_amount_minor = nil
+}
+
+// SetRemainingAmountMinor sets the "remaining_amount_minor" field.
+func (m *SellerCreditMaturityMutation) SetRemainingAmountMinor(i int64) {
+	m.remaining_amount_minor = &i
+	m.addremaining_amount_minor = nil
+}
+
+// RemainingAmountMinor returns the value of the "remaining_amount_minor" field in the mutation.
+func (m *SellerCreditMaturityMutation) RemainingAmountMinor() (r int64, exists bool) {
+	v := m.remaining_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemainingAmountMinor returns the old "remaining_amount_minor" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldRemainingAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemainingAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemainingAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemainingAmountMinor: %w", err)
+	}
+	return oldValue.RemainingAmountMinor, nil
+}
+
+// AddRemainingAmountMinor adds i to the "remaining_amount_minor" field.
+func (m *SellerCreditMaturityMutation) AddRemainingAmountMinor(i int64) {
+	if m.addremaining_amount_minor != nil {
+		*m.addremaining_amount_minor += i
+	} else {
+		m.addremaining_amount_minor = &i
+	}
+}
+
+// AddedRemainingAmountMinor returns the value that was added to the "remaining_amount_minor" field in this mutation.
+func (m *SellerCreditMaturityMutation) AddedRemainingAmountMinor() (r int64, exists bool) {
+	v := m.addremaining_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRemainingAmountMinor resets all changes to the "remaining_amount_minor" field.
+func (m *SellerCreditMaturityMutation) ResetRemainingAmountMinor() {
+	m.remaining_amount_minor = nil
+	m.addremaining_amount_minor = nil
+}
+
+// SetAvailableAt sets the "available_at" field.
+func (m *SellerCreditMaturityMutation) SetAvailableAt(t time.Time) {
+	m.available_at = &t
+}
+
+// AvailableAt returns the value of the "available_at" field in the mutation.
+func (m *SellerCreditMaturityMutation) AvailableAt() (r time.Time, exists bool) {
+	v := m.available_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAvailableAt returns the old "available_at" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldAvailableAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAvailableAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAvailableAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAvailableAt: %w", err)
+	}
+	return oldValue.AvailableAt, nil
+}
+
+// ResetAvailableAt resets all changes to the "available_at" field.
+func (m *SellerCreditMaturityMutation) ResetAvailableAt() {
+	m.available_at = nil
+}
+
+// SetMaturedAt sets the "matured_at" field.
+func (m *SellerCreditMaturityMutation) SetMaturedAt(t time.Time) {
+	m.matured_at = &t
+}
+
+// MaturedAt returns the value of the "matured_at" field in the mutation.
+func (m *SellerCreditMaturityMutation) MaturedAt() (r time.Time, exists bool) {
+	v := m.matured_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaturedAt returns the old "matured_at" field's value of the SellerCreditMaturity entity.
+// If the SellerCreditMaturity object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerCreditMaturityMutation) OldMaturedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaturedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaturedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaturedAt: %w", err)
+	}
+	return oldValue.MaturedAt, nil
+}
+
+// ClearMaturedAt clears the value of the "matured_at" field.
+func (m *SellerCreditMaturityMutation) ClearMaturedAt() {
+	m.matured_at = nil
+	m.clearedFields[sellercreditmaturity.FieldMaturedAt] = struct{}{}
+}
+
+// MaturedAtCleared returns if the "matured_at" field was cleared in this mutation.
+func (m *SellerCreditMaturityMutation) MaturedAtCleared() bool {
+	_, ok := m.clearedFields[sellercreditmaturity.FieldMaturedAt]
+	return ok
+}
+
+// ResetMaturedAt resets all changes to the "matured_at" field.
+func (m *SellerCreditMaturityMutation) ResetMaturedAt() {
+	m.matured_at = nil
+	delete(m.clearedFields, sellercreditmaturity.FieldMaturedAt)
+}
+
+// Where appends a list predicates to the SellerCreditMaturityMutation builder.
+func (m *SellerCreditMaturityMutation) Where(ps ...predicate.SellerCreditMaturity) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SellerCreditMaturityMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SellerCreditMaturityMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SellerCreditMaturity, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SellerCreditMaturityMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SellerCreditMaturityMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SellerCreditMaturity).
+func (m *SellerCreditMaturityMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SellerCreditMaturityMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, sellercreditmaturity.FieldCreatedAt)
+	}
+	if m.seller_user_id != nil {
+		fields = append(fields, sellercreditmaturity.FieldSellerUserID)
+	}
+	if m.currency != nil {
+		fields = append(fields, sellercreditmaturity.FieldCurrency)
+	}
+	if m.source_reference != nil {
+		fields = append(fields, sellercreditmaturity.FieldSourceReference)
+	}
+	if m.original_amount_minor != nil {
+		fields = append(fields, sellercreditmaturity.FieldOriginalAmountMinor)
+	}
+	if m.remaining_amount_minor != nil {
+		fields = append(fields, sellercreditmaturity.FieldRemainingAmountMinor)
+	}
+	if m.available_at != nil {
+		fields = append(fields, sellercreditmaturity.FieldAvailableAt)
+	}
+	if m.matured_at != nil {
+		fields = append(fields, sellercreditmaturity.FieldMaturedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SellerCreditMaturityMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sellercreditmaturity.FieldCreatedAt:
+		return m.CreatedAt()
+	case sellercreditmaturity.FieldSellerUserID:
+		return m.SellerUserID()
+	case sellercreditmaturity.FieldCurrency:
+		return m.Currency()
+	case sellercreditmaturity.FieldSourceReference:
+		return m.SourceReference()
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		return m.OriginalAmountMinor()
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		return m.RemainingAmountMinor()
+	case sellercreditmaturity.FieldAvailableAt:
+		return m.AvailableAt()
+	case sellercreditmaturity.FieldMaturedAt:
+		return m.MaturedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SellerCreditMaturityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sellercreditmaturity.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case sellercreditmaturity.FieldSellerUserID:
+		return m.OldSellerUserID(ctx)
+	case sellercreditmaturity.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case sellercreditmaturity.FieldSourceReference:
+		return m.OldSourceReference(ctx)
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		return m.OldOriginalAmountMinor(ctx)
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		return m.OldRemainingAmountMinor(ctx)
+	case sellercreditmaturity.FieldAvailableAt:
+		return m.OldAvailableAt(ctx)
+	case sellercreditmaturity.FieldMaturedAt:
+		return m.OldMaturedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SellerCreditMaturity field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerCreditMaturityMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sellercreditmaturity.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case sellercreditmaturity.FieldSellerUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellerUserID(v)
+		return nil
+	case sellercreditmaturity.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case sellercreditmaturity.FieldSourceReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceReference(v)
+		return nil
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalAmountMinor(v)
+		return nil
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemainingAmountMinor(v)
+		return nil
+	case sellercreditmaturity.FieldAvailableAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAvailableAt(v)
+		return nil
+	case sellercreditmaturity.FieldMaturedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaturedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SellerCreditMaturity field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SellerCreditMaturityMutation) AddedFields() []string {
+	var fields []string
+	if m.addoriginal_amount_minor != nil {
+		fields = append(fields, sellercreditmaturity.FieldOriginalAmountMinor)
+	}
+	if m.addremaining_amount_minor != nil {
+		fields = append(fields, sellercreditmaturity.FieldRemainingAmountMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SellerCreditMaturityMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		return m.AddedOriginalAmountMinor()
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		return m.AddedRemainingAmountMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerCreditMaturityMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOriginalAmountMinor(v)
+		return nil
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRemainingAmountMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SellerCreditMaturity numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SellerCreditMaturityMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(sellercreditmaturity.FieldMaturedAt) {
+		fields = append(fields, sellercreditmaturity.FieldMaturedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SellerCreditMaturityMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SellerCreditMaturityMutation) ClearField(name string) error {
+	switch name {
+	case sellercreditmaturity.FieldMaturedAt:
+		m.ClearMaturedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerCreditMaturity nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SellerCreditMaturityMutation) ResetField(name string) error {
+	switch name {
+	case sellercreditmaturity.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case sellercreditmaturity.FieldSellerUserID:
+		m.ResetSellerUserID()
+		return nil
+	case sellercreditmaturity.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case sellercreditmaturity.FieldSourceReference:
+		m.ResetSourceReference()
+		return nil
+	case sellercreditmaturity.FieldOriginalAmountMinor:
+		m.ResetOriginalAmountMinor()
+		return nil
+	case sellercreditmaturity.FieldRemainingAmountMinor:
+		m.ResetRemainingAmountMinor()
+		return nil
+	case sellercreditmaturity.FieldAvailableAt:
+		m.ResetAvailableAt()
+		return nil
+	case sellercreditmaturity.FieldMaturedAt:
+		m.ResetMaturedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerCreditMaturity field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SellerCreditMaturityMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SellerCreditMaturityMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SellerCreditMaturityMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SellerCreditMaturityMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SellerCreditMaturityMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SellerCreditMaturityMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SellerCreditMaturityMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SellerCreditMaturity unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SellerCreditMaturityMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SellerCreditMaturity edge %s", name)
 }
