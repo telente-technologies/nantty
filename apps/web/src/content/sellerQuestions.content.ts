@@ -27,7 +27,7 @@ export const sellerQuestions: readonly QuestionAndAnswer[] = [
   {
     question: "What is the Zudomart Dashboard?",
     answer:
-      "The Zudomart Dashboard is a web app for verified Gold businesses with a subscription. It adds point of sale for your physical shop, advanced inventory, staff accounts and sales reports. Sign in with the same account you use in the Zudomart app.",
+      "The Zudomart Dashboard is a web app for verified Gold businesses with a subscription. It adds advanced inventory, staff accounts and sales reports. Sign in with the same account you use in the Zudomart app.",
   },
   {
     question: "How do I advertise my store?",
