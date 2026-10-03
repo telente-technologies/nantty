@@ -7,13 +7,13 @@ import (
 
 type SellerPayoutInstruction struct {
 	WithdrawalId  string
+	UserId        string
 	Reference     string
-	Provider      string
 	AmountMinor   int64
+	FeeMinor      int64
 	Currency      string
 	BankCode      string
 	AccountNumber string
-	AccountName   string
 }
 
 type SellerSettlementAdapter interface {
@@ -21,4 +21,4 @@ type SellerSettlementAdapter interface {
 	SettleSellerPayout(ctx context.Context, instruction SellerPayoutInstruction) (string, error)
 }
 
-var ErrSettlementAdapterNotImplemented = errors.New("seller settlement adapter is not implemented yet")
+var ErrPayoutNotSentRetryLater = errors.New("payout was not sent to the provider; retry in a later run")
