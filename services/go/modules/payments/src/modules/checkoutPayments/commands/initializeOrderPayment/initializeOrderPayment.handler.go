@@ -50,7 +50,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 			if payment.AuthorizationUrl != nil {
 				authorizationUrl = *payment.AuthorizationUrl
 			}
-			return dtos.PaymentInitializationDto{OrderId: command.OrderId, Reference: payment.Reference, AuthorizationUrl: authorizationUrl, CallbackUrl: payment.CallbackUrl, Payment: payment}, nil
+			return dtos.PaymentInitializationDto{OrderId: command.OrderId, Reference: payment.Reference, AuthorizationUrl: authorizationUrl, AccessCode: payment.AccessCode, CallbackUrl: payment.CallbackUrl, Payment: payment}, nil
 		},
 	})
 }
