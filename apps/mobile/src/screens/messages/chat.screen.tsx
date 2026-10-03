@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, Platform, StyleSheet, View } from "react-native";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { removeExpiredMessagesFromCaches } from "@/cache/messageRealtimeCache.util";
@@ -17,13 +17,15 @@ import { StreakMilestoneCelebration } from "@/components/chatSafety/streakMilest
 import { StreakSheet } from "@/components/chatSafety/streakSheet";
 import { chatSafetyService } from "@/services/chatSafety.service";
 import { MessageReactionPicker } from "@/components/chat/messageReactionPicker";
-import { useKeyboardInset } from "@/hooks/useKeyboardInset.hook";
 import { useMessageReactionToggle } from "@/components/chat/messageReactions.hook";
 import { useOptimisticChatMessageSender } from "@/components/chat/optimisticChatMessageSender.hook";
 import { useOptimisticImageMessageSender } from "@/components/chat/optimisticImageMessageSender.hook";
+import { useOptimisticDocumentSender } from "@/components/chat/optimisticDocumentSender.hook";
+import { useOptimisticLocationAndPollSender } from "@/components/chat/optimisticLocationAndPollSender.hook";
 import { useOptimisticVoiceNoteSender } from "@/components/chat/optimisticVoiceNoteSender.hook";
 import { useUsersTypingInConversation } from "@/components/chat/typingIndicators.store";
 import { TypingDots } from "@/components/chat/typingDots";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -61,7 +63,6 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const [isMuteSheetOpen, setIsMuteSheetOpen] = useState(false);
   const [isStreakSheetOpen, setIsStreakSheetOpen] = useState(false);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
-  const { inset: keyboardInset, handleLayout } = useKeyboardInset();
 
   const conversation = useQuery({
     queryKey: ["conversation", route.params.conversationId ?? `user:${userId}`],
@@ -86,10 +87,6 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   }, [conversationId, conversation.data?.inboxFolder]);
 
   useEffect(() => {
-    if (keyboardInset > 0) listRef.current?.scrollToEnd({ animated: false });
-  }, [keyboardInset]);
-
-  useEffect(() => {
     if (!conversationId) return;
     const sweepTimer = setInterval(() => removeExpiredMessagesFromCaches(queryClient, conversationId), EXPIRED_MESSAGE_SWEEP_INTERVAL_MS);
     return () => clearInterval(sweepTimer);
@@ -98,16 +95,21 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const sendMessageOptimistically = useOptimisticChatMessageSender(conversationId, myUserId);
   const sendVoiceNoteOptimistically = useOptimisticVoiceNoteSender(conversationId, myUserId);
   const sendImageOptimistically = useOptimisticImageMessageSender(conversationId, myUserId);
+  const { sendCurrentLocation, startSharingLiveLocation, sendPoll } = useOptimisticLocationAndPollSender(conversationId, myUserId);
+  const { sendDocument, retryDocument, discardDocument } = useOptimisticDocumentSender(conversationId, myUserId);
   const toggleReactionOnMessage = useMessageReactionToggle(conversationId);
 
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
   const isGroupLike = !!display && (display.isGroup || display.isChannel);
   const peer = conversation.data?.peer;
   const items = messages.data ?? [];
+  const newestFirstItems = useMemo(() => [...items].reverse(), [items]);
   const disappearingSeconds = conversation.data?.disappearingMessagesSeconds ?? null;
   const isMyMessage = (message: LocallyStoredMessage) => message.senderId === myUserId || message.senderId === "u_me";
   const inboxFolder = conversation.data?.inboxFolder ?? "chats";
   const streak = conversation.data?.streak ?? null;
+  const isComposerReplacedByNotice =
+    (!!conversation.data && inboxFolder !== "chats") || (!isGroupLike && peer?.account?.status === "suspended") || (!!display && !display.canPostMessages);
   const dismissCelebration = () => {
     setIsCelebrationDismissed(true);
     if (conversationId) chatSafetyService.acknowledgeStreakCelebration(conversationId).catch(() => undefined);
@@ -117,9 +119,9 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   };
 
   return (
-    <Screen background={colors.surface} edges={["top", "bottom"]}>
+    <Screen background={colors.surface} edges={["top"]}>
       <ChatLockGate>
-      <View style={[styles.flex, { paddingBottom: keyboardInset }]} onLayout={handleLayout}>
+      <View style={styles.flex}>
         <ChatHeader
           conversation={conversation.data}
           fallbackName={name}
@@ -140,12 +142,12 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
         <FlatList
           ref={listRef}
           style={styles.flex}
-          data={items}
+          data={newestFirstItems}
+          inverted
           keyExtractor={(m) => m.id}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-          ListHeaderComponent={
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+          ListFooterComponent={
             <View>
               {peer && !isGroupLike ? (
                 <ConversationIntro
@@ -166,7 +168,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           }
           ItemSeparatorComponent={() => <View style={styles.bubbleGap} />}
           contentContainerStyle={styles.listContent}
-          ListFooterComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
+          ListHeaderComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
           renderItem={({ item }) => (
             <ChatBubble
               message={item}
@@ -176,6 +178,8 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
               showReadReceipt={inboxFolder === "chats"}
               onLongPress={item.deliveryStatus === "sent" && item.kind !== "system" ? () => setMessageBeingReactedTo(item) : undefined}
               onToggleReaction={(emoji, shouldReact) => toggleReactionOnMessage(item, emoji, shouldReact).catch(() => undefined)}
+              onRetryDocument={() => void retryDocument(item.id)}
+              onDiscardDocument={() => discardDocument(item.id)}
             />
           )}
         />
@@ -198,14 +202,24 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           </View>
         ) : (
           <ChatComposerWithVoiceNotes
-            onSendText={(text) => sendMessageOptimistically(text).catch(() => undefined)}
+            mentionConversation={
+              conversationId && (conversation.data?.kind === "group" || !conversation.data?.kind || conversation.data.kind === "direct")
+                ? { id: conversationId, surface: conversation.data?.kind === "group" ? "group" : "direct" }
+                : undefined
+            }
+            onSendText={(text, mentions) => sendMessageOptimistically(text, mentions).catch(() => undefined)}
             onSendVoiceNote={(voiceNote) => sendVoiceNoteOptimistically(voiceNote).catch(() => undefined)}
             onSendImage={(image) => sendImageOptimistically(image).catch(() => undefined)}
+            onSendLocation={(location) => void sendCurrentLocation(location)}
+            onStartLiveLocation={(location, durationMinutes) => void startSharingLiveLocation(location, durationMinutes)}
+            onSendDocument={(document) => void sendDocument(document)}
+            onSendPoll={(poll) => void sendPoll(poll)}
             onTypingChange={(isTyping) => {
               if (conversationId) realtimeService.sendTypingSignal(conversationId, isTyping);
             }}
           />
         )}
+        {isComposerReplacedByNotice ? <KeyboardSpacer /> : null}
         {streak?.milestoneCelebrationPending && !isCelebrationDismissed && peer ? (
           <StreakMilestoneCelebration milestoneDays={streak.milestoneDays ?? 0} peerName={peer.name} onDismiss={dismissCelebration} />
         ) : null}
@@ -234,6 +248,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   line: { height: 0.5, backgroundColor: colors.divider },
   bubbleGap: { height: 4 },
   typingRow: { paddingHorizontal: 20, paddingTop: 4, flexDirection: "row", justifyContent: "flex-start" },
-  listContent: { paddingBottom: 12 },
+  listContent: { paddingTop: 12 },
   readOnlyNotice: { paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.divider },
 }));

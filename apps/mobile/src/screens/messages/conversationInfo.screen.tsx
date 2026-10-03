@@ -7,6 +7,7 @@ import { describeConversationForDisplay } from "@/components/chat/conversationDi
 import { DisappearingMessagesPicker } from "@/components/chat/disappearingMessagesPicker";
 import { GroupMemberPicker } from "@/components/chat/groupMemberPicker";
 import { GroupMemberRow } from "@/components/chat/groupMemberRow";
+import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,17 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
               selectedSeconds={conversation.data?.disappearingMessagesSeconds ?? null}
               disabled={updateSettings.isPending}
               onSelectSeconds={(seconds) => updateSettings.mutate({ disappearingMessagesSeconds: seconds })}
+            />
+          </View>
+        ) : null}
+
+        {display?.isGroup && display.isAdmin ? (
+          <View style={styles.section}>
+            <ConsentToggleRow
+              label="Only admins can @all"
+              description="When on, only admins can notify every member with @all."
+              enabled={conversation.data?.onlyAdminsCanMentionAll === true}
+              onChange={(enabled) => updateSettings.mutate({ onlyAdminsCanMentionAll: enabled })}
             />
           </View>
         ) : null}
