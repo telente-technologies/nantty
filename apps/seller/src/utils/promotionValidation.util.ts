@@ -10,7 +10,6 @@ export interface PromotionInput {
   readonly minimumSpendMinor: number | null;
   readonly usageLimit: number | null;
   readonly usageLimitPerCustomer: number | null;
-  readonly channels: ("online" | "pos")[];
   readonly startsAt: string;
   readonly endsAt: string | null;
 }
@@ -35,7 +34,6 @@ export function validatePromotionInput(input: PromotionInput): ValidationIssue[]
   if (input.minimumSpendMinor !== null && (!Number.isSafeInteger(input.minimumSpendMinor) || input.minimumSpendMinor < 0)) issues.push({ path: "minimumSpend", message: "Minimum spend must be zero or more." });
   if (!isOptionalPositiveWholeNumber(input.usageLimit)) issues.push({ path: "usageLimit", message: "Usage limit must be a whole number above zero." });
   if (!isOptionalPositiveWholeNumber(input.usageLimitPerCustomer)) issues.push({ path: "usageLimitPerCustomer", message: "Limit per customer must be a whole number above zero." });
-  if (input.channels.length === 0) issues.push({ path: "channels", message: "Choose where the promotion applies: online, in store or both." });
   const startTime = new Date(input.startsAt).getTime();
   const endTime = input.endsAt ? new Date(input.endsAt).getTime() : null;
   if (Number.isNaN(startTime)) issues.push({ path: "startsAt", message: "Choose a start date and time." });

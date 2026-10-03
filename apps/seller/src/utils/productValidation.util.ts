@@ -1,4 +1,4 @@
-import type { ProductStatus } from "@/types/catalog.type";
+import type { ProductStatus, ProductVisibility } from "@/types/catalog.type";
 import type { ProductUpsertRequest } from "@/types/productRequests.type";
 import type { ValidationIssue } from "@/utils/formValidation.util";
 import { isValidEan13 } from "@/utils/ean13.util";
@@ -7,12 +7,48 @@ export const productStatuses: readonly ProductStatus[] = ["draft", "active", "ar
 export const skuPattern = /^[A-Za-z0-9._-]{1,64}$/;
 export const maximumMoneyMinor = 1_000_000_000_000;
 export const maximumVariantsPerProduct = 100;
+export const productVisibilities: readonly ProductVisibility[] = ["public", "store_only", "link_only"];
+export const maximumProductAttributes = 20;
+export const maximumProductVideos = 3;
+
+export function isHttpsVideoUrl(candidate: string): boolean {
+  try {
+    const parsedUrl = new URL(candidate);
+    return parsedUrl.protocol === "https:" && candidate.length <= 500;
+  } catch {
+    return false;
+  }
+}
 
 export interface ProductValidationContext {
   readonly categoryIds: readonly string[] | null;
   readonly locationIds: readonly string[] | null;
   readonly skusUsedByOtherProducts: ReadonlySet<string>;
   readonly barcodesUsedByOtherProducts: ReadonlySet<string>;
+  readonly supplierIds?: readonly string[] | null;
+}
+
+function validateProductMerchandisingFields(request: ProductUpsertRequest, context: ProductValidationContext, addIssue: (path: string, message: string) => void): void {
+  if (request.visibility !== undefined && !productVisibilities.includes(request.visibility)) addIssue("visibility", "Choose who can see this product.");
+  if (request.publishAt) {
+    const publishTime = new Date(request.publishAt).getTime();
+    if (Number.isNaN(publishTime)) addIssue("publishAt", "Pick a valid date and time to publish.");
+    else if (request.status !== "draft") addIssue("publishAt", "Only drafts can be scheduled. Set the status to draft.");
+    else if (publishTime > Date.now() + 366 * 86_400_000) addIssue("publishAt", "Schedule publishing within the next 12 months.");
+  }
+  const attributes = request.attributes ?? [];
+  if (!Array.isArray(attributes) || attributes.length > maximumProductAttributes) addIssue("attributes", `Use up to ${maximumProductAttributes} attributes.`);
+  else attributes.forEach((attribute, index) => {
+    if (typeof attribute.name !== "string" || attribute.name.trim().length < 1 || attribute.name.length > 40) addIssue(`attributes.${index}.name`, `Attribute ${index + 1}: name needs 1 to 40 characters.`);
+    if (typeof attribute.value !== "string" || attribute.value.trim().length < 1 || attribute.value.length > 200) addIssue(`attributes.${index}.value`, `Attribute ${index + 1}: value needs 1 to 200 characters.`);
+  });
+  const videos = request.videos ?? [];
+  if (!Array.isArray(videos) || videos.length > maximumProductVideos) addIssue("videos", `Add up to ${maximumProductVideos} videos.`);
+  else videos.forEach((video, index) => {
+    if (typeof video.url !== "string" || !isHttpsVideoUrl(video.url)) addIssue(`videos.${index}.url`, `Video ${index + 1}: use a full https:// link.`);
+    if (typeof video.title !== "string" || video.title.length > 80) addIssue(`videos.${index}.title`, `Video ${index + 1}: title must be 80 characters or fewer.`);
+  });
+  if (request.supplierId && context.supplierIds && !context.supplierIds.includes(request.supplierId)) addIssue("supplierId", "Choose one of your suppliers.");
 }
 
 function isWholeMinorAmount(value: unknown, allowNull: boolean): boolean {
@@ -42,6 +78,7 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
   }
   if (!Array.isArray(request.tags) || request.tags.length > 20 || request.tags.some((tag) => typeof tag !== "string" || tag.trim().length === 0 || tag.length > 30)) addIssue("tags", "Use up to 20 tags of 30 characters or fewer.");
   if (!Array.isArray(request.imageMediaIds) || request.imageMediaIds.length > 10) addIssue("imageMediaIds", "A product can have up to 10 images.");
+  validateProductMerchandisingFields(request, context, addIssue);
 
   const options = Array.isArray(request.options) ? request.options : [];
   if (options.length > 3) addIssue("options", "Use up to 3 options, such as Size and Colour.");
@@ -80,6 +117,10 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
     else if (variant.compareAtPriceMinor !== null && variant.compareAtPriceMinor <= variant.priceMinor) addIssue(`${path}.compareAtPriceMinor`, `${label}: compare-at price must be higher than the price.`);
     if (!isWholeMinorAmount(variant.costPriceMinor, true)) addIssue(`${path}.costPriceMinor`, `${label}: cost price must be zero or more.`);
     if (!Number.isSafeInteger(variant.lowStockThreshold) || variant.lowStockThreshold < 0 || variant.lowStockThreshold > 100_000) addIssue(`${path}.lowStockThreshold`, `${label}: low-stock alert must be a whole number from 0 to 100,000.`);
+    for (const reorderField of ["reorderPoint", "reorderQuantity"] as const) {
+      const reorderValue = variant[reorderField];
+      if (reorderValue !== undefined && (!Number.isSafeInteger(reorderValue) || reorderValue < 0 || reorderValue > 1_000_000)) addIssue(`${path}.${reorderField}`, `${label}: reorder numbers must be whole numbers from 0 to 1,000,000.`);
+    }
     const optionValues = variant.optionValues ?? {};
     const hasEveryOptionValue = options.every((option, optionIndex) => option.values.includes(optionValues[optionNames[optionIndex] ?? ""] ?? ""));
     if (!hasEveryOptionValue || Object.keys(optionValues).length !== options.length) addIssue(`${path}.optionValues`, `${label}: pick one value for each option.`);

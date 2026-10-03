@@ -1,19 +1,14 @@
 import type { SellerAccess, SellerAccessDestination } from "@/types/sellerAccess.type";
 
-export function hasActiveGoldSubscription(access: SellerAccess): boolean {
-  const subscriptionStatus = access.subscription?.status;
-  return subscriptionStatus === "active" || subscriptionStatus === "trialing";
-}
+const restrictedVerificationStatuses = new Set<SellerAccess["verification"]["status"]>(["suspended", "revoked"]);
 
 export function decideSellerAccessDestination(access: SellerAccess): SellerAccessDestination {
   if (!access.storeId || !access.role) return "not-seller";
-  if (access.verification.status !== "verified") return "verification";
-  if (!hasActiveGoldSubscription(access)) return "billing";
+  if (restrictedVerificationStatuses.has(access.verification.status)) return "restricted";
   return "app";
 }
 
 export const gatePagePathByDestination: Record<Exclude<SellerAccessDestination, "app">, string> = {
   "not-seller": "/access/apply",
-  verification: "/access/verification",
-  billing: "/access/billing",
+  restricted: "/access/verification",
 };
