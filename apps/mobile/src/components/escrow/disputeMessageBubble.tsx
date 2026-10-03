@@ -7,6 +7,7 @@ import { colors, palette } from "@/constants/colors.constant";
 import type { DisputeMessage } from "@/types/commerce.type";
 
 import { formatFriendlyDateTime } from "./escrowStage.util";
+import { PreviewableImage } from "@/components/ui/previewableImage";
 
 const ROLE_LABELS = { buyer: "Buyer", seller: "Seller", support: "Zudomart Support" } as const;
 
@@ -25,8 +26,10 @@ export function DisputeMessageBubble({ message, sentByViewer }: { message: Dispu
           <Text size={14} lineHeight={19} color={textColor}>
             {message.text}
           </Text>
-          {message.attachmentUrls.map((url) => (
-            <Image key={url} source={{ uri: url }} style={styles.attachment} contentFit="cover" accessibilityLabel="Attached photo" />
+          {message.attachmentUrls.map((url, index) => (
+            <PreviewableImage key={url} imageUrl={url} galleryImageUrls={message.attachmentUrls} galleryIndex={index} accessibilityLabel="View attached photo">
+              <Image source={{ uri: url }} style={styles.attachment} contentFit="cover" />
+            </PreviewableImage>
           ))}
         </View>
         <Text size={11} lineHeight={14} color={colors.textSubtle}>
