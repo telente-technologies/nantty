@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
@@ -13,15 +13,13 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { buildContactMailtoUrl } from "@/constants/contactEmails.constant";
+import { useActingProfileType } from "@/hooks/useActingProfileType.hook";
+import { webHandoffService } from "@/services/webHandoff.service";
+import { MANAGE_ON_THE_WEB_LABEL, verificationForProfileKind } from "@/utils/verificationProfile.util";
+import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { verificationService } from "@/services/verification.service";
-
-const COLOUR_SECTIONS = [
-  { color: "blue" as const, title: "Blue — people", body: "For individuals and creators. Confirms you are who you say you are." },
-  { color: "gold" as const, title: "Gold — businesses & stores", body: "For registered businesses. Includes access to the Zudomart Dashboard with one subscription." },
-];
 
 export function VerificationScreen({ navigation }: MainScreenProps<"Verification">) {
   const { colors } = useTheme();
@@ -38,18 +36,22 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
       setCancelSheetVisible(false);
     },
   });
+  const { kind, type } = useActingProfileType();
+  const actingProfileId = useActingProfileStore((state) => state.actingProfile?.id ?? "me");
   const subscription = mine.data?.subscription;
+  const currentForProfile = verificationForProfileKind(mine.data?.current, kind ?? "person");
+  const goldPending = type === "business" && currentForProfile?.status !== "active";
   const application = mine.data?.application;
 
   return (
     <Screen>
       <Header title="Verification" />
       <ScrollView contentContainerStyle={styles.content}>
-        {mine.data?.current || application ? (
+        {type === "personal" && (currentForProfile || application) ? (
           <View style={styles.card}>
             <View style={styles.row}>
               <Text size={16} weight={600} lineHeight={19.2}>Your verification</Text>
-              <VerificationBadge verification={mine.data?.current} size={20} />
+              <VerificationBadge verification={currentForProfile} size={20} />
             </View>
             {application?.status === "pending" ? <StatusPill label="Application under review" tone="caution" /> : null}
             {application?.status === "rejected" ? <Text size={13} color={colors.error}>{application.rejectionReason ?? "Your application wasn't approved."}</Text> : null}
@@ -64,34 +66,40 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
           </View>
         ) : null}
 
-        {COLOUR_SECTIONS.map((section) => (
-          <View key={section.color} style={styles.section}>
-            <Text size={16} weight={600} lineHeight={19.2}>{section.title}</Text>
-            <Text size={13} lineHeight={17.5} color={colors.textMuted}>{section.body}</Text>
-            {(plans.data ?? []).filter((plan) => plan.color === section.color).map((plan) => (
+        {type === "personal" ? (
+          <View style={styles.section}>
+            <Text size={16} weight={600} lineHeight={19.2}>Blue: people</Text>
+            <Text size={13} lineHeight={17.5} color={colors.textMuted}>For individuals and creators. Confirms you are who you say you are.</Text>
+            {(plans.data ?? []).filter((plan) => plan.color === "blue").map((plan) => (
               <VerificationPlanCard key={plan.id} plan={plan} current={subscription?.planId === plan.id} />
             ))}
-            <Button
-              title={section.color === "blue" ? "Get the blue badge" : "Verify my business"}
-              variant={section.color === "blue" ? "primary" : "subtle"}
-              disabled={application?.status === "pending"}
-              onPress={() => navigation.navigate("VerificationApply", { color: section.color })}
-            />
+            <Button title="Get the blue badge" disabled={application?.status === "pending"} onPress={() => navigation.navigate("VerificationApply", { color: "blue" })} />
           </View>
-        ))}
+        ) : null}
 
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Text size={16} weight={600} lineHeight={19.2}>Black — government</Text>
-            <VerificationBadge verification={{ status: "active", type: "government", color: "black", tier: "OFFICIAL", badgeVisible: true }} size={20} />
+        {type === "business" ? (
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text size={16} weight={600} lineHeight={19.2}>Gold: businesses and brands</Text>
+              <VerificationBadge verification={currentForProfile} size={20} />
+            </View>
+            <Text size={13} lineHeight={17.5} color={colors.textMuted}>
+              {goldPending ? "Gold after business verification" : "Your business profile is verified."}
+            </Text>
+            <Button variant="subtle" title={MANAGE_ON_THE_WEB_LABEL} onPress={() => webHandoffService.openManageBilling(actingProfileId)} />
           </View>
-          <Text size={13} lineHeight={17.5} color={colors.textMuted}>
-            Official government bodies apply through our official process. This badge can't be bought.
-          </Text>
-          <Text size={13} weight={500} lineHeight={17.5} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL(buildContactMailtoUrl("Official government verification"))}>
-            Contact our government partnerships team
-          </Text>
-        </View>
+        ) : null}
+
+        {type === "government" ? (
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text size={16} weight={600} lineHeight={19.2}>Black: government</Text>
+              <VerificationBadge verification={currentForProfile} size={20} />
+            </View>
+            <Text size={13} lineHeight={17.5} color={colors.textMuted}>Official government bodies apply through a reviewed process. This badge can't be bought in the app.</Text>
+            <Button variant="subtle" title="Apply for government verification" onPress={() => webHandoffService.openGovernmentApplication()} />
+          </View>
+        ) : null}
       </ScrollView>
       <ConfirmActionSheet
         visible={cancelSheetVisible}
