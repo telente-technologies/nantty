@@ -39,12 +39,12 @@ export function SaveToggleButton({ target, savedAccordingToServer, foregroundCol
       accessibilityRole="button"
       accessibilityLabel={isSaved ? `Remove ${noun} from saved` : `Save ${noun}`}
       accessibilityState={{ selected: isSaved }}
-      hitSlop={8}
+      hitSlop={{ top: 11, bottom: 11, left: 8, right: 8 }}
       onPress={toggleWithFeedback}
       style={[showLabel ? styles.withLabel : null, style]}
     >
       <Animated.View style={{ transform: [{ scale: popScale }] }}>
-        {isSaved ? <BookmarkFill24Icon color={savedInk} /> : <Bookmark24Icon color={foregroundColor} />}
+        {isSaved ? <BookmarkFill24Icon size={22} color={savedInk} /> : <Bookmark24Icon size={22} color={foregroundColor} />}
       </Animated.View>
       {showLabel ? (
         <Text size={13} lineHeight={16.9} color={foregroundColor} style={foregroundColor ? styles.readableOnVideo : undefined}>
