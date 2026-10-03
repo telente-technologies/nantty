@@ -60,8 +60,8 @@ func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Clie
 }
 
 func selectSellerSettlementAdapter(name string, payments *paymentservices.PaymentGateway) interfaces.SellerSettlementAdapter {
-	if name == "heldSubaccountRelease" {
-		return integrations.HeldSubaccountReleaseSettlement{}
+	switch name {
+	default:
+		return integrations.BachsManualPayoutSettlement{Payments: payments}
 	}
-	return integrations.PaystackTransferSettlement{Payments: payments}
 }
