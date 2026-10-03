@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Bell24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { CartHeaderButtonShownOnlyWhenCartHasItems } from "./cartHeaderButton";
 
@@ -16,6 +16,8 @@ export interface HomeHeaderProps {
 }
 
 export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPressNotifications }: HomeHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const sectionTab = (section: HomeSection, label: string) => {
     const active = activeSection === section;
     return (
@@ -46,15 +48,15 @@ export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPr
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: {
     height: 40,
     paddingHorizontal: 16,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   tabs: { flexDirection: "row", alignItems: "center", gap: 8 },
   actions: { flexDirection: "row", alignItems: "center", gap: 16 },
-});
+}));

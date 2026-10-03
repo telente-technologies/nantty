@@ -3,10 +3,12 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { ShoppingCart24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useMyCart } from "@/hooks/useCart.hook";
 
 export function CartHeaderButtonShownOnlyWhenCartHasItems() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const { data: cart } = useMyCart();
   const totalItemCount = cart?.items.reduce((count, item) => count + item.quantity, 0) ?? 0;
@@ -31,7 +33,7 @@ export function CartHeaderButtonShownOnlyWhenCartHasItems() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   badge: {
     position: "absolute",
     top: -6,
@@ -40,8 +42,8 @@ const styles = StyleSheet.create({
     height: 16,
     paddingHorizontal: 4,
     borderRadius: 999,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primarySolid,
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { productsService } from "@/services/products.service";
 
 import { CategoryTabs } from "./categoryTabs";
@@ -23,6 +23,8 @@ const isNearBottom = ({ layoutMeasurement, contentOffset, contentSize }: NativeS
   layoutMeasurement.height + contentOffset.y >= contentSize.height - 600;
 
 export function MartTab() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const martHome = useQuery({ queryKey: ["mart-home"], queryFn: productsService.fetchMartHome });
@@ -80,9 +82,9 @@ export function MartTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.surface },
   categories: { marginTop: 34, marginBottom: 12 },
   state: { marginTop: 48, paddingHorizontal: 32 },
   footer: { paddingVertical: 16 },
-});
+}));

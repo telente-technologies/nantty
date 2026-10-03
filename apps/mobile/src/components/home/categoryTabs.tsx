@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { Category } from "@/types";
 
 export interface CategoryTabsProps {
@@ -12,14 +12,16 @@ export interface CategoryTabsProps {
   readonly background?: string;
 }
 
-export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory, tone = "neutral", background = colors.white }: CategoryTabsProps) {
+export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory, tone = "neutral", background: requestedBackground }: CategoryTabsProps) {
+  const { colors } = useTheme();
+  const background = requestedBackground ?? colors.surface;
   const tabs = [{ id: null, name: "All" }, ...categories.filter((c) => c.name !== "All")];
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, backgroundColor: background }} contentContainerStyle={styles.row}>
       {tabs.map((category) => {
         const selected = category.id === selectedCategoryId;
         const selectedBackground = tone === "primary" ? colors.primaryTint : colors.chip;
-        const selectedText = tone === "primary" ? colors.primary : colors.black;
+        const selectedText = tone === "primary" ? colors.primary : colors.text;
         return (
           <Pressable
             key={category.id ?? "all"}

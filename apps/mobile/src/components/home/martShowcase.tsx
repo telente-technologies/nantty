@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { MagnifyingGlass16AltIcon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MartHome } from "@/types/commerce.type";
 
 export interface MartShowcaseProps {
@@ -13,6 +13,8 @@ export interface MartShowcaseProps {
 }
 
 export function MartShowcase({ martHome, onPressSearch, onPressTile }: MartShowcaseProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const tile = (kind: "sales" | "brands" | "arrivals", label: string, imageUrl: string | null | undefined, style: object) => (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={() => onPressTile(kind)} style={[styles.tile, style]}>
       {imageUrl ? <Image source={{ uri: imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
@@ -46,14 +48,14 @@ export function MartShowcase({ martHome, onPressSearch, onPressTile }: MartShowc
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { paddingHorizontal: 12, paddingTop: 12, gap: 12 },
   search: {
     height: 32,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.black,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
@@ -67,4 +69,4 @@ const styles = StyleSheet.create({
   smallTile: { flex: 1 },
   salesLabel: { position: "absolute", top: 9, left: 10, backgroundColor: "rgba(255,255,255,0.88)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
   tileLabel: { position: "absolute", top: 12, left: 12, backgroundColor: "rgba(255,255,255,0.88)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
-});
+}));

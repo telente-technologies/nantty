@@ -3,14 +3,17 @@ import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
+import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCartActions } from "@/hooks/useCart.hook";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { feedsService } from "@/services/feeds.service";
 import type { Post, ProductSummary } from "@/types";
+import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 import { PostProductsSheet } from "./postProductsSheet";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
@@ -23,6 +26,8 @@ type FeedMode = "for-you" | "following";
 const SUGGESTED_CLIPS_POSITION = 2;
 
 export function FeedTab() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
@@ -30,6 +35,7 @@ export function FeedTab() {
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
   const { addProductToCart } = useCartActions();
+  const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const topics = useQuery({ queryKey: ["topics", "mine"], queryFn: feedsService.fetchMyFollowedTopics });
   const suggestedClips = useQuery({ queryKey: ["feed-suggested-clips"], queryFn: feedsService.fetchSuggestedClips });
@@ -64,14 +70,20 @@ export function FeedTab() {
     setSelectedTopicId(topicId);
   };
 
-  const addEveryPostProductToCart = async (products: readonly ProductSummary[]) => {
-    for (const product of products) await addProductToCart.mutateAsync({ productId: product.id, quantity: 1 });
-    setProductsInOpenPost(null);
-    navigation.navigate("Cart");
-  };
+  const addEveryPostProductToCart = (products: readonly ProductSummary[]) =>
+    requireAuthAfterClosingModal(
+      () => setProductsInOpenPost(null),
+      async () => {
+        for (const product of products) await addProductToCart.mutateAsync({ productId: product.id, quantity: 1 });
+        setProductsInOpenPost(null);
+        navigation.navigate("Cart");
+      },
+      "add to cart",
+    );
 
   return (
     <View style={styles.root}>
+      <GuestFeedBanner />
       <FlatList
         data={rows}
         keyExtractor={(row) => (row.type === "post" ? row.post.id : "suggested-clips")}
@@ -82,8 +94,12 @@ export function FeedTab() {
             feedMode={feedMode}
             onSelectTopic={selectTopic}
             onSelectMode={(mode) => {
-              setFeedMode(mode);
-              if (mode === "for-you") setSelectedTopicId(null);
+              if (mode === "for-you") {
+                setFeedMode(mode);
+                setSelectedTopicId(null);
+                return;
+              }
+              requireAuthThen(() => setFeedMode(mode), undefined, "see posts from people you follow");
             }}
           />
         }
@@ -100,7 +116,7 @@ export function FeedTab() {
               onToggleLike={() => togglePostLike(item.post)}
               onPressComments={() => navigation.navigate("PostDetail", { postId: item.post.id })}
               onRepost={() => setReshareTarget(item.post)}
-              onShare={() => sharePost(item.post)}
+              onShare={() => offerSendInChat({ kind: "post", id: item.post.id }, () => sharePost(item.post))}
               onPress={() => navigation.navigate("PostDetail", { postId: item.post.id })}
               onPressOriginalPost={
                 item.post.resharedFrom ? () => navigation.navigate("PostDetail", { postId: item.post.resharedFrom!.id }) : undefined
@@ -135,12 +151,13 @@ export function FeedTab() {
         adding={addProductToCart.isPending}
       />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
+      {sendInChatElement}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.surface },
   state: { marginTop: 48, paddingHorizontal: 32 },
   footer: { paddingVertical: 16 },
-});
+}));
