@@ -56,8 +56,8 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 1.5mm 2mm;
-  background: #fff;
-  color: #000;
+  background: var(--paper);
+  color: var(--paper-ink);
   overflow: hidden;
   font-family: var(--font-sans);
   break-inside: avoid;
@@ -90,7 +90,7 @@
 
 .labelVariant {
   font-size: 6pt;
-  color: #333;
+  color: var(--paper-ink-muted);
 }
 
 .labelBars {

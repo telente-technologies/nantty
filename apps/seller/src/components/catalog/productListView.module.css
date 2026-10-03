@@ -36,7 +36,7 @@
 .thumbnailPlaceholder {
   display: grid;
   place-items: center;
-  color: var(--blue-700);
+  color: var(--color-brand);
   background: var(--blue-tint);
   font-weight: 700;
   font-size: 12px;
