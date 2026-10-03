@@ -1,0 +1,9 @@
+export const marketingFrequencyWindowMs = 7 * 24 * 60 * 60 * 1000;
+export const maximumSqsDelaySeconds = 900;
+export const hardBounceReason = "hard_bounce";
+export const complaintReason = "complaint";
+export const manualReason = "manual";
+export const staffAccessAudience = "zudomart-admin";
+export const staffStepUpAudience = "zudomart-admin-step-up";
+export const bulkBatchJobType = "bulkSend.batch";
+export const unreadEmailJobType = "email.sendIfUnread";
