@@ -229,6 +229,10 @@ func init() {
 	orderpayable.DefaultProductSummary = orderpayableDescProductSummary.Default.(string)
 	// orderpayable.ProductSummaryValidator is a validator for the "product_summary" field. It is called by the builders before save.
 	orderpayable.ProductSummaryValidator = orderpayableDescProductSummary.Validators[0].(func(string) error)
+	// orderpayableDescStoreVerified is the schema descriptor for store_verified field.
+	orderpayableDescStoreVerified := orderpayableFields[10].Descriptor()
+	// orderpayable.DefaultStoreVerified holds the default value on creation for the store_verified field.
+	orderpayable.DefaultStoreVerified = orderpayableDescStoreVerified.Default.(bool)
 	// orderpayableDescID is the schema descriptor for id field.
 	orderpayableDescID := orderpayableMixinFields0[0].Descriptor()
 	// orderpayable.DefaultID holds the default value on creation for the id field.

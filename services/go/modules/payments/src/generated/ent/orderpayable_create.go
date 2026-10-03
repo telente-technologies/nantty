@@ -100,6 +100,34 @@ func (_c *OrderPayableCreate) SetNillableProductSummary(v *string) *OrderPayable
 	return _c
 }
 
+// SetPaymentMode sets the "payment_mode" field.
+func (_c *OrderPayableCreate) SetPaymentMode(v orderpayable.PaymentMode) *OrderPayableCreate {
+	_c.mutation.SetPaymentMode(v)
+	return _c
+}
+
+// SetNillablePaymentMode sets the "payment_mode" field if the given value is not nil.
+func (_c *OrderPayableCreate) SetNillablePaymentMode(v *orderpayable.PaymentMode) *OrderPayableCreate {
+	if v != nil {
+		_c.SetPaymentMode(*v)
+	}
+	return _c
+}
+
+// SetStoreVerified sets the "store_verified" field.
+func (_c *OrderPayableCreate) SetStoreVerified(v bool) *OrderPayableCreate {
+	_c.mutation.SetStoreVerified(v)
+	return _c
+}
+
+// SetNillableStoreVerified sets the "store_verified" field if the given value is not nil.
+func (_c *OrderPayableCreate) SetNillableStoreVerified(v *bool) *OrderPayableCreate {
+	if v != nil {
+		_c.SetStoreVerified(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OrderPayableCreate) SetID(v uuid.UUID) *OrderPayableCreate {
 	_c.mutation.SetID(v)
@@ -156,6 +184,14 @@ func (_c *OrderPayableCreate) defaults() {
 	if _, ok := _c.mutation.ProductSummary(); !ok {
 		v := orderpayable.DefaultProductSummary
 		_c.mutation.SetProductSummary(v)
+	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		v := orderpayable.DefaultPaymentMode
+		_c.mutation.SetPaymentMode(v)
+	}
+	if _, ok := _c.mutation.StoreVerified(); !ok {
+		v := orderpayable.DefaultStoreVerified
+		_c.mutation.SetStoreVerified(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := orderpayable.DefaultID()
@@ -235,6 +271,17 @@ func (_c *OrderPayableCreate) check() error {
 			return &ValidationError{Name: "product_summary", err: fmt.Errorf(`ent: validator failed for field "OrderPayable.product_summary": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		return &ValidationError{Name: "payment_mode", err: errors.New(`ent: missing required field "OrderPayable.payment_mode"`)}
+	}
+	if v, ok := _c.mutation.PaymentMode(); ok {
+		if err := orderpayable.PaymentModeValidator(v); err != nil {
+			return &ValidationError{Name: "payment_mode", err: fmt.Errorf(`ent: validator failed for field "OrderPayable.payment_mode": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StoreVerified(); !ok {
+		return &ValidationError{Name: "store_verified", err: errors.New(`ent: missing required field "OrderPayable.store_verified"`)}
+	}
 	return nil
 }
 
@@ -311,6 +358,14 @@ func (_c *OrderPayableCreate) createSpec() (*OrderPayable, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.ProductSummary(); ok {
 		_spec.SetField(orderpayable.FieldProductSummary, field.TypeString, value)
 		_node.ProductSummary = value
+	}
+	if value, ok := _c.mutation.PaymentMode(); ok {
+		_spec.SetField(orderpayable.FieldPaymentMode, field.TypeEnum, value)
+		_node.PaymentMode = value
+	}
+	if value, ok := _c.mutation.StoreVerified(); ok {
+		_spec.SetField(orderpayable.FieldStoreVerified, field.TypeBool, value)
+		_node.StoreVerified = value
 	}
 	return _node, _spec
 }
@@ -410,6 +465,12 @@ func (u *OrderPayableUpsertOne) UpdateNewValues() *OrderPayableUpsertOne {
 		}
 		if _, exists := u.create.mutation.ProductSummary(); exists {
 			s.SetIgnore(orderpayable.FieldProductSummary)
+		}
+		if _, exists := u.create.mutation.PaymentMode(); exists {
+			s.SetIgnore(orderpayable.FieldPaymentMode)
+		}
+		if _, exists := u.create.mutation.StoreVerified(); exists {
+			s.SetIgnore(orderpayable.FieldStoreVerified)
 		}
 	}))
 	return u
@@ -654,6 +715,12 @@ func (u *OrderPayableUpsertBulk) UpdateNewValues() *OrderPayableUpsertBulk {
 			}
 			if _, exists := b.mutation.ProductSummary(); exists {
 				s.SetIgnore(orderpayable.FieldProductSummary)
+			}
+			if _, exists := b.mutation.PaymentMode(); exists {
+				s.SetIgnore(orderpayable.FieldPaymentMode)
+			}
+			if _, exists := b.mutation.StoreVerified(); exists {
+				s.SetIgnore(orderpayable.FieldStoreVerified)
 			}
 		}
 	}))

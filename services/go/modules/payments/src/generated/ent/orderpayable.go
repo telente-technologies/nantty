@@ -38,7 +38,11 @@ type OrderPayable struct {
 	Currency string `json:"currency,omitempty"`
 	// ProductSummary holds the value of the "product_summary" field.
 	ProductSummary string `json:"product_summary,omitempty"`
-	selectValues   sql.SelectValues
+	// PaymentMode holds the value of the "payment_mode" field.
+	PaymentMode orderpayable.PaymentMode `json:"payment_mode,omitempty"`
+	// StoreVerified holds the value of the "store_verified" field.
+	StoreVerified bool `json:"store_verified,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -46,9 +50,11 @@ func (*OrderPayable) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case orderpayable.FieldStoreVerified:
+			values[i] = new(sql.NullBool)
 		case orderpayable.FieldAmountMinor:
 			values[i] = new(sql.NullInt64)
-		case orderpayable.FieldCheckoutID, orderpayable.FieldOrderID, orderpayable.FieldOrderReference, orderpayable.FieldBuyerUserID, orderpayable.FieldStoreID, orderpayable.FieldSellerUserID, orderpayable.FieldCurrency, orderpayable.FieldProductSummary:
+		case orderpayable.FieldCheckoutID, orderpayable.FieldOrderID, orderpayable.FieldOrderReference, orderpayable.FieldBuyerUserID, orderpayable.FieldStoreID, orderpayable.FieldSellerUserID, orderpayable.FieldCurrency, orderpayable.FieldProductSummary, orderpayable.FieldPaymentMode:
 			values[i] = new(sql.NullString)
 		case orderpayable.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -135,6 +141,18 @@ func (_m *OrderPayable) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ProductSummary = value.String
 			}
+		case orderpayable.FieldPaymentMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_mode", values[i])
+			} else if value.Valid {
+				_m.PaymentMode = orderpayable.PaymentMode(value.String)
+			}
+		case orderpayable.FieldStoreVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field store_verified", values[i])
+			} else if value.Valid {
+				_m.StoreVerified = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -200,6 +218,12 @@ func (_m *OrderPayable) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("product_summary=")
 	builder.WriteString(_m.ProductSummary)
+	builder.WriteString(", ")
+	builder.WriteString("payment_mode=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PaymentMode))
+	builder.WriteString(", ")
+	builder.WriteString("store_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StoreVerified))
 	builder.WriteByte(')')
 	return builder.String()
 }

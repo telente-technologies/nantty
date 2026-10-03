@@ -629,6 +629,8 @@ type OrderPayableMutation struct {
 	addamount_minor *int64
 	currency        *string
 	product_summary *string
+	payment_mode    *orderpayable.PaymentMode
+	store_verified  *bool
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*OrderPayable, error)
@@ -1119,6 +1121,78 @@ func (m *OrderPayableMutation) ResetProductSummary() {
 	m.product_summary = nil
 }
 
+// SetPaymentMode sets the "payment_mode" field.
+func (m *OrderPayableMutation) SetPaymentMode(om orderpayable.PaymentMode) {
+	m.payment_mode = &om
+}
+
+// PaymentMode returns the value of the "payment_mode" field in the mutation.
+func (m *OrderPayableMutation) PaymentMode() (r orderpayable.PaymentMode, exists bool) {
+	v := m.payment_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentMode returns the old "payment_mode" field's value of the OrderPayable entity.
+// If the OrderPayable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderPayableMutation) OldPaymentMode(ctx context.Context) (v orderpayable.PaymentMode, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentMode: %w", err)
+	}
+	return oldValue.PaymentMode, nil
+}
+
+// ResetPaymentMode resets all changes to the "payment_mode" field.
+func (m *OrderPayableMutation) ResetPaymentMode() {
+	m.payment_mode = nil
+}
+
+// SetStoreVerified sets the "store_verified" field.
+func (m *OrderPayableMutation) SetStoreVerified(b bool) {
+	m.store_verified = &b
+}
+
+// StoreVerified returns the value of the "store_verified" field in the mutation.
+func (m *OrderPayableMutation) StoreVerified() (r bool, exists bool) {
+	v := m.store_verified
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreVerified returns the old "store_verified" field's value of the OrderPayable entity.
+// If the OrderPayable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderPayableMutation) OldStoreVerified(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreVerified is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreVerified requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreVerified: %w", err)
+	}
+	return oldValue.StoreVerified, nil
+}
+
+// ResetStoreVerified resets all changes to the "store_verified" field.
+func (m *OrderPayableMutation) ResetStoreVerified() {
+	m.store_verified = nil
+}
+
 // Where appends a list predicates to the OrderPayableMutation builder.
 func (m *OrderPayableMutation) Where(ps ...predicate.OrderPayable) {
 	m.predicates = append(m.predicates, ps...)
@@ -1153,7 +1227,7 @@ func (m *OrderPayableMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderPayableMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, orderpayable.FieldCreatedAt)
 	}
@@ -1184,6 +1258,12 @@ func (m *OrderPayableMutation) Fields() []string {
 	if m.product_summary != nil {
 		fields = append(fields, orderpayable.FieldProductSummary)
 	}
+	if m.payment_mode != nil {
+		fields = append(fields, orderpayable.FieldPaymentMode)
+	}
+	if m.store_verified != nil {
+		fields = append(fields, orderpayable.FieldStoreVerified)
+	}
 	return fields
 }
 
@@ -1212,6 +1292,10 @@ func (m *OrderPayableMutation) Field(name string) (ent.Value, bool) {
 		return m.Currency()
 	case orderpayable.FieldProductSummary:
 		return m.ProductSummary()
+	case orderpayable.FieldPaymentMode:
+		return m.PaymentMode()
+	case orderpayable.FieldStoreVerified:
+		return m.StoreVerified()
 	}
 	return nil, false
 }
@@ -1241,6 +1325,10 @@ func (m *OrderPayableMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldCurrency(ctx)
 	case orderpayable.FieldProductSummary:
 		return m.OldProductSummary(ctx)
+	case orderpayable.FieldPaymentMode:
+		return m.OldPaymentMode(ctx)
+	case orderpayable.FieldStoreVerified:
+		return m.OldStoreVerified(ctx)
 	}
 	return nil, fmt.Errorf("unknown OrderPayable field %s", name)
 }
@@ -1319,6 +1407,20 @@ func (m *OrderPayableMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProductSummary(v)
+		return nil
+	case orderpayable.FieldPaymentMode:
+		v, ok := value.(orderpayable.PaymentMode)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentMode(v)
+		return nil
+	case orderpayable.FieldStoreVerified:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreVerified(v)
 		return nil
 	}
 	return fmt.Errorf("unknown OrderPayable field %s", name)
@@ -1413,6 +1515,12 @@ func (m *OrderPayableMutation) ResetField(name string) error {
 		return nil
 	case orderpayable.FieldProductSummary:
 		m.ResetProductSummary()
+		return nil
+	case orderpayable.FieldPaymentMode:
+		m.ResetPaymentMode()
+		return nil
+	case orderpayable.FieldStoreVerified:
+		m.ResetStoreVerified()
 		return nil
 	}
 	return fmt.Errorf("unknown OrderPayable field %s", name)
