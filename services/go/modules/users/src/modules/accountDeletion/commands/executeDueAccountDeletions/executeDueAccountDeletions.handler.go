@@ -52,6 +52,7 @@ func (handler Handler) executeNextDueRequest(ctx context.Context) (bool, error) 
 		if err := json.Unmarshal(due.RetentionSnapshot, &snapshot); err != nil {
 			return err
 		}
+		finalEmail := handler.finalEmailOf(ctx, due)
 		steps, err := handler.executeRequest(ctx, tx, due, snapshot)
 		if err != nil {
 			return err
@@ -60,7 +61,7 @@ func (handler Handler) executeNextDueRequest(ctx context.Context) (bool, error) 
 			return err
 		}
 		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, deletionevents.AccountDeletionExecutedType, due.AccountID.String(), now, deletionevents.AccountDeletionExecutedData{
-			AccountId: due.AccountID.String(), ExecutedAt: now.UTC().Format(time.RFC3339), RetentionPolicy: snapshot, AppliedSteps: steps,
+			AccountId: due.AccountID.String(), ExecutedAt: now.UTC().Format(time.RFC3339), RetentionPolicy: snapshot, AppliedSteps: steps, FinalEmail: finalEmail, ReferenceId: due.ID.String(),
 		})
 	})
 	return worked, err
@@ -118,4 +119,16 @@ func accountOutcomeOf(snapshot []retentionmodels.PolicySnapshot) string {
 		}
 	}
 	return services.OutcomeRetained
+}
+
+func (handler Handler) finalEmailOf(ctx context.Context, due *ent.DeletionRequest) string {
+	directory, err := identityports.Default.AccountDirectory()
+	if err != nil {
+		return ""
+	}
+	summary, found, err := directory.FindAccountSummary(ctx, due.AccountID)
+	if err != nil || !found || summary.Email == nil {
+		return ""
+	}
+	return *summary.Email
 }
