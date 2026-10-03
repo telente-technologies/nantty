@@ -74,6 +74,9 @@ import { SupportTicketsScreen } from "@/screens/support/supportTickets.screen";
 import { NewSupportTicketScreen } from "@/screens/support/newSupportTicket.screen";
 import { SupportTicketDetailScreen } from "@/screens/support/supportTicketDetail.screen";
 import { MyReportsScreen } from "@/screens/support/myReports.screen";
+import { HelpCenterScreen } from "@/screens/support/helpCenter.screen";
+import { HelpArticleScreen } from "@/screens/support/helpArticle.screen";
+import { BusinessDocumentsScreen } from "@/screens/seller/businessDocuments.screen";
 import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.screen";
 import { BrandProfileScreen } from "@/screens/brand/brandProfile.screen";
 import { CreateBusinessProfileScreen } from "@/screens/brand/createBusinessProfile.screen";
@@ -170,6 +173,9 @@ export function MainNavigator() {
       <Stack.Screen name="NewSupportTicket" component={NewSupportTicketScreen} />
       <Stack.Screen name="SupportTicketDetail" component={SupportTicketDetailScreen} />
       <Stack.Screen name="MyReports" component={MyReportsScreen} />
+      <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
+      <Stack.Screen name="HelpArticle" component={HelpArticleScreen} />
+      <Stack.Screen name="BusinessDocuments" component={BusinessDocumentsScreen} />
       <Stack.Screen name="SettingsUsername" component={SettingsUsernameScreen} />
       <Stack.Screen name="BrandProfile" component={BrandProfileScreen} />
       <Stack.Screen name="CreateBrand" component={CreateBrandScreen} />
