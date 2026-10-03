@@ -36,7 +36,7 @@ function StoreProfileForm({ settings }: { readonly settings: StoreSettings }) {
   }
 
   return (
-    <SettingsFormFrame title="Store profile" description="Shown on receipts, packing slips and your Zudomart store page." errorMessages={Object.values(errors)} isSaving={isSaving} onSubmit={() => void saveStoreProfile()}>
+    <SettingsFormFrame title="Store profile" description="Shown on invoices, packing slips and your Zudomart store page. Edit your logo, cover and policies in Storefront." errorMessages={Object.values(errors)} isSaving={isSaving} onSubmit={() => void saveStoreProfile()}>
       <div className={styles.twoColumns}>
         <TextField label="Store name" value={draft.name} maxLength={80} onChange={(event) => updateDraftField("name", event.target.value)} errorMessage={errors.name} />
         <TextField label="Store handle" value={`@${settings.handle}`} readOnly hint="Change your handle in the Zudomart app." />

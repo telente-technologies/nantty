@@ -40,7 +40,7 @@ export function SettingsFormFrame({ title, description, errorMessages, isSaving,
     <form onSubmit={submitSettingsForm} noValidate>
       <Panel title={title} description={description} actions={canEdit ? <Button type="submit" variant="primary" isBusy={isSaving}>{submitLabel}</Button> : null}>
         <div className={styles.formStack}>
-          {canEdit ? null : <Callout tone="info">You can view these settings. Only owners and admins can change them.</Callout>}
+          {canEdit ? null : <Callout tone="info">You can view these settings. Only the owner and managers can change them.</Callout>}
           <FormErrorSummary messages={errorMessages} />
           <fieldset className={styles.fieldset} disabled={!canEdit || isSaving}>
             {children}
