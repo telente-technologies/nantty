@@ -110,6 +110,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         ) : (
           <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
+        {profile?.isSeller ? <SettingsRow label="Business documents" icon={<Tag24Icon />} onPress={() => navigation.navigate("BusinessDocuments")} /> : null}
         <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => {
           if (!creatorEntry.isLoading) navigation.navigate(creatorEntry.route);
         }} />
