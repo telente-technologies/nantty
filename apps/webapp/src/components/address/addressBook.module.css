@@ -1,0 +1,66 @@
+.book {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  color: var(--ink-muted);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-strong);
+  font-weight: 750;
+}
+
+.meta {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: var(--radius-small);
+  background: var(--surface-brand-tint);
+  color: var(--color-brand);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
