@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package zudomart.money.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Internal only (go-live -> go-money). Never exposed through the gateway.
+// Errors are gRPC statuses with a google.rpc.ErrorInfo reason:
+//   INVALID_ARGUMENT     VALIDATION_FAILED
+//   FAILED_PRECONDITION  INSUFFICIENT_COINS, CANNOT_GIFT_SELF, BATTLE_ALREADY_SETTLED_DIFFERENTLY
+//   ALREADY_EXISTS       IDEMPOTENCY_KEY_REUSED (same key, different request)
+// Retrying with the same idempotency_key and the same request returns the stored receipt with replayed = true.
+service LiveMoneyService {
+  rpc ChargeGiftAndCreditCreator(ChargeGiftAndCreditCreatorRequest) returns (ChargeGiftAndCreditCreatorResponse);
+  rpc SettleBattle(SettleBattleRequest) returns (SettleBattleResponse);
+  rpc GetBattleGiftTotals(GetBattleGiftTotalsRequest) returns (GetBattleGiftTotalsResponse);
+  rpc GetCoinBalance(GetCoinBalanceRequest) returns (GetCoinBalanceResponse);
+}
+
+message ChargeGiftAndCreditCreatorRequest {
+  string sender_user_id = 1;
+  string receiver_user_id = 2;
+  // Host of the live: receives the creator share when the receiver is not in the Creator Program (backendPlan §4.2.1).
+  string host_user_id = 3;
+  string live_id = 4;
+  string gift_id = 5;
+  // 1..100
+  int32 quantity = 6;
+  // Price the client was shown; > 0.
+  int64 unit_price_coins = 7;
+  // Set by go-live only while the battle is active; the creator share then goes to the receiver's battle holding.
+  optional string battle_id = 8;
+  // 8..128 chars [A-Za-z0-9_-], scoped to sender_user_id.
+  string idempotency_key = 9;
+  optional string combo_id = 10;
+}
+
+enum GiftTransactionStatus {
+  GIFT_TRANSACTION_STATUS_UNSPECIFIED = 0;
+  GIFT_TRANSACTION_STATUS_COMMITTED = 1;
+  GIFT_TRANSACTION_STATUS_HELD_FOR_REVIEW = 2;
+  GIFT_TRANSACTION_STATUS_REVERSED = 3;
+}
+
+message GiftTransaction {
+  string gift_transaction_id = 1;
+  string sender_user_id = 2;
+  string receiver_user_id = 3;
+  // User whose earned coins (or battle holding) received the creator share: the receiver or the host.
+  string credited_user_id = 4;
+  string live_id = 5;
+  optional string battle_id = 6;
+  string gift_id = 7;
+  int32 quantity = 8;
+  int64 unit_price_coins = 9;
+  int64 total_coins = 10;
+  int64 platform_fee_coins = 11;
+  int64 creator_amount_coins = 12;
+  int32 creator_share_bps = 13;
+  GiftTransactionStatus status = 14;
+  string ledger_transaction_id = 15;
+  optional string combo_id = 16;
+  google.protobuf.Timestamp created_at = 17;
+}
+
+message ChargeGiftAndCreditCreatorResponse {
+  GiftTransaction gift_transaction = 1;
+  // Sender's spendable coin balance after the charge.
+  int64 sender_coin_balance = 2;
+  bool replayed = 3;
+}
+
+enum BattleSettlementRule {
+  BATTLE_SETTLEMENT_RULE_UNSPECIFIED = 0;
+  BATTLE_SETTLEMENT_RULE_KEEP_OWN = 1;
+  BATTLE_SETTLEMENT_RULE_WINNER_TAKES_ALL = 2;
+}
+
+enum BattleParticipantOutcome {
+  BATTLE_PARTICIPANT_OUTCOME_UNSPECIFIED = 0;
+  BATTLE_PARTICIPANT_OUTCOME_ACTIVE = 1;
+  // Left voluntarily: under winner-takes-all the holding goes to the winner.
+  BATTLE_PARTICIPANT_OUTCOME_FORFEITED = 2;
+  // Removed by the host: always keeps their own holding (anti-abuse, §4.2.8).
+  BATTLE_PARTICIPANT_OUTCOME_REMOVED_BY_HOST = 3;
+}
+
+message BattleParticipant {
+  string user_id = 1;
+  BattleParticipantOutcome outcome = 2;
+}
+
+message SettleBattleRequest {
+  string battle_id = 1;
+  string live_id = 2;
+  string host_user_id = 3;
+  BattleSettlementRule rule = 4;
+  // Empty means a tie or no winner: settles as keep-own.
+  optional string winner_user_id = 5;
+  repeated BattleParticipant participants = 6;
+}
+
+message BattleCoinTransfer {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  int64 coins = 3;
+}
+
+message BattleParticipantPayout {
+  string user_id = 1;
+  int64 holding_coins = 2;
+  string credited_user_id = 3;
+}
+
+message BattleSettlement {
+  string battle_id = 1;
+  BattleSettlementRule rule_applied = 2;
+  optional string winner_user_id = 3;
+  repeated BattleParticipantPayout payouts = 4;
+  // Only coins that moved between streamers (winner-takes-all); empty for keep-own.
+  repeated BattleCoinTransfer transfers = 5;
+  string ledger_transaction_id = 6;
+  google.protobuf.Timestamp settled_at = 7;
+}
+
+message SettleBattleResponse {
+  BattleSettlement settlement = 1;
+  bool replayed = 2;
+}
+
+message GetBattleGiftTotalsRequest {
+  string battle_id = 1;
+}
+
+message BattleGiftTotal {
+  string receiver_user_id = 1;
+  int64 gross_coins = 2;
+  int64 gift_count = 3;
+  google.protobuf.Timestamp reached_at = 4;
+}
+
+message GetBattleGiftTotalsResponse {
+  repeated BattleGiftTotal totals = 1;
+}
+
+message GetCoinBalanceRequest {
+  string user_id = 1;
+}
+
+message GetCoinBalanceResponse {
+  int64 coins = 1;
+  int64 earned_coins = 2;
+}
