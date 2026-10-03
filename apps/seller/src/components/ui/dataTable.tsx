@@ -11,6 +11,13 @@ export interface DataTableColumn<Row> {
   readonly align?: "start" | "end" | "center";
   readonly width?: string;
   readonly hideBelowTablet?: boolean;
+  readonly sortKey?: string;
+  readonly mobileLabel?: string;
+}
+
+export interface TableSortState {
+  readonly key: string;
+  readonly direction: "ascending" | "descending";
 }
 
 interface DataTableProps<Row> {
@@ -24,20 +31,46 @@ interface DataTableProps<Row> {
   readonly hasMore?: boolean;
   readonly onLoadMore?: () => void;
   readonly isLoadingMore?: boolean;
+  readonly sortState?: TableSortState | null;
+  readonly onSortChange?: (sortState: TableSortState) => void;
+  readonly errorMessage?: string | null;
+  readonly onRetry?: () => void;
+  readonly footer?: ReactNode;
 }
 
-export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, emptyState, onRowActivate, hasMore, onLoadMore, isLoadingMore }: DataTableProps<Row>) {
+function readNextSortState(current: TableSortState | null | undefined, sortKey: string): TableSortState {
+  if (current?.key !== sortKey) return { key: sortKey, direction: "descending" };
+  return { key: sortKey, direction: current.direction === "descending" ? "ascending" : "descending" };
+}
+
+export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, emptyState, onRowActivate, hasMore, onLoadMore, isLoadingMore, sortState, onSortChange, errorMessage, onRetry, footer }: DataTableProps<Row>) {
   const showSkeleton = isLoading && (!rows || rows.length === 0);
+  const showError = Boolean(errorMessage) && !isLoading && (!rows || rows.length === 0);
   return (
     <div className={styles.wrapper}>
       <div className={styles.scroller}>
-        <table className={styles.table}>
+        <table className={`${styles.table} ${styles.stackOnPhones}`}>
           <caption className="visuallyHidden">{caption}</caption>
           <thead>
             <tr>
               {columns.map((column) => (
-                <th key={column.key} scope="col" style={{ width: column.width, textAlign: column.align === "end" ? "right" : column.align === "center" ? "center" : "left" }} className={column.hideBelowTablet ? styles.hideBelowTablet : undefined}>
-                  {column.header}
+                <th
+                  key={column.key}
+                  scope="col"
+                  style={{ width: column.width, textAlign: column.align === "end" ? "right" : column.align === "center" ? "center" : "left" }}
+                  className={column.hideBelowTablet ? styles.hideBelowTablet : undefined}
+                  aria-sort={column.sortKey && sortState?.key === column.sortKey ? sortState.direction : undefined}
+                >
+                  {column.sortKey && onSortChange ? (
+                    <button type="button" className={styles.sortButton} onClick={() => onSortChange(readNextSortState(sortState, column.sortKey as string))}>
+                      {column.header}
+                      <span aria-hidden="true" className={styles.sortMark}>
+                        {sortState?.key === column.sortKey ? (sortState.direction === "ascending" ? "▲" : "▼") : "↕"}
+                      </span>
+                    </button>
+                  ) : (
+                    column.header
+                  )}
                 </th>
               ))}
             </tr>
@@ -62,7 +95,7 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, 
                     tabIndex={onRowActivate ? 0 : undefined}
                   >
                     {columns.map((column) => (
-                      <td key={column.key} style={{ textAlign: column.align === "end" ? "right" : column.align === "center" ? "center" : "left" }} className={column.hideBelowTablet ? styles.hideBelowTablet : undefined}>
+                      <td key={column.key} data-label={column.mobileLabel ?? (typeof column.header === "string" ? column.header : "")} style={{ textAlign: column.align === "end" ? "right" : column.align === "center" ? "center" : "left" }} className={column.hideBelowTablet ? styles.hideBelowTablet : undefined}>
                         {column.render(row)}
                       </td>
                     ))}
@@ -71,7 +104,17 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, 
           </tbody>
         </table>
       </div>
-      {!showSkeleton && rows && rows.length === 0 ? <div className={styles.empty}>{emptyState ?? "Nothing here yet."}</div> : null}
+      {showError ? (
+        <div className={styles.error} role="alert">
+          <p>{errorMessage}</p>
+          {onRetry ? (
+            <Button size="small" onClick={onRetry}>
+              Try again
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      {!showSkeleton && !showError && rows && rows.length === 0 ? <div className={styles.empty}>{emptyState ?? "Nothing here yet."}</div> : null}
       {hasMore && onLoadMore ? (
         <div className={styles.footer}>
           <Button size="small" onClick={onLoadMore} isBusy={isLoadingMore}>
@@ -79,6 +122,7 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, 
           </Button>
         </div>
       ) : null}
+      {footer ? <div className={styles.footer}>{footer}</div> : null}
     </div>
   );
 }

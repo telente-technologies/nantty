@@ -1,0 +1,26 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  font-size: 13px;
+}
+
+.summary {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageLabel {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
+}

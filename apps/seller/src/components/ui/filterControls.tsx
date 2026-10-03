@@ -33,7 +33,8 @@ const dateRangePresets = [
   { label: "Today", days: 1 },
   { label: "7 days", days: 7 },
   { label: "30 days", days: 30 },
-  { label: "90 days", days: 90 },
+  { label: "3 months", days: 90 },
+  { label: "12 months", days: 365 },
 ];
 
 export function DateRangeControl({ value, onValueChange }: { readonly value: DateRangeValue; readonly onValueChange: (value: DateRangeValue) => void }) {
