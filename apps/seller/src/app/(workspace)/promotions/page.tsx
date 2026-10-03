@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
-
-import { PromotionsListView } from "@/components/promotions/promotionsListView";
-
-export const metadata: Metadata = { title: "Promotions" };
+import { redirect } from "next/navigation";
 
 export default function PromotionsPage() {
-  return <PromotionsListView />;
+  redirect("/marketing/discounts");
 }
