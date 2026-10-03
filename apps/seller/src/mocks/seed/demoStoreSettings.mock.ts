@@ -14,12 +14,8 @@ export interface DemoStoreSettingsBasics {
   readonly email: string;
   readonly address: string;
   readonly taxes: TaxRate[];
-  readonly receiptHeaderText: string;
-  readonly receiptFooterText: string;
   readonly returnPolicy: string;
-  readonly paperWidth: StoreSettings["receipt"]["paperWidth"];
-  readonly cardTerminalInstructions: string;
-  readonly bankTransferInstructions: string;
+  readonly shippingPolicy: string;
   readonly loyalty: { readonly enabled: boolean; readonly spendRequiredPerPointMinor: number; readonly redeemValuePerPointMinor: number; readonly minimumPointsToRedeem: number };
 }
 
@@ -40,21 +36,17 @@ export function buildDemoStoreSettingsFromBasics(basics: DemoStoreSettingsBasics
     address: basics.address,
     taxes: basics.taxes,
     pricesIncludeTax: true,
-    receipt: { showLogo: true, headerText: basics.receiptHeaderText, footerText: basics.receiptFooterText, returnPolicy: basics.returnPolicy, paperWidth: basics.paperWidth, showCashierName: true },
-    paymentMethods: [
-      { method: "cash", enabled: true, label: "Cash", instructions: null },
-      { method: "card", enabled: true, label: "Card (POS terminal)", instructions: basics.cardTerminalInstructions },
-      { method: "bank_transfer", enabled: true, label: "Bank transfer", instructions: basics.bankTransferInstructions },
-      { method: "zudomart_wallet", enabled: true, label: "Zudomart wallet", instructions: null },
-      { method: "pay_link", enabled: true, label: "Pay link", instructions: null },
-    ],
-    discountApprovalThresholdBasisPoints: 1000,
+    policies: {
+      returns: basics.returnPolicy,
+      shipping: basics.shippingPolicy,
+      privacy: "We only use your details to deliver your order and reply to your messages in the Zudomart app.",
+    },
     loyalty: {
       enabled: basics.loyalty.enabled,
       spendRequiredPerPoint: { amountMinor: basics.loyalty.spendRequiredPerPointMinor, currency },
       redeemValuePerPoint: { amountMinor: basics.loyalty.redeemValuePerPointMinor, currency },
       minimumPointsToRedeem: basics.loyalty.minimumPointsToRedeem,
     },
-    notifications: { newOrderEmail: true, newOrderSms: false, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: true },
+    notifications: { newOrderEmail: true, newOrderSms: false, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: true, lowStockSms: false, reviewEmail: true, messageDigestEmail: true, weeklyPerformanceEmail: true },
   };
 }

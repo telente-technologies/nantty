@@ -4,7 +4,7 @@ import type { ProductBrandTag } from "@/types/brand.type";
 import type { ProductCategory } from "@/types/catalog.type";
 import type { PayoutAccount } from "@/types/wallet.type";
 import type { Promotion } from "@/types/promotion.type";
-import type { PosRegister, StoreLocation, StoreSettings } from "@/types/store.type";
+import type { StoreLocation, StoreSettings } from "@/types/store.type";
 
 export interface DemoProductBlueprint {
   readonly key: string;
@@ -36,23 +36,6 @@ export type DemoCustomerRow = readonly [name: string, phone: string | null, emai
 export interface DemoCustomerPlan {
   readonly rows: readonly DemoCustomerRow[];
   readonly firstCustomerNote: { readonly body: string; readonly authorStaffId: string; readonly authorName: string } | null;
-}
-
-export interface DemoRegisterCashier {
-  readonly registerId: string;
-  readonly locationId: string;
-  readonly cashier: { readonly id: string; readonly name: string };
-}
-
-export interface DemoPosHistoryPlan {
-  readonly registerCashiers: readonly DemoRegisterCashier[];
-  readonly registersWithOpenShiftToday: readonly string[];
-  readonly historyLengthInDays: number;
-  readonly salesPerClosedShift: readonly [minimum: number, maximum: number];
-  readonly salesPerOpenShift: readonly [minimum: number, maximum: number];
-  readonly openingFloatMinor: number;
-  readonly firstReceiptSequence: number;
-  readonly customerShare: number;
 }
 
 export interface DemoMarketplaceBuyer {
@@ -93,16 +76,14 @@ export interface DemoStoreProfile {
   readonly storeId: string;
   readonly recordKey: string | null;
   readonly receiptPrefix: string;
-  readonly randomSeeds: { readonly products: number; readonly posHistory: number; readonly onlineOrders: number };
+  readonly randomSeeds: { readonly products: number; readonly onlineOrders: number };
   readonly buildSettings: () => StoreSettings;
   readonly buildLocations: () => StoreLocation[];
-  readonly buildRegisters: () => PosRegister[];
   readonly buildCategories: () => ProductCategory[];
   readonly buildStaff: () => MockStaffRecord[];
   readonly buildPromotions: (currency: CurrencyCode) => Promotion[];
   readonly catalog: DemoCatalogPlan;
   readonly customers: DemoCustomerPlan;
-  readonly posHistory: DemoPosHistoryPlan;
   readonly onlineOrders: DemoOnlineOrderPlan;
   readonly wallet: DemoWalletPlan;
   readonly auditEntries: readonly DemoAuditEntry[];

@@ -1,5 +1,3 @@
-import { randomBytes, scryptSync } from "node:crypto";
-
 import { demoMainStoreId } from "@/mocks/seed/demoStore.mock";
 import { buildIsoDateDaysAgo } from "@/mocks/seed/seededRandom.mock";
 import type { StaffRole } from "@/types/sellerAccess.type";
@@ -23,15 +21,7 @@ export interface MockStoreMembership {
   readonly staffId: string;
 }
 
-export interface MockStaffRecord extends StaffMember {
-  readonly pinHash: string | null;
-  readonly failedPinAttempts: number;
-}
-
-export function hashPosPinForStorage(pin: string): string {
-  const salt = randomBytes(16).toString("hex");
-  return `${salt}:${scryptSync(pin, salt, 32).toString("hex")}`;
-}
+export type MockStaffRecord = StaffMember;
 
 export function buildDemoUserAccounts(): MockUserAccount[] {
   return [
@@ -58,23 +48,21 @@ export function buildDemoMemberships(): MockStoreMembership[] {
     { userId: "usr_adaeze", storeId: demoMainStoreId, role: "owner", staffId: "stf_adaeze" },
     { userId: "usr_tunde", storeId: demoMainStoreId, role: "manager", staffId: "stf_tunde" },
     { userId: "usr_adaeze", storeId: "store_adire_lab_studio", role: "owner", staffId: "stf_adaeze_adire" },
-    { userId: "usr_blessing", storeId: demoMainStoreId, role: "cashier", staffId: "stf_blessing" },
+    { userId: "usr_blessing", storeId: demoMainStoreId, role: "sales", staffId: "stf_blessing" },
     { userId: "usr_ibrahim", storeId: demoMainStoreId, role: "inventory", staffId: "stf_ibrahim" },
-    { userId: "usr_ngozi", storeId: demoMainStoreId, role: "support", staffId: "stf_ngozi" },
+    { userId: "usr_ngozi", storeId: demoMainStoreId, role: "sales", staffId: "stf_ngozi" },
+    { userId: "usr_amina", storeId: demoMainStoreId, role: "accountant", staffId: "stf_amina" },
     { userId: "usr_kelechi", storeId: "store_kelechi_kicks", role: "owner", staffId: "stf_kelechi" },
     { userId: "usr_funmi", storeId: "store_funmi_bakes", role: "owner", staffId: "stf_funmi" },
   ];
 }
 
-export function buildDemoStaffRecord(partial: Pick<StaffMember, "id" | "userId" | "name" | "username" | "role" | "locationIds">, pin: string | null, lastActiveDaysAgo: number): MockStaffRecord {
+export function buildDemoStaffRecord(partial: Pick<StaffMember, "id" | "userId" | "name" | "username" | "role" | "locationIds">, lastActiveDaysAgo: number): MockStaffRecord {
   return {
     ...partial,
     avatarUrl: null,
     status: "active",
-    hasPosPin: pin !== null,
-    pinHash: pin ? hashPosPinForStorage(pin) : null,
-    failedPinAttempts: 0,
-    pinLockedUntil: null,
+    permissions: null,
     lastActiveAt: buildIsoDateDaysAgo(lastActiveDaysAgo, 9),
     invitedAt: buildIsoDateDaysAgo(200 - lastActiveDaysAgo * 10),
   };
@@ -83,13 +71,13 @@ export function buildDemoStaffRecord(partial: Pick<StaffMember, "id" | "userId" 
 export function buildIfeLifestyleStaffRecords(): MockStaffRecord[] {
   const everyLocation = ["loc_lekki", "loc_ikeja", "loc_wuse", "loc_apapa"];
   return [
-    buildDemoStaffRecord({ id: "stf_adaeze", userId: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", role: "owner", locationIds: everyLocation }, "1111", 0),
-    buildDemoStaffRecord({ id: "stf_tunde", userId: "usr_tunde", name: "Tunde Bakare", username: "tunde.bakare", role: "manager", locationIds: ["loc_lekki", "loc_ikeja"] }, "2580", 0),
-    buildDemoStaffRecord({ id: "stf_blessing", userId: "usr_blessing", name: "Blessing Eze", username: "blessing.eze", role: "cashier", locationIds: ["loc_lekki"] }, "1234", 0),
-    buildDemoStaffRecord({ id: "stf_chidi", userId: "usr_chidi", name: "Chidi Amadi", username: "chidi.amadi", role: "cashier", locationIds: ["loc_ikeja"] }, "4321", 1),
-    buildDemoStaffRecord({ id: "stf_amina", userId: "usr_amina", name: "Amina Bello", username: "amina.bello", role: "cashier", locationIds: ["loc_wuse"] }, "9876", 2),
-    buildDemoStaffRecord({ id: "stf_ibrahim", userId: "usr_ibrahim", name: "Ibrahim Musa", username: "ibrahim.musa", role: "inventory", locationIds: ["loc_apapa", "loc_lekki"] }, null, 1),
-    buildDemoStaffRecord({ id: "stf_ngozi", userId: "usr_ngozi", name: "Ngozi Nwosu", username: "ngozi.nwosu", role: "support", locationIds: everyLocation }, null, 3),
-    { ...buildDemoStaffRecord({ id: "stf_seun", userId: "usr_seun", name: "Seun Alabi", username: "seun.alabi", role: "cashier", locationIds: ["loc_lekki"] }, null, 0), status: "invited", lastActiveAt: null },
+    buildDemoStaffRecord({ id: "stf_adaeze", userId: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", role: "owner", locationIds: everyLocation }, 0),
+    buildDemoStaffRecord({ id: "stf_tunde", userId: "usr_tunde", name: "Tunde Bakare", username: "tunde.bakare", role: "manager", locationIds: ["loc_lekki", "loc_ikeja"] }, 0),
+    buildDemoStaffRecord({ id: "stf_blessing", userId: "usr_blessing", name: "Blessing Eze", username: "blessing.eze", role: "sales", locationIds: ["loc_lekki"] }, 0),
+    buildDemoStaffRecord({ id: "stf_chidi", userId: "usr_chidi", name: "Chidi Amadi", username: "chidi.amadi", role: "sales", locationIds: ["loc_ikeja"] }, 1),
+    buildDemoStaffRecord({ id: "stf_amina", userId: "usr_amina", name: "Amina Bello", username: "amina.bello", role: "accountant", locationIds: ["loc_wuse"] }, 2),
+    buildDemoStaffRecord({ id: "stf_ibrahim", userId: "usr_ibrahim", name: "Ibrahim Musa", username: "ibrahim.musa", role: "inventory", locationIds: ["loc_apapa", "loc_lekki"] }, 1),
+    { ...buildDemoStaffRecord({ id: "stf_ngozi", userId: "usr_ngozi", name: "Ngozi Nwosu", username: "ngozi.nwosu", role: "sales", locationIds: everyLocation }, 3), permissions: ["dashboard:view", "catalog:view", "settings:view", "orders:view", "orders:manage", "delivery:manage", "customers:view", "customers:manage", "messages:manage", "reviews:manage", "analytics:view", "promotions:manage"] },
+    { ...buildDemoStaffRecord({ id: "stf_seun", userId: "usr_seun", name: "Seun Alabi", username: "seun.alabi", role: "sales", locationIds: ["loc_lekki"] }, 0), status: "invited", lastActiveAt: null },
   ];
 }

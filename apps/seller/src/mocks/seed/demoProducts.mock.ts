@@ -26,6 +26,20 @@ function buildDemoStockLevels(plan: DemoCatalogPlan, random: () => number, isLow
   });
 }
 
+const demoAttributeValuesByCategoryName: Record<string, readonly [string, string][]> = {
+  Fashion: [["Material", "100% cotton"], ["Made in", "Lagos, Nigeria"], ["Care", "Hand wash cold"]],
+  Bags: [["Material", "Full-grain leather"], ["Dimensions", "32 × 24 × 12 cm"]],
+  Jewellery: [["Material", "Gold-plated brass"], ["Length", "45 cm"]],
+  "Beauty & care": [["Skin type", "All skin types"], ["Size", "As labelled"]],
+  Gadgets: [["Warranty", "6 months"], ["Battery", "Up to 40 hours"]],
+  Home: [["Material", "Stainless steel"], ["Care", "Hand wash"]],
+};
+
+function buildDemoProductAttributes(categoryName: string, productIndex: number): { name: string; value: string }[] {
+  const candidates = demoAttributeValuesByCategoryName[categoryName] ?? [["Made in", "Nigeria"]];
+  return candidates.slice(0, 1 + (productIndex % candidates.length)).map(([name, value]) => ({ name, value }));
+}
+
 export function buildDemoProductsFromCatalogPlan(plan: DemoCatalogPlan, currency: CurrencyCode, randomSeed: number): Product[] {
   const random = createSeededRandomNumberGenerator(randomSeed);
   const toMoney = (amountMajor: number) => ({ amountMinor: Math.round(amountMajor * minorUnitsPerMajorUnitByCurrency[currency]), currency });
@@ -48,6 +62,8 @@ export function buildDemoProductsFromCatalogPlan(plan: DemoCatalogPlan, currency
         compareAtPrice: productIndex % 7 === 3 ? toMoney(Math.round(blueprint.priceMajor * 1.2)) : null,
         costPrice: toMoney(blueprint.costMajor),
         lowStockThreshold: isHighVolume ? 12 : 5,
+        reorderPoint: isHighVolume ? 15 : 6,
+        reorderQuantity: isHighVolume ? 60 : 20,
         stock: buildDemoStockLevels(plan, random, (productIndex + variantIndex) % 9 === 0),
       };
     });
@@ -66,6 +82,11 @@ export function buildDemoProductsFromCatalogPlan(plan: DemoCatalogPlan, currency
       trackInventory: true,
       tags: blueprint.tags ?? [],
       brand: plan.brandTagsByProductKey[blueprint.key] ?? null,
+      visibility: productIndex % 11 === 5 ? "store_only" : "public",
+      publishAt: null,
+      attributes: buildDemoProductAttributes(blueprint.categoryName, productIndex),
+      videos: [],
+      supplierId: productIndex % 5 === 4 ? null : `sup_${(productIndex % 4) + 1}`,
       createdAt: buildIsoDateDaysAgo(120 - productIndex * 3),
       updatedAt: buildIsoDateDaysAgo(productIndex % 10),
     };
