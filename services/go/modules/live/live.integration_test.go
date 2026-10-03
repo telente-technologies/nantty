@@ -99,7 +99,11 @@ func startLiveModuleAgainstFreshSchema(t *testing.T) *liveHarness {
 		LiveAdTermsCurrentVersion: "2026-10", GiftPlatformBurstLimitPerSecond: 50,
 	}
 	verifier := jwtauth.NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, testIssuer, testAudience)
-	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("live-test")}
+	logSink := io.Discard
+	if os.Getenv("LIVE_TEST_LOG") != "" {
+		logSink = os.Stderr
+	}
+	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(logSink, nil)), Health: health.NewRegistryForService("live-test")}
 	module, err := StartLiveModuleWithSettings(ctx, settings, Collaborators{
 		Money: harness.money, Directory: harness.directory, Media: integrations.NoopRoomController{}, Verifier: verifier, Publisher: harness.publisher,
 	}, dependencies)
