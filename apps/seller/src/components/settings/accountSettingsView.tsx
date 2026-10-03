@@ -1,5 +1,7 @@
 "use client";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { KeyValueList, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -29,6 +31,9 @@ export function AccountSettingsView() {
             { label: "Store plan", value: sellerPlanLabels[convertAccessToSellerPlan(access)] },
           ]}
         />
+      </Panel>
+      <Panel title="Appearance" description="Choose light or dark, or follow your device. Your choice follows your account to every Zudomart app.">
+        <ThemeSwitcher label="Colour theme" />
       </Panel>
       <Panel
         title="What you can do here"
