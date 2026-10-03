@@ -13,3 +13,5 @@ type AdvisoryConsumer = services.AdvisoryConsumer
 func Mount(mux *http.ServeMux, c *container.Container) {
 	routes.MountSuspensionCasesRoutes(mux, c)
 }
+
+func QueueNameForTests(queueUrl string) string { return services.QueueNameFromUrl(queueUrl) }

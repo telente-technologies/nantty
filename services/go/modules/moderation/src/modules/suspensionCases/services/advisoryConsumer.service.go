@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log/slog"
+	"fmt"
 	"math"
 	"net/url"
 	"slices"
@@ -41,7 +41,7 @@ func HandleAdvisoryMessage(application *container.Container) platformevents.Mess
 	return func(ctx context.Context, body []byte) error {
 		var message advisoryMessage
 		if err := json.Unmarshal(body, &message); err != nil {
-			return nil
+			return fmt.Errorf("%w: advisory message is not JSON", platformevents.ErrPoisonMessage)
 		}
 		if !message.AdvisoryOnly || message.SubjectType != "account" || message.SuggestionId == "" {
 			return nil
@@ -71,15 +71,13 @@ func HandleAdvisoryMessage(application *container.Container) platformevents.Mess
 
 type AdvisoryConsumer struct {
 	Container *container.Container
-	Queues    interface {
-		ConsumeQueueUntilContextDone(ctx context.Context, queueName string, handler platformevents.MessageHandler, logger *slog.Logger) error
-	}
+	Queues    platformevents.QueueConsumer
 }
 
 func (consumer AdvisoryConsumer) RunUntilContextDone(ctx context.Context) error {
-	queueName := QueueNameFromUrl(consumer.Container.Settings.AdvisoryQueueUrl)
+	queueName := consumer.Container.Settings.AdvisoryQueueName
 	if queueName == "" {
-		return errors.New("INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL does not name a queue")
+		return errors.New("INTELLIGENCE_TRUST_ADVISORY_QUEUE is not set")
 	}
 	return consumer.Queues.ConsumeQueueUntilContextDone(ctx, queueName, HandleAdvisoryMessage(consumer.Container), consumer.Container.Logger)
 }
