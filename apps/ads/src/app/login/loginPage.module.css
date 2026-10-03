@@ -18,9 +18,9 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: var(--radius-medium);
-  background: var(--yellow-50);
-  border: 1px solid var(--yellow-100);
-  color: var(--yellow-900);
+  background: var(--notice-bg);
+  border: 1px solid var(--notice-border);
+  color: var(--notice-ink);
   font-size: var(--fs-13);
 }
 
