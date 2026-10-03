@@ -5,6 +5,7 @@ import { registerAdvertiserAccountMockHandlers } from "./advertiserAccounts.mock
 import { registerCopyrightClaimMockHandlers } from "./copyrightClaims.mock";
 import { registerModerationAppealMockHandlers } from "./moderationAppeals.mock";
 import { registerModerationReportMockHandlers } from "./moderationReports.mock";
+import { registerSuspensionMockHandlers } from "./suspensions.mock";
 import { readTrustStore } from "./trustStore.mock";
 
 function findOldestTimestamp(timestamps: readonly string[]): string | null {
@@ -50,5 +51,6 @@ export function registerTrustAndSafetyMockHandlers(): void {
   registerCopyrightClaimMockHandlers();
   registerAdsReviewMockHandlers();
   registerAdvertiserAccountMockHandlers();
+  registerSuspensionMockHandlers();
   registerTrustAndSafetyQueueCounters();
 }
