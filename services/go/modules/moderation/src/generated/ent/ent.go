@@ -9,8 +9,14 @@ import (
 	"reflect"
 	"sync"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreport"
+	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
+	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
+	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
+	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
+	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
 
 	"entgo.io/ent"
@@ -77,8 +83,14 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			chatreport.Table:               chatreport.ValidColumn,
+			contentreport.Table:            contentreport.ValidColumn,
+			contentreportentry.Table:       contentreportentry.ValidColumn,
+			copyrightclaim.Table:           copyrightclaim.ValidColumn,
+			counternotice.Table:            counternotice.ValidColumn,
 			evidenceretentionsetting.Table: evidenceretentionsetting.ValidColumn,
+			ipclaim.Table:                  ipclaim.ValidColumn,
 			outboxevent.Table:              outboxevent.ValidColumn,
+			strike.Table:                   strike.ValidColumn,
 			suspensioncase.Table:           suspensioncase.ValidColumn,
 		})
 	})

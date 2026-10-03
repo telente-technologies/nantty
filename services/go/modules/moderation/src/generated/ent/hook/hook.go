@@ -20,6 +20,54 @@ func (f ChatReportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChatReportMutation", m)
 }
 
+// The ContentReportFunc type is an adapter to allow the use of ordinary
+// function as ContentReport mutator.
+type ContentReportFunc func(context.Context, *ent.ContentReportMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ContentReportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ContentReportMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContentReportMutation", m)
+}
+
+// The ContentReportEntryFunc type is an adapter to allow the use of ordinary
+// function as ContentReportEntry mutator.
+type ContentReportEntryFunc func(context.Context, *ent.ContentReportEntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ContentReportEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ContentReportEntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContentReportEntryMutation", m)
+}
+
+// The CopyrightClaimFunc type is an adapter to allow the use of ordinary
+// function as CopyrightClaim mutator.
+type CopyrightClaimFunc func(context.Context, *ent.CopyrightClaimMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CopyrightClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CopyrightClaimMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CopyrightClaimMutation", m)
+}
+
+// The CounterNoticeFunc type is an adapter to allow the use of ordinary
+// function as CounterNotice mutator.
+type CounterNoticeFunc func(context.Context, *ent.CounterNoticeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CounterNoticeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CounterNoticeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CounterNoticeMutation", m)
+}
+
 // The EvidenceRetentionSettingFunc type is an adapter to allow the use of ordinary
 // function as EvidenceRetentionSetting mutator.
 type EvidenceRetentionSettingFunc func(context.Context, *ent.EvidenceRetentionSettingMutation) (ent.Value, error)
@@ -32,6 +80,18 @@ func (f EvidenceRetentionSettingFunc) Mutate(ctx context.Context, m ent.Mutation
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EvidenceRetentionSettingMutation", m)
 }
 
+// The IpClaimFunc type is an adapter to allow the use of ordinary
+// function as IpClaim mutator.
+type IpClaimFunc func(context.Context, *ent.IpClaimMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IpClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IpClaimMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IpClaimMutation", m)
+}
+
 // The OutboxEventFunc type is an adapter to allow the use of ordinary
 // function as OutboxEvent mutator.
 type OutboxEventFunc func(context.Context, *ent.OutboxEventMutation) (ent.Value, error)
@@ -42,6 +102,18 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
+}
+
+// The StrikeFunc type is an adapter to allow the use of ordinary
+// function as Strike mutator.
+type StrikeFunc func(context.Context, *ent.StrikeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StrikeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StrikeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StrikeMutation", m)
 }
 
 // The SuspensionCaseFunc type is an adapter to allow the use of ordinary
