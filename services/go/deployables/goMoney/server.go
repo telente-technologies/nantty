@@ -8,7 +8,6 @@ import (
 	"zudomart/modules/escrow"
 	"zudomart/modules/ledger"
 	"zudomart/modules/payments"
-	"zudomart/modules/rewards"
 	"zudomart/modules/subscriptions"
 	"zudomart/modules/wallet"
 	"zudomart/platform/servicemodule"
@@ -22,7 +21,6 @@ func main() {
 		escrow.NewEscrowModule,
 		subscriptions.NewSubscriptionsModule,
 		creators.NewCreatorsModule,
-		rewards.NewRewardsModule,
 	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
