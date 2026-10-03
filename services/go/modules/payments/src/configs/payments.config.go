@@ -19,6 +19,7 @@ type PaymentsSettings struct {
 	BachsSecretKey              string
 	BachsWebhookSigningSecrets  []string
 	BachsPayoutFeeOverrides     map[string]int64
+	BachsPayoutFeeSchedule      string
 	BachsMaximumAttempts        int
 	DefaultProvider             string
 	AllowedReturnUrls           []string
@@ -42,6 +43,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		BachsSecretKey:              reader.ReadStringOrDefault("BACHS_SECRET_KEY", ""),
 		BachsWebhookSigningSecrets:  reader.ReadCommaSeparatedListOrDefault("BACHS_WEBHOOK_SIGNING_SECRETS", nil),
 		BachsPayoutFeeOverrides:     parseCurrencyAmountOverrides(reader.ReadStringOrDefault("BACHS_PAYOUT_FEE_OVERRIDES", "")),
+		BachsPayoutFeeSchedule:      reader.ReadStringOrDefault("BACHS_PAYOUT_FEE_SCHEDULE", ""),
 		BachsMaximumAttempts:        reader.ReadIntegerOrDefault("BACHS_MAXIMUM_ATTEMPTS", 3),
 		DefaultProvider:             reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "bachs"),
 		AllowedReturnUrls:           reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
