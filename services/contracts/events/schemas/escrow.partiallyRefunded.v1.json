@@ -15,7 +15,8 @@
     "amount",
     "commission",
     "refunded",
-    "releasedToSeller"
+    "releasedToSeller",
+    "orderNumber"
   ],
   "properties": {
     "escrowId": {
@@ -91,6 +92,26 @@
       }
     },
     "releasedToSeller": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "orderNumber": {
+      "type": "string"
+    },
+    "processingFee": {
       "type": "object",
       "additionalProperties": false,
       "required": [

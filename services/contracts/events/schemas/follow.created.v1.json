@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/follow.created.v1.json",
+  "title": "FollowCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["followId","followerId","followeeId","state"],
+  "properties": { "followId": { "type": "string", "format": "uuid" }, "followerId": { "type": "string", "format": "uuid" }, "followeeId": { "type": "string", "format": "uuid" }, "state": { "enum": ["requested", "accepted"] } }
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/mention.created.v1.json",
+  "title": "MentionCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["authorId","surface"],
+  "properties": { "mentionedUserId": { "type": "string", "format": "uuid" }, "authorId": { "type": "string", "format": "uuid" }, "surface": { "enum": ["post", "comment", "group"] }, "postId": { "type": "string", "format": "uuid" }, "commentId": { "type": "string", "format": "uuid" }, "conversationId": { "type": "string", "format": "uuid" }, "mentionsAll": { "type": "boolean" }, "recipientIds": { "type": "array", "items": { "type": "string", "format": "uuid" } } }
+}

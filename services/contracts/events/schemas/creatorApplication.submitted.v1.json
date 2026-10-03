@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/creatorApplication.submitted.v1.json",
+  "title": "creatorApplication.submitted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "applicationId"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "applicationId": {
+      "type": "string"
+    },
+    "decisionWithinDays": {
+      "type": "integer"
+    }
+  }
+}
