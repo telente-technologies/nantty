@@ -4,6 +4,7 @@ import { registerAuditLogMockHandlers } from "@/mocks/handlers/platform/auditLog
 import { registerAuthenticationMockHandlers } from "@/mocks/handlers/platform/authentication.mock";
 import { registerConsentsMockHandlers } from "@/mocks/handlers/platform/consents.mock";
 import { registerPlatformMetricsMockHandlers } from "@/mocks/handlers/platform/platformMetrics.mock";
+import { registerUserPreferencesMockHandlers } from "@/mocks/handlers/platform/userPreferences.mock";
 
 export function registerPlatformMockHandlers(): void {
   registerAuthenticationMockHandlers();
@@ -12,4 +13,5 @@ export function registerPlatformMockHandlers(): void {
   registerAuditLogMockHandlers();
   registerPlatformMetricsMockHandlers();
   registerConsentsMockHandlers();
+  registerUserPreferencesMockHandlers();
 }
