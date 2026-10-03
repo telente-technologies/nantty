@@ -11,7 +11,6 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { brandsService } from "@/services/brands.service";
-import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
@@ -19,7 +18,7 @@ import { verificationForProfileKind } from "@/utils/verificationProfile.util";
 
 import { VerificationBadge } from "./verificationBadge";
 
-const KIND_LABELS = { person: "Personal", creator: "Creator", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
+const KIND_LABELS = { person: "Personal", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
 
 function useActingProfileWithServerFallback() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
@@ -52,7 +51,6 @@ export function ProfileSwitcherSheet() {
   const { isProfileSwitcherSheetVisible, closeProfileSwitcherSheet } = useProfileSwitcherSheetStore();
   const setActingProfile = useActingProfileStore((s) => s.setActingProfile);
   const active = useActingProfileWithServerFallback();
-  const isCreatorApproved = useCreatorEntry().route === "CreatorDashboard";
   const profiles = useQuery({ queryKey: ["users", "me", "profiles"], queryFn: brandsService.listMyProfiles, enabled: isProfileSwitcherSheetVisible });
 
   const switchProfile = useMutation({
@@ -71,7 +69,7 @@ export function ProfileSwitcherSheet() {
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>Posts, messages and store actions happen as the profile you choose.</Text>
         {profiles.isPending ? <ListSkeleton rows={3} padding={0} /> : null}
         {profiles.isError ? <ErrorState message="Couldn't load your profiles." onRetry={() => profiles.refetch()} /> : null}
-        {(profiles.data ?? []).filter((profile) => profile.kind !== "creator" || isCreatorApproved).map((profile) => (
+        {(profiles.data ?? []).map((profile) => (
           <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === active.id }} onPress={() => switchProfile.mutate(profile.id)} style={styles.row}>
             <Avatar uri={profile.avatarUrl} size={40} />
             <View style={styles.texts}>
