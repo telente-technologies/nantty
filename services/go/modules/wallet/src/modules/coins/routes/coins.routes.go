@@ -1,0 +1,24 @@
+package routes
+
+import (
+	"net/http"
+
+	"zudomart/modules/ledger/src/middlewares"
+	"zudomart/modules/wallet/src/modules/coins"
+	"zudomart/modules/wallet/src/modules/coins/controllers"
+)
+
+func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
+	controller := controllers.CoinsController{Application: application}
+	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
+	mux.HandleFunc("GET /api/v1/coins/packages", controller.ListCoinPackages)
+	mux.HandleFunc("GET /api/v1/coins/packs", controller.ListCoinPackages)
+	mux.Handle("GET /api/v1/coins/balance", requireUser(http.HandlerFunc(controller.GetCoinBalance)))
+	mux.Handle("GET /api/v1/coins/transactions", requireUser(http.HandlerFunc(controller.ListCoinActivity)))
+	mux.Handle("POST /api/v1/coins/purchases", requireUser(http.HandlerFunc(controller.StartCoinPurchase)))
+	mux.Handle("POST /api/v1/coins/purchases/{reference}/verify", requireUser(http.HandlerFunc(controller.VerifyCoinPurchase)))
+	mux.Handle("POST /api/v1/coins/iap/receipts", requireUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
+	mux.Handle("GET /api/v1/coins/transfers/quote", requireUser(http.HandlerFunc(controller.QuoteCoinTransfer)))
+	mux.Handle("POST /api/v1/coins/transfers", requireUser(http.HandlerFunc(controller.TransferCoins)))
+	mux.Handle("POST /api/v1/creators/earnings/convert", requireUser(http.HandlerFunc(controller.ConvertEarnedCoins)))
+}
