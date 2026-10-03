@@ -1,5 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 
+import { isChatReportBody, submitChatReportMock } from "./chatReports.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const VALID_REPORT_TARGET_TYPES = ["post", "clip", "comment", "live", "user", "product", "message"];
@@ -8,6 +9,7 @@ export const receivedMockFeedFeedback: { postId: string; type: string }[] = [];
 
 export const reportsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/reports", ({ body }) => {
+    if (isChatReportBody(body)) return submitChatReportMock(body);
     const input = body as { targetType: string; targetId: string; reason: string; details?: string };
     if (!VALID_REPORT_TARGET_TYPES.includes(input.targetType) || !input.targetId || !input.reason) {
       throw new ApiError(422, "Please choose a reason for your report", "INVALID_REPORT");

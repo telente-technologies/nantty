@@ -40,17 +40,26 @@ export function keepAllowedMentionEntities(text: string, mentions: unknown): Men
   return kept;
 }
 
-const rankOf = (userId: string): MentionCandidate["rank"] => (followedUserIds.has(userId) ? "following" : recentlyInteractedUserIds.has(userId) ? "recent" : "other");
-const rankOrder = { following: 0, recent: 1, other: 2, member: 3 } as const;
+const followerUserIds = new Set<string>(["u_7", "u_8", "u_10", "u_11", "u_14", "u_17", "u_19", "u_20", "u_21", "u_23", "u_1", "u_13"]);
+const rankOf = (userId: string): MentionCandidate["rank"] => (followedUserIds.has(userId) ? "following" : followerUserIds.has(userId) ? "follower" : recentlyInteractedUserIds.has(userId) ? "recent" : "other");
+const rankOrder = { following: 0, follower: 1, recent: 2, other: 3, member: 4 } as const;
+
+const matchScore = (user: { username: string; name: string }, term: string) =>
+  !term ? 3 : user.username.toLowerCase() === term ? 0 : user.username.toLowerCase().startsWith(term) || user.name.toLowerCase().startsWith(term) ? 1 : 2;
 
 const listMentionCandidates = (query: string): MentionCandidatesResponse => {
   const normalisedQuery = query.trim().toLowerCase();
   const candidates = directoryUsersExcludingAccounts
     .filter((user) => isMentionableAtAll(user.id) && !blockedUserIds.has(user.id))
-    .filter((user) => !normalisedQuery || user.username.toLowerCase().startsWith(normalisedQuery) || user.name.toLowerCase().includes(normalisedQuery))
+    .filter((user) => !normalisedQuery || user.username.toLowerCase().includes(normalisedQuery) || user.name.toLowerCase().includes(normalisedQuery))
     .map((user) => ({ user: summariseUser(user), allowsMentions: isUserAllowedToBeMentionedByViewer(user.id), rank: rankOf(user.id) }))
-    .sort((first, second) => rankOrder[first.rank] - rankOrder[second.rank])
-    .slice(0, 8);
+    .sort((first, second) => {
+      const networkDelta = Number(first.rank === "other") - Number(second.rank === "other");
+      if (networkDelta) return networkDelta;
+      const scoreDelta = matchScore(first.user, normalisedQuery) - matchScore(second.user, normalisedQuery);
+      return scoreDelta || rankOrder[first.rank] - rankOrder[second.rank];
+    })
+    .slice(0, 12);
   return { candidates, everyone: null };
 };
 

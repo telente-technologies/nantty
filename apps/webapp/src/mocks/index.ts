@@ -35,6 +35,7 @@ import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
 import { walletMocks } from "./wallet.mock";
+import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
 import { discoveryMocks } from "./discovery.mock";
 import { savesMocks } from "./saves.mock";
@@ -73,6 +74,7 @@ export const routes: MockRoute[] = [
   ...mediaMocks,
   ...adEventsMocks,
   ...reportsMocks,
+  ...chatReportsMocks,
   ...coinsMocks,
   ...notificationsMocks,
   ...liveMocks.filter((route) => route.path === "/api/v1/lives/suggested"),
