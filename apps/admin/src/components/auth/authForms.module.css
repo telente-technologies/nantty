@@ -48,7 +48,7 @@
   list-style: none;
   border-radius: var(--radius-medium);
   background: var(--console-night);
-  color: var(--yellow-500);
+  color: var(--console-night-accent);
   font-family: var(--font-mono);
   font-size: 13px;
 }
@@ -58,7 +58,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--blue-500);
+  color: var(--color-brand);
   font-weight: 500;
   cursor: pointer;
 }
