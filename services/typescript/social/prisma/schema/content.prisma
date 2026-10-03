@@ -39,6 +39,7 @@ model Post {
   repostCount        Int            @default(0)
   shareCount         Int            @default(0)
   viewCount          Int            @default(0)
+  profileVisitCount  Int            @default(0)
   expiresAt          DateTime?
   deletedAt          DateTime?
   createdAt          DateTime       @default(now())
@@ -153,4 +154,60 @@ model StoryView {
 
   @@id([storyId, viewerId])
   @@map("story_views")
+}
+
+model PostViewer {
+  postId    String   @db.Uuid
+  viewerKey String
+  createdAt DateTime @default(now())
+
+  @@id([postId, viewerKey])
+  @@map("post_viewers")
+}
+
+model PostDailyStat {
+  postId      String @db.Uuid
+  day         String
+  impressions Int    @default(0)
+
+  @@id([postId, day])
+  @@map("post_daily_stats")
+}
+
+enum SoundStatus {
+  available
+  under_copyright_review
+  removed
+}
+
+model Sound {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  ownerId      String      @db.Uuid
+  title        String
+  isOriginal   Boolean     @default(true)
+  allowReuse   Boolean     @default(true)
+  status       SoundStatus @default(available)
+  usageCount   Int         @default(0)
+  audioUrl     String?
+  coverUrl     String?
+  sourceClipId String?     @db.Uuid
+  createdAt    DateTime    @default(now())
+
+  saves SoundSave[]
+
+  @@index([ownerId])
+  @@index([status, usageCount])
+  @@map("sounds")
+}
+
+model SoundSave {
+  soundId   String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  sound Sound @relation(fields: [soundId], references: [id], onDelete: Cascade)
+
+  @@id([soundId, userId])
+  @@index([userId, createdAt])
+  @@map("sound_saves")
 }
