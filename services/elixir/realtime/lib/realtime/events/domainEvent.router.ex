@@ -23,7 +23,26 @@ defmodule Realtime.Events.DomainEventRouter do
     "battle.settled" => "battle.settled",
     "battle.cancelled" => "battle.cancelled",
     "battle.scoreUpdated" => "battle.score.updated",
-    "battle.winnerCelebrated" => "battle.winner.celebrated"
+    "battle.winnerCelebrated" => "battle.winner.celebrated",
+    "liveComment.deleted" => "live.comment.deleted",
+    "liveComment.pinned" => "live.comment.pinned",
+    "liveComment.unpinned" => "live.comment.unpinned",
+    "liveRoomSettings.updated" => "live.room.settings",
+    "overlayScene.published" => "overlay.scene.published",
+    "overlayScene.unpublished" => "overlay.scene.unpublished"
+  }
+
+  @private_user_event_names %{
+    "liveViewer.muted" => "live.viewer.muted",
+    "liveViewer.unmuted" => "live.viewer.unmuted",
+    "liveViewer.banned" => "live.viewer.banned",
+    "liveViewer.unbanned" => "live.viewer.unbanned"
+  }
+
+  @host_recording_event_names %{
+    "liveRecording.started" => "live.recording.started",
+    "liveRecording.completed" => "live.recording.ready",
+    "liveRecording.failed" => "live.recording.failed"
   }
 
   def route_domain_event_to_topic(%{
@@ -32,6 +51,21 @@ defmodule Realtime.Events.DomainEventRouter do
       })
       when is_binary(user_id),
       do: {:ok, "user:#{user_id}", Map.put(data, "type", "guest.invited")}
+
+  def route_domain_event_to_topic(%{
+        "type" => "liveComment.created",
+        "data" => %{"liveId" => live_id, "comment" => %{} = comment}
+      })
+      when is_binary(live_id) and live_id != "",
+      do: {:ok, "live:#{live_id}", Map.put(comment, "type", "live.comment")}
+
+  def route_domain_event_to_topic(%{"type" => type, "data" => %{"userId" => user_id} = data})
+      when is_map_key(@private_user_event_names, type) and is_binary(user_id) and user_id != "",
+      do: {:ok, "user:#{user_id}", Map.put(data, "type", Map.fetch!(@private_user_event_names, type))}
+
+  def route_domain_event_to_topic(%{"type" => type, "data" => %{"hostId" => host_id} = data})
+      when is_map_key(@host_recording_event_names, type) and is_binary(host_id) and host_id != "",
+      do: {:ok, "user:#{host_id}", Map.put(data, "type", Map.fetch!(@host_recording_event_names, type))}
 
   def route_domain_event_to_topic(%{"type" => type, "data" => %{"liveId" => live_id} = data})
       when is_map_key(@live_event_names, type) and is_binary(live_id) and live_id != "",
