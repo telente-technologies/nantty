@@ -119,7 +119,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
         </SelectableRow>
         <SelectableRow selected={paymentMethod === "card"} onPress={() => setPaymentMethod("card")} accessibilityLabel="Card or bank transfer">
           <Text size={14} weight={500} lineHeight={16.8}>Card or bank transfer</Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>Pay securely on our payment partner's page</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>Pay in a secure payment window</Text>
         </SelectableRow>
       </ScrollView>
       <View style={styles.footer}>

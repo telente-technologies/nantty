@@ -72,7 +72,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
               <View style={styles.section}>
                 <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>Stores</Text>
                 {data.stores.map((store) => (
-                  <PersonRow key={store.id} name={store.name} handle={`${store.rating.toFixed(1)} ★ • ${store.reviewCount} reviews`} avatarUrl={store.logoUrl} onPress={() => navigation.navigate("Store", { storeId: store.id })} />
+                  <PersonRow key={store.id} name={store.name} handle={`${store.rating.toFixed(1)} rating · ${store.reviewCount} reviews`} avatarUrl={store.logoUrl} onPress={() => navigation.navigate("Store", { storeId: store.id })} />
                 ))}
               </View>
             ) : null}

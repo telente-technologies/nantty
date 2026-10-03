@@ -20,6 +20,7 @@ import { paymentsService } from "@/services/payments.service";
 import type { CreatorSubscriptionCheckout, CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 const VERIFY_MAX_ATTEMPTS = 6;
 const VERIFY_RETRY_DELAY_MS = 1_500;
@@ -106,11 +107,11 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
             <Text size={15} weight={600} lineHeight={18}>{plan.name}</Text>
             <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>{formatMoneyForDisplay(plan.price)} / {plan.interval}</Text>
             {plan.benefits.map((benefit) => (
-              <Text key={benefit} size={13} lineHeight={17.5} color={colors.textMuted}>• {benefit}</Text>
+              <BulletLine key={benefit} size={13} lineHeight={17.5}>{benefit}</BulletLine>
             ))}
           </SelectableRow>
         ))}
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>You'll pay securely on our payment partner's page. Renews automatically until you cancel.</Text>
+        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>You'll pay in a secure payment window. Renews automatically until you cancel.</Text>
       </ScrollView>
       <View style={styles.footer}>
         {subscribe.isError ? <Text size={12} color={colors.error} align="center">{subscribe.error.message}</Text> : null}

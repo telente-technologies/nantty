@@ -6,6 +6,7 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-n
 import { AffiliationsSection } from "@/components/creator/affiliationsSection";
 import { CreatorEarningsCard } from "@/components/creator/creatorEarningsCard";
 import { creatorQueryKeys, useCreatorRevenueRulesQuery } from "@/components/creator/creatorQueries.hook";
+import { PayoutSetupCard } from "@/components/payoutOnboarding/payoutSetupCard";
 import { RevenueRulesCard } from "@/components/creator/revenueRulesCard";
 import { StudioCoinsSection } from "@/components/creator/studioCoinsSection";
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
@@ -56,6 +57,7 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
           contentContainerStyle={styles.content}
           refreshControl={<RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} tintColor={colors.primary} />}
         >
+          <PayoutSetupCard context="creator" />
           <StudioCoinsSection onOpenActivity={() => navigation.navigate("CoinActivity")} />
           <Text size={16} weight={600} lineHeight={19.2}>Wallet &amp; earnings</Text>
           <CreatorEarningsCard dashboard={dashboard.data} />
