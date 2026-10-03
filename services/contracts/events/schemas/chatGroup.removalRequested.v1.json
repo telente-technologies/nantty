@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/chatGroup.removalRequested.v1.json",
+  "title": "ChatGroupRemovalRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "reportId"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string"
+    },
+    "reportId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

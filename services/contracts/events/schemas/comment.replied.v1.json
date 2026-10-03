@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/comment.replied.v1.json",
-  "title": "CommentReplied",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["commentId","postId","parentCommentId","parentAuthorId","authorId"],
-  "properties": { "commentId": { "type": "string", "format": "uuid" }, "postId": { "type": "string", "format": "uuid" }, "parentCommentId": { "type": "string", "format": "uuid" }, "parentAuthorId": { "type": "string", "format": "uuid" }, "authorId": { "type": "string", "format": "uuid" } }
-}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/comment.created.v1.json",
+  "title": "CommentCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipientUserId",
+    "actor",
+    "commentId",
+    "postId"
+  ],
+  "properties": {
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "target": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "commentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "parentCommentId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

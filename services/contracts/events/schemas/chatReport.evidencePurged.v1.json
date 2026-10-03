@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/chatReport.evidencePurged.v1.json",
+  "title": "ChatReportEvidencePurged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportId"
+  ],
+  "properties": {
+    "reportId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

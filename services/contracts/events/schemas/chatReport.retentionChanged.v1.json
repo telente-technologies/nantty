@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/chatReport.retentionChanged.v1.json",
+  "title": "ChatReportRetentionChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retentionDays",
+    "legalHoldDays"
+  ],
+  "properties": {
+    "retentionDays": {
+      "type": "integer"
+    },
+    "legalHoldDays": {
+      "type": "integer"
+    }
+  }
+}

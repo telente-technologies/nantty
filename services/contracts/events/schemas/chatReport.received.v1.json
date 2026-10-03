@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/chatReport.received.v1.json",
+  "title": "ChatReportReceived",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportId",
+    "reporterId",
+    "targetType",
+    "conversationId",
+    "reason",
+    "priority",
+    "blockReportedUser"
+  ],
+  "properties": {
+    "reportId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reporterId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "targetType": {
+      "type": "string"
+    },
+    "reportedUserId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "conversationId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    },
+    "blockReportedUser": {
+      "type": "boolean"
+    }
+  }
+}

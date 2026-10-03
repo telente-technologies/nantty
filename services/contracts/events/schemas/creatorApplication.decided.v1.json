@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/creatorApplication.decided.v1.json",
+  "title": "CreatorApplicationDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "applicationId",
+    "status",
+    "decision",
+    "automatic"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "applicationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "decision": {
+      "type": "string"
+    },
+    "automatic": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "reviewedBy": {
+      "type": "string"
+    }
+  }
+}
