@@ -17,6 +17,9 @@ type PrivacySettings struct {
 	DeletionGraceDays          int
 	DeletionWorkerPollInterval time.Duration
 	InternalApiToken           string
+	NotificationServiceToken   string
+	MoneyInternalUrl           string
+	MoneyInternalToken         string
 	AnonymousConsentPerMinute  int
 }
 
@@ -32,6 +35,9 @@ func ReadPrivacySettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		DeletionGraceDays:          reader.ReadIntegerOrDefault("USERS_DELETION_GRACE_DAYS", 14),
 		DeletionWorkerPollInterval: reader.ReadDurationOrDefault("USERS_DELETION_WORKER_POLL_INTERVAL", time.Minute),
 		InternalApiToken:           reader.ReadStringOrDefault("USERS_INTERNAL_API_TOKEN", ""),
+		MoneyInternalUrl:           reader.ReadStringOrDefault("USERS_MONEY_INTERNAL_URL", ""),
+		MoneyInternalToken:         reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),
+		NotificationServiceToken:   reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 		AnonymousConsentPerMinute:  reader.ReadIntegerOrDefault("USERS_ANONYMOUS_CONSENT_PER_MINUTE", 30),
 	}
 }

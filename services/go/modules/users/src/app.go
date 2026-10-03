@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/events"
 	"zudomart/modules/users/src/generated/ent"
+	"zudomart/modules/users/src/integrations"
 	"zudomart/modules/users/src/migrations"
 	accountenforcement "zudomart/modules/users/src/modules/accountEnforcement"
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
@@ -25,6 +26,7 @@ import (
 	creatorprogram "zudomart/modules/users/src/modules/creatorProgram"
 	creatorstatus "zudomart/modules/users/src/modules/creatorStatus"
 	"zudomart/modules/users/src/modules/legal"
+	notificationdirectory "zudomart/modules/users/src/modules/notificationDirectory"
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
 	"zudomart/modules/users/src/modules/usernames"
@@ -79,6 +81,9 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 		_ = database.Close()
 		return nil, err
 	}
+	if settings.Privacy.MoneyInternalUrl != "" {
+		usersContainer.PendingWithdrawals = integrations.NewHttpPendingWithdrawalChecker(settings.Privacy.MoneyInternalUrl, settings.Privacy.MoneyInternalToken)
+	}
 	identityports.Default.RegisterUsernameGuard(services.UsernameGuardService{Container: usersContainer})
 	identityports.Default.RegisterAccountCountryLookup(services.AccountCountryService{Container: usersContainer})
 	dependencies.Health.AddReadinessCheck("users-postgres", postgres.ReadinessCheckForDatabase(database))
@@ -100,6 +105,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	businessdocuments.Mount(mux, module.container)
 	legal.Mount(mux, module.container)
 	contactprivacy.Mount(mux, module.container)
+	notificationdirectory.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -126,16 +132,9 @@ func publishedKeySetFromAuth(ctx context.Context) (jwk.Set, error) {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.UsersSettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }
+
+func (module *Module) Container() *container.Container { return module.container }

@@ -28,6 +28,7 @@ func (ProfileSignal) Fields() []ent.Field {
 		field.Int("success_rate_percent").Default(0).Min(0).Max(100),
 		field.Bool("has_active_store_or_brand_page").Default(false),
 		field.Enum("seller_plan").Values("FREE", "PRO", "BUSINESS").Default("FREE"),
+		field.Time("checkmark_suggested_at").Optional().Nillable(),
 		field.String("source").Default("").MaxLen(40),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

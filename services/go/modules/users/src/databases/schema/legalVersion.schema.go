@@ -26,6 +26,7 @@ func (LegalVersion) Fields() []ent.Field {
 		field.Time("effective_at"),
 		field.Bool("is_material_change").Default(false),
 		field.Bool("is_flagged_for_legal_review").Default(false),
+		field.Bool("effective_at_is_default").Default(false),
 		field.String("created_by").MaxLen(64).Immutable(),
 		field.String("created_by_name").MaxLen(120).Default(""),
 		field.String("submitted_by").MaxLen(64).Default(""),
