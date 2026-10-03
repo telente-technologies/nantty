@@ -1,9 +1,11 @@
+import { convertAccessToSellerPlan, isFeatureIncludedInPlan } from "@/config/planFeatures.config";
+import { sellerPermissions, type SellerPermission } from "@/config/rolePermissions.config";
 import { staffRoles } from "@/constants/roles.constant";
 import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { assertStaffSeatAvailable, describeMockActor } from "@/mocks/handlers/settingsEntitlements.mock";
 import { createMockIdentifier, matchesSearchText, MockHttpError, paginateMockList, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithNoContent, respondWithValidationFailure } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
-import { buildDemoUserAccounts, hashPosPinForStorage, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
+import { buildDemoUserAccounts, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
 import type { StaffRole } from "@/types/sellerAccess.type";
 import type { StaffMember, ZudomartUserCandidate } from "@/types/staff.type";
 import { fieldChecks, validateObjectAgainstChecks, type ValidationIssue } from "@/utils/formValidation.util";
@@ -11,8 +13,7 @@ import { fieldChecks, validateObjectAgainstChecks, type ValidationIssue } from "
 const invitableRoles = staffRoles.filter((role) => role !== "owner");
 
 function convertStaffRecordToPublicMember(record: MockStaffRecord): StaffMember {
-  const { pinHash: _pinHash, failedPinAttempts: _failedPinAttempts, ...member } = record;
-  return member;
+  return record;
 }
 
 function findStaffIndexOrThrow(staffId: string): number {
@@ -33,13 +34,33 @@ function validateLocationIds(value: unknown, issues: ValidationIssue[]): string[
 function assertActorMayAssignRole(request: MockRequest, role: StaffRole): void {
   const principal = requireMockStorePrincipal(request);
   if (role === "owner") throw new MockHttpError(403, "OWNER_ROLE_RESERVED", "There is only one owner per store.");
-  if (role === "admin" && principal.role !== "owner") throw new MockHttpError(403, "OWNER_ONLY", "Only the store owner can make someone an admin.");
+  if (role === "manager" && principal.role !== "owner") throw new MockHttpError(403, "OWNER_ONLY", "Only the store owner can make someone a manager.");
 }
 
 function assertActorMayManageMember(request: MockRequest, target: MockStaffRecord): void {
   const principal = requireMockStorePrincipal(request);
   if (target.role === "owner") throw new MockHttpError(403, "OWNER_PROTECTED", "The store owner cannot be changed here.");
-  if (target.role === "admin" && principal.role !== "owner") throw new MockHttpError(403, "OWNER_ONLY", "Only the store owner can change an admin.");
+  if (target.role === "manager" && principal.role !== "owner") throw new MockHttpError(403, "OWNER_ONLY", "Only the store owner can change a manager.");
+}
+
+const permissionsReservedForOwner = new Set<SellerPermission>(["billing:manage", "developer:manage", "wallet:withdraw"]);
+
+function readCustomPermissionsFromBody(storeId: string, value: unknown, issues: ValidationIssue[]): SellerPermission[] | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  const gateStore = readMockDatabase().gateStores.find((store) => store.storeId === storeId);
+  if (!isFeatureIncludedInPlan("advanced_permissions", convertAccessToSellerPlan({ subscription: gateStore?.subscription.subscription ?? null }))) {
+    throw new MockHttpError(402, "PLAN_FEATURE_REQUIRED", "Custom permissions are part of the Business plan.");
+  }
+  if (!Array.isArray(value) || value.some((permission) => typeof permission !== "string" || !(sellerPermissions as readonly string[]).includes(permission))) {
+    issues.push({ path: "permissions", message: "Choose permissions from the list." });
+    return undefined;
+  }
+  if (value.some((permission) => permissionsReservedForOwner.has(permission as SellerPermission))) {
+    issues.push({ path: "permissions", message: "Billing, withdrawals and developer access stay with the owner." });
+    return undefined;
+  }
+  return [...new Set(value as SellerPermission[])];
 }
 
 function recordStaffAudit(request: MockRequest, action: string, target: MockStaffRecord, summary: string): void {
@@ -84,6 +105,7 @@ export function registerStaffTeamMockHandlers(): void {
     const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
     if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Zudomart account." });
     const locationIds = validateLocationIds(body.locationIds, issues);
+    const customPermissions = readCustomPermissionsFromBody(principal.storeId, body.permissions, issues);
     if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
     const role = body.role as StaffRole;
     assertActorMayAssignRole(request, role);
@@ -100,10 +122,7 @@ export function registerStaffTeamMockHandlers(): void {
       avatarUrl: zudomartAccount.avatarUrl,
       role,
       status: "invited",
-      hasPosPin: false,
-      pinHash: null,
-      failedPinAttempts: 0,
-      pinLockedUntil: null,
+      permissions: customPermissions ?? null,
       locationIds,
       lastActiveAt: null,
       invitedAt: new Date().toISOString(),
@@ -125,9 +144,10 @@ export function registerStaffTeamMockHandlers(): void {
       status: fieldChecks.optional(fieldChecks.oneOf("Status", ["active", "suspended"] as const)),
     });
     const locationIds = body.locationIds === undefined ? target.locationIds : validateLocationIds(body.locationIds, issues);
+    const customPermissions = readCustomPermissionsFromBody(principal.storeId, body.permissions, issues);
     if (issues.length > 0) return respondWithValidationFailure(issues);
     const isSelf = target.id === principal.staffId;
-    if (isSelf && (body.role !== undefined || body.status !== undefined)) throw new MockHttpError(403, "CANNOT_EDIT_SELF", "You cannot change your own role or status. Ask the owner.");
+    if (isSelf && (body.role !== undefined || body.status !== undefined || body.permissions !== undefined)) throw new MockHttpError(403, "CANNOT_EDIT_SELF", "You cannot change your own role or status. Ask the owner.");
     if (!isSelf) assertActorMayManageMember(request, target);
     if (body.role !== undefined) assertActorMayAssignRole(request, body.role as StaffRole);
     if (body.status === "active" && target.status === "suspended") assertStaffSeatAvailable(principal.storeId);
@@ -138,9 +158,10 @@ export function registerStaffTeamMockHandlers(): void {
       role: (body.role as StaffRole | undefined) ?? target.role,
       status: nextStatus,
       locationIds,
+      permissions: customPermissions === undefined ? target.permissions : customPermissions,
     };
     database.staff[staffIndex] = updated;
-    const changes = [body.role !== undefined && body.role !== target.role ? `role ${target.role} → ${updated.role}` : null, body.status !== undefined && body.status !== target.status ? `status ${target.status} → ${updated.status}` : null, body.locationIds !== undefined ? "locations" : null].filter(Boolean);
+    const changes = [body.role !== undefined && body.role !== target.role ? `role ${target.role} → ${updated.role}` : null, body.status !== undefined && body.status !== target.status ? `status ${target.status} → ${updated.status}` : null, body.locationIds !== undefined ? "locations" : null, body.permissions !== undefined ? (customPermissions ? "custom permissions" : "permissions reset to role defaults") : null].filter(Boolean);
     recordStaffAudit(request, "staff.updated", updated, `Updated ${updated.name}${changes.length ? `: ${changes.join(", ")}` : ""}`);
     return respondWithJson(200, convertStaffRecordToPublicMember(updated));
   });
@@ -153,33 +174,8 @@ export function registerStaffTeamMockHandlers(): void {
     if (target.id === principal.staffId) throw new MockHttpError(403, "CANNOT_REMOVE_SELF", "You cannot remove yourself.");
     assertActorMayManageMember(request, target);
     database.staff.splice(staffIndex, 1);
-    for (const [operatorToken, operatorSession] of database.operatorSessions) if (operatorSession.staffId === target.id) database.operatorSessions.delete(operatorToken);
     recordStaffAudit(request, "staff.removed", target, `Removed ${target.name} from the team`);
     return respondWithNoContent();
-  });
-
-  registerMockRoute("POST", "/seller/staff/:staffId/pin", (request) => {
-    const database = readMockDatabase();
-    const staffIndex = findStaffIndexOrThrow(request.params.staffId ?? "");
-    const target = database.staff[staffIndex] as MockStaffRecord;
-    const pin = readJsonObjectBody(request).pin;
-    if (typeof pin !== "string" || !/^\d{4,6}$/.test(pin)) return respondWithValidationFailure([{ path: "pin", message: "The PIN must be 4 to 6 digits." }]);
-    if (/^(\d)\1+$/.test(pin) || "0123456789".includes(pin) || "9876543210".includes(pin)) return respondWithValidationFailure([{ path: "pin", message: "Pick a PIN that is harder to guess than a repeated digit or a straight run." }]);
-    if (target.role === "owner" && target.id !== requireMockStorePrincipal(request).staffId) throw new MockHttpError(403, "OWNER_PROTECTED", "Only the owner can set the owner's PIN.");
-    const updated: MockStaffRecord = { ...target, pinHash: hashPosPinForStorage(pin), hasPosPin: true, failedPinAttempts: 0, pinLockedUntil: null };
-    database.staff[staffIndex] = updated;
-    recordStaffAudit(request, "staff.pin_set", updated, `${target.hasPosPin ? "Reset" : "Set"} the register PIN for ${target.name}`);
-    return respondWithJson(200, convertStaffRecordToPublicMember(updated));
-  });
-
-  registerMockRoute("POST", "/seller/staff/:staffId/unlock-pin", (request) => {
-    const database = readMockDatabase();
-    const staffIndex = findStaffIndexOrThrow(request.params.staffId ?? "");
-    const target = database.staff[staffIndex] as MockStaffRecord;
-    const updated: MockStaffRecord = { ...target, failedPinAttempts: 0, pinLockedUntil: null };
-    database.staff[staffIndex] = updated;
-    recordStaffAudit(request, "staff.pin_unlocked", updated, `Unlocked the register PIN for ${target.name}`);
-    return respondWithJson(200, convertStaffRecordToPublicMember(updated));
   });
 
   registerMockRoute("GET", "/seller/audit-log", (request) => {

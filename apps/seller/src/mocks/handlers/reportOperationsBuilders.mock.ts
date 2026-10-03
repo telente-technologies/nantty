@@ -1,5 +1,5 @@
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
-import { collectSaleLineRecords, convertIsoToStoreDateKey, doesRecordMatchReportFilters, isDateKeyWithinRange, type ReportFilters } from "@/mocks/handlers/reportSalesRecords.mock";
+import { collectSaleLineRecords, doesRecordMatchReportFilters, type ReportFilters } from "@/mocks/handlers/reportSalesRecords.mock";
 import { createStoreMoney, type BuiltReportTable } from "@/mocks/handlers/reportSalesBuilders.mock";
 
 export function buildTaxReport(filters: ReportFilters): BuiltReportTable {
@@ -75,49 +75,5 @@ export function buildInventoryValuationReport(filters: ReportFilters): BuiltRepo
     ],
     rows,
     totals: { product: "Total", variant: null, sku: null, location: null, onHand: totalOnHand, unitCost: null, costValue: createStoreMoney(totalCostMinor), retailValue: createStoreMoney(totalRetailMinor), potentialProfit: createStoreMoney(totalRetailMinor - totalCostMinor) },
-  };
-}
-
-export function buildShiftsReport(filters: ReportFilters): BuiltReportTable {
-  const database = readMockDatabase();
-  const registerNameById = new Map(database.registers.map((register) => [register.id, register.name]));
-  const locationNameById = new Map(database.locations.map((location) => [location.id, location.name]));
-  const shifts = database.shifts
-    .filter((shift) => isDateKeyWithinRange(convertIsoToStoreDateKey(shift.openedAt, database.settings.timezone), filters.fromKey, filters.toKey))
-    .filter((shift) => !filters.locationId || shift.locationId === filters.locationId)
-    .sort((first, second) => second.openedAt.localeCompare(first.openedAt));
-  let varianceMinor = 0;
-  let netSalesMinor = 0;
-  const rows = shifts.map((shift) => {
-    varianceMinor += shift.cashVariance?.amountMinor ?? 0;
-    netSalesMinor += shift.totals.netSales.amountMinor;
-    return {
-      openedAt: shift.openedAt,
-      location: locationNameById.get(shift.locationId) ?? shift.locationId,
-      register: registerNameById.get(shift.registerId) ?? shift.registerId,
-      cashier: shift.openedBy.name,
-      status: shift.status === "open" ? "Open" : "Closed",
-      sales: shift.totals.salesCount,
-      netSales: shift.totals.netSales,
-      expectedCash: shift.expectedCash,
-      countedCash: shift.countedCash,
-      variance: shift.cashVariance,
-    };
-  });
-  return {
-    columns: [
-      { key: "openedAt", label: "Opened", kind: "date" },
-      { key: "location", label: "Location", kind: "text" },
-      { key: "register", label: "Register", kind: "text" },
-      { key: "cashier", label: "Cashier", kind: "text" },
-      { key: "status", label: "Status", kind: "text" },
-      { key: "sales", label: "Sales", kind: "number" },
-      { key: "netSales", label: "Net sales", kind: "money" },
-      { key: "expectedCash", label: "Expected cash", kind: "money" },
-      { key: "countedCash", label: "Counted cash", kind: "money" },
-      { key: "variance", label: "Variance", kind: "money" },
-    ],
-    rows,
-    totals: { openedAt: "Total", location: null, register: null, cashier: null, status: null, sales: shifts.reduce((sum, shift) => sum + shift.totals.salesCount, 0), netSales: createStoreMoney(netSalesMinor), expectedCash: null, countedCash: null, variance: createStoreMoney(varianceMinor) },
   };
 }

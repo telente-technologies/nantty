@@ -1,8 +1,7 @@
 import type { StoreSettings } from "@/types/store.type";
 import { fieldChecks, validateObjectAgainstChecks, type FieldCheck, type ValidationIssue } from "@/utils/formValidation.util";
 
-const editableTopLevelKeys = new Set(["name", "description", "phone", "email", "address", "taxes", "pricesIncludeTax", "receipt", "paymentMethods", "discountApprovalThresholdBasisPoints", "loyalty", "notifications"]);
-const paymentMethodValues = ["cash", "card", "bank_transfer", "zudomart_wallet", "pay_link"] as const;
+const editableTopLevelKeys = new Set(["name", "description", "phone", "email", "address", "taxes", "pricesIncludeTax", "policies", "loyalty", "notifications"]);
 const basisPointsCheck = (label: string) => fieldChecks.integer({ label, min: 0, max: 10_000 });
 
 function prefixIssues(prefix: string, issues: ValidationIssue[]): ValidationIssue[] {
@@ -32,22 +31,6 @@ function validateTaxRates(value: unknown, knownCategoryIds: ReadonlySet<string>)
   if (defaultRates.some((taxRate) => (taxRate as { appliesToCategoryIds?: unknown }).appliesToCategoryIds !== null)) issues.push({ path: "taxes", message: "The default rate must apply to everything." });
   const taxIds = value.map((taxRate) => (taxRate as { id?: unknown }).id);
   if (new Set(taxIds).size !== taxIds.length) issues.push({ path: "taxes", message: "Each tax rate needs its own id." });
-  return issues;
-}
-
-function validatePaymentMethods(value: unknown): ValidationIssue[] {
-  if (!Array.isArray(value) || value.length === 0) return [{ path: "paymentMethods", message: "Send your payment methods." }];
-  const issues = value.flatMap((paymentMethod, index) =>
-    validateNestedObject(paymentMethod, `paymentMethods.${index}`, {
-      method: fieldChecks.oneOf("Payment method", paymentMethodValues),
-      enabled: fieldChecks.boolean("Enabled"),
-      label: fieldChecks.text({ label: "Label", max: 40 }),
-      instructions: fieldChecks.optional(fieldChecks.text({ label: "Instructions", max: 300 })),
-    }),
-  );
-  const methods = value.map((paymentMethod) => (paymentMethod as { method?: unknown }).method);
-  if (new Set(methods).size !== methods.length) issues.push({ path: "paymentMethods", message: "Each payment method can appear once." });
-  if (!value.some((paymentMethod) => (paymentMethod as { enabled?: unknown }).enabled === true)) issues.push({ path: "paymentMethods", message: "Keep at least one payment method switched on." });
   return issues;
 }
 
@@ -83,19 +66,14 @@ export function validateStoreSettingsPatch(body: Record<string, unknown>, curren
   if (has("email")) topLevelChecks.email = fieldChecks.email();
   if (has("address")) topLevelChecks.address = fieldChecks.text({ label: "Address", min: 5, max: 200 });
   if (has("pricesIncludeTax")) topLevelChecks.pricesIncludeTax = fieldChecks.boolean("Prices include tax");
-  if (has("discountApprovalThresholdBasisPoints")) topLevelChecks.discountApprovalThresholdBasisPoints = basisPointsCheck("Approval threshold");
   issues.push(...validateObjectAgainstChecks(body, topLevelChecks));
   if (has("taxes")) issues.push(...validateTaxRates(body.taxes, knownCategoryIds));
-  if (has("paymentMethods")) issues.push(...validatePaymentMethods(body.paymentMethods));
   if (has("loyalty")) issues.push(...validateLoyaltyRules(body.loyalty, current.currency));
-  if (has("receipt")) {
-    issues.push(...validateNestedObject(body.receipt, "receipt", {
-      showLogo: fieldChecks.boolean("Show logo"),
-      showCashierName: fieldChecks.boolean("Show cashier"),
-      headerText: fieldChecks.optional(fieldChecks.text({ label: "Header", max: 120 })),
-      footerText: fieldChecks.optional(fieldChecks.text({ label: "Footer", max: 200 })),
-      returnPolicy: fieldChecks.optional(fieldChecks.text({ label: "Return policy", max: 400 })),
-      paperWidth: fieldChecks.oneOf("Paper width", ["58mm", "80mm"] as const),
+  if (has("policies")) {
+    issues.push(...validateNestedObject(body.policies, "policies", {
+      returns: (value) => (typeof value === "string" && value.length <= 2000 ? null : "Keep the returns policy under 2,000 characters."),
+      shipping: (value) => (typeof value === "string" && value.length <= 2000 ? null : "Keep the shipping policy under 2,000 characters."),
+      privacy: (value) => (typeof value === "string" && value.length <= 2000 ? null : "Keep the privacy policy under 2,000 characters."),
     }));
   }
   if (has("notifications")) {
