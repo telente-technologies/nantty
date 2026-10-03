@@ -1,9 +1,12 @@
-import { unprocessable } from "../../../../errors/social.error.js";
+import { forbidden, notFound, unprocessable } from "../../../../errors/social.error.js";
 import { socialEventTypes } from "../../../../events/eventTypes.event.js";
+import { buildExcerpt, resolveEventActor } from "../../../../events/actor.event.js";
 import { appendDomainEventsToOutbox, type DomainEventInput } from "../../../../events/outbox.event.js";
 import type { Prisma } from "../../../../generated/prisma/client.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { storyLifetimeHours } from "../../../../constants/social.constant.js";
+import { soundRepository } from "../../../sounds/repositories/sound.repository.js";
+import { canUseSound } from "../../../sounds/services/soundView.service.js";
 import { prepareMentionsForWrite } from "../../../mentions/services/mentionWrite.service.js";
 import type { PostView } from "../../models/post.model.js";
 import { postRepository } from "../../repositories/post.repository.js";
@@ -23,8 +26,15 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
     assertMediaFitsPostKind(command.kind, command.text, media);
     if (command.replyToComment === undefined && command.stickerLayout !== undefined) throw unprocessable("STICKER_WITHOUT_REPLY", "A sticker layout needs a comment to reply to.");
     const comment = command.replyToComment === undefined ? undefined : await assertAuthorMayReplyToCommentWithVideo(context, command.authorId, command.kind, command.replyToComment);
+    if (command.soundId !== undefined) {
+      if (command.kind !== "clip") throw unprocessable("SOUND_REQUIRES_CLIP", "Only clips can use a sound.");
+      const sound = await soundRepository.findById(context.database.client, command.soundId);
+      if (sound === null) throw notFound("SOUND_NOT_FOUND", "Sound not found.");
+      if (!canUseSound(sound, command.authorId)) throw forbidden("SOUND_NOT_REUSABLE", "This sound can't be used.");
+    }
     const mentionResult = await prepareMentionsForWrite(context, { surface: "post", authorId: command.authorId, text: command.text, entities: command.mentions });
     const now = context.clock.now();
+    const actor = await resolveEventActor(context.directory, command.authorId);
     const created = await context.database.transaction(async (transaction) => {
       const post = await postRepository.create(transaction, {
         authorId: command.authorId,
@@ -46,12 +56,13 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
           })),
         },
       });
+      if (command.soundId !== undefined) await soundRepository.incrementUsage(transaction, command.soundId, 1);
       const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, kind: post.kind, audience: post.audience, visibility: post.visibility, isAiGenerated: post.isAiGenerated } }];
       for (const userId of mentionResult.userIdsToNotify) {
-        events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { mentionedUserId: userId, authorId: command.authorId, surface: "post", postId: post.id } });
+        events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "post", postId: post.id, excerpt: buildExcerpt(command.text), url: `/post/${post.id}` } });
       }
       if (comment !== undefined) {
-        events.push({ eventType: socialEventTypes.videoReplyPublished, subject: post.id, occurredAt: now, data: { replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
+        events.push({ eventType: socialEventTypes.videoReplyCreated, subject: post.id, occurredAt: now, data: { recipientUserId: comment.authorId, actor, url: `/clips/${post.id}`, replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
       }
       await appendDomainEventsToOutbox(transaction, events);
       return post;
