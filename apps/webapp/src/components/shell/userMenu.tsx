@@ -55,7 +55,7 @@ export function UserMenu() {
     { href: "/me", label: "Your profile", icon: <UserIcon size={18} /> },
     { href: "/saved", label: "Saved", icon: <BookmarkIcon size={18} /> },
     { href: "/orders", label: "Orders", icon: <OrdersIcon size={18} /> },
-    { href: "/creator", label: "Creator dashboard", icon: <CreatorIcon size={18} /> },
+    { href: "/creator", label: "Creator tools", icon: <CreatorIcon size={18} /> },
     { href: "/settings", label: "Settings", icon: <SettingsIcon size={18} /> },
   ];
 
