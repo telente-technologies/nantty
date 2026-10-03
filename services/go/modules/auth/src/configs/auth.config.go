@@ -30,6 +30,8 @@ type AuthSettings struct {
 	GoogleJwksUrl               string
 	AppleJwksUrl                string
 	StaffAccessTokenTimeToLive  time.Duration
+	DirectoryGrpcAddress        string
+	InternalGrpcToken           string
 }
 
 func (settings AuthSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -58,6 +60,11 @@ func ReadAuthSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) A
 		GoogleJwksUrl:               reader.ReadStringOrDefault("AUTH_GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs"),
 		AppleJwksUrl:                reader.ReadStringOrDefault("AUTH_APPLE_JWKS_URL", "https://appleid.apple.com/auth/keys"),
 		StaffAccessTokenTimeToLive:  reader.ReadDurationOrDefault("AUTH_STAFF_ACCESS_TOKEN_TTL", 10*time.Minute),
+		DirectoryGrpcAddress:        reader.ReadStringOrDefault("AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS", ""),
+		InternalGrpcToken:           reader.ReadStringOrDefault("AUTH_INTERNAL_GRPC_TOKEN", ""),
+	}
+	if settings.IsProduction() && settings.DirectoryGrpcAddress != "" && len(settings.InternalGrpcToken) < 32 {
+		reader.ReadRequiredString("AUTH_INTERNAL_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
 	}
 	if settings.IsProduction() && settings.OneTimeCodeDeliveryMode == "log" {
 		reader.ReadRequiredString("AUTH_OTP_DELIVERY_NOT_LOG_IN_PRODUCTION")
