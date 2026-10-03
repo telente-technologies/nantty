@@ -29,6 +29,14 @@ export const authMocks: MockRoute[] = [
     if (!identifier?.trim() || !password) throw new ApiError(401, "Enter your email or username and your password.", "INVALID_CREDENTIALS");
     return mintSession();
   }),
+  createMockRoute("POST", "/api/v1/auth/google", ({ body }) => {
+    if (!(body as { idToken?: string } | undefined)?.idToken) throw new ApiError(400, "Google sign-in failed. Try again.", "VALIDATION_FAILED");
+    return mintSession();
+  }),
+  createMockRoute("POST", "/api/v1/auth/apple", ({ body }) => {
+    if (!(body as { identityToken?: string } | undefined)?.identityToken) throw new ApiError(400, "Apple sign-in failed. Try again.", "VALIDATION_FAILED");
+    return mintSession();
+  }),
   createMockRoute("POST", "/api/v1/auth/logout", () => undefined),
   createMockRoute("POST", "/api/v1/auth/refresh", () => ({ accessToken, refreshToken })),
   createMockRoute("GET", "/api/v1/users/me", () => studioViewer),

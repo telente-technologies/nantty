@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { ID, ISODate, LiveCategory, LiveComment, LiveEarnings, LiveProduct, LiveSession, OverlayLayer, OverlayScene } from "@/types";
+import type { ID, ISODate, LiveCategory, LiveComment, LiveCommentWire, LiveEarnings, LiveProduct, LiveSession, OverlayLayer, OverlayScene } from "@/types";
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -34,6 +34,13 @@ const buildScene = (liveId: ID): OverlayScene => ({
   liveId,
   name: "Main scene",
   layers: [...DEFAULT_LAYERS],
+});
+
+const toCommentWire = (comment: LiveComment): LiveCommentWire => ({
+  id: comment.id,
+  author: { id: `u_${comment.authorName.toLowerCase()}`, name: comment.authorName, username: comment.authorName.toLowerCase(), avatarUrl: null },
+  text: comment.text,
+  createdAt: comment.createdAt,
 });
 
 const liveState = new Map<ID, LiveSession>();
@@ -197,7 +204,7 @@ export const liveMocks: MockRoute[] = [
     overlayState.set(liveId, scene);
     return scene;
   }),
-  createMockRoute("GET", "/api/v1/lives/:liveId/comments", ({ params }) => commentState.get(params.liveId!) ?? []),
+  createMockRoute("GET", "/api/v1/lives/:liveId/comments", ({ params }) => ({ data: (commentState.get(params.liveId!) ?? []).map(toCommentWire), nextCursor: null })),
   createMockRoute("POST", "/api/v1/lives/:liveId/comments", ({ params, body }) => {
     const liveId = params.liveId!;
     const text = String((body as { text?: unknown } | null)?.text ?? "").trim();
@@ -205,7 +212,7 @@ export const liveMocks: MockRoute[] = [
     const comment: LiveComment = { id: `c_${Date.now()}`, authorName: "You", text, createdAt: new Date().toISOString() };
     const next = [comment, ...(commentState.get(liveId) ?? [])];
     commentState.set(liveId, next);
-    return comment;
+    return toCommentWire(comment);
   }),
   createMockRoute("GET", "/api/v1/lives/:liveId/products", ({ params }) => findLiveOrThrow(params.liveId!).products),
   createMockRoute("POST", "/api/v1/lives/:liveId/products", ({ params, body }) => {
