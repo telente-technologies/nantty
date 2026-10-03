@@ -135,6 +135,9 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	}
 	deployed.Funding = collaborators.Funding
 	if deployed.Funding == nil {
+		deployed.Funding = selectMoneyFundingGateway(settings, deployed.Logger)
+	}
+	if deployed.Funding == nil {
 		deployed.Funding = integrations.UnconfiguredFundingGateway{}
 		if settings.AllowInMemoryFunding {
 			deployed.Logger.Warn("no money gateway is configured: wallet boosts use an in-memory fake that moves no real money")
@@ -181,6 +184,24 @@ func completeStorageAndJobs(ctx context.Context, deployed *container.Container, 
 func refuseFakeFundingInProduction(funding interfaces.FundingGateway, settings configs.AdsSettings) error {
 	if _, fake := funding.(*integrations.InMemoryFundingGateway); fake && settings.IsProduction() {
 		return errors.New("the in-memory funding gateway moves no real money and is refused in production")
+	}
+	return nil
+}
+
+func selectMoneyFundingGateway(settings configs.AdsSettings, logger *slog.Logger) interfaces.FundingGateway {
+	var fallback *integrations.HttpMoneyFundingGateway
+	if settings.MoneyHttpUrl != "" {
+		fallback = &integrations.HttpMoneyFundingGateway{BaseUrl: settings.MoneyHttpUrl, Token: settings.MoneyInternalToken, Http: &http.Client{Timeout: 5 * time.Second}}
+	}
+	if settings.MoneyGrpcAddress != "" {
+		gateway, err := integrations.DialGrpcMoneyFundingGateway(settings.MoneyGrpcAddress, settings.MoneyInternalToken, fallback)
+		if err == nil {
+			return gateway
+		}
+		logger.Warn("money gRPC dial failed, using the HTTP fallback", slog.Any("error", err))
+	}
+	if fallback != nil {
+		return fallback
 	}
 	return nil
 }
