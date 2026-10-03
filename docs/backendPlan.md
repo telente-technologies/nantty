@@ -43,7 +43,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 ### 1.1 Role of `apps/api`
 
-`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy Paystack/Flutterwave gateways (replaced by Bachs in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
+`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by Bachs Connect in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
 
 | `apps/api` module | Ports to | Reuse |
 | --- | --- | --- |
@@ -320,10 +320,10 @@ Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`
 
 ### 2.15 Built so far: go-money (ledger, payments, escrow, wallet, creators)
 
-Done and covered by integration tests (real Postgres, fake provider API; to be re-pointed at a fake Bachs API): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
+Done and covered by integration tests (real Postgres, Bachs faked at the HTTP layer): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
 
 - Internal gRPC for go-live (`LiveMoneyService`: gift charge with tier split / host fallback / battle holdings, battle settlement, battle gift totals, coin balance) and go-commerce (`CheckoutMoneyService`: register checkout payables with escrow/direct mode, record shipped/delivered, confirm receipt, get escrow). See `services/README.md`.
-- **Superseded by the Bachs direction (3 Oct):** the Paystack/Flutterwave adapters, `platform:clearing:*` accounts, batch Paystack transfers and "Zudomart holds the escrow" settlement below must be reworked per `docs/checkoutPaymentFlowPlan.md` (section 11 checklist). Ledger states become a mirror of Bachs-held seller balances.
+- **Bachs Connect (3 Oct, done):** the old provider adapters, clearing accounts and platform-held settlement are gone. Each seller and creator has a Bachs connected account; marketplace orders are direct charges on the seller account (`X-Account-Id`, `platform_fee`), escrow and the 24h lock stay inside the seller account (manual payout schedule, payouts only from go-money), refunds return the platform fee first, creator shares move by transfer then payout, and the ledger is a mirror of provider-held seller funds reconciled daily against Bachs balances (mismatch freezes payouts). See `docs/checkoutPaymentFlowPlan.md` §11.
 - Seller balances per the checkout plan: in escrow → locked 24h → available → payout requested → paid, with debt recovery instead of negative balances; daily payout run; `GET /wallets/me` adds `locked`, `inEscrow`, `payoutRequested`, `negativeBalance`, `nextAvailableAt`.
 - `POST /disputes/:id/close` (buyer withdraws), `POST /wallets/me/withdrawals/:id/cancel`, `GET /wallets/me/withdrawals`.
 - Admin: ledger integrity and statements, journal reversal (step-up), provider reconciliation, dispute queue and resolution (release / refund / partial, step-up), escrow refunds, withdrawal review, payout run, creator tiers and membership.
@@ -398,7 +398,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Models:** `Store`, `Product`, `ProductVariant` (SKU, options), `StockLevel`, `StockReservation`, `Cart`, `Checkout`, `Order`, `OrderItem`, `OrderEvent` (timeline), `Payment`, `WebhookEvent`, `Escrow`, `Dispute`, `DisputeMessage`, `PayoutAccount` (encrypted, masked), `Withdrawal`, ledger accounts.
 - **Infra:** Bachs only (https://docs.bachs.io) behind one provider interface: per-seller connected accounts, direct-charge checkout with `platform_fee`, refunds, transfers, payouts, balances, disputes, webhooks with `X-Bachs-Signature-V2` verification. Zudomart holds no one's money; escrow funds stay locked in the seller account and the ledger is a mirror. Details: `docs/checkoutPaymentFlowPlan.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); per-seller mirror reconciliation against Bachs balances; py.intelligence `/v1/risk/score` for orders and payouts.
 - **Checkout transaction (inside `go-commerce` + `go-money`):** recompute prices, seller grouping, shipping (§4.6), discounts and eligibility on the server → reserve stock (TTL 15 min) → create Checkout/Orders with a locked exchange rate → initialise payment → on verified webhook: mark paid, hold in escrow, commit the reservation → seller fulfils → buyer confirms or auto-release after N days → release escrow minus commission → seller wallet.
-- **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`, `/api/v1/referrals`.
+- **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`.
 - **Acceptance:** client-sent prices ignored; double-submitting checkout with the same key returns the same orders; webhook replay is processed once; concurrent withdrawals cannot overdraw (row lock + version); ledger trial balance = 0 per currency after the e2e suite; escrow release, refunds and payouts are written to the audit log.
 
 ### Phase 7 — Seller dashboard
@@ -1069,6 +1069,7 @@ Still open:
   - proof the entity exists (official site or gazette).
 
   Approval needs two different admins with step-up auth, and is audited. Black is re-verified yearly and whenever the representative changes, and revoked immediately on misuse. The handle stays reserved even if the subscription lapses.
+- **Web billing on Bachs (implemented in go-money):** `POST /payments/subscriptions/checkout` starts a Bachs subscription checkout for a plan mapped in `BACHS_SUBSCRIPTION_PLAN_PRODUCTS` (dashboard plans, Premium web, Gold/Black business billing); refused from the apps. Trials use Bachs product `trial_period` (beta): the card is saved at checkout and charged at trial end; Bachs retries failed renewals 1, 3 and 5 days apart, then cancels (or marks unpaid). go-money records `billing_subscriptions` and emits `billingSubscription.downgraded` when recovery runs out. A refunded verification charge is not part of Bachs trials (UNCONFIRMED — ask Bachs).
 - **Lapsed payment:** Blue and Gold drop at period end. Black gets a 14-day grace period with reminders (admin-editable) before the badge is removed.
 - **Admin-granted lifetime checkmarks** bypass billing but still respect the profile-type rule.
 
