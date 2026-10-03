@@ -13,14 +13,14 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) ([]dtos.CoinPackageDto, error) {
-	channel := coinpackage.PurchaseChannelWebCheckout
+	platform := coinpackage.ClientPlatformWeb
 	canCharge := func(currency string) bool {
 		provider, found := handler.Application.Container.Payments.Container.Providers[handler.Application.Container.Payments.Container.Settings.DefaultProvider]
 		return found && provider.SupportsCurrency(currency)
 	}
 	if query.ClientPlatform == "ios" || query.ClientPlatform == "android" {
-		channel = coinpackage.PurchaseChannelStoreIap
+		platform = coinpackage.ClientPlatform(query.ClientPlatform)
 		canCharge = func(string) bool { return true }
 	}
-	return handler.Application.Catalog.ListActiveCoinPackages(ctx, channel, query.Currency, canCharge)
+	return handler.Application.Catalog.ListActiveCoinPackages(ctx, platform, query.Currency, canCharge)
 }
