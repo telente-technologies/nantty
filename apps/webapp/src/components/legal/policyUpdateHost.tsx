@@ -2,79 +2,103 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { ModalDialog } from "@/components/ui/modalDialog";
-import { privacyService } from "@/services/privacy.service";
+import { Dialog } from "@/components/ui/dialog";
+import { CloseIcon, ShieldIcon } from "@/components/ui/icons";
+import { showToast } from "@/components/ui/toast";
 import type { PolicyVersionSummary } from "@/types/policyUpdate.type";
 
-import styles from "./policyUpdateHost.module.css";
+import { PolicyDocumentCard } from "./policyDocumentCard";
+import { formatPolicyEffectiveDate, joinPolicyTitles } from "./policyHighlights.util";
+import { PolicyReacceptScreen } from "./policyReacceptScreen";
+import styles from "./policyUpdate.module.css";
 import { usePolicyUpdates } from "./usePolicyUpdates.hook";
 
-function formatDate(isoText: string): string {
-  return new Date(isoText).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+interface WhatChangedDialogProps {
+  readonly versions: readonly PolicyVersionSummary[];
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onRemindLater: () => void;
+  readonly onAcknowledge: () => void;
+  readonly isAccepting: boolean;
+  readonly errorMessage: string | null;
 }
 
-function describeUpdatedDocuments(versions: readonly PolicyVersionSummary[]): string {
-  return versions.map((version) => version.title).join(" and ");
-}
-
-function SummaryDialog({ version, isOpen, onClose, onAccept, isAccepting, errorMessage }: { readonly version: PolicyVersionSummary; readonly isOpen: boolean; readonly onClose: () => void; readonly onAccept: () => void; readonly isAccepting: boolean; readonly errorMessage: string | null }) {
+function WhatChangedDialog({ versions, isOpen, onClose, onRemindLater, onAcknowledge, isAccepting, errorMessage }: WhatChangedDialogProps) {
+  const materialVersions = versions.filter((version) => version.isMaterialChange);
+  const actions =
+    materialVersions.length > 0
+      ? [
+          { label: "Accept the update", variant: "primary" as const, busy: isAccepting, onClick: onAcknowledge },
+          { label: "Remind me later", variant: "secondary" as const, onClick: onRemindLater },
+        ]
+      : [{ label: "Got it", variant: "primary" as const, busy: isAccepting, onClick: onAcknowledge }];
   return (
-    <ModalDialog isOpen={isOpen} title={`${version.title} updated`} description={`Version ${version.versionLabel}, effective ${formatDate(version.effectiveAt)}`} onClose={onClose}
-      footer={<Button busy={isAccepting} onClick={onAccept}>{version.isMaterialChange ? "Accept update" : "Got it"}</Button>}>
-      <p>{version.summary}</p>
-      {version.isMaterialChange ? <p className={styles.muted}>This is a material change. Please accept it by {formatDate(version.effectiveAt)} to keep using Zudomart.</p> : null}
-      <p><a href={version.documentUrl} target="_blank" rel="noreferrer">Read the full {version.title}</a></p>
-      {errorMessage ? <p className={styles.error} role="alert">{errorMessage}</p> : null}
-    </ModalDialog>
-  );
-}
-
-function BlockingReacceptScreen({ version, onAccept, isAccepting, errorMessage }: { readonly version: PolicyVersionSummary; readonly onAccept: () => void; readonly isAccepting: boolean; readonly errorMessage: string | null }) {
-  const [exportMessage, setExportMessage] = useState<string | null>(null);
-  async function requestExport() {
-    try {
-      await privacyService.requestMyDataExport();
-      setExportMessage("We are preparing your data. We will email you when it is ready.");
-    } catch {
-      setExportMessage("We could not start the export. Try again in a moment.");
-    }
-  }
-  return (
-    <div className={styles.blocker} role="alertdialog" aria-modal="true" aria-labelledby="reaccept-title">
-      <div className={styles.blockerCard}>
-        <h1 id="reaccept-title" className={styles.blockerTitle}>Please review our updated {version.title}</h1>
-        <p>{version.summary}</p>
-        <p className={styles.muted}>Effective {formatDate(version.effectiveAt)}. To keep using Zudomart you need to accept it. <a href={version.documentUrl} target="_blank" rel="noreferrer">Read the full document</a>.</p>
-        <Button fullWidth busy={isAccepting} onClick={onAccept}>Accept and continue</Button>
-        {errorMessage ? <p className={styles.error} role="alert">{errorMessage}</p> : null}
-        <div className={styles.alternatives}>
-          <p className={styles.muted}>Do not agree? You can take your data and leave.</p>
-          <Button variant="secondary" onClick={() => void requestExport()}>Download my data</Button>
-          <a className={styles.deleteLink} href="/settings/privacy">Delete my account</a>
-          {exportMessage ? <p className={styles.muted} role="status">{exportMessage}</p> : null}
-        </div>
+    <Dialog isOpen={isOpen} onClose={onClose} title="What changed" description={`Updates to our ${joinPolicyTitles(versions)}`} layout="sheet" size="medium" showCloseButton actions={actions}>
+      <div className={styles.documentStack}>
+        {versions.map((version) => (
+          <PolicyDocumentCard key={version.policyVersionId} version={version} />
+        ))}
+        {materialVersions.map((version) => (
+          <p key={version.policyVersionId} className={styles.mutedText}>
+            You can keep using Zudomart as normal. From {formatPolicyEffectiveDate(version.effectiveAt)} we&apos;ll ask you to accept the new {version.title} before you continue.
+          </p>
+        ))}
+        {errorMessage ? <p className={styles.errorText} role="alert">{errorMessage}</p> : null}
       </div>
-    </div>
+    </Dialog>
   );
 }
 
 export function PolicyUpdateHost() {
-  const { isSignedIn, blocking, bannerVersions, dismiss, accept, isAccepting, acceptErrorMessage } = usePolicyUpdates();
-  const [openedId, setOpenedId] = useState<string | null>(null);
+  const { isSignedIn, pending, blocking, bannerVersions, dismiss, accept, acceptAllPending, isAccepting, acceptErrorMessage } = usePolicyUpdates();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   if (!isSignedIn) return null;
-  if (blocking) return <BlockingReacceptScreen version={blocking} onAccept={() => void accept(blocking)} isAccepting={isAccepting} errorMessage={acceptErrorMessage} />;
-  const opened = bannerVersions.find((version) => version.policyVersionId === openedId) ?? null;
-  if (bannerVersions.length === 0) return null;
-  const first = bannerVersions[0] as PolicyVersionSummary;
+  if (blocking) {
+    return <PolicyReacceptScreen versions={pending.length > 0 ? pending : [blocking]} onAccept={acceptAllPending} isAccepting={isAccepting} errorMessage={acceptErrorMessage} />;
+  }
+  if (bannerVersions.length === 0 && !isDialogOpen) return null;
+  const earliest = [...bannerVersions].sort((left, right) => Date.parse(left.effectiveAt) - Date.parse(right.effectiveAt))[0];
+  const dismissAll = () => bannerVersions.forEach((version) => dismiss(version.policyVersionId));
+  const acknowledgeAll = async () => {
+    try {
+      for (const version of bannerVersions) await accept(version);
+      setIsDialogOpen(false);
+      showToast({ text: "Thanks. You're up to date." });
+    } catch {
+      return;
+    }
+  };
   return (
     <>
-      <div className={styles.banner} role="status">
-        <p className={styles.bannerText}>We&apos;ve updated our {describeUpdatedDocuments(bannerVersions)}.</p>
-        <Button size="sm" variant="secondary" onClick={() => setOpenedId(first.policyVersionId)}>See what changed</Button>
-        <button type="button" className={styles.dismiss} onClick={() => bannerVersions.forEach((version) => dismiss(version.policyVersionId))} aria-label="Dismiss this notice">×</button>
-      </div>
-      {opened ? <SummaryDialog version={opened} isOpen onClose={() => setOpenedId(null)} isAccepting={isAccepting} errorMessage={acceptErrorMessage} onAccept={async () => { await accept(opened); setOpenedId(null); }} /> : null}
+      {earliest ? (
+        <section className={styles.banner} aria-label="Policy update">
+          <span className={styles.bannerIcon} aria-hidden="true">
+            <ShieldIcon size={20} />
+          </span>
+          <div className={styles.bannerText}>
+            <p className={styles.bannerTitle}>We&apos;ve updated our {joinPolicyTitles(bannerVersions)}</p>
+            <p className={styles.bannerMeta}>Effective {formatPolicyEffectiveDate(earliest.effectiveAt)}</p>
+          </div>
+          <button type="button" className={styles.bannerReview} onClick={() => setIsDialogOpen(true)}>
+            Review changes
+          </button>
+          <button type="button" className={styles.bannerDismiss} onClick={dismissAll} aria-label="Dismiss this notice">
+            <CloseIcon size={16} />
+          </button>
+        </section>
+      ) : null}
+      <WhatChangedDialog
+        versions={bannerVersions}
+        isOpen={isDialogOpen && bannerVersions.length > 0}
+        onClose={() => setIsDialogOpen(false)}
+        onRemindLater={() => {
+          setIsDialogOpen(false);
+          dismissAll();
+        }}
+        onAcknowledge={() => void acknowledgeAll()}
+        isAccepting={isAccepting}
+        errorMessage={acceptErrorMessage}
+      />
     </>
   );
 }

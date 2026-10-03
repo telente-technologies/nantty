@@ -49,5 +49,8 @@ export function usePolicyUpdates() {
   const pending = (versions.data?.items ?? []).filter((version) => (version.documentKey === "terms" || version.documentKey === "privacy") && !accepted.has(version.policyVersionId));
   const blocking = pending.find((version) => version.isMaterialChange && Date.parse(version.effectiveAt) <= Date.now()) ?? null;
   const bannerVersions = pending.filter((version) => !dismissedIds.includes(version.policyVersionId));
-  return { isSignedIn, pending, blocking, bannerVersions, dismiss, accept: acceptMutation.mutateAsync, isAccepting: acceptMutation.isPending, acceptErrorMessage: acceptMutation.isError ? "We could not save that. Try again." : null };
+  const acceptAllPending = async () => {
+    for (const version of pending) await acceptMutation.mutateAsync(version);
+  };
+  return { isSignedIn, pending, blocking, acceptAllPending, bannerVersions, dismiss, accept: acceptMutation.mutateAsync, isAccepting: acceptMutation.isPending, acceptErrorMessage: acceptMutation.isError ? "We could not save that. Try again." : null };
 }
