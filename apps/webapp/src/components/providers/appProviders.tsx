@@ -1,16 +1,26 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { ThemeProvider, type ThemePreference } from "@zudomart/web-kit";
+import { Suspense, useCallback, useState, type ReactNode } from "react";
 
-import { isRetryableApiFailure } from "@/services/clientApi.service";
+import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/clientApi.service";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
+import { AuthPromptModal } from "@/components/auth/authPromptModal";
+import { ToastViewport } from "@/components/ui/toast";
 
 import { SessionProvider } from "./sessionProvider";
 import type { User } from "@/types";
 
-export function AppProviders({ viewer, csrfToken, children }: { readonly viewer: User | null; readonly csrfToken: string | null; readonly children: ReactNode }) {
+interface AppProvidersProps {
+  readonly viewer: User | null;
+  readonly csrfToken: string | null;
+  readonly themePreference: ThemePreference;
+  readonly children: ReactNode;
+}
+
+export function AppProviders({ viewer, csrfToken, themePreference, children }: AppProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -26,12 +36,27 @@ export function AppProviders({ viewer, csrfToken, children }: { readonly viewer:
       }),
   );
 
+  const isSignedIn = viewer !== null;
+  const saveThemePreferenceToProfile = useCallback(
+    async (theme: ThemePreference) => {
+      if (!isSignedIn) return;
+      await sendRequestToWebappServer<void>("/api/v1/users/me/preferences", { method: "PATCH", body: { theme } });
+    },
+    [isSignedIn],
+  );
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider viewer={viewer} csrfToken={csrfToken}>
-        {children}
-        <ConsentBannerHost />
-      </SessionProvider>
-    </QueryClientProvider>
+    <ThemeProvider initialPreference={themePreference} onPreferenceChange={saveThemePreferenceToProfile}>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider viewer={viewer} csrfToken={csrfToken}>
+          {children}
+          <ConsentBannerHost />
+          <ToastViewport />
+          <Suspense fallback={null}>
+            <AuthPromptModal />
+          </Suspense>
+        </SessionProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
