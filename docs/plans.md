@@ -815,13 +815,15 @@ Owner (everything), Manager (all but billing, withdrawals, developer), Inventory
 
 ## 21. Social graph, profiles & ZudoPoints (mobile) **[DONE — mock]**
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mock mode only; `services/**` untouched.
 
 | # | Feature | Mobile scope | Marker |
 | --- | --- | --- | --- |
 | 1 | Private profiles | Public/Private chips in Settings > Privacy (`PATCH /users/me { isPrivate }`); follow states `none/requested/accepted/rejected/blocked`; button reads Follow / Requested / Following; private profile hides posts and shows "This account is private"; Follow requests inbox (approve/decline) from the own-profile shortcuts and Privacy | **[DONE]** |
 | 2 | Followers / Following | Profile counts open a searchable list (`GET /users/:id/followers\|following?q=` returning `{ data, nextCursor }`); private lists return 403 for non-followers and render the private state | **[DONE]** |
-| 3 | Profile switching | Existing switcher sheet extended: Personal / Creator (only when `useCreatorEntry` resolves to approved) / Business; "Create business profile" form with category > subcategory, several allowed, plus custom (pending review); open to any organisation | **[DONE]** |
+| 3 | Profile switching | Existing switcher sheet extended: Personal / Business (creator is a status on the Personal profile, not a switchable profile; owner correction 2026-10-03); "Create business profile" form with category > subcategory, several allowed, plus custom (pending review); open to any organisation | **[DONE]** |
 | 4 | AI-generated label | "AI generated" switch in the composer sends `isAiGenerated: true`; label on posts and clips | **[DONE]** |
 | 5 | ZudoPoints on live | Supporter board ranks by points (gifts 1 coin = 1 point, like, share, follow, watch time); like-points capped at 10/min in the mock while visual likes stay unlimited; viewer's own points pill; leaderboard chip/sheet and live-ended Top Supporters use points; Rankings screen (Global / Country / Category x Streamers / Supporters / Creators). No cash-out or money display | **[DONE]** |
 | 6 | Live-ad settings | "Live monetization" sheet in go-live setup: allow ads (off by default), placements, max interruptions 0-3, minimum interval, ad indicator, live-ad terms (`acceptedLiveAdTermsVersion` stored with the session), free-text own sponsorship line | **[DONE]** |
@@ -830,7 +832,7 @@ Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mo
 
 - `isAiGenerated` is used on `NewPostInput` and `Post` (backendPlan names it `aiGenerated`; reconcile when wiring).
 - Posts from private profiles are hidden on the profile post list; feed and search filtering is **[LATER]**.
-- **[LATER]** Real points awards via domain events, hourly ranking rebuild, creator profile created server-side on approval, business verification (KYB), live-ad delivery, "who can see my followers" setting.
+- **[LATER]** Real points awards via domain events, hourly ranking rebuild, `creatorStatus` set to approved on the personal profile server-side on approval, business verification (KYB), live-ad delivery, "who can see my followers" setting.
 
 
 ---
@@ -1126,6 +1128,8 @@ The source of truth for routes is `config/guestAccess.config.ts`.
 
 ## 29. Trust, verification & support (mobile) **[DONE (mobile, mock)]**
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile only, mock mode. Defaults below are admin-editable on the backend.
 
 ### 29.1 Suspended accounts
@@ -1139,8 +1143,8 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 ### 29.2 Checkmark suggestions
 
-- Cards "You may qualify for a verified checkmark" on Settings and the own-profile shortcuts, shown only when `eligible && !dismissed` and only for the active profile's colour: Personal and Creator get Blue, Business and Brand get Gold, Government gets Black (never suggested). Blue never shows on a business and Gold never on a person. Badges render from the profile (`verificationForProfileKind`, `VerificationBadge` rejects a colour that doesn't match its profile type), never from the account.
-- Blue (Personal/Creator): Apply opens `VerificationApply` (ID check, then a mock in-app purchase sheet, no real StoreKit). Not now dismisses.
+- Cards "You may qualify for a verified checkmark" on Settings and the own-profile shortcuts, shown only when `eligible && !dismissed` and only for the active profile's colour: Personal (including creator accounts) gets Blue, Business and Brand get Gold, Government gets Black (never suggested). Blue never shows on a business and Gold never on a person. Badges render from the profile (`verificationForProfileKind`, `VerificationBadge` rejects a colour that doesn't match its profile type), never from the account.
+- Blue (Personal, incl. creator accounts): Apply opens `VerificationApply` (ID check, then a mock in-app purchase sheet, no real StoreKit). Not now dismisses.
 - Gold (Business/Brand): not sold in the app. The card, the Verification screen and "Verify brand" show "Manage on the web", which opens dashboard.zudomart.com billing in an in-app browser. No prices, price links or discounts anywhere in the app. Status reads "Gold after business verification" until KYB is approved.
 - Black (Government profiles only): "Apply for government verification" opens the web application flow.
 - Lapsed Black keeps its badge for everyone during the 14-day grace period (`graceEndsAt`); staff also see "Renewal due". Blue and Gold drop at period end.
@@ -1191,12 +1195,14 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 ## 30. Admin trust & support, seller trials & documents **[DONE (admin + seller, mock)]**
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 Spec: owner trials/verification/admin bullets, "Decided 2026-10-03" and backendPlan §4.8. Mock mode; endpoints are in `apps/admin/apiContract.md` and `apps/seller/apiContract.md`, change log in docs/CHANGELOG.md.
 
 ### 30.1 Admin
 
 - Suspensions: queue of risk-service suggestions plus user reports, approve (reason + note), dismiss, escalate; suspended list with a 120-day deletion countdown (profile, posts, media and messages deleted; order/payment records anonymised and kept), appeal queue, reinstate. Python never suspends. Every action needs step-up and is audited.
-- Accounts: admin-created accounts bypass the reserved check and force a password change; lifetime free checkmarks respect profile type (Blue personal/creator, Gold business/brand, Black government, superadmin only). Reserved usernames manager already covered exact/prefix/pattern/confusables and the test box.
+- Accounts: admin-created accounts bypass the reserved check and force a password change; lifetime free checkmarks respect profile type (Blue personal incl. creators, Gold business/brand, Black government, superadmin only). Reserved usernames manager already covered exact/prefix/pattern/confusables and the test box.
 - Business documents review (CAC, ID, proof of address) and Black applications: four-item vetting checklist, two-admin maker-checker with step-up, handle reserved (kept on revoke), yearly re-verification reminders.
 - Rules: checkmark suggestions, Creator thresholds, trial rules and yearly discount, and pricing (bundle 15%, cap 3, Gold-only NGN 3,000, Black NGN 50,000, Black grace 14 days).
 - Support: live chat (recorded, not E2EE) and SES email with marketing consent and unsubscribe.
@@ -1295,7 +1301,7 @@ Spec: owner rules. Superadmins create Legal admins; Legal admins manage the priv
 
 ### 32.4 Open items
 
-- Render the draft preview and send with the `policyUpdated` template from `@zudomart/email-templates` (not in the package yet; the admin uses a placeholder frame).
+- ~~Render the draft preview with the `policyUpdated` template~~ Done: the admin preview uses `@zudomart/email-templates` (§34). Sending with it is part of the notifications worker.
 - Real SES, SQS and SNS; real acceptance records; the web site still reads build-time mock data.
 - Webapp/mobile banner dismissal is per device (webapp localStorage, mobile in memory). Not tested in a browser or on a device.
 
@@ -1309,3 +1315,139 @@ Spec: owner rules. Superadmins create Legal admins; Legal admins manage the priv
 - **Removed:** referral codes, links, invite-and-earn screens, referral attribution at signup and referral rewards; platform-funded loyalty points and cashback on orders and escrow release; loyalty tiers and redemption at checkout; the admin referral/loyalty/cashback revenue rules; the seller "Loyalty" settings page and per-customer point adjustments.
 - **Kept:** ZudoPoints engagement and gift points on lives (leaderboards, rankings, streak points). They are non-monetary.
 - **Seller-funded store rewards (owner, 2026-10-03).** A store can turn on "Store rewards" under Marketing: X% of order value back as store credit, with minimum order, max per order, expiry and an on/off switch. Credit is redeemable only at that store as a discount on a future order, never cash, never withdrawable. Earned after escrow release; reversed on refund. The seller sees outstanding liability. Mobile and webapp show "Store credit −₦X" in the checkout summary, a "Store rewards" list per store (balance, expiry) and "Earn X% back at this store" on product and store pages. Mock contracts: `apps/seller/apiContract.md` (Store rewards), `GET /api/v1/store-rewards/me` (buyer apps). Backend: per-store credit ledger in go-commerce (see `backendPlan.md`, Store rewards).
+
+---
+
+## 34. Email templates **[DONE (package + admin gallery, mock rendering)]**
+
+Spec: owner (3 Oct 2026). Every email is branded, carries the company legal name and address, support contacts and app links, and covers every flow. Provider: AWS SES, sent by the TypeScript notifications worker.
+
+### 34.1 Package `@zudomart/email-templates` (`packages/emailTemplates`)
+
+- React Email (`react-email` 6.11, the successor of the now-deprecated `@react-email/components`) plus `@react-email/render` 2.1. Each template is a typed `defineEmailTemplate<Props>()` definition with a React component, a subject builder, a preheader, a plain-text version built from the same content blocks, catalogue metadata (category, kind, audience, trigger event, consent rule) and sample props.
+- `renderEmail(templateKey, props, { locale, theme, timeZone, brand, links })` → `{ subject, html, text }`. `theme` is `auto` (light + `prefers-color-scheme` dark overrides, also `[data-ogsc]` for Outlook.com), `light` or `dark`. Defaults: `en-NG`, `Africa/Lagos`. The worker passes the per-recipient `unsubscribeUrl` (signed token) for marketing emails.
+- Money is always `{ amountMinor, currency }`, formatted with `Intl` using the currency's minor digits. Nothing hardcodes ₦.
+- Layout: 600 px table layout, inline styles, no JS, alt text on every image, colours from `@zudomart/design-tokens` (contrast checked for text and buttons; danger buttons use the AA-safe red in both themes), Inter with system fallbacks. Header: wordmark (CDN image from `ZUDOMART_EMAIL_LOGO_URL`, otherwise an HTML "z" tile + "zudomart" wordmark that renders everywhere), an optional mono reference (order, case, ticket number). Brand strip (blue with the yellow accent), hero with a tone eyebrow, content blocks, bulletproof button (table cell with `bgcolor` + React Email's MSO padding). Signature block: a progress "track" showing where the order or money is (Ordered → Paid → Shipped → Delivered → Complete; In escrow → Locked 24h → Available → Payout sent; dispute stages).
+- Footer: app store links (badge images when `ZUDOMART_EMAIL_APP_STORE_BADGE_URL` / `..._PLAY_STORE_BADGE_URL` are set), social links, a "why you got this email" line, **Unsubscribe + Manage email preferences only on marketing emails**, Manage notifications on transactional, security and legal emails, Help Centre, support emails (oyinlola.tech@icloud.com, oluwayemioyinlola2@icloud.com until a support address exists), "we never ask for your password or code", © legal name and address.
+- **OWNER TO FILL:** `ZUDOMART_COMPANY_LEGAL_NAME` and `ZUDOMART_COMPANY_ADDRESS` (placeholders render literally until set; `isBrandConfigComplete()` lets the worker refuse to send in production), the App Store id, social handles, and a hosted PNG wordmark + store badges on the CDN. `readEmailBrandFromEnvironment(process.env)` reads them.
+- Marketing products are typed `VerifiedProduct` (`sellerVerified: true`) so only verified sellers and brands can appear.
+- `pnpm --filter @zudomart/email-templates preview` renders every template (light, dark, text) into `packages/emailTemplates/previews/` (gitignored) with an `index.html`. `pnpm --filter @zudomart/email-templates test` runs the vitest suite (render in light and dark, footer/legal content present, unsubscribe only on marketing, money formatting, 4 plain-text snapshots).
+
+### 34.2 Admin
+
+- **Support → Email templates** (`/support/email-templates`, `support:email` or superadmin): searchable list grouped by category with a kind badge, trigger/audience/consent facts, a sandboxed `srcDoc` iframe preview with sample data, a light/dark toggle and a plain-text view. Rendered by the mock admin BFF (`GET /admin/email-templates`, `GET /admin/email-templates/:key/preview?theme=`).
+- The legal notice draft and publish dialog now render the real `policyUpdated` template (subject, summary, "what changed", effective date, re-accept note → re-accept CTA) in light and dark via `POST /admin/email-templates/policy-updated/preview` (support or legal permissions; inputs validated).
+- In production the admin CSP (`style-src` nonce) blocks the email's `<style>` inside the preview iframe, so the auto dark-mode and mobile media queries don't apply there; the Dark toggle renders the dark palette inline, so it still works. Not tested in a browser (no dev server run).
+
+### 34.3 Catalogue
+
+Kinds: transactional, security and legal emails ignore marketing consent (security and legal can't be turned off); marketing needs marketing consent and always includes unsubscribe. No referral or cashback emails (removed, §33).
+
+| Key | Category | Trigger event | Audience | Type | Consent rule |
+| --- | --- | --- | --- | --- | --- |
+| `emailOtp` | auth | `auth.otp.requested` | Any user | Transactional (security) | Always (security) |
+| `newSignIn` | auth | `identity.session.new_device` | Any user | Transactional (security) | Always (security) |
+| `passwordChanged` | auth | `identity.password.changed` | Any user | Transactional (security) | Always (security) |
+| `passwordReset` | auth | `identity.password.reset_requested` | Any user | Transactional (security) | Always (security) |
+| `sessionsRevoked` | auth | `identity.sessions.revoked` | Any user | Transactional (security) | Always (security) |
+| `twoFactorEnabled` | auth | `identity.mfa.enabled` | Any user | Transactional (security) | Always (security) |
+| `verifyEmail` | auth | `identity.email.verification_requested` | Any user | Transactional (security) | Always (security) |
+| `welcome` | auth | `identity.account.created` | New user | Transactional (transactional) | Always (account/transaction) |
+| `orderCancelled` | orders | `commerce.order.cancelled` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `orderCompleted` | orders | `commerce.order.completed` | Buyer | Transactional (transactional) | On by default; user can turn off |
+| `orderDelivered` | orders | `commerce.shipment.delivered` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `orderPlaced` | orders | `commerce.order.placed` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `orderShipped` | orders | `commerce.shipment.dispatched` | Buyer | Transactional (transactional) | On by default; user can turn off |
+| `paymentConfirmed` | orders | `payments.charge.succeeded` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `refundIssued` | orders | `payments.refund.succeeded` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `sellerAccepted` | orders | `commerce.order.seller_accepted` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `sellerRejected` | orders | `commerce.order.seller_rejected` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `disputeOpened` | escrow | `escrow.dispute.opened` | Buyer and seller | Transactional (transactional) | Always (account/transaction) |
+| `disputeResolved` | escrow | `escrow.dispute.resolved` | Buyer and seller | Transactional (transactional) | Always (account/transaction) |
+| `disputeUpdate` | escrow | `escrow.dispute.updated` | Buyer and seller | Transactional (transactional) | Always (account/transaction) |
+| `escrowAutoReleaseReminder` | escrow | `escrow.release.reminder (24h before)` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `escrowFundsProtected` | escrow | `escrow.hold.created` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `escrowReleased` | escrow | `escrow.hold.released` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `payoutFailed` | seller | `money.payout.failed` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `payoutScheduled` | seller | `money.payout.scheduled` | Seller | Transactional (transactional) | On by default; user can turn off |
+| `payoutSent` | seller | `money.payout.paid` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `sellerFundsAvailable` | seller | `money.balance.available` | Seller | Transactional (transactional) | On by default; user can turn off |
+| `sellerFundsLocked` | seller | `money.balance.locked` | Seller | Transactional (transactional) | On by default; user can turn off |
+| `sellerLowStock` | seller | `catalog.inventory.below_threshold (daily digest)` | Seller | Transactional (transactional) | On by default; user can turn off |
+| `sellerNewOrder` | seller | `commerce.order.paid (per seller group)` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `sellerOrderCancelled` | seller | `commerce.order.cancelled (per seller group)` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `documentsApproved` | seller | `verification.business_documents.approved` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `documentsReceived` | seller | `verification.business_documents.submitted` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `documentsRejected` | seller | `verification.business_documents.rejected` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `planPaymentFailed` | seller | `billing.invoice.payment_failed` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `planReceipt` | seller | `billing.invoice.paid` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `planTrialConverted` | seller | `billing.trial.converted` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `planTrialEnding` | seller | `billing.trial.ending (T-3d, T-1d)` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `planTrialStarted` | seller | `billing.trial.started` | Seller | Transactional (transactional) | Always (account/transaction) |
+| `cardVerificationRefunded` | payments | `billing.card_verification.refunded` | Any user starting a trial | Transactional (transactional) | Always (account/transaction) |
+| `coinPurchaseReceipt` | payments | `coins.purchase.succeeded (web)` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `paymentFailed` | payments | `payments.charge.failed` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `paymentReceipt` | payments | `payments.charge.succeeded (receipt)` | Buyer | Transactional (transactional) | Always (account/transaction) |
+| `subscriptionReceipt` | payments | `billing.subscription.invoice_paid` | Subscriber | Transactional (transactional) | Always (account/transaction) |
+| `storeCreditEarned` | orders | `rewards.store_credit.earned (on order completion)` | Buyer | Transactional (transactional) | On by default; user can turn off |
+| `storeCreditExpiring` | orders | `rewards.store_credit.expiring (7 days before)` | Buyer | Transactional (transactional) | On by default; user can turn off |
+| `creatorApplicationReceived` | creator | `creator.application.submitted` | Creator | Transactional (transactional) | Always (account/transaction) |
+| `creatorApproved` | creator | `creator.application.approved` | Creator | Transactional (transactional) | Always (account/transaction) |
+| `creatorEarningsStatement` | creator | `creator.statement.generated (monthly)` | Creator | Transactional (transactional) | On by default; user can turn off |
+| `creatorGiftMilestone` | creator | `live.gifts.milestone_reached` | Creator | Transactional (transactional) | On by default; user can turn off |
+| `creatorNeedsReview` | creator | `creator.application.manual_review` | Creator | Transactional (transactional) | Always (account/transaction) |
+| `creatorNotEligibleYet` | creator | `creator.application.not_eligible` | Creator | Transactional (transactional) | Always (account/transaction) |
+| `creatorPayoutSent` | creator | `creator.payout.paid` | Creator | Transactional (transactional) | Always (account/transaction) |
+| `blackVettingUpdate` | checkmarks | `verification.black.vetting_step_changed` | Government applicant | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkApplicationReceived` | checkmarks | `verification.application.submitted` | Applicant or checkmark holder | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkApproved` | checkmarks | `verification.application.approved` | Applicant or checkmark holder | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkRejected` | checkmarks | `verification.application.rejected` | Applicant or checkmark holder | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkRenewalDue` | checkmarks | `verification.renewal.payment_failed` | Applicant or checkmark holder | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkRevoked` | checkmarks | `verification.checkmark.revoked` | Applicant or checkmark holder | Transactional (transactional) | Always (account/transaction) |
+| `checkmarkSuggestion` | checkmarks | `verification.suggestion.created (rule-based)` | Eligible user | Transactional (transactional) | On by default; user can turn off |
+| `followRequestDigest` | social | `social.follow_request.digest (daily, private accounts)` | Any user | Transactional (transactional) | On by default; user can turn off |
+| `liveStarted` | social | `live.stream.started (opt-in per creator)` | Any user | Transactional (transactional) | On by default; user can turn off |
+| `mentionedYou` | social | `social.mention.created (if not seen in app within 1h)` | Any user | Transactional (transactional) | On by default; user can turn off |
+| `messageRequestDigest` | social | `chat.message_request.digest (daily)` | Any user | Transactional (transactional) | On by default; user can turn off |
+| `accountBanned` | trust | `trust.enforcement.banned` | Affected user | Transactional (transactional) | Always (account/transaction) |
+| `accountRestricted` | trust | `trust.enforcement.restricted` | Affected user | Transactional (transactional) | Always (account/transaction) |
+| `accountSuspended` | trust | `trust.enforcement.suspended` | Affected user | Transactional (transactional) | Always (account/transaction) |
+| `appealDecision` | trust | `trust.appeal.decided` | Affected user | Transactional (transactional) | Always (account/transaction) |
+| `reportOutcome` | trust | `trust.report.closed` | Reporter | Transactional (transactional) | On by default; user can turn off |
+| `accountDeletionCompleted` | privacy | `privacy.deletion.completed` | Account owner | Transactional (legal) | Always (legal notice) |
+| `accountDeletionScheduled` | privacy | `privacy.deletion.scheduled` | Account owner | Transactional (legal) | Always (legal notice) |
+| `consentConfirmation` | privacy | `privacy.consent.changed` | Account owner | Transactional (legal) | Always (legal notice) |
+| `dataExportReady` | privacy | `privacy.export.completed` | Account owner | Transactional (security) | Always (security) |
+| `policyUpdated` | privacy | `legal.policy_version.published (notice)` | Account owner | Transactional (legal) | Always (legal notice) |
+| `supportAgentReplied` | support | `support.ticket.agent_replied` | User with a ticket | Transactional (transactional) | Always (account/transaction) |
+| `supportTicketReceived` | support | `support.ticket.created` | User with a ticket | Transactional (transactional) | Always (account/transaction) |
+| `supportTicketResolved` | support | `support.ticket.resolved` | User with a ticket | Transactional (transactional) | Always (account/transaction) |
+| `abandonedCart` | marketing | `commerce.cart.abandoned (24h, once per cart)` | Users with marketing consent | Marketing | Marketing consent required; unsubscribe link |
+| `backInStock` | marketing | `catalog.inventory.restocked (saved or waitlisted)` | Users with marketing consent | Marketing | Marketing consent required; unsubscribe link |
+| `pickedForYou` | marketing | `marketing.recommendations.weekly` | Users with marketing consent | Marketing | Marketing consent required; unsubscribe link |
+| `priceDrop` | marketing | `catalog.price.dropped (saved items)` | Users with marketing consent | Marketing | Marketing consent required; unsubscribe link |
+| `weeklyDigest` | marketing | `marketing.digest.weekly` | Users with marketing consent | Marketing | Marketing consent required; unsubscribe link |
+
+### 34.4 Backend requirements and open items
+
+- Notifications worker (TypeScript): consume outbox events from SQS, map event → template key, load the recipient's locale, time zone, verified email and consent, check marketing consent and the SES suppression list, render with `renderEmail`, send through SES with `List-Unsubscribe` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers on marketing mail, idempotency key per event and recipient, record sends, bounces and complaints (SNS).
+- Digest jobs (follow requests, message requests, low stock, weekly digest) and timers (trial T-3d/T-1d, escrow auto-release T-24h, store credit T-7d) are scheduled jobs that emit the trigger events above.
+- Copy is English only; `locale` drives number, money and date formatting. Translations later.
+- Test in Litmus or Email on Acid (Gmail web/app, Outlook desktop/365, Apple Mail light/dark) before launch.
+
+
+---
+
+## 35. Reply to comments with video **[DONE (mobile, mock)]**
+
+Owner rule: only the author of a clip can reply to comments on it with a video (TikTok style).
+
+- **Entry points (author only, signed in):** a video icon next to Reply on each comment, a "Reply with video" item in the long-press menu, and a "Reply with video" button at the top of the comments sheet that turns on pick mode (tap a comment). Non-authors and guests never see them. Hidden when the commenter blocked the author (`videoReplyBlocked`).
+- **Creation:** opens `CreatePost` in clip mode with `videoReply` params. Header reads "Reply to @user's comment". Draggable, pinch-resizable (and rotatable) comment sticker over the picked video: avatar, @username, text cut at 150 characters. Smaller, Larger and Hide buttons are the accessible fallback. Clip rules unchanged (exactly one video, 180s cap). The commenter is auto-mentioned.
+- **Sticker is metadata, not burned in:** `stickerLayout { x, y, scale, rotation, hidden? }`, x and y normalised to 0..1, rendered as an overlay in `ClipPage` so it can be hidden later.
+- **Publish:** `POST /api/v1/posts` with `kind: "clip"`, `replyToComment { commentId, clipId, commenterUserId }`, `stickerLayout`. Mock rejects with 403 if the signer is not the clip author or the commenter blocked them, 404 if the comment is missing.
+- **Read side:** `GET /api/v1/comments/:id` returns the comment with `videoReplies[] { clipId, thumbnailUrl, createdAt }`; list endpoints include it too. Comment row shows a "Replied with video" chip with a thumbnail that opens the reply clip. The reply clip shows the sticker plus a tappable "Replying to @user's comment" link to the original clip.
+- **Notification:** kind `videoReply`, "@author replied to your comment with a video", sent to the commenter.
+- **Edge cases:** deleted comment (GET 404) shows "Comment deleted" in the sticker and "Replying to a deleted comment" in the link. If the original clip is subscriber-only the reply defaults to Followers, with a warning when the author picks Everyone. Theme-aware styles; the sticker has no animation, so reduced motion is respected.
+- **Demo and links:** mock clips `clip_me_demo_1` and `clip_me_demo_2` are owned by the demo user. The overlay also renders in `PostCard` (PostDetail, feeds). The "Replying to" link opens the Clips tab at the original clip with the comments sheet open, scrolled to and highlighting the comment (top-level or preview reply only).
+- **Open items:** real server enforcement of audience, block and author rules; deeper nested replies are not scrolled to. Not tested on a device.

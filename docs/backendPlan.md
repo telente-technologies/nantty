@@ -300,7 +300,7 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 Done and covered by integration tests: everything marked **✅ built** in §2.1 and §2.2, plus these additions that have no mobile client yet:
 
 - Auth: `DELETE /auth/sessions` (revoke all other sessions), `GET /auth/sessions` is cursor-paged (`{data,nextCursor}`).
-- Users: `POST /users/me/media/upload-intents` (signed placeholder upload, replaced by ts.media), `PATCH /users/me/business-profiles/{id}`, `POST /users/me/creator-profile`, `GET /business-categories`, staff username tools (`/admin/usernames/reserved`, `/admin/usernames/withheld`).
+- Users: `POST /users/me/media/upload-intents` (signed placeholder upload, replaced by ts.media), `PATCH /users/me/business-profiles/{id}`, `POST /users/me/creator-application` (sets the personal profile's `creatorStatus` to `pending`), `GET /business-categories`, staff username tools (`/admin/usernames/reserved`, `/admin/usernames/withheld`).
 - Geo and addresses: `GET /geo/countries`, `/geo/countries/{code}/regions`, `/geo/regions/{id}/admin-areas|cities`, `/geo/admin-areas/{id}/cities`; `/users/me/addresses` carries `regionId`, `adminAreaId`, `cityId` plus resolved names (Nigeria: states and LGAs seeded, the city step stays optional).
 - Privacy: consent ledger (`/policies/current`, `/consents` anonymous by `X-Device-Id`, `/users/me/consents`, `/users/me/consents/merge`, `/users/me/terms-acceptances`), `/users/me/privacy-settings`, data export (`/users/me/data-exports`), deletion (`/users/me/deletion-request`).
 - Currency: `GET /currency/convert`, staff `GET/PUT /admin/exchange-rates` (step-up).
@@ -313,7 +313,7 @@ Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`
 3. **Avatar and banner.** Prefer `avatarMediaId`/`bannerMediaId` from `POST /users/me/media/upload-intents`; `avatarUrl`/`bannerUrl` still work (https only). Clearing sends `null`.
 4. **Social sign-in.** Send the raw nonce: Google compares it to the token's `nonce` claim, Apple accepts the SHA-256 hex the app already puts in the token. A missing provider configuration answers `503 SOCIAL_SIGN_IN_NOT_CONFIGURED`.
 5. **Username availability** now returns `reason` (`taken|reserved|invalid|recently_used|withheld`); `PATCH /users/me/username` answers 429 `USERNAME_CHANGE_TOO_SOON`, 409 `USERNAME_TAKEN`, 422 `USERNAME_INVALID|USERNAME_UNAVAILABLE`. `GET /users/me/username-policy` also returns `username`, `cooldownDays`, `maxChangesPerYear`, `quarantineDays`, `history`.
-6. **Acting profiles** use the mobile vocabulary in `kind` (`person|creator|business`) and the plan vocabulary in `type` (`personal|creator|business`); business creation is `POST /users/me/business-profiles` with `categories: [{categoryId, subcategoryId, customName}]`.
+6. **Acting profiles** use the mobile vocabulary in `kind` (`person|business`) and the plan vocabulary in `type` (`personal|business`); the personal profile also carries `creatorStatus`; business creation is `POST /users/me/business-profiles` with `categories: [{categoryId, subcategoryId, customName}]`.
 7. **Addresses** send `countryCode`, `regionId` (and `adminAreaId`, `cityId` where the country has them); free-text `state`/`city` is accepted only for countries without seeded data.
 8. **Password change/reset** return 204 with no body; change keeps the current session and revokes the others, so the app should keep its refresh token.
 9. **Still mocked** for these prefixes: `/users/me/settings`, `/topics`, `/users/me/topics`, `/users/me/blocked`, follows, verification, brands (`/brands`).
@@ -860,6 +860,8 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 
 ### 4.5 ZudoPoints and social graph
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 > **Live part built in go-live (3 Oct 2026).** `points_entries` / `points_rules` live in the `live` schema (not a separate `points` schema). Like points cap at 10/min per user via the `like` rule (`perMinuteCap`), share/follow once per live, watch once a minute; gifts award `support` points to the sender and `stream` points to the receiver (1 per coin, rules `gift`/`giftReceived`). Per-stream boards are stored at `live.ended`; `GET /rankings` aggregates on demand (no hourly rebuild yet); the country scope uses `X-Client-Region` captured when the live starts. Profiles, social graph and follow awards from the users service are not part of this batch.
 
 **4.5.1 ZudoPoints** (Go `points` schema; Redis for rate limits and live boards)
@@ -873,8 +875,8 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 
 **4.5.2 Profiles: one account, many profiles** (Go `accounts` schema)
 
-- `Profile { id, accountId, type: personal|creator|business, handle, displayName, … }`. Every account has one personal profile. Users switch profile with `PUT /users/me/acting-profile` and never create a new account.
-- **Creator profile:** apply once requirements are met. The thresholds (followers, account age, original posts, no recent strikes) live in `CreatorEligibilityRule`, admin-configurable. This is the existing Creator Program gate.
+- `Profile { id, accountId, type: personal|business, creatorStatus: none|pending|approved|rejected, handle, displayName, … }`. Every account has one personal profile. Users switch profile with `PUT /users/me/acting-profile` and never create a new account.
+- **Creator account:** the personal account is upgraded once requirements are met (`creatorStatus` on the personal profile, no new profile). The thresholds (followers, account age, original posts, no recent strikes) live in `CreatorEligibilityRule`, admin-configurable. This is the existing Creator Program gate.
 - **Business profile:** for any organization, not only sellers (brands, NGOs, media, venues). It has flexible multi-level categories (several allowed, plus custom ones pending admin review). A business can later open a store. Business verification (KYB) plus a Pro or Business plan gives the Gold checkmark (§4.3.1).
 
 **4.5.3 Content flags and privacy**
@@ -1049,9 +1051,11 @@ Still open:
 
 ## 4.8 Verification checkmarks and billing (owner, 2026-10-03; supersedes earlier checkmark rules)
 
+> **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
+
 | Profile type | Checkmark | Billing | Where sold |
 |---|---|---|---|
-| Personal, Creator | Blue only | Personal subscription tied to the person | App (Apple/Google IAP) or web (Bachs) |
+| Personal (incl. creator accounts) | Blue only | Personal subscription tied to the person | App (Apple/Google IAP) or web (Bachs) |
 | Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Bachs) |
 | Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Bachs) |
 

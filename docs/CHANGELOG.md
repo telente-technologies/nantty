@@ -8,6 +8,11 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ## apps/mobile
 
+### Reply to comments with video (§35, 3 Oct) — not tested on a device
+
+- `components/clips/videoReply/*`: draggable/pinch sticker, create-flow stage, playback overlay, "Replying to" link, "Replied with video" chip. Comment row, thread, sheet, controller, `ClipPage`, `ClipDetails`, create screen and composer panel wired in (author only).
+- Types: `replyToComment`, `stickerLayout`, `Comment.videoReplies`, notification kind `videoReply`. Mocks: post create validation, `GET /comments/:id`, notification.
+
 ### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
 
 | File | Change |
@@ -799,6 +804,17 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## apps/admin
 
+### Email templates gallery and policy email preview (§34, 2026-10-03) — not tested in a browser
+
+| File | Change |
+| --- | --- |
+| `package.json`, `next.config.ts` | Depends on `@zudomart/email-templates` (workspace) and transpiles it. |
+| `app/(console)/support/email-templates/page.tsx`, `components/emailTemplates/*` | New **Support → Email templates** page (`support:email` or superadmin): searchable list by category with kind badges, trigger/audience/consent, sandboxed iframe preview with sample data, light/dark toggle, plain-text view. |
+| `mocks/handlers/content/emailTemplates.mock.ts`, `contentHandlers.mock.ts` | Mock BFF renders with the package: `GET /admin/email-templates`, `GET /admin/email-templates/:key/preview?theme=`, `POST /admin/email-templates/policy-updated/preview` (validated draft fields). |
+| `config/apiAccess.config.ts`, `config/navigation.config.ts` | Access rule for `/admin/email-templates` (support email or legal permissions); nav item under Support. |
+| `services/emailTemplatesApi.service.ts`, `types/emailTemplates.type.ts` | Client calls and types. |
+| `components/legal/legalNoticeEmailFrame.tsx` | Placeholder replaced: the legal notice draft and publish dialog render the real `policyUpdated` email (debounced live preview, light/dark). |
+
 ### Referral and purchase loyalty/cashback removed (owner, 2026-10-03)
 
 | File | Change |
@@ -859,6 +875,20 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | Creative previews, landing illustrations, `charts/lineChart` | Driven by tokens and `--chart-*`, `--chart-grid` and `--chart-axis` |
 | `shell/accountShell` | The top bar hid nothing below 720 px and overflowed to 526 px. The badges, balance and duplicate "Create campaign" are now hidden there |
 | `charts/lineChart.tsx`, `app/globals.css`, `ui/surfaces`, `ui/formFields`, `overview/kpiTileGrid` | The screen-reader data table is wrapped so it can't widen the page. Card headers wrap. The segmented metric control scrolls. KPI values scale down instead of truncating at 390 px |
+
+## packages/emailTemplates
+
+### New package `@zudomart/email-templates` (§34, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `package.json`, `tsconfig.json`, `vitest.config.ts`, `.gitignore` | React Email (`react-email` 6.11 + `@react-email/render` 2.1; `@react-email/components` is deprecated upstream), vitest, tsx. `previews/` is gitignored. |
+| `src/render/renderEmail.tsx`, `src/render/plainText.ts`, `src/catalogue.ts`, `src/index.ts` | `renderEmail(key, props, { locale, theme, timeZone, brand, links })` → `{ subject, html, text }` for the SES worker; catalogue and sample rendering. |
+| `src/layout/*.layout.tsx`, `src/blocks/*.block.tsx`, `src/theme/emailPalette.ts`, `src/config/emailBrand.config.ts`, `src/format/emailFormat.ts` | Branded 600 px layout (wordmark with CDN/inline fallback, brand strip, hero, content blocks, bulletproof button, progress track), footer (legal name/address placeholders, support emails, socials, app links, why-you-got-this, unsubscribe on marketing only, manage notifications otherwise), dark mode, design-token colours, `Intl` money from `{ amountMinor, currency }`. |
+| `src/templates/*.template.tsx` | 82 templates: auth/security, buyer orders, escrow and disputes, seller orders/payouts/balances, documents and plan trials/receipts, payments, store credit, creator, checkmarks, social/live, trust, privacy/legal, support, marketing (verified sellers only). |
+| `scripts/renderPreviews.script.tsx`, `tests/emailTemplates.test.tsx` | Preview renderer (light, dark, text + index) and 172 vitest checks with 4 plain-text snapshots. |
+
+**Owner to fill:** `ZUDOMART_COMPANY_LEGAL_NAME`, `ZUDOMART_COMPANY_ADDRESS`, App Store id, social handles, CDN wordmark and badge images.
 
 ## packages/webKit
 
