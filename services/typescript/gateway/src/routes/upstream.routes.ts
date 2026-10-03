@@ -7,14 +7,51 @@ export interface UpstreamRoute {
   readonly upstream: UpstreamName;
   readonly authentication: AuthenticationRequirement;
   readonly methods?: readonly string[];
+  readonly exactPathOnly?: boolean;
+  readonly rawBodyPassthrough?: boolean;
 }
 
 export const upstreamRoutes: readonly UpstreamRoute[] = [
+  { pathPrefix: "/webhooks/", upstream: "money", authentication: "optional", methods: ["POST"], rawBodyPassthrough: true },
   { pathPrefix: "/api/v1/auth/logout", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/sessions", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/auth/password/change", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/legal/policy-versions/current", upstream: "identity", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/creators/eligibility", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/creators/applications", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/verification/", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/business-documents", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/reports/me", upstream: "trust", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/users/by-username/", upstream: "identity", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/users/me/follow-requests", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/users/me/blocked", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/users/*/follow", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/users/*/follow-status", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/users/*/followers", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/users/*/following", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/users/*/block", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/users/*/posts", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/users/*/stories", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/follow-requests/", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/posts", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/comments/", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/stories", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/feeds/", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/clips", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/sounds", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/media", upstream: "media", authentication: "required" },
+  { pathPrefix: "/api/v1/search/people", upstream: "social", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/search/recent", upstream: "search", authentication: "required" },
+  { pathPrefix: "/api/v1/search", upstream: "search", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/copyright/claims", upstream: "trust", authentication: "required" },
+  { pathPrefix: "/api/v1/ip-claims", upstream: "trust", authentication: "required" },
+  { pathPrefix: "/api/v1/saves", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/mentions/", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/conversations", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/messages/", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/chat/", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/reports", upstream: "social", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/users/", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/business-categories", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/geo/", upstream: "identity", authentication: "optional" },
@@ -32,7 +69,13 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/legal/versions/*/notice-draft/test-send", upstream: "notifications", authentication: "optional", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/legal/versions/*/notice-preview", upstream: "notifications", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/admin/gifts", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/lives/suggested", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/lives", upstream: "live", authentication: "optional", methods: ["GET"], exactPathOnly: true },
+  { pathPrefix: "/api/v1/lives/*", upstream: "live", authentication: "optional", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/lives", upstream: "live", authentication: "required" },
+  { pathPrefix: "/api/v1/explore", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/products", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/stores", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/battles/", upstream: "live", authentication: "required" },
   { pathPrefix: "/api/v1/live/", upstream: "live", authentication: "required" },
   { pathPrefix: "/api/v1/gifts", upstream: "live", authentication: "required" },
@@ -47,6 +90,30 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/orders/*/escrow", upstream: "money", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/orders/*/disputes", upstream: "money", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/disputes", upstream: "money", authentication: "required" },
+  { pathPrefix: "/api/v1/mart/home", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/categories", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/brands", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/products", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/stores", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/cart", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/orders", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/store-rewards/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/analytics/product-interactions", upstream: "commerce", authentication: "optional", methods: ["POST"] },
+  { pathPrefix: "/api/v1/seller/access", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/stores/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/store", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/products", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/categories", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/inventory/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/suppliers", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/locations", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/orders", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/delivery/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/shipping/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/customers", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/reviews", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/marketing/rewards/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/reports/", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/creators/earnings/convert", upstream: "money", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/ledger/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/payments/", upstream: "money", authentication: "optional" },
@@ -58,8 +125,25 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/creator-tiers", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/creators/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/coins/", upstream: "money", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/chat-reports", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/suspensions/cases", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/reports", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/copyright-claims", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/ip-claims", upstream: "trust", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
+
+export const sensitiveGuestPathPrefixes: readonly string[] = ["/api/v1/feeds/", "/api/v1/explore", "/api/v1/search", "/api/v1/products", "/api/v1/stores", "/api/v1/clips"];
+
+export function isChatReportSubmission(method: string, path: string, body: Uint8Array | undefined): boolean {
+  if (method.toUpperCase() !== "POST" || path !== "/api/v1/reports" || body === undefined) return false;
+  try {
+    const parsed = JSON.parse(new TextDecoder().decode(body)) as { readonly conversationId?: unknown; readonly targetType?: unknown };
+    return (typeof parsed.conversationId === "string" && parsed.conversationId !== "") || parsed.targetType === "conversation" || parsed.targetType === "group";
+  } catch {
+    return false;
+  }
+}
 
 function doesPathMatchRoute(path: string, routePath: string): boolean {
   if (routePath.includes("*")) {
@@ -72,5 +156,5 @@ function doesPathMatchRoute(path: string, routePath: string): boolean {
 }
 
 export function resolveUpstreamRouteForRequest(method: string, path: string, routes: readonly UpstreamRoute[] = upstreamRoutes): UpstreamRoute | undefined {
-  return routes.find((route) => doesPathMatchRoute(path, route.pathPrefix) && (route.methods === undefined || route.methods.includes(method.toUpperCase())));
+  return routes.find((route) => (route.exactPathOnly === true ? path === route.pathPrefix || doesPathMatchRoute(path, route.pathPrefix) && route.pathPrefix.includes("*") : doesPathMatchRoute(path, route.pathPrefix)) && (route.methods === undefined || route.methods.includes(method.toUpperCase())));
 }
