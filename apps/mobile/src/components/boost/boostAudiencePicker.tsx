@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { BoostAudience } from "@/types/boost.type";
 
 const POPULAR_STATES = ["Lagos", "FCT Abuja", "Rivers", "Oyo", "Kano", "Enugu", "Anambra", "Delta"] as const;
@@ -19,6 +19,8 @@ export interface BoostAudiencePickerProps {
 const toggleValue = <T,>(values: readonly T[], value: T): T[] => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
 
 export function BoostAudiencePicker({ audience, interestOptions, countryCode, onChange }: BoostAudiencePickerProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const custom = audience.mode === "custom" ? audience : { mode: "custom" as const, countryCode, states: [], interests: [], ageMin: 18, ageMax: 65 };
   return (
     <View style={styles.root}>
@@ -56,8 +58,8 @@ export function BoostAudiencePicker({ audience, interestOptions, countryCode, on
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { gap: 8 },
-  custom: { backgroundColor: colors.white, borderRadius: 12, padding: 12, gap: 8 },
+  custom: { backgroundColor: colors.surface, borderRadius: 12, padding: 12, gap: 8 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-});
+}));

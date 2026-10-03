@@ -3,9 +3,11 @@ import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { ArrowUpRight24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { adsManagerConfig } from "@/config/adsManager.config";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function AdsManagerBanner() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="link" accessibilityLabel="Open Zudomart Ads Manager" onPress={() => Linking.openURL(adsManagerConfig.adsManagerUrl)} style={styles.banner}>
       <View style={styles.flex}>
@@ -17,7 +19,7 @@ export function AdsManagerBanner() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1, gap: 2 },
-  banner: { backgroundColor: colors.white, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: colors.primaryTint },
-});
+  banner: { backgroundColor: colors.surface, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: colors.primaryTint },
+}));
