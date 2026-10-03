@@ -5,7 +5,7 @@ import { Check16Icon, CaretRight24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface GeoPickerOption {
   readonly id: string;
@@ -22,6 +22,8 @@ export interface GeoPickerFieldProps {
 }
 
 export function GeoPickerField({ label, options, selectedId, onSelect, disabled = false, placeholder }: GeoPickerFieldProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const selected = options.find((option) => option.id === selectedId);
@@ -76,7 +78,7 @@ export function GeoPickerField({ label, options, selectedId, onSelect, disabled 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
   box: { minHeight: 48, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   disabled: { opacity: 0.5 },
@@ -85,4 +87,4 @@ const styles = StyleSheet.create({
   list: { maxHeight: 360, paddingHorizontal: 16 },
   row: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
   empty: { paddingVertical: 24 },
-});
+}));

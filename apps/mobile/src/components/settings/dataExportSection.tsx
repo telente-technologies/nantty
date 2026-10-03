@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { DataExportStatus } from "@/types";
 
 const STATUS_COPY: Record<DataExportStatus, string> = {
@@ -16,6 +16,7 @@ const STATUS_COPY: Record<DataExportStatus, string> = {
 };
 
 export function DataExportSection() {
+  const { colors } = useTheme();
   const exportRequest = useDataExportQuery();
   const requestExport = useRequestDataExportMutation();
 

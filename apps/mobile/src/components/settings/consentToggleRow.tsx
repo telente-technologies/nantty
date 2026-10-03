@@ -1,7 +1,7 @@
 import { StyleSheet, Switch, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface ConsentToggleRowProps {
   readonly label: string;
@@ -11,6 +11,7 @@ export interface ConsentToggleRowProps {
 }
 
 export function ConsentToggleRow({ label, description, enabled, onChange }: ConsentToggleRowProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.row}>
       <View style={styles.text}>

@@ -2,13 +2,15 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { CaretRight24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Address } from "@/types";
 
 export const formatAddressLocation = (address: Address) =>
   [address.line1, address.city, address.lga, address.state, address.country].filter(Boolean).join(", ");
 
 export function AddressRow({ address, onPress }: { address: Address; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,10 +43,10 @@ export function AddressRow({ address, onPress }: { address: Address; onPress: ()
   );
 }
 
-const styles = StyleSheet.create({
-  row: { backgroundColor: colors.white, paddingVertical: 16, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  row: { backgroundColor: colors.surface, paddingVertical: 16, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 10 },
   details: { flex: 1, gap: 4 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   defaultPill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99, backgroundColor: colors.primaryTint },
   pressed: { opacity: 0.7 },
-});
+}));

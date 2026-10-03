@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Check16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CountryOption } from "@/types/account.type";
 
 export interface CountryPickerSheetProps {
@@ -15,6 +15,8 @@ export interface CountryPickerSheetProps {
 }
 
 export function CountryPickerSheet({ visible, countries, selectedCountryCode, onSelect, onClose }: CountryPickerSheetProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Country & currency">
       <ScrollView style={styles.list} contentContainerStyle={styles.content}>
@@ -48,10 +50,10 @@ export function CountryPickerSheet({ visible, countries, selectedCountryCode, on
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { maxHeight: 420 },
   content: { paddingHorizontal: 16, paddingBottom: 16 },
   row: { minHeight: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
   text: { gap: 2 },
   note: { marginTop: 12 },
-});
+}));

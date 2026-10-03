@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { consentsService } from "@/services/consents.service";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -17,6 +17,7 @@ const ANONYMIZED = ["Reviews and chat messages you sent stay visible without you
 const RETAINED = ["Orders, payments, payouts and escrow records may be kept for as long as the law requires for tax, fraud and dispute purposes"];
 
 function Section({ title, lines }: { title: string; lines: string[] }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.section}>
       <Text size={13} weight={600} lineHeight={16.9}>{title}</Text>
@@ -28,6 +29,7 @@ function Section({ title, lines }: { title: string; lines: string[] }) {
 }
 
 export function DeleteAccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { colors } = useTheme();
   const [confirmation, setConfirmation] = useState("");
   const signOut = useAuthStore((state) => state.clearSessionAndSignOut);
   const requestDeletion = useMutation({
