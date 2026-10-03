@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { CalendarDots16Icon } from "@/components/icons";
 import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
+import { PreviewableImage, useImagePreview } from "@/components/ui/previewableImage";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList } from "@/navigation/navigation.types";
@@ -29,19 +30,31 @@ export interface ProfileSummaryProps {
 
 function ProfileAvatar({ profile, borderRadius }: { readonly profile: User; readonly borderRadius: number }) {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const { openImagePreview, imagePreviewElement } = useImagePreview();
   const avatarImage = profile.avatarUrl ? <Image source={{ uri: profile.avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null;
-  if (!profile.live) return <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>;
+  if (!profile.live) {
+    return (
+      <PreviewableImage imageUrl={profile.avatarUrl} accessibilityLabel={`View ${profile.name}'s profile photo`}>
+        <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
+      </PreviewableImage>
+    );
+  }
   const liveId = profile.live.liveId;
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${profile.name} is live, open livestream`}
-      onPress={() => navigation.navigate("Live", { liveId })}
-    >
-      <LiveAvatarRing size={64} borderRadius={borderRadius}>
-        <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
-      </LiveAvatarRing>
-    </Pressable>
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${profile.name} is live, open livestream`}
+        accessibilityHint="Long press to view the profile photo"
+        onPress={() => navigation.navigate("Live", { liveId })}
+        onLongPress={() => openImagePreview([profile.avatarUrl])}
+      >
+        <LiveAvatarRing size={64} borderRadius={borderRadius}>
+          <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
+        </LiveAvatarRing>
+      </Pressable>
+      {imagePreviewElement}
+    </>
   );
 }
 
@@ -52,7 +65,11 @@ export function ProfileSummary({ profile, variant, actions, identityAction, onPr
   return (
     <View style={styles.root}>
       <View style={[styles.banner, { backgroundColor: isOwn ? "#C4C4C4" : colors.placeholder }]}>
-        {profile.bannerUrl ? <Image source={{ uri: profile.bannerUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+        {profile.bannerUrl ? (
+          <PreviewableImage imageUrl={profile.bannerUrl} accessibilityLabel={`View ${profile.name}'s cover photo`} style={StyleSheet.absoluteFill}>
+            <Image source={{ uri: profile.bannerUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          </PreviewableImage>
+        ) : null}
       </View>
 
       <View style={styles.identity}>
