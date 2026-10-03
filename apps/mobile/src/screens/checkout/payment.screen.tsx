@@ -77,6 +77,7 @@ export function PaymentScreen({ navigation, route }: MainScreenProps<"Payment">)
       <View style={styles.footer}>
         <Button title="Open checkout again" disabled={busy || !authorizationUrl} onPress={openCheckoutThenVerify} />
         <Button variant="subtle" title="I've paid, check status" disabled={busy} onPress={verifyWithServerUntilSettled} />
+        <Button variant="subtle" title="Get help with this payment" onPress={() => navigation.navigate("NewSupportTicket", { category: "payment", linkedReference: { kind: "payment", id: orderId, label: "Payment for this order" } })} />
         <Button variant="danger" title="View my orders" onPress={() => navigation.replace("Orders")} />
       </View>
     </Screen>
