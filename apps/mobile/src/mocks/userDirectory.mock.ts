@@ -73,6 +73,8 @@ const DIRECTORY_USER_SEEDS: readonly DirectoryUserSeed[] = [
   { key: "u_25", name: "Zudomart Support", username: "zudomart", bio: "Official help desk. We never ask for your password or card PIN.", followers: 58200, following: 12, posts: 140, joinedAt: "2024-04-01T00:00:00.000Z" },
 ];
 
+export const SUSPENDED_USER_IDS: ReadonlySet<string> = new Set(["u_16", "u_22"]);
+
 const CREATOR_USER_IDS = new Set<DirectoryUserId>(["u_me", "u_9", "u_10", "u_12", "u_13", "u_18"]);
 
 const avatarForSeed = (key: DirectoryUserId) =>
@@ -82,6 +84,7 @@ const coverForSeed = (key: DirectoryUserId) =>
 
 const buildUserFromSeed = (seed: DirectoryUserSeed): User => ({
   id: seed.key,
+  account: { status: SUSPENDED_USER_IDS.has(seed.key) ? "suspended" : "active" },
   name: seed.name,
   username: seed.username,
   avatarUrl: avatarForSeed(seed.key),
@@ -100,12 +103,13 @@ const buildUserFromSeed = (seed: DirectoryUserSeed): User => ({
 
 export const directoryUsers: readonly User[] = DIRECTORY_USER_SEEDS.map(buildUserFromSeed);
 
-export const directoryUsersExcludingAccounts = directoryUsers.filter((user) => user.id !== "u_me" && user.id !== "u_buyer");
+export const directoryUsersExcludingAccounts = directoryUsers.filter((user) => user.id !== "u_me" && user.id !== "u_buyer" && user.account?.status === "active");
 
 export const findDirectoryUserById = (userId: string): User | undefined => directoryUsers.find((user) => user.id === userId);
 
 export const summariseUser = (user: User): UserSummary => ({
   id: user.id,
+  account: user.account ?? { status: "active" },
   name: user.name,
   username: user.username,
   avatarUrl: user.avatarUrl,

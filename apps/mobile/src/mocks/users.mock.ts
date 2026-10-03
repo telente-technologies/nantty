@@ -10,7 +10,7 @@ import { setFollowingAuthor } from "./followGraph.mock";
 import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds } from "./socialGraph.mock";
 import { findActiveLiveForHost } from "./activeLives.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
-import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
+import { SUSPENDED_USER_IDS, directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
 const profileEditsByUserId = new Map<string, Partial<User>>();
 
@@ -71,7 +71,7 @@ export const usersMocks: MockRoute[] = [
     };
   }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: canSignedInUserSeeProfileContent(params.userId!) ? listPostsByAuthor(params.userId!).map(withCurrentProductPrices) : [],
+    data: canSignedInUserSeeProfileContent(params.userId!) && !SUSPENDED_USER_IDS.has(params.userId!) ? listPostsByAuthor(params.userId!).map(withCurrentProductPrices) : [],
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),

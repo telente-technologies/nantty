@@ -8,9 +8,12 @@ export const me: User = { ...findDirectoryUserById("u_me")!, email: "testzudomar
 
 export const demoFanAccount: User = { ...findDirectoryUserById("u_buyer")!, email: "fan.zudomart@gmail.com", phone: null };
 
+export const suspendedDemoAccount: User = { ...findDirectoryUserById("u_22")!, email: "suspended.zudomart@gmail.com", phone: null };
+
 export const mockSession: { signedInUserId: string } = { signedInUserId: me.id };
 
-export const getSignedInMockUser = (): User => (mockSession.signedInUserId === demoFanAccount.id ? demoFanAccount : me);
+export const getSignedInMockUser = (): User =>
+  mockSession.signedInUserId === demoFanAccount.id ? demoFanAccount : mockSession.signedInUserId === suspendedDemoAccount.id ? suspendedDemoAccount : me;
 
 export const signedInUserIsTheDemoSeller = () => getSignedInMockUser().id === me.id;
 
