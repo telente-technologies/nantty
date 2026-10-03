@@ -47,18 +47,21 @@ func (service *LiveService) applySlotEvent(ctx context.Context, tx *ent.Tx, slot
 		return nil, liveerrors.Api(http.StatusConflict, "INVALID_SLOT_TRANSITION", err.Error())
 	}
 	now := service.Now()
-	update := slot.Update().SetState(guestslot.State(next)).ClearStateDeadlineAt()
+	update := slot.Update().SetState(guestslot.State(next))
 	switch next {
 	case SlotJoining:
 		update.SetStateDeadlineAt(now.Add(JoiningTimeoutSeconds * time.Second))
 	case SlotReconnecting:
 		update.SetStateDeadlineAt(now.Add(ReconnectGraceSeconds * time.Second))
 	case SlotOnStage:
+		update.ClearStateDeadlineAt()
 		if slot.JoinedAt == nil {
 			update.SetJoinedAt(now)
 		}
 	case SlotLeft, SlotRemoved, SlotFailed:
-		update.SetLeftAt(now)
+		update.ClearStateDeadlineAt().SetLeftAt(now)
+	default:
+		update.ClearStateDeadlineAt()
 	}
 	return update.Save(ctx)
 }
