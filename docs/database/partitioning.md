@@ -119,7 +119,7 @@ Base Y3 about 480k orders/yr x about 3 KB = about 1.5 GB/yr; High about 7 GB/yr.
 | --- | --- | --- | --- |
 | `product_interactions` | Base Y3 about 400k MAU x 50/day = 7.3B/yr; read as aggregates | `MergeTree`, `PARTITION BY toYYYYMM(ts)`, `ORDER BY (product_id, ts)`, TTL per retention | denormalized counters on product (updated by batch job, not per event) |
 | `video_views` | Base Y3 about 4.4B/yr | `ORDER BY (video_id, ts)`; `AggregatingMergeTree` rollups per hour | `view_count` columns on video, updated every N seconds from stream |
-Ingestion: events -> SQS/Kinesis/Firehose -> ClickHouse (see `performance.md` s5). Consent-withdrawal deletion in CH uses lightweight deletes or partition drop keyed by consent class: **LEGAL REVIEW**.
+Ingestion: events -> RabbitMQ queue (or Kinesis/Firehose for raw clickstream) -> ClickHouse (see `performance.md` s5). Consent-withdrawal deletion in CH uses lightweight deletes or partition drop keyed by consent class: **LEGAL REVIEW**.
 
 ### 3.9 Ads (PLANNED)
 

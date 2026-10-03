@@ -19,7 +19,7 @@ As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE. **No production data
 | Boot | A separate `sql.Open` for migrations at every start (closed after) plus 5 s ping at open | `migrations.runner.go` | see `migrations.md` |
 | Search path | `search_path` is passed as a connection-URL query parameter (a startup parameter) per module | `platform/postgres/schema.scope.go` | matters for RDS Proxy (1.4) |
 | Locks | Transaction-scoped advisory lock (`pg_advisory_xact_lock`) in ledger posting: compatible with transaction pooling. golang-migrate uses a **session** advisory lock: needs a direct (non-pooled) connection | `ledgerPosting.service.go:52`, golang-migrate | note |
-| Outbox relay | Each module's relay holds a transaction open **while publishing to SNS** (`PublishPendingOutboxEventsInTransaction`), pinning one connection and row locks for the SNS round-trip | `modules/*/src/events/outbox.event.go` | P2: a slow SNS holds the connection up to the HTTP timeout; set a short publish timeout |
+| Outbox relay | Each module's relay holds a transaction open **while publishing to RabbitMQ** (`PublishPendingOutboxEventsInTransaction`), pinning one connection and row locks until the broker confirms | `modules/*/src/events/outbox.event.go` | P2: a slow or blocked broker holds the connection up to the confirm timeout (10 s); keep it short |
 
 ### 1.2 Budget model
 
@@ -85,10 +85,10 @@ Implementation: separate `*sql.DB` per replica with a **read-only role** (`svc_x
 
 ```mermaid
 flowchart LR
-  APP[Clients and services] -->|batched events| ING[Ingestion API / SQS or Kinesis]
+  APP[Clients and services] -->|batched events| ING[Ingestion API / RabbitMQ or Kinesis]
   ING --> S3[S3 raw Parquet, Object Lock for audit class]
   ING --> CH[(ClickHouse)]
-  PG[(Aurora outbox)] -->|SNS/SQS domain events| CH
+  PG[(Aurora outbox)] -->|RabbitMQ domain events| CH
   CH --> REP[Report API: seller, creator, admin, ads]
   CH --> ML[Feature store / intelligence]
 ```
@@ -171,7 +171,7 @@ Labelled **TARGETS to validate with k6 load tests** at Base Y1 peak load (sectio
 | Notification inbox | 1 / 5 / 12 ms | 25 / 70 / 150 ms |
 | Feed read (precomputed) | 2 / 8 / 20 ms | 40 / 100 / 250 ms |
 | Seller dashboard summary (replica or CH) | 10 / 40 / 120 ms | 100 / 300 / 700 ms |
-| Outbox relay: commit to SNS publish | n/a | p50 < 1 s, p99 < 5 s (alarm 60 s) |
+| Outbox relay: commit to RabbitMQ publish confirm | n/a | p50 < 1 s, p99 < 5 s (alarm 60 s) |
 
 Load profile for k6 (assumption): peak = 10x average of the Base Y1 daily rate; gift bursts of 100 sends/s for one live; soak 1 h; failover test during load; connection-pool saturation test at 2x tasks.
 
@@ -282,7 +282,7 @@ The owner's phase wording was not available to this audit beyond the brief (desi
 | P1-4 | Services migrate on boot with schema-owner credentials | P1 (`migrations.md`) |
 | P1-5 | Messages dominate PG storage in every scenario: decide store/partition before the module is built | P1 |
 | P2-1 | Statement/lock/idle-in-tx timeouts and `application_name` per service | P2 |
-| P2-2 | Relay holds a tx open during SNS publish | P2 |
+| P2-2 | Relay holds a tx open during RabbitMQ publish | P2 |
 | F1 | Run `EXPLAIN (ANALYZE, BUFFERS)` on seeded tables (needs compose Postgres): users profile handle lookup, `journal_lines (account_id, created_at)`, outbox pending scan, audit filters | follow-up |
 | F2 | k6 baseline and pool saturation test | follow-up |
 | F3 | Replace assumptions in 6.1 with real analytics after the first 30 days of traffic | follow-up |
