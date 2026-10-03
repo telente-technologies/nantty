@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/cardVerification.refunded.v1.json",
+  "title": "cardVerification.refunded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "amount",
+    "cardLabel",
+    "reference"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "cardLabel": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

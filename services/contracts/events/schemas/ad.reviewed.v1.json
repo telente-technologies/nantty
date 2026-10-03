@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ad.reviewed.v1.json",
+  "title": "AdReviewed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "adId",
+    "accountId",
+    "decision",
+    "policyCode",
+    "reviewerName"
+  ],
+  "properties": {
+    "adId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "decision": {
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "policyCode": {
+      "type": "string"
+    },
+    "reviewerName": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adPremiumPool.allocated.v1.json",
+  "title": "AdPremiumPoolAllocated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "month",
+    "currency",
+    "poolMinor",
+    "allocations"
+  ],
+  "properties": {
+    "month": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "poolMinor": {
+      "type": "integer"
+    },
+    "allocations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "creatorUserId",
+          "amountMinor"
+        ],
+        "properties": {
+          "creatorUserId": {
+            "type": "string"
+          },
+          "amountMinor": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

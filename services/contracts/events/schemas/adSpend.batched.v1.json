@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adSpend.batched.v1.json",
+  "title": "AdSpendBatched",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batchId",
+    "accountId",
+    "currency",
+    "debitMinor",
+    "spendMicros",
+    "creatorShareMicros",
+    "platformShareMicros",
+    "impressionCount",
+    "idempotencyKey"
+  ],
+  "properties": {
+    "batchId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "debitMinor": {
+      "type": "integer"
+    },
+    "spendMicros": {
+      "type": "integer"
+    },
+    "creatorShareMicros": {
+      "type": "integer"
+    },
+    "platformShareMicros": {
+      "type": "integer"
+    },
+    "impressionCount": {
+      "type": "integer"
+    },
+    "idempotencyKey": {
+      "type": "string"
+    }
+  }
+}

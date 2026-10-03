@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adCreatorEarnings.posted.v1.json",
+  "title": "AdCreatorEarningsPosted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "creatorUserId",
+    "currency",
+    "amountMinor",
+    "batchId",
+    "idempotencyKey"
+  ],
+  "properties": {
+    "creatorUserId": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "amountMinor": {
+      "type": "integer"
+    },
+    "batchId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotencyKey": {
+      "type": "string"
+    }
+  }
+}

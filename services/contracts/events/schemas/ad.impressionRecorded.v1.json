@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ad.impressionRecorded.v1.json",
+  "title": "AdImpressionRecorded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "impressionId",
+    "adId",
+    "campaignId",
+    "accountId",
+    "userId",
+    "placement",
+    "slotKind",
+    "contentId",
+    "creatorUserId",
+    "country",
+    "aiGenerated",
+    "watchMs",
+    "completed",
+    "clicked",
+    "fraudScore",
+    "currency",
+    "chargeMicros",
+    "qualifiedAt"
+  ],
+  "properties": {
+    "impressionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "adId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "campaignId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "placement": {
+      "type": "string"
+    },
+    "slotKind": {
+      "type": "string"
+    },
+    "contentId": {
+      "type": "string"
+    },
+    "creatorUserId": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "aiGenerated": {
+      "type": "boolean"
+    },
+    "watchMs": {
+      "type": "integer"
+    },
+    "completed": {
+      "type": "boolean"
+    },
+    "clicked": {
+      "type": "boolean"
+    },
+    "fraudScore": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "chargeMicros": {
+      "type": "integer"
+    },
+    "qualifiedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

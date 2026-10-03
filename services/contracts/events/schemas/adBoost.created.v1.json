@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adBoost.created.v1.json",
+  "title": "AdBoostCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "boostId",
+    "userId",
+    "postId",
+    "goal",
+    "totalBudgetMinor",
+    "currency",
+    "paymentMethod"
+  ],
+  "properties": {
+    "boostId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "userId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string"
+    },
+    "goal": {
+      "enum": [
+        "views",
+        "profile_visits",
+        "messages"
+      ]
+    },
+    "totalBudgetMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "paymentMethod": {
+      "enum": [
+        "wallet",
+        "card"
+      ]
+    }
+  }
+}
