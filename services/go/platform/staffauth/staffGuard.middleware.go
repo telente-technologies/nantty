@@ -18,10 +18,12 @@ const (
 	SuperadminRole   = "superadmin"
 	AdminRole        = "admin"
 	permissionPrefix = "perm:"
+	namePrefix       = "name:"
 )
 
 type Staff struct {
 	Id          string
+	Name        string
 	SessionId   string
 	Role        string
 	Permissions []string
@@ -43,6 +45,20 @@ func (staff Staff) Can(permission string) bool {
 	return staff.Role == SuperadminRole || slices.Contains(staff.Permissions, permission)
 }
 
+func (staff Staff) CanAny(permissions ...string) bool {
+	for _, permission := range permissions {
+		if staff.Can(permission) {
+			return true
+		}
+	}
+	return false
+}
+
+func RolesClaimForNamedStaff(name, role string, permissions []string) []string {
+	claim := []string{namePrefix + name}
+	return append(claim, RolesClaimForStaff(role, permissions)...)
+}
+
 func RolesClaimForStaff(role string, permissions []string) []string {
 	claim := []string{role}
 	for _, permission := range permissions {
@@ -56,6 +72,8 @@ func staffFromPrincipal(principal jwtauth.Principal) Staff {
 	for _, role := range principal.Roles {
 		if permission, isPermission := strings.CutPrefix(role, permissionPrefix); isPermission {
 			staff.Permissions = append(staff.Permissions, permission)
+		} else if name, isName := strings.CutPrefix(role, namePrefix); isName {
+			staff.Name = name
 		} else {
 			staff.Role = role
 		}
@@ -84,6 +102,23 @@ func (guard Guard) RequireStaff(permission string, requireStepUp bool) func(http
 	}
 }
 
+func (guard Guard) RequireStaffWithAnyPermission(permissions []string, requireStepUp bool) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			staff, failure := guard.authenticate(request, requireStepUp)
+			if failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
+			if !staff.CanAny(permissions...) {
+				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
+				return
+			}
+			next.ServeHTTP(writer, request.WithContext(ContextWithStaff(request.Context(), staff)))
+		})
+	}
+}
+
 func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staff, *httpserver.ApiError) {
 	tokens, err := guard.Registry.StaffTokenService()
 	if err != nil {
@@ -95,6 +130,11 @@ func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staf
 		return Staff{}, httpserver.ErrUnauthorized
 	}
 	staff := staffFromPrincipal(principal)
+	if checker, checkerErr := guard.Registry.StaffSessionChecker(); checkerErr == nil {
+		if active, err := checker.IsStaffSessionActive(request.Context(), staff.Id, staff.SessionId); err != nil || !active {
+			return Staff{}, httpserver.ErrUnauthorized
+		}
+	}
 	if !requireStepUp {
 		return staff, nil
 	}
