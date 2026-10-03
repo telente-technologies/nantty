@@ -2,6 +2,7 @@ package runpayouts
 
 import (
 	"context"
+	"time"
 
 	"zudomart/modules/wallet/src/modules/payouts"
 	"zudomart/modules/wallet/src/modules/payouts/services"
@@ -12,5 +13,8 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) services.PayoutRunReport {
-	return handler.Application.Withdrawals.RunPayoutBatch(ctx, command.Maximum)
+	creators := handler.Application.Creators.TransferCreatorEarningsToConnectedAccounts(ctx, time.Now().UTC().Format("2006-01-02"))
+	report := handler.Application.Withdrawals.RunPayoutBatch(ctx, command.Maximum)
+	report.CreatorTransfers = creators.Transferred
+	return report
 }
