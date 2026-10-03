@@ -27,5 +27,5 @@
 }
 
 .creatorLink:hover {
-  border-color: var(--blue-400);
+  border-color: var(--color-brand);
 }
