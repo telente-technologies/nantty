@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { AdsWordmark } from "@/components/shell/adsWordmark";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import { buildContactMailtoLinkForBothAddresses } from "@/constants/contact.constant";
 
 import styles from "./notFound.module.css";
@@ -10,7 +10,7 @@ export default function NotFound() {
     <div className={styles.page}>
       <header className={styles.bar}>
         <Link href="/" aria-label="Zudomart Ads home" className={styles.wordmarkLink}>
-          <AdsWordmark />
+          <ZudomartWordmark productLabel="Ads" tone="onDark" />
         </Link>
       </header>
       <main id="main-content" className={styles.main}>
