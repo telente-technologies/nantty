@@ -16,9 +16,15 @@ import (
 	"zudomart/modules/users/src/events"
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/modules/users/src/migrations"
+	accountenforcement "zudomart/modules/users/src/modules/accountEnforcement"
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
+	businessdocuments "zudomart/modules/users/src/modules/businessDocuments"
 	businessprofiles "zudomart/modules/users/src/modules/businessProfiles"
+	"zudomart/modules/users/src/modules/checkmarks"
+	contactprivacy "zudomart/modules/users/src/modules/contactPrivacy"
+	creatorprogram "zudomart/modules/users/src/modules/creatorProgram"
 	creatorstatus "zudomart/modules/users/src/modules/creatorStatus"
+	"zudomart/modules/users/src/modules/legal"
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
 	"zudomart/modules/users/src/modules/usernames"
@@ -65,6 +71,10 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 		Client: client, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: jwtauth.NewAccessTokenVerifierFromKeySetProvider(publishedKeySetFromAuth, settings.TokenIssuer, settings.TokenAudience),
 	}
+	if err := legal.SeedReferenceData(ctx, usersContainer); err != nil {
+		_ = database.Close()
+		return nil, err
+	}
 	if err := privacy.SeedReferenceData(ctx, usersContainer); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -84,10 +94,18 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	businessprofiles.Mount(mux, module.container)
 	creatorstatus.Mount(mux, module.container)
 	privacy.Mount(mux, module.container)
+	accountenforcement.Mount(mux, module.container)
+	creatorprogram.Mount(mux, module.container)
+	checkmarks.Mount(mux, module.container)
+	businessdocuments.Mount(mux, module.container)
+	legal.Mount(mux, module.container)
+	contactprivacy.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go func() { _ = privacy.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
+	go func() { _ = accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
+	go func() { _ = checkmarks.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,
