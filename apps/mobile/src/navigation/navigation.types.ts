@@ -67,6 +67,7 @@ export type MainStackParamList = {
   CoinActivity: undefined;
   Withdraw: undefined;
   PayoutAccounts: undefined;
+  PayoutSetup: { context?: "creator" | "seller" } | undefined;
   SellerApplication: undefined;
   SellerDashboard: undefined;
   SellerProducts: undefined;

@@ -40,6 +40,7 @@ import { StoreRewardsScreen } from "@/screens/wallet/storeRewards.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
 import { CoinActivityScreen } from "@/screens/wallet/coinActivity.screen";
 import { WithdrawScreen } from "@/screens/wallet/withdraw.screen";
+import { PayoutSetupScreen } from "@/screens/wallet/payoutSetup.screen";
 import { PayoutAccountsScreen } from "@/screens/wallet/payoutAccounts.screen";
 import { SellerApplicationScreen } from "@/screens/seller/sellerApplication.screen";
 import { SellerDashboardScreen } from "@/screens/seller/sellerDashboard.screen";
@@ -140,6 +141,7 @@ export function MainNavigator() {
       <Stack.Screen name="CoinActivity" component={CoinActivityScreen} />
       <Stack.Screen name="Withdraw" component={WithdrawScreen} />
       <Stack.Screen name="PayoutAccounts" component={PayoutAccountsScreen} />
+      <Stack.Screen name="PayoutSetup" component={PayoutSetupScreen} />
       <Stack.Screen name="SellerApplication" component={SellerApplicationScreen} />
       <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
       <Stack.Screen name="SellerProducts" component={SellerProductsScreen} />
