@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
-  background: rgb(255 255 255 / 0.92);
+  background: color-mix(in srgb, var(--surface-card) 88%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--divider);
 }
@@ -50,19 +50,32 @@
 
 .action {
   padding: 8px 18px;
+  white-space: nowrap;
   border-radius: var(--radius-pill);
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
   color: var(--ink-inverse);
   font-size: var(--text-sm);
   font-weight: 700;
 }
 
 .action:hover {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 @media (max-width: 720px) {
   .navigationList {
     display: none;
+  }
+
+  .navigation {
+    gap: var(--space-2);
+  }
+
+  .inner {
+    gap: var(--space-2);
+  }
+
+  .action {
+    padding: 8px 14px;
   }
 }

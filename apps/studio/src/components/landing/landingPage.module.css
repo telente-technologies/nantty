@@ -10,7 +10,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .section {
@@ -46,14 +46,14 @@
   justify-content: center;
   padding: 13px 26px;
   border-radius: var(--radius-pill);
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
   color: var(--ink-inverse);
   font-size: var(--text-base);
   font-weight: 700;
 }
 
 .primaryAction:hover {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 .secondaryAction {

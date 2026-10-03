@@ -1,6 +1,7 @@
 .footer {
   background: var(--surface-inverse);
-  border-top: 1px solid rgb(255 255 255 / 0.12);
+  border-top: 1px solid var(--on-brand-divider);
+  color: var(--ink-inverse);
 }
 
 .inner {
@@ -12,13 +13,14 @@
   padding-block: var(--space-5);
 }
 
-.brand {
-  font-weight: 800;
-  letter-spacing: var(--tracking-display);
-}
-
 .note {
   font-size: var(--text-xs);
-  color: rgb(255 255 255 / 0.6);
+  color: var(--on-brand-muted);
   overflow-wrap: anywhere;
+}
+
+.note a {
+  color: var(--ink-inverse);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

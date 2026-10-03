@@ -16,6 +16,12 @@
   border: 1px solid var(--divider);
   border-radius: var(--radius-medium);
   box-shadow: var(--shadow-card);
+  transition: transform var(--motion-base) var(--motion-ease), border-color var(--motion-base) var(--motion-ease);
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--color-brand) 40%, var(--divider));
+  transform: translateY(-2px);
 }
 
 .cardTitle {

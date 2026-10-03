@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import shared from "./landingPage.module.css";
@@ -27,18 +28,23 @@ export function LandingHero() {
         </div>
 
         <div className={styles.stage} aria-hidden="true">
-          <div className={styles.stageFrame}>
-            <span className={styles.stageBadge}>
-              <span className={styles.stageDot} />
-              LIVE
-            </span>
-            <span className={styles.stageSource}>Gaming · OBS</span>
-            <span className={styles.stageLogo}>z</span>
-            <div className={styles.stageLowerThird}>
-              <p className={styles.stageName}>Temitope Adeyemi</p>
-              <p className={styles.stageHandle}>@temi.creates</p>
+          <div className={styles.stageScene}>
+            <div className={styles.stageFrame}>
+              <span className={styles.stageBadge}>
+                <span className={styles.stageDot} />
+                LIVE
+              </span>
+              <span className={styles.stageSource}>Gaming · OBS</span>
+              <span className={styles.stageLogo}>z</span>
+              <div className={styles.stageLowerThird}>
+                <p className={styles.stageName}>Temitope Adeyemi</p>
+                <p className={styles.stageHandle}>@temi.creates</p>
+              </div>
+              <span className={styles.stageTicker}>Gift goal: 7.4K / 10K coins</span>
             </div>
-            <span className={styles.stageTicker}>Gift goal: 7.4K / 10K coins</span>
+            <div className={styles.stagePhone}>
+              <Image src="/screens/viewerLiveScreen.webp" alt="" width={786} height={1704} sizes="(max-width: 900px) 30vw, 190px" className={styles.stagePhoneScreen} priority />
+            </div>
           </div>
           <div className={styles.stageBar}>
             <span className={styles.stageMetric}>

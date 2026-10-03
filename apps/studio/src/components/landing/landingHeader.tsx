@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 
 import styles from "./landingHeader.module.css";
 
@@ -23,6 +23,7 @@ export function LandingHeader() {
               </a>
             </li>
           </ul>
+          <ThemeSwitcher iconOnly />
           <Link href="/login" className={styles.action}>
             Log in
           </Link>
