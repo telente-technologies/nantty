@@ -140,7 +140,7 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
             {detail.usernameHistory.map((entry) => (
               <li key={entry.id} className={styles.listItem}>
                 <span>
-                  <span className="mono">@{entry.fromUsername} → @{entry.toUsername}</span> <StatusBadge label={humanizeConstantName(entry.kind)} tone={entry.kind === "USER_CHANGE" ? "neutral" : "night"} hasDot={false} />
+                  <span className="mono">@{entry.fromUsername} to @{entry.toUsername}</span> <StatusBadge label={humanizeConstantName(entry.kind)} tone={entry.kind === "USER_CHANGE" ? "neutral" : "night"} hasDot={false} />
                   {entry.reason ? <><br /><span className={styles.muted}>{entry.reason}</span></> : null}
                 </span>
                 <span className={styles.faint}>{formatDateTime(entry.changedAt)} · {entry.changedByName}</span>

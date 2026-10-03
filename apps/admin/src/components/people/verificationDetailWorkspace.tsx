@@ -20,11 +20,13 @@ import { VerificationDecisionPanel } from "./verificationDecisionPanel";
 import { VerificationDocumentViewer } from "./verificationDocumentViewer";
 import { VerificationTierLabel } from "./verificationTierLabel";
 import styles from "./peopleWorkspace.module.css";
+import { ZudoIcon } from "@/components/ui/zudoIcon";
+import type { ZudoIconName } from "@/constants/zudoIconNames.constant";
 
-const checkSymbols: Record<VerificationAutomatedCheck["result"], { symbol: string; className: string; label: string }> = {
-  PASS: { symbol: "✓", className: styles.checkPass ?? "", label: "Passed" },
-  FAIL: { symbol: "✕", className: styles.checkFail ?? "", label: "Failed" },
-  REVIEW: { symbol: "?", className: styles.checkReview ?? "", label: "Needs review" },
+const checkSymbols: Record<VerificationAutomatedCheck["result"], { icon: ZudoIconName; className: string; label: string }> = {
+  PASS: { icon: "check16", className: styles.checkPass ?? "", label: "Passed" },
+  FAIL: { icon: "cancel20", className: styles.checkFail ?? "", label: "Failed" },
+  REVIEW: { icon: "warning20", className: styles.checkReview ?? "", label: "Needs review" },
 };
 
 export function VerificationDetailWorkspace({ verificationId }: { readonly verificationId: string }) {
@@ -74,7 +76,7 @@ export function VerificationDetailWorkspace({ verificationId }: { readonly verif
                   const symbol = checkSymbols[check.result];
                   return (
                     <li key={check.label} className={styles.check}>
-                      <span className={symbol.className} aria-label={symbol.label}>{symbol.symbol}</span>
+                      <span className={symbol.className} aria-label={symbol.label}><ZudoIcon name={symbol.icon} size={14} /></span>
                       <span>
                         <strong>{check.label}</strong>
                         <br />
