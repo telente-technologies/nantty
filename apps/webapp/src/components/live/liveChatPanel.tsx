@@ -1,5 +1,6 @@
 "use client";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -40,7 +41,7 @@ export function LiveChatPanel({ liveId }: { readonly liveId: string }) {
           <li key={comment.id} className={[panelStyles.chatRow, comment.kind === "gift" ? panelStyles.chatRowGift : ""].join(" ")}>
             <Avatar name={comment.author.name} src={comment.author.avatarUrl} size="xs" />
             <p>
-              <strong>{comment.author.name}</strong> {comment.kind === "joined" ? "joined" : comment.gift ? `sent ${comment.gift.quantity} × ${comment.gift.emoji} ${comment.gift.name}` : comment.text}
+              <strong>{comment.author.name}</strong> {comment.kind === "joined" ? "joined" : comment.gift ? `sent ${comment.gift.quantity} × ${comment.gift.emoji} ${comment.gift.name}` : <MentionText text={comment.text} />}
             </p>
           </li>
         ))}
