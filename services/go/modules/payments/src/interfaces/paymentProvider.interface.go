@@ -93,6 +93,7 @@ type ConnectProvider interface {
 	MoneyMovementProvider
 	DisputeProvider
 	SubscriptionProvider
+	SavedCardProvider
 }
 
 type StoreReceipt struct {
@@ -109,12 +110,32 @@ type VerifiedStorePurchase struct {
 	Currency              string
 	Environment           string
 	PurchasedAt           time.Time
+	ExpiresAt             *time.Time
+	IsSubscription        bool
 }
 
+type StoreNotificationKind string
+
+const (
+	StoreNotificationRefund        StoreNotificationKind = "refund"
+	StoreNotificationRenewed       StoreNotificationKind = "renewed"
+	StoreNotificationExpired       StoreNotificationKind = "expired"
+	StoreNotificationRenewalFailed StoreNotificationKind = "renewalFailed"
+	StoreNotificationOther         StoreNotificationKind = "other"
+)
+
 type StoreRefundNotification struct {
-	NotificationId     string
-	StoreTransactionId string
-	RefundedAt         time.Time
+	NotificationId        string
+	StoreTransactionId    string
+	RefundedAt            time.Time
+	Kind                  StoreNotificationKind
+	OriginalTransactionId string
+	ProductId             string
+	ExpiresAt             *time.Time
+}
+
+func (notification StoreRefundNotification) IsRefund() bool {
+	return notification.Kind == "" || notification.Kind == StoreNotificationRefund
 }
 
 type StoreReceiptVerifier interface {
