@@ -1,4 +1,5 @@
 import type { LinkPreview } from "@/types";
+import type { MentionEntity } from "@/types/mention.type";
 
 export type OfflineMutation =
   | { readonly kind: "likePost"; readonly payload: { readonly postId: string } }
@@ -7,7 +8,7 @@ export type OfflineMutation =
   | { readonly kind: "unfollowUser"; readonly payload: { readonly userId: string } }
   | {
       readonly kind: "sendMessage";
-      readonly payload: { readonly conversationId: string; readonly text: string; readonly localMessageId: string; readonly linkPreview?: LinkPreview | null };
+      readonly payload: { readonly conversationId: string; readonly text: string; readonly localMessageId: string; readonly linkPreview?: LinkPreview | null; readonly mentions?: readonly MentionEntity[] };
     };
 
 export type OfflineMutationKind = OfflineMutation["kind"];

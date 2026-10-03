@@ -52,4 +52,5 @@ export async function fetchConversationListAndSaveLocally(filter: ConversationFi
 export const savePendingOutgoingMessageLocally = messageHistoryStore.savePendingOutgoingMessage;
 export const replacePendingMessageWithDeliveredMessageLocally = messageHistoryStore.replacePendingMessageWithDeliveredMessage;
 export const deleteAllLocallySavedMessageHistory = messageHistoryStore.deleteAllSavedMessageHistory;
+export const deleteLocalMessage = messageHistoryStore.deleteLocalMessage;
 export const markPendingMessageAsFailedLocally = messageHistoryStore.markPendingMessageAsFailed;

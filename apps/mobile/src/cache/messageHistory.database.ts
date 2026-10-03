@@ -29,7 +29,7 @@ interface SavedMessageRow {
 }
 
 type ConversationExtras = Omit<Conversation, "id" | "peer" | "lastMessage" | "lastMessageAt" | "unread" | "isFriend">;
-type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "readAt" | "encryption">;
+type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "location" | "document" | "poll" | "readAt" | "encryption">;
 
 let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
@@ -95,6 +95,9 @@ const extractMessageExtras = (message: Message): MessageExtras => ({
   mediaExpiresAt: message.mediaExpiresAt,
   linkPreview: message.linkPreview,
   sharedContent: message.sharedContent,
+  location: message.location,
+  document: message.document,
+  poll: message.poll,
   readAt: message.readAt,
   encryption: message.encryption,
 });
@@ -224,6 +227,8 @@ export const messageHistoryStore: MessageHistoryStore = {
       (database) => database.runSync("UPDATE messages SET delivery_status = 'failed' WHERE id = ?", localMessageId),
       undefined,
     ),
+  deleteLocalMessage: (localMessageId) =>
+    runSafelyOrReturnFallback((database) => database.runSync("DELETE FROM messages WHERE id = ?", localMessageId), undefined),
   deleteExpiredMessages: () =>
     runSafelyOrReturnFallback(
       (database) =>

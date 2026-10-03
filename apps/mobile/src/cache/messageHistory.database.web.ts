@@ -41,6 +41,9 @@ export const messageHistoryStore: MessageHistoryStore = {
     const pendingMessage = messagesKeptInMemory.get(localMessageId);
     if (pendingMessage) messagesKeptInMemory.set(localMessageId, { ...pendingMessage, deliveryStatus: "failed" });
   },
+  deleteLocalMessage: (localMessageId) => {
+    messagesKeptInMemory.delete(localMessageId);
+  },
   deleteExpiredMessages: () => {
     for (const [messageId, message] of messagesKeptInMemory) if (hasMessageExpired(message)) messagesKeptInMemory.delete(messageId);
   },

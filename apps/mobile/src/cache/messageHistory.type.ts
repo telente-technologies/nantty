@@ -16,6 +16,7 @@ export interface MessageHistoryStore {
   readonly savePendingOutgoingMessage: (message: Message) => void;
   readonly replacePendingMessageWithDeliveredMessage: (localMessageId: string, deliveredMessage: Message) => void;
   readonly markPendingMessageAsFailed: (localMessageId: string) => void;
+  readonly deleteLocalMessage: (localMessageId: string) => void;
   readonly deleteExpiredMessages: () => void;
   readonly deleteAllSavedMessageHistory: () => void;
 }
