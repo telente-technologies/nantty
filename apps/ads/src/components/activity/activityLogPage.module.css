@@ -29,13 +29,13 @@
   background: var(--blue-500);
   color: #fff;
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .systemMark {
   background: var(--blue-900);
   color: var(--yellow-500);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .entryBody {
@@ -61,7 +61,7 @@
   flex-direction: column;
   gap: 2px;
   margin-top: 4px;
-  font-size: 12.5px;
+  font-size: var(--fs-13);
 }
 
 .changeFrom {
@@ -71,7 +71,7 @@
 
 .time {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
   white-space: nowrap;
 }
 
