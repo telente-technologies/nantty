@@ -287,3 +287,7 @@ Checklist for the implementing agent. Files are the current Paystack-era code.
 - [ ] Platform revenue: web coin packs, seller plans, ads top-ups use platform-account checkouts (no `X-Account-Id`). Add `CoinPack.channel`, per-channel price and coins, and IAP verifiers (Apple StoreKit 2 JWS plus Notifications v2, Google Play Developer API plus RTDN) before any mobile coin sale.
 - [ ] Config: Bachs API base URL (`https://api.bachs.io`, `https://sandbox-api.bachs.io`), `sk_sandbox_` keys, separate sandbox and production signing secrets, scoped production keys, secrets in the secret store.
 - [ ] Update `.github/workflows/backend.yml` and `services/go/.env.example` for the Bachs variables. Update the `paystack.integration.go` mention in `architecture/backend.md`, the webhook route in `architecture/devops.md` and `architecture/security.md`, `architecture/system.md`, `architecture/privacy.md` and `architecture/disaster-recovery.md` (one-provider failure mode: hide the pay button, keep browse and cart).
+
+## Customer email (owner, 2026-10-03)
+
+Checkout never asks for an email. go-money sends the account's verified email (from go-identity) to Bachs as the customer email when creating the checkout session, and every receipt, refund notice and payment email goes to that address. If the account has no verified email, checkout is blocked with "Verify your email to continue". Clients never send an email field; the server ignores one if sent.

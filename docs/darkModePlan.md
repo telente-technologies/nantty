@@ -114,3 +114,12 @@ Shared pieces (2026-10-03):
 | App | Status | Preference endpoint (BFF) | Notes |
 |---|---|---|---|
 | mobile | Beta (default Light) | `PATCH /api/v1/users/me/preferences { theme }` (mock) | Light unchanged. Dark follows Figma node 874:5002 (owner decision): canvas `#0E0E10`, surface `#2C2C2C`, derived greys, brand `#2043F5` fills and yellow kept. Grey text lightened for AA: `@handle` `#5B5B5B`→`#B3B3B3`, metadata `#909090`→`#A6A6A6`. Blue text `#7A8DF9` pending design confirmation. Mobile-only; `designTokens` untouched. `app.json` stays `"light"` until visual QA. See plans.md §27. |
+| web (marketing) | Shipped | none (no sign-in) | Stays static: there is no `cookies()` read, so `ThemeInitScript` applies the cookie before paint. The switcher sits in the header and footer. Dark is art-directed (navy canvas, deeper brand bands, solid glass header over the yellow hero) |
+| studio | Shipped | `PATCH /api/v1/users/me/preferences` | The switcher is in the shell, the landing header and auth. The control room, overlay editor and stream overlays stay dark in both themes |
+| seller | Shipped | `PATCH /seller/users/me/preferences` (signed_in) | Now imports `@zudomart/design-tokens`. The switcher is in the top bar, account settings and the landing footer. Print (packing slips, statements, barcode labels) is forced to light paper tokens |
+| ads | Shipped | `PATCH /ads/users/me/preferences` (signed-in path) | The switcher is in the user menu and the Settings > Appearance card. Ad previews and charts are driven by `--chart-*` tokens. The top bar fits at 390 px |
+| admin | Shipped | `PATCH /admin/users/me/preferences` (anyAdmin, listed before `/admin/users`) | The nonce is passed to `ThemeInitScript`. The `--console-night*` rail stays dark in both themes. The switcher is in the console top bar and the account page |
+| webapp | Owned by the webapp workstream | `PATCH /bff/.../users/me/preferences` | Consumes the same kit |
+| mobile | Not started | n/a | Waiting on Figma sign-off (section 5) |
+
+Out of scope by design: brand and document artwork (`brandDocumentArtwork`, `verificationDocumentArtwork`), OG images, barcodes and live stream overlays keep their literal colours.
