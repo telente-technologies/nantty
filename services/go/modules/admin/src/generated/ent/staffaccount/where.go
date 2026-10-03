@@ -106,6 +106,16 @@ func CreatedBy(v uuid.UUID) predicate.StaffAccount {
 	return predicate.StaffAccount(sql.FieldEQ(FieldCreatedBy, v))
 }
 
+// ApprovedBy applies equality check predicate on the "approved_by" field. It's identical to ApprovedByEQ.
+func ApprovedBy(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldEQ(FieldApprovedBy, v))
+}
+
+// ApprovedAt applies equality check predicate on the "approved_at" field. It's identical to ApprovedAtEQ.
+func ApprovedAt(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldEQ(FieldApprovedAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.StaffAccount {
 	return predicate.StaffAccount(sql.FieldEQ(FieldUpdatedAt, v))
@@ -674,6 +684,106 @@ func CreatedByIsNil() predicate.StaffAccount {
 // CreatedByNotNil applies the NotNil predicate on the "created_by" field.
 func CreatedByNotNil() predicate.StaffAccount {
 	return predicate.StaffAccount(sql.FieldNotNull(FieldCreatedBy))
+}
+
+// ApprovedByEQ applies the EQ predicate on the "approved_by" field.
+func ApprovedByEQ(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldEQ(FieldApprovedBy, v))
+}
+
+// ApprovedByNEQ applies the NEQ predicate on the "approved_by" field.
+func ApprovedByNEQ(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNEQ(FieldApprovedBy, v))
+}
+
+// ApprovedByIn applies the In predicate on the "approved_by" field.
+func ApprovedByIn(vs ...uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldIn(FieldApprovedBy, vs...))
+}
+
+// ApprovedByNotIn applies the NotIn predicate on the "approved_by" field.
+func ApprovedByNotIn(vs ...uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNotIn(FieldApprovedBy, vs...))
+}
+
+// ApprovedByGT applies the GT predicate on the "approved_by" field.
+func ApprovedByGT(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldGT(FieldApprovedBy, v))
+}
+
+// ApprovedByGTE applies the GTE predicate on the "approved_by" field.
+func ApprovedByGTE(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldGTE(FieldApprovedBy, v))
+}
+
+// ApprovedByLT applies the LT predicate on the "approved_by" field.
+func ApprovedByLT(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldLT(FieldApprovedBy, v))
+}
+
+// ApprovedByLTE applies the LTE predicate on the "approved_by" field.
+func ApprovedByLTE(v uuid.UUID) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldLTE(FieldApprovedBy, v))
+}
+
+// ApprovedByIsNil applies the IsNil predicate on the "approved_by" field.
+func ApprovedByIsNil() predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldIsNull(FieldApprovedBy))
+}
+
+// ApprovedByNotNil applies the NotNil predicate on the "approved_by" field.
+func ApprovedByNotNil() predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNotNull(FieldApprovedBy))
+}
+
+// ApprovedAtEQ applies the EQ predicate on the "approved_at" field.
+func ApprovedAtEQ(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldEQ(FieldApprovedAt, v))
+}
+
+// ApprovedAtNEQ applies the NEQ predicate on the "approved_at" field.
+func ApprovedAtNEQ(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNEQ(FieldApprovedAt, v))
+}
+
+// ApprovedAtIn applies the In predicate on the "approved_at" field.
+func ApprovedAtIn(vs ...time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldIn(FieldApprovedAt, vs...))
+}
+
+// ApprovedAtNotIn applies the NotIn predicate on the "approved_at" field.
+func ApprovedAtNotIn(vs ...time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNotIn(FieldApprovedAt, vs...))
+}
+
+// ApprovedAtGT applies the GT predicate on the "approved_at" field.
+func ApprovedAtGT(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldGT(FieldApprovedAt, v))
+}
+
+// ApprovedAtGTE applies the GTE predicate on the "approved_at" field.
+func ApprovedAtGTE(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldGTE(FieldApprovedAt, v))
+}
+
+// ApprovedAtLT applies the LT predicate on the "approved_at" field.
+func ApprovedAtLT(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldLT(FieldApprovedAt, v))
+}
+
+// ApprovedAtLTE applies the LTE predicate on the "approved_at" field.
+func ApprovedAtLTE(v time.Time) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldLTE(FieldApprovedAt, v))
+}
+
+// ApprovedAtIsNil applies the IsNil predicate on the "approved_at" field.
+func ApprovedAtIsNil() predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldIsNull(FieldApprovedAt))
+}
+
+// ApprovedAtNotNil applies the NotNil predicate on the "approved_at" field.
+func ApprovedAtNotNil() predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNotNull(FieldApprovedAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

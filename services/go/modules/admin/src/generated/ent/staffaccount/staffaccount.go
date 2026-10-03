@@ -24,6 +24,8 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldRoleIds holds the string denoting the role_ids field in the database.
+	FieldRoleIds = "role_ids"
 	// FieldPermissions holds the string denoting the permissions field in the database.
 	FieldPermissions = "permissions"
 	// FieldPasswordHash holds the string denoting the password_hash field in the database.
@@ -42,6 +44,10 @@ const (
 	FieldLockedUntil = "locked_until"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
+	// FieldApprovedBy holds the string denoting the approved_by field in the database.
+	FieldApprovedBy = "approved_by"
+	// FieldApprovedAt holds the string denoting the approved_at field in the database.
+	FieldApprovedAt = "approved_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
@@ -82,6 +88,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldDisplayName,
 	FieldRole,
+	FieldRoleIds,
 	FieldPermissions,
 	FieldPasswordHash,
 	FieldStatus,
@@ -91,6 +98,8 @@ var Columns = []string{
 	FieldFailedAttempts,
 	FieldLockedUntil,
 	FieldCreatedBy,
+	FieldApprovedBy,
+	FieldApprovedAt,
 	FieldUpdatedAt,
 }
 
@@ -113,6 +122,8 @@ var (
 	DefaultDisplayName string
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	DisplayNameValidator func(string) error
+	// DefaultRoleIds holds the default value on creation for the "role_ids" field.
+	DefaultRoleIds []string
 	// DefaultPermissions holds the default value on creation for the "permissions" field.
 	DefaultPermissions []string
 	// DefaultTotpLastUsedStep holds the default value on creation for the "totp_last_used_step" field.
@@ -136,6 +147,7 @@ type Role string
 const (
 	RoleSuperadmin Role = "superadmin"
 	RoleAdmin      Role = "admin"
+	RoleSupport    Role = "support"
 )
 
 func (r Role) String() string {
@@ -145,7 +157,7 @@ func (r Role) String() string {
 // RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
 func RoleValidator(r Role) error {
 	switch r {
-	case RoleSuperadmin, RoleAdmin:
+	case RoleSuperadmin, RoleAdmin, RoleSupport:
 		return nil
 	default:
 		return fmt.Errorf("staffaccount: invalid enum value for role field: %q", r)
@@ -160,9 +172,12 @@ const DefaultStatus = StatusInvited
 
 // Status values.
 const (
-	StatusInvited  Status = "invited"
-	StatusActive   Status = "active"
-	StatusDisabled Status = "disabled"
+	StatusInvited         Status = "invited"
+	StatusActive          Status = "active"
+	StatusDisabled        Status = "disabled"
+	StatusSuspended       Status = "suspended"
+	StatusRevoked         Status = "revoked"
+	StatusPendingApproval Status = "pending_approval"
 )
 
 func (s Status) String() string {
@@ -172,7 +187,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusInvited, StatusActive, StatusDisabled:
+	case StatusInvited, StatusActive, StatusDisabled, StatusSuspended, StatusRevoked, StatusPendingApproval:
 		return nil
 	default:
 		return fmt.Errorf("staffaccount: invalid enum value for status field: %q", s)
@@ -240,6 +255,16 @@ func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByApprovedBy orders the results by the approved_by field.
+func ByApprovedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldApprovedBy, opts...).ToFunc()
+}
+
+// ByApprovedAt orders the results by the approved_at field.
+func ByApprovedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldApprovedAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
