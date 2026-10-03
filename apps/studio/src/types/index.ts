@@ -9,6 +9,7 @@ export interface User {
   readonly email: string | null;
   readonly isCreator: boolean;
   readonly channelHandle: string;
+  readonly hasStore: boolean;
 }
 
 export interface AuthSession {
@@ -19,10 +20,38 @@ export interface AuthSession {
 
 export type LiveState = "idle" | "connecting" | "live" | "ended";
 
+export type LiveCategory = "justChatting" | "gaming" | "music" | "irl" | "education" | "shopping";
+
+export interface LiveGifter {
+  readonly id: ID;
+  readonly name: string;
+  readonly coins: number;
+}
+
+export interface LiveBattleResult {
+  readonly id: ID;
+  readonly opponentName: string;
+  readonly coinsFor: number;
+  readonly coinsAgainst: number;
+}
+
+export interface LiveEarnings {
+  readonly coins: number;
+  readonly giftCount: number;
+  readonly newSubscribers: number;
+  readonly topGifters: readonly LiveGifter[];
+  readonly battles: readonly LiveBattleResult[];
+}
+
+export interface Money {
+  readonly amountMinor: number;
+  readonly currency: string;
+}
+
 export interface LiveProduct {
   readonly id: ID;
   readonly title: string;
-  readonly priceLabel: string;
+  readonly price: Money;
   readonly imageUrl: string | null;
   readonly pinned: boolean;
 }
@@ -37,6 +66,8 @@ export interface LiveComment {
 export interface LiveSession {
   readonly id: ID;
   readonly title: string;
+  readonly category: LiveCategory;
+  readonly earnings: LiveEarnings;
   readonly state: LiveState;
   readonly createdAt: ISODate;
   readonly startedAt: ISODate | null;
