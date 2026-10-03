@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/transfer.created.v1.json",
+  "title": "TransferCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transferId",
+    "storeId",
+    "reference",
+    "fromLocationId",
+    "toLocationId"
+  ],
+  "properties": {
+    "transferId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "fromLocationId": {
+      "type": "string"
+    },
+    "toLocationId": {
+      "type": "string"
+    }
+  }
+}

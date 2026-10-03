@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/user.unbanned.v1.json",
+  "title": "UserUnbanned",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

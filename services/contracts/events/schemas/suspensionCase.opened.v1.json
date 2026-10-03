@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/suspensionCase.opened.v1.json",
+  "title": "SuspensionCaseOpened",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseId",
+    "accountId",
+    "source",
+    "riskScore"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source": {
+      "type": "string"
+    },
+    "riskScore": {
+      "type": "integer"
+    }
+  }
+}

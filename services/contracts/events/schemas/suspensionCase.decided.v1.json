@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/suspensionCase.decided.v1.json",
+  "title": "SuspensionCaseDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseId",
+    "accountId",
+    "outcome"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "type": "string"
+    }
+  }
+}

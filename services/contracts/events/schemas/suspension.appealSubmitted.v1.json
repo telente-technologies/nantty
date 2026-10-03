@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/suspension.appealSubmitted.v1.json",
+  "title": "SuspensionAppealSubmitted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "suspensionId"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "suspensionId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

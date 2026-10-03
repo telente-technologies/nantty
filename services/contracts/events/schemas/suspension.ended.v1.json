@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/suspension.ended.v1.json",
+  "title": "SuspensionEnded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "suspensionId",
+    "outcome"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "suspensionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "type": "string"
+    }
+  }
+}

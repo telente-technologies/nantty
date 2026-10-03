@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/user.warned.v1.json",
+  "title": "UserWarned",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "reportId",
+    "reason"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reportId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}
