@@ -48,6 +48,20 @@ func (_c *ProfileCreate) SetKind(v profile.Kind) *ProfileCreate {
 	return _c
 }
 
+// SetCreatorStatus sets the "creator_status" field.
+func (_c *ProfileCreate) SetCreatorStatus(v profile.CreatorStatus) *ProfileCreate {
+	_c.mutation.SetCreatorStatus(v)
+	return _c
+}
+
+// SetNillableCreatorStatus sets the "creator_status" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillableCreatorStatus(v *profile.CreatorStatus) *ProfileCreate {
+	if v != nil {
+		_c.SetCreatorStatus(*v)
+	}
+	return _c
+}
+
 // SetHandle sets the "handle" field.
 func (_c *ProfileCreate) SetHandle(v string) *ProfileCreate {
 	_c.mutation.SetHandle(v)
@@ -290,6 +304,10 @@ func (_c *ProfileCreate) defaults() {
 		v := profile.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatorStatus(); !ok {
+		v := profile.DefaultCreatorStatus
+		_c.mutation.SetCreatorStatus(v)
+	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		v := profile.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
@@ -334,6 +352,14 @@ func (_c *ProfileCreate) check() error {
 	if v, ok := _c.mutation.Kind(); ok {
 		if err := profile.KindValidator(v); err != nil {
 			return &ValidationError{Name: "kind", err: fmt.Errorf(`ent: validator failed for field "Profile.kind": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorStatus(); !ok {
+		return &ValidationError{Name: "creator_status", err: errors.New(`ent: missing required field "Profile.creator_status"`)}
+	}
+	if v, ok := _c.mutation.CreatorStatus(); ok {
+		if err := profile.CreatorStatusValidator(v); err != nil {
+			return &ValidationError{Name: "creator_status", err: fmt.Errorf(`ent: validator failed for field "Profile.creator_status": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Handle(); !ok {
@@ -453,6 +479,10 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Kind(); ok {
 		_spec.SetField(profile.FieldKind, field.TypeEnum, value)
 		_node.Kind = value
+	}
+	if value, ok := _c.mutation.CreatorStatus(); ok {
+		_spec.SetField(profile.FieldCreatorStatus, field.TypeEnum, value)
+		_node.CreatorStatus = value
 	}
 	if value, ok := _c.mutation.Handle(); ok {
 		_spec.SetField(profile.FieldHandle, field.TypeString, value)

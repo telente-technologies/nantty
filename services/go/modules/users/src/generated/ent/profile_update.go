@@ -30,6 +30,20 @@ func (_u *ProfileUpdate) Where(ps ...predicate.Profile) *ProfileUpdate {
 	return _u
 }
 
+// SetCreatorStatus sets the "creator_status" field.
+func (_u *ProfileUpdate) SetCreatorStatus(v profile.CreatorStatus) *ProfileUpdate {
+	_u.mutation.SetCreatorStatus(v)
+	return _u
+}
+
+// SetNillableCreatorStatus sets the "creator_status" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillableCreatorStatus(v *profile.CreatorStatus) *ProfileUpdate {
+	if v != nil {
+		_u.SetCreatorStatus(*v)
+	}
+	return _u
+}
+
 // SetHandle sets the "handle" field.
 func (_u *ProfileUpdate) SetHandle(v string) *ProfileUpdate {
 	_u.mutation.SetHandle(v)
@@ -319,6 +333,11 @@ func (_u *ProfileUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ProfileUpdate) check() error {
+	if v, ok := _u.mutation.CreatorStatus(); ok {
+		if err := profile.CreatorStatusValidator(v); err != nil {
+			return &ValidationError{Name: "creator_status", err: fmt.Errorf(`ent: validator failed for field "Profile.creator_status": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Handle(); ok {
 		if err := profile.HandleValidator(v); err != nil {
 			return &ValidationError{Name: "handle", err: fmt.Errorf(`ent: validator failed for field "Profile.handle": %w`, err)}
@@ -383,6 +402,9 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatorStatus(); ok {
+		_spec.SetField(profile.FieldCreatorStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Handle(); ok {
 		_spec.SetField(profile.FieldHandle, field.TypeString, value)
@@ -504,6 +526,20 @@ type ProfileUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProfileMutation
+}
+
+// SetCreatorStatus sets the "creator_status" field.
+func (_u *ProfileUpdateOne) SetCreatorStatus(v profile.CreatorStatus) *ProfileUpdateOne {
+	_u.mutation.SetCreatorStatus(v)
+	return _u
+}
+
+// SetNillableCreatorStatus sets the "creator_status" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillableCreatorStatus(v *profile.CreatorStatus) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetCreatorStatus(*v)
+	}
+	return _u
 }
 
 // SetHandle sets the "handle" field.
@@ -808,6 +844,11 @@ func (_u *ProfileUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ProfileUpdateOne) check() error {
+	if v, ok := _u.mutation.CreatorStatus(); ok {
+		if err := profile.CreatorStatusValidator(v); err != nil {
+			return &ValidationError{Name: "creator_status", err: fmt.Errorf(`ent: validator failed for field "Profile.creator_status": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Handle(); ok {
 		if err := profile.HandleValidator(v); err != nil {
 			return &ValidationError{Name: "handle", err: fmt.Errorf(`ent: validator failed for field "Profile.handle": %w`, err)}
@@ -889,6 +930,9 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatorStatus(); ok {
+		_spec.SetField(profile.FieldCreatorStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Handle(); ok {
 		_spec.SetField(profile.FieldHandle, field.TypeString, value)

@@ -6991,6 +6991,7 @@ type ProfileMutation struct {
 	created_at        *time.Time
 	account_id        *uuid.UUID
 	kind              *profile.Kind
+	creator_status    *profile.CreatorStatus
 	handle            *string
 	display_name      *string
 	bio               *string
@@ -7223,6 +7224,42 @@ func (m *ProfileMutation) OldKind(ctx context.Context) (v profile.Kind, err erro
 // ResetKind resets all changes to the "kind" field.
 func (m *ProfileMutation) ResetKind() {
 	m.kind = nil
+}
+
+// SetCreatorStatus sets the "creator_status" field.
+func (m *ProfileMutation) SetCreatorStatus(ps profile.CreatorStatus) {
+	m.creator_status = &ps
+}
+
+// CreatorStatus returns the value of the "creator_status" field in the mutation.
+func (m *ProfileMutation) CreatorStatus() (r profile.CreatorStatus, exists bool) {
+	v := m.creator_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorStatus returns the old "creator_status" field's value of the Profile entity.
+// If the Profile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileMutation) OldCreatorStatus(ctx context.Context) (v profile.CreatorStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorStatus: %w", err)
+	}
+	return oldValue.CreatorStatus, nil
+}
+
+// ResetCreatorStatus resets all changes to the "creator_status" field.
+func (m *ProfileMutation) ResetCreatorStatus() {
+	m.creator_status = nil
 }
 
 // SetHandle sets the "handle" field.
@@ -7859,7 +7896,7 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, profile.FieldCreatedAt)
 	}
@@ -7868,6 +7905,9 @@ func (m *ProfileMutation) Fields() []string {
 	}
 	if m.kind != nil {
 		fields = append(fields, profile.FieldKind)
+	}
+	if m.creator_status != nil {
+		fields = append(fields, profile.FieldCreatorStatus)
 	}
 	if m.handle != nil {
 		fields = append(fields, profile.FieldHandle)
@@ -7922,6 +7962,8 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.AccountID()
 	case profile.FieldKind:
 		return m.Kind()
+	case profile.FieldCreatorStatus:
+		return m.CreatorStatus()
 	case profile.FieldHandle:
 		return m.Handle()
 	case profile.FieldDisplayName:
@@ -7963,6 +8005,8 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldAccountID(ctx)
 	case profile.FieldKind:
 		return m.OldKind(ctx)
+	case profile.FieldCreatorStatus:
+		return m.OldCreatorStatus(ctx)
 	case profile.FieldHandle:
 		return m.OldHandle(ctx)
 	case profile.FieldDisplayName:
@@ -8018,6 +8062,13 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetKind(v)
+		return nil
+	case profile.FieldCreatorStatus:
+		v, ok := value.(profile.CreatorStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorStatus(v)
 		return nil
 	case profile.FieldHandle:
 		v, ok := value.(string)
@@ -8206,6 +8257,9 @@ func (m *ProfileMutation) ResetField(name string) error {
 		return nil
 	case profile.FieldKind:
 		m.ResetKind()
+		return nil
+	case profile.FieldCreatorStatus:
+		m.ResetCreatorStatus()
 		return nil
 	case profile.FieldHandle:
 		m.ResetHandle()

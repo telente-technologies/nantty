@@ -421,7 +421,7 @@ func init() {
 	// profile.DefaultCreatedAt holds the default value on creation for the created_at field.
 	profile.DefaultCreatedAt = profileDescCreatedAt.Default.(func() time.Time)
 	// profileDescHandle is the schema descriptor for handle field.
-	profileDescHandle := profileFields[2].Descriptor()
+	profileDescHandle := profileFields[3].Descriptor()
 	// profile.HandleValidator is a validator for the "handle" field. It is called by the builders before save.
 	profile.HandleValidator = func() func(string) error {
 		validators := profileDescHandle.Validators
@@ -439,51 +439,51 @@ func init() {
 		}
 	}()
 	// profileDescDisplayName is the schema descriptor for display_name field.
-	profileDescDisplayName := profileFields[3].Descriptor()
+	profileDescDisplayName := profileFields[4].Descriptor()
 	// profile.DefaultDisplayName holds the default value on creation for the display_name field.
 	profile.DefaultDisplayName = profileDescDisplayName.Default.(string)
 	// profile.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	profile.DisplayNameValidator = profileDescDisplayName.Validators[0].(func(string) error)
 	// profileDescBio is the schema descriptor for bio field.
-	profileDescBio := profileFields[4].Descriptor()
+	profileDescBio := profileFields[5].Descriptor()
 	// profile.DefaultBio holds the default value on creation for the bio field.
 	profile.DefaultBio = profileDescBio.Default.(string)
 	// profile.BioValidator is a validator for the "bio" field. It is called by the builders before save.
 	profile.BioValidator = profileDescBio.Validators[0].(func(string) error)
 	// profileDescWebsite is the schema descriptor for website field.
-	profileDescWebsite := profileFields[5].Descriptor()
+	profileDescWebsite := profileFields[6].Descriptor()
 	// profile.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
 	profile.WebsiteValidator = profileDescWebsite.Validators[0].(func(string) error)
 	// profileDescAvatarMediaKey is the schema descriptor for avatar_media_key field.
-	profileDescAvatarMediaKey := profileFields[6].Descriptor()
+	profileDescAvatarMediaKey := profileFields[7].Descriptor()
 	// profile.AvatarMediaKeyValidator is a validator for the "avatar_media_key" field. It is called by the builders before save.
 	profile.AvatarMediaKeyValidator = profileDescAvatarMediaKey.Validators[0].(func(string) error)
 	// profileDescAvatarURL is the schema descriptor for avatar_url field.
-	profileDescAvatarURL := profileFields[7].Descriptor()
+	profileDescAvatarURL := profileFields[8].Descriptor()
 	// profile.AvatarURLValidator is a validator for the "avatar_url" field. It is called by the builders before save.
 	profile.AvatarURLValidator = profileDescAvatarURL.Validators[0].(func(string) error)
 	// profileDescBannerMediaKey is the schema descriptor for banner_media_key field.
-	profileDescBannerMediaKey := profileFields[8].Descriptor()
+	profileDescBannerMediaKey := profileFields[9].Descriptor()
 	// profile.BannerMediaKeyValidator is a validator for the "banner_media_key" field. It is called by the builders before save.
 	profile.BannerMediaKeyValidator = profileDescBannerMediaKey.Validators[0].(func(string) error)
 	// profileDescBannerURL is the schema descriptor for banner_url field.
-	profileDescBannerURL := profileFields[9].Descriptor()
+	profileDescBannerURL := profileFields[10].Descriptor()
 	// profile.BannerURLValidator is a validator for the "banner_url" field. It is called by the builders before save.
 	profile.BannerURLValidator = profileDescBannerURL.Validators[0].(func(string) error)
 	// profileDescIsPrivate is the schema descriptor for is_private field.
-	profileDescIsPrivate := profileFields[10].Descriptor()
+	profileDescIsPrivate := profileFields[11].Descriptor()
 	// profile.DefaultIsPrivate holds the default value on creation for the is_private field.
 	profile.DefaultIsPrivate = profileDescIsPrivate.Default.(bool)
 	// profileDescCountryCode is the schema descriptor for country_code field.
-	profileDescCountryCode := profileFields[11].Descriptor()
+	profileDescCountryCode := profileFields[12].Descriptor()
 	// profile.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
 	profile.CountryCodeValidator = profileDescCountryCode.Validators[0].(func(string) error)
 	// profileDescVerified is the schema descriptor for verified field.
-	profileDescVerified := profileFields[12].Descriptor()
+	profileDescVerified := profileFields[13].Descriptor()
 	// profile.DefaultVerified holds the default value on creation for the verified field.
 	profile.DefaultVerified = profileDescVerified.Default.(bool)
 	// profileDescUpdatedAt is the schema descriptor for updated_at field.
-	profileDescUpdatedAt := profileFields[14].Descriptor()
+	profileDescUpdatedAt := profileFields[15].Descriptor()
 	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
 	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

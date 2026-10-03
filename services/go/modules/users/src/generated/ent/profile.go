@@ -24,6 +24,8 @@ type Profile struct {
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// Kind holds the value of the "kind" field.
 	Kind profile.Kind `json:"kind,omitempty"`
+	// CreatorStatus holds the value of the "creator_status" field.
+	CreatorStatus profile.CreatorStatus `json:"creator_status,omitempty"`
 	// Handle holds the value of the "handle" field.
 	Handle string `json:"handle,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
@@ -81,7 +83,7 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case profile.FieldIsPrivate, profile.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case profile.FieldKind, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldStatus:
+		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldStatus:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreatedAt, profile.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -125,6 +127,12 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field kind", values[i])
 			} else if value.Valid {
 				_m.Kind = profile.Kind(value.String)
+			}
+		case profile.FieldCreatorStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_status", values[i])
+			} else if value.Valid {
+				_m.CreatorStatus = profile.CreatorStatus(value.String)
 			}
 		case profile.FieldHandle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -259,6 +267,9 @@ func (_m *Profile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("kind=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
+	builder.WriteString(", ")
+	builder.WriteString("creator_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatorStatus))
 	builder.WriteString(", ")
 	builder.WriteString("handle=")
 	builder.WriteString(_m.Handle)
