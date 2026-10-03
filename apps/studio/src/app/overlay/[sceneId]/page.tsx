@@ -38,7 +38,7 @@ export default function OverlayBrowserSourcePage({ params }: { readonly params: 
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: "html,body{margin:0;padding:0;background:transparent;overflow:hidden}" }} />
+      <style dangerouslySetInnerHTML={{ __html: "html,body{margin:0;padding:0;background:transparent;overflow:hidden;color-scheme:normal}" }} />
       <main className={styles.canvas} aria-label="Overlay layer">
         {layers.map((layer) => (
           <div key={layer.id} className={styles.layer} style={layerStyle(layer)}>
