@@ -808,3 +808,23 @@ Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mo
 - `isAiGenerated` is used on `NewPostInput` and `Post` (backendPlan names it `aiGenerated`; reconcile when wiring).
 - Posts from private profiles are hidden on the profile post list; feed and search filtering is **[LATER]**.
 - **[LATER]** Real points awards via domain events, hourly ranking rebuild, creator profile created server-side on approval, business verification (KYB), live-ad delivery, "who can see my followers" setting.
+
+
+---
+
+## 22. Shipping, addresses & privacy (mobile) **[DONE: mock]**
+
+Contracts: backendPlan §4.6 and §4.7. Mock mode only; `services/**` untouched.
+
+| # | Feature | Mobile scope | Marker |
+| --- | --- | --- | --- |
+| 1 | Structured addresses | Country > State/Region > LGA > City pickers (searchable), levels per country (Nigeria shows State + LGA + City; Ghana/Kenya region only); geo IDs stored with street, postal code, details, recipient, phone; address book reused at checkout | **[DONE]** |
+| 2 | Seller-grouped cart | Per seller: items, subtotal, discounts, shipping, total; grand total (items, shipping, total) before payment; needs-address, not-shipped, FREE and add-X-more messages; sellers that do not ship are excluded from totals and the order | **[DONE]** |
+| 3 | Shipping engine | Rules with country/state/LGA zones, free destinations, free threshold; `POST /cart/shipping-quote {addressId}`; checkout recomputes and ignores client prices | **[DONE]** |
+| 4 | Privacy & Data | `GET/PUT /users/me/consents` with `policyVersionId`, `GET /privacy/exports/latest`, `POST /privacy/exports`, `POST /privacy/deletion`, policy links | **[DONE]** |
+| 5 | Interaction tracking | `trackProductInteraction` batches to `POST /analytics/product-interactions`; personalization events skipped when off; analytics off sends no events at all | **[DONE]** |
+
+### 22.1 Notes
+
+- Differences from backendPlan: the plan has no consents GET/PUT, no export-status GET and no city level in geo, so the mock uses `GET/PUT /users/me/consents`, `GET /privacy/exports/latest` and `GET /geo/admin-areas/:id/cities`. Cart groups use flat `storeName` and no `fees`/`taxes`/`badge`; the grand total is `itemsTotal`/`shipping`/`total` on `Cart` (no `grandTotal`/`currency`); quotes add `isFree`, `freeThreshold`, `amountToFreeShipping`. Consent keys are `essential` omitted (not toggleable), `analytics`, `personalization`, `advertising`, `marketing`.
+- **[LATER]** Real geo dataset (all LGAs, cities), carrier rates, per-item weight rules, stored shipping on orders, real data-export job and deletion grace-period cancel.

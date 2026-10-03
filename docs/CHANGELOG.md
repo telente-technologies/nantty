@@ -255,6 +255,18 @@ Real screen capture (ReplayKit / MediaProjection) is still plans §8.3.7 **[LATE
 | `src/components/live/points/*`, `live/gifts/liveTopGiftersChip.tsx`, `liveGiftLeaderboard*.tsx`, `liveTopSupporterCard.tsx`, `liveTopSupportersList.tsx`, `screens/live/live.screen.tsx`, `liveEnded.screen.tsx` | **New/changed.** Points hook and pill, chip/sheet/list show points, engagement awards on double-tap, share, follow and watch time, ended screen Top Supporters by points. |
 | `src/components/create/liveMonetization*.ts(x)`, `liveSetupPanel.tsx`, `screens/create/createPost.screen.tsx` | **New/changed.** Live monetization sheet and payload builder (ads off until terms are accepted). |
 
+### Shipping, addresses & privacy
+
+| File | Change |
+| --- | --- |
+| `src/types/geo.type.ts`, `shipping.type.ts`, `privacy.type.ts`; `cartOrder.type.ts`, `account.type.ts` | **New/changed.** Geo levels and selection, `ShippingQuote`, `CartSellerGroup`, consents, data export, interaction events. `Cart` gains `groups`, `addressId`, `payableGroupCount`; `Address` stores geo IDs plus postal code and details. |
+| `src/mocks/geo.mock.ts`, `geoNigeria.mock.ts`; `services/geo.service.ts` | **New.** Nigeria (36 states + FCT, LGAs for every state, full lists for Lagos/Ogun/Oyo/Ondo/FCT/Rivers), Ghana and Kenya at region level. `GET /geo/countries`, `GET /geo/areas?parentId=`. |
+| `src/mocks/shippingEngine.mock.ts`, `commerceFixtures.mock.ts`, `cart.mock.ts`, `orders.mock.ts` | **New/changed.** Per-seller rules (country/state/LGA zones, free destinations, free threshold), amounts as `{amountMinor, currency}`. Cart is grouped by seller; `POST /cart/shipping-quote` quotes shipping (statuses `calculated|needsAddress|notDeliverable`); checkout recomputes server-side style, ignores client prices and only orders sellers that ship to the address. |
+| `src/components/settings/geoPickerField.tsx`, `addressGeoFields.tsx`, `geoQueries.hook.ts`; `screens/settings/addressForm.screen.tsx`, `addressRow.tsx` | **New/changed.** Searchable Country, State/Region, LGA, City pickers driven by the country's levels; recipient, phone, street, postal code, details. |
+| `src/components/cart/cartSellerGroupCard.tsx`, `shippingStatusLine.tsx`, `cartGrandTotalCard.tsx`, `deliveryAddressPicker.tsx`; `store/deliveryAddress.store.ts`; `cart.screen.tsx`, `checkout.screen.tsx` | **New/changed.** Seller groups with subtotal, discounts, shipping and total; needs-address, not-shipped, FREE and add-X-more states; grand total before payment. `orderSummaryCard.tsx` removed. |
+| `src/mocks/privacy.mock.ts`, `services/consents.service.ts`, `config/legalLinks.config.ts`; `components/settings/privacyQueries.hook.ts`, `consentToggleRow.tsx`, `dataExportSection.tsx`, `deleteAccountSheet.tsx`; `screens/settings/settingsPrivacyData.screen.tsx` | **New.** Settings > Privacy & Data: consents (with policy version), data export request/status, account deletion, policy links. |
+| `src/services/productInteractions.service.ts`; product detail, store, search, category, `productMasonry.tsx`, `useCart.hook.ts`, checkout | **New/changed.** Batched `trackProductInteraction`; personalization events dropped when personalization is off; analytics off sends no events. |
+
 Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 
 ---
