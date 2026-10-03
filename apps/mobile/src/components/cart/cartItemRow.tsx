@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Minus16Icon, Plus16AltIcon, Trash24Icon } from "@/components/icons";
 import { MoneyAmount } from "@/components/product/moneyAmount";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CartItem } from "@/types";
 
 export interface CartItemRowProps {
@@ -15,6 +15,8 @@ export interface CartItemRowProps {
 }
 
 export function CartItemRow({ item, onChangeQuantity, onRemove, onPress }: CartItemRowProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <Pressable accessibilityRole="button" accessibilityLabel={item.product.name} onPress={onPress} style={styles.left}>
@@ -55,7 +57,7 @@ export function CartItemRow({ item, onChangeQuantity, onRemove, onPress }: CartI
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 24 },
   left: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   image: { width: 64, height: 64, borderRadius: 12, backgroundColor: colors.placeholder, overflow: "hidden" },
@@ -74,4 +76,4 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.4 },
   right: { alignItems: "flex-end", gap: 12 },
-});
+}));

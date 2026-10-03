@@ -9,11 +9,13 @@ import { formatAddressLocation } from "@/components/settings/addressRow";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { usersService } from "@/services/users.service";
 import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 
 export function DeliveryAddressPicker({ onAddAddress }: { onAddAddress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [open, setOpen] = useState(false);
   const { chosenAddressId, chooseDeliveryAddress } = useDeliveryAddressStore();
   const { data: addresses = [] } = useQuery({ queryKey: profileQueryKeys.addresses, queryFn: usersService.listMyShippingAddresses });
@@ -65,9 +67,9 @@ export function DeliveryAddressPicker({ onAddAddress }: { onAddAddress: () => vo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.divider },
   text: { flex: 1, gap: 4 },
   list: { maxHeight: 420 },
   listContent: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
-});
+}));

@@ -6,11 +6,12 @@ import { CategoryTabs } from "@/components/home/categoryTabs";
 import { ShoppingCart48Icon } from "@/components/icons";
 import { FeaturedProductsGrid } from "@/components/product/featuredProductsGrid";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { categoriesService } from "@/services/categories.service";
 import { productsService } from "@/services/products.service";
 
 export function EmptyCartState() {
+  const { colors } = useTheme();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoriesService.fetchProductCategories });
   const featured = useQuery({ queryKey: ["products", "featured"], queryFn: productsService.fetchFeaturedProducts });

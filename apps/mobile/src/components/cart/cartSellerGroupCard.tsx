@@ -4,7 +4,7 @@ import { CartItemRow } from "@/components/cart/cartItemRow";
 import { ShippingStatusLine } from "@/components/cart/shippingStatusLine";
 import { MoneyAmount } from "@/components/product/moneyAmount";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { CartSellerGroup, Money } from "@/types";
 
 export interface CartSellerGroupCardProps {
@@ -16,6 +16,7 @@ export interface CartSellerGroupCardProps {
 }
 
 function AmountLine({ label, amount, strong = false }: { label: string; amount: Money; strong?: boolean }) {
+  const styles = useStyles();
   return (
     <View style={styles.line}>
       <Text size={13} weight={strong ? 600 : 400} lineHeight={16.9}>{label}</Text>
@@ -25,6 +26,7 @@ function AmountLine({ label, amount, strong = false }: { label: string; amount: 
 }
 
 export function CartSellerGroupCard({ group, showItems = true, onOpenProduct, onChangeQuantity, onRemove }: CartSellerGroupCardProps) {
+  const styles = useStyles();
   const isBlocked = group.shipping.status === "notDeliverable";
   return (
     <View style={[styles.card, isBlocked && styles.blocked]} accessibilityLabel={`Seller ${group.storeName}`}>
@@ -50,9 +52,9 @@ export function CartSellerGroupCard({ group, showItems = true, onOpenProduct, on
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.divider, gap: 4 },
   blocked: { borderColor: colors.error },
   lines: { gap: 8, paddingTop: 8 },
   line: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-});
+}));

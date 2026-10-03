@@ -2,10 +2,11 @@ import { StyleSheet, View } from "react-native";
 
 import { MoneyAmount } from "@/components/product/moneyAmount";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Cart, Money } from "@/types";
 
 function GrandTotalLine({ label, amount, strong = false }: { label: string; amount: Money; strong?: boolean }) {
+  const styles = useStyles();
   return (
     <View style={styles.line}>
       <Text size={13} weight={strong ? 600 : 400} lineHeight={16.9}>{label}</Text>
@@ -15,6 +16,8 @@ function GrandTotalLine({ label, amount, strong = false }: { label: string; amou
 }
 
 export function CartGrandTotalCard({ cart }: { cart: Cart }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const excludedCount = cart.addressId ? cart.groups.length - cart.payableGroupCount : 0;
   return (
     <View style={styles.section}>
@@ -33,8 +36,8 @@ export function CartGrandTotalCard({ cart }: { cart: Cart }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   section: { gap: 12 },
   card: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.divider, gap: 8 },
   line: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-});
+}));

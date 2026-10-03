@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export interface SelectableRowProps {
   readonly selected: boolean;
@@ -11,6 +11,7 @@ export interface SelectableRowProps {
 }
 
 export function SelectableRow({ selected, onPress, accessibilityLabel, children }: SelectableRowProps) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -25,13 +26,13 @@ export function SelectableRow({ selected, onPress, accessibilityLabel, children 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: {
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -40,5 +41,5 @@ const styles = StyleSheet.create({
   body: { flex: 1, gap: 4 },
   radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: colors.textSubtle, alignItems: "center", justifyContent: "center" },
   radioSelected: { borderColor: colors.primary },
-  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
-});
+  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primarySolid },
+}));

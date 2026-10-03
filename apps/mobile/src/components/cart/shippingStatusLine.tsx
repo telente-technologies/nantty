@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { MoneyAmount } from "@/components/product/moneyAmount";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { CartSellerGroup } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -23,6 +23,7 @@ export function describeShippingHint(group: CartSellerGroup): string | null {
 }
 
 export function ShippingStatusLine({ group }: { group: CartSellerGroup }) {
+  const { colors } = useTheme();
   const { shipping } = group;
   const hint = describeShippingHint(group);
   const isBlocked = shipping.status === "notDeliverable";
