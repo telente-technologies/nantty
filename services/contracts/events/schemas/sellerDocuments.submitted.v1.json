@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/sellerDocuments.submitted.v1.json",
+  "title": "sellerDocuments.submitted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "storeName",
+    "documents"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reviewWithinDays": {
+      "type": "integer"
+    }
+  }
+}

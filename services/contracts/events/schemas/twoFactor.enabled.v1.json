@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/twoFactor.enabled.v1.json",
+  "title": "twoFactor.enabled",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "method"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    }
+  }
+}

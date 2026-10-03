@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/suspension.suggested.v1.json",
+  "title": "SuspensionSuggested",
+  "description": "Advisory only. goTrust opens a case for an admin to decide; nothing is suspended automatically.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["suggestionId", "subjectType", "subjectId", "source", "score", "evidence", "advisoryOnly", "generatedAt"],
+  "properties": {
+    "suggestionId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "subjectType": { "const": "account" },
+    "subjectId": { "type": "string", "format": "uuid" },
+    "source": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "weight"],
+        "properties": { "code": { "type": "string" }, "weight": { "type": "number" } }
+      }
+    },
+    "advisoryOnly": { "const": true },
+    "generatedAt": { "type": "string", "format": "date-time" }
+  }
+}

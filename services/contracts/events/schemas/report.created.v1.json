@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/report.created.v1.json",
+  "title": "ReportCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reportId","reporterId","targetType","targetId","reason","priority"],
+  "properties": { "reportId": { "type": "string", "format": "uuid" }, "reporterId": { "type": "string", "format": "uuid" }, "targetType": { "type": "string" }, "targetId": { "type": "string" }, "conversationId": { "type": "string" }, "reportedUserId": { "type": "string" }, "reason": { "type": "string" }, "details": { "type": "string" }, "priority": { "enum": ["normal", "urgent"] }, "blockReportedUser": { "type": "boolean" }, "evidenceHash": { "type": "string" }, "evidence": { "type": "array" } }
+}

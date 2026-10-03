@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/sellerDocuments.rejected.v1.json",
+  "title": "sellerDocuments.rejected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "storeName",
+    "documents",
+    "issues"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
