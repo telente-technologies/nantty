@@ -21,9 +21,9 @@ export function SubscriptionPaymentConfirmation({ reference }: { readonly refere
 
   return (
     <>
-      <PageHeader title="Confirming your Gold payment" description="We check the payment with our payment partner before switching anything on." />
+      <PageHeader title="Confirming your plan payment" description="We check the payment with our payment partner before switching anything on." />
       {errorMessage ? (
-        <Callout tone="error" title="We could not confirm this payment" action={<ButtonLink href="/access/billing">Back to plans</ButtonLink>}>
+        <Callout tone="error" title="We could not confirm this payment" action={<ButtonLink href="/settings/billing">Back to plans</ButtonLink>}>
           {errorMessage}
         </Callout>
       ) : (

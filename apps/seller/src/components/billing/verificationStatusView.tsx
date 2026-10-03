@@ -25,11 +25,11 @@ const documentStatusTone: Record<VerificationDocument["status"], StatusTone> = {
 const documentStatusLabel: Record<VerificationDocument["status"], string> = { missing: "Not sent", in_review: "In review", approved: "Approved", rejected: "Needs attention" };
 
 const headlineByStatus: Record<VerificationStatus, { title: string; description: string }> = {
-  unverified: { title: "Verify your store to use the dashboard", description: "Send your business documents from the Zudomart app. Once verified, pick a Gold plan to unlock the dashboard." },
-  pending: { title: "We are reviewing your store", description: "You will get a notification in the Zudomart app when we are done. Nothing else is needed from you right now." },
-  verified: { title: "Your store is verified", description: "Pick a Gold plan to unlock the dashboard." },
-  suspended: { title: "Your verification is suspended", description: "Selling tools are paused while we look into your account. Check the note below and contact support." },
-  revoked: { title: "Your verification was removed", description: "Your store no longer has a gold badge or dashboard access. Read the note below to find out how to apply again." },
+  unverified: { title: "Your store is not verified yet", description: "You can use the dashboard on any plan. Verifying adds the gold badge and builds trust with buyers." },
+  pending: { title: "We are reviewing your store", description: "You can keep using the dashboard while we review. You will get a notification in the Zudomart app when we are done." },
+  verified: { title: "Your store is verified", description: "Your store shows the gold badge." },
+  suspended: { title: "Your store is restricted", description: "Selling tools are paused while we look into your account. Check the note below and contact support." },
+  revoked: { title: "Your store was removed", description: "Your store can no longer sell on Zudomart. Read the note below to find out how to apply again." },
 };
 
 export function VerificationDocumentsList({ details }: { readonly details: VerificationDetails }) {
@@ -54,11 +54,11 @@ export function VerificationStatusView() {
     <>
       <PageHeader eyebrow={sessionView?.access.storeName ?? "Your store"} title={headline.title} description={headline.description} />
       {verificationQuery.data?.note ? <Callout tone={status === "pending" ? "info" : "caution"} title="Note from Zudomart">{verificationQuery.data.note}</Callout> : null}
-      <Panel title="Your path to the dashboard">
+      <Panel title="What to do next">
         <ol>
-          <GateStep state={status === "unverified" ? "current" : "done"} title="Send your documents in the Zudomart app" />
-          <GateStep state={status === "pending" ? "current" : status === "verified" ? "done" : "todo"} title="Verification review" />
-          <GateStep state={status === "verified" ? "current" : "todo"} title="Choose Gold Pro or Gold Premium" />
+          <GateStep state="current" title="Read the note from Zudomart" />
+          <GateStep state="todo" title="Reply to support from the Zudomart app" />
+          <GateStep state="todo" title="Sign in again once the restriction is lifted" />
         </ol>
       </Panel>
       <Panel title="Documents">

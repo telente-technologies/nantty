@@ -75,7 +75,7 @@
 }
 
 .entitlements li span {
-  color: var(--success);
+  color: var(--success-ink);
 }
 
 .perks {

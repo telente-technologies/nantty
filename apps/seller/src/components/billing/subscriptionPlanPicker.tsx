@@ -7,18 +7,32 @@ import { Callout, LoadingBlock } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { planHighlightsByPlan, sellerPlanLabels, type SellerPlan } from "@/config/planFeatures.config";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { SubscriptionPlan } from "@/types/subscription.type";
-import { describeGoldEntitlements } from "@/utils/goldEntitlements.util";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
-import styles from "./goldPlanPicker.module.css";
+import styles from "./subscriptionPlanPicker.module.css";
 
-export { describeGoldEntitlements };
+function convertTierToSellerPlan(tier: SubscriptionPlan["tier"]): SellerPlan {
+  return tier === "BUSINESS" ? "business" : "pro";
+}
 
-export function GoldPlanPicker({ currentPlanId }: { readonly currentPlanId: string | null }) {
+function PlanHighlightsList({ plan }: { readonly plan: SellerPlan }) {
+  return (
+    <ul className={styles.entitlements}>
+      {planHighlightsByPlan[plan].map((highlight) => (
+        <li key={highlight}>
+          <ZudoIcon name="check16" size={14} /> {highlight}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function SubscriptionPlanPicker({ currentPlanId, currentPlan }: { readonly currentPlanId: string | null; readonly currentPlan: SellerPlan }) {
   const plansQuery = useSellerQuery<CursorPage<SubscriptionPlan>>("/seller/subscription/plans");
   const [billingInterval, setBillingInterval] = useState<"month" | "year">("month");
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
@@ -38,9 +52,9 @@ export function GoldPlanPicker({ currentPlanId }: { readonly currentPlanId: stri
     }
   }
 
-  if (plansQuery.isLoading) return <LoadingBlock label="Loading Gold plans" />;
+  if (plansQuery.isLoading) return <LoadingBlock label="Loading plans" />;
   if (!plansQuery.data) return <Callout tone="error">{plansQuery.errorMessage ?? "Plans could not be loaded."}</Callout>;
-  const plans = plansQuery.data.data.filter((plan) => plan.interval === billingInterval);
+  const paidPlans = plansQuery.data.data.filter((plan) => plan.interval === billingInterval);
   const hasYearlyPlans = plansQuery.data.data.some((plan) => plan.interval === "year");
 
   return (
@@ -50,28 +64,33 @@ export function GoldPlanPicker({ currentPlanId }: { readonly currentPlanId: stri
       ) : null}
       {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
       <div className={styles.planGrid}>
-        {plans.map((plan) => {
+        <article className={styles.planCard}>
+          <header className={styles.planHeader}>
+            <h3 className={styles.planName}>Free</h3>
+            {currentPlan === "free" ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
+          </header>
+          <p className={styles.price}>Free<span className={styles.interval}> forever</span></p>
+          <PlanHighlightsList plan="free" />
+          <p className={styles.footnote}>Basic selling is never locked.</p>
+        </article>
+        {paidPlans.map((plan) => {
+          const sellerPlan = convertTierToSellerPlan(plan.tier);
           const isCurrentPlan = plan.id === currentPlanId;
+          const planName = sellerPlanLabels[sellerPlan];
           return (
-            <article key={plan.id} className={`${styles.planCard} ${plan.tier === "PREMIUM" ? styles.premium : ""}`}>
+            <article key={plan.id} className={`${styles.planCard} ${sellerPlan === "business" ? styles.premium : ""}`}>
               <header className={styles.planHeader}>
                 <span className={styles.goldMark}>
-                  <ZudoIcon name="sealCheck20" size={18} />
+                  <ZudoIcon name="star16" size={16} />
                 </span>
-                <h3 className={styles.planName}>Gold {plan.tier === "PREMIUM" ? "Premium" : "Pro"}</h3>
+                <h3 className={styles.planName}>{planName}</h3>
                 {isCurrentPlan ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
               </header>
               <p className={styles.price}>
                 {formatMoneyForDisplay(plan.price)}
                 <span className={styles.interval}>/{plan.interval === "year" ? "year" : "month"}</span>
               </p>
-              <ul className={styles.entitlements}>
-                {describeGoldEntitlements(plan.entitlements).map((description) => (
-                  <li key={description}>
-                    <ZudoIcon name="check16" size={14} /> {description}
-                  </li>
-                ))}
-              </ul>
+              <PlanHighlightsList plan={sellerPlan} />
               {plan.perks.length > 0 ? (
                 <ul className={styles.perks}>
                   {plan.perks.map((perk) => (
@@ -82,8 +101,8 @@ export function GoldPlanPicker({ currentPlanId }: { readonly currentPlanId: stri
                   ))}
                 </ul>
               ) : null}
-              <Button variant={plan.tier === "PREMIUM" ? "tender" : "primary"} size="large" fullWidth disabled={isCurrentPlan || pendingPlanId !== null} isBusy={pendingPlanId === plan.id} onClick={() => void startHostedCheckoutForPlan(plan.id)}>
-                {isCurrentPlan ? "Your plan" : currentPlanId ? `Switch to Gold ${plan.tier === "PREMIUM" ? "Premium" : "Pro"}` : `Get Gold ${plan.tier === "PREMIUM" ? "Premium" : "Pro"}`}
+              <Button variant={sellerPlan === "business" ? "tender" : "primary"} size="large" fullWidth disabled={isCurrentPlan || pendingPlanId !== null} isBusy={pendingPlanId === plan.id} onClick={() => void startHostedCheckoutForPlan(plan.id)}>
+                {isCurrentPlan ? "Your plan" : currentPlanId ? `Switch to ${planName}` : `Upgrade to ${planName}`}
               </Button>
             </article>
           );
