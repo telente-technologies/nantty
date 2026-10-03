@@ -10,6 +10,8 @@ import { ChatComposerWithVoiceNotes } from "@/components/chat/chatComposerWithVo
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
 import { ConversationIntro } from "@/components/chat/conversationIntro";
+import { ChatActionsMenu } from "@/components/chatReport/chatActionsMenu";
+import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
 import { ChatLockGate } from "@/components/chatSafety/chatLockGate";
 import { ChatMuteSheet } from "@/components/chatSafety/chatMuteSheet";
 import { InboxRequestActions } from "@/components/chatSafety/inboxRequestActions";
@@ -61,6 +63,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const listRef = useRef<FlatList<LocallyStoredMessage>>(null);
   const [messageBeingReactedTo, setMessageBeingReactedTo] = useState<LocallyStoredMessage | null>(null);
   const [isMuteSheetOpen, setIsMuteSheetOpen] = useState(false);
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
   const [isStreakSheetOpen, setIsStreakSheetOpen] = useState(false);
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
 
@@ -92,6 +95,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
     return () => clearInterval(sweepTimer);
   }, [conversationId, queryClient]);
 
+  const report = useChatReportLauncher(conversation.data);
   const sendMessageOptimistically = useOptimisticChatMessageSender(conversationId, myUserId);
   const sendVoiceNoteOptimistically = useOptimisticVoiceNoteSender(conversationId, myUserId);
   const sendImageOptimistically = useOptimisticImageMessageSender(conversationId, myUserId);
@@ -130,6 +134,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           onOpenConversationInfo={openConversationInfo}
           onOpenStreak={() => setIsStreakSheetOpen(true)}
           onOpenMute={() => setIsMuteSheetOpen(true)}
+          onOpenOptionsMenu={() => setIsOptionsMenuOpen(true)}
         />
         {disappearingSeconds ? (
           <View style={styles.disappearingBanner}>
@@ -227,6 +232,16 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
       {conversationId && peer && streak && streak.state !== "none" ? (
         <StreakSheet visible={isStreakSheetOpen} onClose={() => setIsStreakSheetOpen(false)} conversationId={conversationId} streak={streak} peerName={peer.name} />
       ) : null}
+      <ChatActionsMenu
+        visible={isOptionsMenuOpen}
+        conversation={conversation.data}
+        isGroupLike={isGroupLike}
+        onClose={() => setIsOptionsMenuOpen(false)}
+        onOpenConversationInfo={openConversationInfo}
+        onBlocked={() => navigation.goBack()}
+        report={report}
+      />
+      {report.reportSheet}
       {conversationId ? <ChatMuteSheet visible={isMuteSheetOpen} onClose={() => setIsMuteSheetOpen(false)} conversationId={conversationId} isMuted={!!conversation.data?.mutedUntil} /> : null}
       </ChatLockGate>
       <MessageReactionPicker
@@ -236,6 +251,15 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
           if (messageBeingReactedTo) toggleReactionOnMessage(messageBeingReactedTo, emoji, true).catch(() => undefined);
           setMessageBeingReactedTo(null);
         }}
+        onReportMessage={
+          messageBeingReactedTo && !isMyMessage(messageBeingReactedTo)
+            ? () => {
+                const reportedMessage = messageBeingReactedTo;
+                setMessageBeingReactedTo(null);
+                setTimeout(() => report.reportMessage(reportedMessage, reportedMessage.sender ?? null), 350);
+              }
+            : undefined
+        }
       />
     </Screen>
   );

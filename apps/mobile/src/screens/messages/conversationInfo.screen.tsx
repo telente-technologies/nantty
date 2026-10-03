@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { BusinessLabel } from "@/components/chat/businessLabel";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
 import { DisappearingMessagesPicker } from "@/components/chat/disappearingMessagesPicker";
+import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
 import { GroupMemberPicker } from "@/components/chat/groupMemberPicker";
 import { GroupMemberRow } from "@/components/chat/groupMemberRow";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
@@ -13,6 +14,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
+import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -21,6 +23,8 @@ import { groupsService } from "@/services/groups.service";
 import { messagesService } from "@/services/messages.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Conversation, ConversationSettingsUpdate, UserSummary } from "@/types";
+import { LockSimple24Icon } from "@/components/icons";
+import { IconRow } from "@/components/ui/iconRow";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -34,6 +38,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
 
   const conversation = useQuery({ queryKey: ["conversation", conversationId], queryFn: () => messagesService.fetchConversationById(conversationId) });
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
+  const report = useChatReportLauncher(conversation.data);
   const members = useQuery({
     queryKey: ["conversation-members", conversationId],
     queryFn: () => groupsService.fetchConversationMembers(conversationId),
@@ -95,9 +100,11 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
       </View>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.encryptionNotice} accessibilityRole="text">
-          <Text size={12} lineHeight={17} color={colors.textMuted} align="center">
-            🔒 Messages are end-to-end encrypted. Only people in this chat can read them.
-          </Text>
+          <IconRow icon={<LockSimple24Icon size={14} color={colors.textMuted} />} justify="center" gap={6}>
+            <Text size={12} lineHeight={17} color={colors.textMuted} align="center" style={{ flexShrink: 1 }}>
+              Messages are end-to-end encrypted. Only people in this chat can read them.
+            </Text>
+          </IconRow>
         </View>
         <View style={styles.identity}>
           <Avatar uri={display?.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
@@ -182,7 +189,13 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                 canManageMembers={canEditGroup}
                 onPromoteToAdmin={() => runMemberAction.mutate(() => groupsService.promoteMemberToAdmin(conversationId, member.user.id))}
                 onDemoteToMember={() => runMemberAction.mutate(() => groupsService.demoteAdminToMember(conversationId, member.user.id))}
-                onRemoveFromGroup={() => runMemberAction.mutate(() => groupsService.removeMemberFromGroup(conversationId, member.user.id))}
+                onReport={() => report.reportMember(member.user)}
+                onRemoveFromGroup={() =>
+                  showAlertWithButtons(`Remove ${member.user.name}?`, "They'll stop getting messages from this group.", [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Remove", style: "destructive", onPress: () => runMemberAction.mutate(() => groupsService.removeMemberFromGroup(conversationId, member.user.id)) },
+                  ])
+                }
               />
             ))}
           </View>
@@ -199,10 +212,20 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
             title={display.isChannel ? (conversation.data?.myRole === "owner" ? "Leave channel" : "Unsubscribe") : "Leave group"}
             variant="danger"
             loading={leaveConversation.isPending}
-            onPress={() => leaveConversation.mutate()}
+            onPress={() => {
+              const leaveLabel = display.isChannel ? (conversation.data?.myRole === "owner" ? "Leave channel" : "Unsubscribe") : "Leave group";
+              showAlertWithButtons(`${leaveLabel}?`, display.isChannel ? "You'll stop getting new posts from this channel." : "You'll stop getting messages from this group. Someone will need to add you back.", [
+                { text: "Cancel", style: "cancel" },
+                { text: leaveLabel, style: "destructive", onPress: () => leaveConversation.mutate() },
+              ]);
+            }}
           />
         ) : null}
+        {display && (display.isGroup || display.isChannel) ? (
+          <Button title={display.isChannel ? "Report channel" : "Report group"} variant="outline" onPress={report.reportGroup} />
+        ) : null}
       </ScrollView>
+      {report.reportSheet}
     </Screen>
   );
 }
