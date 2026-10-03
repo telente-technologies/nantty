@@ -96,6 +96,11 @@ export type MainStackParamList = {
   SettingsUsername: undefined;
   BrandProfile: { brandId: string };
   CreateBrand: undefined;
+  FollowRequests: undefined;
+  SettingsPrivacy: undefined;
+  SettingsPrivacyData: undefined;
+  CreateBusinessProfile: undefined;
+  Rankings: undefined;
   Sound: { soundId: string };
 };
 
