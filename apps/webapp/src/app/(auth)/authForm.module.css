@@ -74,13 +74,13 @@
 .errorText {
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 .successText {
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--success);
+  color: var(--color-success-text);
 }
 
 .mutedText {
@@ -307,7 +307,7 @@
 }
 
 .ruleMet {
-  color: var(--success);
+  color: var(--color-success-text);
 }
 
 .strengthTrack {
