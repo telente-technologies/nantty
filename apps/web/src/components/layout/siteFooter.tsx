@@ -37,6 +37,11 @@ const footerLinkGroups = [
       { label: "Privacy policy", href: "/privacy" },
       { label: "Cookie policy", href: "/cookies" },
       { label: "Terms of service", href: "/terms" },
+      { label: "Community guidelines", href: "/community-guidelines" },
+      { label: "Seller terms", href: "/seller-terms" },
+      { label: "Creator Program terms", href: "/creator-terms" },
+      { label: "Ads policy", href: "/ads-policy" },
+      { label: "Refund and escrow policy", href: "/refund-escrow-policy" },
     ],
   },
 ] as const;
