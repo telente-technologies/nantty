@@ -42,7 +42,7 @@ async function refreshAccessTokenWithRefreshToken(): Promise<boolean> {
 
 async function sendHttpRequest<T>(method: Method, path: string, options: RequestOptions = {}): Promise<T> {
   const url = appendQueryStringToPath(path, options.query);
-  if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body);
+  if (apiConfig.useMocks) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey);
 
   const headers: Record<string, string> = { Accept: "application/json", ...getAuthorizedRequestHeaders(options.auth !== false) };
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
