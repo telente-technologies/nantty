@@ -1,0 +1,142 @@
+.room {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.stage {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: calc(100dvh - 60px - var(--space-8));
+  margin-inline: auto;
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  border-radius: var(--radius-large);
+  background: var(--color-inverse);
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.liveBadge,
+.endedBadge,
+.viewerBadge {
+  position: absolute;
+  top: var(--space-3);
+  padding: 2px 8px;
+  border-radius: var(--radius-small);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
+.liveBadge {
+  left: var(--space-3);
+  background: var(--color-danger-text);
+  color: var(--color-surface);
+  letter-spacing: 0.08em;
+}
+
+.endedBadge {
+  left: var(--space-3);
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+}
+
+.viewerBadge {
+  right: var(--space-3);
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+}
+
+.hostBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  border-radius: var(--radius-medium);
+}
+
+.host > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hostName {
+  font-weight: 800;
+}
+
+.liveTitle {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productStrip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.productChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.productChip:hover {
+  border-color: var(--color-brand);
+}
+
+.productThumb {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+}
+
+@media (min-width: 1024px) {
+  .room {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+
+  .side {
+    position: sticky;
+    top: calc(60px + var(--space-5));
+  }
+}
