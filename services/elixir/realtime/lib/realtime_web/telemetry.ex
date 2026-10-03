@@ -46,7 +46,6 @@ defmodule RealtimeWeb.Telemetry do
         tags: [:event],
         unit: {:native, :millisecond}
       ),
-
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
@@ -55,7 +54,6 @@ defmodule RealtimeWeb.Telemetry do
   end
 
   defp periodic_measurements do
-    [
-    ]
+    []
   end
 end
