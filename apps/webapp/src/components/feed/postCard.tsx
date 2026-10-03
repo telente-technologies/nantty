@@ -18,6 +18,7 @@ import type { Post } from "@/types";
 
 import styles from "./postCard.module.css";
 import { hasVideoMedia, isLandscapeVideoPost, PostMedia } from "./postCardMedia";
+import { AppIcon } from "@/components/ui/appIcon";
 
 export function PostCard({ post, priority = false }: { readonly post: Post; readonly priority?: boolean }) {
   const queryClient = useQueryClient();
@@ -46,7 +47,7 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
           <span className={styles.authorText}>
             <span className={styles.authorName}>
               {post.author.name}
-              {post.author.verified ? <span className={styles.verified} aria-label="Verified account">✓</span> : null}
+              {post.author.verified ? <span className={styles.verified} aria-label="Verified account"><AppIcon name="check16" size={10} /></span> : null}
             </span>
             <span className={styles.authorMeta}>@{post.author.username}</span>
           </span>

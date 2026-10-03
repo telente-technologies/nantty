@@ -12,6 +12,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { OrderStatus } from "@/types";
 
 import styles from "./orderListPanel.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning" | "error"> = {
   pending: "warning",
@@ -75,7 +76,7 @@ export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: stri
       ) : ordersQuery.isError ? (
         <ErrorState description="We couldn't load your orders." action={<RetryButton onRetry={() => ordersQuery.refetch()} />} />
       ) : (ordersQuery.data ?? []).length === 0 ? (
-        <EmptyState icon="📦" title="No orders yet" description="When you place an order it will show up here with live escrow status." action={
+        <EmptyState icon={<AppIcon name="package24" size={28} />} title="No orders yet" description="When you place an order it will show up here with live escrow status." action={
             <Link href="/mart" className={styles.cta}>
               Start shopping
             </Link>

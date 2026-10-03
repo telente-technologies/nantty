@@ -10,6 +10,7 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { coinsService } from "@/services/webActions.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
 import styles from "@/components/actions/actionDialogs.module.css";
 
@@ -20,13 +21,14 @@ export function CoinPurchaseDialog({ isOpen, onClose, coinsNeeded }: { readonly 
   const packagesQuery = useQuery({ queryKey: ["coins", "packages", "web"], queryFn: coinsService.fetchWebCoinPackages, enabled: isOpen, retry: false });
   const purchaseMutation = useMutation({
     mutationFn: (packageId: string) => coinsService.startCoinPurchase(packageId),
-    onSuccess: (checkout) => {
+    onSuccess: async (checkout) => {
       try {
         window.sessionStorage.setItem(coinPurchaseReturnPathStorageKey, `${window.location.pathname}${window.location.search}`);
       } catch {
-        return window.location.assign(checkout.checkoutUrl);
+        return openPaystackCheckout(checkout);
       }
-      window.location.assign(checkout.checkoutUrl);
+      const outcome = await openPaystackCheckout(checkout);
+      if (outcome === "completed") window.location.assign(`/coins/return?reference=${encodeURIComponent(checkout.reference)}`);
     },
   });
 
@@ -35,7 +37,7 @@ export function CoinPurchaseDialog({ isOpen, onClose, coinsNeeded }: { readonly 
       isOpen={isOpen}
       onClose={onClose}
       title="Get coins"
-      description={coinsNeeded ? `You need ${coinsNeeded} more coins for this gift.` : "Coins pay for live gifts. Checkout opens on Bachs, our payment partner."}
+      description={coinsNeeded ? `You need ${coinsNeeded} more coins for this gift.` : "Coins pay for live gifts. Pay by card, bank transfer or USSD in a secure window."}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

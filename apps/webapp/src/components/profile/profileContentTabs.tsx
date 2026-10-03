@@ -15,6 +15,7 @@ import { usersService } from "@/services/users.service";
 import type { Post, User } from "@/types";
 
 import styles from "./profileContentTabs.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 type ProfileTab = "posts" | "media";
 
@@ -72,7 +73,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
         ) : postsQuery.isError ? (
           <ErrorState description="We couldn't load these posts." action={<RetryButton onRetry={() => postsQuery.refetch()} />} />
         ) : posts.length === 0 ? (
-          <EmptyState icon="📝" title="No posts yet" description={isSelf ? "Share something with your followers from the app." : `${user.name} hasn't posted yet.`} />
+          <EmptyState icon={<AppIcon name="note24" size={28} />} title="No posts yet" description={isSelf ? "Share something with your followers from the app." : `${user.name} hasn't posted yet.`} />
         ) : tab === "media" ? (
           <MediaGrid posts={posts} />
         ) : (

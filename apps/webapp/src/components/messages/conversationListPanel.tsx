@@ -13,6 +13,7 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import type { ConversationFilter } from "@/types";
 
 import styles from "./conversationListPanel.module.css";
+import { AppIcon } from "@/components/ui/appIcon";
 
 const filters: readonly { readonly value: ConversationFilter; readonly label: string }[] = [
   { value: "all", label: "All" },
@@ -94,7 +95,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
         searchResults.isLoading ? (
           <Spinner label="Searching" />
         ) : visible.length === 0 && people.length === 0 ? (
-          <EmptyState icon="💬" title="No matches" description="Nobody matched that search." />
+          <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No matches" description="Nobody matched that search." />
         ) : (
           <>
             {people.length > 0 ? (
@@ -115,7 +116,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
           </>
         )
       ) : conversations.length === 0 ? (
-        <EmptyState icon="💬" title="No chats yet" description="Message a seller or a friend to get started." />
+        <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." />
       ) : (
         <ul className={styles.list}>
           {conversations.map((conversation) => (
