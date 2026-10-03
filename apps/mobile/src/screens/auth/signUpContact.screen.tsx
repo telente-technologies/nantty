@@ -4,7 +4,7 @@ import { AuthStep } from "@/components/auth/authStep";
 import { RoundCheckbox } from "@/components/auth/roundCheckbox";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
@@ -12,6 +12,7 @@ import { useSignUpStore } from "@/store/signup.store";
 import { isValidEmailAddress } from "@/utils/validators.util";
 
 export function SignUpContactScreen({ navigation }: AuthScreenProps<"SignUpContact">) {
+  const { colors } = useTheme();
   const { saveLoginInfo, updateSignUpDraft } = useSignUpStore();
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

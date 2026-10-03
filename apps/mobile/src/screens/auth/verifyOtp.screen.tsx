@@ -4,7 +4,7 @@ import { AuthStep } from "@/components/auth/authStep";
 import { OTP_CODE_LENGTH, OtpCodeInput } from "@/components/auth/otpCodeInput";
 import { ResendCodeTimer } from "@/components/auth/resendCodeTimer";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { authService } from "@/services/auth.service";
@@ -19,6 +19,7 @@ function describeCodeDestination(destination: string): string {
 }
 
 export function VerifyOtpScreen({ navigation, route }: AuthScreenProps<"VerifyOtp">) {
+  const { colors } = useTheme();
   const { destination, purpose } = route.params;
   const updateSignUpDraft = useSignUpStore((state) => state.updateSignUpDraft);
   const [code, setCode] = useState("");

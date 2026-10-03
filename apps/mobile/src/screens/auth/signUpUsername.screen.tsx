@@ -4,7 +4,7 @@ import { Pressable } from "react-native";
 import { AuthStep } from "@/components/auth/authStep";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { useUsernameAvailability } from "@/components/settings/usernameAvailability.hook";
@@ -15,6 +15,7 @@ import { useSignUpStore } from "@/store/signup.store";
 import { isValidUsername } from "@/utils/validators.util";
 
 export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUsername">) {
+  const { colors } = useTheme();
   const draft = useSignUpStore();
   const replaceSessionTokens = useAuthStore((state) => state.replaceSessionTokens);
   const [username, setUsername] = useState(draft.username);

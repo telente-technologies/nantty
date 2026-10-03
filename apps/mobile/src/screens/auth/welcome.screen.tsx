@@ -1,9 +1,10 @@
 import { StyleSheet, View } from "react-native";
 
 import { BrandWordmark } from "@/components/auth/brand";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export function WelcomeScreen() {
+  const styles = useStyles();
   return (
     <View style={styles.root}>
       <BrandWordmark />
@@ -11,4 +12,4 @@ export function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" } });
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ root: { flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" } }));

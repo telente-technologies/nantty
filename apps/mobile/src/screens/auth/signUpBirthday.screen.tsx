@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { AuthStep } from "@/components/auth/authStep";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { useSignUpStore } from "@/store/signup.store";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/utils/validators.util";
 
 export function SignUpBirthdayScreen({ navigation }: AuthScreenProps<"SignUpBirthday">) {
+  const { colors } = useTheme();
   const updateSignUpDraft = useSignUpStore((state) => state.updateSignUpDraft);
   const [birthdayText, setBirthdayText] = useState("");
   const isComplete = birthdayText.length === 10;
