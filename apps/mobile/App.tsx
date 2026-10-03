@@ -31,6 +31,7 @@ import { startAutomaticUploadResume } from "@/services/uploadBackgroundTask.serv
 import { useAuthStore } from "@/store/auth.store";
 import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
+import { ThemeProvider, useTheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 WebBrowser.maybeCompleteAuthSession();
@@ -93,15 +94,22 @@ export default function App() {
   if (!ready) return null;
 
   return (
-    <SafeAreaProvider>
-      <DeviceFrame>
-        <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
-          <StatusBar style="dark" />
-          <KeepRealtimeMessagingConnectedWhileSignedIn />
-          <RootNavigator />
-          <OfflineIndicator />
-        </PersistQueryClientProvider>
-      </DeviceFrame>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <DeviceFrame>
+          <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
+            <StatusBarFollowingTheme />
+            <KeepRealtimeMessagingConnectedWhileSignedIn />
+            <RootNavigator />
+            <OfflineIndicator />
+          </PersistQueryClientProvider>
+        </DeviceFrame>
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
+}
+
+function StatusBarFollowingTheme() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? "light" : "dark"} />;
 }
