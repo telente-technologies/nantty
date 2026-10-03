@@ -62,7 +62,7 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 		SetPaymentIntentID(payment.IntentId).SetPaymentReference(payment.Reference).SetProvider(payment.Provider).
 		SetBuyerUserID(payable.BuyerUserId).SetStoreID(payable.StoreId).SetSellerUserID(payable.SellerUserId).
 		SetProductSummary(payable.ProductSummary).SetAmountMinor(payable.AmountMinor).SetCurrency(payable.Currency).
-		SetCommissionBps(service.Container.Settings.PlatformCommissionBps).SetCommissionMinor(payment.PlatformFeeMinor).
+		SetCommissionBps(escrowFeeBpsFor(payment.PlatformFeeMinor, payable.AmountMinor)).SetCommissionMinor(payment.PlatformFeeMinor).
 		SetProcessingFeeMinor(payment.ProviderFeeMinor).SetSellerAmountMinor(sellerNet).SetCreatedAt(now)
 	if direct {
 		create.SetPaymentMode(escrow.PaymentModeDirect).SetStatus(escrow.StatusReleased).SetReleasedAt(now).
@@ -74,14 +74,19 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 	}
 	awaiting := ledgermodels.JournalLineRequest{Account: ledgermodels.PaymentsAwaitingApplicationAccount(payable.Currency), Direction: ledgermodels.Debit, AmountMinor: payment.AppliedAmountMinor}
 	if direct {
-		err = service.creditSellerAndPlatform(ctx, transaction, held, awaiting, ledgermodels.PlatformCommissionRevenueAccount(held.Currency), "direct-payment:"+payable.OrderId, "Order "+payable.OrderReference+" paid directly")
+		_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+			Reference: "direct-payment:" + payable.OrderId, Kind: "directPayment.settlingByPaystack", Description: "Order " + payable.OrderReference + " paid directly to the seller's Paystack subaccount",
+			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "paystackProcessingFeeMinor": payment.ProviderFeeMinor},
+			Lines:    appendPositiveCredit([]ledgermodels.JournalLineRequest{awaiting}, ledgermodels.SellerSettlingByPaystackAccount(held.SellerUserID, payable.Currency), sellerNet),
+		})
 	} else {
 		lines := []ledgermodels.JournalLineRequest{awaiting}
 		lines = appendPositiveCredit(lines, ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), payable.Currency), sellerNet)
 		lines = appendPositiveCredit(lines, ledgermodels.PlatformFeesUnearnedAccount(payable.Currency), held.CommissionMinor)
+		lines = appendPositiveCredit(lines, ledgermodels.PaymentProcessingFeeExpenseAccount(payable.Currency), payment.ProviderFeeMinor)
 		_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: "escrow-hold:" + payable.OrderId, Kind: "escrow.held", Description: "Order " + payable.OrderReference + " held in escrow inside the seller's provider account",
-			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference}, Lines: lines,
+			Reference: "escrow-hold:" + payable.OrderId, Kind: "escrow.held", Description: "Order " + payable.OrderReference + " held in escrow",
+			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "escrowFeeMinor": held.CommissionMinor, "paystackProcessingFeeMinor": payment.ProviderFeeMinor}, Lines: lines,
 		})
 	}
 	if err != nil {
@@ -100,12 +105,10 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 func (service EscrowService) creditSellerAndPlatform(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, source ledgermodels.JournalLineRequest, platformFeeSource ledgermodels.AccountRef, reference, description string) error {
 	lines := []ledgermodels.JournalLineRequest{source}
 	lines = appendPositiveCredit(lines, ledgermodels.SellerPendingAccount(held.SellerUserID, held.Currency), held.SellerAmountMinor)
-	if platformFeeSource.Code == ledgermodels.PlatformCommissionRevenueAccount(held.Currency).Code {
-		lines = appendPositiveCredit(lines, platformFeeSource, held.CommissionMinor)
-	} else if held.CommissionMinor > 0 {
+	if held.CommissionMinor > 0 {
 		lines = append(lines,
 			ledgermodels.JournalLineRequest{Account: platformFeeSource, Direction: ledgermodels.Debit, AmountMinor: held.CommissionMinor},
-			ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformCommissionRevenueAccount(held.Currency), Direction: ledgermodels.Credit, AmountMinor: held.CommissionMinor})
+			ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), Direction: ledgermodels.Credit, AmountMinor: held.CommissionMinor})
 	}
 	if _, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: reference, Kind: "sellerCredit.locked", Description: description,
@@ -148,4 +151,11 @@ func escrowEventData(held *ent.Escrow) map[string]any {
 		"refunded":         map[string]any{"amountMinor": held.RefundedMinor, "currency": held.Currency},
 		"releasedToSeller": map[string]any{"amountMinor": held.ReleasedToSellerMinor, "currency": held.Currency},
 	}
+}
+
+func escrowFeeBpsFor(feeMinor, amountMinor int64) int64 {
+	if amountMinor <= 0 || feeMinor <= 0 {
+		return 0
+	}
+	return (feeMinor*10_000 + amountMinor/2) / amountMinor
 }

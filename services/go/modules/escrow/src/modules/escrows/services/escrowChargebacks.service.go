@@ -79,7 +79,7 @@ func (service EscrowService) settleEscrowForLostChargeback(ctx context.Context, 
 	}
 	reference := "chargeback-lost:" + held.ID.String()
 	metadata := map[string]any{"escrowId": held.ID.String(), "orderId": held.OrderID, "providerDisputeId": notice.ProviderDisputeId}
-	providerHeld := ledgermodels.SellerProviderHeldFundsAccount(held.SellerUserID, held.Currency)
+	providerHeld := ledgermodels.PlatformProviderBalanceAccount(held.Provider, held.Currency)
 	now := service.Container.Now().UTC()
 	status := escrow.StatusRefunded
 	if disputed < held.AmountMinor {
@@ -103,7 +103,7 @@ func (service EscrowService) settleEscrowForLostChargeback(ctx context.Context, 
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
 	lines = paymentservices.AppendPositiveLine(lines, providerHeld, ledgermodels.Credit, disputed)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.SellerPendingAccount(held.SellerUserID, held.Currency), ledgermodels.Credit, max(escrowed-disputed, 0))
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformCommissionRevenueAccount(held.Currency), ledgermodels.Credit, held.CommissionMinor)
+	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), ledgermodels.Credit, held.CommissionMinor)
 	if _, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: reference, Kind: "escrow.chargebackLost", Description: "Chargeback lost on order " + held.OrderReference, Metadata: metadata, Lines: lines,
 	}); err != nil {

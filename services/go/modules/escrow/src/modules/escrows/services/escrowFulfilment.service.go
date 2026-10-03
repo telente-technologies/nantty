@@ -69,7 +69,7 @@ func (service EscrowService) ReleaseEscrowsWhoseInspectionPeriodEnded(ctx contex
 			result = EscrowSettlementResult{}
 			due, err := service.Container.Client(transaction).Escrow.Query().
 				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC())).
-				Order(ent.Asc(escrow.FieldAutoReleaseAt)).Limit(1).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).Only(ctx)
+				Order(ent.Asc(escrow.FieldAutoReleaseAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 			if ent.IsNotFound(err) {
 				return nil
 			}

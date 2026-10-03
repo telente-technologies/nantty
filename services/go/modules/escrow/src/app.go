@@ -2,8 +2,11 @@ package src
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
+	refundordergroup "zudomart/modules/escrow/src/modules/escrows/commands/refundOrderGroup"
 
 	"google.golang.org/grpc"
 
@@ -42,6 +45,18 @@ func NewEscrowModule(ctx context.Context, dependencies servicemodule.Dependencie
 		return nil, err
 	}
 	loaders.RegisterMoneyGrpcService(module.RegisterGrpcServices)
+	application := module.Application
+	loaders.RegisterMoneyDomainEventHandler("orderGroup.refundRequested", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var command refundordergroup.Command
+		if err := loaders.DecodeEventData(envelope, &command); err != nil {
+			return err
+		}
+		_, _, err := refundordergroup.Handler{Application: application}.Execute(ctx, command)
+		if errors.Is(err, refundordergroup.ErrRefundDoesNotMatchOrder) || errors.Is(err, refundordergroup.ErrPartialRefundAfterRelease) {
+			return fmt.Errorf("%w: %v", platformevents.ErrPoisonMessage, err)
+		}
+		return err
+	})
 	return module, nil
 }
 
