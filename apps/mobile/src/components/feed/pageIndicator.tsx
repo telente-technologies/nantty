@@ -1,6 +1,6 @@
 import { Animated, StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 const INACTIVE_DOT_WIDTH = 4;
 const ACTIVE_DOT_WIDTH = 24;
@@ -17,6 +17,8 @@ export interface AnimatedPageIndicatorProps {
 }
 
 export function AnimatedPageIndicator({ count, activeIndex, scrollOffsetX, pageWidth }: AnimatedPageIndicatorProps) {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles();
   if (count <= 1) return null;
   const dotGap = count >= MANY_ITEMS_THRESHOLD ? DOT_GAP_FOR_MANY_ITEMS : DOT_GAP_FOR_FEW_ITEMS;
   return (
@@ -34,7 +36,7 @@ export function AnimatedPageIndicator({ count, activeIndex, scrollOffsetX, pageW
         });
         const backgroundColor = scrollOffsetX.interpolate({
           inputRange,
-          outputRange: [colors.placeholder, ACTIVE_DOT_COLOR, colors.placeholder],
+          outputRange: [colors.placeholder, isDark ? colors.text : ACTIVE_DOT_COLOR, colors.placeholder],
           extrapolate: "clamp",
         });
         return <Animated.View key={dotIndex} style={[styles.dot, { width, backgroundColor }]} />;
@@ -43,7 +45,7 @@ export function AnimatedPageIndicator({ count, activeIndex, scrollOffsetX, pageW
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   pill: {
     height: 8,
     paddingHorizontal: 4,
@@ -53,4 +55,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dot: { height: 4, borderRadius: 21 },
-});
+}));

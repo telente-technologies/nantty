@@ -3,7 +3,7 @@ import { StyleSheet, View, Pressable } from "react-native";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 
@@ -16,6 +16,8 @@ export interface ResharedPostBlockProps {
 }
 
 export function ResharedPostBlock({ original, onPressAuthor, onPress }: ResharedPostBlockProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`Open post by ${original.author.name}`} disabled={!onPress} onPress={onPress} style={styles.block}>
       <Pressable accessibilityRole="button" disabled={!onPressAuthor} onPress={onPressAuthor} style={styles.header}>
@@ -46,7 +48,7 @@ export function ResharedPostBlock({ original, onPressAuthor, onPress }: Reshared
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   block: {
     marginHorizontal: 16,
     padding: 12,
@@ -54,8 +56,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.divider,
     borderRadius: 8,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   header: { flexDirection: "row", alignItems: "center", gap: 6 },
   dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.avatar },
-});
+}));

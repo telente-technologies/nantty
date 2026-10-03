@@ -5,7 +5,7 @@ import { Animated, FlatList, PanResponder, Pressable, StyleSheet, View, useWindo
 import { Cancel20Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Media } from "@/types";
 
 const DOUBLE_TAP_DELAY_MS = 260;
@@ -18,6 +18,8 @@ export interface MediaLightboxProps {
 }
 
 export function MediaLightbox({ images, initialIndex, onClose }: MediaLightboxProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { width, height } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -80,6 +82,7 @@ function LightboxPage({
   readonly onClose: () => void;
   readonly onZoomedChange: (isZoomed: boolean) => void;
 }) {
+  const pageStyles = usePageStyles();
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
@@ -187,7 +190,7 @@ function LightboxPage({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.black },
   chrome: {
     position: "absolute",
@@ -216,9 +219,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));
 
-const pageStyles = StyleSheet.create({
+const usePageStyles = makeThemedStyles((colors) => StyleSheet.create({
   page: { alignItems: "center", justifyContent: "center", backgroundColor: colors.black },
   imageBox: { alignItems: "center", justifyContent: "center" },
-});
+}));

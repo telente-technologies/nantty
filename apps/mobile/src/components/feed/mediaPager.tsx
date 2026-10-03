@@ -6,10 +6,10 @@ import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
 import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { calculateFeedVideoAspectRatio } from "@/components/media/videoOrientation.util";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import { claimAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
 import { useVideoAudioStore } from "@/store/videoAudio.store";
-import type { Media } from "@/types";
+import type { Media, SaveTarget } from "@/types";
 
 import { MediaLightbox } from "./mediaLightbox";
 import { AnimatedPageIndicator } from "./pageIndicator";
@@ -19,12 +19,15 @@ export interface MediaPagerProps {
   readonly height?: number;
   readonly isVisibleOnScreen?: boolean;
   readonly onPressViewProducts?: () => void;
+  readonly saveTarget?: SaveTarget;
+  readonly savedAccordingToServer?: boolean;
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer }: MediaPagerProps) {
+  const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const pageWidth = containerWidth ?? windowWidth;
@@ -134,7 +137,13 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
           ) : null}
         </View>
       </View>
-      <LandscapeVideoFullScreenModal media={fullScreenVideo} isMuted={isMuted} onClose={() => setFullScreenVideo(null)} />
+      <LandscapeVideoFullScreenModal
+        media={fullScreenVideo}
+        isMuted={isMuted}
+        onClose={() => setFullScreenVideo(null)}
+        saveTarget={saveTarget}
+        savedAccordingToServer={savedAccordingToServer}
+      />
       {openedImageIndex !== null ? (
         <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} />
       ) : null}
@@ -177,7 +186,7 @@ function MediaPagerPage({
 
 const isActiveOrPreloadable = (media: Media) => !!(media.url || media.hlsUrl) && media.status !== "processing" && media.status !== "failed";
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { backgroundColor: colors.media, overflow: "hidden" },
   overlay: {
     position: "absolute",
@@ -190,4 +199,4 @@ const styles = StyleSheet.create({
   },
   overlayActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   mutedSpeaker: { opacity: 0.35 },
-});
+}));

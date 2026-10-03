@@ -2,13 +2,14 @@ import { useNavigation } from "@react-navigation/native";
 import { Linking, Pressable, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { adEventsService } from "@/services/adEvents.service";
 import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 
-export function SponsoredLabel({ sponsored, color = colors.textSubtle }: { sponsored: SponsoredPlacement; color?: string }) {
+export function SponsoredLabel({ sponsored, color }: { sponsored: SponsoredPlacement; color?: string }) {
+  const { colors } = useTheme();
   return (
-    <Text size={12} weight={400} lineHeight={16.8} color={color} accessibilityLabel={`${sponsored.label} by ${sponsored.advertiserName}`}>
+    <Text size={12} weight={400} lineHeight={16.8} color={color ?? colors.textSubtle} accessibilityLabel={`${sponsored.label} by ${sponsored.advertiserName}`}>
       {sponsored.label}
     </Text>
   );
@@ -22,6 +23,8 @@ export interface SponsoredCallToActionProps {
 }
 
 export function SponsoredCallToAction({ sponsored, placement, itemId, horizontalMargin = 0 }: SponsoredCallToActionProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const navigation = useNavigation();
   if (!sponsored.ctaLabel) return null;
   const openAdvertiserLinkAndRecordClick = () => {
@@ -54,12 +57,12 @@ export function SponsoredCallToAction({ sponsored, placement, itemId, horizontal
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   callToAction: {
     height: 36,
     borderRadius: 4,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primarySolid,
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
+import { isViewerSignedIn, requireAuthThen } from "@/utils/requireAuth.util";
 import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import type { Post } from "@/types";
 
@@ -17,6 +18,7 @@ export interface ReshareSheetProps {
 }
 
 export function ReshareSheet({ post, onClose }: ReshareSheetProps) {
+  const { colors } = useTheme();
   const { resharePost } = usePostInteractions();
   const [showComposer, setShowComposer] = useState(false);
   const [quote, setQuote] = useState("");
@@ -36,6 +38,11 @@ export function ReshareSheet({ post, onClose }: ReshareSheetProps) {
     setBusy(true);
     setError(null);
     try {
+      if (!isViewerSignedIn()) {
+        close();
+        requireAuthThen(() => resharePost(post, text).then(() => undefined, () => undefined), undefined, "reshare posts");
+        return;
+      }
       await resharePost(post, text);
       close();
     } catch {
@@ -81,6 +88,7 @@ export function ReshareSheet({ post, onClose }: ReshareSheetProps) {
 }
 
 function OptionRow({ icon, label, onPress }: { icon: ReactNode; label: string; onPress: () => void }) {
+  const { colors } = useTheme();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.optionRow}>
       <View style={styles.optionIcon}>{icon}</View>

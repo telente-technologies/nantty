@@ -9,7 +9,7 @@ import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarSta
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
 import type { AdPlacement, Post } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -20,6 +20,8 @@ import { ResharedPostBlock } from "./resharedPostBlock";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
 import { LikeBurst } from "@/components/clips/likeBurst";
+import { SaveToggleButton } from "@/components/saves/saveToggleButton";
+import { saveTargetForPost } from "@/types";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -40,6 +42,8 @@ export interface PostCardProps {
 }
 
 export function PostCard(props: PostCardProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { post } = props;
   const openUserProfile = useOpenUserProfile();
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -167,6 +171,8 @@ export function PostCard(props: PostCardProps) {
             media={post.media}
             isVisibleOnScreen={isVisibleForAutoplay}
             onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
+            saveTarget={saveTargetForPost(post)}
+            savedAccordingToServer={post.bookmarked}
           />
         ) : null}
         {post.sponsored ? (
@@ -187,12 +193,15 @@ export function PostCard(props: PostCardProps) {
           <Counter label="Repost" count={post.reposts} onPress={props.onRepost}>
             <Refresh24Icon />
           </Counter>
-          <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={8} onPress={props.onShare}>
-            <Share24Icon />
-          </Pressable>
           <Counter label="Impressions" count={post.views} onPress={isOwnPost ? props.onPressAnalytics : undefined}>
             <Analytics24Icon />
           </Counter>
+        </View>
+        <View style={styles.trailingActions}>
+          <SaveToggleButton target={saveTargetForPost(post)} savedAccordingToServer={post.bookmarked} />
+          <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={8} onPress={props.onShare}>
+            <Share24Icon />
+          </Pressable>
         </View>
       </View>
       <LikeBurst burstKey={likeBurstKey} />
@@ -211,6 +220,7 @@ export function PostCard(props: PostCardProps) {
 }
 
 function Counter({ label, count, onPress, children }: { label: string; count: number; onPress?: () => void; children: React.ReactNode }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={6} onPress={onPress} style={styles.counter}>
       {children}
@@ -221,9 +231,9 @@ function Counter({ label, count, onPress, children }: { label: string; count: nu
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.divider,
@@ -237,11 +247,12 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.avatar },
   authorActions: { flexDirection: "row", alignItems: "center", gap: 12 },
-  follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primary, justifyContent: "center" },
+  follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primarySolid, justifyContent: "center" },
   body: { paddingHorizontal: 16, paddingVertical: 8 },
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
-  interactions: { paddingHorizontal: 16, marginTop: 8 },
-  counters: { flexDirection: "row", alignItems: "center", gap: 24 },
+  interactions: { paddingHorizontal: 16, marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  counters: { flexDirection: "row", alignItems: "center", gap: 20, flexShrink: 1 },
+  trailingActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   lockedMedia: { height: 335, overflow: "hidden" },
   counter: { flexDirection: "row", alignItems: "center", gap: 8 },
-});
+}));
