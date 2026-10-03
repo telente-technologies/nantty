@@ -1,6 +1,7 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "@/components/feed/sponsoredContent";
 import { Group1234Icon } from "@/components/icons";
@@ -14,6 +15,7 @@ import type { MainStackParamList } from "@/navigation/navigation.types";
 import type { Clip } from "@/types";
 
 import { FollowPill } from "./followPill";
+import { ReplyingToCommentLink } from "./videoReply/commentStickerOverlay";
 
 export interface ClipDetailsProps {
   readonly clip: Clip;
@@ -55,10 +57,9 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
         </Pressable>
         <FollowPill isFollowing={isFollowing} onPress={onToggleFollow} />
       </View>
+      {clip.replyToComment ? <ReplyingToCommentLink clip={clip} foregroundColor={foregroundColor} /> : null}
       {clip.isAiGenerated ? <AiGeneratedLabel onVideo /> : null}
-      <Text size={13} lineHeight={16.9} numberOfLines={2} color={foregroundColor} style={readableTextStyle}>
-        {clip.text}
-      </Text>
+      <MentionText text={clip.text} mentions={clip.mentions} size={13} lineHeight={16.9} numberOfLines={2} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} />
       {clip.sound ? (
         <ClipSoundRow
           sound={clip.sound}

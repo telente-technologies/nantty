@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Gif24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface ClipCommentBarProps {
   readonly myAvatarUrl: string | null;
@@ -12,6 +12,8 @@ export interface ClipCommentBarProps {
 }
 
 export function ClipCommentBar({ myAvatarUrl, onPress, horizontalPadding = 12 }: ClipCommentBarProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={[styles.bar, { paddingHorizontal: horizontalPadding }]}>
       <Avatar uri={myAvatarUrl} size={32} placeholderColor={colors.placeholder} />
@@ -25,13 +27,13 @@ export function ClipCommentBar({ myAvatarUrl, onPress, horizontalPadding = 12 }:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bar: {
     height: 50,
     paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -47,4 +49,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-});
+}));

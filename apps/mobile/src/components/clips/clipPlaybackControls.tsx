@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { ArrowsOutSimple24Icon, Play24Icon, SpeakerHigh24Icon, Speedometer24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface ClipPlaybackControlsProps {
   readonly remainingSeconds: number;
@@ -18,6 +18,8 @@ export interface ClipPlaybackControlsProps {
 const formatRemainingPlaybackTime = (seconds: number) => `-${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 export function ClipPlaybackControls(props: ClipPlaybackControlsProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const played = Math.min(Math.max(props.progress, 0), 1);
   return (
     <View style={styles.root}>
@@ -68,13 +70,13 @@ export function ClipPlaybackControls(props: ClipPlaybackControlsProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  root: { backgroundColor: colors.surface },
   progress: { height: 2, flexDirection: "row", gap: 4 },
-  segment: { height: 2, borderRadius: 4, backgroundColor: colors.black },
+  segment: { height: 2, borderRadius: 4, backgroundColor: colors.text },
   row: { height: 50, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   left: { flexDirection: "row", alignItems: "center", gap: 14 },
   right: { flexDirection: "row", alignItems: "center", gap: 22 },
   speed: { flexDirection: "row", alignItems: "center", gap: 2 },
   mutedSpeaker: { opacity: 0.35 },
-});
+}));

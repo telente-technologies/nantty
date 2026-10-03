@@ -36,7 +36,7 @@ function RailButton({
   children: ReactNode;
 }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={6} onPress={onPress} style={styles.button}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={{ top: 11, bottom: 11, left: 6, right: 6 }} onPress={onPress} style={styles.button}>
       {children}
       <Text size={13} lineHeight={16.9} color={foregroundColor} style={foregroundColor ? styles.readableOnVideo : undefined}>
         {formatCountWithThousandsSuffix(count)}
@@ -50,34 +50,34 @@ export function ClipActionRail(props: ClipActionRailProps) {
   return (
     <View style={styles.rail}>
       <RailButton label={props.liked ? "Unlike" : "Like"} count={props.likes} onPress={props.onToggleLike} foregroundColor={color}>
-        {props.liked ? <HeartFill72Icon size={24} /> : <Heart24Icon color={color} />}
+        {props.liked ? <HeartFill72Icon size={22} /> : <Heart24Icon size={22} color={color} />}
       </RailButton>
       <RailButton label="Comments" count={props.comments} onPress={props.onOpenComments} foregroundColor={color}>
-        <ChatCircle24Icon color={color} />
+        <ChatCircle24Icon size={22} color={color} />
       </RailButton>
       <RailButton label="Share" count={props.shares} onPress={props.onShare} foregroundColor={color}>
-        <PaperPlaneTilt24Icon color={color} />
+        <PaperPlaneTilt24Icon size={22} color={color} />
       </RailButton>
       {props.saveTarget ? (
         <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} showLabel />
       ) : null}
       {props.onTip ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={8} onPress={props.onTip} style={styles.button}>
-          <Coin24Icon color={color} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={{ top: 11, bottom: 11, left: 6, right: 6 }} onPress={props.onTip} style={styles.button}>
+          <Coin24Icon size={22} color={color} />
           <Text size={13} lineHeight={16.9} color={color} style={color ? styles.readableOnVideo : undefined}>
             Tip
           </Text>
         </Pressable>
       ) : null}
-      <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={8} onPress={props.onMore}>
-        <DotsThreeVertical24Icon color={color} />
+      <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} onPress={props.onMore}>
+        <DotsThreeVertical24Icon size={22} color={color} />
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  rail: { width: 32, gap: 16, alignItems: "center" },
+  rail: { width: 32, gap: 20, alignItems: "center" },
   button: { width: 32, gap: 4, alignItems: "center" },
   readableOnVideo: { textShadowColor: "rgba(0,0,0,0.45)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
 });

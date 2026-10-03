@@ -11,6 +11,7 @@ import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins
 import { TipSheet } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
 import type { Clip } from "@/types";
 
@@ -20,6 +21,7 @@ import { ClipDetails } from "./clipDetails";
 import { ClipPlaybackControls } from "./clipPlaybackControls";
 import { ClipReadabilityScrim } from "./clipReadabilityScrim";
 import { LikeBurst } from "./likeBurst";
+import { CommentStickerOverlay } from "./videoReply/commentStickerOverlay";
 import { PromotedLiveOverlay } from "./promotedLiveOverlay";
 
 export interface ClipEngagement {
@@ -54,6 +56,7 @@ const PLAYBACK_SPEED_STEPS = [1, 1.5, 2, 0.5] as const;
 const FOREGROUND_ON_VIDEO = colors.white;
 
 function ClipPageComponent(props: ClipPageProps) {
+  const { colors: themeColors } = useTheme();
   const { clip, engagement, isActive } = props;
   const [isPausedByUser, setIsPausedByUser] = useState(false);
   const [burstKey, setBurstKey] = useState(0);
@@ -124,6 +127,7 @@ function ClipPageComponent(props: ClipPageProps) {
         ) : video ? (
           <VideoPosterOnly media={video} contentFit={isLandscapeVideo ? "contain" : "cover"} style={StyleSheet.absoluteFill} />
         ) : null}
+        {clip.replyToComment ? <CommentStickerOverlay clip={clip} /> : null}
         <ClipReadabilityScrim edge="top" height={props.topInset + 96} />
         <ClipReadabilityScrim edge="bottom" height={bottomChromeHeight + 260} />
         {showPlaybackControls ? (
@@ -176,7 +180,7 @@ function ClipPageComponent(props: ClipPageProps) {
           foregroundColor={FOREGROUND_ON_VIDEO}
         />
       </View>
-      <View style={[styles.bottomChrome, { paddingBottom: props.bottomInset }]}>
+      <View style={[styles.bottomChrome, { paddingBottom: props.bottomInset, backgroundColor: themeColors.surface }]}>
         {showPlaybackControls ? (
           <ClipPlaybackControls
             remainingSeconds={Math.max(durationSeconds - playbackProgress.currentSeconds, 0)}
@@ -239,5 +243,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   fullScreenButtonRow: { position: "absolute", left: 0, right: 0, alignItems: "center" },
-  bottomChrome: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: colors.white },
+  bottomChrome: { position: "absolute", left: 0, right: 0, bottom: 0 },
 });
