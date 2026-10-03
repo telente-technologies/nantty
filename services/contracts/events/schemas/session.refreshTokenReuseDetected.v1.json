@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/session.refreshTokenReuseDetected.v1.json",
+  "title": "SessionRefreshTokenReuseDetected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accountId", "sessionId"],
+  "properties": {
+    "accountId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "format": "uuid" }
+  }
+}

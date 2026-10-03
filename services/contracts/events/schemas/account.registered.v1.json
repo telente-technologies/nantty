@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.registered.v1.json",
+  "title": "AccountRegistered",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accountId", "username", "name", "email", "method"],
+  "properties": {
+    "accountId": { "type": "string", "format": "uuid" },
+    "username": { "type": "string" },
+    "name": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "method": { "enum": ["password", "google", "apple"] }
+  }
+}

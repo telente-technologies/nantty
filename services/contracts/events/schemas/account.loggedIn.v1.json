@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.loggedIn.v1.json",
+  "title": "AccountLoggedIn",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accountId", "sessionId", "method"],
+  "properties": {
+    "accountId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "format": "uuid" },
+    "method": { "enum": ["password", "google", "apple"] }
+  }
+}

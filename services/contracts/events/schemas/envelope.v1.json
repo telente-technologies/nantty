@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/envelope.v1.json",
+  "title": "EventEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "source", "subject", "schemaVersion", "occurredAt", "data"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "type": { "type": "string", "pattern": "^[a-z]+\\.[A-Za-z]+$" },
+    "source": { "type": "string" },
+    "subject": { "type": "string" },
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "data": { "type": "object" }
+  }
+}
