@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
-import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { MapPinIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
@@ -58,7 +59,17 @@ export default function CheckoutPage() {
     onError: (caught) => setError(readErrorMessageForDisplay(caught)),
   });
 
-  if (cartQuery.isLoading || addressesQuery.isLoading) return <Spinner label="Preparing checkout" />;
+  if (cartQuery.isLoading || addressesQuery.isLoading) {
+    return (
+      <div className={styles.page} role="status" aria-label="Preparing checkout">
+        <Skeleton width={160} height={32} />
+        <div className={styles.layout}>
+          <Skeleton height={360} />
+          <Skeleton height={300} />
+        </div>
+      </div>
+    );
+  }
   if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." action={<RetryButton onRetry={() => cartQuery.refetch()} />} />;
 
   const cart = cartQuery.data;
@@ -149,6 +160,7 @@ export default function CheckoutPage() {
 
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>Order summary</h2>
+          <SellerGroupedSummary items={cart.items} />
           <div className={styles.moneyRow}>
             <span>Items total</span>
             <span>{formatMoneyForDisplay(cart.itemsTotal)}</span>
