@@ -8,16 +8,18 @@ import { SoundOwnerControls } from "@/components/sounds/soundOwnerControls";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = 2;
 const MAXIMUM_CONTENT_WIDTH = 393;
 
 export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
+  const { colors } = useTheme();
   const { soundId } = route.params;
   const { width } = useWindowDimensions();
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -27,7 +29,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
   const isViewerTheOwner = !!soundData && !!signedInUserId && soundData.owner.id === signedInUserId;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title="Sound" />
       {sound.isPending ? (
         <ListSkeleton />
@@ -51,7 +53,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
               <SoundHeaderCard
                 sound={soundData}
                 onPressOwner={() => openUserProfileOrMyProfile(navigation, soundData.owner.id, signedInUserId)}
-                onToggleSaved={() => toggleSavedSound.mutate(!!soundData.savedByViewer)}
+                onToggleSaved={() => requireAuthThen(() => toggleSavedSound.mutate(!!soundData.savedByViewer), undefined, "save sounds")}
                 onUseSound={() => navigation.navigate("CreatePost", { mode: "post", soundId: soundData.id })}
               />
               {isViewerTheOwner ? (
