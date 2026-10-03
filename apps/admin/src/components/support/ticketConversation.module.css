@@ -23,7 +23,7 @@
 .agent {
   align-self: flex-end;
   background: var(--color-brand-tint);
-  border-color: var(--blue-50);
+  border-color: var(--brand-line);
   border-bottom-right-radius: 4px;
 }
 

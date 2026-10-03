@@ -34,7 +34,7 @@
 
 .noteMode {
   background: var(--caution-tint);
-  border-color: #f7d49a;
+  border-color: var(--caution-line);
 }
 
 .replyToolbar {
