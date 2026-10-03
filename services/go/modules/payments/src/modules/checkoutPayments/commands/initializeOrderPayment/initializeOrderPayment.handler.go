@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/payments/src/modules/checkoutPayments/dtos"
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/models"
+	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -22,7 +23,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 	if !application.Gateway.IsAllowedReturnUrl(command.ReturnTo) {
 		return dtos.PaymentInitializationDto{}, false, httpserver.NewApiError(http.StatusUnprocessableEntity, "RETURN_URL_NOT_ALLOWED", "This return address is not allowed.")
 	}
-	return ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.PaymentInitializationDto]{
+	initialized, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.PaymentInitializationDto]{
 		Scope:       command.BuyerUserId + ":payments.initialize",
 		Key:         command.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderId, command.Provider, command.ReturnTo),
@@ -31,26 +32,43 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Payme
 			if err != nil {
 				return dtos.PaymentInitializationDto{}, err
 			}
-			if payables[0].BuyerUserId != command.BuyerUserId {
+			payable, found := payableForOrder(payables, command.OrderId)
+			if !found || payable.BuyerUserId != command.BuyerUserId {
 				return dtos.PaymentInitializationDto{}, httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
 			}
-			var total int64
-			for _, payable := range payables {
-				total += payable.AmountMinor
-			}
-			payment, err := application.Gateway.CreatePaymentIntentAndInitializeChargeInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
-				Purpose: constants.PurposeOrderCheckout, OwnerUserId: command.BuyerUserId, SubjectId: payables[0].CheckoutId,
-				Provider: command.Provider, AmountMinor: total, Currency: payables[0].Currency, ReturnTo: command.ReturnTo,
-				Metadata: map[string]string{"checkoutId": payables[0].CheckoutId, "orderId": command.OrderId},
+			payment, err := application.Gateway.CreatePendingPaymentIntentInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
+				Purpose: constants.PurposeOrderCheckout, OwnerUserId: command.BuyerUserId, SubjectId: payable.OrderId,
+				Provider: command.Provider, AmountMinor: payable.AmountMinor, Currency: payable.Currency, ReturnTo: command.ReturnTo,
+				BeneficiaryUserId: payable.SellerUserId, PlatformFeeMinor: utils.PlatformFeeForAmount(payable.AmountMinor, application.Container.Settings.PlatformCommissionBps),
+				Metadata: map[string]string{"checkoutId": payable.CheckoutId, "orderId": payable.OrderId, "paymentMode": payable.PaymentMode},
 			})
 			if err != nil {
 				return dtos.PaymentInitializationDto{}, err
 			}
-			authorizationUrl := ""
-			if payment.AuthorizationUrl != nil {
-				authorizationUrl = *payment.AuthorizationUrl
-			}
-			return dtos.PaymentInitializationDto{OrderId: command.OrderId, Reference: payment.Reference, AuthorizationUrl: authorizationUrl, AccessCode: payment.AccessCode, CallbackUrl: payment.CallbackUrl, Payment: payment}, nil
+			return dtos.PaymentInitializationDto{
+				OrderId: command.OrderId, Reference: payment.Reference, CallbackUrl: payment.CallbackUrl, PaymentsRemainingInCheckout: len(payables), Payment: payment,
+			}, nil
 		},
 	})
+	if err != nil {
+		return initialized, replayed, err
+	}
+	opened, err := application.Gateway.OpenProviderCheckoutForIntent(ctx, initialized.Payment.Id)
+	if err != nil {
+		return initialized, replayed, err
+	}
+	if opened.CheckoutUrl != nil {
+		initialized.CheckoutUrl, initialized.AuthorizationUrl = *opened.CheckoutUrl, *opened.CheckoutUrl
+	}
+	initialized.Payment = opened
+	return initialized, replayed, nil
+}
+
+func payableForOrder(payables []models.OrderPayable, orderId string) (models.OrderPayable, bool) {
+	for _, payable := range payables {
+		if payable.OrderId == orderId {
+			return payable, true
+		}
+	}
+	return models.OrderPayable{}, false
 }
