@@ -86,6 +86,8 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
       <SettingsGroup>
         <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.black} />} onPress={() => navigation.navigate("SettingsAccount")} />
         <SettingsRow label="Security & Password" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
+        <SettingsRow label="Privacy" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} />
+        <SettingsRow label="Privacy & Data" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacyData")} />
         <SettingsRow label="Notification" icon={<BellRinging24Icon />} onPress={() => navigation.navigate("SettingsNotifications")} />
       </SettingsGroup>
 
@@ -101,8 +103,11 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
         ) : (
           <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
-        <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => navigation.navigate(creatorEntry.route)} />
+        <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => {
+          if (!creatorEntry.isLoading) navigation.navigate(creatorEntry.route);
+        }} />
         <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.black} />} onPress={() => navigation.navigate("Verification")} />
+        <SettingsRow label="Create business profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBusinessProfile")} />
         <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
         <SettingsRow label="Invite friends" icon={<Share24Icon />} onPress={() => navigation.navigate("Referral")} />
       </SettingsGroup>
