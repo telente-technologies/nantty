@@ -40,6 +40,9 @@ func WriteProduct(ctx context.Context, deployed *container.Container, write Prod
 	if err := checkReferencesBeforeWrite(ctx, deployed, inventory, write); err != nil {
 		return uuid.Nil, err
 	}
+	if err := checkActiveProductCap(ctx, deployed, write); err != nil {
+		return uuid.Nil, err
+	}
 	var product *ent.Product
 	var provisioned []provisionedVariant
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
