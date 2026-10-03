@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { convertIsoToLocalDateTimeInputValue, convertLocalDateTimeInputValueToIso, describePromotionDiscount, promotionKindLabel } from "@/components/promotions/promotionPresentation.util";
 import { PromotionScopePicker, type PromotionScopeValue } from "@/components/promotions/promotionScopePicker";
 import { Button } from "@/components/ui/button";
-import { CheckboxField, FormErrorSummary, MoneyField, SelectField, TextField } from "@/components/ui/formFields";
+import { FormErrorSummary, MoneyField, SelectField, TextField } from "@/components/ui/formFields";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { Panel } from "@/components/ui/panel";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
@@ -38,7 +38,6 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
   const [minimumSpendText, setMinimumSpendText] = useState(promotion?.minimumSpend ? convertMinorUnitsToMajorInputText(promotion.minimumSpend.amountMinor, currency) : "");
   const [usageLimitText, setUsageLimitText] = useState(promotion?.usageLimit ? String(promotion.usageLimit) : "");
   const [perCustomerText, setPerCustomerText] = useState(promotion?.usageLimitPerCustomer ? String(promotion.usageLimitPerCustomer) : "");
-  const [channels, setChannels] = useState<("online" | "pos")[]>(promotion?.channels ?? ["online", "pos"]);
   const [startsLocal, setStartsLocal] = useState(convertIsoToLocalDateTimeInputValue(promotion?.startsAt ?? new Date().toISOString()));
   const [endsLocal, setEndsLocal] = useState(convertIsoToLocalDateTimeInputValue(promotion?.endsAt ?? null));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -54,7 +53,6 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
       minimumSpendMinor,
       usageLimit: convertOptionalWholeNumberText(usageLimitText),
       usageLimitPerCustomer: convertOptionalWholeNumberText(perCustomerText),
-      channels,
       startsAt: convertLocalDateTimeInputValueToIso(startsLocal) ?? "",
       endsAt: convertLocalDateTimeInputValueToIso(endsLocal),
     };
@@ -69,7 +67,6 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
   }
 
   const previewInput = buildPromotionInputFromForm();
-  const toggleChannel = (channel: "online" | "pos", isOn: boolean) => setChannels((current) => (isOn ? [...new Set([...current, channel])] : current.filter((existing) => existing !== channel)));
 
   return (
     <form onSubmit={submitPromotionForm} noValidate className={styles.editorGrid}>
@@ -78,7 +75,7 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
         <Panel title="Basics">
           <div className={styles.stack}>
             <TextField label="Name" hint="Only your team sees this." value={name} onChange={(event) => setName(event.target.value)} maxLength={80} errorMessage={fieldErrors.name} />
-            <SelectField label="Type" value={kind} onChange={(event) => setKind(event.target.value as Promotion["kind"])} options={(Object.keys(promotionKindLabel) as Promotion["kind"][]).map((value) => ({ value, label: promotionKindLabel[value] }))} hint={kind === "coupon" ? "Customers enter a code online or tell the cashier." : kind === "automatic" ? "Applies by itself when the rules match." : "A storewide or category sale between two dates."} />
+            <SelectField label="Type" value={kind} onChange={(event) => setKind(event.target.value as Promotion["kind"])} options={(Object.keys(promotionKindLabel) as Promotion["kind"][]).map((value) => ({ value, label: promotionKindLabel[value] }))} hint={kind === "coupon" ? "Customers enter the code at checkout in the Zudomart app." : kind === "automatic" ? "Applies by itself when the rules match." : "A storewide or category sale between two dates."} />
             {kind === "coupon" ? <TextField label="Coupon code" value={code} onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ""))} maxLength={24} errorMessage={fieldErrors.code} placeholder="WELCOME10" /> : null}
           </div>
         </Panel>
@@ -99,11 +96,6 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
             <TextField label="Total uses (optional)" inputMode="numeric" value={usageLimitText} onChange={(event) => setUsageLimitText(event.target.value.replace(/\D/g, ""))} errorMessage={fieldErrors.usageLimit} />
             <TextField label="Uses per customer (optional)" inputMode="numeric" value={perCustomerText} onChange={(event) => setPerCustomerText(event.target.value.replace(/\D/g, ""))} errorMessage={fieldErrors.usageLimitPerCustomer} />
           </div>
-          <div className={styles.row} style={{ marginTop: 12 }}>
-            <CheckboxField label="Online on Zudomart" checked={channels.includes("online")} onCheckedChange={(isOn) => toggleChannel("online", isOn)} />
-            <CheckboxField label="In store at the till" checked={channels.includes("pos")} onCheckedChange={(isOn) => toggleChannel("pos", isOn)} />
-          </div>
-          {fieldErrors.channels ? <p className={styles.fieldError}>{fieldErrors.channels}</p> : null}
         </Panel>
         <Panel title="Schedule">
           <div className={styles.row}>
@@ -117,7 +109,7 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
           <p className={styles.summaryLine}><strong>{previewInput.name || "Untitled promotion"}</strong></p>
           <p className={styles.summaryLine}>{Number.isNaN(previewInput.discount.value) ? "Set a discount" : describePromotionDiscount(previewInput, formatMoney, currency)} {scope.kind === "all" ? "everything" : `${scope.ids.length} ${scope.kind === "products" ? "product(s)" : "categories"}`}</p>
           {kind === "coupon" && previewInput.code ? <p className={styles.summaryLine}>Code <code className={styles.code}>{previewInput.code}</code></p> : null}
-          <p className={styles.summaryLine}>{channels.length === 2 ? "Online and in store" : channels[0] === "pos" ? "In store only" : channels[0] === "online" ? "Online only" : "No channel chosen"}</p>
+          <p className={styles.summaryLine}>Applies to orders in the Zudomart app</p>
           <div style={{ marginTop: 12 }}>
             <Button type="submit" variant="primary" fullWidth isBusy={isSaving}>{promotion ? "Save promotion" : "Create promotion"}</Button>
           </div>

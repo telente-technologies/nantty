@@ -66,7 +66,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
     try {
       await sendSellerApiRequest(`/seller/promotions/${promotion.id}`, { method: "DELETE" });
       showToast("Promotion deleted.");
-      router.push("/promotions");
+      router.push("/marketing/discounts");
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");
     }
@@ -75,7 +75,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
   return (
     <PageStack>
       <PageHeader
-        eyebrow={<Link href="/promotions">← Promotions</Link>}
+        eyebrow={<Link href="/marketing/discounts">← Discounts</Link>}
         title={promotion ? promotion.name : "New promotion"}
         description={promotion ? `Used ${promotion.usedCount.toLocaleString()} times` : "Discounts use your store's currency and apply before tax."}
         actions={

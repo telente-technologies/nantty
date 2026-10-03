@@ -5,7 +5,7 @@ import { formatBasisPointsAsPercent } from "@/utils/money.util";
 
 export const promotionStatusTone: Record<PromotionStatus, StatusTone> = { active: "success", scheduled: "info", expired: "neutral", disabled: "caution" };
 export const promotionStatusLabel: Record<PromotionStatus, string> = { active: "Active", scheduled: "Scheduled", expired: "Ended", disabled: "Switched off" };
-export const promotionKindLabel: Record<Promotion["kind"], string> = { coupon: "Coupon code", automatic: "Automatic discount", scheduled_sale: "Scheduled sale" };
+export const promotionKindLabel: Record<Promotion["kind"], string> = { coupon: "Discount code", automatic: "Product discount", scheduled_sale: "Scheduled sale" };
 
 export function describePromotionDiscount(promotion: Pick<Promotion, "discount">, formatMoney: (money: Money) => string, currency: Money["currency"] | null): string {
   if (promotion.discount.kind === "percent") return `${formatBasisPointsAsPercent(promotion.discount.value)} off`;
