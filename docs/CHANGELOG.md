@@ -8,6 +8,62 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ## apps/mobile
 
+### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `screens/wallet/referral.screen.tsx`, `types/rewards.type.ts`, `services/rewards.service.ts`, `mocks/rewards.mock.ts`, `components/wallet/loyaltyCard.tsx` | **Deleted.** Referral, loyalty and cashback. |
+| `navigation/*`, `config/guestAccess.config.ts`, `settings.screen.tsx`, `ownProfileShortcuts.tsx`, `wallet.screen.tsx`, `walletQueries.hook.ts`, `mocks/index.ts` | Removed the Referral route, "Invite friends" rows and loyalty queries. |
+| `checkout.screen.tsx`, `services/orders.service.ts` | Removed the "Use loyalty points" row and `redeemLoyaltyPoints`. |
+| `types/storeRewards.type.ts`, `services/storeRewards.service.ts`, `mocks/storeRewards.mock.ts`, `screens/wallet/storeRewards.screen.tsx`, `components/store/earnBackLine.tsx` | **New.** Store rewards list per store, wired to Wallet and the `StoreRewards` route. |
+| `cartGrandTotalCard.tsx`, `types/cartOrder.type.ts`, `types/shipping.type.ts`, `mocks/commerceFixtures.mock.ts`, `aboutShopCard.tsx`, `storeProfileHeader.tsx` | "Store credit −X" in the order total; "Earn X% back at this store" on product and store pages. ZudoPoints untouched. Not run on a device. |
+
+
+### Policy update banner and re-accept screen (§32, 3 Oct) — not tested on a device
+
+| File | Change |
+| --- | --- |
+| `types/policyUpdate.type.ts`, `services/legal.service.ts`, `mocks/legal.mock.ts`, `mocks/privacy.mock.ts`, `mocks/index.ts` | **New.** Current policy versions and acceptances mocks; the consents PUT records `policyVersionId`. |
+| `store/policyUpdate.store.ts`, `hooks/usePolicyUpdates.hook.ts` | **New.** Pending versions, banner dismissal (in memory) and accept mutation. |
+| `components/legal/policyUpdateBanner.tsx`, `policyReacceptScreen.tsx`, `navigation/root.navigator.tsx` | **New.** Dismissible banner with summary sheet; blocking re-accept screen after the effective date of a material change (Accept, Download my data, Delete account). `makeThemedStyles`. |
+
+### Keyboard handling, clips dark mode, clips coach overlay (2026-10-03) — not tested on a device
+
+| File | Change |
+| --- | --- |
+| `package.json`, root `pnpm-lock.yaml`, `App.tsx`, `app.json` | Added `react-native-keyboard-controller` 1.21.9, `react-native-reanimated` 4.5.1 and `react-native-worklets` 0.10.1. `KeyboardProvider` at the root. Android `softwareKeyboardLayoutMode: "resize"`. **Needs a new EAS dev-client/APK build.** |
+| `components/ui/keyboardSpacer.tsx`, `hooks/useLastKeyboardHeight.hook.ts` | New shared spacer that follows the real keyboard height frame by frame, rests at the bottom safe area, and snaps instead of animating when reduced motion is on. Deleted `hooks/useKeyboardInset.hook.ts`. |
+| `chat.screen.tsx`, `messageComposerBar.tsx`, `chatComposerWithVoiceNotes.tsx` | Composer sits flush on the keyboard. Inverted message list. iOS interactive dismiss. Emoji panel uses the last keyboard height with no jump. |
+| `clipCommentsSheet.tsx`, `commentComposer.tsx`, `postDetail.screen.tsx`, `ui/bottomSheet.tsx`, `threadedCommentList.tsx` | Comment input sits on the keyboard in the sheet and on post detail. The sheet rises and shrinks with the keyboard. All `BottomSheet` users are covered. |
+| `story.screen.tsx`, `live.screen.tsx`, `supportTicketDetail.screen.tsx`, `disputeDetail.screen.tsx`, `createPost.screen.tsx`, `editProfile.screen.tsx`, `authStep.tsx` | RN `KeyboardAvoidingView` (which did nothing on Android) replaced with the spacer / `KeyboardAwareScrollView` / the library's KAV. Live comment bar now avoids the keyboard. |
+| `mainTabs.navigator.tsx`, `clipCommentBar.tsx`, `clipPage.tsx` (bottom chrome), `clipPlaybackControls.tsx`, `commentRow.tsx`, `commentThread.tsx`, `threadedCommentList.tsx`, `commentComposer.tsx`, `clipCommentsSheet.tsx`, `followPill.tsx` | Clips dark mode: removed the forced-light scope on the Clips tab and moved the surrounding UI to `makeThemedStyles`. Video, scrims and on-video text stay as they were. |
+| `gestureTipsOverlay.tsx`, `clipGestureTipsSeen.util.ts`, `storageKeys.constant.ts`, `clips.screen.tsx` | Rebuilt the coach overlay: real clip gestures (swipe up/down, tap, double-tap, hold for 2×, ⋮ for options) with real icons and SVG glyphs, an animated hand that respects reduced motion, a dark scrim, "Got it" plus tap anywhere. "Seen" is saved in SecureStore (`zm.clipGestureTipsSeen`, plus a per-account key), so it shows once per install and once per new account. |
+
+### Action icon refinement (2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `postCard.tsx`, `saveToggleButton.tsx` | Feed action icons 24 → 22; icon–count gap 8 → 4; group gap 20 → 16; tap targets kept at 44 high via hitSlop. |
+| `clipActionRail.tsx` | Rail icons 24 → 22; vertical gap 16 → 20; hitSlop 6/8 → 11 vertical. |
+| `landscapeVideoFullScreenModal.tsx` | Fullscreen icon 18 → 16. Live reaction rail untouched (emoji, not icons). |
+
+### Mentions (2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `src/types/mention.type.ts`, `src/utils/mentions.util.ts`, `src/services/mentions.service.ts` | Structured entities `{ userId, username, start, length }` / `{ type: "all", ... }`, edit-safe offsets, 20-mention cap. |
+| `components/mentions/*`, `store/toast.store.ts`, `components/ui/toastHost.tsx` | `useMentionComposer` (debounced autocomplete, `requireAuthThen` for guests), suggestion list with `@all`, `MentionText` (brand colour, pill, suspended plain, "User not found" toast). |
+| `commentComposer.tsx`, `commentRow.tsx`, `postComposerPanel.tsx`, `postCard.tsx`, `clipDetails.tsx`, `messageComposerBar.tsx`, `chatBubble.tsx`, `conversationInfo.screen.tsx` | Mentions in comments, replies, posts, clip captions and group chats; group setting "Only admins can @all". |
+| `settingsPrivacy.screen.tsx`, `mentionPrivacySection.tsx` | Privacy: Who can mention me (Everyone, People I follow, No one). |
+| `mocks/mentions*.mock.ts`, `comments`, `media`, `chats`, `groups`, `notifications` mocks | Candidates, resolve, privacy, enforcement, "mentioned you" notifications. See plans.md section 31. |
+
+### Verification checkmarks by profile type (2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `src/utils/verificationProfile.util.ts`, `components/profile/verificationBadge.tsx`, `profileSwitcher.tsx`, `mocks/brands.mock.ts`, `mocks/userDirectory.mock.ts` | Badge colour follows the profile type (Blue personal/creator, Gold business/brand, Black government); never from the account. Black grace period shows the badge, with "Renewal due" for staff only. |
+| `screens/verification/*`, `checkmarkSuggestionCards.tsx`, `mockIapSheet.tsx`, `services/webHandoff.service.ts`, `brandProfile.screen.tsx` | Blue uses a mock IAP sheet; Gold shows "Manage on the web" (dashboard.zudomart.com billing, in-app browser, no prices); Black shows "Apply for government verification" on government profiles; "Gold after business verification" until KYB. |
+
 ### Feed — images
 
 | File | Change |
@@ -362,7 +418,81 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean. **Not checked visually*
 
 Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean. **Not run** on a device or simulator (Expo was not started), so the modal-over-modal ordering and the post-sign-in replay timing (350 ms) are unchecked.
 
+### Chat attachments: location, documents, polls (plans §25.3)
+
+Placeholders found: plus menu Location and Documents (COMING_SOON_MESSAGES), plus Poll (same "Coming soon" alert). No other dead buttons in `components/chat`, `screens/messages` or the info screen.
+
+| File | Change |
+| --- | --- |
+| `types/messaging.type.ts`, `cache/messageHistory.database.ts` | Kinds `location`, `liveLocation`, `document`, `poll`; `SharedLocation`, `MessageDocument`, `MessagePoll`; new fields persist in `extra_json`. |
+| `cache/messageHistory.type.ts`, `.database.ts`, `.database.web.ts`, `messageSync.util.ts` | `deleteLocalMessage` (discarding a failed upload). |
+| `services/locationSharing.service.ts`, `liveLocationSharing.service.ts`, `store/liveLocationShares.store.ts`, `utils/mapLinks.util.ts` | Permission states, one-time consent, reverse geocoding, 15 s foreground live updates, OSM tile grid, maps URLs. |
+| `components/chat/chatLocationSheet.tsx`, `staticMapPreview.tsx`, `locationBubble.tsx`, `optimisticLocationAndPollSender.hook.ts` | Consent, denied and Settings states; current or live (15 min / 1 h / 8 h); map bubble with "Live until", Stop sharing, Open in maps, Copy address. |
+| `utils/chatDocument.util.ts`, `components/chat/pickChatDocument.util.ts`, `documentBubble.tsx`, `optimisticDocumentSender.hook.ts`, `services/documentUpload.service.ts`, `documentOpening.service.ts`, `store/documentUploads.store.ts` | Allowlist and 100 MB cap, PDF page count, progress, cancel, Retry, Discard, Open/Save via `expo-sharing` and the folder picker, "File expired". |
+| `components/chat/chatPollComposerSheet.tsx`, `pollBubble.tsx`, `richMessageContent.tsx`, `conversationMessageCache.hook.ts` | Poll builder and voting; bubble routing. |
+| `components/chat/chatComposerWithVoiceNotes.tsx`, `chatBubble.tsx`, `screens/messages/chat.screen.tsx` | "Coming soon" removed; sheets wired; entry points go through `requireAuthThen`. |
+| `mocks/chatAttachments.mock.ts`, `chatAttachmentRoutes.mock.ts`, `chats.mock.ts`, `index.ts`, `services/messages.service.ts` | Seeds, previews ("📍 Location"), PATCH location, stop, poll vote. |
+| `mocks/clips.mock.ts` | Clips feed and `findMockClipsByIds` hide suspended authors (as posts already did). |
+| `package.json`, `app.json`, `pnpm-lock.yaml` | `expo-location`, `expo-document-picker`, `expo-sharing`, `expo-clipboard` (via `npx expo install`); location permission copy. |
+| `apps/mobile/CHANGELOG.md` | Removed; its content is the next entry. |
+
+Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean. **Not run** on a device (no Expo): map tiles, live updates, share sheet and folder picker are unchecked.
+
+### Trust, verification and support (plans §29)
+
+Plan: [plans.md §29](./plans.md). Mock mode only. Verified with `tsc --noEmit`.
+
+| Area | Files | Change |
+| --- | --- | --- |
+| Suspended accounts | `types/models.type.ts`, `mocks/userDirectory.mock.ts`, `mocks/fixtures.mock.ts`, `mocks/auth.mock.ts`, `mocks/accountStatus.mock.ts`, `mocks/feed.mock.ts`, `mocks/users.mock.ts`, `mocks/chats.mock.ts`, `services/accountStatus.service.ts`, `components/profile/suspendedProfileState.tsx`, `components/chatSafety/suspendedBadge.tsx`, `components/chat/chatHeader.tsx`, `screens/messages/chat.screen.tsx`, `screens/profile/userProfile.screen.tsx`, `screens/account/suspendedAccount.screen.tsx`, `navigation/root.navigator.tsx`, `config/legalLinks.config.ts` | `account.status` on users. Suspended profile and chat states, hidden from search, suggestions and feeds. Full-screen notice for the suspended user with appeal, data download and the 120-day deletion note. |
+| Checkmark suggestions | `types/trust.type.ts`, `mocks/checkmarkSuggestions.mock.ts`, `mocks/trustStats.mock.ts`, `services/verification.service.ts`, `components/profile/checkmarkSuggestionCards.tsx`, `verificationQueries.hook.ts`, `ownProfileShortcuts.tsx`, `screens/settings/settings.screen.tsx` | Dismissible Blue and Gold cards when the eligibility endpoint says eligible. Black is never suggested. Apply opens the existing verification flow. |
+| Creator Program | `types/creator.type.ts`, `mocks/creatorProgram.mock.ts`, `components/creator/creatorDecisionBanner.tsx`, `screens/creator/creatorProgram.screen.tsx` | Decision states (auto approve, manual review, not eligible), new checklist items (original posts in 60 days, no violations in 90 days). |
+| Business documents | `mocks/businessDocuments.mock.ts`, `services/businessDocuments.service.ts`, `components/seller/businessDocumentsQueries.hook.ts`, `businessDocumentsNudge.tsx`, `screens/seller/businessDocuments.screen.tsx`, `screens/seller/sellerDashboard.screen.tsx`, `screens/store/storeDetail.screen.tsx` | CAC, ID and address uploads with status and rejection reason, sent to the admin queue. Nudge banner until approved. Never blocks store creation. |
+| Help and support | `mocks/helpCenter.mock.ts`, `mocks/support.mock.ts`, `services/helpCenter.service.ts`, `services/support.service.ts`, `types/support.type.ts`, `screens/support/helpCenter.screen.tsx`, `helpArticle.screen.tsx`, `newSupportTicket.screen.tsx`, `supportTicketDetail.screen.tsx`, `supportTickets.screen.tsx`, `components/support/supportRecordingNotice.tsx`, `screens/orders/orderDetail.screen.tsx`, `screens/checkout/payment.screen.tsx`, `screens/settings/settingsSupport.screen.tsx`, `navigation/*` | Searchable help centre. Tickets link an order or payment. Live "Zudomart Support" thread with a not-E2EE, recorded notice. Entry points on Settings, Order detail and Payment. |
+| Marketing emails | `mocks/marketingPreferences.mock.ts`, `services/consents.service.ts`, `components/settings/marketingFrequencyPicker.tsx`, `screens/settings/settingsPrivacyData.screen.tsx` | New marketing copy and a weekly, only important or off choice. |
+| Usernames | `types/account.type.ts`, `mocks/username.mock.ts`, `mocks/auth.mock.ts`, `components/settings/usernameAvailability.hook.ts`, `screens/auth/signUpUsername.screen.tsx`, `services/auth.service.ts` | The server's reason ("This username is reserved.") is shown on signup, username change and availability checks. |
+
 ## apps/webapp
+
+### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `mocks/rewards.mock.ts`, `types/rewards.type.ts` | **Deleted.** `redeemLoyaltyPoints` removed from checkout and `orders.service.ts`. |
+| `app/(app)/store-rewards/page.tsx`, `services/storeRewards.service.ts`, `mocks/storeRewards.mock.ts`, `me/page.tsx` | **New.** Store rewards list (balance, expiry per store). |
+| `checkout/page.tsx`, `cart/page.tsx`, `types/orders.type.ts`, `mocks/commerceFixtures.mock.ts`, `product/[productId]/page.tsx` | "Store credit −X" in summaries; "Earn X% back at this store" on product page. |
+
+
+### Tablet/desktop, dark mode, saved & guest browsing (§26, 3 Oct)
+
+Plan: [plans.md §26](./plans.md). Verified with `tsc --noEmit`, `next build`, `pnpm lint:styles` (no `color-no-hex` in the webapp) and headless Chrome screenshots at 768, 1024 and 1440 in light and dark.
+
+| Area | Files | Change |
+| --- | --- | --- |
+| Shell | `components/shell/appShell.tsx`, `sideNavigation.tsx`, `topBar.tsx`, `userMenu.tsx`, `rightRail.tsx`, `rightRailModules.tsx`, `shellNavigation.config.tsx`, `shellLayout.config.ts`, `useShellBadgeCounts.hook.ts` + CSS | Phones keep the bottom bar. Tablets get an icon rail with a labelled overlay drawer. Desktop gets a labelled, collapsible sidebar, per-route content widths and a contextual right rail (wallet/coins, who to follow, trending, cart summary). The avatar menu has links, a theme switcher and sign-out. |
+| Theme | `app/layout.tsx`, `components/providers/appProviders.tsx`, `components/settings/appearanceSection.tsx`, `settingsHome.module.css`, `app/(app)/settings/page.tsx`, `mocks/settings.mock.ts` | The `theme` cookie sets `data-theme` server-side. Adds `ThemeInitScript`, `themeViewport` and `ThemeProvider`, which saves `preferences.theme`. New Settings hub with Appearance. |
+| Tokens | every `*.module.css` touched by `pnpm lint:styles`, `app/globals.css` | Ramps and hex values moved to semantic tokens. Status text uses `-text` variants. `phoneFrame` artwork is allowlisted. |
+| Saved | `types/saves.type.ts`, `services/saves.service.ts`, `components/saves/*`, `app/(app)/saved/*`, `mocks/saves.mock.ts`, `mocks/saveState.mock.ts`, `public/icons/bookmarkSimple24.svg`, `bookmarkSimpleFill24.svg` | Optimistic save toggle with toast. `/saved` with type tabs, collections, a move-to-collection picker and infinite scroll. Mock `POST/DELETE/GET /saves`, `/saves/collections`, `PATCH /saves/:id`. |
+| Feed | `app/(app)/page.tsx`, `components/feed/postCard.tsx`, `postCardMedia.tsx`, `feedTopicFilterRow.tsx`, `commentsPanel.tsx`, `components/ui/useInfiniteScrollSentinel.hook.ts`, `filterChips.module.css` | Infinite scroll. Save action, timestamp link to `/post/:id`, landscape video cards that open the watch view, shared chips. |
+| New routes | `app/(app)/mart`, `clips`, `watch/[videoId]`, `live`, `post/[postId]` | Mart browser, snap clips feed with keyboard stepping, watch page with Up next, live grid, post detail with comments. |
+| Two panes | `app/(app)/chats/layout.tsx`, `components/messages/conversationListPanel.tsx`, `app/(app)/orders/layout.tsx`, `components/orders/orderListPanel.tsx` | List + detail from 768px, with placeholders when nothing is selected. |
+| Commerce | `components/commerce/productGallery.tsx`, `martBrowser.tsx`, `sellerGroupedSummary.tsx`, `utils/groupCartItemsByStore.util.ts`, `app/(app)/product/[productId]/*`, `cart/page.tsx`, `checkout/page.tsx`, `mocks/commerceFixtures.mock.ts` | Sticky buy box, vertical gallery thumbnails, save on product, seller-grouped cart and checkout summaries, skeletons. Checkout sends no email field and shows "Verify your email to continue" when the account email is unverified (`User.emailVerified`). |
+| Profile | `components/profile/profileView.tsx`, `profileContentTabs.tsx` | Cover/header fix, Posts/Media tabs with a media grid, Saved shortcut. |
+| Guest browsing | `config/guestBrowsing.config.ts`, `proxy.ts`, `server/gateway.service.ts`, `server/anonymousViewerFields.service.ts`, `components/auth/authPrompt.store.ts`, `authPromptModal.tsx`, `services/clientApi.service.ts`, `mocks/feed.mock.ts` | Public pages and GETs work without a session. Viewer fields are forced to false. `requireAuthThen` opens an inline sign-in dialog and replays the action after sign-in. 401s on mutations open the prompt. Popular feed for guests. |
+| Mocks | `mocks/videos.mock.ts`, `discovery.mock.ts`, `index.ts`, `postCatalog.mock.ts`, `clips.mock.ts`, `products.mock.ts` | Landscape videos (Blender open movies, CC BY), suggested accounts, trending, `bookmarked` state. |
+| UI kit | `components/ui/toast.tsx`, `underlineTabs.tsx`, `icons.tsx`, `appIcon.tsx`, `public/icons/{coin24,flips34,gift24}.svg` | Toasts (`aria-live`), keyboard tablist, Figma icons copied from mobile. |
+
+### Web actions, email verification & mentions (§26.5–26.7, 3 Oct)
+
+| Area | Files | Change |
+| --- | --- | --- |
+| Comments | `src/components/feed/commentsPanel.tsx`, `commentThread.tsx`, `commentComposer.tsx`, `commentsPanel.module.css` | Threaded comments: preview replies, "View N replies" paging, reply composer, like, delete own, report. Guests can read; writing goes through `requireAuthThen`. |
+| Mentions (§31) | `src/types/mentions.type.ts`, `src/utils/mentions.util.ts`, `src/components/mentions/*`, `src/services/mentions.service.ts`, `src/mocks/mentions.mock.ts`, `src/components/settings/mentionPrivacySection.tsx` | Typing `@` opens an autocomplete fed by `/mentions/candidates`; people who don't allow mentions are greyed out, with an `n/20` counter. Entities are `{ userId, username, start, length }` or `{ type: "all", … }`. Usernames are re-resolved through `/mentions/resolve` (deleted shows a toast, suspended renders as plain text, `@all` as a pill). Adds the "Who can mention me" setting. |
+| Share and report | `src/components/actions/contentActionsMenu.tsx`, `shareToChatDialog.tsx`, `shareToChatButton.tsx`, `reportDialog.tsx`, `src/components/ui/modalDialog.tsx`, `src/mocks/webActions.mock.ts` | A "More" menu (Send in chat, Copy link, Report) on post cards, clips, the watch view, lives, product and profiles. Send in chat: multi-select up to 20 chats plus a note (`POST /chat/shares`). Report: reason list plus optional details (`POST /reports`). |
+| Live and gifts | `src/app/(app)/live/[liveId]/page.tsx`, `src/components/live/*` | Live room: player, host bar, product strip, live chat, and a gift tray (×1/5/10) that uses the gift catalog and send mocks. When coins run out, a coin store opens Bachs hosted checkout; `/coins/return` confirms with the server. |
+| Subscribe | `src/components/actions/subscribeToCreatorDialog.tsx`, `src/components/profile/profileVisitorActions.tsx`, `src/app/(app)/subscriptions/return/page.tsx` | Creator profiles with plans show Subscribe, which opens a plan picker and then Bachs checkout; the return page polls the subscription state. |
+| Email verification | `src/app/(app)/verify-email/*`, `src/app/(app)/checkout/page.tsx`, `src/app/(app)/settings/page.tsx`, `src/mocks/users.mock.ts` | `/verify-email` sends a code, takes the OTP and returns to `next`. The checkout gate links there and reads `GET /users/me/email`. Settings has an Email row. |
+| Services and types | `src/services/webActions.service.ts`, `src/types/orders.type.ts`, `src/app/(auth)/authSteps.module.css`, `src/app/(auth)/signup/{signupRules.util.ts,passwordRequirements.tsx,signupFieldSteps.tsx,signupVerifyCodeStep.tsx,signupTopicsStep.tsx,useUsernameAvailability.hook.ts}` | One service per action. Cart, order and wallet types are split out of `models.type.ts`. OTP, password and topic styles are split out of `authForm.module.css`. Signup is split into step components and a username hook. Every file is now under 300 lines. |
 
 ### Shipping config & web privacy (§23)
 
@@ -471,6 +601,13 @@ Verified headless (Chrome CDP): `/welcome` label `Use email` in login mode → `
 
 ---
 
+### Policy update banner and re-accept screen (§32, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `types/policyUpdate.type.ts`, `services/legal.service.ts`, `mocks/legal.mock.ts`, `mocks/privacy.mock.ts`, `mocks/index.ts` | **New.** Current policy versions and acceptances mocks. Consents PUT now accepts `policyVersionId` and records the acceptance. |
+| `components/legal/policyUpdateHost.tsx`, `usePolicyUpdates.hook.ts`, `policyUpdateHost.module.css`, `components/shell/appShell.tsx` | **New.** Dismissible Terms/Privacy banner with summary dialog; blocking re-accept screen after the effective date of a material change (Accept, Download my data, Delete account). Tokenised, dark mode through tokens. `tsc` clean; not browser-tested. |
+
 ## apps/studio
 
 ### Shipping config & web privacy (§23)
@@ -565,6 +702,15 @@ The public pages now follow the same file layout as `apps/ads` and `apps/seller`
 
 ## apps/seller
 
+### Referral and purchase loyalty/cashback removed (owner, 2026-10-03); Seller-funded store rewards (owner, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `settings/loyalty` page, `loyaltySettingsForm.tsx`, `customerLoyaltyPanel.tsx`, `settingsSectionTabs.tsx` | **Deleted.** Platform-style loyalty points and manual point adjustments (`loyalty-adjustments` route). |
+| `marketing/rewards` page, `storeRewardsView.tsx`, `customerStoreCreditPanel.tsx`, `marketingPresentation.util.ts` | **New.** Marketing > Store rewards: on/off, % back, minimum order, max per order, expiry, outstanding credit liability; customer detail shows store credit. |
+| `types/store.type.ts` (`StoreRewardsRules`), `types/customer.type.ts` (`storeCreditBalance`), settings validation, seed profiles, customer mocks, `apiContract.md` | `loyalty` replaced by `storeRewards`; `loyaltyPoints` replaced by store credit. |
+
+
 ### Shipping config & web privacy (§23)
 
 | File | Change |
@@ -643,7 +789,22 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | Landing polish | Token type scale, spacing, wordmark and radii. Checked at 390 and 1440 with no horizontal scroll. Reduced motion stops the marquee |
 | Copy fix | Dropped "point of sale for your physical shop" from the sellers page, the FAQ and the site config, because the dashboard has no POS |
 
+### Legal pages with versions (§32, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `content/legalPolicies.content.ts`, `content/legalNewDocuments.content.ts` | **New.** Mock versioned registry for eight documents (current plus previous versions). |
+| `components/legal/legalPolicyPage.tsx`, `legalDocument.tsx`, `legalDocument.module.css` | **New.** Shows version, effective date and "View previous versions". The "Draft, pending legal review" notice stays until `isReviewedByLegal`. |
+| `app/{terms,privacy,cookies,community-guidelines,seller-terms,creator-terms,ads-policy,refund-escrow-policy}/page.tsx`, `app/legal-archive/[slug]/[version]/page.tsx`, `app/sitemap.ts`, `components/layout/siteFooter.tsx` | Five new pages, archive route, sitemap and footer links. `next build` passes. |
+
 ## apps/admin
+
+### Referral and purchase loyalty/cashback removed (owner, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `types/platformConfiguration.type.ts`, `revenueRulesEditor.tsx`, `revenueEffectPreview.tsx`, `configurationDocuments.mock.ts`, `configurationDocumentValidation.mock.ts`, `apiContract.md` | Removed `loyalty`, `cashback` and `referral` from revenue rules (editor cards, preview row, seed, validation, contract). |
+
 
 ### Shipping config & web privacy (§23)
 
@@ -666,6 +827,16 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | `config/apiAccess.config.ts`, `mocks/handlers/platform/userPreferences.mock.ts` | `anyAdmin` rule listed before the `/admin/users` prefix, plus the mock route |
 | `shell/consoleTopBar`, `account/accountSecurityWorkspace` | Light/Dark/System switcher |
 | About 45 CSS modules (shell, auth, ui kit, money, trust, configuration) | Raw hex moved onto tokens. `--surface-hover` now uses `--color-surface-hover`. The `--console-night*` rail stays dark in both themes. Document artwork untouched |
+
+### Legal admin and policy versioning (§32, 3 Oct)
+
+| File | Change |
+| --- | --- |
+| `constants/adminPermissions.constant.ts`, `adminRoleTemplates.constant.ts`, `config/navigation.config.ts`, `config/apiAccess.config.ts`, `mocks/seed/demoAdmins.mock.ts` | `legal.documents.view/edit/publish` and `legal.notices.send`, a Legal role template, Legal nav group, API access rules, step-up on publish and notice send, two demo Legal admins. |
+| `types/legal.type.ts`, `constants/legalDocuments.constant.ts`, `services/legalApi.service.ts`, `utils/legalLineDiff.util.ts` | **New.** Types, document list, API client, line diff. |
+| `mocks/handlers/legal/*`, `mocks/seed/legalDocuments.mock.ts`, `mocks/mockHandlerRegistry.mock.ts` | **New.** Versions CRUD, submit/return/publish (maker-checker, step-up, short-notice check), rollback, notice draft/test send/preview/status, acceptance stats, audit entries. |
+| `components/legal/*`, `app/(console)/legal/**` | **New.** Documents list, editor with preview, review/publish, history, side-by-side diff, rollback, email draft with placeholder preview frame, notices progress page. `tsc` clean; not browser-tested. |
+| `apiContract.md` | Legal documents, notices and user-facing endpoints. |
 
 ## apps/ads
 
@@ -709,12 +880,26 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 
 ## docs
 
+### Referral and purchase loyalty/cashback removed (owner, 2026-10-03)
+
+| File | Change |
+| --- | --- |
+| `architecture/microservicesPlan.json` | Removed the go-money `rewards` block and the `referrals` block; go-money description updated; added go-commerce `storeRewards` (seller-funded). |
+| `architecture/{events,fraud,payments,backend,inventory,system}.md`, `backendPlan.md`, `plans.md` (§33) | Removed referral/loyalty/cashback; fraud "referral abuse" is now "promo abuse"; added Seller-funded store rewards (owner, 2026-10-03) and backend requirements. |
+
+
 | File | Change |
 | --- | --- |
 | `docs/plans.md` | The working plan: feed media, feed video audio, chat keyboard/voice/timestamps/typing, creator subscriptions, Creator Studio requirements, webapp auth parity + desktop split, **reshare (§7)**, **Studio subdomain + live broadcasting (§8)** — with the in-app go-live source picker table (§8.4: Camera / Screen / External for gamers), the mock contract renumbered to **§8.5**, phase markers updated to what is now built, **mock mode (§9)**, **post impressions & owner-only analytics (§11)**, **the feed & chat UX batch (§12)**, plus three new sections: **§13 verification checkmarks proposal** (gold = business/store, blue = personal, two independent subscriptions that never conflict), **§14 orders tracking** (history/details/status — already built on both apps), and **§15 auth wording, social sign-in & creator analytics batch**. This batch: **§5.1 gating, §5.2 Studio home, §5.3 clip/video upload paths → [DONE — §16]**; **§5.4 → [BLOCKED]** with the contract finding (`audience` is `everyone`-only; the subscriber tier is the separate `visibility: "public" | "subscribers"` field + `assertApprovedCreator`, and today's mobile `audience: "followers"` sends are invalid against the real API — flagged as debt); **§6.2 social sign-in → [DONE — §15]** (verified end-to-end headless). |
 | `docs/CHANGELOG.md` | **New.** This file. |
 
 ---
+
+### Legal admin and policy versioning (3 Oct)
+
+| File | Change |
+| --- | --- |
+| `docs/plans.md` | New §32 with admin and user behaviour, backend requirements (versions table, maker-checker, SES bulk send through SQS with throttling and suppression, acceptance records) and open items. |
 
 ## Design system pass
 
@@ -776,3 +961,35 @@ Verified: `pnpm -C apps/seller exec tsc --noEmit` → clean; `pnpm -C apps/selle
 | File | Change |
 | --- | --- |
 | `src/app/globals.css` | Imports `tokens.css`; marketing radii stay local (art directed). |
+
+---
+
+## apps/admin
+
+### 2026-10-03: trust, accounts, documents, rules and support
+
+Plan: [docs/plans.md §30](../../docs/plans.md). Verified with `tsc --noEmit` and `next build`. Mock mode only.
+
+| Area | Files | Change |
+| --- | --- | --- |
+| Suspensions | `app/(console)/moderation/suspensions`, `components/trust/suspension*.tsx`, `suspendedAccountsPanel.tsx`, `types/suspensions.type.ts`, `mocks/handlers/trust/suspensions.mock.ts`, `mocks/seed/suspensionsSeed.mock.ts` | Queue of suggested and report-driven cases with signals and evidence, approve (reason + note), dismiss, escalate, suspended list with 120-day deletion countdown, appeal queue, reinstate. Every action needs step-up and is audited. |
+| Accounts | `app/(console)/accounts`, `components/people/accounts/*`, `types/accountsAdmin.type.ts`, `mocks/handlers/people/peopleAccountsAdmin.mock.ts` | Create accounts that bypass the reserved check (forced password change), lifetime free checkmarks that respect profile type (Blue personal/creator, Gold business/brand, Black government and superadmin only), revoke. |
+| Business documents | `app/(console)/verification/business-documents`, `components/people/businessDocuments*.tsx`, `mocks/handlers/people/peopleBusinessDocuments.mock.ts` | Per-document approve/reject with reasons, watermarked audited viewer, Gold granted when approved on Pro/Business. |
+| Black applications | `app/(console)/verification/black`, `components/people/blackApplicationsWorkspace.tsx`, `mocks/handlers/people/peopleBlackApplications.mock.ts` | Four-item vetting checklist, two-admin maker-checker approval with step-up, handle reserved on approval and kept on revoke, yearly re-verification reminders, revocation. |
+| Rules | `components/configuration/rules/trustRulesEditors.tsx`, `mocks/handlers/configuration/configurationTrustRulesValidation.mock.ts`, `mocks/seed/configurationTrustRules.mock.ts` | Versioned documents: checkmark suggestion thresholds, Creator auto-approve/review thresholds, trial rules and yearly discount, checkmark pricing (bundle 15%, cap 3, Gold-only NGN 3,000, Black NGN 50,000, grace 14 days). |
+| Support | `app/(console)/support/chat`, `support/email`, `components/support/liveChat*.tsx`, `emailOutreachWorkspace.tsx`, `mocks/handlers/content/supportChat.mock.ts`, `supportEmail.mock.ts` | Recorded (not E2EE) live chat with canned replies, and email to a user or segment through SES (mock) with marketing consent checks and automatic unsubscribe link. Ticket queue, notes, macros and SLA timers already existed. |
+| Staff, roles and user actions | `components/admins/*`, `mocks/handlers/platform/staffAccess.mock.ts`, `staffManagement.mock.ts`, `constants/adminRoleTemplates.constant.ts`, `mocks/handlers/people/peopleUserActions.mock.ts`, `components/people/userModerationActions.tsx` | Superadmins create superadmins and admins from the UI with step-up and an optional second-superadmin approval (default on); suspend or revoke access kills sessions. Admins cannot create or edit superadmins. New fine-grained permissions, nine department templates plus custom roles, several roles per admin. Audit entries carry staff id and department, and staff pages show last actions. User restrict, suspend, ban (blocks re-signup), delete (anonymise and retain) and username reassign, all permission-gated, audited and notifying. |
+| Shared | `services/safetyApi.service.ts`, `services/supportOutreachApi.service.ts`, `config/navigation.config.ts` | New services and nav entries. |
+
+## apps/seller
+
+### 2026-10-03: trials, bundle pricing, business documents
+
+Plan: [docs/plans.md §30](../../docs/plans.md). Verified with `tsc --noEmit` and `next build`. Mock mode only.
+
+| Area | Files | Change |
+| --- | --- | --- |
+| Free trial | `components/billing/trialOfferNotice.tsx`, `trialStatusPanel.tsx`, `billingPricing.util.ts`, `types/billingOffer.type.ts`, `mocks/handlers/billingOffer.mock.ts` | Card-saved trial through Bachs (mock hosted page), refunded verification charge copy, reminders at 3 and 1 day, one-tap cancel, gentle ineligibility reasons. The account email is shown read-only and never asked for. |
+| Plan picker | `components/billing/subscriptionPlanPicker.tsx`, `components/settings/billingSettingsView.tsx`, `mocks/seed/demoFinance.mock.ts` | Monthly/yearly toggle with the yearly discount, "Blue + Gold bundle -15%" when an active Blue exists (yearly wins when bigger), Gold-only plan card, per-business billing note. Yearly prices now carry a 20% discount. |
+| Business documents | `components/documents/*`, `components/dashboard/businessDocumentsBanner.tsx`, `app/(workspace)/settings/business-documents`, `mocks/handlers/businessDocuments.mock.ts` | Upload/re-upload CAC, ID and proof of address with statuses and rejection reasons, dashboard banner until approved, Gold checkmark preview. Never blocks selling. |
+| Layout fix | `components/layout/compactWorkspaceSwitcher.module.css`, `topBar.module.css` | Store switcher text ellipsizes at 390px instead of clipping. |

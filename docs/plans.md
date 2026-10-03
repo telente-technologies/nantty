@@ -42,12 +42,35 @@ Requirement: **every video in the feed has an audible/played state the user cont
 
 ---
 
-## 3. Chat: keyboard and composer **[DONE]**
+## 3. Chat: keyboard and composer **[REDONE 2026-10-03 — NOT TESTED ON A DEVICE]**
 
-- New hook `hooks/useKeyboardInset.hook.ts` measures baseline container height against keyboard height (`RESIZE_DETECTION_RATIO 0.6`, survives rotation) and returns `{ inset, handleLayout }`.
-- `chat.screen.tsx` dropped `KeyboardAvoidingView` (which fought the screen container and dropped content behind the keyboard on Android) for a plain bottom padding driven by the hook, `Screen edges={["top","bottom"]}`, `keyboardShouldPersistTaps="handled"`, `keyboardDismissMode="on-drag"`, and an auto scroll-to-end whenever the inset grows.
+**Why the first version failed.** `useKeyboardInset` only listened to `keyboardWillShow` / `keyboardDidShow`. That missed later height changes (suggestion bar, emoji keyboard, third-party keyboards). It also added the full keyboard height on top of `Screen edges={["top","bottom"]}`, so on iPhones with a home indicator there was a gap the size of the bottom safe area. On Android it reacted only after the keyboard had finished animating. Its "did the window already shrink?" guess (`RESIZE_DETECTION_RATIO`) breaks under Expo SDK 57's enforced edge-to-edge, where `adjustResize` no longer resizes the window. Comments were worse. `ClipCommentsSheet`, `BottomSheet`, `postDetail`, `story`, `support` and `dispute` used React Native's `KeyboardAvoidingView` with `behavior={undefined}` on Android, so they did nothing there. The iOS `"padding"` also kept the safe-area padding (another gap). The live comment bar had no keyboard handling at all.
 
-Result: tapping the input raises the keyboard and the composer rides on top of it.
+**Fix.**
+- Added `react-native-keyboard-controller` 1.21.9, plus its peers `react-native-reanimated` 4.5.1 and `react-native-worklets` 0.10.1, installed with `npx expo install`. `KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge` wraps the app in `App.tsx`. The library tracks the real keyboard frame on every frame on both platforms. `app.json` sets android `softwareKeyboardLayoutMode: "resize"`, which the library expects. Inside the provider the window is not resized, so the offset is applied once and never doubled.
+- **Native rebuild required.** These are native modules, so Expo Go and the current APK/dev client will crash or show nothing until you run a new EAS build (dev client and APK). They are autolinked, so no config plugin is needed. babel-preset-expo adds the worklets plugin automatically.
+- One shared primitive, `components/ui/keyboardSpacer.tsx`. Its height is `max(keyboardHeight − offset + openedGap·progress, restingHeight, reservedHeight)`, where `restingHeight` defaults to the bottom safe-area inset. A composer placed directly above it sits flush on the keyboard and drops back above the home indicator when the keyboard closes. With reduced motion on, it jumps to the target height at `onStart`/`onEnd` instead of animating.
+- Chat (`chat.screen.tsx`, which covers DMs, groups and channels) is now an **inverted** FlatList, so the newest message stays anchored while the keyboard animates. It uses interactive dismiss on iOS and on-drag on Android. `MessageComposerBar` owns the spacer. The emoji panel renders *inside* the spacer at `useLastKeyboardHeight()` (the last real keyboard height), and that height stays reserved until the keyboard has finished opening again, so switching between keyboard and emoji panel doesn't jump. Read-only notices and the voice-note recorder also sit on a spacer.
+- Comments: `CommentComposer` owns a spacer on `postDetail`. In `ClipCommentsSheet` the spacer sits *below* the sheet and the sheet `flexShrink`s, so the 566 pt sheet rises with the keyboard and shrinks on short phones. `BottomSheet` works the same way, which covers the sound picker, report, share-live, poll and gift-goal sheets (floating sheets keep their 14 pt gap).
+- Story reply, live comment bar, support chat, dispute chat and the create-post caption use the spacer. `editProfile` uses `KeyboardAwareScrollView`. `authStep` uses the library's `KeyboardAvoidingView` (padding on both platforms).
+- Deleted `hooks/useKeyboardInset.hook.ts`. There are no tab bars under these screens (they are stack screens, and Clips hides the tab bar), so `offset` is 0 everywhere.
+
+**Manual test checklist (to run on devices — none of this was tested on a device):**
+
+| Device | Default keyboard | Emoji keyboard | Gboard + suggestion bar | SwiftKey |
+| --- | --- | --- | --- | --- |
+| Small Android, gesture nav | ☐ | ☐ | ☐ | ☐ |
+| Android, 3-button nav | ☐ | ☐ | ☐ | ☐ |
+| iPhone SE | ☐ | ☐ | n/a | ☐ |
+| iPhone with Dynamic Island | ☐ | ☐ | n/a | ☐ |
+| iPad (runs as iPhone app, `supportsTablet: false`; also try split view / floating keyboard) | ☐ | ☐ | n/a | ☐ |
+
+For every cell, check each screen: DM chat, group chat, support chat, dispute chat, post detail comments, clip comments sheet (top-level and reply), live comment bar, story reply, create-post caption, a sheet with a search/field (sound picker, report, gift goal).
+- The composer sits flush on the keyboard: no gap and no overlap, including after switching keyboards and toggling the suggestion bar.
+- When the keyboard closes, the composer returns above the home indicator / nav bar.
+- Chat: the latest message stays visible while the keyboard animates. On iOS, drag the list down to dismiss interactively.
+- Chat emoji panel ↔ keyboard switching doesn't jump.
+- With Reduce Motion on (iOS) / Remove animations on (Android), the composer repositions without animating.
 
 ### 3.1 Voice note play/pause **[DONE]**
 
@@ -777,7 +800,7 @@ Owner (everything), Manager (all but billing, withdrawals, developer), Inventory
 | 13 | Reviews | `/reviews` | Free | **[DONE]** |
 | 14 | Team | `/staff`, `/staff/roles`, `/staff/activity` | Team Pro; permission toggles Business | **[DONE]** |
 | 15 | Reports | `/reports`, `/reports/[kind]` | Core Sales/Inventory CSV free; rest + Excel/PDF Pro | **[DONE]** |
-| 16 | Settings | `/settings/*` (store, account, security, notifications, payouts, delivery, locations, taxes, loyalty, team, developers, integrations, billing, verification) | Alerts and API Pro; accounting Business | **[DONE]** |
+| 16 | Settings | `/settings/*` (store, account, security, notifications, payouts, delivery, locations, taxes, team, developers, integrations, billing, verification) | Alerts and API Pro; accounting Business | **[DONE]** |
 
 ### 19.5 Later
 
@@ -906,11 +929,31 @@ Mock mode only; `services/**` and the web apps untouched. Real Signal-protocol e
 - Seeds: `c_1` is at 99 days (send once to hit 100 and see the celebration), `c_3` is broken with a restore available, `c_req_*` are requests, `c_spam_*` are spam, `c_1` has expired and fresh media plus every link type.
 - **[LATER]** libsignal sessions and per-device keys, server-side 30-day media purge, push delivery honouring mute and preview settings, group streaks (open), timezone change rate-limit.
 
+### 25.3 Attachments: location, documents, polls (mock contract)
+
+Message `kind` gains `location`, `liveLocation`, `document` and `poll`. Entries in the plus menu never show "Coming soon"; each opens a working flow.
+
+| Method + path | Request | Response |
+| --- | --- | --- |
+| `POST /conversations/:id/messages` | `{ kind: "location"\|"liveLocation", location { latitude, longitude, address, liveUntil? } }` | `Message` with `location { ..., updatedAt }` |
+| `POST /conversations/:id/messages` | `{ kind: "document", document { fileName, mimeType, sizeBytes, pageCount?, url } }` | `Message` with `document` and `mediaExpiresAt = sentAt + 30d` |
+| `POST /conversations/:id/messages` | `{ kind: "poll", poll { question, allowMultipleAnswers, options: string[] } }` | `Message` with `poll { question, allowMultipleAnswers, options[ { id, text, voteCount, votedByMe } ] }` |
+| `PATCH /messages/:id/location` | `{ latitude, longitude, address }` | `Message`; 409 once `liveUntil` has passed |
+| `POST /messages/:id/live-location/stop` | | `Message` with `location.liveUntil = now` |
+| `POST /messages/:id/poll-votes` | `{ optionId }` (toggles; single-answer polls move the vote) | `MessagePoll` |
+
+- Location: first use shows "Your location is shared only with this chat" (consent kept on the device). Choices: send current location, or live for 15 min / 1 h / 8 h. Denied permission shows an explanation; permanently denied links to Settings. The address comes from `expo-location` reverse geocoding. Live updates go out every 15 s while the app is foregrounded (timers in `liveLocationSharing.service.ts`); the bubble shows "Live until 14:30" with "Stop sharing" for the sender and "Live location ended" afterwards, including after an app restart (the timer does not survive it).
+- Map: static OpenStreetMap tiles (2x2 grid, zoom 15) with a pin and the required "© OpenStreetMap" credit. `react-native-maps` is not installed. "Open in maps" uses `maps.apple.com` (iOS), `geo:` (Android) or Google Maps (web). "Copy address" copies the address or the coordinates.
+- Documents: `expo-document-picker`, type allowlist (PDF, Word, Excel, PowerPoint, txt, zip, jpg/png/webp/heic as files), 100 MB cap. The bubble shows a typed badge, name, size and PDF page count (counted on the device for PDFs up to 20 MB). Upload progress, cancel, Retry and Discard use the optimistic sender pattern (`optimisticDocumentSender.hook.ts`). Upload is simulated in mock mode (`documentUpload.service.ts`). Tap offers Open (system share/view sheet via `expo-sharing`) or Save (folder picker). After 30 days the bubble reads "File expired".
+- Polls: 2 to 6 options, unique, optional multiple answers; tapping an option votes or unvotes.
+- Seeds in `c_1`: a location, a live location (45 min left), a PDF, an expired XLSX and a poll.
+- **[LATER]** server-side live location fan-out and purge, real document upload through the media service, background live location (needs a background-location review), poll closing.
+
 ---
 
 ## 26. Webapp tablet/desktop, dark mode & saved **[DONE (webapp, mock)]**
 
-Scope: `apps/webapp` only. Theme plumbing comes from `@zudomart/web-kit` (`ThemeProvider`, `ThemeSwitcher`, `ThemeInitScript`, `theme` cookie) and dark values from `@zudomart/design-tokens`. Files are listed in [apps/webapp/CHANGELOG.md](../apps/webapp/CHANGELOG.md).
+Scope: `apps/webapp` only. Theme plumbing comes from `@zudomart/web-kit` (`ThemeProvider`, `ThemeSwitcher`, `ThemeInitScript`, `theme` cookie) and dark values from `@zudomart/design-tokens`. Files are listed in [CHANGELOG.md](./CHANGELOG.md) under apps/webapp.
 
 ### 26.1 Layouts
 
@@ -922,7 +965,7 @@ Scope: `apps/webapp` only. Theme plumbing comes from `@zudomart/web-kit` (`Theme
 
 - Right rail modules: wallet and coins, who to follow, trending in Nigeria, cart summary on mart pages. Guests only see trending and who to follow.
 - Two-pane routes use nested layouts with `useSelectedLayoutSegment`: `/chats` (list + conversation) and `/orders` (list + detail). On phones, the list and the detail stay separate pages.
-- Product detail: the gallery has vertical thumbnails on desktop and the buy box is sticky. Cart and checkout group items by seller and show a sticky seller-grouped summary.
+- Product detail: the gallery has vertical thumbnails on desktop and the buy box is sticky. Cart and checkout group items by seller and show a sticky seller-grouped summary. Checkout never asks for an email: the server uses the account's verified email for the payment provider and receipts. When the account email is unverified, the pay button is replaced by "Verify your email to continue", which links to `/verify-email` (§26.6).
 - Profile: cover, overlapping avatar header, stats, then Posts / Media tabs (3-column media grid) and a Saved shortcut on your own profile.
 - New routes: `/mart`, `/clips` (snap feed, one clip per screen, j/k and arrow keys, desktop action column), `/watch/[videoId]` (16:9 player, Up next rail, comments), `/live` (live grid), `/post/[postId]` (post + read-only comments), `/saved`.
 - Pointer and keyboard: hover states, `:focus-visible` rings from `--focus-ring`, tablists with arrow keys, `--control-*` sizes (32–36px on fine pointers, 44px on coarse). Skeleton, empty and error states use the web-kit kit.
@@ -961,7 +1004,36 @@ Anyone can browse without signing in: home (popular feed fallback, `GET /feeds/p
 - `config/guestBrowsing.config.ts` owns two allowlists. Pages: the proxy lets anonymous requests through. Everything else (messages, notifications, orders, checkout, cart, wallet, creator, settings, `/me`, saved) still sends the visitor to `/login?next=`. API reads: the BFF forwards anonymous public GETs without a token, and `server/anonymousViewerFields.service.ts` forces viewer fields (`liked`, `bookmarked`, `isFollowing*`, `savedByViewer`, `reactedByMe`, `isSubscribed`) to `false`.
 - Every action goes through `requireAuthThen(action, reason)` (`components/auth/authPrompt.store.ts`): like, save, follow, message, add to cart and buy are wired today. Signed-in viewers run the action immediately. Guests get `AuthPromptModal`, a native `<dialog>` with an inline sign-in form and links to `/login?next=` and `/signup?next=`. After an inline sign-in the page refreshes and the pending action replays once, held in memory only.
 - A 401 (`UNAUTHENTICATED` or `SESSION_EXPIRED`) on a mutation opens the same prompt instead of a hard redirect. For guests, the shell skips badge, cart, wallet and notification queries, and the sidebar shows only the browse group.
-- **[LATER]** wire comment, share-to-chat, gift, report and subscribe once those actions exist on web; give the guest home a sign-up banner; add SEO metadata to public pages.
+- **[LATER]** give the guest home a sign-up banner; add SEO metadata to public pages.
+
+### 26.5 Web actions (parity with mobile)
+
+All of these go through `requireAuthThen`. Guests can read comments and watch lives.
+
+| Action | Surface | Contract |
+| --- | --- | --- |
+| Comments (threaded) | post detail, watch view | `GET /posts/:id/comments` (with `previewReplies`), `GET /comments/:id/replies`, `POST /posts/:id/comments { text, parentCommentId?, mentions[] }`, `POST/DELETE /comments/:id/like`, `DELETE /comments/:id` (own only) |
+| Send in chat | "More" menu on posts, clips, videos, lives, profiles; Share on product | `POST /chat/shares { conversationIds (1–20), reference { kind, id }, note }` returns `{ sentCount, shareCount }` (§25.1) |
+| Report | "More" menu, comment rows | `POST /reports { targetType, targetId, reason, details }` |
+| Live gifts | `/live/[liveId]` | `GET /gifts`, `POST /lives/:id/gifts { giftId, quantity }`. A `402 INSUFFICIENT_COINS` response opens the coin store |
+| Buy coins (web) | coin store dialog | `GET /coins/packages?channel=web`, `POST /coins/purchases { packageId, channel: "web" }` returns `{ reference, checkoutUrl }` (Bachs hosted checkout). `/coins/return?reference=` shows "Confirming payment…" until `POST /coins/purchases/:ref/verify` reports `succeeded`. Production confirms only from the `collection.succeeded` webhook (checkoutPaymentFlowPlan §6–8) |
+| Subscribe to creator | visitor profile (only when the creator has plans) | `GET /creators/:id/subscription-plans` (public), `POST /creators/:id/subscriptions { planId }` returns `{ subscriptionId, checkoutUrl }` (Bachs). `/subscriptions/return` polls `GET /subscriptions/:id` |
+
+In mock mode the checkout URLs point straight at the return pages.
+
+### 26.6 Email verification
+
+`/verify-email?next=`: send a code (`POST /users/me/email/verification` returns `{ expiresIn, resendAfterSeconds }`), enter the 6-digit OTP (`POST /users/me/email/verification/confirm { code }` returns `{ email, emailVerified }`), then return to `next`. `GET /users/me/email` reads the status. The checkout gate reads it and links to `/verify-email?next=/checkout`. The client never sends an email address. In the mock, the demo seller is verified and the fan account is not.
+
+### 26.7 @mentions (web)
+
+Follows §31; the web changes no part of the contract.
+
+- Comment composer: typing `@` opens a combobox fed by `GET /mentions/candidates?surface=comment&q=` (ranked following, recent, other). People who don't allow mentions are greyed out with "Doesn't allow mentions" and can't be picked. Arrow keys, Enter or Tab, and Esc work. The composer shows `n/20 mentions`. For guests, focusing the input runs `requireAuthThen`.
+- Entities follow §31.2: `{ userId, username, start, length }` or `{ type: "all", start, length }`, sent as `mentions` on `POST /posts/:id/comments`. The mock re-checks bounds, overlaps, blocks, suspended users and `whoCanMentionMe`, and returns `422 TOO_MANY_MENTIONS` above 20.
+- Rendering (`MentionText`): usernames are re-resolved through `POST /mentions/resolve`, which is public for guests. Active users link to their profile, `deleted` shows a "User not found" toast, `suspended` renders as plain text, and `@all` renders as a non-tappable pill.
+- Settings → Privacy & data → "Who can mention me" (`everyone`, `following`, `no_one`) uses `GET/PUT /users/me/mention-privacy`.
+- **[LATER]** composer and mentions for posts and group chats on web, since the web has neither yet.
 
 ---
 
@@ -1028,7 +1100,7 @@ Owner rule: anyone who downloads the app can use the public parts without regist
 | Home For you feed, Clips, Search, Category, Mart | Chats tab, Chat, NewMessage, NewGroup, ConversationInfo, chat settings |
 | ProductDetail, ProductReviews, Store, BrandProfile | Notifications |
 | UserProfile, Connections, Story | Create tab, CreatePost (posts, clips, go live), PostAnalytics, PromotePost, BoostStatus |
-| PostDetail with read-only comments, Sound, Rankings | Wallet, Transactions, CoinActivity, Withdraw, PayoutAccounts, Referral |
+| PostDetail with read-only comments, Sound, Rankings | Wallet, Transactions, CoinActivity, Withdraw, PayoutAccounts, StoreRewards |
 | Live and LiveEnded (watch, read chat) | Cart, Checkout, Payment, OrderSuccess, Orders, OrderDetail, OpenDispute, EscrowStatus, DisputeDetail |
 | SettingsAppPreference (appearance, region), SettingsAbout (legal) | Me tab content, EditProfile, Saved, Settings and every other settings screen, Verification, Support tickets |
 | | Seller screens, Creator screens, CreatorSubscribe, MySubscriptions, CreateBrand, CreateBusinessProfile, FollowRequests |
@@ -1049,3 +1121,191 @@ The source of truth for routes is `config/guestAccess.config.ts`.
 - Anonymous requests are **rate-limited by IP and device** (`X-Device-Id` or the existing `X-Client-Region` plus IP), with stricter limits on search and feeds, and cached at the edge where the response is viewer-independent. Responses must set viewer fields to `false` and never include blocked-user, private-account or own-state data.
 - `GET /feeds/for-you` without a token returns the popular feed (the webapp calls it `GET /feeds/popular`; pick one). Anonymous 401 is `{ code: "UNAUTHENTICATED" }`; expired sessions keep `SESSION_EXPIRED`.
 - **[LATER]** persist guest analytics consent on the device and send it with anonymous event calls; local guest cart merged on sign-in; guest sessions remembered across launches; deep links open the target and prompt only on action.
+
+---
+
+## 29. Trust, verification & support (mobile) **[DONE (mobile, mock)]**
+
+Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile only, mock mode. Defaults below are admin-editable on the backend.
+
+### 29.1 Suspended accounts
+
+- `account.status` is `active | suspended | deactivated` on `UserSummary`. Mock suspended users: `u_16`, `u_22`. Log in with an identifier containing `suspended` (for example `suspended.zudomart@gmail.com`) to be the suspended user.
+- Profile: `SuspendedProfileState` (greyed avatar, "This account is suspended", Learn more to the community guidelines link). No posts, tabs, follow or message buttons.
+- Chat: header `SuspendedBadge`, composer replaced by "You can't message this account", history stays visible (mock conversation `c_susp`).
+- Hidden from search, suggestions, connection suggestions, ranking lists and feeds; `GET /users/:id/posts` returns an empty page.
+- The suspended user sees `SuspendedAccountScreen` instead of the app: reason, date, "Appeal this decision" (creates an `account` support ticket), Download my data (existing export section), the 120-day deletion notice (profile, posts, media and messages deleted; financial and order records kept, anonymised, for the legal period) and Log out.
+- Python may only suggest suspensions; an admin decides.
+
+### 29.2 Checkmark suggestions
+
+- Cards "You may qualify for a verified checkmark" on Settings and the own-profile shortcuts, shown only when `eligible && !dismissed` and only for the active profile's colour: Personal and Creator get Blue, Business and Brand get Gold, Government gets Black (never suggested). Blue never shows on a business and Gold never on a person. Badges render from the profile (`verificationForProfileKind`, `VerificationBadge` rejects a colour that doesn't match its profile type), never from the account.
+- Blue (Personal/Creator): Apply opens `VerificationApply` (ID check, then a mock in-app purchase sheet, no real StoreKit). Not now dismisses.
+- Gold (Business/Brand): not sold in the app. The card, the Verification screen and "Verify brand" show "Manage on the web", which opens dashboard.zudomart.com billing in an in-app browser. No prices, price links or discounts anywhere in the app. Status reads "Gold after business verification" until KYB is approved.
+- Black (Government profiles only): "Apply for government verification" opens the web application flow.
+- Lapsed Black keeps its badge for everyone during the 14-day grace period (`graceEndsAt`); staff also see "Renewal due". Blue and Gold drop at period end.
+- Blue rules: ID verified, account at least 90 days, at least 1,000 real followers, no violations in 90 days, no active checkmark yet. Gold rules: business verification passed, active store or brand, success rate at least 90%.
+
+### 29.3 Creator Program
+
+- `GET /creators/eligibility` now returns `decision` (`auto_approve | manual_review | not_eligible`) and `decisionNote`. Checklist: real followers (for example 720 / 1,000), account age 30 days, verified phone, 10 original posts in 60 days, no violations in 90 days. All met and ID verified with no risk flag is auto-approved (the application is stored as `approved`); all met with a risk flag or no ID goes to manual review; anything else is not eligible. Shown by `CreatorDecisionBanner` above `EligibilityChecklist`.
+
+### 29.4 Business documents
+
+- Store creation never waits for documents. `BusinessDocumentsScreen` (Settings for sellers) takes a CAC certificate, government ID and proof of address, each `not_uploaded | pending | approved | rejected` with the rejection reason. Uploads go to the admin review queue. `BusinessDocumentsNudge` shows on the seller dashboard and the owner's store page until all three are approved.
+
+### 29.5 Help and support
+
+- Help centre (`HelpCenter`, `HelpArticle`) with search; public for guests, contacting support is gated with `requireAuthThen`.
+- Tickets: category, optional linked order or payment, screenshots. "Get help" on Order detail and Payment passes the link. List shows status and the link.
+- Ticket thread is a live chat (3 s poll, typing indicator) with an admin agent labelled "Zudomart Support". A notice states it is not end-to-end encrypted and is recorded for quality and safety.
+
+### 29.6 Marketing emails and usernames
+
+- Privacy & Data: marketing toggle reads "Personalised picks from verified sellers, price drops, back in stock, weekly digest" with a frequency choice (weekly, only important, off). "Off" turns the marketing consent off. Emails go out through AWS SES, only to opted-in users and only about verified sellers.
+- Usernames: the server returns `message` with the reason ("This username is reserved.") on availability checks, username change and register; the app shows it as is.
+
+### 29.7 Mock contracts
+
+| Method and path | Response |
+| --- | --- |
+| `GET /users/me/suspension` | `{ reason, suspendedAt, deletionScheduledFor, retentionDays }` (404 when active) |
+| `GET /verification/suggestions` | `CheckmarkSuggestion[]` (`color`, `eligible`, `dismissed`, `headline`, `detail`, `rules[]`) |
+| `POST /verification/suggestions/:color/dismiss` | 204 |
+| `GET /creators/eligibility` | `{ eligible, decision, decisionNote, requirements[] }` |
+| `GET /seller/business-documents` | `{ documents[], allApproved }` |
+| `PUT /seller/business-documents/:kind` | body `{ fileUrl }`, returns the state, document becomes `pending` |
+| `GET /help/articles?q=`, `GET /help/articles/:id` | `HelpArticle[]`, `HelpArticle` |
+| `POST /support/tickets` | body adds `linkedReference: { kind, id, label } \| null` |
+| `GET /support/tickets/:id` | adds `linkedReference`, `agentTyping` |
+| `POST /support/tickets/:id/messages` | appends the user message; the mock agent replies after about 1.5 s |
+| `GET/PUT /users/me/marketing-preferences` | `{ frequency: weekly \| important_only \| off }` |
+| `GET /auth/username-available` | adds `message` |
+
+### 29.8 Backend requirements and open items
+
+- Server enforces: suspended users cannot post, message, follow or sell; suspended content is excluded from search, feeds and suggestions; deletion job at 120 days.
+- Admin queue for business documents and creator manual reviews; support chat transcripts stored and audited.
+- **[LATER]** real file upload for the appeal, email to the suspended user, web checkmark purchase after approval, push for document decisions.
+
+
+## 30. Admin trust & support, seller trials & documents **[DONE (admin + seller, mock)]**
+
+Spec: owner trials/verification/admin bullets, "Decided 2026-10-03" and backendPlan §4.8. Mock mode; endpoints are in `apps/admin/apiContract.md` and `apps/seller/apiContract.md`, change log in docs/CHANGELOG.md.
+
+### 30.1 Admin
+
+- Suspensions: queue of risk-service suggestions plus user reports, approve (reason + note), dismiss, escalate; suspended list with a 120-day deletion countdown (profile, posts, media and messages deleted; order/payment records anonymised and kept), appeal queue, reinstate. Python never suspends. Every action needs step-up and is audited.
+- Accounts: admin-created accounts bypass the reserved check and force a password change; lifetime free checkmarks respect profile type (Blue personal/creator, Gold business/brand, Black government, superadmin only). Reserved usernames manager already covered exact/prefix/pattern/confusables and the test box.
+- Business documents review (CAC, ID, proof of address) and Black applications: four-item vetting checklist, two-admin maker-checker with step-up, handle reserved (kept on revoke), yearly re-verification reminders.
+- Rules: checkmark suggestions, Creator thresholds, trial rules and yearly discount, and pricing (bundle 15%, cap 3, Gold-only NGN 3,000, Black NGN 50,000, Black grace 14 days).
+- Support: live chat (recorded, not E2EE) and SES email with marketing consent and unsubscribe.
+
+- Staff: first superadmin from the CLI only; then superadmins create superadmins and admins from the UI (step-up, second-superadmin approval setting default ON), and suspend or revoke any access with sessions killed. Admins never create or edit superadmins and can only grant permissions they hold.
+- Permissions and departments: fine-grained `area:action` keys across the system, nine department templates plus custom roles, several roles per admin; the nav and buttons hide by permission and the mock BFF returns 403.
+- Audit: staff id, departments, action, target, before/after, reason, IP, time; viewer with filters and CSV export; last actions on each staff page.
+- User actions: restrict, suspend (120-day flow), ban (blocks re-signup by email, phone, device), delete (anonymise and retain financial records), reassign username (old owner gets an auto name; history kept). Each is gated, reasoned, audited and notifies the user.
+
+- Username hold: a username given up is held 120 days. The reassign flow shows the release and available dates and lets `usernames:reassign` holders assign it anyway (reason, step-up, audited as "hold bypassed"). The reserved-usernames manager lists held names with dates.
+
+### 30.2 Seller (web)
+
+- Trial (7 days or 1 month) with card saved through Bachs, refunded verification charge, reminders at 3 and 1 day, one-tap cancel; eligibility comes from the server. Account email only, read-only.
+- Per-business billing; "Blue + Gold bundle -15%" shown when Blue is active, yearly wins when it is bigger (no stacking); Gold-only plan card; Gold shows only after business verification.
+- Business documents page and dashboard banner never block selling.
+- Store switcher no longer clips at 390px (CSS fix, not browser-verified).
+
+### 30.3 Open items
+
+- Real Bachs hosted card setup and refund webhooks; SES delivery and unsubscribe handling; document upload through the media API.
+- Eligibility signals (device, card, phone, risk score) come from the backend and Python; the mock uses seeded values.
+- Bundle lapse at renewal when Blue ends needs a billing job.
+
+
+## 31. Mentions (mobile) **[DONE (mobile, mock)]**
+
+Spec: owner mention rules. Mobile only, mock mode. Typing `@` in a post, comment, reply, clip caption or group chat opens autocomplete; the app stores structured entities, never only text.
+
+### 31.1 Rules
+
+- Posts, comments, replies and clip captions: `@username` can tag anybody except users who blocked the author.
+- Group chats: only current members, plus `@all` (notifies every member). Group setting `onlyAdminsCanMentionAll` (default `false`, admins toggle it in Group info, "Only admins can @all"); when on, non-admins cannot use `@all`.
+- One-to-one chats: the app does not offer autocomplete; a mention of the peer is allowed and never notifies specially.
+- Max 20 mentions per post, comment or message (`422 TOO_MANY_MENTIONS`); the composer shows `n/20 mentions` and blocks further picks.
+- Privacy, Settings, Privacy, "Who can mention me": `everyone` (default), `following` (only people the target follows), `no_one`. A disallowed mention is stored as plain text (entity dropped), sends no notification, and the autocomplete greys the person out with "Doesn't allow mentions".
+- Guests cannot compose: input focus runs `requireAuthThen`.
+
+### 31.2 Entity format
+
+Sent as `mentions` on `POST /posts` (`NewPostInput`), `POST /posts/:postId/comments` (`NewCommentInput`) and `POST /conversations/:id/messages`, and returned on `Post`, `Comment`, `Message`.
+
+```json
+[
+  { "userId": "u_21", "username": "blessing.etim", "start": 6, "length": 14 },
+  { "type": "all", "start": 30, "length": 4 }
+]
+```
+
+- `start` and `length` are UTF-16 offsets into `text` and cover the `@` plus the label. The server validates bounds, de-duplicates overlaps and re-checks every rule above, returning only the entities that survived.
+- Links use `userId`, so renames do not break them. Clients render the current username from the resolve endpoint.
+- Rendering: highlighted in the theme primary colour; tap opens the profile, or shows a "User not found" toast when the status is `deleted`; `suspended` renders as plain text; `@all` renders as a pill and is not tappable.
+
+### 31.3 Mock endpoints
+
+| Method and path | Request and response |
+| --- | --- |
+| `GET /mentions/candidates?surface=post\|comment\|group&q=&conversationId=` | `{ candidates: [{ user: UserSummary, allowsMentions, rank: following\|recent\|other\|member }], everyone: { available, unavailableReason } \| null }`. Posts and comments rank following, then recently interacted, then others; groups return members only, and `everyone` is the first option (non-null only for groups). Excludes suspended users, the author and users who blocked the author. |
+| `POST /mentions/resolve` | body `{ userIds }`, returns `{ [userId]: { username \| null, status: active\|suspended\|deleted } }`. Public for guests. |
+| `GET/PUT /users/me/mention-privacy` | `{ whoCanMentionMe: everyone\|following\|no_one }` |
+| `PATCH /conversations/:id` | accepts `onlyAdminsCanMentionAll` (admins only); `Conversation` returns it |
+
+Notifications: each tagged user gets "X mentioned you in a post / comment / group"; `@all` gives other members "X mentioned everyone in a group". The mock adds them to `GET /notifications` for the tagged user (category `social`). The notifications screen has no filters yet, so there is no "Mentions" filter; add one with a `mention` kind when filters exist.
+
+### 31.4 Backend requirements and open items
+
+- Store entities as JSONB next to the text; fan out notifications from the outbox; resolve statuses in one batched query per page.
+- Enforce block, privacy, membership, admin-only `@all` and the 20 cap on write; never trust client entities.
+- **[LATER]** in-input highlighting while typing, one-to-one autocomplete, mentions in story replies and live chat, a Mentions notification filter.
+
+
+## 32. Legal admin & policy versioning **[DONE (admin + web + webapp + mobile, mock)]**
+
+Spec: owner rules. Superadmins create Legal admins; Legal admins manage the privacy policy, terms and other legal documents; all users get an email when privacy or terms change. Mock mode; endpoints are in `apps/admin/apiContract.md` ("Legal documents and policy versioning").
+
+### 32.1 Admin
+
+- "Legal" department template with `legal.documents.view|edit|publish` and `legal.notices.send`; superadmins hold every permission implicitly (checked centrally in UI, BFF and mock). Two demo Legal admins are seeded.
+- Documents: Terms of Service, Privacy Policy, Cookie Policy, Community Guidelines, Seller Terms, Creator Program Terms, Ads Policy, Refund and Escrow Policy. Markdown editor with live preview; draft, in review, published, superseded.
+- Each version has a number, change summary, effective date and a material-change flag. Publish needs a second Legal admin or a superadmin (never the author or submitter) and step-up. Side-by-side diff, full history, and rollback that creates a new draft version. Every action is audited with the admin's name.
+- Material change: effective date defaults to 30 days later (editable), flagged for LEGAL REVIEW; a shorter notice needs an explicit "legal cleared it" confirmation.
+- Policy updated email: drafted in the admin (subject, summary, "what changed" list generated from the diff, effective date, re-accept note), previewed, test-sent to the author, then queued to all users on publish. Preview shows recipient count, skipped bounces and suppressions, batch size and rate; progress page polls while sending.
+
+### 32.2 Users
+
+- apps/web: `/terms`, `/privacy`, `/cookies` plus `/community-guidelines`, `/seller-terms`, `/creator-terms`, `/ads-policy`, `/refund-escrow-policy` render the current version with version, effective date and a "View previous versions" list (`/legal-archive/{slug}/{version}`). Build-time mock data; the "Draft, pending legal review" notice stays until a version has `isReviewedByLegal`.
+- apps/webapp and apps/mobile: dismissible "We've updated our Terms/Privacy Policy" banner with a summary sheet; for material changes a blocking re-accept screen after the effective date (Accept, Download my data, Delete account). Acceptance goes through `PUT /users/me/consents` with `policyVersionId`. Guests just read the latest documents.
+
+### 32.3 Backend requirements
+
+- Tables: `legal_documents(key)`, `legal_versions(id, document_key, version_number unique per document, status, body, change_summary, effective_at, is_material, created_by, submitted_by, published_by, published_at, rolled_back_from)`, `legal_notice_drafts(version_id, subject, summary, what_changed jsonb, reaccept_note)`, `policy_acceptances(user_id, policy_version_id, accepted_at, source, ip, user_agent)` with a unique key on user and version. Published versions are immutable; one open version per document.
+- Maker-checker enforced in the service (publisher differs from author and submitter), step-up required, audit row per action with the admin's name.
+- On publish write the version and an outbox row in one transaction; a worker expands recipients (all active users) in pages and enqueues SQS jobs of 50. Send through SES with a throttle at the account rate (start at 14 per second), idempotency key per user and version, retries with backoff. Transactional legal notice: ignore marketing consent but skip the SES suppression list, hard bounces and complaints, and record every skip. Webhooks (SNS) update the suppression table. Progress counters feed `GET /admin/legal/notices`.
+- Material changes: `must_accept_by = effective_at`; clients ask for current versions and the user's acceptances; the API returns `428 POLICY_ACCEPTANCE_REQUIRED` for write calls after the date until accepted. Account deletion and data export stay available while blocked.
+- Public `GET /legal/policy-versions/current` is cacheable; the web site rebuilds (or revalidates) when a version is published.
+
+### 32.4 Open items
+
+- Render the draft preview and send with the `policyUpdated` template from `@zudomart/email-templates` (not in the package yet; the admin uses a placeholder frame).
+- Real SES, SQS and SNS; real acceptance records; the web site still reads build-time mock data.
+- Webapp/mobile banner dismissal is per device (webapp localStorage, mobile in memory). Not tested in a browser or on a device.
+
+
+---
+
+## 33. Referral and purchase loyalty/cashback removed; seller-funded store rewards (3 Oct 2026)
+
+> **Referral and purchase loyalty/cashback removed (owner, 2026-10-03).** Reason: "we don't know how to pay for them".
+
+- **Removed:** referral codes, links, invite-and-earn screens, referral attribution at signup and referral rewards; platform-funded loyalty points and cashback on orders and escrow release; loyalty tiers and redemption at checkout; the admin referral/loyalty/cashback revenue rules; the seller "Loyalty" settings page and per-customer point adjustments.
+- **Kept:** ZudoPoints engagement and gift points on lives (leaderboards, rankings, streak points). They are non-monetary.
+- **Seller-funded store rewards (owner, 2026-10-03).** A store can turn on "Store rewards" under Marketing: X% of order value back as store credit, with minimum order, max per order, expiry and an on/off switch. Credit is redeemable only at that store as a discount on a future order, never cash, never withdrawable. Earned after escrow release; reversed on refund. The seller sees outstanding liability. Mobile and webapp show "Store credit −₦X" in the checkout summary, a "Store rewards" list per store (balance, expiry) and "Earn X% back at this store" on product and store pages. Mock contracts: `apps/seller/apiContract.md` (Store rewards), `GET /api/v1/store-rewards/me` (buyer apps). Backend: per-store credit ledger in go-commerce (see `backendPlan.md`, Store rewards).

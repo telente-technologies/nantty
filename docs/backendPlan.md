@@ -17,6 +17,7 @@ These apply to every backend file, whether a person or an agent writes it.
 - Function names are long and self-explanatory, for example `calculateCartTotalsInKobo`, `settleLiveBattleAndPostLedgerEntries`, `assertViewerCanGiftStreamerOnStage`.
 - Every route declares its permission and is denied by default. Every body, query and params object is schema-validated before it reaches a handler. Every money-moving route requires `Idempotency-Key`.
 - Money is always `{ amountMinor: integer, currency }`. Coins are plain integers in their own unit (`COIN`) and are never mixed with fiat minor units. The server resolves the viewer's currency, and nothing hardcodes NGN.
+- **Referral and purchase loyalty/cashback removed (owner, 2026-10-03).** There is no referral system and no platform-funded points or cashback on purchases; the go-money `rewards` module and the `referrals` block in `microservicesPlan.json` are gone. ZudoPoints engagement and gift points stay (non-monetary, in go-live). **Seller-funded store rewards (owner, 2026-10-03):** stores may fund store credit (see Store rewards below).
 - **There is no in-store POS or cash register.** No registers, shifts, cash movements, offline sales, parked sales, PIN cashier switching, manager-PIN discount approvals or POS pay links. The `pos` block in `microservicesPlan.json` (registers, shifts, cash sales, `staffPins`) must go. The foundation agent owns that JSON and is removing it. The POS sections of `apps/seller/apiContract.md` and their mocks must also be deleted (§4.3.9).
 
 ---
@@ -48,7 +49,7 @@ These apply to every backend file, whether a person or an agent writes it.
 | --- | --- | --- |
 | auth, users (+ usernames), verifications, currency, admin, audit | go.auth, go.users, go.currency, go.admin | Rules and validators translate 1:1. Admin has commands but no routes yet |
 | stores, products, categories, carts, orders, reviews | go.catalog, go.inventory, go.orders | Reviews go to go.catalog (product engagement) |
-| payments, wallets, escrows, coins, creatorSubscriptions, subscriptions, loyalty | go.payments, go.wallet, go.ledger, go.escrow, go.subscriptions, go.rewards | Ledger + idempotency + webhook dedupe are the most valuable logic to port carefully |
+| payments, wallets, escrows, coins, creatorSubscriptions, subscriptions | go.payments, go.wallet, go.ledger, go.escrow, go.subscriptions | Ledger + idempotency + webhook dedupe are the most valuable logic to port carefully |
 | creators (gifts, tips, earnings, affiliations) | go.creators | Gift catalogue and splits move to config tables |
 | posts (incl. live + stories), feeds, follows, media, notifications, search, support, waitlist | ts.social, ts.feed, ts.media, ts.notifications, ts.search, ts.support, ts.campaigns; **live → go.live** | Copy most of the TS code directly |
 | messages (+ realtime hub) | elixir.realtime (sockets, presence) + chat persistence in elixir.realtime | The WebSocket JSON envelope is kept (§5.6) |
@@ -64,7 +65,7 @@ The JSON lists about 17 Go services. Running 17 separately deployed Go binaries,
 | --- | --- | --- |
 | `go-identity` | auth, users, currency, admin | Low write volume, shared session/JWKS concerns |
 | `go-commerce` | catalog, inventory, orders | Stock reservation and order creation in one transaction |
-| `go-money` | payments, wallet, ledger, escrow, subscriptions, creators, rewards | **Every balance change commits in one Postgres transaction**, so there are no cross-service money sagas |
+| `go-money` | payments, wallet, ledger, escrow, subscriptions, creators | **Every balance change commits in one Postgres transaction**, so there are no cross-service money sagas |
 | `go-live` | live (sessions, guests, battles, LiveKit tokens) | Hot, latency-sensitive state machine |
 | `go-ads` | ads | Separate scaling and billing cadence |
 | `go-trust` | moderation | Async, queue-driven |
@@ -197,13 +198,13 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /search?q&scope | M W | ✅ (1 route) | → ts.search on OpenSearch. Response `{products,stores,people,brands?}` |
 | Reviews: GET/POST /products/:id/reviews, rating-summary, /stores/:id/reviews, reply | M SD | ✅ | |
 | Cart: GET/DELETE /cart, POST /cart/items `{productId,quantity,size?,color?}`, PATCH/DELETE /cart/items/:id | M W | ✅ | Request sends `size`/`color`, response has `variant: string\|null`. Accept `variantId` (preferred) or `size`+`color`, and return `variant{id,size,color,sku}` |
-| POST /orders/checkout `{addressId,redeemLoyaltyPoints}` → `{orderGroups,payableCheckoutId,total}` | M W | ✅ | One `Checkout`, **one order group per seller** (§4.6). Mobile reads `orders`/`payableOrderId` today; rename during wiring |
+| POST /orders/checkout `{addressId}` → `{orderGroups,payableCheckoutId,total}` | M W | ✅ | One `Checkout`, **one order group per seller** (§4.6). Mobile reads `orders`/`payableOrderId` today; rename during wiring |
 | GET /orders?status, /orders/:id, cancel, confirm-receipt | M W | ✅ | Mobile `GET /orders` expects a bare array, which needs a page envelope; `status` filter values must match §4.3.5 |
 | GET /orders/:id/escrow, POST /orders/:id/disputes, GET /disputes, /disputes/:id, messages | M W | ✅ (GET /disputes list ✗) | **✅ built (go-money).** |
 | POST /payments/initialize `{orderId}` (Bachs hosted checkout, one per seller group), POST /payments/orders/:id/verify, POST /webhooks/bachs | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built (go-money).** |
 | GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
 | GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
-| GET /loyalty/me, /referrals/me, POST redemptions | M | ✅ | → go.rewards |
+| GET /store-rewards/me (per-store credit balances), GET /seller/marketing/rewards/summary | M S | ✅ | **New, seller-funded** (§ Store rewards below). Per-store credit ledger in go-commerce, not go-money cash. Referral and platform loyalty/cashback endpoints removed |
 | GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
 | POST /waitlist | L | ✅ | ts.campaigns |
@@ -222,7 +223,7 @@ Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.t
 | /seller/inventory/levels, adjustments, transfers (+receive/cancel) | ◐ | go.inventory | apps/api has `GET /seller/inventory`, which is renamed to `/levels`. `available = onHand − reserved` |
 | /seller/orders (+`countsByStatus`), /:id, /:id/fulfilment, /:id/cancel | ◐ | go.orders | apps/api uses `/ship` + `/deliver`. Contract uses `/fulfilment`. Lifecycle in §4.3.5 |
 | /seller/returns (+approve/decline/receive), /seller/disputes (+responses) | ✗ | go.orders.returns / go.escrow.disputes | |
-| /seller/customers (+export, notes, purchases, loyalty-adjustments) | ✗ | go.orders (customer read model) | New `customers` module (not in JSON) |
+| /seller/customers (+export, notes, purchases) | ✗ | go.orders (customer read model) | New `customers` module (not in JSON) |
 | /seller/promotions (+validate-code) | ✗ | go.orders (pricing) | Drop the `pos` channel; channels = `app`, `storefront` |
 | GET /seller/dashboard, /seller/reports/:kind (+`format=csv`) | ◐ | reporting (ClickHouse) | Drop `sales-by-staff` shifts/register kinds and `shifts`. Add xlsx/pdf (§4.3.13) |
 | /seller/wallet/balances, transactions, statements, payout-settings, payouts, banks, payout-accounts | ◐ | go.wallet | Payouts: owner/finance only, step-up re-auth |
@@ -397,7 +398,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Models:** `Store`, `Product`, `ProductVariant` (SKU, options), `StockLevel`, `StockReservation`, `Cart`, `Checkout`, `Order`, `OrderItem`, `OrderEvent` (timeline), `Payment`, `WebhookEvent`, `Escrow`, `Dispute`, `DisputeMessage`, `PayoutAccount` (encrypted, masked), `Withdrawal`, ledger accounts.
 - **Infra:** Bachs only (https://docs.bachs.io) behind one provider interface: per-seller connected accounts, direct-charge checkout with `platform_fee`, refunds, transfers, payouts, balances, disputes, webhooks with `X-Bachs-Signature-V2` verification. Zudomart holds no one's money; escrow funds stay locked in the seller account and the ledger is a mirror. Details: `docs/checkoutPaymentFlowPlan.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); per-seller mirror reconciliation against Bachs balances; py.intelligence `/v1/risk/score` for orders and payouts.
 - **Checkout transaction (inside `go-commerce` + `go-money`):** recompute prices, seller grouping, shipping (§4.6), discounts and eligibility on the server → reserve stock (TTL 15 min) → create Checkout/Orders with a locked exchange rate → initialise payment → on verified webhook: mark paid, hold in escrow, commit the reservation → seller fulfils → buyer confirms or auto-release after N days → release escrow minus commission → seller wallet.
-- **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`, `/api/v1/loyalty`, `/api/v1/referrals`.
+- **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`, `/api/v1/referrals`.
 - **Acceptance:** client-sent prices ignored; double-submitting checkout with the same key returns the same orders; webhook replay is processed once; concurrent withdrawals cannot overdraw (row lock + version); ledger trial balance = 0 per currency after the e2e suite; escrow release, refunds and payouts are written to the audit log.
 
 ### Phase 7 — Seller dashboard
@@ -1045,3 +1046,37 @@ Still open:
 5. **Per-language migration tools** (Atlas / Ecto / Alembic), given the Prisma-only rule covers TS services. (§0)
 6. **Gift art:** commission final transparent HEVC/WebM + Lottie assets. Should `star` join the catalogue?
 7. **Points rules:** starting point values and caps per action in `PointsRule` (§4.5.1).
+
+## 4.8 Verification checkmarks and billing (owner, 2026-10-03; supersedes earlier checkmark rules)
+
+| Profile type | Checkmark | Billing | Where sold |
+|---|---|---|---|
+| Personal, Creator | Blue only | Personal subscription tied to the person | App (Apple/Google IAP) or web (Bachs) |
+| Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Bachs) |
+| Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Bachs) |
+
+- Blue and Gold never cross profile types. Gold requires business verification (CAC/KYB) before it shows. Seller Pro (₦5,000) and Business (₦15,000) include Gold.
+- **Gold-only plan** for brands and businesses that don't sell: its own lower admin-set price (proposed ₦3,000/month), with the checkmark and brand-page features but no seller dashboard tools.
+- **Blue + Gold bundle:** 15% off a Gold subscription when the same verified identity has an active Blue. It doesn't stack with the yearly discount (the bigger one wins), applies to at most 3 businesses per person, and lapses at the business's next renewal if Blue ends. It never applies to Black. The percentage and cap are admin settings.
+- **Black: deep vetting and maker-checker.** Black is never suggested or self-serve; it's by application or invite, followed by manual review. Vetting covers:
+  - an official letterhead letter signed by an authorised officer;
+  - confirmation through an official channel (a published `.gov.ng` domain or official phone line);
+  - representative ID plus BVN/NIN and proof of their role;
+  - proof the entity exists (official site or gazette).
+
+  Approval needs two different admins with step-up auth, and is audited. Black is re-verified yearly and whenever the representative changes, and revoked immediately on misuse. The handle stays reserved even if the subscription lapses.
+- **Lapsed payment:** Blue and Gold drop at period end. Black gets a 14-day grace period with reminders (admin-editable) before the badge is removed.
+- **Admin-granted lifetime checkmarks** bypass billing but still respect the profile-type rule.
+
+- **Username release hold (owner, 2026-10-03):** when a user changes their username, the old one is held for **120 days** (`USERS_USERNAME_QUARANTINE_DAYS`, default 120) before anyone else can claim it. Only an admin username reassignment (audited, permission `users.reassignUsername`) bypasses the hold.
+
+
+## Store rewards (backend requirements)
+
+> **Seller-funded store rewards (owner, 2026-10-03).** Not platform-funded: Zudomart holds no money for it.
+
+- Per-store credit ledger in **go-commerce** (schema `orders`), never go-money cash. Entries per (store, buyer): `earn`, `reverse`, `redeem`, `expire`. Append-only, idempotent on `(orderGroupId, kind)`.
+- Rules per store (`StoreSettings.storeRewards`): `enabled`, `percentBackBasisPoints` (0–2000), `minimumOrder`, `maxPerOrder`, `expiryDays`.
+- Earn only when the order completes (after escrow release: consume `order.completed` / `escrow.released`); reverse on `refund.completed`.
+- Redeem only at the issuing store as a discount line on a later order (the seller absorbs it; payout is computed on the discounted subtotal). Never withdrawable, never cross-store, never convertible to cash.
+- Seller sees outstanding liability (`GET /seller/marketing/rewards/summary`); buyers see balances per store (`GET /store-rewards/me`).
