@@ -1,4 +1,4 @@
-import { apiConfig } from "@/config/api.config";
+import { apiConfig, shouldUseMockForPath } from "@/config/api.config";
 import { useAuthStore } from "@/store/auth.store";
 import type { RealtimeServerEvent } from "@/types";
 
@@ -80,7 +80,7 @@ function openAuthenticatedWebSocket() {
 }
 
 function startRealtimeTransport() {
-  if (apiConfig.useMocks) {
+  if (shouldUseMockForPath("/ws")) {
     stopMockEmitter ??= startMockRealtimeEventEmitter(deliverEventToListeners);
     return;
   }

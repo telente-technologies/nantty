@@ -6,9 +6,9 @@ import { api, generateIdempotencyKey } from "./apiClient.service";
 
 export const walletsService = {
   fetchMyWalletBalance: () => api.get<WalletSummary>("/api/v1/wallets/me"),
-  listMyWalletTransactions: () => api.get<WalletTransaction[]>("/api/v1/wallets/me/transactions"),
-  listMyEscrowHolds: () => api.get<EscrowHold[]>("/api/v1/wallets/me/escrow-holds"),
-  listMyPayoutAccounts: () => api.get<PayoutAccount[]>("/api/v1/wallets/me/payout-accounts"),
+  listMyWalletTransactions: () => api.getList<WalletTransaction>("/api/v1/wallets/me/transactions"),
+  listMyEscrowHolds: () => api.getList<EscrowHold>("/api/v1/wallets/me/escrow-holds"),
+  listMyPayoutAccounts: () => api.getList<PayoutAccount>("/api/v1/wallets/me/payout-accounts"),
   addPayoutAccount: (input: PayoutAccountInput) => api.post<PayoutAccount>("/api/v1/wallets/me/payout-accounts", input),
   removePayoutAccount: (payoutAccountId: string) =>
     api.delete<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`),
