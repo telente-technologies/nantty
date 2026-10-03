@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon } from "@/components/icons";
@@ -48,7 +47,7 @@ export function AuthStep({
     <Screen>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior="padding"
       >
         <View style={styles.top}>
           {navigation.canGoBack() ? (
