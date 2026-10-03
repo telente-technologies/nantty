@@ -1,57 +1,116 @@
-import { BlurView } from "expo-blur";
+import { useEffect, type ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import Animated, { Easing, cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Path } from "react-native-svg";
 
+import { DotsThreeVertical24Icon, Heart24Icon, PauseFill24Icon, Speedometer24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
-const TIPS = [
-  { title: "Go forward", hint: "Tap the screen" },
-  { title: "Go back", hint: "Drag down" },
-] as const;
+const INK_ON_SCRIM = colors.white;
+const MUTED_INK_ON_SCRIM = "rgba(255,255,255,0.72)";
+const HAND_TRAVEL = 28;
+
+function SwipeGlyph({ direction }: { direction: "up" | "down" }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" style={direction === "down" ? styles.flipped : undefined}>
+      <Path d="M12 20V5M6.5 10.5 12 5l5.5 5.5" stroke={INK_ON_SCRIM} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function HandGlyph() {
+  return (
+    <Svg width={44} height={52} viewBox="0 0 44 52" fill="none">
+      <Path
+        d="M17 24V8.5a3.5 3.5 0 0 1 7 0V22m0-3.5a3.5 3.5 0 0 1 7 0V24m0-2.5a3.5 3.5 0 0 1 7 0v10C38 41 32 48 23.5 48h-1.2c-4.4 0-7.6-1.9-10.2-5.4L6.4 34.8a3.4 3.4 0 0 1 5.3-4.3L17 36"
+        stroke={INK_ON_SCRIM}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+const TIPS: readonly { readonly title: string; readonly hint: string; readonly glyph: ReactNode }[] = [
+  { title: "Next clip", hint: "Swipe up", glyph: <SwipeGlyph direction="up" /> },
+  { title: "Previous clip", hint: "Swipe down", glyph: <SwipeGlyph direction="down" /> },
+  { title: "Pause or play", hint: "Tap once", glyph: <PauseFill24Icon color={INK_ON_SCRIM} /> },
+  { title: "Like", hint: "Double-tap", glyph: <Heart24Icon color={INK_ON_SCRIM} /> },
+  { title: "Play at 2×", hint: "Press and hold", glyph: <Speedometer24Icon color={INK_ON_SCRIM} /> },
+  { title: "More options", hint: "Tap ⋮ beside the clip", glyph: <DotsThreeVertical24Icon color={INK_ON_SCRIM} /> },
+];
+
+function AnimatedSwipeHand() {
+  const reduceMotion = useReducedMotion();
+  const travel = useSharedValue(0);
+  useEffect(() => {
+    if (reduceMotion) return;
+    travel.value = withRepeat(
+      withSequence(withTiming(-HAND_TRAVEL, { duration: 700, easing: Easing.out(Easing.cubic) }), withTiming(0, { duration: 500, easing: Easing.in(Easing.quad) })),
+      -1,
+    );
+    return () => cancelAnimation(travel);
+  }, [reduceMotion, travel]);
+  const handStyle = useAnimatedStyle(() => ({ transform: [{ translateY: travel.value }], opacity: 1 + travel.value / (HAND_TRAVEL * 3) }));
+  return (
+    <View style={styles.hero} importantForAccessibility="no-hide-descendants">
+      <SwipeGlyph direction="up" />
+      <Animated.View style={handStyle}>
+        <HandGlyph />
+      </Animated.View>
+    </View>
+  );
+}
 
 export function GestureTipsOverlay({ onDismiss }: { onDismiss: () => void }) {
+  const { colors: themeColors } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Tap to keep watching" onPress={onDismiss} style={StyleSheet.absoluteFill}>
-      <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
-      <View style={styles.dim} />
-      <View style={styles.center}>
-        <View style={styles.heading}>
-          <Text size={14} weight={500} lineHeight={16.8} align="center">
-            Watching stories
-          </Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted} align="center">
-            You can use these gestures to control playback
-          </Text>
-        </View>
-        <View style={styles.tips}>
-          {TIPS.map((tip) => (
-            <View key={tip.title} style={styles.tip}>
-              <View style={styles.phone} />
-              <View>
-                <Text size={13} weight={500} lineHeight={16.9}>
-                  {tip.title}
-                </Text>
-                <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-                  {tip.hint}
-                </Text>
-              </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Clip gestures. Swipe up for the next clip, swipe down for the previous one, tap to pause, double-tap to like, press and hold to play at double speed, and use the more button for options. Tap to dismiss."
+      onPress={onDismiss}
+      style={[styles.scrim, { paddingTop: insets.top + 48, paddingBottom: insets.bottom + 24 }]}
+    >
+      <AnimatedSwipeHand />
+      <Text size={18} weight={600} lineHeight={22} color={INK_ON_SCRIM} align="center" accessibilityRole="header">
+        How clips work
+      </Text>
+      <View style={styles.tips}>
+        {TIPS.map((tip) => (
+          <View key={tip.title} style={styles.tip}>
+            <View style={styles.glyph}>{tip.glyph}</View>
+            <View style={styles.tipText}>
+              <Text size={14} weight={600} lineHeight={18} color={INK_ON_SCRIM}>
+                {tip.title}
+              </Text>
+              <Text size={13} lineHeight={17} color={MUTED_INK_ON_SCRIM}>
+                {tip.hint}
+              </Text>
             </View>
-          ))}
-        </View>
-        <Text size={13} weight={500} lineHeight={16.9} align="center" style={styles.keepWatching}>
-          Tap to keep watching
-        </Text>
+          </View>
+        ))}
       </View>
+      <Pressable accessibilityRole="button" accessibilityLabel="Got it" onPress={onDismiss} style={[styles.gotIt, { backgroundColor: themeColors.primarySolid }]}>
+        <Text size={15} weight={600} lineHeight={18} color={themeColors.onPrimary}>
+          Got it
+        </Text>
+      </Pressable>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  dim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.1)" },
-  center: { position: "absolute", top: 190, left: 0, right: 0, alignItems: "center" },
-  heading: { width: 176, gap: 0 },
-  tips: { marginTop: 32, gap: 48 },
-  tip: { flexDirection: "row", alignItems: "center", gap: 13 },
-  phone: { width: 32, height: 40, backgroundColor: "#444444" },
-  keepWatching: { marginTop: 128 },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.78)", alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 24 },
+  hero: { height: 96, alignItems: "center", justifyContent: "flex-end", gap: 4 },
+  flipped: { transform: [{ rotate: "180deg" }] },
+  tips: { alignSelf: "stretch", gap: 18 },
+  tip: { flexDirection: "row", alignItems: "center", gap: 14 },
+  glyph: { width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  tipText: { flex: 1, gap: 2 },
+  gotIt: { alignSelf: "stretch", height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", marginTop: 8 },
 });

@@ -3,7 +3,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { postCommentsService } from "@/services/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment, UserSummary } from "@/types";
+import type { MentionEntity } from "@/types/mention.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { canReplyWithVideo } from "./videoReply/videoReply.util";
 import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 export const TOP_LEVEL_PARENT_KEY = "root";
@@ -34,12 +36,28 @@ const FALLBACK_SIGNED_IN_AUTHOR: UserSummary = { id: "u_me", name: "You", userna
 
 export const isPendingComment = (comment: Comment) => comment.id.startsWith("pending_");
 
-export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void) {
+export interface VideoReplyOptions {
+  readonly clipAuthorId: string | null | undefined;
+  readonly onStartVideoReply: (comment: Comment) => void;
+}
+
+export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void, videoReply?: VideoReplyOptions) {
   const signedInUser = useAuthStore((s) => s.user);
+  const [isPickingVideoReplyComment, setIsPickingVideoReplyComment] = useState(false);
   const signedInAuthor: UserSummary = signedInUser ?? FALLBACK_SIGNED_IN_AUTHOR;
   const [threadState, setThreadState] = useState<CommentThreadLocalState>(EMPTY_THREAD_STATE);
 
-  useEffect(() => setThreadState(EMPTY_THREAD_STATE), [postId]);
+  useEffect(() => {
+    setThreadState(EMPTY_THREAD_STATE);
+    setIsPickingVideoReplyComment(false);
+  }, [postId]);
+
+  const canReplyWithVideoTo = (comment: Comment) => !!videoReply && canReplyWithVideo(comment, videoReply.clipAuthorId, signedInUser?.id ?? null);
+  const startVideoReplyTo = (comment: Comment) => {
+    if (!canReplyWithVideoTo(comment)) return;
+    setIsPickingVideoReplyComment(false);
+    videoReply?.onStartVideoReply(comment);
+  };
 
   const applyLocalOverridesToComment = useCallback(
     <T extends Comment>(comment: T): T => {
@@ -68,7 +86,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       return { ...s, locallyPostedCommentsByParentKey: { ...s.locallyPostedCommentsByParentKey, [parentKey]: updated } };
     });
 
-  const applyCommentOrReplyText = (text: string) => {
+  const applyCommentOrReplyText = (text: string, mentions: readonly MentionEntity[]) => {
     if (!postId || !text.trim()) return;
     const parent = threadState.replyTarget;
     const parentKey = parent?.id ?? TOP_LEVEL_PARENT_KEY;
@@ -79,6 +97,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       rootCommentId: parent ? (parent.rootCommentId ?? parent.id) : null,
       author: signedInAuthor,
       text: text.trim(),
+      mentions,
       createdAt: new Date().toISOString(),
       likes: 0,
       liked: false,
@@ -96,7 +115,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       },
     }));
     postCommentsService
-      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id })
+      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id, mentions })
       .then((savedComment) => replaceLocallyPostedComment(parentKey, pendingComment.id, savedComment))
       .catch(() => {
         replaceLocallyPostedComment(parentKey, pendingComment.id, null);
@@ -108,9 +127,9 @@ export function useCommentThreadController(postId: string | null, closeContainin
     closeContainingModal ? requireAuthAfterClosingModal(closeContainingModal, action, reason) : requireAuthThen(action, undefined, reason);
 
   const toggleLikeOnComment = (comment: Comment) => requireSignInFor(() => applyCommentLikeToggle(comment), "like comments");
-  const submitCommentOrReplyText = (text: string) => {
+  const submitCommentOrReplyText = (text: string, mentions: readonly MentionEntity[] = []) => {
     if (!postId || !text.trim()) return;
-    requireSignInFor(() => applyCommentOrReplyText(text), "comment");
+    requireSignInFor(() => applyCommentOrReplyText(text, mentions), "comment");
   };
 
   const setDeletedFlag = (commentId: string, deleted: boolean) =>
@@ -146,6 +165,10 @@ export function useCommentThreadController(postId: string | null, closeContainin
 
   return {
     postId,
+    canReplyWithVideoTo,
+    startVideoReplyTo,
+    isPickingVideoReplyComment,
+    setIsPickingVideoReplyComment,
     replyTarget: threadState.replyTarget,
     applyLocalOverridesToComment,
     toggleLikeOnComment,

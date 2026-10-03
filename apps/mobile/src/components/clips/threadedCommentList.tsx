@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { ActivityIndicator, FlatList, Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CommentWithReplies } from "@/types";
 
 import { CommentThread } from "./commentThread";
@@ -16,6 +16,8 @@ export interface ThreadedCommentListProps {
 }
 
 export function ThreadedCommentList({ listHeader, contentContainerStyle, commentHorizontalPadding = 0 }: ThreadedCommentListProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const thread = useCommentThreadContext();
   const { query, topLevelComments, loadNextPageOfTopLevelComments } = useTopLevelCommentsForPost(thread.postId);
   const locallyPostedTopLevel = thread
@@ -33,6 +35,7 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
       ListHeaderComponent={listHeader}
       contentContainerStyle={contentContainerStyle}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
       onEndReachedThreshold={0.4}
       onEndReached={loadNextPageOfTopLevelComments}
       ItemSeparatorComponent={() => <View style={styles.gap} />}
@@ -57,8 +60,8 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   gap: { height: 20 },
   status: { paddingVertical: 24 },
-});
+}));

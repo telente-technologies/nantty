@@ -3,27 +3,47 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Cancel20Icon, Gif24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
+import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
+import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import type { Comment } from "@/types";
+import type { MentionEntity } from "@/types/mention.type";
+import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
 export const QUICK_REACTION_EMOJI = ["😂", "😍", "💕", "😊", "🥰", "😆", "😎", "🤔"] as const;
 
 export interface CommentComposerProps {
   readonly myAvatarUrl: string | null;
-  readonly onSubmit: (text: string) => void;
+  readonly onSubmit: (text: string, mentions: readonly MentionEntity[]) => void;
   readonly placeholder?: string;
   readonly replyTarget?: Comment | null;
   readonly onCancelReply?: () => void;
+  readonly avoidKeyboard?: boolean;
 }
 
 export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(function CommentComposer(
-  { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply },
+  { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply, avoidKeyboard = true },
   ref,
 ) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [text, setText] = useState("");
+  const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
   const inputRef = useRef<TextInput>(null);
+  const mentionComposer = useMentionComposer({
+    surface: "comment",
+    text,
+    mentions,
+    inputRef,
+    signInReason: "comment",
+    onChange: (nextText, nextMentions) => {
+      setText(nextText);
+      setMentions(nextMentions);
+    },
+  });
   useImperativeHandle(ref, () => inputRef.current as TextInput);
 
   useEffect(() => {
@@ -32,12 +52,16 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
 
   const submitTypedComment = () => {
     if (!text.trim()) return;
-    onSubmit(text.trim());
+    const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
+    onSubmit(trimmed.text, trimmed.mentions);
     setText("");
+    setMentions([]);
   };
   const effectivePlaceholder = replyTarget ? `Reply to @${replyTarget.author.username}...` : placeholder;
 
   return (
+    <>
+    {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
     <View style={styles.root}>
       {replyTarget ? (
         <View style={styles.replyingTo}>
@@ -54,7 +78,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
       ) : null}
       <View style={styles.emojiRow}>
         {QUICK_REACTION_EMOJI.map((emoji) => (
-          <Pressable key={emoji} accessibilityRole="button" accessibilityLabel={`Add ${emoji}`} onPress={() => setText((t) => t + emoji)}>
+          <Pressable key={emoji} accessibilityRole="button" accessibilityLabel={`Add ${emoji}`} onPress={() => mentionComposer.inputProps.onChangeText(text + emoji)}>
             <Text size={24} lineHeight={28.8} letterSpacing={-0.5}>
               {emoji}
             </Text>
@@ -66,8 +90,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
         <View style={styles.field}>
           <TextInput
             ref={inputRef}
-            value={text}
-            onChangeText={setText}
+            {...mentionComposer.inputProps}
             placeholder={effectivePlaceholder}
             placeholderTextColor={colors.placeholder}
             selectionColor={colors.primary}
@@ -80,13 +103,17 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
           <Gif24Icon />
         </View>
       </View>
+      <MentionCountLabel mentionCount={mentionComposer.mentionCount} />
     </View>
+    {avoidKeyboard ? <KeyboardSpacer style={styles.keyboardArea} /> : null}
+    </>
   );
 });
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
-  root: { padding: 16, gap: 16, borderTopWidth: 1, borderTopColor: colors.divider, backgroundColor: colors.white },
+  root: { padding: 16, gap: 16, borderTopWidth: 1, borderTopColor: colors.divider, backgroundColor: colors.surface },
+  keyboardArea: { backgroundColor: colors.surface },
   replyingTo: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: -4 },
   emojiRow: { flexDirection: "row", justifyContent: "space-between" },
   inputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -110,4 +137,4 @@ const styles = StyleSheet.create({
     letterSpacing: calculateDefaultLetterSpacing(14),
     color: colors.text,
   },
-});
+}));

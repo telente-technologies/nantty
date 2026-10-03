@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Comment } from "@/types";
 
 import { CommentRow } from "./commentRow";
@@ -23,6 +23,8 @@ const describeHiddenReplyCount = (hiddenReplyCount: number, alreadyShowingSomeRe
 };
 
 export function CommentThread({ comment, nestingDepth, previewReplies = [] }: CommentThreadProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const thread = useCommentThreadContext();
   const visibility = thread.replyThreadVisibilityFor(comment.id);
   const isExpanded = visibility === "expanded";
@@ -63,6 +65,8 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
           onToggleLike={() => thread.toggleLikeOnComment(comment)}
           onReply={() => thread.startReplyingToComment(comment)}
           onDelete={() => thread.deleteOwnComment(comment)}
+          onReplyWithVideo={thread.canReplyWithVideoTo(comment) ? () => thread.startVideoReplyTo(comment) : undefined}
+          isPickingForVideoReply={thread.isPickingVideoReplyComment}
         />
       </View>
       {visibleReplies.map((reply) => (
@@ -90,6 +94,8 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
 }
 
 function ThreadLink({ label, onPress }: { label: string; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.linkRow}>
       <View style={styles.linkLine} />
@@ -100,9 +106,9 @@ function ThreadLink({ label, onPress }: { label: string; onPress: () => void }) 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   thread: { gap: 16 },
   links: { gap: 12 },
   linkRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   linkLine: { width: 24, height: 1, backgroundColor: colors.divider },
-});
+}));
