@@ -44,9 +44,9 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
     setCreatingAccount(true);
     try {
       if (chosenUsername) {
-        const { available } = await authService.checkIfUsernameIsAvailable(chosenUsername);
+        const { available, message: serverReason } = await authService.checkIfUsernameIsAvailable(chosenUsername);
         if (!available) {
-          setErrorMessage(availabilityMessage ?? "That username isn't available. Try another one.");
+          setErrorMessage(serverReason ?? availabilityMessage ?? "That username isn't available. Try another one.");
           return;
         }
       }
