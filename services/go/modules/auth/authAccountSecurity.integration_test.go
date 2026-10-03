@@ -139,7 +139,7 @@ func TestListingAndRevokingSessions(t *testing.T) {
 
 func TestGoogleSignInCreatesLinksAndRejectsBadTokens(t *testing.T) {
 	provider := startFakeIdentityProvider(t, "https://accounts.google.com", "google-client-id")
-	harness := startAuthModuleAgainstFreshSchema(t, func(settings *config.AuthSettings) {
+	harness := startAuthModuleAgainstFreshSchema(t, func(settings *configs.AuthSettings) {
 		settings.GoogleClientIds = []string{"google-client-id"}
 		settings.GoogleJwksUrl = provider.jwksUrl
 	})
@@ -175,7 +175,7 @@ func TestGoogleSignInCreatesLinksAndRejectsBadTokens(t *testing.T) {
 
 func TestSocialSignInLinksToExistingVerifiedEmailAndReportsNotConfigured(t *testing.T) {
 	provider := startFakeIdentityProvider(t, "https://appleid.apple.com", "app.zudomart.ios")
-	harness := startAuthModuleAgainstFreshSchema(t, func(settings *config.AuthSettings) {
+	harness := startAuthModuleAgainstFreshSchema(t, func(settings *configs.AuthSettings) {
 		settings.AppleClientIds = []string{"app.zudomart.ios"}
 		settings.AppleJwksUrl = provider.jwksUrl
 	})

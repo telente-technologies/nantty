@@ -48,10 +48,10 @@ type authTestHarness struct {
 	server    *httptest.Server
 	logs      *lockedBuffer
 	publisher *events.RecordingPublisher
-	settings  config.AuthSettings
+	settings  configs.AuthSettings
 }
 
-func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config.AuthSettings)) *authTestHarness {
+func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*configs.AuthSettings)) *authTestHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("AUTH_TEST_DATABASE_URL")
 	if databaseUrl == "" {
@@ -67,7 +67,7 @@ func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { dropSchemaAndClose(administrator, schema) })
-	settings := config.AuthSettings{
+	settings := configs.AuthSettings{
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema,
 		TokenIssuer: "https://auth.zudomart.test", TokenAudience: "zudomart-api",
 		AccessTokenTimeToLive: 15 * time.Minute, RefreshTokenTimeToLive: 24 * time.Hour, SessionMaximumLifetime: 48 * time.Hour,
