@@ -34,7 +34,7 @@
 }
 
 .kindCardSelected {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
 }
 
