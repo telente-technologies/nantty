@@ -125,6 +125,17 @@ func (directory *FakeAccountDirectory) FindAccountSummary(_ context.Context, acc
 	return summary, found, nil
 }
 
+func (directory *FakeAccountDirectory) FindAccountSummaryByUsername(_ context.Context, username string) (identityports.AccountSummary, bool, error) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	for _, existing := range directory.accounts {
+		if existing.Username == username {
+			return existing, true, nil
+		}
+	}
+	return identityports.AccountSummary{}, false, nil
+}
+
 func (directory *FakeAccountDirectory) IsUsernameTaken(_ context.Context, username string, excludingAccountId uuid.UUID) (bool, error) {
 	directory.mutex.Lock()
 	defer directory.mutex.Unlock()
