@@ -1,7 +1,7 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
 
 export type AdminRole = "SUPERADMIN" | "ADMIN" | "SUPPORT";
-export type AdminStatus = "ACTIVE" | "INVITED" | "DISABLED" | "LOCKED";
+export type AdminStatus = "ACTIVE" | "INVITED" | "DISABLED" | "LOCKED" | "SUSPENDED" | "REVOKED" | "PENDING_APPROVAL";
 
 export interface SignedInAdmin {
   readonly id: string;
@@ -28,6 +28,9 @@ export interface AdminAccountSummary {
   readonly role: AdminRole;
   readonly status: AdminStatus;
   readonly permissions: readonly AdminPermission[];
+  readonly roleIds: readonly string[];
+  readonly roleNames: readonly string[];
+  readonly approvedByName: string | null;
   readonly mfaEnrolled: boolean;
   readonly passkeyCount: number;
   readonly lastLoginAt: string | null;
@@ -49,4 +52,16 @@ export interface AdminActiveSession {
   readonly startedAt: string;
   readonly lastSeenAt: string;
   readonly isCurrent: boolean;
+}
+
+export interface AdminRoleDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly department: string;
+  readonly permissions: readonly AdminPermission[];
+  readonly isTemplate: boolean;
+}
+
+export interface StaffSettings {
+  readonly requireSecondSuperadminApproval: boolean;
 }

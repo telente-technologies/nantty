@@ -5,6 +5,7 @@ export interface AuditActor {
   readonly name: string;
   readonly kind: "ADMIN" | "USER" | "SYSTEM";
   readonly role: string | null;
+  readonly departments?: readonly string[];
 }
 
 export interface AuditTarget {
