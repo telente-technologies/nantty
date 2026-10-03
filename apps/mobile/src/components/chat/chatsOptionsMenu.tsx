@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles } from "@/theme";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
+import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 
 export interface ChatsOptionsMenuProps {
   readonly visible: boolean;
@@ -45,22 +46,8 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   backdrop: { flex: 1 },
-  menu: {
-    position: "absolute",
-    right: 12,
-    minWidth: 180,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    shadowColor: colors.black,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  item: { height: 44, paddingHorizontal: 16, justifyContent: "center" },
+  menu: { position: "absolute", right: 12, ...buildPopoverMenuSurface(colors, scheme) },
+  item: { minHeight: 48, paddingHorizontal: 16, justifyContent: "center" },
 }));

@@ -14,14 +14,16 @@ export interface GroupMemberRowProps {
   readonly onPromoteToAdmin: () => void;
   readonly onDemoteToMember: () => void;
   readonly onRemoveFromGroup: () => void;
+  readonly onReport?: () => void;
 }
 
 const ROLE_LABELS: Record<ConversationMember["role"], string> = { owner: "Owner", admin: "Admin", member: "" };
 
-export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmin, onDemoteToMember, onRemoveFromGroup }: GroupMemberRowProps) {
+export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmin, onDemoteToMember, onRemoveFromGroup, onReport }: GroupMemberRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const canManageThisMember = canManageMembers && !isMe && member.role !== "owner";
+  const hasAnyAction = canManageThisMember || (!!onReport && !isMe);
   const [isShowingActions, setIsShowingActions] = useState(false);
   const roleLabel = isMe && member.role !== "member" ? `You · ${ROLE_LABELS[member.role]}` : isMe ? "You" : ROLE_LABELS[member.role];
   const runActionAndCollapse = (action: () => void) => () => {
@@ -33,7 +35,7 @@ export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmi
       <PersonRow
         person={member.user}
         avatarSize={40}
-        onPress={canManageThisMember ? () => setIsShowingActions((showing) => !showing) : undefined}
+        onPress={hasAnyAction ? () => setIsShowingActions((showing) => !showing) : undefined}
         right={
           roleLabel ? (
             <Text size={12} weight={500} lineHeight={16.8} color={member.role === "member" ? colors.textMuted : colors.primary} style={styles.role}>
@@ -44,11 +46,16 @@ export function GroupMemberRow({ member, isMe, canManageMembers, onPromoteToAdmi
       />
       {isShowingActions ? (
         <View style={styles.actions}>
-          <MemberActionButton
-            label={member.role === "admin" ? "Remove as admin" : "Make group admin"}
-            onPress={runActionAndCollapse(member.role === "admin" ? onDemoteToMember : onPromoteToAdmin)}
-          />
-          <MemberActionButton label="Remove from group" destructive onPress={runActionAndCollapse(onRemoveFromGroup)} />
+          {canManageThisMember ? (
+            <>
+              <MemberActionButton
+                label={member.role === "admin" ? "Remove as admin" : "Make group admin"}
+                onPress={runActionAndCollapse(member.role === "admin" ? onDemoteToMember : onPromoteToAdmin)}
+              />
+              <MemberActionButton label="Remove from group" destructive onPress={runActionAndCollapse(onRemoveFromGroup)} />
+            </>
+          ) : null}
+          {onReport ? <MemberActionButton label="Report member" destructive onPress={runActionAndCollapse(onReport)} /> : null}
         </View>
       ) : null}
     </View>

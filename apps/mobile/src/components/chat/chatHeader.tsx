@@ -22,6 +22,7 @@ export interface ChatHeaderProps {
   readonly onOpenConversationInfo: () => void;
   readonly onOpenStreak?: () => void;
   readonly onOpenMute?: () => void;
+  readonly onOpenOptionsMenu?: () => void;
 }
 
 const describeWhoIsTyping = (usersTyping: readonly UserSummary[], isGroupLike: boolean) => {
@@ -31,7 +32,7 @@ const describeWhoIsTyping = (usersTyping: readonly UserSummary[], isGroupLike: b
   return firstNames.length === 1 ? `${firstNames[0]} is typing…` : `${firstNames.length} people are typing…`;
 };
 
-export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, onOpenConversationInfo, onOpenStreak, onOpenMute }: ChatHeaderProps) {
+export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, onOpenConversationInfo, onOpenStreak, onOpenMute, onOpenOptionsMenu }: ChatHeaderProps) {
   const { colors } = useTheme();
   const display = conversation ? describeConversationForDisplay(conversation) : null;
   const isGroupLike = !!display && (display.isGroup || display.isChannel);
@@ -87,7 +88,7 @@ export function ChatHeader({ conversation, fallbackName, usersTyping, onGoBack, 
             <Bell24Icon />
           </Pressable>
         ) : null}
-        <Pressable accessibilityRole="button" accessibilityLabel="Conversation options" hitSlop={10} onPress={onOpenConversationInfo}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Conversation options" hitSlop={10} onPress={onOpenOptionsMenu ?? onOpenConversationInfo}>
           <DotsThreeVertical24Icon />
         </Pressable>
       </View>
