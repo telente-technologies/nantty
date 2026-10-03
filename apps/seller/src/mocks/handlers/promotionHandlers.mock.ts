@@ -1,4 +1,4 @@
-import { buildMockAuditActor } from "@/mocks/handlers/orderHandlers.mock";
+import { describeMockActor } from "@/mocks/handlers/settingsEntitlements.mock";
 import { appendMockAuditLogEntry, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import {
   MockHttpError,
@@ -14,7 +14,7 @@ import {
 } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { Promotion } from "@/types/promotion.type";
-import { calculateDiscountAmountMinor } from "@/utils/posCartPricing.util";
+import { calculateDiscountAmountMinor } from "@/utils/pricingRules.util";
 import { derivePromotionStatusFromSchedule, validatePromotionInput, type PromotionInput } from "@/utils/promotionValidation.util";
 
 function readNullableWholeNumber(value: unknown): number | null {
@@ -38,7 +38,6 @@ function readPromotionInput(body: Record<string, unknown>, existing: Promotion |
     minimumSpendMinor: "minimumSpendMinor" in body ? readNullableWholeNumber(body.minimumSpendMinor) : existing?.minimumSpend?.amountMinor ?? null,
     usageLimit: "usageLimit" in body ? readNullableWholeNumber(body.usageLimit) : existing?.usageLimit ?? null,
     usageLimitPerCustomer: "usageLimitPerCustomer" in body ? readNullableWholeNumber(body.usageLimitPerCustomer) : existing?.usageLimitPerCustomer ?? null,
-    channels: Array.isArray(body.channels) ? [...new Set(body.channels.filter((channel): channel is "online" | "pos" => channel === "online" || channel === "pos"))] : existing?.channels ?? [],
     startsAt: typeof body.startsAt === "string" ? body.startsAt : existing?.startsAt ?? "",
     endsAt: "endsAt" in body ? (typeof body.endsAt === "string" && body.endsAt !== "" ? body.endsAt : null) : existing?.endsAt ?? null,
   };
@@ -55,7 +54,6 @@ function convertInputToPromotionFields(input: PromotionInput, usedCount: number)
     minimumSpend: input.minimumSpendMinor === null ? null : { amountMinor: input.minimumSpendMinor, currency },
     usageLimit: input.usageLimit,
     usageLimitPerCustomer: input.usageLimitPerCustomer,
-    channels: input.channels,
     startsAt: new Date(input.startsAt).toISOString(),
     endsAt: input.endsAt ? new Date(input.endsAt).toISOString() : null,
   };
@@ -87,9 +85,8 @@ function registerCouponValidationHandler(): void {
     const body = readJsonObjectBody(request);
     const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
     const subtotalMinor = body.subtotalMinor;
-    const channel = body.channel === "online" ? "online" : body.channel === "pos" ? "pos" : null;
-    if (!code || typeof subtotalMinor !== "number" || !Number.isSafeInteger(subtotalMinor) || subtotalMinor < 0 || !channel) {
-      return respondWithValidationFailure([{ path: "code", message: "Send a code, a whole-number subtotal and a channel." }]);
+    if (!code || typeof subtotalMinor !== "number" || !Number.isSafeInteger(subtotalMinor) || subtotalMinor < 0) {
+      return respondWithValidationFailure([{ path: "code", message: "Send a code and a whole-number subtotal." }]);
     }
     const promotion = refreshPromotionStatuses().find((candidate) => candidate.kind === "coupon" && candidate.code === code);
     if (!promotion) return respondWithError(404, "COUPON_NOT_FOUND", `There is no coupon called ${code}.`);
@@ -97,7 +94,6 @@ function registerCouponValidationHandler(): void {
     if (promotion.status === "disabled") return notApplicable(`${code} has been switched off.`);
     if (promotion.status === "scheduled") return notApplicable(`${code} starts on ${new Date(promotion.startsAt).toLocaleDateString("en-NG")}.`);
     if (promotion.status === "expired") return notApplicable(`${code} has expired or reached its usage limit.`);
-    if (!promotion.channels.includes(channel)) return notApplicable(`${code} only works ${channel === "pos" ? "online" : "in store"}.`);
     if (promotion.minimumSpend && subtotalMinor < promotion.minimumSpend.amountMinor) return notApplicable(`${code} needs a minimum spend before it applies.`);
     const discountMinor = calculateDiscountAmountMinor(subtotalMinor, promotion.discount);
     return respondWithJson(200, {
@@ -117,7 +113,8 @@ export function registerPromotionMockHandlers(): void {
   registerMockRoute("GET", "/seller/promotions", (request) => {
     requireMockStorePrincipal(request);
     const status = request.query.get("status");
-    const promotions = refreshPromotionStatuses().filter((promotion) => (!status || status === "all" || promotion.status === status) && matchesSearchText(request.query.get("q"), promotion.name, promotion.code));
+    const kind = request.query.get("kind");
+    const promotions = refreshPromotionStatuses().filter((promotion) => (!status || status === "all" || promotion.status === status) && (!kind || kind === "all" || promotion.kind === kind) && matchesSearchText(request.query.get("q"), promotion.name, promotion.code));
     return respondWithJson(200, paginateMockList(promotions, request.query, 50));
   });
 
@@ -129,7 +126,7 @@ export function registerPromotionMockHandlers(): void {
     assertCouponCodeIsUnique(input.code, null);
     const promotion: Promotion = { id: createMockIdentifier("promo"), ...convertInputToPromotionFields(input, 0), usedCount: 0, createdAt: new Date().toISOString() };
     readMockDatabase().promotions.unshift(promotion);
-    appendMockAuditLogEntry({ actor: buildMockAuditActor(principal), action: "promotion.created", targetType: "promotion", targetId: promotion.id, summary: `Created promotion ${promotion.name}` });
+    appendMockAuditLogEntry({ actor: describeMockActor(principal), action: "promotion.created", targetType: "promotion", targetId: promotion.id, summary: `Created promotion ${promotion.name}` });
     return respondWithJson(201, promotion);
   });
 
@@ -152,7 +149,7 @@ export function registerPromotionMockHandlers(): void {
     const status = body.status === "disabled" ? "disabled" : body.status === "active" || existing.status !== "disabled" ? recomputed.status : "disabled";
     const updated: Promotion = { ...existing, ...recomputed, status };
     database.promotions[promotionIndex] = updated;
-    appendMockAuditLogEntry({ actor: buildMockAuditActor(principal), action: "promotion.updated", targetType: "promotion", targetId: updated.id, summary: `${status === "disabled" ? "Switched off" : "Updated"} promotion ${updated.name}` });
+    appendMockAuditLogEntry({ actor: describeMockActor(principal), action: "promotion.updated", targetType: "promotion", targetId: updated.id, summary: `${status === "disabled" ? "Switched off" : "Updated"} promotion ${updated.name}` });
     return respondWithJson(200, updated);
   });
 
@@ -161,7 +158,7 @@ export function registerPromotionMockHandlers(): void {
     const database = readMockDatabase();
     const promotionIndex = findPromotionIndexOrThrow(request.params.promotionId ?? "");
     const [removed] = database.promotions.splice(promotionIndex, 1);
-    appendMockAuditLogEntry({ actor: buildMockAuditActor(principal), action: "promotion.deleted", targetType: "promotion", targetId: removed?.id ?? null, summary: `Deleted promotion ${removed?.name ?? ""}` });
+    appendMockAuditLogEntry({ actor: describeMockActor(principal), action: "promotion.deleted", targetType: "promotion", targetId: removed?.id ?? null, summary: `Deleted promotion ${removed?.name ?? ""}` });
     return respondWithNoContent();
   });
 }

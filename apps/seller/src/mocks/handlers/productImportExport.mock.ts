@@ -2,6 +2,7 @@ import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { runOnceForIdempotencyKey } from "@/mocks/mockIdempotency.mock";
 import { MockHttpError, readJsonObjectBody, requireMockStorePrincipal, respondWithCsv, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
+import { assertMockStorePlanIncludesFeature } from "@/mocks/handlers/catalogPlanRules.mock";
 import { buildMockProductFromRequest, recordCatalogAuditEntry, replaceMockProduct, validateProductRequestAgainstStore } from "@/mocks/handlers/productCatalogStore.mock";
 import { productCsvColumns, readYesNoCell } from "@/constants/productCsvColumns.constant";
 import type { ProductImportRow, ProductImportResult, ProductVariantUpsertRequest } from "@/types/productRequests.type";
@@ -118,7 +119,8 @@ function importProductRows(rows: ProductImportRow[], locationId: string): Produc
 
 export function registerProductImportExportMockRoutes(): void {
   registerMockRoute("GET", "/seller/products/export", (request) => {
-    requireMockStorePrincipal(request);
+    const principal = requireMockStorePrincipal(request);
+    assertMockStorePlanIncludesFeature(principal.storeId, "bulk_tools", "Product export");
     const database = readMockDatabase();
     const locationId = request.query.get("locationId");
     const rows = database.products.filter((product) => product.status !== "archived").flatMap((product) => product.variants.map((variant) => {
@@ -140,6 +142,7 @@ export function registerProductImportExportMockRoutes(): void {
 
   registerMockRoute("POST", "/seller/products/import", (request) => runOnceForIdempotencyKey(request, () => {
     const principal = requireMockStorePrincipal(request);
+    assertMockStorePlanIncludesFeature(principal.storeId, "bulk_tools", "Product import");
     const body = readJsonObjectBody(request);
     const locationId = String(body.locationId ?? "");
     if (!readMockDatabase().locations.some((location) => location.id === locationId)) throw new MockHttpError(400, "INVALID_LOCATION", "Choose the location that receives opening stock.");

@@ -3,6 +3,7 @@ import { MockHttpError, createMockIdentifier } from "@/mocks/mockResponses.mock"
 import type { MockPrincipal } from "@/mocks/mockRouter.mock";
 import type { Product, ProductImage, ProductVariant, StockLevel } from "@/types/catalog.type";
 import type { ProductUpsertRequest } from "@/types/productRequests.type";
+import { readMockSupplierSlice } from "@/mocks/handlers/supplierStore.mock";
 import { buildVariantTitleFromOptionValues, validateProductUpsertRequest } from "@/utils/productValidation.util";
 
 export function findMockProductOrThrow(productId: string): Product {
@@ -80,6 +81,7 @@ export function validateProductRequestAgainstStore(request: ProductUpsertRequest
     locationIds: database.locations.map((location) => location.id),
     skusUsedByOtherProducts: used.skus,
     barcodesUsedByOtherProducts: used.barcodes,
+    supplierIds: readMockSupplierSlice().suppliers.map((supplier) => supplier.id),
   });
 }
 
@@ -107,6 +109,8 @@ export function buildMockProductFromRequest(request: ProductUpsertRequest, exist
       compareAtPrice: variantRequest.compareAtPriceMinor === null ? null : { amountMinor: variantRequest.compareAtPriceMinor, currency },
       costPrice: variantRequest.costPriceMinor === null ? null : { amountMinor: variantRequest.costPriceMinor, currency },
       lowStockThreshold: variantRequest.lowStockThreshold,
+      reorderPoint: variantRequest.reorderPoint ?? existingVariant?.reorderPoint ?? variantRequest.lowStockThreshold,
+      reorderQuantity: variantRequest.reorderQuantity ?? existingVariant?.reorderQuantity ?? Math.max(10, variantRequest.lowStockThreshold * 4),
       stock,
     };
   });
@@ -130,6 +134,12 @@ export function buildMockProductFromRequest(request: ProductUpsertRequest, exist
     taxable: request.taxable,
     trackInventory: request.trackInventory,
     tags: [...new Set(request.tags.map((tag) => tag.trim().toLowerCase()))],
+    brand: existingProduct?.brand ?? null,
+    visibility: request.visibility ?? existingProduct?.visibility ?? "public",
+    publishAt: request.status === "draft" ? request.publishAt ?? null : null,
+    attributes: (request.attributes ?? existingProduct?.attributes ?? []).map((attribute) => ({ name: attribute.name.trim(), value: attribute.value.trim() })),
+    videos: request.videos === undefined ? existingProduct?.videos ?? [] : request.videos.map((video, index) => ({ id: existingProduct?.videos.find((candidate) => candidate.url === video.url)?.id ?? createMockIdentifier(`vid${index}`), url: video.url, title: video.title.trim() })),
+    supplierId: request.supplierId === undefined ? existingProduct?.supplierId ?? null : request.supplierId,
     createdAt: existingProduct?.createdAt ?? now,
     updatedAt: now,
   };
