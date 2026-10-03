@@ -41,5 +41,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.EscrowDet
 	} else if !ent.IsNotFound(err) {
 		return dtos.EscrowDetailDto{}, err
 	}
-	return services.ConvertEscrowToDetail(held, container.Settings.InspectionPeriod, disputeId, events), nil
+	return services.ConvertEscrowToDetail(held, container.Policy(ctx).AutoReleasePeriod, disputeId, events), nil
 }
