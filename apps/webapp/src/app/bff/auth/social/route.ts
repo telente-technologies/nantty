@@ -16,10 +16,6 @@ interface SocialSignInBody {
   readonly fullName?: { readonly givenName?: string | null; readonly familyName?: string | null } | null;
 }
 
-function readClientIdForProvider(provider: SocialProvider): string {
-  return (provider === "google" ? process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID : process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) ?? "";
-}
-
 function buildDemoIdentityToken(provider: SocialProvider): string {
   const encodeSegment = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
   const issuedAt = Math.floor(Date.now() / 1000);
@@ -36,13 +32,13 @@ export async function POST(request: NextRequest) {
   const suppliedIdToken = typeof body?.idToken === "string" && body.idToken.length > 0 ? body.idToken : null;
   const demoToken = suppliedIdToken ?? (isMockBackendEnabled() ? buildDemoIdentityToken(provider) : null);
 
-  if (!demoToken && !readClientIdForProvider(provider)) {
+  if (!demoToken) {
     return respondWithBffError(501, "SOCIAL_SIGN_IN_NOT_CONFIGURED", `${providerDisplayNames[provider]} sign-in isn't configured yet.`);
   }
 
   const nonce = typeof body?.nonce === "string" ? body.nonce : undefined;
   const fullName = provider === "apple" ? (body?.fullName ?? undefined) : undefined;
-  const exchangeBody = provider === "google" ? { idToken: demoToken ?? suppliedIdToken, nonce } : { identityToken: demoToken ?? suppliedIdToken, nonce, fullName };
+  const exchangeBody = provider === "google" ? { idToken: demoToken, nonce } : { identityToken: demoToken, nonce, fullName };
 
   const result = await callAuthEndpoint(provider === "google" ? "/api/v1/auth/google" : "/api/v1/auth/apple", exchangeBody);
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "SOCIAL_SIGN_IN_FAILED", result.error?.message ?? `${providerDisplayNames[provider]} sign-in failed. Try again.`);
