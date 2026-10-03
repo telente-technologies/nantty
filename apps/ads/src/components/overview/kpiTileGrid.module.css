@@ -33,7 +33,7 @@
 }
 
 .value {
-  font-size: var(--fs-24);
+  font-size: clamp(var(--fs-20), 5.2vw, var(--fs-24));
   font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
