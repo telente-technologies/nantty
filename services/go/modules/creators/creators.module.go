@@ -3,9 +3,12 @@ package creators
 import (
 	"context"
 
+	"zudomart/modules/creators/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewCreatorsModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "creators"}, nil
+type Module = src.Module
+
+func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewCreatorsModule(ctx, dependencies)
 }
