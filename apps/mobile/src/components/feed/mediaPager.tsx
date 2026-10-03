@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
@@ -21,12 +21,13 @@ export interface MediaPagerProps {
   readonly onPressViewProducts?: () => void;
   readonly saveTarget?: SaveTarget;
   readonly savedAccordingToServer?: boolean;
+  readonly overlay?: ReactNode;
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay }: MediaPagerProps) {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
@@ -111,6 +112,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
           </View>
         )}
       />
+      {overlay}
       <View style={styles.overlay} pointerEvents="box-none">
         {pages.length > 1 ? (
           <AnimatedPageIndicator count={pages.length} activeIndex={activePageIndex} scrollOffsetX={scrollOffsetX} pageWidth={pageWidth} />

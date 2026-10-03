@@ -16,6 +16,7 @@ import type { AdPlacement, Post } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
+import { CommentStickerOverlay } from "@/components/clips/videoReply/commentStickerOverlay";
 import { MediaPager } from "./mediaPager";
 import { ResharedPostBlock } from "./resharedPostBlock";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
@@ -168,6 +169,7 @@ export function PostCard(props: PostCardProps) {
         ) : hasMedia || post.products.length > 0 ? (
           <MediaPager
             media={post.media}
+            overlay={post.replyToComment ? <CommentStickerOverlay clip={post} /> : undefined}
             isVisibleOnScreen={isVisibleForAutoplay}
             onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
             saveTarget={saveTargetForPost(post)}
