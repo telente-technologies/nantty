@@ -40,7 +40,7 @@
 
 .errorText {
   margin: 0;
-  color: var(--error-ink, var(--error));
+  color: var(--color-danger-text);
   font-size: var(--text-sm);
 }
 
@@ -70,7 +70,7 @@
 }
 
 .switch[aria-checked="true"] {
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
 }
 
 .switch:disabled {
@@ -85,7 +85,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   transition: transform 0.15s;
 }
 
@@ -105,8 +105,8 @@
   min-height: 40px;
   padding-inline: var(--space-4);
   border-radius: var(--radius-pill);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 700;
   text-decoration: none;
 }
