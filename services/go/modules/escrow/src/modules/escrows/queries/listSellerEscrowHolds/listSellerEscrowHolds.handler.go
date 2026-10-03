@@ -33,7 +33,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	}
 	holds := make([]dtos.EscrowHoldDto, len(rows))
 	for index, row := range rows {
-		holds[index] = services.ConvertEscrowToSellerHold(row, container.Settings.InspectionPeriod)
+		holds[index] = services.ConvertEscrowToSellerHold(row, container.Policy(ctx).AutoReleasePeriod)
 	}
 	return httpserver.NewCursorPage(holds, nextCursor), nil
 }
