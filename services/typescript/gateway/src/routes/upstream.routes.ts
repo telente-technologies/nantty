@@ -12,7 +12,18 @@ export interface UpstreamRoute {
 export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/auth/logout", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/sessions", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/auth/password/change", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/users/", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/business-categories", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/geo/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/policies/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/consents", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/locale", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/currencies", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/currency/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/platform-config/", upstream: "identity", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
 
 export function resolveUpstreamRouteForRequest(method: string, path: string, routes: readonly UpstreamRoute[] = upstreamRoutes): UpstreamRoute | undefined {
