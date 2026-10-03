@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/businessProfile.created.v1.json",
+  "title": "BusinessProfileCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "profileId",
+    "handle"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "profileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "handle": {
+      "type": "string"
+    }
+  }
+}

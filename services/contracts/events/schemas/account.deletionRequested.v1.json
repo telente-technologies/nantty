@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.deletionRequested.v1.json",
+  "title": "AccountDeletionRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "requestedAt",
+    "scheduledFor",
+    "retentionPolicy"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scheduledFor": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retentionPolicy": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "action",
+          "retentionDays",
+          "needsLegalReview"
+        ],
+        "properties": {
+          "category": {
+            "enum": [
+              "account",
+              "orders",
+              "financial",
+              "messages",
+              "analytics",
+              "security_logs",
+              "consents",
+              "marketing"
+            ]
+          },
+          "action": {
+            "enum": [
+              "delete",
+              "anonymize",
+              "retain"
+            ]
+          },
+          "retentionDays": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "needsLegalReview": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

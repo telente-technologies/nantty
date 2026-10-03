@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.deletionExecuted.v1.json",
+  "title": "AccountDeletionExecuted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "executedAt",
+    "retentionPolicy",
+    "appliedSteps"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "executedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retentionPolicy": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "action",
+          "retentionDays",
+          "needsLegalReview"
+        ],
+        "properties": {
+          "category": {
+            "enum": [
+              "account",
+              "orders",
+              "financial",
+              "messages",
+              "analytics",
+              "security_logs",
+              "consents",
+              "marketing"
+            ]
+          },
+          "action": {
+            "enum": [
+              "delete",
+              "anonymize",
+              "retain"
+            ]
+          },
+          "retentionDays": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "needsLegalReview": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "appliedSteps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "outcome"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "retained",
+              "deleted",
+              "anonymized",
+              "deferred_until_retention_period",
+              "handled_by_owning_service"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
