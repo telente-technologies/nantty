@@ -69,7 +69,7 @@
 }
 
 .legal a {
-  color: var(--blue-500);
+  color: var(--color-brand);
   text-decoration: none;
 }
 
