@@ -82,7 +82,7 @@ func (controller SessionsController) ListSuggestedLives(writer http.ResponseWrit
 	if err == nil {
 		var views []types.SuggestedLiveView
 		if views, err = (listsuggestedlives.Handler{Container: controller.Container}).Execute(request.Context(), listsuggestedlives.Query{Viewer: actor.UserId}); err == nil {
-			httpserver.WriteJsonResponse(writer, http.StatusOK, views)
+			httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(views, ""))
 			return
 		}
 	}
