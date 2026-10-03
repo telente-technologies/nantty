@@ -295,7 +295,8 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
-		{Name: "kind", Type: field.TypeEnum, Enums: []string{"personal", "creator", "business"}},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"personal", "business"}},
+		{Name: "creator_status", Type: field.TypeEnum, Enums: []string{"none", "pending", "approved", "rejected"}, Default: "none"},
 		{Name: "handle", Type: field.TypeString, Size: 30},
 		{Name: "display_name", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "bio", Type: field.TypeString, Size: 300, Default: ""},
@@ -319,7 +320,7 @@ var (
 			{
 				Name:    "profile_handle",
 				Unique:  true,
-				Columns: []*schema.Column{ProfilesColumns[4]},
+				Columns: []*schema.Column{ProfilesColumns[5]},
 			},
 			{
 				Name:    "profile_account_id",
@@ -332,14 +333,6 @@ var (
 				Columns: []*schema.Column{ProfilesColumns[2]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "kind = 'personal'",
-				},
-			},
-			{
-				Name:    "profile_one_creator_per_account",
-				Unique:  true,
-				Columns: []*schema.Column{ProfilesColumns[2]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "kind = 'creator'",
 				},
 			},
 		},
