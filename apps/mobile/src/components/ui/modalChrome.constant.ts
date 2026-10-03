@@ -70,3 +70,24 @@ export function buildModalElevation(scheme: ColorSchemeName, palette: ModalPalet
   if (scheme === "dark") return { borderWidth: StyleSheet.hairlineWidth, borderColor: palette.border };
   return { shadowColor: "#0B1752", shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.16, shadowRadius: 28, elevation: 12 };
 }
+
+export function buildPopoverMenuSurface(colors: ThemeColors, scheme: ColorSchemeName): ViewStyle {
+  const palette = buildModalPalette(colors, scheme);
+  return {
+    minWidth: 200,
+    paddingVertical: 6,
+    borderRadius: modalRadius.card,
+    backgroundColor: palette.surface,
+    ...buildModalElevation(scheme, palette),
+    ...(scheme === "dark" ? null : { borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(10, 10, 20, 0.08)" }),
+  };
+}
+
+export const mediaGlass = {
+  background: "rgba(12, 12, 18, 0.50)",
+  backgroundStrong: "rgba(12, 12, 18, 0.66)",
+  border: "rgba(255, 255, 255, 0.14)",
+  ink: "#FFFFFF",
+  inkMuted: "rgba(255, 255, 255, 0.82)",
+  pressed: "rgba(255, 255, 255, 0.12)",
+} as const;
