@@ -11,5 +11,5 @@
       ]
     }
   },
-  "exclude": ["node_modules", "src/**/__tests__/**"]
+  "exclude": ["node_modules", "src/**/__tests__/**", "src/**/*.test.ts"]
 }

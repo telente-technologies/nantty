@@ -10,7 +10,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "icons:generate": "node scripts/generateIconComponents.mjs"
+    "icons:generate": "node scripts/generateIconComponents.mjs",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -83,6 +84,15 @@
         "@types/react",
         "@types/react-dom"
       ]
+    }
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "<rootDir>/src/**/*.test.ts"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
     }
   }
 }

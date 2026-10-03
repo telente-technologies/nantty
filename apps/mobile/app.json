@@ -29,7 +29,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:3000",
+      "apiUrl": "http://localhost:8080",
       "eas": {
         "projectId": "47fadf5d-9059-49f9-8673-56453ca26a58"
       }
