@@ -1,14 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { buildLiveMonetizationInput, DEFAULT_LIVE_MONETIZATION_DRAFT, type LiveMonetizationDraft } from "@/components/create/liveMonetization.constant";
 import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { SoundPickerRow } from "@/components/create/soundPickerRow";
 import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
+import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
+import { DEFAULT_STICKER_LAYOUT } from "@/components/clips/videoReply/videoReply.util";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
@@ -19,16 +22,29 @@ import { liveService } from "@/services/live.service";
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
 import { storiesService } from "@/services/stories.service";
-import type { CreateMode, LiveCategory, LiveSource } from "@/types";
+import type { CommentStickerLayout, CreateMode, LiveCategory, LiveSource } from "@/types";
+import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
-const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone", kind: "photo", isAiGenerated: false };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", isAiGenerated: false };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
-  const [mode, setMode] = useState<CreateMode>(route.params?.mode ?? "post");
+  const videoReply = route.params?.videoReply;
+  const [mode, setMode] = useState<CreateMode>(videoReply ? "clip" : (route.params?.mode ?? "post"));
+  const [stickerLayout, setStickerLayout] = useState<CommentStickerLayout>(DEFAULT_STICKER_LAYOUT);
   const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
-  const [postDraft, setPostDraft] = useState<PostComposerDraft>(EMPTY_POST_DRAFT);
+  const [postDraft, setPostDraft] = useState<PostComposerDraft>(() =>
+    videoReply
+      ? {
+          ...EMPTY_POST_DRAFT,
+          kind: "clip",
+          text: `@${videoReply.commenterUsername} `,
+          mentions: [{ userId: videoReply.commenterUserId, username: videoReply.commenterUsername, start: 0, length: videoReply.commenterUsername.length + 1 }],
+          audience: videoReply.originalAudience === "everyone" ? "everyone" : "followers",
+        }
+      : EMPTY_POST_DRAFT,
+  );
   const postDraftUploads = usePostDraftMediaUploads(mode === "clip" ? "clip" : "post");
   const [selectedSoundId, setSelectedSoundId] = useState<string | null>(route.params?.soundId ?? null);
   const draftContainsVideo = postDraftUploads.draftMediaItems.some((item) => item.mediaType === "video");
@@ -52,12 +68,17 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     mutationFn: async () => {
       const mediaIds = await postDraftUploads.waitForAllDraftMediaIds();
       const soundIdForVideoPost = draftContainsVideo && selectedSoundId ? { soundId: selectedSoundId } : {};
+      const trimmedDraft = shiftMentionsAfterTrimmingStart(postDraft.text, postDraft.mentions);
       return storiesService.publishPost({
-        text: postDraft.text.trim(),
+        text: trimmedDraft.text,
+        mentions: trimmedDraft.mentions,
         audience: postDraft.audience,
         mediaIds,
         kind: postDraft.kind === "clip" ? "clip" : "post",
         ...(postDraft.isAiGenerated ? { isAiGenerated: true } : {}),
+        ...(videoReply
+          ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
+          : {}),
         ...soundIdForVideoPost,
       });
     },
@@ -106,6 +127,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const openLiveRoom = (liveId: string) => navigation.replace("Live", { liveId, host: true });
 
   const switchCreateMode = (next: CreateMode) => {
+    if (videoReply) return;
     if (next === "product") {
       navigation.replace("ProductForm");
       return;
@@ -135,8 +157,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       : "Post";
 
   return (
-    <Screen background={colors.surface} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Screen background={colors.surface} edges={["top"]}>
+      <View style={styles.flex}>
         {mode === "live" ? (
           <CreateHeader
             onClose={closeOrStepBack}
@@ -146,7 +168,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           />
         ) : (
           <CreateHeader
-            title={mode === "story" ? "Story" : mode === "clip" ? "Clip" : "Post"}
+            title={videoReply ? `Reply to @${videoReply.commenterUsername}'s comment` : mode === "story" ? "Story" : mode === "clip" ? "Clip" : "Post"}
             onClose={closeOrStepBack}
             actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
             actionDisabled={!canContinuePost}
@@ -167,6 +189,17 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             publishButtonTitle={publishButtonTitle}
             publishErrorMessage={publishPost.error ? publishPost.error.message : null}
             validationHint={clipValidationHint}
+            videoReplyStage={
+              videoReply ? (
+                <VideoReplyStage
+                  target={videoReply}
+                  draftMediaItems={postDraftUploads.draftMediaItems}
+                  layout={stickerLayout}
+                  audience={postDraft.audience}
+                  onChangeLayout={setStickerLayout}
+                />
+              ) : undefined
+            }
             onPublish={() => publishPost.mutate()}
             soundPicker={
               draftContainsVideo || selectedSoundId ? (
@@ -200,7 +233,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onChangeMonetization={setLiveMonetization}
           />
         )}
-      </KeyboardAvoidingView>
+      </View>
+      <KeyboardSpacer />
     </Screen>
   );
 }
