@@ -45,7 +45,12 @@ func StartPaymentsModuleWithSettings(ctx context.Context, settings configs.Payme
 	if err != nil {
 		return nil, err
 	}
-	return &Module{Application: gateway.NewPaymentsApplication(container.NewPaymentsContainer(resources, settings, containerOverrides))}, nil
+	paymentsContainer, err := container.NewPaymentsContainer(resources, settings, containerOverrides)
+	if err != nil {
+		_ = resources.Close()
+		return nil, err
+	}
+	return &Module{Application: gateway.NewPaymentsApplication(paymentsContainer)}, nil
 }
 
 func (module *Module) Name() string { return "payments" }
