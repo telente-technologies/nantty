@@ -4,53 +4,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProductCard } from "@/components/commerce/productCard";
+import { ProductGallery } from "@/components/commerce/productGallery";
+import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
-import { ErrorState, Spinner, Badge } from "@/components/ui/feedback";
-import { Avatar, MediaImage } from "@/components/ui/media";
-import { HeartIcon, ShareIcon, StarIcon, StoreIcon } from "@/components/ui/icons";
+import { ErrorState, Badge } from "@/components/ui/feedback";
+import { Avatar } from "@/components/ui/media";
+import { ShareIcon, StarIcon, StoreIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
 import { productsService } from "@/services/products.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
+import controlStyles from "./buyBoxControls.module.css";
 import styles from "./page.module.css";
-
-function ProductGallery({ images, name, priority }: { readonly images: readonly string[]; readonly name: string; readonly priority: boolean }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const shown = images.filter(Boolean);
-  const active = shown[activeIndex];
-
-  if (shown.length === 0) {
-    return <div className={styles.galleryEmpty} aria-hidden="true" />;
-  }
-
-  return (
-    <div className={styles.gallery}>
-      <div className={styles.galleryMain}>
-        <MediaImage src={active} alt={name} sizes="(max-width: 900px) 100vw, 640px" priority={priority} />
-      </div>
-      {shown.length > 1 ? (
-        <div className={styles.thumbnails} role="tablist" aria-label="Product images">
-          {shown.map((image, index) => (
-            <button
-              key={image}
-              type="button"
-              role="tab"
-              aria-selected={index === activeIndex}
-              className={[styles.thumbnail, index === activeIndex ? styles.thumbnailActive : ""].filter(Boolean).join(" ")}
-              onClick={() => setActiveIndex(index)}
-            >
-              <MediaImage src={image} alt={`View ${index + 1}`} sizes="80px" />
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+import { ProductDetailSkeleton } from "./productDetailSkeleton";
 
 export default function ProductDetailPage({ params }: { readonly params: Promise<{ readonly productId: string }> }) {
   const { productId } = use(params);
@@ -79,7 +50,7 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
     onError: () => setMessage("Couldn't add to cart. Try again."),
   });
 
-  if (productQuery.isLoading) return <Spinner label="Loading product" />;
+  if (productQuery.isLoading) return <ProductDetailSkeleton />;
   if (productQuery.isError || !productQuery.data) {
     return <ErrorState title="Product unavailable" description="This product may have been removed." action={<RetryButton onRetry={() => productQuery.refetch()} />} />;
   }
@@ -158,14 +129,14 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
             {product.promo ? <Badge tone="success">{product.promo}</Badge> : null}
 
             {product.sizes.length > 0 ? (
-              <fieldset className={styles.optionGroup}>
-                <legend className={styles.optionLabel}>Size</legend>
-                <div className={styles.options}>
+              <fieldset className={controlStyles.optionGroup}>
+                <legend className={controlStyles.optionLabel}>Size</legend>
+                <div className={controlStyles.options}>
                   {product.sizes.map((size) => (
                     <button
                       key={size}
                       type="button"
-                      className={[styles.option, selectedSize === size ? styles.optionActive : ""].filter(Boolean).join(" ")}
+                      className={[controlStyles.option, selectedSize === size ? controlStyles.optionActive : ""].filter(Boolean).join(" ")}
                       aria-pressed={selectedSize === size}
                       onClick={() => setSelectedSize(size)}
                     >
@@ -177,14 +148,14 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
             ) : null}
 
             {product.colors.length > 0 ? (
-              <fieldset className={styles.optionGroup}>
-                <legend className={styles.optionLabel}>Colour</legend>
-                <div className={styles.options}>
+              <fieldset className={controlStyles.optionGroup}>
+                <legend className={controlStyles.optionLabel}>Colour</legend>
+                <div className={controlStyles.options}>
                   {product.colors.map((color) => (
                     <button
                       key={color}
                       type="button"
-                      className={[styles.option, selectedColor === color ? styles.optionActive : ""].filter(Boolean).join(" ")}
+                      className={[controlStyles.option, selectedColor === color ? controlStyles.optionActive : ""].filter(Boolean).join(" ")}
                       aria-pressed={selectedColor === color}
                       onClick={() => setSelectedColor(color)}
                     >
@@ -195,16 +166,16 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
               </fieldset>
             ) : null}
 
-            <div className={styles.optionGroup}>
-              <span className={styles.optionLabel}>Quantity</span>
-              <div className={styles.quantity}>
-                <button type="button" className={styles.quantityButton} onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity">
+            <div className={controlStyles.optionGroup}>
+              <span className={controlStyles.optionLabel}>Quantity</span>
+              <div className={controlStyles.quantity}>
+                <button type="button" className={controlStyles.quantityButton} onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity">
                   −
                 </button>
-                <span className={styles.quantityValue} aria-live="polite">
+                <span className={controlStyles.quantityValue} aria-live="polite">
                   {quantity}
                 </span>
-                <button type="button" className={styles.quantityButton} onClick={() => setQuantity((value) => Math.min(99, value + 1))} aria-label="Increase quantity">
+                <button type="button" className={controlStyles.quantityButton} onClick={() => setQuantity((value) => Math.min(99, value + 1))} aria-label="Increase quantity">
                   +
                 </button>
               </div>
@@ -217,18 +188,16 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
             ) : null}
 
             <div className={styles.actions}>
-              <Button size="lg" onClick={() => handleAddToCart(true)} busy={addToCart.isPending}>
+              <Button size="lg" onClick={() => requireAuthThen(() => handleAddToCart(true), "Sign in to add items to your cart.")} busy={addToCart.isPending}>
                 Add to cart
               </Button>
-              <Button size="lg" variant="secondary" onClick={() => handleAddToCart(false)} busy={addToCart.isPending}>
+              <Button size="lg" variant="secondary" onClick={() => requireAuthThen(() => handleAddToCart(false), "Sign in to buy with escrow protection.")} busy={addToCart.isPending}>
                 Buy now
               </Button>
             </div>
 
             <div className={styles.secondaryActions}>
-              <button type="button" className={styles.ghostAction}>
-                <HeartIcon size={18} /> Save
-              </button>
+              <SaveToggleButton targetType="product" targetId={product.id} initiallySaved={product.bookmarked ?? false} appearance="pill" showLabel iconSize={18} />
               <button type="button" className={styles.ghostAction}>
                 <ShareIcon size={18} /> Share
               </button>
