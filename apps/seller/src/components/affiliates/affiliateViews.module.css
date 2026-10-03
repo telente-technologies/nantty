@@ -49,7 +49,7 @@
 .requestMessage {
   grid-column: 1 / -1;
   padding: 10px 12px;
-  border-left: 3px solid var(--blue-100);
+  border-left: 3px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
   background: var(--surface-app);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
   color: var(--ink-muted);
@@ -121,7 +121,7 @@
 }
 
 .directoryOption[aria-pressed="true"] {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
 }
 
