@@ -111,6 +111,10 @@ export interface CreateUploadSessionRequest {
 
 export interface UploadSession {
   readonly uploadId: ID;
+  readonly mediaId?: ID;
+  readonly mode?: "single" | "multipart";
+  readonly partSizeBytes?: number;
+  readonly partCount?: number;
   readonly chunkSizeBytes: number;
   readonly totalChunks: number;
   readonly uploadedChunks: readonly number[];
