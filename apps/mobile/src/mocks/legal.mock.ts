@@ -7,8 +7,8 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 const DAY_MS = 86_400_000;
 
 const currentPolicyVersions: readonly PolicyVersionSummary[] = [
-  { policyVersionId: "lgv_terms_3", documentKey: "terms", title: "Terms of Service", versionLabel: "3", summary: "Added a contact address and clarified the username rules.", publishedAt: new Date(Date.now() - DAY_MS).toISOString(), effectiveAt: new Date(Date.now() + 30 * DAY_MS).toISOString(), isMaterialChange: true, documentUrl: legalLinks.terms },
-  { policyVersionId: "lgv_privacy_3", documentKey: "privacy", title: "Privacy Policy", versionLabel: "3", summary: "Fixed typos in the data retention section.", publishedAt: new Date(Date.now() - DAY_MS).toISOString(), effectiveAt: new Date(Date.now() - DAY_MS).toISOString(), isMaterialChange: false, documentUrl: legalLinks.privacyPolicy },
+  { policyVersionId: "lgv_terms_3", documentKey: "terms", title: "Terms of Service", versionLabel: "3", summary: "Added a contact address and clarified the username rules.", whatChanged: ["We added a postal address for legal notices.", "Usernames can now be changed once every 30 days.", "Clearer rules on impersonation and reserved names."], publishedAt: new Date(Date.now() - DAY_MS).toISOString(), effectiveAt: new Date(Date.now() + 30 * DAY_MS).toISOString(), isMaterialChange: true, documentUrl: legalLinks.terms },
+  { policyVersionId: "lgv_privacy_3", documentKey: "privacy", title: "Privacy Policy", versionLabel: "3", summary: "Fixed typos in the data retention section.", whatChanged: ["Fixed typos in the data retention section. Nothing about how we use your data has changed."], publishedAt: new Date(Date.now() - DAY_MS).toISOString(), effectiveAt: new Date(Date.now() - DAY_MS).toISOString(), isMaterialChange: false, documentUrl: legalLinks.privacyPolicy },
 ];
 
 const acceptedPolicyVersionIds = new Set<string>();
