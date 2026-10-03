@@ -25,8 +25,8 @@
 }
 
 .tab[aria-current="page"] {
-  color: var(--blue-600);
-  border-bottom-color: var(--blue-500);
+  color: var(--color-brand);
+  border-bottom-color: var(--color-brand);
 }
 
 .segmented {
@@ -51,5 +51,5 @@
 .segment[aria-checked="true"] {
   background: var(--surface-card);
   color: var(--ink-strong);
-  box-shadow: 0 1px 2px rgb(11 23 82 / 0.12);
+  box-shadow: var(--shadow-card);
 }

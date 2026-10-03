@@ -63,12 +63,12 @@
 }
 
 .primary {
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 .secondary {
@@ -78,7 +78,7 @@
 }
 
 .secondary:hover:not(:disabled) {
-  border-color: var(--blue-300);
+  border-color: color-mix(in srgb, var(--color-brand) 60%, transparent);
   background: var(--blue-tint);
 }
 
@@ -94,7 +94,7 @@
 
 .danger {
   background: var(--error);
-  color: #fff;
+  color: var(--color-on-brand);
 }
 
 .danger:hover:not(:disabled) {
@@ -107,7 +107,7 @@
 }
 
 .tender:hover:not(:disabled) {
-  background: #e6d41a;
+  background: var(--accent-hover);
 }
 
 .spinner {

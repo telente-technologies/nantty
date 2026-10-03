@@ -14,7 +14,7 @@
   padding: 12px 14px;
   border-radius: var(--radius-medium);
   background: var(--blue-900);
-  color: #fff;
+  color: var(--rail-ink-strong);
   box-shadow: var(--shadow-float);
   font-weight: 500;
   animation: rise 180ms ease-out;

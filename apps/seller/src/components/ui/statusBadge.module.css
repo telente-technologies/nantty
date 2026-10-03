@@ -17,7 +17,7 @@
 
 .info {
   background: var(--blue-tint);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .success {
@@ -36,6 +36,6 @@
 }
 
 .highlight {
-  background: var(--yellow-100);
-  color: var(--yellow-900);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
 }

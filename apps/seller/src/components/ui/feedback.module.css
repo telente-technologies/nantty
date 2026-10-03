@@ -15,7 +15,7 @@
   margin-bottom: 6px;
   border-radius: 50%;
   background: var(--blue-tint);
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .emptyTitle {
@@ -56,25 +56,25 @@
 
 .info {
   background: var(--blue-tint);
-  border-color: var(--blue-50);
-  color: var(--blue-900);
+  border-color: color-mix(in srgb, var(--color-brand) 30%, transparent);
+  color: var(--ink-strong);
 }
 
 .caution {
   background: var(--caution-tint);
-  border-color: #fbd899;
+  border-color: color-mix(in srgb, var(--color-warn) 45%, transparent);
   color: var(--caution-ink);
 }
 
 .error {
   background: var(--error-tint);
-  border-color: #f9c1c1;
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
   color: var(--error-ink);
 }
 
 .success {
   background: var(--success-tint);
-  border-color: #b3ead4;
+  border-color: color-mix(in srgb, var(--color-success) 45%, transparent);
   color: var(--success-ink);
 }
 
@@ -90,7 +90,7 @@
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid var(--blue-500);
+  border: 2px solid var(--color-brand);
   border-right-color: transparent;
   border-radius: 50%;
   animation: spin 700ms linear infinite;
