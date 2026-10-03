@@ -14,7 +14,7 @@
   height: 44px;
   border-radius: var(--radius-lg);
   background: var(--blue-tint);
-  color: var(--blue-500);
+  color: var(--color-brand);
   margin-bottom: 4px;
 }
 
@@ -66,25 +66,25 @@
 
 .info {
   background: var(--blue-tint);
-  border-color: var(--blue-50);
-  color: var(--blue-900);
+  border-color: var(--brand-border-soft);
+  color: var(--brand-ink);
 }
 
 .success {
   background: var(--success-tint);
-  border-color: #bfeedd;
+  border-color: var(--success-border);
   color: var(--success-ink);
 }
 
 .caution {
   background: var(--caution-tint);
-  border-color: #fbd9a0;
+  border-color: var(--caution-border);
   color: var(--caution-ink);
 }
 
 .error {
   background: var(--error-tint);
-  border-color: #f8c4c4;
+  border-color: var(--error-border);
   color: var(--error-ink);
 }
 
@@ -92,7 +92,7 @@
 .skeletonLine {
   display: block;
   border-radius: var(--radius-medium);
-  background: linear-gradient(90deg, var(--surface-sunken) 0%, #e7eaf6 50%, var(--surface-sunken) 100%);
+  background: linear-gradient(90deg, var(--color-skeleton) 0%, var(--color-skeleton-shine) 50%, var(--color-skeleton) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.2s ease-in-out infinite;
 }

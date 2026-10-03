@@ -1,14 +1,14 @@
 .dialog {
   border: 0;
   padding: 0;
-  background: var(--surface-card);
+  background: var(--color-elevated);
   color: inherit;
   box-shadow: var(--shadow-float);
   max-height: calc(100dvh - 24px);
 }
 
 .dialog::backdrop {
-  background: rgb(11 23 82 / 0.42);
+  background: var(--color-overlay);
 }
 
 .modal {

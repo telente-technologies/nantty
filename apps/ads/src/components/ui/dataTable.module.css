@@ -56,7 +56,7 @@
 }
 
 .table tbody tr:hover td {
-  background: #fafbff;
+  background: var(--row-hover);
 }
 
 .table tfoot td {
@@ -82,7 +82,7 @@
 .selectCell input {
   width: 15px;
   height: 15px;
-  accent-color: var(--blue-500);
+  accent-color: var(--color-brand);
 }
 
 .sortButton {
@@ -98,7 +98,7 @@
 
 .sortMark {
   width: 8px;
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .empty {

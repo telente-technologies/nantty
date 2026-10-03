@@ -43,12 +43,12 @@
 }
 
 .primary {
-  background: var(--blue-500);
+  background: var(--color-brand-solid);
   color: var(--color-on-brand);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 .accent {
@@ -67,7 +67,7 @@
 }
 
 .secondary:hover:not(:disabled) {
-  border-color: var(--blue-300);
+  border-color: var(--brand-border);
   background: var(--blue-tint);
 }
 

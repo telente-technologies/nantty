@@ -14,7 +14,7 @@
   padding: 6px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
-  background: var(--surface-card);
+  background: var(--color-elevated);
   box-shadow: var(--shadow-float);
 }
 
@@ -33,5 +33,5 @@
 }
 
 .option input {
-  accent-color: var(--blue-500);
+  accent-color: var(--color-brand);
 }
