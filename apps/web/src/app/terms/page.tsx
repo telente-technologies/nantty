@@ -14,7 +14,8 @@ export default function TermsOfServicePage() {
     <PlaceholderLegalDocument
       title="Terms of service"
       summary="The rules for buying, selling and posting on Zudomart."
-      lastUpdatedLabel="Draft, not yet in effect"
+      versionLabel="[version placeholder]"
+      effectiveDateLabel="[effective date placeholder]"
       sections={termsOfServiceSections}
     />
   );
