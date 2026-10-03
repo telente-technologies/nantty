@@ -3,9 +3,12 @@ package ledger
 import (
 	"context"
 
+	"zudomart/modules/ledger/src"
 	"zudomart/platform/servicemodule"
 )
 
-func NewLedgerModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
-	return servicemodule.RoutelessModule{ModuleName: "ledger"}, nil
+type Module = src.Module
+
+func NewLedgerModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
+	return src.NewLedgerModule(ctx, dependencies)
 }
