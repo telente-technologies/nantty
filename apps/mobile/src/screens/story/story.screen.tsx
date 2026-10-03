@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useState } from "react";
-import { KeyboardAvoidingView, PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
@@ -52,10 +52,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   });
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.root, { paddingTop: insets.top + 4, paddingBottom: insets.bottom }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={[styles.root, { paddingTop: insets.top + 4 }]}>
       <StoryProgressBar
         count={Math.max(list.length, 1)}
         activeIndex={activeIndex}
@@ -137,7 +134,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
           }}
         />
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
