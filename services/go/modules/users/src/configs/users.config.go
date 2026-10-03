@@ -36,7 +36,7 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		TokenAudience:               reader.ReadStringOrDefault("USERS_TOKEN_AUDIENCE", reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api")),
 		UsernameChangeCooldown:      time.Duration(reader.ReadIntegerOrDefault("USERS_USERNAME_CHANGE_COOLDOWN_DAYS", 30)) * 24 * time.Hour,
 		UsernameMaximumChangesYear:  reader.ReadIntegerOrDefault("USERS_USERNAME_MAX_CHANGES_PER_YEAR", 3),
-		UsernameQuarantine:          time.Duration(reader.ReadIntegerOrDefault("USERS_USERNAME_QUARANTINE_DAYS", 30)) * 24 * time.Hour,
+		UsernameQuarantine:          time.Duration(reader.ReadIntegerOrDefault("USERS_USERNAME_QUARANTINE_DAYS", 120)) * 24 * time.Hour,
 		MediaPublicBaseUrl:          reader.ReadStringOrDefault("USERS_MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media"),
 		MediaUploadBaseUrl:          reader.ReadStringOrDefault("USERS_MEDIA_UPLOAD_BASE_URL", "http://localhost:18333/zudomart-media"),
 		MediaUploadSigningKey:       readSigningKey(reader, "USERS_MEDIA_UPLOAD_SIGNING_KEY"),
