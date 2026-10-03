@@ -10,6 +10,9 @@ func ValidateCreateBusinessProfileRequest(request dtos.CreateBusinessProfileRequ
 	collector.RequireLength("displayName", request.DisplayName, 2, 320)
 	collector.RequireLength("handle", request.Handle, 1, 64)
 	collector.RequireLength("description", request.Description, 0, 1200)
+	if request.BusinessType != "" && request.BusinessType != "business" && request.BusinessType != "brand" && request.BusinessType != "government" {
+		collector.Add("businessType", "must be business, brand or government")
+	}
 	if len(request.Categories) == 0 || len(request.Categories) > 5 {
 		collector.Add("categories", "must contain 1 to 5 entries")
 	}
