@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View, type Style
 import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel20Icon } from "@/components/icons";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 import { Text } from "./text";
 import { FrameAwareModal } from "./frameAwareModal";
@@ -21,6 +21,7 @@ export interface BottomSheetProps {
 }
 
 export function BottomSheet({ visible, onClose, title, titleSize = 16, floating = false, children, style }: BottomSheetProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const frame = useSafeAreaFrame();
   const tallestSheetHeight = frame.height - insets.top - SHEET_TOP_GAP;
@@ -54,10 +55,10 @@ export function BottomSheet({ visible, onClose, title, titleSize = 16, floating 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1, justifyContent: "flex-end" },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: colors.overlay },
-  sheet: { backgroundColor: colors.white, borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: "hidden" },
+  sheet: { backgroundColor: colors.elevated, borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: "hidden" },
   floating: { marginHorizontal: 11, borderRadius: 16 },
   titleRow: { paddingHorizontal: 13, paddingTop: 16, paddingBottom: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-});
+}));

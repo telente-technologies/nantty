@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 import { Text } from "./text";
 
@@ -14,7 +14,9 @@ export interface ChipProps {
 }
 
 export function Chip({ label, selected = false, onPress, kind = "topic", dropdown = false }: ChipProps) {
-  const look = kind === "topic" ? topic : filter;
+  const { colors } = useTheme();
+  const looks = useChipLooks();
+  const look = kind === "topic" ? looks.topic : looks.filter;
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,25 +29,26 @@ export function Chip({ label, selected = false, onPress, kind = "topic", dropdow
       </Text>
       {dropdown ? (
         <Svg width={12} height={12} viewBox="0 0 12 12">
-          <Path d="M1.8 3.2h8.4a.6.6 0 0 1 .47.98l-4.2 5.1a.6.6 0 0 1-.93 0l-4.2-5.1a.6.6 0 0 1 .46-.98Z" fill={colors.black} />
+          <Path d="M1.8 3.2h8.4a.6.6 0 0 1 .47.98l-4.2 5.1a.6.6 0 0 1-.93 0l-4.2-5.1a.6.6 0 0 1 .46-.98Z" fill={colors.text} />
         </Svg>
       ) : null}
     </Pressable>
   );
 }
 
-const topic = {
-  box: { height: 33, paddingHorizontal: 8, borderRadius: 4, flexDirection: "row", alignItems: "center", gap: 10 } as const,
-  bg: colors.skeleton,
-  selectedBg: colors.primary,
-  selectedText: colors.white,
-};
-
-const filter = {
-  box: { height: 25, paddingHorizontal: 4, borderRadius: 4, flexDirection: "row", alignItems: "center", gap: 8 } as const,
-  bg: colors.white,
-  selectedBg: colors.chip,
-  selectedText: colors.black,
-};
+const useChipLooks = makeThemedStyles((colors) => ({
+  topic: {
+    box: { height: 33, paddingHorizontal: 8, borderRadius: 4, flexDirection: "row", alignItems: "center", gap: 10 } as const,
+    bg: colors.skeleton,
+    selectedBg: colors.primarySolid,
+    selectedText: colors.onPrimary,
+  },
+  filter: {
+    box: { height: 25, paddingHorizontal: 4, borderRadius: 4, flexDirection: "row", alignItems: "center", gap: 8 } as const,
+    bg: colors.surface,
+    selectedBg: colors.chip,
+    selectedText: colors.text,
+  },
+}));
 
 export const chipStyles = StyleSheet.create({ row: { flexDirection: "row", flexWrap: "wrap", gap: 12 } });

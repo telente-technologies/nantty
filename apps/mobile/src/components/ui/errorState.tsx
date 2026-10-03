@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 import { Button } from "./button";
 import { Text } from "./text";
@@ -11,6 +11,7 @@ export interface ErrorStateProps {
 }
 
 export function ErrorState({ message = "Something went wrong.", onRetry }: ErrorStateProps) {
+  const { colors } = useTheme();
   return (
     <View accessibilityRole="alert" style={styles.root}>
       <Text align="center" color={colors.textMuted}>{message}</Text>

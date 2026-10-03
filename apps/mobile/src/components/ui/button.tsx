@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, type ThemeColors } from "@/theme";
 import { radius } from "@/constants/spacing.constant";
 
 import { Text } from "./text";
@@ -31,6 +31,7 @@ export function Button({
   style,
   accessibilityLabel,
 }: ButtonProps) {
+  const { looks, disabledLook } = useButtonLooks();
   const inactive = disabled || loading;
   const look = inactive && (variant === "primary" || variant === "brand") ? disabledLook : looks[variant];
   return (
@@ -65,11 +66,11 @@ interface Look {
   readonly gap: number;
 }
 
-const looks: Record<ButtonVariant, Look> = {
-  primary: { container: { backgroundColor: colors.primary }, textColor: colors.white, size: 15, weight: 500, lineHeight: 21, gap: 10 },
-  brand: { container: { backgroundColor: colors.primary }, textColor: colors.white, size: 14, weight: 400, lineHeight: 16.8, gap: 12 },
+const buildButtonLooks = (colors: ThemeColors): Record<ButtonVariant, Look> => ({
+  primary: { container: { backgroundColor: colors.primarySolid }, textColor: colors.onPrimary, size: 15, weight: 500, lineHeight: 21, gap: 10 },
+  brand: { container: { backgroundColor: colors.primarySolid }, textColor: colors.onPrimary, size: 14, weight: 400, lineHeight: 16.8, gap: 12 },
   outline: {
-    container: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.black },
+    container: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.text },
     textColor: colors.text,
     size: 14,
     weight: 400,
@@ -78,17 +79,20 @@ const looks: Record<ButtonVariant, Look> = {
   },
   neutral: { container: { backgroundColor: colors.chip }, textColor: colors.text, size: 14, weight: 400, lineHeight: 16.8, gap: 8 },
   subtle: {
-    container: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.divider },
+    container: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
     textColor: colors.text,
     size: 14,
     weight: 400,
     lineHeight: 16.8,
     gap: 8,
   },
-  danger: { container: { backgroundColor: colors.white }, textColor: colors.error, size: 13, weight: 400, lineHeight: 16.9, gap: 8 },
-};
+  danger: { container: { backgroundColor: colors.surface }, textColor: colors.error, size: 13, weight: 400, lineHeight: 16.9, gap: 8 },
+});
 
-const disabledLook: Look = { ...looks.primary, container: { backgroundColor: colors.disabled }, textColor: colors.disabledText };
+const useButtonLooks = makeThemedStyles((colors) => {
+  const looks = buildButtonLooks(colors);
+  return { looks, disabledLook: { ...looks.primary, container: { backgroundColor: colors.disabled }, textColor: colors.disabledText } as Look };
+});
 
 const styles = StyleSheet.create({
   base: {
