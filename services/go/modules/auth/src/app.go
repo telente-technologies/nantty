@@ -106,6 +106,13 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 		module.container.Logger.WarnContext(ctx, "signing key maintenance failed", slog.Any("error", err))
 	}
 	go func() { _ = module.container.Keys.RunRotationAndReloadLoopUntilContextDone(ctx, reportError) }()
+	go func() {
+		settings := module.container.Settings
+		directory := services.AccountDirectoryService{Container: module.container}
+		if err := integrations.ServeAccountDirectoryUntilContextDone(ctx, settings.DirectoryGrpcAddress, settings.InternalGrpcToken, directory, module.container.Logger); err != nil {
+			module.container.Logger.ErrorContext(ctx, "account directory gRPC stopped", slog.Any("error", err))
+		}
+	}()
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,
