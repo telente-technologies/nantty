@@ -8,6 +8,7 @@ import (
 
 type PrivacySettings struct {
 	ExportBucket               string
+	DocumentsBucket            string
 	ExportObjectEndpoint       string
 	ExportRegion               string
 	ExportDownloadLinkTtl      time.Duration
@@ -22,6 +23,7 @@ type PrivacySettings struct {
 func ReadPrivacySettingsFromEnvironment(reader *platformconfig.EnvironmentReader) PrivacySettings {
 	return PrivacySettings{
 		ExportBucket:               reader.ReadStringOrDefault("USERS_EXPORT_BUCKET", "zudomart-exports"),
+		DocumentsBucket:            reader.ReadStringOrDefault("USERS_DOCUMENTS_BUCKET", "zudomart-private-documents"),
 		ExportObjectEndpoint:       reader.ReadStringOrDefault("USERS_EXPORT_S3_ENDPOINT", reader.ReadStringOrDefault("AWS_ENDPOINT_URL", "")),
 		ExportRegion:               reader.ReadStringOrDefault("AWS_REGION", "eu-west-1"),
 		ExportDownloadLinkTtl:      reader.ReadDurationOrDefault("USERS_EXPORT_DOWNLOAD_LINK_TTL", 15*time.Minute),
