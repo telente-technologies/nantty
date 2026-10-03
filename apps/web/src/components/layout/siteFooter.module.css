@@ -100,3 +100,12 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+button.footerLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

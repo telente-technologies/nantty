@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
+import { CookieSettingsButton } from "./cookieSettingsButton";
 import styles from "./siteFooter.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
 
@@ -11,7 +12,7 @@ const footerLinkGroups = [
     links: [
       { label: "How it works", href: "/#how-it-works" },
       { label: "Escrow protection", href: "/#escrow" },
-      { label: "Posts, clips and live", href: "/#social-shopping" },
+      { label: "Posts, clips and live streams", href: "/#social-shopping" },
       { label: "Creators and badges", href: "/#creators" },
       { label: "Questions", href: "/#questions" },
     ],
@@ -32,6 +33,7 @@ const footerLinkGroups = [
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
       { label: "Privacy policy", href: "/privacy" },
+      { label: "Cookie policy", href: "/cookies" },
       { label: "Terms of service", href: "/terms" },
     ],
   },
@@ -77,7 +79,7 @@ export function SiteFooterWithGiantWordmark() {
         </nav>
       </div>
       <div className={`pageContainer ${styles.bottomRow}`}>
-        <p>© {currentYear} Zudomart. Made in Nigeria.</p>
+        <p>© {currentYear} Zudomart. Made in Nigeria. <CookieSettingsButton className={styles.footerLink} /></p>
         <p>Prices in your local currency. Payments held in escrow until delivery is confirmed.</p>
       </div>
       <p className={styles.giantWordmark} aria-hidden="true">
