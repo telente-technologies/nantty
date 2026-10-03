@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 
+	"zudomart/modules/ledger/src/constants"
 	"zudomart/modules/ledger/src/middlewares"
 	"zudomart/modules/wallet/src/modules/coins"
 	"zudomart/modules/wallet/src/modules/coins/controllers"
@@ -11,6 +12,10 @@ import (
 func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
 	controller := controllers.CoinsController{Application: application}
 	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
+	requirePricingRead := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionManageMonetization, false)
+	requirePricingWrite := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionManageMonetization, true)
+	mux.Handle("GET /api/v1/admin/coins/price-table", requirePricingRead(http.HandlerFunc(controller.ListCoinPriceTable)))
+	mux.Handle("PUT /api/v1/admin/coins/price-table/{packageId}", requirePricingWrite(http.HandlerFunc(controller.UpsertCoinPriceRow)))
 	mux.HandleFunc("GET /api/v1/coins/packages", controller.ListCoinPackages)
 	mux.HandleFunc("GET /api/v1/coins/packs", controller.ListCoinPackages)
 	mux.Handle("GET /api/v1/coins/balance", requireUser(http.HandlerFunc(controller.GetCoinBalance)))
