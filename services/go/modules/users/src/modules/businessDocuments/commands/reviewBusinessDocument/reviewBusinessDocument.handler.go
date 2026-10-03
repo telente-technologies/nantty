@@ -1,0 +1,75 @@
+package reviewbusinessdocument
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+
+	"zudomart/modules/users/src/container"
+	usersErrors "zudomart/modules/users/src/errors"
+	usersevents "zudomart/modules/users/src/events"
+	"zudomart/modules/users/src/generated/ent"
+	"zudomart/modules/users/src/generated/ent/businessdocument"
+	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
+	businessevents "zudomart/modules/users/src/modules/businessDocuments/events"
+	"zudomart/modules/users/src/modules/businessDocuments/services"
+	usersservices "zudomart/modules/users/src/services"
+)
+
+type Handler struct {
+	Container *container.Container
+}
+
+func (handler Handler) Execute(ctx context.Context, command Command) (services.SubmissionView, error) {
+	reason, err := accountservices.RequireReason(command.Reason)
+	if err != nil {
+		return services.SubmissionView{}, err
+	}
+	owner, ownerErr := uuid.Parse(command.AccountId)
+	documentId, documentErr := uuid.Parse(command.DocumentId)
+	if ownerErr != nil || documentErr != nil {
+		return services.SubmissionView{}, usersErrors.NotFound("That document was not found.")
+	}
+	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		document, err := tx.BusinessDocument.Query().Where(businessdocument.ID(documentId), businessdocument.AccountID(owner), businessdocument.IsCurrent(true), businessdocument.IsUploaded(true)).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) {
+			return usersErrors.NotFound("That document was not found.")
+		}
+		if err != nil {
+			return err
+		}
+		if document.Status != businessdocument.StatusPending {
+			return usersErrors.Conflict("ALREADY_DECIDED", "This document was already reviewed.")
+		}
+		status, action := businessdocument.StatusRejected, "business_document.rejected"
+		if command.Approve {
+			status, action = businessdocument.StatusApproved, "business_document.approved"
+		}
+		now := handler.Container.Now()
+		update := document.Update().SetStatus(status).SetReviewedByName(command.Actor.Name).SetReviewedAt(now)
+		if !command.Approve {
+			update.SetRejectionReason(reason)
+		}
+		if err := update.Exec(ctx); err != nil {
+			return err
+		}
+		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, businessevents.BusinessDocumentReviewedType, owner.String(), now, businessevents.DocumentEventData{
+			AccountId: owner.String(), DocumentId: document.ID.String(), Kind: string(document.Kind), Status: string(status), Reason: reason,
+		}); err != nil {
+			return err
+		}
+		if command.Approve {
+			if err := services.EvaluateGoldFromApprovedDocuments(ctx, handler.Container, tx, owner); err != nil {
+				return err
+			}
+		}
+		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{
+			Action: action, SubjectType: "business_document", SubjectId: document.ID.String(), SubjectLabel: string(document.Kind), Reason: reason,
+			Before: map[string]any{"status": "pending"}, After: map[string]any{"status": status, "accountId": owner},
+		})
+	})
+	if err != nil {
+		return services.SubmissionView{}, err
+	}
+	return services.BuildSubmissionView(ctx, handler.Container, owner)
+}
