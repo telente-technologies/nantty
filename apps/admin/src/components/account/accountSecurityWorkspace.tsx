@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { ThemeSwitcher } from "@zudomart/web-kit";
+
 import { useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { ErrorBlock, LoadingBlock, NoticeBanner } from "@/components/ui/feedback";
@@ -96,6 +98,12 @@ export function AccountSecurityWorkspace() {
               </li>
             ))}
           </ul>
+        </Card>
+        <Card title="Appearance">
+          <div className={styles.stack}>
+            <p className={styles.muted}>Choose how the console looks on this and your other Zudomart apps. System follows your device setting.</p>
+            <ThemeSwitcher label="Colour theme" />
+          </div>
         </Card>
         <Card title="What you can do">
           {admin.role === "SUPERADMIN" ? <p>Every permission, including managing admins.</p> : <PermissionSummary permissions={admin.permissions} />}
