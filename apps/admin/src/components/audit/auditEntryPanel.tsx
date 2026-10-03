@@ -16,7 +16,8 @@ export function AuditEntryPanel({ entry, onClose }: { readonly entry: AuditLogEn
         columns={2}
         items={[
           { label: "Who", value: `${entry.actor.name}${entry.actor.role ? ` (${entry.actor.role.toLowerCase()})` : ""}` },
-          { label: "Actor ID", value: entry.actor.id, isMono: true },
+          { label: "Staff ID", value: entry.actor.id, isMono: true },
+          { label: "Department / role", value: entry.actor.departments && entry.actor.departments.length > 0 ? entry.actor.departments.join(", ") : "—" },
           { label: "Target", value: `${entry.target.type} · ${entry.target.label}` },
           { label: "Target ID", value: entry.target.id, isMono: true },
           { label: "Area", value: entry.area },
