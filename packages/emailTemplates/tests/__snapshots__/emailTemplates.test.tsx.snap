@@ -1,0 +1,146 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`money and snapshots > emailOtp plain text matches snapshot 1`] = `
+"482913 is your Zudomart code
+
+Zudomart
+
+VERIFICATION CODE
+Here's your code to sign in
+===========================
+
+482913
+Expires in 10 minutes · Use it once
+
+Enter this code in the Zudomart app or on the website. Never share it with anyone — Zudomart staff will never ask for it, not even on a call or in chat.
+
+Didn't ask for a code? Someone may have typed your email by mistake. You can ignore this email; nobody can get in without the code.
+
+--
+We send security emails to every account owner so you always know what happens to your account. You can't turn these off.
+Manage notifications: https://zudomart.com/settings/notifications
+Help Centre: https://zudomart.com/help
+Support: oyinlola.tech@icloud.com or oluwayemioyinlola2@icloud.com
+Zudomart will never ask for your password, PIN or one-time code by email.
+App Store: https://apps.apple.com/app/zudomart/id0000000000
+Google Play: https://play.google.com/store/apps/details?id=com.zudomart.app
+© YEAR ZUDOMART_COMPANY_LEGAL_NAME. ZUDOMART_COMPANY_ADDRESS.
+"
+`;
+
+exports[`money and snapshots > orderShipped plain text matches snapshot 1`] = `
+"On its way: your order from Adire Lagos Studio
+
+Zudomart
+
+SHIPPED
+Arriving by 7 October 2026
+==========================
+
+[x] Ordered  [x] Paid  [x] Shipped  [>] Delivered  [ ] Complete
+
+TRACKING
+Carrier: GIG Logistics
+Tracking number: GIG-7782-1190-NG
+Estimated delivery: 7 October 2026
+
+Track package: https://zudomart.com/orders/ZM-48213/tracking
+
+Sold by Adire Lagos Studio
+  1 × Hand-dyed adire two-piece (Indigo · Size M) — ₦38,500.00
+  2 × Leather slide sandals (Tan · 42) — ₦28,000.00
+  Shipping (GIG Logistics, 2–4 days): ₦2,500.00
+  From this seller: ₦69,000.00
+
+Check your items when they arrive. You'll have 3 days to confirm or report a problem before payment is released.
+
+--
+You're getting this email because of activity on your Zudomart account.
+Manage notifications: https://zudomart.com/settings/notifications
+Help Centre: https://zudomart.com/help
+Support: oyinlola.tech@icloud.com or oluwayemioyinlola2@icloud.com
+Zudomart will never ask for your password, PIN or one-time code by email.
+App Store: https://apps.apple.com/app/zudomart/id0000000000
+Google Play: https://play.google.com/store/apps/details?id=com.zudomart.app
+© YEAR ZUDOMART_COMPANY_LEGAL_NAME. ZUDOMART_COMPANY_ADDRESS.
+"
+`;
+
+exports[`money and snapshots > policyUpdated plain text matches snapshot 1`] = `
+"We're updating our Privacy Policy on 1 November 2026
+
+Zudomart
+
+ACTION NEEDED
+Changes to our Privacy Policy
+=============================
+
+Hi Amaka, we've rewritten our Privacy Policy to be clearer about how we use your information to keep orders safe and personalise your feed.
+
+What's changing
+- We explain how escrow and payment partners process your payment details.
+- New section on how recommendations use what you watch and save, and how to turn it off.
+- Retention periods are now listed per type of data.
+- Clearer steps to download or delete your data.
+
+Policy: Privacy Policy
+Effective: 1 November 2026
+
+[Please review and accept] These are significant changes, so we need your agreement. You'll be asked to accept the next time you open Zudomart on or after 1 November 2026.
+
+Review and accept: https://zudomart.com/legal/accept?doc=privacy
+
+Read the full Privacy Policy: https://zudomart.com/legal/privacy
+
+--
+We send this to everyone with a Zudomart account because it affects your rights and how we handle your information.
+Manage notifications: https://zudomart.com/settings/notifications
+Help Centre: https://zudomart.com/help
+Support: oyinlola.tech@icloud.com or oluwayemioyinlola2@icloud.com
+Zudomart will never ask for your password, PIN or one-time code by email.
+App Store: https://apps.apple.com/app/zudomart/id0000000000
+Google Play: https://play.google.com/store/apps/details?id=com.zudomart.app
+© YEAR ZUDOMART_COMPANY_LEGAL_NAME. ZUDOMART_COMPANY_ADDRESS.
+"
+`;
+
+exports[`money and snapshots > weeklyDigest plain text matches snapshot 1`] = `
+"Your week on Zudomart: 29 Sep – 5 Oct
+
+Zudomart
+
+29 SEP – 5 OCT
+This week on Zudomart
+=====================
+
+Trending from verified sellers
+- Classic chronograph watch by Timepiece Co. — ₦84,500.00 (was ₦99,000.00)
+  https://zudomart.com/p/classic-chronograph
+- Oud & amber eau de parfum by Scent Bar Abuja — ₦46,000.00
+  https://zudomart.com/p/oud-amber
+- Mirrorless camera kit by Gadget Hub NG — ₦615,000.00 (was ₦680,000.00)
+  https://zudomart.com/p/mirrorless-kit
+- Everyday leather tote by Adire Lagos Studio — ₦52,000.00
+  https://zudomart.com/p/leather-tote
+
+————————————————————————
+
+Lives coming up
+
+- Adire Lagos Studio (@adirelagos) — Thu 7pm · New indigo drop
+- Kemi Cooks (@kemicooks) — Sat 11am · Jollof masterclass
+
+Open Zudomart: https://zudomart.com/
+
+--
+You're getting this because you said yes to deals and recommendations from Zudomart. We only feature verified sellers and brands.
+Unsubscribe: https://zudomart.com/email/unsubscribe
+Email preferences: https://zudomart.com/settings/notifications/email
+Help Centre: https://zudomart.com/help
+Support: oyinlola.tech@icloud.com or oluwayemioyinlola2@icloud.com
+Zudomart will never ask for your password, PIN or one-time code by email.
+App Store: https://apps.apple.com/app/zudomart/id0000000000
+Google Play: https://play.google.com/store/apps/details?id=com.zudomart.app
+© YEAR ZUDOMART_COMPANY_LEGAL_NAME. ZUDOMART_COMPANY_ADDRESS.
+"
+`;
