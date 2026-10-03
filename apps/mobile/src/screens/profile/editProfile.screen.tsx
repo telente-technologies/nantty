@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { CameraBolt24Icon, SealCheck20Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary, type PickedImage } from "@/components/profile/pickImage.util";
@@ -13,6 +14,8 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { mediaService } from "@/services/media.service";
+
+const KEYBOARD_BOTTOM_OFFSET = 24;
 
 export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">) {
   const { colors } = useTheme();
@@ -53,8 +56,8 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
   return (
     <Screen background={colors.surface}>
       <Header title="Profile" paddingHorizontal={12} />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <View style={styles.flex}>
+        <KeyboardAwareScrollView bottomOffset={KEYBOARD_BOTTOM_OFFSET} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Pressable accessibilityRole="button" accessibilityLabel="Change banner image" onPress={async () => setBanner((await pickSquareOrWideImageFromLibrary([3, 1])) ?? banner)} style={styles.banner}>
             {bannerUri ? <Image source={{ uri: bannerUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
             <CameraBolt24Icon />
@@ -100,11 +103,11 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
               {error}
             </Text>
           ) : null}
-        </ScrollView>
+        </KeyboardAwareScrollView>
         <View style={styles.footer}>
           <Button title="Save" disabled={!name.trim()} loading={uploading} onPress={uploadPickedImagesAndSaveProfile} />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }
