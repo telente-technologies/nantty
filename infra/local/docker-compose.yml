@@ -1,0 +1,100 @@
+name: zudomart-backend
+
+x-local-only: &local-only
+  restart: unless-stopped
+
+services:
+  postgres:
+    <<: *local-only
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: zudomart
+      POSTGRES_PASSWORD: zudomart
+      POSTGRES_DB: zudomart
+    ports: ["127.0.0.1:15432:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/create-databases.sh:/docker-entrypoint-initdb.d/10-create-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zudomart -d zudomart"]
+      interval: 5s
+      retries: 20
+
+  valkey:
+    <<: *local-only
+    image: valkey/valkey:9-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    ports: ["127.0.0.1:16379:6379"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      retries: 20
+
+  localstack:
+    <<: *local-only
+    image: localstack/localstack:4.9
+    environment:
+      SERVICES: sns,sqs
+      AWS_DEFAULT_REGION: eu-west-1
+    ports: ["127.0.0.1:14566:4566"]
+    volumes: ["./localstack/create-topics-and-queues.sh:/etc/localstack/init/ready.d/10-create-topics-and-queues.sh:ro"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/zudomart-messaging-ready"]
+      interval: 5s
+      retries: 30
+
+  opensearch:
+    <<: *local-only
+    profiles: [search]
+    image: opensearchproject/opensearch:3
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports: ["127.0.0.1:19200:9200"]
+    volumes: [opensearch-data:/usr/share/opensearch/data]
+
+  object-storage:
+    <<: *local-only
+    image: chrislusf/seaweedfs:latest
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-ip.bind=0.0.0.0", "-master.volumeSizeLimitMB=1024"]
+    ports: ["127.0.0.1:18333:8333"]
+    volumes: [object-storage-data:/data]
+
+  livekit:
+    <<: *local-only
+    image: livekit/livekit-server:latest
+    command: ["--config", "/etc/livekit.yaml"]
+    volumes: ["./livekit/livekit.yaml:/etc/livekit.yaml:ro"]
+    ports: ["127.0.0.1:7880:7880", "127.0.0.1:7881:7881", "127.0.0.1:7882:7882/udp"]
+
+  otel-collector:
+    <<: *local-only
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel/collector.yaml"]
+    volumes: ["./otel/collector.yaml:/etc/otel/collector.yaml:ro"]
+    ports: ["127.0.0.1:4317:4317", "127.0.0.1:4318:4318"]
+    depends_on: [jaeger]
+
+  jaeger:
+    <<: *local-only
+    image: jaegertracing/jaeger:latest
+    ports: ["127.0.0.1:16686:16686"]
+
+  clickhouse:
+    <<: *local-only
+    profiles: [analytics]
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      CLICKHOUSE_USER: zudomart
+      CLICKHOUSE_PASSWORD: zudomart
+      CLICKHOUSE_DB: analytics
+    ports: ["127.0.0.1:18123:8123", "127.0.0.1:19000:9000"]
+    volumes: [clickhouse-data:/var/lib/clickhouse]
+
+volumes:
+  postgres-data:
+  opensearch-data:
+  object-storage-data:
+  clickhouse-data:
