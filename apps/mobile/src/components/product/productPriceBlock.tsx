@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { BookmarkSimple24Icon, Share24Icon, Star16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { Product } from "@/types";
 
 import { MoneyAmount } from "./moneyAmount";
@@ -17,6 +17,7 @@ export interface ProductPriceBlockProps {
 }
 
 export function ProductPriceBlock({ product, bookmarked, onShare, onToggleBookmark, onPressRating }: ProductPriceBlockProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.block}>
       <View style={styles.top}>
@@ -29,7 +30,7 @@ export function ProductPriceBlock({ product, bookmarked, onShare, onToggleBookma
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={bookmarked ? "Remove bookmark" : "Bookmark product"}
+              accessibilityLabel={bookmarked ? "Remove product from saved" : "Save product"}
               accessibilityState={{ selected: bookmarked }}
               hitSlop={8}
               onPress={onToggleBookmark}

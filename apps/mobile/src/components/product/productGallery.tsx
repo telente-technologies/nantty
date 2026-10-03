@@ -4,7 +4,7 @@ import { FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "reac
 
 import { useImagePreview } from "@/components/ui/previewableImage";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 
 export interface ProductGalleryProps {
   readonly images: readonly string[];
@@ -12,6 +12,7 @@ export interface ProductGalleryProps {
 }
 
 export function ProductGallery({ images, promo }: ProductGalleryProps) {
+  const styles = useStyles();
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, 393);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -57,7 +58,7 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   image: { height: 418, backgroundColor: colors.textSubtle, overflow: "hidden" },
   promo: {
     height: 33,
@@ -66,9 +67,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#8F8F8F",
+    borderColor: scheme === "dark" ? colors.textSubtle : "#8F8F8F",
   },
   indicator: { marginTop: 11, marginLeft: 12, flexDirection: "row", alignItems: "center", gap: 4 },
   bar: { width: 12, height: 4, borderRadius: 21, backgroundColor: colors.placeholder },
-  activeBar: { width: 24, height: 4, borderRadius: 21, backgroundColor: "#0D0D0D" },
-});
+  activeBar: { width: 24, height: 4, borderRadius: 21, backgroundColor: scheme === "dark" ? colors.text : "#0D0D0D" },
+}));

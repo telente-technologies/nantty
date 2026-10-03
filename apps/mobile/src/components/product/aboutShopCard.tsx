@@ -5,7 +5,7 @@ import { Star16Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles } from "@/theme";
 import type { StoreSummary } from "@/types";
 
 export interface AboutShopCardProps {
@@ -16,6 +16,7 @@ export interface AboutShopCardProps {
 }
 
 export function AboutShopCard({ store, following, onToggleFollow, onViewShop }: AboutShopCardProps) {
+  const styles = useStyles();
   return (
     <View style={styles.card}>
       <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">
@@ -59,7 +60,7 @@ export function AboutShopCard({ store, following, onToggleFollow, onViewShop }: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { paddingHorizontal: 12, gap: 12 },
   shopRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   logo: { width: 60, height: 60, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
@@ -71,4 +72,4 @@ const styles = StyleSheet.create({
   separator: { width: 1, height: 12, backgroundColor: colors.black },
   buttons: { flexDirection: "row", gap: 8 },
   button: { flex: 1 },
-});
+}));

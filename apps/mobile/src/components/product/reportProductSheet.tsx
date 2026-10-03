@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { REPORT_REASON_OPTIONS, reportsService, type ReportReason } from "@/services/reports.service";
 
 const PRODUCT_REASON_LABEL_OVERRIDES: Partial<Record<ReportReason, string>> = {
@@ -12,6 +12,8 @@ const PRODUCT_REASON_LABEL_OVERRIDES: Partial<Record<ReportReason, string>> = {
 };
 
 export function ReportProductSheet({ productId, visible, onClose }: { productId: string; visible: boolean; onClose: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [submitted, setSubmitted] = useState(false);
   const report = useMutation({
     mutationFn: (reason: ReportReason) => reportsService.submitReportForContent({ targetType: "product", targetId: productId, reason, details: "" }),
@@ -42,8 +44,8 @@ export function ReportProductSheet({ productId, visible, onClose }: { productId:
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { maxHeight: 440 },
   body: { paddingHorizontal: 16, paddingBottom: 16 },
   option: { minHeight: 50, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
-});
+}));

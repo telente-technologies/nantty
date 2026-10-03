@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import { useProductLikeToggle } from "@/hooks/useProductLike.hook";
 import type { ProductSummary } from "@/types";
 
@@ -14,6 +14,7 @@ export interface FeaturedProductsGridProps {
 }
 
 export function FeaturedProductsGrid({ products, title = "Featured with" }: FeaturedProductsGridProps) {
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const toggleProductLike = useProductLikeToggle();
   const rows: ProductSummary[][] = [];

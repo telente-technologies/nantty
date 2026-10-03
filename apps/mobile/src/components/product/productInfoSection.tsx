@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { CaretDown24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface ProductInfoSectionProps {
   readonly title: string;
@@ -12,6 +12,7 @@ export interface ProductInfoSectionProps {
 }
 
 export function ProductInfoSection({ title, body, collapsible = false }: ProductInfoSectionProps) {
+  const { colors } = useTheme();
   const [expanded, setExpanded] = useState(true);
   const heading = (
     <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">

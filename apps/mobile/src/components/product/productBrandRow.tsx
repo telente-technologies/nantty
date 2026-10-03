@@ -5,10 +5,12 @@ import { CaretRight24Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { OfficialStoreBadge } from "@/components/store/officialStoreBadge";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { BrandTag } from "@/types/brand.type";
 
 export function ProductBrandRow({ brand, isOfficialStore, onPress }: { brand: BrandTag; isOfficialStore: boolean; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`Brand: ${brand.name}${isOfficialStore ? ", Official Store" : ""}`} onPress={onPress} style={styles.row}>
       <Image source={{ uri: brand.logoUrl ?? undefined }} style={styles.logo} contentFit="cover" />
@@ -25,9 +27,9 @@ export function ProductBrandRow({ brand, isOfficialStore, onPress }: { brand: Br
   );
 }
 
-const styles = StyleSheet.create({
-  row: { marginHorizontal: 12, marginTop: 16, padding: 10, borderRadius: 12, backgroundColor: colors.white, flexDirection: "row", alignItems: "center", gap: 10 },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  row: { marginHorizontal: 12, marginTop: 16, padding: 10, borderRadius: 12, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", gap: 10 },
   logo: { width: 36, height: 36, borderRadius: 6, backgroundColor: colors.placeholder },
   texts: { flex: 1, gap: 2 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-});
+}));

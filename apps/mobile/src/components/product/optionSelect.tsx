@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { CaretDown24Icon, Check16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface OptionSelectProps {
   readonly label: string;
@@ -16,6 +16,8 @@ export interface OptionSelectProps {
 }
 
 export function OptionSelect({ label, placeholder, options, value, onChange, trailingValue }: OptionSelectProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [pickerOpen, setPickerOpen] = useState(false);
   return (
     <View style={styles.field}>
@@ -65,7 +67,7 @@ export function OptionSelect({ label, placeholder, options, value, onChange, tra
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 12 },
   box: {
     height: 38,
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.textSubtle,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -88,4 +90,4 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
-});
+}));

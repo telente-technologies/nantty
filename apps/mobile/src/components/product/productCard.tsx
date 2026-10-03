@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View, type DimensionValue } from "react-native";
 
 import { Like16Icon, Plus16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { adEventsService } from "@/services/adEvents.service";
 import type { AdPlacement, ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -21,6 +21,8 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "grid", imageHeight, width = 175, onPress, onAddToCart, onToggleLike, adPlacement = "mart" }: ProductCardProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isMart = variant === "mart";
   const sponsored = product.sponsored;
   useEffect(() => {
@@ -76,6 +78,8 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
 }
 
 export function AdPill() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.adPill} accessible accessibilityLabel="Advertisement">
       <Text size={11} weight={500} lineHeight={13.2} letterSpacing={0} color={colors.textMuted}>
@@ -86,6 +90,7 @@ export function AdPill() {
 }
 
 export function SponsoredLabel() {
+  const { colors } = useTheme();
   return (
     <Text size={12} weight={400} lineHeight={14.4} color={colors.textSubtle} accessibilityLabel="Sponsored">
       Sponsored
@@ -93,7 +98,7 @@ export function SponsoredLabel() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { gap: 8 },
   image: { width: "100%", backgroundColor: colors.placeholder, overflow: "hidden" },
   martInfo: { paddingHorizontal: 8, gap: 4 },
@@ -101,4 +106,4 @@ const styles = StyleSheet.create({
   gridInfo: { flexDirection: "row", justifyContent: "space-between", gap: 19 },
   gridText: { flex: 1, gap: 2 },
   adPill: { position: "absolute", top: 8, left: 8, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99, backgroundColor: colors.skeleton },
-});
+}));
