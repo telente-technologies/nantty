@@ -9,6 +9,7 @@ const (
 	CreatorRequirementsKey = "creator.requirements"
 	MonetizationPolicyKey  = "monetization.policy"
 	GiftShareTiersKey      = "gift.shareTiers"
+	EscrowPolicyKey        = "escrow.policy"
 	maximumCreatorShareBps = 7000
 )
 
@@ -31,6 +32,7 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 		{MinimumMonthlyGiftCoins: 500000, CreatorShareBps: 6000},
 		{MinimumMonthlyGiftCoins: 5000000, CreatorShareBps: maximumCreatorShareBps},
 	}}},
+	EscrowPolicyKey: {Validate: validateEscrowPolicy, DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
 }
 
 type CreatorRequirements struct {
@@ -56,6 +58,12 @@ type MonetizationPolicy struct {
 type GiftShareTier struct {
 	MinimumMonthlyGiftCoins int64 `json:"minimumMonthlyGiftCoins"`
 	CreatorShareBps         int   `json:"creatorShareBps"`
+}
+
+type EscrowPolicy struct {
+	AutoReleaseDays       int `json:"autoReleaseDays"`
+	SellerCreditHoldHours int `json:"sellerCreditHoldHours"`
+	SellerReserveBps      int `json:"sellerReserveBps"`
 }
 
 type GiftShareTiers struct {

@@ -95,3 +95,20 @@ func validateGiftShareTiers(raw json.RawMessage) (json.RawMessage, error) {
 	}
 	return canonicalJson(value)
 }
+
+func validateEscrowPolicy(raw json.RawMessage) (json.RawMessage, error) {
+	var value EscrowPolicy
+	if err := decodeStrictly(raw, &value); err != nil {
+		return nil, err
+	}
+	for _, check := range []error{
+		requireWithin("autoReleaseDays", value.AutoReleaseDays, 1, 30),
+		requireWithin("sellerCreditHoldHours", value.SellerCreditHoldHours, 0, 720),
+		requireWithin("sellerReserveBps", value.SellerReserveBps, 0, 5000),
+	} {
+		if check != nil {
+			return nil, check
+		}
+	}
+	return canonicalJson(value)
+}
