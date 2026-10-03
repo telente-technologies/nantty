@@ -61,7 +61,7 @@ export function AutomationWorkspace() {
           columns={[
             { key: "name", header: "Rule", render: (rule) => <span><strong>{rule.content.name}</strong><br /><span className={styles.note}>{rule.content.description}</span></span> },
             { key: "event", header: "When", render: (rule) => <code>{eventLabel(rule.content.event)}</code> },
-            { key: "shape", header: "Logic", width: "150px", render: (rule) => `${rule.content.conditions.length} condition${rule.content.conditions.length === 1 ? "" : "s"} → ${rule.content.actions.length} action${rule.content.actions.length === 1 ? "" : "s"}` },
+            { key: "shape", header: "Logic", width: "150px", render: (rule) => `${rule.content.conditions.length} condition${rule.content.conditions.length === 1 ? "" : "s"} to ${rule.content.actions.length} action${rule.content.actions.length === 1 ? "" : "s"}` },
             { key: "status", header: "Status", width: "90px", render: (rule) => <StatusBadge label={rule.content.isEnabled ? "On" : "Off"} tone={rule.content.isEnabled ? "success" : "neutral"} /> },
             { key: "version", header: "Version", width: "70px", isMono: true, render: (rule) => `v${rule.version}` },
           ]}
