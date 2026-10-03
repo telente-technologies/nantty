@@ -1,0 +1,78 @@
+package services
+
+import (
+	"context"
+
+	"zudomart/modules/subscriptions/src/constants"
+	"zudomart/modules/subscriptions/src/generated/ent"
+	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+)
+
+type ProfileEntitlement struct {
+	ProfileId  string `json:"profileId"`
+	Plan       string `json:"plan"`
+	Status     string `json:"status"`
+	ValidUntil string `json:"validUntil"`
+}
+
+type TrialState struct {
+	ProfileId   string `json:"profileId"`
+	Plan        string `json:"plan"`
+	TrialEndsAt string `json:"trialEndsAt"`
+	IsCancelled bool   `json:"isCancelled"`
+}
+
+type Entitlements struct {
+	UserId              string               `json:"userId"`
+	SellerPlan          string               `json:"sellerPlan"`
+	SellerPlanStatus    string               `json:"sellerPlanStatus"`
+	Premium             bool                 `json:"premium"`
+	Blue                bool                 `json:"blue"`
+	BlueEssential       bool                 `json:"blueEssential"`
+	Gold                []ProfileEntitlement `json:"gold"`
+	Black               []ProfileEntitlement `json:"black"`
+	Trial               *TrialState          `json:"trial"`
+	SubscribedToCreator bool                 `json:"subscribedToCreator"`
+}
+
+func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Entitlements, error) {
+	rows, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
+		Where(subscription.OwnerUserID(userId), subscription.StatusIn(liveStatuses()...)).Order(ent.Asc(subscription.FieldCreatedAt)).All(ctx)
+	if err != nil {
+		return Entitlements{}, err
+	}
+	result := Entitlements{UserId: userId, SellerPlan: "free", Gold: []ProfileEntitlement{}, Black: []ProfileEntitlement{}}
+	rank := map[string]int{"free": 0, "pro": 1, "business": 2}
+	for _, row := range rows {
+		definition := constants.Plans[row.PlanCode]
+		entitlement := ProfileEntitlement{ProfileId: row.ProfileID, Plan: row.PlanCode, Status: string(row.Status), ValidUntil: isoTime(row.CurrentPeriodEndsAt)}
+		switch row.PlanCode {
+		case constants.PlanPremium:
+			result.Premium, result.Blue = true, true
+		case constants.PlanBlue:
+			result.Blue = true
+		case constants.PlanBlueEssential:
+			result.BlueEssential = true
+		case constants.PlanBlack:
+			result.Black = append(result.Black, entitlement)
+		}
+		if definition.Checkmark == "gold" {
+			result.Gold = append(result.Gold, entitlement)
+		}
+		if definition.SellerPlan != "" && rank[definition.SellerPlan] > rank[result.SellerPlan] {
+			result.SellerPlan, result.SellerPlanStatus = definition.SellerPlan, string(row.Status)
+		}
+		if row.Status == subscription.StatusTrialing && result.Trial == nil {
+			result.Trial = &TrialState{ProfileId: row.ProfileID, Plan: row.PlanCode, TrialEndsAt: isoTime(row.TrialEndsAt), IsCancelled: row.CancelAtPeriodEnd}
+		}
+	}
+	return result, nil
+}
+
+func (billing Billing) SellerPlanOf(ctx context.Context, userId string) string {
+	entitlements, err := billing.ReadEntitlements(ctx, userId)
+	if err != nil {
+		return "free"
+	}
+	return entitlements.SellerPlan
+}

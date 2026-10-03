@@ -1,0 +1,29 @@
+package routes
+
+import (
+	"net/http"
+
+	"zudomart/modules/ledger/src/constants"
+	"zudomart/modules/ledger/src/middlewares"
+	"zudomart/modules/subscriptions/src/modules/billing/controllers"
+)
+
+func MountBillingRoutes(mux *http.ServeMux, controller controllers.BillingController) {
+	resources := controller.Billing.Container.Resources
+	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
+	requirePricingRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionManageMonetization, false)
+	requirePricingWrite := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionManageMonetization, true)
+	mux.HandleFunc("GET /api/v1/subscriptions/plans", controller.ListPlans)
+	mux.HandleFunc("GET /api/v1/seller/subscription/plans", controller.ListPlans)
+	mux.Handle("GET /api/v1/subscriptions/me", requireUser(http.HandlerFunc(controller.ListMine)))
+	mux.Handle("GET /api/v1/subscriptions/offer", requireUser(http.HandlerFunc(controller.Offer)))
+	mux.Handle("GET /api/v1/seller/subscription/trial", requireUser(http.HandlerFunc(controller.Offer)))
+	mux.Handle("POST /api/v1/subscriptions/checkout", requireUser(http.HandlerFunc(controller.StartCheckout)))
+	mux.Handle("POST /api/v1/seller/subscription/checkout", requireUser(http.HandlerFunc(controller.StartCheckout)))
+	mux.Handle("POST /api/v1/seller/subscription/trial/checkout", requireUser(http.HandlerFunc(controller.StartCheckout)))
+	mux.Handle("POST /api/v1/subscriptions/{subscriptionId}/cancel", requireUser(http.HandlerFunc(controller.Cancel)))
+	mux.Handle("POST /api/v1/subscriptions/store-receipts", requireUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
+	mux.HandleFunc("GET /api/v1/internal/entitlements/{userId}", controller.InternalEntitlements)
+	mux.Handle("GET /api/v1/admin/subscriptions/price-table", requirePricingRead(http.HandlerFunc(controller.ListPriceTable)))
+	mux.Handle("PUT /api/v1/admin/subscriptions/price-table/{planCode}/{countryCode}", requirePricingWrite(http.HandlerFunc(controller.UpsertPrice)))
+}
