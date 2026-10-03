@@ -38,10 +38,10 @@ function CoinPurchaseReturn() {
   return (
     <PaymentReturnStatus
       state={state}
-      confirmingText="We're waiting for Bachs to confirm your coin purchase. This usually takes a few seconds."
+      confirmingText="Confirming payment… This usually takes a few seconds."
       succeededTitle="Coins added"
       succeededText={`${confirmationQuery.data?.coins.toLocaleString() ?? ""} coins are in your balance.`}
-      failedText="We couldn't confirm this purchase. If you were charged, the coins will appear once Bachs confirms it."
+      failedText="We couldn't confirm this purchase. If you were charged, the coins will appear once the payment is confirmed."
       continueHref={returnPath}
       continueLabel="Back to the live"
     />

@@ -21,7 +21,7 @@ function SubscriptionReturn() {
   return (
     <PaymentReturnStatus
       state={state}
-      confirmingText="We're waiting for Bachs to confirm your subscription."
+      confirmingText="Confirming payment…"
       succeededTitle="You're subscribed"
       succeededText={stateQuery.data?.renewsAt ? `Renews on ${new Date(stateQuery.data.renewsAt).toLocaleDateString()}.` : "Subscriber-only posts, clips and lives are now unlocked."}
       failedText="The subscription wasn't completed. You haven't been charged for a failed attempt."
