@@ -13,6 +13,7 @@ import { searchService, type SearchScope } from "@/services/search.service";
 import { useQuery } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
+import { AppIcon, IconLabel } from "@/components/ui/appIcon";
 
 const scopeOptions: readonly { readonly value: SearchScope; readonly label: string }[] = [
   { value: "all", label: "All" },
@@ -37,7 +38,7 @@ function ExploreResults() {
   if (!query) {
     return (
       <EmptyState
-        icon="🔎"
+        icon={<AppIcon name="magnifyingGlass24" size={28} />}
         title="Search Zudomart"
         description="Find products, stores, brands and people. Use the search bar above to get started."
       />
@@ -51,7 +52,7 @@ function ExploreResults() {
   const totalResults = (results?.products.length ?? 0) + (results?.stores.length ?? 0) + (results?.people.length ?? 0) + (results?.brands?.length ?? 0);
 
   if (totalResults === 0) {
-    return <EmptyState icon="🙈" title={`No results for “${query}”`} description="Try a different spelling or browse categories from the home screen." />;
+    return <EmptyState icon={<AppIcon name="searchOff24" size={28} />} title={`No results for “${query}”`} description="Try a different spelling or browse categories from the home screen." />;
   }
 
   return (
@@ -92,7 +93,7 @@ function ExploreResults() {
                   <Avatar name={store.name} src={store.logoUrl} size="md" />
                   <span className={styles.entityText}>
                     <span className={styles.entityName}>{store.name}</span>
-                    <span className={styles.entityMeta}>★ {store.rating > 0 ? store.rating.toFixed(1) : "New"} · {store.reviewCount} reviews</span>
+                    <span className={styles.entityMeta}><IconLabel name="star16" size={12}>{store.rating > 0 ? store.rating.toFixed(1) : "New"} · {store.reviewCount} reviews</IconLabel></span>
                   </span>
                 </Link>
               </li>

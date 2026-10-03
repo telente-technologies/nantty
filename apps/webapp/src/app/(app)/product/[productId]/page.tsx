@@ -24,6 +24,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import controlStyles from "./buyBoxControls.module.css";
 import styles from "./page.module.css";
 import { ProductDetailSkeleton } from "./productDetailSkeleton";
+import { IconLabel } from "@/components/ui/appIcon";
 
 export default function ProductDetailPage({ params }: { readonly params: Promise<{ readonly productId: string }> }) {
   const { productId } = use(params);
@@ -212,7 +213,7 @@ export default function ProductDetailPage({ params }: { readonly params: Promise
                 <StoreIcon size={16} /> {product.store.name}
               </span>
               <span className={styles.storeMeta}>
-                ★ {product.store.rating > 0 ? product.store.rating.toFixed(1) : "New"} · {formatCountWithThousandsSuffix(product.store.reviewCount)} reviews
+                <IconLabel name="star16" size={12}>{product.store.rating > 0 ? product.store.rating.toFixed(1) : "New"} · {formatCountWithThousandsSuffix(product.store.reviewCount)} reviews</IconLabel>
               </span>
               {product.store.earnBackBasisPoints ? <span className={styles.storeMeta}>Earn {product.store.earnBackBasisPoints / 100}% back at this store</span> : null}
             </span>
