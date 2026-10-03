@@ -2,9 +2,9 @@ import shared from "./landingPage.module.css";
 import styles from "./landingSteps.module.css";
 
 const steps = [
-  { title: "Create a live", body: "Give your stream a title in Studio." },
+  { title: "Create a live", body: "Give your stream a title and pick a category: just chatting, gaming, music, education or shopping." },
   { title: "Connect your source", body: "Push RTMP from OBS, or stream straight from your phone." },
-  { title: "Build the overlay", body: "Add text and logos, then paste the browser source into OBS." },
+  { title: "Build the overlay", body: "Add your logo, gift goal or lower third, then paste the browser source into OBS." },
 ];
 
 export function LandingSteps() {

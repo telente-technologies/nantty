@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ZudomartWordmark } from "@zudomart/web-kit";
 
 import styles from "./landingHeader.module.css";
 
@@ -7,7 +8,7 @@ export function LandingHeader() {
     <header className={styles.header}>
       <div className={`${styles.inner} pageContainer`}>
         <Link href="/" className={styles.brand} aria-label="Zudomart Studio home">
-          zudomart <span className={styles.brandPill}>studio</span>
+          <ZudomartWordmark productLabel="Studio" />
         </Link>
         <nav className={styles.navigation} aria-label="Main">
           <ul className={styles.navigationList}>

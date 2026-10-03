@@ -4,27 +4,27 @@ import styles from "./landingFeatures.module.css";
 const features = [
   {
     title: "Connect OBS or any encoder",
-    body: "Grab a server URL and stream key, paste them into OBS, and you are broadcasting to Zudomart.",
+    body: "Grab a server URL and stream key and broadcast your game, console or studio setup to Zudomart.",
   },
   {
     title: "Overlays you control",
-    body: "Lower thirds, logos, shapes, countdowns and tickers on a 1920×1080 canvas, sent to your stream as a browser source.",
+    body: "Lower thirds, logos, gift goals, countdowns and tickers on a 1920×1080 canvas, sent to your stream as a browser source.",
   },
   {
     title: "Go live from your phone",
     body: "Stream from the camera, share your screen while you play, or hand off to an external encoder.",
   },
   {
-    title: "Sell while you stream",
-    body: "Pin products to the live so viewers can check out without leaving the stream.",
+    title: "Battles and guests",
+    body: "Bring up to several guests on stage or battle another creator and let the audience decide with gifts.",
   },
   {
-    title: "Live chat, one inbox",
-    body: "Read and reply to stream comments from the same control room as your encoder status.",
+    title: "Gifts and earnings",
+    body: "Viewers send gifts and subscribe to your channel. Track coins, top gifters and battle results per live.",
   },
   {
-    title: "Post analytics",
-    body: "Impressions, unique viewers and profile visits for every live and every post you own.",
+    title: "Sell if you want to",
+    body: "Have a store? Pin products to your live. No store? Studio works exactly the same without them.",
   },
 ];
 
@@ -34,7 +34,7 @@ export function LandingFeatures() {
       <div className={shared.sectionInner}>
         <div className={shared.sectionHead}>
           <p className={shared.eyebrow}>Everything in one control room</p>
-          <h2 className={shared.sectionTitle}>Built for people who stream to sell.</h2>
+          <h2 className={shared.sectionTitle}>Built for every kind of creator.</h2>
         </div>
         <ul className={styles.grid}>
           {features.map((feature) => (
