@@ -7,6 +7,7 @@ export const userStatusOptions: readonly SelectOption[] = [
   { value: "SUSPENDED", label: "Suspended" },
   { value: "BANNED", label: "Banned" },
   { value: "DEACTIVATED", label: "Deactivated" },
+  { value: "DELETED", label: "Deleted" },
 ];
 
 export const userVerificationOptions: readonly SelectOption[] = [

@@ -17,3 +17,6 @@ export const suspensionDurationOptions: SelectOption[] = [
   { value: "30", label: "30 days" },
 ];
 export const policySeverityOptions: SelectOption[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((value) => ({ value, label: humanizeConstantName(value) }));
+
+export const suspensionReasonOptions: SelectOption[] = ["FRAUD", "SCAM", "COUNTERFEIT", "HARASSMENT", "IMPERSONATION", "SPAM_NETWORK", "OTHER"].map((value) => ({ value, label: humanizeConstantName(value) }));
+export const suspensionSourceOptions = buildOptions(["PYTHON_SUGGESTION", "USER_REPORTS"], "All sources");

@@ -8,8 +8,12 @@ export const adminPermissionGroups = [
     permissions: [
       { key: "users:read", label: "Search and view users" },
       { key: "users:read-pii", label: "Reveal personal data (email, phone, legal name)" },
-      { key: "users:moderate", label: "Warn, suspend and force-logout users" },
+      { key: "users:moderate", label: "Warn and force-logout users" },
+      { key: "users:restrict", label: "Restrict features (posting, messaging, selling) for a time" },
+      { key: "users:suspend", label: "Suspend users and decide suspension cases" },
       { key: "users:ban", label: "Ban users" },
+      { key: "users:delete", label: "Delete accounts (anonymising financial records)" },
+      { key: "usernames:reassign", label: "Move a username from one account to another" },
       { key: "usernames:manage", label: "Withhold and reclaim usernames" },
       { key: "reserved-usernames:manage", label: "Manage the reserved usernames list" },
     ],
@@ -19,6 +23,7 @@ export const adminPermissionGroups = [
     permissions: [
       { key: "verification:review", label: "Approve and reject verification requests" },
       { key: "verification:documents", label: "Open identity and business documents" },
+      { key: "verification:grant", label: "Grant lifetime free checkmarks" },
       { key: "verification:revoke", label: "Suspend and revoke verification" },
     ],
   },
@@ -84,6 +89,37 @@ export const adminPermissionGroups = [
     permissions: [
       { key: "support:tickets", label: "Reply to support tickets" },
       { key: "support:assign", label: "Assign tickets and manage macros" },
+      { key: "support:chat", label: "Answer live chats" },
+      { key: "support:email", label: "Email a user or segment" },
+    ],
+  },
+  {
+    area: "Growth",
+    permissions: [
+      { key: "marketing:campaigns", label: "Run marketing campaigns" },
+      { key: "marketing:email", label: "Send marketing emails" },
+      { key: "sales:leads", label: "Work seller and brand sales leads" },
+      { key: "content:review", label: "Review content and creator submissions" },
+    ],
+  },
+  {
+    area: "Legal",
+    permissions: [
+      { key: "legal.documents.view", label: "Read legal documents, versions and notices" },
+      { key: "legal.documents.edit", label: "Draft and submit legal document versions" },
+      { key: "legal.documents.publish", label: "Approve and publish legal document versions (second person)" },
+      { key: "legal.notices.send", label: "Send and resend Policy updated emails to users" },
+    ],
+  },
+  {
+    area: "Finance",
+    permissions: [{ key: "finance:reports", label: "Open financial reports and exports" }],
+  },
+  {
+    area: "Platform",
+    permissions: [
+      { key: "settings:edit", label: "Edit platform settings" },
+      { key: "staff:manage", label: "Create and manage admins and roles" },
     ],
   },
   {
