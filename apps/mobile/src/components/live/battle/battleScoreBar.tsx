@@ -3,6 +3,7 @@ import { Animated, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import type { LiveBattleParticipant } from "@/types/liveStage.type";
+import { Lightning24Icon } from "@/components/icons";
 
 const MINIMUM_SIDE_SHARE = 0.08;
 export const BATTLE_LEFT_COLOR = "#FF2D6F";
@@ -30,9 +31,7 @@ export function BattleTugOfWarBar({ left, right }: { left: LiveBattleParticipant
       <View style={[StyleSheet.absoluteFill, { backgroundColor: BATTLE_RIGHT_COLOR }]} />
       <Animated.View style={[styles.leftFill, { width: leftWidth }]} />
       <Animated.View style={[styles.spark, { left: leftWidth }]}>
-        <Text size={12} lineHeight={14}>
-          ⚡
-        </Text>
+        <Lightning24Icon size={14} color="#FFFFFF" />
       </Animated.View>
       <Text size={11} weight={700} lineHeight={18} color="#FFFFFF" style={styles.leftScore}>
         {left.score.toLocaleString("en-US")}

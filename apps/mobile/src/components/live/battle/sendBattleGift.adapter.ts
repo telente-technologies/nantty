@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useLiveGiftCatalog } from "@/components/live/gifts/liveGiftCatalog.hook";
 import { useLiveGiftSentEvents } from "@/components/live/gifts/liveGiftEventStream.hook";
 import { useSendLiveGift } from "@/components/live/gifts/sendLiveGift.hook";
-import { apiConfig } from "@/config/api.config";
+import { shouldUseMockForPath } from "@/config/api.config";
 import { liveGuestsService } from "@/services/liveGuests.service";
 import type { LiveStage } from "@/types/liveStage.type";
 
@@ -24,7 +24,7 @@ export function useSendBattleGiftToStreamer(options: UseSendBattleGiftToStreamer
 
   useLiveGiftSentEvents(options.liveId, (event) => {
     const { runningBattleId, signedInUserId, recipientUserId, onStageUpdated } = latest.current;
-    if (!apiConfig.useMocks || !runningBattleId || !recipientUserId || event.sender.id !== signedInUserId) return;
+    if (!shouldUseMockForPath("/api/v1/lives") || !runningBattleId || !recipientUserId || event.sender.id !== signedInUserId) return;
     liveGuestsService
       .creditLiveBattleGift(runningBattleId, { recipientUserId, giftId: event.giftId, quantity: event.quantity })
       .then(onStageUpdated)
