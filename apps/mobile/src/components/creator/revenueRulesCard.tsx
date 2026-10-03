@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreatorRevenueRules } from "@/types/creator.type";
+import { BulletLine } from "@/components/ui/bulletLine";
 
 export function RevenueRulesCard({ rules }: { rules: CreatorRevenueRules }) {
   const { colors } = useTheme();
@@ -20,7 +21,7 @@ export function RevenueRulesCard({ rules }: { rules: CreatorRevenueRules }) {
     <View style={styles.card}>
       <Text size={16} weight={600} lineHeight={19.2}>How you earn</Text>
       {lines.map((line) => (
-        <Text key={line} size={13} lineHeight={17.5} color={colors.textMuted}>• {line}</Text>
+        <BulletLine key={line} size={13} lineHeight={17.5}>{line}</BulletLine>
       ))}
     </View>
   );
