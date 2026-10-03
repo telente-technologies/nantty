@@ -19,9 +19,11 @@ import (
 	"zudomart/modules/admin/src/middlewares"
 	"zudomart/modules/admin/src/migrations"
 	auditlog "zudomart/modules/admin/src/modules/auditLog"
+	auditlogservices "zudomart/modules/admin/src/modules/auditLog/services"
 	platformsettings "zudomart/modules/admin/src/modules/platformSettings"
 	seeddefaultsettings "zudomart/modules/admin/src/modules/platformSettings/commands/seedDefaultSettings"
 	staffadmins "zudomart/modules/admin/src/modules/staffAdmins"
+	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
 	staffauthmodule "zudomart/modules/admin/src/modules/staffAuth"
 	"zudomart/platform/events"
 	"zudomart/platform/identityports"
@@ -74,7 +76,13 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		_ = database.Close()
 		return nil, fmt.Errorf("seed default platform settings: %w", err)
 	}
+	if err := staffadminservices.SeedDepartmentRoleTemplates(ctx, client); err != nil {
+		_ = database.Close()
+		return nil, fmt.Errorf("seed department role templates: %w", err)
+	}
+	identityports.Default.RegisterStaffSessionChecker(staffadminservices.StaffSessionChecker{Container: adminContainer})
 	identityports.Default.RegisterAuditRecorder(auditlog.AuditRecorder{Container: adminContainer})
+	identityports.Default.RegisterAuditHistoryReader(auditlogservices.AuditHistoryService{Container: adminContainer})
 	identityports.Default.RegisterPlatformSettings(platformsettings.NewSettingsPort(adminContainer))
 	dependencies.Health.AddReadinessCheck("admin-postgres", postgres.ReadinessCheckForDatabase(database))
 	return &Module{container: adminContainer, publisher: publisher}, nil
