@@ -12,6 +12,9 @@ type BillingSubscription func(*sql.Selector)
 // ConnectedAccount is the predicate function for connectedaccount builders.
 type ConnectedAccount func(*sql.Selector)
 
+// ConnectedAccountJob is the predicate function for connectedaccountjob builders.
+type ConnectedAccountJob func(*sql.Selector)
+
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
@@ -27,14 +30,23 @@ type PaymentIntent func(*sql.Selector)
 // PaymentRefund is the predicate function for paymentrefund builders.
 type PaymentRefund func(*sql.Selector)
 
+// PayoutOnboarding is the predicate function for payoutonboarding builders.
+type PayoutOnboarding func(*sql.Selector)
+
 // PayoutTransfer is the predicate function for payouttransfer builders.
 type PayoutTransfer func(*sql.Selector)
+
+// ProviderCustomer is the predicate function for providercustomer builders.
+type ProviderCustomer func(*sql.Selector)
 
 // ProviderDispute is the predicate function for providerdispute builders.
 type ProviderDispute func(*sql.Selector)
 
 // ProviderPayoutDestination is the predicate function for providerpayoutdestination builders.
 type ProviderPayoutDestination func(*sql.Selector)
+
+// SavedCardSetup is the predicate function for savedcardsetup builders.
+type SavedCardSetup func(*sql.Selector)
 
 // StorePurchase is the predicate function for storepurchase builders.
 type StorePurchase func(*sql.Selector)

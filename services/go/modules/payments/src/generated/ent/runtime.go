@@ -7,14 +7,18 @@ import (
 	"zudomart/modules/payments/src/databases/schema"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
+	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/paymentrefund"
+	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
+	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -136,8 +140,20 @@ func init() {
 	billingsubscription.DefaultProviderSubscriptionID = billingsubscriptionDescProviderSubscriptionID.Default.(string)
 	// billingsubscription.ProviderSubscriptionIDValidator is a validator for the "provider_subscription_id" field. It is called by the builders before save.
 	billingsubscription.ProviderSubscriptionIDValidator = billingsubscriptionDescProviderSubscriptionID.Validators[0].(func(string) error)
+	// billingsubscriptionDescProviderCustomerID is the schema descriptor for provider_customer_id field.
+	billingsubscriptionDescProviderCustomerID := billingsubscriptionFields[7].Descriptor()
+	// billingsubscription.DefaultProviderCustomerID holds the default value on creation for the provider_customer_id field.
+	billingsubscription.DefaultProviderCustomerID = billingsubscriptionDescProviderCustomerID.Default.(string)
+	// billingsubscription.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	billingsubscription.ProviderCustomerIDValidator = billingsubscriptionDescProviderCustomerID.Validators[0].(func(string) error)
+	// billingsubscriptionDescEmailToken is the schema descriptor for email_token field.
+	billingsubscriptionDescEmailToken := billingsubscriptionFields[8].Descriptor()
+	// billingsubscription.DefaultEmailToken holds the default value on creation for the email_token field.
+	billingsubscription.DefaultEmailToken = billingsubscriptionDescEmailToken.Default.(string)
+	// billingsubscription.EmailTokenValidator is a validator for the "email_token" field. It is called by the builders before save.
+	billingsubscription.EmailTokenValidator = billingsubscriptionDescEmailToken.Validators[0].(func(string) error)
 	// billingsubscriptionDescStatus is the schema descriptor for status field.
-	billingsubscriptionDescStatus := billingsubscriptionFields[7].Descriptor()
+	billingsubscriptionDescStatus := billingsubscriptionFields[9].Descriptor()
 	// billingsubscription.DefaultStatus holds the default value on creation for the status field.
 	billingsubscription.DefaultStatus = billingsubscriptionDescStatus.Default.(string)
 	// billingsubscription.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -157,7 +173,7 @@ func init() {
 		}
 	}()
 	// billingsubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	billingsubscriptionDescUpdatedAt := billingsubscriptionFields[11].Descriptor()
+	billingsubscriptionDescUpdatedAt := billingsubscriptionFields[13].Descriptor()
 	// billingsubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	billingsubscription.DefaultUpdatedAt = billingsubscriptionDescUpdatedAt.Default.(func() time.Time)
 	// billingsubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -213,58 +229,88 @@ func init() {
 	}()
 	// connectedaccountDescProviderAccountID is the schema descriptor for provider_account_id field.
 	connectedaccountDescProviderAccountID := connectedaccountFields[2].Descriptor()
+	// connectedaccount.DefaultProviderAccountID holds the default value on creation for the provider_account_id field.
+	connectedaccount.DefaultProviderAccountID = connectedaccountDescProviderAccountID.Default.(string)
 	// connectedaccount.ProviderAccountIDValidator is a validator for the "provider_account_id" field. It is called by the builders before save.
-	connectedaccount.ProviderAccountIDValidator = func() func(string) error {
-		validators := connectedaccountDescProviderAccountID.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(provider_account_id string) error {
-			for _, fn := range fns {
-				if err := fn(provider_account_id); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	connectedaccount.ProviderAccountIDValidator = connectedaccountDescProviderAccountID.Validators[0].(func(string) error)
+	// connectedaccountDescLastError is the schema descriptor for last_error field.
+	connectedaccountDescLastError := connectedaccountFields[4].Descriptor()
+	// connectedaccount.DefaultLastError holds the default value on creation for the last_error field.
+	connectedaccount.DefaultLastError = connectedaccountDescLastError.Default.(string)
+	// connectedaccount.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	connectedaccount.LastErrorValidator = connectedaccountDescLastError.Validators[0].(func(string) error)
 	// connectedaccountDescAcceptsPayments is the schema descriptor for accepts_payments field.
-	connectedaccountDescAcceptsPayments := connectedaccountFields[3].Descriptor()
+	connectedaccountDescAcceptsPayments := connectedaccountFields[9].Descriptor()
 	// connectedaccount.DefaultAcceptsPayments holds the default value on creation for the accepts_payments field.
 	connectedaccount.DefaultAcceptsPayments = connectedaccountDescAcceptsPayments.Default.(bool)
+	// connectedaccountDescRecipientCode is the schema descriptor for recipient_code field.
+	connectedaccountDescRecipientCode := connectedaccountFields[11].Descriptor()
+	// connectedaccount.DefaultRecipientCode holds the default value on creation for the recipient_code field.
+	connectedaccount.DefaultRecipientCode = connectedaccountDescRecipientCode.Default.(string)
+	// connectedaccount.RecipientCodeValidator is a validator for the "recipient_code" field. It is called by the builders before save.
+	connectedaccount.RecipientCodeValidator = connectedaccountDescRecipientCode.Validators[0].(func(string) error)
+	// connectedaccountDescSettlementSubaccountCode is the schema descriptor for settlement_subaccount_code field.
+	connectedaccountDescSettlementSubaccountCode := connectedaccountFields[12].Descriptor()
+	// connectedaccount.DefaultSettlementSubaccountCode holds the default value on creation for the settlement_subaccount_code field.
+	connectedaccount.DefaultSettlementSubaccountCode = connectedaccountDescSettlementSubaccountCode.Default.(string)
+	// connectedaccount.SettlementSubaccountCodeValidator is a validator for the "settlement_subaccount_code" field. It is called by the builders before save.
+	connectedaccount.SettlementSubaccountCodeValidator = connectedaccountDescSettlementSubaccountCode.Validators[0].(func(string) error)
+	// connectedaccountDescEscrowSubaccountCode is the schema descriptor for escrow_subaccount_code field.
+	connectedaccountDescEscrowSubaccountCode := connectedaccountFields[13].Descriptor()
+	// connectedaccount.DefaultEscrowSubaccountCode holds the default value on creation for the escrow_subaccount_code field.
+	connectedaccount.DefaultEscrowSubaccountCode = connectedaccountDescEscrowSubaccountCode.Default.(string)
+	// connectedaccount.EscrowSubaccountCodeValidator is a validator for the "escrow_subaccount_code" field. It is called by the builders before save.
+	connectedaccount.EscrowSubaccountCodeValidator = connectedaccountDescEscrowSubaccountCode.Validators[0].(func(string) error)
+	// connectedaccountDescBankCode is the schema descriptor for bank_code field.
+	connectedaccountDescBankCode := connectedaccountFields[14].Descriptor()
+	// connectedaccount.DefaultBankCode holds the default value on creation for the bank_code field.
+	connectedaccount.DefaultBankCode = connectedaccountDescBankCode.Default.(string)
+	// connectedaccount.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	connectedaccount.BankCodeValidator = connectedaccountDescBankCode.Validators[0].(func(string) error)
+	// connectedaccountDescAccountLast4 is the schema descriptor for account_last4 field.
+	connectedaccountDescAccountLast4 := connectedaccountFields[15].Descriptor()
+	// connectedaccount.DefaultAccountLast4 holds the default value on creation for the account_last4 field.
+	connectedaccount.DefaultAccountLast4 = connectedaccountDescAccountLast4.Default.(string)
+	// connectedaccount.AccountLast4Validator is a validator for the "account_last4" field. It is called by the builders before save.
+	connectedaccount.AccountLast4Validator = connectedaccountDescAccountLast4.Validators[0].(func(string) error)
+	// connectedaccountDescAccountName is the schema descriptor for account_name field.
+	connectedaccountDescAccountName := connectedaccountFields[16].Descriptor()
+	// connectedaccount.DefaultAccountName holds the default value on creation for the account_name field.
+	connectedaccount.DefaultAccountName = connectedaccountDescAccountName.Default.(string)
+	// connectedaccount.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	connectedaccount.AccountNameValidator = connectedaccountDescAccountName.Validators[0].(func(string) error)
 	// connectedaccountDescManualPayoutScheduleConfirmed is the schema descriptor for manual_payout_schedule_confirmed field.
-	connectedaccountDescManualPayoutScheduleConfirmed := connectedaccountFields[7].Descriptor()
+	connectedaccountDescManualPayoutScheduleConfirmed := connectedaccountFields[20].Descriptor()
 	// connectedaccount.DefaultManualPayoutScheduleConfirmed holds the default value on creation for the manual_payout_schedule_confirmed field.
 	connectedaccount.DefaultManualPayoutScheduleConfirmed = connectedaccountDescManualPayoutScheduleConfirmed.Default.(bool)
 	// connectedaccountDescPayoutsFrozen is the schema descriptor for payouts_frozen field.
-	connectedaccountDescPayoutsFrozen := connectedaccountFields[8].Descriptor()
+	connectedaccountDescPayoutsFrozen := connectedaccountFields[21].Descriptor()
 	// connectedaccount.DefaultPayoutsFrozen holds the default value on creation for the payouts_frozen field.
 	connectedaccount.DefaultPayoutsFrozen = connectedaccountDescPayoutsFrozen.Default.(bool)
 	// connectedaccountDescPayoutsFrozenReason is the schema descriptor for payouts_frozen_reason field.
-	connectedaccountDescPayoutsFrozenReason := connectedaccountFields[9].Descriptor()
+	connectedaccountDescPayoutsFrozenReason := connectedaccountFields[22].Descriptor()
 	// connectedaccount.DefaultPayoutsFrozenReason holds the default value on creation for the payouts_frozen_reason field.
 	connectedaccount.DefaultPayoutsFrozenReason = connectedaccountDescPayoutsFrozenReason.Default.(string)
 	// connectedaccount.PayoutsFrozenReasonValidator is a validator for the "payouts_frozen_reason" field. It is called by the builders before save.
 	connectedaccount.PayoutsFrozenReasonValidator = connectedaccountDescPayoutsFrozenReason.Validators[0].(func(string) error)
 	// connectedaccountDescVirtualAccountNumber is the schema descriptor for virtual_account_number field.
-	connectedaccountDescVirtualAccountNumber := connectedaccountFields[10].Descriptor()
+	connectedaccountDescVirtualAccountNumber := connectedaccountFields[23].Descriptor()
 	// connectedaccount.DefaultVirtualAccountNumber holds the default value on creation for the virtual_account_number field.
 	connectedaccount.DefaultVirtualAccountNumber = connectedaccountDescVirtualAccountNumber.Default.(string)
 	// connectedaccount.VirtualAccountNumberValidator is a validator for the "virtual_account_number" field. It is called by the builders before save.
 	connectedaccount.VirtualAccountNumberValidator = connectedaccountDescVirtualAccountNumber.Validators[0].(func(string) error)
 	// connectedaccountDescVirtualAccountBankName is the schema descriptor for virtual_account_bank_name field.
-	connectedaccountDescVirtualAccountBankName := connectedaccountFields[11].Descriptor()
+	connectedaccountDescVirtualAccountBankName := connectedaccountFields[24].Descriptor()
 	// connectedaccount.DefaultVirtualAccountBankName holds the default value on creation for the virtual_account_bank_name field.
 	connectedaccount.DefaultVirtualAccountBankName = connectedaccountDescVirtualAccountBankName.Default.(string)
 	// connectedaccount.VirtualAccountBankNameValidator is a validator for the "virtual_account_bank_name" field. It is called by the builders before save.
 	connectedaccount.VirtualAccountBankNameValidator = connectedaccountDescVirtualAccountBankName.Validators[0].(func(string) error)
 	// connectedaccountDescVersion is the schema descriptor for version field.
-	connectedaccountDescVersion := connectedaccountFields[12].Descriptor()
+	connectedaccountDescVersion := connectedaccountFields[25].Descriptor()
 	// connectedaccount.DefaultVersion holds the default value on creation for the version field.
 	connectedaccount.DefaultVersion = connectedaccountDescVersion.Default.(int64)
 	// connectedaccountDescUpdatedAt is the schema descriptor for updated_at field.
-	connectedaccountDescUpdatedAt := connectedaccountFields[13].Descriptor()
+	connectedaccountDescUpdatedAt := connectedaccountFields[26].Descriptor()
 	// connectedaccount.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	connectedaccount.DefaultUpdatedAt = connectedaccountDescUpdatedAt.Default.(func() time.Time)
 	// connectedaccount.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -273,6 +319,71 @@ func init() {
 	connectedaccountDescID := connectedaccountMixinFields0[0].Descriptor()
 	// connectedaccount.DefaultID holds the default value on creation for the id field.
 	connectedaccount.DefaultID = connectedaccountDescID.Default.(func() uuid.UUID)
+	connectedaccountjobMixin := schema.ConnectedAccountJob{}.Mixin()
+	connectedaccountjobMixinFields0 := connectedaccountjobMixin[0].Fields()
+	_ = connectedaccountjobMixinFields0
+	connectedaccountjobFields := schema.ConnectedAccountJob{}.Fields()
+	_ = connectedaccountjobFields
+	// connectedaccountjobDescCreatedAt is the schema descriptor for created_at field.
+	connectedaccountjobDescCreatedAt := connectedaccountjobMixinFields0[1].Descriptor()
+	// connectedaccountjob.DefaultCreatedAt holds the default value on creation for the created_at field.
+	connectedaccountjob.DefaultCreatedAt = connectedaccountjobDescCreatedAt.Default.(func() time.Time)
+	// connectedaccountjobDescUserID is the schema descriptor for user_id field.
+	connectedaccountjobDescUserID := connectedaccountjobFields[0].Descriptor()
+	// connectedaccountjob.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	connectedaccountjob.UserIDValidator = func() func(string) error {
+		validators := connectedaccountjobDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// connectedaccountjobDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	connectedaccountjobDescIdempotencyKey := connectedaccountjobFields[3].Descriptor()
+	// connectedaccountjob.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	connectedaccountjob.IdempotencyKeyValidator = func() func(string) error {
+		validators := connectedaccountjobDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// connectedaccountjobDescAttemptCount is the schema descriptor for attempt_count field.
+	connectedaccountjobDescAttemptCount := connectedaccountjobFields[5].Descriptor()
+	// connectedaccountjob.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	connectedaccountjob.DefaultAttemptCount = connectedaccountjobDescAttemptCount.Default.(int)
+	// connectedaccountjobDescLastError is the schema descriptor for last_error field.
+	connectedaccountjobDescLastError := connectedaccountjobFields[8].Descriptor()
+	// connectedaccountjob.DefaultLastError holds the default value on creation for the last_error field.
+	connectedaccountjob.DefaultLastError = connectedaccountjobDescLastError.Default.(string)
+	// connectedaccountjob.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	connectedaccountjob.LastErrorValidator = connectedaccountjobDescLastError.Validators[0].(func(string) error)
+	// connectedaccountjobDescUpdatedAt is the schema descriptor for updated_at field.
+	connectedaccountjobDescUpdatedAt := connectedaccountjobFields[12].Descriptor()
+	// connectedaccountjob.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	connectedaccountjob.DefaultUpdatedAt = connectedaccountjobDescUpdatedAt.Default.(func() time.Time)
+	// connectedaccountjob.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	connectedaccountjob.UpdateDefaultUpdatedAt = connectedaccountjobDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// connectedaccountjobDescID is the schema descriptor for id field.
+	connectedaccountjobDescID := connectedaccountjobMixinFields0[0].Descriptor()
+	// connectedaccountjob.DefaultID holds the default value on creation for the id field.
+	connectedaccountjob.DefaultID = connectedaccountjobDescID.Default.(func() uuid.UUID)
 	idempotentrequestMixin := schema.IdempotentRequest{}.Mixin()
 	idempotentrequestMixinFields0 := idempotentrequestMixin[0].Fields()
 	_ = idempotentrequestMixinFields0
@@ -772,24 +883,30 @@ func init() {
 	paymentrefund.DefaultFeeTopUpTransferID = paymentrefundDescFeeTopUpTransferID.Default.(string)
 	// paymentrefund.FeeTopUpTransferIDValidator is a validator for the "fee_top_up_transfer_id" field. It is called by the builders before save.
 	paymentrefund.FeeTopUpTransferIDValidator = paymentrefundDescFeeTopUpTransferID.Validators[0].(func(string) error)
+	// paymentrefundDescPayoutReference is the schema descriptor for payout_reference field.
+	paymentrefundDescPayoutReference := paymentrefundFields[13].Descriptor()
+	// paymentrefund.DefaultPayoutReference holds the default value on creation for the payout_reference field.
+	paymentrefund.DefaultPayoutReference = paymentrefundDescPayoutReference.Default.(string)
+	// paymentrefund.PayoutReferenceValidator is a validator for the "payout_reference" field. It is called by the builders before save.
+	paymentrefund.PayoutReferenceValidator = paymentrefundDescPayoutReference.Validators[0].(func(string) error)
 	// paymentrefundDescProviderRefundID is the schema descriptor for provider_refund_id field.
-	paymentrefundDescProviderRefundID := paymentrefundFields[12].Descriptor()
+	paymentrefundDescProviderRefundID := paymentrefundFields[14].Descriptor()
 	// paymentrefund.DefaultProviderRefundID holds the default value on creation for the provider_refund_id field.
 	paymentrefund.DefaultProviderRefundID = paymentrefundDescProviderRefundID.Default.(string)
 	// paymentrefund.ProviderRefundIDValidator is a validator for the "provider_refund_id" field. It is called by the builders before save.
 	paymentrefund.ProviderRefundIDValidator = paymentrefundDescProviderRefundID.Validators[0].(func(string) error)
 	// paymentrefundDescFailureReason is the schema descriptor for failure_reason field.
-	paymentrefundDescFailureReason := paymentrefundFields[13].Descriptor()
+	paymentrefundDescFailureReason := paymentrefundFields[15].Descriptor()
 	// paymentrefund.DefaultFailureReason holds the default value on creation for the failure_reason field.
 	paymentrefund.DefaultFailureReason = paymentrefundDescFailureReason.Default.(string)
 	// paymentrefund.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	paymentrefund.FailureReasonValidator = paymentrefundDescFailureReason.Validators[0].(func(string) error)
 	// paymentrefundDescAttemptCount is the schema descriptor for attempt_count field.
-	paymentrefundDescAttemptCount := paymentrefundFields[14].Descriptor()
+	paymentrefundDescAttemptCount := paymentrefundFields[16].Descriptor()
 	// paymentrefund.DefaultAttemptCount holds the default value on creation for the attempt_count field.
 	paymentrefund.DefaultAttemptCount = paymentrefundDescAttemptCount.Default.(int)
 	// paymentrefundDescUpdatedAt is the schema descriptor for updated_at field.
-	paymentrefundDescUpdatedAt := paymentrefundFields[16].Descriptor()
+	paymentrefundDescUpdatedAt := paymentrefundFields[18].Descriptor()
 	// paymentrefund.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	paymentrefund.DefaultUpdatedAt = paymentrefundDescUpdatedAt.Default.(func() time.Time)
 	// paymentrefund.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -798,6 +915,107 @@ func init() {
 	paymentrefundDescID := paymentrefundMixinFields0[0].Descriptor()
 	// paymentrefund.DefaultID holds the default value on creation for the id field.
 	paymentrefund.DefaultID = paymentrefundDescID.Default.(func() uuid.UUID)
+	payoutonboardingMixin := schema.PayoutOnboarding{}.Mixin()
+	payoutonboardingMixinFields0 := payoutonboardingMixin[0].Fields()
+	_ = payoutonboardingMixinFields0
+	payoutonboardingFields := schema.PayoutOnboarding{}.Fields()
+	_ = payoutonboardingFields
+	// payoutonboardingDescCreatedAt is the schema descriptor for created_at field.
+	payoutonboardingDescCreatedAt := payoutonboardingMixinFields0[1].Descriptor()
+	// payoutonboarding.DefaultCreatedAt holds the default value on creation for the created_at field.
+	payoutonboarding.DefaultCreatedAt = payoutonboardingDescCreatedAt.Default.(func() time.Time)
+	// payoutonboardingDescUserID is the schema descriptor for user_id field.
+	payoutonboardingDescUserID := payoutonboardingFields[0].Descriptor()
+	// payoutonboarding.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	payoutonboarding.UserIDValidator = func() func(string) error {
+		validators := payoutonboardingDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutonboardingDescRole is the schema descriptor for role field.
+	payoutonboardingDescRole := payoutonboardingFields[1].Descriptor()
+	// payoutonboarding.DefaultRole holds the default value on creation for the role field.
+	payoutonboarding.DefaultRole = payoutonboardingDescRole.Default.(string)
+	// payoutonboarding.RoleValidator is a validator for the "role" field. It is called by the builders before save.
+	payoutonboarding.RoleValidator = payoutonboardingDescRole.Validators[0].(func(string) error)
+	// payoutonboardingDescLegalName is the schema descriptor for legal_name field.
+	payoutonboardingDescLegalName := payoutonboardingFields[2].Descriptor()
+	// payoutonboarding.DefaultLegalName holds the default value on creation for the legal_name field.
+	payoutonboarding.DefaultLegalName = payoutonboardingDescLegalName.Default.(string)
+	// payoutonboarding.LegalNameValidator is a validator for the "legal_name" field. It is called by the builders before save.
+	payoutonboarding.LegalNameValidator = payoutonboardingDescLegalName.Validators[0].(func(string) error)
+	// payoutonboardingDescIDType is the schema descriptor for id_type field.
+	payoutonboardingDescIDType := payoutonboardingFields[4].Descriptor()
+	// payoutonboarding.DefaultIDType holds the default value on creation for the id_type field.
+	payoutonboarding.DefaultIDType = payoutonboardingDescIDType.Default.(string)
+	// payoutonboarding.IDTypeValidator is a validator for the "id_type" field. It is called by the builders before save.
+	payoutonboarding.IDTypeValidator = payoutonboardingDescIDType.Validators[0].(func(string) error)
+	// payoutonboardingDescIDLast4 is the schema descriptor for id_last4 field.
+	payoutonboardingDescIDLast4 := payoutonboardingFields[5].Descriptor()
+	// payoutonboarding.DefaultIDLast4 holds the default value on creation for the id_last4 field.
+	payoutonboarding.DefaultIDLast4 = payoutonboardingDescIDLast4.Default.(string)
+	// payoutonboarding.IDLast4Validator is a validator for the "id_last4" field. It is called by the builders before save.
+	payoutonboarding.IDLast4Validator = payoutonboardingDescIDLast4.Validators[0].(func(string) error)
+	// payoutonboardingDescRegisteredBusiness is the schema descriptor for registered_business field.
+	payoutonboardingDescRegisteredBusiness := payoutonboardingFields[6].Descriptor()
+	// payoutonboarding.DefaultRegisteredBusiness holds the default value on creation for the registered_business field.
+	payoutonboarding.DefaultRegisteredBusiness = payoutonboardingDescRegisteredBusiness.Default.(bool)
+	// payoutonboardingDescCacNumber is the schema descriptor for cac_number field.
+	payoutonboardingDescCacNumber := payoutonboardingFields[7].Descriptor()
+	// payoutonboarding.DefaultCacNumber holds the default value on creation for the cac_number field.
+	payoutonboarding.DefaultCacNumber = payoutonboardingDescCacNumber.Default.(string)
+	// payoutonboarding.CacNumberValidator is a validator for the "cac_number" field. It is called by the builders before save.
+	payoutonboarding.CacNumberValidator = payoutonboardingDescCacNumber.Validators[0].(func(string) error)
+	// payoutonboardingDescBusinessType is the schema descriptor for business_type field.
+	payoutonboardingDescBusinessType := payoutonboardingFields[8].Descriptor()
+	// payoutonboarding.DefaultBusinessType holds the default value on creation for the business_type field.
+	payoutonboarding.DefaultBusinessType = payoutonboardingDescBusinessType.Default.(string)
+	// payoutonboarding.BusinessTypeValidator is a validator for the "business_type" field. It is called by the builders before save.
+	payoutonboarding.BusinessTypeValidator = payoutonboardingDescBusinessType.Validators[0].(func(string) error)
+	// payoutonboardingDescBankCode is the schema descriptor for bank_code field.
+	payoutonboardingDescBankCode := payoutonboardingFields[9].Descriptor()
+	// payoutonboarding.DefaultBankCode holds the default value on creation for the bank_code field.
+	payoutonboarding.DefaultBankCode = payoutonboardingDescBankCode.Default.(string)
+	// payoutonboarding.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	payoutonboarding.BankCodeValidator = payoutonboardingDescBankCode.Validators[0].(func(string) error)
+	// payoutonboardingDescBankName is the schema descriptor for bank_name field.
+	payoutonboardingDescBankName := payoutonboardingFields[10].Descriptor()
+	// payoutonboarding.DefaultBankName holds the default value on creation for the bank_name field.
+	payoutonboarding.DefaultBankName = payoutonboardingDescBankName.Default.(string)
+	// payoutonboarding.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	payoutonboarding.BankNameValidator = payoutonboardingDescBankName.Validators[0].(func(string) error)
+	// payoutonboardingDescAccountLast4 is the schema descriptor for account_last4 field.
+	payoutonboardingDescAccountLast4 := payoutonboardingFields[11].Descriptor()
+	// payoutonboarding.DefaultAccountLast4 holds the default value on creation for the account_last4 field.
+	payoutonboarding.DefaultAccountLast4 = payoutonboardingDescAccountLast4.Default.(string)
+	// payoutonboarding.AccountLast4Validator is a validator for the "account_last4" field. It is called by the builders before save.
+	payoutonboarding.AccountLast4Validator = payoutonboardingDescAccountLast4.Validators[0].(func(string) error)
+	// payoutonboardingDescResolvedAccountName is the schema descriptor for resolved_account_name field.
+	payoutonboardingDescResolvedAccountName := payoutonboardingFields[12].Descriptor()
+	// payoutonboarding.DefaultResolvedAccountName holds the default value on creation for the resolved_account_name field.
+	payoutonboarding.DefaultResolvedAccountName = payoutonboardingDescResolvedAccountName.Default.(string)
+	// payoutonboarding.ResolvedAccountNameValidator is a validator for the "resolved_account_name" field. It is called by the builders before save.
+	payoutonboarding.ResolvedAccountNameValidator = payoutonboardingDescResolvedAccountName.Validators[0].(func(string) error)
+	// payoutonboardingDescUpdatedAt is the schema descriptor for updated_at field.
+	payoutonboardingDescUpdatedAt := payoutonboardingFields[14].Descriptor()
+	// payoutonboarding.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	payoutonboarding.DefaultUpdatedAt = payoutonboardingDescUpdatedAt.Default.(func() time.Time)
+	// payoutonboarding.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	payoutonboarding.UpdateDefaultUpdatedAt = payoutonboardingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// payoutonboardingDescID is the schema descriptor for id field.
+	payoutonboardingDescID := payoutonboardingMixinFields0[0].Descriptor()
+	// payoutonboarding.DefaultID holds the default value on creation for the id field.
+	payoutonboarding.DefaultID = payoutonboardingDescID.Default.(func() uuid.UUID)
 	payouttransferMixin := schema.PayoutTransfer{}.Mixin()
 	payouttransferMixinFields0 := payouttransferMixin[0].Fields()
 	_ = payouttransferMixinFields0
@@ -959,6 +1177,73 @@ func init() {
 	payouttransferDescID := payouttransferMixinFields0[0].Descriptor()
 	// payouttransfer.DefaultID holds the default value on creation for the id field.
 	payouttransfer.DefaultID = payouttransferDescID.Default.(func() uuid.UUID)
+	providercustomerMixin := schema.ProviderCustomer{}.Mixin()
+	providercustomerMixinFields0 := providercustomerMixin[0].Fields()
+	_ = providercustomerMixinFields0
+	providercustomerFields := schema.ProviderCustomer{}.Fields()
+	_ = providercustomerFields
+	// providercustomerDescCreatedAt is the schema descriptor for created_at field.
+	providercustomerDescCreatedAt := providercustomerMixinFields0[1].Descriptor()
+	// providercustomer.DefaultCreatedAt holds the default value on creation for the created_at field.
+	providercustomer.DefaultCreatedAt = providercustomerDescCreatedAt.Default.(func() time.Time)
+	// providercustomerDescUserID is the schema descriptor for user_id field.
+	providercustomerDescUserID := providercustomerFields[0].Descriptor()
+	// providercustomer.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	providercustomer.UserIDValidator = func() func(string) error {
+		validators := providercustomerDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providercustomerDescProvider is the schema descriptor for provider field.
+	providercustomerDescProvider := providercustomerFields[1].Descriptor()
+	// providercustomer.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	providercustomer.ProviderValidator = func() func(string) error {
+		validators := providercustomerDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providercustomerDescProviderCustomerID is the schema descriptor for provider_customer_id field.
+	providercustomerDescProviderCustomerID := providercustomerFields[2].Descriptor()
+	// providercustomer.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	providercustomer.ProviderCustomerIDValidator = func() func(string) error {
+		validators := providercustomerDescProviderCustomerID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider_customer_id string) error {
+			for _, fn := range fns {
+				if err := fn(provider_customer_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providercustomerDescID is the schema descriptor for id field.
+	providercustomerDescID := providercustomerMixinFields0[0].Descriptor()
+	// providercustomer.DefaultID holds the default value on creation for the id field.
+	providercustomer.DefaultID = providercustomerDescID.Default.(func() uuid.UUID)
 	providerdisputeMixin := schema.ProviderDispute{}.Mixin()
 	providerdisputeMixinFields0 := providerdisputeMixin[0].Fields()
 	_ = providerdisputeMixinFields0
@@ -1139,6 +1424,123 @@ func init() {
 	providerpayoutdestinationDescID := providerpayoutdestinationMixinFields0[0].Descriptor()
 	// providerpayoutdestination.DefaultID holds the default value on creation for the id field.
 	providerpayoutdestination.DefaultID = providerpayoutdestinationDescID.Default.(func() uuid.UUID)
+	savedcardsetupMixin := schema.SavedCardSetup{}.Mixin()
+	savedcardsetupMixinFields0 := savedcardsetupMixin[0].Fields()
+	_ = savedcardsetupMixinFields0
+	savedcardsetupFields := schema.SavedCardSetup{}.Fields()
+	_ = savedcardsetupFields
+	// savedcardsetupDescCreatedAt is the schema descriptor for created_at field.
+	savedcardsetupDescCreatedAt := savedcardsetupMixinFields0[1].Descriptor()
+	// savedcardsetup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	savedcardsetup.DefaultCreatedAt = savedcardsetupDescCreatedAt.Default.(func() time.Time)
+	// savedcardsetupDescReference is the schema descriptor for reference field.
+	savedcardsetupDescReference := savedcardsetupFields[0].Descriptor()
+	// savedcardsetup.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	savedcardsetup.ReferenceValidator = func() func(string) error {
+		validators := savedcardsetupDescReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reference string) error {
+			for _, fn := range fns {
+				if err := fn(reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// savedcardsetupDescUserID is the schema descriptor for user_id field.
+	savedcardsetupDescUserID := savedcardsetupFields[1].Descriptor()
+	// savedcardsetup.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	savedcardsetup.UserIDValidator = func() func(string) error {
+		validators := savedcardsetupDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// savedcardsetupDescProvider is the schema descriptor for provider field.
+	savedcardsetupDescProvider := savedcardsetupFields[2].Descriptor()
+	// savedcardsetup.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	savedcardsetup.ProviderValidator = func() func(string) error {
+		validators := savedcardsetupDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// savedcardsetupDescProviderCustomerID is the schema descriptor for provider_customer_id field.
+	savedcardsetupDescProviderCustomerID := savedcardsetupFields[3].Descriptor()
+	// savedcardsetup.DefaultProviderCustomerID holds the default value on creation for the provider_customer_id field.
+	savedcardsetup.DefaultProviderCustomerID = savedcardsetupDescProviderCustomerID.Default.(string)
+	// savedcardsetup.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	savedcardsetup.ProviderCustomerIDValidator = savedcardsetupDescProviderCustomerID.Validators[0].(func(string) error)
+	// savedcardsetupDescProviderCheckoutID is the schema descriptor for provider_checkout_id field.
+	savedcardsetupDescProviderCheckoutID := savedcardsetupFields[4].Descriptor()
+	// savedcardsetup.DefaultProviderCheckoutID holds the default value on creation for the provider_checkout_id field.
+	savedcardsetup.DefaultProviderCheckoutID = savedcardsetupDescProviderCheckoutID.Default.(string)
+	// savedcardsetup.ProviderCheckoutIDValidator is a validator for the "provider_checkout_id" field. It is called by the builders before save.
+	savedcardsetup.ProviderCheckoutIDValidator = savedcardsetupDescProviderCheckoutID.Validators[0].(func(string) error)
+	// savedcardsetupDescPurpose is the schema descriptor for purpose field.
+	savedcardsetupDescPurpose := savedcardsetupFields[5].Descriptor()
+	// savedcardsetup.DefaultPurpose holds the default value on creation for the purpose field.
+	savedcardsetup.DefaultPurpose = savedcardsetupDescPurpose.Default.(string)
+	// savedcardsetup.PurposeValidator is a validator for the "purpose" field. It is called by the builders before save.
+	savedcardsetup.PurposeValidator = savedcardsetupDescPurpose.Validators[0].(func(string) error)
+	// savedcardsetupDescSubjectID is the schema descriptor for subject_id field.
+	savedcardsetupDescSubjectID := savedcardsetupFields[6].Descriptor()
+	// savedcardsetup.DefaultSubjectID holds the default value on creation for the subject_id field.
+	savedcardsetup.DefaultSubjectID = savedcardsetupDescSubjectID.Default.(string)
+	// savedcardsetup.SubjectIDValidator is a validator for the "subject_id" field. It is called by the builders before save.
+	savedcardsetup.SubjectIDValidator = savedcardsetupDescSubjectID.Validators[0].(func(string) error)
+	// savedcardsetupDescCardBrand is the schema descriptor for card_brand field.
+	savedcardsetupDescCardBrand := savedcardsetupFields[8].Descriptor()
+	// savedcardsetup.DefaultCardBrand holds the default value on creation for the card_brand field.
+	savedcardsetup.DefaultCardBrand = savedcardsetupDescCardBrand.Default.(string)
+	// savedcardsetup.CardBrandValidator is a validator for the "card_brand" field. It is called by the builders before save.
+	savedcardsetup.CardBrandValidator = savedcardsetupDescCardBrand.Validators[0].(func(string) error)
+	// savedcardsetupDescCardLast4 is the schema descriptor for card_last4 field.
+	savedcardsetupDescCardLast4 := savedcardsetupFields[9].Descriptor()
+	// savedcardsetup.DefaultCardLast4 holds the default value on creation for the card_last4 field.
+	savedcardsetup.DefaultCardLast4 = savedcardsetupDescCardLast4.Default.(string)
+	// savedcardsetup.CardLast4Validator is a validator for the "card_last4" field. It is called by the builders before save.
+	savedcardsetup.CardLast4Validator = savedcardsetupDescCardLast4.Validators[0].(func(string) error)
+	// savedcardsetupDescCardExpiryMonth is the schema descriptor for card_expiry_month field.
+	savedcardsetupDescCardExpiryMonth := savedcardsetupFields[10].Descriptor()
+	// savedcardsetup.DefaultCardExpiryMonth holds the default value on creation for the card_expiry_month field.
+	savedcardsetup.DefaultCardExpiryMonth = savedcardsetupDescCardExpiryMonth.Default.(int)
+	// savedcardsetupDescCardExpiryYear is the schema descriptor for card_expiry_year field.
+	savedcardsetupDescCardExpiryYear := savedcardsetupFields[11].Descriptor()
+	// savedcardsetup.DefaultCardExpiryYear holds the default value on creation for the card_expiry_year field.
+	savedcardsetup.DefaultCardExpiryYear = savedcardsetupDescCardExpiryYear.Default.(int)
+	// savedcardsetupDescCardFingerprintHash is the schema descriptor for card_fingerprint_hash field.
+	savedcardsetupDescCardFingerprintHash := savedcardsetupFields[12].Descriptor()
+	// savedcardsetup.DefaultCardFingerprintHash holds the default value on creation for the card_fingerprint_hash field.
+	savedcardsetup.DefaultCardFingerprintHash = savedcardsetupDescCardFingerprintHash.Default.(string)
+	// savedcardsetup.CardFingerprintHashValidator is a validator for the "card_fingerprint_hash" field. It is called by the builders before save.
+	savedcardsetup.CardFingerprintHashValidator = savedcardsetupDescCardFingerprintHash.Validators[0].(func(string) error)
+	// savedcardsetupDescID is the schema descriptor for id field.
+	savedcardsetupDescID := savedcardsetupMixinFields0[0].Descriptor()
+	// savedcardsetup.DefaultID holds the default value on creation for the id field.
+	savedcardsetup.DefaultID = savedcardsetupDescID.Default.(func() uuid.UUID)
 	storepurchaseMixin := schema.StorePurchase{}.Mixin()
 	storepurchaseMixinFields0 := storepurchaseMixin[0].Fields()
 	_ = storepurchaseMixinFields0
@@ -1338,11 +1740,11 @@ func init() {
 	// webhookevent.PayloadSha256Validator is a validator for the "payload_sha256" field. It is called by the builders before save.
 	webhookevent.PayloadSha256Validator = webhookeventDescPayloadSha256.Validators[0].(func(string) error)
 	// webhookeventDescAttemptCount is the schema descriptor for attempt_count field.
-	webhookeventDescAttemptCount := webhookeventFields[6].Descriptor()
+	webhookeventDescAttemptCount := webhookeventFields[7].Descriptor()
 	// webhookevent.DefaultAttemptCount holds the default value on creation for the attempt_count field.
 	webhookevent.DefaultAttemptCount = webhookeventDescAttemptCount.Default.(int)
 	// webhookeventDescLastError is the schema descriptor for last_error field.
-	webhookeventDescLastError := webhookeventFields[7].Descriptor()
+	webhookeventDescLastError := webhookeventFields[8].Descriptor()
 	// webhookevent.DefaultLastError holds the default value on creation for the last_error field.
 	webhookevent.DefaultLastError = webhookeventDescLastError.Default.(string)
 	// webhookevent.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
