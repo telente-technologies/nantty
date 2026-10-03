@@ -28,8 +28,8 @@ export function CustomersSummaryPanels() {
             title="Customer growth by month"
             description="Stacked bars per month: new customers in dark blue, returning customers in light blue."
             series={[
-              { key: "newCustomers", label: "New", colorVariable: "--blue-500" },
-              { key: "returningCustomers", label: "Returning", colorVariable: "--blue-200" },
+              { key: "newCustomers", label: "New", colorVariable: "--chart-1" },
+              { key: "returningCustomers", label: "Returning", colorVariable: "--chart-4" },
             ]}
             points={summary.growth.map((point) => ({ label: formatMonthKeyAsLongLabel(point.month, locale), shortLabel: formatMonthKeyAsShortLabel(point.month, locale), values: { newCustomers: point.newCustomers, returningCustomers: point.returningCustomers } }))}
             formatValue={(value) => `${value} customers`}

@@ -49,8 +49,8 @@
 .note {
   padding: 10px 12px;
   border-radius: var(--radius-medium);
-  background: var(--yellow-50);
-  border: 1px solid var(--yellow-100);
+  background: var(--color-warn-tint);
+  border: 1px solid color-mix(in srgb, var(--color-warn) 35%, transparent);
 }
 
 .noteMeta {
