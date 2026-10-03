@@ -181,11 +181,11 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 | Endpoint | Callers | Ref | Notes / mismatch |
 | --- | --- | --- | --- |
-| GET /coins/balance `{coins,earnedCoins}` | M W | ✅ | Webapp mock omits `earnedCoins` |
-| GET /coins/packages (alias /coins/packs) | M W | ✅ | Drop the `/packs` alias after wiring |
-| POST /coins/purchases `{packageId}` → `{reference,purchaseChannel,authorizationUrl?}`; POST /coins/purchases/:ref/verify; POST /coins/iap/receipts | M W | ✅ | Coin verify takes the reference in the **path** and creator-subscription verify takes it in the **body**. Keep both (both exist server-side); new endpoints use the body |
-| GET /coins/transactions, /coins/transfers/quote, POST /coins/transfers | M W | ✅ | 25% transfer fee (config) |
-| POST /creators/earnings/convert `{coins}` | M | ✅ | 422 minimum payout surfaces verbatim |
+| GET /coins/balance `{coins,earnedCoins}` | M W | ✅ | Webapp mock omits `earnedCoins` **✅ built (go-money).** |
+| GET /coins/packages (alias /coins/packs) | M W | ✅ | Drop the `/packs` alias after wiring **✅ built (go-money).** |
+| POST /coins/purchases `{packageId}` → `{reference,purchaseChannel,authorizationUrl?}`; POST /coins/purchases/:ref/verify; POST /coins/iap/receipts | M W | ✅ | Coin verify takes the reference in the **path** and creator-subscription verify takes it in the **body**. Keep both (both exist server-side); new endpoints use the body **✅ built (go-money).** |
+| GET /coins/transactions, /coins/transfers/quote, POST /coins/transfers | M W | ✅ | 25% transfer fee (config) **✅ built (go-money).** |
+| POST /creators/earnings/convert `{coins}` | M | ✅ | 422 minimum payout surfaces verbatim **✅ built (go-money).** |
 | GET /creators/me, /eligibility, /applications/me, POST /applications, /dashboard?period, /earnings, /revenue-rules, /affiliations, /me/affiliated-products | M W | ✅ (affiliated-products ✗) | Dashboard `topContent[].kind` includes `live`. Studio's earnings panel needs per-live gifts/battles (§4.2) |
 | Creator subscription plans + subscriptions (11 routes, plans §4.1) | M | ✅ | Already aligned (plans §4.3) |
 
@@ -199,10 +199,10 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | Cart: GET/DELETE /cart, POST /cart/items `{productId,quantity,size?,color?}`, PATCH/DELETE /cart/items/:id | M W | ✅ | Request sends `size`/`color`, response has `variant: string\|null`. Accept `variantId` (preferred) or `size`+`color`, and return `variant{id,size,color,sku}` |
 | POST /orders/checkout `{addressId,redeemLoyaltyPoints}` → `{orderGroups,payableCheckoutId,total}` | M W | ✅ | One `Checkout`, **one order group per seller** (§4.6). Mobile reads `orders`/`payableOrderId` today; rename during wiring |
 | GET /orders?status, /orders/:id, cancel, confirm-receipt | M W | ✅ | Mobile `GET /orders` expects a bare array, which needs a page envelope; `status` filter values must match §4.3.5 |
-| GET /orders/:id/escrow, POST /orders/:id/disputes, GET /disputes, /disputes/:id, messages | M W | ✅ (GET /disputes list ✗) | |
-| POST /payments/initialize `{orderId,provider}`, POST /payments/orders/:id/verify, POST /payments/webhooks/:provider | M W | ✅ | Paid only after webhook/verify (SECURITY.md) |
-| GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | |
-| GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | |
+| GET /orders/:id/escrow, POST /orders/:id/disputes, GET /disputes, /disputes/:id, messages | M W | ✅ (GET /disputes list ✗) | **✅ built (go-money).** |
+| POST /payments/initialize `{orderId,provider}`, POST /payments/orders/:id/verify, POST /payments/webhooks/:provider | M W | ✅ | Paid only after webhook/verify (SECURITY.md) **✅ built (go-money).** |
+| GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
+| GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
 | GET /loyalty/me, /referrals/me, POST redemptions | M | ✅ | → go.rewards |
 | GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
@@ -316,6 +316,17 @@ Changes the clients must make before dropping the mocks (prefixes `/api/v1/auth`
 7. **Addresses** send `countryCode`, `regionId` (and `adminAreaId`, `cityId` where the country has them); free-text `state`/`city` is accepted only for countries without seeded data.
 8. **Password change/reset** return 204 with no body; change keeps the current session and revokes the others, so the app should keep its refresh token.
 9. **Still mocked** for these prefixes: `/users/me/settings`, `/topics`, `/users/me/topics`, `/users/me/blocked`, follows, verification, brands (`/brands`).
+
+### 2.15 Built so far: go-money (ledger, payments, escrow, wallet, creators)
+
+Done and covered by integration tests (real Postgres, fake Paystack API): everything marked **✅ built (go-money)** in §2.7 and §2.8, plus:
+
+- Internal gRPC for go-live (`LiveMoneyService`: gift charge with tier split / host fallback / battle holdings, battle settlement, battle gift totals, coin balance) and go-commerce (`CheckoutMoneyService`: register checkout payables with escrow/direct mode, record shipped/delivered, confirm receipt, get escrow). See `services/README.md`.
+- Seller balances per the checkout plan: in escrow → locked 24h → available → payout requested → paid, with debt recovery instead of negative balances; daily payout run; `GET /wallets/me` adds `locked`, `inEscrow`, `payoutRequested`, `negativeBalance`, `nextAvailableAt`.
+- `POST /disputes/:id/close` (buyer withdraws), `POST /wallets/me/withdrawals/:id/cancel`, `GET /wallets/me/withdrawals`.
+- Admin: ledger integrity and statements, journal reversal (step-up), provider reconciliation, dispute queue and resolution (release / refund / partial, step-up), escrow refunds, withdrawal review, payout run, creator tiers and membership.
+
+Changes the clients must make: lists are `{data,nextCursor}` (`/coins/packages`, `/banks`, `/wallets/me/transactions`, `/wallets/me/payout-accounts`, `/wallets/me/escrow-holds`, `/disputes`); the coin purchase body is `{packageId}` and app clients get `purchaseChannel: "store_iap"` (they must buy through IAP); `POST /wallets/me/withdrawals` returns a `WalletTransaction` plus `fee`, `netAmount`, `withdrawalStatus`; `EscrowDetail.buyer`/`store` carry only `id` until the gateway composes profiles.
 
 ## 3. Wiring order
 

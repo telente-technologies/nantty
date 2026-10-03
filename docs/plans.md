@@ -860,3 +860,48 @@ Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship thems
 - Profile (`components/profile/profileSummary.tsx`): the avatar gets the LIVE ring and opens `Live` on tap.
 - Rules: live beats story; the pulse is off under reduced motion; the mock hides `live` on private profiles for non-followers (`mocks/users.mock.ts`). Hosts are mapped in `mocks/activeLives.mock.ts`.
 - **[LATER]** the badge on feed and post authors, search, followers lists and the chat header; a lock and subscribe prompt for subscriber-only lives; realtime invalidation.
+
+
+---
+
+## 25. Chat privacy, spam, links & streaks (mobile) **[DONE (mobile, mock)]**
+
+Mock mode only; `services/**` and the web apps untouched. Real Signal-protocol encryption (libsignal, per-device keys) stays **[LATER]**: the app only carries the placeholder fields and shows the notice.
+
+| # | Feature | Scope | Marker |
+| --- | --- | --- | --- |
+| 1 | Inbox folders | Dropdown Chats / Requests / Spam. Requests: Accept, Delete, Block; read receipts hidden and `read` not sent until accepted. Spam: server-flagged by sender behaviour metadata only, never content; "Not spam" moves the chat to Requests | **[DONE]** |
+| 2 | Chat settings | Request audience Everyone / People I follow / Followers / Nobody (server enforced); device passcode 4-6 digits + biometrics + auto-lock (device only, forgot = re-login); 30-day media notice; blocked accounts (same list as profiles); push toggles + message preview; per-chat mute | **[DONE]** |
+| 3 | Media expiry | `mediaExpiresAt = sentAt + 30d`; expired media renders "Media expired"; text stays | **[DONE]** |
+| 4 | Link previews | Built on the sender, stored on the message. Warning sheet before opening shortened or suspicious domains; never auto-open. Internal links render permission-aware cards | **[DONE]** |
+| 5 | Share to chat | "Send in chat" sheet with multi-select and note; rich card message; share count increments | **[DONE]** |
+| 6 | Streaks | 1-to-1 only; +1 when both send on their own local day; hourglass at 4h left; break resets to 0; restores 3/month (Premium 6), 48h window, either person restores for both; milestones every 100 days | **[DONE]** |
+| 7 | E2EE placeholders | `Message.encryption { deviceId, ciphertext, protocol: "signal-v1-pending" }`; "Messages are end-to-end encrypted" in conversation info and settings | **[DONE: notice only]** |
+
+### 25.1 Mock contract
+
+| Method + path | Request | Response |
+| --- | --- | --- |
+| `GET /conversations?folder=chats\|requests\|spam&filter=` | | `Conversation[]` with `inboxFolder`, `spamReason`, `streak`, `mutedUntil`. Requests from senders outside the viewer's audience are hidden |
+| `POST /conversations/:id/accept` | | `Conversation` (moves to Chats, receipts enabled) |
+| `DELETE /conversations/:id` | | void |
+| `POST /conversations/:id/block` | | void; adds the peer to the shared block list (`/users/me/blocked`) |
+| `POST /conversations/:id/not-spam` | | `Conversation` (to Requests) |
+| `PUT /conversations/:id/mute` | `{ duration: "8h"\|"1w"\|"always"\|"off" }` | `{ mutedUntil }` |
+| `GET/PATCH /chat/settings` | `{ messageRequestsFrom, notifications { messages, requests, groups, streakReminders, showMessagePreview } }` | `ChatSettings` |
+| `POST /conversations/:id/messages` | `{ text, kind?, linkPreview?, sharedContent? }` | `Message` with `mediaExpiresAt`, `encryption`. 403 when the peer's audience rejects a new request |
+| `GET /link-previews/resolve?url=` | | `LinkPreview { url, domain, title, description, imageUrl }` (lookup table, fallback domain-only) |
+| `GET /chat/content?kind=&id=` | kind: post, clip, product, live, store, profile | `SharedContentCard { availability: available\|private\|unavailable, title, subtitle, imageUrl, priceLabel, stock, isLive, viewerCount, followsAuthor }` |
+| `POST /chat/shares` | `{ conversationIds, reference { kind, id }, note }` | `{ sentCount, shareCount }` |
+| `POST /conversations/:id/streak/restore` | | `ChatStreak`; 403 when no restores are left, 409 outside 48h |
+| `POST /conversations/:id/streak/celebrated` | | void |
+
+`ChatStreak`: `count`, `state` (none, active, broken), `hourglass`, `secondsUntilMyDayEnds`, `sentToday { me, peer }`, `restoresRemaining`, `restoresPerMonth`, `restorableUntil`, `countBeforeBreak`, `milestoneDays`, `milestoneCelebrationPending`.
+
+### 25.2 Notes
+
+- Spam scoring (`mocks/chatInboxState.mock.ts`): recipients in the last hour >= 50, or account under 3 days with >= 20 recipients, or duplicate-message ratio >= 0.8. Production: the Python service scores behaviour metadata and the chat service decides.
+- Streak days use each user's saved timezone (`savedTimezoneByUserId`). Restores reset on the 1st local, no carry-over. Premium = the user subscription (`verification.tier === "PREMIUM"`); seller Pro does not count (open question kept at the recommended answer).
+- The passcode is salted SHA-256 in `expo-secure-store` and never leaves the device. Auto-lock fires when the app returns from background after the chosen delay.
+- Seeds: `c_1` is at 99 days (send once to hit 100 and see the celebration), `c_3` is broken with a restore available, `c_req_*` are requests, `c_spam_*` are spam, `c_1` has expired and fresh media plus every link type.
+- **[LATER]** libsignal sessions and per-device keys, server-side 30-day media purge, push delivery honouring mute and preview settings, group streaks (open), timezone change rate-limit.

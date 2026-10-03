@@ -1,6 +1,6 @@
 # Dark mode plan
 
-Status: proposal (2026-10-03). Nothing ships until the token package (step 1) lands.
+Status: shipping (2026-10-03). Tokens and the shared web theme kit have landed; per-app status is in section 6.
 
 ## 1. Token architecture
 
@@ -29,11 +29,16 @@ Semantic tokens (names are final, values are the starting point and must pass AA
 | `--color-sunken` | `#F0F2FA` | `#0F1220` | inputs, table headers |
 | `--color-text` | `#0A0A14` | `#F2F3F8` | primary text |
 | `--color-text-muted` | `#5B5B6B` | `#A9ADC2` | secondary text |
-| `--color-text-subtle` | `#6E6E80` | `#8A8FA8` | metadata (replaces `#909090`/`#8B8B9E`, which fail AA at 3.0 to 3.3:1) |
-| `--color-border` | `#E4E6F2` | `#262B42` | dividers |
-| `--color-border-strong` | `#CDD1E6` | `#353B57` | input borders |
-| `--color-brand` | `#2043F5` | `#6A82F8` | fills with white text use `--color-brand-solid` |
-| `--color-brand-solid` | `#2043F5` | `#4563F7` | primary buttons (white text 6.6:1 light) |
+| `--color-text-subtle` | `#68687B` | `#8A8FA8` | metadata (replaces `#909090`/`#8B8B9E`, which fail AA at 3.0 to 3.3:1). Light was `#6E6E80`, which is 4.47:1 on `--color-sunken`, so it was darkened |
+| `--color-border` | `#E4E6F2` | `#2A3048` | dividers (decorative, no contrast floor) |
+| `--color-border-strong` | `#CDD1E6` | `#353B57` | card and table outlines |
+| `--color-border-control` | `#80869F` | `#646C8E` | input, checkbox and switch boundaries (3:1 on canvas and surface) |
+| `--color-surface-hover` | `#F4F6FD` | `#1A1E30` | row and menu hover |
+| `--color-inverse` / `--color-on-inverse` | `#0B1752` / `#FFFFFF` | `#1C2033` / `#F2F3F8` | inverse bands (footers, tooltips) |
+| `--color-skeleton` / `-shine` | `#ECEEF7` / `#F7F8FD` | `#1C2033` / `#262B42` | loading shimmer |
+| `--color-brand` | `#2043F5` | `#7B90F9` | text, links and icons. Dark was `#6A82F8`, which is 4.47:1 on `--color-brand-tint`. Fills with white text use `--color-brand-solid` |
+| `--color-brand-solid` | `#2043F5` | `#4563F7` | primary buttons (white text 6.6:1 light, 4.8:1 dark) |
+| `--color-brand-solid-hover` | `#1B39CC` | `#3A57F2` | primary button hover (darkens in both themes so white text keeps its contrast) |
 | `--color-brand-tint` | `#ECEFFF` | `#1A2150` | selected nav, chips |
 | `--color-on-brand` | `#FFFFFF` | `#FFFFFF` | |
 | `--color-accent` | `#F5E320` | `#F5E320` | yellow; text on it is always `#0A0A14` |
@@ -81,7 +86,7 @@ Mobile:
 - AA in both themes: body text 4.5:1, large text and UI boundaries 3:1. Add a token test that computes every text/surface pair in `semantic.ts` and fails CI below threshold.
 - Never put status colours (`success`/`warn`/`danger` base) on text. Use the `-text` variants. Today webapp has 8 and studio 11 such cases (for example studio "Won"/"Lost").
 - Images, video, product photos, avatars and user content are never filtered or inverted. Give media containers a `--color-sunken` placeholder and no white borders.
-- Brand blue `#2043F5` on dark navy is 2.5:1, so on dark backgrounds use `#6A82F8` for text and links and `#4563F7` for filled buttons. Yellow stays as is, always with dark text.
+- Brand blue `#2043F5` on dark navy is 2.5:1, so on dark backgrounds use `#7B90F9` for text and links and `#4563F7` for filled buttons. Yellow stays as is, always with dark text.
 - Charts: series colours come from `--chart-1..n` with dark variants. Gridlines use `--color-border`, axis labels `--color-text-subtle`, and nothing relies on colour alone (keep labels and patterns).
 - Live, reels and studio control room are already dark-first: they keep their dark surfaces in both themes and only consume tokens for consistency.
 - Stylelint rule: no raw hex or `rgb()` in `*.module.css` outside `packages/designTokens` and an allowlist (illustrations, print, artwork).
@@ -93,3 +98,18 @@ Mobile is built pixel-exact from Figma file `4lzFdjt4oRgyuOIuPTePLl`, and Figma 
 - Light mode stays byte-identical to Figma. The token migration must cause zero visual diff in light (verify with screenshot diffs).
 - Dark mode can ship first on non-Figma screens (orders, checkout, escrow, disputes, wallet, seller, creator, support) behind a feature flag.
 - Figma's `#909090` metadata text fails AA (3.0:1 on `#F7F8FE`). Flag it to design. Don't change it unilaterally on Figma screens.
+
+## 6. Implementation status
+
+Shared pieces (2026-10-03):
+- `packages/designTokens/tokens.css`: light `:root`, `:root[data-theme="dark"]`, the `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` fallback for `system`, `prefers-contrast: more` steps, and `color-scheme` per theme. Charts use `--chart-1..5`, `--chart-compare`, `--chart-grid` and `--chart-axis`, and each has a dark variant.
+- `@zudomart/web-kit` theme API (stable):
+  - `parseThemePreference(cookieValue)` and `readHtmlThemeAttribute(preference)` give server layouts `<html data-theme>`. Add `suppressHydrationWarning` on `<html>`.
+  - `<ThemeInitScript nonce? />` goes in `<head>`. It is the pre-paint fallback for static pages and stale caches: it reads the `theme` cookie and sets `data-theme` and `theme-color`.
+  - Spread `themeViewport` into `export const viewport`. It sets `color-scheme: light dark` and a per-scheme `theme-color`.
+  - `<ThemeProvider initialPreference onPreferenceChange>` and `useTheme()` return `{ preference, resolvedTheme, setPreference }`. It writes the `theme` cookie (1 year, Lax), updates the attribute and `theme-color` live, follows OS changes while on `system`, and calls `onPreferenceChange` so signed-in apps can PATCH `…/users/me/preferences` with `{ theme }`.
+  - `<ThemeSwitcher label? showLabel? iconOnly? />` is a Light / Dark / System radiogroup.
+  - Skeleton, empty and error states, the wordmark and the cookie banner are fully tokenised.
+
+| App | Status | Preference endpoint (BFF) | Notes |
+|---|---|---|---|

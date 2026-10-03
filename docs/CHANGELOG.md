@@ -293,6 +293,22 @@ Verified: `pnpm -C apps/mobile exec tsc --noEmit` clean.
 | `src/components/product/productGallery.tsx` | Tapping a product image opens the full gallery at that image. |
 | `src/components/chat/chatBubble.tsx`, `src/components/escrow/disputeMessageBubble.tsx` | Chat photos and dispute attachments open the preview (attachments swipe as a gallery). |
 
+### Chat — privacy, spam, links & streaks (plans §25)
+
+| File | Change |
+| --- | --- |
+| `src/types/chatSafety.type.ts`, `src/types/messaging.type.ts` | **New / extended.** `InboxFolder`, `ChatSettings`, `LinkPreview`, `SharedContentCard`, `ChatStreak`, `MessageEncryptionEnvelope` (`deviceId`, `ciphertext`, `protocol: "signal-v1-pending"`, no crypto). `Conversation` gains `inboxFolder`, `spamReason`, `streak`, `mutedUntil`; `Message` gains `mediaExpiresAt`, `linkPreview`, `sharedContent`, `readAt`, `encryption`, kind `"shared"`. |
+| `src/cache/messageHistory.database.ts`, `src/cache/offlineMutation*.ts` | New message fields persist in `extra_json`; queued sends carry `linkPreview`. |
+| `src/services/chatSafety.service.ts`, `linkPreviews.service.ts`, `messages.service.ts` | Settings, mute, content resolve, share-to-chats, streak restore/celebrated; sender-side link preview; inbox folder, accept, delete, block, not-spam. |
+| `src/screens/messages/chats.screen.tsx`, `src/components/chatSafety/inboxFolderMenu.tsx`, `inboxRequestActions.tsx` | Chats / Requests / Spam dropdown. Requests: Accept, Delete, Block, receipts hidden until accepted. Spam: reason plus "Not spam". |
+| `src/screens/messages/chatSettings.screen.tsx`, `chatNotificationSettings.screen.tsx`, `chatPasscode.screen.tsx` | Request audience, passcode (4-6 digits, biometrics, auto-lock), media-retention notice, blocked accounts (existing list), push toggles incl. message preview. New routes `ChatSettings`, `ChatNotificationSettings`, `ChatPasscode`. |
+| `src/utils/chatPasscode.util.ts`, `src/store/chatLock.store.ts`, `src/components/chatSafety/chatLockGate.tsx` | Salted SHA-256 passcode in `expo-secure-store`; `expo-local-authentication` biometrics; lock on background after the auto-lock timer; "Forgot passcode" logs out and wipes the device passcode. |
+| `src/components/chat/chatBubble.tsx`, `chatLinks.util.ts`, `src/components/chatSafety/linkPreviewCard.tsx`, `sharedContentCardView.tsx` | "Media expired" tile, external preview card with warning sheet for shortened or suspicious domains (never auto-open), permission-aware internal cards (product price + stock, profile Follow, live LIVE + viewers, "This post is private", "No longer available"). |
+| `src/components/chatSafety/sendInChatSheet.tsx`, `shareToChat.hook.tsx` | "Send in chat" from feed posts, post detail, clips, products, lives, stores and profiles. |
+| `src/components/chatSafety/streakBadge.tsx`, `streakSheet.tsx`, `streakMilestoneCelebration.tsx`, `chatMuteSheet.tsx`, `src/components/chat/chatHeader.tsx`, `conversationRow.tsx` | Flame + days and hourglass in list and header, restore sheet with remaining restores, milestone celebration (static under reduced motion), per-chat mute 8h / 1 week / always. E2EE notice in conversation info. |
+| `src/mocks/chat*.mock.ts`, `chats.mock.ts`, `live.mock.ts`, `index.ts` | Inbox state, spam-by-sender-behaviour, streak engine with per-user timezones, link lookup table, content resolver, share route, expired-media and link seed messages. `buildLiveSession` exported. |
+| `package.json`, `app.json` | `expo-local-authentication` (via `npx expo install`) and its config plugin. |
+
 ---
 
 ## apps/webapp
