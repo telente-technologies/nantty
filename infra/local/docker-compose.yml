@@ -34,7 +34,7 @@ services:
     <<: *local-only
     image: localstack/localstack:4.9
     environment:
-      SERVICES: sns,sqs
+      SERVICES: sns,sqs,ses
       AWS_DEFAULT_REGION: eu-west-1
     ports: ["127.0.0.1:14566:4566"]
     volumes: ["./localstack/create-topics-and-queues.sh:/etc/localstack/init/ready.d/10-create-topics-and-queues.sh:ro"]
