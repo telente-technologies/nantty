@@ -3,52 +3,19 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { AnalyticsIcon, HeartIcon, MoreIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { AnalyticsIcon, ChatIcon, HeartIcon, MoreIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsService } from "@/services/posts.service";
-import type { Media, Post } from "@/types";
+import type { Post } from "@/types";
 
 import styles from "./postCard.module.css";
-
-function PostMedia({ media, priority }: { readonly media: readonly Media[]; readonly priority: boolean }) {
-  const [imageIndex, setImageIndex] = useState(0);
-  const visible = media.filter((entry) => entry.type === "image" || entry.posterUrl || entry.url);
-  if (visible.length === 0) return null;
-  const active = visible[Math.min(imageIndex, visible.length - 1)];
-
-  if (visible.length > 1) {
-    return (
-      <div className={styles.mediaFrame}>
-        <div className={styles.mediaScroller} onScroll={(event) => setImageIndex(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth))}>
-          {visible.map((entry, index) => (
-            <div className={styles.mediaSlide} key={`${entry.id ?? index}`}>
-              <MediaImage src={entry.type === "image" ? entry.url : (entry.posterUrl ?? entry.url)} alt="" sizes="(max-width: 768px) 100vw, 640px" priority={priority && index === 0} />
-            </div>
-          ))}
-        </div>
-        <div className={styles.mediaDots} aria-hidden="true">
-          {visible.map((entry, index) => (
-            <span key={entry.id ?? index} className={index === Math.min(imageIndex, visible.length - 1) ? styles.mediaDotActive : styles.mediaDot} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.mediaFrame}>
-      {active?.type === "video" && active.url && !active.url.endsWith(".m3u8") ? (
-        <video className={styles.video} src={active.url} poster={active.posterUrl ?? undefined} controls preload="metadata" playsInline />
-      ) : (
-        <MediaImage src={active?.type === "image" ? active.url : (active?.posterUrl ?? active?.url)} alt="" sizes="(max-width: 768px) 100vw, 640px" priority={priority} />
-      )}
-    </div>
-  );
-}
+import { hasVideoMedia, isLandscapeVideoPost, PostMedia } from "./postCardMedia";
 
 export function PostCard({ post, priority = false }: { readonly post: Post; readonly priority?: boolean }) {
   const queryClient = useQueryClient();
@@ -79,10 +46,11 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
               {post.author.name}
               {post.author.verified ? <span className={styles.verified} aria-label="Verified account">✓</span> : null}
             </span>
-            <span className={styles.authorMeta}>
-              @{post.author.username} · {formatTimeSincePosted(post.createdAt)}
-            </span>
+            <span className={styles.authorMeta}>@{post.author.username}</span>
           </span>
+        </Link>
+        <Link href={`/post/${post.id}`} className={styles.timestamp}>
+          <time dateTime={post.createdAt}>{formatTimeSincePosted(post.createdAt)}</time>
         </Link>
         <button type="button" className={styles.moreButton} aria-label="More options">
           <MoreIcon size={20} />
@@ -90,7 +58,7 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
       </header>
 
       {post.text ? <p className={styles.text}>{post.text}</p> : null}
-      <PostMedia media={post.media} priority={priority} />
+      <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) ? `/watch/${post.id}` : null} />
 
       {post.products.length > 0 ? (
         <div className={styles.productStrip}>
@@ -114,29 +82,32 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
           type="button"
           className={[styles.action, optimisticLiked ? styles.actionActive : ""].filter(Boolean).join(" ")}
           aria-pressed={optimisticLiked}
-          onClick={() => likeMutation.mutate(optimisticLiked)}
+          onClick={() => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.")}
         >
           <HeartIcon size={19} />
           {formatCountWithThousandsSuffix(optimisticLikes)}
         </button>
         <span className={styles.action}>
-          <span className={styles.actionBubble} aria-hidden="true" />
+          <ChatIcon size={18} />
           {formatCountWithThousandsSuffix(post.comments)}
         </span>
         <span className={styles.action}>
           <ShareIcon size={18} />
           {formatCountWithThousandsSuffix(post.reposts)}
         </span>
+        <SaveToggleButton targetType={hasVideoMedia(post) ? "video" : "post"} targetId={post.id} initiallySaved={post.bookmarked} iconSize={18} />
         {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
         {viewer?.id === post.author.id ? (
           <Link className={styles.actionViews} href={`/analytics/post/${post.id}`} aria-label="Open post analytics">
             <AnalyticsIcon size={16} />
-            {formatCountWithThousandsSuffix(post.views)} impressions
+            {formatCountWithThousandsSuffix(post.views)}
+            <span className={styles.viewsWord}> impressions</span>
           </Link>
         ) : (
           <span className={styles.actionViews}>
             <AnalyticsIcon size={16} />
-            {formatCountWithThousandsSuffix(post.views)} impressions
+            {formatCountWithThousandsSuffix(post.views)}
+            <span className={styles.viewsWord}> impressions</span>
           </span>
         )}
       </footer>
