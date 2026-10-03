@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"zudomart/modules/auth/internal/application"
-	"zudomart/modules/auth/internal/ent"
+	"zudomart/modules/auth/src/generated/ent"
 )
 
 type RegisterRequest struct {
