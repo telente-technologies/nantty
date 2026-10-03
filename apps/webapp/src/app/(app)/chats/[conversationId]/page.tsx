@@ -1,8 +1,14 @@
 "use client";
 
+import { MentionText } from "@/components/mentions/mentionText";
 import Link from "next/link";
 import { use, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
+import { ChatActionsMenu } from "@/components/chatReport/chatActionsMenu";
+import { ChatReportDialog } from "@/components/chatReport/chatReportDialog";
+import type { ChatReportTarget } from "@/components/chatReport/chatReportTarget.type";
+import reportStyles from "@/components/chatReport/chatReport.module.css";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { Avatar } from "@/components/ui/media";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { ErrorState, Spinner } from "@/components/ui/feedback";
@@ -23,6 +29,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
+  const [reportTarget, setReportTarget] = useState<ChatReportTarget | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -103,6 +110,9 @@ export default function ConversationPage({ params }: { readonly params: Promise<
         ) : (
           <span className={styles.headerName}>Conversation</span>
         )}
+        {conversationQuery.data ? (
+          <ChatActionsMenu conversation={conversationQuery.data} onStartReport={(target) => setReportTarget({ ...target, conversationId })} />
+        ) : null}
       </header>
 
       <div className={styles.messages} ref={listRef}>
@@ -118,7 +128,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
             return (
               <div key={message.id} className={[styles.bubbleRow, mine ? styles.bubbleRowMine : ""].filter(Boolean).join(" ")}>
                 <div className={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs].join(" ")}>
-                  {message.text ? <p className={styles.bubbleText}>{message.text}</p> : null}
+                  {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} /></p> : null}
                   {message.media?.url ? (
                     message.media.type === "image" ? (
                       <img src={message.media.url} alt="" className={styles.bubbleImage} loading="lazy" />
@@ -128,6 +138,21 @@ export default function ConversationPage({ params }: { readonly params: Promise<
                   ) : null}
                   <span className={styles.bubbleTime}>{formatMessageTime(message.createdAt)}</span>
                 </div>
+                {mine || message.kind === "system" ? null : (
+                  <button
+                    type="button"
+                    className={reportStyles.messageReport}
+                    aria-label="Report message"
+                    onClick={() =>
+                      requireAuthThen(
+                        () => setReportTarget({ kind: "message", conversationId, reportedUser: message.sender ?? peer ?? null, message, alsoBlock: false }),
+                        "Sign in to report a message.",
+                      )
+                    }
+                  >
+                    Report
+                  </button>
+                )}
               </div>
             );
           })
@@ -157,6 +182,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
           {sendMutation.isPending ? "…" : "Send"}
         </button>
       </form>
+      <ChatReportDialog target={reportTarget} messages={messages} viewerId={viewer?.id ?? ""} onClose={() => setReportTarget(null)} />
     </div>
   );
 }
