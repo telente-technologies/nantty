@@ -11,28 +11,29 @@ import { LandingPricing } from "@/components/landing/landingPricing";
 import { LandingQuestions } from "@/components/landing/landingQuestions";
 import { LandingSyncSection } from "@/components/landing/landingSyncSection";
 import { LandingTicker } from "@/components/landing/landingTicker";
+import { freePlanPromise } from "@/config/planFeatures.config";
 import { readAdsManagerUrl, readMarketingSiteUrl } from "@/config/siteMetadata.config";
-import { loadPublicGoldPlansForVisitor } from "@/server/publicPlans.service";
+import { loadPublicSubscriptionPlansForVisitor } from "@/server/publicPlans.service";
 
 import styles from "@/components/landing/landingPage.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Zudomart Dashboard — point of sale and back office for Gold sellers" },
-  description: "Run your Zudomart store from one screen: a point of sale that works offline, stock across locations, online orders with escrow, customers, staff, reports and payouts. Sign in with your Zudomart account.",
+  title: { absolute: "Zudomart Dashboard — run your business, free for every seller" },
+  description: "The Zudomart App lets you sell from anywhere. Zudomart Dashboard is where you run your business: products, inventory, app orders with escrow, customers, analytics, marketing, payouts, team and reports. Free for every Zudomart seller.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
-  openGraph: { type: "website", title: "Zudomart Dashboard", description: "The point of sale and back office for Gold-verified Zudomart businesses.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Zudomart Dashboard home" }] },
+  openGraph: { type: "website", title: "Zudomart Dashboard", description: "Run your Zudomart business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Zudomart Dashboard home" }] },
 };
 
 export default async function LandingPage() {
-  const { plans, locale } = await loadPublicGoldPlansForVisitor();
+  const { plans, locale } = await loadPublicSubscriptionPlansForVisitor();
   const marketingSiteUrl = readMarketingSiteUrl();
   return (
     <div className={styles.page}>
       <aside className={styles.announcement} aria-label="Announcement">
-        <span className={styles.announcementBadge}>Gold</span>
+        <span className={styles.announcementBadge}>Free</span>
         <span>
-          Included with Gold Pro and Gold Premium. <Link href="/login">Sign in with your app account</Link>
+          {freePlanPromise} <Link href="/login">Sign in with your app account</Link>
         </span>
       </aside>
       <LandingHeader />

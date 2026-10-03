@@ -29,8 +29,8 @@ export default function NotFoundPage() {
           <Link href="/" className={styles.primaryAction}>
             Back to your dashboard
           </Link>
-          <Link href="/pos" className={styles.secondaryAction}>
-            Open the register
+          <Link href="/orders" className={styles.secondaryAction}>
+            See your orders
           </Link>
         </div>
       </div>

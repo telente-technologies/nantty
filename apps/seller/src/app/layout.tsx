@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
+import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { SellerSessionProvider } from "@/components/session/sellerSessionProvider";
 import { ToastProvider } from "@/components/ui/toastProvider";
 import { dashboardProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
@@ -16,7 +17,7 @@ const receiptFont = JetBrains_Mono({ subsets: ["latin"], display: "swap", variab
 export const metadata: Metadata = {
   metadataBase: new URL(readPublicSiteUrl()),
   title: { default: dashboardProductName, template: `%s · ${dashboardProductName}` },
-  description: "Run your Zudomart store: point of sale, stock, orders, customers, payouts and ads in one place.",
+  description: "Run your Zudomart business: products, inventory, app orders, customers, analytics, payouts and team in one place.",
   applicationName: dashboardProductName,
   manifest: "/manifest.webmanifest",
   robots: { index: false, follow: false },
@@ -43,6 +44,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </a>
         <SellerSessionProvider initialSessionView={sessionView} csrfToken={csrfToken}>
           <ToastProvider>{children}</ToastProvider>
+          <ConsentBannerHost isSignedIn={sessionView !== null} />
         </SellerSessionProvider>
       </body>
     </html>
