@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"time"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/ledger/src/middlewares"
@@ -30,6 +31,8 @@ type MoneyModuleSettings struct {
 	JwksUrl              string
 	TokenIssuer          string
 	TokenAudience        string
+	AdminSchema          string
+	PlatformSettingsTtl  time.Duration
 }
 
 func (settings MoneyModuleSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -47,6 +50,8 @@ func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentRe
 		JwksUrl:              reader.ReadRequiredString("AUTH_JWKS_URL"),
 		TokenIssuer:          reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
 		TokenAudience:        reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+		AdminSchema:          reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
+		PlatformSettingsTtl:  reader.ReadDurationOrDefault("MONEY_PLATFORM_SETTINGS_TTL", 30*time.Second),
 	}
 }
 
@@ -56,6 +61,7 @@ type MoneyModuleResources struct {
 	AccessVerifier *jwtauth.AccessTokenVerifier
 	StaffVerifiers middlewares.StaffTokenVerifiers
 	Logger         *slog.Logger
+	Platform       *PlatformSettingsSource
 	release        func() error
 }
 
@@ -70,6 +76,7 @@ type MoneyModuleOverrides struct {
 	Publisher      events.DomainEventPublisher
 	AccessVerifier *jwtauth.AccessTokenVerifier
 	StaffVerifiers *middlewares.StaffTokenVerifiers
+	Platform       *PlatformSettingsSource
 }
 
 func PrepareMoneyModuleResources(ctx context.Context, settings MoneyModuleSettings, migrationFiles fs.FS, dependencies servicemodule.Dependencies, overrides MoneyModuleOverrides) (MoneyModuleResources, error) {
@@ -102,7 +109,11 @@ func PrepareMoneyModuleResources(ctx context.Context, settings MoneyModuleSettin
 	if dependencies.Health != nil {
 		dependencies.Health.AddReadinessCheck(settings.ModuleName+"-postgres", postgres.ReadinessCheckForDatabase(database))
 	}
-	return MoneyModuleResources{Database: database, Publisher: publisher, AccessVerifier: verifier, StaffVerifiers: staffVerifiers, Logger: logger, release: release}, nil
+	platform := overrides.Platform
+	if platform == nil {
+		platform = NewPlatformSettingsSource(database, settings.AdminSchema, settings.PlatformSettingsTtl, logger)
+	}
+	return MoneyModuleResources{Database: database, Publisher: publisher, AccessVerifier: verifier, StaffVerifiers: staffVerifiers, Logger: logger, Platform: platform, release: release}, nil
 }
 
 func createDomainEventPublisher(ctx context.Context, settings MoneyModuleSettings, logger *slog.Logger) (events.DomainEventPublisher, error) {
