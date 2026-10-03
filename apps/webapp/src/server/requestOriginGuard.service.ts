@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { readWebappOrigin } from "@/config/webappEnvironment.config";
 import { readSessionIdFromCookies } from "@/server/session.service";
 import { isCsrfTokenValidForSession } from "@/server/signedCookie.service";
+import { readSafeRelativeRedirectPath } from "@/utils/safeRedirectPath.util";
 
 export const csrfHeaderName = "x-csrf-token";
 
@@ -24,7 +25,4 @@ export function isSafeHttpMethod(method: string): boolean {
   return method === "GET" || method === "HEAD";
 }
 
-export function readSafeRelativeRedirectPath(candidate: string | null, fallbackPath: string): string {
-  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//") || candidate.startsWith("/\\") || candidate.startsWith("/bff")) return fallbackPath;
-  return candidate;
-}
+export { readSafeRelativeRedirectPath };
