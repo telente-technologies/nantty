@@ -18,6 +18,10 @@ import (
 	"zudomart/modules/moderation/src/middlewares"
 	"zudomart/modules/moderation/src/migrations"
 	"zudomart/modules/moderation/src/modules/chatReports"
+	"zudomart/modules/moderation/src/modules/contentReports"
+	"zudomart/modules/moderation/src/modules/copyrightClaims"
+	"zudomart/modules/moderation/src/modules/ipClaims"
+	"zudomart/modules/moderation/src/modules/strikes"
 	"zudomart/modules/moderation/src/modules/suspensionCases"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/jwtauth"
@@ -29,6 +33,7 @@ import (
 type Module struct {
 	container *container.Container
 	publisher platformevents.DomainEventPublisher
+	bus       platformevents.MessageBusSelection
 }
 
 type Overrides struct {
@@ -36,6 +41,7 @@ type Overrides struct {
 	StaffVerifiers *middlewares.StaffTokenVerifiers
 	Users          integrations.UsersService
 	Audit          integrations.AuditService
+	Targets        integrations.TargetResolver
 }
 
 func NewModerationModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
@@ -76,10 +82,15 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 	if moderationContainer.Audit == nil {
 		moderationContainer.Audit = integrations.NewHttpAuditService(settings.UsersInternalUrl, settings.AdminInternalToken)
 	}
+	moderationContainer.Targets = overrides.Targets
+	if moderationContainer.Targets == nil {
+		moderationContainer.Targets = integrations.NewHttpTargetResolver(settings.TargetSources)
+	}
 	if dependencies.Health != nil {
 		dependencies.Health.AddReadinessCheck("moderation-postgres", postgres.ReadinessCheckForDatabase(database))
 	}
-	return &Module{container: moderationContainer, publisher: publisher}, nil
+	bus := platformevents.MessageBusSelection{DeployableName: dependencies.DeployableName, Logger: logger, IsProduction: settings.IsProduction()}
+	return &Module{container: moderationContainer, publisher: publisher, bus: bus}, nil
 }
 
 func resolveVerifiers(ctx context.Context, settings configs.ModerationSettings, overrides Overrides, target *container.Container) error {
@@ -101,16 +112,24 @@ func resolveVerifiers(ctx context.Context, settings configs.ModerationSettings, 
 	return err
 }
 
+func (module *Module) Container() *container.Container { return module.container }
+
 func (module *Module) Name() string { return "moderation" }
 
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	chatreports.Mount(mux, module.container)
 	suspensioncases.Mount(mux, module.container)
+	strikes.Mount(mux, module.container)
+	contentreports.Mount(mux, module.container)
+	copyrightclaims.Mount(mux, module.container)
+	ipclaims.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go chatreports.RunBackgroundWorkersUntilContextDone(ctx, module.container)
 	go module.consumeAdvisorySuggestions(ctx)
+	go copyrightclaims.RunRestoreWorkerUntilContextDone(ctx, module.container)
+	go module.consumeContentSignals(ctx)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,
@@ -123,31 +142,37 @@ func (module *Module) Close(context.Context) error {
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.ModerationSettings, dependencies servicemodule.Dependencies) (platformevents.DomainEventPublisher, error) {
-	if settings.DomainEventsTopicArn == "" {
-		if settings.IsProduction() {
-			return nil, errors.New("DOMAIN_EVENTS_TOPIC_ARN is required in production")
-		}
-		dependencies.Logger.Warn("DOMAIN_EVENTS_TOPIC_ARN is not set: moderation outbox events are marked published without leaving the process")
-		return platformevents.DiscardingPublisher{}, nil
-	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return platformevents.NewSnsDomainEventPublisher(awsConfig, settings.DomainEventsTopicArn), nil
+	return platformevents.CreateDomainEventPublisherFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
+	})
 }
 
 func (module *Module) consumeAdvisorySuggestions(ctx context.Context) {
-	if module.container.Settings.AdvisoryQueueUrl == "" {
+	if module.container.Settings.AdvisoryQueueName == "" {
 		return
 	}
-	awsConfig, err := platformevents.LoadAwsConfigHonouringEndpointOverride(ctx)
-	if err != nil {
-		module.container.Logger.ErrorContext(ctx, "advisory queue consumer could not start", slog.Any("error", err))
+	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, module.bus)
+	if err != nil || queues == nil {
+		module.container.Logger.WarnContext(ctx, "advisory queue consumer disabled: no message broker configured", slog.Any("error", err))
 		return
 	}
-	consumer := suspensioncases.AdvisoryConsumer{Container: module.container, Queues: platformevents.NewSqsQueues(awsConfig)}
-	if err := consumer.RunUntilContextDone(ctx); err != nil {
-		module.container.Logger.ErrorContext(ctx, "advisory queue consumer stopped", slog.Any("error", err))
+	consumer := suspensioncases.AdvisoryConsumer{Container: module.container, Queues: queues}
+	for ctx.Err() == nil {
+		if err := consumer.RunUntilContextDone(ctx); err != nil && ctx.Err() == nil {
+			module.container.Logger.ErrorContext(ctx, "advisory queue consumer stopped; retrying in 30s", slog.Any("error", err))
+		}
+		select {
+		case <-ctx.Done():
+		case <-time.After(30 * time.Second):
+		}
 	}
+}
+
+func (module *Module) consumeContentSignals(ctx context.Context) {
+	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, module.bus)
+	if err != nil || queues == nil {
+		module.container.Logger.WarnContext(ctx, "content report and score consumers disabled: no message broker configured", slog.Any("error", err))
+		return
+	}
+	contentreports.RunConsumersUntilContextDone(ctx, module.container, queues)
 }

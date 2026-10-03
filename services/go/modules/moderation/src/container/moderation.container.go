@@ -23,6 +23,7 @@ type Container struct {
 	StaffVerifiers middlewares.StaffTokenVerifiers
 	Users          integrations.UsersService
 	Audit          integrations.AuditService
+	Targets        integrations.TargetResolver
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {
