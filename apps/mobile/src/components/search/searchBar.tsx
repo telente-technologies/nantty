@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import { MagnifyingGlass20Icon } from "@/components/icons";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 
 export interface SearchBarProps {
@@ -12,6 +12,8 @@ export interface SearchBarProps {
 }
 
 export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBar({ value, onChangeText, placeholder = "Search" }, ref) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.box}>
       <MagnifyingGlass20Icon />
@@ -30,7 +32,7 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBa
   );
 });
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   box: {
     flex: 1,
     height: 40,
@@ -38,10 +40,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.textSubtle,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
   input: { flex: 1, height: "100%", padding: 0, fontFamily: fontFamily[400], fontSize: 13, color: colors.text },
-});
+}));

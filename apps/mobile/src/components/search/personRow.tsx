@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { SealCheck20Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 
 export interface PersonRowProps {
   readonly name: string;
@@ -14,6 +14,7 @@ export interface PersonRowProps {
 }
 
 export function PersonRow({ name, handle, avatarUrl, verified, onPress }: PersonRowProps) {
+  const { colors } = useTheme();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={name} onPress={onPress} style={styles.row}>
       <Avatar uri={avatarUrl} size={40} placeholderColor={colors.primaryTint} />
