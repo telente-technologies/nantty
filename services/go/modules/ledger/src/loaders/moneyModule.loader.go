@@ -25,6 +25,7 @@ type MoneyModuleSettings struct {
 	DatabaseUrl          string
 	DatabaseSchema       string
 	DatabaseOwnerRole    string
+	LedgerSchema         string
 	DomainEventsTopicArn string
 	JwksUrl              string
 	TokenIssuer          string
@@ -41,6 +42,7 @@ func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentRe
 		DatabaseUrl:          reader.ReadRequiredString("MONEY_DATABASE_URL"),
 		DatabaseSchema:       reader.ReadStringOrDefault(prefix+"DATABASE_SCHEMA", moduleName),
 		DatabaseOwnerRole:    reader.ReadStringOrDefault(prefix+"DATABASE_OWNER_ROLE", "svc_"+moduleName),
+		LedgerSchema:         reader.ReadStringOrDefault("LEDGER_DATABASE_SCHEMA", "ledger"),
 		DomainEventsTopicArn: reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		JwksUrl:              reader.ReadRequiredString("AUTH_JWKS_URL"),
 		TokenIssuer:          reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
