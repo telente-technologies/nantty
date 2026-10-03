@@ -1,4 +1,5 @@
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
+import { adaptListEnvelope } from "@/utils/listEnvelope.util";
 
 let currentCsrfToken: string | null = null;
 
@@ -80,7 +81,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
   if (options.expect === "blob") return (await response.blob()) as Payload;
-  return (await response.json()) as Payload;
+  return adaptListEnvelope((await response.json()) as Payload);
 }
 
 export function sendAdsApiRequest<Payload>(apiPath: string, options: AdsApiRequestOptions = {}): Promise<Payload> {

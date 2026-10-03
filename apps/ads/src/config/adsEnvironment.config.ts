@@ -1,9 +1,9 @@
 const isProductionRuntime = process.env.NODE_ENV === "production";
 const developmentOnlySessionSecret = "zudomart-ads-manager-development-only-secret-never-use-in-production";
-const defaultHostedCheckoutHosts = ["checkout.paystack.com", "checkout.flutterwave.com"];
+const defaultHostedCheckoutHosts = ["checkout.paystack.com"];
 
 export function readAdsApiBaseUrl(): string {
-  const configuredUrl = process.env.ADS_API_URL ?? (isProductionRuntime ? "" : "http://localhost:3000");
+  const configuredUrl = process.env.ADS_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");
   if (!configuredUrl) throw new Error("ADS_API_URL is not configured.");
   return configuredUrl.replace(/\/+$/, "");
 }
@@ -12,6 +12,18 @@ export function isMockBackendEnabled(): boolean {
   const configuredValue = process.env.ADS_USE_MOCKS;
   if (configuredValue === undefined || configuredValue === "") return !isProductionRuntime;
   return configuredValue === "true";
+}
+
+export function readRealApiPrefixes(): readonly string[] {
+  return (process.env.ADS_REAL_API_PREFIXES ?? "")
+    .split(",")
+    .map((prefix) => prefix.trim().replace(/\/+$/, ""))
+    .filter((prefix) => prefix.startsWith("/"));
+}
+
+export function shouldUseRealBackend(fullPath: string): boolean {
+  if (!isMockBackendEnabled()) return true;
+  return readRealApiPrefixes().some((prefix) => fullPath === prefix || fullPath.startsWith(`${prefix}/`));
 }
 
 export function readSessionSigningSecret(): string {

@@ -25,8 +25,9 @@ export async function exchangeRefreshTokenForNewTokenPair(refreshToken: string):
 
 async function fetchMembershipsWithAccessToken(accessToken: string): Promise<{ status: number; memberships: AdAccountMembership[] | null }> {
   const result = await callAdsBackend({ method: "GET", path: "/ads/memberships", accessToken });
-  const body = result.status === 200 ? readJsonFromBackendResult<{ items: AdAccountMembership[] }>(result) : null;
-  return { status: result.status, memberships: body ? body.items.filter((membership) => /^[A-Za-z0-9_-]{1,64}$/.test(membership.accountId)) : null };
+  const body = result.status === 200 ? readJsonFromBackendResult<{ items?: AdAccountMembership[]; data?: AdAccountMembership[] }>(result) : null;
+  const memberships = body?.items ?? body?.data ?? null;
+  return { status: result.status, memberships: memberships ? memberships.filter((membership) => /^[A-Za-z0-9_-]{1,64}$/.test(membership.accountId)) : null };
 }
 
 async function fetchSignedInUserWithAccessToken(accessToken: string): Promise<AdsUser | null> {
