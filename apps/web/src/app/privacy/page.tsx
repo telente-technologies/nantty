@@ -13,8 +13,9 @@ export default function PrivacyPolicyPage() {
   return (
     <PlaceholderLegalDocument
       title="Privacy policy"
-      summary="What personal data Zudomart collects, why, and the choices you have."
-      lastUpdatedLabel="Draft, not yet in effect"
+      summary="What personal data Zudomart collects, why, who we share it with, and the choices you have."
+      versionLabel="[version placeholder]"
+      effectiveDateLabel="[effective date placeholder]"
       sections={privacyPolicySections}
     />
   );
