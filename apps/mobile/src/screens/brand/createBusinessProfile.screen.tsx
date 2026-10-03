@@ -11,7 +11,7 @@ import { TextField } from "@/components/ui/input";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { brandsService } from "@/services/brands.service";
@@ -19,6 +19,7 @@ import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { BusinessCategorySelection } from "@/types/socialGraph.type";
 
 export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"CreateBusinessProfile">) {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const setActingProfile = useActingProfileStore((state) => state.setActingProfile);
   const categories = useQuery({ queryKey: ["business-categories"], queryFn: brandsService.listBusinessCategories });

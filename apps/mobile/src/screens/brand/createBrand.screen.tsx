@@ -12,7 +12,7 @@ import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { brandsService } from "@/services/brands.service";
@@ -20,6 +20,8 @@ import { categoriesService } from "@/services/categories.service";
 import { mediaService } from "@/services/media.service";
 
 export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoriesService.fetchProductCategories });
   const [name, setName] = useState("");
@@ -83,11 +85,11 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
   cover: { height: 110, borderRadius: 8, backgroundColor: colors.chip, overflow: "hidden", alignItems: "center", justifyContent: "center" },
-  logo: { width: 72, height: 72, borderRadius: 8, marginTop: -40, marginLeft: 12, backgroundColor: colors.skeleton, borderWidth: 2, borderColor: colors.white, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  logo: { width: 72, height: 72, borderRadius: 8, marginTop: -40, marginLeft: 12, backgroundColor: colors.skeleton, borderWidth: 2, borderColor: colors.surface, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   multiline: { height: 100, alignItems: "flex-start", paddingVertical: 12 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
-});
+}));

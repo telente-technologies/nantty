@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { brandsService } from "@/services/brands.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -20,8 +20,11 @@ import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { PreviewableImage } from "@/components/ui/previewableImage";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function BrandProfileScreen({ navigation, route }: MainScreenProps<"BrandProfile">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { brandId } = route.params;
   const queryClient = useQueryClient();
   const signedInUserId = useAuthStore((state) => state.user?.id);
@@ -46,7 +49,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
   const ownsBrand = details.ownerUserId === signedInUserId;
 
   return (
-    <Screen background={colors.white}>
+    <Screen background={colors.surface}>
       <Header title={details.name} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.cover}>
@@ -74,7 +77,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
           <Text size={13} lineHeight={17.5} color={colors.primary} style={styles.padded} accessibilityRole="link" onPress={() => Linking.openURL(details.website!)}>{details.website}</Text>
         ) : null}
         <View style={[styles.actions, styles.padded]}>
-          <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => toggleFollow.mutate(!details.isFollowing)} />
+          <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => requireAuthThen(() => toggleFollow.mutate(!details.isFollowing), undefined, "follow brands")} />
           {ownsBrand && !details.verification?.badgeVisible ? (
             <Button variant="subtle" title="Verify brand" style={styles.flex} onPress={() => navigation.navigate("VerificationApply", { color: "gold" })} />
           ) : null}
@@ -116,7 +119,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingBottom: 40, gap: 12 },
   cover: { marginHorizontal: 12, height: 110, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
@@ -127,4 +130,4 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", gap: 8 },
   section: { gap: 8, marginTop: 12 },
   sectionTitle: { paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-});
+}));
