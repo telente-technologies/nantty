@@ -69,7 +69,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
         {type === "personal" ? (
           <View style={styles.section}>
             <Text size={16} weight={600} lineHeight={19.2}>Blue: people</Text>
-            <Text size={13} lineHeight={17.5} color={colors.textMuted}>For individuals and creators. Confirms you are who you say you are.</Text>
+            <Text size={13} lineHeight={17.5} color={colors.textMuted}>For personal accounts, including creator accounts. Confirms you are who you say you are.</Text>
             {(plans.data ?? []).filter((plan) => plan.color === "blue").map((plan) => (
               <VerificationPlanCard key={plan.id} plan={plan} current={subscription?.planId === plan.id} />
             ))}
