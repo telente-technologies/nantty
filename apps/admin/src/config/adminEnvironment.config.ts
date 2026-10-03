@@ -4,7 +4,7 @@ const developmentOnlySessionSecret = "zudomart-admin-development-only-secret-nev
 export type AdminDeploymentEnvironment = "production" | "staging" | "development";
 
 export function readAdminApiBaseUrl(): string {
-  const configuredUrl = process.env.ADMIN_API_URL ?? (isProductionRuntime ? "" : "http://localhost:3000");
+  const configuredUrl = process.env.ADMIN_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");
   if (!configuredUrl) throw new Error("ADMIN_API_URL is not configured.");
   return configuredUrl.replace(/\/+$/, "");
 }
@@ -13,6 +13,18 @@ export function isMockBackendEnabled(): boolean {
   const configuredValue = process.env.ADMIN_USE_MOCKS;
   if (configuredValue === undefined || configuredValue === "") return !isProductionRuntime;
   return configuredValue === "true";
+}
+
+export function readRealApiPrefixes(): readonly string[] {
+  return (process.env.ADMIN_REAL_API_PREFIXES ?? "")
+    .split(",")
+    .map((prefix) => prefix.trim().replace(/\/+$/, ""))
+    .filter((prefix) => prefix.startsWith("/"));
+}
+
+export function shouldUseRealBackend(fullPath: string): boolean {
+  if (!isMockBackendEnabled()) return true;
+  return readRealApiPrefixes().some((prefix) => fullPath === prefix || fullPath.startsWith(`${prefix}/`));
 }
 
 export function readSessionSigningSecret(): string {

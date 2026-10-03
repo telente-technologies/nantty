@@ -1,6 +1,7 @@
-import { isMockBackendEnabled, readAdminApiBaseUrl } from "@/config/adminEnvironment.config";
+import { shouldUseRealBackend, readAdminApiBaseUrl } from "@/config/adminEnvironment.config";
 import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
 import type { ApiErrorBody } from "@/types/api.type";
+import { toServerListEnvelope } from "@/utils/listEnvelope.util";
 
 export interface BackendCall {
   readonly method: string;
@@ -40,7 +41,7 @@ async function callMockBackend(call: BackendCall, headers: Headers): Promise<Bac
     return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(mockResponse.body) };
   }
   responseHeaders.set("Content-Type", "application/json; charset=utf-8");
-  return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(JSON.stringify(mockResponse.body)) };
+  return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(JSON.stringify(toServerListEnvelope(mockResponse.body))) };
 }
 
 async function callRealBackend(call: BackendCall, headers: Headers): Promise<BackendResult> {
@@ -68,7 +69,7 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
 
 export async function callAdminBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return isMockBackendEnabled() ? callMockBackend(call, headers) : callRealBackend(call, headers);
+  return shouldUseRealBackend(`/api/v1${call.path}`) ? callRealBackend(call, headers) : callMockBackend(call, headers);
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {

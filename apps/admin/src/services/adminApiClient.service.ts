@@ -1,4 +1,5 @@
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
+import { adaptListEnvelope } from "@/utils/listEnvelope.util";
 
 let currentCsrfToken: string | null = null;
 let stepUpPrompt: (() => Promise<boolean>) | null = null;
@@ -103,7 +104,7 @@ export async function sendRequestToAdminConsoleServer<Payload>(bffPath: string, 
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
   if (options.expect === "blob") return (await response.blob()) as Payload;
-  return (await response.json()) as Payload;
+  return adaptListEnvelope((await response.json()) as Payload);
 }
 
 export function sendAdminApiRequest<Payload>(apiPath: string, options: AdminApiRequestOptions = {}): Promise<Payload> {
