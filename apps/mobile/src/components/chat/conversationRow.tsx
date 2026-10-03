@@ -10,6 +10,7 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { BusinessLabel } from "./businessLabel";
 import { describeConversationForDisplay } from "./conversationDisplay.util";
+import { BellSlash24Icon } from "@/components/icons";
 
 export interface ConversationRowProps {
   readonly conversation: Conversation;
@@ -40,7 +41,7 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
             )}
             {display.isBusiness ? <BusinessLabel /> : null}
             <StreakBadge streak={conversation.streak} />
-            {conversation.mutedUntil ? <Text size={11} lineHeight={14} color={colors.textMuted} accessibilityLabel="Muted">🔕</Text> : null}
+            {conversation.mutedUntil ? <View accessible accessibilityLabel="Muted"><BellSlash24Icon size={14} color={colors.textMuted} /></View> : null}
           </View>
           <Text size={13} weight={500} lineHeight={16.9} color={colors.textSubtle}>
             {formatTimeSincePosted(lastMessageAt)} ago
