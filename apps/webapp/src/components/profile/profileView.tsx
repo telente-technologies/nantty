@@ -83,9 +83,6 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
         <div className={styles.actions}>
           {isSelf ? (
             <>
-              <Button size="sm" variant="secondary" onClick={() => router.push("/settings")}>
-                Edit profile
-              </Button>
               <div className={styles.iconLinks}>
                 <Link href="/orders" className={styles.iconLink} aria-label="Your orders">
                   <StoreIcon size={18} />

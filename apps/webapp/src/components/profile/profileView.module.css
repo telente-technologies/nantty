@@ -160,7 +160,7 @@
 
 .signOut:hover {
   border-color: var(--error);
-  color: var(--error);
+  color: var(--color-danger-text);
 }
 
 @media (min-width: 768px) {
