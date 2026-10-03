@@ -16,7 +16,7 @@ type PaymentRefund struct {
 }
 
 func (PaymentRefund) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Checks(map[string]string{"payment_refunds_amount_positive": "amount_minor > 0 AND fee_top_up_minor >= 0"})}
+	return []schema.Annotation{entsql.Checks(map[string]string{"payment_refunds_amount_positive": "amount_minor > 0", "payment_refunds_fee_top_up_not_negative": "fee_top_up_minor >= 0"})}
 }
 
 func (PaymentRefund) Mixin() []ent.Mixin {

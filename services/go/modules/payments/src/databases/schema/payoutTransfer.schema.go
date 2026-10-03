@@ -15,7 +15,7 @@ type PayoutTransfer struct {
 }
 
 func (PayoutTransfer) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Checks(map[string]string{"payout_transfers_amount_positive": "amount_minor > 0 AND fee_minor >= 0"})}
+	return []schema.Annotation{entsql.Checks(map[string]string{"payout_transfers_amount_positive": "amount_minor > 0", "payout_transfers_fee_not_negative": "fee_minor >= 0"})}
 }
 
 func (PayoutTransfer) Mixin() []ent.Mixin {
