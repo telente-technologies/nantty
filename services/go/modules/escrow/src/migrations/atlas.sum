@@ -1,4 +1,6 @@
-h1:tvsZdhEG9M2/uJsJGJbIqlHjo0pJ8nlJjtY9Jq736wU=
+h1:ZbbsE4evEGhZ7Y7UFCRvKfuVJW7J9yP3z6E5jH3g/a0=
 20261003111009_create_escrow_tables.up.sql h1:cpe4UNQ0eKS2O/FR57TOTh+GoO2Hnk75IaiSY0sevtY=
 20261003111109_grant_read_access_to_other_services.up.sql h1:4HAy3Hkqlr+Obcp6YmbNiJfOTjNGJiTb9qQwj+qeH3o=
 20261003114152_pause_auto_release_during_disputes.up.sql h1:kTfdUROe9s+viD8K8W1EZMFRWYgHGvfpuE957XdKcZE=
+20261003142241_bachs_connect_mirror.up.sql h1:T1zjLivYSDi6sanshEbQ7yvGpO0HThFtZEIpFos3yrQ=
+20261003142306_protect_append_only_escrow_history.up.sql h1:PZcotgPUDDzLjuX3h+Txt9OZwiJiTx+voq0HnPtclQU=
