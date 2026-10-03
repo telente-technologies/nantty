@@ -1,10 +1,13 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { Coin24Icon, Gift24Icon, PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
+import { useTheme } from "@/theme";
+
+import { liveAccent, useLiveForeground } from "./liveSurface.constant";
+
+const LIVE_COMMENT_MAX_LENGTH = 200;
 
 export interface LiveCommentBarProps {
   readonly onSend: (text: string) => void;
@@ -12,70 +15,95 @@ export interface LiveCommentBarProps {
   readonly onPressProducts?: () => void;
   readonly onPressGift?: () => void;
   readonly onPressTip?: () => void;
+  readonly isShownOverVideo?: boolean;
+  readonly isSending?: boolean;
 }
 
-export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip }: LiveCommentBarProps) {
+function RoundAction({ label, onPress, background, border, children }: { label: string; onPress: () => void; background: string; border?: string; children: ReactNode }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={4}
+      onPress={onPress}
+      style={({ pressed }) => [styles.roundAction, { backgroundColor: background, borderColor: border ?? "transparent" }, pressed ? styles.pressed : null]}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip, isShownOverVideo = true, isSending = false }: LiveCommentBarProps) {
   const [text, setText] = useState("");
+  const { colors, isDark } = useTheme();
+  const foreground = useLiveForeground(isShownOverVideo);
+  const hasText = text.trim().length > 0;
+  const placeholderInk = isShownOverVideo ? "rgba(255, 255, 255, 0.72)" : colors.inputPlaceholderText;
   const sendTypedLiveComment = () => {
-    if (!text.trim()) return;
+    if (!hasText || isSending) return;
     onSend(text.trim());
     setText("");
   };
   return (
     <View style={styles.bar}>
-      <View style={styles.field}>
+      <View style={[styles.pill, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}>
         <TextInput
           value={text}
           onChangeText={setText}
-          placeholder="Add comment..."
-          placeholderTextColor={colors.placeholder}
-          selectionColor={colors.primary}
+          placeholder="Say something…"
+          placeholderTextColor={placeholderInk}
+          selectionColor={isShownOverVideo ? "#FFFFFF" : colors.primary}
+          keyboardAppearance={isShownOverVideo || isDark ? "dark" : "light"}
           returnKeyType="send"
+          maxLength={LIVE_COMMENT_MAX_LENGTH}
           onSubmitEditing={sendTypedLiveComment}
           accessibilityLabel="Add comment"
-          style={styles.input}
+          accessibilityHint="Type @ before a username to mention someone"
+          style={[styles.input, { color: foreground.ink }]}
         />
+        {hasText ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Send comment"
+            accessibilityState={{ busy: isSending, disabled: isSending }}
+            disabled={isSending}
+            hitSlop={6}
+            onPress={sendTypedLiveComment}
+            style={[styles.sendButton, { backgroundColor: colors.primarySolid }]}
+          >
+            {isSending ? <ActivityIndicator size="small" color="#FFFFFF" /> : <PaperPlaneTilt24Icon size={16} color="#FFFFFF" />}
+          </Pressable>
+        ) : (
+          <Pressable accessibilityRole="button" accessibilityLabel="Reactions" hitSlop={6} onPress={onToggleReactions} style={styles.emojiButton}>
+            <Smiley24Icon size={22} color={foreground.inkMuted} />
+          </Pressable>
+        )}
       </View>
-      {text.trim() ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Send comment" hitSlop={8} onPress={sendTypedLiveComment}>
-          <PaperPlaneTilt24Icon />
-        </Pressable>
-      ) : (
-        <Pressable accessibilityRole="button" accessibilityLabel="Reactions" hitSlop={8} onPress={onToggleReactions}>
-          <Smiley24Icon />
-        </Pressable>
-      )}
       {onPressGift ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Send a gift" hitSlop={8} onPress={onPressGift}>
-          <Gift24Icon />
-        </Pressable>
+        <RoundAction label="Send a gift" onPress={onPressGift} background={liveAccent.gold}>
+          <Gift24Icon size={20} color={liveAccent.goldInk} />
+        </RoundAction>
       ) : null}
       {onPressTip ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Tip the host with coins" hitSlop={8} onPress={onPressTip}>
-          <Coin24Icon />
-        </Pressable>
+        <RoundAction label="Tip the host with coins" onPress={onPressTip} background={foreground.chip} border={foreground.chipBorder}>
+          <Coin24Icon size={20} />
+        </RoundAction>
       ) : null}
       {onPressProducts ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Products in this live" hitSlop={8} onPress={onPressProducts}>
-          <ViewProducts24Icon color={colors.black} />
-        </Pressable>
+        <RoundAction label="Products in this live" onPress={onPressProducts} background={foreground.chip} border={foreground.chipBorder}>
+          <ViewProducts24Icon size={20} color={foreground.ink} />
+        </RoundAction>
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
-    height: 40,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    backgroundColor: colors.white,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  field: { flex: 1, height: 24, borderWidth: 1, borderColor: colors.divider, borderRadius: 4, paddingHorizontal: 8, justifyContent: "center" },
-  input: { padding: 0, fontFamily: fontFamily[400], fontSize: 14, letterSpacing: calculateDefaultLetterSpacing(14), color: colors.text },
+  bar: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8, flexDirection: "row", alignItems: "center", gap: 8 },
+  pill: { flex: 1, minHeight: 42, borderRadius: 21, borderWidth: StyleSheet.hairlineWidth, paddingLeft: 16, paddingRight: 4, flexDirection: "row", alignItems: "center", gap: 6 },
+  input: { flex: 1, paddingVertical: 10, fontFamily: fontFamily[400], fontSize: 14, letterSpacing: calculateDefaultLetterSpacing(14) },
+  sendButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
+  emojiButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
+  roundAction: { width: 42, height: 42, borderRadius: 21, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.96 }] },
 });

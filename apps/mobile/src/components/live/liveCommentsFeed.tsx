@@ -1,20 +1,72 @@
+import { MentionText } from "@/components/mentions/mentionText";
 import { useRef } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
+import { useTheme } from "@/theme";
 import type { LiveComment } from "@/types";
 
-const describeLiveComment = (comment: LiveComment) => {
-  if (comment.kind === "joined") return "joined the live";
-  if (comment.kind === "reply") return `replied ${comment.text}`;
+import { liveGlass, useLiveForeground, type LiveForeground } from "./liveSurface.constant";
+
+const VISIBLE_COMMENT_COUNT = 12;
+const FEED_MAX_HEIGHT = 232;
+const FADED_ROW_OPACITIES = [0.35, 0.6, 0.85];
+
+const describeSystemComment = (comment: LiveComment): string | null => {
+  if (comment.kind === "joined") return "joined";
+  if (comment.kind === "follow") return "followed the host";
   if (comment.kind === "gift" && comment.gift) {
     const quantityPrefix = comment.gift.quantity > 1 ? `${comment.gift.quantity} × ` : "";
-    return `sent ${quantityPrefix}${comment.gift.emoji} ${comment.gift.name}`;
+    return `sent ${quantityPrefix}${comment.gift.name}`;
   }
-  return comment.text;
+  return null;
 };
+
+function CommentTextWithMentions({ text, ink, mentionInk }: { text: string; ink: string; mentionInk: string }) {
+  return (
+    <MentionText text={text} size={13} lineHeight={18} color={ink} mentionColor={mentionInk} />
+  );
+}
+
+function SystemRow({ comment, foreground }: { comment: LiveComment; foreground: LiveForeground }) {
+  const isGift = comment.kind === "gift";
+  return (
+    <View style={[styles.systemRow, isGift ? styles.giftRow : { backgroundColor: foreground.chip }]}>
+      {isGift && comment.gift ? (
+        <Text size={16} lineHeight={20}>{comment.gift.emoji}</Text>
+      ) : (
+        <Avatar uri={comment.author.avatarUrl} size={18} />
+      )}
+      <Text size={12} lineHeight={16} color={isGift ? "#1A1400" : foreground.inkMuted} style={styles.flexText} numberOfLines={2}>
+        <Text size={12} weight={600} lineHeight={16} color={isGift ? "#1A1400" : foreground.ink}>
+          {comment.author.username}
+        </Text>{" "}
+        {describeSystemComment(comment)}
+      </Text>
+    </View>
+  );
+}
+
+function CommentRow({ comment, foreground, mentionInk }: { comment: LiveComment; foreground: LiveForeground; mentionInk: string }) {
+  return (
+    <View style={[styles.commentRow, { backgroundColor: foreground.chip }]}>
+      <Avatar uri={comment.author.avatarUrl} size={26} />
+      <View style={styles.flexText}>
+        <View style={styles.nameRow}>
+          <Text size={12} weight={600} lineHeight={16} color={foreground.inkMuted} numberOfLines={1} style={styles.shrink}>
+            {comment.author.username}
+          </Text>
+          <VerificationBadge verification={comment.author.verification} legacyVerified={comment.author.verified} size={11} />
+        </View>
+        <CommentTextWithMentions text={comment.kind === "reply" ? `replied ${comment.text}` : comment.text} ink={foreground.ink} mentionInk={mentionInk} />
+      </View>
+    </View>
+  );
+}
 
 export interface LiveCommentsFeedProps {
   readonly comments: readonly LiveComment[];
@@ -23,41 +75,41 @@ export interface LiveCommentsFeedProps {
 
 export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFeedProps) {
   const scrollViewRef = useRef<ScrollView>(null);
-  const commentTextColor = isShownOverVideo ? colors.white : colors.text;
-  const usernameColor = isShownOverVideo ? colors.white : colors.textMuted;
+  const foreground = useLiveForeground(isShownOverVideo);
+  const { isDark } = useTheme();
+  const reduceMotion = useReducedMotionPreference();
+  const visibleComments = comments.slice(-VISIBLE_COMMENT_COUNT);
+  const fadeStartsAt = visibleComments.length > 5 ? 0 : FADED_ROW_OPACITIES.length;
+  const mentionInk = isShownOverVideo ? "#C9D2FF" : isDark ? "#8FA1FA" : "#2043F5";
   return (
     <ScrollView
       ref={scrollViewRef}
       style={styles.feed}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
-      onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: false })}
+      accessibilityLabel="Live comments"
+      onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: !reduceMotion })}
     >
-      {comments.slice(-8).map((comment) => (
-        <View key={comment.id} style={[styles.row, comment.kind === "gift" ? styles.giftRow : null]}>
-          <Avatar uri={comment.author.avatarUrl} size={24} placeholderColor={colors.placeholder} />
-          <Text
-            size={13}
-            lineHeight={16.9}
-            color={comment.kind === "gift" ? colors.text : commentTextColor}
-            style={[styles.text, isShownOverVideo && comment.kind !== "gift" ? styles.readableOnVideo : null]}
-          >
-            <Text size={13} lineHeight={16.9} weight={isShownOverVideo ? 600 : 400} color={comment.kind === "gift" ? colors.textMuted : usernameColor}>
-              @{comment.author.username}
-            </Text>{" "}
-            {describeLiveComment(comment)}
-          </Text>
-        </View>
-      ))}
+      {visibleComments.map((comment, index) => {
+        const rowOpacity = index >= fadeStartsAt && index < FADED_ROW_OPACITIES.length ? FADED_ROW_OPACITIES[index] : 1;
+        const isSystemRow = comment.kind === "joined" || comment.kind === "gift" || comment.kind === "follow";
+        return (
+          <Animated.View key={comment.id} entering={reduceMotion ? undefined : FadeInDown.duration(220)} style={{ opacity: rowOpacity }}>
+            {isSystemRow ? <SystemRow comment={comment} foreground={foreground} /> : <CommentRow comment={comment} foreground={foreground} mentionInk={mentionInk} />}
+          </Animated.View>
+        );
+      })}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  feed: { maxHeight: 150, width: 315 },
-  content: { gap: 10, justifyContent: "flex-end", flexGrow: 1 },
-  row: { flexDirection: "row", alignItems: "center", gap: 6 },
-  giftRow: { paddingVertical: 4, paddingHorizontal: 6, borderRadius: 8, backgroundColor: colors.primaryTint },
-  text: { flex: 1 },
-  readableOnVideo: { textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  feed: { maxHeight: FEED_MAX_HEIGHT, flex: 1, maxWidth: 320 },
+  content: { gap: 6, justifyContent: "flex-end", flexGrow: 1, alignItems: "flex-start" },
+  commentRow: { flexDirection: "row", alignItems: "flex-start", gap: 8, paddingLeft: 4, paddingRight: 12, paddingVertical: 5, borderRadius: 16, maxWidth: "100%" },
+  systemRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 4, paddingRight: 10, paddingVertical: 4, borderRadius: 999, maxWidth: "100%" },
+  giftRow: { backgroundColor: "rgba(245, 197, 24, 0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border },
+  flexText: { flexShrink: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 3 },
+  shrink: { flexShrink: 1 },
 });

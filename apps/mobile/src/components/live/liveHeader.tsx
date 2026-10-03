@@ -6,8 +6,9 @@ import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { LiveCategory, LiveSessionDetails } from "@/types";
+
+import { liveAccent, useLiveForeground, type LiveForeground } from "./liveSurface.constant";
 
 export interface LiveHeaderProps {
   readonly session: LiveSessionDetails;
@@ -20,32 +21,25 @@ export interface LiveHeaderProps {
   readonly onMore: () => void;
 }
 
-function HostCounts({ followers, following, textColor }: { followers: number; following: number; textColor: string }) {
+function HostCounts({ followers, foreground }: { followers: number; foreground: LiveForeground }) {
   return (
-    <View style={styles.counts}>
-      {[followers, following].map((count, i) => (
-        <View key={i} style={styles.count}>
-          <View style={styles.countDot} />
-          <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={textColor}>
-            {count}
-          </Text>
-        </View>
-      ))}
-    </View>
+    <Text size={11} weight={500} lineHeight={15} color={foreground.inkMuted} style={foreground.textShadow} numberOfLines={1}>
+      {Intl.NumberFormat("en", { notation: "compact" }).format(followers)} followers
+    </Text>
   );
 }
 
-function LiveViewerCountBadge({ viewers }: { viewers: number }) {
+function LiveViewerCountBadge({ viewers, foreground }: { viewers: number; foreground: LiveForeground }) {
   return (
-    <View style={styles.viewerBadge} accessibilityLabel={`Live, ${viewers} watching`}>
+    <View style={[styles.viewerBadge, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]} accessibilityLabel={`Live, ${viewers} watching`}>
       <View style={styles.liveTag}>
-        <Text size={11} weight={500} lineHeight={15.4} letterSpacing={-0.22} color={colors.white}>
+        <Text size={11} weight={700} lineHeight={14} letterSpacing={0.4} color="#FFFFFF">
           LIVE
         </Text>
       </View>
       <View style={styles.viewerCount}>
-        <Eye16Icon />
-        <Text size={12} weight={500} lineHeight={14.4} letterSpacing={-0.24}>
+        <Eye16Icon color={foreground.ink} />
+        <Text size={12} weight={600} lineHeight={15} color={foreground.ink}>
           {viewers}
         </Text>
       </View>
@@ -53,7 +47,7 @@ function LiveViewerCountBadge({ viewers }: { viewers: number }) {
   );
 }
 
-const LIVE_CATEGORY_LABELS: Record<LiveCategory, string> = {
+export const LIVE_CATEGORY_LABELS: Record<LiveCategory, string> = {
   justChatting: "Just chatting",
   gaming: "Gaming",
   music: "Music",
@@ -64,56 +58,50 @@ const LIVE_CATEGORY_LABELS: Record<LiveCategory, string> = {
 
 export function LiveHeader(props: LiveHeaderProps) {
   const openUserProfile = useOpenUserProfile();
+  const foreground = useLiveForeground(props.isShownOverVideo);
   const { session } = props;
-  const foregroundColor = props.isShownOverVideo ? colors.white : colors.text;
-  const readableTextStyle = props.isShownOverVideo ? styles.readableOnVideo : undefined;
   return (
     <View style={styles.bar}>
       <View style={styles.left}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Leave live" hitSlop={12} onPress={props.onBack}>
-          <ArrowLeft24Icon color={foregroundColor} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Leave live" hitSlop={12} onPress={props.onBack} style={[styles.iconButton, { backgroundColor: foreground.chip }]}>
+          <ArrowLeft24Icon size={20} color={foreground.ink} />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${session.host.name}'s profile`} onPress={() => openUserProfile(session.host.id)} style={styles.host}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${session.host.name}'s profile`}
+          onPress={() => openUserProfile(session.host.id)}
+          style={[styles.host, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}
+        >
           <Avatar uri={session.host.avatarUrl} size={32} />
           <View style={styles.hostText}>
             <View style={styles.hostNameRow}>
-              <Text
-                size={props.showTitle ? 13 : 11}
-                weight={500}
-                lineHeight={props.showTitle ? 16.9 : 15.4}
-                letterSpacing={props.showTitle ? undefined : 0}
-                numberOfLines={1}
-                color={foregroundColor}
-                style={readableTextStyle}
-              >
+              <Text size={13} weight={600} lineHeight={17} numberOfLines={1} color={foreground.ink} style={[styles.shrink, foreground.textShadow]}>
                 {session.host.name}
               </Text>
               <VerificationBadge verification={session.host.verification} legacyVerified={session.host.verified} size={12} />
             </View>
             {props.showTitle ? (
-              <Text size={12} lineHeight={16.8} numberOfLines={1} color={foregroundColor} style={readableTextStyle}>
+              <Text size={11} lineHeight={15} numberOfLines={1} color={foreground.inkMuted} style={foreground.textShadow}>
                 {session.title}
               </Text>
             ) : (
-              <HostCounts followers={session.host.followers} following={session.host.following} textColor={foregroundColor} />
+              <HostCounts followers={session.host.followers} foreground={foreground} />
             )}
           </View>
+          {!props.showTitle && !props.isHost && !props.isFollowingHost ? <FollowPill isFollowing={false} onPress={props.onToggleFollow} /> : null}
         </Pressable>
       </View>
       <View style={styles.right}>
         {session.category && session.category !== "justChatting" ? (
-          <View style={styles.categoryChip}>
-            <Text size={11} weight={500} lineHeight={14} color={colors.white}>
+          <View style={[styles.categoryChip, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}>
+            <Text size={11} weight={600} lineHeight={14} color={foreground.ink}>
               {LIVE_CATEGORY_LABELS[session.category]}
             </Text>
           </View>
         ) : null}
-        {props.showTitle ? <LiveViewerCountBadge viewers={session.viewers} /> : null}
-        {!props.showTitle && !props.isHost && !props.isFollowingHost ? (
-          <FollowPill large isFollowing={false} onPress={props.onToggleFollow} />
-        ) : null}
-        <Pressable accessibilityRole="button" accessibilityLabel="Live options" hitSlop={10} onPress={props.onMore}>
-          <DotsThreeVertical24Icon color={foregroundColor} />
+        {props.showTitle ? <LiveViewerCountBadge viewers={session.viewers} foreground={foreground} /> : null}
+        <Pressable accessibilityRole="button" accessibilityLabel="Live options" hitSlop={10} onPress={props.onMore} style={[styles.iconButton, { backgroundColor: foreground.chip }]}>
+          <DotsThreeVertical24Icon size={20} color={foreground.ink} />
         </Pressable>
       </View>
     </View>
@@ -121,18 +109,16 @@ export function LiveHeader(props: LiveHeaderProps) {
 }
 
 const styles = StyleSheet.create({
-  hostNameRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  bar: { height: 48, paddingHorizontal: 16, paddingVertical: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  left: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
-  host: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 },
+  bar: { minHeight: 52, paddingHorizontal: 12, paddingVertical: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  left: { flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1 },
+  iconButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  host: { flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1, paddingLeft: 3, paddingRight: 10, paddingVertical: 3, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
   hostText: { flexShrink: 1 },
-  counts: { flexDirection: "row", gap: 4 },
-  count: { flexDirection: "row", alignItems: "center", gap: 2 },
-  countDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.avatar },
-  right: { flexDirection: "row", alignItems: "center", gap: 12 },
-  categoryChip: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(0,0,0,0.45)" },
-  viewerBadge: { height: 27, padding: 4, borderRadius: 4, backgroundColor: colors.placeholder, flexDirection: "row", alignItems: "center", gap: 4 },
-  liveTag: { height: 19, paddingHorizontal: 4, borderRadius: 2, backgroundColor: colors.error, justifyContent: "center" },
-  viewerCount: { flexDirection: "row", alignItems: "center", gap: 2 },
-  readableOnVideo: { textShadowColor: "rgba(0,0,0,0.45)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  hostNameRow: { flexDirection: "row", alignItems: "center", gap: 3 },
+  shrink: { flexShrink: 1 },
+  right: { flexDirection: "row", alignItems: "center", gap: 8 },
+  categoryChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
+  viewerBadge: { height: 28, paddingLeft: 3, paddingRight: 8, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, flexDirection: "row", alignItems: "center", gap: 6 },
+  liveTag: { height: 22, paddingHorizontal: 7, borderRadius: 999, backgroundColor: liveAccent.red, justifyContent: "center" },
+  viewerCount: { flexDirection: "row", alignItems: "center", gap: 3 },
 });

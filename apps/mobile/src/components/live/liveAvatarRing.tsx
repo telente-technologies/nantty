@@ -2,8 +2,10 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
+import { useTheme } from "@/theme";
+
+import { liveAccent } from "./liveSurface.constant";
 
 export interface LiveAvatarRingProps {
   readonly size: number;
@@ -34,6 +36,7 @@ function usePulsingRingOpacity(isReducedMotion: boolean) {
 }
 
 export function LiveAvatarRing({ size, borderRadius, children }: LiveAvatarRingProps) {
+  const { colors } = useTheme();
   const isReducedMotion = useReducedMotionPreference();
   const ringOpacity = usePulsingRingOpacity(isReducedMotion);
   const outerSize = size + (RING_GAP + RING_WIDTH) * 2;
@@ -46,8 +49,8 @@ export function LiveAvatarRing({ size, borderRadius, children }: LiveAvatarRingP
         style={[StyleSheet.absoluteFill, styles.ring, { borderRadius: outerRadius, opacity: ringOpacity }]}
       />
       <View style={{ width: size, height: size, borderRadius: innerRadius, overflow: "hidden" }}>{children}</View>
-      <View pointerEvents="none" style={styles.pill}>
-        <Text size={9} weight={700} lineHeight={11} color={colors.white} letterSpacing={0.6}>
+      <View pointerEvents="none" style={[styles.pill, { borderColor: colors.background }]}>
+        <Text size={9} weight={700} lineHeight={11} color="#FFFFFF" letterSpacing={0.6}>
           LIVE
         </Text>
       </View>
@@ -56,7 +59,7 @@ export function LiveAvatarRing({ size, borderRadius, children }: LiveAvatarRingP
 }
 
 const styles = StyleSheet.create({
-  ring: { borderWidth: RING_WIDTH, borderColor: colors.live },
+  ring: { borderWidth: RING_WIDTH, borderColor: liveAccent.red },
   pill: {
     position: "absolute",
     bottom: -4,
@@ -65,7 +68,6 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: colors.white,
-    backgroundColor: colors.live,
+    backgroundColor: liveAccent.red,
   },
 });
