@@ -116,6 +116,7 @@
   flex-direction: column;
   gap: var(--space-3);
   max-width: 420px;
+  text-align: left;
 }
 
 .linkList {

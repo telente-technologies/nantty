@@ -4,12 +4,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { TextField } from "@/components/ui/field";
 import { privacyService } from "@/services/privacy.service";
 
+import { DeleteAccountDialog } from "./deleteAccountDialog";
 import styles from "./settings.module.css";
-
-const confirmationWord = "DELETE";
 
 const deletedItems = ["Your profile, bio and photos", "Your posts, clips, stories and comments", "Your saved addresses, payment methods and preferences"];
 const anonymizedItems = ["Reviews and chat messages you sent stay visible without your name or photo", "Product interaction data is stripped of anything that identifies you"];
@@ -40,18 +38,10 @@ export function DeleteAccountSection() {
       <ExplanationList title="What we may keep" items={retainedItems} />
       {requestDeletion.data ? (
         <p role="status">Your account is scheduled for deletion on {new Date(requestDeletion.data.scheduledFor).toLocaleDateString()}.</p>
-      ) : isOpen ? (
-        <div className={styles.confirmBox}>
-          <TextField label={`Type ${confirmationWord} to confirm`} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoCapitalize="characters" autoComplete="off" />
-          {requestDeletion.isError ? <p className={styles.errorText} role="alert">{requestDeletion.error.message}</p> : null}
-          <div className={styles.buttonRow}>
-            <Button variant="quiet" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button variant="danger" disabled={confirmation.trim() !== confirmationWord} busy={requestDeletion.isPending} onClick={() => requestDeletion.mutate()}>Delete my account</Button>
-          </div>
-        </div>
       ) : (
         <div><Button variant="danger" onClick={() => setIsOpen(true)}>Delete my account</Button></div>
       )}
+      <DeleteAccountDialog isOpen={isOpen && !requestDeletion.data} onClose={() => setIsOpen(false)} confirmation={confirmation} onConfirmationChange={setConfirmation} deletion={{ isPending: requestDeletion.isPending, isSuccess: requestDeletion.isSuccess, errorMessage: requestDeletion.error?.message ?? null, confirm: () => requestDeletion.mutate() }} />
     </section>
   );
 }
