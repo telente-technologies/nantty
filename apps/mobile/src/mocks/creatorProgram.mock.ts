@@ -6,6 +6,7 @@ import type {
   CreatorDashboard,
   CreatorDashboardPeriod,
   CreatorEligibility,
+  CreatorProgramDecision,
 } from "@/types/creator.type";
 
 import {
@@ -18,6 +19,7 @@ import {
   signedInUserIsApprovedCreator,
 } from "./creatorFixtures.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
+import { accountAgeInDaysForSignedInUser, trustStatsForSignedInUser } from "./trustStats.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -28,17 +30,25 @@ const EARNINGS_PAGE_SIZE = 6;
 
 const creatorApplicationsByUserId = new Map<string, CreatorApplication>();
 
+const DECISION_NOTES = {
+  auto_approve: "You meet every requirement. Your application will be approved automatically.",
+  manual_review: "You meet the requirements. A member of our team will review your application within 2 working days.",
+  not_eligible: "Keep going. This list updates automatically as you grow.",
+} as const;
+
 function buildEligibilityForSignedInUser(): CreatorEligibility {
   const user = getSignedInMockUser();
-  const accountAgeInDays = Math.floor((Date.now() - new Date(user.joinedAt).getTime()) / DAY_IN_MS);
+  const stats = trustStatsForSignedInUser();
   const requirements = [
-    { key: "followers" as const, label: "At least 1,000 followers", currentValue: user.followers, requiredValue: 1000 },
-    { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDays, requiredValue: 30 },
+    { key: "followers" as const, label: "At least 1,000 real followers", currentValue: stats.realFollowers, requiredValue: 1000 },
+    { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDaysForSignedInUser(), requiredValue: 30 },
     { key: "verified_phone" as const, label: "Verified phone number", currentValue: user.phone ? 1 : 0, requiredValue: 1 },
-    { key: "no_violations" as const, label: "No community guideline strikes in 90 days", currentValue: 1, requiredValue: 1 },
-    { key: "posts" as const, label: "At least 10 posts", currentValue: user.posts, requiredValue: 10 },
+    { key: "original_posts" as const, label: "10 original posts in the last 60 days", currentValue: stats.originalPostsLast60Days, requiredValue: 10 },
+    { key: "no_violations" as const, label: "No violations in the last 90 days", currentValue: stats.violationsLast90Days === 0 ? 1 : 0, requiredValue: 1 },
   ].map((requirement) => ({ ...requirement, met: requirement.currentValue >= requirement.requiredValue }));
-  return { eligible: requirements.every((requirement) => requirement.met), requirements };
+  const allMet = requirements.every((requirement) => requirement.met);
+  const decision: CreatorProgramDecision = !allMet ? "not_eligible" : stats.flaggedForRisk || !stats.idVerified ? "manual_review" : "auto_approve";
+  return { eligible: allMet, decision, decisionNote: DECISION_NOTES[decision], requirements };
 }
 
 const approvedApplicationForDemoCreator = (): CreatorApplication => ({
@@ -90,10 +100,10 @@ export const creatorProgramMocks: MockRoute[] = [
     const eligibility = buildEligibilityForSignedInUser();
     const application: CreatorApplication = {
       id: `ca_${Date.now()}`,
-      status: eligibility.eligible ? "pending" : "rejected",
+      status: eligibility.decision === "auto_approve" ? "approved" : eligibility.eligible ? "pending" : "rejected",
       contentCategories: input.contentCategories,
       submittedAt: new Date().toISOString(),
-      reviewedAt: eligibility.eligible ? null : new Date().toISOString(),
+      reviewedAt: eligibility.decision === "manual_review" ? null : new Date().toISOString(),
       rejectionReason: eligibility.eligible
         ? null
         : `Not eligible yet: ${eligibility.requirements.filter((r) => !r.met).map((r) => r.label.toLowerCase()).join(", ")}.`,

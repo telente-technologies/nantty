@@ -5,6 +5,7 @@ import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { withViewerSavedState } from "./savedEntries.mock";
+import { SUSPENDED_USER_IDS } from "./userDirectory.mock";
 
 const TOPICS = ["For You", "Fashion", "Gadgets", "Food", "Beauty", "Home & Living", "Football", "Travel"];
 const POSTS_PER_PAGE = 7;
@@ -25,7 +26,7 @@ const pageOfPostsWithSponsoredSlot = (
   filter: (post: Post) => boolean = () => true,
   order: (a: Post, b: Post) => number = byNewestFirst,
 ): Page<Post> => {
-  const organic = [...mockPostsState.values()].filter((post) => isAuthorContentVisibleToSignedInViewer(post.author.id)).filter(filter).sort(order);
+  const organic = [...mockPostsState.values()].filter((post) => isAuthorContentVisibleToSignedInViewer(post.author.id) && !SUSPENDED_USER_IDS.has(post.author.id)).filter(filter).sort(order);
   const start = Number(cursor ?? 0);
   const pageIndex = Math.floor(start / POSTS_PER_PAGE);
   const pageOfOrganic = organic.slice(start, start + POSTS_PER_PAGE).map(withCurrentProductPrices);

@@ -46,6 +46,7 @@ export const mockConversations: Conversation[] = [
   },
   directConversation("c_3", "u_7", "Arsenal no go carry last this season, trust me", 8, 0, true),
   { ...directConversation("c_4", "u_2", "Yes, the earbuds come with a 1-year warranty", 30, 0, false), kind: "business", store: { id: "s_tunde", name: "TundeTech Gadgets" } },
+  directConversation("c_susp", "u_22", "Thanks, I'll send the invoice tomorrow", 48, 0, true),
   directConversation("c_req_1", "u_20", "Hi! I saw your store, do you ship to Abuja?", 3, 1, false),
   directConversation("c_req_2", "u_9", "Hello, I'd love to shoot your next collection", 6, 1, false),
   directConversation("c_req_3", "u_16", "Please can I get the price list?", 12, 2, false),
@@ -76,6 +77,14 @@ export const mockMessagesByConversation = new Map<string, Message[]>([
       textMessage("m_c1_1", "c_1", "u_21", "Good evening dear, how far with the dress?", 1),
       { ...textMessage("m_c1_2", "c_1", "u_me", "Almost ready! Tailor said Thursday latest", 0.8), readAt: isoDateHoursAgo(0.7) },
       textMessage("m_c1_3", "c_1", "u_21", "Abeg send me the pictures of the aso-ebi when you can 🙏", 0.4),
+    ],
+  ],
+  [
+    "c_susp",
+    [
+      textMessage("m_cs_1", "c_susp", "u_22", "Is the car mat set still available?", 50),
+      textMessage("m_cs_2", "c_susp", "u_me", "Yes, it is. I can ship tomorrow.", 49),
+      textMessage("m_cs_3", "c_susp", "u_22", "Thanks, I'll send the invoice tomorrow", 48),
     ],
   ],
   ["c_req_1", [textMessage("m_rq1", "c_req_1", "u_20", "Hi! I saw your store, do you ship to Abuja?", 3)]],

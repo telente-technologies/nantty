@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 
-import { demoFanAccount, getSignedInMockUser, me, mockSession } from "./fixtures.mock";
+import { demoFanAccount, getSignedInMockUser, me, mockSession, suspendedDemoAccount } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { generateAutomaticUsername } from "./username.mock";
 import { applyProfileEditForSignedInUser, signedInProfile } from "./users.mock";
@@ -11,7 +11,9 @@ const DEMO_FAN_IDENTIFIER_HINTS = ["fan", "buyer"];
 
 const signInDemoAccountMatchingIdentifier = (identifier: string) => {
   const lowered = identifier.toLowerCase();
-  mockSession.signedInUserId = DEMO_FAN_IDENTIFIER_HINTS.some((hint) => lowered.includes(hint)) ? demoFanAccount.id : me.id;
+  mockSession.signedInUserId = lowered.includes("suspended")
+    ? suspendedDemoAccount.id
+    : DEMO_FAN_IDENTIFIER_HINTS.some((hint) => lowered.includes(hint)) ? demoFanAccount.id : me.id;
 };
 
 const TOPICS = [
