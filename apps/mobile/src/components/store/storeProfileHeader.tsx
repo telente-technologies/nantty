@@ -1,3 +1,4 @@
+import { EarnBackLine } from "@/components/store/earnBackLine";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -65,6 +66,7 @@ export function StoreProfileHeader({ store, onToggleFollow, onMessage }: StorePr
       </View>
       <View style={styles.about}>
         <Text size={13} lineHeight={16.9}>{store.bio}</Text>
+        <EarnBackLine basisPoints={store.earnBackBasisPoints} />
         <View style={styles.joined}>
           <CalendarDots16Icon />
           <Text size={13} lineHeight={16.9}>{formatJoinedDate(store.joinedAt)}</Text>
