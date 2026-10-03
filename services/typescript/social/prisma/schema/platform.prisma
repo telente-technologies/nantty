@@ -1,0 +1,41 @@
+model OutboxEvent {
+  id          String    @id @db.Uuid
+  eventType   String
+  subject     String
+  payload     Json
+  createdAt   DateTime  @default(now())
+  lockedUntil DateTime?
+  lockToken   String?
+  attempts    Int       @default(0)
+  publishedAt DateTime?
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+model IdempotencyRecord {
+  accountId      String   @db.Uuid
+  key            String
+  requestPath    String
+  responseStatus Int
+  responseBody   Json?
+  createdAt      DateTime @default(now())
+
+  @@id([accountId, key])
+  @@index([createdAt])
+  @@map("idempotency_records")
+}
+
+model ReportIntake {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  reporterId     String   @db.Uuid
+  targetType     String
+  targetId       String
+  reason         String
+  priority       String   @default("normal")
+  evidenceHash   String?
+  createdAt      DateTime @default(now())
+
+  @@index([reporterId, createdAt])
+  @@map("report_intakes")
+}

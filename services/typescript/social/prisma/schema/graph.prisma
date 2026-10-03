@@ -1,0 +1,29 @@
+enum FollowState {
+  requested
+  accepted
+  rejected
+}
+
+model Follow {
+  id          String      @id @default(uuid(7)) @db.Uuid
+  followerId  String      @db.Uuid
+  followeeId  String      @db.Uuid
+  state       FollowState
+  createdAt   DateTime    @default(now())
+  respondedAt DateTime?
+
+  @@unique([followerId, followeeId])
+  @@index([followeeId, state, id])
+  @@index([followerId, state, id])
+  @@map("follows")
+}
+
+model Block {
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
+}

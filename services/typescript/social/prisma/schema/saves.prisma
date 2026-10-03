@@ -1,0 +1,35 @@
+enum SavedItemType {
+  post
+  video
+  clip
+  product
+}
+
+model SaveCollection {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+
+  items SavedItem[]
+
+  @@unique([userId, name])
+  @@map("save_collections")
+}
+
+model SavedItem {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  userId       String        @db.Uuid
+  type         SavedItemType
+  targetId     String
+  collectionId String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+
+  collection SaveCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, type, targetId])
+  @@index([userId, id])
+  @@index([userId, type, id])
+  @@index([userId, collectionId, id])
+  @@map("saved_items")
+}

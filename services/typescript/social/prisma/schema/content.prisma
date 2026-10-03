@@ -1,0 +1,156 @@
+enum PostKind {
+  post
+  clip
+  story
+}
+
+enum PostAudience {
+  everyone
+  followers
+}
+
+enum PostVisibility {
+  public
+  subscribers
+}
+
+enum MediaKind {
+  image
+  video
+}
+
+model Post {
+  id                 String         @id @default(uuid(7)) @db.Uuid
+  authorId           String         @db.Uuid
+  kind               PostKind
+  text               String         @default("")
+  audience           PostAudience   @default(everyone)
+  visibility         PostVisibility @default(public)
+  isAiGenerated      Boolean        @default(false)
+  soundId            String?        @db.Uuid
+  resharedFromId     String?        @db.Uuid
+  replyToCommentId   String?        @db.Uuid
+  replyToClipId      String?        @db.Uuid
+  replyToCommenterId String?        @db.Uuid
+  stickerLayout      Json?
+  mentions           Json           @default("[]")
+  likeCount          Int            @default(0)
+  commentCount       Int            @default(0)
+  repostCount        Int            @default(0)
+  shareCount         Int            @default(0)
+  viewCount          Int            @default(0)
+  expiresAt          DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime       @default(now())
+
+  media      PostMedia[]
+  comments   Comment[]
+  likes      PostLike[]
+  resharedFrom Post?  @relation("Reshares", fields: [resharedFromId], references: [id])
+  reshares   Post[]   @relation("Reshares")
+
+  @@index([authorId, id])
+  @@index([kind, id])
+  @@index([kind, createdAt, likeCount])
+  @@index([resharedFromId])
+  @@index([replyToCommentId])
+  @@map("posts")
+}
+
+model PostMedia {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  postId          String    @db.Uuid
+  mediaId         String    @db.Uuid
+  position        Int
+  type            MediaKind
+  url             String?
+  posterUrl       String?
+  hlsUrl          String?
+  width           Int?
+  height          Int?
+  durationSeconds Int?
+  blurhash        String?
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, position])
+  @@index([mediaId])
+  @@map("post_media")
+}
+
+model PostLike {
+  postId    String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId, createdAt])
+  @@map("post_likes")
+}
+
+model PostShare {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  postId    String   @db.Uuid
+  userId    String   @db.Uuid
+  channel   String   @default("link")
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@map("post_shares")
+}
+
+model Comment {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  postId           String    @db.Uuid
+  parentCommentId  String?   @db.Uuid
+  rootCommentId    String?   @db.Uuid
+  authorId         String    @db.Uuid
+  text             String
+  mentions         Json      @default("[]")
+  likeCount        Int       @default(0)
+  replyCount       Int       @default(0)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  post    Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes   CommentLike[]
+
+  @@index([postId, parentCommentId, id])
+  @@index([rootCommentId, id])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model CommentLike {
+  commentId String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+  @@map("comment_likes")
+}
+
+model FeedFeedback {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  kind      String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([postId])
+  @@map("feed_feedback")
+}
+
+model StoryView {
+  storyId   String   @db.Uuid
+  viewerId  String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@id([storyId, viewerId])
+  @@map("story_views")
+}

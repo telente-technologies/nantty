@@ -1,0 +1,190 @@
+enum ConversationKind {
+  direct
+  group
+  channel
+  business
+}
+
+enum MemberRole {
+  owner
+  admin
+  member
+  subscriber
+}
+
+enum InboxFolder {
+  chats
+  requests
+  spam
+}
+
+enum MessageKind {
+  text
+  voice
+  image
+  video
+  system
+  shared
+  location
+  liveLocation
+  document
+  poll
+}
+
+enum MessageRequestAudience {
+  everyone
+  following
+  followers
+  nobody
+}
+
+model Conversation {
+  id                           String           @id @default(uuid(7)) @db.Uuid
+  kind                         ConversationKind
+  directKey                    String?          @unique
+  title                        String?
+  photoMediaId                 String?          @db.Uuid
+  createdById                  String           @db.Uuid
+  storeId                      String?
+  disappearingMessagesSeconds  Int?
+  onlyAdminsCanMentionAll      Boolean          @default(false)
+  lastMessageKind              MessageKind?
+  lastMessageAt                DateTime         @default(now())
+  createdAt                    DateTime         @default(now())
+
+  members  ConversationMember[]
+  messages Message[]
+  streak   ChatStreak?
+
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationMember {
+  conversationId String      @db.Uuid
+  accountId      String      @db.Uuid
+  role           MemberRole  @default(member)
+  inboxFolder    InboxFolder @default(chats)
+  spamReason     String?
+  spamScore      Float?
+  restricted     Boolean     @default(false)
+  mutedUntil     DateTime?
+  mutedAlways    Boolean     @default(false)
+  unreadCount    Int         @default(0)
+  lastReadAt     DateTime?
+  joinedAt       DateTime    @default(now())
+  leftAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, accountId])
+  @@index([accountId, inboxFolder, leftAt])
+  @@map("conversation_members")
+}
+
+model Message {
+  id               String      @id @default(uuid(7)) @db.Uuid
+  conversationId   String      @db.Uuid
+  senderId         String      @db.Uuid
+  kind             MessageKind
+  clientMessageId  String?
+  ciphertext       String?
+  deviceId         String?
+  protocol         String      @default("signal-v1-pending")
+  mediaId          String?     @db.Uuid
+  mediaType        String?
+  mediaUrl         String?
+  mediaDurationSeconds Int?
+  linkPreviewEnvelope  String?
+  sharedContent    Json?
+  location         Json?
+  document         Json?
+  mentions         Json        @default("[]")
+  expiresAt        DateTime?
+  mediaExpiresAt   DateTime?
+  mediaPurgedAt    DateTime?
+  createdAt        DateTime    @default(now())
+
+  conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  reactions    MessageReaction[]
+  pollOptions  MessagePollOption[]
+
+  pollQuestion          String?
+  pollAllowMultiple     Boolean @default(false)
+
+  @@unique([conversationId, senderId, clientMessageId])
+  @@index([conversationId, id])
+  @@index([mediaExpiresAt, mediaPurgedAt])
+  @@index([expiresAt])
+  @@map("messages")
+}
+
+model MessageReaction {
+  messageId String   @db.Uuid
+  userId    String   @db.Uuid
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId, emoji])
+  @@map("message_reactions")
+}
+
+model MessagePollOption {
+  id        String @id @default(uuid(7)) @db.Uuid
+  messageId String @db.Uuid
+  text      String
+  position  Int
+
+  message Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  votes   MessagePollVote[]
+
+  @@unique([messageId, position])
+  @@map("message_poll_options")
+}
+
+model MessagePollVote {
+  optionId  String   @db.Uuid
+  messageId String   @db.Uuid
+  userId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  option MessagePollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@id([optionId, userId])
+  @@index([messageId, userId])
+  @@map("message_poll_votes")
+}
+
+model ChatSettings {
+  accountId             String                 @id @db.Uuid
+  messageRequestsFrom   MessageRequestAudience @default(everyone)
+  notifyMessages        Boolean                @default(true)
+  notifyRequests        Boolean                @default(true)
+  notifyGroups          Boolean                @default(true)
+  notifyStreakReminders Boolean                @default(true)
+  showMessagePreview    Boolean                @default(true)
+  timezone              String                 @default("UTC")
+  timezoneChangedAt     DateTime?
+  updatedAt             DateTime               @updatedAt
+
+  @@map("chat_settings")
+}
+
+model SenderBehaviourMetric {
+  accountId          String   @id @db.Uuid
+  windowStartedAt    DateTime @default(now())
+  recipientsInWindow Int      @default(0)
+  updatedAt          DateTime @updatedAt
+
+  @@map("sender_behaviour_metrics")
+}
+
+model ChatMediaExpiryRun {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  purgedCount Int
+  ranAt       DateTime @default(now())
+
+  @@map("chat_media_expiry_runs")
+}

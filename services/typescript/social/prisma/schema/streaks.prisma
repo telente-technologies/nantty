@@ -1,0 +1,63 @@
+enum StreakState {
+  none
+  active
+  broken
+}
+
+model ChatStreak {
+  conversationId     String      @id @db.Uuid
+  count              Int         @default(0)
+  state              StreakState @default(none)
+  lastCompletedDay   String?
+  countBeforeBreak   Int         @default(0)
+  brokenAt           DateTime?
+  restorableUntil    DateTime?
+  updatedAt          DateTime    @updatedAt
+
+  conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderDays   StreakSenderDay[]
+  restores     StreakRestore[]
+  celebrations StreakCelebration[]
+
+  @@map("chat_streaks")
+}
+
+model StreakSenderDay {
+  conversationId String   @db.Uuid
+  accountId      String   @db.Uuid
+  localDay       String
+  firstSentAt    DateTime @default(now())
+
+  streak ChatStreak @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+
+  @@id([conversationId, accountId, localDay])
+  @@map("streak_sender_days")
+}
+
+model StreakRestore {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  conversationId String   @db.Uuid
+  accountId      String   @db.Uuid
+  monthKey       String
+  restoredCount  Int
+  createdAt      DateTime @default(now())
+
+  streak ChatStreak @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+
+  @@index([accountId, monthKey])
+  @@map("streak_restores")
+}
+
+model StreakCelebration {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  conversationId String    @db.Uuid
+  accountId      String    @db.Uuid
+  days           Int
+  createdAt      DateTime  @default(now())
+  celebratedAt   DateTime?
+
+  streak ChatStreak @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+
+  @@index([conversationId, accountId, celebratedAt])
+  @@map("streak_celebrations")
+}
