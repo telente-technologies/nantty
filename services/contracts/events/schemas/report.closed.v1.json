@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/report.closed.v1.json",
+  "title": "ReportClosed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reporterUserId",
+    "reportId",
+    "reportedWhat",
+    "outcome",
+    "reportedAt"
+  ],
+  "properties": {
+    "reporterUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reportId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reportedWhat": {
+      "type": "string"
+    },
+    "outcome": {
+      "enum": [
+        "action_taken",
+        "no_violation",
+        "none"
+      ]
+    },
+    "reportedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

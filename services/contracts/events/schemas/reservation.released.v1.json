@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/reservation.released.v1.json",
+  "title": "ReservationReleased",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reference"
+  ],
+  "properties": {
+    "reference": {
+      "type": "string"
+    }
+  }
+}

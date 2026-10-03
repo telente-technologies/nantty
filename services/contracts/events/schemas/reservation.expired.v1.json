@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/reservation.expired.v1.json",
+  "title": "ReservationExpired",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reference"
+  ],
+  "properties": {
+    "reference": {
+      "type": "string"
+    }
+  }
+}

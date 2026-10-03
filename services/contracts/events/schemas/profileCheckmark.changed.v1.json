@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/profileCheckmark.changed.v1.json",
+  "title": "ProfileCheckmarkChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "accountId",
+    "color",
+    "status",
+    "source",
+    "lifetime",
+    "badgeVisible",
+    "handleReserved",
+    "currentPeriodEnd"
+  ],
+  "properties": {
+    "profileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "color": {
+      "enum": [
+        "blue",
+        "gold",
+        "black"
+      ]
+    },
+    "status": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "lifetime": {
+      "type": "boolean"
+    },
+    "badgeVisible": {
+      "type": "boolean"
+    },
+    "handleReserved": {
+      "type": "boolean"
+    },
+    "currentPeriodEnd": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

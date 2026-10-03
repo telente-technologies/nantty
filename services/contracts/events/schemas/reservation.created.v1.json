@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/reservation.created.v1.json",
+  "title": "ReservationCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reference",
+    "lines"
+  ],
+  "properties": {
+    "reference": {
+      "type": "string"
+    },
+    "expiresAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/return.requested.v1.json",
+  "title": "ReturnRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "returnId",
+    "orderGroupId",
+    "storeId",
+    "buyerAccountId",
+    "refundAmountMinor",
+    "currency"
+  ],
+  "properties": {
+    "returnId": {
+      "type": "string"
+    },
+    "orderGroupId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "refundAmountMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    }
+  }
+}

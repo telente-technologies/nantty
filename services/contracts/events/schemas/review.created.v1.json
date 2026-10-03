@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/review.created.v1.json",
+  "title": "ReviewCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reviewId",
+    "storeId",
+    "rating",
+    "authorAccountId"
+  ],
+  "properties": {
+    "reviewId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "productId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rating": {
+      "type": "integer"
+    },
+    "authorAccountId": {
+      "type": "string"
+    }
+  }
+}
