@@ -5,6 +5,7 @@
   --caution: var(--color-warn);
   --error: var(--color-danger);
   --error-soft: var(--color-danger-tint);
+  --danger-solid: #d32f2f;
   --success-soft: var(--color-success-tint);
 
   --surface-app: var(--color-bg);
@@ -145,6 +146,16 @@ button {
 ::selection {
   background: var(--color-accent);
   color: var(--color-on-accent);
+}
+
+:root[data-theme="dark"] {
+  --danger-solid: #c8333b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --danger-solid: #c8333b;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
