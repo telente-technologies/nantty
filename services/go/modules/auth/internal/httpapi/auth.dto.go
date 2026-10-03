@@ -96,3 +96,29 @@ func ConvertAccountToCurrentUserResponse(account *ent.Account) CurrentUserRespon
 		CreatedAt:     joinedAt,
 	}
 }
+
+type ResetPasswordRequest struct {
+	OtpToken string `json:"otpToken"`
+	Password string `json:"password"`
+}
+
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
+}
+
+type GoogleSignInRequest struct {
+	IdToken string `json:"idToken"`
+	Nonce   string `json:"nonce"`
+}
+
+type AppleFullNameRequest struct {
+	GivenName  *string `json:"givenName"`
+	FamilyName *string `json:"familyName"`
+}
+
+type AppleSignInRequest struct {
+	IdentityToken string                `json:"identityToken"`
+	Nonce         string                `json:"nonce"`
+	FullName      *AppleFullNameRequest `json:"fullName"`
+}

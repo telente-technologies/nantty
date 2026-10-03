@@ -29,6 +29,14 @@ func (routes AuthRoutes) MountAuthRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/v1/auth/otp/send", routes.sendOneTimeCode)
 	mux.HandleFunc("POST /api/v1/auth/otp/verify", routes.verifyOneTimeCode)
 	mux.HandleFunc("GET /api/v1/auth/username-available", routes.checkUsernameAvailability)
+	mux.HandleFunc("POST /api/v1/auth/password/reset", routes.resetPassword)
+	mux.HandleFunc("POST /api/v1/auth/google", routes.signInWithGoogle)
+	mux.HandleFunc("POST /api/v1/auth/apple", routes.signInWithApple)
+	requireAccessToken := jwtauth.RequireVerifiedAccessToken(routes.AccessVerifier)
+	mux.Handle("POST /api/v1/auth/password/change", requireAccessToken(http.HandlerFunc(routes.changePassword)))
+	mux.Handle("GET /api/v1/auth/sessions", requireAccessToken(http.HandlerFunc(routes.listActiveSessions)))
+	mux.Handle("DELETE /api/v1/auth/sessions", requireAccessToken(http.HandlerFunc(routes.revokeOtherSessions)))
+	mux.Handle("DELETE /api/v1/auth/sessions/{sessionId}", requireAccessToken(http.HandlerFunc(routes.revokeSession)))
 	mux.HandleFunc("GET /.well-known/jwks.json", routes.serveJsonWebKeySet)
 }
 

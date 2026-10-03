@@ -81,3 +81,42 @@ func ValidateVerifyOneTimeCodeRequest(request VerifyOneTimeCodeRequest) error {
 	collector.requireOneOf("purpose", request.Purpose, oneTimeCodePurposes)
 	return collector.result()
 }
+
+func ValidateResetPasswordRequest(request ResetPasswordRequest) error {
+	collector := &issueCollector{}
+	collector.requireLength("otpToken", request.OtpToken, opaqueTokenMinLength, opaqueTokenMaxLength)
+	collector.requireLength("password", request.Password, 1, 128)
+	return collector.result()
+}
+
+func ValidateChangePasswordRequest(request ChangePasswordRequest) error {
+	collector := &issueCollector{}
+	collector.requireLength("currentPassword", request.CurrentPassword, 0, 128)
+	collector.requireLength("newPassword", request.NewPassword, 1, 128)
+	return collector.result()
+}
+
+func ValidateGoogleSignInRequest(request GoogleSignInRequest) error {
+	collector := &issueCollector{}
+	collector.requireLength("idToken", request.IdToken, 20, 4096)
+	collector.requireLength("nonce", request.Nonce, 16, 256)
+	return collector.result()
+}
+
+func ValidateAppleSignInRequest(request AppleSignInRequest) error {
+	collector := &issueCollector{}
+	collector.requireLength("identityToken", request.IdentityToken, 20, 4096)
+	collector.requireLength("nonce", request.Nonce, 16, 256)
+	if request.FullName != nil {
+		collector.requireLength("fullName.givenName", derefOrEmpty(request.FullName.GivenName), 0, 80)
+		collector.requireLength("fullName.familyName", derefOrEmpty(request.FullName.FamilyName), 0, 80)
+	}
+	return collector.result()
+}
+
+func derefOrEmpty(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
