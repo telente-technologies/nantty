@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
+import { buildLiveMonetizationInput, DEFAULT_LIVE_MONETIZATION_DRAFT, type LiveMonetizationDraft } from "@/components/create/liveMonetization.constant";
 import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
@@ -12,14 +13,15 @@ import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { colors } from "@/constants/colors.constant";
+import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 import type { LocalMediaFile } from "@/services/mediaPreparation.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
 import { storiesService } from "@/services/stories.service";
-import type { CreateMode, LiveSource } from "@/types";
+import type { CreateMode, LiveCategory, LiveSource } from "@/types";
 
-const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone", kind: "photo" };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", audience: "everyone", kind: "photo", isAiGenerated: false };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const queryClient = useQueryClient();
@@ -40,6 +42,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const [liveTitle, setLiveTitle] = useState("");
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
   const [liveSource, setLiveSource] = useState<LiveSource>("camera");
+  const [liveCategory, setLiveCategory] = useState<LiveCategory>("justChatting");
+  const canSellDuringLive = Boolean(useMyProfileQuery().data?.isSeller);
+  const [liveMonetization, setLiveMonetization] = useState<LiveMonetizationDraft>(DEFAULT_LIVE_MONETIZATION_DRAFT);
   const [liveCredentials, setLiveCredentials] = useState<LiveStreamCredentials | null>(null);
 
   const publishPost = useMutation({
@@ -51,6 +56,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
         audience: postDraft.audience,
         mediaIds,
         kind: postDraft.kind === "clip" ? "clip" : "post",
+        ...(postDraft.isAiGenerated ? { isAiGenerated: true } : {}),
         ...soundIdForVideoPost,
       });
     },
@@ -78,12 +84,12 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   useEffect(() => {
     if (mode !== "live" || !isLiveModeLockedForViewer) return;
     setMode("post");
-    openCreatorProgramOrSettings(navigation, creatorEntry.route);
-  }, [mode, isLiveModeLockedForViewer, navigation, creatorEntry.route]);
+    if (!creatorEntry.isLoading) openCreatorProgramOrSettings(navigation, creatorEntry.route);
+  }, [mode, isLiveModeLockedForViewer, navigation, creatorEntry.route, creatorEntry.isLoading]);
   const goLive = useMutation({
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
-      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart");
+      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart", liveCategory, buildLiveMonetizationInput(liveMonetization));
       if (liveSource !== "external") return { session, credentials: null as LiveStreamCredentials | null };
       const issued = await liveService.issueStreamKey(session.id);
       return { session, credentials: { liveId: session.id, ...issued } satisfies LiveStreamCredentials };
@@ -104,9 +110,11 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       return;
     }
     if (next === "live" && isLiveModeLockedForViewer) {
+      if (creatorEntry.isLoading) return;
       openCreatorProgramOrSettings(navigation, creatorEntry.route);
       return;
     }
+    if ((next === "clip") !== (mode === "clip")) postDraftUploads.discardAllDraftMedia();
     setMode(next);
   };
 
@@ -175,6 +183,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onStartEditingTitle={() => setIsEditingLiveTitle(true)}
             onFinishEditingTitle={() => setIsEditingLiveTitle(false)}
             onChangeMode={switchCreateMode}
+            category={liveCategory}
+            onChangeCategory={setLiveCategory}
+            canSell={canSellDuringLive}
             source={liveSource}
             onChangeSource={(next) => {
               setLiveSource(next);
@@ -184,6 +195,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onOpenLiveRoom={openLiveRoom}
             starting={goLive.isPending}
             onGoLive={() => goLive.mutate()}
+            monetization={liveMonetization}
+            onChangeMonetization={setLiveMonetization}
           />
         )}
       </KeyboardAvoidingView>
