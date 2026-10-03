@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 
 import { shouldUseMockForPath } from "@/config/api.config";
 import { ApiError } from "@/errors/api.error";
-import type { ChunkUploadUrl, CompletedUpload, CreateUploadSessionRequest, ID, MediaAsset, UploadSession, UploadSessionStatus } from "@/types";
+import type { BatchChunkUploadUrls, ChunkUploadUrl, CompletedUpload, CreateUploadSessionRequest, ID, MediaAsset, UploadSession, UploadSessionStatus } from "@/types";
 
 import { api } from "./apiClient.service";
 
@@ -65,8 +65,16 @@ export const mediaUploadTransport = {
   abortUploadSession: (uploadId: ID) => api.delete<void>(`/api/v1/media/uploads/${uploadId}`),
   fetchChunkUploadUrl: (uploadId: ID, chunkIndex: number) =>
     api.get<ChunkUploadUrl>(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}/url`),
-  uploadChunk: async (uploadId: ID, chunkIndex: number, chunkBytes: Uint8Array, onBytesSent: (bytesSent: number) => void) => {
-    const target = await mediaUploadTransport.fetchChunkUploadUrl(uploadId, chunkIndex);
+  fetchChunkUploadUrls: (uploadId: ID, chunkIndexes: readonly number[]) =>
+    api.post<BatchChunkUploadUrls>(`/api/v1/media/uploads/${uploadId}/chunks/urls`, { chunkIndexes }),
+  uploadChunk: async (
+    uploadId: ID,
+    chunkIndex: number,
+    chunkBytes: Uint8Array,
+    onBytesSent: (bytesSent: number) => void,
+    presignedTarget?: ChunkUploadUrl,
+  ) => {
+    const target = presignedTarget ?? (await mediaUploadTransport.fetchChunkUploadUrl(uploadId, chunkIndex));
     if (shouldUseMockForPath(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}/url`)) {
       await api.put(`/api/v1/media/uploads/${uploadId}/chunks/${chunkIndex}`, { byteLength: chunkBytes.byteLength });
       onBytesSent(chunkBytes.byteLength);

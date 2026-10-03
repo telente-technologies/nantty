@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import { useUploadQueueStore, type UploadJob } from "@/store/uploadQueue.store";
-import type { ID, MediaAsset, MediaUploadPurpose } from "@/types";
+import type { ChunkUploadUrl, ID, MediaAsset, MediaUploadPurpose } from "@/types";
 
 import {
   deletePreparedUploadFile,
@@ -11,7 +11,8 @@ import {
 import { mediaUploadTransport, readChunkBytesFromLocalFile } from "./mediaUploadTransport.service";
 import { DeviceOfflineError, retryWithExponentialBackoffAndJitter, runTasksWithBoundedConcurrency } from "./mediaUploadRetry.service";
 
-const CHUNK_UPLOAD_CONCURRENCY = 3;
+const MULTIPART_PART_CONCURRENCY = 4;
+const SINGLE_PUT_MAXIMUM_BYTES = 8 * 1024 * 1024;
 const MAXIMUM_JOB_FAILURES_BEFORE_GIVING_UP = 5;
 const MEDIA_PROCESSING_POLL_TIMEOUT_MS = 5 * 60_000;
 const FINISHED_JOB_RETENTION_MS = 24 * 60 * 60_000;
@@ -43,6 +44,8 @@ export async function enqueueLocalMediaForUpload(media: LocalMediaFile, purpose:
     height: media.height,
     durationSeconds: media.durationSeconds,
     uploadId: null,
+    reservedMediaId: null,
+    uploadMode: null,
     chunkSizeBytes: null,
     totalChunks: null,
     uploadedChunks: [],
@@ -127,10 +130,13 @@ async function openOrResumeUploadSession(job: UploadJob): Promise<UploadJob> {
   const session = await retryWithExponentialBackoffAndJitter(() =>
     mediaUploadTransport.createUploadSession({ fileName: job.fileName, mimeType: job.mimeType, sizeBytes: job.sizeBytes, purpose: job.purpose }),
   );
+  const uploadMode = session.mode ?? (job.sizeBytes < SINGLE_PUT_MAXIMUM_BYTES ? "single" : "multipart");
   updateUploadJob(job.jobId, {
     uploadId: session.uploadId,
-    chunkSizeBytes: session.chunkSizeBytes,
-    totalChunks: session.totalChunks,
+    reservedMediaId: session.mediaId ?? null,
+    uploadMode,
+    chunkSizeBytes: uploadMode === "single" ? Math.max(job.sizeBytes, 1) : (session.partSizeBytes ?? session.chunkSizeBytes),
+    totalChunks: uploadMode === "single" ? 1 : (session.partCount ?? session.totalChunks),
     uploadedChunks: [...session.uploadedChunks],
   });
   return getUploadJob(job.jobId)!;
@@ -145,18 +151,41 @@ async function uploadMissingChunksForJob(job: UploadJob) {
   const publishInFlightBytes = () =>
     useUploadQueueStore.getState().setInFlightBytesForJob(job.jobId, [...bytesSentByChunkIndex.values()].reduce((a, b) => a + b, 0));
 
-  await runTasksWithBoundedConcurrency(missingChunkIndexes, CHUNK_UPLOAD_CONCURRENCY, async (chunkIndex) => {
+  const prefetchedTargets = new Map<number, ChunkUploadUrl>();
+  if (missingChunkIndexes.length > 1) {
+    try {
+      const batch = await mediaUploadTransport.fetchChunkUploadUrls(uploadId, missingChunkIndexes);
+      batch.urls.forEach(({ chunkIndex, ...target }) => prefetchedTargets.set(chunkIndex, target));
+    } catch {
+      prefetchedTargets.clear();
+    }
+  }
+  const concurrency = job.uploadMode === "single" ? 1 : MULTIPART_PART_CONCURRENCY;
+  await runTasksWithBoundedConcurrency(missingChunkIndexes, concurrency, async (chunkIndex) => {
     const chunkOffset = chunkIndex * chunkSizeBytes;
     const chunkLength = Math.min(chunkSizeBytes, job.sizeBytes - chunkOffset);
     const chunkBytes = await readChunkBytesFromLocalFile(preparedFileUri, chunkOffset, chunkLength);
-    const { uploadedChunks } = await retryWithExponentialBackoffAndJitter(() =>
-      mediaUploadTransport.uploadChunk(uploadId, chunkIndex, chunkBytes, (bytesSent) => {
-        bytesSentByChunkIndex.set(chunkIndex, Math.min(bytesSent, chunkLength));
-        publishInFlightBytes();
-      }),
-    );
+    let presignedTarget = prefetchedTargets.get(chunkIndex);
+    await retryWithExponentialBackoffAndJitter(async () => {
+      try {
+        await mediaUploadTransport.uploadChunk(
+          uploadId,
+          chunkIndex,
+          chunkBytes,
+          (bytesSent) => {
+            bytesSentByChunkIndex.set(chunkIndex, Math.min(bytesSent, chunkLength));
+            publishInFlightBytes();
+          },
+          presignedTarget,
+        );
+      } catch (error) {
+        presignedTarget = undefined;
+        bytesSentByChunkIndex.delete(chunkIndex);
+        throw error;
+      }
+    });
     bytesSentByChunkIndex.delete(chunkIndex);
-    updateUploadJob(job.jobId, (current) => ({ uploadedChunks: mergeChunkIndexes(current.uploadedChunks, uploadedChunks, [chunkIndex]) }));
+    updateUploadJob(job.jobId, (current) => ({ uploadedChunks: mergeChunkIndexes(current.uploadedChunks, [chunkIndex]) }));
     publishInFlightBytes();
   });
 }
@@ -242,6 +271,8 @@ export function retryFailedUpload(jobId: ID) {
 }
 
 export function cancelAndRemoveUpload(jobId: ID) {
+  const abandoned = getUploadJob(jobId);
+  if (abandoned?.uploadId && !abandoned.mediaId) mediaUploadTransport.abortUploadSession(abandoned.uploadId).catch(() => undefined);
   deletePreparedUploadFile(getUploadJob(jobId)?.preparedFileUri ?? null);
   useUploadQueueStore.getState().removeUploadJob(jobId);
 }
@@ -265,6 +296,8 @@ const waitForJobToSatisfy = <T>(jobId: ID, extractResult: (job: UploadJob) => T 
       outcome.run();
     });
   });
+
+export const waitForReservedMediaId = (jobId: ID) => waitForJobToSatisfy(jobId, (job) => job.mediaId ?? job.reservedMediaId ?? null);
 
 export const waitForUploadedMediaId = (jobId: ID) => waitForJobToSatisfy(jobId, (job) => job.mediaId);
 
