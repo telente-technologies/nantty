@@ -65,3 +65,14 @@ func SplitCoinClawback(spendableBalance, purchasedCoins int64) CoinClawback {
 	recovered := min(max(spendableBalance, 0), purchasedCoins)
 	return CoinClawback{RecoveredCoins: recovered, ShortfallCoins: purchasedCoins - recovered}
 }
+
+func CoinsForChannelPrice(priceMinor, channelFeeBps, netValuePerCoinMinor int64) (int64, error) {
+	if priceMinor <= 0 || netValuePerCoinMinor <= 0 || channelFeeBps < 0 || channelFeeBps >= 10_000 {
+		return 0, ErrCoinAmountOutOfRange
+	}
+	high, low := bits.Mul64(uint64(priceMinor), uint64(10_000-channelFeeBps))
+	if high != 0 || low > 1<<63-1 {
+		return 0, ErrCoinAmountOutOfRange
+	}
+	return int64(low) / 10_000 / netValuePerCoinMinor, nil
+}

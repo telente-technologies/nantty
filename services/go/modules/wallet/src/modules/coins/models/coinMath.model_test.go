@@ -61,3 +61,19 @@ func TestClawbackRecoversWhatIsLeftAndCountsTheShortfall(t *testing.T) {
 		}
 	}
 }
+
+func TestWebPacksGiveMoreCoinsPerNairaWhileNettingTheSamePerCoin(t *testing.T) {
+	cases := []struct {
+		channelFeeBps int64
+		want          int64
+	}{{3000, 105}, {1500, 127}, {200, 147}}
+	for _, testCase := range cases {
+		coins, err := CoinsForChannelPrice(150_000, testCase.channelFeeBps, 1_000)
+		if err != nil || coins != testCase.want {
+			t.Errorf("fee %d: coins %d err %v, want %d", testCase.channelFeeBps, coins, err, testCase.want)
+		}
+	}
+	if _, err := CoinsForChannelPrice(150_000, 10_000, 1_000); err == nil {
+		t.Fatal("a 100% channel fee must be rejected")
+	}
+}
