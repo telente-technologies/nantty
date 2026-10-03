@@ -29,12 +29,12 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--blue-900);
+  border-bottom: 2px solid var(--ink-strong);
 }
 
 .brand {
   font-weight: 800;
-  color: var(--blue-500);
+  color: var(--color-brand);
 }
 
 .title {

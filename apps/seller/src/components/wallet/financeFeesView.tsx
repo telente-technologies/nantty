@@ -18,10 +18,10 @@ import { formatBasisPointsAsPercent } from "@/utils/money.util";
 import styles from "./wallet.module.css";
 
 const feeColorVariables: Record<FinanceFeeKind, string> = {
-  marketplace_commission: "--blue-500",
-  payment_processing: "--blue-200",
-  withdrawal: "--yellow-500",
-  ads: "--blue-800",
+  marketplace_commission: "--chart-1",
+  payment_processing: "--chart-4",
+  withdrawal: "--chart-2",
+  ads: "--chart-compare",
   subscription: "--caution",
 };
 

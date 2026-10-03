@@ -15,7 +15,7 @@
 }
 
 .balanceCardAvailable {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   box-shadow: inset 0 -4px 0 var(--yellow-500);
 }
 
@@ -91,7 +91,7 @@
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   padding: 10px 14px;
-  background: var(--yellow-50);
+  background: var(--color-warn-tint);
   border-radius: var(--radius-medium);
 }
 
@@ -216,9 +216,9 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--blue-500);
+  border-color: var(--color-brand);
   background: var(--blue-tint);
-  color: var(--blue-800);
+  color: var(--color-brand);
   font-weight: 600;
 }
 
