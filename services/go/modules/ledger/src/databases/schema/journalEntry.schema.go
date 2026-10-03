@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -37,7 +38,8 @@ func (JournalEntry) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("reference").Unique(),
 		index.Fields("reverses_entry_id").Unique(),
-		index.Fields("external_reference"),
+		index.Fields("external_reference").Annotations(entsql.IndexWhere("external_reference <> ''")),
+		index.Fields("posted_at"),
 		index.Fields("kind", "posted_at"),
 	}
 }

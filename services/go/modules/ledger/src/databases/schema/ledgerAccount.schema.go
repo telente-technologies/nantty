@@ -50,6 +50,7 @@ func (LedgerAccount) Edges() []ent.Edge {
 func (LedgerAccount) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("code", "currency").Unique(),
+		index.Fields("code").Annotations(entsql.OpClass("varchar_pattern_ops")).StorageKey("ledgeraccount_code_pattern"),
 		index.Fields("owner_type", "owner_id"),
 	}
 }

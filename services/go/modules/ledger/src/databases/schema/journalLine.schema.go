@@ -48,7 +48,7 @@ func (JournalLine) Edges() []ent.Edge {
 
 func (JournalLine) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("account_id", "created_at"),
+		index.Fields("account_id", "id").Annotations(entsql.DescColumns("id")),
 		index.Fields("entry_id", "line_number").Unique(),
 	}
 }
