@@ -19,6 +19,7 @@ interface MockStoredMedia {
 }
 
 const MOCK_CHUNK_SIZE_BYTES = 512 * 1024;
+const MOCK_SINGLE_PUT_MAXIMUM_BYTES = 8 * 1024 * 1024;
 const MOCK_PROCESSING_DELAY_MS = 2_500;
 const uploadSessionsById = new Map<string, MockUploadSession>();
 const storedMediaById = new Map<string, MockStoredMedia>();
@@ -58,9 +59,24 @@ export const mediaMocks: MockRoute[] = [
       throw new ApiError(415, "Unsupported media type", "UNSUPPORTED_MEDIA_TYPE");
     }
     const uploadId = nextMockId("up");
-    const totalChunks = Math.max(1, Math.ceil(request.sizeBytes / MOCK_CHUNK_SIZE_BYTES));
-    uploadSessionsById.set(uploadId, { request, chunkSizeBytes: MOCK_CHUNK_SIZE_BYTES, totalChunks, uploadedChunks: new Set(), mediaId: null });
-    return { uploadId, chunkSizeBytes: MOCK_CHUNK_SIZE_BYTES, totalChunks, uploadedChunks: [] };
+    const mode = request.sizeBytes < MOCK_SINGLE_PUT_MAXIMUM_BYTES ? "single" : "multipart";
+    const chunkSizeBytes = mode === "single" ? request.sizeBytes : MOCK_CHUNK_SIZE_BYTES;
+    const totalChunks = mode === "single" ? 1 : Math.ceil(request.sizeBytes / MOCK_CHUNK_SIZE_BYTES);
+    uploadSessionsById.set(uploadId, { request, chunkSizeBytes, totalChunks, uploadedChunks: new Set(), mediaId: null });
+    return { uploadId, mode, partSizeBytes: chunkSizeBytes, partCount: totalChunks, chunkSizeBytes, totalChunks, uploadedChunks: [] };
+  }),
+  createMockRoute("POST", "/api/v1/media/uploads/:uploadId/chunks/urls", ({ params, body }) => {
+    const session = findUploadSessionOrThrow(params.uploadId!);
+    const { chunkIndexes } = body as { chunkIndexes: number[] };
+    return {
+      urls: chunkIndexes.map((chunkIndex) => ({
+        chunkIndex,
+        url: `https://mock-media.s3.amazonaws.com/${params.uploadId}/${chunkIndex}`,
+        method: "PUT",
+        expectedBytes: session.chunkSizeBytes,
+        expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+      })),
+    };
   }),
   createMockRoute("PUT", "/api/v1/media/uploads/:uploadId/chunks/:chunkIndex", ({ params }) => {
     const session = findUploadSessionOrThrow(params.uploadId!);
