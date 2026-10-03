@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ThemeSwitcher } from "@zudomart/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
-import { signOut } from "@/components/profile/profileView";
+import { confirmThenSignOut } from "@/components/profile/profileView";
 import { BookmarkIcon, CreatorIcon, LogOutIcon, OrdersIcon, SettingsIcon, UserIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 
@@ -98,7 +98,9 @@ export function UserMenu() {
             type="button"
             className={styles.link}
             onClick={() => {
-              signOut().finally(() => {
+              setIsOpen(false);
+              void confirmThenSignOut().then((didSignOut) => {
+                if (!didSignOut) return;
                 router.push("/login");
                 router.refresh();
               });
