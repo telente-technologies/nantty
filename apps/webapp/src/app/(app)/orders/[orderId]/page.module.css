@@ -13,7 +13,7 @@
 }
 
 .breadcrumbs a:hover {
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .header {
@@ -39,20 +39,20 @@
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
-  border: 1px solid var(--blue-200);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-large);
   background: var(--surface-brand-tint);
 }
 
 .paymentTitle {
   font-size: var(--text-lg);
-  color: var(--blue-800);
+  color: var(--color-brand);
 }
 
 .paymentBody {
   margin-top: 4px;
   font-size: var(--text-sm);
-  color: var(--blue-700);
+  color: var(--color-brand);
 }
 
 .paymentActions {
@@ -68,13 +68,13 @@
   min-height: 42px;
   padding-inline: 20px;
   border-radius: var(--radius-pill);
-  background: var(--blue-500);
-  color: #fff;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
   font-weight: 750;
 }
 
 .payLink:hover {
-  background: var(--blue-600);
+  background: var(--color-brand-solid-hover);
 }
 
 .notice {
@@ -151,8 +151,8 @@
 }
 
 .timelineStep[data-state="current"] .timelineMarker {
-  border-color: var(--blue-500);
-  box-shadow: 0 0 0 4px rgb(32 67 245 / 0.18);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 22%, transparent);
 }
 
 .timelineStep[data-state="blocked"] .timelineMarker {
@@ -219,7 +219,7 @@
 }
 
 .itemName:hover {
-  color: var(--blue-600);
+  color: var(--color-brand);
 }
 
 .itemVariant {
