@@ -48,7 +48,7 @@ export const planFeatureDescriptions: Record<PlanFeature, { readonly title: stri
   bulk_tools: { title: "Bulk tools", description: "Import, export and edit many products at once." },
   advanced_analytics: { title: "Advanced analytics", description: "Breakdowns by category, location and hour, plus longer date ranges." },
   advanced_reports: { title: "Advanced reports", description: "Every report, in CSV, Excel and PDF." },
-  customer_segments: { title: "Customer segments", description: "Group customers by spend, recency and loyalty." },
+  customer_segments: { title: "Customer segments", description: "Group customers by spend and recency." },
   team: { title: "Team members", description: "Add Zudomart users to your team with roles." },
   advanced_promotions: { title: "Advanced promotions", description: "Flash sales, bundles and featured products." },
   ads_tools: { title: "Ads tools", description: "See ad spend, clicks and attributed orders here." },

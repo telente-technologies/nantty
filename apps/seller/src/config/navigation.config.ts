@@ -26,7 +26,7 @@ export function buildNavigationGroups(): NavigationGroup[] {
         { label: "Orders", href: "/orders", iconName: "shoppingCart24", permission: "orders:view", keywords: "marketplace app escrow returns disputes refunds invoice" },
         { label: "Delivery", href: "/delivery", iconName: "truck24", permission: "delivery:manage", keywords: "shipping courier pickup dispatch areas fees" },
         { label: "Messages", href: "/messages", iconName: "chatCircle24", permission: "messages:manage", keywords: "chat inbox conversations customers" },
-        { label: "Customers", href: "/customers", iconName: "userCircle24", permission: "customers:view", keywords: "crm segments buyers loyalty" },
+        { label: "Customers", href: "/customers", iconName: "userCircle24", permission: "customers:view", keywords: "crm segments buyers" },
         { label: "Reviews", href: "/reviews", iconName: "star16", permission: "reviews:manage", keywords: "ratings reputation feedback" },
       ],
     },
