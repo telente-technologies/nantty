@@ -13,7 +13,7 @@ import styles from "./dashboard.module.css";
 export function describeChangeBetweenNumbers(current: number, previous: number, comparisonLabel: string): { text: string; tone: "positive" | "negative" | "neutral" } {
   if (previous === 0) return { text: current > 0 ? `New vs ${comparisonLabel}` : `No change vs ${comparisonLabel}`, tone: "neutral" };
   const changePercent = Math.round(((current - previous) / previous) * 1000) / 10;
-  return { text: `${changePercent >= 0 ? "▲" : "▼"} ${Math.abs(changePercent)}% vs ${comparisonLabel}`, tone: changePercent >= 0 ? "positive" : "negative" };
+  return { text: `${changePercent >= 0 ? "+" : "-"}${Math.abs(changePercent)}% vs ${comparisonLabel}`, tone: changePercent >= 0 ? "positive" : "negative" };
 }
 
 function describePeriodChange(period: DashboardPeriodSales, comparisonLabel: string) {
