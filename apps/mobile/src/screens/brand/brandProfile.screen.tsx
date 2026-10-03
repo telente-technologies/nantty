@@ -19,6 +19,7 @@ import type { BrandDetail } from "@/types/brand.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { PreviewableImage } from "@/components/ui/previewableImage";
 
 export function BrandProfileScreen({ navigation, route }: MainScreenProps<"BrandProfile">) {
   const { brandId } = route.params;
@@ -48,9 +49,17 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
     <Screen background={colors.white}>
       <Header title={details.name} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.cover}>{details.coverUrl ? <Image source={{ uri: details.coverUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
+        <View style={styles.cover}>
+          {details.coverUrl ? (
+            <PreviewableImage imageUrl={details.coverUrl} accessibilityLabel="View brand cover photo" style={StyleSheet.absoluteFill}>
+              <Image source={{ uri: details.coverUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            </PreviewableImage>
+          ) : null}
+        </View>
         <View style={styles.identity}>
-          <Image source={{ uri: details.logoUrl ?? undefined }} style={styles.logo} contentFit="cover" />
+          <PreviewableImage imageUrl={details.logoUrl} accessibilityLabel="View brand logo">
+            <Image source={{ uri: details.logoUrl ?? undefined }} style={styles.logo} contentFit="cover" />
+          </PreviewableImage>
           <View style={styles.flex}>
             <View style={styles.nameRow}>
               <Text size={16} weight={600} lineHeight={19.2}>{details.name}</Text>
