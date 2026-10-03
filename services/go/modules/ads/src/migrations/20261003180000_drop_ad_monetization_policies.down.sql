@@ -1,0 +1,3 @@
+CREATE TABLE "ad_monetization_policies" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "key" character varying NOT NULL, "revenue_source" character varying NOT NULL DEFAULT 'ads', "content_type" character varying NOT NULL, "creator_share_bps" bigint NOT NULL, "multiplier_bps" bigint NOT NULL, "effective_from" timestamptz NOT NULL, "effective_to" timestamptz NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "admonetizationpolicy_key" ON "ad_monetization_policies" ("key");
+CREATE INDEX "admonetizationpolicy_revenue_source_content_type" ON "ad_monetization_policies" ("revenue_source", "content_type");

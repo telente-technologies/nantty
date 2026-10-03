@@ -30,6 +30,8 @@ DROP INDEX "admonetizationpolicy_revenue_source_content_type";
 DROP INDEX "admonetizationpolicy_key";
 -- reverse: create "ad_monetization_policies" table
 DROP TABLE "ad_monetization_policies";
+-- reverse: create index "adimpression_user_id_clicked_at" to table: "ad_impressions"
+DROP INDEX "adimpression_user_id_clicked_at";
 -- reverse: create index "adimpression_served_at" to table: "ad_impressions"
 DROP INDEX "adimpression_served_at";
 -- reverse: create index "adimpression_fraud_status_served_at" to table: "ad_impressions"
@@ -58,6 +60,12 @@ DROP TABLE "ad_frequency_policies";
 DROP INDEX "adcreatorearning_creator_user_id_currency";
 -- reverse: create "ad_creator_earnings" table
 DROP TABLE "ad_creator_earnings";
+-- reverse: create index "adconversion_conversion_id" to table: "ad_conversions"
+DROP INDEX "adconversion_conversion_id";
+-- reverse: create index "adconversion_account_id_occurred_at" to table: "ad_conversions"
+DROP INDEX "adconversion_account_id_occurred_at";
+-- reverse: create "ad_conversions" table
+DROP TABLE "ad_conversions";
 -- reverse: create index "ad_content_signals_content_id_key" to table: "ad_content_signals"
 DROP INDEX "ad_content_signals_content_id_key";
 -- reverse: create "ad_content_signals" table
