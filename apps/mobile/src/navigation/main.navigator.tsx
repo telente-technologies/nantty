@@ -36,6 +36,7 @@ import { ChatPasscodeScreen } from "@/screens/messages/chatPasscode.screen";
 import { ChatSettingsScreen } from "@/screens/messages/chatSettings.screen";
 import { BlockedUsersScreen } from "@/screens/settings/blockedUsers.screen";
 import { WalletScreen } from "@/screens/wallet/wallet.screen";
+import { StoreRewardsScreen } from "@/screens/wallet/storeRewards.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
 import { CoinActivityScreen } from "@/screens/wallet/coinActivity.screen";
 import { WithdrawScreen } from "@/screens/wallet/withdraw.screen";
@@ -63,7 +64,6 @@ import { CreatorProgramScreen } from "@/screens/creator/creatorProgram.screen";
 import { CreatorApplicationScreen } from "@/screens/creator/creatorApplication.screen";
 import { CreatorApplicationStatusScreen } from "@/screens/creator/creatorApplicationStatus.screen";
 import { CreatorDashboardScreen } from "@/screens/creator/creatorDashboard.screen";
-import { ReferralScreen } from "@/screens/wallet/referral.screen";
 import { CreatorSubscribeScreen } from "@/screens/creator/creatorSubscribe.screen";
 import { MySubscriptionsScreen } from "@/screens/creator/mySubscriptions.screen";
 import { VerificationScreen } from "@/screens/verification/verification.screen";
@@ -136,6 +136,7 @@ export function MainNavigator() {
       <Stack.Screen name="ChatPasscode" component={ChatPasscodeScreen} />
       <Stack.Screen name="Wallet" component={WalletScreen} />
       <Stack.Screen name="Transactions" component={TransactionsScreen} />
+      <Stack.Screen name="StoreRewards" component={StoreRewardsScreen} />
       <Stack.Screen name="CoinActivity" component={CoinActivityScreen} />
       <Stack.Screen name="Withdraw" component={WithdrawScreen} />
       <Stack.Screen name="PayoutAccounts" component={PayoutAccountsScreen} />
@@ -162,7 +163,6 @@ export function MainNavigator() {
       <Stack.Screen name="CreatorApplication" component={CreatorApplicationScreen} />
       <Stack.Screen name="CreatorApplicationStatus" component={CreatorApplicationStatusScreen} />
       <Stack.Screen name="CreatorDashboard" component={CreatorDashboardScreen} />
-      <Stack.Screen name="Referral" component={ReferralScreen} />
       <Stack.Screen name="CreatorSubscribe" component={CreatorSubscribeScreen} />
       <Stack.Screen name="MySubscriptions" component={MySubscriptionsScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />

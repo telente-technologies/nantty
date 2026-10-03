@@ -1,3 +1,4 @@
+import type { VideoReplyTarget } from "@/components/clips/videoReply/videoReply.util";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -62,6 +63,7 @@ export type MainStackParamList = {
   ChatPasscode: undefined;
   Wallet: undefined;
   Transactions: undefined;
+  StoreRewards: undefined;
   CoinActivity: undefined;
   Withdraw: undefined;
   PayoutAccounts: undefined;
@@ -75,7 +77,7 @@ export type MainStackParamList = {
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
-  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string } | undefined;
+  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string; videoReply?: VideoReplyTarget } | undefined;
   PostDetail: { postId: string };
   PostAnalytics: { postId: string };
   Live: { liveId: string; host?: boolean };
@@ -88,11 +90,10 @@ export type MainStackParamList = {
   CreatorApplication: undefined;
   CreatorApplicationStatus: undefined;
   CreatorDashboard: undefined;
-  Referral: undefined;
   CreatorSubscribe: { creatorId: string };
   MySubscriptions: undefined;
   Verification: undefined;
-  VerificationApply: { color: "blue" | "gold" };
+  VerificationApply: { color: "blue" };
   PromotePost: { postId: string };
   BoostStatus: { boostId: string };
   SupportTickets: undefined;
