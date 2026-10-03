@@ -9,9 +9,11 @@ import (
 )
 
 type SetConsentsRequest struct {
-	DeviceId      *string         `json:"deviceId"`
-	PolicyVersion *string         `json:"policyVersion"`
-	Decisions     map[string]bool `json:"decisions"`
+	DeviceId        *string         `json:"deviceId"`
+	PolicyVersion   *string         `json:"policyVersion"`
+	PolicyVersionId *string         `json:"policyVersionId"`
+	Decisions       map[string]bool `json:"decisions"`
+	Consents        map[string]bool `json:"consents"`
 }
 
 type MergeConsentsRequest struct {
