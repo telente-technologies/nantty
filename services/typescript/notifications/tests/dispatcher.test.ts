@@ -1,3 +1,4 @@
+import { testOtpKey } from "./fixtures/eventFixtures.fixture.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { eventMappings } from "../src/modules/eventIngestion/mappings/eventMappingRegistry.js";
@@ -6,7 +7,7 @@ import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
 import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com", otpEnvelopeKeys: { "otp-1": testOtpKey } };
 let harness: TestHarness;
 let handler: HandleDomainEventHandler;
 

@@ -1,3 +1,13 @@
+import { createCipheriv } from "node:crypto";
+
+export const testOtpKey = Buffer.alloc(32, 9);
+const sealedOtp = (code: string): string => {
+  const nonce = Buffer.alloc(12, 3);
+  const cipher = createCipheriv("aes-256-gcm", testOtpKey, nonce);
+  const body = Buffer.concat([cipher.update(code, "utf8"), cipher.final()]);
+  return Buffer.concat([nonce, body, cipher.getAuthTag()]).toString("base64");
+};
+
 const money = (amountMinor: number) => ({ amountMinor, currency: "NGN" });
 
 const groups = [{
@@ -35,8 +45,8 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "dispute.opened": { data: { ...dispute, respondBy: "2026-10-05T10:00:00.000Z", openedBy: "the buyer" }, templates: ["disputeOpened", "disputeOpened"], inAppRecipients: ["buyer1", "seller1"] },
   "disputeMessage.posted": { data: { ...dispute, authorUserId: "buyer1", message: "Photos attached.", stage: 2 }, templates: ["disputeUpdate"], inAppRecipients: ["seller1"] },
   "dispute.resolved": { data: { ...dispute, outcome: "refund_partial", buyerRefund: money(900000), sellerPayout: money(950000), summary: "Partial refund agreed." }, templates: ["disputeResolved", "disputeResolved"], inAppRecipients: ["buyer1", "seller1"] },
-  "payment.failed": { data: { paymentId: "p1", reference: "R1", purpose: "order_checkout", subjectId: "o1", ownerUserId: "buyer1", provider: "bachs", status: "failed", amount: money(1850000) }, templates: ["paymentFailed"], inAppRecipients: ["buyer1"] },
-  "payment.succeeded": { data: { paymentId: "p2", reference: "R2", purpose: "wallet_top_up", subjectId: "w1", ownerUserId: "buyer1", provider: "bachs", status: "succeeded", amount: money(500000) }, templates: [], inAppRecipients: ["buyer1"] },
+  "payment.failed": { data: { paymentId: "p1", reference: "R1", purpose: "order_checkout", subjectId: "o1", ownerUserId: "buyer1", provider: "paystack", status: "failed", amount: money(1850000) }, templates: ["paymentFailed"], inAppRecipients: ["buyer1"] },
+  "payment.succeeded": { data: { paymentId: "p2", reference: "R2", purpose: "wallet_top_up", subjectId: "w1", ownerUserId: "buyer1", provider: "paystack", status: "succeeded", amount: money(500000) }, templates: [], inAppRecipients: ["buyer1"] },
   "coinPurchase.completed": { data: { coinPurchaseId: "cp1", userId: "buyer1", packageId: "pack_500", coins: 500, source: "web", amount: money(500000), receiptNumber: "RCPT-1", balanceAfter: 700 }, templates: ["coinPurchaseReceipt"], inAppRecipients: ["buyer1"] },
   "payout.completed": { data: { withdrawalId: "w1", userId: "seller1", status: "paid", reference: "BANKREF1", amount: money(1757500), fee: money(5000) }, templates: ["payoutSent"], inAppRecipients: ["seller1"] },
   "payout.failed": { data: { withdrawalId: "w2", userId: "seller1", status: "failed", reference: "BANKREF2", amount: money(1757500), fee: money(5000) }, templates: ["payoutFailed"], inAppRecipients: ["seller1"] },
@@ -45,7 +55,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "withdrawal.failed": { data: { withdrawalId: "w3", userId: "seller1" }, templates: [], inAppRecipients: ["seller1"] },
   "withdrawal.cancelled": { data: { withdrawalId: "w3", userId: "seller1" }, templates: [], inAppRecipients: ["seller1"] },
   "account.registered": { data: { accountId: "u1", username: "amaka", name: "Amaka", email: "amaka@example.com", method: "password" }, templates: ["welcome"], inAppRecipients: ["u1"] },
-  "otp.issued": { data: { destination: "new@example.com", code: "482913", purpose: "signup", expiresInMinutes: 5 }, templates: ["emailOtp"], inAppRecipients: [] },
+  "otp.issued": { data: { destination: "new@example.com", codeSealed: sealedOtp("482913"), keyId: "otp-1", expiresAt: "2999-01-01T00:00:00.000Z", purpose: "signup", expiresInMinutes: 5 }, templates: ["emailOtp"], inAppRecipients: [] },
   "account.passwordChanged": { data: { accountId: "u1", sessionsRevoked: 2, method: "reset", device: "Pixel 8" }, templates: ["passwordChanged"], inAppRecipients: ["u1"] },
   "session.revoked": { data: { accountId: "u1", sessionId: "s1", reason: "revoke_all", sessionCount: 3 }, templates: ["sessionsRevoked"], inAppRecipients: ["u1"] },
   "session.refreshTokenReuseDetected": { data: { accountId: "u1", sessionId: "s1" }, templates: ["sessionsRevoked"], inAppRecipients: ["u1"] },
