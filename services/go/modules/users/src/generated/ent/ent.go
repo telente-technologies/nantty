@@ -8,25 +8,42 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/users/src/generated/ent/accountban"
+	"zudomart/modules/users/src/generated/ent/accountremoval"
+	"zudomart/modules/users/src/generated/ent/accountrestriction"
+	"zudomart/modules/users/src/generated/ent/accountsuspension"
 	"zudomart/modules/users/src/generated/ent/actingprofile"
+	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
+	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
+	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
+	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
 	"zudomart/modules/users/src/generated/ent/deletionrequest"
 	"zudomart/modules/users/src/generated/ent/geoadminarea"
 	"zudomart/modules/users/src/generated/ent/geocity"
 	"zudomart/modules/users/src/generated/ent/geocountry"
 	"zudomart/modules/users/src/generated/ent/georegion"
+	"zudomart/modules/users/src/generated/ent/legaldocument"
+	"zudomart/modules/users/src/generated/ent/legalnotice"
+	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
+	"zudomart/modules/users/src/generated/ent/legalversion"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
 	"zudomart/modules/users/src/generated/ent/profile"
+	"zudomart/modules/users/src/generated/ent/profilecheckmark"
+	"zudomart/modules/users/src/generated/ent/profilesignal"
 	"zudomart/modules/users/src/generated/ent/reservedusernamerule"
 	"zudomart/modules/users/src/generated/ent/retentionpolicy"
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
+	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
 	"zudomart/modules/users/src/generated/ent/termsacceptance"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
+	"zudomart/modules/users/src/generated/ent/verificationapplication"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -91,25 +108,42 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			actingprofile.Table:        actingprofile.ValidColumn,
-			businesscategory.Table:     businesscategory.ValidColumn,
-			dataexportrequest.Table:    dataexportrequest.ValidColumn,
-			deletionrequest.Table:      deletionrequest.ValidColumn,
-			geoadminarea.Table:         geoadminarea.ValidColumn,
-			geocity.Table:              geocity.ValidColumn,
-			geocountry.Table:           geocountry.ValidColumn,
-			georegion.Table:            georegion.ValidColumn,
-			outboxevent.Table:          outboxevent.ValidColumn,
-			policyversion.Table:        policyversion.ValidColumn,
-			privacysetting.Table:       privacysetting.ValidColumn,
-			profile.Table:              profile.ValidColumn,
-			reservedusernamerule.Table: reservedusernamerule.ValidColumn,
-			retentionpolicy.Table:      retentionpolicy.ValidColumn,
-			shippingaddress.Table:      shippingaddress.ValidColumn,
-			termsacceptance.Table:      termsacceptance.ValidColumn,
-			userconsent.Table:          userconsent.ValidColumn,
-			usernamechange.Table:       usernamechange.ValidColumn,
-			usernamehold.Table:         usernamehold.ValidColumn,
+			accountban.Table:              accountban.ValidColumn,
+			accountremoval.Table:          accountremoval.ValidColumn,
+			accountrestriction.Table:      accountrestriction.ValidColumn,
+			accountsuspension.Table:       accountsuspension.ValidColumn,
+			actingprofile.Table:           actingprofile.ValidColumn,
+			admincreatedaccount.Table:     admincreatedaccount.ValidColumn,
+			blackapplication.Table:        blackapplication.ValidColumn,
+			businesscategory.Table:        businesscategory.ValidColumn,
+			businessdocument.Table:        businessdocument.ValidColumn,
+			checkmarkgrant.Table:          checkmarkgrant.ValidColumn,
+			creatorapplication.Table:      creatorapplication.ValidColumn,
+			dataexportrequest.Table:       dataexportrequest.ValidColumn,
+			deletionrequest.Table:         deletionrequest.ValidColumn,
+			geoadminarea.Table:            geoadminarea.ValidColumn,
+			geocity.Table:                 geocity.ValidColumn,
+			geocountry.Table:              geocountry.ValidColumn,
+			georegion.Table:               georegion.ValidColumn,
+			legaldocument.Table:           legaldocument.ValidColumn,
+			legalnotice.Table:             legalnotice.ValidColumn,
+			legalnoticedraft.Table:        legalnoticedraft.ValidColumn,
+			legalversion.Table:            legalversion.ValidColumn,
+			outboxevent.Table:             outboxevent.ValidColumn,
+			policyversion.Table:           policyversion.ValidColumn,
+			privacysetting.Table:          privacysetting.ValidColumn,
+			profile.Table:                 profile.ValidColumn,
+			profilecheckmark.Table:        profilecheckmark.ValidColumn,
+			profilesignal.Table:           profilesignal.ValidColumn,
+			reservedusernamerule.Table:    reservedusernamerule.ValidColumn,
+			retentionpolicy.Table:         retentionpolicy.ValidColumn,
+			shippingaddress.Table:         shippingaddress.ValidColumn,
+			suggestiondismissal.Table:     suggestiondismissal.ValidColumn,
+			termsacceptance.Table:         termsacceptance.ValidColumn,
+			userconsent.Table:             userconsent.ValidColumn,
+			usernamechange.Table:          usernamechange.ValidColumn,
+			usernamehold.Table:            usernamehold.ValidColumn,
+			verificationapplication.Table: verificationapplication.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
