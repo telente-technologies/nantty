@@ -4,16 +4,16 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/feedback";
-import { SegmentedControl, TextField } from "@/components/ui/formFields";
+import { TextField } from "@/components/ui/formFields";
 import { OverlayDialog } from "@/components/ui/overlayDialog";
 import { billingApi } from "@/services/billingApi.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
-import type { BillingOverview, PaymentProvider } from "@/types/billing.type";
+import type { BillingOverview } from "@/types/billing.type";
 import type { Money } from "@/types/money.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 import { formatMajorAmountForInput, formatMoneyForDisplay, parseTypedMajorAmountToMoney, readCurrencySymbol } from "@/utils/money.util";
 
-import { openHostedCheckoutIfSafe } from "./hostedCheckout.util";
+import { openPaystackCheckoutIfSafe } from "./hostedCheckout.util";
 import styles from "./billingPage.module.css";
 
 interface TopUpDialogProps {
@@ -22,11 +22,6 @@ interface TopUpDialogProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
-
-const providerOptions: readonly { value: PaymentProvider; label: string }[] = [
-  { value: "paystack", label: "Paystack" },
-  { value: "flutterwave", label: "Flutterwave" },
-];
 
 function validateTopUpAmount(amount: Money | null, overview: BillingOverview): string | undefined {
   if (!amount || amount.amountMinor <= 0) return "Enter an amount.";
@@ -38,7 +33,6 @@ function validateTopUpAmount(amount: Money | null, overview: BillingOverview): s
 export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialogProps) {
   const currency = overview.balance.currency;
   const [typedAmount, setTypedAmount] = useState(() => formatMajorAmountForInput(overview.suggestedTopUps[1] ?? overview.suggestedTopUps[0] ?? null));
-  const [provider, setProvider] = useState<PaymentProvider>("paystack");
   const [idempotencyKey] = useState(() => createClientIdempotencyKey("topup"));
   const [showErrors, setShowErrors] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -52,8 +46,8 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
     setIsStarting(true);
     setErrorMessage(null);
     try {
-      const checkout = await billingApi.startTopUpCheckout(accountId, amount, provider, idempotencyKey);
-      if (!openHostedCheckoutIfSafe(checkout.authorizationUrl)) {
+      const checkout = await billingApi.startTopUpCheckout(accountId, amount, "paystack", idempotencyKey);
+      if (!(await openPaystackCheckoutIfSafe(checkout, `/accounts/${accountId}/billing/return?reference=${encodeURIComponent(checkout.reference)}`))) {
         setErrorMessage("The payment page address was not recognised, so we did not open it. Contact support.");
         setIsStarting(false);
       }
@@ -100,11 +94,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
         error={showErrors ? amountError : undefined}
         hint={`Between ${formatMoneyForDisplay(overview.minimumTopUp)} and ${formatMoneyForDisplay(overview.maximumTopUp)}.`}
       />
-      <div>
-        <p style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>Pay with</p>
-        <SegmentedControl label="Payment provider" value={provider} onValueChange={setProvider} options={providerOptions} />
-      </div>
-      <InlineNotice tone="info">You will finish paying on the provider&apos;s secure page, then come back here. We never see your card number.</InlineNotice>
+      <InlineNotice tone="info">Pay by card, bank transfer or USSD in Paystack&apos;s secure window. We never see your card number.</InlineNotice>
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
     </OverlayDialog>
   );

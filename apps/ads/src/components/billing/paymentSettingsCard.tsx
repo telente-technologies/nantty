@@ -15,7 +15,7 @@ import type { BillingOverview, FundingMode } from "@/types/billing.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 import { formatMajorAmountForInput, formatMoneyForDisplay, parseTypedMajorAmountToMoney, readCurrencySymbol } from "@/utils/money.util";
 
-import { openHostedCheckoutIfSafe } from "./hostedCheckout.util";
+import { openPaystackCheckoutIfSafe } from "./hostedCheckout.util";
 import styles from "./billingPage.module.css";
 
 interface PaymentSettingsCardProps {
@@ -75,7 +75,7 @@ export function PaymentSettingsCard({ accountId, overview, canManageBilling, onO
   const startAddingCardThroughProvider = () =>
     runBillingChange("addCard", async () => {
       const checkout = await billingApi.startAddingCard(accountId, "paystack", cardIdempotencyKey);
-      if (!openHostedCheckoutIfSafe(checkout.authorizationUrl)) showToast("The card page address was not recognised, so we did not open it.", "error");
+      if (!(await openPaystackCheckoutIfSafe(checkout, `/accounts/${accountId}/billing/return?cardReference=${encodeURIComponent(checkout.reference)}`))) showToast("The card page address was not recognised, so we did not open it.", "error");
     });
 
   const spentShare = overview.spendLimit.amount ? Math.min(1, overview.spendLimit.spent.amountMinor / Math.max(overview.spendLimit.amount.amountMinor, 1)) : 0;
@@ -103,7 +103,7 @@ export function PaymentSettingsCard({ accountId, overview, canManageBilling, onO
                   {method.brand} ···· {method.last4}
                 </p>
                 <p className={styles.muted}>
-                  Expires {String(method.expMonth).padStart(2, "0")}/{method.expYear} · {method.provider === "paystack" ? "Paystack" : "Flutterwave"}
+                  Expires {String(method.expMonth).padStart(2, "0")}/{method.expYear} · Paystack
                 </p>
               </div>
               <div className={styles.cardRowEnd}>
