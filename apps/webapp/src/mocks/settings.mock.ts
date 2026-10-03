@@ -49,10 +49,14 @@ const SUPPORTED_COUNTRIES: CountryOption[] = [
   { countryCode: "US", countryName: "United States", currency: "USD", currencyName: "US dollar" },
 ];
 
+const viewerThemePreference = { current: "system" };
+
 export const settingsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/locale/countries", () => SUPPORTED_COUNTRIES),
   createMockRoute("PATCH", "/api/v1/users/me/preferences", ({ body }) => {
-    const { countryCode } = body as { countryCode: string };
+    const { countryCode, theme } = body as { countryCode?: string; theme?: string };
+    if (theme) viewerThemePreference.current = theme;
+    if (!countryCode) return;
     settings = { ...settings, countryCode };
     useLocaleStore.setState({ deviceRegionCode: countryCode });
   }),
