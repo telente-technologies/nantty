@@ -38,7 +38,7 @@ func removalPolicySnapshot() []retentionmodels.PolicySnapshot {
 	return snapshot
 }
 
-func RemoveAccountDataAndAnonymize(ctx context.Context, application *container.Container, accountId uuid.UUID, username, trigger, reason, deletedBy string) (RemovalOutcome, error) {
+func RemoveAccountDataAndAnonymize(ctx context.Context, application *container.Container, accountId uuid.UUID, username, finalEmail, trigger, reason, deletedBy string) (RemovalOutcome, error) {
 	now := application.Now()
 	outcome := RemovalOutcome{Removed: []string{"profile", "posts", "media", "messages", "addresses", "consents"}, AnonymizedRecords: []string{"orders", "payments", "ledger"}, RetainedUntil: now.AddDate(0, 0, financialRecordRetentionDays)}
 	snapshot := removalPolicySnapshot()
@@ -56,7 +56,7 @@ func RemoveAccountDataAndAnonymize(ctx context.Context, application *container.C
 			return err
 		}
 		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, deletionevents.AccountDeletionExecutedType, accountId.String(), now, deletionevents.AccountDeletionExecutedData{
-			AccountId: accountId.String(), ExecutedAt: now.UTC().Format(time.RFC3339), RetentionPolicy: snapshot, AppliedSteps: steps,
+			AccountId: accountId.String(), ExecutedAt: now.UTC().Format(time.RFC3339), RetentionPolicy: snapshot, AppliedSteps: steps, FinalEmail: finalEmail, ReferenceId: accountId.String(),
 		})
 	})
 	if err != nil {

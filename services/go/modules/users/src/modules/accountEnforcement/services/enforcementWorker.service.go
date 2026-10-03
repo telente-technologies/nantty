@@ -56,7 +56,7 @@ func (worker EnforcementWorker) deleteDueSuspendedAccounts(ctx context.Context, 
 		if err != nil {
 			return err
 		}
-		if _, err := RemoveAccountDataAndAnonymize(ctx, worker.Container, row.AccountID, target.Account.Username, "suspension_expired", "120-day suspension period ended", "system"); err != nil {
+		if _, err := RemoveAccountDataAndAnonymize(ctx, worker.Container, row.AccountID, target.Account.Username, emailText(target.Account.Email), "suspension_expired", "120-day suspension period ended", "system"); err != nil {
 			return err
 		}
 		if err := row.Update().SetStatus(accountsuspension.StatusDeleted).SetClosedAt(now).Exec(ctx); err != nil {
@@ -64,4 +64,11 @@ func (worker EnforcementWorker) deleteDueSuspendedAccounts(ctx context.Context, 
 		}
 	}
 	return nil
+}
+
+func emailText(email *string) string {
+	if email == nil {
+		return ""
+	}
+	return *email
 }
