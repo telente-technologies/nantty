@@ -1,6 +1,6 @@
 import type { PlatformUserSummary, VerificationColor } from "@/types/platformUser.type";
 
-export type ProfileType = "PERSONAL" | "CREATOR" | "BUSINESS" | "BRAND" | "GOVERNMENT";
+export type ProfileType = "PERSONAL" | "BUSINESS" | "BRAND" | "GOVERNMENT";
 
 export interface AdminCreatedAccount {
   readonly profileType: ProfileType;
