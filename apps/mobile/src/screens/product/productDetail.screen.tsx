@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 
+import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { Frame69424Icon } from "@/components/icons";
 import { AboutShopCard } from "@/components/product/aboutShopCard";
 import { FeaturedProductsGrid } from "@/components/product/featuredProductsGrid";
@@ -15,8 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { useCartActions } from "@/hooks/useCart.hook";
+import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { productsService } from "@/services/products.service";
@@ -27,6 +30,8 @@ import { ErrorState } from "@/components/ui/errorState";
 const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
 
 export function ProductDetailScreen({ navigation, route }: MainScreenProps<"ProductDetail">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { productId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
   useEffect(() => {
@@ -35,7 +40,8 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [bookmarked, setBookmarked] = useState(false);
+  const { offerSendInChat, sendInChatElement } = useShareToChat();
+  const productSave = useSaveToggle({ type: "product", targetId: productId }, product.data?.savedByViewer ?? false);
   const [followingShop, setFollowingShop] = useState(false);
   const [cartError, setCartError] = useState<string | null>(null);
   const [reportSheetVisible, setReportSheetVisible] = useState(false);
@@ -48,7 +54,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
     onError: (_error, followNow) => setFollowingShop(!followNow),
   });
 
-  const addSelectedProductToCart = async () => {
+  const addSelectedProductToCart = () => {
     const detail = product.data;
     if (!detail) return;
     if ((detail.sizes.length > 0 && !selectedSize) || (detail.colors.length > 0 && !selectedColor)) {
@@ -56,17 +62,16 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
       return;
     }
     setCartError(null);
+    requireAuthThen(addValidatedProductToCart, undefined, "add to cart");
+  };
+
+  const addValidatedProductToCart = async () => {
     try {
       await addProductToCart.mutateAsync({ productId, quantity, size: selectedSize, color: selectedColor });
       navigation.navigate("Cart");
     } catch {
       setCartError("Couldn't add to cart. Try again.");
     }
-  };
-
-  const bookmarkProduct = async () => {
-    setBookmarked((value) => !value);
-    await productsService.bookmarkProduct(productId).catch(() => setBookmarked((value) => !value));
   };
 
   const header = (
@@ -97,15 +102,16 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   return (
     <Screen>
       {header}
+      {sendInChatElement}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.gallery}>
           <ProductGallery images={detail.images} promo={detail.promo} />
         </View>
         <ProductPriceBlock
           product={detail}
-          bookmarked={bookmarked}
-          onShare={() => Share.share({ message: `${detail.name} on Zudomart: https://zudomart.com/products/${detail.id}` })}
-          onToggleBookmark={bookmarkProduct}
+          bookmarked={productSave.isSaved}
+          onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Zudomart: https://zudomart.com/products/${detail.id}` }))}
+          onToggleBookmark={productSave.toggleSaved}
           onPressRating={() => navigation.navigate("ProductReviews", { productId })}
         />
         {detail.brand ? (
@@ -133,11 +139,11 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           <AboutShopCard
             store={detail.store}
             following={followingShop}
-            onToggleFollow={() => toggleShopFollow.mutate(!followingShop)}
+            onToggleFollow={() => requireAuthThen(() => toggleShopFollow.mutate(!followingShop), undefined, "follow shops")}
             onViewShop={() => navigation.navigate("Store", { storeId: detail.store.id })}
           />
           <FeaturedProductsGrid products={detail.related} />
-          <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} align="center" accessibilityRole="button" onPress={() => setReportSheetVisible(true)}>
+          <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} align="center" accessibilityRole="button" onPress={() => requireAuthThen(() => setReportSheetVisible(true), undefined, "report")}>
             Report this product
           </Text>
         </View>
@@ -155,7 +161,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   content: { paddingBottom: 21 },
   gallery: { marginTop: 8 },
   selectors: { paddingHorizontal: 12, marginTop: 24, gap: 12 },
@@ -172,4 +178,4 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 12,
   },
-});
+}));

@@ -6,13 +6,15 @@ import { Avatar } from "@/components/ui/avatar";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { reviewsService } from "@/services/reviews.service";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
 function StarRow({ rating }: { rating: number }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.stars} accessibilityLabel={`${rating} out of 5 stars`}>
       {Array.from({ length: 5 }, (_, i) => (
@@ -23,6 +25,8 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const reviews = useQuery({
     queryKey: ["products", "reviews", route.params.productId],
     queryFn: () => reviewsService.fetchProductReviews(route.params.productId),
@@ -63,7 +67,7 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   summary: { alignItems: "center", paddingVertical: 20, gap: 6 },
   stars: { flexDirection: "row", gap: 2 },
@@ -71,4 +75,4 @@ const styles = StyleSheet.create({
   review: { paddingVertical: 16, gap: 8 },
   author: { flexDirection: "row", alignItems: "center", gap: 9 },
   authorText: { flex: 1, gap: 2 },
-});
+}));
