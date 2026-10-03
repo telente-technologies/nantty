@@ -5,6 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
+	adbalancecontrollers "zudomart/modules/wallet/src/modules/adBalances/controllers"
+	adbalancedtos "zudomart/modules/wallet/src/modules/adBalances/dtos"
+	adbalanceroutes "zudomart/modules/wallet/src/modules/adBalances/routes"
+	adbalanceservices "zudomart/modules/wallet/src/modules/adBalances/services"
+	payoutcontrollers "zudomart/modules/wallet/src/modules/payouts/controllers"
+	payoutservices "zudomart/modules/wallet/src/modules/payouts/services"
 
 	ledgerevents "zudomart/modules/ledger/src/events"
 	"zudomart/modules/ledger/src/loaders"
@@ -22,8 +29,10 @@ import (
 )
 
 type Module struct {
-	Coins   *coins.Application
-	Payouts *payouts.Application
+	Coins      *coins.Application
+	Payouts    *payouts.Application
+	AdBalances adbalanceservices.AdBalances
+	Reserves   payoutservices.SellerReserves
 }
 
 func NewWalletModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
@@ -48,7 +57,10 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 		_ = resources.Close()
 		return nil, err
 	}
-	module := &Module{Coins: coins.NewCoinsApplication(walletContainer), Payouts: payouts.NewPayoutsApplication(walletContainer)}
+	module := &Module{
+		Coins: coins.NewCoinsApplication(walletContainer), Payouts: payouts.NewPayoutsApplication(walletContainer),
+		AdBalances: adbalanceservices.AdBalances{Container: walletContainer}, Reserves: payoutservices.SellerReserves{Container: walletContainer},
+	}
 	if err := module.Coins.Catalog.SeedDefaultCoinPackagesWhenMissing(ctx); err != nil {
 		_ = resources.Close()
 		return nil, err
@@ -57,6 +69,17 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeWithdrawal, module.Payouts.Withdrawals)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeCreatorEarnings, module.Payouts.Creators)
+	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeAdBalanceTopUp, module.AdBalances)
+	sellerbalances.RegisterSellerReservePolicy(module.Reserves.PolicyFor)
+	adBalances := module.AdBalances
+	loaders.RegisterMoneyDomainEventHandler("adSpend.batched", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var batch adbalancedtos.SpendBatchRequestDto
+		if err := loaders.DecodeEventData(envelope, &batch); err != nil {
+			return err
+		}
+		_, err := adBalances.ApplySpendBatch(ctx, batch)
+		return err
+	})
 	return module, nil
 }
 
@@ -65,6 +88,8 @@ func (module *Module) Name() string { return "wallet" }
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	coinroutes.MountCoinsRoutes(mux, module.Coins)
 	payoutroutes.MountPayoutsRoutes(mux, module.Payouts)
+	payoutroutes.MountSellerReserveRoutes(mux, payoutcontrollers.SellerReservesController{Application: module.Payouts, Reserves: module.Reserves})
+	adbalanceroutes.MountAdBalancesRoutes(mux, adbalancecontrollers.AdBalancesController{Container: module.Coins.Container, Balances: module.AdBalances})
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

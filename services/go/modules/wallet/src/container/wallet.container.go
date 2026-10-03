@@ -50,7 +50,7 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
 			CoinConversion: schema, CoinPackage: schema, CoinPurchase: schema, CoinTransfer: schema, IdempotentRequest: schema,
-			OutboxEvent: schema, PayoutAccount: schema, WalletRiskFlag: schema, Withdrawal: schema,
+			AdBalanceTopUp: schema, AdSpendDebit: schema, OutboxEvent: schema, PayoutAccount: schema, SellerReserveFlag: schema, WalletRiskFlag: schema, Withdrawal: schema,
 		},
 	}, nil
 }
@@ -62,6 +62,6 @@ func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Clie
 func selectSellerSettlementAdapter(name string, payments *paymentservices.PaymentGateway) interfaces.SellerSettlementAdapter {
 	switch name {
 	default:
-		return integrations.BachsManualPayoutSettlement{Payments: payments}
+		return integrations.PaystackTransferSettlement{Payments: payments}
 	}
 }

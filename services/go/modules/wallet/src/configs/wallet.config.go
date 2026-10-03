@@ -11,6 +11,9 @@ import (
 )
 
 type WalletSettings struct {
+	InternalApiToken             string
+	AdPrepaidRefundsEnabled      bool
+	SellerReserveHoldDays        int
 	Money                        loaders.MoneyModuleSettings
 	CoinTransferFeeBps           int64
 	CoinCashValueMinorByCurrency map[string]int64
@@ -41,10 +44,13 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		WithdrawalsRequireReview:     reader.ReadStringOrDefault("WALLET_WITHDRAWALS_REQUIRE_REVIEW", "true") != "false",
 		AccountDirectorySchema:       reader.ReadStringOrDefault("WALLET_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
 		PayoutRunInterval:            reader.ReadDurationOrDefault("WALLET_PAYOUT_RUN_INTERVAL", 24*time.Hour),
-		SellerSettlementAdapter:      reader.ReadStringOrDefault("WALLET_SELLER_SETTLEMENT_ADAPTER", "bachsManualPayout"),
+		SellerSettlementAdapter:      reader.ReadStringOrDefault("WALLET_SELLER_SETTLEMENT_ADAPTER", "paystackTransfer"),
 		CreatorTransferMinimum:       ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_TRANSFER_MINIMUMS", "NGN:10000,USD:100")),
 		CoinNetValueMinorByCurrency:  ParseCurrencyAmounts(reader.ReadStringOrDefault("COIN_NET_VALUES", "NGN:1000,USD:1")),
-		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:200,ios:3000,android:1500")),
+		InternalApiToken:             reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),
+		AdPrepaidRefundsEnabled:      reader.ReadStringOrDefault("ADS_PREPAID_REFUNDS_ENABLED", "false") == "true",
+		SellerReserveHoldDays:        reader.ReadIntegerOrDefault("WALLET_SELLER_RESERVE_HOLD_DAYS", 90),
+		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:300,ios:3000,android:1500")),
 	}
 	if settings.CoinTransferFeeBps < 0 || settings.CoinTransferFeeBps >= 10_000 {
 		reader.ReadRequiredString("COIN_TRANSFER_FEE_BPS_BETWEEN_0_AND_9999")
