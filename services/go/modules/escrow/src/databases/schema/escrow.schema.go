@@ -18,10 +18,10 @@ type Escrow struct {
 
 func (Escrow) Annotations() []schema.Annotation {
 	return []schema.Annotation{entsql.Checks(map[string]string{
-		"escrows_amount_positive":         "amount_minor > 0",
-		"escrows_split_sums_to_amount":    "commission_minor >= 0 AND seller_amount_minor >= 0 AND processing_fee_minor >= 0 AND commission_minor + seller_amount_minor + processing_fee_minor = amount_minor",
-		"escrows_refund_within_amount":    "refunded_minor >= 0 AND refunded_minor <= amount_minor",
-		"escrows_commission_bps_in_range": "commission_bps >= 0 AND commission_bps <= 10000",
+		"escrows_amount_positive":              "amount_minor > 0",
+		"escrows_split_and_fees_sum_to_amount": "commission_minor >= 0 AND seller_amount_minor >= 0 AND processing_fee_minor >= 0 AND commission_minor + seller_amount_minor + processing_fee_minor = amount_minor",
+		"escrows_refund_within_amount":         "refunded_minor >= 0 AND refunded_minor <= amount_minor",
+		"escrows_commission_bps_in_range":      "commission_bps >= 0 AND commission_bps <= 10000",
 	})}
 }
 
