@@ -8,11 +8,13 @@ import { LiveTopSupportersList } from "@/components/live/gifts/liveTopSupporters
 import { LiveTopSupporterCard } from "@/components/live/gifts/liveTopSupporterCard";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
+import { makeThemedStyles, useTheme } from "@/theme";
 
 export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnded">) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const session = useQuery({ queryKey: ["live", route.params.liveId], queryFn: () => liveService.fetchLiveSessionById(route.params.liveId) });
   const suggested = useQuery({ queryKey: ["suggested-lives"], queryFn: liveService.fetchSuggestedLives });
@@ -33,8 +35,8 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
           <Text size={16} weight={600} lineHeight={19.2} align="center">
             {session.data?.host.name ?? ""}
           </Text>
-          <Text size={14} lineHeight={16.8} align="center">
-            Live Ended
+          <Text size={14} lineHeight={16.8} align="center" color={colors.textMuted}>
+            Live ended
           </Text>
         </View>
         <LiveTopSupporterCard liveId={route.params.liveId} />
@@ -44,7 +46,7 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
         <View style={[styles.sheet, { paddingBottom: insets.bottom }]}>
           <View style={styles.handle} />
           <Text size={16} weight={600} lineHeight={19.2} style={styles.sheetTitle} accessibilityRole="header">
-            Suggested Live
+            Suggested lives
           </Text>
           <ScrollView contentContainerStyle={styles.grid}>
             {suggested.data.map((live) => (
@@ -65,24 +67,24 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.background },
   header: { height: 24, paddingHorizontal: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   host: { marginTop: 72, alignItems: "center", gap: 12 },
   hostText: { gap: 4, alignItems: "center" },
   sheet: {
     flex: 1,
     marginTop: 22,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: 0,
     borderColor: colors.divider,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     overflow: "hidden",
   },
-  handle: { alignSelf: "center", marginTop: 12, width: 46, height: 4, borderRadius: 99, backgroundColor: colors.black },
+  handle: { alignSelf: "center", marginTop: 12, width: 46, height: 4, borderRadius: 99, backgroundColor: colors.divider },
   sheetTitle: { marginTop: 24, marginHorizontal: 16 },
   grid: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  tile: { width: 177, height: 254, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden", flexGrow: 1, flexBasis: "45%" },
-});
+  tile: { width: 177, height: 254, borderRadius: 12, backgroundColor: colors.placeholder, overflow: "hidden", flexGrow: 1, flexBasis: "45%" },
+}));
