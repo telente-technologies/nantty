@@ -30,6 +30,7 @@ export interface User extends UserSummary {
   readonly bio: string;
   readonly bannerUrl: string | null;
   readonly email?: string;
+  readonly emailVerified?: boolean;
   readonly phone?: string | null;
   readonly followers: number;
   readonly following: number;
@@ -58,6 +59,7 @@ export interface StoreSummary {
   readonly ratingCount: number;
   readonly reviewCount: number;
   readonly verification?: Verification | null;
+  readonly earnBackBasisPoints?: number | null;
 }
 
 export interface ProductSummary {
@@ -126,6 +128,7 @@ export interface Post {
   readonly sponsored?: SponsoredPlacement | null;
   readonly subscriberOnly?: boolean;
   readonly viewerHasAccess?: boolean;
+  readonly mentions?: readonly import("./mentions.type").MentionEntity[];
 }
 
 export interface PostAnalyticsDaily {
@@ -158,46 +161,7 @@ export interface Comment {
   readonly liked: boolean;
   readonly replyCount: number;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
-}
-
-export interface CartItem {
-  readonly id: ID;
-  readonly product: ProductSummary;
-  readonly quantity: number;
-  readonly variant: string | null;
-  readonly store?: StoreSummary | null;
-}
-
-export interface Cart {
-  readonly items: readonly CartItem[];
-  readonly itemsTotal: Money;
-  readonly shopDiscount: Money;
-  readonly shipping: Money;
-  readonly total: Money;
-}
-
-export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
-
-export interface Order {
-  readonly id: ID;
-  readonly reference: string;
-  readonly status: OrderStatus;
-  readonly items: readonly CartItem[];
-  readonly total: Money;
-  readonly buyer: UserSummary;
-  readonly store: StoreSummary;
-  readonly createdAt: ISODate;
-  readonly escrowReleaseAt: ISODate | null;
-}
-
-export interface Address {
-  readonly id: ID;
-  readonly fullName: string;
-  readonly phone: string;
-  readonly line1: string;
-  readonly city: string;
-  readonly state: string;
-  readonly isDefault: boolean;
+  readonly mentions?: readonly import("./mentions.type").MentionEntity[];
 }
 
 export interface Conversation {
@@ -277,35 +241,6 @@ export interface AppNotification {
   readonly actor: UserSummary | null;
 }
 
-export interface WalletSummary {
-  readonly available: Money;
-  readonly pending: Money;
-}
-
-export interface WalletTransaction {
-  readonly id: ID;
-  readonly kind: "credit" | "debit";
-  readonly amount: Money;
-  readonly description: string;
-  readonly createdAt: ISODate;
-  readonly status: "pending" | "completed" | "failed";
-}
-
-export interface PayoutAccount {
-  readonly id: ID;
-  readonly bankName: string;
-  readonly accountNumberMasked: string;
-  readonly accountName: string;
-}
-
-export interface SellerDashboard {
-  readonly totalSales: Money;
-  readonly orders: number;
-  readonly series: readonly { readonly label: string; readonly value: number }[];
-  readonly recentOrders: readonly Order[];
-  readonly inventory: readonly ProductSummary[];
-}
-
 export interface Page<T> {
   readonly data: readonly T[];
   readonly nextCursor: string | null;
@@ -315,4 +250,15 @@ export interface AuthSession {
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly user: User;
+}
+
+export type { CartItem, Cart, OrderStatus, Order, Address, WalletSummary, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
+
+export interface StoreCreditBalance {
+  readonly storeId: ID;
+  readonly storeName: string;
+  readonly logoUrl: string | null;
+  readonly balance: Money;
+  readonly expiresAt: ISODate | null;
+  readonly earnBackBasisPoints: number | null;
 }
