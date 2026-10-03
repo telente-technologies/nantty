@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/platformSetting.changed.v1.json",
+  "title": "PlatformSettingChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "version", "changedBy"],
+  "properties": {
+    "key": { "enum": ["creator.requirements", "monetization.policy", "gift.shareTiers"] },
+    "version": { "type": "integer", "minimum": 2 },
+    "changedBy": { "type": "string", "format": "uuid" }
+  }
+}

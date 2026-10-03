@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/staff.invited.v1.json",
+  "title": "StaffInvited",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["staffId", "email", "role", "invitedBy"],
+  "properties": {
+    "staffId": { "type": "string", "format": "uuid" },
+    "email": { "type": "string", "format": "email" },
+    "role": { "enum": ["admin"] },
+    "invitedBy": { "type": "string", "format": "uuid" }
+  }
+}
