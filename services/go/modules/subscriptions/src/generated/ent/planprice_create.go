@@ -62,6 +62,82 @@ func (_c *PlanPriceCreate) SetMonthlyAmountMinor(v int64) *PlanPriceCreate {
 	return _c
 }
 
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (_c *PlanPriceCreate) SetYearlyAmountMinor(v int64) *PlanPriceCreate {
+	_c.mutation.SetYearlyAmountMinor(v)
+	return _c
+}
+
+// SetNillableYearlyAmountMinor sets the "yearly_amount_minor" field if the given value is not nil.
+func (_c *PlanPriceCreate) SetNillableYearlyAmountMinor(v *int64) *PlanPriceCreate {
+	if v != nil {
+		_c.SetYearlyAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (_c *PlanPriceCreate) SetIosMonthlyAmountMinor(v int64) *PlanPriceCreate {
+	_c.mutation.SetIosMonthlyAmountMinor(v)
+	return _c
+}
+
+// SetNillableIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field if the given value is not nil.
+func (_c *PlanPriceCreate) SetNillableIosMonthlyAmountMinor(v *int64) *PlanPriceCreate {
+	if v != nil {
+		_c.SetIosMonthlyAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (_c *PlanPriceCreate) SetIosYearlyAmountMinor(v int64) *PlanPriceCreate {
+	_c.mutation.SetIosYearlyAmountMinor(v)
+	return _c
+}
+
+// SetNillableIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field if the given value is not nil.
+func (_c *PlanPriceCreate) SetNillableIosYearlyAmountMinor(v *int64) *PlanPriceCreate {
+	if v != nil {
+		_c.SetIosYearlyAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (_c *PlanPriceCreate) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceCreate {
+	_c.mutation.SetAndroidMonthlyAmountMinor(v)
+	return _c
+}
+
+// SetNillableAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field if the given value is not nil.
+func (_c *PlanPriceCreate) SetNillableAndroidMonthlyAmountMinor(v *int64) *PlanPriceCreate {
+	if v != nil {
+		_c.SetAndroidMonthlyAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (_c *PlanPriceCreate) SetAndroidYearlyAmountMinor(v int64) *PlanPriceCreate {
+	_c.mutation.SetAndroidYearlyAmountMinor(v)
+	return _c
+}
+
+// SetNillableAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field if the given value is not nil.
+func (_c *PlanPriceCreate) SetNillableAndroidYearlyAmountMinor(v *int64) *PlanPriceCreate {
+	if v != nil {
+		_c.SetAndroidYearlyAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (_c *PlanPriceCreate) SetStoreProductIds(v map[string]string) *PlanPriceCreate {
+	_c.mutation.SetStoreProductIds(v)
+	return _c
+}
+
 // SetActive sets the "active" field.
 func (_c *PlanPriceCreate) SetActive(v bool) *PlanPriceCreate {
 	_c.mutation.SetActive(v)
@@ -157,6 +233,30 @@ func (_c *PlanPriceCreate) defaults() {
 		v := planprice.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.YearlyAmountMinor(); !ok {
+		v := planprice.DefaultYearlyAmountMinor
+		_c.mutation.SetYearlyAmountMinor(v)
+	}
+	if _, ok := _c.mutation.IosMonthlyAmountMinor(); !ok {
+		v := planprice.DefaultIosMonthlyAmountMinor
+		_c.mutation.SetIosMonthlyAmountMinor(v)
+	}
+	if _, ok := _c.mutation.IosYearlyAmountMinor(); !ok {
+		v := planprice.DefaultIosYearlyAmountMinor
+		_c.mutation.SetIosYearlyAmountMinor(v)
+	}
+	if _, ok := _c.mutation.AndroidMonthlyAmountMinor(); !ok {
+		v := planprice.DefaultAndroidMonthlyAmountMinor
+		_c.mutation.SetAndroidMonthlyAmountMinor(v)
+	}
+	if _, ok := _c.mutation.AndroidYearlyAmountMinor(); !ok {
+		v := planprice.DefaultAndroidYearlyAmountMinor
+		_c.mutation.SetAndroidYearlyAmountMinor(v)
+	}
+	if _, ok := _c.mutation.StoreProductIds(); !ok {
+		v := planprice.DefaultStoreProductIds
+		_c.mutation.SetStoreProductIds(v)
+	}
 	if _, ok := _c.mutation.Active(); !ok {
 		v := planprice.DefaultActive
 		_c.mutation.SetActive(v)
@@ -206,6 +306,24 @@ func (_c *PlanPriceCreate) check() error {
 	}
 	if _, ok := _c.mutation.MonthlyAmountMinor(); !ok {
 		return &ValidationError{Name: "monthly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.monthly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.YearlyAmountMinor(); !ok {
+		return &ValidationError{Name: "yearly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.yearly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.IosMonthlyAmountMinor(); !ok {
+		return &ValidationError{Name: "ios_monthly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.ios_monthly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.IosYearlyAmountMinor(); !ok {
+		return &ValidationError{Name: "ios_yearly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.ios_yearly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.AndroidMonthlyAmountMinor(); !ok {
+		return &ValidationError{Name: "android_monthly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.android_monthly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.AndroidYearlyAmountMinor(); !ok {
+		return &ValidationError{Name: "android_yearly_amount_minor", err: errors.New(`ent: missing required field "PlanPrice.android_yearly_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.StoreProductIds(); !ok {
+		return &ValidationError{Name: "store_product_ids", err: errors.New(`ent: missing required field "PlanPrice.store_product_ids"`)}
 	}
 	if _, ok := _c.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "PlanPrice.active"`)}
@@ -277,6 +395,30 @@ func (_c *PlanPriceCreate) createSpec() (*PlanPrice, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MonthlyAmountMinor(); ok {
 		_spec.SetField(planprice.FieldMonthlyAmountMinor, field.TypeInt64, value)
 		_node.MonthlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.YearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldYearlyAmountMinor, field.TypeInt64, value)
+		_node.YearlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.IosMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosMonthlyAmountMinor, field.TypeInt64, value)
+		_node.IosMonthlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.IosYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosYearlyAmountMinor, field.TypeInt64, value)
+		_node.IosYearlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.AndroidMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidMonthlyAmountMinor, field.TypeInt64, value)
+		_node.AndroidMonthlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.AndroidYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidYearlyAmountMinor, field.TypeInt64, value)
+		_node.AndroidYearlyAmountMinor = value
+	}
+	if value, ok := _c.mutation.StoreProductIds(); ok {
+		_spec.SetField(planprice.FieldStoreProductIds, field.TypeJSON, value)
+		_node.StoreProductIds = value
 	}
 	if value, ok := _c.mutation.Active(); ok {
 		_spec.SetField(planprice.FieldActive, field.TypeBool, value)
@@ -393,6 +535,108 @@ func (u *PlanPriceUpsert) UpdateMonthlyAmountMinor() *PlanPriceUpsert {
 // AddMonthlyAmountMinor adds v to the "monthly_amount_minor" field.
 func (u *PlanPriceUpsert) AddMonthlyAmountMinor(v int64) *PlanPriceUpsert {
 	u.Add(planprice.FieldMonthlyAmountMinor, v)
+	return u
+}
+
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (u *PlanPriceUpsert) SetYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Set(planprice.FieldYearlyAmountMinor, v)
+	return u
+}
+
+// UpdateYearlyAmountMinor sets the "yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateYearlyAmountMinor() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldYearlyAmountMinor)
+	return u
+}
+
+// AddYearlyAmountMinor adds v to the "yearly_amount_minor" field.
+func (u *PlanPriceUpsert) AddYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Add(planprice.FieldYearlyAmountMinor, v)
+	return u
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsert) SetIosMonthlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Set(planprice.FieldIosMonthlyAmountMinor, v)
+	return u
+}
+
+// UpdateIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateIosMonthlyAmountMinor() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldIosMonthlyAmountMinor)
+	return u
+}
+
+// AddIosMonthlyAmountMinor adds v to the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsert) AddIosMonthlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Add(planprice.FieldIosMonthlyAmountMinor, v)
+	return u
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsert) SetIosYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Set(planprice.FieldIosYearlyAmountMinor, v)
+	return u
+}
+
+// UpdateIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateIosYearlyAmountMinor() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldIosYearlyAmountMinor)
+	return u
+}
+
+// AddIosYearlyAmountMinor adds v to the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsert) AddIosYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Add(planprice.FieldIosYearlyAmountMinor, v)
+	return u
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsert) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Set(planprice.FieldAndroidMonthlyAmountMinor, v)
+	return u
+}
+
+// UpdateAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateAndroidMonthlyAmountMinor() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldAndroidMonthlyAmountMinor)
+	return u
+}
+
+// AddAndroidMonthlyAmountMinor adds v to the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsert) AddAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Add(planprice.FieldAndroidMonthlyAmountMinor, v)
+	return u
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsert) SetAndroidYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Set(planprice.FieldAndroidYearlyAmountMinor, v)
+	return u
+}
+
+// UpdateAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateAndroidYearlyAmountMinor() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldAndroidYearlyAmountMinor)
+	return u
+}
+
+// AddAndroidYearlyAmountMinor adds v to the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsert) AddAndroidYearlyAmountMinor(v int64) *PlanPriceUpsert {
+	u.Add(planprice.FieldAndroidYearlyAmountMinor, v)
+	return u
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (u *PlanPriceUpsert) SetStoreProductIds(v map[string]string) *PlanPriceUpsert {
+	u.Set(planprice.FieldStoreProductIds, v)
+	return u
+}
+
+// UpdateStoreProductIds sets the "store_product_ids" field to the value that was provided on create.
+func (u *PlanPriceUpsert) UpdateStoreProductIds() *PlanPriceUpsert {
+	u.SetExcluded(planprice.FieldStoreProductIds)
 	return u
 }
 
@@ -543,6 +787,125 @@ func (u *PlanPriceUpsertOne) AddMonthlyAmountMinor(v int64) *PlanPriceUpsertOne 
 func (u *PlanPriceUpsertOne) UpdateMonthlyAmountMinor() *PlanPriceUpsertOne {
 	return u.Update(func(s *PlanPriceUpsert) {
 		s.UpdateMonthlyAmountMinor()
+	})
+}
+
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) SetYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetYearlyAmountMinor(v)
+	})
+}
+
+// AddYearlyAmountMinor adds v to the "yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) AddYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddYearlyAmountMinor(v)
+	})
+}
+
+// UpdateYearlyAmountMinor sets the "yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateYearlyAmountMinor() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateYearlyAmountMinor()
+	})
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsertOne) SetIosMonthlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetIosMonthlyAmountMinor(v)
+	})
+}
+
+// AddIosMonthlyAmountMinor adds v to the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsertOne) AddIosMonthlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddIosMonthlyAmountMinor(v)
+	})
+}
+
+// UpdateIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateIosMonthlyAmountMinor() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateIosMonthlyAmountMinor()
+	})
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) SetIosYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetIosYearlyAmountMinor(v)
+	})
+}
+
+// AddIosYearlyAmountMinor adds v to the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) AddIosYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddIosYearlyAmountMinor(v)
+	})
+}
+
+// UpdateIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateIosYearlyAmountMinor() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateIosYearlyAmountMinor()
+	})
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsertOne) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetAndroidMonthlyAmountMinor(v)
+	})
+}
+
+// AddAndroidMonthlyAmountMinor adds v to the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsertOne) AddAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddAndroidMonthlyAmountMinor(v)
+	})
+}
+
+// UpdateAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateAndroidMonthlyAmountMinor() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateAndroidMonthlyAmountMinor()
+	})
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) SetAndroidYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetAndroidYearlyAmountMinor(v)
+	})
+}
+
+// AddAndroidYearlyAmountMinor adds v to the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsertOne) AddAndroidYearlyAmountMinor(v int64) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddAndroidYearlyAmountMinor(v)
+	})
+}
+
+// UpdateAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateAndroidYearlyAmountMinor() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateAndroidYearlyAmountMinor()
+	})
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (u *PlanPriceUpsertOne) SetStoreProductIds(v map[string]string) *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetStoreProductIds(v)
+	})
+}
+
+// UpdateStoreProductIds sets the "store_product_ids" field to the value that was provided on create.
+func (u *PlanPriceUpsertOne) UpdateStoreProductIds() *PlanPriceUpsertOne {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateStoreProductIds()
 	})
 }
 
@@ -866,6 +1229,125 @@ func (u *PlanPriceUpsertBulk) AddMonthlyAmountMinor(v int64) *PlanPriceUpsertBul
 func (u *PlanPriceUpsertBulk) UpdateMonthlyAmountMinor() *PlanPriceUpsertBulk {
 	return u.Update(func(s *PlanPriceUpsert) {
 		s.UpdateMonthlyAmountMinor()
+	})
+}
+
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) SetYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetYearlyAmountMinor(v)
+	})
+}
+
+// AddYearlyAmountMinor adds v to the "yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) AddYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddYearlyAmountMinor(v)
+	})
+}
+
+// UpdateYearlyAmountMinor sets the "yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateYearlyAmountMinor() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateYearlyAmountMinor()
+	})
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) SetIosMonthlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetIosMonthlyAmountMinor(v)
+	})
+}
+
+// AddIosMonthlyAmountMinor adds v to the "ios_monthly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) AddIosMonthlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddIosMonthlyAmountMinor(v)
+	})
+}
+
+// UpdateIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateIosMonthlyAmountMinor() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateIosMonthlyAmountMinor()
+	})
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) SetIosYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetIosYearlyAmountMinor(v)
+	})
+}
+
+// AddIosYearlyAmountMinor adds v to the "ios_yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) AddIosYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddIosYearlyAmountMinor(v)
+	})
+}
+
+// UpdateIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateIosYearlyAmountMinor() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateIosYearlyAmountMinor()
+	})
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetAndroidMonthlyAmountMinor(v)
+	})
+}
+
+// AddAndroidMonthlyAmountMinor adds v to the "android_monthly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) AddAndroidMonthlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddAndroidMonthlyAmountMinor(v)
+	})
+}
+
+// UpdateAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateAndroidMonthlyAmountMinor() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateAndroidMonthlyAmountMinor()
+	})
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) SetAndroidYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetAndroidYearlyAmountMinor(v)
+	})
+}
+
+// AddAndroidYearlyAmountMinor adds v to the "android_yearly_amount_minor" field.
+func (u *PlanPriceUpsertBulk) AddAndroidYearlyAmountMinor(v int64) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.AddAndroidYearlyAmountMinor(v)
+	})
+}
+
+// UpdateAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateAndroidYearlyAmountMinor() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateAndroidYearlyAmountMinor()
+	})
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (u *PlanPriceUpsertBulk) SetStoreProductIds(v map[string]string) *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.SetStoreProductIds(v)
+	})
+}
+
+// UpdateStoreProductIds sets the "store_product_ids" field to the value that was provided on create.
+func (u *PlanPriceUpsertBulk) UpdateStoreProductIds() *PlanPriceUpsertBulk {
+	return u.Update(func(s *PlanPriceUpsert) {
+		s.UpdateStoreProductIds()
 	})
 }
 

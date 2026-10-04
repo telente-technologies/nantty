@@ -177,18 +177,42 @@ func init() {
 			return nil
 		}
 	}()
+	// planpriceDescYearlyAmountMinor is the schema descriptor for yearly_amount_minor field.
+	planpriceDescYearlyAmountMinor := planpriceFields[4].Descriptor()
+	// planprice.DefaultYearlyAmountMinor holds the default value on creation for the yearly_amount_minor field.
+	planprice.DefaultYearlyAmountMinor = planpriceDescYearlyAmountMinor.Default.(int64)
+	// planpriceDescIosMonthlyAmountMinor is the schema descriptor for ios_monthly_amount_minor field.
+	planpriceDescIosMonthlyAmountMinor := planpriceFields[5].Descriptor()
+	// planprice.DefaultIosMonthlyAmountMinor holds the default value on creation for the ios_monthly_amount_minor field.
+	planprice.DefaultIosMonthlyAmountMinor = planpriceDescIosMonthlyAmountMinor.Default.(int64)
+	// planpriceDescIosYearlyAmountMinor is the schema descriptor for ios_yearly_amount_minor field.
+	planpriceDescIosYearlyAmountMinor := planpriceFields[6].Descriptor()
+	// planprice.DefaultIosYearlyAmountMinor holds the default value on creation for the ios_yearly_amount_minor field.
+	planprice.DefaultIosYearlyAmountMinor = planpriceDescIosYearlyAmountMinor.Default.(int64)
+	// planpriceDescAndroidMonthlyAmountMinor is the schema descriptor for android_monthly_amount_minor field.
+	planpriceDescAndroidMonthlyAmountMinor := planpriceFields[7].Descriptor()
+	// planprice.DefaultAndroidMonthlyAmountMinor holds the default value on creation for the android_monthly_amount_minor field.
+	planprice.DefaultAndroidMonthlyAmountMinor = planpriceDescAndroidMonthlyAmountMinor.Default.(int64)
+	// planpriceDescAndroidYearlyAmountMinor is the schema descriptor for android_yearly_amount_minor field.
+	planpriceDescAndroidYearlyAmountMinor := planpriceFields[8].Descriptor()
+	// planprice.DefaultAndroidYearlyAmountMinor holds the default value on creation for the android_yearly_amount_minor field.
+	planprice.DefaultAndroidYearlyAmountMinor = planpriceDescAndroidYearlyAmountMinor.Default.(int64)
+	// planpriceDescStoreProductIds is the schema descriptor for store_product_ids field.
+	planpriceDescStoreProductIds := planpriceFields[9].Descriptor()
+	// planprice.DefaultStoreProductIds holds the default value on creation for the store_product_ids field.
+	planprice.DefaultStoreProductIds = planpriceDescStoreProductIds.Default.(map[string]string)
 	// planpriceDescActive is the schema descriptor for active field.
-	planpriceDescActive := planpriceFields[4].Descriptor()
+	planpriceDescActive := planpriceFields[10].Descriptor()
 	// planprice.DefaultActive holds the default value on creation for the active field.
 	planprice.DefaultActive = planpriceDescActive.Default.(bool)
 	// planpriceDescUpdatedByStaffID is the schema descriptor for updated_by_staff_id field.
-	planpriceDescUpdatedByStaffID := planpriceFields[5].Descriptor()
+	planpriceDescUpdatedByStaffID := planpriceFields[11].Descriptor()
 	// planprice.DefaultUpdatedByStaffID holds the default value on creation for the updated_by_staff_id field.
 	planprice.DefaultUpdatedByStaffID = planpriceDescUpdatedByStaffID.Default.(string)
 	// planprice.UpdatedByStaffIDValidator is a validator for the "updated_by_staff_id" field. It is called by the builders before save.
 	planprice.UpdatedByStaffIDValidator = planpriceDescUpdatedByStaffID.Validators[0].(func(string) error)
 	// planpriceDescUpdatedAt is the schema descriptor for updated_at field.
-	planpriceDescUpdatedAt := planpriceFields[6].Descriptor()
+	planpriceDescUpdatedAt := planpriceFields[12].Descriptor()
 	// planprice.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	planprice.DefaultUpdatedAt = planpriceDescUpdatedAt.Default.(func() time.Time)
 	// planprice.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

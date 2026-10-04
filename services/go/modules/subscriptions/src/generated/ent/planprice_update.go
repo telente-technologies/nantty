@@ -92,6 +92,117 @@ func (_u *PlanPriceUpdate) AddMonthlyAmountMinor(v int64) *PlanPriceUpdate {
 	return _u
 }
 
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) SetYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.ResetYearlyAmountMinor()
+	_u.mutation.SetYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableYearlyAmountMinor sets the "yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdate) SetNillableYearlyAmountMinor(v *int64) *PlanPriceUpdate {
+	if v != nil {
+		_u.SetYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddYearlyAmountMinor adds value to the "yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) AddYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.AddYearlyAmountMinor(v)
+	return _u
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (_u *PlanPriceUpdate) SetIosMonthlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.ResetIosMonthlyAmountMinor()
+	_u.mutation.SetIosMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdate) SetNillableIosMonthlyAmountMinor(v *int64) *PlanPriceUpdate {
+	if v != nil {
+		_u.SetIosMonthlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddIosMonthlyAmountMinor adds value to the "ios_monthly_amount_minor" field.
+func (_u *PlanPriceUpdate) AddIosMonthlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.AddIosMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) SetIosYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.ResetIosYearlyAmountMinor()
+	_u.mutation.SetIosYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdate) SetNillableIosYearlyAmountMinor(v *int64) *PlanPriceUpdate {
+	if v != nil {
+		_u.SetIosYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddIosYearlyAmountMinor adds value to the "ios_yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) AddIosYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.AddIosYearlyAmountMinor(v)
+	return _u
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (_u *PlanPriceUpdate) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.ResetAndroidMonthlyAmountMinor()
+	_u.mutation.SetAndroidMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdate) SetNillableAndroidMonthlyAmountMinor(v *int64) *PlanPriceUpdate {
+	if v != nil {
+		_u.SetAndroidMonthlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddAndroidMonthlyAmountMinor adds value to the "android_monthly_amount_minor" field.
+func (_u *PlanPriceUpdate) AddAndroidMonthlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.AddAndroidMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) SetAndroidYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.ResetAndroidYearlyAmountMinor()
+	_u.mutation.SetAndroidYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdate) SetNillableAndroidYearlyAmountMinor(v *int64) *PlanPriceUpdate {
+	if v != nil {
+		_u.SetAndroidYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddAndroidYearlyAmountMinor adds value to the "android_yearly_amount_minor" field.
+func (_u *PlanPriceUpdate) AddAndroidYearlyAmountMinor(v int64) *PlanPriceUpdate {
+	_u.mutation.AddAndroidYearlyAmountMinor(v)
+	return _u
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (_u *PlanPriceUpdate) SetStoreProductIds(v map[string]string) *PlanPriceUpdate {
+	_u.mutation.SetStoreProductIds(v)
+	return _u
+}
+
 // SetActive sets the "active" field.
 func (_u *PlanPriceUpdate) SetActive(v bool) *PlanPriceUpdate {
 	_u.mutation.SetActive(v)
@@ -219,6 +330,39 @@ func (_u *PlanPriceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedMonthlyAmountMinor(); ok {
 		_spec.AddField(planprice.FieldMonthlyAmountMinor, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.YearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.IosMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedIosMonthlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldIosMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.IosYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedIosYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldIosYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AndroidMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAndroidMonthlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldAndroidMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AndroidYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAndroidYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldAndroidYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.StoreProductIds(); ok {
+		_spec.SetField(planprice.FieldStoreProductIds, field.TypeJSON, value)
+	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(planprice.FieldActive, field.TypeBool, value)
 	}
@@ -310,6 +454,117 @@ func (_u *PlanPriceUpdateOne) SetNillableMonthlyAmountMinor(v *int64) *PlanPrice
 // AddMonthlyAmountMinor adds value to the "monthly_amount_minor" field.
 func (_u *PlanPriceUpdateOne) AddMonthlyAmountMinor(v int64) *PlanPriceUpdateOne {
 	_u.mutation.AddMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) SetYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.ResetYearlyAmountMinor()
+	_u.mutation.SetYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableYearlyAmountMinor sets the "yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdateOne) SetNillableYearlyAmountMinor(v *int64) *PlanPriceUpdateOne {
+	if v != nil {
+		_u.SetYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddYearlyAmountMinor adds value to the "yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) AddYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.AddYearlyAmountMinor(v)
+	return _u
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) SetIosMonthlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.ResetIosMonthlyAmountMinor()
+	_u.mutation.SetIosMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdateOne) SetNillableIosMonthlyAmountMinor(v *int64) *PlanPriceUpdateOne {
+	if v != nil {
+		_u.SetIosMonthlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddIosMonthlyAmountMinor adds value to the "ios_monthly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) AddIosMonthlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.AddIosMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) SetIosYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.ResetIosYearlyAmountMinor()
+	_u.mutation.SetIosYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdateOne) SetNillableIosYearlyAmountMinor(v *int64) *PlanPriceUpdateOne {
+	if v != nil {
+		_u.SetIosYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddIosYearlyAmountMinor adds value to the "ios_yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) AddIosYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.AddIosYearlyAmountMinor(v)
+	return _u
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) SetAndroidMonthlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.ResetAndroidMonthlyAmountMinor()
+	_u.mutation.SetAndroidMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdateOne) SetNillableAndroidMonthlyAmountMinor(v *int64) *PlanPriceUpdateOne {
+	if v != nil {
+		_u.SetAndroidMonthlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddAndroidMonthlyAmountMinor adds value to the "android_monthly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) AddAndroidMonthlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.AddAndroidMonthlyAmountMinor(v)
+	return _u
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) SetAndroidYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.ResetAndroidYearlyAmountMinor()
+	_u.mutation.SetAndroidYearlyAmountMinor(v)
+	return _u
+}
+
+// SetNillableAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field if the given value is not nil.
+func (_u *PlanPriceUpdateOne) SetNillableAndroidYearlyAmountMinor(v *int64) *PlanPriceUpdateOne {
+	if v != nil {
+		_u.SetAndroidYearlyAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddAndroidYearlyAmountMinor adds value to the "android_yearly_amount_minor" field.
+func (_u *PlanPriceUpdateOne) AddAndroidYearlyAmountMinor(v int64) *PlanPriceUpdateOne {
+	_u.mutation.AddAndroidYearlyAmountMinor(v)
+	return _u
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (_u *PlanPriceUpdateOne) SetStoreProductIds(v map[string]string) *PlanPriceUpdateOne {
+	_u.mutation.SetStoreProductIds(v)
 	return _u
 }
 
@@ -469,6 +724,39 @@ func (_u *PlanPriceUpdateOne) sqlSave(ctx context.Context) (_node *PlanPrice, er
 	}
 	if value, ok := _u.mutation.AddedMonthlyAmountMinor(); ok {
 		_spec.AddField(planprice.FieldMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.YearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.IosMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedIosMonthlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldIosMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.IosYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldIosYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedIosYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldIosYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AndroidMonthlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAndroidMonthlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldAndroidMonthlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AndroidYearlyAmountMinor(); ok {
+		_spec.SetField(planprice.FieldAndroidYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAndroidYearlyAmountMinor(); ok {
+		_spec.AddField(planprice.FieldAndroidYearlyAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.StoreProductIds(); ok {
+		_spec.SetField(planprice.FieldStoreProductIds, field.TypeJSON, value)
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(planprice.FieldActive, field.TypeBool, value)
