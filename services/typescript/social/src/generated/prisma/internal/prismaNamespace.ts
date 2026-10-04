@@ -418,13 +418,16 @@ export const ModelName = {
   PostDailyStat: 'PostDailyStat',
   Sound: 'Sound',
   SoundSave: 'SoundSave',
+  ContentPreference: 'ContentPreference',
   Follow: 'Follow',
   Block: 'Block',
+  LinkPreviewCache: 'LinkPreviewCache',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
   ReportIntake: 'ReportIntake',
   SaveCollection: 'SaveCollection',
   SavedItem: 'SavedItem',
+  SaveCounter: 'SaveCounter',
   ChatStreak: 'ChatStreak',
   StreakSenderDay: 'StreakSenderDay',
   StreakRestore: 'StreakRestore',
@@ -444,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "follow" | "block" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "follow" | "block" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2002,6 +2005,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContentPreference: {
+      payload: Prisma.$ContentPreferencePayload<ExtArgs>
+      fields: Prisma.ContentPreferenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContentPreferenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContentPreferenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        findFirst: {
+          args: Prisma.ContentPreferenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContentPreferenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        findMany: {
+          args: Prisma.ContentPreferenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>[]
+        }
+        create: {
+          args: Prisma.ContentPreferenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        createMany: {
+          args: Prisma.ContentPreferenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContentPreferenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>[]
+        }
+        delete: {
+          args: Prisma.ContentPreferenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        update: {
+          args: Prisma.ContentPreferenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        deleteMany: {
+          args: Prisma.ContentPreferenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContentPreferenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContentPreferenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>[]
+        }
+        upsert: {
+          args: Prisma.ContentPreferenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPreferencePayload>
+        }
+        aggregate: {
+          args: Prisma.ContentPreferenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContentPreference>
+        }
+        groupBy: {
+          args: Prisma.ContentPreferenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPreferenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContentPreferenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPreferenceCountAggregateOutputType> | number
+        }
+      }
+    }
     Follow: {
       payload: Prisma.$FollowPayload<ExtArgs>
       fields: Prisma.FollowFieldRefs
@@ -2147,6 +2224,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BlockCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BlockCountAggregateOutputType> | number
+        }
+      }
+    }
+    LinkPreviewCache: {
+      payload: Prisma.$LinkPreviewCachePayload<ExtArgs>
+      fields: Prisma.LinkPreviewCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LinkPreviewCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LinkPreviewCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        findFirst: {
+          args: Prisma.LinkPreviewCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LinkPreviewCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        findMany: {
+          args: Prisma.LinkPreviewCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>[]
+        }
+        create: {
+          args: Prisma.LinkPreviewCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        createMany: {
+          args: Prisma.LinkPreviewCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LinkPreviewCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>[]
+        }
+        delete: {
+          args: Prisma.LinkPreviewCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        update: {
+          args: Prisma.LinkPreviewCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.LinkPreviewCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LinkPreviewCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LinkPreviewCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.LinkPreviewCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPreviewCachePayload>
+        }
+        aggregate: {
+          args: Prisma.LinkPreviewCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLinkPreviewCache>
+        }
+        groupBy: {
+          args: Prisma.LinkPreviewCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkPreviewCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LinkPreviewCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkPreviewCacheCountAggregateOutputType> | number
         }
       }
     }
@@ -2517,6 +2668,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SavedItemCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SavedItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    SaveCounter: {
+      payload: Prisma.$SaveCounterPayload<ExtArgs>
+      fields: Prisma.SaveCounterFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SaveCounterFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SaveCounterFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        findFirst: {
+          args: Prisma.SaveCounterFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SaveCounterFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        findMany: {
+          args: Prisma.SaveCounterFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>[]
+        }
+        create: {
+          args: Prisma.SaveCounterCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        createMany: {
+          args: Prisma.SaveCounterCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SaveCounterCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>[]
+        }
+        delete: {
+          args: Prisma.SaveCounterDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        update: {
+          args: Prisma.SaveCounterUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        deleteMany: {
+          args: Prisma.SaveCounterDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SaveCounterUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SaveCounterUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>[]
+        }
+        upsert: {
+          args: Prisma.SaveCounterUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SaveCounterPayload>
+        }
+        aggregate: {
+          args: Prisma.SaveCounterAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSaveCounter>
+        }
+        groupBy: {
+          args: Prisma.SaveCounterGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SaveCounterGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SaveCounterCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SaveCounterCountAggregateOutputType> | number
         }
       }
     }
@@ -2904,6 +3129,7 @@ export const MessageScalarFieldEnum = {
   mediaId: 'mediaId',
   mediaType: 'mediaType',
   mediaUrl: 'mediaUrl',
+  mediaStatus: 'mediaStatus',
   mediaDurationSeconds: 'mediaDurationSeconds',
   linkPreviewEnvelope: 'linkPreviewEnvelope',
   sharedContent: 'sharedContent',
@@ -3001,12 +3227,23 @@ export const PostScalarFieldEnum = {
   replyToCommenterId: 'replyToCommenterId',
   stickerLayout: 'stickerLayout',
   mentions: 'mentions',
+  linkPreview: 'linkPreview',
   likeCount: 'likeCount',
   commentCount: 'commentCount',
   repostCount: 'repostCount',
   shareCount: 'shareCount',
   viewCount: 'viewCount',
   profileVisitCount: 'profileVisitCount',
+  saveCount: 'saveCount',
+  quoteCount: 'quoteCount',
+  isQuote: 'isQuote',
+  replyPolicy: 'replyPolicy',
+  sensitiveLabels: 'sensitiveLabels',
+  authorSensitiveLabels: 'authorSensitiveLabels',
+  moderationSensitiveLabels: 'moderationSensitiveLabels',
+  advisorySensitiveLabels: 'advisorySensitiveLabels',
+  sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
+  moderationVisibility: 'moderationVisibility',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -3027,7 +3264,8 @@ export const PostMediaScalarFieldEnum = {
   width: 'width',
   height: 'height',
   durationSeconds: 'durationSeconds',
-  blurhash: 'blurhash'
+  blurhash: 'blurhash',
+  status: 'status'
 } as const
 
 export type PostMediaScalarFieldEnum = (typeof PostMediaScalarFieldEnum)[keyof typeof PostMediaScalarFieldEnum]
@@ -3063,6 +3301,9 @@ export const CommentScalarFieldEnum = {
   mentions: 'mentions',
   likeCount: 'likeCount',
   replyCount: 'replyCount',
+  depth: 'depth',
+  path: 'path',
+  moderationVisibility: 'moderationVisibility',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
@@ -3143,6 +3384,15 @@ export const SoundSaveScalarFieldEnum = {
 export type SoundSaveScalarFieldEnum = (typeof SoundSaveScalarFieldEnum)[keyof typeof SoundSaveScalarFieldEnum]
 
 
+export const ContentPreferenceScalarFieldEnum = {
+  accountId: 'accountId',
+  showSensitiveWithoutWarning: 'showSensitiveWithoutWarning',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
+
+
 export const FollowScalarFieldEnum = {
   id: 'id',
   followerId: 'followerId',
@@ -3162,6 +3412,22 @@ export const BlockScalarFieldEnum = {
 } as const
 
 export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
+
+
+export const LinkPreviewCacheScalarFieldEnum = {
+  normalizedUrl: 'normalizedUrl',
+  url: 'url',
+  status: 'status',
+  title: 'title',
+  description: 'description',
+  siteName: 'siteName',
+  imageUrl: 'imageUrl',
+  imageMediaId: 'imageMediaId',
+  fetchedAt: 'fetchedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type LinkPreviewCacheScalarFieldEnum = (typeof LinkPreviewCacheScalarFieldEnum)[keyof typeof LinkPreviewCacheScalarFieldEnum]
 
 
 export const OutboxEventScalarFieldEnum = {
@@ -3225,6 +3491,16 @@ export const SavedItemScalarFieldEnum = {
 } as const
 
 export type SavedItemScalarFieldEnum = (typeof SavedItemScalarFieldEnum)[keyof typeof SavedItemScalarFieldEnum]
+
+
+export const SaveCounterScalarFieldEnum = {
+  type: 'type',
+  targetId: 'targetId',
+  count: 'count',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SaveCounterScalarFieldEnum = (typeof SaveCounterScalarFieldEnum)[keyof typeof SaveCounterScalarFieldEnum]
 
 
 export const ChatStreakScalarFieldEnum = {
@@ -3449,6 +3725,20 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'MediaProcessingStatus'
+ */
+export type EnumMediaProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaProcessingStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MediaProcessingStatus[]'
+ */
+export type ListEnumMediaProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaProcessingStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -3515,6 +3805,48 @@ export type EnumPostVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'PostVisibility[]'
  */
 export type ListEnumPostVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PostVisibility[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ReplyPolicy'
+ */
+export type EnumReplyPolicyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReplyPolicy'>
+    
+
+
+/**
+ * Reference to a field of type 'ReplyPolicy[]'
+ */
+export type ListEnumReplyPolicyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReplyPolicy[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SensitiveLabel[]'
+ */
+export type ListEnumSensitiveLabelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SensitiveLabel[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SensitiveLabel'
+ */
+export type EnumSensitiveLabelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SensitiveLabel'>
+    
+
+
+/**
+ * Reference to a field of type 'ModerationVisibility'
+ */
+export type EnumModerationVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModerationVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'ModerationVisibility[]'
+ */
+export type ListEnumModerationVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModerationVisibility[]'>
     
 
 
@@ -3759,13 +4091,16 @@ export type GlobalOmitConfig = {
   postDailyStat?: Prisma.PostDailyStatOmit
   sound?: Prisma.SoundOmit
   soundSave?: Prisma.SoundSaveOmit
+  contentPreference?: Prisma.ContentPreferenceOmit
   follow?: Prisma.FollowOmit
   block?: Prisma.BlockOmit
+  linkPreviewCache?: Prisma.LinkPreviewCacheOmit
   outboxEvent?: Prisma.OutboxEventOmit
   idempotencyRecord?: Prisma.IdempotencyRecordOmit
   reportIntake?: Prisma.ReportIntakeOmit
   saveCollection?: Prisma.SaveCollectionOmit
   savedItem?: Prisma.SavedItemOmit
+  saveCounter?: Prisma.SaveCounterOmit
   chatStreak?: Prisma.ChatStreakOmit
   streakSenderDay?: Prisma.StreakSenderDayOmit
   streakRestore?: Prisma.StreakRestoreOmit

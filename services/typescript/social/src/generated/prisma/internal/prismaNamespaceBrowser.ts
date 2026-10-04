@@ -72,13 +72,16 @@ export const ModelName = {
   PostDailyStat: 'PostDailyStat',
   Sound: 'Sound',
   SoundSave: 'SoundSave',
+  ContentPreference: 'ContentPreference',
   Follow: 'Follow',
   Block: 'Block',
+  LinkPreviewCache: 'LinkPreviewCache',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
   ReportIntake: 'ReportIntake',
   SaveCollection: 'SaveCollection',
   SavedItem: 'SavedItem',
+  SaveCounter: 'SaveCounter',
   ChatStreak: 'ChatStreak',
   StreakSenderDay: 'StreakSenderDay',
   StreakRestore: 'StreakRestore',
@@ -150,6 +153,7 @@ export const MessageScalarFieldEnum = {
   mediaId: 'mediaId',
   mediaType: 'mediaType',
   mediaUrl: 'mediaUrl',
+  mediaStatus: 'mediaStatus',
   mediaDurationSeconds: 'mediaDurationSeconds',
   linkPreviewEnvelope: 'linkPreviewEnvelope',
   sharedContent: 'sharedContent',
@@ -247,12 +251,23 @@ export const PostScalarFieldEnum = {
   replyToCommenterId: 'replyToCommenterId',
   stickerLayout: 'stickerLayout',
   mentions: 'mentions',
+  linkPreview: 'linkPreview',
   likeCount: 'likeCount',
   commentCount: 'commentCount',
   repostCount: 'repostCount',
   shareCount: 'shareCount',
   viewCount: 'viewCount',
   profileVisitCount: 'profileVisitCount',
+  saveCount: 'saveCount',
+  quoteCount: 'quoteCount',
+  isQuote: 'isQuote',
+  replyPolicy: 'replyPolicy',
+  sensitiveLabels: 'sensitiveLabels',
+  authorSensitiveLabels: 'authorSensitiveLabels',
+  moderationSensitiveLabels: 'moderationSensitiveLabels',
+  advisorySensitiveLabels: 'advisorySensitiveLabels',
+  sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
+  moderationVisibility: 'moderationVisibility',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -273,7 +288,8 @@ export const PostMediaScalarFieldEnum = {
   width: 'width',
   height: 'height',
   durationSeconds: 'durationSeconds',
-  blurhash: 'blurhash'
+  blurhash: 'blurhash',
+  status: 'status'
 } as const
 
 export type PostMediaScalarFieldEnum = (typeof PostMediaScalarFieldEnum)[keyof typeof PostMediaScalarFieldEnum]
@@ -309,6 +325,9 @@ export const CommentScalarFieldEnum = {
   mentions: 'mentions',
   likeCount: 'likeCount',
   replyCount: 'replyCount',
+  depth: 'depth',
+  path: 'path',
+  moderationVisibility: 'moderationVisibility',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
@@ -389,6 +408,15 @@ export const SoundSaveScalarFieldEnum = {
 export type SoundSaveScalarFieldEnum = (typeof SoundSaveScalarFieldEnum)[keyof typeof SoundSaveScalarFieldEnum]
 
 
+export const ContentPreferenceScalarFieldEnum = {
+  accountId: 'accountId',
+  showSensitiveWithoutWarning: 'showSensitiveWithoutWarning',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
+
+
 export const FollowScalarFieldEnum = {
   id: 'id',
   followerId: 'followerId',
@@ -408,6 +436,22 @@ export const BlockScalarFieldEnum = {
 } as const
 
 export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
+
+
+export const LinkPreviewCacheScalarFieldEnum = {
+  normalizedUrl: 'normalizedUrl',
+  url: 'url',
+  status: 'status',
+  title: 'title',
+  description: 'description',
+  siteName: 'siteName',
+  imageUrl: 'imageUrl',
+  imageMediaId: 'imageMediaId',
+  fetchedAt: 'fetchedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type LinkPreviewCacheScalarFieldEnum = (typeof LinkPreviewCacheScalarFieldEnum)[keyof typeof LinkPreviewCacheScalarFieldEnum]
 
 
 export const OutboxEventScalarFieldEnum = {
@@ -471,6 +515,16 @@ export const SavedItemScalarFieldEnum = {
 } as const
 
 export type SavedItemScalarFieldEnum = (typeof SavedItemScalarFieldEnum)[keyof typeof SavedItemScalarFieldEnum]
+
+
+export const SaveCounterScalarFieldEnum = {
+  type: 'type',
+  targetId: 'targetId',
+  count: 'count',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SaveCounterScalarFieldEnum = (typeof SaveCounterScalarFieldEnum)[keyof typeof SaveCounterScalarFieldEnum]
 
 
 export const ChatStreakScalarFieldEnum = {
