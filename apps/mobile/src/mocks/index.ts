@@ -1,11 +1,13 @@
 import { ApiError } from "@/errors/api.error";
 
+import { accountHealthMocks } from "./accountHealth.mock";
 import { accountStatusMocks } from "./accountStatus.mock";
 import { celebrationsMocks } from "./celebrations.mock";
 import { notificationPreferencesMocks } from "./notificationPreferences.mock";
 import { businessDocumentsMocks } from "./businessDocuments.mock";
 import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
 import { helpCenterMocks } from "./helpCenter.mock";
+import { exploreMocks } from "./explore.mock";
 import { mentionsMocks } from "./mentions.mock";
 import { marketingPreferencesMocks } from "./marketingPreferences.mock";
 import { adEventsMocks } from "./adEvents.mock";
@@ -41,6 +43,8 @@ import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
 import { postAudienceMocks } from "./postAudience.mock";
+import { placesMocks } from "./places.mock";
+import { postTagsMocks } from "./postTags.mock";
 import { productsMocks } from "./products.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
 import { savesMocks } from "./saves.mock";
@@ -67,6 +71,7 @@ const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...accountStatusMocks,
+  ...accountHealthMocks,
   ...celebrationsMocks,
   ...notificationPreferencesMocks,
   ...businessDocumentsMocks,
@@ -78,7 +83,10 @@ const routes: MockRoute[] = [
   ...followGraphMocks,
   ...usersMocks,
   ...feedMocks,
+  ...exploreMocks,
   ...postAudienceMocks,
+  ...placesMocks,
+  ...postTagsMocks,
   ...postsMocks,
   ...productsMocks,
   ...storeRewardsMocks,
