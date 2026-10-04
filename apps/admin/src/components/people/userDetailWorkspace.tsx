@@ -19,6 +19,7 @@ import { formatDateTime } from "@/utils/formatting.util";
 
 import { UserSessionsPanel, UserStrikesPanel, UserWalletPanel } from "./userActivityPanels";
 import { UserModerationActions } from "./userModerationActions";
+import { UserAccountHealthCard } from "./userAccountHealthCard";
 import { UserProfilePanel } from "./userProfilePanel";
 import { UserUsernamePanel } from "./userUsernamePanel";
 import styles from "./peopleWorkspace.module.css";
@@ -73,6 +74,7 @@ export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
         </NoticeBanner>
       ) : null}
       <div className={styles.stack}>
+        <UserAccountHealthCard userId={user.id} />
         <SegmentedTabs label="User sections" items={tabs} activeKey={activeTab} onChange={setActiveTab} />
         {activeTab === "profile" ? <UserProfilePanel detail={detail} canRevealPersonalData={can("users:read-pii")} /> : null}
         {activeTab === "sessions" ? <UserSessionsPanel detail={detail} canForceLogout={can("users:moderate")} onUpdated={acceptUpdatedDetail} /> : null}
