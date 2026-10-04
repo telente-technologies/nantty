@@ -5,6 +5,13 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 ## Published schemas (fields read)
 | Type | Producer | Fields |
 | --- | --- | --- |
+| copyrightClaim.warningIssued | goTrust | R claimId, targetType, targetId, infringerId, deadlineAt; O workTitle, reason. Trust category: in-app + push + email `copyrightWarning` with the countdown |
+| copyrightClaim.audioMuteOrdered | goTrust | R claimId, targetType, targetId, infringerId; O workTitle, reason. In-app + email `audioMuted` (counter-notice rights) |
+| copyrightClaim.contentTakenDown | goTrust | R claimId, targetType, targetId; O infringerId (nothing sent without it), strikeId, workTitle, reason. In-app + push + email `contentTakenDown` |
+| copyrightClaim.counterNoticeReceived | goTrust | R claimId, restoreEligibleAt; O claimantUserId (nothing sent without it), claimantEmail (email address override), workTitle. Email `counterNoticeReceived` to the claimant |
+| copyrightClaim.restored | goTrust | R claimId, targetType, targetId; O infringerId, remedy (audio_muted = sound restored), workTitle. In-app + email `contentRestored` |
+| strike.issued | goTrust | R accountId, kind (warnings are skipped), expiresAt, activeStrikeCount; O source, policy. In-app + email `strikeIssued` |
+| strike.expired | goTrust | R accountId, kind (warnings are skipped), activeStrikeCount; O source, policy. In-app + email `strikeExpired` |
 | account.registered | goIdentity | R accountId, username |
 | account.passwordChanged | goIdentity | R accountId; O device, location, ipAddress |
 | session.revoked | goIdentity | R accountId, reason; O sessionCount |

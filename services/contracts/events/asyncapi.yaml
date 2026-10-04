@@ -58,6 +58,30 @@ channels:
         $ref: '#/components/messages/copyrightClaimCounterNoticeDecided'
       copyrightClaimRestored:
         $ref: '#/components/messages/copyrightClaimRestored'
+      copyrightClaimAudioMuteOrdered:
+        $ref: '#/components/messages/copyrightClaimAudioMuteOrdered'
+      copyrightClaimWarningIssued:
+        $ref: '#/components/messages/copyrightClaimWarningIssued'
+      copyrightClaimContentTakenDown:
+        $ref: '#/components/messages/copyrightClaimContentTakenDown'
+      copyrightClaimContentRemovedVoluntarily:
+        $ref: '#/components/messages/copyrightClaimContentRemovedVoluntarily'
+      strikeExpired:
+        $ref: '#/components/messages/strikeExpired'
+      strikeAppealed:
+        $ref: '#/components/messages/strikeAppealed'
+      strikeAppealDecided:
+        $ref: '#/components/messages/strikeAppealDecided'
+      accountHealthChanged:
+        $ref: '#/components/messages/accountHealthChanged'
+      clipAudioMuteRequested:
+        $ref: '#/components/messages/clipAudioMuteRequested'
+      clipAudioRestoreRequested:
+        $ref: '#/components/messages/clipAudioRestoreRequested'
+      mediaAudioMuted:
+        $ref: '#/components/messages/mediaAudioMuted'
+      mediaAudioRestored:
+        $ref: '#/components/messages/mediaAudioRestored'
       ipClaimReceived:
         $ref: '#/components/messages/ipClaimReceived'
       ipClaimDecided:
@@ -388,6 +412,12 @@ channels:
         $ref: '#/components/messages/flashSaleSaved'
       productBundleSaved:
         $ref: '#/components/messages/productBundleSaved'
+      securityAccessViolationDetected:
+        $ref: '#/components/messages/securityAccessViolationDetected'
+      securityAccountAutoSuspended:
+        $ref: '#/components/messages/securityAccountAutoSuspended'
+      securityCaseDecided:
+        $ref: '#/components/messages/securityCaseDecided'
       liveSafetyHold:
         $ref: '#/components/messages/liveSafetyHold'
       liveSafetyReleased:
@@ -623,6 +653,16 @@ operations:
       - $ref: '#/channels/domainEvents/messages/transferCancelled'
       - $ref: '#/channels/domainEvents/messages/reorderLevelChanged'
 
+  publishSecuritySignals:
+    action: send
+    summary: The gateway and Go services report access probing to go-trust (security.accessViolationDetected on trust-domain-events); go-trust publishes automatic suspensions and staff case decisions. Automation never bans or deletes.
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/securityAccessViolationDetected'
+      - $ref: '#/channels/domainEvents/messages/securityAccountAutoSuspended'
+      - $ref: '#/channels/domainEvents/messages/securityCaseDecided'
+
   publishLiveSafetyDecisions:
     action: send
     summary: go-trust decides from advisory scores, reports and moderator actions; go-live consumes on live-domain-events.
@@ -714,6 +754,27 @@ components:
       summary: Job on zudomart.jobs, routing key intelligence-trust-live-safety; raw score body. Advisory only; go-trust applies the policy.
       payload:
         $ref: './schemas/liveSafetyScore.generated.v1.json'
+    securityAccessViolationDetected:
+      name: security.accessViolationDetected
+      headers: { type: object, properties: { eventType: { const: security.accessViolationDetected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/security.accessViolationDetected.v1.json' } }
+    securityAccountAutoSuspended:
+      name: security.accountAutoSuspended
+      headers: { type: object, properties: { eventType: { const: security.accountAutoSuspended } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/security.accountAutoSuspended.v1.json' } }
+    securityCaseDecided:
+      name: security.caseDecided
+      headers: { type: object, properties: { eventType: { const: security.caseDecided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/security.caseDecided.v1.json' } }
     liveSafetyHold:
       name: live.safetyHold
       headers: { type: object, properties: { eventType: { const: live.safetyHold } } }
@@ -2014,6 +2075,90 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/copyrightClaim.restored.v1.json' } }
+    copyrightClaimAudioMuteOrdered:
+      name: copyrightClaim.audioMuteOrdered
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.audioMuteOrdered } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.audioMuteOrdered.v1.json' } }
+    copyrightClaimWarningIssued:
+      name: copyrightClaim.warningIssued
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.warningIssued } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.warningIssued.v1.json' } }
+    copyrightClaimContentTakenDown:
+      name: copyrightClaim.contentTakenDown
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.contentTakenDown } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.contentTakenDown.v1.json' } }
+    copyrightClaimContentRemovedVoluntarily:
+      name: copyrightClaim.contentRemovedVoluntarily
+      headers: { type: object, properties: { eventType: { const: copyrightClaim.contentRemovedVoluntarily } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/copyrightClaim.contentRemovedVoluntarily.v1.json' } }
+    strikeExpired:
+      name: strike.expired
+      headers: { type: object, properties: { eventType: { const: strike.expired } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/strike.expired.v1.json' } }
+    strikeAppealed:
+      name: strike.appealed
+      headers: { type: object, properties: { eventType: { const: strike.appealed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/strike.appealed.v1.json' } }
+    strikeAppealDecided:
+      name: strike.appealDecided
+      headers: { type: object, properties: { eventType: { const: strike.appealDecided } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/strike.appealDecided.v1.json' } }
+    accountHealthChanged:
+      name: accountHealth.changed
+      headers: { type: object, properties: { eventType: { const: accountHealth.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/accountHealth.changed.v1.json' } }
+    clipAudioMuteRequested:
+      name: clipAudio.muteRequested
+      headers: { type: object, properties: { eventType: { const: clipAudio.muteRequested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/clipAudio.muteRequested.v1.json' } }
+    clipAudioRestoreRequested:
+      name: clipAudio.restoreRequested
+      headers: { type: object, properties: { eventType: { const: clipAudio.restoreRequested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/clipAudio.restoreRequested.v1.json' } }
+    mediaAudioMuted:
+      name: media.audioMuted
+      headers: { type: object, properties: { eventType: { const: media.audioMuted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.audioMuted.v1.json' } }
+    mediaAudioRestored:
+      name: media.audioRestored
+      headers: { type: object, properties: { eventType: { const: media.audioRestored } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/media.audioRestored.v1.json' } }
     ipClaimReceived:
       name: ipClaim.received
       headers: { type: object, properties: { eventType: { const: ipClaim.received } } }
