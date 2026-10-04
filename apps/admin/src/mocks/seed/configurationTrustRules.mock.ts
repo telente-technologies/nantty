@@ -19,5 +19,5 @@ export function buildInitialTrialRules(): TrialRules {
 }
 
 export function buildInitialCheckmarkPricing(): CheckmarkPricingRules {
-  return { bundleDiscountPercent: 15, bundleMaximumBusinesses: 3, blueMonthlyPrice: { amountMinor: 250_000, currency: "NGN" }, goldOnlyMonthlyPrice: { amountMinor: 300_000, currency: "NGN" }, blackMonthlyPrice: { amountMinor: 5_000_000, currency: "NGN" }, blackGraceDays: 14 };
+  return { bundleDiscountPercent: 15, bundleMaximumBusinesses: 3, blackGraceDays: 14 };
 }

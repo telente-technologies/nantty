@@ -41,5 +41,6 @@ export function buildInitialConfigurationDocuments(): { id: keyof ConfigurationD
     { id: "trial-rules", content: buildInitialTrialRules(), changeReason: "Launch trial rules." },
     { id: "checkmark-pricing", content: buildInitialCheckmarkPricing(), changeReason: "Owner pricing: bundle 15%, Gold-only NGN 3,000, Black NGN 50,000." },
     { id: "regional-pricing", content: buildInitialRegionalPricingDocument(), changeReason: "Regional ad floors and creator subscription bands from docs/pricing.md (4 Oct 2026)." },
+    { id: "feed.ranking", content: { tierBoostBps: { blue_essential: 10_200, blue_verified: 10_400, premium: 10_600, gold_business: 10_800, black_official: 11_000 }, officialEditorialBoostBps: 11_000 }, changeReason: "Disclosed, capped checkmark and Official boosts (owner rules, 4 Oct 2026)." },
   ];
 }

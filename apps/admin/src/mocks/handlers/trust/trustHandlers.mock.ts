@@ -4,9 +4,11 @@ import { registerAdsReviewMockHandlers } from "./adsReview.mock";
 import { registerAdvertiserAccountMockHandlers } from "./advertiserAccounts.mock";
 import { registerChatReportMockHandlers } from "./chatReports.mock";
 import { registerCopyrightClaimMockHandlers } from "./copyrightClaims.mock";
+import { registerCopyrightRemedyMockHandlers } from "./copyrightRemedies.mock";
 import { registerLiveIncidentMockHandlers } from "./liveIncidents.mock";
 import { registerModerationAppealMockHandlers } from "./moderationAppeals.mock";
 import { registerModerationReportMockHandlers } from "./moderationReports.mock";
+import { registerSecurityCaseMockHandlers } from "./securityCases.mock";
 import { registerSuspensionMockHandlers } from "./suspensions.mock";
 import { readTrustStore } from "./trustStore.mock";
 
@@ -60,9 +62,11 @@ export function registerTrustAndSafetyMockHandlers(): void {
   registerChatReportMockHandlers();
   registerModerationAppealMockHandlers();
   registerCopyrightClaimMockHandlers();
+  registerCopyrightRemedyMockHandlers();
   registerAdsReviewMockHandlers();
   registerAdvertiserAccountMockHandlers();
   registerSuspensionMockHandlers();
+  registerSecurityCaseMockHandlers();
   registerLiveIncidentMockHandlers();
   registerTrustAndSafetyQueueCounters();
 }
