@@ -18,6 +18,9 @@ locals {
       SMILE_ID_CALLBACK_URL               = "https://${local.api_domain}/api/v1/webhooks/smile-id"
       WEB_APP_BASE_URL                    = var.app_origins["webapp"]
     }
+    go-money = {
+      PAYMENT_RETURN_URLS = join(",", ["${var.app_origins["web"]}/pay/return", "${var.app_origins["webapp"]}/pay/return", "${var.app_origins["webapp"]}/settings/verification"])
+    }
     go-commerce = {
       ORDERS_MONEY_GRPC_ADDRESS    = local.grpc_address["go-money"]
       ORDERS_MONEY_INTERNAL_URL    = local.internal_url["go-money"]
