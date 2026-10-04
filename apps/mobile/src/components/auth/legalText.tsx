@@ -1,10 +1,10 @@
-import { Linking } from "react-native";
 
+import { openTrustedWebPage } from "@/components/links/openLink.util";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 
 const link = (label: string, url: string, linkColor: string) => (
-  <Text size={12} lineHeight={16.8} color={linkColor} onPress={() => Linking.openURL(url)} accessibilityRole="link">
+  <Text size={12} lineHeight={16.8} color={linkColor} onPress={() => openTrustedWebPage(url)} accessibilityRole="link">
     {label}
   </Text>
 );

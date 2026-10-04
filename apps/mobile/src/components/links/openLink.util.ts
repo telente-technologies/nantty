@@ -60,3 +60,7 @@ export function openLinkFromText(href: string, colors?: InAppBrowserColors) {
   if (navigateToInternalUrl(href)) return;
   confirmRiskyLink(href, () => void openInAppBrowser(href, colors));
 }
+
+export const openTrustedWebPage = (url: string, colors?: InAppBrowserColors) => void openInAppBrowser(url, colors);
+
+export const openUserSuppliedWebLink = (url: string, colors?: InAppBrowserColors) => confirmRiskyLink(url, () => void openInAppBrowser(url, colors));

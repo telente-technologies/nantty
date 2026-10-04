@@ -1,5 +1,6 @@
-import { Linking, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 import { Check16Icon, Warning20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
@@ -123,7 +124,7 @@ export function EscrowTimeline({ escrow, viewerRole }: { escrow: EscrowDetail; v
               {step.detail}
             </Text>
             {step.trackingUrl && step.state !== "upcoming" ? (
-              <Text size={12} weight={500} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL(step.trackingUrl!)}>
+              <Text size={12} weight={500} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openUserSuppliedWebLink(step.trackingUrl!, inAppBrowserColorsFromTheme(colors))}>
                 Track parcel
               </Text>
             ) : null}

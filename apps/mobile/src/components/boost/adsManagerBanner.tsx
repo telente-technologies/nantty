@@ -1,5 +1,6 @@
-import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { ArrowUpRight24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { adsManagerConfig } from "@/config/adsManager.config";
@@ -9,7 +10,7 @@ export function AdsManagerBanner() {
   const { colors } = useTheme();
   const styles = useStyles();
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel="Open Zudomart Ads Manager" onPress={() => Linking.openURL(adsManagerConfig.adsManagerUrl)} style={styles.banner}>
+    <Pressable accessibilityRole="link" accessibilityLabel="Open Zudomart Ads Manager" onPress={() => openTrustedWebPage(adsManagerConfig.adsManagerUrl, inAppBrowserColorsFromTheme(colors))} style={styles.banner}>
       <View style={styles.flex}>
         <Text size={14} weight={600} lineHeight={16.8}>Need full campaigns?</Text>
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>Open Zudomart Ads Manager for product catalogues, A/B tests and detailed reports.</Text>
