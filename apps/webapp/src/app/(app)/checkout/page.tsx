@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { AddressEditorDialog, addressesQueryKey } from "@/components/address/addressBook";
 import { formatAddressLocation } from "@/components/address/addressForm.util";
 import { useShippingQuote } from "@/components/address/shippingQuote.hook";
+import { PaymentModeChooser } from "@/components/commerce/paymentModeChooser";
 import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
@@ -20,6 +21,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { paymentsService } from "@/services/payments.service";
 import type { CheckoutResult, PaymentChannel, PaymentInitialization } from "@/types/commerce.type";
+import type { PaymentMode } from "@/types";
+import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
+import { isDirectPaymentStore, toPaymentModeChoices } from "@/utils/paymentMode.util";
 import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
 import styles from "./page.module.css";
@@ -41,6 +45,11 @@ export default function CheckoutPage() {
   const channelsQuery = useQuery({ queryKey: ["payments", "channels"], queryFn: paymentsService.fetchPaymentChannels, retry: false });
   const [error, setError] = useState<string | null>(null);
   const checkoutKey = useRef(createIdempotencyKey("checkout"));
+  const [paymentModes, setPaymentModes] = useState<Record<string, PaymentMode>>({});
+  const choosePaymentMode = (storeId: string, mode: PaymentMode) => {
+    checkoutKey.current = createIdempotencyKey("checkout");
+    setPaymentModes((current) => ({ ...current, [storeId]: mode }));
+  };
 
   const addressId = chosenAddressId ?? addressesQuery.data?.find((address) => address.isDefault)?.id ?? addressesQuery.data?.[0]?.id ?? null;
 
@@ -52,9 +61,14 @@ export default function CheckoutPage() {
   const placeOrder = useMutation({
     mutationFn: async () => {
       if (!addressId) throw new Error("Choose a shipping address first.");
+      const directChoices = Object.fromEntries(
+        groupCartItemsByStore(cartQuery.data?.items ?? [])
+          .filter((group) => isDirectPaymentStore(group.store))
+          .map((group) => [group.storeId, paymentModes[group.storeId] ?? "escrow"] as const),
+      );
       const result = await sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", {
         method: "POST",
-        body: { addressId },
+        body: { addressId, paymentModes: toPaymentModeChoices(directChoices) },
         idempotencyKey: checkoutKey.current,
       });
       const payment = await sendRequestToWebappServer<PaymentInitialization>("/api/v1/payments/initialize", {
@@ -166,6 +180,11 @@ export default function CheckoutPage() {
           </section>
 
           <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>How to pay each seller</h2>
+            <PaymentModeChooser groups={groupCartItemsByStore(cart.items)} modes={paymentModes} onChange={choosePaymentMode} />
+          </section>
+
+          <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Items</h2>
             <ul className={styles.itemList}>
               {cart.items.map((item) => (
@@ -209,7 +228,7 @@ export default function CheckoutPage() {
               {addressId ? "Pay now" : "Choose an address"}
             </Button>
           )}
-          <p className={styles.terms}>Payment is held in escrow until you confirm delivery.</p>
+          <p className={styles.terms}>Escrow orders are held until you confirm delivery. Direct orders pay the seller right away.</p>
         </aside>
       </div>
     </div>

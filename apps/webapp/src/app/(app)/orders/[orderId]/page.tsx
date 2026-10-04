@@ -94,6 +94,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
   }
 
   const order = orderQuery.data;
+  const isDirect = order.paymentMode === "direct";
   const activeStepIndex = statusSteps.findIndex((step) => step.status === order.status);
 
   return (
@@ -147,12 +148,17 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
             return (
               <li key={step.status} className={styles.timelineStep} data-state={state}>
                 <span className={styles.timelineMarker} aria-hidden="true" />
-                <span className={styles.timelineLabel}>{step.label}</span>
+                <span className={styles.timelineLabel}>{isDirect && step.status === "paid" ? "Paid to seller" : step.label}</span>
               </li>
             );
           })}
         </ol>
-        {order.escrowReleaseAt ? <p className={styles.escrowNote}>Escrow releases to the seller on {new Date(order.escrowReleaseAt).toLocaleDateString()}.</p> : null}
+        <p className={styles.escrowNote}>
+          {isDirect
+            ? "Paid directly: the seller was paid right away. For a refund, ask the seller or contact support."
+            : "Protected by Zudomart Escrow: your money is held until you confirm delivery. You can open a dispute if something is wrong."}
+        </p>
+        {order.escrowReleaseAt && !isDirect ? <p className={styles.escrowNote}>Escrow releases to the seller on {new Date(order.escrowReleaseAt).toLocaleDateString()}.</p> : null}
       </section>
 
       <section className={styles.panel}>
@@ -185,6 +191,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
           Confirm delivery
         </Button>
       ) : null}
+      <Link href={`/help/tickets/new?category=order&linkKind=order&linkId=${encodeURIComponent(order.id)}&linkLabel=${encodeURIComponent(`Order ${order.reference}`)}`}>Get help with this order</Link>
     </div>
   );
 }
