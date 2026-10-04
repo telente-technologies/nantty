@@ -1,4 +1,6 @@
-h1:SrhfkeiA8ghDHmXeWRGkZS4OM/r9QFNyUfqj+HZO+6A=
+h1:01Z+t3Gg2cuqgrQn4XK+kFwYEfLxWOor9Ivj+VTCLXw=
 20261003155934_create_moderation_tables.up.sql h1:jXq1wBCD1bOI24pBYQyg+TqXK2HtgFqQr5yCFFk3W6I=
 20261003225836_add_trust_enforcement_tables.up.sql h1:lkIxT3wH8naYXzAdt2z/7E/YOefTumqH2b9sVKS2PxU=
 20261004080000_add_live_safety_tables.up.sql h1:l0Xko8zKxhlEV7a3W1vI4kkiMhuG6D9h8boELivY8I4=
+20261004103816_add_access_security_tables.up.sql h1:FIE/RvCPCvZxPk42ZhvcZ05abtXvdWXs2BydnB/cjZ8=
+20261004104548_add_copyright_remedies.up.sql h1:4dtuvowTDjv+bbgr6LdjGb5b7E5NZvb5gU2LX5wRb2c=
