@@ -1,81 +1,187 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: var(--z-nav);
-  background: color-mix(in srgb, var(--surface-card) 88%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--divider);
+  z-index: 50;
+  padding: 12px var(--landing-gutter) 0;
 }
 
-.inner {
+.pill {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-5);
-  min-height: 64px;
+  gap: 16px;
+  max-width: var(--landing-width);
+  margin-inline: auto;
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--deep-glass);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  box-shadow: inset 0 0 0 1px var(--deep-hairline);
+  color: var(--deep-ink);
+  transition: box-shadow 200ms ease;
+}
+
+.scrolled .pill {
+  box-shadow: inset 0 0 0 1px var(--deep-hairline), var(--shadow-float);
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--text-lg);
-  font-weight: 800;
-  letter-spacing: var(--tracking-display);
+  color: var(--deep-ink);
 }
 
-.navigation {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
+.brand:hover {
+  text-decoration: none;
 }
 
-.navigationList {
+.desktopNavigation {
+  display: none;
+  margin-left: auto;
+}
+
+.desktopNavigation ul {
   display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  gap: 2px;
 }
 
 .navigationLink {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--ink-muted);
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  color: var(--deep-ink-muted);
+  font-size: 0.9375rem;
+  font-weight: 550;
 }
 
 .navigationLink:hover {
-  color: var(--ink-strong);
+  background: var(--deep-hairline);
+  color: var(--deep-ink);
+  text-decoration: none;
 }
 
-.action {
-  padding: 8px 18px;
-  white-space: nowrap;
+.signInButton {
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
   border-radius: var(--radius-pill);
-  background: var(--color-brand-solid);
-  color: var(--ink-inverse);
-  font-size: var(--text-sm);
+  background: var(--yellow-500);
+  color: var(--blue-900);
   font-weight: 700;
 }
 
-.action:hover {
-  background: var(--color-brand-solid-hover);
+.signInButton:hover {
+  background: var(--deep-ink);
+  text-decoration: none;
 }
 
-@media (max-width: 720px) {
-  .navigationList {
+.menuButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 50%;
+  background: var(--yellow-500);
+  color: var(--blue-900);
+}
+
+.menuBars,
+.menuBars::before {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 200ms ease;
+}
+
+.menuBars {
+  position: relative;
+  transform: translateY(-3px);
+}
+
+.menuBars::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+}
+
+.menuButton[aria-expanded="true"] .menuBars {
+  transform: rotate(45deg);
+}
+
+.menuButton[aria-expanded="true"] .menuBars::before {
+  top: 0;
+  transform: rotate(-90deg);
+}
+
+.mobileMenu {
+  position: fixed;
+  inset: 76px 0 0;
+  z-index: 49;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 32px var(--landing-gutter) 40px;
+  background: var(--color-brand-solid);
+}
+
+.mobileMenu[hidden] {
+  display: none;
+}
+
+.mobileLink {
+  display: block;
+  padding: 6px 0;
+  color: var(--deep-ink);
+  font-size: clamp(2.2rem, 10vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.mobileLink:hover {
+  color: var(--yellow-500);
+  text-decoration: none;
+}
+
+.mobileSignIn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  font-weight: 700;
+}
+
+@media (min-width: 900px) {
+  .desktopNavigation,
+  .signInButton {
+    display: flex;
+  }
+
+  .menuButton,
+  .mobileMenu {
     display: none;
   }
+}
 
-  .navigation {
-    gap: var(--space-2);
-  }
+.brand :global(svg) {
+  display: block;
+}
 
-  .inner {
-    gap: var(--space-2);
-  }
+.signInButton:focus-visible,
+.menuButton:focus-visible,
+.navigationLink:focus-visible {
+  box-shadow: 0 0 0 2px var(--blue-900), 0 0 0 4px var(--yellow-500);
+}
 
-  .action {
-    padding: 8px 14px;
+@media (min-width: 900px) and (max-width: 1060px) {
+  .navigationLink {
+    padding: 10px 10px;
+    font-size: 0.875rem;
   }
 }

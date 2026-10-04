@@ -1,270 +1,76 @@
 .hero {
-  position: relative;
+  padding: clamp(40px, 7vw, 88px) var(--landing-gutter) 0;
   overflow: hidden;
-  border-bottom: 1px solid var(--divider);
-  background:
-    radial-gradient(70% 60% at 0% 0%, var(--surface-brand-tint) 0%, transparent 65%),
-    radial-gradient(50% 50% at 100% 100%, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 70%),
-    var(--surface-card);
 }
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-  gap: clamp(32px, 5vw, 72px);
-  align-items: center;
-  width: 100%;
-  max-width: calc(var(--content-width) + var(--gutter) * 2);
-  margin-inline: auto;
-  padding: clamp(48px, 8vw, 112px) var(--gutter);
+  gap: 56px;
+  max-width: var(--landing-width);
+  margin: 0 auto;
 }
 
 .copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  animation: heroRise var(--motion-slow) var(--motion-ease) both;
+  display: grid;
+  gap: 22px;
+  justify-items: start;
+  align-content: center;
 }
 
-.title {
-  font-size: clamp(2.5rem, 6vw, 4.25rem);
-  line-height: 1;
+.heading {
+  font-size: clamp(2.6rem, 6.4vw, 4.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  max-width: 11ch;
+  text-wrap: balance;
+}
+
+.headingLine {
+  display: block;
 }
 
 .lede {
-  max-width: 46ch;
-  font-size: clamp(var(--fs-16), 1.4vw, var(--fs-20));
-  line-height: 1.55;
+  max-width: 48ch;
+  font-size: clamp(1.05rem, 1.5vw, 1.18rem);
   color: var(--ink-muted);
+  line-height: 1.55;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-}
-
-.note {
-  font-size: var(--text-xs);
-  color: var(--ink-faint);
-}
-
-.stage {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
-  animation: heroRise 480ms var(--motion-ease) 90ms both;
-}
-
-.stageScene {
-  position: relative;
-  padding: 0 16% 17% 0;
-}
-
-.stageFrame {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border: 1px solid var(--stage-line);
-  border-radius: var(--radius-large);
-  background:
-    radial-gradient(60% 80% at 30% 40%, color-mix(in srgb, var(--blue-500) 28%, transparent) 0%, transparent 70%),
-    repeating-conic-gradient(var(--stage-tile-light) 0% 25%, var(--stage-tile-dark) 0% 50%) 50% / 40px 40px;
-  box-shadow: var(--stage-shadow);
-}
-
-.stagePhone {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 24%;
-  padding: 4px;
-  border-radius: 22px;
-  background: var(--stage-canvas);
-  box-shadow: 0 0 0 1px var(--stage-line), var(--stage-shadow);
-  transform: rotate(3deg);
-}
-
-.stagePhoneScreen {
+  gap: 10px;
   width: 100%;
-  height: auto;
-  border-radius: 18px;
 }
 
-.stageBadge {
-  position: absolute;
-  top: 14px;
-  left: 14px;
+.proofList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  color: var(--ink-muted);
+  font-size: var(--fs-14);
+}
+
+.proofList li {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--stage-live);
-  color: var(--stage-text);
-  font-size: var(--text-2xs);
-  font-weight: 800;
-  letter-spacing: 0.08em;
 }
 
-.stageDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--stage-text);
-  animation: livePulse 1.6s ease-in-out infinite;
+.proofIcon {
+  color: var(--color-brand);
 }
 
-.stageSource {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  padding: 4px 10px;
-  border: 1px solid var(--stage-line);
-  border-radius: var(--radius-pill);
-  background: var(--stage-scrim);
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  color: var(--stage-text-muted);
-}
-
-.stageLogo {
-  position: absolute;
-  top: 52px;
-  right: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-small);
-  background: var(--yellow-500);
-  color: var(--blue-900);
-  font-size: var(--fs-20);
-  font-weight: 800;
-}
-
-.stageLowerThird {
-  position: absolute;
-  left: 18px;
-  bottom: 22px;
-  width: min(58%, 300px);
-  padding: 10px 14px;
-  border-left: 4px solid var(--yellow-500);
-  border-radius: var(--radius-small);
-  background: var(--stage-panel);
-}
-
-.stageName {
-  font-size: clamp(var(--fs-13), 1.4vw, var(--fs-16));
-  font-weight: 800;
-  color: var(--stage-text);
-}
-
-.stageHandle {
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  color: var(--blue-200);
-}
-
-.stageTicker {
-  position: absolute;
-  top: 52px;
-  left: 14px;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  background: var(--yellow-500);
-  color: var(--blue-900);
-  font-size: var(--text-2xs);
-  font-weight: 800;
-}
-
-.stageBar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-  max-width: 72%;
-  margin-top: -13%;
-}
-
-.stageMetric {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--divider);
-  border-radius: var(--radius-medium);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
-
-.stageMetricLabel {
-  overflow: hidden;
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  text-overflow: ellipsis;
-  letter-spacing: 0.06em;
+.note {
+  max-width: 52ch;
   color: var(--ink-faint);
+  font-size: var(--fs-13);
 }
 
-.stageMetricValue {
-  font-size: var(--text-lg);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-@keyframes heroRise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-@keyframes livePulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@media (max-width: 900px) {
+@media (min-width: 1000px) {
   .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 520px) {
-  .stageMetric {
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .stageMetricValue {
-    font-size: var(--text-md);
-  }
-
-  .stageLogo,
-  .stageSource {
-    display: none;
-  }
-
-  .stageTicker {
-    top: 42px;
-    left: 10px;
-    padding: 4px 10px;
-  }
-
-  .stageBadge {
-    top: 10px;
-    left: 10px;
-  }
-
-  .stageLowerThird {
-    bottom: 10px;
-    left: 10px;
-    width: 72%;
-    padding: 6px 10px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 48px;
   }
 }

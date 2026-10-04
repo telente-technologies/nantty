@@ -1,26 +1,131 @@
 .footer {
-  background: var(--surface-inverse);
-  border-top: 1px solid var(--on-brand-divider);
-  color: var(--ink-inverse);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(56px, 8vw, 96px) var(--landing-gutter) 0;
+  background: var(--deep-surface);
+  color: var(--blue-100);
 }
 
-.inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding-block: var(--space-5);
+.topRow,
+.bottomRow {
+  max-width: var(--landing-width);
+  margin: 0 auto;
 }
 
-.note {
-  font-size: var(--text-xs);
-  color: var(--on-brand-muted);
+.topRow {
+  display: grid;
+  gap: 48px;
+}
+
+.brandColumn {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  max-width: 380px;
+  line-height: 1.55;
+}
+
+.wordmark {
+  color: var(--deep-ink);
+}
+
+.emailLink {
+  justify-self: start;
+  color: var(--deep-ink);
+  font-weight: 650;
   overflow-wrap: anywhere;
 }
 
-.note a {
-  color: var(--ink-inverse);
+.emailLink:hover {
+  color: var(--yellow-500);
+}
+
+.linkGroups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
+}
+
+.groupHeading {
+  margin-bottom: 14px;
+  color: var(--deep-ink);
+  font-size: var(--fs-13);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.linkList {
+  display: grid;
+  gap: 10px;
+}
+
+.linkList a {
+  color: var(--blue-100);
+}
+
+.linkList a:hover {
+  color: var(--yellow-500);
+}
+
+.bottomRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--deep-hairline);
+  font-size: var(--fs-14);
+  color: var(--blue-200);
+}
+
+.bottomRow p {
+  align-self: center;
+}
+
+.themeSwitcher {
+  --color-sunken: var(--deep-hover);
+  --color-border: var(--deep-hairline);
+  --color-elevated: var(--deep-hairline-strong);
+  --color-text: var(--deep-ink);
+  --color-text-muted: var(--deep-ink-muted);
+  --shadow-card: none;
+}
+
+.giantWordmark {
+  margin: 24px 0 -0.24em;
+  color: var(--color-brand);
+  font-size: min(19vw, 18rem);
+  font-weight: 750;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+}
+
+@media (min-width: 760px) {
+  .topRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+
+  .linkGroups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.emailList {
+  display: grid;
+  gap: 4px;
+}
+
+.linkList a:hover,
+.emailLink:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.giantWordmark {
+  font-size: min(26vw, 22rem);
 }
