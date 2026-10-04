@@ -20,7 +20,7 @@ export function PlansWorkspace() {
   const { can } = useAdminPermissions();
   return (
     <>
-      <PageHeader area="Configuration" title="Plans & prices" description="Verification tiers, their perks, Gold dashboard entitlements and prices in every supported currency. Each save is a new version." />
+      <PageHeader area="Configuration" title="Plans & prices" description="Verification tiers, their perks and Gold dashboard entitlements. Prices live in Regional pricing. Each save is a new version." />
       <VersionedDocumentSection<PlansConfiguration>
         endpoint={plansEndpoint}
         recordId="plans"
@@ -32,7 +32,7 @@ export function PlansWorkspace() {
           return (
             <div className={styles.sections}>
               <p className={styles.currencies}>
-                Supported currencies: {content.supportedCurrencies.map((currency) => <code key={currency}>{currency}</code>)}
+                Prices moved to <a href="/config/pricing">Regional pricing</a>, the price book go-money charges from.
               </p>
               {colorSections.map((section) => (
                 <section key={section.color} className={styles.colorSection} aria-label={section.title}>
@@ -40,7 +40,7 @@ export function PlansWorkspace() {
                   {content.plans
                     .filter((plan) => plan.color === section.color)
                     .map((plan) => (
-                      <PlanEditorCard key={plan.planKey} plan={plan} supportedCurrencies={content.supportedCurrencies} canWrite={canWrite} onChange={(updater) => updatePlan(plan.planKey, updater)} />
+                      <PlanEditorCard key={plan.planKey} plan={plan} canWrite={canWrite} onChange={(updater) => updatePlan(plan.planKey, updater)} />
                     ))}
                 </section>
               ))}
