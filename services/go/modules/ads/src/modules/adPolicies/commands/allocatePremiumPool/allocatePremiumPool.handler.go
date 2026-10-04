@@ -17,6 +17,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Premi
 	for _, row := range command.Request.Consumption {
 		weights = append(weights, adsservices.ConsumptionWeight{CreatorUserId: row.CreatorUserId, WatchSeconds: row.WatchSeconds})
 	}
+	creatorIds := make([]string, 0, len(weights))
+	for _, weight := range weights {
+		creatorIds = append(creatorIds, weight.CreatorUserId)
+	}
+	paused, err := (adsservices.CreatorMonetisationHolds{Client: handler.Container.Client, Now: handler.Container.Now}).PausedCreators(ctx, creatorIds)
+	if err != nil {
+		return dtos.PremiumPoolResult{}, err
+	}
+	weights = adsservices.ExcludePausedCreatorsFromConsumption(weights, paused)
 	allocations, err := adsservices.AllocatePremiumPoolByConsumption(command.Request.PoolMinor, command.Request.Currency, weights)
 	if err != nil {
 		return dtos.PremiumPoolResult{}, err

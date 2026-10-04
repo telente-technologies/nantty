@@ -25,6 +25,12 @@ func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.
 				deployed.Logger.Warn("scheduled report consumer stopped", slog.Any("error", err))
 			}
 		}()
+		holds := services.CreatorMonetisationHolds{Client: deployed.Client, Now: deployed.Now}
+		go func() {
+			if err := deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.DomainEventsQueueName, holds.HandleAccountHealthMessage, deployed.Logger); err != nil {
+				deployed.Logger.Warn("ads domain event consumer stopped", slog.Any("error", err))
+			}
+		}()
 	}
 	go runEvery(ctx, deployed.Settings.RetentionInterval, deployed, "raw impression retention", func(ctx context.Context) error {
 		_, err := PruneSettledRawImpressions(ctx, deployed)
