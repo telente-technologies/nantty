@@ -43,6 +43,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Ad, e
 	if err := issues.Error(); err != nil {
 		return dtos.Ad{}, err
 	}
+	if command.Patch.Creative != nil {
+		if err := adsservices.VerifyCreativeOwnership(ctx, deployed.Ownership, adsservices.AdvertiserIdentity{OwnerUserId: account.OwnerUserID.String(), StoreId: account.StoreID}, *command.Patch.Creative, "creative"); err != nil {
+			return dtos.Ad{}, err
+		}
+	}
 	if command.Patch.Status != nil {
 		if err := handler.checkStatusChange(account, row, *command.Patch.Status); err != nil {
 			return dtos.Ad{}, err

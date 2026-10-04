@@ -36,7 +36,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdSet
 		return dtos.AdSet{}, err
 	}
 	issues := validators.NewIssues("")
-	validators.ValidateAdSetInput(command.Request.AdSetInput, string(campaign.BudgetLevel), account.Currency, issues, "")
+	validators.ValidateAdSetInput(command.Request.AdSetInput, string(campaign.BudgetLevel), account.Currency, deployed.Pricing.FloorsForAudience(ctx, command.Request.AdSetInput.Audience, account.Currency), issues, "")
 	if err := issues.Error(); err != nil {
 		return dtos.AdSet{}, err
 	}

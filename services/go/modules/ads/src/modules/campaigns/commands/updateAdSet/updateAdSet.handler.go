@@ -34,7 +34,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdSet
 	}
 	merged := merge(services.AdSetInputFromRow(group, account.Currency), command.Patch)
 	issues := validators.NewIssues("")
-	validators.ValidateAdSetInput(merged, string(campaign.BudgetLevel), account.Currency, issues, "")
+	validators.ValidateAdSetInput(merged, string(campaign.BudgetLevel), account.Currency, deployed.Pricing.FloorsForAudience(ctx, merged.Audience, account.Currency), issues, "")
 	if err := issues.Error(); err != nil {
 		return dtos.AdSet{}, err
 	}

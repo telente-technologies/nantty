@@ -45,6 +45,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Ad, e
 	if err := issues.Error(); err != nil {
 		return dtos.Ad{}, err
 	}
+	if err := adsservices.VerifyCreativeOwnership(ctx, deployed.Ownership, adsservices.AdvertiserIdentity{OwnerUserId: account.OwnerUserID.String(), StoreId: account.StoreID}, command.Request.Creative, "creative"); err != nil {
+		return dtos.Ad{}, err
+	}
 	actor := accountservices.ActorFor(ctx, deployed, command.UserId)
 	var row *ent.Ad
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
