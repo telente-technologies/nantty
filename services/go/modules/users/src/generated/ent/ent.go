@@ -46,6 +46,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
 	"zudomart/modules/users/src/generated/ent/verificationapplication"
+	"zudomart/modules/users/src/generated/ent/verificationcase"
+	"zudomart/modules/users/src/generated/ent/verificationeligibility"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -148,6 +150,8 @@ func checkColumn(t, c string) error {
 			usernamechange.Table:          usernamechange.ValidColumn,
 			usernamehold.Table:            usernamehold.ValidColumn,
 			verificationapplication.Table: verificationapplication.ValidColumn,
+			verificationcase.Table:        verificationcase.ValidColumn,
+			verificationeligibility.Table: verificationeligibility.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

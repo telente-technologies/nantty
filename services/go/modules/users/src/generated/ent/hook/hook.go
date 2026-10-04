@@ -464,6 +464,30 @@ func (f VerificationApplicationFunc) Mutate(ctx context.Context, m ent.Mutation)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationApplicationMutation", m)
 }
 
+// The VerificationCaseFunc type is an adapter to allow the use of ordinary
+// function as VerificationCase mutator.
+type VerificationCaseFunc func(context.Context, *ent.VerificationCaseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VerificationCaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VerificationCaseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationCaseMutation", m)
+}
+
+// The VerificationEligibilityFunc type is an adapter to allow the use of ordinary
+// function as VerificationEligibility mutator.
+type VerificationEligibilityFunc func(context.Context, *ent.VerificationEligibilityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VerificationEligibilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VerificationEligibilityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationEligibilityMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

@@ -94,7 +94,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
-		{Name: "source", Type: field.TypeEnum, Enums: []string{"staff", "python_suggestion", "user_reports", "chat_report"}, Default: "staff"},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"staff", "python_suggestion", "user_reports", "chat_report", "security"}, Default: "staff"},
 		{Name: "reason_code", Type: field.TypeString, Size: 40, Default: "OTHER"},
 		{Name: "note", Type: field.TypeString, Size: 1000, Default: ""},
 		{Name: "suspended_by", Type: field.TypeString, Size: 64, Default: ""},
@@ -1130,6 +1130,103 @@ var (
 			},
 		},
 	}
+	// VerificationCasesColumns holds the columns for the "verification_cases" table.
+	VerificationCasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold"}},
+		{Name: "subscription_id", Type: field.TypeString, Unique: true, Size: 80},
+		{Name: "plan_code", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "payment_channel", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"awaiting_consent", "awaiting_capture", "processing", "under_review", "approved", "rejected"}, Default: "awaiting_consent"},
+		{Name: "refund_status", Type: field.TypeEnum, Enums: []string{"not_applicable", "requested", "refunded", "not_charged", "failed", "manual_store_refund"}, Default: "not_applicable"},
+		{Name: "consent_version", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "consent_at", Type: field.TypeTime, Nullable: true},
+		{Name: "smile_job_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 80},
+		{Name: "smile_reference", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "smile_product", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "smile_result_code", Type: field.TypeString, Size: 10, Default: ""},
+		{Name: "document_type", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "document_country", Type: field.TypeString, Size: 2, Default: ""},
+		{Name: "liveness_result", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "document_result", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "face_match_result", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "database_result", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "face_match_confidence", Type: field.TypeFloat64, Default: 0},
+		{Name: "name_match_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "trust_score", Type: field.TypeInt, Default: 0},
+		{Name: "eligible_at_payment", Type: field.TypeBool, Default: false},
+		{Name: "document_fingerprint", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "decision_reasons", Type: field.TypeJSON},
+		{Name: "fraud_signals", Type: field.TypeJSON},
+		{Name: "decision_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "decided_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "callback_count", Type: field.TypeInt, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// VerificationCasesTable holds the schema information for the "verification_cases" table.
+	VerificationCasesTable = &schema.Table{
+		Name:       "verification_cases",
+		Columns:    VerificationCasesColumns,
+		PrimaryKey: []*schema.Column{VerificationCasesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "verificationcase_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationCasesColumns[8], VerificationCasesColumns[1]},
+			},
+			{
+				Name:    "verificationcase_profile_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationCasesColumns[2], VerificationCasesColumns[8]},
+			},
+			{
+				Name:    "verificationcase_document_fingerprint",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationCasesColumns[26]},
+			},
+		},
+	}
+	// VerificationEligibilitiesColumns holds the columns for the "verification_eligibilities" table.
+	VerificationEligibilitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "color", Type: field.TypeEnum, Enums: []string{"blue", "gold"}},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"assessed", "requested", "eligible"}, Default: "assessed"},
+		{Name: "tier", Type: field.TypeEnum, Enums: []string{"buy_now", "request", "blocked"}, Default: "request"},
+		{Name: "trust_score", Type: field.TypeInt, Default: 0},
+		{Name: "reasons", Type: field.TypeJSON},
+		{Name: "score_source", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "requested_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_checked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "next_check_at", Type: field.TypeTime, Nullable: true},
+		{Name: "notified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// VerificationEligibilitiesTable holds the schema information for the "verification_eligibilities" table.
+	VerificationEligibilitiesTable = &schema.Table{
+		Name:       "verification_eligibilities",
+		Columns:    VerificationEligibilitiesColumns,
+		PrimaryKey: []*schema.Column{VerificationEligibilitiesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "verificationeligibility_profile_id",
+				Unique:  true,
+				Columns: []*schema.Column{VerificationEligibilitiesColumns[2]},
+			},
+			{
+				Name:    "verificationeligibility_state_next_check_at",
+				Unique:  false,
+				Columns: []*schema.Column{VerificationEligibilitiesColumns[5], VerificationEligibilitiesColumns[12]},
+			},
+		},
+	}
 	// ProfileCategoriesColumns holds the columns for the "profile_categories" table.
 	ProfileCategoriesColumns = []*schema.Column{
 		{Name: "profile_id", Type: field.TypeUUID},
@@ -1195,6 +1292,8 @@ var (
 		UsernameChangesTable,
 		UsernameHoldsTable,
 		VerificationApplicationsTable,
+		VerificationCasesTable,
+		VerificationEligibilitiesTable,
 		ProfileCategoriesTable,
 	}
 )

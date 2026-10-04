@@ -119,3 +119,9 @@ type UsernameHold func(*sql.Selector)
 
 // VerificationApplication is the predicate function for verificationapplication builders.
 type VerificationApplication func(*sql.Selector)
+
+// VerificationCase is the predicate function for verificationcase builders.
+type VerificationCase func(*sql.Selector)
+
+// VerificationEligibility is the predicate function for verificationeligibility builders.
+type VerificationEligibility func(*sql.Selector)

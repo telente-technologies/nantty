@@ -47,6 +47,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
 	"zudomart/modules/users/src/generated/ent/verificationapplication"
+	"zudomart/modules/users/src/generated/ent/verificationcase"
+	"zudomart/modules/users/src/generated/ent/verificationeligibility"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -100,6 +102,8 @@ const (
 	TypeUsernameChange          = "UsernameChange"
 	TypeUsernameHold            = "UsernameHold"
 	TypeVerificationApplication = "VerificationApplication"
+	TypeVerificationCase        = "VerificationCase"
+	TypeVerificationEligibility = "VerificationEligibility"
 )
 
 // AccountBanMutation represents an operation that mutates the AccountBan nodes in the graph.
@@ -32024,4 +32028,3529 @@ func (m *VerificationApplicationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VerificationApplicationMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown VerificationApplication edge %s", name)
+}
+
+// VerificationCaseMutation represents an operation that mutates the VerificationCase nodes in the graph.
+type VerificationCaseMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *uuid.UUID
+	created_at               *time.Time
+	profile_id               *uuid.UUID
+	account_id               *uuid.UUID
+	color                    *verificationcase.Color
+	subscription_id          *string
+	plan_code                *string
+	payment_channel          *string
+	status                   *verificationcase.Status
+	refund_status            *verificationcase.RefundStatus
+	consent_version          *string
+	consent_at               *time.Time
+	smile_job_id             *string
+	smile_reference          *string
+	smile_product            *string
+	smile_result_code        *string
+	document_type            *string
+	document_country         *string
+	liveness_result          *string
+	document_result          *string
+	face_match_result        *string
+	database_result          *string
+	face_match_confidence    *float64
+	addface_match_confidence *float64
+	name_match_score         *float64
+	addname_match_score      *float64
+	trust_score              *int
+	addtrust_score           *int
+	eligible_at_payment      *bool
+	document_fingerprint     *string
+	decision_reasons         *[]string
+	appenddecision_reasons   []string
+	fraud_signals            *[]string
+	appendfraud_signals      []string
+	decision_reason          *string
+	decided_by_name          *string
+	decided_at               *time.Time
+	verified_at              *time.Time
+	callback_count           *int
+	addcallback_count        *int
+	updated_at               *time.Time
+	clearedFields            map[string]struct{}
+	done                     bool
+	oldValue                 func(context.Context) (*VerificationCase, error)
+	predicates               []predicate.VerificationCase
+}
+
+var _ ent.Mutation = (*VerificationCaseMutation)(nil)
+
+// verificationcaseOption allows management of the mutation configuration using functional options.
+type verificationcaseOption func(*VerificationCaseMutation)
+
+// newVerificationCaseMutation creates new mutation for the VerificationCase entity.
+func newVerificationCaseMutation(c config, op Op, opts ...verificationcaseOption) *VerificationCaseMutation {
+	m := &VerificationCaseMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVerificationCase,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVerificationCaseID sets the ID field of the mutation.
+func withVerificationCaseID(id uuid.UUID) verificationcaseOption {
+	return func(m *VerificationCaseMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VerificationCase
+		)
+		m.oldValue = func(ctx context.Context) (*VerificationCase, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VerificationCase.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVerificationCase sets the old VerificationCase of the mutation.
+func withVerificationCase(node *VerificationCase) verificationcaseOption {
+	return func(m *VerificationCaseMutation) {
+		m.oldValue = func(context.Context) (*VerificationCase, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VerificationCaseMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VerificationCaseMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VerificationCase entities.
+func (m *VerificationCaseMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VerificationCaseMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VerificationCaseMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VerificationCase.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VerificationCaseMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VerificationCaseMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VerificationCaseMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *VerificationCaseMutation) SetProfileID(u uuid.UUID) {
+	m.profile_id = &u
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *VerificationCaseMutation) ProfileID() (r uuid.UUID, exists bool) {
+	v := m.profile_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldProfileID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *VerificationCaseMutation) ResetProfileID() {
+	m.profile_id = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *VerificationCaseMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *VerificationCaseMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *VerificationCaseMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetColor sets the "color" field.
+func (m *VerificationCaseMutation) SetColor(v verificationcase.Color) {
+	m.color = &v
+}
+
+// Color returns the value of the "color" field in the mutation.
+func (m *VerificationCaseMutation) Color() (r verificationcase.Color, exists bool) {
+	v := m.color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColor returns the old "color" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldColor(ctx context.Context) (v verificationcase.Color, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+	}
+	return oldValue.Color, nil
+}
+
+// ResetColor resets all changes to the "color" field.
+func (m *VerificationCaseMutation) ResetColor() {
+	m.color = nil
+}
+
+// SetSubscriptionID sets the "subscription_id" field.
+func (m *VerificationCaseMutation) SetSubscriptionID(s string) {
+	m.subscription_id = &s
+}
+
+// SubscriptionID returns the value of the "subscription_id" field in the mutation.
+func (m *VerificationCaseMutation) SubscriptionID() (r string, exists bool) {
+	v := m.subscription_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriptionID returns the old "subscription_id" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSubscriptionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriptionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriptionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriptionID: %w", err)
+	}
+	return oldValue.SubscriptionID, nil
+}
+
+// ResetSubscriptionID resets all changes to the "subscription_id" field.
+func (m *VerificationCaseMutation) ResetSubscriptionID() {
+	m.subscription_id = nil
+}
+
+// SetPlanCode sets the "plan_code" field.
+func (m *VerificationCaseMutation) SetPlanCode(s string) {
+	m.plan_code = &s
+}
+
+// PlanCode returns the value of the "plan_code" field in the mutation.
+func (m *VerificationCaseMutation) PlanCode() (r string, exists bool) {
+	v := m.plan_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlanCode returns the old "plan_code" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldPlanCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlanCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlanCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlanCode: %w", err)
+	}
+	return oldValue.PlanCode, nil
+}
+
+// ResetPlanCode resets all changes to the "plan_code" field.
+func (m *VerificationCaseMutation) ResetPlanCode() {
+	m.plan_code = nil
+}
+
+// SetPaymentChannel sets the "payment_channel" field.
+func (m *VerificationCaseMutation) SetPaymentChannel(s string) {
+	m.payment_channel = &s
+}
+
+// PaymentChannel returns the value of the "payment_channel" field in the mutation.
+func (m *VerificationCaseMutation) PaymentChannel() (r string, exists bool) {
+	v := m.payment_channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentChannel returns the old "payment_channel" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldPaymentChannel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentChannel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentChannel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentChannel: %w", err)
+	}
+	return oldValue.PaymentChannel, nil
+}
+
+// ResetPaymentChannel resets all changes to the "payment_channel" field.
+func (m *VerificationCaseMutation) ResetPaymentChannel() {
+	m.payment_channel = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *VerificationCaseMutation) SetStatus(v verificationcase.Status) {
+	m.status = &v
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *VerificationCaseMutation) Status() (r verificationcase.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldStatus(ctx context.Context) (v verificationcase.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *VerificationCaseMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetRefundStatus sets the "refund_status" field.
+func (m *VerificationCaseMutation) SetRefundStatus(vs verificationcase.RefundStatus) {
+	m.refund_status = &vs
+}
+
+// RefundStatus returns the value of the "refund_status" field in the mutation.
+func (m *VerificationCaseMutation) RefundStatus() (r verificationcase.RefundStatus, exists bool) {
+	v := m.refund_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefundStatus returns the old "refund_status" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldRefundStatus(ctx context.Context) (v verificationcase.RefundStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefundStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefundStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefundStatus: %w", err)
+	}
+	return oldValue.RefundStatus, nil
+}
+
+// ResetRefundStatus resets all changes to the "refund_status" field.
+func (m *VerificationCaseMutation) ResetRefundStatus() {
+	m.refund_status = nil
+}
+
+// SetConsentVersion sets the "consent_version" field.
+func (m *VerificationCaseMutation) SetConsentVersion(s string) {
+	m.consent_version = &s
+}
+
+// ConsentVersion returns the value of the "consent_version" field in the mutation.
+func (m *VerificationCaseMutation) ConsentVersion() (r string, exists bool) {
+	v := m.consent_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConsentVersion returns the old "consent_version" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldConsentVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConsentVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConsentVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConsentVersion: %w", err)
+	}
+	return oldValue.ConsentVersion, nil
+}
+
+// ResetConsentVersion resets all changes to the "consent_version" field.
+func (m *VerificationCaseMutation) ResetConsentVersion() {
+	m.consent_version = nil
+}
+
+// SetConsentAt sets the "consent_at" field.
+func (m *VerificationCaseMutation) SetConsentAt(t time.Time) {
+	m.consent_at = &t
+}
+
+// ConsentAt returns the value of the "consent_at" field in the mutation.
+func (m *VerificationCaseMutation) ConsentAt() (r time.Time, exists bool) {
+	v := m.consent_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConsentAt returns the old "consent_at" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldConsentAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConsentAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConsentAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConsentAt: %w", err)
+	}
+	return oldValue.ConsentAt, nil
+}
+
+// ClearConsentAt clears the value of the "consent_at" field.
+func (m *VerificationCaseMutation) ClearConsentAt() {
+	m.consent_at = nil
+	m.clearedFields[verificationcase.FieldConsentAt] = struct{}{}
+}
+
+// ConsentAtCleared returns if the "consent_at" field was cleared in this mutation.
+func (m *VerificationCaseMutation) ConsentAtCleared() bool {
+	_, ok := m.clearedFields[verificationcase.FieldConsentAt]
+	return ok
+}
+
+// ResetConsentAt resets all changes to the "consent_at" field.
+func (m *VerificationCaseMutation) ResetConsentAt() {
+	m.consent_at = nil
+	delete(m.clearedFields, verificationcase.FieldConsentAt)
+}
+
+// SetSmileJobID sets the "smile_job_id" field.
+func (m *VerificationCaseMutation) SetSmileJobID(s string) {
+	m.smile_job_id = &s
+}
+
+// SmileJobID returns the value of the "smile_job_id" field in the mutation.
+func (m *VerificationCaseMutation) SmileJobID() (r string, exists bool) {
+	v := m.smile_job_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSmileJobID returns the old "smile_job_id" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSmileJobID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSmileJobID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSmileJobID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSmileJobID: %w", err)
+	}
+	return oldValue.SmileJobID, nil
+}
+
+// ClearSmileJobID clears the value of the "smile_job_id" field.
+func (m *VerificationCaseMutation) ClearSmileJobID() {
+	m.smile_job_id = nil
+	m.clearedFields[verificationcase.FieldSmileJobID] = struct{}{}
+}
+
+// SmileJobIDCleared returns if the "smile_job_id" field was cleared in this mutation.
+func (m *VerificationCaseMutation) SmileJobIDCleared() bool {
+	_, ok := m.clearedFields[verificationcase.FieldSmileJobID]
+	return ok
+}
+
+// ResetSmileJobID resets all changes to the "smile_job_id" field.
+func (m *VerificationCaseMutation) ResetSmileJobID() {
+	m.smile_job_id = nil
+	delete(m.clearedFields, verificationcase.FieldSmileJobID)
+}
+
+// SetSmileReference sets the "smile_reference" field.
+func (m *VerificationCaseMutation) SetSmileReference(s string) {
+	m.smile_reference = &s
+}
+
+// SmileReference returns the value of the "smile_reference" field in the mutation.
+func (m *VerificationCaseMutation) SmileReference() (r string, exists bool) {
+	v := m.smile_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSmileReference returns the old "smile_reference" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSmileReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSmileReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSmileReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSmileReference: %w", err)
+	}
+	return oldValue.SmileReference, nil
+}
+
+// ResetSmileReference resets all changes to the "smile_reference" field.
+func (m *VerificationCaseMutation) ResetSmileReference() {
+	m.smile_reference = nil
+}
+
+// SetSmileProduct sets the "smile_product" field.
+func (m *VerificationCaseMutation) SetSmileProduct(s string) {
+	m.smile_product = &s
+}
+
+// SmileProduct returns the value of the "smile_product" field in the mutation.
+func (m *VerificationCaseMutation) SmileProduct() (r string, exists bool) {
+	v := m.smile_product
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSmileProduct returns the old "smile_product" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSmileProduct(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSmileProduct is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSmileProduct requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSmileProduct: %w", err)
+	}
+	return oldValue.SmileProduct, nil
+}
+
+// ResetSmileProduct resets all changes to the "smile_product" field.
+func (m *VerificationCaseMutation) ResetSmileProduct() {
+	m.smile_product = nil
+}
+
+// SetSmileResultCode sets the "smile_result_code" field.
+func (m *VerificationCaseMutation) SetSmileResultCode(s string) {
+	m.smile_result_code = &s
+}
+
+// SmileResultCode returns the value of the "smile_result_code" field in the mutation.
+func (m *VerificationCaseMutation) SmileResultCode() (r string, exists bool) {
+	v := m.smile_result_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSmileResultCode returns the old "smile_result_code" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSmileResultCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSmileResultCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSmileResultCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSmileResultCode: %w", err)
+	}
+	return oldValue.SmileResultCode, nil
+}
+
+// ResetSmileResultCode resets all changes to the "smile_result_code" field.
+func (m *VerificationCaseMutation) ResetSmileResultCode() {
+	m.smile_result_code = nil
+}
+
+// SetDocumentType sets the "document_type" field.
+func (m *VerificationCaseMutation) SetDocumentType(s string) {
+	m.document_type = &s
+}
+
+// DocumentType returns the value of the "document_type" field in the mutation.
+func (m *VerificationCaseMutation) DocumentType() (r string, exists bool) {
+	v := m.document_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentType returns the old "document_type" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDocumentType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentType: %w", err)
+	}
+	return oldValue.DocumentType, nil
+}
+
+// ResetDocumentType resets all changes to the "document_type" field.
+func (m *VerificationCaseMutation) ResetDocumentType() {
+	m.document_type = nil
+}
+
+// SetDocumentCountry sets the "document_country" field.
+func (m *VerificationCaseMutation) SetDocumentCountry(s string) {
+	m.document_country = &s
+}
+
+// DocumentCountry returns the value of the "document_country" field in the mutation.
+func (m *VerificationCaseMutation) DocumentCountry() (r string, exists bool) {
+	v := m.document_country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentCountry returns the old "document_country" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDocumentCountry(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentCountry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentCountry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentCountry: %w", err)
+	}
+	return oldValue.DocumentCountry, nil
+}
+
+// ResetDocumentCountry resets all changes to the "document_country" field.
+func (m *VerificationCaseMutation) ResetDocumentCountry() {
+	m.document_country = nil
+}
+
+// SetLivenessResult sets the "liveness_result" field.
+func (m *VerificationCaseMutation) SetLivenessResult(s string) {
+	m.liveness_result = &s
+}
+
+// LivenessResult returns the value of the "liveness_result" field in the mutation.
+func (m *VerificationCaseMutation) LivenessResult() (r string, exists bool) {
+	v := m.liveness_result
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLivenessResult returns the old "liveness_result" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldLivenessResult(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLivenessResult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLivenessResult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLivenessResult: %w", err)
+	}
+	return oldValue.LivenessResult, nil
+}
+
+// ResetLivenessResult resets all changes to the "liveness_result" field.
+func (m *VerificationCaseMutation) ResetLivenessResult() {
+	m.liveness_result = nil
+}
+
+// SetDocumentResult sets the "document_result" field.
+func (m *VerificationCaseMutation) SetDocumentResult(s string) {
+	m.document_result = &s
+}
+
+// DocumentResult returns the value of the "document_result" field in the mutation.
+func (m *VerificationCaseMutation) DocumentResult() (r string, exists bool) {
+	v := m.document_result
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentResult returns the old "document_result" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDocumentResult(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentResult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentResult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentResult: %w", err)
+	}
+	return oldValue.DocumentResult, nil
+}
+
+// ResetDocumentResult resets all changes to the "document_result" field.
+func (m *VerificationCaseMutation) ResetDocumentResult() {
+	m.document_result = nil
+}
+
+// SetFaceMatchResult sets the "face_match_result" field.
+func (m *VerificationCaseMutation) SetFaceMatchResult(s string) {
+	m.face_match_result = &s
+}
+
+// FaceMatchResult returns the value of the "face_match_result" field in the mutation.
+func (m *VerificationCaseMutation) FaceMatchResult() (r string, exists bool) {
+	v := m.face_match_result
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFaceMatchResult returns the old "face_match_result" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldFaceMatchResult(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFaceMatchResult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFaceMatchResult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFaceMatchResult: %w", err)
+	}
+	return oldValue.FaceMatchResult, nil
+}
+
+// ResetFaceMatchResult resets all changes to the "face_match_result" field.
+func (m *VerificationCaseMutation) ResetFaceMatchResult() {
+	m.face_match_result = nil
+}
+
+// SetDatabaseResult sets the "database_result" field.
+func (m *VerificationCaseMutation) SetDatabaseResult(s string) {
+	m.database_result = &s
+}
+
+// DatabaseResult returns the value of the "database_result" field in the mutation.
+func (m *VerificationCaseMutation) DatabaseResult() (r string, exists bool) {
+	v := m.database_result
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDatabaseResult returns the old "database_result" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDatabaseResult(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDatabaseResult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDatabaseResult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDatabaseResult: %w", err)
+	}
+	return oldValue.DatabaseResult, nil
+}
+
+// ResetDatabaseResult resets all changes to the "database_result" field.
+func (m *VerificationCaseMutation) ResetDatabaseResult() {
+	m.database_result = nil
+}
+
+// SetFaceMatchConfidence sets the "face_match_confidence" field.
+func (m *VerificationCaseMutation) SetFaceMatchConfidence(f float64) {
+	m.face_match_confidence = &f
+	m.addface_match_confidence = nil
+}
+
+// FaceMatchConfidence returns the value of the "face_match_confidence" field in the mutation.
+func (m *VerificationCaseMutation) FaceMatchConfidence() (r float64, exists bool) {
+	v := m.face_match_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFaceMatchConfidence returns the old "face_match_confidence" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldFaceMatchConfidence(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFaceMatchConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFaceMatchConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFaceMatchConfidence: %w", err)
+	}
+	return oldValue.FaceMatchConfidence, nil
+}
+
+// AddFaceMatchConfidence adds f to the "face_match_confidence" field.
+func (m *VerificationCaseMutation) AddFaceMatchConfidence(f float64) {
+	if m.addface_match_confidence != nil {
+		*m.addface_match_confidence += f
+	} else {
+		m.addface_match_confidence = &f
+	}
+}
+
+// AddedFaceMatchConfidence returns the value that was added to the "face_match_confidence" field in this mutation.
+func (m *VerificationCaseMutation) AddedFaceMatchConfidence() (r float64, exists bool) {
+	v := m.addface_match_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFaceMatchConfidence resets all changes to the "face_match_confidence" field.
+func (m *VerificationCaseMutation) ResetFaceMatchConfidence() {
+	m.face_match_confidence = nil
+	m.addface_match_confidence = nil
+}
+
+// SetNameMatchScore sets the "name_match_score" field.
+func (m *VerificationCaseMutation) SetNameMatchScore(f float64) {
+	m.name_match_score = &f
+	m.addname_match_score = nil
+}
+
+// NameMatchScore returns the value of the "name_match_score" field in the mutation.
+func (m *VerificationCaseMutation) NameMatchScore() (r float64, exists bool) {
+	v := m.name_match_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameMatchScore returns the old "name_match_score" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldNameMatchScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameMatchScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameMatchScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameMatchScore: %w", err)
+	}
+	return oldValue.NameMatchScore, nil
+}
+
+// AddNameMatchScore adds f to the "name_match_score" field.
+func (m *VerificationCaseMutation) AddNameMatchScore(f float64) {
+	if m.addname_match_score != nil {
+		*m.addname_match_score += f
+	} else {
+		m.addname_match_score = &f
+	}
+}
+
+// AddedNameMatchScore returns the value that was added to the "name_match_score" field in this mutation.
+func (m *VerificationCaseMutation) AddedNameMatchScore() (r float64, exists bool) {
+	v := m.addname_match_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNameMatchScore resets all changes to the "name_match_score" field.
+func (m *VerificationCaseMutation) ResetNameMatchScore() {
+	m.name_match_score = nil
+	m.addname_match_score = nil
+}
+
+// SetTrustScore sets the "trust_score" field.
+func (m *VerificationCaseMutation) SetTrustScore(i int) {
+	m.trust_score = &i
+	m.addtrust_score = nil
+}
+
+// TrustScore returns the value of the "trust_score" field in the mutation.
+func (m *VerificationCaseMutation) TrustScore() (r int, exists bool) {
+	v := m.trust_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrustScore returns the old "trust_score" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldTrustScore(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrustScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrustScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrustScore: %w", err)
+	}
+	return oldValue.TrustScore, nil
+}
+
+// AddTrustScore adds i to the "trust_score" field.
+func (m *VerificationCaseMutation) AddTrustScore(i int) {
+	if m.addtrust_score != nil {
+		*m.addtrust_score += i
+	} else {
+		m.addtrust_score = &i
+	}
+}
+
+// AddedTrustScore returns the value that was added to the "trust_score" field in this mutation.
+func (m *VerificationCaseMutation) AddedTrustScore() (r int, exists bool) {
+	v := m.addtrust_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTrustScore resets all changes to the "trust_score" field.
+func (m *VerificationCaseMutation) ResetTrustScore() {
+	m.trust_score = nil
+	m.addtrust_score = nil
+}
+
+// SetEligibleAtPayment sets the "eligible_at_payment" field.
+func (m *VerificationCaseMutation) SetEligibleAtPayment(b bool) {
+	m.eligible_at_payment = &b
+}
+
+// EligibleAtPayment returns the value of the "eligible_at_payment" field in the mutation.
+func (m *VerificationCaseMutation) EligibleAtPayment() (r bool, exists bool) {
+	v := m.eligible_at_payment
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEligibleAtPayment returns the old "eligible_at_payment" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldEligibleAtPayment(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEligibleAtPayment is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEligibleAtPayment requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEligibleAtPayment: %w", err)
+	}
+	return oldValue.EligibleAtPayment, nil
+}
+
+// ResetEligibleAtPayment resets all changes to the "eligible_at_payment" field.
+func (m *VerificationCaseMutation) ResetEligibleAtPayment() {
+	m.eligible_at_payment = nil
+}
+
+// SetDocumentFingerprint sets the "document_fingerprint" field.
+func (m *VerificationCaseMutation) SetDocumentFingerprint(s string) {
+	m.document_fingerprint = &s
+}
+
+// DocumentFingerprint returns the value of the "document_fingerprint" field in the mutation.
+func (m *VerificationCaseMutation) DocumentFingerprint() (r string, exists bool) {
+	v := m.document_fingerprint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentFingerprint returns the old "document_fingerprint" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDocumentFingerprint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentFingerprint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentFingerprint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentFingerprint: %w", err)
+	}
+	return oldValue.DocumentFingerprint, nil
+}
+
+// ResetDocumentFingerprint resets all changes to the "document_fingerprint" field.
+func (m *VerificationCaseMutation) ResetDocumentFingerprint() {
+	m.document_fingerprint = nil
+}
+
+// SetDecisionReasons sets the "decision_reasons" field.
+func (m *VerificationCaseMutation) SetDecisionReasons(s []string) {
+	m.decision_reasons = &s
+	m.appenddecision_reasons = nil
+}
+
+// DecisionReasons returns the value of the "decision_reasons" field in the mutation.
+func (m *VerificationCaseMutation) DecisionReasons() (r []string, exists bool) {
+	v := m.decision_reasons
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecisionReasons returns the old "decision_reasons" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDecisionReasons(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecisionReasons is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecisionReasons requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecisionReasons: %w", err)
+	}
+	return oldValue.DecisionReasons, nil
+}
+
+// AppendDecisionReasons adds s to the "decision_reasons" field.
+func (m *VerificationCaseMutation) AppendDecisionReasons(s []string) {
+	m.appenddecision_reasons = append(m.appenddecision_reasons, s...)
+}
+
+// AppendedDecisionReasons returns the list of values that were appended to the "decision_reasons" field in this mutation.
+func (m *VerificationCaseMutation) AppendedDecisionReasons() ([]string, bool) {
+	if len(m.appenddecision_reasons) == 0 {
+		return nil, false
+	}
+	return m.appenddecision_reasons, true
+}
+
+// ResetDecisionReasons resets all changes to the "decision_reasons" field.
+func (m *VerificationCaseMutation) ResetDecisionReasons() {
+	m.decision_reasons = nil
+	m.appenddecision_reasons = nil
+}
+
+// SetFraudSignals sets the "fraud_signals" field.
+func (m *VerificationCaseMutation) SetFraudSignals(s []string) {
+	m.fraud_signals = &s
+	m.appendfraud_signals = nil
+}
+
+// FraudSignals returns the value of the "fraud_signals" field in the mutation.
+func (m *VerificationCaseMutation) FraudSignals() (r []string, exists bool) {
+	v := m.fraud_signals
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFraudSignals returns the old "fraud_signals" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldFraudSignals(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFraudSignals is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFraudSignals requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFraudSignals: %w", err)
+	}
+	return oldValue.FraudSignals, nil
+}
+
+// AppendFraudSignals adds s to the "fraud_signals" field.
+func (m *VerificationCaseMutation) AppendFraudSignals(s []string) {
+	m.appendfraud_signals = append(m.appendfraud_signals, s...)
+}
+
+// AppendedFraudSignals returns the list of values that were appended to the "fraud_signals" field in this mutation.
+func (m *VerificationCaseMutation) AppendedFraudSignals() ([]string, bool) {
+	if len(m.appendfraud_signals) == 0 {
+		return nil, false
+	}
+	return m.appendfraud_signals, true
+}
+
+// ResetFraudSignals resets all changes to the "fraud_signals" field.
+func (m *VerificationCaseMutation) ResetFraudSignals() {
+	m.fraud_signals = nil
+	m.appendfraud_signals = nil
+}
+
+// SetDecisionReason sets the "decision_reason" field.
+func (m *VerificationCaseMutation) SetDecisionReason(s string) {
+	m.decision_reason = &s
+}
+
+// DecisionReason returns the value of the "decision_reason" field in the mutation.
+func (m *VerificationCaseMutation) DecisionReason() (r string, exists bool) {
+	v := m.decision_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecisionReason returns the old "decision_reason" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDecisionReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecisionReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecisionReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecisionReason: %w", err)
+	}
+	return oldValue.DecisionReason, nil
+}
+
+// ResetDecisionReason resets all changes to the "decision_reason" field.
+func (m *VerificationCaseMutation) ResetDecisionReason() {
+	m.decision_reason = nil
+}
+
+// SetDecidedByName sets the "decided_by_name" field.
+func (m *VerificationCaseMutation) SetDecidedByName(s string) {
+	m.decided_by_name = &s
+}
+
+// DecidedByName returns the value of the "decided_by_name" field in the mutation.
+func (m *VerificationCaseMutation) DecidedByName() (r string, exists bool) {
+	v := m.decided_by_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecidedByName returns the old "decided_by_name" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDecidedByName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecidedByName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecidedByName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecidedByName: %w", err)
+	}
+	return oldValue.DecidedByName, nil
+}
+
+// ResetDecidedByName resets all changes to the "decided_by_name" field.
+func (m *VerificationCaseMutation) ResetDecidedByName() {
+	m.decided_by_name = nil
+}
+
+// SetDecidedAt sets the "decided_at" field.
+func (m *VerificationCaseMutation) SetDecidedAt(t time.Time) {
+	m.decided_at = &t
+}
+
+// DecidedAt returns the value of the "decided_at" field in the mutation.
+func (m *VerificationCaseMutation) DecidedAt() (r time.Time, exists bool) {
+	v := m.decided_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecidedAt returns the old "decided_at" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldDecidedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecidedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecidedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecidedAt: %w", err)
+	}
+	return oldValue.DecidedAt, nil
+}
+
+// ClearDecidedAt clears the value of the "decided_at" field.
+func (m *VerificationCaseMutation) ClearDecidedAt() {
+	m.decided_at = nil
+	m.clearedFields[verificationcase.FieldDecidedAt] = struct{}{}
+}
+
+// DecidedAtCleared returns if the "decided_at" field was cleared in this mutation.
+func (m *VerificationCaseMutation) DecidedAtCleared() bool {
+	_, ok := m.clearedFields[verificationcase.FieldDecidedAt]
+	return ok
+}
+
+// ResetDecidedAt resets all changes to the "decided_at" field.
+func (m *VerificationCaseMutation) ResetDecidedAt() {
+	m.decided_at = nil
+	delete(m.clearedFields, verificationcase.FieldDecidedAt)
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (m *VerificationCaseMutation) SetVerifiedAt(t time.Time) {
+	m.verified_at = &t
+}
+
+// VerifiedAt returns the value of the "verified_at" field in the mutation.
+func (m *VerificationCaseMutation) VerifiedAt() (r time.Time, exists bool) {
+	v := m.verified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifiedAt returns the old "verified_at" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldVerifiedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifiedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifiedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifiedAt: %w", err)
+	}
+	return oldValue.VerifiedAt, nil
+}
+
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (m *VerificationCaseMutation) ClearVerifiedAt() {
+	m.verified_at = nil
+	m.clearedFields[verificationcase.FieldVerifiedAt] = struct{}{}
+}
+
+// VerifiedAtCleared returns if the "verified_at" field was cleared in this mutation.
+func (m *VerificationCaseMutation) VerifiedAtCleared() bool {
+	_, ok := m.clearedFields[verificationcase.FieldVerifiedAt]
+	return ok
+}
+
+// ResetVerifiedAt resets all changes to the "verified_at" field.
+func (m *VerificationCaseMutation) ResetVerifiedAt() {
+	m.verified_at = nil
+	delete(m.clearedFields, verificationcase.FieldVerifiedAt)
+}
+
+// SetCallbackCount sets the "callback_count" field.
+func (m *VerificationCaseMutation) SetCallbackCount(i int) {
+	m.callback_count = &i
+	m.addcallback_count = nil
+}
+
+// CallbackCount returns the value of the "callback_count" field in the mutation.
+func (m *VerificationCaseMutation) CallbackCount() (r int, exists bool) {
+	v := m.callback_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCallbackCount returns the old "callback_count" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldCallbackCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCallbackCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCallbackCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCallbackCount: %w", err)
+	}
+	return oldValue.CallbackCount, nil
+}
+
+// AddCallbackCount adds i to the "callback_count" field.
+func (m *VerificationCaseMutation) AddCallbackCount(i int) {
+	if m.addcallback_count != nil {
+		*m.addcallback_count += i
+	} else {
+		m.addcallback_count = &i
+	}
+}
+
+// AddedCallbackCount returns the value that was added to the "callback_count" field in this mutation.
+func (m *VerificationCaseMutation) AddedCallbackCount() (r int, exists bool) {
+	v := m.addcallback_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCallbackCount resets all changes to the "callback_count" field.
+func (m *VerificationCaseMutation) ResetCallbackCount() {
+	m.callback_count = nil
+	m.addcallback_count = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *VerificationCaseMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *VerificationCaseMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *VerificationCaseMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the VerificationCaseMutation builder.
+func (m *VerificationCaseMutation) Where(ps ...predicate.VerificationCase) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VerificationCaseMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VerificationCaseMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VerificationCase, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VerificationCaseMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VerificationCaseMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VerificationCase).
+func (m *VerificationCaseMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VerificationCaseMutation) Fields() []string {
+	fields := make([]string, 0, 34)
+	if m.created_at != nil {
+		fields = append(fields, verificationcase.FieldCreatedAt)
+	}
+	if m.profile_id != nil {
+		fields = append(fields, verificationcase.FieldProfileID)
+	}
+	if m.account_id != nil {
+		fields = append(fields, verificationcase.FieldAccountID)
+	}
+	if m.color != nil {
+		fields = append(fields, verificationcase.FieldColor)
+	}
+	if m.subscription_id != nil {
+		fields = append(fields, verificationcase.FieldSubscriptionID)
+	}
+	if m.plan_code != nil {
+		fields = append(fields, verificationcase.FieldPlanCode)
+	}
+	if m.payment_channel != nil {
+		fields = append(fields, verificationcase.FieldPaymentChannel)
+	}
+	if m.status != nil {
+		fields = append(fields, verificationcase.FieldStatus)
+	}
+	if m.refund_status != nil {
+		fields = append(fields, verificationcase.FieldRefundStatus)
+	}
+	if m.consent_version != nil {
+		fields = append(fields, verificationcase.FieldConsentVersion)
+	}
+	if m.consent_at != nil {
+		fields = append(fields, verificationcase.FieldConsentAt)
+	}
+	if m.smile_job_id != nil {
+		fields = append(fields, verificationcase.FieldSmileJobID)
+	}
+	if m.smile_reference != nil {
+		fields = append(fields, verificationcase.FieldSmileReference)
+	}
+	if m.smile_product != nil {
+		fields = append(fields, verificationcase.FieldSmileProduct)
+	}
+	if m.smile_result_code != nil {
+		fields = append(fields, verificationcase.FieldSmileResultCode)
+	}
+	if m.document_type != nil {
+		fields = append(fields, verificationcase.FieldDocumentType)
+	}
+	if m.document_country != nil {
+		fields = append(fields, verificationcase.FieldDocumentCountry)
+	}
+	if m.liveness_result != nil {
+		fields = append(fields, verificationcase.FieldLivenessResult)
+	}
+	if m.document_result != nil {
+		fields = append(fields, verificationcase.FieldDocumentResult)
+	}
+	if m.face_match_result != nil {
+		fields = append(fields, verificationcase.FieldFaceMatchResult)
+	}
+	if m.database_result != nil {
+		fields = append(fields, verificationcase.FieldDatabaseResult)
+	}
+	if m.face_match_confidence != nil {
+		fields = append(fields, verificationcase.FieldFaceMatchConfidence)
+	}
+	if m.name_match_score != nil {
+		fields = append(fields, verificationcase.FieldNameMatchScore)
+	}
+	if m.trust_score != nil {
+		fields = append(fields, verificationcase.FieldTrustScore)
+	}
+	if m.eligible_at_payment != nil {
+		fields = append(fields, verificationcase.FieldEligibleAtPayment)
+	}
+	if m.document_fingerprint != nil {
+		fields = append(fields, verificationcase.FieldDocumentFingerprint)
+	}
+	if m.decision_reasons != nil {
+		fields = append(fields, verificationcase.FieldDecisionReasons)
+	}
+	if m.fraud_signals != nil {
+		fields = append(fields, verificationcase.FieldFraudSignals)
+	}
+	if m.decision_reason != nil {
+		fields = append(fields, verificationcase.FieldDecisionReason)
+	}
+	if m.decided_by_name != nil {
+		fields = append(fields, verificationcase.FieldDecidedByName)
+	}
+	if m.decided_at != nil {
+		fields = append(fields, verificationcase.FieldDecidedAt)
+	}
+	if m.verified_at != nil {
+		fields = append(fields, verificationcase.FieldVerifiedAt)
+	}
+	if m.callback_count != nil {
+		fields = append(fields, verificationcase.FieldCallbackCount)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, verificationcase.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VerificationCaseMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case verificationcase.FieldCreatedAt:
+		return m.CreatedAt()
+	case verificationcase.FieldProfileID:
+		return m.ProfileID()
+	case verificationcase.FieldAccountID:
+		return m.AccountID()
+	case verificationcase.FieldColor:
+		return m.Color()
+	case verificationcase.FieldSubscriptionID:
+		return m.SubscriptionID()
+	case verificationcase.FieldPlanCode:
+		return m.PlanCode()
+	case verificationcase.FieldPaymentChannel:
+		return m.PaymentChannel()
+	case verificationcase.FieldStatus:
+		return m.Status()
+	case verificationcase.FieldRefundStatus:
+		return m.RefundStatus()
+	case verificationcase.FieldConsentVersion:
+		return m.ConsentVersion()
+	case verificationcase.FieldConsentAt:
+		return m.ConsentAt()
+	case verificationcase.FieldSmileJobID:
+		return m.SmileJobID()
+	case verificationcase.FieldSmileReference:
+		return m.SmileReference()
+	case verificationcase.FieldSmileProduct:
+		return m.SmileProduct()
+	case verificationcase.FieldSmileResultCode:
+		return m.SmileResultCode()
+	case verificationcase.FieldDocumentType:
+		return m.DocumentType()
+	case verificationcase.FieldDocumentCountry:
+		return m.DocumentCountry()
+	case verificationcase.FieldLivenessResult:
+		return m.LivenessResult()
+	case verificationcase.FieldDocumentResult:
+		return m.DocumentResult()
+	case verificationcase.FieldFaceMatchResult:
+		return m.FaceMatchResult()
+	case verificationcase.FieldDatabaseResult:
+		return m.DatabaseResult()
+	case verificationcase.FieldFaceMatchConfidence:
+		return m.FaceMatchConfidence()
+	case verificationcase.FieldNameMatchScore:
+		return m.NameMatchScore()
+	case verificationcase.FieldTrustScore:
+		return m.TrustScore()
+	case verificationcase.FieldEligibleAtPayment:
+		return m.EligibleAtPayment()
+	case verificationcase.FieldDocumentFingerprint:
+		return m.DocumentFingerprint()
+	case verificationcase.FieldDecisionReasons:
+		return m.DecisionReasons()
+	case verificationcase.FieldFraudSignals:
+		return m.FraudSignals()
+	case verificationcase.FieldDecisionReason:
+		return m.DecisionReason()
+	case verificationcase.FieldDecidedByName:
+		return m.DecidedByName()
+	case verificationcase.FieldDecidedAt:
+		return m.DecidedAt()
+	case verificationcase.FieldVerifiedAt:
+		return m.VerifiedAt()
+	case verificationcase.FieldCallbackCount:
+		return m.CallbackCount()
+	case verificationcase.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VerificationCaseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case verificationcase.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case verificationcase.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case verificationcase.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case verificationcase.FieldColor:
+		return m.OldColor(ctx)
+	case verificationcase.FieldSubscriptionID:
+		return m.OldSubscriptionID(ctx)
+	case verificationcase.FieldPlanCode:
+		return m.OldPlanCode(ctx)
+	case verificationcase.FieldPaymentChannel:
+		return m.OldPaymentChannel(ctx)
+	case verificationcase.FieldStatus:
+		return m.OldStatus(ctx)
+	case verificationcase.FieldRefundStatus:
+		return m.OldRefundStatus(ctx)
+	case verificationcase.FieldConsentVersion:
+		return m.OldConsentVersion(ctx)
+	case verificationcase.FieldConsentAt:
+		return m.OldConsentAt(ctx)
+	case verificationcase.FieldSmileJobID:
+		return m.OldSmileJobID(ctx)
+	case verificationcase.FieldSmileReference:
+		return m.OldSmileReference(ctx)
+	case verificationcase.FieldSmileProduct:
+		return m.OldSmileProduct(ctx)
+	case verificationcase.FieldSmileResultCode:
+		return m.OldSmileResultCode(ctx)
+	case verificationcase.FieldDocumentType:
+		return m.OldDocumentType(ctx)
+	case verificationcase.FieldDocumentCountry:
+		return m.OldDocumentCountry(ctx)
+	case verificationcase.FieldLivenessResult:
+		return m.OldLivenessResult(ctx)
+	case verificationcase.FieldDocumentResult:
+		return m.OldDocumentResult(ctx)
+	case verificationcase.FieldFaceMatchResult:
+		return m.OldFaceMatchResult(ctx)
+	case verificationcase.FieldDatabaseResult:
+		return m.OldDatabaseResult(ctx)
+	case verificationcase.FieldFaceMatchConfidence:
+		return m.OldFaceMatchConfidence(ctx)
+	case verificationcase.FieldNameMatchScore:
+		return m.OldNameMatchScore(ctx)
+	case verificationcase.FieldTrustScore:
+		return m.OldTrustScore(ctx)
+	case verificationcase.FieldEligibleAtPayment:
+		return m.OldEligibleAtPayment(ctx)
+	case verificationcase.FieldDocumentFingerprint:
+		return m.OldDocumentFingerprint(ctx)
+	case verificationcase.FieldDecisionReasons:
+		return m.OldDecisionReasons(ctx)
+	case verificationcase.FieldFraudSignals:
+		return m.OldFraudSignals(ctx)
+	case verificationcase.FieldDecisionReason:
+		return m.OldDecisionReason(ctx)
+	case verificationcase.FieldDecidedByName:
+		return m.OldDecidedByName(ctx)
+	case verificationcase.FieldDecidedAt:
+		return m.OldDecidedAt(ctx)
+	case verificationcase.FieldVerifiedAt:
+		return m.OldVerifiedAt(ctx)
+	case verificationcase.FieldCallbackCount:
+		return m.OldCallbackCount(ctx)
+	case verificationcase.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown VerificationCase field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VerificationCaseMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case verificationcase.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case verificationcase.FieldProfileID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case verificationcase.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case verificationcase.FieldColor:
+		v, ok := value.(verificationcase.Color)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColor(v)
+		return nil
+	case verificationcase.FieldSubscriptionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriptionID(v)
+		return nil
+	case verificationcase.FieldPlanCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlanCode(v)
+		return nil
+	case verificationcase.FieldPaymentChannel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentChannel(v)
+		return nil
+	case verificationcase.FieldStatus:
+		v, ok := value.(verificationcase.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case verificationcase.FieldRefundStatus:
+		v, ok := value.(verificationcase.RefundStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefundStatus(v)
+		return nil
+	case verificationcase.FieldConsentVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConsentVersion(v)
+		return nil
+	case verificationcase.FieldConsentAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConsentAt(v)
+		return nil
+	case verificationcase.FieldSmileJobID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSmileJobID(v)
+		return nil
+	case verificationcase.FieldSmileReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSmileReference(v)
+		return nil
+	case verificationcase.FieldSmileProduct:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSmileProduct(v)
+		return nil
+	case verificationcase.FieldSmileResultCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSmileResultCode(v)
+		return nil
+	case verificationcase.FieldDocumentType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentType(v)
+		return nil
+	case verificationcase.FieldDocumentCountry:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentCountry(v)
+		return nil
+	case verificationcase.FieldLivenessResult:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLivenessResult(v)
+		return nil
+	case verificationcase.FieldDocumentResult:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentResult(v)
+		return nil
+	case verificationcase.FieldFaceMatchResult:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFaceMatchResult(v)
+		return nil
+	case verificationcase.FieldDatabaseResult:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDatabaseResult(v)
+		return nil
+	case verificationcase.FieldFaceMatchConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFaceMatchConfidence(v)
+		return nil
+	case verificationcase.FieldNameMatchScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameMatchScore(v)
+		return nil
+	case verificationcase.FieldTrustScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrustScore(v)
+		return nil
+	case verificationcase.FieldEligibleAtPayment:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEligibleAtPayment(v)
+		return nil
+	case verificationcase.FieldDocumentFingerprint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentFingerprint(v)
+		return nil
+	case verificationcase.FieldDecisionReasons:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecisionReasons(v)
+		return nil
+	case verificationcase.FieldFraudSignals:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFraudSignals(v)
+		return nil
+	case verificationcase.FieldDecisionReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecisionReason(v)
+		return nil
+	case verificationcase.FieldDecidedByName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecidedByName(v)
+		return nil
+	case verificationcase.FieldDecidedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecidedAt(v)
+		return nil
+	case verificationcase.FieldVerifiedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifiedAt(v)
+		return nil
+	case verificationcase.FieldCallbackCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCallbackCount(v)
+		return nil
+	case verificationcase.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationCase field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VerificationCaseMutation) AddedFields() []string {
+	var fields []string
+	if m.addface_match_confidence != nil {
+		fields = append(fields, verificationcase.FieldFaceMatchConfidence)
+	}
+	if m.addname_match_score != nil {
+		fields = append(fields, verificationcase.FieldNameMatchScore)
+	}
+	if m.addtrust_score != nil {
+		fields = append(fields, verificationcase.FieldTrustScore)
+	}
+	if m.addcallback_count != nil {
+		fields = append(fields, verificationcase.FieldCallbackCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VerificationCaseMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case verificationcase.FieldFaceMatchConfidence:
+		return m.AddedFaceMatchConfidence()
+	case verificationcase.FieldNameMatchScore:
+		return m.AddedNameMatchScore()
+	case verificationcase.FieldTrustScore:
+		return m.AddedTrustScore()
+	case verificationcase.FieldCallbackCount:
+		return m.AddedCallbackCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VerificationCaseMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case verificationcase.FieldFaceMatchConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFaceMatchConfidence(v)
+		return nil
+	case verificationcase.FieldNameMatchScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNameMatchScore(v)
+		return nil
+	case verificationcase.FieldTrustScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTrustScore(v)
+		return nil
+	case verificationcase.FieldCallbackCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCallbackCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationCase numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VerificationCaseMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(verificationcase.FieldConsentAt) {
+		fields = append(fields, verificationcase.FieldConsentAt)
+	}
+	if m.FieldCleared(verificationcase.FieldSmileJobID) {
+		fields = append(fields, verificationcase.FieldSmileJobID)
+	}
+	if m.FieldCleared(verificationcase.FieldDecidedAt) {
+		fields = append(fields, verificationcase.FieldDecidedAt)
+	}
+	if m.FieldCleared(verificationcase.FieldVerifiedAt) {
+		fields = append(fields, verificationcase.FieldVerifiedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VerificationCaseMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VerificationCaseMutation) ClearField(name string) error {
+	switch name {
+	case verificationcase.FieldConsentAt:
+		m.ClearConsentAt()
+		return nil
+	case verificationcase.FieldSmileJobID:
+		m.ClearSmileJobID()
+		return nil
+	case verificationcase.FieldDecidedAt:
+		m.ClearDecidedAt()
+		return nil
+	case verificationcase.FieldVerifiedAt:
+		m.ClearVerifiedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationCase nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VerificationCaseMutation) ResetField(name string) error {
+	switch name {
+	case verificationcase.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case verificationcase.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case verificationcase.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case verificationcase.FieldColor:
+		m.ResetColor()
+		return nil
+	case verificationcase.FieldSubscriptionID:
+		m.ResetSubscriptionID()
+		return nil
+	case verificationcase.FieldPlanCode:
+		m.ResetPlanCode()
+		return nil
+	case verificationcase.FieldPaymentChannel:
+		m.ResetPaymentChannel()
+		return nil
+	case verificationcase.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case verificationcase.FieldRefundStatus:
+		m.ResetRefundStatus()
+		return nil
+	case verificationcase.FieldConsentVersion:
+		m.ResetConsentVersion()
+		return nil
+	case verificationcase.FieldConsentAt:
+		m.ResetConsentAt()
+		return nil
+	case verificationcase.FieldSmileJobID:
+		m.ResetSmileJobID()
+		return nil
+	case verificationcase.FieldSmileReference:
+		m.ResetSmileReference()
+		return nil
+	case verificationcase.FieldSmileProduct:
+		m.ResetSmileProduct()
+		return nil
+	case verificationcase.FieldSmileResultCode:
+		m.ResetSmileResultCode()
+		return nil
+	case verificationcase.FieldDocumentType:
+		m.ResetDocumentType()
+		return nil
+	case verificationcase.FieldDocumentCountry:
+		m.ResetDocumentCountry()
+		return nil
+	case verificationcase.FieldLivenessResult:
+		m.ResetLivenessResult()
+		return nil
+	case verificationcase.FieldDocumentResult:
+		m.ResetDocumentResult()
+		return nil
+	case verificationcase.FieldFaceMatchResult:
+		m.ResetFaceMatchResult()
+		return nil
+	case verificationcase.FieldDatabaseResult:
+		m.ResetDatabaseResult()
+		return nil
+	case verificationcase.FieldFaceMatchConfidence:
+		m.ResetFaceMatchConfidence()
+		return nil
+	case verificationcase.FieldNameMatchScore:
+		m.ResetNameMatchScore()
+		return nil
+	case verificationcase.FieldTrustScore:
+		m.ResetTrustScore()
+		return nil
+	case verificationcase.FieldEligibleAtPayment:
+		m.ResetEligibleAtPayment()
+		return nil
+	case verificationcase.FieldDocumentFingerprint:
+		m.ResetDocumentFingerprint()
+		return nil
+	case verificationcase.FieldDecisionReasons:
+		m.ResetDecisionReasons()
+		return nil
+	case verificationcase.FieldFraudSignals:
+		m.ResetFraudSignals()
+		return nil
+	case verificationcase.FieldDecisionReason:
+		m.ResetDecisionReason()
+		return nil
+	case verificationcase.FieldDecidedByName:
+		m.ResetDecidedByName()
+		return nil
+	case verificationcase.FieldDecidedAt:
+		m.ResetDecidedAt()
+		return nil
+	case verificationcase.FieldVerifiedAt:
+		m.ResetVerifiedAt()
+		return nil
+	case verificationcase.FieldCallbackCount:
+		m.ResetCallbackCount()
+		return nil
+	case verificationcase.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationCase field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VerificationCaseMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VerificationCaseMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VerificationCaseMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VerificationCaseMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VerificationCaseMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VerificationCaseMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VerificationCaseMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown VerificationCase unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VerificationCaseMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown VerificationCase edge %s", name)
+}
+
+// VerificationEligibilityMutation represents an operation that mutates the VerificationEligibility nodes in the graph.
+type VerificationEligibilityMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	profile_id      *uuid.UUID
+	account_id      *uuid.UUID
+	color           *verificationeligibility.Color
+	state           *verificationeligibility.State
+	tier            *verificationeligibility.Tier
+	trust_score     *int
+	addtrust_score  *int
+	reasons         *[]string
+	appendreasons   []string
+	score_source    *string
+	requested_at    *time.Time
+	last_checked_at *time.Time
+	next_check_at   *time.Time
+	notified_at     *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*VerificationEligibility, error)
+	predicates      []predicate.VerificationEligibility
+}
+
+var _ ent.Mutation = (*VerificationEligibilityMutation)(nil)
+
+// verificationeligibilityOption allows management of the mutation configuration using functional options.
+type verificationeligibilityOption func(*VerificationEligibilityMutation)
+
+// newVerificationEligibilityMutation creates new mutation for the VerificationEligibility entity.
+func newVerificationEligibilityMutation(c config, op Op, opts ...verificationeligibilityOption) *VerificationEligibilityMutation {
+	m := &VerificationEligibilityMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVerificationEligibility,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVerificationEligibilityID sets the ID field of the mutation.
+func withVerificationEligibilityID(id uuid.UUID) verificationeligibilityOption {
+	return func(m *VerificationEligibilityMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VerificationEligibility
+		)
+		m.oldValue = func(ctx context.Context) (*VerificationEligibility, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VerificationEligibility.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVerificationEligibility sets the old VerificationEligibility of the mutation.
+func withVerificationEligibility(node *VerificationEligibility) verificationeligibilityOption {
+	return func(m *VerificationEligibilityMutation) {
+		m.oldValue = func(context.Context) (*VerificationEligibility, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VerificationEligibilityMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VerificationEligibilityMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VerificationEligibility entities.
+func (m *VerificationEligibilityMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VerificationEligibilityMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VerificationEligibilityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VerificationEligibility.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VerificationEligibilityMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VerificationEligibilityMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VerificationEligibilityMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *VerificationEligibilityMutation) SetProfileID(u uuid.UUID) {
+	m.profile_id = &u
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *VerificationEligibilityMutation) ProfileID() (r uuid.UUID, exists bool) {
+	v := m.profile_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldProfileID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *VerificationEligibilityMutation) ResetProfileID() {
+	m.profile_id = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *VerificationEligibilityMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *VerificationEligibilityMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *VerificationEligibilityMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetColor sets the "color" field.
+func (m *VerificationEligibilityMutation) SetColor(v verificationeligibility.Color) {
+	m.color = &v
+}
+
+// Color returns the value of the "color" field in the mutation.
+func (m *VerificationEligibilityMutation) Color() (r verificationeligibility.Color, exists bool) {
+	v := m.color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColor returns the old "color" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldColor(ctx context.Context) (v verificationeligibility.Color, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+	}
+	return oldValue.Color, nil
+}
+
+// ResetColor resets all changes to the "color" field.
+func (m *VerificationEligibilityMutation) ResetColor() {
+	m.color = nil
+}
+
+// SetState sets the "state" field.
+func (m *VerificationEligibilityMutation) SetState(v verificationeligibility.State) {
+	m.state = &v
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *VerificationEligibilityMutation) State() (r verificationeligibility.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldState(ctx context.Context) (v verificationeligibility.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *VerificationEligibilityMutation) ResetState() {
+	m.state = nil
+}
+
+// SetTier sets the "tier" field.
+func (m *VerificationEligibilityMutation) SetTier(v verificationeligibility.Tier) {
+	m.tier = &v
+}
+
+// Tier returns the value of the "tier" field in the mutation.
+func (m *VerificationEligibilityMutation) Tier() (r verificationeligibility.Tier, exists bool) {
+	v := m.tier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTier returns the old "tier" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldTier(ctx context.Context) (v verificationeligibility.Tier, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTier: %w", err)
+	}
+	return oldValue.Tier, nil
+}
+
+// ResetTier resets all changes to the "tier" field.
+func (m *VerificationEligibilityMutation) ResetTier() {
+	m.tier = nil
+}
+
+// SetTrustScore sets the "trust_score" field.
+func (m *VerificationEligibilityMutation) SetTrustScore(i int) {
+	m.trust_score = &i
+	m.addtrust_score = nil
+}
+
+// TrustScore returns the value of the "trust_score" field in the mutation.
+func (m *VerificationEligibilityMutation) TrustScore() (r int, exists bool) {
+	v := m.trust_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrustScore returns the old "trust_score" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldTrustScore(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrustScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrustScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrustScore: %w", err)
+	}
+	return oldValue.TrustScore, nil
+}
+
+// AddTrustScore adds i to the "trust_score" field.
+func (m *VerificationEligibilityMutation) AddTrustScore(i int) {
+	if m.addtrust_score != nil {
+		*m.addtrust_score += i
+	} else {
+		m.addtrust_score = &i
+	}
+}
+
+// AddedTrustScore returns the value that was added to the "trust_score" field in this mutation.
+func (m *VerificationEligibilityMutation) AddedTrustScore() (r int, exists bool) {
+	v := m.addtrust_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTrustScore resets all changes to the "trust_score" field.
+func (m *VerificationEligibilityMutation) ResetTrustScore() {
+	m.trust_score = nil
+	m.addtrust_score = nil
+}
+
+// SetReasons sets the "reasons" field.
+func (m *VerificationEligibilityMutation) SetReasons(s []string) {
+	m.reasons = &s
+	m.appendreasons = nil
+}
+
+// Reasons returns the value of the "reasons" field in the mutation.
+func (m *VerificationEligibilityMutation) Reasons() (r []string, exists bool) {
+	v := m.reasons
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReasons returns the old "reasons" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldReasons(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReasons is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReasons requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReasons: %w", err)
+	}
+	return oldValue.Reasons, nil
+}
+
+// AppendReasons adds s to the "reasons" field.
+func (m *VerificationEligibilityMutation) AppendReasons(s []string) {
+	m.appendreasons = append(m.appendreasons, s...)
+}
+
+// AppendedReasons returns the list of values that were appended to the "reasons" field in this mutation.
+func (m *VerificationEligibilityMutation) AppendedReasons() ([]string, bool) {
+	if len(m.appendreasons) == 0 {
+		return nil, false
+	}
+	return m.appendreasons, true
+}
+
+// ResetReasons resets all changes to the "reasons" field.
+func (m *VerificationEligibilityMutation) ResetReasons() {
+	m.reasons = nil
+	m.appendreasons = nil
+}
+
+// SetScoreSource sets the "score_source" field.
+func (m *VerificationEligibilityMutation) SetScoreSource(s string) {
+	m.score_source = &s
+}
+
+// ScoreSource returns the value of the "score_source" field in the mutation.
+func (m *VerificationEligibilityMutation) ScoreSource() (r string, exists bool) {
+	v := m.score_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScoreSource returns the old "score_source" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldScoreSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScoreSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScoreSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScoreSource: %w", err)
+	}
+	return oldValue.ScoreSource, nil
+}
+
+// ResetScoreSource resets all changes to the "score_source" field.
+func (m *VerificationEligibilityMutation) ResetScoreSource() {
+	m.score_source = nil
+}
+
+// SetRequestedAt sets the "requested_at" field.
+func (m *VerificationEligibilityMutation) SetRequestedAt(t time.Time) {
+	m.requested_at = &t
+}
+
+// RequestedAt returns the value of the "requested_at" field in the mutation.
+func (m *VerificationEligibilityMutation) RequestedAt() (r time.Time, exists bool) {
+	v := m.requested_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestedAt returns the old "requested_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldRequestedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestedAt: %w", err)
+	}
+	return oldValue.RequestedAt, nil
+}
+
+// ClearRequestedAt clears the value of the "requested_at" field.
+func (m *VerificationEligibilityMutation) ClearRequestedAt() {
+	m.requested_at = nil
+	m.clearedFields[verificationeligibility.FieldRequestedAt] = struct{}{}
+}
+
+// RequestedAtCleared returns if the "requested_at" field was cleared in this mutation.
+func (m *VerificationEligibilityMutation) RequestedAtCleared() bool {
+	_, ok := m.clearedFields[verificationeligibility.FieldRequestedAt]
+	return ok
+}
+
+// ResetRequestedAt resets all changes to the "requested_at" field.
+func (m *VerificationEligibilityMutation) ResetRequestedAt() {
+	m.requested_at = nil
+	delete(m.clearedFields, verificationeligibility.FieldRequestedAt)
+}
+
+// SetLastCheckedAt sets the "last_checked_at" field.
+func (m *VerificationEligibilityMutation) SetLastCheckedAt(t time.Time) {
+	m.last_checked_at = &t
+}
+
+// LastCheckedAt returns the value of the "last_checked_at" field in the mutation.
+func (m *VerificationEligibilityMutation) LastCheckedAt() (r time.Time, exists bool) {
+	v := m.last_checked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastCheckedAt returns the old "last_checked_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldLastCheckedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastCheckedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastCheckedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastCheckedAt: %w", err)
+	}
+	return oldValue.LastCheckedAt, nil
+}
+
+// ClearLastCheckedAt clears the value of the "last_checked_at" field.
+func (m *VerificationEligibilityMutation) ClearLastCheckedAt() {
+	m.last_checked_at = nil
+	m.clearedFields[verificationeligibility.FieldLastCheckedAt] = struct{}{}
+}
+
+// LastCheckedAtCleared returns if the "last_checked_at" field was cleared in this mutation.
+func (m *VerificationEligibilityMutation) LastCheckedAtCleared() bool {
+	_, ok := m.clearedFields[verificationeligibility.FieldLastCheckedAt]
+	return ok
+}
+
+// ResetLastCheckedAt resets all changes to the "last_checked_at" field.
+func (m *VerificationEligibilityMutation) ResetLastCheckedAt() {
+	m.last_checked_at = nil
+	delete(m.clearedFields, verificationeligibility.FieldLastCheckedAt)
+}
+
+// SetNextCheckAt sets the "next_check_at" field.
+func (m *VerificationEligibilityMutation) SetNextCheckAt(t time.Time) {
+	m.next_check_at = &t
+}
+
+// NextCheckAt returns the value of the "next_check_at" field in the mutation.
+func (m *VerificationEligibilityMutation) NextCheckAt() (r time.Time, exists bool) {
+	v := m.next_check_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextCheckAt returns the old "next_check_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldNextCheckAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextCheckAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextCheckAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextCheckAt: %w", err)
+	}
+	return oldValue.NextCheckAt, nil
+}
+
+// ClearNextCheckAt clears the value of the "next_check_at" field.
+func (m *VerificationEligibilityMutation) ClearNextCheckAt() {
+	m.next_check_at = nil
+	m.clearedFields[verificationeligibility.FieldNextCheckAt] = struct{}{}
+}
+
+// NextCheckAtCleared returns if the "next_check_at" field was cleared in this mutation.
+func (m *VerificationEligibilityMutation) NextCheckAtCleared() bool {
+	_, ok := m.clearedFields[verificationeligibility.FieldNextCheckAt]
+	return ok
+}
+
+// ResetNextCheckAt resets all changes to the "next_check_at" field.
+func (m *VerificationEligibilityMutation) ResetNextCheckAt() {
+	m.next_check_at = nil
+	delete(m.clearedFields, verificationeligibility.FieldNextCheckAt)
+}
+
+// SetNotifiedAt sets the "notified_at" field.
+func (m *VerificationEligibilityMutation) SetNotifiedAt(t time.Time) {
+	m.notified_at = &t
+}
+
+// NotifiedAt returns the value of the "notified_at" field in the mutation.
+func (m *VerificationEligibilityMutation) NotifiedAt() (r time.Time, exists bool) {
+	v := m.notified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotifiedAt returns the old "notified_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldNotifiedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotifiedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotifiedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotifiedAt: %w", err)
+	}
+	return oldValue.NotifiedAt, nil
+}
+
+// ClearNotifiedAt clears the value of the "notified_at" field.
+func (m *VerificationEligibilityMutation) ClearNotifiedAt() {
+	m.notified_at = nil
+	m.clearedFields[verificationeligibility.FieldNotifiedAt] = struct{}{}
+}
+
+// NotifiedAtCleared returns if the "notified_at" field was cleared in this mutation.
+func (m *VerificationEligibilityMutation) NotifiedAtCleared() bool {
+	_, ok := m.clearedFields[verificationeligibility.FieldNotifiedAt]
+	return ok
+}
+
+// ResetNotifiedAt resets all changes to the "notified_at" field.
+func (m *VerificationEligibilityMutation) ResetNotifiedAt() {
+	m.notified_at = nil
+	delete(m.clearedFields, verificationeligibility.FieldNotifiedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *VerificationEligibilityMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *VerificationEligibilityMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the VerificationEligibility entity.
+// If the VerificationEligibility object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationEligibilityMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *VerificationEligibilityMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the VerificationEligibilityMutation builder.
+func (m *VerificationEligibilityMutation) Where(ps ...predicate.VerificationEligibility) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VerificationEligibilityMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VerificationEligibilityMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VerificationEligibility, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VerificationEligibilityMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VerificationEligibilityMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VerificationEligibility).
+func (m *VerificationEligibilityMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VerificationEligibilityMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.created_at != nil {
+		fields = append(fields, verificationeligibility.FieldCreatedAt)
+	}
+	if m.profile_id != nil {
+		fields = append(fields, verificationeligibility.FieldProfileID)
+	}
+	if m.account_id != nil {
+		fields = append(fields, verificationeligibility.FieldAccountID)
+	}
+	if m.color != nil {
+		fields = append(fields, verificationeligibility.FieldColor)
+	}
+	if m.state != nil {
+		fields = append(fields, verificationeligibility.FieldState)
+	}
+	if m.tier != nil {
+		fields = append(fields, verificationeligibility.FieldTier)
+	}
+	if m.trust_score != nil {
+		fields = append(fields, verificationeligibility.FieldTrustScore)
+	}
+	if m.reasons != nil {
+		fields = append(fields, verificationeligibility.FieldReasons)
+	}
+	if m.score_source != nil {
+		fields = append(fields, verificationeligibility.FieldScoreSource)
+	}
+	if m.requested_at != nil {
+		fields = append(fields, verificationeligibility.FieldRequestedAt)
+	}
+	if m.last_checked_at != nil {
+		fields = append(fields, verificationeligibility.FieldLastCheckedAt)
+	}
+	if m.next_check_at != nil {
+		fields = append(fields, verificationeligibility.FieldNextCheckAt)
+	}
+	if m.notified_at != nil {
+		fields = append(fields, verificationeligibility.FieldNotifiedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, verificationeligibility.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VerificationEligibilityMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case verificationeligibility.FieldCreatedAt:
+		return m.CreatedAt()
+	case verificationeligibility.FieldProfileID:
+		return m.ProfileID()
+	case verificationeligibility.FieldAccountID:
+		return m.AccountID()
+	case verificationeligibility.FieldColor:
+		return m.Color()
+	case verificationeligibility.FieldState:
+		return m.State()
+	case verificationeligibility.FieldTier:
+		return m.Tier()
+	case verificationeligibility.FieldTrustScore:
+		return m.TrustScore()
+	case verificationeligibility.FieldReasons:
+		return m.Reasons()
+	case verificationeligibility.FieldScoreSource:
+		return m.ScoreSource()
+	case verificationeligibility.FieldRequestedAt:
+		return m.RequestedAt()
+	case verificationeligibility.FieldLastCheckedAt:
+		return m.LastCheckedAt()
+	case verificationeligibility.FieldNextCheckAt:
+		return m.NextCheckAt()
+	case verificationeligibility.FieldNotifiedAt:
+		return m.NotifiedAt()
+	case verificationeligibility.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VerificationEligibilityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case verificationeligibility.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case verificationeligibility.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case verificationeligibility.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case verificationeligibility.FieldColor:
+		return m.OldColor(ctx)
+	case verificationeligibility.FieldState:
+		return m.OldState(ctx)
+	case verificationeligibility.FieldTier:
+		return m.OldTier(ctx)
+	case verificationeligibility.FieldTrustScore:
+		return m.OldTrustScore(ctx)
+	case verificationeligibility.FieldReasons:
+		return m.OldReasons(ctx)
+	case verificationeligibility.FieldScoreSource:
+		return m.OldScoreSource(ctx)
+	case verificationeligibility.FieldRequestedAt:
+		return m.OldRequestedAt(ctx)
+	case verificationeligibility.FieldLastCheckedAt:
+		return m.OldLastCheckedAt(ctx)
+	case verificationeligibility.FieldNextCheckAt:
+		return m.OldNextCheckAt(ctx)
+	case verificationeligibility.FieldNotifiedAt:
+		return m.OldNotifiedAt(ctx)
+	case verificationeligibility.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown VerificationEligibility field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VerificationEligibilityMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case verificationeligibility.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case verificationeligibility.FieldProfileID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case verificationeligibility.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case verificationeligibility.FieldColor:
+		v, ok := value.(verificationeligibility.Color)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColor(v)
+		return nil
+	case verificationeligibility.FieldState:
+		v, ok := value.(verificationeligibility.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case verificationeligibility.FieldTier:
+		v, ok := value.(verificationeligibility.Tier)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTier(v)
+		return nil
+	case verificationeligibility.FieldTrustScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrustScore(v)
+		return nil
+	case verificationeligibility.FieldReasons:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReasons(v)
+		return nil
+	case verificationeligibility.FieldScoreSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScoreSource(v)
+		return nil
+	case verificationeligibility.FieldRequestedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestedAt(v)
+		return nil
+	case verificationeligibility.FieldLastCheckedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastCheckedAt(v)
+		return nil
+	case verificationeligibility.FieldNextCheckAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextCheckAt(v)
+		return nil
+	case verificationeligibility.FieldNotifiedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotifiedAt(v)
+		return nil
+	case verificationeligibility.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationEligibility field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VerificationEligibilityMutation) AddedFields() []string {
+	var fields []string
+	if m.addtrust_score != nil {
+		fields = append(fields, verificationeligibility.FieldTrustScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VerificationEligibilityMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case verificationeligibility.FieldTrustScore:
+		return m.AddedTrustScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VerificationEligibilityMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case verificationeligibility.FieldTrustScore:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTrustScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationEligibility numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VerificationEligibilityMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(verificationeligibility.FieldRequestedAt) {
+		fields = append(fields, verificationeligibility.FieldRequestedAt)
+	}
+	if m.FieldCleared(verificationeligibility.FieldLastCheckedAt) {
+		fields = append(fields, verificationeligibility.FieldLastCheckedAt)
+	}
+	if m.FieldCleared(verificationeligibility.FieldNextCheckAt) {
+		fields = append(fields, verificationeligibility.FieldNextCheckAt)
+	}
+	if m.FieldCleared(verificationeligibility.FieldNotifiedAt) {
+		fields = append(fields, verificationeligibility.FieldNotifiedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VerificationEligibilityMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VerificationEligibilityMutation) ClearField(name string) error {
+	switch name {
+	case verificationeligibility.FieldRequestedAt:
+		m.ClearRequestedAt()
+		return nil
+	case verificationeligibility.FieldLastCheckedAt:
+		m.ClearLastCheckedAt()
+		return nil
+	case verificationeligibility.FieldNextCheckAt:
+		m.ClearNextCheckAt()
+		return nil
+	case verificationeligibility.FieldNotifiedAt:
+		m.ClearNotifiedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationEligibility nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VerificationEligibilityMutation) ResetField(name string) error {
+	switch name {
+	case verificationeligibility.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case verificationeligibility.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case verificationeligibility.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case verificationeligibility.FieldColor:
+		m.ResetColor()
+		return nil
+	case verificationeligibility.FieldState:
+		m.ResetState()
+		return nil
+	case verificationeligibility.FieldTier:
+		m.ResetTier()
+		return nil
+	case verificationeligibility.FieldTrustScore:
+		m.ResetTrustScore()
+		return nil
+	case verificationeligibility.FieldReasons:
+		m.ResetReasons()
+		return nil
+	case verificationeligibility.FieldScoreSource:
+		m.ResetScoreSource()
+		return nil
+	case verificationeligibility.FieldRequestedAt:
+		m.ResetRequestedAt()
+		return nil
+	case verificationeligibility.FieldLastCheckedAt:
+		m.ResetLastCheckedAt()
+		return nil
+	case verificationeligibility.FieldNextCheckAt:
+		m.ResetNextCheckAt()
+		return nil
+	case verificationeligibility.FieldNotifiedAt:
+		m.ResetNotifiedAt()
+		return nil
+	case verificationeligibility.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VerificationEligibility field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VerificationEligibilityMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VerificationEligibilityMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VerificationEligibilityMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VerificationEligibilityMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VerificationEligibilityMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VerificationEligibilityMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VerificationEligibilityMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown VerificationEligibility unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VerificationEligibilityMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown VerificationEligibility edge %s", name)
 }
