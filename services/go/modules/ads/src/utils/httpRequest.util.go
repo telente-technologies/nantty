@@ -11,6 +11,8 @@ import (
 
 	"zudomart/platform/httpserver"
 	"zudomart/platform/jwtauth"
+
+	"zudomart/platform/regionpricing"
 )
 
 type Responder struct{ Logger *slog.Logger }
@@ -82,4 +84,8 @@ func ClientCountry(request *http.Request) string {
 		return ""
 	}
 	return region
+}
+
+func ResolvePricingRegion(request *http.Request) regionpricing.Resolution {
+	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, regionpricing.DefaultTrustedCountryKey, ""))
 }

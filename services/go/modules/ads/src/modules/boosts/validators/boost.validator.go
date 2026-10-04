@@ -6,9 +6,10 @@ import (
 	"zudomart/modules/ads/src/modules/boosts/dtos"
 	"zudomart/modules/ads/src/modules/boosts/services"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
-func ValidateEstimate(request dtos.BoostEstimateRequest, minimumDailyMinor map[string]int64) error {
+func ValidateEstimate(request dtos.BoostEstimateRequest, minimumDailyMinor int64) error {
 	var issues []httpserver.ValidationIssue
 	if request.PostId == "" || len(request.PostId) > 80 {
 		issues = append(issues, httpserver.ValidationIssue{Path: "postId", Message: "Choose a post to boost."})
@@ -19,10 +20,9 @@ func ValidateEstimate(request dtos.BoostEstimateRequest, minimumDailyMinor map[s
 	if !slices.Contains(services.DurationDayOptions, request.DurationDays) {
 		issues = append(issues, httpserver.ValidationIssue{Path: "durationDays", Message: "Choose 1, 3, 7 or 14 days."})
 	}
-	minimum, known := minimumDailyMinor[request.DailyBudget.Currency]
-	if !known {
+	if !regionpricing.IsSupportedCurrency(request.DailyBudget.Currency) {
 		issues = append(issues, httpserver.ValidationIssue{Path: "dailyBudget.currency", Message: "This currency is not supported for boosts."})
-	} else if request.DailyBudget.AmountMinor < minimum {
+	} else if request.DailyBudget.AmountMinor < minimumDailyMinor {
 		issues = append(issues, httpserver.ValidationIssue{Path: "dailyBudget", Message: "Your daily budget is below the minimum."})
 	}
 	if request.Audience.Mode != "automatic" && request.Audience.Mode != "custom" {
@@ -37,7 +37,7 @@ func ValidateEstimate(request dtos.BoostEstimateRequest, minimumDailyMinor map[s
 	return nil
 }
 
-func ValidateCreate(request dtos.CreateBoostRequest, minimumDailyMinor map[string]int64) error {
+func ValidateCreate(request dtos.CreateBoostRequest, minimumDailyMinor int64) error {
 	if err := ValidateEstimate(request.BoostEstimateRequest, minimumDailyMinor); err != nil {
 		return err
 	}
