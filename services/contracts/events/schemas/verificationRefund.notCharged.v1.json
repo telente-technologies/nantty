@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verificationRefund.notCharged.v1.json",
+  "title": "verificationRefund.notCharged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseId",
+    "subscriptionId",
+    "accountId",
+    "channel",
+    "amount",
+    "path"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "path": {
+      "type": "string"
+    }
+  }
+}
