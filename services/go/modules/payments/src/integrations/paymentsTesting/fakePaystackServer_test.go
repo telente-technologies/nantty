@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -25,7 +26,8 @@ func TestServeFakePaystackForLocalApiSmoke(t *testing.T) {
 	fake.FundPlatformBalance("NGN", 1_000_000_000)
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /__smoke/charges/{reference}/complete", func(writer http.ResponseWriter, request *http.Request) {
-		transaction := fake.CompleteCheckout(request.PathValue("reference"), 0, 0, "card")
+		fee, _ := strconv.ParseInt(request.URL.Query().Get("fee"), 10, 64)
+		transaction := fake.CompleteCheckout(request.PathValue("reference"), 0, fee, "card")
 		if transaction == nil {
 			writeFakeJson(writer, http.StatusNotFound, map[string]any{"message": "unknown reference"})
 			return

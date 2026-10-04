@@ -46,6 +46,7 @@ func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integra
 	return integrations.NewPaystackProvider(integrations.PaystackSettings{
 		BaseUrl: paystack.BaseUrl, SecretKey: paystack.SecretKey, PreviousSecretKey: paystack.PreviousSecretKey, Channels: paystack.Channels,
 		TransferFeeBands: integrations.ParseTransferFeeBands(paystack.TransferFeeBands), MaximumAttempts: paystack.MaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
+		SupportedCurrencies: paystack.SupportedCurrencies,
 	})
 }
 

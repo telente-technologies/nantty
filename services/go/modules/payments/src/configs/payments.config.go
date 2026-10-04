@@ -51,6 +51,7 @@ type PaystackSettings struct {
 	SubaccountBearsFee     bool
 	MaximumAttempts        int
 	CardVerificationAmount int64
+	SupportedCurrencies    []string
 }
 
 type AppleStoreSettings struct {
@@ -85,6 +86,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 			SubaccountBearsFee:     reader.ReadStringOrDefault("PAYSTACK_SPLIT_BEARER", "subaccount") == "subaccount",
 			MaximumAttempts:        reader.ReadIntegerOrDefault("PAYSTACK_MAXIMUM_ATTEMPTS", 3),
 			CardVerificationAmount: int64(reader.ReadIntegerOrDefault("PAYSTACK_CARD_VERIFICATION_AMOUNT_MINOR", 5000)),
+			SupportedCurrencies:    reader.ReadCommaSeparatedListOrDefault("PAYSTACK_SUPPORTED_CURRENCIES", []string{"NGN", "USD"}),
 		},
 		DefaultProvider:             reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack"),
 		AllowedReturnUrls:           reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
