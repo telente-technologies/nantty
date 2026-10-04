@@ -4,6 +4,6 @@ import type { UnsaveItemCommand } from "./unsaveItem.command.js";
 
 export function createUnsaveItemHandler(context: HandlerContext): Handler<UnsaveItemCommand, void> {
   return async ({ userId, type, targetId }) => {
-    await savedItemRepository.delete(context.database.client, userId, type, targetId);
+    await context.database.client.$transaction((transaction) => savedItemRepository.unsaveAndCount(transaction, userId, type, targetId));
   };
 }

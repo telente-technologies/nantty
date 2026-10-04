@@ -15,6 +15,6 @@ export function createSaveItemHandler(context: HandlerContext): Handler<SaveItem
       await loadPostVisibleToViewer(context, userId, targetId);
     }
     if (collectionId !== undefined && (await saveCollectionRepository.findOwned(db, userId, collectionId)) === null) throw notFound("COLLECTION_NOT_FOUND", "Collection not found.");
-    await savedItemRepository.upsert(db, userId, type, targetId, collectionId);
+    await db.$transaction((transaction) => savedItemRepository.saveAndCount(transaction, userId, type, targetId, collectionId));
   };
 }

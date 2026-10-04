@@ -1,16 +1,36 @@
 import type { SavedItemType } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
+import { isUniqueConstraintViolationError } from "../../../utils/prismaError.util.js";
+import { adjustSaveCount } from "../services/saveCounter.service.js";
 
 export const savedItemRepository = {
-  upsert: (db: Db, userId: string, type: SavedItemType, targetId: string, collectionId: string | undefined) =>
-    db.savedItem.upsert({
-      where: { userId_type_targetId: { userId, type, targetId } },
-      create: { userId, type, targetId, ...(collectionId === undefined ? {} : { collectionId }) },
-      update: collectionId === undefined ? {} : { collectionId },
-    }),
+  saveAndCount: async (db: Db, userId: string, type: SavedItemType, targetId: string, collectionId: string | undefined): Promise<boolean> => {
+    const where = { userId_type_targetId: { userId, type, targetId } };
+    const existing = await db.savedItem.findUnique({ where });
+    if (existing !== null) {
+      if (collectionId !== undefined) await db.savedItem.update({ where, data: { collectionId } });
+      return false;
+    }
+    try {
+      await db.savedItem.create({ data: { userId, type, targetId, ...(collectionId === undefined ? {} : { collectionId }) } });
+    } catch (error) {
+      if (isUniqueConstraintViolationError(error)) return false;
+      throw error;
+    }
+    await adjustSaveCount(db, type, targetId, 1);
+    return true;
+  },
 
-  delete: (db: Db, userId: string, type: SavedItemType | undefined, targetId: string) =>
-    db.savedItem.deleteMany({ where: { userId, targetId, ...(type === undefined ? {} : { type }) } }),
+  unsaveAndCount: async (db: Db, userId: string, type: SavedItemType | undefined, targetId: string): Promise<number> => {
+    const rows = await db.savedItem.findMany({ where: { userId, targetId, ...(type === undefined ? {} : { type }) }, select: { id: true, type: true } });
+    let removed = 0;
+    for (const row of rows) {
+      if ((await db.savedItem.deleteMany({ where: { id: row.id } })).count === 0) continue;
+      removed += 1;
+      await adjustSaveCount(db, row.type, targetId, -1);
+    }
+    return removed;
+  },
 
   findById: (db: Db, id: string) => db.savedItem.findUnique({ where: { id } }),
 
