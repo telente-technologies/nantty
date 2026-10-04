@@ -72,6 +72,8 @@ export const soundsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/copyright/claims", ({ body }) => {
     const claim = body as CopyrightClaimInput;
     if (!claim.goodFaith) throw new ApiError(422, "The good-faith declaration is required", "GOOD_FAITH_REQUIRED");
+    if (!claim.accuracyDeclared) throw new ApiError(422, "The accuracy declaration is required", "ACCURACY_DECLARATION_REQUIRED");
+    if (claim.signatureName?.trim().toLowerCase() !== claim.claimantName?.trim().toLowerCase()) throw new ApiError(422, "Type your full name as your electronic signature", "SIGNATURE_REQUIRED");
     receivedCopyrightClaims.push(claim);
     if (claim.targetType === "sound") {
       const state = findMutableSoundState(claim.targetId);
