@@ -33,6 +33,8 @@ func (Store) Fields() []ent.Field {
 		field.Bool("verified").Default(false),
 		field.Int64("rating_sum").Default(0),
 		field.Int("rating_count").Default(0),
+		field.String("moderation_visibility").Default("visible"),
+		field.JSON("shipping_country_codes", []string{}).Optional(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

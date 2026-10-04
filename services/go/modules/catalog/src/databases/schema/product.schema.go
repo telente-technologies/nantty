@@ -26,6 +26,12 @@ type ProductVideo struct {
 	Title string `json:"title"`
 }
 
+type RegionalPrice struct {
+	Currency            string `json:"currency"`
+	PriceMinor          int64  `json:"priceMinor"`
+	CompareAtPriceMinor *int64 `json:"compareAtPriceMinor,omitempty"`
+}
+
 type Product struct {
 	ent.Schema
 }
@@ -60,6 +66,7 @@ func (Product) Fields() []ent.Field {
 		field.Int("rating_count").Default(0),
 		field.Int("like_count").Default(0),
 		field.Int("units_sold").Default(0),
+		field.String("moderation_visibility").Default("visible"),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
@@ -109,6 +116,7 @@ func (ProductVariant) Fields() []ent.Field {
 		field.Int64("price_minor"),
 		field.Int64("compare_at_price_minor").Optional().Nillable(),
 		field.Int64("cost_price_minor").Optional().Nillable(),
+		field.JSON("regional_prices", []RegionalPrice{}).Optional(),
 		field.Int("low_stock_threshold").Default(5),
 		field.Int("reorder_point").Default(5),
 		field.Int("reorder_quantity").Default(10),
