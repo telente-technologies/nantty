@@ -19,7 +19,7 @@ import { cartsService } from "@/services/carts.service";
 import { productsService } from "@/services/products.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
-import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
 import { buildProductPath, buildStorePath } from "@/utils/seoPaths.util";
 import type { BrandedProduct } from "@/types/brand.type";
 
@@ -133,7 +133,7 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
 
             <h1 className={styles.title}>{product.title}</h1>
 
-            <p className={styles.price}>{formatMoneyForDisplay(product.price)}</p>
+            <p className={styles.price}>{formatProductPriceForDisplay(product)}</p>
             {product.promo ? <Badge tone="success">{product.promo}</Badge> : null}
 
             {product.sizes.length > 0 ? (
