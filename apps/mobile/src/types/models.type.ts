@@ -4,6 +4,7 @@ import type { Money } from "./money.type";
 import type { Order } from "./cartOrder.type";
 import type { FollowState } from "./socialGraph.type";
 import type { MentionEntity } from "./mention.type";
+import type { TaggedUser } from "./taggedUser.type";
 import type { ReplyPolicy, ReplyRestriction, SensitiveContent } from "./postAudience.type";
 
 export type ID = string;
@@ -173,6 +174,8 @@ export interface Post {
   readonly isAiGenerated?: boolean;
   readonly location?: PostLocationTag | null;
   readonly mentions?: readonly MentionEntity[];
+  readonly taggedUsers?: readonly TaggedUser[];
+  readonly taggedUsersCount?: number;
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
   readonly linkPreview?: import("./chatSafety.type").LinkPreview | null;
