@@ -6,6 +6,7 @@ import type { RouteFactory } from "../../../utils/route.util.js";
 import { createGetModerationTargetPreviewHandler } from "../queries/getModerationTargetPreview/getModerationTargetPreview.handler.js";
 import { createGetPostSearchSourceHandler } from "../queries/getPostSearchSource/getPostSearchSource.handler.js";
 import { createGetSaveCountsHandler } from "../queries/getSaveCounts/getSaveCounts.handler.js";
+import { createGetAccountActivityCountsHandler } from "../queries/getAccountActivityCounts/getAccountActivityCounts.handler.js";
 import { createGetSoundSearchSourceHandler } from "../queries/getSoundSearchSource/getSoundSearchSource.handler.js";
 import { createListAdContentSourcesHandler } from "../queries/listAdContentSources/listAdContentSources.handler.js";
 import { createListAudienceEngagersHandler } from "../queries/listAudienceEngagers/listAudienceEngagers.handler.js";
@@ -18,6 +19,7 @@ const accountParams = schema.object({ accountId: identifier });
 const pageQuery = { cursor: schema.string().max(100).optional(), limit: schema.coerce.number().int().min(1).max(1000).optional() };
 const contentQuery = schema.object({ ownerUserId: identifier, storeId: schema.string().max(64).optional(), type: schema.enum(["post", "clip", "product", "live", "store"]).optional(), search: schema.string().max(100).optional(), ...pageQuery });
 const engagerQuery = schema.object({ source: schema.enum(["any_post", "clips_watched", "messaged"]), retentionDays: schema.coerce.number().int().min(1).max(365), ...pageQuery });
+const activityCountQuery = schema.object({ sinceDays: schema.coerce.number().int().min(1).max(3660).optional() });
 const saveCountQuery = schema.object({ type: schema.enum(["post", "video", "clip", "product"]), ids: schema.string().min(1).max(4000) });
 
 export function createInternalSourcesController(route: RouteFactory, internalToken: string, context: HandlerContext) {
@@ -28,6 +30,7 @@ export function createInternalSourcesController(route: RouteFactory, internalTok
   const listFollowers = createListAudienceFollowersHandler(context);
   const listEngagers = createListAudienceEngagersHandler(context);
   const getSaveCounts = createGetSaveCountsHandler(context);
+  const getActivityCounts = createGetAccountActivityCountsHandler(context);
   return {
     searchSource: requireInternalToken(internalToken, route({ authentication: "optional", params: searchSourceParams }, ({ params }) =>
       params.collection === "posts" ? getPost({ postId: params.id }) : getSound({ soundId: params.id }))),
@@ -38,6 +41,8 @@ export function createInternalSourcesController(route: RouteFactory, internalTok
       listFollowers({ accountId: params.accountId, cursor: query.cursor, limit: query.limit ?? 500 }))),
     engagers: requireInternalToken(internalToken, route({ authentication: "optional", params: accountParams, query: engagerQuery }, ({ params, query }) =>
       listEngagers({ accountId: params.accountId, source: query.source, since: new Date(context.clock.now().getTime() - query.retentionDays * 86_400_000), cursor: query.cursor, limit: query.limit ?? 500 }))),
+    activityCounts: requireInternalToken(internalToken, route({ authentication: "optional", params: accountParams, query: activityCountQuery }, ({ params, query }) =>
+      getActivityCounts({ accountId: params.accountId, sinceDays: query.sinceDays ?? 365 }))),
     saveCounts: requireInternalToken(internalToken, route({ authentication: "optional", query: saveCountQuery }, ({ query }) =>
       getSaveCounts({ type: query.type, targetIds: [...new Set(query.ids.split(",").map((id) => id.trim()).filter((id) => id !== ""))].slice(0, 200) }))),
   };
