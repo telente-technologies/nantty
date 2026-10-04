@@ -25,7 +25,7 @@ flowchart LR
     SK[16 skeleton modules]
   end
   RT[Phoenix /ws<br/>no event producers]
-  PY[apps/intelligence<br/>no consumer]
+  PY[services/python/intelligence<br/>no consumer]
   PG[(Postgres + PostGIS<br/>local compose)]
   Q[[LocalStack SNS/SQS]]
   LEG[apps/api monolith<br/>reference only]

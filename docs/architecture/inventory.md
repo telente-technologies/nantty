@@ -16,7 +16,7 @@ Status legend: **EXISTING** implemented code; **MOCK-ONLY** frontend mock contra
 | `apps/seller`, `apps/ads`, `apps/admin` | Next 16 seller dashboard, ads manager, admin console, each with a BFF | EXISTING UI, MOCK-ONLY data |
 | `apps/web` | Next 16 marketing site (6 pages, no BFF) | EXISTING |
 | `apps/api` | Zudojs modular monolith, reference only, "never deployed" per `services/README.md` | EXISTING (reference) |
-| `apps/intelligence` | FastAPI scoring service (Python 3.14) | EXISTING (stateless scoring), no event consumer |
+| `services/python/intelligence` | FastAPI scoring service (Python 3.14) | EXISTING (stateless scoring), no event consumer |
 | `apps/gift` | three mp4 files (`heart.mp4`, `rose.mp4`, `star.mp4`), no code | assets only |
 | `services/go` | Go 1.26 workspace: 14 platform libs, 18 module dirs, 6 deployables | EXISTING, one module complete |
 | `services/typescript/gateway` | Zudojs edge proxy | EXISTING, one upstream |
@@ -165,7 +165,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Tests | 6 ExUnit files: sqs consumer, domain event router, access token verifier, throttle, SigV4, topic authorizer. Run in Docker (`services/scripts/test-realtime-in-docker.sh`) | `test/realtime/*` |
 | Absent | chat persistence, message send path, groups/channels, encryption keys, conversation membership data source, presence list API, notification stream producer (all PROPOSED in `microservicesPlan.json` `elixir.realtime`) | |
 
-### 2.6 Python intelligence (`apps/intelligence`)
+### 2.6 Python intelligence (`services/python/intelligence`)
 
 | Item | Finding | Evidence |
 | --- | --- | --- |
@@ -174,7 +174,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Endpoints | `POST /v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/assign`, `GET /v1/experiments/{key}/metrics`, `/v1/audio/{fingerprints,match,sounds/status}` + health | `apiContract.md` section 7 |
 | Auth | HMAC-SHA256 signed requests (`x-zudo-timestamp`, `x-zudo-nonce`, `x-zudo-signature`), 300 s skew, Redis nonce store (fail closed 503), previous-secret rotation, token-bucket rate limit, 1 MiB/4 MiB body caps | `apiContract.md` section 2 |
 | Storage | Redis online features, Parquet feature logs, synthetic data simulators and offline metrics utils | `src/repositories`, `src/utils` |
-| Tests | 15 `test_*.py` files in `tests/` (counted by `find`); not run here | `apps/intelligence/tests` |
+| Tests | 15 `test_*.py` files in `tests/` (counted by `find`); not run here | `services/python/intelligence/tests` |
 | Callers | No Go/TS service calls it yet; `services/python/README.md` says it reads SQS queue `intelligence-domain-events`, but no SQS/boto code exists in `src` (grep). It ingests via `POST /v1/events` | `services/python/README.md`, grep |
 | Location | Plan says to move to `services/python/intelligence` later; currently `services/python/` is only a README | `services/python/README.md` |
 
@@ -272,8 +272,8 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | Bootstrap | schemas and roles per service, `zudomart_test` and `atlas_dev` DBs, PostGIS | `infra/local/postgres/create-databases.sh` |
 | Observability | Go OTLP/gRPC tracing opt-in by env, collector config at `infra/local/otel/collector.yaml`, Jaeger UI :16686; Elixir has `telemetry.ex` metrics only; gateway has no tracing; no metrics backend, no log shipping | `platform/telemetry`, `infra/local/otel` |
 | AWS | `infra/aws/README.md` only: planned Terraform modules (network, ecs-cluster, ecs-service, alb, aurora-postgres, elasticache, messaging, step-functions, media, livekit, secrets, observability, opensearch, clickhouse), envs staging/production; "Nothing here is applied" | README |
-| Dockerfiles | 6 Go (one per deployable), gateway, realtime, `apps/api`, `apps/intelligence`. None for the Next apps | find |
-| CI | `.github/workflows/backend.yml`: file-length and no-raw-SQL checks; Go build/vet/test with compose Postgres plus `govulncheck`; gateway typecheck+test; realtime tests in Docker. `androidApk.yml`: mobile APK build. No CI for the Next apps (no lint/typecheck/build job), `apps/api`, or `apps/intelligence`; no deploy pipeline; no `pnpm audit` job though root script exists | workflows |
+| Dockerfiles | 6 Go (one per deployable), gateway, realtime, `apps/api`, `services/python/intelligence`. None for the Next apps | find |
+| CI | `.github/workflows/backend.yml`: file-length and no-raw-SQL checks; Go build/vet/test with compose Postgres plus `govulncheck`; gateway typecheck+test; realtime tests in Docker. `androidApk.yml`: mobile APK build. No CI for the Next apps (no lint/typecheck/build job), `apps/api`, or `services/python/intelligence`; no deploy pipeline; no `pnpm audit` job though root script exists | workflows |
 | Scripts | `services/scripts/{check-backend-file-lengths,check-no-raw-sql-in-typescript,test-go-workspace,test-realtime-in-docker}.sh` | |
 | Env handling | `*.example` env files per app and service; real `.env*` ignored by `.gitignore`; Go config reader fails fast on missing required vars; BFFs require a session secret; no secrets-manager client code (AWS Secrets Manager only in the AWS README plan) | `.gitignore`, `services/go/platform/config` |
 
@@ -315,7 +315,7 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | --- | --- | --- | --- |
 | 1 | `services/README.md` and AWS README list 6 Go deployables as ECS services | all 6 compile, but only go-identity serves anything (auth); 16 of 18 modules are 11-line skeletons; `live` has schema and no handlers | `services/go/modules/*` |
 | 2 | `backendPlan.md` section 0 says the `pos` block in `microservicesPlan.json` must go | already absent from the JSON; the seller UI roles were also cleaned (no `cashier`/`pos:*` left in apps/seller/src, verified 2026-10-03) | grep, `backendPlan.md` 2.13 |
-| 3 | `services/python/README.md`: intelligence reads SQS `intelligence-domain-events` | queue exists in LocalStack; no consumer code in `apps/intelligence` | grep for sqs/boto |
+| 3 | `services/python/README.md`: intelligence reads SQS `intelligence-domain-events` | queue exists in LocalStack; no consumer code in `services/python/intelligence` | grep for sqs/boto |
 | 4 | AsyncAPI: consumers filter by `eventType` | local subscriptions have no filter policy and use raw delivery | `create-topics-and-queues.sh` |
 | 5 | Plan treats Elixir as owner of chat | `message.created` is routed but no component produces it; `conversation:*` authorization denies everyone by default | `topic_authorizer.ex` |
 | 6 | Gateway route `/api/v1/auth/sessions` is declared | no such route in go auth module | `upstream.routes.ts` vs `auth.routes.go` |

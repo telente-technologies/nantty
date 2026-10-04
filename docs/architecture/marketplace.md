@@ -12,7 +12,7 @@ Status date: 2026-10-03. Labels: **EXISTING**, **MOCK-ONLY**, **PROPOSED**, **OP
 | Buyer cart, checkout, orders, escrow, disputes screens | MOCK-ONLY | `apps/mobile/src/screens/{cart,checkout,orders,escrow,disputes}`, `apps/webapp` cart, checkout, orders |
 | Seller dashboard: orders, products, inventory, delivery, wallet (escrow, settlements, withdraw), disputes, returns | MOCK-ONLY, 88 pages | `apps/seller` (inventory 1.1) |
 | Shipping profiles, zones, rules | PROPOSED (`backendPlan.md` 4.6); seller delivery pages MOCK-ONLY | `apps/seller` delivery |
-| Python intelligence ranking and order risk scoring | EXISTING service, not called | `apps/intelligence/src/modules/{recommendations,risk}` |
+| Python intelligence ranking and order risk scoring | EXISTING service, not called | `services/python/intelligence/src/modules/{recommendations,risk}` |
 
 ## 2. End-to-end flow
 

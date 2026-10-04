@@ -83,7 +83,7 @@ Levers: sample every 10 s when a live has fewer than N viewers, skip frames whos
 
 | Piece | Status |
 | --- | --- |
-| Hash-matching hook | `CsamHashMatchProvider` interface in `apps/intelligence/src/modules/live_safety/services/csam_hash_match_interface_service.py`. `INTELLIGENCE_LIVE_SAFETY_CSAM_HASH_MATCHING_ENABLED=false` by default; enabling it without a vetted PhotoDNA-style provider refuses to start. Matching runs before any other processor and a matched frame is never sent to Rekognition |
+| Hash-matching hook | `CsamHashMatchProvider` interface in `services/python/intelligence/src/modules/live_safety/services/csam_hash_match_interface_service.py`. `INTELLIGENCE_LIVE_SAFETY_CSAM_HASH_MATCHING_ENABLED=false` by default; enabling it without a vetted PhotoDNA-style provider refuses to start. Matching runs before any other processor and a matched frame is never sent to Rekognition |
 | Score | The score carries `hashMatch: true`, the provider name and match reference, no labels |
 | Evidence preservation | go-trust copies the frame into the private KYC bucket under `trust-evidence/live/` with SSE-KMS, object-lock legal hold and a `classification=restricted-legal` tag. The go-trust role can write there but cannot read it back; access is for a dedicated legal role (to be created) only |
 | Display | The admin queue never shows a hash-matched frame or its labels; it shows a restricted notice and asks the moderator to escalate to legal |
