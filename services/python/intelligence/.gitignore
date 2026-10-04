@@ -1,6 +1,6 @@
 .venv/
-data/
-model_registry/
+/data/
+/model_registry/
 __pycache__/
 *.pyc
 .mypy_cache/
