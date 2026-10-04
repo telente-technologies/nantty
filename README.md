@@ -184,7 +184,7 @@ Real screens from the mobile design, shown on the marketing site (`apps/web/publ
 | **Ads Manager** | [`apps/ads`](apps/ads) | `ads.zudomart.com` | 3300 | Advertisers and agencies | UI built, mock data by default |
 | **Admin** | [`apps/admin`](apps/admin) | `admin.zudomart.com` | 3400 | Zudomart staff: trust, money, legal, support, config | UI built, mock data by default |
 | **Marketing site** | [`apps/web`](apps/web) | `zudomart.com` | Next default | Public landing, sellers page, legal pages | Built (static, no API) |
-| **Intelligence** | [`apps/intelligence`](apps/intelligence) | internal only | 8090 | Ranking, recommendations, ads, fraud and risk scores | Built (stateless scoring), not yet called in production paths |
+| **Intelligence** | [`services/python/intelligence`](services/python/intelligence) | internal only | 8090 | Ranking, recommendations, ads, fraud and risk scores | Built (stateless scoring), not yet called in production paths |
 
 <details>
 <summary><b>What each Next.js app shares</b></summary>
@@ -550,7 +550,7 @@ Every backend stack (Go, TypeScript, Elixir, Python) uses the same Zudojs layout
 | pnpm | 11 or newer |
 | Docker + Compose | recent (Elixir runs in the `elixir:1.19` image, no local install needed) |
 | Go | 1.26 |
-| Python + uv | 3.14 (only for `apps/intelligence`) |
+| Python + uv | 3.14 (only for `services/python/intelligence`) |
 
 ### 1. Install
 
@@ -640,7 +640,7 @@ Only `*.example` files are committed. Production secrets come from AWS Secrets M
 | `services/typescript/{social,notifications}/.env.example` | Prisma database URL and schema, RabbitMQ, SES (LocalStack locally) |
 | [`apps/mobile/.env.example`](apps/mobile/.env.example) | `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_REAL_API_PREFIXES` |
 | [`apps/webapp/.env.example`](apps/webapp/.env.example) (and studio, seller, ads, admin) | `<APP>_API_URL`, `<APP>_USE_MOCKS`, `<APP>_REAL_API_PREFIXES`, `<APP>_SESSION_SECRET`, `NEXT_PUBLIC_*` site URLs |
-| [`apps/intelligence/.env.example`](apps/intelligence/.env.example) | `INTELLIGENCE_SHARED_SECRET` (HMAC requests), `INTELLIGENCE_REDIS_URL`, model registry and signing secret, rate limits |
+| [`services/python/intelligence/.env.example`](services/python/intelligence/.env.example) | `INTELLIGENCE_SHARED_SECRET` (HMAC requests), `INTELLIGENCE_REDIS_URL`, model registry and signing secret, rate limits |
 
 <sub>`services/go/.env.example` still lists legacy `BACHS_*` keys from an abandoned provider; they are being removed (see [docs/checkoutPaymentFlowPlan.md](docs/checkoutPaymentFlowPlan.md) section 12).</sub>
 
@@ -789,7 +789,7 @@ Zudomart is a private, owner-led project. If you have been invited to contribute
 | Trust and ops | [Security](docs/architecture/security.md), [Privacy](docs/architecture/privacy.md), [Fraud](docs/architecture/fraud.md), [Observability](docs/architecture/observability.md), [DevOps](docs/architecture/devops.md), [Disaster recovery](docs/architecture/disaster-recovery.md), [SECURITY.md](SECURITY.md) |
 | Backend services | [services/README.md](services/README.md), [Zudojs structure](services/zudojsStructure.md), [Backend plan](docs/backendPlan.md), [Service map](docs/architecture/microservicesPlan.json), [AWS layout](infra/aws/README.md) |
 | Front ends | [Frontend wiring](docs/integrations/frontendWiring.md), [Working plans](docs/plans.md), [Dark mode plan](docs/darkModePlan.md), [Changelog](docs/CHANGELOG.md) |
-| API contracts | [Seller](apps/seller/apiContract.md), [Ads](apps/ads/apiContract.md), [Admin](apps/admin/apiContract.md), [Intelligence](apps/intelligence/apiContract.md), [Seller README](apps/seller/README.md), [Intelligence README](apps/intelligence/README.md) |
+| API contracts | [Seller](apps/seller/apiContract.md), [Ads](apps/ads/apiContract.md), [Admin](apps/admin/apiContract.md), [Intelligence](services/python/intelligence/apiContract.md), [Seller README](apps/seller/README.md), [Intelligence README](services/python/intelligence/README.md) |
 
 ---
 
