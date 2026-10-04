@@ -93,6 +93,8 @@ func translateMoneyError(err error) error {
 		return interfaces.ErrInsufficientCoins
 	case reason == "CANNOT_GIFT_SELF":
 		return interfaces.ErrCannotGiftSelf
+	case reason == "RECIPIENT_CANNOT_RECEIVE_GIFTS":
+		return interfaces.ErrRecipientCannotReceiveGifts
 	case reason == "IDEMPOTENCY_KEY_REUSED":
 		return interfaces.ErrIdempotencyKeyReused
 	case reason == "BATTLE_ALREADY_SETTLED_DIFFERENTLY":
