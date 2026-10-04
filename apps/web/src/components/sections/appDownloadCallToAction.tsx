@@ -1,6 +1,8 @@
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
+import { storeLinks } from "@/lib/siteConfig.config";
 import type { WaitlistRole } from "@/types/waitlist.types";
 
-import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./appDownloadCallToAction.module.css";
 import { WaitlistEmailSignupForm } from "./waitlistForm";
@@ -32,22 +34,7 @@ export function AppDownloadCallToActionPanel({
             </h2>
             <p className={styles.description}>{description}</p>
             <WaitlistEmailSignupForm source={source} defaultRole={defaultRole} showRolePicker tone="dark" />
-            <ul className={styles.storeList} aria-label="Coming soon to">
-              <li className={styles.storeBadge}>
-                <FigmaIconTintedWithCurrentColor name="apple24" size={22} />
-                <span>
-                  <small>Coming soon</small>
-                  App Store
-                </span>
-              </li>
-              <li className={styles.storeBadge}>
-                <FigmaIconTintedWithCurrentColor name="play24" size={20} />
-                <span>
-                  <small>Coming soon</small>
-                  Google Play
-                </span>
-              </li>
-            </ul>
+            <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
           </div>
           <div className={styles.phoneColumn}>
             <PhoneFrameWithAppScreen screen="homeMartScreen" alt="Zudomart Mart tab with Sales of the Day, Featured Brands and New Arrivals" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />

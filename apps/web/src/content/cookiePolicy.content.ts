@@ -1,5 +1,5 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
-import { contactEmailDisplayText } from "@/lib/siteConfig.config";
+import { emailAddresses } from "@/lib/siteConfig.config";
 
 export const cookiePolicySections: readonly LegalDocumentSection[] = [
   {
@@ -37,7 +37,7 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
   {
     id: "contact",
     heading: "Contact us",
-    paragraphs: [`Questions about cookies: ${contactEmailDisplayText}.`],
+    paragraphs: [`Questions about cookies: ${emailAddresses.privacy}.`],
   },
   {
     id: "updates",
