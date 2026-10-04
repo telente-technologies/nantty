@@ -29,7 +29,9 @@ defmodule Realtime.Events.DomainEventRouter do
     "liveComment.unpinned" => "live.comment.unpinned",
     "liveRoomSettings.updated" => "live.room.settings",
     "overlayScene.published" => "overlay.scene.published",
-    "overlayScene.unpublished" => "overlay.scene.unpublished"
+    "overlayScene.unpublished" => "overlay.scene.unpublished",
+    "liveSafety.paused" => "live.safety.paused",
+    "liveSafety.resumed" => "live.safety.resumed"
   }
 
   @private_user_event_names %{
@@ -42,7 +44,8 @@ defmodule Realtime.Events.DomainEventRouter do
   @host_recording_event_names %{
     "liveRecording.started" => "live.recording.started",
     "liveRecording.completed" => "live.recording.ready",
-    "liveRecording.failed" => "live.recording.failed"
+    "liveRecording.failed" => "live.recording.failed",
+    "liveSafety.hostNotice" => "live.safety.hostNotice"
   }
 
   def route_domain_event_to_topic(%{
@@ -61,11 +64,15 @@ defmodule Realtime.Events.DomainEventRouter do
 
   def route_domain_event_to_topic(%{"type" => type, "data" => %{"userId" => user_id} = data})
       when is_map_key(@private_user_event_names, type) and is_binary(user_id) and user_id != "",
-      do: {:ok, "user:#{user_id}", Map.put(data, "type", Map.fetch!(@private_user_event_names, type))}
+      do:
+        {:ok, "user:#{user_id}",
+         Map.put(data, "type", Map.fetch!(@private_user_event_names, type))}
 
   def route_domain_event_to_topic(%{"type" => type, "data" => %{"hostId" => host_id} = data})
       when is_map_key(@host_recording_event_names, type) and is_binary(host_id) and host_id != "",
-      do: {:ok, "user:#{host_id}", Map.put(data, "type", Map.fetch!(@host_recording_event_names, type))}
+      do:
+        {:ok, "user:#{host_id}",
+         Map.put(data, "type", Map.fetch!(@host_recording_event_names, type))}
 
   def route_domain_event_to_topic(%{"type" => type, "data" => %{"liveId" => live_id} = data})
       when is_map_key(@live_event_names, type) and is_binary(live_id) and live_id != "",

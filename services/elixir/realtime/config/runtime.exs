@@ -14,7 +14,7 @@ end
 
 if config_env() != :test do
   config :realtime, :live_internal,
-    url: System.get_env("LIVE_INTERNAL_URL", "http://localhost:8110"),
+    url: System.get_env("LIVE_INTERNAL_URL", "http://localhost:8102"),
     token: System.get_env("LIVE_INTERNAL_API_TOKEN", "")
 end
 
