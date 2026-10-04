@@ -49,6 +49,7 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
         <nav className={styles.navLinks} aria-label="Studio sections">
           <Link href="/lives" className={styles.navLink}>Lives</Link>
           <Link href="/earnings" className={styles.navLink}>Earnings</Link>
+          <a href={`${process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com"}/help/live`} className={styles.navLink} target="_blank" rel="noopener noreferrer">Help</a>
         </nav>
         <div className={styles.account}>
           <ThemeSwitcher iconOnly className={styles.themeSwitcher} />
