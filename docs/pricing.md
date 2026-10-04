@@ -6,6 +6,7 @@ Status: recommended defaults, 4 October 2026, replacing the Nigeria-only sheet o
 
 - Prices differ per **pricing region**: Nigeria (NG, NGN), Ghana (GH, GHS), Kenya (KE, KES), South Africa (ZA, ZAR), United Kingdom (GB, GBP), Eurozone (EU, EUR; the 20 euro countries share one price), United States (US, USD).
 - **Any other country pays the US price in USD.**
+- A rejected verification refunds only the checkmark share on plans that sell more than the checkmark (§2.1).
 - Regional prices cover every checkmark (Blue Essential/Verified/Premium, Gold through seller Pro/Business and Gold-only, Black), the Premium user subscription (= Blue Premium), coin packs, suggested creator-subscription bands, boosts, and ad floors and minimum budgets.
 - **The creator ad revenue share (40%) is the same in every region.** So is the creator subscription share (80% of net) and the gift share tiers.
 - **How the region is chosen** (`platform/regionpricing`):
@@ -44,6 +45,10 @@ App = Apple and Google (same price on both). Seller plans, Gold-only and Black a
 | Black | ₦480,000 | GH₵5,760 | KSh 96,000 | R14,399.99 | £1,430.99 | €1,622.99 | $1,622.99 |
 
 The Blue+Gold bundle (15% off Gold, max 3 businesses, never stacks with yearly, never on Black) applies in every region on the web price.
+
+### 2.1 Checkmark share on a rejected verification
+
+When a seller plan (Pro, Business) or Premium is bought and the identity check is rejected, the plan keeps running and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price in the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), capped at the amount paid (so a discounted bundle tier never refunds more than it cost). Example, Nigeria on web: Pro rejected refunds ₦3,000 of ₦5,000 (monthly); Premium refunds ₦2,500 of ₦4,500. Standalone Blue, Gold-only, Black and bundle tiers get the full refund. Renewals still charge the full plan price until a checkmark-less renewal price exists (follow-up in plans.md §53.6).
 
 ### 2.2 Price points
 
