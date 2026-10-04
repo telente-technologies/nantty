@@ -63,7 +63,37 @@ type CopyrightClaim struct {
 	StrikeID *uuid.UUID `json:"strike_id,omitempty"`
 	// IdempotencyKey holds the value of the "idempotency_key" field.
 	IdempotencyKey *string `json:"idempotency_key,omitempty"`
-	selectValues   sql.SelectValues
+	// ClaimScope holds the value of the "claim_scope" field.
+	ClaimScope copyrightclaim.ClaimScope `json:"claim_scope,omitempty"`
+	// ClaimantPhone holds the value of the "claimant_phone" field.
+	ClaimantPhone string `json:"claimant_phone,omitempty"`
+	// ClaimantAddress holds the value of the "claimant_address" field.
+	ClaimantAddress string `json:"claimant_address,omitempty"`
+	// OriginalWorkURL holds the value of the "original_work_url" field.
+	OriginalWorkURL string `json:"original_work_url,omitempty"`
+	// OriginalWorkMediaID holds the value of the "original_work_media_id" field.
+	OriginalWorkMediaID string `json:"original_work_media_id,omitempty"`
+	// ProofUrls holds the value of the "proof_urls" field.
+	ProofUrls []string `json:"proof_urls,omitempty"`
+	// ProofMediaIds holds the value of the "proof_media_ids" field.
+	ProofMediaIds []string `json:"proof_media_ids,omitempty"`
+	// InfringingSegments holds the value of the "infringing_segments" field.
+	InfringingSegments []byte `json:"infringing_segments,omitempty"`
+	// AccuracyDeclared holds the value of the "accuracy_declared" field.
+	AccuracyDeclared bool `json:"accuracy_declared,omitempty"`
+	// SignatureName holds the value of the "signature_name" field.
+	SignatureName string `json:"signature_name,omitempty"`
+	// SignedAt holds the value of the "signed_at" field.
+	SignedAt *time.Time `json:"signed_at,omitempty"`
+	// Remedy holds the value of the "remedy" field.
+	Remedy copyrightclaim.Remedy `json:"remedy,omitempty"`
+	// RemedyState holds the value of the "remedy_state" field.
+	RemedyState copyrightclaim.RemedyState `json:"remedy_state,omitempty"`
+	// TakedownDeadlineAt holds the value of the "takedown_deadline_at" field.
+	TakedownDeadlineAt *time.Time `json:"takedown_deadline_at,omitempty"`
+	// WarningID holds the value of the "warning_id" field.
+	WarningID    *uuid.UUID `json:"warning_id,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -71,15 +101,17 @@ func (*CopyrightClaim) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case copyrightclaim.FieldClaimantUserID, copyrightclaim.FieldInfringerID, copyrightclaim.FieldStrikeID:
+		case copyrightclaim.FieldClaimantUserID, copyrightclaim.FieldInfringerID, copyrightclaim.FieldStrikeID, copyrightclaim.FieldWarningID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case copyrightclaim.FieldClaimedUrls, copyrightclaim.FieldTargetPreview, copyrightclaim.FieldAudioMatches, copyrightclaim.FieldDecision:
+		case copyrightclaim.FieldClaimedUrls, copyrightclaim.FieldTargetPreview, copyrightclaim.FieldAudioMatches, copyrightclaim.FieldDecision, copyrightclaim.FieldProofUrls, copyrightclaim.FieldProofMediaIds, copyrightclaim.FieldInfringingSegments:
 			values[i] = new([]byte)
+		case copyrightclaim.FieldAccuracyDeclared:
+			values[i] = new(sql.NullBool)
 		case copyrightclaim.FieldTopAudioMatchPercent:
 			values[i] = new(sql.NullInt64)
-		case copyrightclaim.FieldClaimantName, copyrightclaim.FieldClaimantOrganization, copyrightclaim.FieldClaimantEmail, copyrightclaim.FieldRepresents, copyrightclaim.FieldWorkTitle, copyrightclaim.FieldWorkType, copyrightclaim.FieldTargetType, copyrightclaim.FieldTargetID, copyrightclaim.FieldTargetFlag, copyrightclaim.FieldStatus, copyrightclaim.FieldRightsBasis, copyrightclaim.FieldSwornStatement, copyrightclaim.FieldIdempotencyKey:
+		case copyrightclaim.FieldClaimantName, copyrightclaim.FieldClaimantOrganization, copyrightclaim.FieldClaimantEmail, copyrightclaim.FieldRepresents, copyrightclaim.FieldWorkTitle, copyrightclaim.FieldWorkType, copyrightclaim.FieldTargetType, copyrightclaim.FieldTargetID, copyrightclaim.FieldTargetFlag, copyrightclaim.FieldStatus, copyrightclaim.FieldRightsBasis, copyrightclaim.FieldSwornStatement, copyrightclaim.FieldIdempotencyKey, copyrightclaim.FieldClaimScope, copyrightclaim.FieldClaimantPhone, copyrightclaim.FieldClaimantAddress, copyrightclaim.FieldOriginalWorkURL, copyrightclaim.FieldOriginalWorkMediaID, copyrightclaim.FieldSignatureName, copyrightclaim.FieldRemedy, copyrightclaim.FieldRemedyState:
 			values[i] = new(sql.NullString)
-		case copyrightclaim.FieldCreatedAt:
+		case copyrightclaim.FieldCreatedAt, copyrightclaim.FieldSignedAt, copyrightclaim.FieldTakedownDeadlineAt:
 			values[i] = new(sql.NullTime)
 		case copyrightclaim.FieldID:
 			values[i] = new(uuid.UUID)
@@ -243,6 +275,103 @@ func (_m *CopyrightClaim) assignValues(columns []string, values []any) error {
 				_m.IdempotencyKey = new(string)
 				*_m.IdempotencyKey = value.String
 			}
+		case copyrightclaim.FieldClaimScope:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field claim_scope", values[i])
+			} else if value.Valid {
+				_m.ClaimScope = copyrightclaim.ClaimScope(value.String)
+			}
+		case copyrightclaim.FieldClaimantPhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field claimant_phone", values[i])
+			} else if value.Valid {
+				_m.ClaimantPhone = value.String
+			}
+		case copyrightclaim.FieldClaimantAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field claimant_address", values[i])
+			} else if value.Valid {
+				_m.ClaimantAddress = value.String
+			}
+		case copyrightclaim.FieldOriginalWorkURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field original_work_url", values[i])
+			} else if value.Valid {
+				_m.OriginalWorkURL = value.String
+			}
+		case copyrightclaim.FieldOriginalWorkMediaID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field original_work_media_id", values[i])
+			} else if value.Valid {
+				_m.OriginalWorkMediaID = value.String
+			}
+		case copyrightclaim.FieldProofUrls:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field proof_urls", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ProofUrls); err != nil {
+					return fmt.Errorf("unmarshal field proof_urls: %w", err)
+				}
+			}
+		case copyrightclaim.FieldProofMediaIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field proof_media_ids", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ProofMediaIds); err != nil {
+					return fmt.Errorf("unmarshal field proof_media_ids: %w", err)
+				}
+			}
+		case copyrightclaim.FieldInfringingSegments:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field infringing_segments", values[i])
+			} else if value != nil {
+				_m.InfringingSegments = *value
+			}
+		case copyrightclaim.FieldAccuracyDeclared:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field accuracy_declared", values[i])
+			} else if value.Valid {
+				_m.AccuracyDeclared = value.Bool
+			}
+		case copyrightclaim.FieldSignatureName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field signature_name", values[i])
+			} else if value.Valid {
+				_m.SignatureName = value.String
+			}
+		case copyrightclaim.FieldSignedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field signed_at", values[i])
+			} else if value.Valid {
+				_m.SignedAt = new(time.Time)
+				*_m.SignedAt = value.Time
+			}
+		case copyrightclaim.FieldRemedy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remedy", values[i])
+			} else if value.Valid {
+				_m.Remedy = copyrightclaim.Remedy(value.String)
+			}
+		case copyrightclaim.FieldRemedyState:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remedy_state", values[i])
+			} else if value.Valid {
+				_m.RemedyState = copyrightclaim.RemedyState(value.String)
+			}
+		case copyrightclaim.FieldTakedownDeadlineAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field takedown_deadline_at", values[i])
+			} else if value.Valid {
+				_m.TakedownDeadlineAt = new(time.Time)
+				*_m.TakedownDeadlineAt = value.Time
+			}
+		case copyrightclaim.FieldWarningID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field warning_id", values[i])
+			} else if value.Valid {
+				_m.WarningID = new(uuid.UUID)
+				*_m.WarningID = *value.S.(*uuid.UUID)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -353,6 +482,57 @@ func (_m *CopyrightClaim) String() string {
 	if v := _m.IdempotencyKey; v != nil {
 		builder.WriteString("idempotency_key=")
 		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("claim_scope=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClaimScope))
+	builder.WriteString(", ")
+	builder.WriteString("claimant_phone=")
+	builder.WriteString(_m.ClaimantPhone)
+	builder.WriteString(", ")
+	builder.WriteString("claimant_address=")
+	builder.WriteString(_m.ClaimantAddress)
+	builder.WriteString(", ")
+	builder.WriteString("original_work_url=")
+	builder.WriteString(_m.OriginalWorkURL)
+	builder.WriteString(", ")
+	builder.WriteString("original_work_media_id=")
+	builder.WriteString(_m.OriginalWorkMediaID)
+	builder.WriteString(", ")
+	builder.WriteString("proof_urls=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProofUrls))
+	builder.WriteString(", ")
+	builder.WriteString("proof_media_ids=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProofMediaIds))
+	builder.WriteString(", ")
+	builder.WriteString("infringing_segments=")
+	builder.WriteString(fmt.Sprintf("%v", _m.InfringingSegments))
+	builder.WriteString(", ")
+	builder.WriteString("accuracy_declared=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AccuracyDeclared))
+	builder.WriteString(", ")
+	builder.WriteString("signature_name=")
+	builder.WriteString(_m.SignatureName)
+	builder.WriteString(", ")
+	if v := _m.SignedAt; v != nil {
+		builder.WriteString("signed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("remedy=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Remedy))
+	builder.WriteString(", ")
+	builder.WriteString("remedy_state=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RemedyState))
+	builder.WriteString(", ")
+	if v := _m.TakedownDeadlineAt; v != nil {
+		builder.WriteString("takedown_deadline_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.WarningID; v != nil {
+		builder.WriteString("warning_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
 	return builder.String()

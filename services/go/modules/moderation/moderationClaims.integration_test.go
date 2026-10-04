@@ -11,26 +11,38 @@ import (
 )
 
 func copyrightClaimBody(targetType, targetId string) map[string]any {
-	return map[string]any{"targetType": targetType, "targetId": targetId, "workDescription": "My song Lagos Nights", "ownershipStatement": "I wrote and recorded it", "contactEmail": "owner@label.com", "goodFaith": true}
+	return map[string]any{
+		"targetType": targetType, "targetId": targetId, "workDescription": "My song Lagos Nights", "ownershipStatement": "I wrote and recorded it", "contactEmail": "owner@label.com", "goodFaith": true,
+		"claimantName": "Ada Obi", "originalWorkUrl": "https://music.example/lagos-nights", "proofUrls": []string{"https://registry.example/certificates/1"},
+		"segments": []map[string]float64{{"startSeconds": 2, "endSeconds": 31}}, "accuracyDeclared": true, "signatureName": "Ada Obi",
+	}
 }
 
 func TestCopyrightClaimLifecycleFromFilingToCounterNoticeAndRestoration(t *testing.T) {
 	harness := startModerationAgainstFreshSchema(t)
 	uploader := uuid.NewString()
-	harness.targets.own("clip", "clip-1", uploader)
+	harness.targets.own("live", "clip-1", uploader)
 	_, claimantToken := harness.reporter()
-	harness.expect("POST", "/api/v1/copyright/claims", "", copyrightClaimBody("clip", "clip-1"), http.StatusUnauthorized)
-	noGoodFaith := copyrightClaimBody("clip", "clip-1")
+	harness.expect("POST", "/api/v1/copyright/claims", "", copyrightClaimBody("live", "clip-1"), http.StatusUnauthorized)
+	noGoodFaith := copyrightClaimBody("live", "clip-1")
 	noGoodFaith["goodFaith"] = false
 	if got := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, noGoodFaith, http.StatusUnprocessableEntity); got["code"] != "GOOD_FAITH_REQUIRED" {
 		t.Fatalf("unexpected %v", got)
 	}
-	badEmail := copyrightClaimBody("clip", "clip-1")
+	noSignature := copyrightClaimBody("live", "clip-1")
+	noSignature["signatureName"] = ""
+	if got := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, noSignature, http.StatusUnprocessableEntity); got["code"] != "SIGNATURE_REQUIRED" {
+		t.Fatalf("unexpected %v", got)
+	}
+	noProof := copyrightClaimBody("live", "clip-1")
+	delete(noProof, "proofUrls")
+	harness.expect("POST", "/api/v1/copyright/claims", claimantToken, noProof, http.StatusBadRequest)
+	badEmail := copyrightClaimBody("live", "clip-1")
 	badEmail["contactEmail"] = "nope"
 	harness.expect("POST", "/api/v1/copyright/claims", claimantToken, badEmail, http.StatusBadRequest)
 	key := []string{"Idempotency-Key", "claim-key-1"}
-	receipt := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, copyrightClaimBody("clip", "clip-1"), http.StatusCreated, key...)
-	replay := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, copyrightClaimBody("clip", "clip-1"), http.StatusCreated, key...)
+	receipt := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, copyrightClaimBody("live", "clip-1"), http.StatusCreated, key...)
+	replay := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, copyrightClaimBody("live", "clip-1"), http.StatusCreated, key...)
 	if receipt["status"] != "received" || receipt["claimId"] != replay["claimId"] {
 		t.Fatalf("the receipt matches the mobile contract and replays: %v %v", receipt, replay)
 	}
@@ -119,7 +131,7 @@ func TestRejectedCounterNoticeKeepsTheTakedown(t *testing.T) {
 	harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "matches the master"}, http.StatusOK)
 	created := harness.expect("POST", "/api/v1/copyright/claims/"+claimId+"/counter-notices", harness.tokens.SignAccountAccessToken(t, uploader), map[string]any{"statement": "licensed sample", "contactEmail": "me@example.com", "goodFaith": true}, http.StatusCreated)
 	back := harness.expect("POST", base+"/counter-notices/"+created["noticeId"].(string)+"/reject", reviewer, map[string]string{"reason": "no licence shown"}, http.StatusOK)
-	if back["status"] != "UPHELD" || back["targetFlag"] != "TAKEN_DOWN" {
+	if back["status"] != "UPHELD" || back["targetFlag"] != "MUTED" || back["remedy"] != "AUDIO_MUTED" {
 		t.Fatalf("a rejected counter-notice returns the claim to upheld: %v", back)
 	}
 }
