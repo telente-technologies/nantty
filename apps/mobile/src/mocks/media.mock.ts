@@ -217,7 +217,7 @@ export const mediaMocks: MockRoute[] = [
       recordVideoReplyNotification(post.author, videoReplyTarget.commenterUserId);
     }
     if (post.kind === "clip") {
-      appendMockClip({ ...post, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
+      appendMockClip({ ...post, shares: 0, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
     }
     return post;
   }),
