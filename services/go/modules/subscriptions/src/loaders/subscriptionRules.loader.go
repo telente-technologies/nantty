@@ -10,10 +10,8 @@ import (
 )
 
 type CheckmarkPricing struct {
-	Pricing              models.PricingRules
-	GoldOnlyMonthlyMinor int64
-	BlackMonthlyMinor    int64
-	BlackGraceDays       int
+	Pricing        models.PricingRules
+	BlackGraceDays int
 }
 
 func ReadTrialRules(ctx context.Context, source *ledgerloaders.PlatformSettingsSource) (models.TrialRules, int64) {
@@ -58,12 +56,6 @@ func ReadCheckmarkPricing(ctx context.Context, source *ledgerloaders.PlatformSet
 		BundleDiscountPercent   *int `json:"bundleDiscountPercent"`
 		BundleMaximumBusinesses *int `json:"bundleMaximumBusinesses"`
 		BlackGraceDays          *int `json:"blackGraceDays"`
-		GoldOnlyMonthlyPrice    struct {
-			AmountMinor int64 `json:"amountMinor"`
-		} `json:"goldOnlyMonthlyPrice"`
-		BlackMonthlyPrice struct {
-			AmountMinor int64 `json:"amountMinor"`
-		} `json:"blackMonthlyPrice"`
 	}
 	if json.Unmarshal(raw, &stored) != nil {
 		return pricing
@@ -77,6 +69,5 @@ func ReadCheckmarkPricing(ctx context.Context, source *ledgerloaders.PlatformSet
 	if stored.BlackGraceDays != nil {
 		pricing.BlackGraceDays = *stored.BlackGraceDays
 	}
-	pricing.GoldOnlyMonthlyMinor, pricing.BlackMonthlyMinor = stored.GoldOnlyMonthlyPrice.AmountMinor, stored.BlackMonthlyPrice.AmountMinor
 	return pricing
 }

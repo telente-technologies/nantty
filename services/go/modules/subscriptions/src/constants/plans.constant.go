@@ -28,18 +28,17 @@ type PlanDefinition struct {
 	SelfServe           bool
 	GracePeriodEligible bool
 	InAppAllowed        bool
-	DefaultMonthlyNgn   int64
 	Tier                string
 }
 
 var Plans = map[string]PlanDefinition{
-	PlanSellerPro:      {Code: PlanSellerPro, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "pro", TrialAllowed: true, BundleEligible: true, SelfServe: true, DefaultMonthlyNgn: 500_000, Tier: "PRO"},
-	PlanSellerBusiness: {Code: PlanSellerBusiness, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "business", TrialAllowed: true, BundleEligible: true, SelfServe: true, DefaultMonthlyNgn: 1_500_000, Tier: "BUSINESS"},
-	PlanGoldOnly:       {Code: PlanGoldOnly, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", TrialAllowed: true, BundleEligible: true, SelfServe: true, DefaultMonthlyNgn: 300_000, Tier: "GOLD"},
-	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: true, DefaultMonthlyNgn: 5_000_000, Tier: "OFFICIAL"},
-	PlanBlueEssential:  {Code: PlanBlueEssential, ProfileTypes: []string{ProfilePersonal}, SelfServe: true, InAppAllowed: true, DefaultMonthlyNgn: 100_000, Tier: "ESSENTIAL"},
-	PlanBlue:           {Code: PlanBlue, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", SelfServe: true, InAppAllowed: true, DefaultMonthlyNgn: 250_000, Tier: "VERIFIED"},
-	PlanPremium:        {Code: PlanPremium, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", TrialAllowed: true, SelfServe: true, InAppAllowed: true, DefaultMonthlyNgn: 450_000, Tier: "PREMIUM"},
+	PlanSellerPro:      {Code: PlanSellerPro, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "pro", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "PRO"},
+	PlanSellerBusiness: {Code: PlanSellerBusiness, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "business", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "BUSINESS"},
+	PlanGoldOnly:       {Code: PlanGoldOnly, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "GOLD"},
+	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: true, Tier: "OFFICIAL"},
+	PlanBlueEssential:  {Code: PlanBlueEssential, ProfileTypes: []string{ProfilePersonal}, SelfServe: true, InAppAllowed: true, Tier: "ESSENTIAL"},
+	PlanBlue:           {Code: PlanBlue, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", SelfServe: true, InAppAllowed: true, Tier: "VERIFIED"},
+	PlanPremium:        {Code: PlanPremium, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", TrialAllowed: true, SelfServe: true, InAppAllowed: true, Tier: "PREMIUM"},
 }
 
 var LiveStatuses = []string{"trialing", "active", "past_due", "grace"}

@@ -38,10 +38,6 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:     reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 	}
-	if settings.Money.IsProduction() {
-		settings.AdminInternalUrl = reader.ReadRequiredString("ADMIN_INTERNAL_URL")
-		reader.RequireMinimumLength("ADMIN_INTERNAL_API_TOKEN", settings.AdminInternalToken, 32)
-	}
 	if settings.Money.IsProduction() && settings.FingerprintKey == "" {
 		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")
 	}

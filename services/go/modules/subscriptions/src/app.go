@@ -51,6 +51,13 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 	payments.RegisterStoreSubscriptionNotificationHandler(billing)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeSubscription, billing)
 	paymentservices.RegisterSellerPlanLookup(billing.SellerPlanOf)
+	loaders.RegisterMoneyDomainEventHandler("verificationCase.refundRequested", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var request billingservices.VerificationRefundRequest
+		if err := loaders.DecodeEventData(envelope, &request); err != nil {
+			return err
+		}
+		return billing.HandleVerificationRefundRequested(ctx, request)
+	})
 	return &Module{Billing: billing}, nil
 }
 
