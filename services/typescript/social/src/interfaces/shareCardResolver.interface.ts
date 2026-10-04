@@ -1,5 +1,5 @@
 export interface ExternalShareCard {
-  readonly availability: "available" | "private" | "unavailable";
+  readonly availability: "available" | "private" | "unavailable" | "not_in_region";
   readonly title: string | null;
   readonly subtitle: string | null;
   readonly imageUrl: string | null;
