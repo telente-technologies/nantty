@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+
+import { Warning20Icon } from "@/components/icons";
+import { ReportSheet, type ReportTarget } from "@/components/moderation/reportSheet";
 
 import { SoundClipThumbnail } from "@/components/sounds/soundClipThumbnail";
 import { useSoundDetails } from "@/components/sounds/soundDetails.hook";
 import { SoundHeaderCard } from "@/components/sounds/soundHeaderCard";
 import { openUserProfileOrMyProfile } from "@/components/sounds/soundNavigation.util";
 import { SoundOwnerControls } from "@/components/sounds/soundOwnerControls";
-import { Header } from "@/components/ui/header";
+import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -27,10 +31,20 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
   const tileWidth = Math.floor((Math.min(width, MAXIMUM_CONTENT_WIDTH) - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS);
   const soundData = sound.data;
   const isViewerTheOwner = !!soundData && !!signedInUserId && soundData.owner.id === signedInUserId;
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const openCopyrightReport = () =>
+    requireAuthThen(() => setReportTarget({ targetType: "sound", targetId: soundId, initialReason: "intellectual_property" }), undefined, "report");
 
   return (
     <Screen background={colors.surface}>
-      <Header title="Sound" />
+      <Header
+        title="Sound"
+        right={soundData && !isViewerTheOwner ? (
+          <HeaderAction label="Report this sound" onPress={openCopyrightReport}>
+            <Warning20Icon />
+          </HeaderAction>
+        ) : undefined}
+      />
       {sound.isPending ? (
         <ListSkeleton />
       ) : !soundData ? (
@@ -84,6 +98,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
           )}
         />
       )}
+      <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
     </Screen>
   );
 }
