@@ -18,5 +18,6 @@ export interface IdentityDirectory {
   findMentionPrivacy(accountIds: readonly string[]): Promise<ReadonlyMap<string, WhoCanMentionMe>>;
   findMentionTargetStatuses(accountIds: readonly string[]): Promise<ReadonlyMap<string, { readonly username: string | null; readonly status: MentionTargetStatus }>>;
   hasPersonalizationConsent(accountId: string): Promise<boolean>;
+  findAccountsAllowingPersonalizedAds(accountIds: readonly string[]): Promise<ReadonlySet<string>>;
   findAccountCreatedAt(accountId: string): Promise<Date | undefined>;
 }
