@@ -63,7 +63,7 @@ services/
   typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
   typescript/notifications/ Zudojs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
-  python/              pointer to apps/intelligence (not duplicated)
+  python/              Python services (intelligence)
   scripts/             CI checks and test runners
 infra/local/           docker-compose + bootstrap scripts;   infra/aws/  Terraform module layout (README only)
 ```
