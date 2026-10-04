@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
+import { storeLinks } from "@/constants/contact.constant";
+
 import styles from "./landingCallToAction.module.css";
 
 export function LandingCallToAction() {
@@ -20,6 +24,7 @@ export function LandingCallToAction() {
               Join the Creator Program
             </a>
           </div>
+          <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
         </div>
         <div className={styles.photoColumn}>
           <Image src="/photos/podcastDeskHost.webp" alt="A creator in headphones talking into a microphone at his desk" width={1000} height={1250} sizes="(max-width: 960px) 100vw, 520px" className={styles.photo} />
