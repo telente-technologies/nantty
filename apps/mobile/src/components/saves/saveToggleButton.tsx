@@ -1,12 +1,13 @@
 import { useRef } from "react";
 import { Animated, Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
 
-import { Bookmark24Icon, BookmarkFill24Icon } from "@/components/icons";
+import { BookmarkActionIcon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
 import { useTheme } from "@/theme";
 import type { SaveTarget } from "@/types";
+import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 const SAVED_ITEM_NOUN: Record<SaveTarget["type"], string> = { post: "post", video: "video", clip: "clip", product: "product" };
 
@@ -14,13 +15,13 @@ export interface SaveToggleButtonProps {
   readonly target: SaveTarget;
   readonly savedAccordingToServer: boolean;
   readonly foregroundColor?: string;
-  readonly showLabel?: boolean;
+  readonly saveCount?: number;
   readonly style?: StyleProp<ViewStyle>;
 }
 
-export function SaveToggleButton({ target, savedAccordingToServer, foregroundColor, showLabel = false, style }: SaveToggleButtonProps) {
+export function SaveToggleButton({ target, savedAccordingToServer, foregroundColor, saveCount, style }: SaveToggleButtonProps) {
   const { colors } = useTheme();
-  const { isSaved, toggleSaved } = useSaveToggle(target, savedAccordingToServer);
+  const { isSaved, savedDelta, toggleSaved } = useSaveToggle(target, savedAccordingToServer);
   const isReducedMotionPreferred = useReducedMotionPreference();
   const popScale = useRef(new Animated.Value(1)).current;
   const noun = SAVED_ITEM_NOUN[target.type];
@@ -41,14 +42,14 @@ export function SaveToggleButton({ target, savedAccordingToServer, foregroundCol
       accessibilityState={{ selected: isSaved }}
       hitSlop={{ top: 11, bottom: 11, left: 8, right: 8 }}
       onPress={toggleWithFeedback}
-      style={[showLabel ? styles.withLabel : null, style]}
+      style={[saveCount !== undefined ? styles.withCount : null, style]}
     >
       <Animated.View style={{ transform: [{ scale: popScale }] }}>
-        {isSaved ? <BookmarkFill24Icon size={22} color={savedInk} /> : <Bookmark24Icon size={22} color={foregroundColor} />}
+        <BookmarkActionIcon size={saveCount !== undefined ? 26 : 22} color={isSaved ? savedInk : foregroundColor} filled={isSaved} />
       </Animated.View>
-      {showLabel ? (
+      {saveCount !== undefined ? (
         <Text size={13} lineHeight={16.9} color={foregroundColor} style={foregroundColor ? styles.readableOnVideo : undefined}>
-          {isSaved ? "Saved" : "Save"}
+          {formatCountWithThousandsSuffix(Math.max(saveCount + savedDelta, 0))}
         </Text>
       ) : null}
     </Pressable>
@@ -56,6 +57,6 @@ export function SaveToggleButton({ target, savedAccordingToServer, foregroundCol
 }
 
 const styles = StyleSheet.create({
-  withLabel: { width: 32, gap: 4, alignItems: "center" },
+  withCount: { width: 32, gap: 4, alignItems: "center" },
   readableOnVideo: { textShadowColor: "rgba(0,0,0,0.45)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
 });

@@ -26,6 +26,7 @@ export interface ContentOptionsSheetProps {
   readonly onClose: () => void;
   readonly onContentHidden?: (targetId: ID) => void;
   readonly additionalActions?: readonly { readonly label: string; readonly icon: ReactNode; readonly onPress: () => void }[];
+  readonly onReport?: () => void;
 }
 
 type NavigatorWithRouteNames = {
@@ -47,7 +48,7 @@ export function openPromotePostScreenIfAvailable(navigation: NavigatorWithRouteN
   return true;
 }
 
-export function ContentOptionsSheet({ target, onClose, onContentHidden, additionalActions = [] }: ContentOptionsSheetProps) {
+export function ContentOptionsSheet({ target, onClose, onContentHidden, additionalActions = [], onReport }: ContentOptionsSheetProps) {
   const navigation = useNavigation() as unknown as NavigatorWithRouteNames;
   const queryClient = useQueryClient();
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -68,7 +69,7 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
   const openReportSheetForTarget = () => {
     if (!target) return;
     const nextReportTarget = { targetType: target.targetType, targetId: target.targetId };
-    requireAuthAfterClosingModal(onClose, () => setReportTarget(nextReportTarget), "report");
+    requireAuthAfterClosingModal(onClose, onReport ?? (() => setReportTarget(nextReportTarget)), "report");
     onClose();
   };
 
@@ -97,8 +98,8 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
           ...(canPromote ? [{ label: "Promote post", icon: <ArrowUpRight24Icon />, onPress: promoteOwnPost }] : []),
           ...(canGiveFeedFeedback
             ? [
-                { label: `Hide ${noun}`, icon: <EyeClosed20Icon />, onPress: () => hideContentAndSendFeedback("hide") },
-                { label: "Not interested", icon: <EyeClosed20Icon />, onPress: () => hideContentAndSendFeedback("not_interested") },
+                { label: `Hide ${noun}`, icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("hide"), "tune your feed") },
+                { label: "Not interested", icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("not_interested"), "tune your feed") },
               ]
             : []),
           ...(target?.shareUrl ? [{ label: "Copy or share link", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
