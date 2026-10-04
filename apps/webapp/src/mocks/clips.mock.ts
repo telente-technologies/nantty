@@ -39,6 +39,7 @@ const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
     likes: seed.likes,
     comments: seed.comments,
     reposts: Math.round(seed.likes / 40),
+    shares: Math.round(seed.likes / 9),
     views: seed.views,
     liked: false,
     bookmarked: false,
