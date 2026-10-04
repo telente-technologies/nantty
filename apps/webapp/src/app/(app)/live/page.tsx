@@ -8,10 +8,12 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { LiveIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { discoveryService } from "@/services/discovery.service";
+import { useSession } from "@/components/providers/sessionProvider";
 
 import styles from "./page.module.css";
 
 export default function LivePage() {
+  const { viewer } = useSession();
   const livesQuery = useQuery({ queryKey: ["lives", "suggested"], queryFn: discoveryService.fetchSuggestedLives, retry: false, refetchInterval: 30_000 });
 
   return (
@@ -21,9 +23,15 @@ export default function LivePage() {
           <h1 className={styles.title}>Live now</h1>
           <p className={styles.subtitle}>Creators and sellers streaming right now. Watch, chat and send gifts in the Zudomart app.</p>
         </div>
-        <span className={styles.goLiveHint}>
-          <LiveIcon size={18} /> Go live from the app
-        </span>
+        {viewer?.isCreator ? (
+          <span className={styles.goLiveHint}>
+            <LiveIcon size={18} /> Go live from the app
+          </span>
+        ) : viewer ? (
+          <Link href="/creator" className={styles.goLiveHint}>
+            <LiveIcon size={18} /> Join the Creator Program to go live
+          </Link>
+        ) : null}
       </header>
 
       {livesQuery.isLoading ? (

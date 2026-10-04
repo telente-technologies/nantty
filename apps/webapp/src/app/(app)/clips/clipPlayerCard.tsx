@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
-import { ChatIcon, HeartIcon, PlayIcon } from "@/components/ui/icons";
+import { LikeActionIcon, LikeFilledActionIcon, PlayIcon, ReplyActionIcon, SendActionIcon } from "@/components/ui/icons";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { postsService } from "@/services/posts.service";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
@@ -21,6 +23,18 @@ function canPlayInBrowser(url: string | null): url is string {
 export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readonly isActive: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isPausedByViewer, setIsPausedByViewer] = useState(false);
+  const [isLiked, setIsLiked] = useState(clip.liked);
+  const [likeCount, setLikeCount] = useState(clip.likes);
+  const toggleLike = () =>
+    requireAuthThen(() => {
+      const likeNow = !isLiked;
+      setIsLiked(likeNow);
+      setLikeCount((count) => Math.max(0, count + (likeNow ? 1 : -1)));
+      void (likeNow ? postsService.likePost(clip.id) : postsService.unlikePost(clip.id)).catch(() => {
+        setIsLiked(!likeNow);
+        setLikeCount((count) => Math.max(0, count + (likeNow ? -1 : 1)));
+      });
+    }, "Sign in to like clips.");
   const media = clip.media[0];
   const playableUrl = canPlayInBrowser(media?.url ?? null) ? media!.url! : null;
 
@@ -74,23 +88,23 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
       </div>
       <div className={styles.actionColumn}>
         <span className={styles.actionItem}>
-          <span className={styles.actionCircle}>
-            <HeartIcon size={22} />
-          </span>
-          {formatCountWithThousandsSuffix(clip.likes)}
+          <button type="button" className={styles.actionCircle} aria-pressed={isLiked} aria-label={`Like, ${likeCount} likes`} onClick={toggleLike}>
+            {isLiked ? <LikeFilledActionIcon size={24} /> : <LikeActionIcon size={24} />}
+          </button>
+          {formatCountWithThousandsSuffix(likeCount)}
         </span>
         <span className={styles.actionItem}>
-          <span className={styles.actionCircle}>
-            <ChatIcon size={22} />
-          </span>
+          <Link href={`/post/${clip.id}#comments`} className={styles.actionCircle} aria-label={`Comments, ${clip.comments}`}>
+            <ReplyActionIcon size={24} />
+          </Link>
           {formatCountWithThousandsSuffix(clip.comments)}
         </span>
         <span className={styles.actionItem}>
-          <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={22} />
-          Save
+          <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={24} />
+          {formatCountWithThousandsSuffix(clip.saveCount ?? 0)}
         </span>
         <span className={styles.actionItem}>
-          <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} iconSize={22} iconOnly />
+          <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} icon={<SendActionIcon size={24} />} iconOnly />
           {formatCountWithThousandsSuffix(clip.reposts)}
         </span>
         <span className={styles.actionItem}>

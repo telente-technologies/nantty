@@ -72,7 +72,7 @@ function VideoDetails({ video }: { readonly video: Post }) {
             <HeartIcon size={18} /> {formatCountWithThousandsSuffix(video.likes)}
           </span>
           <ShareToChatButton kind="video" referenceId={video.id} className={styles.stat} label={formatCountWithThousandsSuffix(video.reposts)} />
-          <SaveToggleButton targetType="video" targetId={video.id} initiallySaved={video.bookmarked} appearance="pill" showLabel />
+          <SaveToggleButton targetType="video" targetId={video.id} initiallySaved={video.bookmarked} appearance="pill" saveCount={video.saveCount ?? 0} />
           <ContentActionsMenu shareKind={null} reportTargetType="post" targetId={video.id} canonicalPath={`/watch/${video.id}`} />
         </div>
       </div>
