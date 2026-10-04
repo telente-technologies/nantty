@@ -61,7 +61,7 @@ locals {
     python = { INTELLIGENCE_ENVIRONMENT = var.environment, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
       { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600" },
-      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications", "media", "search"], name) },
+      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications", "media", "search", "support"], name) },
     )
   }
 
@@ -70,6 +70,7 @@ locals {
     social        = { PORT = "8105" }
     notifications = { PORT = "8104", SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <no-reply@${var.mail_domain}>", IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media         = { PORT = "8108" }
+    support       = { PORT = "8111" }
     realtime      = { PORT = "4000" }
     intelligence  = { INTELLIGENCE_PORT = "8090" }
     go-identity   = { USERS_DOCUMENTS_BUCKET = module.storage.kyc_bucket.id }
