@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 import { ProductCard } from "@/components/commerce/productCard";
+import { ExploreHome } from "@/components/explore/exploreHome";
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
@@ -35,15 +36,7 @@ function ExploreResults() {
     retry: false,
   });
 
-  if (!query) {
-    return (
-      <EmptyState
-        icon={<AppIcon name="magnifyingGlass24" size={28} />}
-        title="Search Zudomart"
-        description="Find products, stores, brands and people. Use the search bar above to get started."
-      />
-    );
-  }
+  if (!query) return <ExploreHome />;
 
   if (resultsQuery.isLoading) return <ProductGridSkeleton gridClassName={styles.productGrid} />;
   if (resultsQuery.isError) return <ErrorState description="Search is unavailable right now." action={<RetryButton onRetry={() => resultsQuery.refetch()} />} />;
