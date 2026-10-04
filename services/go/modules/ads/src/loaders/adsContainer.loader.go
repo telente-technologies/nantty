@@ -35,6 +35,7 @@ type Collaborators struct {
 	Source    interfaces.AudienceMemberSource
 	Identity  interfaces.IdentityMatcher
 	Content   interfaces.ContentSourceDirectory
+	Ownership interfaces.DestinationOwnership
 	Storage   interfaces.ObjectStorage
 	Jobs      platformevents.JobQueue
 	Access    *jwtauth.AccessTokenVerifier
@@ -67,11 +68,13 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 		keys[id] = []byte(secret)
 	}
 	spend := services.SpendCounters{Store: counters}
+	platformSettings := integrations.NewPlatformSettingsSource(database, settings.AdminSchema, settings.PlatformSettingsTtl, logger)
 	deployed := &container.Container{
 		Client: client, Database: database, Settings: settings, Logger: logger, Now: now, AccessVerifier: accessVerifier, StaffVerifier: staffVerifier, IdempotencyStore: idempotencyStore,
 		Counters: counters, Frequency: services.FrequencyGuard{Store: counters}, Spend: spend,
 		Signer:     services.AdTokenSigner{ActiveKeyId: settings.AdTokenActiveKeyId, Keys: keys, TimeToLive: settings.AdTokenTimeToLive, Now: now},
-		Policies:   &services.PolicySource{Client: client, Now: now, Settings: integrations.NewPlatformSettingsSource(database, settings.AdminSchema, settings.PlatformSettingsTtl, logger), ShareBps: settings.CreatorShareBps},
+		Policies:   &services.PolicySource{Client: client, Now: now, Settings: platformSettings, ShareBps: settings.CreatorShareBps},
+		Pricing:    &services.RegionalAdPricing{Settings: platformSettings, Rates: integrations.NewCurrencyExchangeRates(database, settings.CurrencySchema, 5*time.Minute, logger)},
 		Candidates: &services.CandidateIndex{Client: client, Spend: spend, Now: now, Refresh: settings.CandidateRefresh},
 		Signals:    collaborators.Signals,
 		Users:      collaborators.Users,
@@ -117,6 +120,10 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	deployed.AudienceSource = collaborators.Source
 	if deployed.AudienceSource == nil {
 		deployed.AudienceSource = integrations.UnavailableAudienceSource{}
+		if settings.ContentSourcesUrl != "" || settings.CommerceInternalUrl != "" {
+			deployed.AudienceSource = integrations.NewHttpAudienceSource(integrations.InternalEndpoint{BaseUrl: settings.ContentSourcesUrl, Token: settings.ContentSourcesToken},
+				integrations.InternalEndpoint{BaseUrl: settings.CommerceInternalUrl, Token: settings.CommerceInternalToken})
+		}
 	}
 	deployed.Identity = collaborators.Identity
 	if deployed.Identity == nil {
@@ -126,8 +133,12 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	if deployed.ContentSources == nil {
 		deployed.ContentSources = integrations.NoContentSourceDirectory{}
 		if settings.ContentSourcesUrl != "" {
-			deployed.ContentSources = integrations.HttpContentSourceDirectory{BaseUrl: settings.ContentSourcesUrl, Secret: settings.ContentSourcesSecret, Timeout: 3 * time.Second, Http: &http.Client{}, Now: deployed.Now}
+			deployed.ContentSources = integrations.HttpContentSourceDirectory{BaseUrl: settings.ContentSourcesUrl, Token: settings.ContentSourcesToken, Timeout: 3 * time.Second, Http: &http.Client{}}
 		}
+	}
+	deployed.Ownership = collaborators.Ownership
+	if deployed.Ownership == nil {
+		deployed.Ownership = selectDestinationOwnership(settings, deployed.Logger)
 	}
 	deployed.Stores = collaborators.Stores
 	if deployed.Stores == nil {
@@ -204,4 +215,18 @@ func selectMoneyFundingGateway(settings configs.AdsSettings, logger *slog.Logger
 		return fallback
 	}
 	return nil
+}
+
+func selectDestinationOwnership(settings configs.AdsSettings, logger *slog.Logger) interfaces.DestinationOwnership {
+	social := integrations.InternalEndpoint{BaseUrl: settings.ContentSourcesUrl, Token: settings.ContentSourcesToken}
+	commerce := integrations.InternalEndpoint{BaseUrl: settings.CommerceInternalUrl, Token: settings.CommerceInternalToken}
+	identity := integrations.InternalEndpoint{BaseUrl: settings.IdentityInternalUrl, Token: settings.IdentityInternalToken}
+	if social.BaseUrl != "" || commerce.BaseUrl != "" || identity.BaseUrl != "" {
+		return integrations.HttpDestinationOwnership{Social: social, Commerce: commerce, Identity: identity, Http: &http.Client{}}
+	}
+	if settings.IsProduction() {
+		return integrations.DenyAllOwnership{}
+	}
+	logger.Warn("no ownership services are configured: any post, product, store or profile may be promoted in this environment")
+	return integrations.AllowAllOwnership{}
 }
