@@ -74,7 +74,7 @@ function SuggestedAccountRow({ account }: { readonly account: UserSummary }) {
   });
   return (
     <li className={styles.accountRow}>
-      <Link href={`/user/${account.id}`} className={styles.accountLink}>
+      <Link href={`/${account.username}`} className={styles.accountLink}>
         <Avatar name={account.name} src={account.avatarUrl} size="sm" />
         <span className={styles.accountText}>
           <span className={styles.accountName}>{account.name}</span>

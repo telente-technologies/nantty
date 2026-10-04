@@ -32,7 +32,7 @@ export function DeleteAccountSection() {
   return (
     <section className={styles.block} aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading" className={styles.blockHeading}>Delete my account</h2>
-      <p className={styles.muted}>Deleting your account is scheduled with a grace period, so you can change your mind. Here is what happens.</p>
+      <p className={styles.muted}>Your account will be permanently deleted in 30 days. Log in any time before then to cancel. Here is what happens.</p>
       <ExplanationList title="What gets deleted" items={deletedItems} />
       <ExplanationList title="What gets anonymized" items={anonymizedItems} />
       <ExplanationList title="What we may keep" items={retainedItems} />

@@ -31,7 +31,7 @@ export function MentionText({ text, mentions }: { readonly text: string; readonl
         const mention = segment.entity;
         if (segment.username) {
           return (
-            <Link key={index} href={`/u/${segment.username}`} className={styles.mention}>
+            <Link key={index} href={`/${segment.username}`} className={styles.mention}>
               {segment.text}
             </Link>
           );

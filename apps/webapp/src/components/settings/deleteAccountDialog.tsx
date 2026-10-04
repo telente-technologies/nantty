@@ -25,7 +25,7 @@ export function DeleteAccountDialog({ isOpen, onClose, confirmation, onConfirmat
       tone="danger"
       icon={<TrashIcon size={24} />}
       title="Delete your account?"
-      description="Your account is scheduled for deletion with a grace period. Sign in before it ends to cancel. Order and payment records the law requires are kept."
+      description="Your account will be permanently deleted in 30 days. Log in any time before then to cancel. Order and payment records the law requires are kept."
       dismissible={!deletion.isPending}
       actions={[
         { label: "Delete my account", variant: "danger", disabled: confirmation.trim() !== accountDeletionConfirmationWord, busy: deletion.isPending, onClick: deletion.confirm },
