@@ -144,7 +144,7 @@ sequenceDiagram
 | --- | --- | --- | --- | --- |
 | 1 | Credential stuffing, OTP brute force | High / High | Per-identifier + IP limit 5/min, 20/h; OTP 5 tries lock (EXISTING); uniform responses; WAF bot rule; breached-password check; alert on spike | partial |
 | 2 | Refresh token theft | Medium / High | Rotation + reuse detection (EXISTING); httpOnly cookies; device list; revoke-all on password change (EXISTING route) | EXISTING |
-| 3 | IDOR / cross-tenant access (store, order, wallet) | High / High | Ownership check per resource in every service; IDOR tests in CI; store id from session | PROPOSED |
+| 3 | IDOR / cross-tenant access (store, order, wallet) | High / High | Ownership check per resource in every service with the same 404 for "not yours" and "missing"; gateway probing detector, human check, auto-suspension, Security cases queue (section 10) | EXISTING (orders, conversations, messages, disputes, escrow); detector EXISTING |
 | 4 | Payment webhook forgery or replay | Medium / Critical | Signature on raw body, unique event id, provider verify call before crediting, idempotent handler | PROPOSED, ABSENT in `services/**` |
 | 5 | Double spend / negative balance via race | Medium / Critical | Ledger tx with row locks, idempotency keys, deferred balance constraint, property tests, reconciliation job and `ledger imbalance` page | PROPOSED |
 | 6 | Gift/coin abuse and fraud (self-gifting, stolen cards, chargebacks) | High / High | Python risk score, Go thresholds, per-user rate limit, holds before payout, velocity rules | PROPOSED |
@@ -206,3 +206,65 @@ sequenceDiagram
 ## 9. Compliance statement
 
 These controls are engineering measures. They do not constitute PCI DSS, GDPR, or NDPA compliance. Card data never touches Zudomart systems (hosted provider checkout only), which keeps PCI scope minimal but still needs a qualified assessor's confirmation.
+
+## 10. Abuse protection: access probing and bots
+
+Owner rules (4 Oct 2026): a user who tries to reach endpoints or data that are not theirs is flagged and must pass a human check; repeated failures lead to a temporary suspension; deletion or a ban happens only after a person reviews the evidence. Accounts that look automated are challenged every time.
+
+```
+client ──► gateway ──► service (404 for other people's resources, 403 on role walls)
+             │  classify the finished request (route template, resource type, status)
+             │  Valkey sliding windows per account and per device (ZSET, fallback in memory)
+             │  threshold crossed ─► POST /api/v1/internal/security/access-violations (go-trust)
+             │                       also accepted as security.accessViolationDetected on trust-domain-events
+             │  sensitive request + challenge state from go-trust (cached 15 s) ─► 428 HUMAN_VERIFICATION_REQUIRED
+             └─ POST /api/v1/security/human-verification {token} ─► Turnstile siteverify ─► go-trust records pass/fail
+go-trust (accessSecurity module): deterministic policy, security_account_states, security_events, security_cases
+             └─ suspend ─► go-identity /internal/enforcement/actions (reason "Security: repeated unauthorised access attempts", 7 days, appealable)
+intelligence /v1/trust/bot-score (advisory) ─► intelligence-trust-bot-scores ─► go-trust suspectedBot policy
+admin ─► Trust & safety > Security cases (clear, keep restricted, suspend, ban, delete; step-up, audited)
+```
+
+### 10.1 Detection (gateway)
+
+| Signal | Rule (defaults, env `SECURITY_PROBE_<KIND>_COUNT` / `_WINDOW_SECONDS`) |
+| --- | --- |
+| `privateNotFound` | 404 on another person's private resource family (orders, seller orders/stores, conversations, messages, disputes, wallets, payments, returns, support tickets, notifications, subscriptions, coins, ads, media): 15 in 10 min |
+| `forbidden` | 403 on those families: 10 in 10 min. Public privacy walls (private profiles, followers-only posts) are not counted |
+| `idEnumeration` | distinct resource ids that failed (404/403): 12 in 5 min |
+| `adminRoute` | consumer token answered 401/403 on `/api/v1/admin/*`: 3 per hour |
+| `internalPath` | any `/internal/` path (always 404 at the edge): 3 per hour |
+| `tamperedToken` | unexpired consumer-audience JWT whose signature fails (expired and staff tokens are ignored): 5 in 10 min |
+| `idempotencyMismatch` | `422 IDEMPOTENCY_KEY_REUSED` (same key, different body): 3 per hour |
+
+Evidence sent to go-trust: route template (`/api/v1/orders/:id`), resource type, window count, distinct ids, threshold, device id, IP **prefix** (/24 or /48). Never query strings, bodies, tokens or resource ids. One report per kind and subject per 10 minutes.
+
+**Consistent 404s.** Checked: orders (`getMyOrder` filters by buyer), seller orders, conversations and messages (non-member gets `CONVERSATION_NOT_FOUND`), disputes and escrow (non-party gets `*_NOT_FOUND`). Tests: `services/go/modules/orders/ordersOwnership.integration_test.go`, `services/typescript/social/tests/messages/conversationOwnership.service.test.ts`. Seller store routes answer 403 `NOT_STORE_MEMBER`; store existence is public, so this leaks nothing.
+
+### 10.2 Policy (go-trust, deterministic, configurable)
+
+| Situation | Outcome |
+| --- | --- |
+| Violation reported | Flag (`challenge_required`), open a security case, publish `security.challengeRequired` |
+| Challenge passed while flagged | Flag cleared for `SECURITY_CHALLENGE_CLEARED_HOURS` (24) |
+| Another violation after 3 challenges in 24 h (`SECURITY_CHALLENGES_BEFORE_PROBING_SUSPENSION`) | Temporary suspension |
+| 5 failed challenges in 24 h (`SECURITY_FAILED_CHALLENGES_BEFORE_SUSPENSION`) | Temporary suspension |
+| Bot score >= 0.85 with 2+ independent reasons, or >= 0.6 with a failed device attestation or a reported headless client | `suspectedBot` (sticky until a staff member clears it) |
+| `suspectedBot` | Challenge at the start of every session (12 h session pass) and before **every** sensitive action (single-use action pass): posting, comments, follows, messages, likes in bursts (over 10 a minute), checkout, payments, wallet and payouts, gifts |
+
+The automatic suspension goes through go-identity's existing suspension flow (`source=security`, reason code `SECURITY`, 7 days by default), so the person gets the normal notice, email and appeal. After that, automation stops: further violations and failures are recorded but trigger nothing.
+
+**Automation never bans or deletes.** A ban or deletion is decided by a staff member with `users:ban` / `users:delete` in the Security cases queue, after step-up, and is audited. Why: probing signals have false positives (shared or recycled phones, stale links in group chats, buggy third-party clients, a family member on the same device, carrier-grade NAT), and deleting an account destroys content and anonymises financial records irreversibly. Fairness and consumer-protection law (NDPA 2023, GDPR art. 22) expect a human decision with a chance to respond before a final, significant decision.
+
+### 10.3 Human verification
+
+- Provider: Cloudflare Turnstile behind `HumanVerificationProvider` (`services/typescript/gateway/src/services/security/humanVerificationProvider.service.ts`); `HUMAN_VERIFICATION_PROVIDER=hcaptcha` switches to hCaptcha with the same flow.
+- Server-side verification happens in the gateway (`POST /api/v1/security/human-verification`): token length check, `remoteip`, an idempotency key, optional hostname allow-list (`HUMAN_VERIFICATION_HOSTNAMES`). Rate limit 10 attempts a minute per account and 30 per IP. Tokens are never logged or forwarded.
+- Web: Turnstile widget in a sheet when any request answers 428, then the request is retried once (`apps/webapp/src/components/security/`). CSP allows `challenges.cloudflare.com` for scripts and frames.
+- Mobile: the in-app browser sheet opens `<webapp>/security-check`, which runs Turnstile and returns to `zudomart://security-check#token=…`; the app submits the token and retries (`apps/mobile/src/services/humanVerification.service.ts`). Concurrent 428s share one check.
+- Staff are never challenged: admin routes are exempt and staff tokens are not consumer principals.
+- Device integrity: clients may send `POST /api/v1/security/client-signals` with headless signals and a Play Integrity / App Attest token. go-trust verifies through `DeviceAttestationVerifier` (`PlayIntegrityVerifier`, `AppAttestVerifier` interfaces); until those are configured the verdict is `unavailable` and is ignored.
+
+### 10.4 Data and retention
+
+`security_events` keeps the evidence timeline (kinds, route templates, counts, device id, IP prefix, provider error codes). Events older than `SECURITY_EVENT_RETENTION_DAYS` (365) are purged every 6 hours unless the account has an open case. Disclosed in the privacy policy draft ("Security", "Who we share data with") and the help article `services/typescript/support/content/help/account-and-login/security-checks.md`.

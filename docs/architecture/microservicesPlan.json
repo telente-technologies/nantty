@@ -198,7 +198,9 @@
       "indexing": { "commands": ["indexProduct", "indexProfile", "indexPost", "removeFromIndex"], "queries": [], "events": [] }
     },
     "support": {
-      "tickets": { "commands": ["createSupportTicket", "replyToTicket", "assignTicket", "closeTicket"], "queries": ["listMyTickets", "getTicket", "listTicketQueue"], "events": ["ticketCreated"] },
+      "tickets": { "commands": ["createSupportTicket", "postCustomerReply", "postStaffReply", "changeTicketStatus", "assignTicket", "rateTicket"], "queries": ["listMyTickets", "getRequesterTicket", "listTicketQueue"], "events": ["ticket.created", "ticket.replied", "ticket.resolved"], "stack": "TypeScript support (Zudojs + Prisma, schema support, port 8111); outbox to zudomart.events; notifications emails the user on staff replies", "why": "I/O-bound CRUD and fan-out next to the other TS services; plans.md §44." },
+      "helpContent": { "commands": ["createHelpTopic", "updateHelpTopic", "mergeHelpTopic", "publishHelpTopic", "voteOnHelpTopic"], "queries": ["listHelpCategories", "searchHelpTopics", "getHelpTopic"], "events": [], "stack": "TypeScript support; Markdown topics with versions, Prisma-only keyword search", "why": "Public, guest-readable help that the support team edits in admin." },
+      "autoFaq": { "commands": ["publishTopicFromResolvedTicket"], "queries": [], "events": [], "stack": "TypeScript support job: PII scrubber, similarity dedupe, intelligence /v1/help/answer-drafts with template fallback", "why": "Resolved questions become well-explained topics without personal data." },
       "macros": { "commands": ["createMacro"], "queries": ["listMacros"], "events": [] }
     },
     "integrations": {
