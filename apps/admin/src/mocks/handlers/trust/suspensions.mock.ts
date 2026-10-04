@@ -35,7 +35,7 @@ function presentSummary(record: MockSuspensionCaseRecord): SuspensionCaseSummary
 }
 
 function presentDetail(record: MockSuspensionCaseRecord): SuspensionCaseDetail {
-  return { ...presentSummary(record), signals: record.signals, evidence: record.evidence, reports: record.reports, modelVersion: "risk-suggester-2026.09", decision: record.decision, history: listMockAuditEntriesForTarget("suspensionCase", record.id) };
+  return { ...presentSummary(record), signals: record.signals, evidence: record.evidence, reports: record.reports, modelVersion: record.modelVersion ?? "risk-suggester-2026.09", decision: record.decision, history: listMockAuditEntriesForTarget("suspensionCase", record.id) };
 }
 
 function presentSuspendedAccount(record: MockSuspensionCaseRecord): SuspendedAccount {
@@ -115,9 +115,11 @@ export function registerSuspensionMockHandlers(): void {
     requireMockPermission(request, "users:suspend");
     const status = request.query.get("status") ?? "OPEN";
     const source = request.query.get("source");
+    const modelVersion = request.query.get("modelVersion");
     const search = request.query.get("search");
     const items = readSuspensionCases()
       .filter((record) => (status === "OPEN" ? record.status === "PENDING" || record.status === "ESCALATED" : status === "DECIDED" ? record.status === "SUSPENDED" || record.status === "DISMISSED" : status === "ALL" || record.status === status))
+      .filter((record) => !modelVersion || record.modelVersion === modelVersion)
       .filter((record) => (!source || record.source === source) && matchesSearchText(search, record.id, findPlatformUserRecordOrFail(record.userId).username, findPlatformUserRecordOrFail(record.userId).displayName))
       .sort((first, second) => second.riskScore - first.riskScore)
       .map(presentSummary);

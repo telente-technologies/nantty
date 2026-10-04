@@ -5,6 +5,7 @@ import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockCopyrightClaimRecord } from "@/mocks/seed/trustCopyright.mock";
 import type { CopyrightClaimDetail, CopyrightClaimStatus, CopyrightClaimSummary } from "@/types/copyright.type";
 
+import { applyMockUpheldRemedy } from "./copyrightRemedies.mock";
 import { changeUserStrikeCount, findPlatformUserRecordOrFail, findRecordByIdOrFail, presentModeratedUser, readTrustStore, recordPriorActionOnAuthor } from "./trustStore.mock";
 
 export const repeatInfringerStrikeThreshold = 3;
@@ -15,13 +16,14 @@ function presentClaimSummary(record: MockCopyrightClaimRecord): CopyrightClaimSu
   return {
     id: record.id, claimant: record.claimant, workTitle: record.workTitle, workType: record.workType, target: record.target, infringer,
     targetFlag: record.targetFlag, status: record.status, filedAt: record.filedAt, topAudioMatchConfidencePercent: topMatch, infringerStrikeCount: infringer.strikeCount,
+    claimScope: record.claimScope ?? (record.workType === "SOUND" ? "AUDIO" : "VIDEO"), remedy: record.remedy ?? "NONE", remedyState: record.remedyState ?? "NONE", takedownDeadlineAt: record.takedownDeadlineAt ?? null,
   };
 }
 
 function presentClaimDetail(record: MockCopyrightClaimRecord): CopyrightClaimDetail {
   return {
     ...presentClaimSummary(record), rightsBasis: record.rightsBasis, swornStatement: record.swornStatement, claimedUrls: record.claimedUrls, audioMatches: record.audioMatches,
-    counterNotices: record.counterNotices, repeatInfringerThreshold: repeatInfringerStrikeThreshold, decision: record.decision, history: listMockAuditEntriesForTarget("copyrightClaim", record.id),
+    counterNotices: record.counterNotices, evidence: record.evidence, repeatInfringerThreshold: repeatInfringerStrikeThreshold, decision: record.decision, history: listMockAuditEntriesForTarget("copyrightClaim", record.id),
   };
 }
 
@@ -70,11 +72,11 @@ export function registerCopyrightClaimMockHandlers(): void {
     const record = findClaimInStatusOrFail(request, ["PENDING", "NEEDS_INFO"]);
     const before = snapshotClaimState(record);
     record.status = "UPHELD";
-    record.targetFlag = "TAKEN_DOWN";
-    record.target = { ...record.target, visibility: "REMOVED" };
+    const { remedy, issuesStrike } = applyMockUpheldRemedy(record);
+    decideClaim(record, request, "UPHELD", reason);
+    if (!issuesStrike) return finishClaimChange(request, record, remedy === "AUDIO_MUTED" ? "upheld_audio_muted" : "upheld_warning_issued", reason, before);
     const strikeCount = changeUserStrikeCount(record.infringerUserId, 1);
     recordPriorActionOnAuthor(record.infringerUserId, "COPYRIGHT_STRIKE", `${record.workTitle}: ${reason}`);
-    decideClaim(record, request, "UPHELD", reason);
     const infringer = findPlatformUserRecordOrFail(record.infringerUserId);
     recordMockAuditEntry(request, { action: "user.copyright_strike_added", area: "copyright", target: { type: "user", id: infringer.id, label: `@${infringer.username}` }, reason, before: { strikes: before.infringerStrikes }, after: { strikes: strikeCount, claimId: record.id, isRepeatInfringer: strikeCount >= repeatInfringerStrikeThreshold } });
     return finishClaimChange(request, record, "upheld", reason, before);
@@ -90,6 +92,14 @@ export function registerCopyrightClaimMockHandlers(): void {
     record.target = { ...record.target, visibility: "VISIBLE" };
     decideClaim(record, request, "REJECTED", reason);
     return finishClaimChange(request, record, "rejected", reason, before);
+  });
+
+  registerMockRoute("POST", "/admin/copyright-claims/:claimId/audio-match", (request) => {
+    requireMockPermission(request, "copyright:review");
+    const record = findRecordByIdOrFail(readTrustStore().copyrightClaims, request.params.claimId, "Copyright claim");
+    if (!record.evidence?.originalWorkMediaId && record.audioMatches.length === 0) throw new MockHttpError(409, "AUDIO_MATCH_NOT_POSSIBLE", "An audio match needs the original work uploaded with the claim and video or audio on the claimed content.");
+    if (record.audioMatches.length === 0) record.audioMatches = [{ matchedTrack: record.workTitle, artist: record.claimant.organization ?? record.claimant.name, confidencePercent: 88, source: "Chromaprint fingerprint (advice only)", segments: [{ targetStartSeconds: 0, targetEndSeconds: 24, referenceStartSeconds: 12 }] }];
+    return respondWithJson(200, presentClaimDetail(record));
   });
 
   registerMockRoute("POST", "/admin/copyright-claims/:claimId/request-info", (request) => {
