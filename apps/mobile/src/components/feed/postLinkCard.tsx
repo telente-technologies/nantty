@@ -1,14 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { assessLinkRisk, buildInternalRoute, findFirstExternalUrl, findFirstInternalReference, readFullDomain } from "@/components/chat/chatLinks.util";
+import { buildInternalRoute, findFirstExternalUrl, findFirstInternalReference, readFullDomain } from "@/components/chat/chatLinks.util";
 import { SharedContentCardView } from "@/components/chatSafety/sharedContentCardView";
-import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Button } from "@/components/ui/button";
+import { confirmRiskyLink, inAppBrowserColorsFromTheme, openInAppBrowser } from "@/components/links/openLink.util";
 import { Text } from "@/components/ui/text";
 import { postsService } from "@/services/posts.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -20,34 +17,17 @@ const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string
 function ExternalLinkCard({ preview }: { readonly preview: LinkPreview }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const [isWarningVisible, setIsWarningVisible] = useState(false);
-  const risk = assessLinkRisk(preview.url);
   const domain = preview.domain || readFullDomain(preview.url);
-  const openInAppBrowser = () => {
-    setIsWarningVisible(false);
-    WebBrowser.openBrowserAsync(preview.url, { presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET }).catch(() => undefined);
-  };
+  const openWithSafetyCheck = () => confirmRiskyLink(preview.url, () => void openInAppBrowser(preview.url, inAppBrowserColorsFromTheme(colors)));
   return (
-    <>
-      <Pressable accessibilityRole="link" accessibilityLabel={`${preview.title}, opens ${domain}`} onPress={risk === "safe" ? openInAppBrowser : () => setIsWarningVisible(true)} style={styles.card}>
-        {preview.imageUrl ? <Image source={{ uri: preview.imageUrl }} style={styles.image} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
-        <View style={styles.body}>
-          <Text size={12} lineHeight={16} color={colors.textMuted} numberOfLines={1}>{preview.siteName ?? domain}</Text>
-          <Text size={14} weight={600} lineHeight={19} numberOfLines={2}>{preview.title}</Text>
-          {preview.description ? <Text size={13} lineHeight={18} color={colors.textMuted} numberOfLines={2}>{preview.description}</Text> : null}
-        </View>
-      </Pressable>
-      <BottomSheet visible={isWarningVisible} onClose={() => setIsWarningVisible(false)} title={risk === "shortened" ? "Shortened link" : "Suspicious link"}>
-        <View style={styles.warning}>
-          <Text size={14} lineHeight={20}>
-            {risk === "shortened" ? "This link hides its real destination. Only open it if you trust the author." : "This address looks unusual and may be unsafe. Do not enter passwords or payment details."}
-          </Text>
-          <Text size={13} weight={600} lineHeight={18} color={colors.error}>{domain}</Text>
-          <Button title="Open anyway" variant="danger" onPress={openInAppBrowser} />
-          <Button title="Cancel" variant="outline" onPress={() => setIsWarningVisible(false)} />
-        </View>
-      </BottomSheet>
-    </>
+    <Pressable accessibilityRole="link" accessibilityLabel={`${preview.title}, opens ${domain}`} onPress={openWithSafetyCheck} style={styles.card}>
+      {preview.imageUrl ? <Image source={{ uri: preview.imageUrl }} style={styles.image} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
+      <View style={styles.body}>
+        <Text size={12} lineHeight={16} color={colors.textMuted} numberOfLines={1}>{preview.siteName ?? domain}</Text>
+        <Text size={14} weight={600} lineHeight={19} numberOfLines={2}>{preview.title}</Text>
+        {preview.description ? <Text size={13} lineHeight={18} color={colors.textMuted} numberOfLines={2}>{preview.description}</Text> : null}
+      </View>
+    </Pressable>
   );
 }
 
@@ -91,5 +71,4 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { borderRadius: 14, overflow: "hidden", backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
   image: { width: "100%", aspectRatio: 1.91 },
   body: { paddingHorizontal: 12, paddingVertical: 10, gap: 3 },
-  warning: { gap: 12, paddingHorizontal: 20, paddingBottom: 20 },
 }));

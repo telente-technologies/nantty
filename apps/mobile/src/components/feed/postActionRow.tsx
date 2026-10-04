@@ -11,7 +11,7 @@ import { saveTargetForPost, type Post } from "@/types";
 import { PostActionButton } from "./postActionButton";
 
 const ICON_SIZE = 19;
-export const VIEWS_HELP_ARTICLE_ID = "ha_views";
+export const VIEWS_HELP_TOPIC_SLUG = "views-and-analytics";
 
 export interface PostActionRowProps {
   readonly post: Post;
@@ -29,7 +29,7 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const openViewsHelpArticle = () => {
     setViewsInfoOpen(false);
-    navigation.navigate("HelpArticle", { articleId: VIEWS_HELP_ARTICLE_ID });
+    navigation.navigate("HelpArticle", { topicSlug: VIEWS_HELP_TOPIC_SLUG });
   };
   const { isSaved, savedDelta, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
   return (
