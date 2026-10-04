@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon, DotsThreeVertical24Icon } from "@/components/icons";
@@ -10,6 +10,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
+import { webAppLinks } from "@/config/webAppLinks.config";
 import { makeThemedStyles, useTheme } from "@/theme";
 
 export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnded">) {
@@ -25,7 +26,7 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
         <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={() => navigation.goBack()}>
           <ArrowLeft24Icon />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Share this live" hitSlop={10} onPress={() => Share.share({ message: webAppLinks.live(route.params.liveId) }).catch(() => undefined)}>
           <DotsThreeVertical24Icon />
         </Pressable>
       </View>

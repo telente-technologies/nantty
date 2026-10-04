@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon, Warning20Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { LikeBurst } from "@/components/clips/likeBurst";
@@ -25,13 +25,20 @@ import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
 import { doesLiveStageShowVideo, LiveVideoStage } from "@/components/live/liveVideoStage";
 import { useLiveStageWithActions } from "@/components/live/guests/liveStage.hook";
 import { LiveStageLayer } from "@/components/live/guests/liveStageLayer";
+import { LiveReportSheet, type LiveReportTarget } from "@/components/live/safety/liveReportSheet";
+import { useLiveSafety } from "@/components/live/safety/liveSafety.hook";
+import { LiveSafetyAppealSheet } from "@/components/live/safety/liveSafetyAppealSheet";
+import { LiveSafetyHostBanner } from "@/components/live/safety/liveSafetyHostBanner";
+import { LiveSafetyOverlay } from "@/components/live/safety/liveSafetyOverlay";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
+import { ReportSheet, type ReportTarget } from "@/components/moderation/reportSheet";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { liveService } from "@/services/live.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -51,6 +58,10 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [showTipSheet, setShowTipSheet] = useState(false);
   const [showPinProducts, setShowPinProducts] = useState(false);
   const [showViewerLiveOptions, setShowViewerLiveOptions] = useState(false);
+  const [liveReportTarget, setLiveReportTarget] = useState<LiveReportTarget | null>(null);
+  const [hostReportTarget, setHostReportTarget] = useState<ReportTarget | null>(null);
+  const [appealLiveId, setAppealLiveId] = useState<string | null>(null);
+  const [hasAppealedHold, setHasAppealedHold] = useState(false);
   const live = useLiveSessionWithActions(liveId, hasJoined);
   const livePoints = useLiveEngagementPoints(liveId, hasJoined && !isHost);
   const liveStage = useLiveStageWithActions(liveId, hasJoined);
@@ -58,6 +69,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
   const creatorEntry = useCreatorEntry();
   const session = live.session.data;
+  const liveSafety = useLiveSafety(liveId, session?.safety, isHost, hasJoined && session?.status === "live");
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
   const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
   const hostCanPinAffiliatedProducts = isHost && isApprovedCreator;
@@ -110,19 +122,32 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
     }
   };
 
+  const openLiveReport = () => setLiveReportTarget({ liveId, liveStartedAt: session?.startedAt ?? null });
+  const openHostReport = () => {
+    if (session) setHostReportTarget({ targetType: "user", targetId: session.host.id });
+  };
+
+  useEffect(() => {
+    if (!liveSafety.isPaused) setHasAppealedHold(false);
+  }, [liveSafety.isPaused]);
+
   const viewerLiveOptionsSheet = (
     <>
     {sendInChatElement}
+    <LiveReportSheet target={liveReportTarget} onClose={() => setLiveReportTarget(null)} />
+    <ReportSheet target={hostReportTarget} onClose={() => setHostReportTarget(null)} />
     <ContentOptionsSheet
+      onReport={openLiveReport}
       target={
         showViewerLiveOptions && session
-          ? { targetType: "live", targetId: liveId, authorId: session.host.id, shareUrl: `https://zudomart.com/lives/${liveId}` }
+          ? { targetType: "live", targetId: liveId, authorId: session.host.id, shareUrl: webAppLinks.live(liveId) }
           : null
       }
       onClose={() => setShowViewerLiveOptions(false)}
       additionalActions={[
         { label: "Send in chat", icon: <PaperPlaneTilt24Icon />, onPress: () => openSendInChat({ kind: "live", id: liveId }) },
         { label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => requireAuthAfterClosingModal(() => undefined, () => setShowShare(true), "share with people") },
+        ...(session ? [{ label: `Report @${session.host.username}`, icon: <Warning20Icon />, onPress: () => requireAuthThen(openHostReport, undefined, "report") }] : []),
       ]}
     />
     </>
@@ -176,7 +201,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         isCameraPermissionGranted={isHostCameraAllowed}
         isPlaybackAllowed={isScreenFocused}
       />
+      {!isHost && liveSafety.isPaused ? <LiveSafetyOverlay message={liveSafety.safety?.viewerMessage} /> : null}
       <LiveHeader
+        onHostLongPress={isHost ? undefined : () => setShowViewerLiveOptions(true)}
         isShownOverVideo={isShownOverVideo}
         session={session}
         showTitle={showsTitle}
@@ -189,6 +216,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         }}
         onMore={openLiveOptions}
       />
+      {isHost && liveSafety.safety ? (
+        <LiveSafetyHostBanner safety={liveSafety.safety} hasAppealed={hasAppealedHold} onAppeal={() => setAppealLiveId(liveId)} />
+      ) : null}
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
         <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...giftComments]} isShownOverVideo={isShownOverVideo} />
@@ -225,6 +255,16 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       ) : null}
       <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} onShared={livePoints.awardSharePoints} />
       {isHost ? null : viewerLiveOptionsSheet}
+      {isHost ? (
+        <LiveSafetyAppealSheet
+          liveId={appealLiveId}
+          onClose={() => setAppealLiveId(null)}
+          onAppealed={() => {
+            setHasAppealedHold(true);
+            liveSafety.refresh();
+          }}
+        />
+      ) : null}
       {liveHasProducts ? (
       <LiveProductsSheet
         visible={showProducts}

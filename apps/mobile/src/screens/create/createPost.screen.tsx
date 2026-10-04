@@ -14,6 +14,8 @@ import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
 import { DEFAULT_STICKER_LAYOUT } from "@/components/clips/videoReply/videoReply.util";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { Screen } from "@/components/ui/screen";
+import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
+import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { useTheme } from "@/theme";
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
@@ -25,7 +27,7 @@ import { storiesService } from "@/services/stories.service";
 import type { CommentStickerLayout, CreateMode, LiveCategory, LiveSource } from "@/types";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
-const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", isAiGenerated: false };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", isAiGenerated: false, audienceSettings: { replyPolicy: "everyone", visibility: "public", sensitiveLabels: [] } };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const { colors } = useTheme();
@@ -76,6 +78,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
         mediaIds,
         kind: postDraft.kind === "clip" ? "clip" : "post",
         ...(postDraft.isAiGenerated ? { isAiGenerated: true } : {}),
+        replyPolicy: postDraft.audienceSettings.replyPolicy,
+        visibility: postDraft.audienceSettings.visibility,
+        ...(postDraft.audienceSettings.sensitiveLabels.length > 0 ? { sensitiveLabels: postDraft.audienceSettings.sensitiveLabels } : {}),
         ...(videoReply
           ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
           : {}),
@@ -102,12 +107,14 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   });
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
   const creatorEntry = useCreatorEntry();
-  const isLiveModeLockedForViewer = !canGoLive && !isCreatorStatusLoading;
+  const createAccess = useCreateMenuAccess();
+  const requestedMode = route.params?.mode;
+  const isLiveModeLockedForViewer = (!canGoLive || !createAccess.isApprovedCreator) && !isCreatorStatusLoading;
+  const isProductModeLockedForViewer = !createAccess.isApprovedSeller && !createAccess.isSellerStatusLoading;
   useEffect(() => {
-    if (mode !== "live" || !isLiveModeLockedForViewer) return;
-    setMode("post");
-    if (!creatorEntry.isLoading) openCreatorProgramOrSettings(navigation, creatorEntry.route);
-  }, [mode, isLiveModeLockedForViewer, navigation, creatorEntry.route, creatorEntry.isLoading]);
+    if (mode === "live" && isLiveModeLockedForViewer) setMode("post");
+    if (mode === "product" && createAccess.isApprovedSeller) navigation.replace("ProductForm");
+  }, [mode, isLiveModeLockedForViewer, createAccess.isApprovedSeller, navigation]);
   const goLive = useMutation({
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
@@ -129,6 +136,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const switchCreateMode = (next: CreateMode) => {
     if (videoReply) return;
     if (next === "product") {
+      if (isProductModeLockedForViewer) return;
       navigation.replace("ProductForm");
       return;
     }
@@ -155,6 +163,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     : publishPost.isPending
       ? "Posting…"
       : "Post";
+
+  if (requestedMode === "product" && isProductModeLockedForViewer) return <RoleGateScreen kind="seller" />;
+  if (requestedMode === "live" && isLiveModeLockedForViewer) return <RoleGateScreen kind="creator" />;
 
   return (
     <Screen background={colors.surface} edges={["top"]}>

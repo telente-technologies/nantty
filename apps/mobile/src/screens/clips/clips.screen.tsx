@@ -24,6 +24,7 @@ import type { Clip, ClipsFeedTab } from "@/types";
 
 import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 type ClipsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, "Clips">,
@@ -147,7 +148,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const shareClipLink = async (clip: Clip) => {
-    await Share.share({ message: `https://zudomart.com/clips/${clip.id}` }).catch(() => undefined);
+    await Share.share({ message: webAppLinks.clip(clip.id) }).catch(() => undefined);
     clipsService.recordClipShare(clip.id).catch(() => undefined);
   };
 
