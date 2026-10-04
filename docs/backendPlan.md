@@ -105,7 +105,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | POST /auth/password/reset, /auth/password/change | M W SD | ✅ | **✅ built (go-identity).** |
 | POST /auth/refresh, /auth/logout | all | ✅ | Rotation + reuse detection (SECURITY.md) **✅ built (go-identity).** |
 | POST /auth/google `{idToken,nonce}`, /auth/apple `{identityToken,nonce,fullName?}` | M W | ✅ | Studio mock lacks these routes (`apps/studio/src/mocks/auth.mock.ts`), so social sign-in 404s there **✅ built (go-identity).** |
-| GET /auth/username-available | M W | ✅ | **✅ built (go-identity).** |
+| GET /auth/username-available | M W | ✅ | **✅ built (go-identity).** Taken responses and register 409 add `suggestions` (3), see plans.md §50. |
 | GET /auth/username-suggestion?seed | M W | ✗ | Add to go.users.usernames (`suggestUsername` is in the JSON) **✅ built (go-identity).** |
 | GET/DELETE /auth/sessions[/:id] | — | ✅ | No UI yet **✅ built (go-identity).** |
 
