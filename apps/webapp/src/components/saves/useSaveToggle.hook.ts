@@ -9,13 +9,6 @@ import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { savesService } from "@/services/saves.service";
 import type { SaveTargetType } from "@/types";
 
-const savedToastCopy: Record<SaveTargetType, string> = {
-  post: "Post saved",
-  video: "Video saved",
-  clip: "Clip saved",
-  product: "Product saved",
-};
-
 export function useSaveToggle(targetType: SaveTargetType, targetId: string, initiallySaved: boolean) {
   const queryClient = useQueryClient();
   const [isSaved, setIsSaved] = useState(initiallySaved);
@@ -31,7 +24,7 @@ export function useSaveToggle(targetType: SaveTargetType, targetId: string, init
     },
     onMutate: (saveNow) => {
       setIsSaved(saveNow);
-      showToast(saveNow ? { text: savedToastCopy[targetType], actionLabel: "View saved", actionHref: "/saved" } : { text: "Removed from saved" });
+      showToast(saveNow ? { text: "Added to Saved", actionLabel: "View", actionHref: "/saved" } : { text: "Removed from Saved" });
     },
     onError: (error, saveNow) => {
       setIsSaved(!saveNow);
