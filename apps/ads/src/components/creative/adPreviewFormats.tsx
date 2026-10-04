@@ -1,4 +1,5 @@
 import { LiveCardPreview } from "@/components/creative/adPreviewMarketplaceAndLive";
+import { AppInstallRow, CarouselStrip, MediaWithTapHint } from "@/components/creative/adPreviewRichFormats";
 import { PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { callToActionLabels } from "@/constants/campaignOptions.constant";
@@ -36,13 +37,20 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
         <div className={styles.feedLiveCard}>
           <LiveCardPreview creative={creative} variant="feed" />
         </div>
+      ) : creative.type === "carousel" ? (
+        <CarouselStrip creative={creative} />
       ) : (
-        <PreviewMedia media={firstMedia} altText={creative.headline} className={isWideVideo ? styles.wideMedia : styles.squareMedia} />
+        <MediaWithTapHint creative={creative}>
+          <PreviewMedia media={firstMedia} altText={creative.headline} className={isWideVideo ? styles.wideMedia : styles.squareMedia} />
+        </MediaWithTapHint>
       )}
-      {creative.media.length > 1 ? <p className={styles.carouselHint}>1 / {creative.media.length}</p> : null}
-      <div className={styles.feedCallToAction}>
-        <CallToActionButton creative={creative} />
-      </div>
+      {creative.type === "app_install" ? <AppInstallRow creative={creative} /> : null}
+      {creative.type === "carousel" ? <p className={styles.carouselHint}>Swipe for {creative.cards?.length ?? 0} cards</p> : creative.media.length > 1 ? <p className={styles.carouselHint}>1 / {creative.media.length}</p> : null}
+      {creative.type === "app_install" || creative.type === "carousel" ? null : (
+        <div className={styles.feedCallToAction}>
+          <CallToActionButton creative={creative} />
+        </div>
+      )}
       <div className={styles.interactions} aria-hidden>
         <span className={styles.counter}>
           <ZudoIcon name="heart24Alt" size={20} />0
@@ -98,7 +106,7 @@ export function ClipPreview({ creative, variant }: { readonly creative: Creative
         ) : null}
         <p className={styles.overlayHeadline}>{creative.headline}</p>
         {creative.primaryText ? <p className={styles.overlayText}>{creative.primaryText}</p> : null}
-        <CallToActionButton creative={creative} />
+        {creative.type === "app_install" ? <AppInstallRow creative={creative} inverted /> : <CallToActionButton creative={creative} />}
       </div>
       {variant === "clip" ? (
         <div className={styles.clipActions} aria-hidden>

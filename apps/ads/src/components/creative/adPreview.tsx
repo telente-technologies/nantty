@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BlockedPlacementNotice, LiveCardPreview, LiveDiscoveryPreview, MarketplaceGridPreview } from "@/components/creative/adPreviewMarketplaceAndLive";
+import { CommentThreadPreview } from "@/components/creative/adPreviewRichFormats";
 import { ClipPreview, FeedCardPreview, StoreCardPreview } from "@/components/creative/adPreviewFormats";
 import { SegmentedControl } from "@/components/ui/formFields";
 import { placementLabels } from "@/constants/campaignOptions.constant";
@@ -12,15 +13,15 @@ import { checkCreativeFitForPlacement, type CreativeShape } from "@/utils/adPlac
 
 import styles from "./adPreview.module.css";
 
-export type PreviewSurface = "feed" | "reels" | "stories" | "marketplace" | "search" | "live";
+export type PreviewSurface = "feed" | "comments" | "reels" | "stories" | "marketplace" | "search" | "live";
 
-const surfaceLabels: Record<PreviewSurface, string> = { feed: "Feed", reels: "Reels", stories: "Stories", marketplace: "Marketplace", search: "Search", live: "Live" };
-const placementBySurface: Record<PreviewSurface, AdPlacement> = { feed: "feed", reels: "clips", stories: "stories", marketplace: "mart", search: "search", live: "live" };
+const surfaceLabels: Record<PreviewSurface, string> = { feed: "Feed", comments: "Comments", reels: "Reels", stories: "Stories", marketplace: "Marketplace", search: "Search", live: "Live" };
+const placementBySurface: Record<PreviewSurface, AdPlacement> = { feed: "feed", comments: "feed", reels: "clips", stories: "stories", marketplace: "mart", search: "search", live: "live" };
 const surfaceByPlacement: Record<AdPlacement, PreviewSurface> = { feed: "feed", clips: "reels", stories: "stories", mart: "marketplace", search: "search", live: "live" };
-const surfaceOrder: readonly PreviewSurface[] = ["feed", "reels", "marketplace", "search", "live", "stories"];
+const surfaceOrder: readonly PreviewSurface[] = ["feed", "comments", "reels", "marketplace", "search", "live", "stories"];
 
 export function buildCreativeShapeFromCreative(creative: Creative): CreativeShape {
-  return { sourceType: creative.source.type, media: creative.media, hasProduct: Boolean(creative.product), hasLiveStream: Boolean(creative.live) };
+  return { creativeType: creative.type, sourceType: creative.source.type, media: creative.type === "carousel" ? (creative.cards ?? []).map((card) => card.media) : creative.media, hasProduct: Boolean(creative.product), hasLiveStream: Boolean(creative.live) };
 }
 
 function chooseNaturalSurfaceForCreative(creative: Creative): PreviewSurface {
@@ -34,6 +35,7 @@ function chooseNaturalSurfaceForCreative(creative: Creative): PreviewSurface {
 function renderCreativeOnSurface(creative: Creative, surface: PreviewSurface) {
   const fit = checkCreativeFitForPlacement(buildCreativeShapeFromCreative(creative), placementBySurface[surface]);
   if (fit.status === "blocked" && creative.media.length > 0) return <BlockedPlacementNotice placementLabel={placementLabels[placementBySurface[surface]]} reason={fit.message} />;
+  if (surface === "comments") return <CommentThreadPreview creative={creative} />;
   if (surface === "reels") return <ClipPreview creative={creative} variant="clip" />;
   if (surface === "stories") return <ClipPreview creative={creative} variant="story" />;
   if (surface === "marketplace" || surface === "search") return <MarketplaceGridPreview creative={creative} context={surface === "search" ? "search" : "mart"} />;

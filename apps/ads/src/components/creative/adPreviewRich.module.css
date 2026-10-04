@@ -1,0 +1,187 @@
+.carouselStrip {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.carouselStrip::-webkit-scrollbar {
+  display: none;
+}
+
+.carouselCard {
+  flex: 0 0 72%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.cardMedia {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 10px;
+}
+
+.cardHeadline {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cardDescription {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cardAction {
+  margin: 4px 10px 10px;
+}
+
+.appRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.appRowInverted {
+  margin: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.appIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--color-surface-muted);
+  flex: none;
+}
+
+.appMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appName {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.appButton {
+  padding: 0 14px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.mediaTap {
+  display: block;
+  position: relative;
+}
+
+.mediaTapHint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--media-chip);
+  color: var(--on-media);
+  font-size: 11px;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.threadTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.comment {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.commentBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.commentName {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.commentText {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.sponsoredComment {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+  flex-direction: column;
+}
+
+.sponsoredHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.ghost {
+  height: 10px;
+  border-radius: 4px;
+  background: var(--color-surface-muted);
+}
