@@ -34,6 +34,7 @@ export interface ClipSound {
 
 export interface Clip extends Post {
   readonly durationSeconds: number;
+  readonly shares: number;
   readonly sound: ClipSound;
   readonly promotedLive?: { readonly liveSessionId: ID; readonly title: string; readonly viewers: number } | null;
 }

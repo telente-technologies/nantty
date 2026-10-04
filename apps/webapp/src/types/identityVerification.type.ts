@@ -19,6 +19,7 @@ export interface IdentityCase {
   readonly status: IdentityCaseStatus;
   readonly refundStatus: IdentityRefundStatus;
   readonly refundMethod: "card" | "google_play" | "apple_request" | "plan_continues";
+  readonly refundScope: "full" | "checkmark_share";
   readonly consentGiven: boolean;
   readonly decisionReason: string;
   readonly createdAt: string;
