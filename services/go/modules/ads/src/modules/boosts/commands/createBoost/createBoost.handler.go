@@ -21,7 +21,8 @@ type Handler struct{ Container *container.Container }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CreatedBoost, error) {
 	deployed := handler.Container
-	if err := validators.ValidateCreate(command.Request, deployed.Settings.BoostMinimumDailyMinor); err != nil {
+	floors := deployed.Pricing.FloorsForCountries(ctx, services.BoostTargetCountries(command.Request.Audience), command.Request.DailyBudget.Currency)
+	if err := validators.ValidateCreate(command.Request, floors.BoostMinimumDailyMinor); err != nil {
 		return dtos.CreatedBoost{}, err
 	}
 	hash := hashRequest(command.Request)

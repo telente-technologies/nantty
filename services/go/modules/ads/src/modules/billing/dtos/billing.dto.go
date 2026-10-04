@@ -25,6 +25,7 @@ type BillingOverview struct {
 	MinimumTopUp            types.Money   `json:"minimumTopUp"`
 	MaximumTopUp            types.Money   `json:"maximumTopUp"`
 	SuggestedTopUps         []types.Money `json:"suggestedTopUps"`
+	ReportingSpend          *types.Money  `json:"reportingSpend"`
 }
 
 type BillingTransaction struct {

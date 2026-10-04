@@ -16,5 +16,6 @@ func MountBillingRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET "+base+"/transactions", authenticated(controller.ListTransactions))
 	mux.Handle("PUT "+base+"/spend-limit", authenticated(controller.SetSpendLimit))
 	mux.Handle("PUT "+base+"/funding-mode", authenticated(controller.SetFundingMode))
+	mux.HandleFunc("GET /api/v1/ads/pricing", controller.GetRegionalPricing)
 	mux.Handle("POST /internal/v1/ads/accounts/{accountId}/funds", middlewares.Internal(deployed)(controller.CreditFunds))
 }

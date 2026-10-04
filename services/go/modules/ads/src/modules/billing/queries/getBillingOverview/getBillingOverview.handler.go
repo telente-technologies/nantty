@@ -21,7 +21,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.BillingOv
 		return dtos.BillingOverview{}, err
 	}
 	currency := account.Currency
-	minimum := deployed.Settings.BoostMinimumDailyMinor[currency]
+	minimum := deployed.Pricing.FloorsForCountries(ctx, nil, currency).MinimumDailyBudgetMinor
 	monthSpent, err := deployed.Spend.Read(ctx, adsservices.SpendScope{AccountId: account.ID.String(), Month: deployed.Now().UTC().Format("2006-01")})
 	if err != nil {
 		return dtos.BillingOverview{}, err
@@ -32,6 +32,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.BillingOv
 		LowBalanceThreshold: types.Money{AmountMinor: minimum * 2, Currency: currency}, MinimumTopUp: types.Money{AmountMinor: minimum * 5, Currency: currency},
 		MaximumTopUp: types.Money{AmountMinor: minimum * 5_000, Currency: currency}, SuggestedTopUps: suggestions(minimum, currency),
 		Credits: credits(account, deployed.Now()),
+	}
+	if converted, ok := deployed.Pricing.ConvertForReporting(ctx, overview.SpendLimit.Spent, "USD"); ok {
+		overview.ReportingSpend = &converted
 	}
 	if account.SpendLimitMinor != nil {
 		overview.SpendLimit.Amount = &types.Money{AmountMinor: *account.SpendLimitMinor, Currency: currency}
