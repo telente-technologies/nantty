@@ -1,8 +1,8 @@
 # Python services
 
-The Python intelligence layer already exists at [`apps/intelligence`](../../apps/intelligence) and is not duplicated here.
+The Python intelligence layer lives at [`services/python/intelligence`](intelligence).
 It is structured like a Zudojs app (`src/modules/<domain>`, snake_case files with a kind suffix such as
-`feed_rank.route.py`) and its HTTP contract is [`apps/intelligence/apiContract.md`](../../apps/intelligence/apiContract.md).
+`feed_rank.route.py`) and its HTTP contract is [`services/python/intelligence/apiContract.md`](intelligence/apiContract.md).
 
 Rules that apply to it (see `platform.decisions` in `docs/architecture/microservicesPlan.json`):
 
