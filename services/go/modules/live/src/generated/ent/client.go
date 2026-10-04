@@ -22,6 +22,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
 	"zudomart/modules/live/src/generated/ent/livemoderator"
@@ -73,6 +74,8 @@ type Client struct {
 	JoinRequest *JoinRequestClient
 	// LiveComment is the client for interacting with the LiveComment builders.
 	LiveComment *LiveCommentClient
+	// LiveHostRestriction is the client for interacting with the LiveHostRestriction builders.
+	LiveHostRestriction *LiveHostRestrictionClient
 	// LiveIngress is the client for interacting with the LiveIngress builders.
 	LiveIngress *LiveIngressClient
 	// LiveLeaderboardEntry is the client for interacting with the LiveLeaderboardEntry builders.
@@ -125,6 +128,7 @@ func (c *Client) init() {
 	c.GuestSlot = NewGuestSlotClient(c.config)
 	c.JoinRequest = NewJoinRequestClient(c.config)
 	c.LiveComment = NewLiveCommentClient(c.config)
+	c.LiveHostRestriction = NewLiveHostRestrictionClient(c.config)
 	c.LiveIngress = NewLiveIngressClient(c.config)
 	c.LiveLeaderboardEntry = NewLiveLeaderboardEntryClient(c.config)
 	c.LiveModerator = NewLiveModeratorClient(c.config)
@@ -243,6 +247,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
 		LiveComment:          NewLiveCommentClient(cfg),
+		LiveHostRestriction:  NewLiveHostRestrictionClient(cfg),
 		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
 		LiveModerator:        NewLiveModeratorClient(cfg),
@@ -288,6 +293,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
 		LiveComment:          NewLiveCommentClient(cfg),
+		LiveHostRestriction:  NewLiveHostRestrictionClient(cfg),
 		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
 		LiveModerator:        NewLiveModeratorClient(cfg),
@@ -334,10 +340,10 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
-		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
-		c.LiveSafetyState, c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene,
-		c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveHostRestriction, c.LiveIngress, c.LiveLeaderboardEntry,
+		c.LiveModerator, c.LiveProduct, c.LiveRecording, c.LiveRestriction,
+		c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession, c.LiveViewer,
+		c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule, c.ProcessedGift,
 	} {
 		n.Use(hooks...)
 	}
@@ -349,10 +355,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
-		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
-		c.LiveSafetyState, c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene,
-		c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveHostRestriction, c.LiveIngress, c.LiveLeaderboardEntry,
+		c.LiveModerator, c.LiveProduct, c.LiveRecording, c.LiveRestriction,
+		c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession, c.LiveViewer,
+		c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule, c.ProcessedGift,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -383,6 +389,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.JoinRequest.mutate(ctx, m)
 	case *LiveCommentMutation:
 		return c.LiveComment.mutate(ctx, m)
+	case *LiveHostRestrictionMutation:
+		return c.LiveHostRestriction.mutate(ctx, m)
 	case *LiveIngressMutation:
 		return c.LiveIngress.mutate(ctx, m)
 	case *LiveLeaderboardEntryMutation:
@@ -1878,6 +1886,139 @@ func (c *LiveCommentClient) mutate(ctx context.Context, m *LiveCommentMutation) 
 		return (&LiveCommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown LiveComment mutation op: %q", m.Op())
+	}
+}
+
+// LiveHostRestrictionClient is a client for the LiveHostRestriction schema.
+type LiveHostRestrictionClient struct {
+	config
+}
+
+// NewLiveHostRestrictionClient returns a client for the LiveHostRestriction from the given config.
+func NewLiveHostRestrictionClient(c config) *LiveHostRestrictionClient {
+	return &LiveHostRestrictionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livehostrestriction.Hooks(f(g(h())))`.
+func (c *LiveHostRestrictionClient) Use(hooks ...Hook) {
+	c.hooks.LiveHostRestriction = append(c.hooks.LiveHostRestriction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livehostrestriction.Intercept(f(g(h())))`.
+func (c *LiveHostRestrictionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveHostRestriction = append(c.inters.LiveHostRestriction, interceptors...)
+}
+
+// Create returns a builder for creating a LiveHostRestriction entity.
+func (c *LiveHostRestrictionClient) Create() *LiveHostRestrictionCreate {
+	mutation := newLiveHostRestrictionMutation(c.config, OpCreate)
+	return &LiveHostRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveHostRestriction entities.
+func (c *LiveHostRestrictionClient) CreateBulk(builders ...*LiveHostRestrictionCreate) *LiveHostRestrictionCreateBulk {
+	return &LiveHostRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveHostRestrictionClient) MapCreateBulk(slice any, setFunc func(*LiveHostRestrictionCreate, int)) *LiveHostRestrictionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveHostRestrictionCreateBulk{err: fmt.Errorf("calling to LiveHostRestrictionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveHostRestrictionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveHostRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveHostRestriction.
+func (c *LiveHostRestrictionClient) Update() *LiveHostRestrictionUpdate {
+	mutation := newLiveHostRestrictionMutation(c.config, OpUpdate)
+	return &LiveHostRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveHostRestrictionClient) UpdateOne(_m *LiveHostRestriction) *LiveHostRestrictionUpdateOne {
+	mutation := newLiveHostRestrictionMutation(c.config, OpUpdateOne, withLiveHostRestriction(_m))
+	return &LiveHostRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveHostRestrictionClient) UpdateOneID(id string) *LiveHostRestrictionUpdateOne {
+	mutation := newLiveHostRestrictionMutation(c.config, OpUpdateOne, withLiveHostRestrictionID(id))
+	return &LiveHostRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveHostRestriction.
+func (c *LiveHostRestrictionClient) Delete() *LiveHostRestrictionDelete {
+	mutation := newLiveHostRestrictionMutation(c.config, OpDelete)
+	return &LiveHostRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveHostRestrictionClient) DeleteOne(_m *LiveHostRestriction) *LiveHostRestrictionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveHostRestrictionClient) DeleteOneID(id string) *LiveHostRestrictionDeleteOne {
+	builder := c.Delete().Where(livehostrestriction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveHostRestrictionDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveHostRestriction.
+func (c *LiveHostRestrictionClient) Query() *LiveHostRestrictionQuery {
+	return &LiveHostRestrictionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveHostRestriction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveHostRestriction entity by its id.
+func (c *LiveHostRestrictionClient) Get(ctx context.Context, id string) (*LiveHostRestriction, error) {
+	return c.Query().Where(livehostrestriction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveHostRestrictionClient) GetX(ctx context.Context, id string) *LiveHostRestriction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveHostRestrictionClient) Hooks() []Hook {
+	return c.hooks.LiveHostRestriction
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveHostRestrictionClient) Interceptors() []Interceptor {
+	return c.inters.LiveHostRestriction
+}
+
+func (c *LiveHostRestrictionClient) mutate(ctx context.Context, m *LiveHostRestrictionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveHostRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveHostRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveHostRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveHostRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveHostRestriction mutation op: %q", m.Op())
 	}
 }
 
@@ -3880,17 +4021,18 @@ func (c *ProcessedGiftClient) mutate(ctx context.Context, m *ProcessedGiftMutati
 type (
 	hooks struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
-		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
-		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
-		LiveRestriction, LiveRoomSetting, LiveSafetyState, LiveSession, LiveViewer,
-		OutboxEvent, OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Hook
+		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment,
+		LiveHostRestriction, LiveIngress, LiveLeaderboardEntry, LiveModerator,
+		LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting, LiveSafetyState,
+		LiveSession, LiveViewer, OutboxEvent, OverlayScene, PointsEntry, PointsRule,
+		ProcessedGift []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
-		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
-		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
-		LiveRestriction, LiveRoomSetting, LiveSafetyState, LiveSession, LiveViewer,
-		OutboxEvent, OverlayScene, PointsEntry, PointsRule,
+		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment,
+		LiveHostRestriction, LiveIngress, LiveLeaderboardEntry, LiveModerator,
+		LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting, LiveSafetyState,
+		LiveSession, LiveViewer, OutboxEvent, OverlayScene, PointsEntry, PointsRule,
 		ProcessedGift []ent.Interceptor
 	}
 )

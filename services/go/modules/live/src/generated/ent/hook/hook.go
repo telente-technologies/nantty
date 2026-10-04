@@ -140,6 +140,18 @@ func (f LiveCommentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveCommentMutation", m)
 }
 
+// The LiveHostRestrictionFunc type is an adapter to allow the use of ordinary
+// function as LiveHostRestriction mutator.
+type LiveHostRestrictionFunc func(context.Context, *ent.LiveHostRestrictionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveHostRestrictionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveHostRestrictionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveHostRestrictionMutation", m)
+}
+
 // The LiveIngressFunc type is an adapter to allow the use of ordinary
 // function as LiveIngress mutator.
 type LiveIngressFunc func(context.Context, *ent.LiveIngressMutation) (ent.Value, error)

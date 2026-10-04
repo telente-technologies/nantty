@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
 	"zudomart/modules/live/src/generated/ent/livemoderator"
@@ -109,6 +110,7 @@ func checkColumn(t, c string) error {
 			guestslot.Table:            guestslot.ValidColumn,
 			joinrequest.Table:          joinrequest.ValidColumn,
 			livecomment.Table:          livecomment.ValidColumn,
+			livehostrestriction.Table:  livehostrestriction.ValidColumn,
 			liveingress.Table:          liveingress.ValidColumn,
 			liveleaderboardentry.Table: liveleaderboardentry.ValidColumn,
 			livemoderator.Table:        livemoderator.ValidColumn,

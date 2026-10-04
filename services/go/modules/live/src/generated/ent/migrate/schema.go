@@ -364,6 +364,19 @@ var (
 			},
 		},
 	}
+	// LiveHostRestrictionsColumns holds the columns for the "live_host_restrictions" table.
+	LiveHostRestrictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "can_go_live", Type: field.TypeBool, Default: true},
+		{Name: "health_changed_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LiveHostRestrictionsTable holds the schema information for the "live_host_restrictions" table.
+	LiveHostRestrictionsTable = &schema.Table{
+		Name:       "live_host_restrictions",
+		Columns:    LiveHostRestrictionsColumns,
+		PrimaryKey: []*schema.Column{LiveHostRestrictionsColumns[0]},
+	}
 	// LiveIngressesColumns holds the columns for the "live_ingresses" table.
 	LiveIngressesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -807,6 +820,7 @@ var (
 		GuestSlotsTable,
 		JoinRequestsTable,
 		LiveCommentsTable,
+		LiveHostRestrictionsTable,
 		LiveIngressesTable,
 		LiveLeaderboardEntriesTable,
 		LiveModeratorsTable,
