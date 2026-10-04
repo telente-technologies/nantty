@@ -1,17 +1,29 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import shared from "./landingPage.module.css";
 import styles from "./landingCallToAction.module.css";
 
 export function LandingCallToAction() {
   return (
-    <section className={styles.cta}>
-      <div className={`${styles.inner} pageContainer`}>
-        <h2 className={styles.title}>Ready to go live?</h2>
-        <p className={styles.body}>Sign in with your Zudomart account and start your first broadcast, whether you sell or not.</p>
-        <Link href="/login" className={shared.primaryAction}>
-          Log in to Studio
-        </Link>
+    <section className={styles.section} aria-labelledby="cta-heading">
+      <div className={styles.panel}>
+        <div className={styles.copy}>
+          <h2 id="cta-heading" className={styles.heading}>
+            Your audience is waiting. Go live tonight.
+          </h2>
+          <p className={styles.description}>Sign in with the account you use in the Zudomart app. Not in the Creator Program yet? Apply in the app, then come back here to go live.</p>
+          <div className={styles.actions}>
+            <Link href="/login" className={styles.primaryAction}>
+              Go live with Studio
+            </Link>
+            <a href="#creator-program" className={styles.secondaryAction}>
+              Join the Creator Program
+            </a>
+          </div>
+        </div>
+        <div className={styles.photoColumn}>
+          <Image src="/photos/podcastDeskHost.webp" alt="A creator in headphones talking into a microphone at his desk" width={1000} height={1250} sizes="(max-width: 960px) 100vw, 520px" className={styles.photo} />
+        </div>
       </div>
     </section>
   );

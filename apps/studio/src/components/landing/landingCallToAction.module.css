@@ -1,24 +1,113 @@
-.cta {
-  background:
-    radial-gradient(60% 120% at 50% 0%, var(--brand-panel-glow) 0%, transparent 70%),
-    var(--surface-inverse);
-  color: var(--ink-inverse);
+.section {
+  padding: var(--landing-section-space) var(--landing-gutter);
 }
 
-.inner {
+.panel {
+  display: grid;
+  overflow: hidden;
+  max-width: var(--landing-width);
+  margin: 0 auto;
+  border-radius: 28px;
+  background: radial-gradient(70% 90% at 100% 100%, var(--blue-400), transparent 60%), var(--blue-500);
+  color: var(--deep-ink);
+}
+
+.copy {
+  display: grid;
+  gap: 20px;
+  align-content: center;
+  justify-items: start;
+  padding: clamp(32px, 6vw, 72px);
+}
+
+.heading {
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  max-width: 11ch;
+}
+
+.description {
+  max-width: 44ch;
+  color: var(--blue-50);
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+
+.actions {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-4);
-  padding-block: clamp(48px, 7vw, 80px);
-  text-align: center;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
 }
 
-.title {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
+.primaryAction {
+  background: var(--yellow-500);
+  color: var(--blue-900);
 }
 
-.body {
-  max-width: 46ch;
-  color: var(--on-brand-muted);
+.secondaryAction {
+  background: var(--deep-scrim);
+  color: var(--deep-ink);
+  box-shadow: inset 0 0 0 1px var(--deep-hairline-strong);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  text-decoration: none;
+  filter: brightness(1.06);
+}
+
+.photoColumn {
+  position: relative;
+  min-height: 320px;
+  max-height: 520px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 960px) {
+  .panel {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    min-height: 520px;
+  }
+}
+
+.photoColumn {
+  overflow: hidden;
+  height: 360px;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  object-position: 50% 30%;
+}
+
+@media (min-width: 960px) {
+  .photoColumn {
+    height: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .primaryAction,
+  .secondaryAction {
+    justify-content: center;
+    width: 100%;
+  }
 }
