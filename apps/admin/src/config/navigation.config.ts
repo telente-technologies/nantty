@@ -76,6 +76,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     title: "Configuration",
     items: [
       { label: "Plans & prices", href: "/config/plans", icon: "viewProducts24", requirement: "config:read" },
+      { label: "Regional pricing", href: "/config/pricing", icon: "creditCard24", requirement: "config:read" },
       { label: "Revenue rules", href: "/config/revenue", icon: "creditCard24", requirement: "config:read" },
       { label: "Platform rules", href: "/config/rules", icon: "slidersHorizontal24", requirement: "config:read" },
       { label: "Feature flags", href: "/config/flags", icon: "check16", requirement: "flags:manage" },
