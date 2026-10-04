@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verification.fraudSignalDetected.v1.json",
+  "title": "verification.fraudSignalDetected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "suggestionId",
+    "accountId",
+    "caseId",
+    "signals",
+    "riskScore",
+    "advisoryOnly"
+  ],
+  "properties": {
+    "suggestionId": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "riskScore": {
+      "type": "integer"
+    },
+    "advisoryOnly": {
+      "type": "boolean"
+    }
+  }
+}

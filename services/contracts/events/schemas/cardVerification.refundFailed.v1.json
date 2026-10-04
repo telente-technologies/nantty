@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/cardVerification.refundFailed.v1.json",
+  "title": "cardVerification.refundFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paymentIntentId",
+    "reason",
+    "alert"
+  ],
+  "properties": {
+    "paymentIntentId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "alert": {
+      "type": "boolean"
+    }
+  }
+}

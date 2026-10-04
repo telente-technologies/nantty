@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verification.rejectedRefunded.v1.json",
+  "title": "verification.rejectedRefunded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "checkmark",
+    "accountName",
+    "caseId",
+    "reasons",
+    "refundMethod",
+    "reapplyFrom"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "checkmark": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "refundMethod": {
+      "type": "string"
+    },
+    "reapplyFrom": {
+      "type": "string"
+    }
+  }
+}

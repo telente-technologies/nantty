@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verification.eligible.v1.json",
+  "title": "verification.eligible",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "checkmark",
+    "accountName",
+    "deepLink"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "checkmark": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "deepLink": {
+      "type": "string"
+    }
+  }
+}
