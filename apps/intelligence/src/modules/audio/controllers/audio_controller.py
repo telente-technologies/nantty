@@ -16,7 +16,9 @@ from src.modules.audio.dtos.audio_fingerprint_dto import (
     AudioSoundStatusResponse,
     AudioSoundStatusUpdateRequest,
 )
+from src.modules.audio.dtos.copyright_audio_match_dto import CopyrightAudioMatchRequest, CopyrightAudioMatchResponse
 from src.modules.audio.queries.match_audio_excerpt.match_audio_excerpt_query import MatchAudioExcerptQuery
+from src.modules.audio.queries.match_copyright_audio.match_copyright_audio_query import MatchCopyrightAudioQuery
 from src.modules.audio.services.audio_fingerprint_index_service import (
     AudioSoundAlreadyRegisteredError,
     AudioSoundNotFoundError,
@@ -26,6 +28,7 @@ from src.utils.cqrs_util import CommandBus, QueryBus
 from src.utils.request_deadline_util import run_within_request_deadline
 
 AUDIO_REQUEST_DEADLINE_SECONDS = 3.0
+COPYRIGHT_MATCH_DEADLINE_SECONDS = 60.0
 
 
 async def translate_audio_errors(operation: Awaitable[Any]) -> Any:
@@ -63,5 +66,11 @@ class AudioController:
     async def update_sound_status(self, request: AudioSoundStatusUpdateRequest) -> AudioSoundStatusResponse:
         response: AudioSoundStatusResponse = await translate_audio_errors(
             self.command_bus.execute(UpdateSoundStatusCommand(request))
+        )
+        return response
+
+    async def match_copyright_audio(self, request: CopyrightAudioMatchRequest) -> CopyrightAudioMatchResponse:
+        response: CopyrightAudioMatchResponse = await run_within_request_deadline(
+            self.query_bus.execute(MatchCopyrightAudioQuery(request)), COPYRIGHT_MATCH_DEADLINE_SECONDS
         )
         return response

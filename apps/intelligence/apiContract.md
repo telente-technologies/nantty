@@ -138,7 +138,7 @@ The service enforces an internal per-request deadline of 250 ms for ranking-styl
 
 | endpoint | client timeout | fallback when Python is down, times out, returns 4xx/5xx |
 |---|---|---|
-| POST /v1/feed/rank | 100 ms | For You: `recency × engagement` score (e.g. `(likes+2·comments+3·shares+1)/(ageHours+2)^1.5`), cap 1 consecutive post per author/store, drop blocked/muted/hidden/seen. Following: pure reverse chronological. |
+| POST /v1/feed/rank | 250 ms | For You: social `deterministicFeedRanker` (quality x integrity x capped boost, see `docs/architecture/recommendations.md` §7), no consecutive author, drop blocked/hidden/seen. Following: pure reverse chronological. |
 | POST /v1/clips/rank | 100 ms | recency × historical completion rate, no consecutive same creator, drop seen |
 | POST /v1/social-proof/select | 80 ms | no banners, or a simple rule: ≥2 followed friends engaged, at most every 5th post |
 | POST /v1/ads/select | 120 ms | no ads, or highest-bid eligible ad per slot using the same load rules (first after 3 organic, ≥6 between, never adjacent, skip sensitive/reported neighbours) and charging no more than the bid; never exceed budget |
@@ -736,6 +736,7 @@ fallback; none of these calls may sit in the critical path of a payment (use the
 | POST /v1/risk/score-extended | 120 ms | the service's conservative rules; unknown => `review` |
 | POST /v1/creators/real-followers | 500 ms | use raw follower count with the manual-review gate |
 | POST /v1/ads/predicted-ctr | 80 ms | smoothed historical CTR from the ads store |
+| POST /v1/verification/eligibility | 2 s | queue the request (`request` tier) and recheck on schedule |
 
 ### POST /v1/chat/spam-score
 
@@ -773,10 +774,26 @@ It never suspends anything; goTrust opens an advisory case. Publish failures are
 Per-follower authenticity is a multiplicative rule model. Response: `{creatorId, sampledFollowers, estimatedRealRatio, estimatedRealFollowers, realFollowersLowerBound, suspiciousFollowers, topReasons, metadata}`.
 With `totalFollowerCount` the sampled ratio is scaled to the total. Use `realFollowersLowerBound` against the eligibility threshold; the decision stays in Go.
 
+### POST /v1/verification/eligibility
+
+Checkmark trust score for the verification hub (go-identity calls it on page view, on "Request verification" and from the recheck scheduler).
+`{profileId, color: blue|gold, accountAgeDays, realFollowers, originalPostsLast60Days, daysSinceLastViolation, fraudScore, riskScore, borderlineContent,
+phoneVerified, emailVerified, accountRestricted, completedOrders, successRatePercent, hasActiveStoreOrBrandPage, thresholds{minimumAccountAgeDays,
+minimumRealFollowers, noViolationsInDays, minimumCompletedOrders, minimumSuccessRatePercent}}` (thresholds are the admin-editable checkmark rules).
+Response: `{profileId, trustScore 0-100, tier: buy_now|request|blocked, reasons[], recheckAfterHours, scoringSource}`. `buy_now` needs a score of 75+
+and every hard threshold met; restricted accounts or fraud >= 80 / risk >= 85 are `blocked`. Go decides; when this endpoint is down Go falls back to
+`request` (never `buy_now`) and asks again later.
+
 ### POST /v1/ads/predicted-ctr
 
 `{placement, viewer, candidates[<=300 AdCandidate]}` => `{predictions[{adId, predictedClickRate}], personalized, metadata}`. Uses the same features and `ad_click`
 model (or heuristic) as `/v1/ads/select`; `personalized:false` when the viewer opted out or the store is unavailable.
+
+### POST /v1/help/answer-drafts
+
+Called by `services/typescript/support` when a resolved ticket becomes a Help Centre topic (plans.md §44). The caller scrubs personal data first and never calls when anything suspicious remains; this endpoint redacts emails, links, amounts, long digit runs and @handles again as a safeguard.
+
+Request `{ category: "order"|"payment"|…, locale: "en", subject, question, answer }` (placeholders such as `[order number]` allowed; unknown fields rejected). Response `{ title, summary, question, answerMarkdown, tags[], source: "template", redactedByIntelligence }`. Deterministic template: greetings, sign-offs and filler removed, placeholders turned into generic words, the first real question (or the subject) becomes the title, step sentences become a numbered list, and the body has "The question", "The answer" and "Still need help?" sections. The caller falls back to its own template when this endpoint is slow or down.
 
 ### Domain event consumer (RabbitMQ)
 
@@ -805,6 +822,20 @@ backend failures are republished to the retry queues (30 s, 2 m, 10 m, 30 m) and
 `read_viewer_online_features` / top-topic reads return empty, so feed, clips, search, recommendations, social proof and ads fall back to
 popularity/recency/relevance. Safety counters (messages metadata, logins, reports, gifts) are kept for fraud and abuse scoring.
 Known limit: counterparties' incoming value-flow sets still list a deleted account's id until their TTL expires.
+
+## 7c. Fair ranking, integrity and headlines (2026-10-04)
+
+`POST /v1/feed/rank` candidates accept `repostCount`, `saveCount`, `completionRate`, `authorTier` (`none`, `blue_essential`, `blue_verified`, `premium`, `gold_business`, `black_official`), `authorIsOfficial`, `authorQualityPrior` (0-1, default 0.5), `integrity` (`engagerCount`, `newAccountEngagerShare`, `lowTrustEngagerShare`, `suspendedEngagerShare`, `clusteredEngagerShare`, `reciprocalPodShare`, `burstRatio`, `purchasedEngagementSuspected`, `spamHashtagCount`), `isPromoted`, `ageRestricted`. The request accepts `boostPolicy` (`version`, `tierBoosts`, `officialEditorialBoost`; always clamped to the hard caps: tiers 1.05/1.08/1.10/1.12/1.15, Official 1.15, combined 1.25, tier order enforced) and `trendingTopics`. Items add `explanations[]` (`code`, `label`, `detail`), `boostMultiplier` and `trustedEngagementShare`; the response adds `manipulatedItemIds` and `boostPolicyVersion`. `authorIsVerified` is ignored for scoring. Non-adult viewers never receive `ageRestricted` or `isSensitive` candidates. Manipulated authors (10+ engagers, >= 50% suspicious) go to the goTrust advisory queue with `source: "engagement_integrity"`.
+
+Event `context` accepts `actorTrust` (`new`, `low`, `normal`) and `actorClusterKey` (an opaque hash of network /24 + device, never a raw IP). At ingestion a second actor from the same cluster on the same item within an hour counts x0.1, low-trust actors x0.25, and an actor's engagements beyond 60 an hour stop counting for trends.
+
+`POST /v1/trending` accepts `category` (`news`, `sports`, `entertainment`, `music`, `tech`, `business`, `fashion`, `gaming`, `comedy`, `religion`, `food`, `politics`, `lifestyle`, `other`); items add `category` and `manipulationShare`; the response adds `manipulatedIds`. Spam hashtags are never returned; politics needs twice the distinct actors.
+
+`POST /v1/trending/headlines` takes `{ country?, category?, posts: [{ postId, authorId, text, hashtags, topics, createdAt, likeCount, commentCount, repostCount, shareCount, viewCount, isSensitive, ageRestricted, isPublic, integrity? }], limit (<= 20), minimumPostsPerStory (3), minimumDistinctAuthors (3), excludedStoryKeys }` and returns `headlines: [{ storyKey, title, summary, category, postIds (<= 10), postCount, authorCount, topHashtags, sourceLabel: "Summarised from posts", generatedBy: "extractive_v1" | "template_v1", updatedAt }]`. Sensitive, age-restricted, non-public and manipulated posts are dropped; politics and religion always use the template title.
+
+`content.sensitivityAdvised` (domain event, exchange `zudomart.events`) is published after a processed image scores on a mapped category: `data: { targetType: "post" | "clip", targetId, ownerId, mediaId, scores: [{ label: "nudity" | "graphic_violence" | "dangerous_acts" | "self_harm", score }], confidence, modelVersion, advisoryOnly: true }`. Rekognition needs `INTELLIGENCE_MEDIA_BUCKET` and AWS credentials; otherwise the image model reports no signal and nothing is published.
+
+`INTELLIGENCE_SERVER_WORKERS` runs that many uvicorn worker processes (default 1).
 
 ## 8. What the TS API must do
 
