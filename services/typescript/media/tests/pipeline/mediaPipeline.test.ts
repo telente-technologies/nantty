@@ -201,6 +201,8 @@ describe("video and audio", () => {
       posterName: "poster.jpg", hlsMasterName: "hls/master.m3u8", moderationFrames: [Buffer.from("frame")],
     }),
     processAudio: async () => ({ width: 0, height: 0, durationSeconds: 4, files: [{ name: "audio.m4a", contentType: "audio/mp4", format: "m4a", width: 0, height: 0, bitrateKbps: 64, isVariant: true, source: { buffer: Buffer.from("aac") }, sizeBytes: 3 }], moderationFrames: [] }),
+    muteVideoAudio: async () => { throw new Error("not used"); },
+    computeAudioFingerprint: async () => null,
   };
 
   it("publishes mp4, hls and poster for a clip", async () => {

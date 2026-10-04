@@ -22,6 +22,8 @@ export const unavailableTranscoder: MediaTranscoder = {
   isAvailable: async () => false,
   processVideo: async () => { throw new (await import("../../src/errors/media.error.js")).ProcessorUnavailableError("no ffmpeg"); },
   processAudio: async () => { throw new (await import("../../src/errors/media.error.js")).ProcessorUnavailableError("no ffmpeg"); },
+  muteVideoAudio: async () => { throw new (await import("../../src/errors/media.error.js")).ProcessorUnavailableError("no ffmpeg"); },
+  computeAudioFingerprint: async () => null,
 };
 
 export interface Harness {
