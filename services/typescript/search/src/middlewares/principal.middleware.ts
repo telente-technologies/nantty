@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 
 import type { HttpRouterContext } from "@zudojs/http";
 
-import { accountIdHeaderName, clientRegionHeaderName, internalTokenHeaderName } from "../constants/search.constant.js";
+import { accountIdHeaderName, ageBracketHeaderName, clientRegionHeaderName, internalTokenHeaderName } from "../constants/search.constant.js";
 import { unauthorized } from "../errors/search.error.js";
 
 const accountIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -10,6 +10,10 @@ const accountIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a
 export function findViewerId(context: HttpRouterContext): string | undefined {
   const accountId = context.request.getHeader(accountIdHeaderName)?.trim();
   return accountId !== undefined && accountIdPattern.test(accountId) ? accountId.toLowerCase() : undefined;
+}
+
+export function isViewerVerifiedAdult(context: HttpRouterContext): boolean {
+  return findViewerId(context) !== undefined && context.request.getHeader(ageBracketHeaderName)?.trim().toLowerCase() === "adult";
 }
 
 export function requireViewerId(context: HttpRouterContext): string {

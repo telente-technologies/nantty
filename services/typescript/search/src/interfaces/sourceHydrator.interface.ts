@@ -63,6 +63,7 @@ export interface ProductSource {
   readonly visibility: string;
   readonly storeActive: boolean;
   readonly countryCode: string | null;
+  readonly shippingRegions?: readonly string[];
   readonly purchaseCount: number;
   readonly createdAt: string;
 }
@@ -80,6 +81,7 @@ export interface PostSource {
   readonly likeCount: number;
   readonly viewCount: number;
   readonly removed: boolean;
+  readonly sensitiveLabels?: readonly string[];
   readonly createdAt: string;
 }
 

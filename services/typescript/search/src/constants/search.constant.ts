@@ -1,4 +1,5 @@
 export const accountIdHeaderName = "x-zudomart-account-id";
+export const ageBracketHeaderName = "x-zudomart-age-bracket";
 export const clientRegionHeaderName = "x-client-region";
 export const internalTokenHeaderName = "x-internal-token";
 export const defaultPageSize = 20;
