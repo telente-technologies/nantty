@@ -92,6 +92,7 @@ export type IdentityProfileScalarFieldEnum = (typeof IdentityProfileScalarFieldE
 export const IdentityPrivacySettingScalarFieldEnum = {
   accountId: 'accountId',
   personalization: 'personalization',
+  personalizedAds: 'personalizedAds',
   whoCanMentionMe: 'whoCanMentionMe'
 } as const
 

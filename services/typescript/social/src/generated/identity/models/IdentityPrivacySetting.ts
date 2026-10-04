@@ -27,18 +27,21 @@ export type AggregateIdentityPrivacySetting = {
 export type IdentityPrivacySettingMinAggregateOutputType = {
   accountId: string | null
   personalization: boolean | null
+  personalizedAds: boolean | null
   whoCanMentionMe: string | null
 }
 
 export type IdentityPrivacySettingMaxAggregateOutputType = {
   accountId: string | null
   personalization: boolean | null
+  personalizedAds: boolean | null
   whoCanMentionMe: string | null
 }
 
 export type IdentityPrivacySettingCountAggregateOutputType = {
   accountId: number
   personalization: number
+  personalizedAds: number
   whoCanMentionMe: number
   _all: number
 }
@@ -47,18 +50,21 @@ export type IdentityPrivacySettingCountAggregateOutputType = {
 export type IdentityPrivacySettingMinAggregateInputType = {
   accountId?: true
   personalization?: true
+  personalizedAds?: true
   whoCanMentionMe?: true
 }
 
 export type IdentityPrivacySettingMaxAggregateInputType = {
   accountId?: true
   personalization?: true
+  personalizedAds?: true
   whoCanMentionMe?: true
 }
 
 export type IdentityPrivacySettingCountAggregateInputType = {
   accountId?: true
   personalization?: true
+  personalizedAds?: true
   whoCanMentionMe?: true
   _all?: true
 }
@@ -138,6 +144,7 @@ export type IdentityPrivacySettingGroupByArgs<ExtArgs extends runtime.Types.Exte
 export type IdentityPrivacySettingGroupByOutputType = {
   accountId: string
   personalization: boolean
+  personalizedAds: boolean
   whoCanMentionMe: string
   _count: IdentityPrivacySettingCountAggregateOutputType | null
   _min: IdentityPrivacySettingMinAggregateOutputType | null
@@ -165,12 +172,14 @@ export type IdentityPrivacySettingWhereInput = {
   NOT?: Prisma.IdentityPrivacySettingWhereInput | Prisma.IdentityPrivacySettingWhereInput[]
   accountId?: Prisma.UuidFilter<"IdentityPrivacySetting"> | string
   personalization?: Prisma.BoolFilter<"IdentityPrivacySetting"> | boolean
+  personalizedAds?: Prisma.BoolFilter<"IdentityPrivacySetting"> | boolean
   whoCanMentionMe?: Prisma.StringFilter<"IdentityPrivacySetting"> | string
 }
 
 export type IdentityPrivacySettingOrderByWithRelationInput = {
   accountId?: Prisma.SortOrder
   personalization?: Prisma.SortOrder
+  personalizedAds?: Prisma.SortOrder
   whoCanMentionMe?: Prisma.SortOrder
 }
 
@@ -180,12 +189,14 @@ export type IdentityPrivacySettingWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.IdentityPrivacySettingWhereInput[]
   NOT?: Prisma.IdentityPrivacySettingWhereInput | Prisma.IdentityPrivacySettingWhereInput[]
   personalization?: Prisma.BoolFilter<"IdentityPrivacySetting"> | boolean
+  personalizedAds?: Prisma.BoolFilter<"IdentityPrivacySetting"> | boolean
   whoCanMentionMe?: Prisma.StringFilter<"IdentityPrivacySetting"> | string
 }, "accountId">
 
 export type IdentityPrivacySettingOrderByWithAggregationInput = {
   accountId?: Prisma.SortOrder
   personalization?: Prisma.SortOrder
+  personalizedAds?: Prisma.SortOrder
   whoCanMentionMe?: Prisma.SortOrder
   _count?: Prisma.IdentityPrivacySettingCountOrderByAggregateInput
   _max?: Prisma.IdentityPrivacySettingMaxOrderByAggregateInput
@@ -198,66 +209,77 @@ export type IdentityPrivacySettingScalarWhereWithAggregatesInput = {
   NOT?: Prisma.IdentityPrivacySettingScalarWhereWithAggregatesInput | Prisma.IdentityPrivacySettingScalarWhereWithAggregatesInput[]
   accountId?: Prisma.UuidWithAggregatesFilter<"IdentityPrivacySetting"> | string
   personalization?: Prisma.BoolWithAggregatesFilter<"IdentityPrivacySetting"> | boolean
+  personalizedAds?: Prisma.BoolWithAggregatesFilter<"IdentityPrivacySetting"> | boolean
   whoCanMentionMe?: Prisma.StringWithAggregatesFilter<"IdentityPrivacySetting"> | string
 }
 
 export type IdentityPrivacySettingCreateInput = {
   accountId: string
   personalization: boolean
+  personalizedAds: boolean
   whoCanMentionMe: string
 }
 
 export type IdentityPrivacySettingUncheckedCreateInput = {
   accountId: string
   personalization: boolean
+  personalizedAds: boolean
   whoCanMentionMe: string
 }
 
 export type IdentityPrivacySettingUpdateInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   personalization?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  personalizedAds?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whoCanMentionMe?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type IdentityPrivacySettingUncheckedUpdateInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   personalization?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  personalizedAds?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whoCanMentionMe?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type IdentityPrivacySettingCreateManyInput = {
   accountId: string
   personalization: boolean
+  personalizedAds: boolean
   whoCanMentionMe: string
 }
 
 export type IdentityPrivacySettingUpdateManyMutationInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   personalization?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  personalizedAds?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whoCanMentionMe?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type IdentityPrivacySettingUncheckedUpdateManyInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   personalization?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  personalizedAds?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whoCanMentionMe?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type IdentityPrivacySettingCountOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   personalization?: Prisma.SortOrder
+  personalizedAds?: Prisma.SortOrder
   whoCanMentionMe?: Prisma.SortOrder
 }
 
 export type IdentityPrivacySettingMaxOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   personalization?: Prisma.SortOrder
+  personalizedAds?: Prisma.SortOrder
   whoCanMentionMe?: Prisma.SortOrder
 }
 
 export type IdentityPrivacySettingMinOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   personalization?: Prisma.SortOrder
+  personalizedAds?: Prisma.SortOrder
   whoCanMentionMe?: Prisma.SortOrder
 }
 
@@ -266,28 +288,32 @@ export type IdentityPrivacySettingMinOrderByAggregateInput = {
 export type IdentityPrivacySettingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   accountId?: boolean
   personalization?: boolean
+  personalizedAds?: boolean
   whoCanMentionMe?: boolean
 }, ExtArgs["result"]["identityPrivacySetting"]>
 
 export type IdentityPrivacySettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   accountId?: boolean
   personalization?: boolean
+  personalizedAds?: boolean
   whoCanMentionMe?: boolean
 }, ExtArgs["result"]["identityPrivacySetting"]>
 
 export type IdentityPrivacySettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   accountId?: boolean
   personalization?: boolean
+  personalizedAds?: boolean
   whoCanMentionMe?: boolean
 }, ExtArgs["result"]["identityPrivacySetting"]>
 
 export type IdentityPrivacySettingSelectScalar = {
   accountId?: boolean
   personalization?: boolean
+  personalizedAds?: boolean
   whoCanMentionMe?: boolean
 }
 
-export type IdentityPrivacySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"accountId" | "personalization" | "whoCanMentionMe", ExtArgs["result"]["identityPrivacySetting"]>
+export type IdentityPrivacySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"accountId" | "personalization" | "personalizedAds" | "whoCanMentionMe", ExtArgs["result"]["identityPrivacySetting"]>
 
 export type $IdentityPrivacySettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "IdentityPrivacySetting"
@@ -295,6 +321,7 @@ export type $IdentityPrivacySettingPayload<ExtArgs extends runtime.Types.Extensi
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     accountId: string
     personalization: boolean
+    personalizedAds: boolean
     whoCanMentionMe: string
   }, ExtArgs["result"]["identityPrivacySetting"]>
   composites: {}
@@ -721,6 +748,7 @@ export interface Prisma__IdentityPrivacySettingClient<T, Null = never, ExtArgs e
 export interface IdentityPrivacySettingFieldRefs {
   readonly accountId: Prisma.FieldRef<"IdentityPrivacySetting", 'String'>
   readonly personalization: Prisma.FieldRef<"IdentityPrivacySetting", 'Boolean'>
+  readonly personalizedAds: Prisma.FieldRef<"IdentityPrivacySetting", 'Boolean'>
   readonly whoCanMentionMe: Prisma.FieldRef<"IdentityPrivacySetting", 'String'>
 }
     
