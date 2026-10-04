@@ -1,7 +1,7 @@
 # Zudomart Intelligence API Contract (v1)
 
 This is the authoritative contract between the TypeScript API (`apps/api`) and the Python
-intelligence service (`apps/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
+intelligence service (`services/python/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
 of truth; this document mirrors them.
 
 Rule: **the TS API owns the product, Python owns intelligence, events connect them.** Python never

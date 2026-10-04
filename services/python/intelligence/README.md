@@ -177,7 +177,7 @@ that finishes in seconds.
 ## Docker
 
 ```bash
-docker build -t zudomart-intelligence apps/intelligence
+docker build -t zudomart-intelligence services/python/intelligence
 ```
 
 The image runs as a non-root user (code owned by root, only `data/` and `model_registry/` writable) with only runtime dependencies. Audio fingerprinting is pure
@@ -187,7 +187,7 @@ numpy/scipy, so no ffmpeg or other system package is needed in this image (the T
 services:
   intelligence:
     image: zudomart-intelligence
-    env_file: apps/intelligence/.env
+    env_file: services/python/intelligence/.env
     environment:
       INTELLIGENCE_REDIS_URL: redis://redis:6379/3
     expose: ["8090"]
