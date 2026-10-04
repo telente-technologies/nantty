@@ -25,8 +25,8 @@ function isPublicApiRequest(method: string, apiPath: string): boolean {
   return publicApiRoutes.some((route) => route.method === method && route.path === apiPath);
 }
 
-export function respondWithBffError(status: number, code: string, message: string): NextResponse {
-  return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
+export function respondWithBffError(status: number, code: string, message: string, suggestions?: readonly string[]): NextResponse {
+  return NextResponse.json({ message, code, ...(suggestions ? { suggestions } : {}) }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
 function convertBackendResultToResponse(result: BackendResult): NextResponse {

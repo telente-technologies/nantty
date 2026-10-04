@@ -123,6 +123,7 @@ export type UsernameUnavailableReason = "taken" | "reserved" | "invalid" | "rece
 export interface UsernameAvailability {
   readonly available: boolean;
   readonly reason?: UsernameUnavailableReason;
+  readonly suggestions?: readonly string[];
 }
 
 export interface UsernameChangeRecord {

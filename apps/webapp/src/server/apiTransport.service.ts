@@ -36,8 +36,8 @@ function buildJsonResult(status: number, payload: unknown): BackendResult {
   return { status, headers: new Headers({ "Content-Type": "application/json; charset=utf-8" }), body: textEncoder.encode(JSON.stringify(payload)) };
 }
 
-function buildErrorResult(status: number, message: string, code: string): BackendResult {
-  const body: ApiErrorBody = { message, code };
+function buildErrorResult(status: number, message: string, code: string, suggestions?: readonly string[]): BackendResult {
+  const body: ApiErrorBody = { message, code, ...(suggestions ? { suggestions } : {}) };
   return { status, headers: new Headers({ "Content-Type": "application/json; charset=utf-8" }), body: textEncoder.encode(JSON.stringify(body)) };
 }
 
@@ -46,7 +46,7 @@ async function callMockBackend(call: BackendCall): Promise<BackendResult> {
     const value = await dispatchMockApiRequest(call.method, call.path, call.query ?? new URLSearchParams(), call.body ?? null);
     return buildJsonResult(200, value);
   } catch (error) {
-    if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR");
+    if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR", error.suggestions);
     return buildErrorResult(500, error instanceof Error ? error.message : "Something went wrong", "MOCK_FAILURE");
   }
 }
