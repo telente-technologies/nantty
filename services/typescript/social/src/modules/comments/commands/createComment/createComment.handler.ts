@@ -7,6 +7,8 @@ import type { Handler, HandlerContext } from "../../../../types/handlerContext.t
 import { prepareMentionsForWrite } from "../../../mentions/services/mentionWrite.service.js";
 import { postRepository } from "../../../posts/repositories/post.repository.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
+import { assertViewerMayReplyToPost } from "../../../posts/services/replyPolicy.service.js";
+import { placeReplyUnderParent } from "../../services/commentThread.service.js";
 import type { CommentView } from "../../models/comment.model.js";
 import { commentRepository } from "../../repositories/comment.repository.js";
 import { buildCommentViews } from "../../services/commentView.service.js";
@@ -19,6 +21,8 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
     const post = await loadPostVisibleToViewer(context, command.authorId, command.postId);
     const parent = command.parentCommentId === undefined ? null : await commentRepository.findById(context.database.client, command.parentCommentId);
     if (command.parentCommentId !== undefined && (parent === null || parent.postId !== post.id)) throw notFound("COMMENT_NOT_FOUND", "Comment not found.");
+    await assertViewerMayReplyToPost(context, command.authorId, post);
+    const placement = placeReplyUnderParent(parent);
     const mentionResult = await prepareMentionsForWrite(context, { surface: "comment", authorId: command.authorId, text: command.text, entities: command.mentions });
     const now = context.clock.now();
     const actor = await resolveEventActor(context.directory, command.authorId);
@@ -29,7 +33,9 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
         text: command.text,
         mentions: mentionResult.entities as unknown as Prisma.InputJsonValue,
         createdAt: now,
-        ...(parent === null ? {} : { parentCommentId: parent.id, rootCommentId: parent.rootCommentId ?? parent.id }),
+        depth: placement.depth,
+        path: placement.path,
+        ...(placement.parentCommentId === null ? {} : { parentCommentId: placement.parentCommentId, rootCommentId: placement.rootCommentId }),
       });
       await postRepository.incrementCounter(transaction, post.id, "commentCount", 1);
       if (parent !== null) await commentRepository.incrementReplies(transaction, parent.id, 1);

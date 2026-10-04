@@ -8,6 +8,8 @@ import { createLikeCommentHandler } from "./commands/likeComment/likeComment.han
 import { createUnlikeCommentHandler } from "./commands/unlikeComment/unlikeComment.handler.js";
 import { createCommentsController } from "./controllers/comments.controller.js";
 import { createGetCommentHandler } from "./queries/getComment/getComment.handler.js";
+import { createGetCommentThreadHandler } from "./queries/getCommentThread/getCommentThread.handler.js";
+import { createGetPostConversationHandler } from "./queries/getPostConversation/getPostConversation.handler.js";
 import { createListCommentRepliesHandler } from "./queries/listCommentReplies/listCommentReplies.handler.js";
 import { createListPostCommentsHandler } from "./queries/listPostComments/listPostComments.handler.js";
 import { registerCommentsRoutes } from "./routes/comments.routes.js";
@@ -21,5 +23,7 @@ export function mountCommentsModule(router: HttpRouter, route: RouteFactory, con
     listPostComments: createListPostCommentsHandler(context),
     listCommentReplies: createListCommentRepliesHandler(context),
     getComment: createGetCommentHandler(context),
+    getCommentThread: createGetCommentThreadHandler(context),
+    getPostConversation: createGetPostConversationHandler(context),
   }));
 }

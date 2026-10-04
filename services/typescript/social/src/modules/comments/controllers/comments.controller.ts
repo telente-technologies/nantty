@@ -6,11 +6,13 @@ import type { CreateCommentCommand } from "../commands/createComment/createComme
 import type { DeleteCommentCommand } from "../commands/deleteComment/deleteComment.command.js";
 import type { LikeCommentCommand } from "../commands/likeComment/likeComment.command.js";
 import type { UnlikeCommentCommand } from "../commands/unlikeComment/unlikeComment.command.js";
-import type { CommentView, CommentWithReplies } from "../models/comment.model.js";
+import type { CommentThreadPage, CommentView, CommentWithReplies, ThreadReplyView } from "../models/comment.model.js";
+import type { GetCommentThreadQuery } from "../queries/getCommentThread/getCommentThread.query.js";
+import type { GetPostConversationQuery } from "../queries/getPostConversation/getPostConversation.query.js";
 import type { GetCommentQuery } from "../queries/getComment/getComment.query.js";
 import type { ListCommentRepliesQuery } from "../queries/listCommentReplies/listCommentReplies.query.js";
 import type { ListPostCommentsQuery } from "../queries/listPostComments/listPostComments.query.js";
-import { commentParamsSchema, commentsPageQuerySchema, newCommentBodySchema, postCommentsParamsSchema } from "../validators/comments.validator.js";
+import { commentParamsSchema, commentsPageQuerySchema, conversationQuerySchema, newCommentBodySchema, postCommentsParamsSchema } from "../validators/comments.validator.js";
 
 export interface CommentsHandlers {
   readonly createComment: Handler<CreateCommentCommand, CommentView>;
@@ -20,6 +22,8 @@ export interface CommentsHandlers {
   readonly listPostComments: Handler<ListPostCommentsQuery, Page<CommentWithReplies>>;
   readonly listCommentReplies: Handler<ListCommentRepliesQuery, Page<CommentView>>;
   readonly getComment: Handler<GetCommentQuery, CommentView>;
+  readonly getCommentThread: Handler<GetCommentThreadQuery, CommentThreadPage>;
+  readonly getPostConversation: Handler<GetPostConversationQuery, Page<ThreadReplyView>>;
 }
 
 export function createCommentsController(route: RouteFactory, handlers: CommentsHandlers) {
@@ -30,6 +34,10 @@ export function createCommentsController(route: RouteFactory, handlers: Comments
       handlers.listPostComments({ viewerId: principal?.accountId, postId: params.postId, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),
     listCommentReplies: route({ authentication: "optional", params: commentParamsSchema, query: commentsPageQuerySchema }, ({ principal, params, query }) =>
       handlers.listCommentReplies({ viewerId: principal?.accountId, commentId: params.commentId, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),
+    getPostConversation: route({ authentication: "optional", params: postCommentsParamsSchema, query: conversationQuerySchema }, ({ principal, params, query }) =>
+      handlers.getPostConversation({ viewerId: principal?.accountId, postId: params.postId, sort: query.sort ?? "top", cursor: query.cursor, limit: clampPageSize(query.limit, 10) })),
+    getCommentThread: route({ authentication: "optional", params: commentParamsSchema, query: commentsPageQuerySchema }, ({ principal, params, query }) =>
+      handlers.getCommentThread({ viewerId: principal?.accountId, commentId: params.commentId, cursor: query.cursor, limit: clampPageSize(query.limit, 10) })),
     getComment: route({ authentication: "optional", params: commentParamsSchema }, ({ principal, params }) => handlers.getComment({ viewerId: principal?.accountId, commentId: params.commentId })),
     deleteComment: route({ authentication: "required", params: commentParamsSchema }, ({ principal, params }) => handlers.deleteComment({ actorId: principal.accountId, commentId: params.commentId })),
     likeComment: route({ authentication: "required", params: commentParamsSchema }, ({ principal, params }) => handlers.likeComment({ actorId: principal.accountId, commentId: params.commentId })),

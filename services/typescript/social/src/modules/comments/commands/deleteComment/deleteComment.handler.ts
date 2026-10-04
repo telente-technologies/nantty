@@ -4,17 +4,9 @@ import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { postRepository } from "../../../posts/repositories/post.repository.js";
 import { commentRepository } from "../../repositories/comment.repository.js";
+import { commentThreadRepository } from "../../repositories/commentThread.repository.js";
 import type { DeleteCommentCommand } from "./deleteComment.command.js";
 
-async function collectSubtreeIds(context: HandlerContext, rootId: string): Promise<string[]> {
-  const collected = [rootId];
-  let frontier = [rootId];
-  while (frontier.length > 0) {
-    frontier = await commentRepository.directChildIds(context.database.client, frontier);
-    collected.push(...frontier);
-  }
-  return collected;
-}
 
 export function createDeleteCommentHandler(context: HandlerContext): Handler<DeleteCommentCommand, void> {
   return async ({ actorId, commentId }) => {
@@ -22,7 +14,7 @@ export function createDeleteCommentHandler(context: HandlerContext): Handler<Del
     if (comment === null) throw notFound("COMMENT_NOT_FOUND", "Comment not found.");
     const post = await postRepository.findById(context.database.client, comment.postId);
     if (comment.authorId !== actorId && post?.authorId !== actorId) throw forbidden("FORBIDDEN", "You can only delete your own comments");
-    const ids = await collectSubtreeIds(context, commentId);
+    const ids = [commentId, ...(await commentThreadRepository.allDescendantIds(context.database.client, comment))];
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
       const removed = await commentRepository.softDeleteMany(transaction, ids, now);

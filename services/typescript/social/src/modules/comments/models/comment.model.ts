@@ -18,6 +18,7 @@ export interface CommentView {
   readonly likes: number;
   readonly liked: boolean;
   readonly replyCount: number;
+  readonly depth: number;
   readonly replyingTo?: { readonly userId: string; readonly username: string };
   readonly mentions: readonly MentionEntity[];
   readonly videoReplies: readonly CommentVideoReply[];
@@ -26,4 +27,27 @@ export interface CommentView {
 
 export interface CommentWithReplies extends CommentView {
   readonly previewReplies: readonly CommentView[];
+}
+
+export interface ThreadConnector {
+  readonly depth: number;
+  readonly hasParentAbove: boolean;
+  readonly hasChildBelow: boolean;
+  readonly isLastInChain: boolean;
+}
+
+export interface ThreadReplyView extends CommentView {
+  readonly isPostAuthor: boolean;
+  readonly connector: ThreadConnector;
+  readonly inlineReplies: readonly ThreadReplyView[];
+  readonly hasMoreReplies: boolean;
+  readonly continuesInThread: boolean;
+}
+
+export interface CommentThreadPage {
+  readonly data: readonly ThreadReplyView[];
+  readonly nextCursor: string | null;
+  readonly focus: CommentView;
+  readonly ancestors: readonly CommentView[];
+  readonly maximumVisibleDepth: number;
 }
