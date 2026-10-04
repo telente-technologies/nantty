@@ -26,18 +26,38 @@ const buildDailyImpressions = (impressions: number): PostAnalyticsDaily[] => {
   }));
 };
 
-const buildPostAnalytics = (post: Post): PostAnalytics => ({
-  postId: post.id,
-  author: post.author,
-  postedAt: post.createdAt,
-  impressions: post.views,
-  uniqueViewers: Math.round(post.views * 0.68),
-  likes: post.likes,
-  comments: post.comments,
-  reposts: post.reposts,
-  profileVisits: Math.round(post.views * 0.042),
-  daily: buildDailyImpressions(post.views),
-});
+const buildPostAnalytics = (post: Post): PostAnalytics => {
+  const saves = post.saveCount ?? Math.round(post.likes * 0.15);
+  const shares = Math.round(post.reposts * 0.6);
+  const linkClicks = Math.round(post.views * 0.011);
+  const profileClicks = Math.round(post.views * 0.019);
+  const engagements = post.likes + post.comments + post.reposts + saves + shares + linkClicks + profileClicks;
+  const isVideo = post.media.some((item) => item.type === "video");
+  return {
+    postId: post.id,
+    author: post.author,
+    postedAt: post.createdAt,
+    impressions: post.views,
+    uniqueViewers: Math.round(post.views * 0.68),
+    likes: post.likes,
+    comments: post.comments,
+    reposts: post.reposts,
+    profileVisits: Math.round(post.views * 0.042),
+    saves,
+    shares,
+    linkClicks,
+    profileClicks,
+    newFollows: Math.round(post.views * 0.0025),
+    engagements,
+    engagementRate: post.views > 0 ? Math.round((engagements / post.views) * 1000) / 10 : 0,
+    video: isVideo ? { views: Math.round(post.views * 0.55), watchTimeSeconds: Math.round(post.views * 0.55 * 11) } : null,
+    audience: [
+      { label: "Followers", share: 38 },
+      { label: "Non-followers", share: 62 },
+    ],
+    daily: buildDailyImpressions(post.views),
+  };
+};
 
 export const postsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
