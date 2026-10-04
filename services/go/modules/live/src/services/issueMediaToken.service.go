@@ -10,6 +10,7 @@ import (
 
 	"zudomart/modules/live/src/generated/ent"
 	"zudomart/modules/live/src/generated/ent/guestslot"
+	"zudomart/modules/live/src/generated/ent/livesafetystate"
 	"zudomart/modules/live/src/generated/ent/livesession"
 )
 
@@ -40,6 +41,13 @@ func (service *LiveService) IssueMediaToken(ctx context.Context, actor types.Act
 		} else if err := service.requireLiveAccess(ctx, session, actor.UserId); err != nil {
 			return types.MediaTokenView{}, err
 		}
+	}
+	if canPublish {
+		held, err := service.Client.LiveSafetyState.Query().Where(livesafetystate.LiveID(liveId), livesafetystate.HoldActive(true)).Exist(ctx)
+		if err != nil {
+			return types.MediaTokenView{}, err
+		}
+		canPublish = !held
 	}
 	participants, err := service.lookupParticipants(ctx, actor.UserId)
 	if err != nil {

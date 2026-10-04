@@ -97,12 +97,21 @@ func (service *LiveService) decideEngagementPoints(ctx context.Context, tx *ent.
 }
 
 func (service *LiveService) readViewerPoints(ctx context.Context, db *ent.Client, userId, liveId uuid.UUID) (int64, int, error) {
-	total, err := db.PointsEntry.Query().Where(pointsentry.UserID(userId), pointsentry.LiveID(liveId)).Aggregate(ent.Sum(pointsentry.FieldAmount)).Int(ctx)
-	if err != nil && !ent.IsNotFound(err) {
+	var totals []struct {
+		UserID uuid.UUID `json:"user_id"`
+		Total  int64     `json:"total"`
+	}
+	err := db.PointsEntry.Query().Where(pointsentry.UserID(userId), pointsentry.LiveID(liveId)).GroupBy(pointsentry.FieldUserID).
+		Aggregate(ent.As(ent.Sum(pointsentry.FieldAmount), "total")).Scan(ctx, &totals)
+	if err != nil {
 		return 0, 0, err
 	}
+	var total int64
+	if len(totals) > 0 {
+		total = totals[0].Total
+	}
 	likes, err := db.PointsEntry.Query().Where(pointsentry.UserID(userId), pointsentry.SourceType("like"), pointsentry.CreatedAtGT(service.Now().Add(-time.Minute))).Count(ctx)
-	return int64(total), likes, err
+	return total, likes, err
 }
 
 func (service *LiveService) GetMyLivePoints(ctx context.Context, actor types.Actor, liveId uuid.UUID) (types.ViewerLivePoints, error) {

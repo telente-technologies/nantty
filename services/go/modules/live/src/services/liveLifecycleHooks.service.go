@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	liveerrors "zudomart/modules/live/src/errors"
 	"zudomart/modules/live/src/generated/ent"
+	"zudomart/modules/live/src/generated/ent/livesafetystate"
 )
 
 func liveAdsAllowed(session *ent.LiveSession) bool {
@@ -37,5 +38,8 @@ func (service *LiveService) afterLiveEnded(ctx context.Context, session *ent.Liv
 	}
 	if err := service.revokeAllStreamKeys(ctx, session.ID); err != nil {
 		service.Logger.Warn("stream keys were not fully revoked", slog.String("liveId", session.ID.String()), slog.Any("error", err))
+	}
+	if state, err := service.Client.LiveSafetyState.Query().Where(livesafetystate.LiveID(session.ID)).Only(ctx); err == nil {
+		service.StopSafetyCaptureForLive(ctx, state)
 	}
 }
