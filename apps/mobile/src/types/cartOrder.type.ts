@@ -21,6 +21,8 @@ export interface Cart {
   readonly payableGroupCount: number;
 }
 
+export type PaymentMode = "escrow" | "direct";
+
 export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
 
 export interface Order {
@@ -33,6 +35,7 @@ export interface Order {
   readonly store: StoreSummary;
   readonly createdAt: ISODate;
   readonly escrowReleaseAt: ISODate | null;
+  readonly paymentMode?: PaymentMode;
 }
 
 export interface Address {
