@@ -6,7 +6,9 @@ import { Text } from "@/components/ui/text";
 import { usePostActionTint } from "@/components/feed/postActionButton";
 import { DotsThreeVertical24Icon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, SendActionIcon } from "@/components/icons";
 import type { SaveTarget } from "@/types";
-import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { formatCompactCount } from "@/utils/formatCount.util";
+
+import { RAIL_ITEM_WIDTH, clipRailStyles } from "./clipRail.constant";
 
 const RAIL_ICON_SIZE = 26;
 
@@ -40,10 +42,10 @@ function RailButton({
   children: ReactNode;
 }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={{ top: 11, bottom: 11, left: 6, right: 6 }} onPress={onPress} style={styles.button}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={{ top: 11, bottom: 11 }} onPress={onPress} style={clipRailStyles.item}>
       {children}
-      <Text size={13} lineHeight={16.9} color={foregroundColor} style={foregroundColor ? styles.readableOnVideo : undefined}>
-        {formatCountWithThousandsSuffix(count)}
+      <Text size={13} lineHeight={16.9} color={foregroundColor} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[clipRailStyles.count, foregroundColor ? clipRailStyles.readableOnVideo : null]}>
+        {formatCompactCount(count)}
       </Text>
     </Pressable>
   );
@@ -67,14 +69,14 @@ export function ClipActionRail(props: ClipActionRailProps) {
         <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} saveCount={props.saveCount ?? 0} />
       ) : null}
       {props.onTip ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={{ top: 11, bottom: 11, left: 6, right: 6 }} onPress={props.onTip} style={styles.button}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={{ top: 11, bottom: 11 }} onPress={props.onTip} style={clipRailStyles.item}>
           <GiftActionIcon size={RAIL_ICON_SIZE} color={color} />
-          <Text size={13} lineHeight={16.9} color={color} style={color ? styles.readableOnVideo : undefined}>
+          <Text size={13} lineHeight={16.9} color={color} numberOfLines={1} style={[clipRailStyles.count, color ? clipRailStyles.readableOnVideo : null]}>
             Tip
           </Text>
         </Pressable>
       ) : null}
-      <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} onPress={props.onMore}>
+      <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={{ top: 11, bottom: 11 }} onPress={props.onMore} style={clipRailStyles.item}>
         <DotsThreeVertical24Icon size={22} color={color} />
       </Pressable>
     </View>
@@ -82,7 +84,5 @@ export function ClipActionRail(props: ClipActionRailProps) {
 }
 
 const styles = StyleSheet.create({
-  rail: { width: 32, gap: 20, alignItems: "center" },
-  button: { width: 32, gap: 4, alignItems: "center" },
-  readableOnVideo: { textShadowColor: "rgba(0,0,0,0.45)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  rail: { width: RAIL_ITEM_WIDTH, gap: 20, alignItems: "center" },
 });

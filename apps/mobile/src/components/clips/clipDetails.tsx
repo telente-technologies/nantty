@@ -16,6 +16,8 @@ import type { MainStackParamList } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
 import type { Clip } from "@/types";
 
+import { ClipTaggedPill } from "@/components/taggedPeople/clipTaggedPill";
+
 import { FollowPill } from "./followPill";
 import { ReplyingToCommentLink } from "./videoReply/commentStickerOverlay";
 
@@ -26,9 +28,10 @@ export interface ClipDetailsProps {
   readonly onPressAuthor: () => void;
   readonly foregroundColor?: string;
   readonly isActive?: boolean;
+  readonly onOpenTaggedPeople?: () => void;
 }
 
-export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true }: ClipDetailsProps) {
+export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true, onOpenTaggedPeople }: ClipDetailsProps) {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const isViewerTheAuthor = useAuthStore((state) => state.user?.id === clip.author.id);
   const readableTextStyle = foregroundColor ? styles.readableOnVideo : undefined;
@@ -62,6 +65,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
       </View>
       {clip.replyToComment ? <ReplyingToCommentLink clip={clip} foregroundColor={foregroundColor} /> : null}
       {clip.isAiGenerated ? <AiGeneratedLabel onVideo /> : null}
+      {onOpenTaggedPeople ? <ClipTaggedPill post={clip} onPress={onOpenTaggedPeople} /> : null}
       <MentionText text={clip.text} mentions={clip.mentions} size={13} lineHeight={16.9} numberOfLines={2} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} />
       {clip.sound ? (
         <ClipSoundRow

@@ -24,6 +24,7 @@ import { LikeBurst } from "./likeBurst";
 import { CommentStickerOverlay } from "./videoReply/commentStickerOverlay";
 import { PromotedLiveOverlay } from "./promotedLiveOverlay";
 import { webAppLinks } from "@/config/webAppLinks.config";
+import { TaggedPeopleSheet } from "@/components/taggedPeople/taggedPeopleSheet";
 
 export interface ClipEngagement {
   readonly liked: boolean;
@@ -79,6 +80,7 @@ function ClipPageComponent(props: ClipPageProps) {
   const [isFullScreenPlayerOpen, setIsFullScreenPlayerOpen] = useState(false);
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const [isTipSheetOpen, setIsTipSheetOpen] = useState(false);
+  const [isTaggedSheetOpen, setIsTaggedSheetOpen] = useState(false);
   const canTipAuthor = clip.author.isCreator === true && clip.author.id !== signedInUserId;
   const isClipLockedForViewer = isContentLockedForViewer(clip);
 
@@ -120,7 +122,7 @@ function ClipPageComponent(props: ClipPageProps) {
             isActive={isActive && !isFullScreenPlayerOpen}
             contentFit={isLandscapeVideo ? "contain" : "cover"}
             isMuted={props.isMuted || clip.sound?.status === "under_copyright_review"}
-            isPausedByUser={isPausedByUser}
+            isPausedByUser={isPausedByUser || isTaggedSheetOpen}
             playbackRate={isHeldForFastForward ? 2 : PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
             onPlaybackProgress={isActive ? setPlaybackProgress : undefined}
             style={StyleSheet.absoluteFill}
@@ -165,6 +167,7 @@ function ClipPageComponent(props: ClipPageProps) {
           onToggleFollow={props.onToggleFollow}
           onPressAuthor={props.onPressAuthor}
           foregroundColor={FOREGROUND_ON_VIDEO}
+          onOpenTaggedPeople={() => setIsTaggedSheetOpen(true)}
         />
         <ClipActionRail
           liked={engagement.liked}
@@ -215,6 +218,7 @@ function ClipPageComponent(props: ClipPageProps) {
         isMuted={props.isMuted}
         onClose={() => setIsFullScreenPlayerOpen(false)}
       />
+      {isTaggedSheetOpen ? <TaggedPeopleSheet post={clip} visible onClose={() => setIsTaggedSheetOpen(false)} /> : null}
       {isTipSheetOpen ? (
         <TipSheet target={{ targetType: "clip", targetId: clip.id, creatorName: clip.author.name }} onClose={() => setIsTipSheetOpen(false)} />
       ) : null}
