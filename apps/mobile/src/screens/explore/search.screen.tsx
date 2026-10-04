@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
+import { ExploreHome } from "@/components/explore/exploreHome";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { PersonRow } from "@/components/search/personRow";
 import { SearchBar } from "@/components/search/searchBar";
@@ -15,6 +16,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { searchService, type SearchScope } from "@/services/search.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { ErrorState } from "@/components/ui/errorState";
 
 const SCOPES: { label: string; scope: SearchScope }[] = [
   { label: "All", scope: "all" },
@@ -54,14 +56,22 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
       <View style={styles.searchRow}>
         <SearchBar value={query} onChangeText={setQuery} placeholder="Search for anything..." />
       </View>
-      <View style={styles.scopes}>
-        {SCOPES.map((option) => (
-          <Chip key={option.scope} kind="filter" label={option.label} selected={scope === option.scope} onPress={() => setScope(option.scope)} />
-        ))}
-      </View>
+      {query.trim().length > 0 ? (
+        <View style={styles.scopes}>
+          {SCOPES.map((option) => (
+            <Chip key={option.scope} kind="filter" label={option.label} selected={scope === option.scope} onPress={() => setScope(option.scope)} />
+          ))}
+        </View>
+      ) : null}
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {debouncedQuery.length === 0 ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>Search products, stores and people.</Text>
+          <ExploreHome
+            onSearchHashtag={(hashtag) => setQuery(`#${hashtag}`)}
+            onOpenPost={(postId) => navigation.navigate("PostDetail", { postId })}
+            onOpenProfile={(userId) => navigation.navigate("UserProfile", { userId })}
+          />
+        ) : results.isError ? (
+          <ErrorState message="Search is unavailable right now." onRetry={() => void results.refetch()} />
         ) : results.isLoading ? (
           <ListSkeleton />
         ) : !data || (data.products.length + data.stores.length + data.people.length + (data.brands?.length ?? 0) === 0) ? (

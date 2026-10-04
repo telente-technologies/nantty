@@ -86,6 +86,21 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
         ))}
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Audience</Text>
         <BoostAudiencePicker audience={audience} interestOptions={options.data.interests} countryCode={countryCode} onChange={setAudience} />
+        {options.data.packages && options.data.packages.length > 0 ? (
+          <>
+            <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Packages</Text>
+            {options.data.packages.map((boostPackage) => {
+              const daily = { amountMinor: Math.floor(boostPackage.priceMinor / boostPackage.days), currency: boostPackage.currency };
+              const selected = durationDays === boostPackage.days && dailyBudget?.amountMinor === daily.amountMinor;
+              return (
+                <SelectableRow key={`${boostPackage.label}-${boostPackage.priceMinor}`} selected={selected} onPress={() => { setChosenDailyBudget(daily); setChosenDurationDays(boostPackage.days); }} accessibilityLabel={`${boostPackage.label} package`}>
+                  <Text size={14} weight={500} lineHeight={16.8}>{formatMoneyForDisplay({ amountMinor: boostPackage.priceMinor, currency: boostPackage.currency }, { showDecimals: false })} · {boostPackage.label}</Text>
+                  <Text size={12} lineHeight={16.8} color={colors.textMuted}>About {boostPackage.estimatedReach.low.toLocaleString()}–{boostPackage.estimatedReach.high.toLocaleString()} people</Text>
+                </SelectableRow>
+              );
+            })}
+          </>
+        ) : null}
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Daily budget</Text>
         <View style={styles.chips}>
           {options.data.suggestedDailyBudgets.map((budget) => (
@@ -107,6 +122,13 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
                 {estimate.data.estimatedReachMin.toLocaleString()}–{estimate.data.estimatedReachMax.toLocaleString()} people
               </Text>
               <Text size={13} lineHeight={16.9}>{estimate.data.estimatedResultsLabel}</Text>
+              {estimate.data.impressions ? <Text size={13} lineHeight={16.9} color={colors.textMuted}>{estimate.data.impressions.low.toLocaleString()}–{estimate.data.impressions.high.toLocaleString()} impressions over {durationDays} {durationDays === 1 ? "day" : "days"}</Text> : null}
+              {estimate.data.costPerResultMinor ? (
+                <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+                  Cost per result: {formatMoneyForDisplay({ amountMinor: estimate.data.costPerResultMinor.low, currency: estimate.data.totalCost.currency })}–{formatMoneyForDisplay({ amountMinor: estimate.data.costPerResultMinor.high, currency: estimate.data.totalCost.currency })}
+                </Text>
+              ) : null}
+              {estimate.data.minimumDailyBudget ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Minimum daily budget here: {formatMoneyForDisplay(estimate.data.minimumDailyBudget)}</Text> : null}
               <Text size={14} weight={600} lineHeight={16.8}>Total: {formatMoneyForDisplay(estimate.data.totalCost)}</Text>
             </>
           ) : null}

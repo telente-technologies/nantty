@@ -44,8 +44,11 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const detail = order.data;
   const stage = escrow.data?.stage;
   const canConfirm = detail.status === "shipped" || detail.status === "delivered";
-  const canDispute = (detail.status === "paid" || canConfirm) && !escrow.data?.disputeId;
-  const releaseLine = escrow.data?.releasedAt
+  const isDirect = detail.paymentMode === "direct";
+  const canDispute = !isDirect && (detail.status === "paid" || canConfirm) && !escrow.data?.disputeId;
+  const releaseLine = isDirect
+    ? `Paid directly: ${detail.store.name} was paid right away. For a refund, contact the seller or support.`
+    : escrow.data?.releasedAt
     ? `Released to ${detail.store.name} on ${formatFriendlyDate(escrow.data.releasedAt)}`
     : escrow.data?.autoReleaseAt
       ? `Auto-releases ${formatFriendlyDate(escrow.data.autoReleaseAt)} unless you report a problem`
@@ -68,8 +71,8 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           <Shield24Icon color={colors.primary} />
           <View style={styles.flex}>
             <View style={styles.row}>
-              <Text size={14} weight={600} lineHeight={16.8}>Payment protection</Text>
-              {stage ? <StatusPill label={ESCROW_STAGE_APPEARANCE[stage].label} tone={ESCROW_STAGE_APPEARANCE[stage].tone} /> : null}
+              <Text size={14} weight={600} lineHeight={16.8}>{isDirect ? "Paid directly" : "Payment protection"}</Text>
+              {stage && !isDirect ? <StatusPill label={ESCROW_STAGE_APPEARANCE[stage].label} tone={ESCROW_STAGE_APPEARANCE[stage].tone} /> : null}
             </View>
             <Text size={12} lineHeight={16.8} color={colors.textMuted}>{releaseLine}</Text>
           </View>
@@ -106,7 +109,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <ConfirmActionSheet
         visible={confirmSheetVisible}
         title="Confirm you received it?"
-        message={`Only confirm if everything arrived as described. ${detail.store.name} will be paid right away and this can't be undone.`}
+        message={isDirect ? "Only confirm if everything arrived as described." : `Only confirm if everything arrived as described. ${detail.store.name} will be paid right away and this can't be undone.`}
         confirmTitle="Yes, release payment"
         confirming={confirmReceipt.isPending}
         errorMessage={confirmReceipt.isError ? confirmReceipt.error.message : null}

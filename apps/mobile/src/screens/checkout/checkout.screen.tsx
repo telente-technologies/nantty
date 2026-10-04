@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 import { CartGrandTotalCard } from "@/components/cart/cartGrandTotalCard";
 import { CartSellerGroupCard } from "@/components/cart/cartSellerGroupCard";
+import { PaymentModeChooser } from "@/components/cart/paymentModeChooser";
 import { PurchaseTermsText } from "@/components/cart/purchaseTermsText";
 import { formatAddressLocation } from "@/components/settings/addressRow";
 import { SelectableRow } from "@/components/cart/selectableRow";
@@ -20,6 +21,8 @@ import { paymentsService } from "@/services/payments.service";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 import type { PaymentChannel, SavedCardDisplay } from "@/types/commerce.type";
+import type { PaymentMode } from "@/types";
+import { directChoicesFor } from "@/utils/paymentMode.util";
 import { readSavedCardDisplay, unlockSavedCardAuthorizationCode } from "@/utils/savedCard.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
@@ -45,12 +48,17 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     });
   }, []);
   const checkoutKey = useRef(generateIdempotencyKey());
+  const [paymentModes, setPaymentModes] = useState<Record<string, PaymentMode>>({});
+  const choosePaymentMode = (storeId: string, mode: PaymentMode) => {
+    checkoutKey.current = generateIdempotencyKey();
+    setPaymentModes((current) => ({ ...current, [storeId]: mode }));
+  };
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
   const cart = useMyCart(addressId);
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
-      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current);
+      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
       if (useSavedCard && savedCard) {
         const code = await unlockSavedCardAuthorizationCode();
         if (!code) throw new Error("Saved card not unlocked");
@@ -124,6 +132,14 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         </View>
         {cart.data ? (
           <View style={styles.section}>
+            <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">How to pay each seller</Text>
+            {cart.data.groups.map((group) => (
+              <PaymentModeChooser key={group.storeId} group={group} mode={paymentModes[group.storeId] ?? "escrow"} onChange={(mode) => choosePaymentMode(group.storeId, mode)} />
+            ))}
+          </View>
+        ) : null}
+        {cart.data ? (
+          <View style={styles.section}>
             <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
             {cart.data.groups.map((group) => (
               <CartSellerGroupCard key={group.storeId} group={group} showItems={false} />
@@ -132,7 +148,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           </View>
         ) : null}
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-          Your payment is held safely in escrow and only released to the seller after you confirm delivery.
+          Escrow orders are held until you confirm delivery. Direct orders pay the seller right away.
         </Text>
         <PurchaseTermsText />
       </ScrollView>

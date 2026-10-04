@@ -31,7 +31,8 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
 
   const openNotification = (notification: CategorizedNotification) => {
     if (!notification.read) markOneRead.mutate(notification.id);
-    if (notification.category === "orders") navigation.navigate("Orders");
+    if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
+    else if (notification.category === "orders") navigation.navigate("Orders");
     else if (notification.actor) navigation.navigate("UserProfile", { userId: notification.actor.id });
   };
 
