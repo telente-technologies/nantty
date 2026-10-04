@@ -65,6 +65,7 @@ export type PreferenceCategory =
   | "creator"
   | "checkmarks"
   | "social"
+  | "milestones"
   | "live"
   | "trust"
   | "privacy"
