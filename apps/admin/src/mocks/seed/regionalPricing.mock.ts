@@ -31,7 +31,7 @@ export function roundToPricePoint(amountMinor: number, currency: string): number
   if (currency === "NGN") return roundUpToStep(amountMinor, amountMinor >= 1_000_000 ? 50_000 : 10_000);
   if (currency === "KES") return roundUpToStep(amountMinor, amountMinor >= 100_000 ? 5_000 : 1_000);
   if (currency === "GHS") return roundUpToStep(amountMinor, 100);
-  return roundUpToStep(amountMinor + 1, 100) - 1;
+  return roundUpToStep(amountMinor + 1, amountMinor < 1_000 ? 10 : 100) - 1;
 }
 
 const yearlyFromMonthly = (monthlyMinor: number, currency: string) => roundToPricePoint(Math.round(monthlyMinor * 12 * 0.8), currency);
@@ -75,13 +75,13 @@ export function buildInitialCoinPackRows(): CoinPackPriceRow[] {
 }
 
 const adRegionPricing: readonly AdRegionPricing[] = [
-  { region: "NG", currency: "NGN", cpmFloorMinor: 50_000, cpcFloorMinor: 3_000, minimumDailyBudgetMinor: 100_000, boostMinimumDailyMinor: 100_000 },
-  { region: "GH", currency: "GHS", cpmFloorMinor: 600, cpcFloorMinor: 40, minimumDailyBudgetMinor: 1_500, boostMinimumDailyMinor: 1_500 },
-  { region: "KE", currency: "KES", cpmFloorMinor: 6_000, cpcFloorMinor: 400, minimumDailyBudgetMinor: 15_000, boostMinimumDailyMinor: 15_000 },
-  { region: "ZA", currency: "ZAR", cpmFloorMinor: 1_500, cpcFloorMinor: 120, minimumDailyBudgetMinor: 4_000, boostMinimumDailyMinor: 4_000 },
-  { region: "GB", currency: "GBP", cpmFloorMinor: 200, cpcFloorMinor: 15, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
-  { region: "EU", currency: "EUR", cpmFloorMinor: 200, cpcFloorMinor: 15, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
-  { region: "US", currency: "USD", cpmFloorMinor: 250, cpcFloorMinor: 20, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
+  { region: "NG", currency: "NGN", cpmFloorMinor: 40_000, cpcFloorMinor: 2_500, minimumDailyBudgetMinor: 100_000, boostMinimumDailyMinor: 100_000, suggestedCpmMinor: 150_000, suggestedCpcMinor: 6_000, suggestedCpvMinor: 500, suggestedDailyBudgetMinor: 500_000 },
+  { region: "GH", currency: "GHS", cpmFloorMinor: 600, cpcFloorMinor: 40, minimumDailyBudgetMinor: 1_500, boostMinimumDailyMinor: 1_500, suggestedCpmMinor: 1_800, suggestedCpcMinor: 100, suggestedCpvMinor: 6, suggestedDailyBudgetMinor: 7_500 },
+  { region: "KE", currency: "KES", cpmFloorMinor: 8_000, cpcFloorMinor: 500, minimumDailyBudgetMinor: 15_000, boostMinimumDailyMinor: 15_000, suggestedCpmMinor: 17_000, suggestedCpcMinor: 1_200, suggestedCpvMinor: 60, suggestedDailyBudgetMinor: 75_000 },
+  { region: "ZA", currency: "ZAR", cpmFloorMinor: 2_800, cpcFloorMinor: 150, minimumDailyBudgetMinor: 4_000, boostMinimumDailyMinor: 4_000, suggestedCpmMinor: 5_000, suggestedCpcMinor: 400, suggestedCpvMinor: 20, suggestedDailyBudgetMinor: 20_000 },
+  { region: "GB", currency: "GBP", cpmFloorMinor: 250, cpcFloorMinor: 30, minimumDailyBudgetMinor: 500, boostMinimumDailyMinor: 500, suggestedCpmMinor: 600, suggestedCpcMinor: 55, suggestedCpvMinor: 2, suggestedDailyBudgetMinor: 2_500 },
+  { region: "EU", currency: "EUR", cpmFloorMinor: 300, cpcFloorMinor: 30, minimumDailyBudgetMinor: 500, boostMinimumDailyMinor: 500, suggestedCpmMinor: 650, suggestedCpcMinor: 60, suggestedCpvMinor: 2, suggestedDailyBudgetMinor: 2_500 },
+  { region: "US", currency: "USD", cpmFloorMinor: 350, cpcFloorMinor: 35, minimumDailyBudgetMinor: 500, boostMinimumDailyMinor: 500, suggestedCpmMinor: 800, suggestedCpcMinor: 65, suggestedCpvMinor: 3, suggestedDailyBudgetMinor: 2_500 },
 ];
 
 const bandNames = ["supporter", "fan", "superfan", "vip"];
