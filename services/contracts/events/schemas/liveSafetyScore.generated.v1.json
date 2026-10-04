@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveSafetyScore.generated.v1.json",
+  "title": "LiveSafetyScoreGenerated (job on intelligence-trust-live-safety, raw body, no envelope). Advisory only; go-trust decides.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scoreId",
+    "liveId",
+    "hostId",
+    "kind",
+    "frameRef",
+    "capturedAt",
+    "labels",
+    "categories",
+    "confidence",
+    "suggestedAction",
+    "modelVersion",
+    "advisoryOnly",
+    "generatedAt"
+  ],
+  "properties": {
+    "scoreId": {
+      "type": "string"
+    },
+    "liveId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "frame",
+        "transcript"
+      ]
+    },
+    "frameRef": {
+      "type": "string"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "parentName",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parentName": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "confidence"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "suggestedAction": {
+      "enum": [
+        "allow",
+        "review",
+        "hold"
+      ]
+    },
+    "modelVersion": {
+      "type": "string"
+    },
+    "transcriptSnippet": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "hashMatch": {
+      "type": "boolean"
+    },
+    "hashMatchProvider": {
+      "type": "string"
+    },
+    "hashMatchReference": {
+      "type": "string"
+    },
+    "advisoryOnly": {
+      "const": true
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
