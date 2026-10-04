@@ -186,6 +186,11 @@
   font-size: var(--fs-16);
 }
 
+.callToActionStoreBadges {
+  margin: 14px 0 0 -10px;
+  color: inherit;
+}
+
 .callToActionActions {
   display: flex;
   flex-wrap: wrap;

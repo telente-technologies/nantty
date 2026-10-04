@@ -1,5 +1,7 @@
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
 import { ZudoIcon } from "@/components/ui/zudoIcon";
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText, readZudomartMainSiteUrl, storeLinks } from "@/constants/contact.constant";
 
 import { MarketplaceGridIllustration } from "./landingAdIllustrations";
 import { landingQuestions } from "./landingCopy.content";
@@ -13,7 +15,7 @@ export function LandingQuestionsSection() {
         <div>
           <SectionIntro eyebrow="FAQ" headingId="questions-heading" heading="Questions, answered." />
           <p className={styles.contactNote}>
-            Something else? Email <a href={buildContactMailtoLinkForBothAddresses("Zudomart Ads question")}>{contactEmailDisplayText}</a>.
+            Something else? Email <a href={buildContactMailtoLink("Zudomart Ads question")}>{contactEmailDisplayText}</a>.
           </p>
         </div>
         <div className={styles.questionList}>
@@ -50,6 +52,7 @@ export function LandingFinalCallToAction({ primaryAction, isSignedIn }: { readon
                 </a>
               )}
             </div>
+            {isSignedIn ? null : <OfficialStoreBadges links={storeLinks} className={styles.callToActionStoreBadges} />}
           </div>
           <div className={styles.callToActionArt}>
             <MarketplaceGridIllustration />

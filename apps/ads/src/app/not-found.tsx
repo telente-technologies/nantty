@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ZudomartWordmark } from "@zudomart/web-kit";
-import { buildContactMailtoLinkForBothAddresses } from "@/constants/contact.constant";
+import { buildContactMailtoLink } from "@/constants/contact.constant";
 
 import styles from "./notFound.module.css";
 
@@ -26,7 +26,7 @@ export default function NotFound() {
           <Link href="/" className={styles.secondaryLink}>
             Zudomart Ads home
           </Link>
-          <a href={buildContactMailtoLinkForBothAddresses("Broken link in Zudomart Ads")} className={styles.secondaryLink}>
+          <a href={buildContactMailtoLink("Broken link in Zudomart Ads")} className={styles.secondaryLink}>
             Report a broken link
           </a>
         </div>

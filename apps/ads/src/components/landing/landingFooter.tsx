@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ZudomartWordmark } from "@zudomart/web-kit";
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
 
 import styles from "./landingFooter.module.css";
 
@@ -13,7 +13,7 @@ export function LandingFooterWithContact() {
         <div className={styles.footerBrand}>
           <ZudomartWordmark productLabel="Ads" tone="onDark" />
           <p>Ads for the Zudomart marketplace: Marketplace, Feed, Reels and Live. Built in Nigeria.</p>
-          <a href={buildContactMailtoLinkForBothAddresses("Zudomart Ads")} className={styles.footerEmail}>
+          <a href={buildContactMailtoLink("Zudomart Ads")} className={styles.footerEmail}>
             {contactEmailDisplayText}
           </a>
         </div>
