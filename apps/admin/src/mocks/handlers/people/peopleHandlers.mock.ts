@@ -4,6 +4,7 @@ import { countPendingApplications, registerPeopleApplicationMockHandlers } from 
 import { registerPeopleAccountsAdminMockHandlers } from "./peopleAccountsAdmin.mock";
 import { registerPeopleBlackApplicationMockHandlers } from "./peopleBlackApplications.mock";
 import { registerPeopleBusinessDocumentMockHandlers } from "./peopleBusinessDocuments.mock";
+import { countIdentityCasesNeedingReview, registerPeopleIdentityCheckMockHandlers } from "./peopleIdentityChecks.mock";
 import { registerPeopleUserActionMockHandlers } from "./peopleUserActions.mock";
 import { registerPeopleUsernameMockHandlers } from "./peopleUsernames.mock";
 import { registerPeopleUserMockHandlers } from "./peopleUsers.mock";
@@ -17,8 +18,10 @@ export function registerPeopleMockHandlers(): void {
   registerPeopleBusinessDocumentMockHandlers();
   registerPeopleBlackApplicationMockHandlers();
   registerPeopleVerificationMockHandlers();
+  registerPeopleIdentityCheckMockHandlers();
   registerPeopleApplicationMockHandlers();
   registerMockQueueCounter({ key: "verification", label: "Verification reviews", href: "/verification", readCount: countPendingVerifications });
+  registerMockQueueCounter({ key: "identityChecks", label: "Identity checks", href: "/verification/identity", readCount: countIdentityCasesNeedingReview });
   registerMockQueueCounter({ key: "sellerApplications", label: "Seller applications", href: "/applications/sellers", readCount: () => countPendingApplications("sellers") });
   registerMockQueueCounter({ key: "creatorApplications", label: "Creator applications", href: "/applications/creators", readCount: () => countPendingApplications("creators") });
 }

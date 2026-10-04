@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { LinkTabs, SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
+import { verificationViewTabs } from "@/constants/identityVerification.constant";
 import { verificationColorOptions, verificationStatusTabs } from "@/constants/peopleFilterOptions.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchVerificationApplications } from "@/services/peopleReviewsApi.service";
@@ -53,7 +54,7 @@ export function VerificationQueueWorkspace() {
   return (
     <>
       <PageHeader area="People" title="Verification reviews" description="Blue is personal (including creator accounts), Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
-      <LinkTabs label="Verification views" items={[{ href: "/verification", label: "Verification requests" }, { href: "/verification/business-documents", label: "Business documents" }, { href: "/verification/black", label: "Black applications" }]} />
+      <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setPage(1); }} />
       <Toolbar>
         <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, legal or business name" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
