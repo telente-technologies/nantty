@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
@@ -41,19 +41,16 @@ export interface ClipComposerProps {
 
 export function ClipComposer({ mode, initialSoundId, onChangeMode, onClose, onPublished }: ClipComposerProps) {
   const uploads = usePostDraftMediaUploads("clip");
-  const [stage, setStage] = useState<ClipStage>("media");
+  const [chosenStage, setStage] = useState<ClipStage>("media");
   const [edits, setEdits] = useState<ClipEdits>(EMPTY_CLIP_EDITS);
   const [caption, setCaption] = useState<{ text: string; mentions: readonly MentionEntity[] }>({ text: "", mentions: [] });
   const [soundId, setSoundId] = useState<ID | null>(initialSoundId);
   const [settings, setSettings] = useState<PostSettingsValue>(DEFAULT_POST_SETTINGS);
   const items = uploads.draftMediaItems;
   const source = readClipSource(items);
+  const stage: ClipStage = source ? chosenStage : "media";
   const validationMessage = validateClipDraft(items, edits);
   const totalSeconds = totalClipSeconds(items, edits);
-
-  useEffect(() => {
-    if (stage !== "media" && items.length === 0) setStage("media");
-  }, [stage, items.length]);
 
   const publish = usePublishPost({
     draftMediaItems: items,

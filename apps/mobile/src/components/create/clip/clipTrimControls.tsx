@@ -32,7 +32,7 @@ export function ClipTrimControls({ durationSeconds, trim, onChange }: ClipTrimCo
   const { colors } = useTheme();
   const styles = useStyles();
   if (!durationSeconds || !trim) {
-    return <Text size={13} lineHeight={18} color={colors.textMuted}>Trimming isn't available for this video. It will post at its full length.</Text>;
+    return <Text size={13} lineHeight={18} color={colors.textMuted}>Trimming isn’t available for this video. It will post at its full length.</Text>;
   }
   const startPercent = (trim.startSeconds / durationSeconds) * 100;
   const widthPercent = ((trim.endSeconds - trim.startSeconds) / durationSeconds) * 100;
