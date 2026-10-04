@@ -9,6 +9,13 @@ from src.interfaces.feature_backend_interface import FeatureBackend
 from src.modules.ad_click_prediction.services.ad_click_prediction_service import AdClickPredictionService
 from src.modules.ads.services.ad_selection_service import AdSelectionService
 from src.modules.audio.services.audio_fingerprint_index_service import AudioFingerprintIndexService
+from src.modules.bot_detection.repositories.bot_score_queue_repository import (
+    AmqpBotScorePublisher,
+    BotScorePublisher,
+    NullBotScorePublisher,
+    SqsBotScorePublisher,
+)
+from src.modules.bot_detection.services.bot_scoring_service import BotScoringService
 from src.modules.chat_spam.services.chat_spam_scoring_service import ChatSpamScoringService
 from src.modules.clips.services.clip_ranking_service import ClipRankingService
 from src.modules.content_scoring.repositories.content_score_queue_repository import (
@@ -84,6 +91,7 @@ class ApplicationContainer:
     experiment_service: ExperimentService
     suspension_suggestion_service: SuspensionSuggestionService
     chat_spam_scoring_service: ChatSpamScoringService
+    bot_scoring_service: BotScoringService
     moderation_model_holder: ModerationModelHolder
     content_moderation_service: ContentModerationService
     image_moderation_model_holder: ImageModerationModelHolder
@@ -120,6 +128,16 @@ def build_sensitivity_advisory_publisher(
     if settings.event_bus == "rabbitmq" and channels is not None:
         return AmqpSensitivityAdvisoryPublisher(channels)
     return NullSensitivityAdvisoryPublisher()
+
+
+def build_bot_score_publisher(
+    settings: IntelligenceSettings, channels: RabbitMqChannelProvider | None
+) -> BotScorePublisher:
+    if settings.event_bus == "rabbitmq" and channels is not None:
+        return AmqpBotScorePublisher(channels, settings.trust_bot_scores_queue)
+    if settings.event_bus == "sqs" and settings.trust_bot_scores_queue_url:
+        return SqsBotScorePublisher(build_sqs_client(settings), settings.trust_bot_scores_queue_url)
+    return NullBotScorePublisher()
 
 
 def build_trust_advisory_publisher(
@@ -190,6 +208,9 @@ def build_application_container(
         experiment_service=ExperimentService(feature_store),
         suspension_suggestion_service=suggestion_service,
         chat_spam_scoring_service=ChatSpamScoringService(feature_store, suggestion_service),
+        bot_scoring_service=BotScoringService(
+            build_bot_score_publisher(settings, rabbitmq_channels), backend, feature_store.keyspace
+        ),
         moderation_model_holder=moderation_model_holder,
         content_moderation_service=content_moderation_service,
         image_moderation_model_holder=image_moderation_model_holder,

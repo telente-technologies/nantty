@@ -46,6 +46,7 @@ class IntelligenceSettings(BaseSettings):
     domain_events_queue: str = "intelligence-domain-events"
     trust_advisory_queue: str = "intelligence-trust-advisory"
     trust_content_scores_queue: str = "intelligence-trust-content-scores"
+    trust_bot_scores_queue: str = "intelligence-trust-bot-scores"
     media_bucket: str = ""
     server_workers: int = Field(default=1, ge=1, le=32)
     trust_live_safety_queue: str = "intelligence-trust-live-safety"
@@ -59,6 +60,9 @@ class IntelligenceSettings(BaseSettings):
     live_safety_transcribe_output_bucket: str = ""
     live_safety_transcribe_language_code: str = "en-US"
     live_safety_csam_hash_matching_enabled: bool = False
+    media_internal_url: str = ""
+    media_internal_token: SecretStr = SecretStr("")
+    media_internal_timeout_seconds: float = Field(default=10.0, gt=0, le=120)
 
     sqs_endpoint_url: str = ""
     sqs_region: str = "us-east-1"
@@ -66,6 +70,7 @@ class IntelligenceSettings(BaseSettings):
     sqs_secret_access_key: SecretStr = SecretStr("")
     domain_events_queue_url: str = ""
     trust_advisory_queue_url: str = ""
+    trust_bot_scores_queue_url: str = ""
 
     model_registry_path: Path = Path("./model_registry")
     model_signing_secret: SecretStr = SecretStr("")
