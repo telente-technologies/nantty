@@ -7,7 +7,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { adEventsService } from "@/services/adEvents.service";
 import type { AdPlacement, ProductSummary } from "@/types";
-import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
 
 export interface ProductCardProps {
   readonly product: ProductSummary;
@@ -46,7 +46,7 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
           </Text>
           <View style={styles.priceRow}>
             <Text size={14} weight={500} lineHeight={16.8}>
-              {formatMoneyForDisplay(product.price)}
+              {formatProductPriceForDisplay(product)}
             </Text>
             <Pressable accessibilityRole="button" accessibilityLabel={`Add ${product.name} to cart`} hitSlop={12} onPress={onAddToCart}>
               <Plus16Icon />
@@ -60,7 +60,7 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
               {product.name}
             </Text>
             <Text size={13} weight={500} lineHeight={16.9}>
-              {formatMoneyForDisplay(product.price)}
+              {formatProductPriceForDisplay(product)}
             </Text>
           </View>
           <Pressable
