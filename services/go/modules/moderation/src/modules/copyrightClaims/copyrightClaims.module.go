@@ -8,7 +8,11 @@ import (
 	"zudomart/modules/moderation/src/modules/copyrightClaims/routes"
 )
 
-var RunRestoreWorkerUntilContextDone = jobs.RunRestoreWorkerUntilContextDone
+var (
+	RunRestoreWorkerUntilContextDone          = jobs.RunRestoreWorkerUntilContextDone
+	RunTakedownDeadlineWorkerUntilContextDone = jobs.RunTakedownDeadlineWorkerUntilContextDone
+	PostDeletedHandler                        = jobs.HandlePostDeletedMessage
+)
 
 func Mount(mux *http.ServeMux, c *container.Container) {
 	routes.MountCopyrightClaimsRoutes(mux, c)
