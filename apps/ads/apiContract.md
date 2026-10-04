@@ -82,7 +82,7 @@ Status machine for campaigns, ad sets and ads: `draft → in_review → active �
 | PATCH | /ads/accounts/:accountId/ads/:adId | campaigns:manage | `{ name?, creative?: CreativeInput, status? }` | `Ad` | 400, 409 |
 | POST | /ads/accounts/:accountId/ads/:adId/appeal | campaigns:manage | `{ message }` (20–1000 chars) | `Ad` with `review.appeal.status = "pending"` | 409 NOT_REJECTED, 409 ALREADY_APPEALED (one appeal per decision) |
 
-Validation (mirror `src/mocks/mockCampaignValidation.mock.ts`): name ≤120; lifetime budget needs `endAt`; `endAt > startAt`; daily budget ≥ per-currency minimum (NGN 100,000 minor, GHS 1,000, KES 10,000, ZAR 2,000, GBP/EUR/USD 100); `budgetLevel: "campaign"` ⇒ campaign budget and no ad-set budget, `"ad_set"` ⇒ the reverse; bid `amount` required unless `auto`; frequency cap 1–20 impressions per 1–30 days; ages 18–65 (65 = 65+); ≥1 location; custom audiences must belong to the account; placements ⊆ `feed, clips, mart, search, stories, live` (automatic = all); headline ≤60, primary text ≤500; destination `url` must be `https://` without credentials; creative sources must belong to the account and be eligible.
+Validation (mirror `src/mocks/mockCampaignValidation.mock.ts`): name ≤120; lifetime budget needs `endAt`; `endAt > startAt`; daily budget ≥ per-currency minimum (NGN 100,000 minor, GHS 1,000, KES 10,000, ZAR 2,000, GBP/EUR/USD 100); `budgetLevel: "campaign"` ⇒ campaign budget and no ad-set budget, `"ad_set"` ⇒ the reverse; bid `amount` required unless `auto`; frequency cap 1–20 impressions per 1–30 days; ages 18–65 (65 = 65+); ≥1 location; custom audiences must belong to the account; placements ⊆ `feed, clips, mart, search, stories, live` (automatic = all); headline ≤60, primary text ≤500; destination `url` must be `https://` without credentials (see Rich ad formats for card, app-install and promoted-post rules); creative sources must belong to the account and be eligible.
 
 Policy review: run automated checks at submit (prohibited categories in `src/constants/policy.constant.ts`), then human review. On rejection set `review.policyCode` (a code from the policy page, used for `/policy#<code>` links) and a plain-language `policyReason`.
 
@@ -112,6 +112,29 @@ The rules live in `src/utils/adPlacementRules.util.ts` and must be mirrored serv
 | GET | /media/:mediaId | signed in | — | file bytes (or a redirect to the CDN) | 404 |
 
 Accepted: JPG, PNG, WebP, AVIF, MP4, MOV up to 500 MB; chunk size is chosen by the server (≤12 MB, the BFF body limit). Process to AVIF/WebP and H.264/HLS like other media; `Creative.media[].url` must be an https CDN URL whose origin is set as `ADS_MEDIA_URL` in the Ads Manager CSP.
+
+## Rich ad formats
+
+`CreativeInput` and `Creative` gain these fields (all optional on old data; a missing `type` means `single`):
+
+| Field | Meaning |
+|---|---|
+| `type` | `single \| carousel \| app_install \| promoted_post` |
+| `mediaClickable` | `single` only: tapping the media opens the destination |
+| `cards[]` | `carousel` only, 2-10: input `{ mediaId, headline (<=40), description (<=90), callToAction, destination }`; resolved `{ media: CreativeMedia, ... }`. Feed format only (`format: "feed_post"`) |
+| `app` | `app_install` only: `{ appName (<=50), iconMediaId?, iconUrl?, rating: 1-5 \| null, iosStoreUrl, androidStoreUrl, webFallbackUrl, iosDeepLink, androidDeepLink }`; destination type `app_store` |
+| `destination.type` | adds `app_store`; `destination.utm?: { source?, medium?, campaign?, content?, term? }` for `url` |
+| `callToAction` | adds `install`, `download`, `book_now`, `contact_us` |
+
+Validation (mirrors `src/utils/adCreativeFormats.util.ts` and go-ads `creativeFormats.validator.go`): carousel needs 2-10 cards, each with media, a headline and a valid destination, and is feed-only; `iosStoreUrl` must be `https://apps.apple.com|itunes.apple.com/.../app/...`, `androidStoreUrl` `https://play.google.com/store/apps/details?id=...`, deep links custom schemes only (never http, javascript, data, file, intent); at least one store link, and a `webFallbackUrl` whenever only one store link is set; `promoted_post` needs source `post|clip` and a `post` destination with the same id. Paths use dot notation (`ads.0.creative.cards.1.headline`, `ads.0.creative.app.iosStoreUrl`). UTM values: letters, digits, `-`, `_`, `.`, up to 60 characters; missing `utm_source`/`utm_medium` default to `zudomart`/`paid`; parameters already on the link are kept.
+
+Review: external destinations are checked at review against `ADS_BLOCKED_DOMAINS` (CRITICAL), link shorteners, raw IPs and punycode hosts (HIGH); card text and app name are scanned with the headline. The review queue item adds `creative.type`, `creative.cards[] { imageUrl, headline, description, callToAction, landingUrl }`, `creative.app`.
+
+Delivery (`POST /api/v1/ads/decide` in the social apps, not the Ads Manager): `DecidedAd.clickLinks { media?, cta?, cards? }` are signed `GET /api/v1/ads/r/{token}` redirects that log the click and `302` to the creative's own destination only; bad tokens return 404 with no redirect. `POST /api/v1/ads/events` accepts `token`, `cardIndex` and event type `card_view`.
+
+| Method | Path | Permission | Request | Response | Errors |
+|---|---|---|---|---|---|
+| GET | /ads/accounts/:accountId/ads/:adId/cards/report | reports:view | `?from&to` | `{ items: [{ cardIndex, headline, imageUrl, impressions, clicks, ctr }] }` for carousels (empty for other types) | 404 |
 
 ## Audiences and estimates
 
