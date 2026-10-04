@@ -15,6 +15,9 @@ func MountPlatformSettingsRoutes(mux *http.ServeMux, container *container.Contai
 	mux.Handle("GET /api/v1/admin/config", requireRead(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/config/{key}", requireRead(http.HandlerFunc(controller.Get)))
 	mux.Handle("PUT /api/v1/admin/config/{key}", requireWrite(http.HandlerFunc(controller.Update)))
+	trendingPermissions := []string{"content:review", "moderation:reports", "settings:edit"}
+	mux.Handle("GET /api/v1/admin/trending/moderation", container.Guard.RequireStaffWithAnyPermission(trendingPermissions, false)(http.HandlerFunc(controller.GetTrendingModeration)))
+	mux.Handle("PUT /api/v1/admin/trending/moderation", container.Guard.RequireStaffWithAnyPermission(trendingPermissions, true)(http.HandlerFunc(controller.UpdateTrendingModeration)))
 	mux.HandleFunc("GET /api/v1/platform-config/creator-requirements", controller.PublicCreatorRequirements)
 	mux.HandleFunc("GET /api/v1/internal/platform-config/{key}", controller.InternalRead)
 }

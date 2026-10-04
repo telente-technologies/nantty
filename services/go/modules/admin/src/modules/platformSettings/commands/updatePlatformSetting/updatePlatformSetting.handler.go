@@ -26,7 +26,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 	if !known {
 		return models.PlatformSettingView{}, adminerrors.SettingNotFound
 	}
-	if !command.Actor.CanAny(definition.WritePermission, "settings:edit") {
+	if !command.Actor.CanAny(append([]string{definition.WritePermission, "settings:edit"}, definition.ExtraWritePermissions...)...) {
 		return models.PlatformSettingView{}, httpserver.ErrForbidden
 	}
 	reason := strings.TrimSpace(command.Reason)
