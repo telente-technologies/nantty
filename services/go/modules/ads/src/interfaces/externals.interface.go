@@ -91,3 +91,16 @@ type ObjectStorage interface {
 	PutObject(ctx context.Context, key, contentType string, body []byte) error
 	Exists(ctx context.Context, key string) (bool, int64, error)
 }
+
+type OwnershipQuery struct {
+	Kind        string
+	TargetId    string
+	OwnerUserId string
+	StoreId     string
+}
+
+// DestinationOwnership asks the owning service (social for posts and clips, commerce for products and stores, identity for profiles)
+// whether the advertiser owns the target or is on the team that manages it.
+type DestinationOwnership interface {
+	Owns(ctx context.Context, query OwnershipQuery) (bool, error)
+}

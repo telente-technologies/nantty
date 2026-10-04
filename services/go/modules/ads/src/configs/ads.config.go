@@ -14,6 +14,7 @@ type AdsSettings struct {
 	DatabaseSchema         string
 	UsersSchema            string
 	AdminSchema            string
+	CurrencySchema         string
 	PlatformSettingsTtl    time.Duration
 	CreatorShareBps        int64
 	DomainEventsTopicArn   string
@@ -31,6 +32,10 @@ type AdsSettings struct {
 	IntelligenceSecret     string
 	IntelligenceTimeout    time.Duration
 	MediaBaseUrl           string
+	PublicBaseUrl          string
+	IdentityInternalUrl    string
+	IdentityInternalToken  string
+	BlockedDomains         []string
 	EnabledPlacements      []string
 	CandidateRefresh       time.Duration
 	SettlementInterval     time.Duration
@@ -50,7 +55,9 @@ type AdsSettings struct {
 	S3Endpoint             string
 	ReportQueueName        string
 	ContentSourcesUrl      string
-	ContentSourcesSecret   string
+	ContentSourcesToken    string
+	CommerceInternalUrl    string
+	CommerceInternalToken  string
 	UploadUrlLifetime      time.Duration
 	ReportLinkLifetime     time.Duration
 	ReportSweepInterval    time.Duration
@@ -68,6 +75,7 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		DatabaseSchema:         reader.ReadStringOrDefault("ADS_DATABASE_SCHEMA", "ads"),
 		UsersSchema:            reader.ReadStringOrDefault("USERS_DATABASE_SCHEMA", "users"),
 		AdminSchema:            reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
+		CurrencySchema:         reader.ReadStringOrDefault("CURRENCY_DATABASE_SCHEMA", "currency"),
 		PlatformSettingsTtl:    reader.ReadDurationOrDefault("ADS_PLATFORM_SETTINGS_TTL", 30*time.Second),
 		CreatorShareBps:        int64(reader.ReadIntegerOrDefault("ADS_CREATOR_SHARE_BPS", 4000)),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
@@ -83,6 +91,10 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		IntelligenceSecret:     reader.ReadStringOrDefault("INTELLIGENCE_SHARED_SECRET", ""),
 		IntelligenceTimeout:    reader.ReadDurationOrDefault("ADS_INTELLIGENCE_TIMEOUT", 80*time.Millisecond),
 		MediaBaseUrl:           reader.ReadStringOrDefault("ADS_MEDIA_URL", "https://cdn.zudomart.com/media"),
+		PublicBaseUrl:          reader.ReadStringOrDefault("ADS_PUBLIC_URL", "https://api.zudomart.com"),
+		IdentityInternalUrl:    reader.ReadStringOrDefault("IDENTITY_INTERNAL_URL", ""),
+		IdentityInternalToken:  reader.ReadStringOrDefault("IDENTITY_INTERNAL_TOKEN", ""),
+		BlockedDomains:         reader.ReadCommaSeparatedListOrDefault("ADS_BLOCKED_DOMAINS", []string{}),
 		EnabledPlacements:      reader.ReadCommaSeparatedListOrDefault("ADS_ENABLED_PLACEMENTS", []string{"feed", "clips", "mart", "search"}),
 		CandidateRefresh:       reader.ReadDurationOrDefault("ADS_CANDIDATE_REFRESH", 10*time.Second),
 		SettlementInterval:     reader.ReadDurationOrDefault("ADS_SETTLEMENT_INTERVAL", time.Minute),
@@ -100,7 +112,9 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		S3Endpoint:             reader.ReadStringOrDefault("ADS_S3_ENDPOINT_URL", ""),
 		ReportQueueName:        reader.ReadStringOrDefault("ADS_REPORT_QUEUE_NAME", ""),
 		ContentSourcesUrl:      reader.ReadStringOrDefault("SOCIAL_INTERNAL_URL", ""),
-		ContentSourcesSecret:   reader.ReadStringOrDefault("SOCIAL_INTERNAL_SHARED_SECRET", ""),
+		ContentSourcesToken:    reader.ReadStringOrDefault("SOCIAL_INTERNAL_TOKEN", ""),
+		CommerceInternalUrl:    reader.ReadStringOrDefault("COMMERCE_INTERNAL_URL", ""),
+		CommerceInternalToken:  reader.ReadStringOrDefault("COMMERCE_INTERNAL_TOKEN", ""),
 		UploadUrlLifetime:      reader.ReadDurationOrDefault("ADS_UPLOAD_URL_TTL", 30*time.Minute),
 		ReportLinkLifetime:     reader.ReadDurationOrDefault("ADS_REPORT_LINK_TTL", 7*24*time.Hour),
 		ReportSweepInterval:    reader.ReadDurationOrDefault("ADS_REPORT_SWEEP_INTERVAL", time.Minute),

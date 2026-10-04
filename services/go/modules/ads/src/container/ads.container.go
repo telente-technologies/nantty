@@ -33,6 +33,7 @@ type Container struct {
 	Spend            services.SpendCounters
 	Signer           services.AdTokenSigner
 	Policies         *services.PolicySource
+	Pricing          *services.RegionalAdPricing
 	Candidates       *services.CandidateIndex
 	Consent          interfaces.ConsentReader
 	Signals          interfaces.ContentSignalReader
@@ -44,6 +45,7 @@ type Container struct {
 	AudienceSource   interfaces.AudienceMemberSource
 	Identity         interfaces.IdentityMatcher
 	ContentSources   interfaces.ContentSourceDirectory
+	Ownership        interfaces.DestinationOwnership
 	Storage          interfaces.ObjectStorage
 	Jobs             platformevents.JobQueue
 	QueueConsumer    QueueConsumer

@@ -25,6 +25,7 @@ import (
 	"zudomart/modules/ads/src/modules/billing"
 	"zudomart/modules/ads/src/modules/boosts"
 	"zudomart/modules/ads/src/modules/campaigns"
+	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
 	"zudomart/modules/ads/src/modules/creatives"
 	"zudomart/modules/ads/src/modules/decision"
 	"zudomart/modules/ads/src/modules/reporting"
@@ -56,6 +57,7 @@ func NewAdsModule(ctx context.Context, dependencies servicemodule.Dependencies) 
 
 func StartAdsModuleWithSettings(ctx context.Context, settings configs.AdsSettings, collaborators Collaborators, dependencies servicemodule.Dependencies) (*Module, error) {
 	logger := dependencies.Logger.With(slog.String("module", "ads"))
+	campaignservices.ConfigureBlockedDomains(settings.BlockedDomains)
 	scopedUrl, err := postgres.ScopeDatabaseUrlToSchema(settings.DatabaseUrl, settings.DatabaseSchema)
 	if err != nil {
 		return nil, err

@@ -64,3 +64,22 @@ func (AdConversion) Fields() []ent.Field {
 func (AdConversion) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("conversion_id").Unique(), index.Fields("account_id", "occurred_at")}
 }
+
+type AdCardStatsDaily struct{ ent.Schema }
+
+func (AdCardStatsDaily) Mixin() []ent.Mixin { return []ent.Mixin{TimeOrderedIdentifierMixin{}} }
+
+func (AdCardStatsDaily) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("day").MaxLen(10).Immutable(),
+		field.UUID("account_id", uuid.UUID{}).Immutable(),
+		field.UUID("ad_id", uuid.UUID{}).Immutable(),
+		field.Int("card_index").Immutable(),
+		field.Int64("impressions").Default(0),
+		field.Int64("clicks").Default(0),
+	}
+}
+
+func (AdCardStatsDaily) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("day", "ad_id", "card_index").Unique(), index.Fields("ad_id", "day")}
+}
