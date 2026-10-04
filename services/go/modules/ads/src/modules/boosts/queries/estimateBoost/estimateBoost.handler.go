@@ -16,5 +16,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.BoostEsti
 	if err := validators.ValidateEstimate(query.Request, floors.BoostMinimumDailyMinor); err != nil {
 		return dtos.BoostEstimate{}, err
 	}
-	return services.EstimateBoost(query.Request, floors.CpmFloorMinor), nil
+	estimate, err := handler.Container.Pricing.Estimate(ctx, services.EstimateRequestForBoost(query.Request))
+	if err != nil {
+		return dtos.BoostEstimate{}, err
+	}
+	return services.EstimateBoost(query.Request, estimate), nil
 }

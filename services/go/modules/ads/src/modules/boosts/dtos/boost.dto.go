@@ -1,6 +1,9 @@
 package dtos
 
-import "zudomart/modules/ads/src/types"
+import (
+	"zudomart/modules/ads/src/types"
+	"zudomart/platform/regionpricing"
+)
 
 type BoostAudience struct {
 	Mode        string   `json:"mode"`
@@ -12,10 +15,12 @@ type BoostAudience struct {
 }
 
 type BoostOptions struct {
-	MinimumDailyBudget    types.Money   `json:"minimumDailyBudget"`
-	SuggestedDailyBudgets []types.Money `json:"suggestedDailyBudgets"`
-	DurationDayOptions    []int         `json:"durationDayOptions"`
-	Interests             []string      `json:"interests"`
+	MinimumDailyBudget    types.Money                  `json:"minimumDailyBudget"`
+	SuggestedDailyBudgets []types.Money                `json:"suggestedDailyBudgets"`
+	DurationDayOptions    []int                        `json:"durationDayOptions"`
+	Interests             []string                     `json:"interests"`
+	Region                string                       `json:"region"`
+	Packages              []regionpricing.BoostPackage `json:"packages"`
 }
 
 type BoostEstimateRequest struct {
@@ -27,10 +32,15 @@ type BoostEstimateRequest struct {
 }
 
 type BoostEstimate struct {
-	EstimatedReachMin     int64       `json:"estimatedReachMin"`
-	EstimatedReachMax     int64       `json:"estimatedReachMax"`
-	EstimatedResultsLabel string      `json:"estimatedResultsLabel"`
-	TotalCost             types.Money `json:"totalCost"`
+	EstimatedReachMin     int64               `json:"estimatedReachMin"`
+	EstimatedReachMax     int64               `json:"estimatedReachMax"`
+	EstimatedResultsLabel string              `json:"estimatedResultsLabel"`
+	TotalCost             types.Money         `json:"totalCost"`
+	Impressions           regionpricing.Range `json:"impressions"`
+	Clicks                regionpricing.Range `json:"clicks"`
+	CostPerResult         regionpricing.Range `json:"costPerResultMinor"`
+	MinimumDailyBudget    types.Money         `json:"minimumDailyBudget"`
+	Region                string              `json:"region"`
 }
 
 type CreateBoostRequest struct {
