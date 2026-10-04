@@ -18,12 +18,6 @@ export const defaultEmailBrand: EmailBrandConfig = {
   playStoreUrl: "https://play.google.com/store/apps/details?id=com.zudomart.app",
   appStoreBadgeUrl: null,
   playStoreBadgeUrl: null,
-  socialLinks: [
-    { label: "Instagram", href: "https://instagram.com/zudomart" },
-    { label: "X", href: "https://x.com/zudomart" },
-    { label: "TikTok", href: "https://tiktok.com/@zudomart" },
-    { label: "YouTube", href: "https://youtube.com/@zudomart" },
-  ],
 };
 
 export type EmailBrandEnvironment = Readonly<Record<string, string | undefined>>;

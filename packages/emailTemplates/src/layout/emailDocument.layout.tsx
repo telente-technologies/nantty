@@ -1,7 +1,6 @@
 import { Body, Container, Head, Html, Preview, Section } from "react-email";
 
 import { EmailBlockList } from "../blocks/emailBlockList.block";
-import { EmailRenderContext } from "../blocks/emailRenderContext";
 import type { EmailBlock, EmailContext, EmailKind } from "../emailTypes";
 import { buildDarkModeCss, fontStack, selectPalette } from "../theme/emailPalette";
 import { EmailFooter } from "./emailFooter.layout";
@@ -36,7 +35,6 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
         <style>{css}</style>
       </Head>
       <Preview useTitleTag={false}>{preheader}</Preview>
-      <EmailRenderContext.Provider value={{ palette, context }}>
         <Body id="body" lang={context.locale} className="zm-page" style={{ margin: 0, padding: 0, backgroundColor: palette.page, fontFamily: fontStack, WebkitTextSizeAdjust: "100%" }}>
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-page" style={{ backgroundColor: palette.page }}>
             <tbody>
@@ -67,7 +65,6 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
             </tbody>
           </table>
         </Body>
-      </EmailRenderContext.Provider>
     </Html>
   );
 }

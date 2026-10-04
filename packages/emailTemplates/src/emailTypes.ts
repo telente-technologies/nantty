@@ -106,7 +106,6 @@ export interface EmailBrandConfig {
   readonly playStoreUrl: string;
   readonly appStoreBadgeUrl: string | null;
   readonly playStoreBadgeUrl: string | null;
-  readonly socialLinks: readonly EmailLink[];
 }
 
 export interface EmailLinks {

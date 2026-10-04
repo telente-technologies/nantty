@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 import type { EmailContext } from "../emailTypes";
 import { lightPalette, type EmailPalette } from "../theme/emailPalette";
@@ -8,10 +8,14 @@ export interface EmailRenderEnvironment {
   readonly context: EmailContext;
 }
 
-export const EmailRenderContext = createContext<EmailRenderEnvironment | null>(null);
+const emailEnvironmentStorage = new AsyncLocalStorage<EmailRenderEnvironment>();
+
+export function runWithEmailEnvironment<Result>(environment: EmailRenderEnvironment, work: () => Result): Result {
+  return emailEnvironmentStorage.run(environment, work);
+}
 
 export function useEmailEnvironment(): EmailRenderEnvironment {
-  const environment = useContext(EmailRenderContext);
+  const environment = emailEnvironmentStorage.getStore();
   if (!environment) throw new Error("Email blocks must render inside EmailDocument.");
   return environment;
 }

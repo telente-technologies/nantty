@@ -43,16 +43,6 @@ export function EmailFooter({ kind, reason }: { readonly kind: EmailKind; readon
         <StoreBadge label="Download on the App Store" href={brand.appStoreUrl} imageUrl={brand.appStoreBadgeUrl} />
         <StoreBadge label="Get it on Google Play" href={brand.playStoreUrl} imageUrl={brand.playStoreBadgeUrl} />
       </div>
-      <Text className="zm-muted" style={{ ...small, paddingBottom: 14 }}>
-        {brand.socialLinks.map((social, index) => (
-          <span key={social.href}>
-            {index > 0 ? "   ·   " : ""}
-            <Link href={social.href} className="zm-muted" style={{ ...linkStyle, fontWeight: 600, textDecoration: "none" }}>
-              {social.label}
-            </Link>
-          </span>
-        ))}
-      </Text>
       <div className="zm-rule" style={{ height: 1, lineHeight: "1px", fontSize: 1, backgroundColor: palette.line, marginBottom: 14 }}>&nbsp;</div>
       <Text className="zm-muted" style={{ ...small, paddingBottom: 8 }}>{reason ?? defaultReasons[kind]}</Text>
       <Text className="zm-muted" style={{ ...small, paddingBottom: 8 }}>
