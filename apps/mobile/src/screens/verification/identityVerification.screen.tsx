@@ -111,7 +111,7 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
   return (
     <>
       {verification?.status === "rejected" ? (
-        <StatusCard pill="Not approved" tone="error" title="We couldn't verify your account" body={`${verification.decisionReason ? `${verification.decisionReason} ` : ""}${describeRefund(verification.refundMethod, verification.refundStatus)}${verification.decidedAt ? ` You can try again 30 days after ${formatFriendlyDate(verification.decidedAt)}.` : ""}`} />
+        <StatusCard pill="Not approved" tone="error" title="We couldn't verify your account" body={`${verification.decisionReason ? `${verification.decisionReason} ` : ""}${describeRefund(verification.refundMethod, verification.refundStatus, verification.refundScope)}${verification.decidedAt ? ` You can try again 30 days after ${formatFriendlyDate(verification.decidedAt)}.` : ""}`} />
       ) : null}
       <View style={styles.card}>
         <Text size={16} weight={600}>The {badgeName} checkmark</Text>

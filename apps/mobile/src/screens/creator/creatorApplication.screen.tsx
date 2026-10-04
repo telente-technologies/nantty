@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { creatorQueryKeys } from "@/components/creator/creatorQueries.hook";
 import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
@@ -114,7 +115,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
         <SelectableRow selected={acceptedTerms} onPress={() => setAcceptedTerms((value) => !value)} accessibilityLabel="I agree to the Creator Terms">
           <Text size={13} lineHeight={17.5}>
             I agree to the{" "}
-            <Text size={13} lineHeight={17.5} color={colors.primary} onPress={() => Linking.openURL("https://zudomart.com/creator-terms")}>Creator Terms</Text>
+            <Text size={13} lineHeight={17.5} color={colors.primary} onPress={() => openTrustedWebPage("https://zudomart.com/creator-terms", inAppBrowserColorsFromTheme(colors))}>Creator Terms</Text>
             , including honest disclosure of sponsored and affiliate content.
           </Text>
         </SelectableRow>

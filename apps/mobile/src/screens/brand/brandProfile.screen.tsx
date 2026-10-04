@@ -1,7 +1,8 @@
+import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
@@ -76,7 +77,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
         </View>
         <MentionText text={details.description} size={13} lineHeight={17.5} style={styles.padded} />
         {details.website ? (
-          <Text size={13} lineHeight={17.5} color={colors.primary} style={styles.padded} accessibilityRole="link" onPress={() => Linking.openURL(details.website!)}>{details.website}</Text>
+          <Text size={13} lineHeight={17.5} color={colors.primary} style={styles.padded} accessibilityRole="link" onPress={() => openUserSuppliedWebLink(details.website!, inAppBrowserColorsFromTheme(colors))}>{details.website}</Text>
         ) : null}
         <View style={[styles.actions, styles.padded]}>
           <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => requireAuthThen(() => toggleFollow.mutate(!details.isFollowing), undefined, "follow brands")} />

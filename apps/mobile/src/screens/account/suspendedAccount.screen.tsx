@@ -1,7 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export function SuspendedAccountScreen() {
         ) : null}
         <Text size={14} lineHeight={19.6} color={colors.textMuted}>
           You can't post, message or sell while your account is suspended.{" "}
-          <Text size={14} lineHeight={19.6} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL(legalLinks.communityGuidelines)}>Read the Community Guidelines</Text>
+          <Text size={14} lineHeight={19.6} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage(legalLinks.communityGuidelines, inAppBrowserColorsFromTheme(colors))}>Read the Community Guidelines</Text>
         </Text>
         {appeal.isSuccess ? (
           <Text size={14} weight={500} lineHeight={19.6} color={colors.success} accessibilityRole="alert">

@@ -1,5 +1,6 @@
-import { Linking, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { ArrowUpRight24Icon, BuildingStore20Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -30,7 +31,7 @@ export function SellerWebAppNote() {
         variant="subtle"
         title="Open Zudomart Dashboard"
         icon={<ArrowUpRight24Icon size={18} />}
-        onPress={() => Linking.openURL(sellerWebAppConfig.dashboardUrl)}
+        onPress={() => openTrustedWebPage(sellerWebAppConfig.dashboardUrl, inAppBrowserColorsFromTheme(colors))}
         style={styles.button}
       />
     </View>
