@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo } from "react";
 
+import { TextLink } from "@/components/links/textLink";
 import { showToast } from "@/components/ui/toast";
 import { mentionsService } from "@/services/mentions.service";
 import { isUserMentionEntity, type MentionEntity } from "@/types/mentions.type";
+import { splitTextByUrls } from "@/utils/linkify.util";
 import { splitTextByTags } from "@/utils/usernameTags.util";
 
 import styles from "./mentions.module.css";
@@ -22,7 +24,23 @@ function useResolvedMentionedUsers(mentions: readonly MentionEntity[] | undefine
   });
 }
 
-export function MentionText({ text, mentions }: { readonly text: string; readonly mentions?: readonly MentionEntity[] }) {
+function LinkifiedPlainText({ text, inverse }: { readonly text: string; readonly inverse: boolean }) {
+  return (
+    <>
+      {splitTextByUrls(text).map((piece, index) =>
+        piece.href ? (
+          <TextLink key={index} href={piece.href} inverse={inverse}>
+            {piece.text}
+          </TextLink>
+        ) : (
+          <span key={index}>{piece.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+export function MentionText({ text, mentions, inverseLinks = false }: { readonly text: string; readonly mentions?: readonly MentionEntity[]; readonly inverseLinks?: boolean }) {
   const resolvedQuery = useResolvedMentionedUsers(mentions);
   const segments = useMemo(() => splitTextByTags(text, (mentions ?? []).filter((mention) => mention.start >= 0 && mention.length > 1 && mention.start + mention.length <= text.length && text[mention.start] === "@")), [text, mentions]);
   return (
@@ -36,7 +54,7 @@ export function MentionText({ text, mentions }: { readonly text: string; readonl
             </Link>
           );
         }
-        if (!mention) return <span key={index}>{segment.text}</span>;
+        if (!mention) return <LinkifiedPlainText key={index} text={segment.text} inverse={inverseLinks} />;
         if (!isUserMentionEntity(mention)) {
           return (
             <span key={index} className={styles.everyonePill}>
