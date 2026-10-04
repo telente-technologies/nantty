@@ -9,7 +9,7 @@ import { uploadSessionRepository } from "../../../uploads/repositories/uploadSes
 
 export interface CreateUploadIntentCommand {
   readonly accountId: string;
-  readonly purpose: Extract<MediaPurposeName, "avatar" | "banner">;
+  readonly purpose: Extract<MediaPurposeName, "avatar" | "banner" | "post">;
   readonly contentType: string;
   readonly sizeBytes: number;
   readonly fileName: string | undefined;

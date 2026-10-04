@@ -8,4 +8,5 @@ export function registerInternalRoutes(router: HttpRouter, controller: ReturnTyp
   router.get("/internal/v1/media/:mediaId", controller.get);
   router.post("/internal/v1/media/:mediaId/signed-url", controller.signedUrl);
   router.post("/internal/v1/media/:mediaId/review", controller.review);
+  router.post("/internal/v1/media/:mediaId/complete", controller.complete);
 }
