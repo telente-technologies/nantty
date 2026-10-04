@@ -25,20 +25,30 @@ export const generateAutomaticUsername = (seed: string) => {
 
 const takenUsernames = () => new Set([...directoryUsers.map((user) => user.username.toLowerCase()), "taken", signedInProfile().username.toLowerCase()]);
 
+const SUGGESTION_SUFFIXES = ["_01", "2026", "_x", ".99", "_ng", "7"];
+
+export function buildUsernameSuggestions(rawUsername: string): string[] {
+  const base = rawUsername.trim().toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 20) || "zudo";
+  const taken = takenUsernames();
+  return SUGGESTION_SUFFIXES.map((suffix) => `${base}${suffix}`.slice(0, 30))
+    .filter((candidate) => isValidUsername(candidate) && !taken.has(candidate) && !WITHHELD_USERNAMES.has(candidate) && !RECENTLY_RELEASED_USERNAMES.has(candidate))
+    .slice(0, 3);
+}
+
 export function checkAvailability(rawUsername: string): UsernameAvailability {
   const username = rawUsername.trim().toLowerCase();
   if (!isValidUsername(username)) return { available: false, reason: "invalid" };
   if (EXACT_ONLY_RESERVED_USERNAMES.has(username.toLowerCase())) return { available: false, reason: "reserved" };
   if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return { available: false, reason: "reserved" };
   if (WITHHELD_USERNAMES.has(username)) return { available: false, reason: "withheld" };
-  if (RECENTLY_RELEASED_USERNAMES.has(username)) return { available: false, reason: "recently_used" };
-  if (takenUsernames().has(username)) return { available: false, reason: "taken" };
+  if (RECENTLY_RELEASED_USERNAMES.has(username)) return { available: false, reason: "recently_used", suggestions: buildUsernameSuggestions(username) };
+  if (takenUsernames().has(username)) return { available: false, reason: "taken", suggestions: buildUsernameSuggestions(username) };
   return { available: true };
 }
 
-const buildUsernameUnavailableError = (availability: UsernameAvailability) => {
+export const buildUsernameUnavailableError = (availability: UsernameAvailability) => {
   const message = "That username isn't available";
-  if (availability.reason === "taken") return new ApiError(409, message, "USERNAME_TAKEN");
+  if (availability.reason === "taken") return new ApiError(409, "That username is taken", "USERNAME_TAKEN", availability.suggestions);
   return new ApiError(422, message, availability.reason === "invalid" ? "USERNAME_INVALID" : "USERNAME_UNAVAILABLE");
 };
 

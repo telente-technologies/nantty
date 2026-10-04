@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     birthday,
     otpToken,
   });
-  if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "REGISTRATION_FAILED", result.error?.message ?? "We could not create your account.");
+  if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "REGISTRATION_FAILED", result.error?.message ?? "We could not create your account.", result.error?.suggestions);
   const response = NextResponse.json({ user: result.session.user }, { status: 201, headers: { "Cache-Control": "no-store" } });
   beginSessionWithAuthResult(response, result.session);
   return response;

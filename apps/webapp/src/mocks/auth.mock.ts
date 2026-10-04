@@ -2,7 +2,7 @@ import { ApiError } from "@/errors/api.error";
 
 import { demoFanAccount, getSignedInMockUser, me, mockSession } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { generateAutomaticUsername } from "./username.mock";
+import { buildUsernameUnavailableError, checkAvailability, generateAutomaticUsername } from "./username.mock";
 import { applyProfileEditForSignedInUser, signedInProfile } from "./users.mock";
 
 const buildMockAuthSession = () => ({ accessToken: "mock-access", refreshToken: "mock-refresh", user: getSignedInMockUser() });
@@ -51,6 +51,8 @@ export const authMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/auth/register", ({ body }) => {
     const { username, email, phone } = body as { username?: string; email?: string; phone?: string };
+    const availability = username?.trim() ? checkAvailability(username) : null;
+    if (availability && !availability.available) throw buildUsernameUnavailableError(availability);
     mockSession.signedInUserId = demoFanAccount.id;
     applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? phone ?? "zudo") });
     return { ...buildMockAuthSession(), user: signedInProfile() };

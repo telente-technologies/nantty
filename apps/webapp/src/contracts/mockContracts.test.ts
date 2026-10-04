@@ -16,3 +16,15 @@ describe("webapp mock responses match the contracts", () => {
     });
   }
 });
+
+describe("taken usernames carry suggestions", () => {
+  it("returns three suggestions from the availability check and the register conflict", async () => {
+    const availability = (await dispatchMockApiRequest("GET", "/api/v1/auth/username-available", new URLSearchParams({ username: "taken" }), null)) as { available: boolean; suggestions: string[] };
+    assert.equal(availability.available, false);
+    assert.equal(availability.suggestions.length, 3);
+    assert.ok(!availability.suggestions.includes("taken"));
+    const failure = await dispatchMockApiRequest("POST", "/api/v1/auth/register", new URLSearchParams(), new TextEncoder().encode(JSON.stringify({ username: "taken", email: "a@b.co" }))).catch((error: unknown) => error);
+    assert.equal((failure as { code?: string }).code, "USERNAME_TAKEN");
+    assert.equal((failure as { suggestions?: string[] }).suggestions?.length, 3);
+  });
+});
