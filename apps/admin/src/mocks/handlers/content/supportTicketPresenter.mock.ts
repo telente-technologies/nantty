@@ -23,7 +23,7 @@ export function findSupportAgent(adminId: string | null): SupportAgent | null {
 }
 
 export function isSupportTicketBreachingSla(record: MockSupportTicketRecord, nowEpochMs = Date.now()): boolean {
-  if (record.status === "SOLVED" || record.status === "CLOSED") return false;
+  if (record.status === "RESOLVED" || record.status === "CLOSED") return false;
   const firstResponseDue = new Date(addMinutesToIso(record.createdAt, firstResponseTargetMinutesByPriority[record.priority])).getTime();
   const resolutionDue = new Date(addMinutesToIso(record.createdAt, resolutionTargetMinutesByPriority[record.priority])).getTime();
   return (!record.firstRespondedAt && nowEpochMs > firstResponseDue) || nowEpochMs > resolutionDue;
@@ -35,20 +35,27 @@ export function presentSupportTicketSummary(record: MockSupportTicketRecord): Su
   const publicMessages = record.messages.filter((message) => message.authorKind !== "INTERNAL_NOTE");
   return {
     id: record.id,
+    reference: `SUP-${record.id.replace(/\D/g, "")}`,
     subject: record.subject,
     category: record.category,
     priority: record.priority,
     status: record.status,
+    channel: "FORM",
     requester: presentPlatformUserSummary(requester),
     assignee: findSupportAgent(record.assigneeAdminId),
     linkedOrderId: record.linkedOrderId,
     linkedDisputeId: record.linkedDisputeId,
+    linkedReference: record.linkedOrderId ? { kind: "order", id: record.linkedOrderId, label: `Order ${record.linkedOrderId}` } : null,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
     firstResponseDueAt: addMinutesToIso(record.createdAt, firstResponseTargetMinutesByPriority[record.priority]),
     firstRespondedAt: record.firstRespondedAt,
     resolutionDueAt: addMinutesToIso(record.createdAt, resolutionTargetMinutesByPriority[record.priority]),
-    solvedAt: record.solvedAt,
+    resolvedAt: record.resolvedAt,
+    closedAt: record.status === "CLOSED" ? record.resolvedAt : null,
+    satisfactionScore: record.satisfactionScore,
+    satisfactionComment: null,
+    autoFaqStatus: record.status === "RESOLVED" || record.status === "CLOSED" ? "PUBLISHED" : "NONE",
     lastMessagePreview: (publicMessages[publicMessages.length - 1]?.body ?? "").slice(0, 140),
     messageCount: record.messages.length,
     isSlaBreached: isSupportTicketBreachingSla(record),

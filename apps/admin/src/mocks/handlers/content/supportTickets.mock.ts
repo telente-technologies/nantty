@@ -8,7 +8,7 @@ import type { SupportTicketStatus } from "@/types/support.type";
 import { readSupportMockStore } from "./contentStores.mock";
 import { findSupportTicketOrFail, listAssignableSupportAgents, presentSupportTicketSummary } from "./supportTicketPresenter.mock";
 
-const ticketStatuses = ["OPEN", "PENDING", "SOLVED", "CLOSED"] as const;
+const ticketStatuses = ["OPEN", "AWAITING_USER", "AWAITING_SUPPORT", "RESOLVED", "CLOSED"] as const;
 const priorityRank = { URGENT: 0, HIGH: 1, NORMAL: 2, LOW: 3 } as const;
 
 function auditTargetForTicket(ticket: MockSupportTicketRecord) {
@@ -17,7 +17,7 @@ function auditTargetForTicket(ticket: MockSupportTicketRecord) {
 
 function applyStatusChange(ticket: MockSupportTicketRecord, status: SupportTicketStatus): void {
   ticket.status = status;
-  ticket.solvedAt = status === "SOLVED" || status === "CLOSED" ? (ticket.solvedAt ?? readIsoNow()) : null;
+  ticket.resolvedAt = status === "RESOLVED" || status === "CLOSED" ? (ticket.resolvedAt ?? readIsoNow()) : null;
   ticket.updatedAt = readIsoNow();
 }
 
@@ -37,7 +37,7 @@ export function registerSupportTicketMockHandlers(): void {
     const tickets = readSupportMockStore()
       .tickets.filter(
         (ticket) =>
-          (!status || ticket.status === status) &&
+          (!status || status.split(",").includes(ticket.status)) &&
           (!priority || ticket.priority === priority) &&
           (!category || ticket.category === category) &&
           (assignee === "all" || (assignee === "me" ? ticket.assigneeAdminId === principal.adminId : ticket.assigneeAdminId === null)) &&
@@ -62,7 +62,7 @@ export function registerSupportTicketMockHandlers(): void {
     if (body.isInternalNote !== undefined && typeof body.isInternalNote !== "boolean") failValidation("isInternalNote", "isInternalNote must be true or false.");
     const isInternalNote = body.isInternalNote === true;
     if (ticket.status === "CLOSED" && !isInternalNote) throw new MockHttpError(409, "TICKET_CLOSED", "This ticket is closed. Reopen it before replying to the customer.");
-    const statusAfterReply = body.statusAfterReply === undefined ? (isInternalNote ? ticket.status : "PENDING") : readEnumValue(body, "statusAfterReply", ticketStatuses);
+    const statusAfterReply = body.statusAfterReply === undefined ? (isInternalNote ? ticket.status : "AWAITING_USER") : readEnumValue(body, "statusAfterReply", ticketStatuses);
     const before = { status: ticket.status, messageCount: ticket.messages.length, firstRespondedAt: ticket.firstRespondedAt };
     const message = { id: createMockId("msg"), authorKind: isInternalNote ? ("INTERNAL_NOTE" as const) : ("AGENT" as const), authorName: principal.name, body: text, createdAt: readIsoNow() };
     ticket.messages.push(message);
@@ -80,9 +80,9 @@ export function registerSupportTicketMockHandlers(): void {
     const status = readEnumValue(body, "status", ticketStatuses);
     const reason = readOptionalTrimmedString(body, "reason", 500);
     if (status === ticket.status) throw new MockHttpError(409, "NO_CHANGE", `This ticket is already ${status.toLowerCase()}.`);
-    const before = { status: ticket.status, solvedAt: ticket.solvedAt };
+    const before = { status: ticket.status, resolvedAt: ticket.resolvedAt };
     applyStatusChange(ticket, status);
-    recordMockAuditEntry(request, { action: "support.status_changed", area: "support", target: auditTargetForTicket(ticket), reason, before, after: { status: ticket.status, solvedAt: ticket.solvedAt } });
+    recordMockAuditEntry(request, { action: "support.status_changed", area: "support", target: auditTargetForTicket(ticket), reason, before, after: { status: ticket.status, resolvedAt: ticket.resolvedAt } });
     return respondWithJson(200, { ticket: presentSupportTicketSummary(ticket), messages: ticket.messages, history: listMockAuditEntriesForTarget("supportTicket", ticket.id) });
   });
 
