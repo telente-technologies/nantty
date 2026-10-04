@@ -35,7 +35,7 @@ func (client *CheckoutMoneyClient) RegisterCheckoutPayables(ctx context.Context,
 		message.Orders = append(message.Orders, &moneyv1.OrderPayable{
 			OrderId: order.OrderId, OrderReference: order.OrderReference, StoreId: order.StoreId, SellerUserId: order.SellerUserId,
 			Amount:         &commonv1.Money{AmountMinor: order.Amount.AmountMinor, Currency: string(order.Amount.Currency)},
-			ProductSummary: order.ProductSummary, PaymentMode: moneyv1.OrderPaymentMode_ORDER_PAYMENT_MODE_ESCROW, StoreVerified: order.StoreVerified,
+			ProductSummary: order.ProductSummary, PaymentMode: grpcPaymentMode(order.PaymentMode), StoreVerified: order.StoreVerified,
 		})
 	}
 	_, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.RegisterCheckoutPayablesResponse, error) {
@@ -106,4 +106,11 @@ func summarizeEscrow(escrow *moneyv1.OrderEscrow) interfaces.EscrowSummary {
 		summary.RefundedAt = &moment
 	}
 	return summary
+}
+
+func grpcPaymentMode(mode string) moneyv1.OrderPaymentMode {
+	if mode == "direct" {
+		return moneyv1.OrderPaymentMode_ORDER_PAYMENT_MODE_DIRECT
+	}
+	return moneyv1.OrderPaymentMode_ORDER_PAYMENT_MODE_ESCROW
 }

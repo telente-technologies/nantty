@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/orderitem"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
+	"zudomart/modules/orders/src/services"
 	"zudomart/platform/commerceports"
 )
 
@@ -20,6 +21,7 @@ type CommerceOrders struct {
 
 var _ commerceports.PurchaseVerifier = CommerceOrders{}
 var _ commerceports.StoreRewardsLookup = CommerceOrders{}
+var _ commerceports.StoreSuccessRates = CommerceOrders{}
 
 var receivedStatuses = []string{enums.StatusDelivered, enums.StatusCompleted}
 
@@ -69,4 +71,8 @@ func (orders CommerceOrders) EarnBackBasisPointsByStore(ctx context.Context, sto
 		result[row.StoreID] = row.PercentBackBasisPoints
 	}
 	return result, nil
+}
+
+func (orders CommerceOrders) SuccessRatesByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]float64, error) {
+	return services.StoreSuccessRates(ctx, orders.Container, storeIds)
 }
