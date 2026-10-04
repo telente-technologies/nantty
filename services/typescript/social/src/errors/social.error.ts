@@ -17,3 +17,4 @@ export const unprocessable = (code: string, message: string, details?: Readonly<
 export const badRequest = (code: string, message: string) => new SocialError(400, code, message);
 export const unauthorized = () => new SocialError(401, "UNAUTHORIZED", "Sign in to continue.");
 export const tooManyRequests = (code: string, message: string) => new SocialError(429, code, message);
+export class PoisonEventError extends Error {}
