@@ -27,13 +27,19 @@ func ParseSettingDocument(raw json.RawMessage, found bool) SettingDocument {
 		return document
 	}
 	var stored SettingDocument
-	if json.Unmarshal(raw, &stored) != nil || ValidateSettingDocument(stored) != nil {
+	if json.Unmarshal(raw, &stored) != nil {
+		return document
+	}
+	for index, row := range stored.Ads {
+		stored.Ads[index] = fillMissingSuggestions(row, FindAdRegionPricing(defaultAdRegionPricing, row.Region))
+	}
+	if ValidateSettingDocument(stored) != nil {
 		return document
 	}
 	for _, row := range stored.Ads {
 		for index := range document.Ads {
 			if document.Ads[index].Region == row.Region {
-				document.Ads[index] = row
+				document.Ads[index] = fillMissingSuggestions(row, document.Ads[index])
 			}
 		}
 	}
@@ -57,6 +63,10 @@ func ValidateSettingDocument(document SettingDocument) error {
 			return fmt.Errorf("ads[%d] floors and minimum budgets must be above zero", index)
 		case row.CpcFloorMinor > row.MinimumDailyBudgetMinor:
 			return fmt.Errorf("ads[%d].cpcFloorMinor can't exceed the minimum daily budget", index)
+		case row.SuggestedCpmMinor < row.CpmFloorMinor || row.SuggestedCpcMinor < row.CpcFloorMinor || row.SuggestedCpvMinor <= 0:
+			return fmt.Errorf("ads[%d] suggested bids must be at least the floors", index)
+		case row.SuggestedDailyBudgetMinor < row.MinimumDailyBudgetMinor:
+			return fmt.Errorf("ads[%d].suggestedDailyBudgetMinor must be at least the minimum daily budget", index)
 		}
 	}
 	for region, bands := range document.CreatorSubscriptionBands {
@@ -72,4 +82,21 @@ func ValidateSettingDocument(document SettingDocument) error {
 		}
 	}
 	return nil
+}
+
+// Documents saved before suggested bids existed keep their floors and take the research suggestions.
+func fillMissingSuggestions(row, defaults AdRegionPricing) AdRegionPricing {
+	if row.SuggestedCpmMinor == 0 {
+		row.SuggestedCpmMinor = max(defaults.SuggestedCpmMinor, row.CpmFloorMinor)
+	}
+	if row.SuggestedCpcMinor == 0 {
+		row.SuggestedCpcMinor = max(defaults.SuggestedCpcMinor, row.CpcFloorMinor)
+	}
+	if row.SuggestedCpvMinor == 0 {
+		row.SuggestedCpvMinor = defaults.SuggestedCpvMinor
+	}
+	if row.SuggestedDailyBudgetMinor == 0 {
+		row.SuggestedDailyBudgetMinor = max(defaults.SuggestedDailyBudgetMinor, row.MinimumDailyBudgetMinor)
+	}
+	return row
 }
