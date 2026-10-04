@@ -17,7 +17,7 @@ import (
 const suggestedLiveLimit = 20
 
 func (service *LiveService) ListSuggestedLives(ctx context.Context, viewer uuid.UUID) ([]types.SuggestedLiveView, error) {
-	rows, err := service.Client.LiveSession.Query().Where(livesession.StateEQ(livesession.StateLive), livesession.VisibilityEQ(livesession.VisibilityPublic), livesession.HostIDNEQ(viewer)).
+	rows, err := service.Client.LiveSession.Query().Where(livesession.StateEQ(livesession.StateLive), livesession.VisibilityEQ(livesession.VisibilityPublic), livesession.HostIDNEQ(viewer), livesession.ModerationVisibilityIn("visible", "restricted")).
 		Order(ent.Desc(livesession.FieldViewers), ent.Desc(livesession.FieldCreatedAt)).Limit(suggestedLiveLimit).All(ctx)
 	if err != nil {
 		return nil, err
