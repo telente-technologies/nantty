@@ -247,6 +247,19 @@ Audit log: `GET /api/v1/admin/audit`, `GET /api/v1/admin/audit/export` (NDJSON, 
 
 Gateway: `/api/v1/admin/*` is routed with `authentication: "optional"` because staff tokens have a different audience; the modules verify them. `/api/v1/internal/*` is not routed.
 
+## Human verification keys (Cloudflare Turnstile)
+
+Abuse protection ([security.md §10](../docs/architecture/security.md), [plans.md §48](../docs/plans.md)) needs one Turnstile widget. Real keys never go in the repo; the `.env.example` files ship Cloudflare's public test keys (always pass).
+
+| Key | Put it in (local, gitignored) | AWS Secrets Manager |
+| --- | --- | --- |
+| `TURNSTILE_SECRET_KEY` | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` → `TURNSTILE_SECRET_KEY` |
+| `TRUST_INTERNAL_TOKEN` (= go-trust `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` → `TRUST_INTERNAL_TOKEN` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/webapp/.env.local` | none: webapp build variable |
+| `EXPO_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/mobile/.env` | none: EAS variable |
+
+Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/modules/platform/secrets.tf`); set the real value with `aws secretsmanager put-secret-value --secret-id zudomart/<environment>/gateway/app` (keep the other JSON keys). Without `TRUST_INTERNAL_TOKEN` the gateway still detects probing locally but sends nothing to go-trust and serves no challenges. To test failures use the always-fail secret `2x0000000000000000000000000000000AA`.
+
 ## Adding a service or module (template for per-service agents)
 
 1. Read the service's block in `microservicesPlan.json` and its rows in `docs/backendPlan.md`; port rules and validators
