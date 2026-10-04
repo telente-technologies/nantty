@@ -202,4 +202,13 @@ async def test_feed_endpoint_returns_camel_case_contract(signed_client: Any, ref
     body = response.json()
     assert response.status_code == 200
     assert set(body["metadata"]) >= {"requestId", "rankingSource", "modelVersion", "degraded", "generatedAt"}
-    assert set(body["items"][0]) == {"itemId", "position", "score", "reasons", "socialProof"}
+    assert set(body["items"][0]) == {
+        "itemId",
+        "position",
+        "score",
+        "reasons",
+        "explanations",
+        "boostMultiplier",
+        "trustedEngagementShare",
+        "socialProof",
+    }
