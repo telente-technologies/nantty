@@ -53,6 +53,7 @@ export type PostMediaMinAggregateOutputType = {
   height: number | null
   durationSeconds: number | null
   blurhash: string | null
+  status: $Enums.MediaProcessingStatus | null
 }
 
 export type PostMediaMaxAggregateOutputType = {
@@ -68,6 +69,7 @@ export type PostMediaMaxAggregateOutputType = {
   height: number | null
   durationSeconds: number | null
   blurhash: string | null
+  status: $Enums.MediaProcessingStatus | null
 }
 
 export type PostMediaCountAggregateOutputType = {
@@ -83,6 +85,7 @@ export type PostMediaCountAggregateOutputType = {
   height: number
   durationSeconds: number
   blurhash: number
+  status: number
   _all: number
 }
 
@@ -114,6 +117,7 @@ export type PostMediaMinAggregateInputType = {
   height?: true
   durationSeconds?: true
   blurhash?: true
+  status?: true
 }
 
 export type PostMediaMaxAggregateInputType = {
@@ -129,6 +133,7 @@ export type PostMediaMaxAggregateInputType = {
   height?: true
   durationSeconds?: true
   blurhash?: true
+  status?: true
 }
 
 export type PostMediaCountAggregateInputType = {
@@ -144,6 +149,7 @@ export type PostMediaCountAggregateInputType = {
   height?: true
   durationSeconds?: true
   blurhash?: true
+  status?: true
   _all?: true
 }
 
@@ -246,6 +252,7 @@ export type PostMediaGroupByOutputType = {
   height: number | null
   durationSeconds: number | null
   blurhash: string | null
+  status: $Enums.MediaProcessingStatus
   _count: PostMediaCountAggregateOutputType | null
   _avg: PostMediaAvgAggregateOutputType | null
   _sum: PostMediaSumAggregateOutputType | null
@@ -284,6 +291,7 @@ export type PostMediaWhereInput = {
   height?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   durationSeconds?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   blurhash?: Prisma.StringNullableFilter<"PostMedia"> | string | null
+  status?: Prisma.EnumMediaProcessingStatusFilter<"PostMedia"> | $Enums.MediaProcessingStatus
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
 }
 
@@ -300,6 +308,7 @@ export type PostMediaOrderByWithRelationInput = {
   height?: Prisma.SortOrderInput | Prisma.SortOrder
   durationSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   blurhash?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
 }
 
@@ -320,6 +329,7 @@ export type PostMediaWhereUniqueInput = Prisma.AtLeast<{
   height?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   durationSeconds?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   blurhash?: Prisma.StringNullableFilter<"PostMedia"> | string | null
+  status?: Prisma.EnumMediaProcessingStatusFilter<"PostMedia"> | $Enums.MediaProcessingStatus
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
 }, "id" | "postId_position">
 
@@ -336,6 +346,7 @@ export type PostMediaOrderByWithAggregationInput = {
   height?: Prisma.SortOrderInput | Prisma.SortOrder
   durationSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   blurhash?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
   _count?: Prisma.PostMediaCountOrderByAggregateInput
   _avg?: Prisma.PostMediaAvgOrderByAggregateInput
   _max?: Prisma.PostMediaMaxOrderByAggregateInput
@@ -359,6 +370,7 @@ export type PostMediaScalarWhereWithAggregatesInput = {
   height?: Prisma.IntNullableWithAggregatesFilter<"PostMedia"> | number | null
   durationSeconds?: Prisma.IntNullableWithAggregatesFilter<"PostMedia"> | number | null
   blurhash?: Prisma.StringNullableWithAggregatesFilter<"PostMedia"> | string | null
+  status?: Prisma.EnumMediaProcessingStatusWithAggregatesFilter<"PostMedia"> | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaCreateInput = {
@@ -373,6 +385,7 @@ export type PostMediaCreateInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
   post: Prisma.PostCreateNestedOneWithoutMediaInput
 }
 
@@ -389,6 +402,7 @@ export type PostMediaUncheckedCreateInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUpdateInput = {
@@ -403,6 +417,7 @@ export type PostMediaUpdateInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
   post?: Prisma.PostUpdateOneRequiredWithoutMediaNestedInput
 }
 
@@ -419,6 +434,7 @@ export type PostMediaUncheckedUpdateInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaCreateManyInput = {
@@ -434,6 +450,7 @@ export type PostMediaCreateManyInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUpdateManyMutationInput = {
@@ -448,6 +465,7 @@ export type PostMediaUpdateManyMutationInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUncheckedUpdateManyInput = {
@@ -463,6 +481,7 @@ export type PostMediaUncheckedUpdateManyInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaListRelationFilter = {
@@ -493,6 +512,7 @@ export type PostMediaCountOrderByAggregateInput = {
   height?: Prisma.SortOrder
   durationSeconds?: Prisma.SortOrder
   blurhash?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type PostMediaAvgOrderByAggregateInput = {
@@ -515,6 +535,7 @@ export type PostMediaMaxOrderByAggregateInput = {
   height?: Prisma.SortOrder
   durationSeconds?: Prisma.SortOrder
   blurhash?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type PostMediaMinOrderByAggregateInput = {
@@ -530,6 +551,7 @@ export type PostMediaMinOrderByAggregateInput = {
   height?: Prisma.SortOrder
   durationSeconds?: Prisma.SortOrder
   blurhash?: Prisma.SortOrder
+  status?: Prisma.SortOrder
 }
 
 export type PostMediaSumOrderByAggregateInput = {
@@ -585,6 +607,10 @@ export type EnumMediaKindFieldUpdateOperationsInput = {
   set?: $Enums.MediaKind
 }
 
+export type EnumMediaProcessingStatusFieldUpdateOperationsInput = {
+  set?: $Enums.MediaProcessingStatus
+}
+
 export type PostMediaCreateWithoutPostInput = {
   id?: string
   mediaId: string
@@ -597,6 +623,7 @@ export type PostMediaCreateWithoutPostInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUncheckedCreateWithoutPostInput = {
@@ -611,6 +638,7 @@ export type PostMediaUncheckedCreateWithoutPostInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
 }
 
 export type PostMediaCreateOrConnectWithoutPostInput = {
@@ -655,6 +683,7 @@ export type PostMediaScalarWhereInput = {
   height?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   durationSeconds?: Prisma.IntNullableFilter<"PostMedia"> | number | null
   blurhash?: Prisma.StringNullableFilter<"PostMedia"> | string | null
+  status?: Prisma.EnumMediaProcessingStatusFilter<"PostMedia"> | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaCreateManyPostInput = {
@@ -669,6 +698,7 @@ export type PostMediaCreateManyPostInput = {
   height?: number | null
   durationSeconds?: number | null
   blurhash?: string | null
+  status?: $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUpdateWithoutPostInput = {
@@ -683,6 +713,7 @@ export type PostMediaUpdateWithoutPostInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUncheckedUpdateWithoutPostInput = {
@@ -697,6 +728,7 @@ export type PostMediaUncheckedUpdateWithoutPostInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 export type PostMediaUncheckedUpdateManyWithoutPostInput = {
@@ -711,6 +743,7 @@ export type PostMediaUncheckedUpdateManyWithoutPostInput = {
   height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus
 }
 
 
@@ -728,6 +761,7 @@ export type PostMediaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   height?: boolean
   durationSeconds?: boolean
   blurhash?: boolean
+  status?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["postMedia"]>
 
@@ -744,6 +778,7 @@ export type PostMediaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   height?: boolean
   durationSeconds?: boolean
   blurhash?: boolean
+  status?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["postMedia"]>
 
@@ -760,6 +795,7 @@ export type PostMediaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   height?: boolean
   durationSeconds?: boolean
   blurhash?: boolean
+  status?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["postMedia"]>
 
@@ -776,9 +812,10 @@ export type PostMediaSelectScalar = {
   height?: boolean
   durationSeconds?: boolean
   blurhash?: boolean
+  status?: boolean
 }
 
-export type PostMediaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "mediaId" | "position" | "type" | "url" | "posterUrl" | "hlsUrl" | "width" | "height" | "durationSeconds" | "blurhash", ExtArgs["result"]["postMedia"]>
+export type PostMediaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "mediaId" | "position" | "type" | "url" | "posterUrl" | "hlsUrl" | "width" | "height" | "durationSeconds" | "blurhash" | "status", ExtArgs["result"]["postMedia"]>
 export type PostMediaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -807,6 +844,7 @@ export type $PostMediaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     height: number | null
     durationSeconds: number | null
     blurhash: string | null
+    status: $Enums.MediaProcessingStatus
   }, ExtArgs["result"]["postMedia"]>
   composites: {}
 }
@@ -1243,6 +1281,7 @@ export interface PostMediaFieldRefs {
   readonly height: Prisma.FieldRef<"PostMedia", 'Int'>
   readonly durationSeconds: Prisma.FieldRef<"PostMedia", 'Int'>
   readonly blurhash: Prisma.FieldRef<"PostMedia", 'String'>
+  readonly status: Prisma.FieldRef<"PostMedia", 'MediaProcessingStatus'>
 }
     
 
