@@ -124,7 +124,8 @@ def test_headlines_cluster_public_posts_and_exclude_sensitive_content(reference_
     assert headline.source_label == "Summarised from posts"
     assert headline.category == "fashion"
     assert headline.generated_by == "extractive_v1"
-    assert "hp_10" not in headline.post_ids and "hp_11" not in headline.post_ids
+    assert "hp_10" not in headline.post_ids
+    assert "hp_11" not in headline.post_ids
     assert headline.title.startswith("Lagos Fashion Week opened tonight")
     assert headline.post_count == 4
 
