@@ -29,6 +29,12 @@ type RefundRequestedData struct {
 	SubscriptionId string `json:"subscriptionId"`
 	AccountId      string `json:"accountId"`
 	Reason         string `json:"reason"`
+	RefundScope    string `json:"refundScope"`
+}
+
+type Money struct {
+	AmountMinor int64  `json:"amountMinor"`
+	Currency    string `json:"currency"`
 }
 
 type FraudSignalData struct {
@@ -48,6 +54,7 @@ type VerificationNotice struct {
 	DeepLink     string   `json:"deepLink,omitempty"`
 	Reasons      []string `json:"reasons,omitempty"`
 	RefundMethod string   `json:"refundMethod,omitempty"`
+	RefundAmount *Money   `json:"refundAmount,omitempty"`
 	ReapplyFrom  string   `json:"reapplyFrom,omitempty"`
 	ReviewWithin int      `json:"reviewWithinDays,omitempty"`
 	VerifiedAt   string   `json:"verifiedAt,omitempty"`

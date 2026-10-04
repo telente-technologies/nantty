@@ -17,6 +17,25 @@ import (
 
 var refundablePlans = map[string]bool{"blue": true, "gold_only": true}
 
+// Plans that sell more than the checkmark keep running on a rejection; only the checkmark's share is refunded.
+var checkmarkShareRefundPlans = map[string]bool{"seller_pro": true, "seller_business": true, "premium": true}
+
+const (
+	RefundScopeFull           = "full"
+	RefundScopeCheckmarkShare = "checkmark_share"
+)
+
+func RefundScopeFor(planCode string) string {
+	if checkmarkShareRefundPlans[planCode] {
+		return RefundScopeCheckmarkShare
+	}
+	return RefundScopeFull
+}
+
+func refundsOnRejection(planCode string) bool {
+	return refundablePlans[planCode] || checkmarkShareRefundPlans[planCode]
+}
+
 type OpenCaseRequest struct {
 	Profile        *ent.Profile
 	Color          string
@@ -90,7 +109,7 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 		return nil, err
 	}
 	refund := verificationcase.RefundStatusNotApplicable
-	if refundablePlans[row.PlanCode] {
+	if refundsOnRejection(row.PlanCode) {
 		refund = verificationcase.RefundStatusRequested
 	}
 	rejected, err := row.Update().SetStatus(verificationcase.StatusRejected).SetRefundStatus(refund).SetDecidedAt(now).SetDecidedByName(decidedBy).SetDecisionReason(reason).Save(ctx)
@@ -99,10 +118,13 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 	}
 	if refund == verificationcase.RefundStatusRequested {
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, verificationevents.VerificationRefundRequestedType, row.SubscriptionID, now, verificationevents.RefundRequestedData{
-			CaseId: row.ID.String(), SubscriptionId: row.SubscriptionID, AccountId: row.AccountID.String(), Reason: reason,
+			CaseId: row.ID.String(), SubscriptionId: row.SubscriptionID, AccountId: row.AccountID.String(), Reason: reason, RefundScope: RefundScopeFor(row.PlanCode),
 		}); err != nil {
 			return nil, err
 		}
+	}
+	if checkmarkShareRefundPlans[row.PlanCode] {
+		return rejected, usersevents.EnqueueOutboxEventInTransaction(ctx, tx, verificationevents.VerificationCaseDecidedType, row.ProfileID.String(), now, caseEventData(rejected, false, reason))
 	}
 	notice := NoticeFor(profile, string(row.Color))
 	notice.CaseId, notice.Reasons, notice.RefundMethod = row.ID.String(), []string{reason}, RefundMethodFor(row.PaymentChannel, refund == verificationcase.RefundStatusRequested)
@@ -111,6 +133,28 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 		return nil, err
 	}
 	return rejected, usersevents.EnqueueOutboxEventInTransaction(ctx, tx, verificationevents.VerificationCaseDecidedType, row.ProfileID.String(), now, caseEventData(rejected, false, reason))
+}
+
+// ShareRefundNotice is sent when the refund outcome for a plan that keeps running is known, because the amount
+// refunded for the checkmark is only known to billing.
+func ShareRefundNotice(profile *ent.Profile, row *ent.VerificationCase, outcome string, amount *verificationevents.Money, now time.Time) verificationevents.VerificationNotice {
+	notice := NoticeFor(profile, string(row.Color))
+	notice.CaseId, notice.Reasons, notice.ReapplyFrom = row.ID.String(), []string{row.DecisionReason}, now.AddDate(0, 0, 30).UTC().Format(time.RFC3339)
+	notice.RefundMethod = ShareRefundMethodFor(outcome)
+	if notice.RefundMethod != "plan_continues" {
+		notice.RefundAmount = amount
+	}
+	return notice
+}
+
+func ShareRefundMethodFor(outcome string) string {
+	switch outcome {
+	case "verificationRefund.succeeded":
+		return "plan_share_card"
+	case "verificationRefund.manualStoreRefundRequired", "verificationRefund.failed":
+		return "plan_share_store"
+	}
+	return "plan_continues"
 }
 
 func RefundMethodFor(channel string, refundable bool) string {
