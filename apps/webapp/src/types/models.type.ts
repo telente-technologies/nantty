@@ -69,6 +69,8 @@ export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
   readonly price: Money;
+  readonly approxPrice?: Money | null;
+  readonly priceIsRegional?: boolean;
   readonly imageUrl: string | null;
   readonly liked?: boolean;
   readonly bookmarked?: boolean;
