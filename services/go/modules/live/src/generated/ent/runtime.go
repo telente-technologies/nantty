@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
 	"zudomart/modules/live/src/generated/ent/livemoderator"
@@ -359,6 +360,36 @@ func init() {
 	livecommentDescID := livecommentMixinFields0[0].Descriptor()
 	// livecomment.DefaultID holds the default value on creation for the id field.
 	livecomment.DefaultID = livecommentDescID.Default.(func() uuid.UUID)
+	livehostrestrictionFields := schema.LiveHostRestriction{}.Fields()
+	_ = livehostrestrictionFields
+	// livehostrestrictionDescCanGoLive is the schema descriptor for can_go_live field.
+	livehostrestrictionDescCanGoLive := livehostrestrictionFields[1].Descriptor()
+	// livehostrestriction.DefaultCanGoLive holds the default value on creation for the can_go_live field.
+	livehostrestriction.DefaultCanGoLive = livehostrestrictionDescCanGoLive.Default.(bool)
+	// livehostrestrictionDescUpdatedAt is the schema descriptor for updated_at field.
+	livehostrestrictionDescUpdatedAt := livehostrestrictionFields[3].Descriptor()
+	// livehostrestriction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	livehostrestriction.DefaultUpdatedAt = livehostrestrictionDescUpdatedAt.Default.(func() time.Time)
+	// livehostrestriction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	livehostrestriction.UpdateDefaultUpdatedAt = livehostrestrictionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// livehostrestrictionDescID is the schema descriptor for id field.
+	livehostrestrictionDescID := livehostrestrictionFields[0].Descriptor()
+	// livehostrestriction.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	livehostrestriction.IDValidator = func() func(string) error {
+		validators := livehostrestrictionDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	liveingressMixin := schema.LiveIngress{}.Mixin()
 	liveingressMixinFields0 := liveingressMixin[0].Fields()
 	_ = liveingressMixinFields0
