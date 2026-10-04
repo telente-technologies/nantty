@@ -23,6 +23,7 @@ type CommerceCatalog struct {
 }
 
 var _ commerceports.CatalogReader = CommerceCatalog{}
+var _ commerceports.StoreShippingCountries = CommerceCatalog{}
 
 func (catalog CommerceCatalog) ListStoreVariants(ctx context.Context, storeId uuid.UUID) ([]commerceports.VariantReference, error) {
 	rows, err := catalog.Container.Client.ProductVariant.Query().Where(productvariant.StoreID(storeId)).Select(productvariant.FieldID, productvariant.FieldProductID).All(ctx)
@@ -93,7 +94,7 @@ func (catalog CommerceCatalog) DescribeStores(ctx context.Context, storeIds []uu
 	for _, row := range rows {
 		snapshot := commerceports.StoreSnapshot{
 			StoreId: row.ID, OwnerAccountId: row.OwnerAccountID, Name: row.Name, Slug: row.Slug, CountryCode: row.CountryCode,
-			Currency: money.CurrencyCode(row.Currency), Verified: row.Verified, Active: row.Status == enums.StoreActive, RatingCount: row.RatingCount,
+			Currency: money.CurrencyCode(row.Currency), Verified: row.Verified, Active: row.Status == enums.StoreActive && enums.IsShownToBuyers(row.ModerationVisibility), RatingCount: row.RatingCount,
 		}
 		if row.LogoURL != nil {
 			snapshot.LogoUrl = *row.LogoURL
@@ -159,6 +160,10 @@ func (catalog CommerceCatalog) loadProductsAndImages(ctx context.Context, varian
 }
 
 func (catalog CommerceCatalog) ResolveProductsForCheckout(ctx context.Context, variantIds []uuid.UUID) (map[uuid.UUID]commerceports.ProductSnapshot, error) {
+	return catalog.ResolveProductsForCheckoutInCountry(ctx, variantIds, "")
+}
+
+func (catalog CommerceCatalog) ResolveProductsForCheckoutInCountry(ctx context.Context, variantIds []uuid.UUID, countryCode string) (map[uuid.UUID]commerceports.ProductSnapshot, error) {
 	variants, err := catalog.Container.Client.ProductVariant.Query().Where(productvariant.IDIn(variantIds...)).All(ctx)
 	if err != nil {
 		return nil, err
@@ -183,14 +188,17 @@ func (catalog CommerceCatalog) ResolveProductsForCheckout(ctx context.Context, v
 			ProductId: parent.ID, VariantId: variant.ID, StoreId: variant.StoreID, SellerAccountId: owner.OwnerAccountId, ProductTitle: parent.Name,
 			VariantTitle: variant.Title, Sku: variant.Sku, Size: variant.Size, Color: variant.Color, ImageUrl: images[parent.ID],
 			UnitPrice: money.Money{AmountMinor: variant.PriceMinor, Currency: currency}, Taxable: parent.Taxable, TrackInventory: parent.TrackInventory,
-			CategoryId: parent.CategoryID, CategoryName: categoryNames[parent.ID], Purchasable: parent.Status == enums.ProductActive && parent.PublishedOnline && owner.Active,
+			CategoryId: parent.CategoryID, CategoryName: categoryNames[parent.ID], Purchasable: parent.Status == enums.ProductActive && parent.PublishedOnline && owner.Active && enums.IsShownToBuyers(parent.ModerationVisibility),
 		}
 		if variant.CostPriceMinor != nil {
 			snapshot.CostPrice = &money.Money{AmountMinor: *variant.CostPriceMinor, Currency: currency}
 		}
 		snapshots[variant.ID] = snapshot
 	}
-	return snapshots, nil
+	if countryCode == "" {
+		return snapshots, nil
+	}
+	return snapshots, catalog.applyRegionToSnapshots(ctx, variants, snapshots, countryCode)
 }
 
 func (catalog CommerceCatalog) categoryNames(ctx context.Context, products map[uuid.UUID]*ent.Product) (map[uuid.UUID]string, error) {
