@@ -111,11 +111,20 @@ func LoadStoreSummaries(ctx context.Context, deployed *container.Container, stor
 			earnBack = found
 		}
 	}
+	rates := map[uuid.UUID]float64{}
+	if lookup, err := commerceports.Default.StoreSuccessRates(); err == nil {
+		if found, lookupError := lookup.SuccessRatesByStore(ctx, identifiers); lookupError == nil {
+			rates = found
+		}
+	}
 	views := map[uuid.UUID]types.StoreSummaryView{}
 	for _, row := range stores {
 		view := types.StoreSummaryView{Id: row.ID.String(), Name: row.Name, LogoUrl: row.LogoURL, RatingCount: row.RatingCount, ReviewCount: row.RatingCount}
 		if row.RatingCount > 0 {
 			view.Rating = float64(row.RatingSum) / float64(row.RatingCount)
+		}
+		if rate, found := rates[row.ID]; found {
+			view.SuccessRate = &rate
 		}
 		if basisPoints, enabled := earnBack[row.ID]; enabled && basisPoints > 0 {
 			view.EarnBackBasisPoints = &basisPoints
