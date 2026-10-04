@@ -18,6 +18,8 @@ import (
 type UsernameAvailability struct {
 	Available bool   `json:"available"`
 	Reason    string `json:"reason,omitempty"`
+
+	Suggestions []string `json:"suggestions,omitempty"`
 }
 
 func unavailableBecause(reason usernames.UnavailableReason) UsernameAvailability {
@@ -48,8 +50,12 @@ func JudgeUsername(ctx context.Context, client *ent.Client, raw string, requeste
 	return username, UsernameAvailability{Available: true}, nil
 }
 
-func CheckUsernameAvailability(ctx context.Context, application *container.Container, raw string) (UsernameAvailability, error) {
-	_, verdict, err := JudgeUsername(ctx, application.Client, raw, uuid.Nil)
+func CheckUsernameAvailability(ctx context.Context, application *container.Container, raw, name string) (UsernameAvailability, error) {
+	username, verdict, err := JudgeUsername(ctx, application.Client, raw, uuid.Nil)
+	if err != nil || (verdict.Reason != string(usernames.ReasonTaken) && verdict.Reason != string(usernames.ReasonRecentlyUsed)) {
+		return verdict, err
+	}
+	verdict.Suggestions, err = SuggestUsernames(ctx, application.Client, application.Now(), username, name)
 	return verdict, err
 }
 

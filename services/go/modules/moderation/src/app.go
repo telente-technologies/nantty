@@ -46,6 +46,7 @@ type Overrides struct {
 	Audit          integrations.AuditService
 	Targets        integrations.TargetResolver
 	LiveSafety     LiveSafetyStorage
+	AudioMatches   integrations.AudioMatchAdvisor
 }
 
 type LiveSafetyStorage interface {
@@ -96,6 +97,10 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 		moderationContainer.Targets = integrations.NewHttpTargetResolver(settings.TargetSources)
 	}
 	moderationContainer.DeviceAttestation = integrations.ProviderDeviceAttestationVerifier{}
+	moderationContainer.AudioMatches = overrides.AudioMatches
+	if moderationContainer.AudioMatches == nil {
+		moderationContainer.AudioMatches = integrations.NewIntelligenceAudioMatchAdvisor(settings.AudioMatch.IntelligenceUrl, settings.AudioMatch.IntelligenceSecret, settings.AudioMatch.Timeout)
+	}
 	if err := resolveLiveSafetyStorage(ctx, settings, overrides, moderationContainer); err != nil {
 		_ = database.Close()
 		return nil, err
