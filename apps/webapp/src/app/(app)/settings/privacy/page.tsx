@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { BirthdayBalloonsSection } from "@/components/settings/birthdayBalloonsSection";
 import { ConsentChoicesSection } from "@/components/settings/consentChoicesSection";
 import { ContentPreferencesSection } from "@/components/settings/contentPreferencesSection";
 import { DataExportSection } from "@/components/settings/dataExportSection";
@@ -21,6 +22,7 @@ export default function PrivacyAndDataPage() {
       </div>
       <ConsentChoicesSection />
       <MentionPrivacySection />
+      <BirthdayBalloonsSection />
       <ContentPreferencesSection />
       <DataExportSection />
       <section aria-labelledby="policies-heading" className={styles.block}>
