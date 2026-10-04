@@ -11,7 +11,9 @@ import {
 } from "./productCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
 import { isTargetSavedByViewer } from "./saveState.mock";
+import { buildRichSponsoredPosts } from "./richAds.mock";
 import { userSummaryById } from "./userDirectory.mock";
+import type { LinkPreview } from "@/types/linkPreview.type";
 
 type EngagementNumbers = readonly [likes: number, comments: number, reposts: number, views: number];
 
@@ -24,6 +26,7 @@ interface PostSeed {
   readonly productKeys?: readonly CatalogProductKey[];
   readonly engagement: EngagementNumbers;
   readonly likedByFriends?: readonly DirectoryUserKey[];
+  readonly linkPreview?: LinkPreview;
 }
 
 const MAXIMUM_IMAGES_PER_POST = 10;
@@ -58,6 +61,8 @@ const POST_SEEDS: readonly PostSeed[] = [
   { id: "post_27", authorKey: "u_9", hoursAgo: 180, photoKey: "cameraGear", engagement: [640, 99, 14, 8_800], text: "Gear check for this weekend's shoot 📷 What should I add to the bag?" },
   { id: "post_28", authorKey: "u_23", hoursAgo: 190, engagement: [980, 120, 17, 11_200], text: "Six cakes delivered today and not one fell in traffic 🙌🏾 Owerri drivers, I salute you." },
   { id: "post_29", authorKey: "u_15", hoursAgo: 200, photoKey: "airportTravel", engagement: [770, 91, 23, 10_100], text: "Off to Calabar for the Carnival! Who else is going? ✈️🎉" },
+  { id: "post_31", authorKey: "u_7", hoursAgo: 15, engagement: [356, 47, 33, 8_900], text: "Good read on how Nigerian fintechs are handling the new CBN rules https://techcabal.com/2026/10/02/fintech-compliance-guide/", linkPreview: { url: "https://techcabal.com/2026/10/02/fintech-compliance-guide/", domain: "techcabal.com", title: "How Nigerian fintechs are adapting to the new CBN rules", description: "Founders and compliance leads explain what changes for wallets, KYC tiers and cross-border payments this quarter.", siteName: "TechCabal", imageUrl: postImageUrlsForPhotoKey("laptopDesk")[0] ?? null, imageMediaId: null } },
+  { id: "post_32", authorKey: "u_10", hoursAgo: 18, engagement: [212, 19, 8, 4_100], text: "This dress is everything for December 😍 https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1" },
   { id: "post_30", authorKey: "u_3", hoursAgo: 210, productKeys: ["b5"], engagement: [1190, 205, 60, 16_400], text: "Edges gone? 😅 Chebe & rosemary oil is back — only 2 bottles left in this batch." },
 ];
 
@@ -93,16 +98,19 @@ function buildPostFromSeed(seed: PostSeed, sponsored = false): Post {
     views,
     liked: false,
     bookmarked: false,
+    saveCount: 0,
     isFollowingAuthor: isFollowingUser(seed.authorKey),
     friendsLiked: seed.likedByFriends ? buildFriendsLikedFromFollowedUsers(seed.likedByFriends, seed.likedByFriends.length + (likes % 17)) : null,
     products: (seed.productKeys ?? []).map((key) => productSummaryByKey(key)),
     sponsored: sponsored && firstProductSeed ? buildSponsoredPlacementForSeed(firstProductSeed) : null,
+    linkPreview: seed.linkPreview ?? null,
   };
 }
 
 export const mockPostsState = new Map<string, Post>(POST_SEEDS.map((seed) => [seed.id, buildPostFromSeed(seed)]));
 
-export const sponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
+const singleSponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
+export const sponsoredFeedPosts: readonly Post[] = [...singleSponsoredFeedPosts, ...buildRichSponsoredPosts(singleSponsoredFeedPosts)];
 
 export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values()].filter((post) => post.author.id === authorId);
 

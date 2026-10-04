@@ -3,6 +3,7 @@ import type { Comment, CommentWithReplies, Page, UserSummary } from "@/types";
 
 import { isoDateHoursAgo, me } from "./fixtures.mock";
 import { keepAllowedMentionEntities } from "./mentions.mock";
+import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
@@ -136,7 +137,7 @@ const flattenSeedIntoComments = (postId: string, seeds: readonly SeedComment[], 
   }
 };
 
-const commentsForPost = (postId: string): Comment[] => {
+export const commentsForPost = (postId: string): Comment[] => {
   if (!commentsByPostId.has(postId)) {
     const seeded: Comment[] = [];
     flattenSeedIntoComments(postId, seedThreads, null, seeded);
@@ -145,7 +146,7 @@ const commentsForPost = (postId: string): Comment[] => {
   return commentsByPostId.get(postId)!;
 };
 
-const findCommentAnywhere = (commentId: string): Comment | undefined => {
+export const findCommentAnywhere = (commentId: string): Comment | undefined => {
   for (const comments of commentsByPostId.values()) {
     const found = comments.find((c) => c.id === commentId);
     if (found) return found;
@@ -163,7 +164,7 @@ const replaceStoredComment = (commentId: string, change: (comment: Comment) => C
   }
 };
 
-const directRepliesOf = (postId: string, parentId: string) => commentsForPost(postId).filter((c) => c.parentCommentId === parentId);
+export const directRepliesOf = (postId: string, parentId: string) => commentsForPost(postId).filter((c) => c.parentCommentId === parentId);
 
 const paginateByOffset = <T>(items: readonly T[], cursor: string | null, pageSize: number): Page<T> => {
   const start = Number(cursor ?? 0);
@@ -192,6 +193,8 @@ export const commentsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
     const input = body as { text: string; parentCommentId?: string; mentions?: unknown };
+    const targetPost = mockPostsState.get(postId);
+    if (targetPost?.viewerCanReply === false && targetPost.author.id !== me.id) throw new ApiError(403, targetPost.replyRestriction?.message ?? "You can't reply to this post.", targetPost.replyRestriction?.reason ?? "REPLIES_OFF");
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
     const created = { ...createStoredComment(postId, me, input.text, parent, 0, 0), mentions: keepAllowedMentionEntities(input.text, input.mentions) };
     const comments = commentsForPost(postId);

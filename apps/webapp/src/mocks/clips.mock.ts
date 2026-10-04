@@ -41,6 +41,7 @@ const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
     views: seed.views,
     liked: false,
     bookmarked: false,
+    saveCount: 0,
     isFollowingAuthor: isFollowingUser(seed.authorId),
     friendsLiked: seed.friendIdsWhoLiked
       ? buildFriendsLikedFromFollowedUsers(seed.friendIdsWhoLiked, seed.friendIdsWhoLiked.length + 9)
