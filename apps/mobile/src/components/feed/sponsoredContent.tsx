@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
-import { Linking, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { adEventsService } from "@/services/adEvents.service";
+import { SponsoredAppInstallRow } from "@/components/feed/sponsoredAppInstall";
+import { openSponsoredTarget } from "@/services/adClick.service";
 import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 
 export function SponsoredLabel({ sponsored, color }: { sponsored: SponsoredPlacement; color?: string }) {
@@ -26,28 +27,13 @@ export function SponsoredCallToAction({ sponsored, placement, itemId, horizontal
   const { colors } = useTheme();
   const styles = useStyles();
   const navigation = useNavigation();
-  if (!sponsored.ctaLabel) return null;
-  const openAdvertiserLinkAndRecordClick = () => {
-    adEventsService.recordSponsoredClick(sponsored, placement, itemId);
-    const ctaUrl = sponsored.ctaUrl;
-    if (!ctaUrl) return;
-    const productRouteMatch = ctaUrl.match(/\/products\/([^/?#]+)/);
-    if (productRouteMatch) {
-      navigation.navigate("ProductDetail", { productId: decodeURIComponent(productRouteMatch[1]) });
-      return;
-    }
-    const storeRouteMatch = ctaUrl.match(/\/stores\/([^/?#]+)/);
-    if (storeRouteMatch) {
-      navigation.navigate("Store", { storeId: decodeURIComponent(storeRouteMatch[1]) });
-      return;
-    }
-    if (/^https:\/\//.test(ctaUrl)) Linking.openURL(ctaUrl).catch(() => undefined);
-  };
+  if (sponsored.adType === "app_install" && sponsored.app) return <SponsoredAppInstallRow sponsored={sponsored} placement={placement} itemId={itemId} horizontalMargin={horizontalMargin} />;
+  if (sponsored.adType === "carousel" || !sponsored.ctaLabel) return null;
   return (
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={`${sponsored.ctaLabel}, ${sponsored.advertiserName}`}
-      onPress={openAdvertiserLinkAndRecordClick}
+      onPress={() => openSponsoredTarget({ sponsored, placement, itemId, target: { kind: "cta" }, navigation })}
       style={[styles.callToAction, { marginHorizontal: horizontalMargin }]}
     >
       <Text size={14} weight={500} lineHeight={16.8} color={colors.white}>
