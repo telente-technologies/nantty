@@ -123,6 +123,11 @@ export type Sound = Prisma.SoundModel
  */
 export type SoundSave = Prisma.SoundSaveModel
 /**
+ * Model ContentPreference
+ * 
+ */
+export type ContentPreference = Prisma.ContentPreferenceModel
+/**
  * Model Follow
  * 
  */
@@ -132,6 +137,11 @@ export type Follow = Prisma.FollowModel
  * 
  */
 export type Block = Prisma.BlockModel
+/**
+ * Model LinkPreviewCache
+ * 
+ */
+export type LinkPreviewCache = Prisma.LinkPreviewCacheModel
 /**
  * Model OutboxEvent
  * 
@@ -157,6 +167,11 @@ export type SaveCollection = Prisma.SaveCollectionModel
  * 
  */
 export type SavedItem = Prisma.SavedItemModel
+/**
+ * Model SaveCounter
+ * 
+ */
+export type SaveCounter = Prisma.SaveCounterModel
 /**
  * Model ChatStreak
  * 

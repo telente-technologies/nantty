@@ -97,6 +97,46 @@ export const MediaKind = {
 export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind]
 
 
+export const ModerationVisibility = {
+  visible: 'visible',
+  restricted: 'restricted',
+  hidden: 'hidden',
+  removed: 'removed'
+} as const
+
+export type ModerationVisibility = (typeof ModerationVisibility)[keyof typeof ModerationVisibility]
+
+
+export const MediaProcessingStatus = {
+  processing: 'processing',
+  ready: 'ready',
+  failed: 'failed'
+} as const
+
+export type MediaProcessingStatus = (typeof MediaProcessingStatus)[keyof typeof MediaProcessingStatus]
+
+
+export const ReplyPolicy = {
+  everyone: 'everyone',
+  following: 'following',
+  followers: 'followers',
+  mentioned: 'mentioned',
+  off: 'off'
+} as const
+
+export type ReplyPolicy = (typeof ReplyPolicy)[keyof typeof ReplyPolicy]
+
+
+export const SensitiveLabel = {
+  nudity: 'nudity',
+  graphic_violence: 'graphic_violence',
+  dangerous_acts: 'dangerous_acts',
+  self_harm: 'self_harm'
+} as const
+
+export type SensitiveLabel = (typeof SensitiveLabel)[keyof typeof SensitiveLabel]
+
+
 export const SoundStatus = {
   available: 'available',
   under_copyright_review: 'under_copyright_review',
