@@ -1,0 +1,109 @@
+.urgentTag {
+  margin-left: auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-danger-tint, color-mix(in srgb, var(--color-danger, #d92d20) 14%, transparent));
+  color: var(--color-danger, #d92d20);
+  font-size: var(--text-xs, 12px);
+  font-weight: 700;
+}
+
+.supportNotice,
+.contextNote {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.supportNotice {
+  padding: var(--space-3);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-hover);
+  color: var(--ink);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  text-align: center;
+  background: color-mix(in srgb, var(--surface-card) 55%, transparent);
+  backdrop-filter: blur(28px) saturate(0.6);
+  -webkit-backdrop-filter: blur(28px) saturate(0.6);
+}
+
+.overlayIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--ink);
+}
+
+.overlayTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-lg, 18px);
+  font-weight: 700;
+}
+
+.overlayText {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.bannerPaused,
+.bannerWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid;
+  border-radius: var(--radius-medium);
+  color: var(--ink);
+}
+
+.bannerPaused {
+  border-color: var(--color-danger, #d92d20);
+  background: color-mix(in srgb, var(--color-danger, #d92d20) 10%, var(--surface-card));
+}
+
+.bannerWarning {
+  border-color: var(--color-warning, #dc6803);
+  background: color-mix(in srgb, var(--color-warning, #dc6803) 10%, var(--surface-card));
+}
+
+.bannerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.bannerTitle {
+  margin: 0;
+  font-weight: 700;
+}
+
+.bannerText {
+  margin: var(--space-1) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .overlay {
+    background: var(--surface-card);
+    backdrop-filter: none;
+  }
+}

@@ -9,6 +9,7 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { Button } from "@/components/ui/button";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
 import type { User } from "@/types";
+import { buildProfilePath } from "@/utils/seoPaths.util";
 
 export function ProfileVisitorActions({ user }: { readonly user: User }) {
   const [isSubscribeOpen, setIsSubscribeOpen] = useState(false);
@@ -21,7 +22,7 @@ export function ProfileVisitorActions({ user }: { readonly user: User }) {
           Subscribe
         </Button>
       ) : null}
-      <ContentActionsMenu shareKind="profile" reportTargetType="user" targetId={user.id} canonicalPath={`/user/${user.id}`} />
+      <ContentActionsMenu shareKind="profile" reportTargetType="user" targetId={user.id} canonicalPath={buildProfilePath(user.username)} />
       {hasPlans ? <SubscribeToCreatorDialog isOpen={isSubscribeOpen} onClose={() => setIsSubscribeOpen(false)} creatorId={user.id} creatorName={user.name} /> : null}
     </>
   );
