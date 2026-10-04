@@ -23,7 +23,7 @@ type Handler struct {
 	Container *container.Container
 }
 
-func (handler Handler) Execute(ctx context.Context, status, source, cursor string) (Result, error) {
+func (handler Handler) Execute(ctx context.Context, status, source, modelVersion, cursor string) (Result, error) {
 	var predicates []predicate.SuspensionCase
 	switch normalized := strings.ToLower(status); normalized {
 	case "", "open":
@@ -36,6 +36,9 @@ func (handler Handler) Execute(ctx context.Context, status, source, cursor strin
 	}
 	if source != "" {
 		predicates = append(predicates, suspensioncase.SourceEQ(suspensioncase.Source(strings.ToLower(source))))
+	}
+	if modelVersion != "" {
+		predicates = append(predicates, suspensioncase.ModelVersion(modelVersion))
 	}
 	offset, _ := strconv.Atoi(cursor)
 	rows, err := handler.Container.Client.SuspensionCase.Query().Where(predicates...).Order(ent.Desc(suspensioncase.FieldRiskScore), ent.Asc(suspensioncase.FieldID)).Offset(offset).Limit(pageSize + 1).All(ctx)
