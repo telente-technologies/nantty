@@ -46,6 +46,7 @@ type UsernameBlock struct {
 
 type UsernameGuard interface {
 	DescribeUsernameBlock(ctx context.Context, username string, requester uuid.UUID) (UsernameBlock, error)
+	FindBlockedUsernames(ctx context.Context, candidates []string) ([]string, error)
 }
 
 type StaffTokenClaims struct {

@@ -10,6 +10,8 @@ type ApiError struct {
 	Code    string            `json:"code"`
 	Message string            `json:"message"`
 	Issues  []ValidationIssue `json:"issues,omitempty"`
+
+	Suggestions []string `json:"suggestions,omitempty"`
 }
 
 type ValidationIssue struct {
@@ -21,6 +23,12 @@ func (apiError *ApiError) Error() string { return apiError.Code + ": " + apiErro
 
 func NewApiError(status int, code, message string) *ApiError {
 	return &ApiError{Status: status, Code: code, Message: message}
+}
+
+func (apiError *ApiError) WithSuggestions(suggestions []string) *ApiError {
+	copied := *apiError
+	copied.Suggestions = suggestions
+	return &copied
 }
 
 func NewValidationFailedError(issues []ValidationIssue) *ApiError {
