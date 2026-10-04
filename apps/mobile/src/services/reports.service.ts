@@ -14,11 +14,29 @@ export type ReportReason =
   | "intellectual_property"
   | "something_else";
 
+export type LiveReportReason =
+  | "child_safety"
+  | "self_harm"
+  | "violence"
+  | "sexual_content"
+  | "hate"
+  | "harassment"
+  | "scam"
+  | "intellectual_property"
+  | "other";
+
+export interface LiveReportContext {
+  readonly offsetSeconds?: number;
+  readonly frameRef?: string;
+  readonly capturedAt?: string;
+}
+
 export interface NewReportInput {
   readonly targetType: ReportTargetType;
   readonly targetId: ID;
-  readonly reason: ReportReason;
+  readonly reason: ReportReason | LiveReportReason;
   readonly details: string;
+  readonly liveContext?: LiveReportContext;
 }
 
 export interface SubmittedReport {
