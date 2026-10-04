@@ -1,4 +1,4 @@
-import { Img, Link, Section } from "react-email";
+import { Img, Link } from "react-email";
 
 import { useEmailEnvironment } from "../blocks/emailRenderContext";
 import { fontStack, monoStack } from "../theme/emailPalette";
@@ -9,10 +9,10 @@ function InlineWordmark() {
     <table role="presentation" cellPadding={0} cellSpacing={0} border={0}>
       <tbody>
         <tr>
-          <td className="zm-btn" align="center" valign="middle" width={30} height={30} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: palette.button, fontFamily: fontStack, fontSize: 19, lineHeight: "30px", fontWeight: 800, color: palette.onButton }}>
+          <td className="zm-btn" align="center" valign="middle" width={28} height={28} style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: palette.button, fontFamily: fontStack, fontSize: 17, lineHeight: "28px", fontWeight: 800, color: palette.onButton, msoLineHeightRule: "exactly" } as React.CSSProperties}>
             z
           </td>
-          <td className="zm-brand" valign="middle" style={{ paddingLeft: 9, fontFamily: fontStack, fontSize: 22, lineHeight: "30px", fontWeight: 700, letterSpacing: "-0.03em", color: palette.brand }}>
+          <td className="zm-text" valign="middle" style={{ paddingLeft: 8, fontFamily: fontStack, fontSize: 20, lineHeight: "28px", fontWeight: 700, letterSpacing: "-0.035em", color: palette.text }}>
             zudomart
           </td>
         </tr>
@@ -21,32 +21,43 @@ function InlineWordmark() {
   );
 }
 
+function referenceParts(reference: string): { readonly label: string | null; readonly value: string } {
+  const match = reference.match(/^([A-Za-z][A-Za-z ]{1,18})\s+([A-Z0-9][\w-]*)$/);
+  return match ? { label: match[1] ?? null, value: match[2] ?? reference } : { label: null, value: reference };
+}
+
 export function EmailHeader({ reference }: { readonly reference?: string }) {
   const { palette, context } = useEmailEnvironment();
   const { brand } = context;
+  const parts = reference ? referenceParts(reference) : null;
   return (
-    <Section style={{ padding: "0 0 18px" }}>
-      <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
-        <tbody>
-          <tr>
-            <td valign="middle">
-              <Link href={brand.webBaseUrl} style={{ textDecoration: "none" }}>
-                {brand.logoUrl ? (
-                  <Img src={brand.logoUrl} alt={brand.productName} width={brand.logoWidth} style={{ display: "block", border: 0, height: "auto", fontFamily: fontStack, fontSize: 22, fontWeight: 700, color: palette.brand }} />
-                ) : (
-                  <InlineWordmark />
-                )}
-              </Link>
+    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
+      <tbody>
+        <tr>
+          <td valign="middle">
+            <Link href={brand.webBaseUrl} style={{ textDecoration: "none" }}>
+              {brand.logoUrl ? (
+                <Img src={brand.logoUrl} alt={brand.productName} width={brand.logoWidth} style={{ display: "block", border: 0, height: "auto", fontFamily: fontStack, fontSize: 20, fontWeight: 700, color: palette.text }} />
+              ) : (
+                <InlineWordmark />
+              )}
+            </Link>
+          </td>
+          {parts ? (
+            <td valign="middle" align="right" style={{ textAlign: "right" }}>
+              {parts.label ? (
+                <span className="zm-subtle" style={{ display: "block", fontFamily: fontStack, fontSize: 10, lineHeight: "14px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: palette.subtle }}>
+                  {parts.label}
+                </span>
+              ) : null}
+              <span className="zm-text" style={{ display: "block", fontFamily: monoStack, fontSize: 12, lineHeight: "16px", fontWeight: 500, letterSpacing: "0.02em", color: palette.text }}>
+                {parts.value}
+              </span>
             </td>
-            {reference ? (
-              <td valign="middle" align="right" className="zm-muted" style={{ fontFamily: monoStack, fontSize: 12, lineHeight: "16px", letterSpacing: "0.04em", color: palette.muted }}>
-                {reference}
-              </td>
-            ) : null}
-          </tr>
-        </tbody>
-      </table>
-    </Section>
+          ) : null}
+        </tr>
+      </tbody>
+    </table>
   );
 }
 
@@ -56,8 +67,8 @@ export function BrandStrip() {
     <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
       <tbody>
         <tr>
-          <td className="zm-btn" width="78%" style={{ height: 5, lineHeight: "5px", fontSize: 1, backgroundColor: palette.button, borderRadius: "16px 0 0 0" }}>&nbsp;</td>
-          <td width="22%" style={{ height: 5, lineHeight: "5px", fontSize: 1, backgroundColor: palette.accent, borderRadius: "0 16px 0 0" }}>&nbsp;</td>
+          <td className="zm-btn" width="86%" style={{ height: 4, lineHeight: "4px", fontSize: 1, backgroundColor: palette.button, borderRadius: "20px 0 0 0", msoLineHeightRule: "exactly" } as React.CSSProperties}>&nbsp;</td>
+          <td width="14%" style={{ height: 4, lineHeight: "4px", fontSize: 1, backgroundColor: palette.accent, borderRadius: "0 20px 0 0", msoLineHeightRule: "exactly" } as React.CSSProperties}>&nbsp;</td>
         </tr>
       </tbody>
     </table>
