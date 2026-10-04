@@ -3,10 +3,13 @@ import type { HttpRouter } from "@zudojs/http";
 import { mountBlocksModule } from "../modules/blocks/blocks.module.js";
 import { mountChatSettingsModule } from "../modules/chatSettings/chatSettings.module.js";
 import { mountCommentsModule } from "../modules/comments/comments.module.js";
+import { mountContentPreferencesModule } from "../modules/contentPreferences/contentPreferences.module.js";
 import { mountConversationsModule } from "../modules/conversations/conversations.module.js";
 import { mountDigestsModule } from "../modules/digests/digests.module.js";
 import { mountFeedsModule } from "../modules/feeds/feeds.module.js";
+import { mountInternalSourcesModule } from "../modules/internalSources/internalSources.module.js";
 import { mountFollowsModule } from "../modules/follows/follows.module.js";
+import { mountLinkPreviewsModule } from "../modules/linkPreviews/linkPreviews.module.js";
 import { mountMentionsModule } from "../modules/mentions/mentions.module.js";
 import { mountMessagesModule } from "../modules/messages/messages.module.js";
 import { mountPostsModule } from "../modules/posts/posts.module.js";
@@ -26,6 +29,7 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountBlocksModule(router, route, context);
   mountPostsModule(router, route, context);
   mountCommentsModule(router, route, context);
+  mountLinkPreviewsModule(router, route, context);
   mountSavesModule(router, route, context);
   mountMentionsModule(router, route, context);
   mountSearchModule(router, route, context);
@@ -34,7 +38,9 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountConversationsModule(router, route, context);
   mountMessagesModule(router, route, context);
   mountChatSettingsModule(router, route, context);
+  mountContentPreferencesModule(router, route, context);
   mountStreaksModule(router, route, context);
   mountReportsModule(router, route, context);
   mountDigestsModule(router, route, context, internalToken);
+  mountInternalSourcesModule(router, route, context, internalToken);
 }
