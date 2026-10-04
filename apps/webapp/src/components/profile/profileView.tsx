@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ProfileCelebration } from "@/components/celebrations/profileCelebration";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProfileContentTabs } from "./profileContentTabs";
 import { ProfileVisitorActions } from "./profileVisitorActions";
@@ -75,6 +76,8 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
           {user.bio ? <p className={styles.bio}><MentionText text={user.bio} /></p> : null}
           <p className={styles.joined}>{formatJoinedDate(user.joinedAt)}</p>
         </div>
+
+        <ProfileCelebration user={user} isSelf={isSelf} />
 
         <div className={styles.actions}>
           {isSelf ? (
