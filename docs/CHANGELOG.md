@@ -6,6 +6,18 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Username suggestions when a username is taken (4 Oct) — go test platform/usernames + auth, gateway vitest + tsc, mobile jest + tsc, webapp tsx --test + tsc
+
+Design: [plans.md §50](./plans.md). The auth Postgres integration test needs `pnpm backend:up` and was skipped locally.
+
+| Area | Change |
+| --- | --- |
+| go-identity (auth, users) | `GET /auth/username-available` and the register `409 USERNAME_TAKEN` return `suggestions` (3 usernames); candidates built from the requested name and display name, batched `IN` checks against accounts, handles, holds (120-day quarantine) and reserved rules; new `FindBlockedUsernames` port method |
+| gateway | `usernameCheck` rate-limit class (30 per minute per IP) on `GET /auth/username-available` |
+| mobile, webapp | Debounced live check, "That username is taken" with tappable suggestion chips, chips also shown on a register 409 race; mocks return suggestions |
+
+---
+
 ## Copyright for videos, clips and sounds, and account status (4 Oct) — go test moderation (unit + integration), media/social/notifications/gateway vitest, email templates vitest, mobile jest, webapp/studio/seller/admin tsx --test, tsc on every touched app
 
 Design: [plans.md §49](./plans.md). Legal wording pending counsel review.
@@ -19,7 +31,9 @@ Design: [plans.md §49](./plans.md). Legal wording pending counsel review.
 | gateway, contracts, infra/local/rabbitmq | Account status and admin routes; 12 new event schemas, asyncapi, topology and definitions |
 | mobile, webapp | Claim form with proof and signature from post, clip and sound menus; Account status page with appeals and counter-notices; countdown banner on the owner's content |
 | studio, seller, admin | Account status summaries; admin claim evidence, remedy banner, copyright policy card, user account health with appeal decisions |
-| docs | plans §49, help article draft in `services/typescript/support/content/drafts` |
+| go-money (wallet), go-ads, go-live | `accountHealth.changed` consumers: restricted creators' earnings stay pending, ad revenue share and premium pool exclude them, going live returns `LIVE_RESTRICTED`; migrations 20261004140000 in wallet, ads and live; tests |
+| intelligence, media, go-trust, admin | Chromaprint audio match advice: media `fpcalc` fingerprints, intelligence `/v1/audio/copyright-matches`, go-trust requests it on claim intake and from the console's "Run audio match" |
+| docs, support | plans §49, help article "Copyright and account status" published in the help centre |
 
 ---
 
