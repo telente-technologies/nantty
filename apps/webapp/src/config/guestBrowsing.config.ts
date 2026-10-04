@@ -5,14 +5,16 @@ const guestBrowsablePagePatterns: readonly RegExp[] = [
   /^\/(explore|mart|clips|live)$/,
   /^\/(product|p|category|collections|store|brand|user|u|post|watch|live)\/[A-Za-z0-9_.~%-]+$/,
   /^\/post\/[A-Za-z0-9_.~%-]+\/quotes$/,
-  /^\/help\/[a-z-]+$/,
+  /^\/help(?:\/(?!tickets(?:\/|$))[a-z0-9-]+(?:\/[a-z0-9-]+)?)?$/,
 ];
 
 const publicApiReadPatterns: readonly RegExp[] = [
   /^\/api\/v1\/feeds\/(popular|for-you|suggested-clips)$/,
+  /^\/api\/v1\/explore\/(categories|trends|headlines|who-to-follow|posts-for-you)$/,
   /^\/api\/v1\/(clips|videos|trending|categories|topics|search|mart\/home|products|products\/featured|lives\/suggested|users\/suggested|brands|gifts)$/,
   /^\/api\/v1\/creators\/(?!me$)[A-Za-z0-9_.~%-]+\/subscription-plans$/,
   /^\/api\/v1\/search\/[a-z-]+$/,
+  /^\/api\/v1\/help\/(categories|topics)(\/[a-z0-9-]+)?$/,
   /^\/api\/v1\/(videos|products|stores|brands|lives|posts|comments)\/[A-Za-z0-9_.~%-]+$/,
   /^\/api\/v1\/products\/[A-Za-z0-9_.~%-]+\/reviews$/,
   /^\/api\/v1\/stores\/[A-Za-z0-9_.~%-]+\/products$/,
