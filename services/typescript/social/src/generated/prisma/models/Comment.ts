@@ -29,11 +29,13 @@ export type AggregateComment = {
 export type CommentAvgAggregateOutputType = {
   likeCount: number | null
   replyCount: number | null
+  depth: number | null
 }
 
 export type CommentSumAggregateOutputType = {
   likeCount: number | null
   replyCount: number | null
+  depth: number | null
 }
 
 export type CommentMinAggregateOutputType = {
@@ -45,6 +47,9 @@ export type CommentMinAggregateOutputType = {
   text: string | null
   likeCount: number | null
   replyCount: number | null
+  depth: number | null
+  path: string | null
+  moderationVisibility: $Enums.ModerationVisibility | null
   deletedAt: Date | null
   createdAt: Date | null
 }
@@ -58,6 +63,9 @@ export type CommentMaxAggregateOutputType = {
   text: string | null
   likeCount: number | null
   replyCount: number | null
+  depth: number | null
+  path: string | null
+  moderationVisibility: $Enums.ModerationVisibility | null
   deletedAt: Date | null
   createdAt: Date | null
 }
@@ -72,6 +80,9 @@ export type CommentCountAggregateOutputType = {
   mentions: number
   likeCount: number
   replyCount: number
+  depth: number
+  path: number
+  moderationVisibility: number
   deletedAt: number
   createdAt: number
   _all: number
@@ -81,11 +92,13 @@ export type CommentCountAggregateOutputType = {
 export type CommentAvgAggregateInputType = {
   likeCount?: true
   replyCount?: true
+  depth?: true
 }
 
 export type CommentSumAggregateInputType = {
   likeCount?: true
   replyCount?: true
+  depth?: true
 }
 
 export type CommentMinAggregateInputType = {
@@ -97,6 +110,9 @@ export type CommentMinAggregateInputType = {
   text?: true
   likeCount?: true
   replyCount?: true
+  depth?: true
+  path?: true
+  moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
 }
@@ -110,6 +126,9 @@ export type CommentMaxAggregateInputType = {
   text?: true
   likeCount?: true
   replyCount?: true
+  depth?: true
+  path?: true
+  moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
 }
@@ -124,6 +143,9 @@ export type CommentCountAggregateInputType = {
   mentions?: true
   likeCount?: true
   replyCount?: true
+  depth?: true
+  path?: true
+  moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
   _all?: true
@@ -225,6 +247,9 @@ export type CommentGroupByOutputType = {
   mentions: runtime.JsonValue
   likeCount: number
   replyCount: number
+  depth: number
+  path: string
+  moderationVisibility: $Enums.ModerationVisibility
   deletedAt: Date | null
   createdAt: Date
   _count: CommentCountAggregateOutputType | null
@@ -262,6 +287,9 @@ export type CommentWhereInput = {
   mentions?: Prisma.JsonFilter<"Comment">
   likeCount?: Prisma.IntFilter<"Comment"> | number
   replyCount?: Prisma.IntFilter<"Comment"> | number
+  depth?: Prisma.IntFilter<"Comment"> | number
+  path?: Prisma.StringFilter<"Comment"> | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
@@ -278,6 +306,9 @@ export type CommentOrderByWithRelationInput = {
   mentions?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
+  path?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
@@ -297,6 +328,9 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   mentions?: Prisma.JsonFilter<"Comment">
   likeCount?: Prisma.IntFilter<"Comment"> | number
   replyCount?: Prisma.IntFilter<"Comment"> | number
+  depth?: Prisma.IntFilter<"Comment"> | number
+  path?: Prisma.StringFilter<"Comment"> | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
@@ -313,6 +347,9 @@ export type CommentOrderByWithAggregationInput = {
   mentions?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
+  path?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.CommentCountOrderByAggregateInput
@@ -335,6 +372,9 @@ export type CommentScalarWhereWithAggregatesInput = {
   mentions?: Prisma.JsonWithAggregatesFilter<"Comment">
   likeCount?: Prisma.IntWithAggregatesFilter<"Comment"> | number
   replyCount?: Prisma.IntWithAggregatesFilter<"Comment"> | number
+  depth?: Prisma.IntWithAggregatesFilter<"Comment"> | number
+  path?: Prisma.StringWithAggregatesFilter<"Comment"> | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityWithAggregatesFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Comment"> | Date | string
 }
@@ -348,6 +388,9 @@ export type CommentCreateInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
@@ -364,6 +407,9 @@ export type CommentUncheckedCreateInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
@@ -378,6 +424,9 @@ export type CommentUpdateInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
@@ -394,6 +443,9 @@ export type CommentUncheckedUpdateInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
@@ -409,6 +461,9 @@ export type CommentCreateManyInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -422,6 +477,9 @@ export type CommentUpdateManyMutationInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -436,6 +494,9 @@ export type CommentUncheckedUpdateManyInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -460,6 +521,9 @@ export type CommentCountOrderByAggregateInput = {
   mentions?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
+  path?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -467,6 +531,7 @@ export type CommentCountOrderByAggregateInput = {
 export type CommentAvgOrderByAggregateInput = {
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
 }
 
 export type CommentMaxOrderByAggregateInput = {
@@ -478,6 +543,9 @@ export type CommentMaxOrderByAggregateInput = {
   text?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
+  path?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -491,6 +559,9 @@ export type CommentMinOrderByAggregateInput = {
   text?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
+  path?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -498,6 +569,7 @@ export type CommentMinOrderByAggregateInput = {
 export type CommentSumOrderByAggregateInput = {
   likeCount?: Prisma.SortOrder
   replyCount?: Prisma.SortOrder
+  depth?: Prisma.SortOrder
 }
 
 export type CommentScalarRelationFilter = {
@@ -570,6 +642,9 @@ export type CommentCreateWithoutPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
   likes?: Prisma.CommentLikeCreateNestedManyWithoutCommentInput
@@ -584,6 +659,9 @@ export type CommentUncheckedCreateWithoutPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
@@ -628,6 +706,9 @@ export type CommentScalarWhereInput = {
   mentions?: Prisma.JsonFilter<"Comment">
   likeCount?: Prisma.IntFilter<"Comment"> | number
   replyCount?: Prisma.IntFilter<"Comment"> | number
+  depth?: Prisma.IntFilter<"Comment"> | number
+  path?: Prisma.StringFilter<"Comment"> | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
 }
@@ -641,6 +722,9 @@ export type CommentCreateWithoutLikesInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
@@ -656,6 +740,9 @@ export type CommentUncheckedCreateWithoutLikesInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -685,6 +772,9 @@ export type CommentUpdateWithoutLikesInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
@@ -700,6 +790,9 @@ export type CommentUncheckedUpdateWithoutLikesInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -713,6 +806,9 @@ export type CommentCreateManyPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   replyCount?: number
+  depth?: number
+  path?: string
+  moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -726,6 +822,9 @@ export type CommentUpdateWithoutPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   likes?: Prisma.CommentLikeUpdateManyWithoutCommentNestedInput
@@ -740,6 +839,9 @@ export type CommentUncheckedUpdateWithoutPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
@@ -754,6 +856,9 @@ export type CommentUncheckedUpdateManyWithoutPostInput = {
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   replyCount?: Prisma.IntFieldUpdateOperationsInput | number
+  depth?: Prisma.IntFieldUpdateOperationsInput | number
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -799,6 +904,9 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   mentions?: boolean
   likeCount?: boolean
   replyCount?: boolean
+  depth?: boolean
+  path?: boolean
+  moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -816,6 +924,9 @@ export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   mentions?: boolean
   likeCount?: boolean
   replyCount?: boolean
+  depth?: boolean
+  path?: boolean
+  moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -831,6 +942,9 @@ export type CommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   mentions?: boolean
   likeCount?: boolean
   replyCount?: boolean
+  depth?: boolean
+  path?: boolean
+  moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
@@ -846,11 +960,14 @@ export type CommentSelectScalar = {
   mentions?: boolean
   likeCount?: boolean
   replyCount?: boolean
+  depth?: boolean
+  path?: boolean
+  moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "deletedAt" | "createdAt", ExtArgs["result"]["comment"]>
+export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "depth" | "path" | "moderationVisibility" | "deletedAt" | "createdAt", ExtArgs["result"]["comment"]>
 export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
   likes?: boolean | Prisma.Comment$likesArgs<ExtArgs>
@@ -879,6 +996,9 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     mentions: runtime.JsonValue
     likeCount: number
     replyCount: number
+    depth: number
+    path: string
+    moderationVisibility: $Enums.ModerationVisibility
     deletedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["comment"]>
@@ -1315,6 +1435,9 @@ export interface CommentFieldRefs {
   readonly mentions: Prisma.FieldRef<"Comment", 'Json'>
   readonly likeCount: Prisma.FieldRef<"Comment", 'Int'>
   readonly replyCount: Prisma.FieldRef<"Comment", 'Int'>
+  readonly depth: Prisma.FieldRef<"Comment", 'Int'>
+  readonly path: Prisma.FieldRef<"Comment", 'String'>
+  readonly moderationVisibility: Prisma.FieldRef<"Comment", 'ModerationVisibility'>
   readonly deletedAt: Prisma.FieldRef<"Comment", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Comment", 'DateTime'>
 }

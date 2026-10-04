@@ -33,6 +33,8 @@ export type PostAvgAggregateOutputType = {
   shareCount: number | null
   viewCount: number | null
   profileVisitCount: number | null
+  saveCount: number | null
+  quoteCount: number | null
 }
 
 export type PostSumAggregateOutputType = {
@@ -42,6 +44,8 @@ export type PostSumAggregateOutputType = {
   shareCount: number | null
   viewCount: number | null
   profileVisitCount: number | null
+  saveCount: number | null
+  quoteCount: number | null
 }
 
 export type PostMinAggregateOutputType = {
@@ -63,6 +67,12 @@ export type PostMinAggregateOutputType = {
   shareCount: number | null
   viewCount: number | null
   profileVisitCount: number | null
+  saveCount: number | null
+  quoteCount: number | null
+  isQuote: boolean | null
+  replyPolicy: $Enums.ReplyPolicy | null
+  sensitiveLabelsReviewed: boolean | null
+  moderationVisibility: $Enums.ModerationVisibility | null
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -87,6 +97,12 @@ export type PostMaxAggregateOutputType = {
   shareCount: number | null
   viewCount: number | null
   profileVisitCount: number | null
+  saveCount: number | null
+  quoteCount: number | null
+  isQuote: boolean | null
+  replyPolicy: $Enums.ReplyPolicy | null
+  sensitiveLabelsReviewed: boolean | null
+  moderationVisibility: $Enums.ModerationVisibility | null
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -107,12 +123,23 @@ export type PostCountAggregateOutputType = {
   replyToCommenterId: number
   stickerLayout: number
   mentions: number
+  linkPreview: number
   likeCount: number
   commentCount: number
   repostCount: number
   shareCount: number
   viewCount: number
   profileVisitCount: number
+  saveCount: number
+  quoteCount: number
+  isQuote: number
+  replyPolicy: number
+  sensitiveLabels: number
+  authorSensitiveLabels: number
+  moderationSensitiveLabels: number
+  advisorySensitiveLabels: number
+  sensitiveLabelsReviewed: number
+  moderationVisibility: number
   expiresAt: number
   deletedAt: number
   createdAt: number
@@ -127,6 +154,8 @@ export type PostAvgAggregateInputType = {
   shareCount?: true
   viewCount?: true
   profileVisitCount?: true
+  saveCount?: true
+  quoteCount?: true
 }
 
 export type PostSumAggregateInputType = {
@@ -136,6 +165,8 @@ export type PostSumAggregateInputType = {
   shareCount?: true
   viewCount?: true
   profileVisitCount?: true
+  saveCount?: true
+  quoteCount?: true
 }
 
 export type PostMinAggregateInputType = {
@@ -157,6 +188,12 @@ export type PostMinAggregateInputType = {
   shareCount?: true
   viewCount?: true
   profileVisitCount?: true
+  saveCount?: true
+  quoteCount?: true
+  isQuote?: true
+  replyPolicy?: true
+  sensitiveLabelsReviewed?: true
+  moderationVisibility?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -181,6 +218,12 @@ export type PostMaxAggregateInputType = {
   shareCount?: true
   viewCount?: true
   profileVisitCount?: true
+  saveCount?: true
+  quoteCount?: true
+  isQuote?: true
+  replyPolicy?: true
+  sensitiveLabelsReviewed?: true
+  moderationVisibility?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -201,12 +244,23 @@ export type PostCountAggregateInputType = {
   replyToCommenterId?: true
   stickerLayout?: true
   mentions?: true
+  linkPreview?: true
   likeCount?: true
   commentCount?: true
   repostCount?: true
   shareCount?: true
   viewCount?: true
   profileVisitCount?: true
+  saveCount?: true
+  quoteCount?: true
+  isQuote?: true
+  replyPolicy?: true
+  sensitiveLabels?: true
+  authorSensitiveLabels?: true
+  moderationSensitiveLabels?: true
+  advisorySensitiveLabels?: true
+  sensitiveLabelsReviewed?: true
+  moderationVisibility?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -314,12 +368,23 @@ export type PostGroupByOutputType = {
   replyToCommenterId: string | null
   stickerLayout: runtime.JsonValue | null
   mentions: runtime.JsonValue
+  linkPreview: runtime.JsonValue | null
   likeCount: number
   commentCount: number
   repostCount: number
   shareCount: number
   viewCount: number
   profileVisitCount: number
+  saveCount: number
+  quoteCount: number
+  isQuote: boolean
+  replyPolicy: $Enums.ReplyPolicy
+  sensitiveLabels: $Enums.SensitiveLabel[]
+  authorSensitiveLabels: $Enums.SensitiveLabel[]
+  moderationSensitiveLabels: $Enums.SensitiveLabel[]
+  advisorySensitiveLabels: $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed: boolean
+  moderationVisibility: $Enums.ModerationVisibility
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date
@@ -363,12 +428,23 @@ export type PostWhereInput = {
   replyToCommenterId?: Prisma.UuidNullableFilter<"Post"> | string | null
   stickerLayout?: Prisma.JsonNullableFilter<"Post">
   mentions?: Prisma.JsonFilter<"Post">
+  linkPreview?: Prisma.JsonNullableFilter<"Post">
   likeCount?: Prisma.IntFilter<"Post"> | number
   commentCount?: Prisma.IntFilter<"Post"> | number
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
   profileVisitCount?: Prisma.IntFilter<"Post"> | number
+  saveCount?: Prisma.IntFilter<"Post"> | number
+  quoteCount?: Prisma.IntFilter<"Post"> | number
+  isQuote?: Prisma.BoolFilter<"Post"> | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFilter<"Post"> | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  authorSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  moderationSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -394,12 +470,23 @@ export type PostOrderByWithRelationInput = {
   replyToCommenterId?: Prisma.SortOrderInput | Prisma.SortOrder
   stickerLayout?: Prisma.SortOrderInput | Prisma.SortOrder
   mentions?: Prisma.SortOrder
+  linkPreview?: Prisma.SortOrderInput | Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   commentCount?: Prisma.SortOrder
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
+  isQuote?: Prisma.SortOrder
+  replyPolicy?: Prisma.SortOrder
+  sensitiveLabels?: Prisma.SortOrder
+  authorSensitiveLabels?: Prisma.SortOrder
+  moderationSensitiveLabels?: Prisma.SortOrder
+  advisorySensitiveLabels?: Prisma.SortOrder
+  sensitiveLabelsReviewed?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -428,12 +515,23 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   replyToCommenterId?: Prisma.UuidNullableFilter<"Post"> | string | null
   stickerLayout?: Prisma.JsonNullableFilter<"Post">
   mentions?: Prisma.JsonFilter<"Post">
+  linkPreview?: Prisma.JsonNullableFilter<"Post">
   likeCount?: Prisma.IntFilter<"Post"> | number
   commentCount?: Prisma.IntFilter<"Post"> | number
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
   profileVisitCount?: Prisma.IntFilter<"Post"> | number
+  saveCount?: Prisma.IntFilter<"Post"> | number
+  quoteCount?: Prisma.IntFilter<"Post"> | number
+  isQuote?: Prisma.BoolFilter<"Post"> | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFilter<"Post"> | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  authorSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  moderationSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -459,12 +557,23 @@ export type PostOrderByWithAggregationInput = {
   replyToCommenterId?: Prisma.SortOrderInput | Prisma.SortOrder
   stickerLayout?: Prisma.SortOrderInput | Prisma.SortOrder
   mentions?: Prisma.SortOrder
+  linkPreview?: Prisma.SortOrderInput | Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   commentCount?: Prisma.SortOrder
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
+  isQuote?: Prisma.SortOrder
+  replyPolicy?: Prisma.SortOrder
+  sensitiveLabels?: Prisma.SortOrder
+  authorSensitiveLabels?: Prisma.SortOrder
+  moderationSensitiveLabels?: Prisma.SortOrder
+  advisorySensitiveLabels?: Prisma.SortOrder
+  sensitiveLabelsReviewed?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -493,12 +602,23 @@ export type PostScalarWhereWithAggregatesInput = {
   replyToCommenterId?: Prisma.UuidNullableWithAggregatesFilter<"Post"> | string | null
   stickerLayout?: Prisma.JsonNullableWithAggregatesFilter<"Post">
   mentions?: Prisma.JsonWithAggregatesFilter<"Post">
+  linkPreview?: Prisma.JsonNullableWithAggregatesFilter<"Post">
   likeCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   commentCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   repostCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   shareCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   viewCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   profileVisitCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  saveCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  quoteCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
+  isQuote?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyWithAggregatesFilter<"Post"> | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  authorSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  moderationSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  sensitiveLabelsReviewed?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityWithAggregatesFilter<"Post"> | $Enums.ModerationVisibility
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
@@ -518,12 +638,23 @@ export type PostCreateInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -549,12 +680,23 @@ export type PostUncheckedCreateInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -578,12 +720,23 @@ export type PostUpdateInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -609,12 +762,23 @@ export type PostUncheckedUpdateInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -639,12 +803,23 @@ export type PostCreateManyInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -664,12 +839,23 @@ export type PostUpdateManyMutationInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -690,15 +876,34 @@ export type PostUncheckedUpdateManyInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EnumSensitiveLabelNullableListFilter<$PrismaModel = never> = {
+  equals?: $Enums.SensitiveLabel[] | Prisma.ListEnumSensitiveLabelFieldRefInput<$PrismaModel> | null
+  has?: $Enums.SensitiveLabel | Prisma.EnumSensitiveLabelFieldRefInput<$PrismaModel> | null
+  hasEvery?: $Enums.SensitiveLabel[] | Prisma.ListEnumSensitiveLabelFieldRefInput<$PrismaModel>
+  hasSome?: $Enums.SensitiveLabel[] | Prisma.ListEnumSensitiveLabelFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type PostNullableScalarRelationFilter = {
@@ -731,12 +936,23 @@ export type PostCountOrderByAggregateInput = {
   replyToCommenterId?: Prisma.SortOrder
   stickerLayout?: Prisma.SortOrder
   mentions?: Prisma.SortOrder
+  linkPreview?: Prisma.SortOrder
   likeCount?: Prisma.SortOrder
   commentCount?: Prisma.SortOrder
   repostCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
+  isQuote?: Prisma.SortOrder
+  replyPolicy?: Prisma.SortOrder
+  sensitiveLabels?: Prisma.SortOrder
+  authorSensitiveLabels?: Prisma.SortOrder
+  moderationSensitiveLabels?: Prisma.SortOrder
+  advisorySensitiveLabels?: Prisma.SortOrder
+  sensitiveLabelsReviewed?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -749,6 +965,8 @@ export type PostAvgOrderByAggregateInput = {
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
 }
 
 export type PostMaxOrderByAggregateInput = {
@@ -770,6 +988,12 @@ export type PostMaxOrderByAggregateInput = {
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
+  isQuote?: Prisma.SortOrder
+  replyPolicy?: Prisma.SortOrder
+  sensitiveLabelsReviewed?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -794,6 +1018,12 @@ export type PostMinOrderByAggregateInput = {
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
+  isQuote?: Prisma.SortOrder
+  replyPolicy?: Prisma.SortOrder
+  sensitiveLabelsReviewed?: Prisma.SortOrder
+  moderationVisibility?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -806,11 +1036,29 @@ export type PostSumOrderByAggregateInput = {
   shareCount?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   profileVisitCount?: Prisma.SortOrder
+  saveCount?: Prisma.SortOrder
+  quoteCount?: Prisma.SortOrder
 }
 
 export type PostScalarRelationFilter = {
   is?: Prisma.PostWhereInput
   isNot?: Prisma.PostWhereInput
+}
+
+export type PostCreatesensitiveLabelsInput = {
+  set: $Enums.SensitiveLabel[]
+}
+
+export type PostCreateauthorSensitiveLabelsInput = {
+  set: $Enums.SensitiveLabel[]
+}
+
+export type PostCreatemoderationSensitiveLabelsInput = {
+  set: $Enums.SensitiveLabel[]
+}
+
+export type PostCreateadvisorySensitiveLabelsInput = {
+  set: $Enums.SensitiveLabel[]
 }
 
 export type PostCreateNestedOneWithoutResharesInput = {
@@ -843,6 +1091,34 @@ export type EnumPostAudienceFieldUpdateOperationsInput = {
 
 export type EnumPostVisibilityFieldUpdateOperationsInput = {
   set?: $Enums.PostVisibility
+}
+
+export type EnumReplyPolicyFieldUpdateOperationsInput = {
+  set?: $Enums.ReplyPolicy
+}
+
+export type PostUpdatesensitiveLabelsInput = {
+  set?: $Enums.SensitiveLabel[]
+  push?: $Enums.SensitiveLabel | $Enums.SensitiveLabel[]
+}
+
+export type PostUpdateauthorSensitiveLabelsInput = {
+  set?: $Enums.SensitiveLabel[]
+  push?: $Enums.SensitiveLabel | $Enums.SensitiveLabel[]
+}
+
+export type PostUpdatemoderationSensitiveLabelsInput = {
+  set?: $Enums.SensitiveLabel[]
+  push?: $Enums.SensitiveLabel | $Enums.SensitiveLabel[]
+}
+
+export type PostUpdateadvisorySensitiveLabelsInput = {
+  set?: $Enums.SensitiveLabel[]
+  push?: $Enums.SensitiveLabel | $Enums.SensitiveLabel[]
+}
+
+export type EnumModerationVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.ModerationVisibility
 }
 
 export type PostUpdateOneWithoutResharesNestedInput = {
@@ -939,12 +1215,23 @@ export type PostCreateWithoutResharesInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -969,12 +1256,23 @@ export type PostUncheckedCreateWithoutResharesInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1002,12 +1300,23 @@ export type PostCreateWithoutResharedFromInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1031,12 +1340,23 @@ export type PostUncheckedCreateWithoutResharedFromInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1081,12 +1401,23 @@ export type PostUpdateWithoutResharesInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1111,12 +1442,23 @@ export type PostUncheckedUpdateWithoutResharesInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1159,12 +1501,23 @@ export type PostScalarWhereInput = {
   replyToCommenterId?: Prisma.UuidNullableFilter<"Post"> | string | null
   stickerLayout?: Prisma.JsonNullableFilter<"Post">
   mentions?: Prisma.JsonFilter<"Post">
+  linkPreview?: Prisma.JsonNullableFilter<"Post">
   likeCount?: Prisma.IntFilter<"Post"> | number
   commentCount?: Prisma.IntFilter<"Post"> | number
   repostCount?: Prisma.IntFilter<"Post"> | number
   shareCount?: Prisma.IntFilter<"Post"> | number
   viewCount?: Prisma.IntFilter<"Post"> | number
   profileVisitCount?: Prisma.IntFilter<"Post"> | number
+  saveCount?: Prisma.IntFilter<"Post"> | number
+  quoteCount?: Prisma.IntFilter<"Post"> | number
+  isQuote?: Prisma.BoolFilter<"Post"> | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFilter<"Post"> | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  authorSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  moderationSensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
+  sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -1184,12 +1537,23 @@ export type PostCreateWithoutMediaInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1214,12 +1578,23 @@ export type PostUncheckedCreateWithoutMediaInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1258,12 +1633,23 @@ export type PostUpdateWithoutMediaInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1288,12 +1674,23 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1316,12 +1713,23 @@ export type PostCreateWithoutLikesInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1346,12 +1754,23 @@ export type PostUncheckedCreateWithoutLikesInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1390,12 +1809,23 @@ export type PostUpdateWithoutLikesInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1420,12 +1850,23 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1448,12 +1889,23 @@ export type PostCreateWithoutCommentsInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1478,12 +1930,23 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1522,12 +1985,23 @@ export type PostUpdateWithoutCommentsInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1552,12 +2026,23 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1580,12 +2065,23 @@ export type PostCreateManyResharedFromInput = {
   replyToCommenterId?: string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: number
   commentCount?: number
   repostCount?: number
   shareCount?: number
   viewCount?: number
   profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1605,12 +2101,23 @@ export type PostUpdateWithoutResharedFromInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1634,12 +2141,23 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1663,12 +2181,23 @@ export type PostUncheckedUpdateManyWithoutResharedFromInput = {
   replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   likeCount?: Prisma.IntFieldUpdateOperationsInput | number
   commentCount?: Prisma.IntFieldUpdateOperationsInput | number
   repostCount?: Prisma.IntFieldUpdateOperationsInput | number
   shareCount?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1747,12 +2276,23 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   replyToCommenterId?: boolean
   stickerLayout?: boolean
   mentions?: boolean
+  linkPreview?: boolean
   likeCount?: boolean
   commentCount?: boolean
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
   profileVisitCount?: boolean
+  saveCount?: boolean
+  quoteCount?: boolean
+  isQuote?: boolean
+  replyPolicy?: boolean
+  sensitiveLabels?: boolean
+  authorSensitiveLabels?: boolean
+  moderationSensitiveLabels?: boolean
+  advisorySensitiveLabels?: boolean
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1779,12 +2319,23 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   replyToCommenterId?: boolean
   stickerLayout?: boolean
   mentions?: boolean
+  linkPreview?: boolean
   likeCount?: boolean
   commentCount?: boolean
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
   profileVisitCount?: boolean
+  saveCount?: boolean
+  quoteCount?: boolean
+  isQuote?: boolean
+  replyPolicy?: boolean
+  sensitiveLabels?: boolean
+  authorSensitiveLabels?: boolean
+  moderationSensitiveLabels?: boolean
+  advisorySensitiveLabels?: boolean
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1806,12 +2357,23 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   replyToCommenterId?: boolean
   stickerLayout?: boolean
   mentions?: boolean
+  linkPreview?: boolean
   likeCount?: boolean
   commentCount?: boolean
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
   profileVisitCount?: boolean
+  saveCount?: boolean
+  quoteCount?: boolean
+  isQuote?: boolean
+  replyPolicy?: boolean
+  sensitiveLabels?: boolean
+  authorSensitiveLabels?: boolean
+  moderationSensitiveLabels?: boolean
+  advisorySensitiveLabels?: boolean
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -1833,18 +2395,29 @@ export type PostSelectScalar = {
   replyToCommenterId?: boolean
   stickerLayout?: boolean
   mentions?: boolean
+  linkPreview?: boolean
   likeCount?: boolean
   commentCount?: boolean
   repostCount?: boolean
   shareCount?: boolean
   viewCount?: boolean
   profileVisitCount?: boolean
+  saveCount?: boolean
+  quoteCount?: boolean
+  isQuote?: boolean
+  replyPolicy?: boolean
+  sensitiveLabels?: boolean
+  authorSensitiveLabels?: boolean
+  moderationSensitiveLabels?: boolean
+  advisorySensitiveLabels?: boolean
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "linkPreview" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "saveCount" | "quoteCount" | "isQuote" | "replyPolicy" | "sensitiveLabels" | "authorSensitiveLabels" | "moderationSensitiveLabels" | "advisorySensitiveLabels" | "sensitiveLabelsReviewed" | "moderationVisibility" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
@@ -1884,12 +2457,23 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     replyToCommenterId: string | null
     stickerLayout: runtime.JsonValue | null
     mentions: runtime.JsonValue
+    linkPreview: runtime.JsonValue | null
     likeCount: number
     commentCount: number
     repostCount: number
     shareCount: number
     viewCount: number
     profileVisitCount: number
+    saveCount: number
+    quoteCount: number
+    isQuote: boolean
+    replyPolicy: $Enums.ReplyPolicy
+    sensitiveLabels: $Enums.SensitiveLabel[]
+    authorSensitiveLabels: $Enums.SensitiveLabel[]
+    moderationSensitiveLabels: $Enums.SensitiveLabel[]
+    advisorySensitiveLabels: $Enums.SensitiveLabel[]
+    sensitiveLabelsReviewed: boolean
+    moderationVisibility: $Enums.ModerationVisibility
     expiresAt: Date | null
     deletedAt: Date | null
     createdAt: Date
@@ -2335,12 +2919,23 @@ export interface PostFieldRefs {
   readonly replyToCommenterId: Prisma.FieldRef<"Post", 'String'>
   readonly stickerLayout: Prisma.FieldRef<"Post", 'Json'>
   readonly mentions: Prisma.FieldRef<"Post", 'Json'>
+  readonly linkPreview: Prisma.FieldRef<"Post", 'Json'>
   readonly likeCount: Prisma.FieldRef<"Post", 'Int'>
   readonly commentCount: Prisma.FieldRef<"Post", 'Int'>
   readonly repostCount: Prisma.FieldRef<"Post", 'Int'>
   readonly shareCount: Prisma.FieldRef<"Post", 'Int'>
   readonly viewCount: Prisma.FieldRef<"Post", 'Int'>
   readonly profileVisitCount: Prisma.FieldRef<"Post", 'Int'>
+  readonly saveCount: Prisma.FieldRef<"Post", 'Int'>
+  readonly quoteCount: Prisma.FieldRef<"Post", 'Int'>
+  readonly isQuote: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly replyPolicy: Prisma.FieldRef<"Post", 'ReplyPolicy'>
+  readonly sensitiveLabels: Prisma.FieldRef<"Post", 'SensitiveLabel[]'>
+  readonly authorSensitiveLabels: Prisma.FieldRef<"Post", 'SensitiveLabel[]'>
+  readonly moderationSensitiveLabels: Prisma.FieldRef<"Post", 'SensitiveLabel[]'>
+  readonly advisorySensitiveLabels: Prisma.FieldRef<"Post", 'SensitiveLabel[]'>
+  readonly sensitiveLabelsReviewed: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly moderationVisibility: Prisma.FieldRef<"Post", 'ModerationVisibility'>
   readonly expiresAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
