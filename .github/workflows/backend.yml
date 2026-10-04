@@ -190,7 +190,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ["@zudomart/gateway", "@zudomart/social", "@zudomart/notifications", "@zudomart/media", "@zudomart/search", "@zudomart/api"]
+        package: ["@zudomart/gateway", "@zudomart/social", "@zudomart/notifications", "@zudomart/media", "@zudomart/search", "@zudomart/support", "@zudomart/api"]
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v6.1.0
