@@ -1,5 +1,6 @@
 import { Linking } from "react-native";
 
+import { MilestonesPreferenceRows } from "@/components/settings/milestonesPreferenceRows";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
@@ -22,6 +23,7 @@ export function SettingsNotificationsScreen() {
         />
         <SettingsRow label="In-app per category" trailing={{ text: "Set Up" }} onPress={() => Linking.openSettings()} />
       </SettingsGroup>
+      <MilestonesPreferenceRows />
     </SettingsPage>
   );
 }
