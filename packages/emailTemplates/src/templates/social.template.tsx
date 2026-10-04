@@ -15,7 +15,7 @@ export const mentionedYou = defineEmailTemplate<{ readonly firstName: string; re
     { type: "button", label: "View and reply", href: p.url },
     { type: "paragraph", muted: true, text: "Control who can mention you in Settings → Privacy → Mentions." },
   ],
-  sample: { firstName: "Amaka", actorName: "Bola Ade", actorHandle: "bolaade", where: "comment", excerpt: "@amaka.styles this adire set would look perfect on you for the wedding next week 😍", url: "https://zudomart.com/p/8812#comment-41" },
+  sample: { firstName: "Amaka", actorName: "Bola Ade", actorHandle: "bolaade", where: "comment", excerpt: "@amaka.styles this adire set would look perfect on you for the wedding next week", url: "https://zudomart.com/p/8812#comment-41" },
 });
 
 export const followRequestDigest = defineEmailTemplate<{ readonly firstName: string; readonly requests: readonly PersonCard[]; readonly totalPending: number }>({
@@ -29,7 +29,7 @@ export const followRequestDigest = defineEmailTemplate<{ readonly firstName: str
     { type: "people", items: p.requests, more: p.totalPending > p.requests.length ? `and ${p.totalPending - p.requests.length} more` : undefined },
     { type: "button", label: "Review requests", href: c.url("/me/follow-requests") },
   ],
-  sample: { firstName: "Amaka", totalPending: 7, requests: [{ name: "Chidi Okeke", handle: "chidi.o", note: "Followed by bolaade and 3 others" }, { name: "Zainab Musa", handle: "zainabm", note: "New to Zudomart" }, { name: "Adire Lagos Studio", handle: "adirelagos", note: "Verified business ✓" }] },
+  sample: { firstName: "Amaka", totalPending: 7, requests: [{ name: "Chidi Okeke", handle: "chidi.o", note: "Followed by bolaade and 3 others" }, { name: "Zainab Musa", handle: "zainabm", note: "New to Zudomart" }, { name: "Adire Lagos Studio", handle: "adirelagos", note: "Verified business" }] },
 });
 
 export const liveStarted = defineEmailTemplate<{ readonly firstName: string; readonly hostName: string; readonly hostHandle: string; readonly title: string; readonly viewerCount: number; readonly liveUrl: string; readonly isShopping: boolean }>({
@@ -57,5 +57,5 @@ export const messageRequestDigest = defineEmailTemplate<{ readonly firstName: st
     { type: "people", items: p.requests, more: p.totalPending > p.requests.length ? `and ${p.totalPending - p.requests.length} more` : undefined },
     { type: "button", label: "Open message requests", href: c.url("/messages/requests") },
   ],
-  sample: { firstName: "Amaka", totalPending: 3, requests: [{ name: "Gadget Hub NG", handle: "gadgethubng", note: "Verified business ✓ · about your order" }, { name: "Tunde Bakare", handle: "tbakare", note: "2 mutual followers" }] },
+  sample: { firstName: "Amaka", totalPending: 3, requests: [{ name: "Gadget Hub NG", handle: "gadgethubng", note: "Verified business · about your order" }, { name: "Tunde Bakare", handle: "tbakare", note: "2 mutual followers" }] },
 });

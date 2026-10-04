@@ -42,7 +42,7 @@ export const checkmarkApplicationReceived = defineEmailTemplate<MarkProps & { re
 
 export const checkmarkApproved = defineEmailTemplate<MarkProps & { readonly renewsAt: string }>({
   ...base, key: "checkmarkApproved", name: "Checkmark approved", trigger: "verification.application.approved",
-  subject: (p) => `${p.accountName} is verified ✓`,
+  subject: (p) => `${p.accountName} is now verified`,
   preheader: (p) => `Your ${p.checkmark} checkmark is live everywhere on Zudomart.`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: `${p.checkmark} checkmark`, title: "You're verified", tone: "success" },

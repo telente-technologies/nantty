@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { emailTemplateKeys, formatMoney, listEmailTemplateCatalogue, readEmailTemplate, renderEmail, renderEmailSample } from "../src/index";
+import { emailTemplateKeys, formatMoney, listEmailTemplateCatalogue, readEmailBrandFromEnvironment, readEmailTemplate, renderEmail, renderEmailSample } from "../src/index";
 
 const catalogue = listEmailTemplateCatalogue();
 const marketingKeys = catalogue.filter((entry) => entry.kind === "marketing").map((entry) => entry.key);
@@ -27,7 +27,10 @@ describe.each(emailTemplateKeys)("%s", (key) => {
       expect(rendered.html).toContain('name="color-scheme"');
       expect(rendered.html).toContain("ZUDOMART_COMPANY_LEGAL_NAME");
       expect(rendered.html).toContain("ZUDOMART_COMPANY_ADDRESS");
-      expect(rendered.html).toContain("oyinlola.tech@icloud.com");
+      expect(rendered.html).toContain("support@zudomart.com");
+      expect(rendered.html).not.toContain("icloud.com");
+      expect(rendered.html).toContain('alt="Download on the App Store"');
+      expect(rendered.html).toContain('alt="Get it on Google Play"');
       expect(rendered.html).not.toContain("<script");
       expect(rendered.text).toContain("ZUDOMART_COMPANY_ADDRESS");
     }
@@ -90,5 +93,32 @@ describe("zudoversary", () => {
     const withoutStats = await renderEmail("zudoversary", { firstName: "Ada", years: 1 });
     expect(withoutStats.text).not.toContain("Your time on Zudomart");
     expect(withoutStats.text).toContain("thanks for being part of Zudomart for 1 year");
+  });
+});
+
+describe("senders and brand", () => {
+  it("sends receipts from receipts@mail and replies to billing", async () => {
+    const rendered = await renderEmailSample("paymentReceipt");
+    expect(rendered.sender).toEqual({ from: "Zudomart Receipts <receipts@mail.zudomart.com>", replyTo: "billing@zudomart.com" });
+  });
+
+  it("sends security mail from noreply@mail with replies to support", async () => {
+    const rendered = await renderEmailSample("emailOtp");
+    expect(rendered.sender).toEqual({ from: "Zudomart <noreply@mail.zudomart.com>", replyTo: "support@zudomart.com" });
+  });
+
+  it("derives addresses and hosted badges from the environment", () => {
+    const brand = readEmailBrandFromEnvironment({ ZUDOMART_MAIL_DOMAIN: "example.ng", ZUDOMART_EMAIL_ASSET_BASE_URL: "https://cdn.example.ng/e/", ZUDOMART_APP_STORE_ID: "id123456789" });
+    expect(brand.supportEmails).toEqual(["support@example.ng"]);
+    expect(brand.sendingDomain).toBe("mail.example.ng");
+    expect(brand.appStoreBadgeUrl).toBe("https://cdn.example.ng/e/storeBadges/app-store-badge-black@2x.png");
+    expect(brand.appStoreUrl).toBe("https://apps.apple.com/app/id123456789");
+    expect(readEmailBrandFromEnvironment({ ZUDOMART_EMAIL_PLAY_STORE_BADGE_URL: "none" }).playStoreBadgeUrl).toBeNull();
+  });
+
+  it("falls back to text store buttons when badge images are off", async () => {
+    const rendered = await renderEmailSample("orderShipped", { brand: { appStoreBadgeUrl: null, playStoreBadgeUrl: null } });
+    expect(rendered.html).toContain("Download on the App Store");
+    expect(rendered.html).not.toContain("<img alt=\"Download on the App Store\"");
   });
 });

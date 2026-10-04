@@ -10,11 +10,12 @@ const escapeHtml = (value: string) => value.replace(/[&<>"]/g, (character) => ({
 await rm(outputDirectory, { recursive: true, force: true });
 await mkdir(outputDirectory, { recursive: true });
 
+const brand = { appStoreBadgeUrl: "../assets/storeBadges/app-store-badge-black@2x.png", playStoreBadgeUrl: "../assets/storeBadges/google-play-badge@2x.png" };
 const catalogue = listEmailTemplateCatalogue();
 const rows: string[] = [];
 for (const entry of catalogue) {
-  const light = await renderEmailSample(entry.key, { theme: "auto" });
-  const dark = await renderEmailSample(entry.key, { theme: "dark" });
+  const light = await renderEmailSample(entry.key, { theme: "auto", brand });
+  const dark = await renderEmailSample(entry.key, { theme: "dark", brand });
   await writeFile(join(outputDirectory, `${entry.key}.html`), light.html);
   await writeFile(join(outputDirectory, `${entry.key}.dark.html`), dark.html);
   await writeFile(join(outputDirectory, `${entry.key}.txt`), `Subject: ${light.subject}\n\n${light.text}`);
