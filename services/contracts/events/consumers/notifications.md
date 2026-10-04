@@ -9,6 +9,7 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | account.passwordChanged | goIdentity | R accountId; O device, location, ipAddress |
 | session.revoked | goIdentity | R accountId, reason; O sessionCount |
 | session.refreshTokenReuseDetected | goIdentity | R accountId; O sessionCount |
+| account.anniversaryReached | goIdentity | R accountId, years, localDate, joinedAt; O timezone, stats.followers, stats.orders. Milestones category, email + in-app |
 | account.deletionRequested | goIdentity | R accountId, scheduledFor; O cancelUrl, openOrders |
 | account.deletionExecuted | goIdentity | R accountId, executedAt; O finalEmail (no email without it), referenceId |
 | dataExport.completed | goIdentity | R accountId, exportId, completedAt, expiresAt, sizeBytes; O downloadUrl, requestedAt |
@@ -42,6 +43,7 @@ otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.
 | order.completed | goCommerce | R order base; O reviewUrl |
 | order.cancelled | goCommerce | R order base + reason; O cancelledBy, refund, refundMethod, restocked |
 | account.restricted / suspended / banned, appeal.decided, report.closed | goTrust | R accountId (reporterUserId for report.closed), caseId, reason, policy, policyUrl, appealUrl + restrictions[], until / appealBy, deletionAt; appeal: outcome, explanation; report: reportId, reportedWhat, outcome, reportedAt |
+| account.warned | goIdentity (via goTrust WARN_AUTHOR / WARN_USER) | R accountId, reason, policy, policyUrl, appealUrl; O caseId (report id), source. In-app + push only, no email template |
 | mention.created | social | R recipientUserId, actor{id,name}, excerpt, url; O surface, mentionedEveryone |
 | follow.created, followRequest.created, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url |
 | comment.created | social | R recipientUserId, actor; O target, excerpt, url |

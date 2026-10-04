@@ -114,6 +114,8 @@ channels:
         $ref: '#/components/messages/dataExportRequested'
       dataExportCompleted:
         $ref: '#/components/messages/dataExportCompleted'
+      accountAnniversaryReached:
+        $ref: '#/components/messages/accountAnniversaryReached'
       accountDeletionRequested:
         $ref: '#/components/messages/accountDeletionRequested'
       accountDeletionCancelled:
@@ -378,6 +380,54 @@ channels:
         $ref: '#/components/messages/mediaHeld'
       mediaDeleted:
         $ref: '#/components/messages/mediaDeleted'
+      postUpdated:
+        $ref: '#/components/messages/postUpdated'
+      accountWarned:
+        $ref: '#/components/messages/accountWarned'
+      flashSaleSaved:
+        $ref: '#/components/messages/flashSaleSaved'
+      productBundleSaved:
+        $ref: '#/components/messages/productBundleSaved'
+      liveSafetyHold:
+        $ref: '#/components/messages/liveSafetyHold'
+      liveSafetyReleased:
+        $ref: '#/components/messages/liveSafetyReleased'
+      liveSafetyWarning:
+        $ref: '#/components/messages/liveSafetyWarning'
+      liveSamplingBoosted:
+        $ref: '#/components/messages/liveSamplingBoosted'
+      liveModeratorEnded:
+        $ref: '#/components/messages/liveModeratorEnded'
+      liveSafetyPaused:
+        $ref: '#/components/messages/liveSafetyPaused'
+      liveSafetyResumed:
+        $ref: '#/components/messages/liveSafetyResumed'
+      liveSafetyHostNotice:
+        $ref: '#/components/messages/liveSafetyHostNotice'
+  trustContentScores:
+    address: intelligence-trust-content-scores
+    description: Job queue bound to zudomart.jobs; Python intelligence sends, go-trust consumes.
+    messages:
+      contentScoreGenerated:
+        $ref: '#/components/messages/contentScoreGenerated'
+  liveFrames:
+    address: jobs-live-frames
+    description: Job queue bound to zudomart.jobs; go-live samples one frame per live every 5s (2s when boosted) and sends, Python intelligence consumes.
+    messages:
+      liveFrameCaptured:
+        $ref: '#/components/messages/liveFrameCaptured'
+  liveAudio:
+    address: jobs-live-audio
+    description: Job queue bound to zudomart.jobs; go-live sends short audio segments when LIVE_SAFETY_AUDIO_ENABLED, Python intelligence transcribes and scores them.
+    messages:
+      liveAudioSegmentCaptured:
+        $ref: '#/components/messages/liveAudioSegmentCaptured'
+  trustLiveSafety:
+    address: intelligence-trust-live-safety
+    description: Job queue bound to zudomart.jobs; Python intelligence sends advisory live safety scores, go-trust applies the policy.
+    messages:
+      liveSafetyScoreGenerated:
+        $ref: '#/components/messages/liveSafetyScoreGenerated'
 operations:
   publishAuthEvents:
     action: send
@@ -395,6 +445,7 @@ operations:
     channel:
       $ref: '#/channels/domainEvents'
     messages:
+      - $ref: '#/channels/domainEvents/messages/accountWarned'
       - $ref: '#/channels/domainEvents/messages/profileUpdated'
       - $ref: '#/channels/domainEvents/messages/profileVisibilityChanged'
       - $ref: '#/channels/domainEvents/messages/usernameChanged'
@@ -407,6 +458,7 @@ operations:
       - $ref: '#/channels/domainEvents/messages/policyVersionPublished'
       - $ref: '#/channels/domainEvents/messages/dataExportRequested'
       - $ref: '#/channels/domainEvents/messages/dataExportCompleted'
+      - $ref: '#/channels/domainEvents/messages/accountAnniversaryReached'
       - $ref: '#/channels/domainEvents/messages/accountDeletionRequested'
       - $ref: '#/channels/domainEvents/messages/accountDeletionCancelled'
       - $ref: '#/channels/domainEvents/messages/accountDeletionExecuted'
@@ -447,6 +499,9 @@ operations:
       - $ref: '#/channels/domainEvents/messages/liveRecordingStarted'
       - $ref: '#/channels/domainEvents/messages/liveRecordingCompleted'
       - $ref: '#/channels/domainEvents/messages/liveRecordingFailed'
+      - $ref: '#/channels/domainEvents/messages/liveSafetyPaused'
+      - $ref: '#/channels/domainEvents/messages/liveSafetyResumed'
+      - $ref: '#/channels/domainEvents/messages/liveSafetyHostNotice'
       - $ref: '#/channels/domainEvents/messages/giftSent'
       - $ref: '#/channels/domainEvents/messages/goalProgressed'
       - $ref: '#/channels/domainEvents/messages/goalCompleted'
@@ -523,6 +578,8 @@ operations:
     channel:
       $ref: '#/channels/domainEvents'
     messages:
+      - $ref: '#/channels/domainEvents/messages/flashSaleSaved'
+      - $ref: '#/channels/domainEvents/messages/productBundleSaved'
       - $ref: '#/channels/domainEvents/messages/productViewed'
       - $ref: '#/channels/domainEvents/messages/productClicked'
       - $ref: '#/channels/domainEvents/messages/productAddedToCart'
@@ -566,6 +623,41 @@ operations:
       - $ref: '#/channels/domainEvents/messages/transferCancelled'
       - $ref: '#/channels/domainEvents/messages/reorderLevelChanged'
 
+  publishLiveSafetyDecisions:
+    action: send
+    summary: go-trust decides from advisory scores, reports and moderator actions; go-live consumes on live-domain-events.
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/liveSafetyHold'
+      - $ref: '#/channels/domainEvents/messages/liveSafetyReleased'
+      - $ref: '#/channels/domainEvents/messages/liveSafetyWarning'
+      - $ref: '#/channels/domainEvents/messages/liveSamplingBoosted'
+      - $ref: '#/channels/domainEvents/messages/liveModeratorEnded'
+  sendLiveFrames:
+    action: send
+    channel:
+      $ref: '#/channels/liveFrames'
+    messages:
+      - $ref: '#/channels/liveFrames/messages/liveFrameCaptured'
+  sendLiveAudioSegments:
+    action: send
+    channel:
+      $ref: '#/channels/liveAudio'
+    messages:
+      - $ref: '#/channels/liveAudio/messages/liveAudioSegmentCaptured'
+  sendLiveSafetyScores:
+    action: send
+    channel:
+      $ref: '#/channels/trustLiveSafety'
+    messages:
+      - $ref: '#/channels/trustLiveSafety/messages/liveSafetyScoreGenerated'
+  sendContentScores:
+    action: send
+    channel:
+      $ref: '#/channels/trustContentScores'
+    messages:
+      - $ref: '#/channels/trustContentScores/messages/contentScoreGenerated'
   publishMediaEvents:
     action: send
     channel:
@@ -579,6 +671,110 @@ operations:
 
 components:
   messages:
+    postUpdated:
+      name: post.updated
+      headers: { type: object, properties: { eventType: { const: post.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.updated.v1.json' } }
+    accountWarned:
+      name: account.warned
+      headers: { type: object, properties: { eventType: { const: account.warned } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.warned.v1.json' } }
+    flashSaleSaved:
+      name: flashSale.saved
+      headers: { type: object, properties: { eventType: { const: flashSale.saved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/flashSale.saved.v1.json' } }
+    productBundleSaved:
+      name: productBundle.saved
+      headers: { type: object, properties: { eventType: { const: productBundle.saved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/productBundle.saved.v1.json' } }
+    liveFrameCaptured:
+      name: liveFrame.captured
+      summary: Job on zudomart.jobs, routing key jobs-live-frames; the body is the platform job wrapper {id, type, payload}.
+      payload:
+        $ref: './schemas/liveFrame.captured.v1.json'
+    liveAudioSegmentCaptured:
+      name: liveAudio.segmentCaptured
+      summary: Job on zudomart.jobs, routing key jobs-live-audio; the body is the platform job wrapper {id, type, payload}.
+      payload:
+        $ref: './schemas/liveAudio.segmentCaptured.v1.json'
+    liveSafetyScoreGenerated:
+      name: liveSafetyScore.generated
+      summary: Job on zudomart.jobs, routing key intelligence-trust-live-safety; raw score body. Advisory only; go-trust applies the policy.
+      payload:
+        $ref: './schemas/liveSafetyScore.generated.v1.json'
+    liveSafetyHold:
+      name: live.safetyHold
+      headers: { type: object, properties: { eventType: { const: live.safetyHold } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.safetyHold.v1.json' } }
+    liveSafetyReleased:
+      name: live.safetyReleased
+      headers: { type: object, properties: { eventType: { const: live.safetyReleased } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.safetyReleased.v1.json' } }
+    liveSafetyWarning:
+      name: live.safetyWarning
+      headers: { type: object, properties: { eventType: { const: live.safetyWarning } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.safetyWarning.v1.json' } }
+    liveSamplingBoosted:
+      name: live.samplingBoosted
+      headers: { type: object, properties: { eventType: { const: live.samplingBoosted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.samplingBoosted.v1.json' } }
+    liveModeratorEnded:
+      name: live.moderatorEnded
+      headers: { type: object, properties: { eventType: { const: live.moderatorEnded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.moderatorEnded.v1.json' } }
+    liveSafetyPaused:
+      name: liveSafety.paused
+      headers: { type: object, properties: { eventType: { const: liveSafety.paused } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveSafety.paused.v1.json' } }
+    liveSafetyResumed:
+      name: liveSafety.resumed
+      headers: { type: object, properties: { eventType: { const: liveSafety.resumed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveSafety.resumed.v1.json' } }
+    liveSafetyHostNotice:
+      name: liveSafety.hostNotice
+      headers: { type: object, properties: { eventType: { const: liveSafety.hostNotice } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/liveSafety.hostNotice.v1.json' } }
+    contentScoreGenerated:
+      name: contentScore.generated
+      summary: Job on the zudomart.jobs exchange, routing key intelligence-trust-content-scores; the body is the score itself, not an envelope. Advisory only; go-trust applies the policy.
+      payload:
+        $ref: './schemas/contentScore.generated.v1.json'
     accountRegistered:
       name: account.registered
       headers: { type: object, properties: { eventType: { const: account.registered } } }
@@ -705,6 +901,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/dataExport.completed.v1.json' } }
+    accountAnniversaryReached:
+      name: account.anniversaryReached
+      headers: { type: object, properties: { eventType: { const: account.anniversaryReached } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/account.anniversaryReached.v1.json' } }
     accountDeletionRequested:
       name: account.deletionRequested
       headers: { type: object, properties: { eventType: { const: account.deletionRequested } } }
