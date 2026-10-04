@@ -810,6 +810,16 @@ func CostPriceMinorNotNil() predicate.ProductVariant {
 	return predicate.ProductVariant(sql.FieldNotNull(FieldCostPriceMinor))
 }
 
+// RegionalPricesIsNil applies the IsNil predicate on the "regional_prices" field.
+func RegionalPricesIsNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIsNull(FieldRegionalPrices))
+}
+
+// RegionalPricesNotNil applies the NotNil predicate on the "regional_prices" field.
+func RegionalPricesNotNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotNull(FieldRegionalPrices))
+}
+
 // LowStockThresholdEQ applies the EQ predicate on the "low_stock_threshold" field.
 func LowStockThresholdEQ(v int) predicate.ProductVariant {
 	return predicate.ProductVariant(sql.FieldEQ(FieldLowStockThreshold, v))

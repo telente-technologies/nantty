@@ -7,11 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/predicate"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -202,6 +204,24 @@ func (_u *ProductVariantUpdate) AddCostPriceMinor(v int64) *ProductVariantUpdate
 // ClearCostPriceMinor clears the value of the "cost_price_minor" field.
 func (_u *ProductVariantUpdate) ClearCostPriceMinor() *ProductVariantUpdate {
 	_u.mutation.ClearCostPriceMinor()
+	return _u
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (_u *ProductVariantUpdate) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpdate {
+	_u.mutation.SetRegionalPrices(v)
+	return _u
+}
+
+// AppendRegionalPrices appends value to the "regional_prices" field.
+func (_u *ProductVariantUpdate) AppendRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpdate {
+	_u.mutation.AppendRegionalPrices(v)
+	return _u
+}
+
+// ClearRegionalPrices clears the value of the "regional_prices" field.
+func (_u *ProductVariantUpdate) ClearRegionalPrices() *ProductVariantUpdate {
+	_u.mutation.ClearRegionalPrices()
 	return _u
 }
 
@@ -434,6 +454,17 @@ func (_u *ProductVariantUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.CostPriceMinorCleared() {
 		_spec.ClearField(productvariant.FieldCostPriceMinor, field.TypeInt64)
 	}
+	if value, ok := _u.mutation.RegionalPrices(); ok {
+		_spec.SetField(productvariant.FieldRegionalPrices, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRegionalPrices(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, productvariant.FieldRegionalPrices, value)
+		})
+	}
+	if _u.mutation.RegionalPricesCleared() {
+		_spec.ClearField(productvariant.FieldRegionalPrices, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.LowStockThreshold(); ok {
 		_spec.SetField(productvariant.FieldLowStockThreshold, field.TypeInt, value)
 	}
@@ -655,6 +686,24 @@ func (_u *ProductVariantUpdateOne) AddCostPriceMinor(v int64) *ProductVariantUpd
 // ClearCostPriceMinor clears the value of the "cost_price_minor" field.
 func (_u *ProductVariantUpdateOne) ClearCostPriceMinor() *ProductVariantUpdateOne {
 	_u.mutation.ClearCostPriceMinor()
+	return _u
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (_u *ProductVariantUpdateOne) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpdateOne {
+	_u.mutation.SetRegionalPrices(v)
+	return _u
+}
+
+// AppendRegionalPrices appends value to the "regional_prices" field.
+func (_u *ProductVariantUpdateOne) AppendRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpdateOne {
+	_u.mutation.AppendRegionalPrices(v)
+	return _u
+}
+
+// ClearRegionalPrices clears the value of the "regional_prices" field.
+func (_u *ProductVariantUpdateOne) ClearRegionalPrices() *ProductVariantUpdateOne {
+	_u.mutation.ClearRegionalPrices()
 	return _u
 }
 
@@ -916,6 +965,17 @@ func (_u *ProductVariantUpdateOne) sqlSave(ctx context.Context) (_node *ProductV
 	}
 	if _u.mutation.CostPriceMinorCleared() {
 		_spec.ClearField(productvariant.FieldCostPriceMinor, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.RegionalPrices(); ok {
+		_spec.SetField(productvariant.FieldRegionalPrices, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRegionalPrices(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, productvariant.FieldRegionalPrices, value)
+		})
+	}
+	if _u.mutation.RegionalPricesCleared() {
+		_spec.ClearField(productvariant.FieldRegionalPrices, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.LowStockThreshold(); ok {
 		_spec.SetField(productvariant.FieldLowStockThreshold, field.TypeInt, value)

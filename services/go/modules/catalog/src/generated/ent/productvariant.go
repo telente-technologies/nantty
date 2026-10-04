@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 
 	"entgo.io/ent"
@@ -45,6 +46,8 @@ type ProductVariant struct {
 	CompareAtPriceMinor *int64 `json:"compare_at_price_minor,omitempty"`
 	// CostPriceMinor holds the value of the "cost_price_minor" field.
 	CostPriceMinor *int64 `json:"cost_price_minor,omitempty"`
+	// RegionalPrices holds the value of the "regional_prices" field.
+	RegionalPrices []schema.RegionalPrice `json:"regional_prices,omitempty"`
 	// LowStockThreshold holds the value of the "low_stock_threshold" field.
 	LowStockThreshold int `json:"low_stock_threshold,omitempty"`
 	// ReorderPoint holds the value of the "reorder_point" field.
@@ -63,7 +66,7 @@ func (*ProductVariant) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case productvariant.FieldOptionValues:
+		case productvariant.FieldOptionValues, productvariant.FieldRegionalPrices:
 			values[i] = new([]byte)
 		case productvariant.FieldPriceMinor, productvariant.FieldCompareAtPriceMinor, productvariant.FieldCostPriceMinor, productvariant.FieldLowStockThreshold, productvariant.FieldReorderPoint, productvariant.FieldReorderQuantity, productvariant.FieldPosition:
 			values[i] = new(sql.NullInt64)
@@ -177,6 +180,14 @@ func (_m *ProductVariant) assignValues(columns []string, values []any) error {
 				_m.CostPriceMinor = new(int64)
 				*_m.CostPriceMinor = value.Int64
 			}
+		case productvariant.FieldRegionalPrices:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field regional_prices", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.RegionalPrices); err != nil {
+					return fmt.Errorf("unmarshal field regional_prices: %w", err)
+				}
+			}
 		case productvariant.FieldLowStockThreshold:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field low_stock_threshold", values[i])
@@ -287,6 +298,9 @@ func (_m *ProductVariant) String() string {
 		builder.WriteString("cost_price_minor=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("regional_prices=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RegionalPrices))
 	builder.WriteString(", ")
 	builder.WriteString("low_stock_threshold=")
 	builder.WriteString(fmt.Sprintf("%v", _m.LowStockThreshold))

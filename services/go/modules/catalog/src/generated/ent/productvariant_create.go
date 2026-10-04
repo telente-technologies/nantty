@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 
 	"entgo.io/ent/dialect"
@@ -147,6 +148,12 @@ func (_c *ProductVariantCreate) SetNillableCostPriceMinor(v *int64) *ProductVari
 	if v != nil {
 		_c.SetCostPriceMinor(*v)
 	}
+	return _c
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (_c *ProductVariantCreate) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantCreate {
+	_c.mutation.SetRegionalPrices(v)
 	return _c
 }
 
@@ -469,6 +476,10 @@ func (_c *ProductVariantCreate) createSpec() (*ProductVariant, *sqlgraph.CreateS
 		_spec.SetField(productvariant.FieldCostPriceMinor, field.TypeInt64, value)
 		_node.CostPriceMinor = &value
 	}
+	if value, ok := _c.mutation.RegionalPrices(); ok {
+		_spec.SetField(productvariant.FieldRegionalPrices, field.TypeJSON, value)
+		_node.RegionalPrices = value
+	}
 	if value, ok := _c.mutation.LowStockThreshold(); ok {
 		_spec.SetField(productvariant.FieldLowStockThreshold, field.TypeInt, value)
 		_node.LowStockThreshold = value
@@ -700,6 +711,24 @@ func (u *ProductVariantUpsert) AddCostPriceMinor(v int64) *ProductVariantUpsert 
 // ClearCostPriceMinor clears the value of the "cost_price_minor" field.
 func (u *ProductVariantUpsert) ClearCostPriceMinor() *ProductVariantUpsert {
 	u.SetNull(productvariant.FieldCostPriceMinor)
+	return u
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (u *ProductVariantUpsert) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpsert {
+	u.Set(productvariant.FieldRegionalPrices, v)
+	return u
+}
+
+// UpdateRegionalPrices sets the "regional_prices" field to the value that was provided on create.
+func (u *ProductVariantUpsert) UpdateRegionalPrices() *ProductVariantUpsert {
+	u.SetExcluded(productvariant.FieldRegionalPrices)
+	return u
+}
+
+// ClearRegionalPrices clears the value of the "regional_prices" field.
+func (u *ProductVariantUpsert) ClearRegionalPrices() *ProductVariantUpsert {
+	u.SetNull(productvariant.FieldRegionalPrices)
 	return u
 }
 
@@ -1030,6 +1059,27 @@ func (u *ProductVariantUpsertOne) UpdateCostPriceMinor() *ProductVariantUpsertOn
 func (u *ProductVariantUpsertOne) ClearCostPriceMinor() *ProductVariantUpsertOne {
 	return u.Update(func(s *ProductVariantUpsert) {
 		s.ClearCostPriceMinor()
+	})
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (u *ProductVariantUpsertOne) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetRegionalPrices(v)
+	})
+}
+
+// UpdateRegionalPrices sets the "regional_prices" field to the value that was provided on create.
+func (u *ProductVariantUpsertOne) UpdateRegionalPrices() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateRegionalPrices()
+	})
+}
+
+// ClearRegionalPrices clears the value of the "regional_prices" field.
+func (u *ProductVariantUpsertOne) ClearRegionalPrices() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearRegionalPrices()
 	})
 }
 
@@ -1541,6 +1591,27 @@ func (u *ProductVariantUpsertBulk) UpdateCostPriceMinor() *ProductVariantUpsertB
 func (u *ProductVariantUpsertBulk) ClearCostPriceMinor() *ProductVariantUpsertBulk {
 	return u.Update(func(s *ProductVariantUpsert) {
 		s.ClearCostPriceMinor()
+	})
+}
+
+// SetRegionalPrices sets the "regional_prices" field.
+func (u *ProductVariantUpsertBulk) SetRegionalPrices(v []schema.RegionalPrice) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetRegionalPrices(v)
+	})
+}
+
+// UpdateRegionalPrices sets the "regional_prices" field to the value that was provided on create.
+func (u *ProductVariantUpsertBulk) UpdateRegionalPrices() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateRegionalPrices()
+	})
+}
+
+// ClearRegionalPrices clears the value of the "regional_prices" field.
+func (u *ProductVariantUpsertBulk) ClearRegionalPrices() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearRegionalPrices()
 	})
 }
 

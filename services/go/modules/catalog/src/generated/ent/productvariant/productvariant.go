@@ -40,6 +40,8 @@ const (
 	FieldCompareAtPriceMinor = "compare_at_price_minor"
 	// FieldCostPriceMinor holds the string denoting the cost_price_minor field in the database.
 	FieldCostPriceMinor = "cost_price_minor"
+	// FieldRegionalPrices holds the string denoting the regional_prices field in the database.
+	FieldRegionalPrices = "regional_prices"
 	// FieldLowStockThreshold holds the string denoting the low_stock_threshold field in the database.
 	FieldLowStockThreshold = "low_stock_threshold"
 	// FieldReorderPoint holds the string denoting the reorder_point field in the database.
@@ -70,6 +72,7 @@ var Columns = []string{
 	FieldPriceMinor,
 	FieldCompareAtPriceMinor,
 	FieldCostPriceMinor,
+	FieldRegionalPrices,
 	FieldLowStockThreshold,
 	FieldReorderPoint,
 	FieldReorderQuantity,
