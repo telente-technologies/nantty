@@ -49,6 +49,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
 	"zudomart/modules/users/src/generated/ent/verificationapplication"
+	"zudomart/modules/users/src/generated/ent/verificationcase"
+	"zudomart/modules/users/src/generated/ent/verificationeligibility"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -140,6 +142,10 @@ type Client struct {
 	UsernameHold *UsernameHoldClient
 	// VerificationApplication is the client for interacting with the VerificationApplication builders.
 	VerificationApplication *VerificationApplicationClient
+	// VerificationCase is the client for interacting with the VerificationCase builders.
+	VerificationCase *VerificationCaseClient
+	// VerificationEligibility is the client for interacting with the VerificationEligibility builders.
+	VerificationEligibility *VerificationEligibilityClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -189,6 +195,8 @@ func (c *Client) init() {
 	c.UsernameChange = NewUsernameChangeClient(c.config)
 	c.UsernameHold = NewUsernameHoldClient(c.config)
 	c.VerificationApplication = NewVerificationApplicationClient(c.config)
+	c.VerificationCase = NewVerificationCaseClient(c.config)
+	c.VerificationEligibility = NewVerificationEligibilityClient(c.config)
 }
 
 type (
@@ -319,6 +327,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		UsernameChange:          NewUsernameChangeClient(cfg),
 		UsernameHold:            NewUsernameHoldClient(cfg),
 		VerificationApplication: NewVerificationApplicationClient(cfg),
+		VerificationCase:        NewVerificationCaseClient(cfg),
+		VerificationEligibility: NewVerificationEligibilityClient(cfg),
 	}, nil
 }
 
@@ -376,6 +386,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		UsernameChange:          NewUsernameChangeClient(cfg),
 		UsernameHold:            NewUsernameHoldClient(cfg),
 		VerificationApplication: NewVerificationApplicationClient(cfg),
+		VerificationCase:        NewVerificationCaseClient(cfg),
+		VerificationEligibility: NewVerificationEligibilityClient(cfg),
 	}, nil
 }
 
@@ -414,7 +426,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
 		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
 		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
-		c.UsernameHold, c.VerificationApplication,
+		c.UsernameHold, c.VerificationApplication, c.VerificationCase,
+		c.VerificationEligibility,
 	} {
 		n.Use(hooks...)
 	}
@@ -433,7 +446,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
 		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
 		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
-		c.UsernameHold, c.VerificationApplication,
+		c.UsernameHold, c.VerificationApplication, c.VerificationCase,
+		c.VerificationEligibility,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -518,6 +532,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UsernameHold.mutate(ctx, m)
 	case *VerificationApplicationMutation:
 		return c.VerificationApplication.mutate(ctx, m)
+	case *VerificationCaseMutation:
+		return c.VerificationCase.mutate(ctx, m)
+	case *VerificationEligibilityMutation:
+		return c.VerificationEligibility.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -5609,6 +5627,272 @@ func (c *VerificationApplicationClient) mutate(ctx context.Context, m *Verificat
 	}
 }
 
+// VerificationCaseClient is a client for the VerificationCase schema.
+type VerificationCaseClient struct {
+	config
+}
+
+// NewVerificationCaseClient returns a client for the VerificationCase from the given config.
+func NewVerificationCaseClient(c config) *VerificationCaseClient {
+	return &VerificationCaseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `verificationcase.Hooks(f(g(h())))`.
+func (c *VerificationCaseClient) Use(hooks ...Hook) {
+	c.hooks.VerificationCase = append(c.hooks.VerificationCase, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `verificationcase.Intercept(f(g(h())))`.
+func (c *VerificationCaseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VerificationCase = append(c.inters.VerificationCase, interceptors...)
+}
+
+// Create returns a builder for creating a VerificationCase entity.
+func (c *VerificationCaseClient) Create() *VerificationCaseCreate {
+	mutation := newVerificationCaseMutation(c.config, OpCreate)
+	return &VerificationCaseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VerificationCase entities.
+func (c *VerificationCaseClient) CreateBulk(builders ...*VerificationCaseCreate) *VerificationCaseCreateBulk {
+	return &VerificationCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VerificationCaseClient) MapCreateBulk(slice any, setFunc func(*VerificationCaseCreate, int)) *VerificationCaseCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VerificationCaseCreateBulk{err: fmt.Errorf("calling to VerificationCaseClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VerificationCaseCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VerificationCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VerificationCase.
+func (c *VerificationCaseClient) Update() *VerificationCaseUpdate {
+	mutation := newVerificationCaseMutation(c.config, OpUpdate)
+	return &VerificationCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VerificationCaseClient) UpdateOne(_m *VerificationCase) *VerificationCaseUpdateOne {
+	mutation := newVerificationCaseMutation(c.config, OpUpdateOne, withVerificationCase(_m))
+	return &VerificationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VerificationCaseClient) UpdateOneID(id uuid.UUID) *VerificationCaseUpdateOne {
+	mutation := newVerificationCaseMutation(c.config, OpUpdateOne, withVerificationCaseID(id))
+	return &VerificationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VerificationCase.
+func (c *VerificationCaseClient) Delete() *VerificationCaseDelete {
+	mutation := newVerificationCaseMutation(c.config, OpDelete)
+	return &VerificationCaseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VerificationCaseClient) DeleteOne(_m *VerificationCase) *VerificationCaseDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VerificationCaseClient) DeleteOneID(id uuid.UUID) *VerificationCaseDeleteOne {
+	builder := c.Delete().Where(verificationcase.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VerificationCaseDeleteOne{builder}
+}
+
+// Query returns a query builder for VerificationCase.
+func (c *VerificationCaseClient) Query() *VerificationCaseQuery {
+	return &VerificationCaseQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVerificationCase},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VerificationCase entity by its id.
+func (c *VerificationCaseClient) Get(ctx context.Context, id uuid.UUID) (*VerificationCase, error) {
+	return c.Query().Where(verificationcase.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VerificationCaseClient) GetX(ctx context.Context, id uuid.UUID) *VerificationCase {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VerificationCaseClient) Hooks() []Hook {
+	return c.hooks.VerificationCase
+}
+
+// Interceptors returns the client interceptors.
+func (c *VerificationCaseClient) Interceptors() []Interceptor {
+	return c.inters.VerificationCase
+}
+
+func (c *VerificationCaseClient) mutate(ctx context.Context, m *VerificationCaseMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VerificationCaseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VerificationCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VerificationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VerificationCaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VerificationCase mutation op: %q", m.Op())
+	}
+}
+
+// VerificationEligibilityClient is a client for the VerificationEligibility schema.
+type VerificationEligibilityClient struct {
+	config
+}
+
+// NewVerificationEligibilityClient returns a client for the VerificationEligibility from the given config.
+func NewVerificationEligibilityClient(c config) *VerificationEligibilityClient {
+	return &VerificationEligibilityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `verificationeligibility.Hooks(f(g(h())))`.
+func (c *VerificationEligibilityClient) Use(hooks ...Hook) {
+	c.hooks.VerificationEligibility = append(c.hooks.VerificationEligibility, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `verificationeligibility.Intercept(f(g(h())))`.
+func (c *VerificationEligibilityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VerificationEligibility = append(c.inters.VerificationEligibility, interceptors...)
+}
+
+// Create returns a builder for creating a VerificationEligibility entity.
+func (c *VerificationEligibilityClient) Create() *VerificationEligibilityCreate {
+	mutation := newVerificationEligibilityMutation(c.config, OpCreate)
+	return &VerificationEligibilityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VerificationEligibility entities.
+func (c *VerificationEligibilityClient) CreateBulk(builders ...*VerificationEligibilityCreate) *VerificationEligibilityCreateBulk {
+	return &VerificationEligibilityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VerificationEligibilityClient) MapCreateBulk(slice any, setFunc func(*VerificationEligibilityCreate, int)) *VerificationEligibilityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VerificationEligibilityCreateBulk{err: fmt.Errorf("calling to VerificationEligibilityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VerificationEligibilityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VerificationEligibilityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VerificationEligibility.
+func (c *VerificationEligibilityClient) Update() *VerificationEligibilityUpdate {
+	mutation := newVerificationEligibilityMutation(c.config, OpUpdate)
+	return &VerificationEligibilityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VerificationEligibilityClient) UpdateOne(_m *VerificationEligibility) *VerificationEligibilityUpdateOne {
+	mutation := newVerificationEligibilityMutation(c.config, OpUpdateOne, withVerificationEligibility(_m))
+	return &VerificationEligibilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VerificationEligibilityClient) UpdateOneID(id uuid.UUID) *VerificationEligibilityUpdateOne {
+	mutation := newVerificationEligibilityMutation(c.config, OpUpdateOne, withVerificationEligibilityID(id))
+	return &VerificationEligibilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VerificationEligibility.
+func (c *VerificationEligibilityClient) Delete() *VerificationEligibilityDelete {
+	mutation := newVerificationEligibilityMutation(c.config, OpDelete)
+	return &VerificationEligibilityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VerificationEligibilityClient) DeleteOne(_m *VerificationEligibility) *VerificationEligibilityDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VerificationEligibilityClient) DeleteOneID(id uuid.UUID) *VerificationEligibilityDeleteOne {
+	builder := c.Delete().Where(verificationeligibility.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VerificationEligibilityDeleteOne{builder}
+}
+
+// Query returns a query builder for VerificationEligibility.
+func (c *VerificationEligibilityClient) Query() *VerificationEligibilityQuery {
+	return &VerificationEligibilityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVerificationEligibility},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VerificationEligibility entity by its id.
+func (c *VerificationEligibilityClient) Get(ctx context.Context, id uuid.UUID) (*VerificationEligibility, error) {
+	return c.Query().Where(verificationeligibility.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VerificationEligibilityClient) GetX(ctx context.Context, id uuid.UUID) *VerificationEligibility {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VerificationEligibilityClient) Hooks() []Hook {
+	return c.hooks.VerificationEligibility
+}
+
+// Interceptors returns the client interceptors.
+func (c *VerificationEligibilityClient) Interceptors() []Interceptor {
+	return c.inters.VerificationEligibility
+}
+
+func (c *VerificationEligibilityClient) mutate(ctx context.Context, m *VerificationEligibilityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VerificationEligibilityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VerificationEligibilityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VerificationEligibilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VerificationEligibilityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VerificationEligibility mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
@@ -5620,7 +5904,8 @@ type (
 		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
 		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
 		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
-		UsernameChange, UsernameHold, VerificationApplication []ent.Hook
+		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
+		VerificationEligibility []ent.Hook
 	}
 	inters struct {
 		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension,
@@ -5631,7 +5916,8 @@ type (
 		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
 		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
 		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
-		UsernameChange, UsernameHold, VerificationApplication []ent.Interceptor
+		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
+		VerificationEligibility []ent.Interceptor
 	}
 )
 

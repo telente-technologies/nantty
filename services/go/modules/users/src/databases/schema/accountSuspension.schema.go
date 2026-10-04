@@ -18,7 +18,7 @@ func (AccountSuspension) Mixin() []ent.Mixin {
 func (AccountSuspension) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
-		field.Enum("source").Values("staff", "python_suggestion", "user_reports", "chat_report").Default("staff").Immutable(),
+		field.Enum("source").Values("staff", "python_suggestion", "user_reports", "chat_report", "security").Default("staff").Immutable(),
 		field.String("reason_code").Default("OTHER").MaxLen(40),
 		field.String("note").Default("").MaxLen(1000),
 		field.String("suspended_by").Default("").MaxLen(64),
