@@ -40,6 +40,8 @@ export interface User extends UserSummary {
   readonly isFollowing?: boolean;
   readonly isSeller?: boolean;
   readonly storeId?: ID | null;
+  readonly birthdayToday?: boolean;
+  readonly anniversaryToday?: boolean;
 }
 
 export interface Topic {
