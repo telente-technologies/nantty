@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verificationCase.refundRequested.v1.json",
+  "title": "verificationCase.refundRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseId",
+    "subscriptionId",
+    "accountId",
+    "reason"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

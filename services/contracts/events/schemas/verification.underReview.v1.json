@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verification.underReview.v1.json",
+  "title": "verification.underReview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "checkmark",
+    "accountName",
+    "caseId",
+    "reviewWithinDays"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "checkmark": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "reviewWithinDays": {
+      "type": "integer"
+    }
+  }
+}
