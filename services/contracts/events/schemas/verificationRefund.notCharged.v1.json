@@ -42,6 +42,28 @@
     },
     "path": {
       "type": "string"
+    },
+    "refundScope": {
+      "type": "string",
+      "enum": [
+        "full",
+        "checkmark_share"
+      ]
+    },
+    "refundAmount": {
+      "type": "object",
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
     }
   }
 }

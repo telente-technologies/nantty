@@ -37,6 +37,21 @@
     },
     "reapplyFrom": {
       "type": "string"
+    },
+    "refundAmount": {
+      "type": "object",
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
     }
   }
 }
