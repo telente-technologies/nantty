@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
+import { BirthdayBalloonsToggle } from "@/components/settings/birthdayBalloonsToggle";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { MarketingFrequencyPicker } from "@/components/settings/marketingFrequencyPicker";
 import { DataExportSection } from "@/components/settings/dataExportSection";
@@ -53,6 +54,7 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
               </View>
             ))
           : null}
+        <BirthdayBalloonsToggle />
         {updateConsent.isError ? <Text size={12} lineHeight={14.4} color={colors.error} accessibilityRole="alert">Couldn't save that choice. Try again.</Text> : null}
       </View>
 
