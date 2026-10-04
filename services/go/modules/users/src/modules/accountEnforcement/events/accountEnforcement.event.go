@@ -8,6 +8,7 @@ const (
 	SuspensionAppealSubmittedType = "suspension.appealSubmitted"
 	AppealDecidedType             = "appeal.decided"
 	UsernameReassignedType        = "username.reassigned"
+	AccountWarnedType             = "account.warned"
 	CommunityGuidelinesUrl        = "https://zudomart.com/community-guidelines"
 	AppealUrl                     = "https://zudomart.com/settings/account/appeal"
 )
@@ -72,4 +73,14 @@ type UsernameReassignedData struct {
 	ToAccountId      string `json:"toAccountId"`
 	ToPreviousUserna string `json:"toPreviousUsername"`
 	Reason           string `json:"reason"`
+}
+
+type AccountWarnedData struct {
+	AccountId string `json:"accountId"`
+	CaseId    string `json:"caseId,omitempty"`
+	Reason    string `json:"reason"`
+	Policy    string `json:"policy"`
+	PolicyUrl string `json:"policyUrl"`
+	AppealUrl string `json:"appealUrl"`
+	Source    string `json:"source,omitempty"`
 }
