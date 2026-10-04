@@ -57,6 +57,7 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
   const isOwnContent = !!target?.authorId && target.authorId === signedInUserId;
   const canGiveFeedFeedback = !!target && !isOwnContent && (target.targetType === "post" || target.targetType === "clip");
   const canPromote = !!target && isOwnContent && target.targetType === "post";
+  const canClaimCopyright = !!target && (target.targetType === "post" || target.targetType === "clip" || target.targetType === "live");
 
   const hideContentAndSendFeedback = (type: FeedFeedbackType) => {
     if (!target) return;
@@ -66,9 +67,9 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
     onClose();
   };
 
-  const openReportSheetForTarget = () => {
+  const openReportSheetForTarget = (initialReason?: ReportTarget["initialReason"]) => {
     if (!target) return;
-    const nextReportTarget = { targetType: target.targetType, targetId: target.targetId };
+    const nextReportTarget: ReportTarget = { targetType: target.targetType, targetId: target.targetId, ...(initialReason ? { initialReason } : {}) };
     requireAuthAfterClosingModal(onClose, onReport ?? (() => setReportTarget(nextReportTarget)), "report");
     onClose();
   };
@@ -103,7 +104,8 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
               ]
             : []),
           ...(target?.shareUrl ? [{ label: "Copy or share link", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
-          ...(!isOwnContent ? [{ label: "Report", icon: <Warning20Icon />, destructive: true, onPress: openReportSheetForTarget }] : []),
+          ...(!isOwnContent ? [{ label: "Report", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget() }] : []),
+          ...(!isOwnContent && canClaimCopyright ? [{ label: "Report copyright", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget("intellectual_property") }] : []),
         ]}
       />
       <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
