@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const result = await callAuthEndpoint(exchangePath, exchangeBody);
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "SOCIAL_SIGN_IN_FAILED", result.error?.message ?? `${providerDisplayNames[provider]} sign-in failed. Try again.`);
 
-  const response = NextResponse.json({ user: result.session.user }, { headers: { "Cache-Control": "no-store" } });
+  const response = NextResponse.json({ user: result.session.user, notice: result.session.notice ?? null }, { headers: { "Cache-Control": "no-store" } });
   beginSessionWithAuthResult(response, result.session);
   return response;
 }

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   }
   const result = await callAuthEndpoint("/api/v1/auth/login", { identifier, password });
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "INVALID_CREDENTIALS", result.error?.message ?? "That sign-in details are not right.");
-  const response = NextResponse.json({ user: result.session.user }, { headers: { "Cache-Control": "no-store" } });
+  const response = NextResponse.json({ user: result.session.user, notice: result.session.notice ?? null }, { headers: { "Cache-Control": "no-store" } });
   beginSessionWithAuthResult(response, result.session);
   return response;
 }
