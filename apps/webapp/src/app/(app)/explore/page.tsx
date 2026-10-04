@@ -127,7 +127,7 @@ function ExploreResults() {
           <ul className={styles.entityList}>
             {results.people.map((person) => (
               <li key={person.id}>
-                <Link href={`/user/${person.id}`} className={styles.entityRow}>
+                <Link href={`/${person.username}`} className={styles.entityRow}>
                   <Avatar name={person.name} src={person.avatarUrl} size="md" />
                   <span className={styles.entityText}>
                     <span className={styles.entityName}>{person.name}</span>

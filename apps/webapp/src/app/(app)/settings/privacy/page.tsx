@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ConsentChoicesSection } from "@/components/settings/consentChoicesSection";
+import { ContentPreferencesSection } from "@/components/settings/contentPreferencesSection";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSection } from "@/components/settings/deleteAccountSection";
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
@@ -20,6 +21,7 @@ export default function PrivacyAndDataPage() {
       </div>
       <ConsentChoicesSection />
       <MentionPrivacySection />
+      <ContentPreferencesSection />
       <DataExportSection />
       <section aria-labelledby="policies-heading" className={styles.block}>
         <h2 id="policies-heading" className={styles.blockHeading}>Policies</h2>

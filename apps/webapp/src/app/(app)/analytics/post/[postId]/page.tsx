@@ -42,7 +42,24 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
     { label: "Impressions", value: data.impressions },
     { label: "Unique viewers", value: data.uniqueViewers },
     { label: "Profile visits", value: data.profileVisits },
+    { label: "Engagements", value: data.engagements },
+    { label: "Engagement rate", value: `${data.engagementRate}%` },
+    { label: "New follows", value: data.newFollows },
+    ...(data.video
+      ? [
+          { label: "Video views", value: data.video.views },
+          { label: "Watch time", value: `${Math.round(data.video.watchTimeSeconds / 60)} min` },
+        ]
+      : []),
+  ];
+  const engagementRows = [
+    { label: "Likes", value: data.likes },
+    { label: "Replies", value: data.comments },
     { label: "Reposts", value: data.reposts },
+    { label: "Saves", value: data.saves },
+    { label: "Shares", value: data.shares },
+    { label: "Link clicks", value: data.linkClicks },
+    { label: "Profile clicks", value: data.profileClicks },
   ];
 
   return (
@@ -62,7 +79,7 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
       <div className={styles.grid}>
         {metrics.map((metric) => (
           <div className={styles.metric} key={metric.label}>
-            <span className={styles.metricValue}>{formatCountWithThousandsSuffix(metric.value)}</span>
+            <span className={styles.metricValue}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</span>
             <span className={styles.metricLabel}>{metric.label}</span>
           </div>
         ))}
@@ -85,24 +102,32 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
       <section className={styles.card}>
         <h2 className={styles.cardTitle}>Engagement</h2>
         <dl className={styles.engagement}>
-          <div className={styles.engagementRow}>
-            <dt>Likes</dt>
-            <dd>{formatCountWithThousandsSuffix(data.likes)}</dd>
-          </div>
-          <div className={styles.engagementRow}>
-            <dt>Comments</dt>
-            <dd>{formatCountWithThousandsSuffix(data.comments)}</dd>
-          </div>
-          <div className={styles.engagementRow}>
-            <dt>Reposts</dt>
-            <dd>{formatCountWithThousandsSuffix(data.reposts)}</dd>
-          </div>
+          {engagementRows.map((row) => (
+            <div className={styles.engagementRow} key={row.label}>
+              <dt>{row.label}</dt>
+              <dd>{formatCountWithThousandsSuffix(row.value)}</dd>
+            </div>
+          ))}
           <div className={styles.engagementRow}>
             <dt>Posted</dt>
             <dd>{formatTimeSincePosted(data.postedAt)} ago</dd>
           </div>
         </dl>
       </section>
+
+      {data.audience.length > 0 ? (
+        <section className={styles.card}>
+          <h2 className={styles.cardTitle}>Audience</h2>
+          <dl className={styles.engagement}>
+            {data.audience.map((row) => (
+              <div className={styles.engagementRow} key={row.label}>
+                <dt>{row.label}</dt>
+                <dd>{row.share}%</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
     </div>
   );
 }
