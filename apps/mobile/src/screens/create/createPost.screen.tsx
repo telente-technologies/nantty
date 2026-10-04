@@ -6,8 +6,11 @@ import { CreateHeader } from "@/components/create/createHeader";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { buildLiveMonetizationInput, DEFAULT_LIVE_MONETIZATION_DRAFT, type LiveMonetizationDraft } from "@/components/create/liveMonetization.constant";
 import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
+import { ClipComposer } from "@/components/create/clip/clipComposer";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
-import { fillProcessingPostMediaWithLocalPreviews, usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
+import { usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
+import { usePublishPost } from "@/components/create/publishPost.hook";
+import { buildPostSettingsFields, DEFAULT_POST_SETTINGS } from "@/components/create/settings/postSettings.type";
 import { SoundPickerRow } from "@/components/create/soundPickerRow";
 import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
@@ -27,7 +30,7 @@ import { storiesService } from "@/services/stories.service";
 import type { CommentStickerLayout, CreateMode, LiveCategory, LiveSource } from "@/types";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
-const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", isAiGenerated: false, audienceSettings: { replyPolicy: "everyone", visibility: "public", sensitiveLabels: [] } };
+const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", ...DEFAULT_POST_SETTINGS };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const { colors } = useTheme();
@@ -35,7 +38,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const videoReply = route.params?.videoReply;
   const [mode, setMode] = useState<CreateMode>(videoReply ? "clip" : (route.params?.mode ?? "post"));
   const [stickerLayout, setStickerLayout] = useState<CommentStickerLayout>(DEFAULT_STICKER_LAYOUT);
-  const [postStage, setPostStage] = useState<"compose" | "preview">("compose");
+  const [postStage, setPostStage] = useState<"compose" | "settings">("compose");
   const [postDraft, setPostDraft] = useState<PostComposerDraft>(() =>
     videoReply
       ? {
@@ -66,32 +69,25 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const [liveMonetization, setLiveMonetization] = useState<LiveMonetizationDraft>(DEFAULT_LIVE_MONETIZATION_DRAFT);
   const [liveCredentials, setLiveCredentials] = useState<LiveStreamCredentials | null>(null);
 
-  const publishPost = useMutation({
-    mutationFn: async () => {
-      const mediaIds = await postDraftUploads.waitForAllDraftMediaIds();
-      const soundIdForVideoPost = draftContainsVideo && selectedSoundId ? { soundId: selectedSoundId } : {};
+  const publishPost = usePublishPost({
+    draftMediaItems: postDraftUploads.draftMediaItems,
+    combinedUploadedFraction: postDraftUploads.combinedUploadedFraction,
+    waitForAllDraftMediaIds: postDraftUploads.waitForAllDraftMediaIds,
+    onPublished: (post) => navigation.replace("PostDetail", { postId: post.id }),
+    buildInput: (mediaIds) => {
       const trimmedDraft = shiftMentionsAfterTrimmingStart(postDraft.text, postDraft.mentions);
-      return storiesService.publishPost({
+      return {
         text: trimmedDraft.text,
         mentions: trimmedDraft.mentions,
         audience: postDraft.audience,
         mediaIds,
         kind: postDraft.kind === "clip" ? "clip" : "post",
-        ...(postDraft.isAiGenerated ? { isAiGenerated: true } : {}),
-        replyPolicy: postDraft.audienceSettings.replyPolicy,
-        visibility: postDraft.audienceSettings.visibility,
-        ...(postDraft.audienceSettings.sensitiveLabels.length > 0 ? { sensitiveLabels: postDraft.audienceSettings.sensitiveLabels } : {}),
+        ...buildPostSettingsFields(postDraft),
         ...(videoReply
           ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
           : {}),
-        ...soundIdForVideoPost,
-      });
-    },
-    onSuccess: (post) => {
-      queryClient.setQueryData(["post", post.id], fillProcessingPostMediaWithLocalPreviews(post, postDraftUploads.draftMediaItems));
-      queryClient.invalidateQueries({ queryKey: ["feed"] });
-      if (post.kind === "clip") queryClient.invalidateQueries({ queryKey: ["clips"] });
-      navigation.replace("PostDetail", { postId: post.id });
+        ...(videoReply && selectedSoundId ? { soundId: selectedSoundId } : {}),
+      };
     },
   });
   const publishStory = useMutation({
@@ -150,22 +146,30 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   };
 
   const closeOrStepBack = () => {
-    if ((mode === "post" || mode === "clip") && postStage === "preview") setPostStage("compose");
+    if ((mode === "post" || mode === "clip") && postStage === "settings") setPostStage("compose");
     else if (mode === "live" && isEditingLiveTitle) setIsEditingLiveTitle(false);
     else navigation.goBack();
   };
 
   const canContinuePost =
     mode === "clip" ? hasExactlyOneClipVideo : postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0;
-  const isWaitingForUploads = publishPost.isPending && postDraftUploads.combinedUploadedFraction < 1;
-  const publishButtonTitle = isWaitingForUploads
-    ? `Uploading ${Math.round(postDraftUploads.combinedUploadedFraction * 100)}%…`
-    : publishPost.isPending
-      ? "Posting…"
-      : "Post";
-
   if (requestedMode === "product" && isProductModeLockedForViewer) return <RoleGateScreen kind="seller" />;
   if (requestedMode === "live" && isLiveModeLockedForViewer) return <RoleGateScreen kind="creator" />;
+
+  if (mode === "clip" && !videoReply) {
+    return (
+      <Screen background={colors.surface} edges={["top"]}>
+        <ClipComposer
+          mode={mode}
+          initialSoundId={selectedSoundId}
+          onChangeMode={switchCreateMode}
+          onClose={() => navigation.goBack()}
+          onPublished={(post) => navigation.replace("PostDetail", { postId: post.id })}
+        />
+        <KeyboardSpacer />
+      </Screen>
+    );
+  }
 
   return (
     <Screen background={colors.surface} edges={["top"]}>
@@ -183,7 +187,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onClose={closeOrStepBack}
             actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
             actionDisabled={!canContinuePost}
-            onAction={() => setPostStage("preview")}
+            onAction={() => setPostStage("settings")}
           />
         )}
         {mode === "post" || mode === "clip" ? (
@@ -196,9 +200,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onAddPickedMedia={postDraftUploads.addPickedMediaAndStartUploading}
             onRemoveDraftMedia={postDraftUploads.removeDraftMediaItem}
             onChangeMode={switchCreateMode}
-            publishing={publishPost.isPending}
-            publishButtonTitle={publishButtonTitle}
-            publishErrorMessage={publishPost.error ? publishPost.error.message : null}
+            publishing={publishPost.mutation.isPending}
+            publishButtonTitle={publishPost.buttonTitle}
+            publishErrorMessage={publishPost.errorMessage}
             validationHint={clipValidationHint}
             videoReplyStage={
               videoReply ? (
@@ -211,12 +215,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
                 />
               ) : undefined
             }
-            onPublish={() => publishPost.mutate()}
-            soundPicker={
-              draftContainsVideo || selectedSoundId ? (
-                <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} />
-              ) : null
-            }
+            onPublish={() => publishPost.mutation.mutate()}
+            soundPicker={videoReply ? <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} /> : null}
           />
         ) : mode === "story" ? (
           <StoryCapturePanel publishing={publishStory.isPending} onChangeMode={switchCreateMode} onCaptured={(m) => publishStory.mutate(m)} />

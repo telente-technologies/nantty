@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 
 import { AuthStep } from "@/components/auth/authStep";
+import { UsernameSuggestionChips } from "@/components/auth/usernameSuggestionChips";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -22,7 +23,15 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [creatingAccount, setCreatingAccount] = useState(false);
   const [suggestedUsername, setSuggestedUsername] = useState<string | null>(null);
-  const { isAvailable, message: availabilityMessage } = useUsernameAvailability(username);
+  const [conflictSuggestions, setConflictSuggestions] = useState<readonly string[]>([]);
+  const { isAvailable, message: availabilityMessage, suggestions: liveSuggestions } = useUsernameAvailability(username);
+  const suggestions = liveSuggestions.length > 0 ? liveSuggestions : conflictSuggestions;
+
+  const chooseSuggestion = (suggestion: string) => {
+    setErrorMessage(null);
+    setConflictSuggestions([]);
+    setUsername(suggestion);
+  };
 
   useEffect(() => {
     if (draft.username) return;
@@ -44,8 +53,9 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
     setCreatingAccount(true);
     try {
       if (chosenUsername) {
-        const { available, message: serverReason } = await authService.checkIfUsernameIsAvailable(chosenUsername);
+        const { available, message: serverReason, suggestions: taken } = await authService.checkIfUsernameIsAvailable(chosenUsername);
         if (!available) {
+          setConflictSuggestions(taken ?? []);
           setErrorMessage(serverReason ?? availabilityMessage ?? "That username isn't available. Try another one.");
           return;
         }
@@ -61,6 +71,7 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
       draft.updateSignUpDraft({ username: chosenUsername ?? "", password: "", pendingSession: session });
       navigation.navigate("Personalization");
     } catch (error) {
+      if (error instanceof ApiError && error.code === "USERNAME_TAKEN") setConflictSuggestions(error.suggestions ?? []);
       setErrorMessage(error instanceof ApiError ? error.message : "We couldn't create your account. Please try again.");
     } finally {
       setCreatingAccount(false);
@@ -86,7 +97,10 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
       <TextField
         placeholder="Username"
         value={username}
-        onChangeText={(text) => setUsername(text.replace(/\s/g, ""))}
+        onChangeText={(text) => {
+          setConflictSuggestions([]);
+          setUsername(text.replace(/\s/g, ""));
+        }}
         autoCapitalize="none"
         autoCorrect={false}
         autoFocus
@@ -102,10 +116,11 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
           {errorMessage}
         </Text>
       ) : (
-        <Text size={12} lineHeight={16.8} color={isAvailable ? colors.success : colors.textSubtle}>
+        <Text size={12} lineHeight={16.8} color={isAvailable ? colors.success : colors.textSubtle} accessibilityLiveRegion="polite">
           {availabilityMessage ?? "3–20 characters. Letters, numbers, underscores and full stops only."}
         </Text>
       )}
+      <UsernameSuggestionChips suggestions={suggestions} onSelect={chooseSuggestion} />
     </AuthStep>
   );
 }

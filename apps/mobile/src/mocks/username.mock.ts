@@ -30,10 +30,26 @@ const UNAVAILABLE_MESSAGES: Record<UsernameUnavailableReason, string> = {
   reserved: "This username is reserved.",
   withheld: "This username is restricted and can't be used.",
   recently_used: "This username was used recently and isn't available yet.",
-  taken: "This username is already taken.",
+  taken: "That username is taken",
 };
 
-const unavailable = (reason: UsernameUnavailableReason): UsernameAvailability => ({ available: false, reason, message: UNAVAILABLE_MESSAGES[reason] });
+const SUGGESTION_COUNT = 3;
+const SUGGESTION_SUFFIXES = ["_01", "2026", "_x", ".99", "_ng", "7"];
+
+export function buildUsernameSuggestions(rawUsername: string): string[] {
+  const base = rawUsername.trim().toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 20) || "zudo";
+  const taken = takenUsernames();
+  return SUGGESTION_SUFFIXES.map((suffix) => `${base}${suffix}`.slice(0, 30))
+    .filter((candidate) => isValidUsername(candidate) && !taken.has(candidate) && !WITHHELD_USERNAMES.has(candidate) && !RECENTLY_RELEASED_USERNAMES.has(candidate))
+    .slice(0, SUGGESTION_COUNT);
+}
+
+const unavailable = (reason: UsernameUnavailableReason, username = ""): UsernameAvailability => ({
+  available: false,
+  reason,
+  message: UNAVAILABLE_MESSAGES[reason],
+  ...(reason === "taken" || reason === "recently_used" ? { suggestions: buildUsernameSuggestions(username) } : {}),
+});
 
 export function checkAvailability(rawUsername: string): UsernameAvailability {
   const username = rawUsername.trim().toLowerCase();
@@ -41,14 +57,14 @@ export function checkAvailability(rawUsername: string): UsernameAvailability {
   if (EXACT_ONLY_RESERVED_USERNAMES.has(username.toLowerCase())) return unavailable("reserved");
   if ([...RESERVED_USERNAMES].some((reserved) => username === reserved || username.startsWith(`${reserved}.`) || username.startsWith(`${reserved}_`))) return unavailable("reserved");
   if (WITHHELD_USERNAMES.has(username)) return unavailable("withheld");
-  if (RECENTLY_RELEASED_USERNAMES.has(username)) return unavailable("recently_used");
-  if (takenUsernames().has(username)) return unavailable("taken");
+  if (RECENTLY_RELEASED_USERNAMES.has(username)) return unavailable("recently_used", username);
+  if (takenUsernames().has(username)) return unavailable("taken", username);
   return { available: true };
 }
 
 export const buildUsernameUnavailableError = (availability: UsernameAvailability) => {
   const message = availability.message ?? "That username isn't available";
-  if (availability.reason === "taken") return new ApiError(409, message, "USERNAME_TAKEN");
+  if (availability.reason === "taken") return new ApiError(409, message, "USERNAME_TAKEN", availability.suggestions);
   return new ApiError(422, message, availability.reason === "invalid" ? "USERNAME_INVALID" : "USERNAME_UNAVAILABLE");
 };
 
