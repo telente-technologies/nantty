@@ -1,36 +1,30 @@
-import { useRef, useState, type ReactNode } from "react";
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import type { ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { MediaPager } from "@/components/feed/mediaPager";
-import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
-import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
-import { MentionText } from "@/components/mentions/mentionText";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { CreateMode, ID, PostAudience } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 
-import { AiGeneratedToggleRow } from "./aiGeneratedToggleRow";
-import { PostAudienceSettings, type PostAudienceSettingsValue } from "./postAudienceSettings";
+import { useCaptionField } from "./captionField.hook";
 import { CreateModePill } from "./createModePill";
+import { DismissKeyboardScrollView } from "./dismissKeyboardScrollView";
 import { DraftMediaStrip } from "./draftMediaStrip";
 import { MAXIMUM_MEDIA_PER_POST, pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
-import { convertDraftItemsToPreviewMedia, type PostDraftMediaItem } from "./postDraftUploads.hook";
+import type { PostDraftMediaItem } from "./postDraftUploads.hook";
 import { PostToolbar } from "./postToolbar";
+import { PostSettingsStep } from "./settings/postSettingsStep";
+import type { PostSettingsValue } from "./settings/postSettings.type";
 
-export interface PostComposerDraft {
+export interface PostComposerDraft extends PostSettingsValue {
   readonly text: string;
   readonly mentions: readonly MentionEntity[];
   readonly audience: PostAudience;
   readonly kind: "clip" | "video" | "photo";
-  readonly isAiGenerated: boolean;
-  readonly audienceSettings: PostAudienceSettingsValue;
 }
 
 export interface PostComposerPanelProps {
-  readonly stage: "compose" | "preview";
+  readonly stage: "compose" | "settings";
   readonly mode: CreateMode;
   readonly draft: PostComposerDraft;
   readonly onChangeDraft: (draft: PostComposerDraft) => void;
@@ -47,126 +41,77 @@ export interface PostComposerPanelProps {
   readonly videoReplyStage?: ReactNode;
 }
 
-export function PostComposerPanel({
-  stage,
-  mode,
-  draft,
-  onChangeDraft,
-  draftMediaItems,
-  onAddPickedMedia,
-  onRemoveDraftMedia,
-  onChangeMode,
-  publishing,
-  publishButtonTitle,
-  publishErrorMessage,
-  validationHint,
-  onPublish,
-  soundPicker,
-  videoReplyStage,
-}: PostComposerPanelProps) {
+const describeDraftMedia = (items: readonly PostDraftMediaItem[]) => {
+  if (items.length === 0) return null;
+  const videos = items.filter((item) => item.mediaType === "video").length;
+  const photos = items.length - videos;
+  return [photos ? `${photos} ${photos === 1 ? "photo" : "photos"}` : null, videos ? `${videos} ${videos === 1 ? "video" : "videos"}` : null].filter(Boolean).join(", ");
+};
+
+export function PostComposerPanel(props: PostComposerPanelProps) {
+  const { draft, onChangeDraft, draftMediaItems, onAddPickedMedia, videoReplyStage } = props;
   const { colors } = useTheme();
   const styles = useStyles();
-  const [focused, setFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
-  const mentionComposer = useMentionComposer({
-    surface: "post",
+  const caption = useCaptionField({
     text: draft.text,
     mentions: draft.mentions,
-    inputRef,
-    signInReason: "post",
+    placeholder: "What’s happening?",
     onChange: (text, mentions) => onChangeDraft({ ...draft, text, mentions }),
   });
   const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
-  const toggleAudience = () => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" });
 
-  if (stage === "preview") {
+  if (props.stage === "settings") {
     return (
-      <ScrollView contentContainerStyle={styles.preview}>
-        {draft.text ? (
-          <MentionText text={draft.text} mentions={draft.mentions} size={14} lineHeight={16.8} />
-        ) : null}
-        {videoReplyStage ?? null}
-        {!videoReplyStage && draftMediaItems.length > 0 ? (
-          <View style={styles.previewMedia}>
-            <MediaPager media={convertDraftItemsToPreviewMedia(draftMediaItems)} height={335} />
-          </View>
-        ) : null}
-        {publishErrorMessage ? (
-          <Text size={13} lineHeight={16.9} color={colors.error} accessibilityLiveRegion="polite">
-            {publishErrorMessage}
-          </Text>
-        ) : null}
-        <Button title={publishButtonTitle} disabled={publishing} onPress={onPublish} />
-      </ScrollView>
+      <PostSettingsStep
+        value={draft}
+        onChange={(settings) => onChangeDraft({ ...draft, ...settings })}
+        caption={draft.text}
+        mentions={draft.mentions}
+        thumbnailUri={draftMediaItems[0]?.previewUri ?? null}
+        mediaSummary={describeDraftMedia(draftMediaItems)}
+        preview={videoReplyStage}
+        publishing={props.publishing}
+        publishButtonTitle={props.publishButtonTitle}
+        publishErrorMessage={props.publishErrorMessage}
+        onPublish={props.onPublish}
+      />
     );
   }
 
   return (
     <View style={styles.flex}>
-      <ScrollView style={styles.flex} contentContainerStyle={styles.compose} keyboardShouldPersistTaps="handled">
-        <TextInput
-          ref={inputRef}
-          {...mentionComposer.inputProps}
-          onFocus={() => {
-            mentionComposer.inputProps.onFocus();
-            setFocused(true);
-          }}
-          onBlur={() => setFocused(false)}
-          placeholder="What’s happening?"
-          placeholderTextColor={colors.textMuted}
-          selectionColor={colors.primary}
-          multiline
-          autoFocus
-          maxLength={2000}
-          accessibilityLabel="What’s happening?"
-          style={styles.input}
-        />
-        <MentionCountLabel mentionCount={mentionComposer.mentionCount} />
+      <DismissKeyboardScrollView contentContainerStyle={styles.compose}>
+        {caption.input}
         {videoReplyStage ?? null}
-        <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={onRemoveDraftMedia} />
-        {validationHint ? (
+        <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={props.onRemoveDraftMedia} />
+        {props.validationHint ? (
           <Text size={12} lineHeight={16.8} color={colors.error} accessibilityLiveRegion="polite">
-            {validationHint}
+            {props.validationHint}
           </Text>
         ) : null}
-        {soundPicker}
-        <AiGeneratedToggleRow value={draft.isAiGenerated} onChange={(isAiGenerated) => onChangeDraft({ ...draft, isAiGenerated })} />
-        <PostAudienceSettings value={draft.audienceSettings} onChange={(audienceSettings) => onChangeDraft({ ...draft, audienceSettings })} />
-      </ScrollView>
-      {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
-      {focused || videoReplyStage ? null : (
+        {props.soundPicker}
+      </DismissKeyboardScrollView>
+      {caption.suggestions}
+      {caption.focused || videoReplyStage ? null : (
         <View style={styles.pill}>
-          <CreateModePill mode={mode} onChangeMode={onChangeMode} />
+          <CreateModePill mode={props.mode} onChangeMode={props.onChangeMode} />
         </View>
       )}
       <PostToolbar
         audience={draft.audience}
-        onToggleAudience={toggleAudience}
+        isKeyboardOpen={caption.focused}
+        onToggleAudience={() => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" })}
         onTakePhoto={async () => {
           if (remainingMediaSlots > 0) onAddPickedMedia(await takePhotoWithSystemCamera());
         }}
         onPickFromLibrary={async () => onAddPickedMedia(await pickPhotosAndVideosFromLibrary(remainingMediaSlots))}
-        onEditMedia={async () => onAddPickedMedia(await pickPhotosAndVideosFromLibrary(Math.min(remainingMediaSlots, 1)))}
-        onAddLocation={() => undefined}
       />
     </View>
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles(() => StyleSheet.create({
   flex: { flex: 1 },
-  compose: { paddingHorizontal: 16, paddingTop: 32, gap: 16 },
-  input: {
-    minHeight: 120,
-    padding: 0,
-    textAlignVertical: "top",
-    fontFamily: fontFamily[400],
-    fontSize: 16,
-    lineHeight: 19.2,
-    letterSpacing: calculateDefaultLetterSpacing(16),
-    color: colors.text,
-  },
+  compose: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 24, gap: 16 },
   pill: { paddingBottom: 29 },
-  preview: { paddingHorizontal: 16, paddingTop: 20, gap: 24, paddingBottom: 40 },
-  previewMedia: { marginHorizontal: -16, overflow: "hidden" },
 }));

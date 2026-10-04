@@ -15,6 +15,7 @@ export interface PostDraftMediaItem {
   readonly mediaType: "image" | "video";
   readonly width: number | null;
   readonly height: number | null;
+  readonly durationSeconds: number | null;
 }
 
 export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
@@ -33,7 +34,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
         if (latestDraftMediaItems.current.length >= MAXIMUM_MEDIA_PER_POST) break;
         try {
           const jobId = await enqueueLocalMediaForUpload(pickedFile, purpose);
-          const newItem: PostDraftMediaItem = { jobId, previewUri: pickedFile.uri, mediaType: pickedFile.mediaType === "video" ? "video" : "image", width: pickedFile.width, height: pickedFile.height };
+          const newItem: PostDraftMediaItem = { jobId, previewUri: pickedFile.uri, mediaType: pickedFile.mediaType === "video" ? "video" : "image", width: pickedFile.width, height: pickedFile.height, durationSeconds: pickedFile.durationSeconds };
           setDraftMediaItems([...latestDraftMediaItems.current, newItem]);
         } catch (error) {
           rejectedMessages.push(error instanceof MediaValidationError ? error.message : "We couldn't add one of the files.");
@@ -48,6 +49,18 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
     (jobId: ID) => {
       cancelAndRemoveUpload(jobId);
       setDraftMediaItems(latestDraftMediaItems.current.filter((item) => item.jobId !== jobId));
+    },
+    [setDraftMediaItems],
+  );
+
+  const moveDraftMediaItem = useCallback(
+    (jobId: ID, offset: -1 | 1) => {
+      const items = [...latestDraftMediaItems.current];
+      const from = items.findIndex((item) => item.jobId === jobId);
+      const to = from + offset;
+      if (from < 0 || to < 0 || to >= items.length) return;
+      [items[from], items[to]] = [items[to]!, items[from]!];
+      setDraftMediaItems(items);
     },
     [setDraftMediaItems],
   );
@@ -68,6 +81,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
     combinedUploadedFraction,
     addPickedMediaAndStartUploading,
     removeDraftMediaItem,
+    moveDraftMediaItem,
     discardAllDraftMedia,
     waitForAllDraftMediaIds,
   };
