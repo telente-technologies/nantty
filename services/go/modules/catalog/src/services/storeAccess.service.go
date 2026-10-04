@@ -38,7 +38,7 @@ func FindStoreAccess(ctx context.Context, deployed *container.Container, account
 	}
 	return commerceports.StoreAccess{
 		StoreId: row.ID, OwnerAccountId: row.OwnerAccountID, Role: chosen.Role, Permissions: chosen.Permissions,
-		Currency: money.CurrencyCode(row.Currency), CountryCode: row.CountryCode,
+		Currency: money.CurrencyCode(row.Currency), CountryCode: row.CountryCode, StoreStatus: row.Status,
 	}, row.Status != "closed", nil
 }
 
