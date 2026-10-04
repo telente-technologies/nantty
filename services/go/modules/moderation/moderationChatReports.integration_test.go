@@ -139,6 +139,9 @@ func TestChatReportActionsUseUserActionsPermissionsStepUpAndNotifyTheReporter(t 
 	act(warn, moderator, map[string]any{"action": "REMOVE_GROUP", "reason": "this is not a group"}, http.StatusForbidden)
 	act(warn, moderator, map[string]any{"action": "REMOVE_GROUP", "reason": "this is not a group"}, http.StatusConflict, moderatorStepUp...)
 	act(warn, moderator, map[string]any{"action": "WARN_USER", "reason": "first warning"}, http.StatusOK)
+	if last := harness.users.last(); last.Action != "warn" || last.Source != "chat_report" || last.CaseId == "" {
+		t.Fatalf("a warning goes through the identity warning path: %+v", last)
+	}
 
 	noUser := submit(map[string]any{"reportedUserId": nil})
 	conflict := act(noUser, moderator, map[string]any{"action": "WARN_USER", "reason": "cannot warn nobody"}, http.StatusConflict)
