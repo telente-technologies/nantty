@@ -18,6 +18,16 @@
         "hidden",
         "removed"
       ]
+    },
+    "copyrightAudio": {
+      "enum": [
+        "disabled",
+        "available"
+      ]
+    },
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
     }
   }
 }

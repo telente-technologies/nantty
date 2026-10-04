@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/strike.appealDecided.v1.json",
+  "title": "StrikeAppealDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "strikeId",
+    "accountId",
+    "outcome",
+    "reason"
+  ],
+  "properties": {
+    "strikeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "enum": [
+        "upheld",
+        "overturned"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

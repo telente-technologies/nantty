@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/security.caseDecided.v1.json",
+  "title": "SecurityCaseDecided",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "caseId",
+    "accountId",
+    "outcome"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "cleared",
+        "kept_restricted",
+        "suspended",
+        "banned",
+        "deleted"
+      ]
+    }
+  }
+}

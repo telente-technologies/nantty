@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/security.botScoreComputed.v1.json",
+  "title": "BotScoreComputed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scoreId",
+    "accountId",
+    "score",
+    "reasonCodes",
+    "modelVersion",
+    "advisoryOnly",
+    "generatedAt"
+  ],
+  "properties": {
+    "scoreId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reasonCodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10
+    },
+    "modelVersion": {
+      "type": "string"
+    },
+    "advisoryOnly": {
+      "const": true
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
