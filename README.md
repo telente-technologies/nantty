@@ -801,10 +801,21 @@ All rights reserved. A license has not been chosen yet; until one is added, no p
 
 ## <img src="docs/assets/readme/icons/mail.svg" width="22" height="22" alt="" /> Contact
 
-Email both addresses for anything about Zudomart, including security reports:
+Every Zudomart address is on the company domain. The full list, with who reads each one and the DNS setup, is in [docs/emailAddresses.md](docs/emailAddresses.md).
 
-- [oyinlola.tech@icloud.com](mailto:oyinlola.tech@icloud.com)
-- [oluwayemioyinlola2@icloud.com](mailto:oluwayemioyinlola2@icloud.com)
+- Help with an order or account: [support@zudomart.com](mailto:support@zudomart.com)
+- Security reports: [security@zudomart.com](mailto:security@zudomart.com) (also in `/.well-known/security.txt`)
+- Privacy and the Data Protection Officer: [privacy@zudomart.com](mailto:privacy@zudomart.com)
+- Press and partnerships: [press@zudomart.com](mailto:press@zudomart.com), [partnerships@zudomart.com](mailto:partnerships@zudomart.com)
+- Everything else: [hello@zudomart.com](mailto:hello@zudomart.com)
+
+<p>
+<img src="apps/web/public/storeBadges/app-store-badge-black.svg" alt="Download on the App Store" height="40" />
+&nbsp;
+<img src="apps/web/public/storeBadges/google-play-badge.png" alt="Get it on Google Play" height="60" />
+</p>
+
+<sub>Coming soon to iPhone and Android; the badges link to the store listings once they are live. Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries and regions. App Store is a service mark of Apple Inc. Google Play and the Google Play logo are trademarks of Google LLC. Badge sources: <a href="apps/web/public/storeBadges/NOTICE.md">NOTICE</a>.</sub>
 
 <div align="center">
 <br />
