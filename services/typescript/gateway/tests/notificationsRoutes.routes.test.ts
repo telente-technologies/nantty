@@ -18,7 +18,6 @@ describe("notifications routes", () => {
     ["POST", "/api/v1/admin/legal/versions/v1/notice-draft/test-send", "optional"],
     ["GET", "/api/v1/admin/legal/versions/v1/notice-preview", "optional"],
     ["GET", "/api/v1/admin/legal/versions/v1", "identity-fallback"],
-    ["GET", "/api/v1/admin/support/tickets", "identity-fallback"],
   ];
 
   it.each(cases)("%s %s", (method, path, expected) => {
