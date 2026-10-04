@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 
-import { buildContactMailtoLinkForBothAddresses, contactEmailRecipients } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailRecipients } from "@/constants/contact.constant";
 
 import { zudomartMainSiteUrl } from "./landingContent.constant";
 import styles from "./landingFooter.module.css";
@@ -32,7 +32,7 @@ export function LandingFooter() {
           <ul className={styles.emailList} aria-label="Contact email addresses">
             {contactEmailRecipients.map((email) => (
               <li key={email}>
-                <a href={buildContactMailtoLinkForBothAddresses("Zudomart Studio")} className={styles.emailLink}>
+                <a href={buildContactMailtoLink("Zudomart Studio")} className={styles.emailLink}>
                   {email}
                 </a>
               </li>
