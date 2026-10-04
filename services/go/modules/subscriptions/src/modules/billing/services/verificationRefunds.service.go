@@ -22,6 +22,8 @@ const (
 	RefundPathNothingCharged VerificationRefundPath = "nothing_charged"
 	RefundPathGooglePlay     VerificationRefundPath = "google_play_revoke"
 	RefundPathAppleManual    VerificationRefundPath = "apple_manual"
+	RefundPathCardShare      VerificationRefundPath = "card_share_refund"
+	RefundPathGoogleShare    VerificationRefundPath = "google_play_share_refund"
 	RefundPathAlreadyDone    VerificationRefundPath = "already_done"
 
 	verificationRefundPending = "verificationRefund:pending"
@@ -37,11 +39,15 @@ type VerificationRefundRequest struct {
 
 // DecideVerificationRefundPath picks how a rejected verification is refunded. A trial that has not converted was
 // never charged (its card check was already refunded), Google Play can be revoked with a full refund, and Apple
-// gives developers no refund API, so those purchases are flagged for a manual store refund.
+// gives developers no refund API, so those purchases are flagged for a manual store refund. A seller plan or Premium
+// keeps running, so only the checkmark's share is refunded and the plan is never cancelled.
 func DecideVerificationRefundPath(row *ent.Subscription, now time.Time) VerificationRefundPath {
+	keeps := KeepsPlanOnRejection(row.PlanCode)
 	switch {
 	case row.LastError == verificationRefundDone:
 		return RefundPathAlreadyDone
+	case row.Channel == subscription.ChannelGooglePlay && keeps:
+		return RefundPathGoogleShare
 	case row.Channel == subscription.ChannelGooglePlay:
 		return RefundPathGooglePlay
 	case row.Channel == subscription.ChannelAppleIap:
@@ -50,6 +56,8 @@ func DecideVerificationRefundPath(row *ent.Subscription, now time.Time) Verifica
 		return RefundPathNothingCharged
 	case row.WithTrial && (row.TrialEndsAt == nil || now.Before(*row.TrialEndsAt)):
 		return RefundPathNothingCharged
+	case keeps:
+		return RefundPathCardShare
 	}
 	return RefundPathCard
 }
@@ -72,6 +80,9 @@ func (billing Billing) HandleVerificationRefundRequested(ctx context.Context, re
 		if path = DecideVerificationRefundPath(row, billing.Container.Now()); path == RefundPathAlreadyDone || row.LastError == verificationRefundPending {
 			return nil
 		}
+		if KeepsPlanOnRejection(row.PlanCode) {
+			return row.Update().SetLastError(verificationRefundPending).Exec(ctx)
+		}
 		if err := row.Update().SetStatus(subscription.StatusCanceled).SetCancelAtPeriodEnd(true).SetLastError(verificationRefundPending).Exec(ctx); err != nil {
 			return err
 		}
@@ -80,7 +91,12 @@ func (billing Billing) HandleVerificationRefundRequested(ctx context.Context, re
 	if err != nil || row == nil || path == RefundPathAlreadyDone {
 		return err
 	}
-	outcome, err := billing.executeVerificationRefund(ctx, row, path, request.Reason)
+	share := int64(0)
+	if KeepsPlanOnRejection(row.PlanCode) {
+		share = billing.checkmarkShareFor(ctx, row)
+		path = ApplyShareToPath(path, share)
+	}
+	outcome, err := billing.executeVerificationRefund(ctx, row, path, share, request)
 	if err != nil {
 		return err
 	}
@@ -88,15 +104,35 @@ func (billing Billing) HandleVerificationRefundRequested(ctx context.Context, re
 		if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetLastError(verificationRefundDone).Exec(ctx); err != nil {
 			return err
 		}
-		return billing.emit(ctx, transaction, "verificationRefund."+outcome, row.ID.String(), map[string]any{
+		data := map[string]any{
 			"caseId": request.CaseId, "subscriptionId": row.ID.String(), "accountId": row.OwnerUserID, "channel": row.Channel.String(), "amount": money(row.AmountMinor, row.Currency), "path": string(path),
-		})
+			"refundScope": "full",
+		}
+		if KeepsPlanOnRejection(row.PlanCode) {
+			data["refundScope"] = "checkmark_share"
+			if share > 0 {
+				data["refundAmount"] = money(share, row.Currency)
+			}
+		}
+		return billing.emit(ctx, transaction, "verificationRefund."+outcome, row.ID.String(), data)
 	})
 }
 
-func (billing Billing) executeVerificationRefund(ctx context.Context, row *ent.Subscription, path VerificationRefundPath, reason string) (string, error) {
+func (billing Billing) executeVerificationRefund(ctx context.Context, row *ent.Subscription, path VerificationRefundPath, share int64, request VerificationRefundRequest) (string, error) {
 	payments := billing.Container.Payments
+	reason := request.Reason
 	switch path {
+	case RefundPathCardShare:
+		return billing.refundCheckmarkShareToCard(ctx, row, share, request)
+	case RefundPathGoogleShare:
+		err := payments.RefundStoreSubscriptionPartially(ctx, paymentconstants.StoreGooglePlay, row.StoreOriginalTransactionID, share, row.Currency)
+		if errors.Is(err, paymentservices.ErrStoreRefundNotSupported) {
+			return "manualStoreRefundRequired", nil
+		}
+		if err != nil {
+			return "", err
+		}
+		return "succeeded", nil
 	case RefundPathCard:
 		if _, err := payments.RefundBillingSubscriptionCharge(ctx, row.BillingReference, "Checkmark verification rejected: "+reason); err != nil {
 			if paymentservices.IsDefinitiveProviderRejection(err) {
@@ -119,7 +155,7 @@ func (billing Billing) executeVerificationRefund(ctx context.Context, row *ent.S
 		billing.Container.Resources.Logger.WarnContext(ctx, "verification rejected on an App Store purchase; the person must request the refund from Apple", "subscriptionId", row.ID.String())
 		return "manualStoreRefundRequired", nil
 	}
-	if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" {
+	if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && !KeepsPlanOnRejection(row.PlanCode) {
 		if err := payments.CancelBillingSubscription(ctx, row.BillingReference); err != nil && !errors.Is(err, paymentservices.ErrPaymentNotFound) {
 			return "", err
 		}
