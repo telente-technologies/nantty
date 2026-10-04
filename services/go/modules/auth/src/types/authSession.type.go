@@ -37,10 +37,18 @@ type AuthSessionResponse struct {
 	IssuedTokens
 	User      CurrentUserResponse `json:"user"`
 	IsNewUser bool                `json:"isNewUser"`
+	Notice    *string             `json:"notice"`
 }
 
+const AccountDeletionCancelledNotice = "Your account deletion has been cancelled"
+
 func ConvertAuthenticationResultToSessionResponse(result AuthenticationResult) AuthSessionResponse {
-	return AuthSessionResponse{IssuedTokens: result.Tokens, User: ConvertAccountToCurrentUserResponse(result.Account), IsNewUser: result.IsNewUser}
+	response := AuthSessionResponse{IssuedTokens: result.Tokens, User: ConvertAccountToCurrentUserResponse(result.Account), IsNewUser: result.IsNewUser}
+	if result.DeletionCancelled {
+		notice := AccountDeletionCancelledNotice
+		response.Notice = &notice
+	}
+	return response
 }
 
 func ConvertAccountToCurrentUserResponse(account *ent.Account) CurrentUserResponse {

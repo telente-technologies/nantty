@@ -16,7 +16,8 @@ type IssuedTokens struct {
 }
 
 type AuthenticationResult struct {
-	Tokens    IssuedTokens
-	Account   *ent.Account
-	IsNewUser bool
+	Tokens            IssuedTokens
+	Account           *ent.Account
+	IsNewUser         bool
+	DeletionCancelled bool
 }
