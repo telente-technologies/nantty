@@ -8,7 +8,7 @@ Local machine only (8 cores, 15 GB RAM, Docker compose stack). Nothing was commi
 | --- | --- |
 | Stack | `backend:reset` + `backend:up`, all migrations applied (embedded Atlas for Go, `prisma migrate deploy` for social, notifications, media, search). All 13 processes started and reported ready: goIdentity, goCommerce, goMoney, goLive, goAds, goTrust, gateway, social, notifications, media, search, Phoenix realtime (`elixir:1.19` container), intelligence |
 | API sweep | 785 service routes inventoried. 709 are public through the gateway: all 709 answer without 5xx, with the right auth behaviour (guest, customer, staff) and the `{message, code}` / `{data, nextCursor}` shapes. 53 internal routes are hidden (404). 0 unrouted, 0 misrouted |
-| Journeys | First pass: 34 of 40 smoke tests pass; the 6 failures were **ledger writes refused under the real service roles**. Second pass (section 6.1): the ledger fix works. Live journey 8/8 (coins, gift, battle); commerce reaches escrow held and delivered; buyer confirm-receipt fails with 409 (order state machine), so release and payout are still unverified |
+| Journeys | First pass: 34 of 40 smoke tests pass; the 6 failures were **ledger writes refused under the real service roles**. Second and third pass (sections 6.1, 6.1.1): the ledger fix and the order fix work. Commerce 8/8, new money journeys 5/5 (multi-seller, fees, 72 h auto-release, 24 h lock, payout, refund), creator payout and USD checkout pass, live journey passes except the realtime socket assertions (no hex network). Direct orders are not reachable over HTTP |
 | Test suites | All green: Go 92 packages (450 test functions, integration on), gateway 109, social 68, notifications 157 (+4 integration), media 81, search 46, realtime 57, intelligence 177 (ruff, format, mypy clean), email templates 172, mobile jest 24, app contract tests 18, `backend:check` |
 | Frontend | `tsc` clean in all 7 apps. `next build` passes for admin, ads, seller, studio, web, webapp (admin was failing at HEAD; fixed). Lint has 0 errors (was 6) |
 | Terraform | `terraform validate` passes for `envs/dev`, `staging`, `prod` |
@@ -921,9 +921,38 @@ New defects found and fixed this pass:
 - goCommerce and goLive need `ORDERS_MONEY_GRPC_ADDRESS` / `LIVE_MONEY_GRPC_ADDRESS` (both empty in `.env.example`). Empty means an in-memory money fake, so checkout registered no payables (`ORDER_NOT_FOUND` on payment initialize) and gifts never reached the ledger. Run with `localhost:9103` for local verification. Consider failing startup outside tests when empty.
 - The fake Paystack restarted its charge ids at 1, so the webhook dedupe (`charge.success:<id>:success`) swallowed every webhook after a fake restart on a reused database (HTTP 200, nothing processed). The fake smoke server now offsets ids by the start time (`fakePaystackServer_test.go`).
 
-Open defect, not fixed (the change was blocked by the auto-mode permission classifier as a security weakening, so it needs the owner's decision): **buyer confirm-receipt always returns 409 `INVALID_STATUS_CHANGE`.** `ConfirmOrderReceipt` in `modules/orders/src/modules/orders/commands/confirmOrderReceipt` calls the money service, then `CompleteOrderGroup` with a buyer actor, but `transitionsBySellerOrBuyer` in `modules/orders/src/services/orderStateMachine.service.go` lets the buyer move an order only to `cancelled`, not `completed`. The fix is a one-line allowance of `completed` for the buyer (or completing with a system actor after the money call succeeds). Until then escrow release by buyer confirmation, the 24h lock and the seller payout cannot be exercised through the journey. The money-side call may already have run before the 409, so check that it is idempotent.
+### 6.1.1 Third pass: order fix applied, money journeys verified (2026-10-04)
 
-Not done in this pass: the remaining journeys need new smoke tests plus the order fix above, and a time hook for the 3-day auto-release (not inspected). Fee posting amounts were not asserted. Everything was stopped afterwards (all started processes, Phoenix container and `docker compose stop`; betng containers untouched).
+The owner allowed the buyer to move an order to `completed` and `disputed`. Buyer confirm-receipt now works end to end. All results below ran against the compose Postgres with the real service roles (`svc_money`, `svc_ledger`), the fake Paystack and the real gateway. Time travel: `ESCROW_AUTO_RELEASE_SWEEP_INTERVAL=2s`, `LEDGER_SELLER_CREDIT_MATURING_INTERVAL=5s`, and `UPDATE` of `escrow.escrows.auto_release_at` / `ledger.seller_credit_maturities.available_at` into the past (the policy values themselves, 72 h and 24 h, are asserted unchanged first). The journal tables were never touched.
+
+New suite `services/scripts/apiSmoke/tests/moneyJourneys.smoke.test.ts` (helpers in `src/commerceFixtures.util.ts`), plus two new steps in `liveJourney.smoke.test.ts`:
+
+| Journey | Result |
+| --- | --- |
+| Buyer confirm-receipt, escrow released, seller wallet, payout transfer (`commerceJourney`) | pass (8/8) |
+| Multi-seller cart: 2 sellers, one checkout, one payment intent, one webhook, 2 escrows held | pass |
+| Fees: escrow fee 1.5% (`commission_bps` 150, 17,250 on 1,150,000) booked to `liability:platformFeesUnearned` at hold and moved to `revenue:escrowFees` only at release; Paystack processing fee (60,000, split 30,000 per group pro rata) booked to `expense:paymentProcessingFees` as its own line; the seller credit is amount minus both (1,102,750) | pass |
+| Auto-release timer is exactly 72 h after delivery; after time travel the sweep releases with trigger `autoRelease` | pass |
+| 24 h lock: the credit sits in `pending` / `locked`, nothing withdrawable, a withdrawal is refused during the lock; after the lock the maturity job moves it to `available` | pass |
+| Payout: withdrawal, staff review, payout run, transfer reaches the provider, settle webhook, withdrawal paid (`withdrawal.requested` then `withdrawal.paid` postings) | pass |
+| Escrow refund (seller rejects a paid order): buyer refunded in full (1,150,000), escrow fee reversed (no fee on refunded amounts), processing fee booked as `refundedProcessingFees`, provider received the refund | pass |
+| Creator payout: gift earnings converted (`coins.convertedToCash`), payout onboarding, admin payout run moves earnings to withdrawable, withdrawal, transfer, settle, paid | pass |
+| USD web checkout (coin package priced in USD, fresh user from the US, `PAYSTACK_SUPPORTED_CURRENCIES=NGN,USD`): intent is `USD` / 500, coins credited | pass |
+| Gift send and battle settlement (HTTP and ledger) | pass; the three realtime socket assertions were not re-run (the `elixir:1.19` container could not fetch hex without network this pass) |
+| Business plan 1% fee | not over HTTP (seller plans need a Paystack plan checkout); covered by the Go suites `escrowFees.service_test.go` (150 vs 100 bps) and `subscriptions.module_integration_test.go`, both green |
+| Direct-order split and direct refund | NOT reachable over HTTP, see below; the Go integration suites pass (`TestDirectCheckoutSplitsToTheSellerSubaccountAndEscrowStaysOnTheMainBalance`, `TestOneCheckoutPaymentSplitsDirectGroupsAndHoldsEscrowGroupsWithPerGroupRefunds`, `TestUnverifiedStoresAreEscrowOnlyAndDirectPaymentsLockTheSellerCreditUntilRefunded`) |
+
+Findings from this pass:
+
+1. **Direct payments cannot be chosen through go-commerce.** `modules/orders/src/integrations/checkoutMoneyGrpc.integration.go` always sends `ORDER_PAYMENT_MODE_ESCROW`, and the checkout request has no payment-mode field. The money side supports direct, but no API path reaches it. Needs a product decision (checkout field per seller group, verified stores only).
+2. Cold start: the first checkout right after goMoney starts can fail with 502 `PAYMENT_SERVICE_UNAVAILABLE` (register-payables gRPC deadline). A retry works.
+3. Seller credit maturing runs every 5 minutes by default (`LEDGER_SELLER_CREDIT_MATURING_INTERVAL`), so the money can show up to 5 minutes after the 24 h lock ends.
+4. A payout onboarding finishes asynchronously: a withdrawal right after onboarding returns 403 `PAYOUT_ACCOUNT_NOT_VERIFIED` for a few seconds.
+5. `GET /wallets/me` returns amounts in the viewer currency (USD for a user with no region), so a Nigerian seller without `x-client-region: NG` sees zeros. Worth deriving the currency from the wallet's own balances.
+6. The fake Paystack smoke server now offsets charge ids by start time (webhook dedupe) and accepts `?fee=` on the charge-complete call.
+7. Run time: auto-release took over 30 s once when the money journey ran in parallel with the other two files; run the money file alone.
+
+Everything started for this pass was stopped, including `docker compose stop` (betng-* untouched).
 
 ### 6.2 Found, not fixed (product or contract decisions)
 
