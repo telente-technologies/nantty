@@ -14,6 +14,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
 	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/celebrationsetting"
+	"zudomart/modules/users/src/generated/ent/celebrationview"
 	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
 	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
@@ -399,6 +401,48 @@ func init() {
 	businessdocumentDescID := businessdocumentMixinFields0[0].Descriptor()
 	// businessdocument.DefaultID holds the default value on creation for the id field.
 	businessdocument.DefaultID = businessdocumentDescID.Default.(func() uuid.UUID)
+	celebrationsettingFields := schema.CelebrationSetting{}.Fields()
+	_ = celebrationsettingFields
+	// celebrationsettingDescTimezone is the schema descriptor for timezone field.
+	celebrationsettingDescTimezone := celebrationsettingFields[1].Descriptor()
+	// celebrationsetting.DefaultTimezone holds the default value on creation for the timezone field.
+	celebrationsetting.DefaultTimezone = celebrationsettingDescTimezone.Default.(string)
+	// celebrationsetting.TimezoneValidator is a validator for the "timezone" field. It is called by the builders before save.
+	celebrationsetting.TimezoneValidator = celebrationsettingDescTimezone.Validators[0].(func(string) error)
+	// celebrationsettingDescBirthdayBalloonsVisible is the schema descriptor for birthday_balloons_visible field.
+	celebrationsettingDescBirthdayBalloonsVisible := celebrationsettingFields[2].Descriptor()
+	// celebrationsetting.DefaultBirthdayBalloonsVisible holds the default value on creation for the birthday_balloons_visible field.
+	celebrationsetting.DefaultBirthdayBalloonsVisible = celebrationsettingDescBirthdayBalloonsVisible.Default.(bool)
+	// celebrationsettingDescUpdatedAt is the schema descriptor for updated_at field.
+	celebrationsettingDescUpdatedAt := celebrationsettingFields[4].Descriptor()
+	// celebrationsetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	celebrationsetting.DefaultUpdatedAt = celebrationsettingDescUpdatedAt.Default.(func() time.Time)
+	// celebrationsetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	celebrationsetting.UpdateDefaultUpdatedAt = celebrationsettingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	celebrationviewFields := schema.CelebrationView{}.Fields()
+	_ = celebrationviewFields
+	// celebrationviewDescLocalDate is the schema descriptor for local_date field.
+	celebrationviewDescLocalDate := celebrationviewFields[3].Descriptor()
+	// celebrationview.LocalDateValidator is a validator for the "local_date" field. It is called by the builders before save.
+	celebrationview.LocalDateValidator = func() func(string) error {
+		validators := celebrationviewDescLocalDate.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(local_date string) error {
+			for _, fn := range fns {
+				if err := fn(local_date); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// celebrationviewDescCreatedAt is the schema descriptor for created_at field.
+	celebrationviewDescCreatedAt := celebrationviewFields[4].Descriptor()
+	// celebrationview.DefaultCreatedAt holds the default value on creation for the created_at field.
+	celebrationview.DefaultCreatedAt = celebrationviewDescCreatedAt.Default.(func() time.Time)
 	checkmarkgrantMixin := schema.CheckmarkGrant{}.Mixin()
 	checkmarkgrantMixinFields0 := checkmarkgrantMixin[0].Fields()
 	_ = checkmarkgrantMixinFields0

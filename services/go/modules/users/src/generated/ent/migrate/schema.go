@@ -281,6 +281,50 @@ var (
 			},
 		},
 	}
+	// CelebrationSettingsColumns holds the columns for the "celebration_settings" table.
+	CelebrationSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "timezone", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "birthday_balloons_visible", Type: field.TypeBool, Default: true},
+		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CelebrationSettingsTable holds the schema information for the "celebration_settings" table.
+	CelebrationSettingsTable = &schema.Table{
+		Name:       "celebration_settings",
+		Columns:    CelebrationSettingsColumns,
+		PrimaryKey: []*schema.Column{CelebrationSettingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "celebrationsetting_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{CelebrationSettingsColumns[1]},
+			},
+		},
+	}
+	// CelebrationViewsColumns holds the columns for the "celebration_views" table.
+	CelebrationViewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"birthday", "anniversary"}},
+		{Name: "surface", Type: field.TypeEnum, Enums: []string{"app", "profile", "email"}},
+		{Name: "local_date", Type: field.TypeString, Size: 10},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// CelebrationViewsTable holds the schema information for the "celebration_views" table.
+	CelebrationViewsTable = &schema.Table{
+		Name:       "celebration_views",
+		Columns:    CelebrationViewsColumns,
+		PrimaryKey: []*schema.Column{CelebrationViewsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "celebrationview_account_id_kind_surface_local_date",
+				Unique:  true,
+				Columns: []*schema.Column{CelebrationViewsColumns[1], CelebrationViewsColumns[2], CelebrationViewsColumns[3], CelebrationViewsColumns[4]},
+			},
+		},
+	}
 	// CheckmarkGrantsColumns holds the columns for the "checkmark_grants" table.
 	CheckmarkGrantsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1122,6 +1166,8 @@ var (
 		BlackApplicationsTable,
 		BusinessCategoriesTable,
 		BusinessDocumentsTable,
+		CelebrationSettingsTable,
+		CelebrationViewsTable,
 		CheckmarkGrantsTable,
 		CreatorApplicationsTable,
 		DataExportRequestsTable,

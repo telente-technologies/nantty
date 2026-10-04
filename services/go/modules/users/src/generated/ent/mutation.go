@@ -17,6 +17,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
 	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/celebrationsetting"
+	"zudomart/modules/users/src/generated/ent/celebrationview"
 	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
 	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
@@ -69,6 +71,8 @@ const (
 	TypeBlackApplication        = "BlackApplication"
 	TypeBusinessCategory        = "BusinessCategory"
 	TypeBusinessDocument        = "BusinessDocument"
+	TypeCelebrationSetting      = "CelebrationSetting"
+	TypeCelebrationView         = "CelebrationView"
 	TypeCheckmarkGrant          = "CheckmarkGrant"
 	TypeCreatorApplication      = "CreatorApplication"
 	TypeDataExportRequest       = "DataExportRequest"
@@ -7865,6 +7869,1112 @@ func (m *BusinessDocumentMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *BusinessDocumentMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown BusinessDocument edge %s", name)
+}
+
+// CelebrationSettingMutation represents an operation that mutates the CelebrationSetting nodes in the graph.
+type CelebrationSettingMutation struct {
+	config
+	op                        Op
+	typ                       string
+	id                        *int
+	account_id                *uuid.UUID
+	timezone                  *string
+	birthday_balloons_visible *bool
+	joined_at                 *time.Time
+	updated_at                *time.Time
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*CelebrationSetting, error)
+	predicates                []predicate.CelebrationSetting
+}
+
+var _ ent.Mutation = (*CelebrationSettingMutation)(nil)
+
+// celebrationsettingOption allows management of the mutation configuration using functional options.
+type celebrationsettingOption func(*CelebrationSettingMutation)
+
+// newCelebrationSettingMutation creates new mutation for the CelebrationSetting entity.
+func newCelebrationSettingMutation(c config, op Op, opts ...celebrationsettingOption) *CelebrationSettingMutation {
+	m := &CelebrationSettingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCelebrationSetting,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCelebrationSettingID sets the ID field of the mutation.
+func withCelebrationSettingID(id int) celebrationsettingOption {
+	return func(m *CelebrationSettingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CelebrationSetting
+		)
+		m.oldValue = func(ctx context.Context) (*CelebrationSetting, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CelebrationSetting.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCelebrationSetting sets the old CelebrationSetting of the mutation.
+func withCelebrationSetting(node *CelebrationSetting) celebrationsettingOption {
+	return func(m *CelebrationSettingMutation) {
+		m.oldValue = func(context.Context) (*CelebrationSetting, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CelebrationSettingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CelebrationSettingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CelebrationSettingMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CelebrationSettingMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CelebrationSetting.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *CelebrationSettingMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *CelebrationSettingMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the CelebrationSetting entity.
+// If the CelebrationSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationSettingMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *CelebrationSettingMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetTimezone sets the "timezone" field.
+func (m *CelebrationSettingMutation) SetTimezone(s string) {
+	m.timezone = &s
+}
+
+// Timezone returns the value of the "timezone" field in the mutation.
+func (m *CelebrationSettingMutation) Timezone() (r string, exists bool) {
+	v := m.timezone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimezone returns the old "timezone" field's value of the CelebrationSetting entity.
+// If the CelebrationSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationSettingMutation) OldTimezone(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimezone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimezone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimezone: %w", err)
+	}
+	return oldValue.Timezone, nil
+}
+
+// ResetTimezone resets all changes to the "timezone" field.
+func (m *CelebrationSettingMutation) ResetTimezone() {
+	m.timezone = nil
+}
+
+// SetBirthdayBalloonsVisible sets the "birthday_balloons_visible" field.
+func (m *CelebrationSettingMutation) SetBirthdayBalloonsVisible(b bool) {
+	m.birthday_balloons_visible = &b
+}
+
+// BirthdayBalloonsVisible returns the value of the "birthday_balloons_visible" field in the mutation.
+func (m *CelebrationSettingMutation) BirthdayBalloonsVisible() (r bool, exists bool) {
+	v := m.birthday_balloons_visible
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBirthdayBalloonsVisible returns the old "birthday_balloons_visible" field's value of the CelebrationSetting entity.
+// If the CelebrationSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationSettingMutation) OldBirthdayBalloonsVisible(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBirthdayBalloonsVisible is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBirthdayBalloonsVisible requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBirthdayBalloonsVisible: %w", err)
+	}
+	return oldValue.BirthdayBalloonsVisible, nil
+}
+
+// ResetBirthdayBalloonsVisible resets all changes to the "birthday_balloons_visible" field.
+func (m *CelebrationSettingMutation) ResetBirthdayBalloonsVisible() {
+	m.birthday_balloons_visible = nil
+}
+
+// SetJoinedAt sets the "joined_at" field.
+func (m *CelebrationSettingMutation) SetJoinedAt(t time.Time) {
+	m.joined_at = &t
+}
+
+// JoinedAt returns the value of the "joined_at" field in the mutation.
+func (m *CelebrationSettingMutation) JoinedAt() (r time.Time, exists bool) {
+	v := m.joined_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJoinedAt returns the old "joined_at" field's value of the CelebrationSetting entity.
+// If the CelebrationSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationSettingMutation) OldJoinedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJoinedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJoinedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJoinedAt: %w", err)
+	}
+	return oldValue.JoinedAt, nil
+}
+
+// ClearJoinedAt clears the value of the "joined_at" field.
+func (m *CelebrationSettingMutation) ClearJoinedAt() {
+	m.joined_at = nil
+	m.clearedFields[celebrationsetting.FieldJoinedAt] = struct{}{}
+}
+
+// JoinedAtCleared returns if the "joined_at" field was cleared in this mutation.
+func (m *CelebrationSettingMutation) JoinedAtCleared() bool {
+	_, ok := m.clearedFields[celebrationsetting.FieldJoinedAt]
+	return ok
+}
+
+// ResetJoinedAt resets all changes to the "joined_at" field.
+func (m *CelebrationSettingMutation) ResetJoinedAt() {
+	m.joined_at = nil
+	delete(m.clearedFields, celebrationsetting.FieldJoinedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CelebrationSettingMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CelebrationSettingMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CelebrationSetting entity.
+// If the CelebrationSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationSettingMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CelebrationSettingMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the CelebrationSettingMutation builder.
+func (m *CelebrationSettingMutation) Where(ps ...predicate.CelebrationSetting) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CelebrationSettingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CelebrationSettingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CelebrationSetting, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CelebrationSettingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CelebrationSettingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CelebrationSetting).
+func (m *CelebrationSettingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CelebrationSettingMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.account_id != nil {
+		fields = append(fields, celebrationsetting.FieldAccountID)
+	}
+	if m.timezone != nil {
+		fields = append(fields, celebrationsetting.FieldTimezone)
+	}
+	if m.birthday_balloons_visible != nil {
+		fields = append(fields, celebrationsetting.FieldBirthdayBalloonsVisible)
+	}
+	if m.joined_at != nil {
+		fields = append(fields, celebrationsetting.FieldJoinedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, celebrationsetting.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CelebrationSettingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case celebrationsetting.FieldAccountID:
+		return m.AccountID()
+	case celebrationsetting.FieldTimezone:
+		return m.Timezone()
+	case celebrationsetting.FieldBirthdayBalloonsVisible:
+		return m.BirthdayBalloonsVisible()
+	case celebrationsetting.FieldJoinedAt:
+		return m.JoinedAt()
+	case celebrationsetting.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CelebrationSettingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case celebrationsetting.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case celebrationsetting.FieldTimezone:
+		return m.OldTimezone(ctx)
+	case celebrationsetting.FieldBirthdayBalloonsVisible:
+		return m.OldBirthdayBalloonsVisible(ctx)
+	case celebrationsetting.FieldJoinedAt:
+		return m.OldJoinedAt(ctx)
+	case celebrationsetting.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CelebrationSetting field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CelebrationSettingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case celebrationsetting.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case celebrationsetting.FieldTimezone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimezone(v)
+		return nil
+	case celebrationsetting.FieldBirthdayBalloonsVisible:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBirthdayBalloonsVisible(v)
+		return nil
+	case celebrationsetting.FieldJoinedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJoinedAt(v)
+		return nil
+	case celebrationsetting.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CelebrationSetting field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CelebrationSettingMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CelebrationSettingMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CelebrationSettingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CelebrationSetting numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CelebrationSettingMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(celebrationsetting.FieldJoinedAt) {
+		fields = append(fields, celebrationsetting.FieldJoinedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CelebrationSettingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CelebrationSettingMutation) ClearField(name string) error {
+	switch name {
+	case celebrationsetting.FieldJoinedAt:
+		m.ClearJoinedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CelebrationSetting nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CelebrationSettingMutation) ResetField(name string) error {
+	switch name {
+	case celebrationsetting.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case celebrationsetting.FieldTimezone:
+		m.ResetTimezone()
+		return nil
+	case celebrationsetting.FieldBirthdayBalloonsVisible:
+		m.ResetBirthdayBalloonsVisible()
+		return nil
+	case celebrationsetting.FieldJoinedAt:
+		m.ResetJoinedAt()
+		return nil
+	case celebrationsetting.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CelebrationSetting field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CelebrationSettingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CelebrationSettingMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CelebrationSettingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CelebrationSettingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CelebrationSettingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CelebrationSettingMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CelebrationSettingMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CelebrationSetting unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CelebrationSettingMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CelebrationSetting edge %s", name)
+}
+
+// CelebrationViewMutation represents an operation that mutates the CelebrationView nodes in the graph.
+type CelebrationViewMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	account_id    *uuid.UUID
+	kind          *celebrationview.Kind
+	surface       *celebrationview.Surface
+	local_date    *string
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CelebrationView, error)
+	predicates    []predicate.CelebrationView
+}
+
+var _ ent.Mutation = (*CelebrationViewMutation)(nil)
+
+// celebrationviewOption allows management of the mutation configuration using functional options.
+type celebrationviewOption func(*CelebrationViewMutation)
+
+// newCelebrationViewMutation creates new mutation for the CelebrationView entity.
+func newCelebrationViewMutation(c config, op Op, opts ...celebrationviewOption) *CelebrationViewMutation {
+	m := &CelebrationViewMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCelebrationView,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCelebrationViewID sets the ID field of the mutation.
+func withCelebrationViewID(id int) celebrationviewOption {
+	return func(m *CelebrationViewMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CelebrationView
+		)
+		m.oldValue = func(ctx context.Context) (*CelebrationView, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CelebrationView.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCelebrationView sets the old CelebrationView of the mutation.
+func withCelebrationView(node *CelebrationView) celebrationviewOption {
+	return func(m *CelebrationViewMutation) {
+		m.oldValue = func(context.Context) (*CelebrationView, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CelebrationViewMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CelebrationViewMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CelebrationViewMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CelebrationViewMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CelebrationView.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *CelebrationViewMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *CelebrationViewMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the CelebrationView entity.
+// If the CelebrationView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationViewMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *CelebrationViewMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *CelebrationViewMutation) SetKind(c celebrationview.Kind) {
+	m.kind = &c
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *CelebrationViewMutation) Kind() (r celebrationview.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the CelebrationView entity.
+// If the CelebrationView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationViewMutation) OldKind(ctx context.Context) (v celebrationview.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *CelebrationViewMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetSurface sets the "surface" field.
+func (m *CelebrationViewMutation) SetSurface(c celebrationview.Surface) {
+	m.surface = &c
+}
+
+// Surface returns the value of the "surface" field in the mutation.
+func (m *CelebrationViewMutation) Surface() (r celebrationview.Surface, exists bool) {
+	v := m.surface
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSurface returns the old "surface" field's value of the CelebrationView entity.
+// If the CelebrationView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationViewMutation) OldSurface(ctx context.Context) (v celebrationview.Surface, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSurface is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSurface requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSurface: %w", err)
+	}
+	return oldValue.Surface, nil
+}
+
+// ResetSurface resets all changes to the "surface" field.
+func (m *CelebrationViewMutation) ResetSurface() {
+	m.surface = nil
+}
+
+// SetLocalDate sets the "local_date" field.
+func (m *CelebrationViewMutation) SetLocalDate(s string) {
+	m.local_date = &s
+}
+
+// LocalDate returns the value of the "local_date" field in the mutation.
+func (m *CelebrationViewMutation) LocalDate() (r string, exists bool) {
+	v := m.local_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocalDate returns the old "local_date" field's value of the CelebrationView entity.
+// If the CelebrationView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationViewMutation) OldLocalDate(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocalDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocalDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocalDate: %w", err)
+	}
+	return oldValue.LocalDate, nil
+}
+
+// ResetLocalDate resets all changes to the "local_date" field.
+func (m *CelebrationViewMutation) ResetLocalDate() {
+	m.local_date = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CelebrationViewMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CelebrationViewMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CelebrationView entity.
+// If the CelebrationView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CelebrationViewMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CelebrationViewMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the CelebrationViewMutation builder.
+func (m *CelebrationViewMutation) Where(ps ...predicate.CelebrationView) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CelebrationViewMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CelebrationViewMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CelebrationView, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CelebrationViewMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CelebrationViewMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CelebrationView).
+func (m *CelebrationViewMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CelebrationViewMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.account_id != nil {
+		fields = append(fields, celebrationview.FieldAccountID)
+	}
+	if m.kind != nil {
+		fields = append(fields, celebrationview.FieldKind)
+	}
+	if m.surface != nil {
+		fields = append(fields, celebrationview.FieldSurface)
+	}
+	if m.local_date != nil {
+		fields = append(fields, celebrationview.FieldLocalDate)
+	}
+	if m.created_at != nil {
+		fields = append(fields, celebrationview.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CelebrationViewMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case celebrationview.FieldAccountID:
+		return m.AccountID()
+	case celebrationview.FieldKind:
+		return m.Kind()
+	case celebrationview.FieldSurface:
+		return m.Surface()
+	case celebrationview.FieldLocalDate:
+		return m.LocalDate()
+	case celebrationview.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CelebrationViewMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case celebrationview.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case celebrationview.FieldKind:
+		return m.OldKind(ctx)
+	case celebrationview.FieldSurface:
+		return m.OldSurface(ctx)
+	case celebrationview.FieldLocalDate:
+		return m.OldLocalDate(ctx)
+	case celebrationview.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CelebrationView field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CelebrationViewMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case celebrationview.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case celebrationview.FieldKind:
+		v, ok := value.(celebrationview.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case celebrationview.FieldSurface:
+		v, ok := value.(celebrationview.Surface)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSurface(v)
+		return nil
+	case celebrationview.FieldLocalDate:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocalDate(v)
+		return nil
+	case celebrationview.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CelebrationView field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CelebrationViewMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CelebrationViewMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CelebrationViewMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CelebrationView numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CelebrationViewMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CelebrationViewMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CelebrationViewMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CelebrationView nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CelebrationViewMutation) ResetField(name string) error {
+	switch name {
+	case celebrationview.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case celebrationview.FieldKind:
+		m.ResetKind()
+		return nil
+	case celebrationview.FieldSurface:
+		m.ResetSurface()
+		return nil
+	case celebrationview.FieldLocalDate:
+		m.ResetLocalDate()
+		return nil
+	case celebrationview.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CelebrationView field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CelebrationViewMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CelebrationViewMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CelebrationViewMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CelebrationViewMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CelebrationViewMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CelebrationViewMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CelebrationViewMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CelebrationView unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CelebrationViewMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CelebrationView edge %s", name)
 }
 
 // CheckmarkGrantMutation represents an operation that mutates the CheckmarkGrant nodes in the graph.

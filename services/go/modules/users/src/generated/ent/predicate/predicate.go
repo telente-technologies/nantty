@@ -33,6 +33,12 @@ type BusinessCategory func(*sql.Selector)
 // BusinessDocument is the predicate function for businessdocument builders.
 type BusinessDocument func(*sql.Selector)
 
+// CelebrationSetting is the predicate function for celebrationsetting builders.
+type CelebrationSetting func(*sql.Selector)
+
+// CelebrationView is the predicate function for celebrationview builders.
+type CelebrationView func(*sql.Selector)
+
 // CheckmarkGrant is the predicate function for checkmarkgrant builders.
 type CheckmarkGrant func(*sql.Selector)
 

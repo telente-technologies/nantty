@@ -116,6 +116,30 @@ func (f BusinessDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessDocumentMutation", m)
 }
 
+// The CelebrationSettingFunc type is an adapter to allow the use of ordinary
+// function as CelebrationSetting mutator.
+type CelebrationSettingFunc func(context.Context, *ent.CelebrationSettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CelebrationSettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CelebrationSettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CelebrationSettingMutation", m)
+}
+
+// The CelebrationViewFunc type is an adapter to allow the use of ordinary
+// function as CelebrationView mutator.
+type CelebrationViewFunc func(context.Context, *ent.CelebrationViewMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CelebrationViewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CelebrationViewMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CelebrationViewMutation", m)
+}
+
 // The CheckmarkGrantFunc type is an adapter to allow the use of ordinary
 // function as CheckmarkGrant mutator.
 type CheckmarkGrantFunc func(context.Context, *ent.CheckmarkGrantMutation) (ent.Value, error)
