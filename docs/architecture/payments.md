@@ -17,7 +17,7 @@ Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend mocks), **PROPOSED**, **
 | Idempotency middleware (Redis) | EXISTING, wired to no route | `services/go/platform/idempotency` |
 | Webhook signature verification in new services | EXISTING for Bachs (to be replaced). PROPOSED: `POST /webhooks/paystack`, HMAC-SHA512 of the raw body with the secret key (`x-paystack-signature`), IP allowlist, `event + data.id + status` dedupe | `services/go/modules/payments/src/integrations/bachsConnectWebhooks.integration.go` (to delete) |
 | Legacy card gateways (to be replaced by the Paystack adapter in the new stack), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | EXISTING only in the reference monolith, which is never deployed | `apps/api/src/modules/payments/gateways/*.gateway.ts`, `modules/escrows/jobs/escrowAutoRelease.job.ts`, `modules/wallets/constants/monetizationLedgerAccounts.constant.ts` |
-| Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `apps/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
+| Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `services/python/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
 | Wallet, escrow, coin, payout screens in mobile, seller, admin | MOCK-ONLY | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller` wallet pages, `apps/admin` commerce pages |
 | Everything below | PROPOSED | `docs/backendPlan.md` phases 5 and 6 |
 

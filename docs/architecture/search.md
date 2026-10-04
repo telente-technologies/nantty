@@ -11,7 +11,7 @@ As of 2026-10-03. Sources: `inventory.md` (compose profile `search`, `jobs-searc
 | OpenSearch 3 in local compose (profile `search`) | EXISTING (local) | `infra/local/docker-compose.yml` |
 | RabbitMQ job queue `jobs-search-indexing` (+retry tiers and `.dlq`, 5 attempts) | EXISTING (local topology) | `infra/local/rabbitmq/topology.json` |
 | Indexing worker, mappings, search API, reindex job, Terraform `opensearch` module | **ABSENT / PROPOSED** (`infra/aws/README.md` lists `opensearch`) | |
-| Python `/v1/search/rerank` | EXISTING (stateless) | `apps/intelligence` |
+| Python `/v1/search/rerank` | EXISTING (stateless) | `services/python/intelligence` |
 
 ## 2. Target pipeline
 

@@ -14,7 +14,7 @@ Labels: **EXISTING** / **MOCK-ONLY** / **PROPOSED** / **OPTIONAL FUTURE**.
 | Privacy and terms pages | EXISTING static pages | `apps/web` (`/privacy`, `/terms`) |
 | Consent banner | ABSENT | none |
 | Log redaction | PROPOSED; legacy `apps/api/src/loggers/redact.ts` | `SECURITY.md` |
-| Python receives opaque IDs only | EXISTING contract | `apps/intelligence/apiContract.md` |
+| Python receives opaque IDs only | EXISTING contract | `services/python/intelligence/apiContract.md` |
 | Auth events carry no password material | EXISTING | `services/go/modules/auth/internal/application/outbox.events.go` |
 | OTP delivery | `log` only, so no real email/SMS processor yet | `one_time_code.delivery.go` |
 

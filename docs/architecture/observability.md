@@ -11,7 +11,7 @@ As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUT
 | Gateway forwards `x-request-id`, `x-forwarded-for`, `x-real-ip`; no tracing | EXISTING | `services/typescript/gateway/src` |
 | Phoenix `telemetry.ex` metrics definitions only; no exporter | EXISTING | `services/elixir/realtime/lib/realtime_web/telemetry.ex` |
 | Local OTel collector + Jaeger UI :16686 | EXISTING | `infra/local/otel/collector.yaml`, `infra/local/docker-compose.yml` |
-| Python: no tracing; HMAC headers only | EXISTING | `apps/intelligence` |
+| Python: no tracing; HMAC headers only | EXISTING | `services/python/intelligence` |
 | Metrics backend, log shipping, dashboards, alerts, SLOs | ABSENT | `inventory.md` s6 |
 | Health: Go readiness checks, realtime `GET /healthz` | EXISTING | `platform/health`, `router.ex` |
 | Outbox publishes without trace context in event envelope | gap | `platform/events/event.envelope.go` |

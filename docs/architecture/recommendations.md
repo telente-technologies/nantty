@@ -1,6 +1,6 @@
 # Recommendations and personalization
 
-As of 2026-10-04 (section 7 added: fair ranking, anti-manipulation, trends, Explore). Sources: `inventory.md` 2.6; `apps/intelligence/apiContract.md` (sections 4, 6, 7); `docs/backendPlan.md` (consent, ranking). Labels: EXISTING, PROPOSED, OPTIONAL FUTURE.
+As of 2026-10-04 (section 7 added: fair ranking, anti-manipulation, trends, Explore). Sources: `inventory.md` 2.6; `services/python/intelligence/apiContract.md` (sections 4, 6, 7); `docs/backendPlan.md` (consent, ranking). Labels: EXISTING, PROPOSED, OPTIONAL FUTURE.
 
 Principle: Python returns **scores and orderings**; Go/TS own candidate sets, eligibility, safety and the final decision. If Python is down, the request still succeeds with a deterministic ranking.
 
@@ -8,7 +8,7 @@ Principle: Python returns **scores and orderings**; Go/TS own candidate sets, el
 
 | Item | Status | Evidence |
 | --- | --- | --- |
-| FastAPI scoring service, 12 modules (feed, clips, recommendations, trending, search rerank, social proof, ads, risk, experiments, audio, events_ingestion, model_registry) | EXISTING | `apps/intelligence/src/modules/*` |
+| FastAPI scoring service, 12 modules (feed, clips, recommendations, trending, search rerank, social proof, ads, risk, experiments, audio, events_ingestion, model_registry) | EXISTING | `services/python/intelligence/src/modules/*` |
 | Endpoints `POST /v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/ads/select` | EXISTING | `apiContract.md` section 7 |
 | HMAC-signed requests (300 s skew, Redis nonce), Redis online features, Parquet feature logs, 15 pytest files | EXISTING | `apiContract.md` section 2 |
 | Callers (Go/TS), SQS consumer (`intelligence-domain-events` queue exists in LocalStack, no consumer code), feature store job, seller recommendations | **ABSENT** | inventory gaps 3 |
