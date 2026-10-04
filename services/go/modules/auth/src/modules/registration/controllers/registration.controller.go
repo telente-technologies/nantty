@@ -35,7 +35,10 @@ func (controller RegistrationController) RegisterAccount(writer http.ResponseWri
 }
 
 func (controller RegistrationController) CheckUsernameAvailability(writer http.ResponseWriter, request *http.Request) {
-	result, err := checkusernameavailability.Handler{Container: controller.Container}.Execute(request.Context(), checkusernameavailability.Query{Username: request.URL.Query().Get("username")})
+	query := request.URL.Query()
+	result, err := checkusernameavailability.Handler{Container: controller.Container}.Execute(request.Context(), checkusernameavailability.Query{
+		Username: utils.TruncateToLength(query.Get("username"), 64), Name: utils.TruncateToLength(query.Get("name"), 80),
+	})
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return

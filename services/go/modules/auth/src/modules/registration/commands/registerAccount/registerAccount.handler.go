@@ -71,7 +71,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		})
 	})
 	if err != nil {
-		return types.AuthenticationResult{}, err
+		return types.AuthenticationResult{}, services.AttachUsernameSuggestions(ctx, application.Client, application.Now(), err, command.Username, command.Name, email)
 	}
 	tokens, err := services.SignAccessTokenAndBuildIssuedTokens(application.Container, created, session.SessionId, session.RefreshToken)
 	return types.AuthenticationResult{Tokens: tokens, Account: created, IsNewUser: true}, err
