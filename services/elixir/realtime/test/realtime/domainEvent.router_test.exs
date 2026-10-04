@@ -122,7 +122,13 @@ defmodule Realtime.Events.DomainEventRouterTest do
   end
 
   test "routes a live comment to the live topic with the comment fields the clients render" do
-    comment = %{"id" => "c-1", "liveId" => "l-1", "author" => %{"id" => "u-1"}, "text" => "hi", "kind" => "comment"}
+    comment = %{
+      "id" => "c-1",
+      "liveId" => "l-1",
+      "author" => %{"id" => "u-1"},
+      "text" => "hi",
+      "kind" => "comment"
+    }
 
     assert {:ok, "live:l-1", payload} =
              DomainEventRouter.route_domain_event_to_topic(%{
@@ -160,5 +166,28 @@ defmodule Realtime.Events.DomainEventRouterTest do
                  "data" => %{"liveId" => "l-1", "hostId" => "host-1", "recordingId" => "r-1"}
                })
     end
+  end
+
+  test "pauses and resumes a live for every viewer without the reason" do
+    for {domain, client, state} <- [
+          {"liveSafety.paused", "live.safety.paused", "paused"},
+          {"liveSafety.resumed", "live.safety.resumed", "live"}
+        ] do
+      assert {:ok, "live:l-1", %{"type" => ^client, "state" => ^state} = payload} =
+               DomainEventRouter.route_domain_event_to_topic(%{
+                 "type" => domain,
+                 "data" => %{"liveId" => "l-1", "state" => state, "message" => "", "at" => "t"}
+               })
+
+      refute Map.has_key?(payload, "category")
+    end
+  end
+
+  test "tells only the host why their live was paused" do
+    assert {:ok, "user:host-1", %{"type" => "live.safety.hostNotice", "kind" => "hold"}} =
+             DomainEventRouter.route_domain_event_to_topic(%{
+               "type" => "liveSafety.hostNotice",
+               "data" => %{"liveId" => "l-1", "hostId" => "host-1", "kind" => "hold", "message" => "m"}
+             })
   end
 end

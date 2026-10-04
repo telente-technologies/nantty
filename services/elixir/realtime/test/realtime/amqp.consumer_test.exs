@@ -8,6 +8,7 @@ defmodule Realtime.Events.AmqpConsumerTest do
     @impl true
     def open(settings) do
       owner = Keyword.fetch!(settings, :owner)
+
       channel_pid =
         spawn(fn ->
           receive do

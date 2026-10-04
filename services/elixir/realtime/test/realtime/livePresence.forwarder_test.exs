@@ -4,7 +4,10 @@ defmodule Realtime.Presence.LivePresenceForwarderTest do
 
   defmodule SendingClient do
     def send_presence_change(live_id, joined, left) do
-      send(Application.fetch_env!(:realtime, :presence_test_pid), {:forwarded, live_id, Enum.sort(joined), Enum.sort(left)})
+      send(
+        Application.fetch_env!(:realtime, :presence_test_pid),
+        {:forwarded, live_id, Enum.sort(joined), Enum.sort(left)}
+      )
     end
   end
 
