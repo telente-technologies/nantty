@@ -2,6 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
   - "services/typescript/*"
+  - "services/scripts/apiSmoke"
 
 # Dependencies allowed to run install scripts (pnpm 10).
 onlyBuiltDependencies:

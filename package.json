@@ -34,6 +34,8 @@
     "backend:test:social": "pnpm --filter @zudomart/social test",
     "backend:test:notifications": "pnpm --filter @zudomart/notifications test",
     "backend:test:realtime": "bash services/scripts/test-realtime-in-docker.sh",
+    "backend:test:smoke": "pnpm --filter @zudomart/api-smoke test",
+    "backend:dev:ads": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8110 RABBITMQ_URL=amqp://go-ads:go-ads-local-only@localhost:5672/zudomart go run ./deployables/goAds",
     "backend:check": "bash services/scripts/check-backend-file-lengths.sh && bash services/scripts/check-no-raw-sql-in-typescript.sh"
   },
   "devDependencies": {
