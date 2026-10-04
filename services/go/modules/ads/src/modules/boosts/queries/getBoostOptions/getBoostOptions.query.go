@@ -1,3 +1,6 @@
 package getboostoptions
 
-type Query struct{ Currency string }
+type Query struct {
+	Currency string
+	Country  string
+}

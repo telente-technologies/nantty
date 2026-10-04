@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"zudomart/modules/ads/src/container"
-	adaccountservices "zudomart/modules/ads/src/modules/adAccounts/services"
 	confirmboostpayment "zudomart/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
 	createboost "zudomart/modules/ads/src/modules/boosts/commands/createBoost"
 	"zudomart/modules/ads/src/modules/boosts/dtos"
@@ -13,6 +13,7 @@ import (
 	getboostoptions "zudomart/modules/ads/src/modules/boosts/queries/getBoostOptions"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 type BoostsController struct{ Container *container.Container }
@@ -22,14 +23,13 @@ func (controller BoostsController) responder() utils.Responder {
 }
 
 func (controller BoostsController) GetOptions(writer http.ResponseWriter, request *http.Request) {
-	currency := request.URL.Query().Get("currency")
-	if currency == "" {
-		currency = adaccountservices.CurrencyForCountry(utils.ClientCountry(request))
-		if utils.ClientCountry(request) == "" {
-			currency = "NGN"
-		}
+	resolution := utils.ResolvePricingRegion(request)
+	currency := strings.ToUpper(request.URL.Query().Get("currency"))
+	if !regionpricing.IsSupportedCurrency(currency) {
+		currency = resolution.Currency
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, (getboostoptions.Handler{Container: controller.Container}).Execute(getboostoptions.Query{Currency: currency}))
+	options := (getboostoptions.Handler{Container: controller.Container}).Execute(request.Context(), getboostoptions.Query{Currency: currency, Country: resolution.CountryCode})
+	httpserver.WriteJsonResponse(writer, http.StatusOK, options)
 }
 
 func (controller BoostsController) Estimate(writer http.ResponseWriter, request *http.Request) {
@@ -38,7 +38,7 @@ func (controller BoostsController) Estimate(writer http.ResponseWriter, request 
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
 		}
-		estimate, err := (estimateboost.Handler{Container: controller.Container}).Execute(estimateboost.Query{Request: body})
+		estimate, err := (estimateboost.Handler{Container: controller.Container}).Execute(request.Context(), estimateboost.Query{Request: body})
 		if err != nil {
 			return err
 		}

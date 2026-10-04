@@ -18,6 +18,14 @@ var callToActionByGoal = map[string]string{"views": "watch_more", "profile_visit
 
 func ObjectiveForGoal(goal string) string { return objectiveByGoal[goal] }
 
+// BoostTargetCountries is the custom audience's country, or none so floors use the booster's billing-currency region.
+func BoostTargetCountries(audience dtos.BoostAudience) []string {
+	if audience.Mode == "custom" && audience.CountryCode != "" {
+		return []string{audience.CountryCode}
+	}
+	return nil
+}
+
 func CallToActionForGoal(goal string) string { return callToActionByGoal[goal] }
 
 func SuggestedDailyBudgets(minimumMinor int64, currency string) []types.Money {
