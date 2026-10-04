@@ -1,0 +1,187 @@
+.section {
+  background: var(--deep-surface);
+  color: var(--deep-ink);
+}
+
+.intro {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.eyebrow {
+  font-size: var(--fs-13);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--yellow-500);
+}
+
+.heading {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.accent {
+  color: var(--yellow-500);
+}
+
+.lede {
+  max-width: 56ch;
+  color: var(--deep-ink-muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+  margin-top: clamp(36px, 5vw, 56px);
+}
+
+.streams {
+  display: grid;
+  gap: 16px;
+}
+
+.streamCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  align-content: start;
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--deep-hover);
+  box-shadow: inset 0 0 0 1px var(--deep-hairline);
+}
+
+.streamIcon {
+  display: grid;
+  place-items: center;
+  grid-row: span 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--yellow-500);
+  color: var(--blue-900);
+}
+
+.streamTitle {
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.streamFigure {
+  color: var(--yellow-500);
+  font-weight: 700;
+}
+
+.streamDescription {
+  color: var(--deep-ink-muted);
+  line-height: 1.55;
+}
+
+.payoutCard {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  justify-items: start;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 24px;
+  background: var(--color-surface);
+  color: var(--ink-strong);
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.6);
+}
+
+.payoutLabel {
+  color: var(--ink-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+
+.payoutBalance {
+  margin-top: -10px;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.bankRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--surface-sunken);
+}
+
+.bankIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.bankText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-14);
+}
+
+.bankText span {
+  color: var(--ink-muted);
+  font-family: var(--landing-mono);
+  font-size: var(--fs-12);
+}
+
+.verifiedChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+
+.payoutHeading {
+  margin-top: 4px;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.payoutFacts {
+  display: grid;
+  gap: 10px;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+}
+
+.payoutFacts li {
+  display: flex;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.factIcon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-brand);
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 24px;
+  }
+}
