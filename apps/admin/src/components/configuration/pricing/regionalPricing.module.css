@@ -1,0 +1,57 @@
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.priceTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.priceTable th,
+.priceTable td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.priceTable thead th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.priceTable tbody th {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.tableScroller {
+  overflow-x: auto;
+}
+
+@media (max-width: 720px) {
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+}

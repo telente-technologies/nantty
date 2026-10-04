@@ -1,7 +1,7 @@
 import { CheckboxField, SelectField } from "@/components/ui/formFields";
 import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorProgramThresholds, TrialLength, TrialRules } from "@/types/platformConfiguration.type";
 
-import { MoneyAmountField, WholeNumberField } from "../shared/configurationFields";
+import { WholeNumberField } from "../shared/configurationFields";
 import styles from "./platformRules.module.css";
 
 interface EditorProps<Rules> {
@@ -103,12 +103,9 @@ export function CheckmarkPricingEditor({ rules, canWrite, onChange }: EditorProp
       <div className={styles.grid}>
         <WholeNumberField label="Blue + Gold bundle discount (%)" value={rules.bundleDiscountPercent} maximum={50} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, bundleDiscountPercent: value }))} />
         <WholeNumberField label="Bundle cap (businesses per person)" value={rules.bundleMaximumBusinesses} minimum={1} maximum={20} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, bundleMaximumBusinesses: value }))} />
-        <MoneyAmountField label="Blue checkmark (per month)" money={rules.blueMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, blueMonthlyPrice: money }))} />
-        <MoneyAmountField label="Gold-only plan (per month)" money={rules.goldOnlyMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, goldOnlyMonthlyPrice: money }))} />
-        <MoneyAmountField label="Black (per month)" money={rules.blackMonthlyPrice} currency="NGN" isDisabled={disabled} onChange={(money) => money && onChange((current) => ({ ...current, blackMonthlyPrice: money }))} />
         <WholeNumberField label="Black grace period (days)" value={rules.blackGraceDays} maximum={90} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, blackGraceDays: value }))} />
       </div>
-      <p className={styles.summary}>The bundle never stacks with the yearly discount: the bigger one wins. It never applies to Black and lapses at the next renewal if Blue ends. Blue and Gold drop at period end. Black keeps its badge for {rules.blackGraceDays} days with reminders before it is removed.</p>
+      <p className={styles.summary}>The bundle never stacks with the yearly discount: the bigger one wins. It never applies to Black and lapses at the next renewal if Blue ends. Blue and Gold drop at period end. Black keeps its badge for {rules.blackGraceDays} days with reminders before it is removed. Prices for every plan and region are set in <a href="/config/pricing">Regional pricing</a>.</p>
     </div>
   );
 }
