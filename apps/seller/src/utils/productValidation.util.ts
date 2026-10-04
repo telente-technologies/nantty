@@ -1,5 +1,6 @@
 import type { ProductStatus, ProductVisibility } from "@/types/catalog.type";
-import type { ProductUpsertRequest } from "@/types/productRequests.type";
+import { supportedCurrencyCodes } from "@/constants/currency.constant";
+import type { ProductUpsertRequest, ProductVariantUpsertRequest } from "@/types/productRequests.type";
 import type { ValidationIssue } from "@/utils/formValidation.util";
 import { isValidEan13 } from "@/utils/ean13.util";
 
@@ -49,6 +50,21 @@ function validateProductMerchandisingFields(request: ProductUpsertRequest, conte
     if (typeof video.title !== "string" || video.title.length > 80) addIssue(`videos.${index}.title`, `Video ${index + 1}: title must be 80 characters or fewer.`);
   });
   if (request.supplierId && context.supplierIds && !context.supplierIds.includes(request.supplierId)) addIssue("supplierId", "Choose one of your suppliers.");
+}
+
+function validateRegionalPrices(prices: ProductVariantUpsertRequest["regionalPrices"], path: string, addIssue: (path: string, message: string) => void): void {
+  if (prices === undefined) return;
+  if (!Array.isArray(prices) || prices.length > supportedCurrencyCodes.length) {
+    addIssue(`${path}.regionalPrices`, "Prices by country has too many entries.");
+    return;
+  }
+  const seen = new Set<string>();
+  prices.forEach((price) => {
+    if (!supportedCurrencyCodes.includes(price.currency)) addIssue(`${path}.regionalPrices.${String(price.currency)}`, "Choose a supported country price currency.");
+    else if (seen.has(price.currency)) addIssue(`${path}.regionalPrices.${price.currency}`, `The ${price.currency} price is set twice.`);
+    seen.add(price.currency);
+    if (!Number.isSafeInteger(price.priceMinor) || price.priceMinor < 1 || price.priceMinor > maximumMoneyMinor) addIssue(`${path}.regionalPrices.${String(price.currency)}`, `The ${String(price.currency)} price must be above zero.`);
+  });
 }
 
 function isWholeMinorAmount(value: unknown, allowNull: boolean): boolean {
@@ -115,6 +131,7 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
     if (!isWholeMinorAmount(variant.priceMinor, false)) addIssue(`${path}.priceMinor`, `${label}: enter a price of zero or more.`);
     if (!isWholeMinorAmount(variant.compareAtPriceMinor, true)) addIssue(`${path}.compareAtPriceMinor`, `${label}: compare-at price must be zero or more.`);
     else if (variant.compareAtPriceMinor !== null && variant.compareAtPriceMinor <= variant.priceMinor) addIssue(`${path}.compareAtPriceMinor`, `${label}: compare-at price must be higher than the price.`);
+    validateRegionalPrices(variant.regionalPrices, path, addIssue);
     if (!isWholeMinorAmount(variant.costPriceMinor, true)) addIssue(`${path}.costPriceMinor`, `${label}: cost price must be zero or more.`);
     if (!Number.isSafeInteger(variant.lowStockThreshold) || variant.lowStockThreshold < 0 || variant.lowStockThreshold > 100_000) addIssue(`${path}.lowStockThreshold`, `${label}: low-stock alert must be a whole number from 0 to 100,000.`);
     for (const reorderField of ["reorderPoint", "reorderQuantity"] as const) {

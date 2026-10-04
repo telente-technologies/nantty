@@ -1,4 +1,5 @@
 import type { ProductStatus, ProductVisibility } from "@/types/catalog.type";
+import type { CurrencyCode } from "@/types/money.type";
 import type { ProductUpsertRequest } from "@/types/productRequests.type";
 
 export function readStringArray(value: unknown): string[] {
@@ -37,6 +38,10 @@ export function coerceProductUpsertRequest(body: Record<string, unknown>): Produ
         priceMinor: record.priceMinor as number,
         compareAtPriceMinor: readNullableInteger(record.compareAtPriceMinor),
         costPriceMinor: readNullableInteger(record.costPriceMinor),
+        regionalPrices: (Array.isArray(record.regionalPrices) ? record.regionalPrices : []).map((entry) => {
+          const priceRecord = (typeof entry === "object" && entry !== null ? entry : {}) as Record<string, unknown>;
+          return { currency: priceRecord.currency as CurrencyCode, priceMinor: priceRecord.priceMinor as number };
+        }),
         lowStockThreshold: record.lowStockThreshold as number,
         reorderPoint: typeof record.reorderPoint === "number" ? record.reorderPoint : undefined,
         reorderQuantity: typeof record.reorderQuantity === "number" ? record.reorderQuantity : undefined,

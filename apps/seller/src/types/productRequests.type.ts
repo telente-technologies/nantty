@@ -1,6 +1,11 @@
 import type { ProductBrandRelationship } from "@/types/brand.type";
-import type { Money } from "@/types/money.type";
+import type { CurrencyCode, Money } from "@/types/money.type";
 import type { ProductAttribute, ProductOption, ProductStatus, ProductVisibility, StockAdjustmentReason } from "@/types/catalog.type";
+
+export interface RegionalPriceRequest {
+  readonly currency: CurrencyCode;
+  readonly priceMinor: number;
+}
 
 export interface ProductVariantUpsertRequest {
   readonly id: string | null;
@@ -10,6 +15,7 @@ export interface ProductVariantUpsertRequest {
   readonly priceMinor: number;
   readonly compareAtPriceMinor: number | null;
   readonly costPriceMinor: number | null;
+  readonly regionalPrices?: readonly RegionalPriceRequest[];
   readonly lowStockThreshold: number;
   readonly reorderPoint?: number;
   readonly reorderQuantity?: number;

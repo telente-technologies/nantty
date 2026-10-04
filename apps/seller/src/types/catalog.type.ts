@@ -41,6 +41,7 @@ export interface ProductVariant {
   readonly price: Money;
   readonly compareAtPrice: Money | null;
   readonly costPrice: Money | null;
+  readonly regionalPrices?: readonly { readonly currency: CurrencyCode; readonly priceMinor: number }[];
   readonly lowStockThreshold: number;
   readonly reorderPoint: number;
   readonly reorderQuantity: number;
