@@ -33,7 +33,7 @@ export const usersService = {
   updateShippingAddress: (addressId: string, input: ShippingAddressInput) =>
     api.patch<Address>(`/api/v1/users/me/addresses/${encodeURIComponent(addressId)}`, input),
   deleteShippingAddress: (addressId: string) => api.delete<void>(`/api/v1/users/me/addresses/${encodeURIComponent(addressId)}`),
-  checkUsernameAvailability: (username: string) => api.get<UsernameAvailability>("/api/v1/auth/username-available", { username }),
+  checkUsernameAvailability: (username: string, name?: string) => api.get<UsernameAvailability>("/api/v1/auth/username-available", name ? { username, name } : { username }),
   fetchSuggestedUsername: (seed: string) => api.get<{ username: string }>("/api/v1/auth/username-suggestion", { seed }),
   fetchMyUsernamePolicy: () => api.get<UsernamePolicy>("/api/v1/users/me/username-policy"),
   changeMyUsername: (username: string) => api.patch<User>("/api/v1/users/me/username", { username }),

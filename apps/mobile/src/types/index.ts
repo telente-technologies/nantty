@@ -20,3 +20,4 @@ export * from "./postAudience.type";
 export * from "./accountHealth.type";
 export * from "./clipCreate.type";
 export * from "./tagCandidate.type";
+export * from "./taggedUser.type";

@@ -126,6 +126,7 @@ export interface UsernameAvailability {
   readonly available: boolean;
   readonly reason?: UsernameUnavailableReason;
   readonly message?: string;
+  readonly suggestions?: readonly string[];
 }
 
 export interface UsernameChangeRecord {
