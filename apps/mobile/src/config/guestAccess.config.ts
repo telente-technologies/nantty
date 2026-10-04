@@ -77,6 +77,7 @@ export const guestPublicRouteNames: readonly string[] = [
   "Store",
   "BrandProfile",
   "UserProfile",
+  "UserProfileByUsername",
   "Connections",
   "PostDetail",
   "Live",
@@ -87,3 +88,16 @@ export const guestPublicRouteNames: readonly string[] = [
   "SettingsAppPreference",
   "SettingsAbout",
 ];
+
+const guestSkippedBackgroundCallPatterns: readonly RegExp[] = [
+  /^\/api\/v1\/lives\/[^/]+\/(join|leave|engagement)$/,
+  /^\/api\/v1\/stories\/[^/]+\/seen$/,
+  /^\/api\/v1\/posts\/[^/]+\/(share|impressions|profile-visits|link-preview)$/,
+  /^\/api\/v1\/ads\/events$/,
+  /^\/api\/v1\/analytics\/product-interactions$/,
+  /^\/api\/v1\/users\/me\/preferences$/,
+];
+
+export function isBackgroundCallSkippedForGuests(method: string, path: string): boolean {
+  return method !== "GET" && guestSkippedBackgroundCallPatterns.some((pattern) => pattern.test(path.split("?")[0] ?? path));
+}

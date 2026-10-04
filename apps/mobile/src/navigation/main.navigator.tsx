@@ -17,6 +17,7 @@ import { OrdersScreen } from "@/screens/orders/orders.screen";
 import { OrderDetailScreen } from "@/screens/orders/orderDetail.screen";
 import { OpenDisputeScreen } from "@/screens/orders/openDispute.screen";
 import { UserProfileScreen } from "@/screens/profile/userProfile.screen";
+import { UserProfileByUsernameScreen } from "@/screens/profile/userProfileByUsername.screen";
 import { EditProfileScreen } from "@/screens/profile/editProfile.screen";
 import { ConnectionsScreen } from "@/screens/profile/connections.screen";
 import { SettingsScreen } from "@/screens/settings/settings.screen";
@@ -55,6 +56,9 @@ import { ConversationInfoScreen } from "@/screens/messages/conversationInfo.scre
 import { CreatePostScreen } from "@/screens/create/createPost.screen";
 import { PostDetailScreen } from "@/screens/posts/postDetail.screen";
 import { PostAnalyticsScreen } from "@/screens/posts/postAnalytics.screen";
+import { PostQuotesScreen } from "@/screens/posts/postQuotes.screen";
+import { CommentThreadScreen } from "@/screens/posts/commentThread.screen";
+import { ContentPreferencesScreen } from "@/screens/settings/contentPreferences.screen";
 import { LiveScreen } from "@/screens/live/live.screen";
 import { LiveEndedScreen } from "@/screens/live/liveEnded.screen";
 import { StoryScreen } from "@/screens/story/story.screen";
@@ -118,6 +122,7 @@ export function MainNavigator() {
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
       <Stack.Screen name="OpenDispute" component={OpenDisputeScreen} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+      <Stack.Screen name="UserProfileByUsername" component={UserProfileByUsernameScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Connections" component={ConnectionsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -155,6 +160,9 @@ export function MainNavigator() {
       <Stack.Screen name="CreatePost" component={CreatePostScreen} options={modal} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
       <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} />
+      <Stack.Screen name="PostQuotes" component={PostQuotesScreen} />
+      <Stack.Screen name="CommentThread" component={CommentThreadScreen} />
+      <Stack.Screen name="ContentPreferences" component={ContentPreferencesScreen} />
       <Stack.Screen name="Live" component={LiveScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="Story" component={StoryScreen} options={dark} layout={keepOnDarkFirstPalette} />
