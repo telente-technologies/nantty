@@ -37,8 +37,12 @@ defmodule Realtime.Topics.TopicAuthorizerTest do
 
   test "denies live and battle topics the live service refuses" do
     Application.put_env(:realtime, :live_access_checker, DenyAll)
-    assert TopicAuthorizer.authorize_subscription(@principal, "live:live-9") == {:error, :forbidden}
-    assert TopicAuthorizer.authorize_subscription(@principal, "battle:battle-3") == {:error, :forbidden}
+
+    assert TopicAuthorizer.authorize_subscription(@principal, "live:live-9") ==
+             {:error, :forbidden}
+
+    assert TopicAuthorizer.authorize_subscription(@principal, "battle:battle-3") ==
+             {:error, :forbidden}
   end
 
   test "asks live with the account id and the full topic" do
@@ -46,13 +50,18 @@ defmodule Realtime.Topics.TopicAuthorizerTest do
     Application.put_env(:realtime, :live_access_checker, RecordingChecker)
     assert TopicAuthorizer.authorize_subscription(@principal, "live:live-9") == :ok
     assert_receive {:asked, "account-1", "live:live-9"}
-    assert TopicAuthorizer.authorize_subscription(@principal, "battle:b-1") == {:error, :forbidden}
+
+    assert TopicAuthorizer.authorize_subscription(@principal, "battle:b-1") ==
+             {:error, :forbidden}
+
     assert_receive {:asked, "account-1", "battle:b-1"}
   end
 
   test "denies live topics when the live service is not configured" do
     Application.delete_env(:realtime, :live_access_checker)
-    assert TopicAuthorizer.authorize_subscription(@principal, "live:live-9") == {:error, :forbidden}
+
+    assert TopicAuthorizer.authorize_subscription(@principal, "live:live-9") ==
+             {:error, :forbidden}
   end
 
   test "denies other users, unknown kinds and conversations without membership" do

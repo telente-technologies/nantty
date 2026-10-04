@@ -14,6 +14,7 @@ defmodule Realtime.Events.RetryPolicyTest do
       {"x-death", :array, []},
       {"traceparent", :longstr, "t"}
     ]
+
     assert RetryPolicy.attempt_from_headers(headers) == 2
     assert RetryPolicy.attempt_from_headers(:undefined) == 0
     retry = RetryPolicy.headers_for_retry(headers, 3, :boom)
