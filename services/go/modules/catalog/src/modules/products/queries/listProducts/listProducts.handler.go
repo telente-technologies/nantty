@@ -23,12 +23,12 @@ type Handler struct {
 }
 
 func PublicListingConditions() []predicate.Product {
-	return []predicate.Product{product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic)}
+	return []predicate.Product{product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic), product.ModerationVisibilityIn(enums.ModerationVisible, enums.ModerationRestricted)}
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.CursorPage[types.ProductSummaryView], error) {
 	empty := httpserver.CursorPage[types.ProductSummaryView]{}
-	conditions := PublicListingConditions()
+	conditions := services.WithRegionCondition(PublicListingConditions(), services.ViewerCountry(ctx, handler.Container, query.Viewer), query.Viewer)
 	if query.CategoryId != nil {
 		conditions = append(conditions, product.CategoryID(*query.CategoryId))
 	}

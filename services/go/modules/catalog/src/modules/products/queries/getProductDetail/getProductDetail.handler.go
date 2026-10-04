@@ -17,7 +17,6 @@ import (
 	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/types"
 	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
 )
 
 type Handler struct {
@@ -25,7 +24,7 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductDetailView, error) {
-	row, err := handler.Container.Client.Product.Query().Where(product.ID(query.ProductId), product.Status(enums.ProductActive), product.PublishedOnline(true)).Only(ctx)
+	row, err := handler.Container.Client.Product.Query().Where(product.ID(query.ProductId), product.Status(enums.ProductActive), product.PublishedOnline(true), product.ModerationVisibilityIn(enums.ModerationVisible, enums.ModerationRestricted)).Only(ctx)
 	if ent.IsNotFound(err) {
 		return types.ProductDetailView{}, catalogerrors.ProductNotFound
 	}
@@ -35,6 +34,10 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductD
 	store, err := handler.Container.Client.Store.Get(ctx, row.StoreID)
 	if err != nil || store.Status != enums.StoreActive {
 		return types.ProductDetailView{}, catalogerrors.ProductNotFound
+	}
+	country := services.ViewerCountry(ctx, handler.Container, query.Viewer)
+	if !services.StoreVisibleInRegion(ctx, handler.Container, store, country, query.Viewer) {
+		return types.ProductDetailView{}, catalogerrors.ProductNotInRegion
 	}
 	summaries, err := services.LoadProductSummaries(ctx, handler.Container, []*ent.Product{row}, query.Viewer)
 	if err != nil {
@@ -52,14 +55,14 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductD
 	if row.RatingCount > 0 {
 		detail.Rating = float64(row.RatingSum) / float64(row.RatingCount)
 	}
-	if err := handler.fillMediaVariantsAndBrand(ctx, row, &detail); err != nil {
+	if err := handler.fillMediaVariantsAndBrand(ctx, row, &detail, country); err != nil {
 		return detail, err
 	}
-	detail.Related, err = handler.related(ctx, row, query.Viewer)
+	detail.Related, err = handler.related(ctx, row, query.Viewer, country)
 	return detail, err
 }
 
-func (handler Handler) fillMediaVariantsAndBrand(ctx context.Context, row *ent.Product, detail *types.ProductDetailView) error {
+func (handler Handler) fillMediaVariantsAndBrand(ctx context.Context, row *ent.Product, detail *types.ProductDetailView, country string) error {
 	media, err := handler.Container.Client.ProductMedia.Query().Where(productmedia.ProductID(row.ID)).Order(ent.Asc(productmedia.FieldPosition)).All(ctx)
 	if err != nil {
 		return err
@@ -82,11 +85,14 @@ func (handler Handler) fillMediaVariantsAndBrand(ctx context.Context, row *ent.P
 		}
 	}
 	sizes, colors := map[string]bool{}, map[string]bool{}
+	pricing := services.LoadDisplayPricing(ctx, handler.Container, country)
+	regionalForAll := services.AllHaveRegionalPrice(variants, pricing.Currency)
 	for _, variant := range variants {
 		inStock := !row.TrackInventory || available[variant.ID] > 0
+		displayed := pricing.ForVariant(row, variant, regionalForAll)
 		detail.Variants = append(detail.Variants, types.BuyerVariantView{
 			Id: variant.ID.String(), Title: variant.Title, Size: variant.Size, Color: variant.Color, Sku: variant.Sku, InStock: inStock,
-			Price: money.Money{AmountMinor: variant.PriceMinor, Currency: money.CurrencyCode(row.Currency)},
+			Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx,
 		})
 		if variant.Size != "" && !sizes[variant.Size] {
 			sizes[variant.Size] = true
@@ -105,11 +111,11 @@ func (handler Handler) fillMediaVariantsAndBrand(ctx context.Context, row *ent.P
 	return nil
 }
 
-func (handler Handler) related(ctx context.Context, row *ent.Product, viewer *uuid.UUID) ([]types.ProductSummaryView, error) {
+func (handler Handler) related(ctx context.Context, row *ent.Product, viewer *uuid.UUID, country string) ([]types.ProductSummaryView, error) {
 	if row.CategoryID == nil {
 		return []types.ProductSummaryView{}, nil
 	}
-	conditions := append(listproducts.PublicListingConditions(), product.CategoryID(*row.CategoryID), product.IDNEQ(row.ID))
+	conditions := append(services.WithRegionCondition(listproducts.PublicListingConditions(), country, viewer), product.CategoryID(*row.CategoryID), product.IDNEQ(row.ID))
 	rows, err := handler.Container.Client.Product.Query().Where(conditions...).Order(ent.Desc(product.FieldUnitsSold), ent.Desc(product.FieldID)).Limit(6).All(ctx)
 	if err != nil {
 		return nil, err

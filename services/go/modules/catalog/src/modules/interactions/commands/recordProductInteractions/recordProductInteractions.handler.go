@@ -33,6 +33,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Inter
 			if err := events.EnqueueOutboxEventInTransaction(ctx, tx, record.Event, subjectOf(data), occurredAt, data); err != nil {
 				return err
 			}
+			if err := services.RecordStoreVisitWhenPersonalized(ctx, tx, record.Event, data, occurredAt); err != nil {
+				return err
+			}
 			result.Accepted++
 		}
 		return nil
