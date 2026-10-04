@@ -23,8 +23,9 @@ type Item struct {
 }
 
 type Result struct {
-	Items []Item `json:"items"`
-	Data  []Item `json:"data"`
+	Items      []Item  `json:"items"`
+	Data       []Item  `json:"data"`
+	NextCursor *string `json:"nextCursor"`
 }
 
 type Handler struct {

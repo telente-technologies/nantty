@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	executedueaccountdeletions "zudomart/modules/users/src/modules/accountDeletion/commands/executeDueAccountDeletions"
+	"zudomart/modules/users/src/services"
 )
 
 func setRetentionAction(t *testing.T, harness *privacyHarness, category, action string) {
@@ -33,8 +34,8 @@ func TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault(t *testing.T)
 	harness.expect("GET", "/api/v1/users/me/deletion-request", token, nil, http.StatusNotFound)
 	requested := harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true, "reason": "moving on"}, http.StatusAccepted)
 	scheduled, _ := time.Parse(time.RFC3339, requested["scheduledFor"].(string))
-	if requested["status"] != "pending" || scheduled.Sub(harness.clock.now()) < 13*24*time.Hour || len(requested["retentionPolicy"].([]any)) != 8 {
-		t.Fatalf("a pending request with a 14 day grace period and a policy snapshot is expected: %v", requested)
+	if requested["status"] != "pending" || scheduled.Sub(harness.clock.now()) < 29*24*time.Hour || len(requested["retentionPolicy"].([]any)) != 8 {
+		t.Fatalf("a pending request with a 30 day grace period and a policy snapshot is expected: %v", requested)
 	}
 	if duplicate := harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true}, http.StatusConflict); duplicate["code"] != "DELETION_ALREADY_REQUESTED" {
 		t.Fatalf("unexpected %v", duplicate)
@@ -49,7 +50,7 @@ func TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault(t *testing.T)
 	harness.expect("POST", "/api/v1/users/me/deletion-request/cancel", token, nil, http.StatusNotFound)
 
 	harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true}, http.StatusAccepted)
-	harness.clock.advance(15 * 24 * time.Hour)
+	harness.clock.advance(31 * 24 * time.Hour)
 	if executed, err := executor.Execute(context.Background(), executedueaccountdeletions.Command{}); err != nil || executed != 1 {
 		t.Fatalf("the due request must run once: %d %v", executed, err)
 	}
@@ -77,7 +78,7 @@ func TestAccountDeletionAppliesConfiguredRetentionToUsersOwnedData(t *testing.T)
 	setRetentionAction(t, harness, "orders", "delete")
 
 	harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true}, http.StatusAccepted)
-	harness.clock.advance(15 * 24 * time.Hour)
+	harness.clock.advance(31 * 24 * time.Hour)
 	if executed, err := (executedueaccountdeletions.Handler{Container: harness.container}).Execute(context.Background(), executedueaccountdeletions.Command{}); err != nil || executed != 1 {
 		t.Fatalf("execution failed: %d %v", executed, err)
 	}
@@ -109,5 +110,32 @@ func TestAccountDeletionAppliesConfiguredRetentionToUsersOwnedData(t *testing.T)
 		if row.EventType == "account.deletionExecuted" && !strings.Contains(string(row.Payload), "handled_by_owning_service") {
 			t.Fatalf("categories owned by other services must be reported as delegated: %s", row.Payload)
 		}
+	}
+}
+
+func TestPendingDeletionIsCancelledWhenTheUserLogsInAgainInsideTheGrace(t *testing.T) {
+	harness := startPrivacyHarness(t)
+	accountId, token := harness.newAccount("returner")
+	canceller := services.DeletionGraceCancelService{Container: harness.container}
+
+	if cancelled, err := canceller.CancelPendingDeletionOnLogin(context.Background(), accountId); err != nil || cancelled {
+		t.Fatalf("nothing pending means nothing cancelled: %v %v", cancelled, err)
+	}
+	harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true}, http.StatusAccepted)
+	harness.clock.advance(29 * 24 * time.Hour)
+	if cancelled, err := canceller.CancelPendingDeletionOnLogin(context.Background(), accountId); err != nil || !cancelled {
+		t.Fatalf("a login on day 29 cancels the deletion: %v %v", cancelled, err)
+	}
+	if status := harness.expect("GET", "/api/v1/users/me/deletion-request", token, nil, http.StatusOK); status["status"] != "cancelled" {
+		t.Fatalf("unexpected %v", status)
+	}
+	harness.clock.advance(5 * 24 * time.Hour)
+	if executed, err := (executedueaccountdeletions.Handler{Container: harness.container}).Execute(context.Background(), executedueaccountdeletions.Command{}); err != nil || executed != 0 {
+		t.Fatalf("a cancelled request never runs: %d %v", executed, err)
+	}
+	harness.expect("POST", "/api/v1/users/me/deletion-request", token, map[string]any{"confirm": true}, http.StatusAccepted)
+	harness.clock.advance(31 * 24 * time.Hour)
+	if cancelled, _ := canceller.CancelPendingDeletionOnLogin(context.Background(), accountId); cancelled {
+		t.Fatal("a request past its grace is not cancellable by login")
 	}
 }

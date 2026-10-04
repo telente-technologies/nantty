@@ -18,8 +18,9 @@ type DocumentSummary struct {
 }
 
 type Result struct {
-	Items []DocumentSummary `json:"items"`
-	Data  []DocumentSummary `json:"data"`
+	Items      []DocumentSummary `json:"items"`
+	Data       []DocumentSummary `json:"data"`
+	NextCursor *string           `json:"nextCursor"`
 }
 
 type Handler struct {

@@ -119,7 +119,7 @@ func startPrivacyHarness(t *testing.T, adjust ...func(*configs.PrivacySettings))
 	clock := &testClock{}
 	privacy := configs.PrivacySettings{
 		ExportBucket: "zudomart-exports-test", ExportObjectEndpoint: "http://localhost:18333", ExportRegion: "eu-west-1",
-		ExportDownloadLinkTtl: 5 * time.Minute, ExportArchiveTtl: 72 * time.Hour, ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14,
+		ExportDownloadLinkTtl: 5 * time.Minute, ExportArchiveTtl: 72 * time.Hour, ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 30,
 		DeletionWorkerPollInterval: time.Hour, InternalApiToken: "internal-secret-token-for-tests", AnonymousConsentPerMinute: 1000,
 	}
 	for _, change := range adjust {
