@@ -6,6 +6,8 @@ import { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ErrorState, Spinner } from "@/components/ui/feedback";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
+import { LiveSafetyPanel } from "@/components/live/liveSafetyPanel";
+import { StageGuestsPanel } from "@/components/live/stageGuestsPanel";
 import { useSession } from "@/components/providers/sessionProvider";
 import { LIVE_CATEGORY_LABELS } from "@/constants/liveCategories.constant";
 import { RetryButton } from "@/components/ui/controls";
@@ -132,6 +134,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
         </div>
       </header>
 
+      <LiveSafetyPanel liveId={session.id} isActive={isLive || session.state === "connecting"} />
+
       <section className={styles.card}>
         <div className={styles.cardHead}>
           <h2 className={styles.cardTitle}>Connect OBS or any encoder</h2>
@@ -154,6 +158,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
       </section>
 
       <LiveEarningsPanel earnings={session.earnings} viewers={session.viewers} peakViewers={session.peakViewers} />
+
+      <StageGuestsPanel liveId={session.id} isActive={isLive} />
 
       <div className={styles.columns}>
         {canPinProducts ? (
