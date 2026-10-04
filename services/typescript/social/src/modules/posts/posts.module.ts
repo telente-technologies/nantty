@@ -19,6 +19,11 @@ import { createListStoryTrayHandler } from "./queries/listStoryTray/listStoryTra
 import { createListUserPostsHandler } from "./queries/listUserPosts/listUserPosts.handler.js";
 import { createListUserStoriesHandler } from "./queries/listUserStories/listUserStories.handler.js";
 import { registerPostsRoutes } from "./routes/posts.routes.js";
+import { createUpdatePostSensitivityHandler } from "./commands/updatePostSensitivity/updatePostSensitivity.handler.js";
+import { createUpdateReplySettingsHandler } from "./commands/updateReplySettings/updateReplySettings.handler.js";
+import { createPostAudienceController } from "./controllers/postAudience.controller.js";
+import { createListPostQuotesHandler } from "./queries/listPostQuotes/listPostQuotes.handler.js";
+import { registerPostAudienceRoutes } from "./routes/postAudience.routes.js";
 
 export function mountPostsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
   registerPostsRoutes(router, createPostsController(route, {
@@ -37,5 +42,10 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     listUserPosts: createListUserPostsHandler(context),
     listStoryTray: createListStoryTrayHandler(context),
     listUserStories: createListUserStoriesHandler(context),
+  }));
+  registerPostAudienceRoutes(router, createPostAudienceController(route, {
+    updateReplySettings: createUpdateReplySettingsHandler(context),
+    updatePostSensitivity: createUpdatePostSensitivityHandler(context),
+    listPostQuotes: createListPostQuotesHandler(context),
   }));
 }

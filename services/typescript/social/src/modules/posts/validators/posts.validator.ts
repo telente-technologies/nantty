@@ -23,6 +23,9 @@ const stickerLayoutSchema = schema.object({
   hidden: schema.boolean().optional(),
 });
 
+const replyPolicySchema = schema.enum(["everyone", "following", "followers", "mentioned", "off"]);
+const sensitiveLabelSchema = schema.enum(["nudity", "graphic_violence", "dangerous_acts", "self_harm"]);
+
 const replyToCommentSchema = schema.object({ commentId: schema.string().uuid(), clipId: schema.string().uuid(), commenterUserId: schema.string().uuid() });
 
 export const createPostBodySchema = schema.object({
@@ -37,7 +40,13 @@ export const createPostBodySchema = schema.object({
   mentions: mentionEntitiesSchema.optional(),
   replyToComment: replyToCommentSchema.optional(),
   stickerLayout: stickerLayoutSchema.optional(),
+  replyPolicy: replyPolicySchema.optional(),
+  sensitiveLabels: schema.array(sensitiveLabelSchema).max(4).optional(),
 });
+
+export const replySettingsBodySchema = schema.object({ replyPolicy: replyPolicySchema });
+export const sensitiveLabelsBodySchema = schema.object({ sensitiveLabels: schema.array(sensitiveLabelSchema).max(4) });
+export const quotesQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
 export const publishStoryBodySchema = schema.object({ mediaId: schema.string().uuid(), media: mediaReferenceSchema });
 export const postIdParamsSchema = schema.object({ postId: schema.string().uuid() });
