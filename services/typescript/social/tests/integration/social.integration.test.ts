@@ -23,6 +23,7 @@ function directoryWithPrivateAccount(users: readonly UserSummary[], privateId: s
     findMentionPrivacy: async () => new Map(),
     findMentionTargetStatuses: async () => new Map(),
     hasPersonalizationConsent: async () => false,
+    findAccountsAllowingPersonalizedAds: async () => new Set<string>(),
     findAccountCreatedAt: async () => undefined,
   };
 }
