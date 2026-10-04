@@ -9,6 +9,7 @@ import { hasSignedInViewerSubscribedToCreator } from "./creatorSubscriptions.moc
 import { currentSoundForClip } from "./soundCatalog.mock";
 import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
 import { userSummaryById } from "./userDirectory.mock";
+import { taggedUsersFieldsForPost } from "./taggedUsers.mock";
 
 const CLIPS_PAGE_SIZE = 6;
 const CLIP_IDS_BY_CREATORS = new Set(["clip_amaka_haul", "clip_aisha_fitcheck", "clip_kelechi_bts", "clip_olumide_barber", "clip_bisola_jollof", "clip_dami_break"]);
@@ -52,6 +53,7 @@ const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
     viewerHasAccess: subscriberOnlyAccess ?? true,
     durationSeconds: seed.durationSeconds,
     sound: currentSoundForClip(seed.id),
+    ...taggedUsersFieldsForPost(seed.id),
   };
 };
 

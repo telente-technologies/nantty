@@ -13,6 +13,7 @@ import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGra
 import { isTargetSavedByViewer } from "./saveState.mock";
 import { buildRichSponsoredPosts } from "./richAds.mock";
 import { userSummaryById } from "./userDirectory.mock";
+import { taggedUsersFieldsForPost } from "./taggedUsers.mock";
 import type { LinkPreview } from "@/types/linkPreview.type";
 
 type EngagementNumbers = readonly [likes: number, comments: number, reposts: number, views: number];
@@ -104,6 +105,7 @@ function buildPostFromSeed(seed: PostSeed, sponsored = false): Post {
     products: (seed.productKeys ?? []).map((key) => productSummaryByKey(key)),
     sponsored: sponsored && firstProductSeed ? buildSponsoredPlacementForSeed(firstProductSeed) : null,
     linkPreview: seed.linkPreview ?? null,
+    ...taggedUsersFieldsForPost(seed.id),
   };
 }
 
