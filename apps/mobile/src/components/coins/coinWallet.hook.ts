@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { ApiError, generateIdempotencyKey } from "@/services/apiClient.service";
 import { coinsService } from "@/services/coins.service";
+import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, readStorePlatformName } from "@/services/storeBilling.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinPackage, VerifiedCoinPurchase } from "@/types";
 
@@ -45,6 +46,17 @@ export type CoinPurchaseOutcome =
   | { readonly kind: "failed" }
   | { readonly kind: "availableOnWebsiteOnly" };
 
+async function buyCoinPackageThroughStore(coinPackage: CoinPackage): Promise<CoinPurchaseOutcome> {
+  const platform = readStorePlatformName();
+  if (!platform || !coinPackage.storeProductId || !isStoreBillingAvailable()) return { kind: "availableOnWebsiteOnly" };
+  const purchase = await purchaseStoreProduct(coinPackage.storeProductId);
+  if (!purchase) return { kind: "failed" };
+  const verified = await coinsService.redeemStoreReceipt({ platform, productId: purchase.productId, receipt: purchase.receipt, transactionId: purchase.transactionId });
+  if (verified.status === "succeeded") await finishStoreTransaction(purchase.transactionId);
+  if (verified.status === "succeeded") return { kind: "credited", coins: verified.coins };
+  return verified.status === "pending" ? { kind: "pending" } : { kind: "failed" };
+}
+
 export function useBuyCoinsWithInAppBrowser() {
   const queryClient = useQueryClient();
   const pendingPurchaseIdempotencyKey = useRef<string | null>(null);
@@ -53,6 +65,7 @@ export function useBuyCoinsWithInAppBrowser() {
 
   const buyCoinPackage = useMutation({
     mutationFn: async (coinPackage: CoinPackage): Promise<CoinPurchaseOutcome> => {
+      if (coinPackage.purchaseChannel === "store_iap") return buyCoinPackageThroughStore(coinPackage);
       pendingPurchaseIdempotencyKey.current ??= generateIdempotencyKey();
       const purchase = await coinsService.startCoinPurchase(coinPackage.id, pendingPurchaseIdempotencyKey.current);
       pendingPurchaseIdempotencyKey.current = null;
