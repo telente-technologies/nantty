@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { buildInternalRoute } from "@/components/chat/chatLinks.util";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { chatSafetyService } from "@/services/chatSafety.service";
@@ -54,7 +55,7 @@ export function SharedContentCardView({ reference, snapshot }: SharedContentCard
           </Text>
         ) : null}
         {isAvailable && reference.kind === "profile" && card.followsAuthor === false ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={`Follow ${card.title}`} onPress={() => follow.mutate()} style={styles.followButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Follow ${card.title}`} onPress={() => requireAuthThen(() => follow.mutate(), undefined, "follow people")} style={styles.followButton}>
             <Text size={12} weight={600} lineHeight={16} color={colors.white}>{follow.isPending ? "Following…" : "Follow"}</Text>
           </Pressable>
         ) : null}
