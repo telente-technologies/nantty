@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
+	"zudomart/modules/orders/src/generated/ent/invoicecounter"
 	"zudomart/modules/orders/src/generated/ent/orderevent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/orderitem"
@@ -32,6 +33,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
+	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
 	"github.com/google/uuid"
 )
@@ -372,6 +374,12 @@ func init() {
 	idempotentrequestDescID := idempotentrequestMixinFields0[0].Descriptor()
 	// idempotentrequest.DefaultID holds the default value on creation for the id field.
 	idempotentrequest.DefaultID = idempotentrequestDescID.Default.(func() uuid.UUID)
+	invoicecounterFields := schema.InvoiceCounter{}.Fields()
+	_ = invoicecounterFields
+	// invoicecounterDescLastNumber is the schema descriptor for last_number field.
+	invoicecounterDescLastNumber := invoicecounterFields[1].Descriptor()
+	// invoicecounter.DefaultLastNumber holds the default value on creation for the last_number field.
+	invoicecounter.DefaultLastNumber = invoicecounterDescLastNumber.Default.(int)
 	ordereventMixin := schema.OrderEvent{}.Mixin()
 	ordereventMixinFields0 := ordereventMixin[0].Fields()
 	_ = ordereventMixinFields0
@@ -474,12 +482,18 @@ func init() {
 	ordergroupDescPaymentStatus := ordergroupFields[10].Descriptor()
 	// ordergroup.DefaultPaymentStatus holds the default value on creation for the payment_status field.
 	ordergroup.DefaultPaymentStatus = ordergroupDescPaymentStatus.Default.(string)
+	// ordergroupDescPaymentMode is the schema descriptor for payment_mode field.
+	ordergroupDescPaymentMode := ordergroupFields[11].Descriptor()
+	// ordergroup.DefaultPaymentMode holds the default value on creation for the payment_mode field.
+	ordergroup.DefaultPaymentMode = ordergroupDescPaymentMode.Default.(string)
+	// ordergroup.PaymentModeValidator is a validator for the "payment_mode" field. It is called by the builders before save.
+	ordergroup.PaymentModeValidator = ordergroupDescPaymentMode.Validators[0].(func(string) error)
 	// ordergroupDescDeliveryStatus is the schema descriptor for delivery_status field.
-	ordergroupDescDeliveryStatus := ordergroupFields[11].Descriptor()
+	ordergroupDescDeliveryStatus := ordergroupFields[12].Descriptor()
 	// ordergroup.DefaultDeliveryStatus holds the default value on creation for the delivery_status field.
 	ordergroup.DefaultDeliveryStatus = ordergroupDescDeliveryStatus.Default.(string)
 	// ordergroupDescCurrency is the schema descriptor for currency field.
-	ordergroupDescCurrency := ordergroupFields[12].Descriptor()
+	ordergroupDescCurrency := ordergroupFields[13].Descriptor()
 	// ordergroup.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	ordergroup.CurrencyValidator = func() func(string) error {
 		validators := ordergroupDescCurrency.Validators
@@ -497,59 +511,59 @@ func init() {
 		}
 	}()
 	// ordergroupDescDiscountMinor is the schema descriptor for discount_minor field.
-	ordergroupDescDiscountMinor := ordergroupFields[14].Descriptor()
+	ordergroupDescDiscountMinor := ordergroupFields[15].Descriptor()
 	// ordergroup.DefaultDiscountMinor holds the default value on creation for the discount_minor field.
 	ordergroup.DefaultDiscountMinor = ordergroupDescDiscountMinor.Default.(int64)
 	// ordergroupDescStoreCreditMinor is the schema descriptor for store_credit_minor field.
-	ordergroupDescStoreCreditMinor := ordergroupFields[16].Descriptor()
+	ordergroupDescStoreCreditMinor := ordergroupFields[17].Descriptor()
 	// ordergroup.DefaultStoreCreditMinor holds the default value on creation for the store_credit_minor field.
 	ordergroup.DefaultStoreCreditMinor = ordergroupDescStoreCreditMinor.Default.(int64)
 	// ordergroupDescRefundedMinor is the schema descriptor for refunded_minor field.
-	ordergroupDescRefundedMinor := ordergroupFields[19].Descriptor()
+	ordergroupDescRefundedMinor := ordergroupFields[20].Descriptor()
 	// ordergroup.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
 	ordergroup.DefaultRefundedMinor = ordergroupDescRefundedMinor.Default.(int64)
 	// ordergroupDescStockReserved is the schema descriptor for stock_reserved field.
-	ordergroupDescStockReserved := ordergroupFields[21].Descriptor()
+	ordergroupDescStockReserved := ordergroupFields[22].Descriptor()
 	// ordergroup.DefaultStockReserved holds the default value on creation for the stock_reserved field.
 	ordergroup.DefaultStockReserved = ordergroupDescStockReserved.Default.(bool)
 	// ordergroupDescCourierName is the schema descriptor for courier_name field.
-	ordergroupDescCourierName := ordergroupFields[22].Descriptor()
+	ordergroupDescCourierName := ordergroupFields[23].Descriptor()
 	// ordergroup.CourierNameValidator is a validator for the "courier_name" field. It is called by the builders before save.
 	ordergroup.CourierNameValidator = ordergroupDescCourierName.Validators[0].(func(string) error)
 	// ordergroupDescTrackingNumber is the schema descriptor for tracking_number field.
-	ordergroupDescTrackingNumber := ordergroupFields[23].Descriptor()
+	ordergroupDescTrackingNumber := ordergroupFields[24].Descriptor()
 	// ordergroup.TrackingNumberValidator is a validator for the "tracking_number" field. It is called by the builders before save.
 	ordergroup.TrackingNumberValidator = ordergroupDescTrackingNumber.Validators[0].(func(string) error)
 	// ordergroupDescTrackingURL is the schema descriptor for tracking_url field.
-	ordergroupDescTrackingURL := ordergroupFields[24].Descriptor()
+	ordergroupDescTrackingURL := ordergroupFields[25].Descriptor()
 	// ordergroup.TrackingURLValidator is a validator for the "tracking_url" field. It is called by the builders before save.
 	ordergroup.TrackingURLValidator = ordergroupDescTrackingURL.Validators[0].(func(string) error)
 	// ordergroupDescRiderName is the schema descriptor for rider_name field.
-	ordergroupDescRiderName := ordergroupFields[26].Descriptor()
+	ordergroupDescRiderName := ordergroupFields[27].Descriptor()
 	// ordergroup.RiderNameValidator is a validator for the "rider_name" field. It is called by the builders before save.
 	ordergroup.RiderNameValidator = ordergroupDescRiderName.Validators[0].(func(string) error)
 	// ordergroupDescRiderPhone is the schema descriptor for rider_phone field.
-	ordergroupDescRiderPhone := ordergroupFields[27].Descriptor()
+	ordergroupDescRiderPhone := ordergroupFields[28].Descriptor()
 	// ordergroup.RiderPhoneValidator is a validator for the "rider_phone" field. It is called by the builders before save.
 	ordergroup.RiderPhoneValidator = ordergroupDescRiderPhone.Validators[0].(func(string) error)
 	// ordergroupDescDeliveryAttempts is the schema descriptor for delivery_attempts field.
-	ordergroupDescDeliveryAttempts := ordergroupFields[28].Descriptor()
+	ordergroupDescDeliveryAttempts := ordergroupFields[29].Descriptor()
 	// ordergroup.DefaultDeliveryAttempts holds the default value on creation for the delivery_attempts field.
 	ordergroup.DefaultDeliveryAttempts = ordergroupDescDeliveryAttempts.Default.(int)
 	// ordergroupDescLastAttemptNote is the schema descriptor for last_attempt_note field.
-	ordergroupDescLastAttemptNote := ordergroupFields[29].Descriptor()
+	ordergroupDescLastAttemptNote := ordergroupFields[30].Descriptor()
 	// ordergroup.LastAttemptNoteValidator is a validator for the "last_attempt_note" field. It is called by the builders before save.
 	ordergroup.LastAttemptNoteValidator = ordergroupDescLastAttemptNote.Validators[0].(func(string) error)
 	// ordergroupDescCancelReason is the schema descriptor for cancel_reason field.
-	ordergroupDescCancelReason := ordergroupFields[37].Descriptor()
+	ordergroupDescCancelReason := ordergroupFields[38].Descriptor()
 	// ordergroup.CancelReasonValidator is a validator for the "cancel_reason" field. It is called by the builders before save.
 	ordergroup.CancelReasonValidator = ordergroupDescCancelReason.Validators[0].(func(string) error)
 	// ordergroupDescVersion is the schema descriptor for version field.
-	ordergroupDescVersion := ordergroupFields[38].Descriptor()
+	ordergroupDescVersion := ordergroupFields[39].Descriptor()
 	// ordergroup.DefaultVersion holds the default value on creation for the version field.
 	ordergroup.DefaultVersion = ordergroupDescVersion.Default.(int)
 	// ordergroupDescUpdatedAt is the schema descriptor for updated_at field.
-	ordergroupDescUpdatedAt := ordergroupFields[39].Descriptor()
+	ordergroupDescUpdatedAt := ordergroupFields[40].Descriptor()
 	// ordergroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	ordergroup.DefaultUpdatedAt = ordergroupDescUpdatedAt.Default.(func() time.Time)
 	// ordergroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1285,4 +1299,29 @@ func init() {
 	storerewardsettingsDescID := storerewardsettingsMixinFields0[0].Descriptor()
 	// storerewardsettings.DefaultID holds the default value on creation for the id field.
 	storerewardsettings.DefaultID = storerewardsettingsDescID.Default.(func() uuid.UUID)
+	storesuccessstatMixin := schema.StoreSuccessStat{}.Mixin()
+	storesuccessstatMixinFields0 := storesuccessstatMixin[0].Fields()
+	_ = storesuccessstatMixinFields0
+	storesuccessstatFields := schema.StoreSuccessStat{}.Fields()
+	_ = storesuccessstatFields
+	// storesuccessstatDescCreatedAt is the schema descriptor for created_at field.
+	storesuccessstatDescCreatedAt := storesuccessstatMixinFields0[1].Descriptor()
+	// storesuccessstat.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storesuccessstat.DefaultCreatedAt = storesuccessstatDescCreatedAt.Default.(func() time.Time)
+	// storesuccessstatDescSettledOrders is the schema descriptor for settled_orders field.
+	storesuccessstatDescSettledOrders := storesuccessstatFields[1].Descriptor()
+	// storesuccessstat.DefaultSettledOrders holds the default value on creation for the settled_orders field.
+	storesuccessstat.DefaultSettledOrders = storesuccessstatDescSettledOrders.Default.(int)
+	// storesuccessstatDescSuccessfulOrders is the schema descriptor for successful_orders field.
+	storesuccessstatDescSuccessfulOrders := storesuccessstatFields[2].Descriptor()
+	// storesuccessstat.DefaultSuccessfulOrders holds the default value on creation for the successful_orders field.
+	storesuccessstat.DefaultSuccessfulOrders = storesuccessstatDescSuccessfulOrders.Default.(int)
+	// storesuccessstatDescComputedAt is the schema descriptor for computed_at field.
+	storesuccessstatDescComputedAt := storesuccessstatFields[3].Descriptor()
+	// storesuccessstat.DefaultComputedAt holds the default value on creation for the computed_at field.
+	storesuccessstat.DefaultComputedAt = storesuccessstatDescComputedAt.Default.(func() time.Time)
+	// storesuccessstatDescID is the schema descriptor for id field.
+	storesuccessstatDescID := storesuccessstatMixinFields0[0].Descriptor()
+	// storesuccessstat.DefaultID holds the default value on creation for the id field.
+	storesuccessstat.DefaultID = storesuccessstatDescID.Default.(func() uuid.UUID)
 }

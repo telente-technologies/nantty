@@ -30,6 +30,8 @@ type Tx struct {
 	FlashSaleItem *FlashSaleItemClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
+	// InvoiceCounter is the client for interacting with the InvoiceCounter builders.
+	InvoiceCounter *InvoiceCounterClient
 	// OrderEvent is the client for interacting with the OrderEvent builders.
 	OrderEvent *OrderEventClient
 	// OrderGroup is the client for interacting with the OrderGroup builders.
@@ -68,6 +70,8 @@ type Tx struct {
 	StoreCreditEntry *StoreCreditEntryClient
 	// StoreRewardSettings is the client for interacting with the StoreRewardSettings builders.
 	StoreRewardSettings *StoreRewardSettingsClient
+	// StoreSuccessStat is the client for interacting with the StoreSuccessStat builders.
+	StoreSuccessStat *StoreSuccessStatClient
 
 	// lazily loaded.
 	client     *Client
@@ -207,6 +211,7 @@ func (tx *Tx) init() {
 	tx.FlashSale = NewFlashSaleClient(tx.config)
 	tx.FlashSaleItem = NewFlashSaleItemClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
+	tx.InvoiceCounter = NewInvoiceCounterClient(tx.config)
 	tx.OrderEvent = NewOrderEventClient(tx.config)
 	tx.OrderGroup = NewOrderGroupClient(tx.config)
 	tx.OrderItem = NewOrderItemClient(tx.config)
@@ -226,6 +231,7 @@ func (tx *Tx) init() {
 	tx.ShippingZone = NewShippingZoneClient(tx.config)
 	tx.StoreCreditEntry = NewStoreCreditEntryClient(tx.config)
 	tx.StoreRewardSettings = NewStoreRewardSettingsClient(tx.config)
+	tx.StoreSuccessStat = NewStoreSuccessStatClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

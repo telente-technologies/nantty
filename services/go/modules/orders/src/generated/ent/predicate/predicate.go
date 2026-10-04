@@ -30,6 +30,9 @@ type FlashSaleItem func(*sql.Selector)
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
+// InvoiceCounter is the predicate function for invoicecounter builders.
+type InvoiceCounter func(*sql.Selector)
+
 // OrderEvent is the predicate function for orderevent builders.
 type OrderEvent func(*sql.Selector)
 
@@ -86,3 +89,6 @@ type StoreCreditEntry func(*sql.Selector)
 
 // StoreRewardSettings is the predicate function for storerewardsettings builders.
 type StoreRewardSettings func(*sql.Selector)
+
+// StoreSuccessStat is the predicate function for storesuccessstat builders.
+type StoreSuccessStat func(*sql.Selector)
