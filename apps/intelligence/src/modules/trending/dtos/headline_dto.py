@@ -13,7 +13,7 @@ from src.validators.common_field_validator import (
     TopicSlug,
 )
 
-HEADLINE_SOURCE_LABEL = "Summarised from posts"
+HEADLINE_SOURCE_LABEL: Literal["Summarised from posts"] = "Summarised from posts"
 
 
 class HeadlinePost(ContractModel):
