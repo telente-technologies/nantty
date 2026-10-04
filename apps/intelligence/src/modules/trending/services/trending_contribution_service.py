@@ -37,6 +37,8 @@ class TrendingContribution:
     country: str | None
     weight: float
     occurred_at: datetime
+    actor_trust: str | None = None
+    actor_cluster_key: str | None = None
 
 
 def build_contributions_for_social_item(
@@ -47,16 +49,15 @@ def build_contributions_for_social_item(
     hashtags: Sequence[str],
     weight: float,
 ) -> list[TrendingContribution]:
-    contributions = [TrendingContribution(item_kind, item_id, event.actor_id, event.country, weight, event.occurred_at)]
-    contributions += [
-        TrendingContribution("hashtag", hashtag, event.actor_id, event.country, weight, event.occurred_at)
-        for hashtag in dict.fromkeys(hashtags)
+    trust = event.context.actor_trust
+    cluster = event.context.actor_cluster_key
+    targets: list[tuple[TrendingItemKind, str]] = [(item_kind, item_id)]
+    targets += [("hashtag", hashtag) for hashtag in dict.fromkeys(hashtags)]
+    targets += [("topic", topic) for topic in dict.fromkeys(topics)]
+    return [
+        TrendingContribution(kind, target, event.actor_id, event.country, weight, event.occurred_at, trust, cluster)
+        for kind, target in targets
     ]
-    contributions += [
-        TrendingContribution("topic", topic, event.actor_id, event.country, weight, event.occurred_at)
-        for topic in dict.fromkeys(topics)
-    ]
-    return contributions
 
 
 def list_trending_contributions_for_event(event: IntelligenceEvent) -> list[TrendingContribution]:
