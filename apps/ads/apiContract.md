@@ -1,6 +1,6 @@
 # Zudomart Ads Manager — API contract
 
-Consumer: `apps/ads` (Ads Manager, `ads.<domain>`). Implementer: `apps/api` (ads module), which calls the Python ads service (`apps/intelligence`) for ranking, the second-price auction with quality score, pacing and frequency capping. This app never talks to the Python service.
+Consumer: `apps/ads` (Ads Manager, `ads.<domain>`). Implementer: `apps/api` (ads module), which calls the Python ads service (`services/python/intelligence`) for ranking, the second-price auction with quality score, pacing and frequency capping. This app never talks to the Python service.
 
 The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/...`), which adds `Authorization: Bearer <accessToken>` from an httpOnly cookie, checks the ad-account role, verifies CSRF, and forwards to `GET|POST|PUT|PATCH|DELETE {ADS_API_URL}/api/v1/<path>`. The mock adapter (`src/mocks/**`, on by default in dev via `ADS_USE_MOCKS`) implements every endpoint below and is the reference behaviour.
 
