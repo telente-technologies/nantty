@@ -55,7 +55,7 @@ export class EmailDeliveryService {
     return this.run(request, request.mailKind, null, async (unsubscribeUrl) => request.render(unsubscribeUrl));
   }
 
-  private async run(request: BaseRequest, mailKind: MailKind, templateKey: string | null, render: (unsubscribeUrl: string) => Promise<{ subject: string; html: string; text: string }>): Promise<EmailDeliveryOutcome> {
+  private async run(request: BaseRequest, mailKind: MailKind, templateKey: string | null, render: (unsubscribeUrl: string) => Promise<{ subject: string; html: string; text: string; sender?: { from: string; replyTo: string } }>): Promise<EmailDeliveryOutcome> {
     const { deliveries } = this.deps;
     const claim = await deliveries.claim({ dedupeKey: request.dedupeKey, eventId: request.eventId, userId: request.recipient.accountId, channel: "email", templateKey, mailKind });
     if (claim.alreadyProcessed) return { status: "duplicate", previous: claim.status };
@@ -67,10 +67,11 @@ export class EmailDeliveryService {
     }
     try {
       const unsubscribeUrl = this.deps.unsubscribeTokens.buildUnsubscribeUrl(request.recipient.accountId);
-      const rendered = await render(unsubscribeUrl);
+      const { sender, ...rendered } = await render(unsubscribeUrl);
       const message: OutgoingEmail = {
         to: request.recipient.email ?? "",
         ...rendered,
+        ...(sender === undefined ? {} : { from: sender.from, replyTo: sender.replyTo }),
         ...(mailKind === "marketing" ? { headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } } : {}),
         tags: { kind: mailKind, ...(templateKey === null ? {} : { template: templateKey }) },
       };

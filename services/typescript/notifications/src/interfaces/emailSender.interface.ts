@@ -3,6 +3,8 @@ export interface OutgoingEmail {
   readonly subject: string;
   readonly html: string;
   readonly text: string;
+  readonly from?: string;
+  readonly replyTo?: string;
   readonly headers?: Readonly<Record<string, string>>;
   readonly tags?: Readonly<Record<string, string>>;
 }

@@ -18,8 +18,9 @@ export class SesEmailSender implements EmailSender {
 
   public async send(email: OutgoingEmail): Promise<{ readonly messageId: string }> {
     const result = await this.client.send(new SendEmailCommand({
-      FromEmailAddress: this.options.fromAddress,
+      FromEmailAddress: email.from ?? this.options.fromAddress,
       Destination: { ToAddresses: [email.to] },
+      ...(email.replyTo === undefined ? {} : { ReplyToAddresses: [email.replyTo] }),
       ConfigurationSetName: this.options.configurationSet,
       EmailTags: Object.entries(email.tags ?? {}).map(([Name, Value]) => ({ Name, Value })),
       Content: {
