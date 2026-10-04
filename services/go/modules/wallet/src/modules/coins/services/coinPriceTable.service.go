@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/wallet/src/modules/coins/dtos"
 	"zudomart/modules/wallet/src/modules/coins/models"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 var ErrCoinPriceRowInvalid = httpserver.NewApiError(http.StatusUnprocessableEntity, "COIN_PRICE_ROW_INVALID", "A coin pack needs a price and a positive coin amount.")
@@ -43,8 +44,8 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 		}
 		row.Coins = coins
 	}
-	for _, price := range row.Prices {
-		if price <= 0 {
+	for currency, price := range row.Prices {
+		if price <= 0 || !regionpricing.IsSupportedCurrency(currency) {
 			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 		}
 	}

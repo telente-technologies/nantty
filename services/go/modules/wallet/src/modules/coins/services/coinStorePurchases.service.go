@@ -21,7 +21,8 @@ var sourceByStore = map[string]coinpurchase.Source{paymentconstants.StoreAppleIa
 
 func (purchases CoinPurchases) RedeemVerifiedStorePurchaseInTransaction(ctx context.Context, transaction *sql.Tx, userId, store string, verified interfaces.VerifiedStorePurchase) (dtos.VerifiedCoinPurchaseDto, error) {
 	client := purchases.Container.Client(transaction)
-	pack, err := client.CoinPackage.Query().Where(coinpackage.StoreProductID(verified.ProductId), coinpackage.PurchaseChannelEQ(coinpackage.PurchaseChannelStoreIap)).Only(ctx)
+	platform := map[string]coinpackage.ClientPlatform{paymentconstants.StoreAppleIap: coinpackage.ClientPlatformIos, paymentconstants.StoreGooglePlay: coinpackage.ClientPlatformAndroid}[store]
+	pack, err := client.CoinPackage.Query().Where(coinpackage.StoreProductID(verified.ProductId), coinpackage.PurchaseChannelEQ(coinpackage.PurchaseChannelStoreIap), coinpackage.ClientPlatformEQ(platform)).First(ctx)
 	if err != nil {
 		return dtos.VerifiedCoinPurchaseDto{}, ErrCoinPackageNotFound
 	}

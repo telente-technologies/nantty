@@ -14,20 +14,10 @@ import (
 	"zudomart/modules/wallet/src/modules/coins/dtos"
 	"zudomart/modules/wallet/src/modules/coins/models"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 var ErrCoinPackageNotFound = httpserver.NewApiError(http.StatusNotFound, "COIN_PACKAGE_NOT_FOUND", "Coin package was not found.")
-
-type defaultCoinPackTier struct {
-	tier             string
-	nairaPriceMinor  int64
-	dollarPriceMinor int64
-	sortOrder        int
-}
-
-var defaultCoinPackTiers = []defaultCoinPackTier{
-	{"1", 150_000, 99, 1}, {"2", 750_000, 499, 2}, {"3", 1_500_000, 999, 3}, {"4", 3_000_000, 1_999, 4}, {"5", 7_500_000, 4_999, 5},
-}
 
 type CoinPackDefinition struct {
 	Id             string
@@ -46,30 +36,26 @@ type CoinCatalog struct {
 }
 
 func (catalog CoinCatalog) DefaultCoinPackDefinitions() []CoinPackDefinition {
-	settings := catalog.Container.Settings
 	var definitions []CoinPackDefinition
 	for _, platform := range []coinpackage.ClientPlatform{coinpackage.ClientPlatformWeb, coinpackage.ClientPlatformIos, coinpackage.ClientPlatformAndroid} {
-		for _, tier := range defaultCoinPackTiers {
-			definition := CoinPackDefinition{Id: string(platform) + "-coins-" + tier.tier, ClientPlatform: platform, Active: true, SortOrder: tier.sortOrder}
-			pricedIn, price := "USD", tier.dollarPriceMinor
+		for _, tier := range regionpricing.DefaultCoinPackTiers {
+			definition := CoinPackDefinition{
+				Id: string(platform) + "-coins-" + tier.Tier, Name: fmt.Sprintf("%d coins", tier.Coins), ClientPlatform: platform, Coins: tier.Coins,
+				Prices: regionpricing.CoinPackPrices(tier.Coins, string(platform)), Active: true, SortOrder: tier.SortOrder,
+			}
 			if platform == coinpackage.ClientPlatformWeb {
-				pricedIn, price = "NGN", tier.nairaPriceMinor
-				definition.Prices = map[string]int64{"NGN": tier.nairaPriceMinor, "USD": tier.dollarPriceMinor}
+				definition.BonusCoins = tier.WebBonusCoins
 			} else {
-				definition.Prices = map[string]int64{"USD": tier.dollarPriceMinor}
-				definition.StoreProductId = "zudomart." + string(platform) + ".coins.tier" + tier.tier
+				definition.StoreProductId = regionpricing.DefaultStoreCoinProductId(tier.Tier)
 			}
-			coins, err := models.CoinsForChannelPrice(price, settings.CoinChannelFeeBps[string(platform)], settings.CoinNetValueMinorByCurrency[pricedIn])
-			if err != nil || coins <= 0 {
-				continue
-			}
-			definition.Coins, definition.Name = coins, fmt.Sprintf("%d coins", coins)
 			definitions = append(definitions, definition)
 		}
 	}
 	return definitions
 }
 
+// SeedDefaultCoinPackagesWhenMissing inserts the regional catalogue and adds any currency an existing pack has no price
+// for yet, never changing a price that is already set.
 func (catalog CoinCatalog) SeedDefaultCoinPackagesWhenMissing(ctx context.Context) error {
 	client := catalog.Container.Client(catalog.Container.Resources.Database)
 	for _, definition := range catalog.DefaultCoinPackDefinitions() {
@@ -80,6 +66,22 @@ func (catalog CoinCatalog) SeedDefaultCoinPackagesWhenMissing(ctx context.Contex
 			OnConflictColumns(coinpackage.FieldID).DoNothing().Exec(ctx)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return err
+		}
+		existing, err := client.CoinPackage.Get(ctx, definition.Id)
+		if err != nil {
+			return err
+		}
+		merged, changed := DecodeCoinPackagePrices(existing), false
+		for currency, amount := range definition.Prices {
+			if _, priced := merged[currency]; !priced {
+				merged[currency], changed = amount, true
+			}
+		}
+		if changed {
+			encoded, _ := json.Marshal(merged)
+			if err := existing.Update().SetPrices(encoded).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

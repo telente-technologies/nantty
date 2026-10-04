@@ -1,29 +1,59 @@
 package utils
 
 import (
+	"context"
+	"database/sql"
 	"net/http"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
+
+	ledgerutils "zudomart/modules/ledger/src/utils"
+	"zudomart/platform/jwtauth"
+	"zudomart/platform/regionpricing"
 )
 
-var currencyByCountry = map[string]string{
-	"NG": "NGN", "GH": "GHS", "KE": "KES", "ZA": "ZAR", "GB": "GBP", "US": "USD",
-	"DE": "EUR", "FR": "EUR", "IE": "EUR", "NL": "EUR", "ES": "EUR", "IT": "EUR", "PT": "EUR", "BE": "EUR", "AT": "EUR", "FI": "EUR",
-}
-
-var supportedCurrencies = map[string]bool{"NGN": true, "GHS": true, "KES": true, "ZAR": true, "GBP": true, "EUR": true, "USD": true}
+type ProfileCountryLookup func(ctx context.Context, accountId string) string
 
 type RegionHeaderCurrencyResolver struct {
-	DefaultCurrency string
+	DefaultCurrency      string
+	TrustedCountryHeader string
+	AccessVerifier       *jwtauth.AccessTokenVerifier
+	ProfileCountry       ProfileCountryLookup
 }
 
+// ResolveViewerCurrency is for display only (wallet balances), so an explicit ?currency choice is honoured.
 func (resolver RegionHeaderCurrencyResolver) ResolveViewerCurrency(request *http.Request) string {
-	if requested := strings.ToUpper(request.URL.Query().Get("currency")); supportedCurrencies[requested] {
+	if requested := strings.ToUpper(request.URL.Query().Get("currency")); regionpricing.IsSupportedCurrency(requested) {
 		return requested
 	}
-	if currency, known := currencyByCountry[strings.ToUpper(strings.TrimSpace(request.Header.Get("X-Client-Region")))]; known {
-		return currency
-	}
-	return resolver.DefaultCurrency
+	return resolver.ResolvePricingRegion(request).Currency
 }
 
-func IsSupportedWalletCurrency(currency string) bool { return supportedCurrencies[currency] }
+// ResolvePricingRegion decides what the viewer pays: storefront (apps) > profile country > CDN country > client hint > US/USD.
+// It never reads ?currency, so a buyer can't pick a cheaper region's prices.
+func (resolver RegionHeaderCurrencyResolver) ResolvePricingRegion(request *http.Request) regionpricing.Resolution {
+	profileCountry := ""
+	if userId := ledgerutils.ReadOptionalPrincipalUserId(request, resolver.AccessVerifier); userId != "" && resolver.ProfileCountry != nil {
+		profileCountry = resolver.ProfileCountry(request.Context(), userId)
+	}
+	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, resolver.TrustedCountryHeader, profileCountry))
+}
+
+func ProfileCountryFromUsersSchema(database *sql.DB, usersSchema string) ProfileCountryLookup {
+	return func(ctx context.Context, accountId string) string {
+		if database == nil || usersSchema == "" {
+			return ""
+		}
+		var country string
+		query := "SELECT COALESCE(country_code, '') FROM " + pgx.Identifier{usersSchema, "profiles"}.Sanitize() + " WHERE account_id::text = $1 AND kind = 'personal' LIMIT 1"
+		if database.QueryRowContext(ctx, query, accountId).Scan(&country) != nil {
+			return ""
+		}
+		return country
+	}
+}
+
+func IsSupportedWalletCurrency(currency string) bool {
+	return regionpricing.IsSupportedCurrency(currency)
+}

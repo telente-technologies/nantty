@@ -1,12 +1,12 @@
 package wallet
 
 import (
-	"strings"
 	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
