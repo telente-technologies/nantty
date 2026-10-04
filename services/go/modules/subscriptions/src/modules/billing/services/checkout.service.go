@@ -35,6 +35,7 @@ type CheckoutRequest struct {
 	ReturnTo       string
 	ClientPlatform string
 	DeviceId       string
+	ViewerCountry  string
 }
 
 type CheckoutView struct {
@@ -75,7 +76,7 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 		return CheckoutView{}, ErrProfileNotEligible
 	}
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	quote, currency, err := billing.QuoteForOwner(ctx, client, request.UserId, request.PlanCode, firstNonEmpty(profile.CountryCode, billing.Container.Settings.DefaultCountry), request.Interval)
+	quote, currency, err := billing.QuoteForOwner(ctx, client, request.UserId, request.PlanCode, firstNonEmpty(profile.CountryCode, request.ViewerCountry), request.Interval)
 	if err != nil {
 		return CheckoutView{}, err
 	}

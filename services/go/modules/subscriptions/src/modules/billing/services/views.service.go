@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/platform/regionpricing"
 )
 
 type SubscriptionView struct {
@@ -48,41 +49,77 @@ func (billing Billing) ListMySubscriptions(ctx context.Context, userId string) (
 }
 
 type PlanView struct {
-	Id        string         `json:"id"`
-	PlanCode  string         `json:"planCode"`
-	Tier      string         `json:"tier"`
-	Interval  string         `json:"interval"`
-	Price     map[string]any `json:"price"`
-	ListPrice map[string]any `json:"listPrice"`
-	Discount  string         `json:"discountKind"`
-	TrialDays int            `json:"trialDays"`
+	Id             string         `json:"id"`
+	PlanCode       string         `json:"planCode"`
+	Tier           string         `json:"tier"`
+	Interval       string         `json:"interval"`
+	Channel        string         `json:"channel"`
+	Region         string         `json:"region"`
+	Price          map[string]any `json:"price"`
+	ListPrice      map[string]any `json:"listPrice"`
+	Discount       string         `json:"discountKind"`
+	TrialDays      int            `json:"trialDays"`
+	StoreProductId *string        `json:"storeProductId"`
 }
 
-func (billing Billing) ListPlans(ctx context.Context, ownerUserId, countryCode string, planCodes []string) ([]PlanView, error) {
+func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolution regionpricing.Resolution, planCodes []string) ([]PlanView, error) {
 	client := billing.Container.Client(billing.Container.Resources.Database)
 	trialRules, _ := billing.rules(ctx)
+	country := firstNonEmpty(resolution.CountryCode, resolution.Region)
 	views := []PlanView{}
 	for _, code := range planCodes {
 		definition := constants.Plans[code]
-		if !definition.SelfServe {
+		if !definition.SelfServe || (resolution.Channel != "web" && !definition.InAppAllowed) {
 			continue
 		}
 		for _, interval := range []string{"month", "year"} {
-			quote, currency, err := billing.QuoteForOwner(ctx, client, ownerUserId, code, countryCode, interval)
+			quote, price, err := billing.QuoteForOwnerOnChannel(ctx, client, ownerUserId, code, country, interval, resolution.Channel)
 			if err == ErrPlanNotFound {
-				break
+				continue
 			}
 			if err != nil {
 				return nil, err
 			}
-			view := PlanView{Id: code + "_" + interval + "ly", PlanCode: code, Tier: definition.Tier, Interval: interval, Price: money(quote.AmountMinor, currency), ListPrice: money(quote.ListAmountMinor, currency), Discount: quote.DiscountKind}
-			if definition.TrialAllowed {
+			view := PlanView{
+				Id: code + "_" + interval + "ly", PlanCode: code, Tier: definition.Tier, Interval: interval, Channel: resolution.Channel, Region: price.Region,
+				Price: money(quote.AmountMinor, price.Currency), ListPrice: money(quote.ListAmountMinor, price.Currency), Discount: quote.DiscountKind,
+			}
+			if productId := price.StoreProductIdFor(resolution.Channel, interval); productId != "" {
+				view.StoreProductId = &productId
+			}
+			if definition.TrialAllowed && resolution.Channel == "web" {
 				view.TrialDays = trialRules.TrialDays
 			}
 			views = append(views, view)
 		}
 	}
 	return views, nil
+}
+
+func (billing Billing) CreatorSubscriptionBands(ctx context.Context, resolution regionpricing.Resolution) map[string]any {
+	raw, found := billing.Container.Resources.Platform.ReadValue(ctx, regionpricing.SettingKey)
+	document := regionpricing.ParseSettingDocument(raw, found)
+	region := resolution.Region
+	bands, known := document.CreatorSubscriptionBands[region]
+	if !known {
+		region, bands = regionpricing.FallbackRegion.Code, document.CreatorSubscriptionBands[regionpricing.FallbackRegion.Code]
+	}
+	currency := regionpricing.FallbackRegion.Currency
+	if matched, ok := regionpricing.FindRegion(region); ok {
+		currency = matched.Currency
+	}
+	if resolution.Channel == "web" && !billing.webCanCharge(currency) {
+		region, currency, bands = regionpricing.FallbackRegion.Code, regionpricing.FallbackRegion.Currency, document.CreatorSubscriptionBands[regionpricing.FallbackRegion.Code]
+	}
+	items := make([]map[string]any, 0, len(bands))
+	for _, band := range bands {
+		amount := band.WebMinor
+		if resolution.Channel != "web" {
+			amount = band.AppMinor
+		}
+		items = append(items, map[string]any{"band": band.Band, "price": money(amount, currency)})
+	}
+	return map[string]any{"region": region, "channel": resolution.Channel, "creatorSharePercentOfNet": 80, "data": items}
 }
 
 func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string) (map[string]any, error) {
@@ -103,8 +140,8 @@ func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string)
 	if err != nil {
 		return nil, err
 	}
-	goldMonthly, _, _ := billing.QuoteForOwner(ctx, client, userId, constants.PlanGoldOnly, firstNonEmpty(profile.CountryCode, billing.Container.Settings.DefaultCountry), "month")
-	goldYearly, currency, _ := billing.QuoteForOwner(ctx, client, userId, constants.PlanGoldOnly, firstNonEmpty(profile.CountryCode, billing.Container.Settings.DefaultCountry), "year")
+	goldMonthly, _, _ := billing.QuoteForOwner(ctx, client, userId, constants.PlanGoldOnly, profile.CountryCode, "month")
+	goldYearly, currency, _ := billing.QuoteForOwner(ctx, client, userId, constants.PlanGoldOnly, profile.CountryCode, "year")
 	trial, err := client.Subscription.Query().Where(subscription.ProfileID(profileId), subscription.StatusEQ(subscription.StatusTrialing)).First(ctx)
 	var activeTrial any
 	if err == nil {

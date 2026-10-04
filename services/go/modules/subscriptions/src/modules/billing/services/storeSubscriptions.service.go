@@ -29,7 +29,8 @@ type StoreReceiptRequest struct {
 }
 
 func (billing Billing) RedeemStoreSubscription(ctx context.Context, request StoreReceiptRequest) (SubscriptionView, error) {
-	product, known := billing.Container.Settings.StoreProductPlans[request.ProductId]
+	planCode, interval, known := billing.PlanForStoreProduct(ctx, request.ProductId)
+	product := struct{ PlanCode, Interval string }{planCode, interval}
 	if !known || !constants.Plans[product.PlanCode].InAppAllowed {
 		return SubscriptionView{}, ErrStoreProductUnknown
 	}
