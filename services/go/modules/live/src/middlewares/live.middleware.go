@@ -10,6 +10,7 @@ import (
 	"zudomart/platform/httpserver"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
+	"zudomart/platform/staffauth"
 )
 
 func Authenticated(deployed *container.Container) func(http.HandlerFunc) http.Handler {
@@ -24,9 +25,29 @@ func Idempotent(deployed *container.Container) func(http.HandlerFunc) http.Handl
 	}
 }
 
+var giftCatalogStaffPermissions = []string{"config:revenue", "money.monetization.manage"}
+
 func Admin(deployed *container.Container) func(http.HandlerFunc) http.Handler {
 	return func(handler http.HandlerFunc) http.Handler {
-		return jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(requireAdminRole(handler))
+		customerAdmin := jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(requireAdminRole(handler))
+		if deployed.StaffVerifier == nil {
+			return customerAdmin
+		}
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			principal, err := deployed.StaffVerifier.VerifyAccessTokenAndExtractPrincipal(request.Context(), jwtauth.ExtractBearerTokenFromAuthorizationHeader(request))
+			if err != nil {
+				customerAdmin.ServeHTTP(writer, request)
+				return
+			}
+			if !slices.ContainsFunc(principal.Roles, func(role string) bool {
+				permission, isPermission := strings.CutPrefix(role, "perm:")
+				return role == staffauth.SuperadminRole || isPermission && slices.Contains(giftCatalogStaffPermissions, permission)
+			}) {
+				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
+				return
+			}
+			handler(writer, request.WithContext(jwtauth.ContextWithPrincipal(request.Context(), principal)))
+		})
 	}
 }
 

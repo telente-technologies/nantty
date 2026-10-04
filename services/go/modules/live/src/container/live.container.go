@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/live/src/generated/ent"
 	"zudomart/modules/live/src/integrations"
 	"zudomart/modules/live/src/interfaces"
+	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
 )
@@ -26,11 +27,15 @@ type Container struct {
 	Logger           *slog.Logger
 	Now              func() time.Time
 	AccessVerifier   *jwtauth.AccessTokenVerifier
+	StaffVerifier    *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
 	Ingress          interfaces.IngressController
 	Recorder         interfaces.RecordingController
 	RecordingStorage interfaces.RecordingStorage
 	Relations        interfaces.SocialRelations
+	SafetyCapture    interfaces.SafetyCaptureController
+	SafetyObjects    interfaces.SafetyObjectLister
+	Jobs             platformevents.JobQueue
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {

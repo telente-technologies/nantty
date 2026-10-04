@@ -36,24 +36,30 @@ import (
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
 	"zudomart/platform/servicemodule"
+	"zudomart/platform/staffauth"
 )
 
 type Collaborators struct {
-	Money     interfaces.MoneyGateway
-	Directory interfaces.ParticipantDirectory
-	Media     interfaces.MediaRoomController
-	Verifier  *jwtauth.AccessTokenVerifier
-	Publisher platformevents.DomainEventPublisher
+	Money         interfaces.MoneyGateway
+	Directory     interfaces.ParticipantDirectory
+	Media         interfaces.MediaRoomController
+	Verifier      *jwtauth.AccessTokenVerifier
+	StaffVerifier *jwtauth.AccessTokenVerifier
+	Publisher     platformevents.DomainEventPublisher
 
 	Ingress          interfaces.IngressController
 	Recorder         interfaces.RecordingController
 	RecordingStorage interfaces.RecordingStorage
 	Relations        interfaces.SocialRelations
+	SafetyCapture    interfaces.SafetyCaptureController
+	SafetyObjects    interfaces.SafetyObjectLister
+	Jobs             platformevents.JobQueue
 }
 
 type Module struct {
 	Container *container.Container
 	publisher platformevents.DomainEventPublisher
+	bus       platformevents.MessageBusSelection
 	closers   []func() error
 }
 
@@ -66,11 +72,15 @@ func NewLiveModule(ctx context.Context, dependencies servicemodule.Dependencies)
 	if err != nil {
 		return nil, err
 	}
+	staffVerifier, err := jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.AccessTokenJwksUrl, settings.TokenIssuer, staffauth.AccessAudience)
+	if err != nil {
+		return nil, err
+	}
 	publisher, err := createDomainEventPublisher(ctx, settings, dependencies)
 	if err != nil {
 		return nil, err
 	}
-	return StartLiveModuleWithSettings(ctx, settings, Collaborators{Verifier: verifier, Publisher: publisher}, dependencies)
+	return StartLiveModuleWithSettings(ctx, settings, Collaborators{Verifier: verifier, StaffVerifier: staffVerifier, Publisher: publisher}, dependencies)
 }
 
 func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSettings, collaborators Collaborators, dependencies servicemodule.Dependencies) (*Module, error) {
@@ -86,7 +96,8 @@ func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSetti
 	if err != nil {
 		return nil, err
 	}
-	module := &Module{publisher: collaborators.Publisher, closers: []func() error{database.Close}}
+	module := &Module{publisher: collaborators.Publisher, closers: []func() error{database.Close},
+		bus: platformevents.MessageBusSelection{DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction()}}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
 	if err := module.completeCollaborators(ctx, &collaborators, settings, database, logger); err != nil {
 		_ = database.Close()
@@ -95,9 +106,10 @@ func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSetti
 	module.Container = &container.Container{
 		Client: client, Settings: settings, Money: collaborators.Money, Directory: collaborators.Directory, Media: collaborators.Media,
 		Tokens:    &integrations.TokenIssuer{ApiKey: settings.LiveKitApiKey, ApiSecret: settings.LiveKitApiSecret, PublicUrl: settings.LiveKitPublicUrl},
-		PinPolicy: integrations.RolesProductPinPolicy{}, Logger: logger, Now: time.Now, AccessVerifier: collaborators.Verifier,
+		PinPolicy: integrations.RolesProductPinPolicy{}, Logger: logger, Now: time.Now, AccessVerifier: collaborators.Verifier, StaffVerifier: collaborators.StaffVerifier,
 		IdempotencyStore: module.openIdempotencyStore(settings, logger),
 		Ingress:          collaborators.Ingress, Recorder: collaborators.Recorder, RecordingStorage: collaborators.RecordingStorage, Relations: collaborators.Relations,
+		SafetyCapture: collaborators.SafetyCapture, SafetyObjects: collaborators.SafetyObjects, Jobs: collaborators.Jobs,
 	}
 	if err := services.NewLiveService(module.Container).SeedDefaultCatalogAndPointsRules(ctx); err != nil {
 		_ = database.Close()
@@ -183,11 +195,28 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go func() { _ = jobs.RunDueTimerSweepsUntilContextDone(ctx, module.Container) }()
+	go jobs.ConsumeLiveEventsUntilContextDone(ctx, module.Container, module.bus)
+	go module.runLiveSafetySampler(ctx)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now},
 		Publisher: module.publisher,
 		Logger:    module.Container.Logger,
 	})
+}
+
+func (module *Module) runLiveSafetySampler(ctx context.Context) {
+	if !module.Container.Settings.Safety.SamplerEnabled {
+		return
+	}
+	if module.Container.Jobs == nil {
+		queue, _, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, module.bus)
+		if err != nil || queue == nil {
+			module.Container.Logger.Error("live safety sampler disabled: no job queue configured", slog.Any("error", err))
+			return
+		}
+		module.Container.Jobs = queue
+	}
+	jobs.RunLiveSafetySamplerUntilContextDone(ctx, module.Container)
 }
 
 func (module *Module) Close(context.Context) error {
