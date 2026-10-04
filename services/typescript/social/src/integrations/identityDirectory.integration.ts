@@ -91,6 +91,12 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       return row?.personalization ?? false;
     },
 
+    async findAccountsAllowingPersonalizedAds(accountIds) {
+      if (accountIds.length === 0) return new Set<string>();
+      const rows = await client.identityPrivacySetting.findMany({ where: { accountId: { in: [...accountIds] }, personalizedAds: true }, select: { accountId: true } });
+      return new Set(rows.map((row) => row.accountId));
+    },
+
     async findAccountCreatedAt(accountId) {
       const row = await client.identityAccount.findUnique({ where: { id: accountId }, select: { createdAt: true } });
       return row?.createdAt;
