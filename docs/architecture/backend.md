@@ -97,7 +97,7 @@ flowchart LR
 | ts-social | social, feed | PROPOSED (port from `apps/api/src/modules/{posts,feeds,follows}`) | RPS, feed p95 | Aurora `social/feed`, Redis timelines, Python |
 | ts-io | media, notifications, search, support, integrations, campaigns | PROPOSED | queue depth | S3, SES, SMS, FCM/APNs, OpenSearch later |
 | ex-realtime | sockets, presence, live fan-out, chat | EXISTING transport + SQS consumer (`services/elixir/realtime`); chat PROPOSED | socket count per task | SQS `realtime-domain-events`, Redis (PubSub across nodes PROPOSED) |
-| py-intelligence | 12 scoring modules | EXISTING (`apps/intelligence`), no callers | RPS, CPU | Redis features, Parquet logs |
+| py-intelligence | 12 scoring modules | EXISTING (`services/python/intelligence`), no callers | RPS, CPU | Redis features, Parquet logs |
 
 ## 2. Code layout (target, all stacks)
 
@@ -132,7 +132,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 | Go | `services/go/deployables/<deployable>/src` + shared `services/go/platform` | `modules/live/commands/sendGift/sendGift.handler.go` | package = lowercased folder (`package sendgift`); ent in `src/generated/ent` |
 | TypeScript | `services/typescript/<service>/src` | `modules/posts/commands/createPost/createPost.command.ts` | barrels `index.ts`; Prisma only, no raw SQL |
 | Elixir | `services/elixir/realtime/lib/realtime/` | `modules/live/events/domainEvent.router.ex` | module names stay idiomatic (`Realtime.Topics.TopicAuthorizer`); tests `<name>.<kind>_test.exs` |
-| Python | `services/python/intelligence/src` (moving from `apps/intelligence`) | `modules/risk/services/risk_scoring_service.py` | snake_case with kind suffix (importability) |
+| Python | `services/python/intelligence/src` (moving from `services/python/intelligence`) | `modules/risk/services/risk_scoring_service.py` | snake_case with kind suffix (importability) |
 
 ## 3. Service ownership matrix
 

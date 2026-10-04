@@ -6,15 +6,15 @@ Status date: 2026-10-03. Labels: **EXISTING**, **MOCK-ONLY**, **PROPOSED**, **OP
 
 | Item | State | Evidence |
 | --- | --- | --- |
-| Python risk scorer: `POST /v1/risk/score`, subjects `order, payout, account_event, coin_purchase, coin_transfer, gift`; returns `score`, `level` (low, medium, high), `recommended_action` (allow, review, hold_for_manual_review), `reasons[{code, weight}]`, `rule_score`, `model_score` | EXISTING, tested in pytest, **no caller** | `apps/intelligence/src/modules/risk/dtos/risk_scoring_dto.py`, `services/risk_scoring_service.py` |
-| Python receives opaque ids and HMAC-signed requests | EXISTING | `apps/intelligence/apiContract.md` section 2 |
+| Python risk scorer: `POST /v1/risk/score`, subjects `order, payout, account_event, coin_purchase, coin_transfer, gift`; returns `score`, `level` (low, medium, high), `recommended_action` (allow, review, hold_for_manual_review), `reasons[{code, weight}]`, `rule_score`, `model_score` | EXISTING, tested in pytest, **no caller** | `services/python/intelligence/src/modules/risk/dtos/risk_scoring_dto.py`, `services/risk_scoring_service.py` |
+| Python receives opaque ids and HMAC-signed requests | EXISTING | `services/python/intelligence/apiContract.md` section 2 |
 | `go-trust` deployable and `moderation` module | EXISTING skeleton, routeless | `services/go/cmd/go-trust`, `services/go/modules/moderation` |
 | Fraud tables, review queue, policy engine, thresholds | PROPOSED, none exist (inventory section 3 "fraud: none") | `microservicesPlan.json` |
 | Moderation models (`ModerationReport/Case/Decision/Appeal`, `AccountSuspension`, `Automation*`) | PROPOSED in Go; reference in Prisma | `apps/api/prisma/schema` |
 | Admin moderation, ads review, ip-claims, support, verification pages | MOCK-ONLY | `apps/admin` |
 | `HELD_FOR_REVIEW` gift status | EXISTING in proto | `live_money.proto` |
 | Rate limiting | Gateway global, in-memory only; none per endpoint in Go | inventory section 7 |
-| Python moderation classifiers | **ABSENT**; no audio/video/text classifier module | `apps/intelligence/src/modules` (12 modules, none for moderation) |
+| Python moderation classifiers | **ABSENT**; no audio/video/text classifier module | `services/python/intelligence/src/modules` (12 modules, none for moderation) |
 
 ## 2. Pipeline
 

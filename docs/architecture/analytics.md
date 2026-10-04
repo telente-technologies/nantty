@@ -1,6 +1,6 @@
 # Analytics architecture
 
-As of 2026-10-03. Sources: `inventory.md` (section 6 infra, 4 events), `docs/backendPlan.md` (analytics rows, 4.3.8), `apps/intelligence/apiContract.md` section 6. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
+As of 2026-10-03. Sources: `inventory.md` (section 6 infra, 4 events), `docs/backendPlan.md` (analytics rows, 4.3.8), `services/python/intelligence/apiContract.md` section 6. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
 
 Two separate systems with different owners and failure modes.
 
@@ -22,7 +22,7 @@ Two separate systems with different owners and failure modes.
 | Gateway tracing, metrics backend, log shipping, dashboards, alarms | ABSENT | inventory 6 |
 | ClickHouse in local compose (profile `analytics`) | EXISTING (local) | `infra/local/docker-compose.yml` |
 | Event envelope + 3 auth event schemas | EXISTING | `services/contracts/events` |
-| Python `POST /v1/events` ingestion, Parquet feature logs | EXISTING | `apps/intelligence` |
+| Python `POST /v1/events` ingestion, Parquet feature logs | EXISTING | `services/python/intelligence` |
 | Seller/creator/admin/ads analytics screens | MOCK-ONLY | `apps/seller`, `apps/ads`, `apps/admin` |
 | Pipeline, ClickHouse schemas, reporting module (`analytics` Go module is an 11-line skeleton) | ABSENT / PROPOSED | `services/go/modules/analytics` |
 
