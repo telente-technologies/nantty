@@ -19,6 +19,7 @@ var (
 	LiveNotActive          = Api(http.StatusConflict, "LIVE_NOT_ACTIVE", "This live is not active.")
 	LiveAlreadyRunning     = Api(http.StatusConflict, "LIVE_ALREADY_RUNNING", "You are already live.")
 	NotLiveHost            = Api(http.StatusForbidden, "NOT_LIVE_HOST", "Only the host can do that.")
+	LiveRestricted         = Api(http.StatusForbidden, "LIVE_RESTRICTED", "Going live is paused on your account because of active strikes. See Settings > Account status.")
 	CreatorProgramNeeded   = Api(http.StatusForbidden, "CREATOR_PROGRAM_REQUIRED", "Join the Creator Program to go live.")
 	ShoppingNeedsStore     = Api(http.StatusUnprocessableEntity, "SHOPPING_REQUIRES_STORE", "Only accounts with a store can host a shopping live.")
 	LiveAdTermsRequired    = Api(http.StatusUnprocessableEntity, "LIVE_AD_TERMS_REQUIRED", "Accept the live-ad terms to allow ads.")

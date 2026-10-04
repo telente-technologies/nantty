@@ -6,6 +6,7 @@ import (
 
 	"zudomart/modules/ads/src/modules/boosts/dtos"
 	"zudomart/modules/ads/src/types"
+	"zudomart/platform/regionpricing"
 )
 
 var DurationDayOptions = []int{1, 3, 7, 14}
@@ -36,21 +37,35 @@ func SuggestedDailyBudgets(minimumMinor int64, currency string) []types.Money {
 	return suggestions
 }
 
-func EstimateBoost(request dtos.BoostEstimateRequest, reservePerMilleMinor int64) dtos.BoostEstimate {
-	total := request.DailyBudget.AmountMinor * int64(request.DurationDays)
-	impressions := total * 1_000 * 10 / (reservePerMilleMinor * 15)
-	reach := impressions * 10 / 16
+var objectiveForBoostGoal = map[string]string{"views": "views", "profile_visits": "profile_visits", "messages": "messages"}
+
+func EstimateRequestForBoost(request dtos.BoostEstimateRequest) regionpricing.EstimateRequest {
+	return regionpricing.EstimateRequest{
+		Countries: BoostTargetCountries(request.Audience), BillingCurrency: request.DailyBudget.Currency, BudgetType: "daily",
+		BudgetMinor: request.DailyBudget.AmountMinor, Days: request.DurationDays, Objective: objectiveForBoostGoal[request.Goal],
+	}
+}
+
+// EstimateBoost turns the regional campaign estimate into the boost sheet's numbers; a custom audience narrows reach by 30%.
+func EstimateBoost(request dtos.BoostEstimateRequest, estimate regionpricing.CampaignEstimate) dtos.BoostEstimate {
+	reach := estimate.Reach
 	if request.Audience.Mode == "custom" {
-		reach = reach * 7 / 10
+		reach = regionpricing.Range{Low: reach.Low * 7 / 10, High: reach.High * 7 / 10}
 	}
 	labels := map[string]string{
-		"views":          fmt.Sprintf("About %d views", impressions),
-		"profile_visits": fmt.Sprintf("About %d profile visits", max(reach*4/100, 1)),
-		"messages":       fmt.Sprintf("About %d messages", max(reach*6/1000, 1)),
+		"views":          fmt.Sprintf("About %d–%d views", estimate.VideoViews.Low, estimate.VideoViews.High),
+		"profile_visits": fmt.Sprintf("About %d–%d profile visits", estimate.Clicks.Low, estimate.Clicks.High),
+		"messages":       fmt.Sprintf("About %d–%d messages", max(estimate.Results.Low, 1), max(estimate.Results.High, 1)),
 	}
+	region := ""
+	if len(estimate.Regions) > 0 {
+		region = estimate.Regions[0].Region
+	}
+	currency := request.DailyBudget.Currency
 	return dtos.BoostEstimate{
-		EstimatedReachMin: reach * 8 / 10, EstimatedReachMax: reach * 125 / 100, EstimatedResultsLabel: labels[request.Goal],
-		TotalCost: types.Money{AmountMinor: total, Currency: request.DailyBudget.Currency},
+		EstimatedReachMin: reach.Low, EstimatedReachMax: reach.High, EstimatedResultsLabel: labels[request.Goal],
+		TotalCost: types.Money{AmountMinor: estimate.TotalCostMinor, Currency: currency}, Impressions: estimate.Impressions, Clicks: estimate.Clicks,
+		CostPerResult: estimate.CostPerResult, MinimumDailyBudget: types.Money{AmountMinor: estimate.MinimumDailyBudgetMinor, Currency: currency}, Region: region,
 	}
 }
 

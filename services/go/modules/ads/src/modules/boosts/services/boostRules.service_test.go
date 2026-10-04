@@ -5,16 +5,21 @@ import (
 
 	"zudomart/modules/ads/src/modules/boosts/dtos"
 	"zudomart/modules/ads/src/types"
+	"zudomart/platform/regionpricing"
 )
 
 func TestBoostEstimateTotalsDailyBudgetOverDurationAndNarrowsCustomAudiences(t *testing.T) {
 	request := dtos.BoostEstimateRequest{Goal: "views", Audience: dtos.BoostAudience{Mode: "automatic"}, DailyBudget: types.Money{AmountMinor: 100_000, Currency: "NGN"}, DurationDays: 7}
-	automatic := EstimateBoost(request, 50_000)
+	estimate, err := regionpricing.EstimateCampaign(regionpricing.DefaultAdRegionPricing(), EstimateRequestForBoost(request), regionpricing.DefaultUsdRatesE8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	automatic := EstimateBoost(request, estimate)
 	if automatic.TotalCost.AmountMinor != 700_000 || automatic.EstimatedReachMin >= automatic.EstimatedReachMax {
 		t.Fatalf("unexpected estimate %+v", automatic)
 	}
 	request.Audience.Mode = "custom"
-	if custom := EstimateBoost(request, 50_000); custom.EstimatedReachMax >= automatic.EstimatedReachMax {
+	if custom := EstimateBoost(request, estimate); custom.EstimatedReachMax >= automatic.EstimatedReachMax || custom.Region != "NG" || custom.MinimumDailyBudget.AmountMinor != 100_000 {
 		t.Fatal("a custom audience must narrow the reach")
 	}
 }
