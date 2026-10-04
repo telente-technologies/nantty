@@ -16,6 +16,7 @@ func MountCopyrightClaimsRoutes(mux *http.ServeMux, container *container.Contain
 	internal := middlewares.RequireInternalToken(container.Settings.IntakeToken)
 	policyEditor := middlewares.RequireStaffWithAnyPermission(container.StaffVerifiers, []string{"copyright:review"}, true)
 	mux.Handle("GET /api/v1/admin/copyright-policy", staff(http.HandlerFunc(controller.GetPolicy)))
+	mux.Handle("POST /api/v1/admin/copyright-claims/{claimId}/audio-match", staff(http.HandlerFunc(controller.RunAudioMatch)))
 	mux.Handle("PUT /api/v1/admin/copyright-policy", policyEditor(http.HandlerFunc(controller.UpdatePolicy)))
 	mux.Handle("POST /api/v1/copyright/claims", requireAccessToken(http.HandlerFunc(controller.Submit)))
 	mux.Handle("POST /api/v1/copyright/claims/{claimId}/counter-notices", requireAccessToken(http.HandlerFunc(controller.SubmitCounterNotice)))
