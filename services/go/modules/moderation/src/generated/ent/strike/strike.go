@@ -43,6 +43,14 @@ const (
 	FieldRevokedAt = "revoked_at"
 	// FieldRevokedReason holds the string denoting the revoked_reason field in the database.
 	FieldRevokedReason = "revoked_reason"
+	// FieldAppealStatus holds the string denoting the appeal_status field in the database.
+	FieldAppealStatus = "appeal_status"
+	// FieldAppealMessage holds the string denoting the appeal_message field in the database.
+	FieldAppealMessage = "appeal_message"
+	// FieldAppealedAt holds the string denoting the appealed_at field in the database.
+	FieldAppealedAt = "appealed_at"
+	// FieldExpiryAnnouncedAt holds the string denoting the expiry_announced_at field in the database.
+	FieldExpiryAnnouncedAt = "expiry_announced_at"
 	// Table holds the table name of the strike in the database.
 	Table = "strikes"
 )
@@ -64,6 +72,10 @@ var Columns = []string{
 	FieldExpiresAt,
 	FieldRevokedAt,
 	FieldRevokedReason,
+	FieldAppealStatus,
+	FieldAppealMessage,
+	FieldAppealedAt,
+	FieldExpiryAnnouncedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -105,6 +117,10 @@ var (
 	DefaultRevokedReason string
 	// RevokedReasonValidator is a validator for the "revoked_reason" field. It is called by the builders before save.
 	RevokedReasonValidator func(string) error
+	// DefaultAppealMessage holds the default value on creation for the "appeal_message" field.
+	DefaultAppealMessage string
+	// AppealMessageValidator is a validator for the "appeal_message" field. It is called by the builders before save.
+	AppealMessageValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -157,6 +173,34 @@ func SourceValidator(s Source) error {
 		return nil
 	default:
 		return fmt.Errorf("strike: invalid enum value for source field: %q", s)
+	}
+}
+
+// AppealStatus defines the type for the "appeal_status" enum field.
+type AppealStatus string
+
+// AppealStatusNone is the default value of the AppealStatus enum.
+const DefaultAppealStatus = AppealStatusNone
+
+// AppealStatus values.
+const (
+	AppealStatusNone       AppealStatus = "none"
+	AppealStatusPending    AppealStatus = "pending"
+	AppealStatusUpheld     AppealStatus = "upheld"
+	AppealStatusOverturned AppealStatus = "overturned"
+)
+
+func (as AppealStatus) String() string {
+	return string(as)
+}
+
+// AppealStatusValidator is a validator for the "appeal_status" field enum values. It is called by the builders before save.
+func AppealStatusValidator(as AppealStatus) error {
+	switch as {
+	case AppealStatusNone, AppealStatusPending, AppealStatusUpheld, AppealStatusOverturned:
+		return nil
+	default:
+		return fmt.Errorf("strike: invalid enum value for appeal_status field: %q", as)
 	}
 }
 
@@ -236,4 +280,24 @@ func ByRevokedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByRevokedReason orders the results by the revoked_reason field.
 func ByRevokedReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRevokedReason, opts...).ToFunc()
+}
+
+// ByAppealStatus orders the results by the appeal_status field.
+func ByAppealStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAppealStatus, opts...).ToFunc()
+}
+
+// ByAppealMessage orders the results by the appeal_message field.
+func ByAppealMessage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAppealMessage, opts...).ToFunc()
+}
+
+// ByAppealedAt orders the results by the appealed_at field.
+func ByAppealedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAppealedAt, opts...).ToFunc()
+}
+
+// ByExpiryAnnouncedAt orders the results by the expiry_announced_at field.
+func ByExpiryAnnouncedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiryAnnouncedAt, opts...).ToFunc()
 }

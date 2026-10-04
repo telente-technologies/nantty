@@ -1,6 +1,11 @@
 package enums
 
 const (
+	PaymentModeEscrow = "escrow"
+	PaymentModeDirect = "direct"
+)
+
+const (
 	StatusPending    = "pending"
 	StatusNew        = "new"
 	StatusProcessing = "processing"

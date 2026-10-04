@@ -46,7 +46,15 @@ type Strike struct {
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 	// RevokedReason holds the value of the "revoked_reason" field.
 	RevokedReason string `json:"revoked_reason,omitempty"`
-	selectValues  sql.SelectValues
+	// AppealStatus holds the value of the "appeal_status" field.
+	AppealStatus strike.AppealStatus `json:"appeal_status,omitempty"`
+	// AppealMessage holds the value of the "appeal_message" field.
+	AppealMessage string `json:"appeal_message,omitempty"`
+	// AppealedAt holds the value of the "appealed_at" field.
+	AppealedAt *time.Time `json:"appealed_at,omitempty"`
+	// ExpiryAnnouncedAt holds the value of the "expiry_announced_at" field.
+	ExpiryAnnouncedAt *time.Time `json:"expiry_announced_at,omitempty"`
+	selectValues      sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -54,9 +62,9 @@ func (*Strike) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case strike.FieldKind, strike.FieldPolicy, strike.FieldReason, strike.FieldSource, strike.FieldIssuedByID, strike.FieldIssuedByName, strike.FieldReferenceType, strike.FieldReferenceID, strike.FieldReferenceKey, strike.FieldRevokedReason:
+		case strike.FieldKind, strike.FieldPolicy, strike.FieldReason, strike.FieldSource, strike.FieldIssuedByID, strike.FieldIssuedByName, strike.FieldReferenceType, strike.FieldReferenceID, strike.FieldReferenceKey, strike.FieldRevokedReason, strike.FieldAppealStatus, strike.FieldAppealMessage:
 			values[i] = new(sql.NullString)
-		case strike.FieldCreatedAt, strike.FieldExpiresAt, strike.FieldRevokedAt:
+		case strike.FieldCreatedAt, strike.FieldExpiresAt, strike.FieldRevokedAt, strike.FieldAppealedAt, strike.FieldExpiryAnnouncedAt:
 			values[i] = new(sql.NullTime)
 		case strike.FieldID, strike.FieldAccountID:
 			values[i] = new(uuid.UUID)
@@ -168,6 +176,32 @@ func (_m *Strike) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RevokedReason = value.String
 			}
+		case strike.FieldAppealStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field appeal_status", values[i])
+			} else if value.Valid {
+				_m.AppealStatus = strike.AppealStatus(value.String)
+			}
+		case strike.FieldAppealMessage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field appeal_message", values[i])
+			} else if value.Valid {
+				_m.AppealMessage = value.String
+			}
+		case strike.FieldAppealedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field appealed_at", values[i])
+			} else if value.Valid {
+				_m.AppealedAt = new(time.Time)
+				*_m.AppealedAt = value.Time
+			}
+		case strike.FieldExpiryAnnouncedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expiry_announced_at", values[i])
+			} else if value.Valid {
+				_m.ExpiryAnnouncedAt = new(time.Time)
+				*_m.ExpiryAnnouncedAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -251,6 +285,22 @@ func (_m *Strike) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("revoked_reason=")
 	builder.WriteString(_m.RevokedReason)
+	builder.WriteString(", ")
+	builder.WriteString("appeal_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AppealStatus))
+	builder.WriteString(", ")
+	builder.WriteString("appeal_message=")
+	builder.WriteString(_m.AppealMessage)
+	builder.WriteString(", ")
+	if v := _m.AppealedAt; v != nil {
+		builder.WriteString("appealed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.ExpiryAnnouncedAt; v != nil {
+		builder.WriteString("expiry_announced_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

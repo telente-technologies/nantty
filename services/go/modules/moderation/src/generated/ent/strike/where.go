@@ -110,6 +110,21 @@ func RevokedReason(v string) predicate.Strike {
 	return predicate.Strike(sql.FieldEQ(FieldRevokedReason, v))
 }
 
+// AppealMessage applies equality check predicate on the "appeal_message" field. It's identical to AppealMessageEQ.
+func AppealMessage(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldAppealMessage, v))
+}
+
+// AppealedAt applies equality check predicate on the "appealed_at" field. It's identical to AppealedAtEQ.
+func AppealedAt(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldAppealedAt, v))
+}
+
+// ExpiryAnnouncedAt applies equality check predicate on the "expiry_announced_at" field. It's identical to ExpiryAnnouncedAtEQ.
+func ExpiryAnnouncedAt(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldExpiryAnnouncedAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Strike {
 	return predicate.Strike(sql.FieldEQ(FieldCreatedAt, v))
@@ -858,6 +873,191 @@ func RevokedReasonEqualFold(v string) predicate.Strike {
 // RevokedReasonContainsFold applies the ContainsFold predicate on the "revoked_reason" field.
 func RevokedReasonContainsFold(v string) predicate.Strike {
 	return predicate.Strike(sql.FieldContainsFold(FieldRevokedReason, v))
+}
+
+// AppealStatusEQ applies the EQ predicate on the "appeal_status" field.
+func AppealStatusEQ(v AppealStatus) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldAppealStatus, v))
+}
+
+// AppealStatusNEQ applies the NEQ predicate on the "appeal_status" field.
+func AppealStatusNEQ(v AppealStatus) predicate.Strike {
+	return predicate.Strike(sql.FieldNEQ(FieldAppealStatus, v))
+}
+
+// AppealStatusIn applies the In predicate on the "appeal_status" field.
+func AppealStatusIn(vs ...AppealStatus) predicate.Strike {
+	return predicate.Strike(sql.FieldIn(FieldAppealStatus, vs...))
+}
+
+// AppealStatusNotIn applies the NotIn predicate on the "appeal_status" field.
+func AppealStatusNotIn(vs ...AppealStatus) predicate.Strike {
+	return predicate.Strike(sql.FieldNotIn(FieldAppealStatus, vs...))
+}
+
+// AppealMessageEQ applies the EQ predicate on the "appeal_message" field.
+func AppealMessageEQ(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldAppealMessage, v))
+}
+
+// AppealMessageNEQ applies the NEQ predicate on the "appeal_message" field.
+func AppealMessageNEQ(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldNEQ(FieldAppealMessage, v))
+}
+
+// AppealMessageIn applies the In predicate on the "appeal_message" field.
+func AppealMessageIn(vs ...string) predicate.Strike {
+	return predicate.Strike(sql.FieldIn(FieldAppealMessage, vs...))
+}
+
+// AppealMessageNotIn applies the NotIn predicate on the "appeal_message" field.
+func AppealMessageNotIn(vs ...string) predicate.Strike {
+	return predicate.Strike(sql.FieldNotIn(FieldAppealMessage, vs...))
+}
+
+// AppealMessageGT applies the GT predicate on the "appeal_message" field.
+func AppealMessageGT(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldGT(FieldAppealMessage, v))
+}
+
+// AppealMessageGTE applies the GTE predicate on the "appeal_message" field.
+func AppealMessageGTE(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldGTE(FieldAppealMessage, v))
+}
+
+// AppealMessageLT applies the LT predicate on the "appeal_message" field.
+func AppealMessageLT(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldLT(FieldAppealMessage, v))
+}
+
+// AppealMessageLTE applies the LTE predicate on the "appeal_message" field.
+func AppealMessageLTE(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldLTE(FieldAppealMessage, v))
+}
+
+// AppealMessageContains applies the Contains predicate on the "appeal_message" field.
+func AppealMessageContains(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldContains(FieldAppealMessage, v))
+}
+
+// AppealMessageHasPrefix applies the HasPrefix predicate on the "appeal_message" field.
+func AppealMessageHasPrefix(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldHasPrefix(FieldAppealMessage, v))
+}
+
+// AppealMessageHasSuffix applies the HasSuffix predicate on the "appeal_message" field.
+func AppealMessageHasSuffix(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldHasSuffix(FieldAppealMessage, v))
+}
+
+// AppealMessageEqualFold applies the EqualFold predicate on the "appeal_message" field.
+func AppealMessageEqualFold(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldEqualFold(FieldAppealMessage, v))
+}
+
+// AppealMessageContainsFold applies the ContainsFold predicate on the "appeal_message" field.
+func AppealMessageContainsFold(v string) predicate.Strike {
+	return predicate.Strike(sql.FieldContainsFold(FieldAppealMessage, v))
+}
+
+// AppealedAtEQ applies the EQ predicate on the "appealed_at" field.
+func AppealedAtEQ(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldAppealedAt, v))
+}
+
+// AppealedAtNEQ applies the NEQ predicate on the "appealed_at" field.
+func AppealedAtNEQ(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldNEQ(FieldAppealedAt, v))
+}
+
+// AppealedAtIn applies the In predicate on the "appealed_at" field.
+func AppealedAtIn(vs ...time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldIn(FieldAppealedAt, vs...))
+}
+
+// AppealedAtNotIn applies the NotIn predicate on the "appealed_at" field.
+func AppealedAtNotIn(vs ...time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldNotIn(FieldAppealedAt, vs...))
+}
+
+// AppealedAtGT applies the GT predicate on the "appealed_at" field.
+func AppealedAtGT(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldGT(FieldAppealedAt, v))
+}
+
+// AppealedAtGTE applies the GTE predicate on the "appealed_at" field.
+func AppealedAtGTE(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldGTE(FieldAppealedAt, v))
+}
+
+// AppealedAtLT applies the LT predicate on the "appealed_at" field.
+func AppealedAtLT(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldLT(FieldAppealedAt, v))
+}
+
+// AppealedAtLTE applies the LTE predicate on the "appealed_at" field.
+func AppealedAtLTE(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldLTE(FieldAppealedAt, v))
+}
+
+// AppealedAtIsNil applies the IsNil predicate on the "appealed_at" field.
+func AppealedAtIsNil() predicate.Strike {
+	return predicate.Strike(sql.FieldIsNull(FieldAppealedAt))
+}
+
+// AppealedAtNotNil applies the NotNil predicate on the "appealed_at" field.
+func AppealedAtNotNil() predicate.Strike {
+	return predicate.Strike(sql.FieldNotNull(FieldAppealedAt))
+}
+
+// ExpiryAnnouncedAtEQ applies the EQ predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtEQ(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldEQ(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtNEQ applies the NEQ predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtNEQ(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldNEQ(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtIn applies the In predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtIn(vs ...time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldIn(FieldExpiryAnnouncedAt, vs...))
+}
+
+// ExpiryAnnouncedAtNotIn applies the NotIn predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtNotIn(vs ...time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldNotIn(FieldExpiryAnnouncedAt, vs...))
+}
+
+// ExpiryAnnouncedAtGT applies the GT predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtGT(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldGT(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtGTE applies the GTE predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtGTE(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldGTE(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtLT applies the LT predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtLT(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldLT(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtLTE applies the LTE predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtLTE(v time.Time) predicate.Strike {
+	return predicate.Strike(sql.FieldLTE(FieldExpiryAnnouncedAt, v))
+}
+
+// ExpiryAnnouncedAtIsNil applies the IsNil predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtIsNil() predicate.Strike {
+	return predicate.Strike(sql.FieldIsNull(FieldExpiryAnnouncedAt))
+}
+
+// ExpiryAnnouncedAtNotNil applies the NotNil predicate on the "expiry_announced_at" field.
+func ExpiryAnnouncedAtNotNil() predicate.Strike {
+	return predicate.Strike(sql.FieldNotNull(FieldExpiryAnnouncedAt))
 }
 
 // And groups predicates with the AND operator between them.
