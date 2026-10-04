@@ -47,6 +47,17 @@
     },
     "canSubmitCounterNotice": {
       "type": "boolean"
+    },
+    "remedy": {
+      "enum": [
+        "audio_muted",
+        "takedown_warning",
+        "taken_down"
+      ]
+    },
+    "takedownDeadlineAt": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }

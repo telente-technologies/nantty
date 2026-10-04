@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/copyrightClaim.contentTakenDown.v1.json",
+  "title": "CopyrightClaimContentTakenDown",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "targetType",
+    "targetId",
+    "infringerId",
+    "workTitle",
+    "reason",
+    "canSubmitCounterNotice"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "targetType": {
+      "enum": [
+        "clip",
+        "sound",
+        "post",
+        "live"
+      ]
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "infringerId": {
+      "type": "string"
+    },
+    "workTitle": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "deadlineAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "warningId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "strikeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "canSubmitCounterNotice": {
+      "type": "boolean"
+    }
+  }
+}

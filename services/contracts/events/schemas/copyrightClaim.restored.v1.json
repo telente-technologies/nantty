@@ -23,6 +23,17 @@
     "infringerId": {
       "type": "string",
       "format": "uuid"
+    },
+    "remedy": {
+      "enum": [
+        "none",
+        "audio_muted",
+        "takedown_warning",
+        "taken_down"
+      ]
+    },
+    "workTitle": {
+      "type": "string"
     }
   }
 }

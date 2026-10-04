@@ -26,6 +26,22 @@
     "restoreEligibleAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "claimantUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "claimantEmail": {
+      "type": "string"
+    },
+    "targetType": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "workTitle": {
+      "type": "string"
     }
   }
 }

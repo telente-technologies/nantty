@@ -19,6 +19,12 @@
     },
     "targetId": {
       "type": "string"
+    },
+    "claimScope": {
+      "enum": [
+        "audio",
+        "video"
+      ]
     }
   }
 }
