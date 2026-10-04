@@ -90,6 +90,10 @@ type Tx struct {
 	UsernameHold *UsernameHoldClient
 	// VerificationApplication is the client for interacting with the VerificationApplication builders.
 	VerificationApplication *VerificationApplicationClient
+	// VerificationCase is the client for interacting with the VerificationCase builders.
+	VerificationCase *VerificationCaseClient
+	// VerificationEligibility is the client for interacting with the VerificationEligibility builders.
+	VerificationEligibility *VerificationEligibilityClient
 
 	// lazily loaded.
 	client     *Client
@@ -259,6 +263,8 @@ func (tx *Tx) init() {
 	tx.UsernameChange = NewUsernameChangeClient(tx.config)
 	tx.UsernameHold = NewUsernameHoldClient(tx.config)
 	tx.VerificationApplication = NewVerificationApplicationClient(tx.config)
+	tx.VerificationCase = NewVerificationCaseClient(tx.config)
+	tx.VerificationEligibility = NewVerificationEligibilityClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
