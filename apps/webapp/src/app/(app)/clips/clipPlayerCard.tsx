@@ -108,7 +108,7 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
           {formatCountWithThousandsSuffix(clip.reposts)}
         </span>
         <span className={styles.actionItem}>
-          <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} />
+          <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} soundId={clip.sound?.id ?? null} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} />
         </span>
       </div>
     </article>
