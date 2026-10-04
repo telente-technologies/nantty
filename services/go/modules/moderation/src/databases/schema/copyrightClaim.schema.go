@@ -28,7 +28,7 @@ func (CopyrightClaim) Fields() []ent.Field {
 		field.Enum("target_type").Values("clip", "sound", "post", "live").Immutable(),
 		field.String("target_id").MaxLen(128).Immutable(),
 		field.UUID("infringer_id", uuid.UUID{}).Optional().Nillable(),
-		field.Enum("target_flag").Values("visible", "limited", "taken_down").Default("visible"),
+		field.Enum("target_flag").Values("visible", "limited", "taken_down", "muted", "warned").Default("visible"),
 		field.Enum("status").Values("pending", "needs_info", "upheld", "rejected", "counter_notice", "restored").Default("pending"),
 		field.String("rights_basis").MaxLen(1000).Immutable(),
 		field.String("sworn_statement").MaxLen(1000).Immutable(),
@@ -39,6 +39,21 @@ func (CopyrightClaim) Fields() []ent.Field {
 		field.Bytes("decision").Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.UUID("strike_id", uuid.UUID{}).Optional().Nillable(),
 		field.String("idempotency_key").MaxLen(128).Optional().Nillable().Immutable(),
+		field.Enum("claim_scope").Values("audio", "video").Default("video").Immutable(),
+		field.String("claimant_phone").MaxLen(40).Default("").Immutable(),
+		field.String("claimant_address").MaxLen(500).Default("").Immutable(),
+		field.String("original_work_url").MaxLen(2048).Default("").Immutable(),
+		field.String("original_work_media_id").MaxLen(64).Default("").Immutable(),
+		field.Strings("proof_urls").Default([]string{}).Immutable(),
+		field.Strings("proof_media_ids").Default([]string{}).Immutable(),
+		field.Bytes("infringing_segments").Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}).Immutable(),
+		field.Bool("accuracy_declared").Default(false).Immutable(),
+		field.String("signature_name").MaxLen(160).Default("").Immutable(),
+		field.Time("signed_at").Optional().Nillable().Immutable(),
+		field.Enum("remedy").Values("none", "audio_muted", "takedown_warning", "taken_down").Default("none"),
+		field.Enum("remedy_state").Values("none", "muted", "awaiting_removal", "removed_voluntarily", "taken_down", "restored").Default("none"),
+		field.Time("takedown_deadline_at").Optional().Nillable(),
+		field.UUID("warning_id", uuid.UUID{}).Optional().Nillable(),
 	}
 }
 
@@ -48,5 +63,6 @@ func (CopyrightClaim) Indexes() []ent.Index {
 		index.Fields("status", "created_at"),
 		index.Fields("infringer_id"),
 		index.Fields("target_type", "target_id"),
+		index.Fields("remedy_state", "takedown_deadline_at"),
 	}
 }
