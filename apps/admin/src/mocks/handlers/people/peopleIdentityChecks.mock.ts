@@ -8,7 +8,7 @@ type MockIdentityCase = { item: IdentityCaseListItem; detail: Omit<IdentityCaseD
 
 const baseCase = (overrides: Partial<IdentityCaseListItem>): IdentityCaseListItem => ({
   id: "0192f3a0-0000-7000-8000-000000000001", profileId: "p1", accountId: "a1", color: "blue", planCode: "blue", paymentChannel: "web_paystack", status: "under_review",
-  refundStatus: "not_applicable", refundMethod: "card", consentGiven: true, documentType: "NIN_SLIP", documentCountry: "NG",
+  refundStatus: "not_applicable", refundMethod: "card", refundScope: "full", consentGiven: true, documentType: "NIN_SLIP", documentCountry: "NG",
   checks: { liveness: "passed", document: "passed", faceMatch: "passed", databaseLookup: "matched", faceMatchConfidence: 0.97, nameMatchScore: 0.62 },
   trustScore: 71, eligibleAtPayment: true, decisionReasons: ["name_does_not_match_profile"], fraudSignals: [], decisionReason: "", smileReference: "0000412233", smileResultCode: "0810",
   createdAt: readIsoTimeOffset(-180), decidedAt: null, verifiedAt: null, profileHandle: "amaka.styles", profileName: "Amaka Obi", ...overrides,

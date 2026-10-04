@@ -21,6 +21,7 @@ export interface IdentityCase {
   readonly status: IdentityCaseStatus;
   readonly refundStatus: IdentityRefundStatus;
   readonly refundMethod: string;
+  readonly refundScope: "full" | "checkmark_share";
   readonly consentGiven: boolean;
   readonly documentType: string;
   readonly documentCountry: string;
