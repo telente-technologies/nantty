@@ -7,6 +7,7 @@ import (
 
 	"zudomart/modules/ads/src/container"
 	exportreportcsv "zudomart/modules/ads/src/modules/reporting/queries/exportReportCsv"
+	getadcardreport "zudomart/modules/ads/src/modules/reporting/queries/getAdCardReport"
 	getreport "zudomart/modules/ads/src/modules/reporting/queries/getReport"
 	"zudomart/modules/ads/src/modules/reporting/validators"
 	"zudomart/modules/ads/src/utils"
@@ -56,4 +57,27 @@ func (controller ReportingController) parse(request *http.Request) (userId, acco
 	}
 	report, columns, err = validators.ParseReportQuery(request.URL.Query())
 	return
+}
+
+func (controller ReportingController) AdCards(writer http.ResponseWriter, request *http.Request) {
+	utils.Responder{Logger: controller.Container.Logger}.Run(writer, request, func() error {
+		user, err := utils.ActorUserId(request)
+		if err != nil {
+			return err
+		}
+		account, err := utils.PathIdentifier(request, "accountId")
+		if err != nil {
+			return err
+		}
+		adId, err := utils.PathIdentifier(request, "adId")
+		if err != nil {
+			return err
+		}
+		rows, err := (getadcardreport.Handler{Container: controller.Container}).Execute(request.Context(), getadcardreport.Query{AccountId: account, AdId: adId, UserId: user, From: request.URL.Query().Get("from"), To: request.URL.Query().Get("to")})
+		if err != nil {
+			return err
+		}
+		httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"items": rows})
+		return nil
+	})
 }
