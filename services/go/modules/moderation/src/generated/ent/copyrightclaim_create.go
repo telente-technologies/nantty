@@ -249,6 +249,192 @@ func (_c *CopyrightClaimCreate) SetNillableIdempotencyKey(v *string) *CopyrightC
 	return _c
 }
 
+// SetClaimScope sets the "claim_scope" field.
+func (_c *CopyrightClaimCreate) SetClaimScope(v copyrightclaim.ClaimScope) *CopyrightClaimCreate {
+	_c.mutation.SetClaimScope(v)
+	return _c
+}
+
+// SetNillableClaimScope sets the "claim_scope" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableClaimScope(v *copyrightclaim.ClaimScope) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetClaimScope(*v)
+	}
+	return _c
+}
+
+// SetClaimantPhone sets the "claimant_phone" field.
+func (_c *CopyrightClaimCreate) SetClaimantPhone(v string) *CopyrightClaimCreate {
+	_c.mutation.SetClaimantPhone(v)
+	return _c
+}
+
+// SetNillableClaimantPhone sets the "claimant_phone" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableClaimantPhone(v *string) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetClaimantPhone(*v)
+	}
+	return _c
+}
+
+// SetClaimantAddress sets the "claimant_address" field.
+func (_c *CopyrightClaimCreate) SetClaimantAddress(v string) *CopyrightClaimCreate {
+	_c.mutation.SetClaimantAddress(v)
+	return _c
+}
+
+// SetNillableClaimantAddress sets the "claimant_address" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableClaimantAddress(v *string) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetClaimantAddress(*v)
+	}
+	return _c
+}
+
+// SetOriginalWorkURL sets the "original_work_url" field.
+func (_c *CopyrightClaimCreate) SetOriginalWorkURL(v string) *CopyrightClaimCreate {
+	_c.mutation.SetOriginalWorkURL(v)
+	return _c
+}
+
+// SetNillableOriginalWorkURL sets the "original_work_url" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableOriginalWorkURL(v *string) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetOriginalWorkURL(*v)
+	}
+	return _c
+}
+
+// SetOriginalWorkMediaID sets the "original_work_media_id" field.
+func (_c *CopyrightClaimCreate) SetOriginalWorkMediaID(v string) *CopyrightClaimCreate {
+	_c.mutation.SetOriginalWorkMediaID(v)
+	return _c
+}
+
+// SetNillableOriginalWorkMediaID sets the "original_work_media_id" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableOriginalWorkMediaID(v *string) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetOriginalWorkMediaID(*v)
+	}
+	return _c
+}
+
+// SetProofUrls sets the "proof_urls" field.
+func (_c *CopyrightClaimCreate) SetProofUrls(v []string) *CopyrightClaimCreate {
+	_c.mutation.SetProofUrls(v)
+	return _c
+}
+
+// SetProofMediaIds sets the "proof_media_ids" field.
+func (_c *CopyrightClaimCreate) SetProofMediaIds(v []string) *CopyrightClaimCreate {
+	_c.mutation.SetProofMediaIds(v)
+	return _c
+}
+
+// SetInfringingSegments sets the "infringing_segments" field.
+func (_c *CopyrightClaimCreate) SetInfringingSegments(v []byte) *CopyrightClaimCreate {
+	_c.mutation.SetInfringingSegments(v)
+	return _c
+}
+
+// SetAccuracyDeclared sets the "accuracy_declared" field.
+func (_c *CopyrightClaimCreate) SetAccuracyDeclared(v bool) *CopyrightClaimCreate {
+	_c.mutation.SetAccuracyDeclared(v)
+	return _c
+}
+
+// SetNillableAccuracyDeclared sets the "accuracy_declared" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableAccuracyDeclared(v *bool) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetAccuracyDeclared(*v)
+	}
+	return _c
+}
+
+// SetSignatureName sets the "signature_name" field.
+func (_c *CopyrightClaimCreate) SetSignatureName(v string) *CopyrightClaimCreate {
+	_c.mutation.SetSignatureName(v)
+	return _c
+}
+
+// SetNillableSignatureName sets the "signature_name" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableSignatureName(v *string) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetSignatureName(*v)
+	}
+	return _c
+}
+
+// SetSignedAt sets the "signed_at" field.
+func (_c *CopyrightClaimCreate) SetSignedAt(v time.Time) *CopyrightClaimCreate {
+	_c.mutation.SetSignedAt(v)
+	return _c
+}
+
+// SetNillableSignedAt sets the "signed_at" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableSignedAt(v *time.Time) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetSignedAt(*v)
+	}
+	return _c
+}
+
+// SetRemedy sets the "remedy" field.
+func (_c *CopyrightClaimCreate) SetRemedy(v copyrightclaim.Remedy) *CopyrightClaimCreate {
+	_c.mutation.SetRemedy(v)
+	return _c
+}
+
+// SetNillableRemedy sets the "remedy" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableRemedy(v *copyrightclaim.Remedy) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetRemedy(*v)
+	}
+	return _c
+}
+
+// SetRemedyState sets the "remedy_state" field.
+func (_c *CopyrightClaimCreate) SetRemedyState(v copyrightclaim.RemedyState) *CopyrightClaimCreate {
+	_c.mutation.SetRemedyState(v)
+	return _c
+}
+
+// SetNillableRemedyState sets the "remedy_state" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableRemedyState(v *copyrightclaim.RemedyState) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetRemedyState(*v)
+	}
+	return _c
+}
+
+// SetTakedownDeadlineAt sets the "takedown_deadline_at" field.
+func (_c *CopyrightClaimCreate) SetTakedownDeadlineAt(v time.Time) *CopyrightClaimCreate {
+	_c.mutation.SetTakedownDeadlineAt(v)
+	return _c
+}
+
+// SetNillableTakedownDeadlineAt sets the "takedown_deadline_at" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableTakedownDeadlineAt(v *time.Time) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetTakedownDeadlineAt(*v)
+	}
+	return _c
+}
+
+// SetWarningID sets the "warning_id" field.
+func (_c *CopyrightClaimCreate) SetWarningID(v uuid.UUID) *CopyrightClaimCreate {
+	_c.mutation.SetWarningID(v)
+	return _c
+}
+
+// SetNillableWarningID sets the "warning_id" field if the given value is not nil.
+func (_c *CopyrightClaimCreate) SetNillableWarningID(v *uuid.UUID) *CopyrightClaimCreate {
+	if v != nil {
+		_c.SetWarningID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CopyrightClaimCreate) SetID(v uuid.UUID) *CopyrightClaimCreate {
 	_c.mutation.SetID(v)
@@ -329,6 +515,50 @@ func (_c *CopyrightClaimCreate) defaults() {
 	if _, ok := _c.mutation.ClaimedUrls(); !ok {
 		v := copyrightclaim.DefaultClaimedUrls
 		_c.mutation.SetClaimedUrls(v)
+	}
+	if _, ok := _c.mutation.ClaimScope(); !ok {
+		v := copyrightclaim.DefaultClaimScope
+		_c.mutation.SetClaimScope(v)
+	}
+	if _, ok := _c.mutation.ClaimantPhone(); !ok {
+		v := copyrightclaim.DefaultClaimantPhone
+		_c.mutation.SetClaimantPhone(v)
+	}
+	if _, ok := _c.mutation.ClaimantAddress(); !ok {
+		v := copyrightclaim.DefaultClaimantAddress
+		_c.mutation.SetClaimantAddress(v)
+	}
+	if _, ok := _c.mutation.OriginalWorkURL(); !ok {
+		v := copyrightclaim.DefaultOriginalWorkURL
+		_c.mutation.SetOriginalWorkURL(v)
+	}
+	if _, ok := _c.mutation.OriginalWorkMediaID(); !ok {
+		v := copyrightclaim.DefaultOriginalWorkMediaID
+		_c.mutation.SetOriginalWorkMediaID(v)
+	}
+	if _, ok := _c.mutation.ProofUrls(); !ok {
+		v := copyrightclaim.DefaultProofUrls
+		_c.mutation.SetProofUrls(v)
+	}
+	if _, ok := _c.mutation.ProofMediaIds(); !ok {
+		v := copyrightclaim.DefaultProofMediaIds
+		_c.mutation.SetProofMediaIds(v)
+	}
+	if _, ok := _c.mutation.AccuracyDeclared(); !ok {
+		v := copyrightclaim.DefaultAccuracyDeclared
+		_c.mutation.SetAccuracyDeclared(v)
+	}
+	if _, ok := _c.mutation.SignatureName(); !ok {
+		v := copyrightclaim.DefaultSignatureName
+		_c.mutation.SetSignatureName(v)
+	}
+	if _, ok := _c.mutation.Remedy(); !ok {
+		v := copyrightclaim.DefaultRemedy
+		_c.mutation.SetRemedy(v)
+	}
+	if _, ok := _c.mutation.RemedyState(); !ok {
+		v := copyrightclaim.DefaultRemedyState
+		_c.mutation.SetRemedyState(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := copyrightclaim.DefaultID()
@@ -443,6 +673,79 @@ func (_c *CopyrightClaimCreate) check() error {
 	if v, ok := _c.mutation.IdempotencyKey(); ok {
 		if err := copyrightclaim.IdempotencyKeyValidator(v); err != nil {
 			return &ValidationError{Name: "idempotency_key", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.idempotency_key": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ClaimScope(); !ok {
+		return &ValidationError{Name: "claim_scope", err: errors.New(`ent: missing required field "CopyrightClaim.claim_scope"`)}
+	}
+	if v, ok := _c.mutation.ClaimScope(); ok {
+		if err := copyrightclaim.ClaimScopeValidator(v); err != nil {
+			return &ValidationError{Name: "claim_scope", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.claim_scope": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ClaimantPhone(); !ok {
+		return &ValidationError{Name: "claimant_phone", err: errors.New(`ent: missing required field "CopyrightClaim.claimant_phone"`)}
+	}
+	if v, ok := _c.mutation.ClaimantPhone(); ok {
+		if err := copyrightclaim.ClaimantPhoneValidator(v); err != nil {
+			return &ValidationError{Name: "claimant_phone", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.claimant_phone": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ClaimantAddress(); !ok {
+		return &ValidationError{Name: "claimant_address", err: errors.New(`ent: missing required field "CopyrightClaim.claimant_address"`)}
+	}
+	if v, ok := _c.mutation.ClaimantAddress(); ok {
+		if err := copyrightclaim.ClaimantAddressValidator(v); err != nil {
+			return &ValidationError{Name: "claimant_address", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.claimant_address": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.OriginalWorkURL(); !ok {
+		return &ValidationError{Name: "original_work_url", err: errors.New(`ent: missing required field "CopyrightClaim.original_work_url"`)}
+	}
+	if v, ok := _c.mutation.OriginalWorkURL(); ok {
+		if err := copyrightclaim.OriginalWorkURLValidator(v); err != nil {
+			return &ValidationError{Name: "original_work_url", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.original_work_url": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.OriginalWorkMediaID(); !ok {
+		return &ValidationError{Name: "original_work_media_id", err: errors.New(`ent: missing required field "CopyrightClaim.original_work_media_id"`)}
+	}
+	if v, ok := _c.mutation.OriginalWorkMediaID(); ok {
+		if err := copyrightclaim.OriginalWorkMediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "original_work_media_id", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.original_work_media_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ProofUrls(); !ok {
+		return &ValidationError{Name: "proof_urls", err: errors.New(`ent: missing required field "CopyrightClaim.proof_urls"`)}
+	}
+	if _, ok := _c.mutation.ProofMediaIds(); !ok {
+		return &ValidationError{Name: "proof_media_ids", err: errors.New(`ent: missing required field "CopyrightClaim.proof_media_ids"`)}
+	}
+	if _, ok := _c.mutation.AccuracyDeclared(); !ok {
+		return &ValidationError{Name: "accuracy_declared", err: errors.New(`ent: missing required field "CopyrightClaim.accuracy_declared"`)}
+	}
+	if _, ok := _c.mutation.SignatureName(); !ok {
+		return &ValidationError{Name: "signature_name", err: errors.New(`ent: missing required field "CopyrightClaim.signature_name"`)}
+	}
+	if v, ok := _c.mutation.SignatureName(); ok {
+		if err := copyrightclaim.SignatureNameValidator(v); err != nil {
+			return &ValidationError{Name: "signature_name", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.signature_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Remedy(); !ok {
+		return &ValidationError{Name: "remedy", err: errors.New(`ent: missing required field "CopyrightClaim.remedy"`)}
+	}
+	if v, ok := _c.mutation.Remedy(); ok {
+		if err := copyrightclaim.RemedyValidator(v); err != nil {
+			return &ValidationError{Name: "remedy", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.RemedyState(); !ok {
+		return &ValidationError{Name: "remedy_state", err: errors.New(`ent: missing required field "CopyrightClaim.remedy_state"`)}
+	}
+	if v, ok := _c.mutation.RemedyState(); ok {
+		if err := copyrightclaim.RemedyStateValidator(v); err != nil {
+			return &ValidationError{Name: "remedy_state", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy_state": %w`, err)}
 		}
 	}
 	return nil
@@ -567,6 +870,66 @@ func (_c *CopyrightClaimCreate) createSpec() (*CopyrightClaim, *sqlgraph.CreateS
 	if value, ok := _c.mutation.IdempotencyKey(); ok {
 		_spec.SetField(copyrightclaim.FieldIdempotencyKey, field.TypeString, value)
 		_node.IdempotencyKey = &value
+	}
+	if value, ok := _c.mutation.ClaimScope(); ok {
+		_spec.SetField(copyrightclaim.FieldClaimScope, field.TypeEnum, value)
+		_node.ClaimScope = value
+	}
+	if value, ok := _c.mutation.ClaimantPhone(); ok {
+		_spec.SetField(copyrightclaim.FieldClaimantPhone, field.TypeString, value)
+		_node.ClaimantPhone = value
+	}
+	if value, ok := _c.mutation.ClaimantAddress(); ok {
+		_spec.SetField(copyrightclaim.FieldClaimantAddress, field.TypeString, value)
+		_node.ClaimantAddress = value
+	}
+	if value, ok := _c.mutation.OriginalWorkURL(); ok {
+		_spec.SetField(copyrightclaim.FieldOriginalWorkURL, field.TypeString, value)
+		_node.OriginalWorkURL = value
+	}
+	if value, ok := _c.mutation.OriginalWorkMediaID(); ok {
+		_spec.SetField(copyrightclaim.FieldOriginalWorkMediaID, field.TypeString, value)
+		_node.OriginalWorkMediaID = value
+	}
+	if value, ok := _c.mutation.ProofUrls(); ok {
+		_spec.SetField(copyrightclaim.FieldProofUrls, field.TypeJSON, value)
+		_node.ProofUrls = value
+	}
+	if value, ok := _c.mutation.ProofMediaIds(); ok {
+		_spec.SetField(copyrightclaim.FieldProofMediaIds, field.TypeJSON, value)
+		_node.ProofMediaIds = value
+	}
+	if value, ok := _c.mutation.InfringingSegments(); ok {
+		_spec.SetField(copyrightclaim.FieldInfringingSegments, field.TypeBytes, value)
+		_node.InfringingSegments = value
+	}
+	if value, ok := _c.mutation.AccuracyDeclared(); ok {
+		_spec.SetField(copyrightclaim.FieldAccuracyDeclared, field.TypeBool, value)
+		_node.AccuracyDeclared = value
+	}
+	if value, ok := _c.mutation.SignatureName(); ok {
+		_spec.SetField(copyrightclaim.FieldSignatureName, field.TypeString, value)
+		_node.SignatureName = value
+	}
+	if value, ok := _c.mutation.SignedAt(); ok {
+		_spec.SetField(copyrightclaim.FieldSignedAt, field.TypeTime, value)
+		_node.SignedAt = &value
+	}
+	if value, ok := _c.mutation.Remedy(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedy, field.TypeEnum, value)
+		_node.Remedy = value
+	}
+	if value, ok := _c.mutation.RemedyState(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedyState, field.TypeEnum, value)
+		_node.RemedyState = value
+	}
+	if value, ok := _c.mutation.TakedownDeadlineAt(); ok {
+		_spec.SetField(copyrightclaim.FieldTakedownDeadlineAt, field.TypeTime, value)
+		_node.TakedownDeadlineAt = &value
+	}
+	if value, ok := _c.mutation.WarningID(); ok {
+		_spec.SetField(copyrightclaim.FieldWarningID, field.TypeUUID, value)
+		_node.WarningID = &value
 	}
 	return _node, _spec
 }

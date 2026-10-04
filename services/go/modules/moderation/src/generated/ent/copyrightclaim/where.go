@@ -140,6 +140,56 @@ func IdempotencyKey(v string) predicate.CopyrightClaim {
 	return predicate.CopyrightClaim(sql.FieldEQ(FieldIdempotencyKey, v))
 }
 
+// ClaimantPhone applies equality check predicate on the "claimant_phone" field. It's identical to ClaimantPhoneEQ.
+func ClaimantPhone(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldClaimantPhone, v))
+}
+
+// ClaimantAddress applies equality check predicate on the "claimant_address" field. It's identical to ClaimantAddressEQ.
+func ClaimantAddress(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldClaimantAddress, v))
+}
+
+// OriginalWorkURL applies equality check predicate on the "original_work_url" field. It's identical to OriginalWorkURLEQ.
+func OriginalWorkURL(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkMediaID applies equality check predicate on the "original_work_media_id" field. It's identical to OriginalWorkMediaIDEQ.
+func OriginalWorkMediaID(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldOriginalWorkMediaID, v))
+}
+
+// InfringingSegments applies equality check predicate on the "infringing_segments" field. It's identical to InfringingSegmentsEQ.
+func InfringingSegments(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldInfringingSegments, v))
+}
+
+// AccuracyDeclared applies equality check predicate on the "accuracy_declared" field. It's identical to AccuracyDeclaredEQ.
+func AccuracyDeclared(v bool) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldAccuracyDeclared, v))
+}
+
+// SignatureName applies equality check predicate on the "signature_name" field. It's identical to SignatureNameEQ.
+func SignatureName(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldSignatureName, v))
+}
+
+// SignedAt applies equality check predicate on the "signed_at" field. It's identical to SignedAtEQ.
+func SignedAt(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldSignedAt, v))
+}
+
+// TakedownDeadlineAt applies equality check predicate on the "takedown_deadline_at" field. It's identical to TakedownDeadlineAtEQ.
+func TakedownDeadlineAt(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldTakedownDeadlineAt, v))
+}
+
+// WarningID applies equality check predicate on the "warning_id" field. It's identical to WarningIDEQ.
+func WarningID(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldWarningID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CopyrightClaim {
 	return predicate.CopyrightClaim(sql.FieldEQ(FieldCreatedAt, v))
@@ -1203,6 +1253,601 @@ func IdempotencyKeyEqualFold(v string) predicate.CopyrightClaim {
 // IdempotencyKeyContainsFold applies the ContainsFold predicate on the "idempotency_key" field.
 func IdempotencyKeyContainsFold(v string) predicate.CopyrightClaim {
 	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldIdempotencyKey, v))
+}
+
+// ClaimScopeEQ applies the EQ predicate on the "claim_scope" field.
+func ClaimScopeEQ(v ClaimScope) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldClaimScope, v))
+}
+
+// ClaimScopeNEQ applies the NEQ predicate on the "claim_scope" field.
+func ClaimScopeNEQ(v ClaimScope) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldClaimScope, v))
+}
+
+// ClaimScopeIn applies the In predicate on the "claim_scope" field.
+func ClaimScopeIn(vs ...ClaimScope) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldClaimScope, vs...))
+}
+
+// ClaimScopeNotIn applies the NotIn predicate on the "claim_scope" field.
+func ClaimScopeNotIn(vs ...ClaimScope) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldClaimScope, vs...))
+}
+
+// ClaimantPhoneEQ applies the EQ predicate on the "claimant_phone" field.
+func ClaimantPhoneEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneNEQ applies the NEQ predicate on the "claimant_phone" field.
+func ClaimantPhoneNEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneIn applies the In predicate on the "claimant_phone" field.
+func ClaimantPhoneIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldClaimantPhone, vs...))
+}
+
+// ClaimantPhoneNotIn applies the NotIn predicate on the "claimant_phone" field.
+func ClaimantPhoneNotIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldClaimantPhone, vs...))
+}
+
+// ClaimantPhoneGT applies the GT predicate on the "claimant_phone" field.
+func ClaimantPhoneGT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneGTE applies the GTE predicate on the "claimant_phone" field.
+func ClaimantPhoneGTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneLT applies the LT predicate on the "claimant_phone" field.
+func ClaimantPhoneLT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneLTE applies the LTE predicate on the "claimant_phone" field.
+func ClaimantPhoneLTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneContains applies the Contains predicate on the "claimant_phone" field.
+func ClaimantPhoneContains(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContains(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneHasPrefix applies the HasPrefix predicate on the "claimant_phone" field.
+func ClaimantPhoneHasPrefix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasPrefix(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneHasSuffix applies the HasSuffix predicate on the "claimant_phone" field.
+func ClaimantPhoneHasSuffix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasSuffix(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneEqualFold applies the EqualFold predicate on the "claimant_phone" field.
+func ClaimantPhoneEqualFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEqualFold(FieldClaimantPhone, v))
+}
+
+// ClaimantPhoneContainsFold applies the ContainsFold predicate on the "claimant_phone" field.
+func ClaimantPhoneContainsFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldClaimantPhone, v))
+}
+
+// ClaimantAddressEQ applies the EQ predicate on the "claimant_address" field.
+func ClaimantAddressEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressNEQ applies the NEQ predicate on the "claimant_address" field.
+func ClaimantAddressNEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressIn applies the In predicate on the "claimant_address" field.
+func ClaimantAddressIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldClaimantAddress, vs...))
+}
+
+// ClaimantAddressNotIn applies the NotIn predicate on the "claimant_address" field.
+func ClaimantAddressNotIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldClaimantAddress, vs...))
+}
+
+// ClaimantAddressGT applies the GT predicate on the "claimant_address" field.
+func ClaimantAddressGT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressGTE applies the GTE predicate on the "claimant_address" field.
+func ClaimantAddressGTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressLT applies the LT predicate on the "claimant_address" field.
+func ClaimantAddressLT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressLTE applies the LTE predicate on the "claimant_address" field.
+func ClaimantAddressLTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressContains applies the Contains predicate on the "claimant_address" field.
+func ClaimantAddressContains(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContains(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressHasPrefix applies the HasPrefix predicate on the "claimant_address" field.
+func ClaimantAddressHasPrefix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasPrefix(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressHasSuffix applies the HasSuffix predicate on the "claimant_address" field.
+func ClaimantAddressHasSuffix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasSuffix(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressEqualFold applies the EqualFold predicate on the "claimant_address" field.
+func ClaimantAddressEqualFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEqualFold(FieldClaimantAddress, v))
+}
+
+// ClaimantAddressContainsFold applies the ContainsFold predicate on the "claimant_address" field.
+func ClaimantAddressContainsFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldClaimantAddress, v))
+}
+
+// OriginalWorkURLEQ applies the EQ predicate on the "original_work_url" field.
+func OriginalWorkURLEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLNEQ applies the NEQ predicate on the "original_work_url" field.
+func OriginalWorkURLNEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLIn applies the In predicate on the "original_work_url" field.
+func OriginalWorkURLIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldOriginalWorkURL, vs...))
+}
+
+// OriginalWorkURLNotIn applies the NotIn predicate on the "original_work_url" field.
+func OriginalWorkURLNotIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldOriginalWorkURL, vs...))
+}
+
+// OriginalWorkURLGT applies the GT predicate on the "original_work_url" field.
+func OriginalWorkURLGT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLGTE applies the GTE predicate on the "original_work_url" field.
+func OriginalWorkURLGTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLLT applies the LT predicate on the "original_work_url" field.
+func OriginalWorkURLLT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLLTE applies the LTE predicate on the "original_work_url" field.
+func OriginalWorkURLLTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLContains applies the Contains predicate on the "original_work_url" field.
+func OriginalWorkURLContains(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContains(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLHasPrefix applies the HasPrefix predicate on the "original_work_url" field.
+func OriginalWorkURLHasPrefix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasPrefix(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLHasSuffix applies the HasSuffix predicate on the "original_work_url" field.
+func OriginalWorkURLHasSuffix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasSuffix(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLEqualFold applies the EqualFold predicate on the "original_work_url" field.
+func OriginalWorkURLEqualFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEqualFold(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkURLContainsFold applies the ContainsFold predicate on the "original_work_url" field.
+func OriginalWorkURLContainsFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldOriginalWorkURL, v))
+}
+
+// OriginalWorkMediaIDEQ applies the EQ predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDNEQ applies the NEQ predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDNEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDIn applies the In predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldOriginalWorkMediaID, vs...))
+}
+
+// OriginalWorkMediaIDNotIn applies the NotIn predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDNotIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldOriginalWorkMediaID, vs...))
+}
+
+// OriginalWorkMediaIDGT applies the GT predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDGT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDGTE applies the GTE predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDGTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDLT applies the LT predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDLT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDLTE applies the LTE predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDLTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDContains applies the Contains predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDContains(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContains(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDHasPrefix applies the HasPrefix predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDHasPrefix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasPrefix(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDHasSuffix applies the HasSuffix predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDHasSuffix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasSuffix(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDEqualFold applies the EqualFold predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDEqualFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEqualFold(FieldOriginalWorkMediaID, v))
+}
+
+// OriginalWorkMediaIDContainsFold applies the ContainsFold predicate on the "original_work_media_id" field.
+func OriginalWorkMediaIDContainsFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldOriginalWorkMediaID, v))
+}
+
+// InfringingSegmentsEQ applies the EQ predicate on the "infringing_segments" field.
+func InfringingSegmentsEQ(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsNEQ applies the NEQ predicate on the "infringing_segments" field.
+func InfringingSegmentsNEQ(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsIn applies the In predicate on the "infringing_segments" field.
+func InfringingSegmentsIn(vs ...[]byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldInfringingSegments, vs...))
+}
+
+// InfringingSegmentsNotIn applies the NotIn predicate on the "infringing_segments" field.
+func InfringingSegmentsNotIn(vs ...[]byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldInfringingSegments, vs...))
+}
+
+// InfringingSegmentsGT applies the GT predicate on the "infringing_segments" field.
+func InfringingSegmentsGT(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsGTE applies the GTE predicate on the "infringing_segments" field.
+func InfringingSegmentsGTE(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsLT applies the LT predicate on the "infringing_segments" field.
+func InfringingSegmentsLT(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsLTE applies the LTE predicate on the "infringing_segments" field.
+func InfringingSegmentsLTE(v []byte) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldInfringingSegments, v))
+}
+
+// InfringingSegmentsIsNil applies the IsNil predicate on the "infringing_segments" field.
+func InfringingSegmentsIsNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIsNull(FieldInfringingSegments))
+}
+
+// InfringingSegmentsNotNil applies the NotNil predicate on the "infringing_segments" field.
+func InfringingSegmentsNotNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotNull(FieldInfringingSegments))
+}
+
+// AccuracyDeclaredEQ applies the EQ predicate on the "accuracy_declared" field.
+func AccuracyDeclaredEQ(v bool) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldAccuracyDeclared, v))
+}
+
+// AccuracyDeclaredNEQ applies the NEQ predicate on the "accuracy_declared" field.
+func AccuracyDeclaredNEQ(v bool) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldAccuracyDeclared, v))
+}
+
+// SignatureNameEQ applies the EQ predicate on the "signature_name" field.
+func SignatureNameEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldSignatureName, v))
+}
+
+// SignatureNameNEQ applies the NEQ predicate on the "signature_name" field.
+func SignatureNameNEQ(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldSignatureName, v))
+}
+
+// SignatureNameIn applies the In predicate on the "signature_name" field.
+func SignatureNameIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldSignatureName, vs...))
+}
+
+// SignatureNameNotIn applies the NotIn predicate on the "signature_name" field.
+func SignatureNameNotIn(vs ...string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldSignatureName, vs...))
+}
+
+// SignatureNameGT applies the GT predicate on the "signature_name" field.
+func SignatureNameGT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldSignatureName, v))
+}
+
+// SignatureNameGTE applies the GTE predicate on the "signature_name" field.
+func SignatureNameGTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldSignatureName, v))
+}
+
+// SignatureNameLT applies the LT predicate on the "signature_name" field.
+func SignatureNameLT(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldSignatureName, v))
+}
+
+// SignatureNameLTE applies the LTE predicate on the "signature_name" field.
+func SignatureNameLTE(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldSignatureName, v))
+}
+
+// SignatureNameContains applies the Contains predicate on the "signature_name" field.
+func SignatureNameContains(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContains(FieldSignatureName, v))
+}
+
+// SignatureNameHasPrefix applies the HasPrefix predicate on the "signature_name" field.
+func SignatureNameHasPrefix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasPrefix(FieldSignatureName, v))
+}
+
+// SignatureNameHasSuffix applies the HasSuffix predicate on the "signature_name" field.
+func SignatureNameHasSuffix(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldHasSuffix(FieldSignatureName, v))
+}
+
+// SignatureNameEqualFold applies the EqualFold predicate on the "signature_name" field.
+func SignatureNameEqualFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEqualFold(FieldSignatureName, v))
+}
+
+// SignatureNameContainsFold applies the ContainsFold predicate on the "signature_name" field.
+func SignatureNameContainsFold(v string) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldContainsFold(FieldSignatureName, v))
+}
+
+// SignedAtEQ applies the EQ predicate on the "signed_at" field.
+func SignedAtEQ(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldSignedAt, v))
+}
+
+// SignedAtNEQ applies the NEQ predicate on the "signed_at" field.
+func SignedAtNEQ(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldSignedAt, v))
+}
+
+// SignedAtIn applies the In predicate on the "signed_at" field.
+func SignedAtIn(vs ...time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldSignedAt, vs...))
+}
+
+// SignedAtNotIn applies the NotIn predicate on the "signed_at" field.
+func SignedAtNotIn(vs ...time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldSignedAt, vs...))
+}
+
+// SignedAtGT applies the GT predicate on the "signed_at" field.
+func SignedAtGT(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldSignedAt, v))
+}
+
+// SignedAtGTE applies the GTE predicate on the "signed_at" field.
+func SignedAtGTE(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldSignedAt, v))
+}
+
+// SignedAtLT applies the LT predicate on the "signed_at" field.
+func SignedAtLT(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldSignedAt, v))
+}
+
+// SignedAtLTE applies the LTE predicate on the "signed_at" field.
+func SignedAtLTE(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldSignedAt, v))
+}
+
+// SignedAtIsNil applies the IsNil predicate on the "signed_at" field.
+func SignedAtIsNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIsNull(FieldSignedAt))
+}
+
+// SignedAtNotNil applies the NotNil predicate on the "signed_at" field.
+func SignedAtNotNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotNull(FieldSignedAt))
+}
+
+// RemedyEQ applies the EQ predicate on the "remedy" field.
+func RemedyEQ(v Remedy) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldRemedy, v))
+}
+
+// RemedyNEQ applies the NEQ predicate on the "remedy" field.
+func RemedyNEQ(v Remedy) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldRemedy, v))
+}
+
+// RemedyIn applies the In predicate on the "remedy" field.
+func RemedyIn(vs ...Remedy) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldRemedy, vs...))
+}
+
+// RemedyNotIn applies the NotIn predicate on the "remedy" field.
+func RemedyNotIn(vs ...Remedy) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldRemedy, vs...))
+}
+
+// RemedyStateEQ applies the EQ predicate on the "remedy_state" field.
+func RemedyStateEQ(v RemedyState) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldRemedyState, v))
+}
+
+// RemedyStateNEQ applies the NEQ predicate on the "remedy_state" field.
+func RemedyStateNEQ(v RemedyState) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldRemedyState, v))
+}
+
+// RemedyStateIn applies the In predicate on the "remedy_state" field.
+func RemedyStateIn(vs ...RemedyState) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldRemedyState, vs...))
+}
+
+// RemedyStateNotIn applies the NotIn predicate on the "remedy_state" field.
+func RemedyStateNotIn(vs ...RemedyState) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldRemedyState, vs...))
+}
+
+// TakedownDeadlineAtEQ applies the EQ predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtEQ(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtNEQ applies the NEQ predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtNEQ(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtIn applies the In predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtIn(vs ...time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldTakedownDeadlineAt, vs...))
+}
+
+// TakedownDeadlineAtNotIn applies the NotIn predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtNotIn(vs ...time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldTakedownDeadlineAt, vs...))
+}
+
+// TakedownDeadlineAtGT applies the GT predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtGT(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtGTE applies the GTE predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtGTE(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtLT applies the LT predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtLT(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtLTE applies the LTE predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtLTE(v time.Time) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldTakedownDeadlineAt, v))
+}
+
+// TakedownDeadlineAtIsNil applies the IsNil predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtIsNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIsNull(FieldTakedownDeadlineAt))
+}
+
+// TakedownDeadlineAtNotNil applies the NotNil predicate on the "takedown_deadline_at" field.
+func TakedownDeadlineAtNotNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotNull(FieldTakedownDeadlineAt))
+}
+
+// WarningIDEQ applies the EQ predicate on the "warning_id" field.
+func WarningIDEQ(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldEQ(FieldWarningID, v))
+}
+
+// WarningIDNEQ applies the NEQ predicate on the "warning_id" field.
+func WarningIDNEQ(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNEQ(FieldWarningID, v))
+}
+
+// WarningIDIn applies the In predicate on the "warning_id" field.
+func WarningIDIn(vs ...uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIn(FieldWarningID, vs...))
+}
+
+// WarningIDNotIn applies the NotIn predicate on the "warning_id" field.
+func WarningIDNotIn(vs ...uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotIn(FieldWarningID, vs...))
+}
+
+// WarningIDGT applies the GT predicate on the "warning_id" field.
+func WarningIDGT(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGT(FieldWarningID, v))
+}
+
+// WarningIDGTE applies the GTE predicate on the "warning_id" field.
+func WarningIDGTE(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldGTE(FieldWarningID, v))
+}
+
+// WarningIDLT applies the LT predicate on the "warning_id" field.
+func WarningIDLT(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLT(FieldWarningID, v))
+}
+
+// WarningIDLTE applies the LTE predicate on the "warning_id" field.
+func WarningIDLTE(v uuid.UUID) predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldLTE(FieldWarningID, v))
+}
+
+// WarningIDIsNil applies the IsNil predicate on the "warning_id" field.
+func WarningIDIsNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldIsNull(FieldWarningID))
+}
+
+// WarningIDNotNil applies the NotNil predicate on the "warning_id" field.
+func WarningIDNotNil() predicate.CopyrightClaim {
+	return predicate.CopyrightClaim(sql.FieldNotNull(FieldWarningID))
 }
 
 // And groups predicates with the AND operator between them.

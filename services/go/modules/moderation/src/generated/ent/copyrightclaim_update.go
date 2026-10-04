@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
 	"zudomart/modules/moderation/src/generated/ent/predicate"
 
@@ -159,6 +160,74 @@ func (_u *CopyrightClaimUpdate) ClearStrikeID() *CopyrightClaimUpdate {
 	return _u
 }
 
+// SetRemedy sets the "remedy" field.
+func (_u *CopyrightClaimUpdate) SetRemedy(v copyrightclaim.Remedy) *CopyrightClaimUpdate {
+	_u.mutation.SetRemedy(v)
+	return _u
+}
+
+// SetNillableRemedy sets the "remedy" field if the given value is not nil.
+func (_u *CopyrightClaimUpdate) SetNillableRemedy(v *copyrightclaim.Remedy) *CopyrightClaimUpdate {
+	if v != nil {
+		_u.SetRemedy(*v)
+	}
+	return _u
+}
+
+// SetRemedyState sets the "remedy_state" field.
+func (_u *CopyrightClaimUpdate) SetRemedyState(v copyrightclaim.RemedyState) *CopyrightClaimUpdate {
+	_u.mutation.SetRemedyState(v)
+	return _u
+}
+
+// SetNillableRemedyState sets the "remedy_state" field if the given value is not nil.
+func (_u *CopyrightClaimUpdate) SetNillableRemedyState(v *copyrightclaim.RemedyState) *CopyrightClaimUpdate {
+	if v != nil {
+		_u.SetRemedyState(*v)
+	}
+	return _u
+}
+
+// SetTakedownDeadlineAt sets the "takedown_deadline_at" field.
+func (_u *CopyrightClaimUpdate) SetTakedownDeadlineAt(v time.Time) *CopyrightClaimUpdate {
+	_u.mutation.SetTakedownDeadlineAt(v)
+	return _u
+}
+
+// SetNillableTakedownDeadlineAt sets the "takedown_deadline_at" field if the given value is not nil.
+func (_u *CopyrightClaimUpdate) SetNillableTakedownDeadlineAt(v *time.Time) *CopyrightClaimUpdate {
+	if v != nil {
+		_u.SetTakedownDeadlineAt(*v)
+	}
+	return _u
+}
+
+// ClearTakedownDeadlineAt clears the value of the "takedown_deadline_at" field.
+func (_u *CopyrightClaimUpdate) ClearTakedownDeadlineAt() *CopyrightClaimUpdate {
+	_u.mutation.ClearTakedownDeadlineAt()
+	return _u
+}
+
+// SetWarningID sets the "warning_id" field.
+func (_u *CopyrightClaimUpdate) SetWarningID(v uuid.UUID) *CopyrightClaimUpdate {
+	_u.mutation.SetWarningID(v)
+	return _u
+}
+
+// SetNillableWarningID sets the "warning_id" field if the given value is not nil.
+func (_u *CopyrightClaimUpdate) SetNillableWarningID(v *uuid.UUID) *CopyrightClaimUpdate {
+	if v != nil {
+		_u.SetWarningID(*v)
+	}
+	return _u
+}
+
+// ClearWarningID clears the value of the "warning_id" field.
+func (_u *CopyrightClaimUpdate) ClearWarningID() *CopyrightClaimUpdate {
+	_u.mutation.ClearWarningID()
+	return _u
+}
+
 // Mutation returns the CopyrightClaimMutation object of the builder.
 func (_u *CopyrightClaimUpdate) Mutation() *CopyrightClaimMutation {
 	return _u.mutation
@@ -201,6 +270,16 @@ func (_u *CopyrightClaimUpdate) check() error {
 	if v, ok := _u.mutation.Status(); ok {
 		if err := copyrightclaim.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Remedy(); ok {
+		if err := copyrightclaim.RemedyValidator(v); err != nil {
+			return &ValidationError{Name: "remedy", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RemedyState(); ok {
+		if err := copyrightclaim.RemedyStateValidator(v); err != nil {
+			return &ValidationError{Name: "remedy_state", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy_state": %w`, err)}
 		}
 	}
 	return nil
@@ -268,6 +347,30 @@ func (_u *CopyrightClaimUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.IdempotencyKeyCleared() {
 		_spec.ClearField(copyrightclaim.FieldIdempotencyKey, field.TypeString)
+	}
+	if _u.mutation.InfringingSegmentsCleared() {
+		_spec.ClearField(copyrightclaim.FieldInfringingSegments, field.TypeBytes)
+	}
+	if _u.mutation.SignedAtCleared() {
+		_spec.ClearField(copyrightclaim.FieldSignedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Remedy(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RemedyState(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedyState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.TakedownDeadlineAt(); ok {
+		_spec.SetField(copyrightclaim.FieldTakedownDeadlineAt, field.TypeTime, value)
+	}
+	if _u.mutation.TakedownDeadlineAtCleared() {
+		_spec.ClearField(copyrightclaim.FieldTakedownDeadlineAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WarningID(); ok {
+		_spec.SetField(copyrightclaim.FieldWarningID, field.TypeUUID, value)
+	}
+	if _u.mutation.WarningIDCleared() {
+		_spec.ClearField(copyrightclaim.FieldWarningID, field.TypeUUID)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -420,6 +523,74 @@ func (_u *CopyrightClaimUpdateOne) ClearStrikeID() *CopyrightClaimUpdateOne {
 	return _u
 }
 
+// SetRemedy sets the "remedy" field.
+func (_u *CopyrightClaimUpdateOne) SetRemedy(v copyrightclaim.Remedy) *CopyrightClaimUpdateOne {
+	_u.mutation.SetRemedy(v)
+	return _u
+}
+
+// SetNillableRemedy sets the "remedy" field if the given value is not nil.
+func (_u *CopyrightClaimUpdateOne) SetNillableRemedy(v *copyrightclaim.Remedy) *CopyrightClaimUpdateOne {
+	if v != nil {
+		_u.SetRemedy(*v)
+	}
+	return _u
+}
+
+// SetRemedyState sets the "remedy_state" field.
+func (_u *CopyrightClaimUpdateOne) SetRemedyState(v copyrightclaim.RemedyState) *CopyrightClaimUpdateOne {
+	_u.mutation.SetRemedyState(v)
+	return _u
+}
+
+// SetNillableRemedyState sets the "remedy_state" field if the given value is not nil.
+func (_u *CopyrightClaimUpdateOne) SetNillableRemedyState(v *copyrightclaim.RemedyState) *CopyrightClaimUpdateOne {
+	if v != nil {
+		_u.SetRemedyState(*v)
+	}
+	return _u
+}
+
+// SetTakedownDeadlineAt sets the "takedown_deadline_at" field.
+func (_u *CopyrightClaimUpdateOne) SetTakedownDeadlineAt(v time.Time) *CopyrightClaimUpdateOne {
+	_u.mutation.SetTakedownDeadlineAt(v)
+	return _u
+}
+
+// SetNillableTakedownDeadlineAt sets the "takedown_deadline_at" field if the given value is not nil.
+func (_u *CopyrightClaimUpdateOne) SetNillableTakedownDeadlineAt(v *time.Time) *CopyrightClaimUpdateOne {
+	if v != nil {
+		_u.SetTakedownDeadlineAt(*v)
+	}
+	return _u
+}
+
+// ClearTakedownDeadlineAt clears the value of the "takedown_deadline_at" field.
+func (_u *CopyrightClaimUpdateOne) ClearTakedownDeadlineAt() *CopyrightClaimUpdateOne {
+	_u.mutation.ClearTakedownDeadlineAt()
+	return _u
+}
+
+// SetWarningID sets the "warning_id" field.
+func (_u *CopyrightClaimUpdateOne) SetWarningID(v uuid.UUID) *CopyrightClaimUpdateOne {
+	_u.mutation.SetWarningID(v)
+	return _u
+}
+
+// SetNillableWarningID sets the "warning_id" field if the given value is not nil.
+func (_u *CopyrightClaimUpdateOne) SetNillableWarningID(v *uuid.UUID) *CopyrightClaimUpdateOne {
+	if v != nil {
+		_u.SetWarningID(*v)
+	}
+	return _u
+}
+
+// ClearWarningID clears the value of the "warning_id" field.
+func (_u *CopyrightClaimUpdateOne) ClearWarningID() *CopyrightClaimUpdateOne {
+	_u.mutation.ClearWarningID()
+	return _u
+}
+
 // Mutation returns the CopyrightClaimMutation object of the builder.
 func (_u *CopyrightClaimUpdateOne) Mutation() *CopyrightClaimMutation {
 	return _u.mutation
@@ -475,6 +646,16 @@ func (_u *CopyrightClaimUpdateOne) check() error {
 	if v, ok := _u.mutation.Status(); ok {
 		if err := copyrightclaim.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Remedy(); ok {
+		if err := copyrightclaim.RemedyValidator(v); err != nil {
+			return &ValidationError{Name: "remedy", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RemedyState(); ok {
+		if err := copyrightclaim.RemedyStateValidator(v); err != nil {
+			return &ValidationError{Name: "remedy_state", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.remedy_state": %w`, err)}
 		}
 	}
 	return nil
@@ -559,6 +740,30 @@ func (_u *CopyrightClaimUpdateOne) sqlSave(ctx context.Context) (_node *Copyrigh
 	}
 	if _u.mutation.IdempotencyKeyCleared() {
 		_spec.ClearField(copyrightclaim.FieldIdempotencyKey, field.TypeString)
+	}
+	if _u.mutation.InfringingSegmentsCleared() {
+		_spec.ClearField(copyrightclaim.FieldInfringingSegments, field.TypeBytes)
+	}
+	if _u.mutation.SignedAtCleared() {
+		_spec.ClearField(copyrightclaim.FieldSignedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Remedy(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RemedyState(); ok {
+		_spec.SetField(copyrightclaim.FieldRemedyState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.TakedownDeadlineAt(); ok {
+		_spec.SetField(copyrightclaim.FieldTakedownDeadlineAt, field.TypeTime, value)
+	}
+	if _u.mutation.TakedownDeadlineAtCleared() {
+		_spec.ClearField(copyrightclaim.FieldTakedownDeadlineAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WarningID(); ok {
+		_spec.SetField(copyrightclaim.FieldWarningID, field.TypeUUID, value)
+	}
+	if _u.mutation.WarningIDCleared() {
+		_spec.ClearField(copyrightclaim.FieldWarningID, field.TypeUUID)
 	}
 	_node = &CopyrightClaim{config: _u.config}
 	_spec.Assign = _node.assignValues

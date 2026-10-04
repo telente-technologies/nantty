@@ -59,6 +59,36 @@ const (
 	FieldStrikeID = "strike_id"
 	// FieldIdempotencyKey holds the string denoting the idempotency_key field in the database.
 	FieldIdempotencyKey = "idempotency_key"
+	// FieldClaimScope holds the string denoting the claim_scope field in the database.
+	FieldClaimScope = "claim_scope"
+	// FieldClaimantPhone holds the string denoting the claimant_phone field in the database.
+	FieldClaimantPhone = "claimant_phone"
+	// FieldClaimantAddress holds the string denoting the claimant_address field in the database.
+	FieldClaimantAddress = "claimant_address"
+	// FieldOriginalWorkURL holds the string denoting the original_work_url field in the database.
+	FieldOriginalWorkURL = "original_work_url"
+	// FieldOriginalWorkMediaID holds the string denoting the original_work_media_id field in the database.
+	FieldOriginalWorkMediaID = "original_work_media_id"
+	// FieldProofUrls holds the string denoting the proof_urls field in the database.
+	FieldProofUrls = "proof_urls"
+	// FieldProofMediaIds holds the string denoting the proof_media_ids field in the database.
+	FieldProofMediaIds = "proof_media_ids"
+	// FieldInfringingSegments holds the string denoting the infringing_segments field in the database.
+	FieldInfringingSegments = "infringing_segments"
+	// FieldAccuracyDeclared holds the string denoting the accuracy_declared field in the database.
+	FieldAccuracyDeclared = "accuracy_declared"
+	// FieldSignatureName holds the string denoting the signature_name field in the database.
+	FieldSignatureName = "signature_name"
+	// FieldSignedAt holds the string denoting the signed_at field in the database.
+	FieldSignedAt = "signed_at"
+	// FieldRemedy holds the string denoting the remedy field in the database.
+	FieldRemedy = "remedy"
+	// FieldRemedyState holds the string denoting the remedy_state field in the database.
+	FieldRemedyState = "remedy_state"
+	// FieldTakedownDeadlineAt holds the string denoting the takedown_deadline_at field in the database.
+	FieldTakedownDeadlineAt = "takedown_deadline_at"
+	// FieldWarningID holds the string denoting the warning_id field in the database.
+	FieldWarningID = "warning_id"
 	// Table holds the table name of the copyrightclaim in the database.
 	Table = "copyright_claims"
 )
@@ -88,6 +118,21 @@ var Columns = []string{
 	FieldDecision,
 	FieldStrikeID,
 	FieldIdempotencyKey,
+	FieldClaimScope,
+	FieldClaimantPhone,
+	FieldClaimantAddress,
+	FieldOriginalWorkURL,
+	FieldOriginalWorkMediaID,
+	FieldProofUrls,
+	FieldProofMediaIds,
+	FieldInfringingSegments,
+	FieldAccuracyDeclared,
+	FieldSignatureName,
+	FieldSignedAt,
+	FieldRemedy,
+	FieldRemedyState,
+	FieldTakedownDeadlineAt,
+	FieldWarningID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -129,6 +174,32 @@ var (
 	DefaultClaimedUrls []string
 	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	IdempotencyKeyValidator func(string) error
+	// DefaultClaimantPhone holds the default value on creation for the "claimant_phone" field.
+	DefaultClaimantPhone string
+	// ClaimantPhoneValidator is a validator for the "claimant_phone" field. It is called by the builders before save.
+	ClaimantPhoneValidator func(string) error
+	// DefaultClaimantAddress holds the default value on creation for the "claimant_address" field.
+	DefaultClaimantAddress string
+	// ClaimantAddressValidator is a validator for the "claimant_address" field. It is called by the builders before save.
+	ClaimantAddressValidator func(string) error
+	// DefaultOriginalWorkURL holds the default value on creation for the "original_work_url" field.
+	DefaultOriginalWorkURL string
+	// OriginalWorkURLValidator is a validator for the "original_work_url" field. It is called by the builders before save.
+	OriginalWorkURLValidator func(string) error
+	// DefaultOriginalWorkMediaID holds the default value on creation for the "original_work_media_id" field.
+	DefaultOriginalWorkMediaID string
+	// OriginalWorkMediaIDValidator is a validator for the "original_work_media_id" field. It is called by the builders before save.
+	OriginalWorkMediaIDValidator func(string) error
+	// DefaultProofUrls holds the default value on creation for the "proof_urls" field.
+	DefaultProofUrls []string
+	// DefaultProofMediaIds holds the default value on creation for the "proof_media_ids" field.
+	DefaultProofMediaIds []string
+	// DefaultAccuracyDeclared holds the default value on creation for the "accuracy_declared" field.
+	DefaultAccuracyDeclared bool
+	// DefaultSignatureName holds the default value on creation for the "signature_name" field.
+	DefaultSignatureName string
+	// SignatureNameValidator is a validator for the "signature_name" field. It is called by the builders before save.
+	SignatureNameValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -197,6 +268,8 @@ const (
 	TargetFlagVisible   TargetFlag = "visible"
 	TargetFlagLimited   TargetFlag = "limited"
 	TargetFlagTakenDown TargetFlag = "taken_down"
+	TargetFlagMuted     TargetFlag = "muted"
+	TargetFlagWarned    TargetFlag = "warned"
 )
 
 func (tf TargetFlag) String() string {
@@ -206,7 +279,7 @@ func (tf TargetFlag) String() string {
 // TargetFlagValidator is a validator for the "target_flag" field enum values. It is called by the builders before save.
 func TargetFlagValidator(tf TargetFlag) error {
 	switch tf {
-	case TargetFlagVisible, TargetFlagLimited, TargetFlagTakenDown:
+	case TargetFlagVisible, TargetFlagLimited, TargetFlagTakenDown, TargetFlagMuted, TargetFlagWarned:
 		return nil
 	default:
 		return fmt.Errorf("copyrightclaim: invalid enum value for target_flag field: %q", tf)
@@ -240,6 +313,90 @@ func StatusValidator(s Status) error {
 		return nil
 	default:
 		return fmt.Errorf("copyrightclaim: invalid enum value for status field: %q", s)
+	}
+}
+
+// ClaimScope defines the type for the "claim_scope" enum field.
+type ClaimScope string
+
+// ClaimScopeVideo is the default value of the ClaimScope enum.
+const DefaultClaimScope = ClaimScopeVideo
+
+// ClaimScope values.
+const (
+	ClaimScopeAudio ClaimScope = "audio"
+	ClaimScopeVideo ClaimScope = "video"
+)
+
+func (cs ClaimScope) String() string {
+	return string(cs)
+}
+
+// ClaimScopeValidator is a validator for the "claim_scope" field enum values. It is called by the builders before save.
+func ClaimScopeValidator(cs ClaimScope) error {
+	switch cs {
+	case ClaimScopeAudio, ClaimScopeVideo:
+		return nil
+	default:
+		return fmt.Errorf("copyrightclaim: invalid enum value for claim_scope field: %q", cs)
+	}
+}
+
+// Remedy defines the type for the "remedy" enum field.
+type Remedy string
+
+// RemedyNone is the default value of the Remedy enum.
+const DefaultRemedy = RemedyNone
+
+// Remedy values.
+const (
+	RemedyNone            Remedy = "none"
+	RemedyAudioMuted      Remedy = "audio_muted"
+	RemedyTakedownWarning Remedy = "takedown_warning"
+	RemedyTakenDown       Remedy = "taken_down"
+)
+
+func (r Remedy) String() string {
+	return string(r)
+}
+
+// RemedyValidator is a validator for the "remedy" field enum values. It is called by the builders before save.
+func RemedyValidator(r Remedy) error {
+	switch r {
+	case RemedyNone, RemedyAudioMuted, RemedyTakedownWarning, RemedyTakenDown:
+		return nil
+	default:
+		return fmt.Errorf("copyrightclaim: invalid enum value for remedy field: %q", r)
+	}
+}
+
+// RemedyState defines the type for the "remedy_state" enum field.
+type RemedyState string
+
+// RemedyStateNone is the default value of the RemedyState enum.
+const DefaultRemedyState = RemedyStateNone
+
+// RemedyState values.
+const (
+	RemedyStateNone               RemedyState = "none"
+	RemedyStateMuted              RemedyState = "muted"
+	RemedyStateAwaitingRemoval    RemedyState = "awaiting_removal"
+	RemedyStateRemovedVoluntarily RemedyState = "removed_voluntarily"
+	RemedyStateTakenDown          RemedyState = "taken_down"
+	RemedyStateRestored           RemedyState = "restored"
+)
+
+func (rs RemedyState) String() string {
+	return string(rs)
+}
+
+// RemedyStateValidator is a validator for the "remedy_state" field enum values. It is called by the builders before save.
+func RemedyStateValidator(rs RemedyState) error {
+	switch rs {
+	case RemedyStateNone, RemedyStateMuted, RemedyStateAwaitingRemoval, RemedyStateRemovedVoluntarily, RemedyStateTakenDown, RemedyStateRestored:
+		return nil
+	default:
+		return fmt.Errorf("copyrightclaim: invalid enum value for remedy_state field: %q", rs)
 	}
 }
 
@@ -339,4 +496,64 @@ func ByStrikeID(opts ...sql.OrderTermOption) OrderOption {
 // ByIdempotencyKey orders the results by the idempotency_key field.
 func ByIdempotencyKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIdempotencyKey, opts...).ToFunc()
+}
+
+// ByClaimScope orders the results by the claim_scope field.
+func ByClaimScope(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClaimScope, opts...).ToFunc()
+}
+
+// ByClaimantPhone orders the results by the claimant_phone field.
+func ByClaimantPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClaimantPhone, opts...).ToFunc()
+}
+
+// ByClaimantAddress orders the results by the claimant_address field.
+func ByClaimantAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClaimantAddress, opts...).ToFunc()
+}
+
+// ByOriginalWorkURL orders the results by the original_work_url field.
+func ByOriginalWorkURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOriginalWorkURL, opts...).ToFunc()
+}
+
+// ByOriginalWorkMediaID orders the results by the original_work_media_id field.
+func ByOriginalWorkMediaID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOriginalWorkMediaID, opts...).ToFunc()
+}
+
+// ByAccuracyDeclared orders the results by the accuracy_declared field.
+func ByAccuracyDeclared(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccuracyDeclared, opts...).ToFunc()
+}
+
+// BySignatureName orders the results by the signature_name field.
+func BySignatureName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignatureName, opts...).ToFunc()
+}
+
+// BySignedAt orders the results by the signed_at field.
+func BySignedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignedAt, opts...).ToFunc()
+}
+
+// ByRemedy orders the results by the remedy field.
+func ByRemedy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemedy, opts...).ToFunc()
+}
+
+// ByRemedyState orders the results by the remedy_state field.
+func ByRemedyState(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemedyState, opts...).ToFunc()
+}
+
+// ByTakedownDeadlineAt orders the results by the takedown_deadline_at field.
+func ByTakedownDeadlineAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTakedownDeadlineAt, opts...).ToFunc()
+}
+
+// ByWarningID orders the results by the warning_id field.
+func ByWarningID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWarningID, opts...).ToFunc()
 }
