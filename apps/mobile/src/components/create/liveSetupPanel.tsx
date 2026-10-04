@@ -240,7 +240,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     borderRadius: 12,
     backgroundColor: colors.surface,
   },
-  credentialDivider: { height: 1, backgroundColor: "#E4E6F2", marginVertical: 6 },
+  credentialDivider: { height: 1, backgroundColor: colors.divider, marginVertical: 6 },
   shareButton: { width: 200 },
   dim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 16, paddingTop: 20 },
   titleInput: {

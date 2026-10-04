@@ -13,6 +13,7 @@ import type { CreateMode, ID, PostAudience } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 
 import { AiGeneratedToggleRow } from "./aiGeneratedToggleRow";
+import { PostAudienceSettings, type PostAudienceSettingsValue } from "./postAudienceSettings";
 import { CreateModePill } from "./createModePill";
 import { DraftMediaStrip } from "./draftMediaStrip";
 import { MAXIMUM_MEDIA_PER_POST, pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
@@ -25,6 +26,7 @@ export interface PostComposerDraft {
   readonly audience: PostAudience;
   readonly kind: "clip" | "video" | "photo";
   readonly isAiGenerated: boolean;
+  readonly audienceSettings: PostAudienceSettingsValue;
 }
 
 export interface PostComposerPanelProps {
@@ -129,6 +131,7 @@ export function PostComposerPanel({
         ) : null}
         {soundPicker}
         <AiGeneratedToggleRow value={draft.isAiGenerated} onChange={(isAiGenerated) => onChangeDraft({ ...draft, isAiGenerated })} />
+        <PostAudienceSettings value={draft.audienceSettings} onChange={(audienceSettings) => onChangeDraft({ ...draft, audienceSettings })} />
       </ScrollView>
       {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
       {focused || videoReplyStage ? null : (

@@ -2,20 +2,16 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
+import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 import type { CreateMode } from "@/types";
-
-const MODES: readonly CreateMode[] = ["story", "post", "clip", "product", "live"];
 
 export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onChangeMode: (mode: CreateMode) => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
-  const isLiveModeLocked = !canGoLive && !isCreatorStatusLoading;
+  const { availableModes } = useCreateMenuAccess();
   return (
     <View style={styles.pill} accessibilityRole="tablist">
-      {MODES.map((m) => {
-        const isLockedMode = m === "live" && isLiveModeLocked;
+      {availableModes.map((m) => {
         return (
           <View key={m} style={styles.modeItem}>
             <Text
@@ -24,13 +20,12 @@ export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onCha
               lineHeight={16.9}
               color={m === mode ? colors.black : colors.textMuted}
               accessibilityRole="tab"
-              accessibilityLabel={isLockedMode ? "LIVE, locked. Join the Creator Program to go live" : m.toUpperCase()}
-              accessibilityState={{ selected: m === mode, disabled: isLockedMode }}
+              accessibilityLabel={m.toUpperCase()}
+              accessibilityState={{ selected: m === mode }}
               onPress={() => onChangeMode(m)}
             >
               {m.toUpperCase()}
             </Text>
-            {isLockedMode ? <View style={styles.lockedModeDot} /> : null}
           </View>
         );
       })}
@@ -50,5 +45,4 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     gap: 12,
   },
   modeItem: { flexDirection: "row", alignItems: "center", gap: 3 },
-  lockedModeDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.textMuted },
 }));
