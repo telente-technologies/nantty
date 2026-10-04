@@ -43,6 +43,7 @@ func (LiveSession) Fields() []ent.Field {
 		field.String("accepted_live_ad_terms_version").Optional().Nillable(),
 		field.Time("accepted_live_ad_terms_at").Optional().Nillable(),
 		field.String("sponsorship_line").Optional().Nillable().MaxLen(200),
+		field.String("moderation_visibility").Default("visible"),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

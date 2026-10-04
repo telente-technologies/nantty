@@ -36,6 +36,7 @@ type LiveSettings struct {
 	LiveAdTermsCurrentVersion       string
 	GiftPlatformBurstLimitPerSecond int
 	InternalApiToken                string
+	EventsQueueName                 string
 	PlatformBlockedWords            []string
 	RecordingBucket                 string
 	RecordingRegion                 string
@@ -44,6 +45,7 @@ type LiveSettings struct {
 	RecordingSecret                 string
 	RecordingDownloadTimeToLive     time.Duration
 	LiveKitWebhookEnabled           bool
+	Safety                          LiveSafetySettings
 }
 
 func (settings LiveSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -77,6 +79,7 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		LiveAdTermsCurrentVersion:       reader.ReadStringOrDefault("LIVE_AD_TERMS_VERSION", "2026-10"),
 		GiftPlatformBurstLimitPerSecond: reader.ReadIntegerOrDefault("LIVE_GIFT_BURST_LIMIT_PER_SECOND", 10),
 		InternalApiToken:                reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
+		EventsQueueName:                 reader.ReadStringOrDefault("LIVE_EVENTS_QUEUE", ""),
 		PlatformBlockedWords:            splitCommaSeparatedWords(reader.ReadStringOrDefault("LIVE_PLATFORM_BLOCKED_WORDS", "")),
 		RecordingBucket:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_BUCKET", ""),
 		RecordingRegion:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_REGION", "us-east-1"),
@@ -86,6 +89,7 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		RecordingDownloadTimeToLive:     reader.ReadDurationOrDefault("LIVE_RECORDING_DOWNLOAD_TTL", time.Hour),
 		LiveKitWebhookEnabled:           reader.ReadStringOrDefault("LIVE_LIVEKIT_WEBHOOK_ENABLED", "true") == "true",
 	}
+	settings.Safety = readLiveSafetySettings(reader)
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {
 		settings.MoneyGrpcAddress = reader.ReadRequiredString("LIVE_MONEY_GRPC_ADDRESS")
