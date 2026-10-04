@@ -25,6 +25,8 @@ model SearchDocument {
   summary         Json
   visibility      String
   available       Boolean
+  restrictedForMinors Boolean @default(false) @map("restricted_for_minors")
+  shippingRegions String[] @default([]) @map("shipping_regions")
   popularity      Float    @default(0)
   region          String?
   version         BigInt
