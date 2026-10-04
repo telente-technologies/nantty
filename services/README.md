@@ -414,3 +414,23 @@ and purchase loyalty/cashback were removed by the owner (no rewards module); eng
 ### Identity and trust endpoints (B1, all done)
 
 Gateway guest browsing and rate limits; admin RBAC (`/admin/roles`, `/admin/admins/*`, `/admin/staff-settings`, audit with filters, CSV, facets); user actions (`/admin/users/{id}/restrict|suspend|reinstate|ban|unban|delete|username/reassign|username/assign-held`, `/admin/usernames/held|hold`, `/admin/suspensions/accounts|cases`, `/users/me/suspension` and its appeal); creator program (`/creators/eligibility|applications`, `/admin/applications/creators`); checkmarks (`/verification/*`, `/admin/verifications`, `/admin/checkmark-grants`, `/admin/accounts`, `/admin/black-applications`); business documents (`/seller/business-documents`, `/admin/business-documents`); legal (`/admin/legal/*`, `/legal/policy-versions/current`, `/users/me/policy-acceptances`); privacy (`/users/me/mention-privacy|message-privacy`); chat reports (`/reports`, `/reports/me`, `/admin/chat-reports`). Internal service endpoints use `X-Internal-Token`: `/internal/enforcement/actions`, `/internal/users/summaries`, `/internal/profiles/{id}/signals`, `/internal/checkmarks/{id}/billing-events`, `/internal/legal/notices/{id}/progress`, `/internal/accounts/{id}/contact-privacy`, `/internal/audit/events|history`, `/internal/suspension-cases`, and the notification directory under `/internal/users/*/notification-recipient` and `/internal/notification-audience/*`.
+
+## Internal endpoints and consumer queues (integration pass, 4 Oct)
+
+Every internal route is `/api/v1/internal/*`, requires `X-Internal-Token` (catalog and orders also accept `Authorization: Bearer`), and is never routed by the gateway.
+
+| Route | Owner (token) | Caller |
+| --- | --- | --- |
+| `GET /internal/search-sources/users/{id}` | goIdentity (`USERS_INTERNAL_API_TOKEN`) | search (`IDENTITY_INTERNAL_*`) |
+| `GET /internal/search-sources/{stores\|products\|categories\|brands}/{id}` | goCommerce catalog (`CATALOG_INTERNAL_API_TOKEN`) | search (`COMMERCE_INTERNAL_*`) |
+| `GET /internal/search-sources/{posts\|sounds}/{id}` | social (`SOCIAL_INTERNAL_TOKEN`) | search (`SOCIAL_INTERNAL_*`) |
+| `GET /internal/moderation/targets/{type}/{id}` | social (post, clip, comment, sound), catalog (product, store), go-live (live) | go-trust (`MODERATION_{SOCIAL,COMMERCE,LIVE}_INTERNAL_*`) |
+| `GET /internal/ad-sources/content`, `/internal/audience-sources/accounts/{id}/{followers\|engagers}` | social | go-ads (`SOCIAL_INTERNAL_*`) |
+| `GET /internal/audience-sources/stores/{id}/{purchasers\|visitors}` | goCommerce orders / catalog | go-ads (`COMMERCE_INTERNAL_*`) |
+| `GET /internal/save-counts?type=&ids=` | social | catalog (`CATALOG_SOCIAL_INTERNAL_*`) |
+| `GET/POST /internal/stores/{storeId}/disputes[/{id}[/responses]]` | go-money escrow (`MONEY_INTERNAL_API_TOKEN`) | goCommerce `/seller/disputes*` (`ORDERS_MONEY_INTERNAL_URL`) |
+| `POST /internal/enforcement/actions` (`warn\|restrict\|suspend\|ban`) | goIdentity | go-trust |
+
+Audience endpoints are cursor-paged (`{data:[{accountId,lastActiveAt,interactions}], nextCursor}`) and drop accounts without `personalized_ads`.
+
+New consumer queues (all in `infra/local/rabbitmq/topology.json`): `identity-domain-events` (`entitlement.*`, `USERS_ENTITLEMENT_EVENTS_QUEUE`), `catalog-domain-events` and `live-domain-events` (`content.visibilityChanged`, `CATALOG_EVENTS_QUEUE`, `LIVE_EVENTS_QUEUE`), `social-domain-events` (`content.visibilityChanged`, `media.processed`, `media.rejected`, `SOCIAL_DOMAIN_EVENTS_QUEUE`). Python intelligence publishes `contentScore.generated` jobs to `intelligence-trust-content-scores` (raw JSON, advisory only) and serves `POST /v1/moderation/classify-image` (pluggable model, no-signal placeholder by default). Terraform wiring for these URLs, tokens and queues is in `infra/aws/modules/platform/wiring.tf`.
