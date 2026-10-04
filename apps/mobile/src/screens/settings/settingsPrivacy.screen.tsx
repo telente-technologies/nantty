@@ -38,6 +38,7 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
           trailing={pendingRequests > 0 ? { text: String(pendingRequests), color: colors.primary } : "chevron"}
           onPress={() => navigation.navigate("FollowRequests")}
         />
+        <SettingsRow label="Content preferences" trailing="chevron" onPress={() => navigation.navigate("ContentPreferences")} />
       </SettingsGroup>
     </SettingsPage>
   );

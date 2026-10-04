@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
@@ -20,12 +20,21 @@ import { sellerService } from "@/services/seller.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { StoreProductInput } from "@/types/account.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
+import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 
 const EMPTY_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", sizes: "", colors: "" };
 const splitCommaSeparatedList = (value: string) => value.split(",").map((v) => v.trim()).filter(Boolean);
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
-export function ProductFormScreen({ navigation, route }: MainScreenProps<"ProductForm">) {
+export function ProductFormScreen(props: MainScreenProps<"ProductForm">) {
+  const access = useCreateMenuAccess();
+  if (access.isSellerStatusLoading) return <Screen><ActivityIndicator style={{ flex: 1 }} /></Screen>;
+  if (!access.isApprovedSeller) return <RoleGateScreen kind="seller" />;
+  return <ProductFormEditor {...props} />;
+}
+
+function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const productId = route.params?.productId;

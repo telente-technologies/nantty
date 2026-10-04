@@ -26,6 +26,7 @@ import { productsService } from "@/services/products.service";
 import { storesService } from "@/services/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
 
@@ -110,7 +111,8 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         <ProductPriceBlock
           product={detail}
           bookmarked={productSave.isSaved}
-          onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Zudomart: https://zudomart.com/products/${detail.id}` }))}
+          saveCount={(detail.saveCount ?? 0) + productSave.savedDelta}
+          onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Zudomart: ${webAppLinks.product(detail)}` }))}
           onToggleBookmark={productSave.toggleSaved}
           onPressRating={() => navigation.navigate("ProductReviews", { productId })}
         />

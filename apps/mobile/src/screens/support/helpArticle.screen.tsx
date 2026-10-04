@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
@@ -27,7 +27,16 @@ export function HelpArticleScreen({ navigation, route }: MainScreenProps<"HelpAr
           <>
             <Text size={12} lineHeight={14.4} color={colors.textSubtle}>{article.data.topic}</Text>
             <Text size={20} weight={600} lineHeight={24} accessibilityRole="header">{article.data.title}</Text>
-            <Text size={14} lineHeight={21}>{article.data.body}</Text>
+            {article.data.body.split("\n\n").map((paragraph, index) => {
+              const [firstLine = "", ...rest] = paragraph.split("\n");
+              const hasHeading = rest.length > 0 && !firstLine.endsWith(".");
+              return (
+                <View key={index} style={styles.paragraph}>
+                  {hasHeading ? <Text size={15} weight={600} lineHeight={20} accessibilityRole="header">{firstLine}</Text> : null}
+                  <Text size={14} lineHeight={21}>{hasHeading ? rest.join("\n") : paragraph}</Text>
+                </View>
+              );
+            })}
             <Button variant="subtle" title="Still need help? Contact support" onPress={() => requireAuthThen(() => navigation.navigate("NewSupportTicket"), undefined, "contact support")} />
           </>
         ) : null}
@@ -36,4 +45,4 @@ export function HelpArticleScreen({ navigation, route }: MainScreenProps<"HelpAr
   );
 }
 
-const styles = StyleSheet.create({ content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 14 } });
+const styles = StyleSheet.create({ content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 14 }, paragraph: { gap: 4 } });
