@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { BirthdayBalloonsToggle } from "@/components/settings/birthdayBalloonsToggle";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { MarketingFrequencyPicker } from "@/components/settings/marketingFrequencyPicker";
@@ -61,9 +62,9 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
       <DataExportSection />
 
       <SettingsGroup>
-        <SettingsRow label="Privacy Policy" trailing="external" onPress={() => Linking.openURL(legalLinks.privacyPolicy)} />
-        <SettingsRow label="Cookie Policy" trailing="external" onPress={() => Linking.openURL(legalLinks.cookiePolicy)} />
-        <SettingsRow label="Terms of Service" trailing="external" onPress={() => Linking.openURL(legalLinks.terms)} />
+        <SettingsRow label="Privacy Policy" trailing="external" onPress={() => openTrustedWebPage(legalLinks.privacyPolicy, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Cookie Policy" trailing="external" onPress={() => openTrustedWebPage(legalLinks.cookiePolicy, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Terms of Service" trailing="external" onPress={() => openTrustedWebPage(legalLinks.terms, inAppBrowserColorsFromTheme(colors))} />
       </SettingsGroup>
 
       <SettingsCenteredAction label="Delete my account" onPress={() => setDeleteSheetVisible(true)} />
