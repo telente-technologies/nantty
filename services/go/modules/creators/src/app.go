@@ -37,6 +37,15 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		return nil, err
 	}
 	loaders.RegisterMoneyGrpcService(module.RegisterGrpcServices)
+	loaders.RegisterMoneyDomainEventHandler("creatorApplication.approved", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var data struct {
+			AccountId string `json:"accountId"`
+		}
+		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		return module.Program.EnrollApprovedCreatorInDefaultTier(ctx, data.AccountId)
+	})
 	return module, nil
 }
 

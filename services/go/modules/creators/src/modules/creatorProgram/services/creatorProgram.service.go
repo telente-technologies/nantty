@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"zudomart/modules/creators/src/container"
 	"zudomart/modules/creators/src/generated/ent"
@@ -95,6 +96,15 @@ func (program CreatorProgram) SetCreatorProgramMembership(ctx context.Context, s
 		return dtos.CreatorMembershipDto{}, err
 	}
 	return dtos.CreatorMembershipDto{UserId: userId, TierId: tierId, Status: status}, nil
+}
+
+func (program CreatorProgram) EnrollApprovedCreatorInDefaultTier(ctx context.Context, userId string) error {
+	if strings.TrimSpace(userId) == "" {
+		return nil
+	}
+	client := program.Container.Client(program.Container.Resources.Database)
+	return client.CreatorProgramMember.Create().SetUserID(userId).SetTierID(program.Container.Settings.DefaultTierId).SetStatus(creatorprogrammember.StatusApproved).
+		SetCreatedAt(program.Container.Now().UTC()).OnConflictColumns(creatorprogrammember.FieldUserID).DoNothing().Exec(ctx)
 }
 
 func (program CreatorProgram) ListCreatorTiers(ctx context.Context) ([]dtos.CreatorTierDto, error) {
