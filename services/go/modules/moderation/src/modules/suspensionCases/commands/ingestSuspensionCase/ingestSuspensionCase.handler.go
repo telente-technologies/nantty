@@ -25,8 +25,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	if err != nil {
 		return "", invalid("accountId", "must be an account id")
 	}
-	if command.Source != "python_suggestion" && command.Source != "user_reports" {
-		return "", invalid("source", "must be python_suggestion or user_reports")
+	if command.Source != "python_suggestion" && command.Source != "user_reports" && command.Source != "copyright_strikes" {
+		return "", invalid("source", "must be python_suggestion, user_reports or copyright_strikes")
 	}
 	if command.RiskScore < 0 || command.RiskScore > 100 || len(command.TopSignals) > 10 || len(command.ExternalReference) > 128 {
 		return "", invalid("riskScore", "must be 0 to 100 with at most 10 top signals")
