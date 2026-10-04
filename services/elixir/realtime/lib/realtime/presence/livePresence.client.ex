@@ -17,14 +17,26 @@ defmodule Realtime.Presence.LivePresenceClient do
   end
 
   defp post(url, token, live_id, joined, left) do
-    full_url = String.trim_trailing(url, "/") <> "/api/v1/internal/live/#{URI.encode(live_id)}/presence"
+    full_url =
+      String.trim_trailing(url, "/") <> "/api/v1/internal/live/#{URI.encode(live_id)}/presence"
+
     body = Jason.encode!(%{"joined" => joined, "left" => left})
     headers = [{~c"x-internal-token", String.to_charlist(token)}]
 
-    case :httpc.request(:post, {String.to_charlist(full_url), headers, ~c"application/json", body}, [timeout: @timeout_ms, connect_timeout: @timeout_ms], []) do
-      {:ok, {{_, status, _}, _, _}} when status in 200..299 -> :ok
-      {:ok, {{_, status, _}, _, _}} -> Logger.warning("live presence forward rejected with status #{status}")
-      {:error, reason} -> Logger.warning("live presence forward failed: #{inspect(reason)}")
+    case :httpc.request(
+           :post,
+           {String.to_charlist(full_url), headers, ~c"application/json", body},
+           [timeout: @timeout_ms, connect_timeout: @timeout_ms],
+           []
+         ) do
+      {:ok, {{_, status, _}, _, _}} when status in 200..299 ->
+        :ok
+
+      {:ok, {{_, status, _}, _, _}} ->
+        Logger.warning("live presence forward rejected with status #{status}")
+
+      {:error, reason} ->
+        Logger.warning("live presence forward failed: #{inspect(reason)}")
     end
   end
 end

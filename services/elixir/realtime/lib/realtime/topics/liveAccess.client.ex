@@ -20,9 +20,18 @@ defmodule Realtime.Topics.LiveAccessClient do
   defp ask_live(url, token, account_id, topic) do
     query = URI.encode_query(%{"userId" => account_id, "topic" => topic})
     full_url = String.trim_trailing(url, "/") <> "/api/v1/internal/live/topic-access?" <> query
-    headers = [{~c"x-internal-token", String.to_charlist(token)}, {~c"accept", ~c"application/json"}]
 
-    case :httpc.request(:get, {String.to_charlist(full_url), headers}, [timeout: @timeout_ms, connect_timeout: @timeout_ms], body_format: :binary) do
+    headers = [
+      {~c"x-internal-token", String.to_charlist(token)},
+      {~c"accept", ~c"application/json"}
+    ]
+
+    case :httpc.request(
+           :get,
+           {String.to_charlist(full_url), headers},
+           [timeout: @timeout_ms, connect_timeout: @timeout_ms],
+           body_format: :binary
+         ) do
       {:ok, {{_, 200, _}, _headers, body}} -> allowed?(body)
       _ -> false
     end

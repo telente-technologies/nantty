@@ -18,7 +18,8 @@ defmodule Realtime.Topics.TopicAuthorizer do
   end
 
   defp authorize_live_access(principal, topic) do
-    checker = Application.get_env(:realtime, :live_access_checker, Realtime.Topics.LiveAccessClient)
+    checker =
+      Application.get_env(:realtime, :live_access_checker, Realtime.Topics.LiveAccessClient)
 
     if checker.can_join?(principal.account_id, topic), do: :ok, else: {:error, :forbidden}
   end
