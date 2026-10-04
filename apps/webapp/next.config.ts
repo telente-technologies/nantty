@@ -19,9 +19,26 @@ const contentSecurityPolicyDirectives: Record<string, string[]> = {
   "worker-src": ["'self'", "blob:"],
 };
 
-const contentSecurityPolicy = Object.entries(contentSecurityPolicyDirectives)
-  .map(([directiveName, sources]) => `${directiveName} ${sources.join(" ")}`)
-  .join("; ");
+const serializeContentSecurityPolicy = (directives: Record<string, string[]>) =>
+  Object.entries(directives)
+    .map(([directiveName, sources]) => `${directiveName} ${sources.join(" ")}`)
+    .join("; ");
+
+const contentSecurityPolicy = serializeContentSecurityPolicy(contentSecurityPolicyDirectives);
+
+const smileIdOrigins = ["https://cdn.smileidentity.com", "https://*.smileidentity.com", "https://*.usesmileid.com"];
+const identityVerificationContentSecurityPolicy = serializeContentSecurityPolicy({
+  ...contentSecurityPolicyDirectives,
+  "script-src": [...(contentSecurityPolicyDirectives["script-src"] ?? []), "https://cdn.smileidentity.com"],
+  "frame-src": [...(contentSecurityPolicyDirectives["frame-src"] ?? []), ...smileIdOrigins],
+  "connect-src": [...(contentSecurityPolicyDirectives["connect-src"] ?? []), ...smileIdOrigins],
+  "worker-src": [...(contentSecurityPolicyDirectives["worker-src"] ?? []), ...smileIdOrigins],
+});
+
+const identityVerificationHeaders = [
+  { key: "Content-Security-Policy", value: identityVerificationContentSecurityPolicy },
+  { key: "Permissions-Policy", value: 'camera=(self "https://cdn.smileidentity.com"), microphone=(), geolocation=(), payment=()' },
+];
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
@@ -41,7 +58,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "**" }, ...(isDevelopmentBuild ? [{ protocol: "http" as const, hostname: "**" }] : [])],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [{ source: "/:path*", headers: securityHeaders }, { source: "/settings/verification", headers: identityVerificationHeaders }];
   },
 };
 
