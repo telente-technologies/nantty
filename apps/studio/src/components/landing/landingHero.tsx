@@ -1,66 +1,47 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import shared from "./landingPage.module.css";
 import styles from "./landingHero.module.css";
+import { LandingIcon } from "./landingIcons";
+import { LiveStageMockup } from "./liveStageMockup";
+
+const heroProofPoints = ["Phone, OBS or WHIP", "Up to 10 creators on stage", "Payouts to your bank"];
 
 export function LandingHero() {
   return (
     <section className={styles.hero} aria-labelledby="landing-hero-heading">
       <div className={styles.layout}>
         <div className={styles.copy}>
-          <p className={shared.eyebrow}>Zudomart Studio</p>
-          <h1 id="landing-hero-heading" className={styles.title}>
-            Your stage, on air.
+          <p className={shared.eyebrow}>Zudomart Studio · for Creator Program members</p>
+          <h1 id="landing-hero-heading" className={styles.heading}>
+            <span className={styles.headingLine}>Go live.</span> <span className={styles.headingLine}>Get gifted.</span>{" "}
+            <span className={styles.headingLine}>
+              Get <span className={shared.highlight}>paid.</span>
+            </span>
           </h1>
           <p className={styles.lede}>
-            Studio is where Zudomart creators go live: talk shows, music, gaming with OBS, IRL and classes. Battle with guests, earn gifts and subscriptions, and sell too if you want to.
+            Studio is your creator control room. Stream from your phone or OBS, bring up to 10 creators on stage, battle for gifts and withdraw to your bank. Talk, music, gaming, classes or IRL. Selling is optional.
           </p>
           <div className={styles.actions}>
             <Link href="/login" className={shared.primaryAction}>
-              Log in to Studio
+              Go live with Studio
+              <LandingIcon name="arrowRight" size={18} strokeWidth={2.2} />
             </Link>
-            <Link href="https://zudomart.com/welcome" className={shared.secondaryAction}>
-              Open Zudomart
-            </Link>
+            <a href="#creator-program" className={shared.secondaryAction}>
+              Join the Creator Program
+            </a>
           </div>
-          <p className={styles.note}>Creator Program members can go live. Studio uses your Zudomart account.</p>
+          <ul className={styles.proofList}>
+            {heroProofPoints.map((point) => (
+              <li key={point}>
+                <LandingIcon name="check" size={16} strokeWidth={2.6} className={styles.proofIcon} />
+                {point}
+              </li>
+            ))}
+          </ul>
+          <p className={styles.note}>Sign in with your Zudomart app account. New to the Creator Program? Apply in the Zudomart app first.</p>
         </div>
-
-        <div className={styles.stage} aria-hidden="true">
-          <div className={styles.stageScene}>
-            <div className={styles.stageFrame}>
-              <span className={styles.stageBadge}>
-                <span className={styles.stageDot} />
-                LIVE
-              </span>
-              <span className={styles.stageSource}>Gaming · OBS</span>
-              <span className={styles.stageLogo}>z</span>
-              <div className={styles.stageLowerThird}>
-                <p className={styles.stageName}>Temitope Adeyemi</p>
-                <p className={styles.stageHandle}>@temi.creates</p>
-              </div>
-              <span className={styles.stageTicker}>Gift goal: 7.4K / 10K coins</span>
-            </div>
-            <div className={styles.stagePhone}>
-              <Image src="/screens/viewerLiveScreen.webp" alt="" width={786} height={1704} sizes="(max-width: 900px) 30vw, 190px" className={styles.stagePhoneScreen} priority />
-            </div>
-          </div>
-          <div className={styles.stageBar}>
-            <span className={styles.stageMetric}>
-              <span className={styles.stageMetricLabel}>Viewers</span>
-              <span className={styles.stageMetricValue}>1.2K</span>
-            </span>
-            <span className={styles.stageMetric}>
-              <span className={styles.stageMetricLabel}>Gifts</span>
-              <span className={styles.stageMetricValue}>640</span>
-            </span>
-            <span className={styles.stageMetric}>
-              <span className={styles.stageMetricLabel}>Subscribers</span>
-              <span className={styles.stageMetricValue}>31</span>
-            </span>
-          </div>
-        </div>
+        <LiveStageMockup />
       </div>
     </section>
   );
