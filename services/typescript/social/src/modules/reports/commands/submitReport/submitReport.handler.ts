@@ -11,9 +11,10 @@ import type { SubmitReportCommand } from "./submitReport.command.js";
 
 const evidenceRequiredTargets = new Set(["message", "conversation", "group"]);
 const urgentReasons = new Set(["child_safety"]);
+const urgentLiveReasons = new Set(["child_safety", "self_harm", "violence"]);
 
-export function classifyReportPriority(reason: string): "normal" | "urgent" {
-  return urgentReasons.has(reason) ? "urgent" : "normal";
+export function classifyReportPriority(reason: string, targetType = ""): "normal" | "urgent" {
+  return urgentReasons.has(reason) || (targetType === "live" && urgentLiveReasons.has(reason)) ? "urgent" : "normal";
 }
 
 export function createSubmitReportHandler(context: HandlerContext): Handler<SubmitReportCommand, { readonly id: string; readonly status: "received"; readonly priority: "normal" | "urgent" }> {
@@ -28,7 +29,7 @@ export function createSubmitReportHandler(context: HandlerContext): Handler<Subm
       const access = await requireConversationMember(db, command.conversationId, command.reporterId).catch(() => undefined);
       if (access === undefined) throw forbidden("NOT_A_MEMBER", "You can only report conversations you're in.");
     }
-    const priority = classifyReportPriority(command.reason);
+    const priority = classifyReportPriority(command.reason, command.targetType);
     const report = await context.database.transaction(async (transaction) => {
       const created = await reportIntakeRepository.create(transaction, { reporterId: command.reporterId, targetType: command.targetType, targetId: command.targetId, reason: command.reason, priority, evidenceHash: command.evidenceHash ?? null });
       await appendDomainEventsToOutbox(transaction, [{
@@ -37,6 +38,7 @@ export function createSubmitReportHandler(context: HandlerContext): Handler<Subm
           reportId: created.id, reporterId: command.reporterId, targetType: command.targetType, targetId: command.targetId, reason: command.reason, priority, details: command.details, blockReportedUser: command.blockReportedUser,
           ...(command.conversationId === undefined ? {} : { conversationId: command.conversationId }), ...(command.reportedUserId === undefined ? {} : { reportedUserId: command.reportedUserId }),
           ...(command.evidenceHash === undefined ? {} : { evidenceHash: command.evidenceHash }), evidence: command.evidence as unknown as Prisma.InputJsonArray,
+          ...(command.targetType === "live" && command.liveContext !== undefined ? { liveContext: { ...command.liveContext } } : {}),
         },
       }]);
       return created;

@@ -12,7 +12,7 @@ export function createReportsController(route: RouteFactory, handlers: ReportsHa
     submit: route({ authentication: "required", body: submitReportBodySchema, successStatus: 201 }, ({ principal, body }) =>
       handlers.submitReport({
         reporterId: principal.accountId, targetType: body.targetType, targetId: body.targetId, conversationId: body.conversationId, reportedUserId: body.reportedUserId,
-        reason: body.reason, details: body.details ?? "", blockReportedUser: body.blockReportedUser ?? false, evidence: body.evidence ?? [], evidenceSelection: body.evidenceSelection, evidenceHash: body.evidenceHash,
+        reason: body.reason, details: body.details ?? "", blockReportedUser: body.blockReportedUser ?? false, evidence: body.evidence ?? [], evidenceSelection: body.evidenceSelection, evidenceHash: body.evidenceHash, liveContext: body.liveContext,
       })),
   };
 }
