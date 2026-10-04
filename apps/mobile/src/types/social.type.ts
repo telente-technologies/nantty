@@ -1,7 +1,9 @@
 import type { LiveGiftSentEvent } from "./liveGift.type";
+import type { LiveSafetyRealtimeEvent, LiveSafetyState } from "./liveSafety.type";
 import type { Comment, CommentStickerLayout, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, ReplyToComment, UserSummary } from "./models.type";
 import type { Money } from "./money.type";
 import type { MentionEntity } from "./mention.type";
+import type { ReplyPolicy, SensitiveLabel } from "./postAudience.type";
 import type { LiveAdSettings } from "./socialGraph.type";
 
 export type ConversationFilter = "all" | "direct";
@@ -82,16 +84,21 @@ export interface NewPostInput {
   readonly mentions?: readonly MentionEntity[];
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
+  readonly replyPolicy?: ReplyPolicy;
+  readonly visibility?: "public" | "subscribers";
+  readonly sensitiveLabels?: readonly SensitiveLabel[];
 }
 
-export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live";
-export type AdEventType = "impression" | "click";
+export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live" | "feedCommentThread";
+export type AdEventType = "impression" | "click" | "card_view";
 
 export interface AdEvent {
   readonly campaignId: ID;
   readonly placement: AdPlacement;
   readonly type: AdEventType;
   readonly itemId: ID;
+  readonly token?: string;
+  readonly cardIndex?: number;
 }
 
 export interface NewStoryInput {
@@ -108,6 +115,7 @@ export interface CreatorStatus {
 }
 
 export interface LiveSessionDetails {
+  readonly safety?: LiveSafetyState | null;
   readonly coverUrl?: string | null;
   readonly playbackUrl?: string | null;
   readonly giftsEnabled?: boolean;
@@ -141,6 +149,8 @@ export interface CoinPackage {
   readonly coins: number;
   readonly bonusCoins?: number;
   readonly price: Money;
+  readonly purchaseChannel?: CoinPurchaseChannel;
+  readonly storeProductId?: string | null;
 }
 
 export type CoinPurchaseChannel = "web_checkout" | "store_iap";
@@ -232,6 +242,7 @@ export type RealtimeServerEvent =
       readonly reactions: readonly MessageReactionSummary[];
     }
   | LiveGiftSentEvent
+  | LiveSafetyRealtimeEvent
   | { readonly type: "pong" };
 
 export interface UpdateSoundInput {
