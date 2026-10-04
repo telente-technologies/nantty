@@ -10,6 +10,7 @@ import { registerMediaMockHandlers } from "@/mocks/handlers/media.mock";
 import { registerMembersMockHandlers } from "@/mocks/handlers/members.mock";
 import { registerReportMockHandlers } from "@/mocks/handlers/reports.mock";
 import { registerToolMockHandlers } from "@/mocks/handlers/tools.mock";
+import { registerRegionalPricingMockHandlers } from "@/mocks/handlers/regionalPricing.mock";
 
 export function registerEveryMockHandler(): void {
   registerAuthMockHandlers();
@@ -21,6 +22,7 @@ export function registerEveryMockHandler(): void {
   registerAdSetAndAdMockHandlers();
   registerAudienceMockHandlers();
   registerMediaMockHandlers();
+  registerRegionalPricingMockHandlers();
   registerBillingMockHandlers();
   registerReportMockHandlers();
   registerToolMockHandlers();
