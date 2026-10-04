@@ -26,6 +26,7 @@ Fixed owner decisions (not up for debate in these docs): one Aurora PostgreSQL +
 | [marketplace.md](marketplace.md) | Catalog, inventory, carts by seller, checkout, orders, shipping |
 | [payments.md](payments.md) | Payments, ledger, escrow, wallets, coins, payouts, reconciliation |
 | [realtime.md](realtime.md) | Phoenix realtime and the livestream stack (LiveKit, guests, battles, gifts fan-out) |
+| [liveSafety.md](liveSafety.md) | Live reports, frame sampling, Rekognition/Transcribe scoring, safety holds, Live incidents queue, CSAM hook (LEGAL REVIEW) |
 | [media.md](media.md) | Uploads, processing, storage and delivery |
 | [search.md](search.md) | Search now (Postgres) and later (OpenSearch) |
 | [recommendations.md](recommendations.md) | Ranking and personalization; Python scores, deterministic fallbacks |

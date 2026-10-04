@@ -137,7 +137,7 @@ flowchart LR
 | Aspect | Detail |
 | --- | --- |
 | Classifier | **ABSENT** today. Needs a Python module or an external provider behind an interface; model choice is open. Start with text blocklist + hash matching + report-driven review, then add classifiers |
-| Live | Live streams are moderated by reports, host strikes and sampled frame/audio classification (OPTIONAL FUTURE); a kill-switch for admins to end a live |
+| Live | Viewer reports plus sampled frames (Rekognition) and optional audio (Transcribe). go-trust decides: severe and very confident means blur and pause for viewers, never an automatic end or ban; moderators confirm in the Live incidents queue. See [liveSafety.md](liveSafety.md) |
 | Marketplace | Listing text and images scored on create and edit; prohibited categories blocked deterministically |
 | Failure | Classifier timeout means `review` for risky surfaces (live, ads, listings) or publish-then-scan for ordinary posts; never block publishing on a classifier outage for low-risk text |
 | Ads | Ads review is a separate policy path (`apps/admin` ads review, MOCK-ONLY) |

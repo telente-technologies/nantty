@@ -53,6 +53,7 @@ Rule: Phoenix only **fans out facts** it consumed from SQS. It never debits, cre
 | Stream rankings | `leaderboard.updated` throttled 1 s | `live:<id>` / `leaderboard.updated` | router EXISTING |
 | Battles | `battle.created/started/scoreUpdated (500 ms)/ended/settled/cancelled/winnerCelebrated` | `live:<id>` | router EXISTING, producer ABSENT |
 | Guests / stage | `guest.joined/left/removed/muted/reconnecting`, `stage.updated`; `guest.invited` to `user:*` | `live:<id>`, `user:<id>` | router EXISTING |
+| Live safety | go-live emits `liveSafety.paused/resumed` (no reason, viewers blur) and `liveSafety.hostNotice` (reason, appeal) after go-trust decisions; see [liveSafety.md](liveSafety.md) | `live:<id>` / `live.safety.paused`, `live.safety.resumed`; `user:<hostId>` / `live.safety.hostNotice` | router EXISTING |
 
 ## 4. Gift sent: money first, then pixels
 
