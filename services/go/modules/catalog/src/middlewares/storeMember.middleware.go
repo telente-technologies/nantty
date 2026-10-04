@@ -27,6 +27,7 @@ func AccountIdFrom(ctx context.Context) uuid.UUID {
 }
 
 var errNotStoreMember = httpserver.NewApiError(http.StatusForbidden, "NOT_STORE_MEMBER", "You are not a member of this store.")
+var errStoreCannotSell = httpserver.NewApiError(http.StatusForbidden, "STORE_NOT_APPROVED", "Your store is not approved to sell right now. Check your seller status.")
 var errMissingPermission = httpserver.NewApiError(http.StatusForbidden, "FORBIDDEN", "You do not have permission to do that.")
 
 func StoreMember(deployed *container.Container, permission string, requireKey bool) func(http.HandlerFunc) http.Handler {
@@ -85,6 +86,22 @@ func StoreMemberFeature(deployed *container.Container, permission, feature strin
 				return
 			}
 			if !sellerplans.Default.RequireFeature(writer, request, access.OwnerAccountId, feature) {
+				return
+			}
+			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+		})
+	}
+}
+
+func SellingStoreMember(deployed *container.Container, permission string) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return Authenticated(deployed)(func(writer http.ResponseWriter, request *http.Request) {
+			access, err := resolveStoreAccess(deployed, request, permission)
+			if err == nil && !access.CanSell() {
+				err = errStoreCannotSell
+			}
+			if err != nil {
+				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
 				return
 			}
 			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
