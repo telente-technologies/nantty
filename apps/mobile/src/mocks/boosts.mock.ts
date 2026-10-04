@@ -12,6 +12,11 @@ const buildOptions = (): BoostOptions => ({
   suggestedDailyBudgets: [100, 300, 700, 1_500].map(convertUsdCentsToViewerCurrency),
   durationDayOptions: [1, 3, 7, 14],
   interests: ["Fashion", "Beauty", "Gadgets", "Food", "Home & Living", "Football", "Music", "Parenting", "Travel", "Tech"],
+  packages: [[1, 1, "1 day"], [3, 3, "3 days"], [7, 7, "1 week"], [15, 7, "1 week, wider reach"]].map(([multiple, days, label]) => {
+    const price = convertUsdCentsToViewerCurrency(MINIMUM_DAILY_BUDGET_USD_CENTS * Number(multiple));
+    const reachMid = Math.round(MINIMUM_DAILY_BUDGET_USD_CENTS * Number(multiple) * REACH_PER_USD_CENT);
+    return { priceMinor: price.amountMinor, currency: price.currency, days: Number(days), label: String(label), estimatedReach: { low: Math.round(reachMid * 0.8), high: Math.round(reachMid * 1.25) }, impressions: { low: reachMid, high: Math.round(reachMid * 1.8) } };
+  }),
 });
 
 const estimate = (request: BoostEstimateRequest): BoostEstimate => {
@@ -21,7 +26,13 @@ const estimate = (request: BoostEstimateRequest): BoostEstimate => {
   const narrowing = request.audience.mode === "custom" ? 0.7 : 1;
   const reachMid = Math.round(totalUsdCents * REACH_PER_USD_CENT * narrowing);
   const results = { views: `${Math.round(reachMid * 1.4).toLocaleString()} views`, profile_visits: `${Math.round(reachMid * 0.04).toLocaleString()} profile visits`, messages: `${Math.max(1, Math.round(reachMid * 0.006))} messages` };
-  return { estimatedReachMin: Math.round(reachMid * 0.8), estimatedReachMax: Math.round(reachMid * 1.25), estimatedResultsLabel: `About ${results[request.goal]}`, totalCost: convertUsdCentsToViewerCurrency(totalUsdCents) };
+  const totalCost = convertUsdCentsToViewerCurrency(totalUsdCents);
+  const clicks = { low: Math.round(reachMid * 0.01), high: Math.round(reachMid * 0.025) };
+  return {
+    estimatedReachMin: Math.round(reachMid * 0.8), estimatedReachMax: Math.round(reachMid * 1.25), estimatedResultsLabel: `About ${results[request.goal]}`, totalCost,
+    impressions: { low: reachMid, high: Math.round(reachMid * 1.8) }, clicks, costPerResultMinor: { low: Math.floor(totalCost.amountMinor / Math.max(clicks.high, 1)), high: Math.ceil(totalCost.amountMinor / Math.max(clicks.low, 1)) },
+    minimumDailyBudget: convertUsdCentsToViewerCurrency(MINIMUM_DAILY_BUDGET_USD_CENTS),
+  };
 };
 
 interface MockBoost { readonly id: string; readonly request: CreateBoostRequest; readonly totalUsdCents: number; readonly createdAt: number }
