@@ -5,6 +5,7 @@ const safeMethods = new Set(["GET", "HEAD", "OPTIONS"]);
 export const anonymousMutationAllowlist: readonly RegExp[] = [
   /^\/webhooks\//,
   /^\/api\/v1\/live\/webhooks\//,
+  /^\/api\/v1\/webhooks\/smile-id$/,
   /^\/api\/v1\/auth\/(otp\/send|otp\/verify|password\/reset|google|apple|login|refresh|register)$/,
   /^\/api\/v1\/admin\/auth\/(login|refresh|accept-invitation|mfa\/verify|mfa\/enroll\/start|mfa\/enroll\/confirm)$/,
   /^\/api\/v1\/consents$/,

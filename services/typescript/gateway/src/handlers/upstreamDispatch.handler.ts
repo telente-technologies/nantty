@@ -12,6 +12,10 @@ import { startGatewaySpan } from "../services/traceContext.service.js";
 import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier, type VerifiedPrincipal } from "../services/accessTokenVerifier.service.js";
 import { forwardRequestToUpstream } from "../services/upstreamProxy.service.js";
 import { convertRequestBodyToBytes, json, unauthorizedResponseBody } from "../utils/http.util.js";
+import { buildSecurityServices, type SecurityServices } from "../services/security/securityServices.service.js";
+import { humanVerificationPath, humanVerificationRequiredBody } from "../services/security/humanVerificationGate.service.js";
+import { handleHumanVerificationRequest } from "./humanVerification.handler.js";
+import { completedRequestSignal, internalPathSignal, observeProbeSignalInBackground, tamperedTokenSignal, type ObservedRequest } from "./securityObservation.handler.js";
 
 export interface UpstreamDispatchOptions {
   readonly config: GatewayConfig;
@@ -19,6 +23,7 @@ export interface UpstreamDispatchOptions {
   readonly logger: Logger;
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
+  readonly security?: SecurityServices;
 }
 
 function buildRateLimited(retryAfterSeconds: number) {
@@ -30,18 +35,25 @@ function buildRateLimited(retryAfterSeconds: number) {
 async function resolvePrincipalForRoute(route: UpstreamRoute, authorizationHeader: string | undefined, verifier: AccessTokenVerifier) {
   const token = extractBearerTokenFromAuthorizationHeader(authorizationHeader);
   const principal: VerifiedPrincipal | undefined = token === undefined ? undefined : await verifier.verifyAccessTokenWithJwks(token);
-  return { principal, rejected: route.authentication === "required" && principal === undefined };
+  return { token, principal, rejected: route.authentication === "required" && principal === undefined };
 }
 
 export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions): HttpMiddleware {
   const rateLimitStore = options.rateLimitStore ?? new InMemoryRateLimitStore();
+  const security = options.security ?? buildSecurityServices(options.config.security, options.config.upstreams.trust, options.logger, undefined);
   return async (context) => {
     const request = context.request;
     if (request.path === "/healthz") return json(200, { status: "up", service: "gateway" });
-    if (isInternalOnlyPath(request.path)) return json(404, { message: "Not found.", code: "NOT_FOUND" });
+    const observed = (principal: VerifiedPrincipal | undefined): ObservedRequest => ({ requestId: request.id, path: request.path, deviceId: request.getHeader("x-device-id"), clientIp: request.remoteAddress, principal });
+    if (isInternalOnlyPath(request.path)) {
+      observeProbeSignalInBackground(security, options.logger, observed(undefined), internalPathSignal(request.path));
+      return json(404, { message: "Not found.", code: "NOT_FOUND" });
+    }
+    if (request.path === humanVerificationPath) return handleHumanVerificationRequest(request, security, options.verifier, rateLimitStore, options.logger);
     const route = resolveUpstreamRouteForRequest(request.method, request.path);
     if (route === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
-    const { principal, rejected } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier);
+    const { token, principal, rejected } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier);
+    observeProbeSignalInBackground(security, options.logger, observed(principal), tamperedTokenSignal(request.path, token, principal, options.config.accessToken.audience));
     if (rejected) return json(401, unauthorizedResponseBody);
     if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
@@ -51,6 +63,14 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         if (gate.acceptanceRequired) return json(428, { message: "Accept the updated policies to continue.", code: "POLICY_ACCEPTANCE_REQUIRED", documentKeys: gate.documentKeys });
       } catch (error) {
         options.logger.warn("policy gate lookup failed; letting the request through", { error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+    if (principal !== undefined && security.gate !== undefined) {
+      try {
+        const gate = await security.gate.evaluate({ method: request.method, path: requestUrl.pathname, accountId: principal.accountId, sessionId: principal.sessionId });
+        if (gate.challenge) return json(428, humanVerificationRequiredBody(gate.reason ?? "security_check", security.provider?.name ?? "turnstile"));
+      } catch (error) {
+        options.logger.warn("human verification gate lookup failed; letting the request through", { error: error instanceof Error ? error.message : String(error) });
       }
     }
     const routeLimit = classifyRequestForRateLimit(request.method, requestUrl.pathname);
@@ -81,6 +101,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         traceparent: trace.traceparent,
         forwardWebhookSignatureHeaders: route.rawBodyPassthrough === true,
       }, options.config.upstreamTimeoutMs);
+      observeProbeSignalInBackground(security, options.logger, observed(principal), completedRequestSignal(requestUrl.pathname, upstreamResponse.status, principal, upstreamResponse.body));
       return createResponseContext({ status: upstreamResponse.status, headers: { ...upstreamResponse.headers, traceparent: trace.traceparent }, body: upstreamResponse.body });
     } catch (error) {
       const timedOut = error instanceof Error && error.name === "TimeoutError";
