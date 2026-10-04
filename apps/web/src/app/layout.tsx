@@ -40,6 +40,11 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
+const organizationJsonLd = JSON.stringify([
+  { "@context": "https://schema.org", "@type": "Organization", name: siteConfig.name, url: siteConfig.siteUrl, logo: `${siteConfig.siteUrl}/zudomartLogo.png` },
+  { "@context": "https://schema.org", "@type": "WebSite", name: siteConfig.name, url: siteConfig.siteUrl },
+]).replace(/</g, "\\u003c");
+
 export const viewport: Viewport = {
   ...themeViewport,
   width: "device-width",
@@ -51,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en-NG" className={interFont.variable} suppressHydrationWarning>
       <head>
         <ThemeInitScript />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: organizationJsonLd }} />
       </head>
       <body>
         <SiteThemeProvider>
