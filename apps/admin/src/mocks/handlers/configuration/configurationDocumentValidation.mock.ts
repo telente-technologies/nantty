@@ -1,30 +1,15 @@
 import { MockHttpError, failValidation } from "@/mocks/mockResponses.mock";
-import type { CreatorEligibilityRules, PlanPrice, PlansConfiguration, RevenueRulesConfiguration, UsernameCharacterClass, UsernameRules, VerificationPlan } from "@/types/platformConfiguration.type";
+import type { CreatorEligibilityRules, PlansConfiguration, RevenueRulesConfiguration, UsernameCharacterClass, UsernameRules, VerificationPlan } from "@/types/platformConfiguration.type";
 
 import {
-  readArrayAtPath, readBasisPoints, readBooleanValue, readCountryCodeList, readCurrencyCodeList, readEnumFromObject, readIntegerBetween, readMoneyPerCurrencyList, readMoneyValue, readObjectAtPath, readTextList, readTextValue,
+  readArrayAtPath, readBasisPoints, readBooleanValue, readCountryCodeList, readCurrencyCodeList, readEnumFromObject, readIntegerBetween, readMoneyPerCurrencyList, readObjectAtPath, readTextList, readTextValue,
 } from "./configurationFieldReaders.mock";
 
-function validatePlanPrices(rawPrices: unknown, path: string, supportedCurrencies: readonly string[]): PlanPrice[] {
-  const prices = readArrayAtPath(rawPrices, path, supportedCurrencies.length).map((rawPrice, index) => {
-    const price = readObjectAtPath(rawPrice, `${path}.${index}`);
-    const currency = readEnumFromObject(price, "currency", `${path}.${index}`, supportedCurrencies);
-    const monthly = price.monthly === null ? null : readMoneyValue(price.monthly, `${path}.${index}.monthly`, supportedCurrencies, currency);
-    const yearly = price.yearly === null ? null : readMoneyValue(price.yearly, `${path}.${index}.yearly`, supportedCurrencies, currency);
-    if (!monthly && !yearly) failValidation(`${path}.${index}`, `Give ${currency} a monthly or yearly price, or remove the row.`);
-    return { currency, monthly, yearly };
-  });
-  if (new Set(prices.map((price) => price.currency)).size !== prices.length) failValidation(path, "Each currency can be priced only once per plan.");
-  return prices;
-}
-
-function validatePlan(rawPlan: unknown, path: string, currentPlan: VerificationPlan, supportedCurrencies: readonly string[]): VerificationPlan {
+function validatePlan(rawPlan: unknown, path: string, currentPlan: VerificationPlan): VerificationPlan {
   const plan = readObjectAtPath(rawPlan, path);
   const isBlackOfficial = currentPlan.color === "BLACK";
   const isPurchasable = isBlackOfficial ? false : readBooleanValue(plan, "isPurchasable", path);
   if (isBlackOfficial && plan.isPurchasable === true) throw new MockHttpError(400, "OFFICIAL_NOT_PURCHASABLE", "Black Official verification is never sold. It is granted only through the manual official process.");
-  const prices = isPurchasable ? validatePlanPrices(plan.prices, `${path}.prices`, supportedCurrencies) : [];
-  if (isPurchasable && prices.length === 0) failValidation(`${path}.prices`, "A purchasable plan needs at least one currency price.");
   const entitlements = currentPlan.color === "GOLD"
     ? readArrayAtPath(plan.dashboardEntitlements, `${path}.dashboardEntitlements`, 30).map((rawEntitlement, index) => {
         const entitlement = readObjectAtPath(rawEntitlement, `${path}.dashboardEntitlements.${index}`);
@@ -39,7 +24,6 @@ function validatePlan(rawPlan: unknown, path: string, currentPlan: VerificationP
     isPurchasable,
     perks: readTextList(plan, "perks", path, 20, 120),
     dashboardEntitlements: entitlements,
-    prices,
   };
 }
 
@@ -51,7 +35,7 @@ export function validatePlansConfiguration(rawContent: unknown, currentContent: 
   const plans = currentContent.plans.map((currentPlan) => {
     const index = rawPlans.findIndex((rawPlan) => readObjectAtPath(rawPlan, "content.plans").planKey === currentPlan.planKey);
     if (index < 0) failValidation("content.plans", `Plan ${currentPlan.planKey} is missing. Plans can be edited, not removed.`);
-    return validatePlan(rawPlans[index], `content.plans.${index}`, currentPlan, supportedCurrencies);
+    return validatePlan(rawPlans[index], `content.plans.${index}`, currentPlan);
   });
   return { supportedCurrencies, plans };
 }

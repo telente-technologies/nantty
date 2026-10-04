@@ -25,8 +25,14 @@ export function validateRegionalPricingDocument(rawContent: unknown): RegionalPr
       cpcFloorMinor: readIntegerBetween(row, "cpcFloorMinor", path, 1, maximumMinor),
       minimumDailyBudgetMinor: readIntegerBetween(row, "minimumDailyBudgetMinor", path, 1, maximumMinor),
       boostMinimumDailyMinor: readIntegerBetween(row, "boostMinimumDailyMinor", path, 1, maximumMinor),
+      suggestedCpmMinor: readIntegerBetween(row, "suggestedCpmMinor", path, 1, maximumMinor),
+      suggestedCpcMinor: readIntegerBetween(row, "suggestedCpcMinor", path, 1, maximumMinor),
+      suggestedCpvMinor: readIntegerBetween(row, "suggestedCpvMinor", path, 1, maximumMinor),
+      suggestedDailyBudgetMinor: readIntegerBetween(row, "suggestedDailyBudgetMinor", path, 1, maximumMinor),
     };
     if (parsed.cpcFloorMinor > parsed.minimumDailyBudgetMinor) failValidation(`${path}.cpcFloorMinor`, "The CPC floor can't be more than the minimum daily budget.");
+    if (parsed.suggestedCpmMinor < parsed.cpmFloorMinor || parsed.suggestedCpcMinor < parsed.cpcFloorMinor) failValidation(`${path}.suggestedCpmMinor`, "Suggested bids must be at least the floors.");
+    if (parsed.suggestedDailyBudgetMinor < parsed.minimumDailyBudgetMinor) failValidation(`${path}.suggestedDailyBudgetMinor`, "The suggested daily budget must be at least the minimum.");
     return parsed;
   });
   const bandsObject = readObjectAtPath(content.creatorSubscriptionBands, "content.creatorSubscriptionBands");
