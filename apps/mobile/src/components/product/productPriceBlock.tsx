@@ -1,9 +1,10 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { BookmarkSimple24Icon, Share24Icon, Star16Icon } from "@/components/icons";
+import { BookmarkFill24Icon, BookmarkSimple24Icon, Share24Icon, Star16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Product } from "@/types";
+import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 import { MoneyAmount } from "./moneyAmount";
 import { SponsoredLabel } from "./productCard";
@@ -11,12 +12,13 @@ import { SponsoredLabel } from "./productCard";
 export interface ProductPriceBlockProps {
   readonly product: Product;
   readonly bookmarked: boolean;
+  readonly saveCount: number;
   readonly onShare: () => void;
   readonly onToggleBookmark: () => void;
   readonly onPressRating: () => void;
 }
 
-export function ProductPriceBlock({ product, bookmarked, onShare, onToggleBookmark, onPressRating }: ProductPriceBlockProps) {
+export function ProductPriceBlock({ product, bookmarked, saveCount, onShare, onToggleBookmark, onPressRating }: ProductPriceBlockProps) {
   const { colors } = useTheme();
   return (
     <View style={styles.block}>
@@ -33,9 +35,13 @@ export function ProductPriceBlock({ product, bookmarked, onShare, onToggleBookma
               accessibilityLabel={bookmarked ? "Remove product from saved" : "Save product"}
               accessibilityState={{ selected: bookmarked }}
               hitSlop={8}
+              style={styles.save}
               onPress={onToggleBookmark}
             >
-              <BookmarkSimple24Icon color={bookmarked ? colors.primary : undefined} />
+              {bookmarked ? <BookmarkFill24Icon size={24} color={colors.primary} /> : <BookmarkSimple24Icon />}
+              <Text size={12} lineHeight={14.4} color={colors.textMuted} align="center">
+                {formatCountWithThousandsSuffix(Math.max(saveCount, 0))}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -57,6 +63,7 @@ const styles = StyleSheet.create({
   block: { paddingHorizontal: 12, marginTop: 24, gap: 11 },
   top: { gap: 12 },
   priceRow: { height: 25, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  save: { alignItems: "center", gap: 2 },
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   rating: { flexDirection: "row", alignItems: "center", gap: 4, alignSelf: "flex-start" },
 });

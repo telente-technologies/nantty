@@ -23,6 +23,7 @@ import { ClipReadabilityScrim } from "./clipReadabilityScrim";
 import { LikeBurst } from "./likeBurst";
 import { CommentStickerOverlay } from "./videoReply/commentStickerOverlay";
 import { PromotedLiveOverlay } from "./promotedLiveOverlay";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 export interface ClipEngagement {
   readonly liked: boolean;
@@ -177,6 +178,7 @@ function ClipPageComponent(props: ClipPageProps) {
           onTip={canTipAuthor ? () => setIsTipSheetOpen(true) : undefined}
           saveTarget={{ type: "clip", targetId: clip.id }}
           savedAccordingToServer={clip.bookmarked}
+          saveCount={clip.saveCount ?? 0}
           foregroundColor={FOREGROUND_ON_VIDEO}
         />
       </View>
@@ -200,7 +202,7 @@ function ClipPageComponent(props: ClipPageProps) {
         <ContentOptionsSheet
           target={
             isOptionsSheetOpen
-              ? { targetType: "clip", targetId: clip.id, authorId: clip.author.id, shareUrl: `https://zudomart.com/clips/${clip.id}` }
+              ? { targetType: "clip", targetId: clip.id, authorId: clip.author.id, shareUrl: webAppLinks.clip(clip.id) }
               : null
           }
           onClose={() => setIsOptionsSheetOpen(false)}

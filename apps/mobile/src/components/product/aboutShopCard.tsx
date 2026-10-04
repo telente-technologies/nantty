@@ -62,7 +62,7 @@ export function AboutShopCard({ store, following, onToggleFollow, onViewShop }: 
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   card: { paddingHorizontal: 12, gap: 12 },
   shopRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   logo: { width: 60, height: 60, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
@@ -71,7 +71,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   statsRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   rating: { flexDirection: "row", alignItems: "center", gap: 2 },
   counts: { flexDirection: "row", alignItems: "center", gap: 4 },
-  separator: { width: 1, height: 12, backgroundColor: colors.black },
+  separator: { width: 1, height: 12, backgroundColor: scheme === "dark" ? colors.textSubtle : colors.black },
   buttons: { flexDirection: "row", gap: 8 },
   button: { flex: 1 },
 }));

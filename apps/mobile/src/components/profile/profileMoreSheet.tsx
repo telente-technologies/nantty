@@ -11,6 +11,7 @@ import { followsService } from "@/services/follows.service";
 import { REPORT_REASON_OPTIONS, reportsService, type ReportReason } from "@/services/reports.service";
 import type { User } from "@/types";
 import { isViewerSignedIn, requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 export interface ProfileMoreSheetProps {
   readonly profile: User;
@@ -37,7 +38,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
   const requireSignIn = (action: () => void, reason: string) => requireAuthAfterClosingModal(closeAndReset, action, reason);
   const shareProfileLink = () => {
     closeAndReset();
-    Share.share({ message: `${profile.name} on Zudomart: https://zudomart.com/@${profile.username}` });
+    Share.share({ message: `${profile.name} on Zudomart: ${webAppLinks.profile(profile.username)}` });
   };
 
   const option = (label: string, onPress: () => void, color: string = colors.text) => (
