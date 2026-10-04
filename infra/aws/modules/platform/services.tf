@@ -6,14 +6,14 @@ locals {
       secret_keys  = ["IDENTITY_INTERNAL_TOKEN"], valkey = true, node = true
     }
     go-identity = {
-      port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8
+      port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9101]
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["AUTH_SIGNING_KEY_ENCRYPTION_KEY", "AUTH_ONE_TIME_CODE_PEPPER", "AUTH_OTP_EVENT_KEY", "USERS_MEDIA_UPLOAD_SIGNING_KEY", "USERS_INTERNAL_API_TOKEN", "ADMIN_TOTP_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN", "AUTH_INTERNAL_GRPC_TOKEN"]
+      secret_keys  = ["AUTH_SIGNING_KEY_ENCRYPTION_KEY", "AUTH_ONE_TIME_CODE_PEPPER", "AUTH_OTP_EVENT_KEY", "USERS_MEDIA_UPLOAD_SIGNING_KEY", "USERS_INTERNAL_API_TOKEN", "ADMIN_TOTP_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN", "AUTH_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN"]
     }
     go-commerce = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 10
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN"]
+      secret_keys  = ["CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN", "MONEY_INTERNAL_API_TOKEN", "CATALOG_SOCIAL_INTERNAL_TOKEN"]
     }
     go-money = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9103]
@@ -28,12 +28,12 @@ locals {
     go-ads = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["ADS_INTERNAL_API_TOKEN"]
+      secret_keys  = ["ADS_INTERNAL_SHARED_SECRET", "ADS_TOKEN_KEYS", "ADS_MONEY_INTERNAL_TOKEN", "SOCIAL_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET"]
     }
     go-trust = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["MODERATION_INTERNAL_API_TOKEN"]
+      secret_keys  = ["MODERATION_INTERNAL_API_TOKEN", "USERS_INTERNAL_API_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "MODERATION_SOCIAL_INTERNAL_TOKEN", "MODERATION_COMMERCE_INTERNAL_TOKEN", "MODERATION_LIVE_INTERNAL_TOKEN"]
     }
     social = {
       port         = 8105, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 12
@@ -48,7 +48,12 @@ locals {
     media = {
       port         = 8108, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 8
       public_rules = [], internal = true, request_target = 0, valkey = true, node = true
-      secret_keys  = ["MEDIA_INTERNAL_TOKEN"]
+      secret_keys  = ["MEDIA_INTERNAL_TOKEN", "MODERATION_TOKEN"]
+    }
+    search = {
+      port         = 8109, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8
+      public_rules = [], internal = true, request_target = 0, valkey = true, node = true
+      secret_keys  = ["SEARCH_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "SOCIAL_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET"]
     }
     realtime = {
       port         = 4000, cpu = 1024, memory = 2048, health = "/healthz", database = false, rabbit = true, min = 2, max = 10

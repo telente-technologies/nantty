@@ -38,6 +38,11 @@ variable "task_policy_statements" {
     sid       = string
     actions   = list(string)
     resources = list(string)
+    conditions = optional(list(object({
+      test     = string
+      variable = string
+      values   = list(string)
+    })), [])
   }))
   default = []
 }

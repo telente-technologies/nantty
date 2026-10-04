@@ -15,10 +15,20 @@ locals {
     ]
     go-live = [
       { sid = "LiveRecordings", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/uploads/live-recordings/*"] },
+      { sid = "LiveSafetyCaptureList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn], conditions = [{ test = "StringLike", variable = "s3:prefix", values = ["live-safety/frames/*", "live-safety/audio/*"] }] },
     ]
     intelligence = [
       { sid = "EventLog", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/intelligence/*"] },
       { sid = "EventLogList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn] },
+      { sid = "LiveSafetyCaptureRead", actions = ["s3:GetObject"], resources = ["${local.media_bucket_arn}/live-safety/frames/*", "${local.media_bucket_arn}/live-safety/audio/*"] },
+      { sid = "LiveSafetyTranscripts", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/live-safety/transcripts/*"] },
+      { sid = "LiveSafetyRekognition", actions = ["rekognition:DetectModerationLabels"], resources = ["*"] },
+      { sid = "LiveSafetyTranscribe", actions = ["transcribe:StartTranscriptionJob", "transcribe:GetTranscriptionJob"], resources = ["arn:aws:transcribe:${var.region}:${data.aws_caller_identity.current.account_id}:transcription-job/live-safety-*"] },
+    ]
+    go-trust = [
+      { sid = "LiveSafetyFramePreviews", actions = ["s3:GetObject"], resources = ["${local.media_bucket_arn}/live-safety/frames/*"] },
+      { sid = "LiveSafetyEvidenceWrite", actions = ["s3:PutObject", "s3:PutObjectTagging", "s3:PutObjectLegalHold"], resources = ["${local.kyc_bucket_arn}/trust-evidence/live/*"] },
+      { sid = "LiveSafetyEvidenceKey", actions = ["kms:Encrypt", "kms:GenerateDataKey"], resources = [module.kms.key_arns["kyc"]] },
     ]
     notifications = [
       { sid = "SendMail", actions = ["ses:SendEmail", "ses:SendRawEmail"], resources = [module.ses.identity_arn, "arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/${module.ses.configuration_set_name}"] },
@@ -51,7 +61,7 @@ locals {
     python = { INTELLIGENCE_ENVIRONMENT = var.environment, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
       { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600" },
-      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications"], name) },
+      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications", "media", "search"], name) },
     )
   }
 
@@ -63,8 +73,15 @@ locals {
     realtime      = { PORT = "4000" }
     intelligence  = { INTELLIGENCE_PORT = "8090" }
     go-identity   = { USERS_DOCUMENTS_BUCKET = module.storage.kyc_bucket.id }
-    go-live       = { LIVE_RECORDING_S3_BUCKET = module.storage.media_bucket.id }
-    go-money      = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_DEFAULT_PROVIDER = "paystack" }
+    go-live = {
+      LIVE_RECORDING_S3_BUCKET     = module.storage.media_bucket.id
+      LIVE_SAFETY_SAMPLER_ENABLED  = "true"
+      LIVE_SAFETY_FRAMES_S3_BUCKET = module.storage.media_bucket.id
+      LIVE_SAFETY_FRAMES_S3_REGION = var.region
+      LIVE_SAFETY_FRAMES_QUEUE     = "jobs-live-frames"
+      LIVE_SAFETY_AUDIO_QUEUE      = "jobs-live-audio"
+    }
+    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_DEFAULT_PROVIDER = "paystack" }
   }
 
   runtime_of = { for name, definition in local.services : name => (
@@ -140,7 +157,7 @@ module "service" {
   extra_ports             = each.value.extra
   health_path             = each.value.health
   container_health_check  = each.value.health_command
-  environment_variables   = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
+  environment_variables   = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
   secrets                 = local.service_secrets[each.key]
   secret_arns             = local.service_secret_arns[each.key]
   secrets_kms_key_arn     = module.kms.key_arns["secrets"]
