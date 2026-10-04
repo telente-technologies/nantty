@@ -13,6 +13,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import type { MainStackParamList } from "@/navigation/navigation.types";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 export function MeScreen() {
   const { colors } = useTheme();
@@ -30,7 +31,7 @@ export function MeScreen() {
 
   const shareMyProfileLink = () => {
     if (!profile) return;
-    Share.share({ message: `Follow ${profile.name} on Zudomart: https://zudomart.com/@${profile.username}` });
+    Share.share({ message: `Follow ${profile.name} on Zudomart: ${webAppLinks.profile(profile.username)}` });
   };
 
   const refreshProfileAndPosts = () => {

@@ -41,7 +41,24 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
     { label: "Impressions", value: data.impressions },
     { label: "Unique viewers", value: data.uniqueViewers },
     { label: "Profile visits", value: data.profileVisits },
+    { label: "Engagements", value: data.engagements },
+    { label: "Engagement rate", value: `${data.engagementRate}%` },
+    { label: "New follows", value: data.newFollows },
+    ...(data.video
+      ? [
+          { label: "Video views", value: data.video.views },
+          { label: "Watch time", value: `${Math.round(data.video.watchTimeSeconds / 60)} min` },
+        ]
+      : []),
+  ];
+  const engagementRows = [
+    { label: "Likes", value: data.likes },
+    { label: "Replies", value: data.comments },
     { label: "Reposts", value: data.reposts },
+    { label: "Saves", value: data.saves },
+    { label: "Shares", value: data.shares },
+    { label: "Link clicks", value: data.linkClicks },
+    { label: "Profile clicks", value: data.profileClicks },
   ];
 
   return (
@@ -61,7 +78,7 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
         <View style={styles.grid}>
           {metrics.map((metric) => (
             <View key={metric.label} style={styles.metric}>
-              <Text size={21} weight={600} lineHeight={25.2}>{formatCountWithThousandsSuffix(metric.value)}</Text>
+              <Text size={21} weight={600} lineHeight={25.2}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</Text>
               <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
             </View>
           ))}
@@ -80,6 +97,28 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
             ))}
           </View>
         </View>
+
+        <View style={styles.card}>
+          <Text size={16} weight={600} lineHeight={19.2}>Engagements</Text>
+          {engagementRows.map((row) => (
+            <View key={row.label} style={styles.rowBetween} accessible accessibilityLabel={`${row.label}, ${row.value}`}>
+              <Text size={14} color={colors.textMuted}>{row.label}</Text>
+              <Text size={14} weight={600}>{formatCountWithThousandsSuffix(row.value)}</Text>
+            </View>
+          ))}
+        </View>
+
+        {data.audience.length > 0 ? (
+          <View style={styles.card}>
+            <Text size={16} weight={600} lineHeight={19.2}>Audience</Text>
+            {data.audience.map((row) => (
+              <View key={row.label} style={styles.rowBetween} accessible accessibilityLabel={`${row.label}, ${row.share} percent`}>
+                <Text size={14} color={colors.textMuted}>{row.label}</Text>
+                <Text size={14} weight={600}>{row.share}%</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.card}>
           <Text size={16} weight={600} lineHeight={19.2}>This post</Text>
@@ -108,6 +147,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   chartColumn: { flex: 1, alignItems: "center", gap: 6 },
   chartTrack: { width: "100%", flex: 1, justifyContent: "flex-end", backgroundColor: colors.skeleton, borderRadius: 6, overflow: "hidden" },
   chartBar: { width: "100%", backgroundColor: colors.primarySolid, borderRadius: 6 },
+  rowBetween: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   postRow: { gap: 4 },
   postText: { flexShrink: 1 },
   footRow: { flexDirection: "row", gap: 16 },
