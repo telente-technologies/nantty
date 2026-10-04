@@ -6,6 +6,124 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Copyright for videos, clips and sounds, and account status (4 Oct) — go test moderation (unit + integration), media/social/notifications/gateway vitest, email templates vitest, mobile jest, webapp/studio/seller/admin tsx --test, tsc on every touched app
+
+Design: [plans.md §49](./plans.md). Legal wording pending counsel review.
+
+| Area | Change |
+| --- | --- |
+| go-trust (moderation) | Claims require proof, segments, accuracy declaration and signature; uphold applies the remedy (audio mute order, takedown warning with configurable deadline, immediate takedown for live); deadline worker takes down and strikes; `post.deleted` before the deadline records voluntary removal; copyright policy settings (admin, step-up); copyright strikes last 90 days; thresholds restrict `GOING_LIVE` and open a suspension review; strike expiry announcements; strike appeals; account health for users, admin and internal callers; migration 20261004104548; unit and integration tests |
+| services/typescript (media) | `clipAudio.muteRequested/restoreRequested` → `media.muteAudio` job: silent soundtrack rendition, variant swap, `media.processed` + `media.audioMuted/audioRestored`; tests with a faked transcoder |
+| services/typescript (social) | Applies audio mute/restore: disables the sound for reuse and fans out mute requests for every clip using it |
+| services/typescript (notifications), packages/emailTemplates | Seven copyright and strike notifications with branded emails |
+| gateway, contracts, infra/local/rabbitmq | Account status and admin routes; 12 new event schemas, asyncapi, topology and definitions |
+| mobile, webapp | Claim form with proof and signature from post, clip and sound menus; Account status page with appeals and counter-notices; countdown banner on the owner's content |
+| studio, seller, admin | Account status summaries; admin claim evidence, remedy banner, copyright policy card, user account health with appeal decisions |
+| docs | plans §49, help article draft in `services/typescript/support/content/drafts` |
+
+---
+
+## Abuse protection: access probing, bots and human checks (4 Oct) — go test moderation (policy unit + Postgres integration), orders ownership, users build/vet, gateway vitest (1018) + tsc + eslint, social vitest, intelligence pytest + ruff + mypy, mobile jest + tsc, tsc admin/webapp
+
+Design: [plans.md §48](./plans.md), [security.md §10](./architecture/security.md).
+
+| Area | Change |
+| --- | --- |
+| services/typescript (gateway) | Probe classifier and detector (Valkey sliding windows per account and device), reports to go-trust; 428 `HUMAN_VERIFICATION_REQUIRED` gate for flagged and suspected-bot accounts; `/api/v1/security/human-verification` with Turnstile (hCaptcha-ready) verification, rate limits, no token logging; trust routes for client signals and the admin queue; security env in `.env.example` |
+| services/go (go-trust) | `accessSecurity` module, three tables and migration, deterministic policy, automatic temporary suspension, suspected-bot marking, Security cases admin API with step-up and audit, bus consumers, evidence retention, device attestation interfaces |
+| services/go (go-identity, orders, staffauth) | Suspension source `security` and reason `SECURITY`; internal `delete` enforcement action; `getMyOrder` returns 404 instead of panicking on an empty view; `security:cases` permission |
+| apps/intelligence | `bot_detection` module and `/v1/trust/bot-score` (advisory), bot score publisher to go-trust |
+| apps/admin | Trust & safety > Security cases (queue, filters, evidence timeline, devices and networks, challenge history, permission-gated actions), mocks, API contract |
+| apps/webapp | Turnstile sheet with automatic retry on 428, `/security-check` page for the app, CSP for challenges.cloudflare.com, test site key in `.env.example` |
+| apps/mobile | In-app browser security check with deep-link return and retry on 428; jest tests |
+| apps/web, support content | Privacy policy draft disclosure; help article `account-and-login/security-checks.md` |
+| contracts, infra | Event schemas and AsyncAPI, RabbitMQ topology/definitions, Terraform gateway secrets and bot queue env |
+
+---
+
+## Checkout: buyer chooses escrow or direct payment per verified store (4 Oct) — go test orders services, webapp tsx --test, mobile jest, tsc webapp/mobile/apiSmoke
+
+| Area | Change |
+| --- | --- |
+| go-commerce (orders) | Checkout accepts `paymentModes` per seller group; direct only for verified stores (422 `DIRECT_PAYMENT_NOT_ALLOWED`); `order_groups.payment_mode` column (migration 20261004120000) and ent regen; mode and `storeVerified` passed to go-money; `paymentMode` on buyer and seller order views; cart group store info (`verified`, rating); unit tests for the resolver |
+| webapp, mobile | Per-seller payment choice on checkout (escrow recommended vs pay directly, Gold badge, trust line), "Protected by Zudomart Escrow" for unverified stores; order detail shows the mode and hides escrow dispute and release copy for direct orders; unit tests |
+| apiSmoke | Direct order case (reject unverified, create, pay, seller paid, seller refund books debt). Not run, needs docker: include in the final run |
+| store success rate | Orders rolls up 90-day success per store (`store_success_stats`, migration 20261004130000, indexed, 6h sweep); shown only from 20 settled orders; served on store, product, cart and order responses through a new port; tests for threshold and calculation |
+| docs | checkoutPaymentFlowPlan 6.3a, seller apiContract |
+
+---
+
+## Help Centre: support service, tickets with reply emails, auto-FAQ from resolved questions (4 Oct) — support vitest (62), notifications vitest, gateway vitest, email templates vitest, intelligence pytest, go test staffauth, tsc admin/mobile/webapp/seller/studio
+
+Design: [plans.md §44](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| services/typescript (support) | New service: help categories/topics (versioned Markdown, votes, related, search), 82 seeded articles covering every part of the platform, tickets (statuses, SLAs, notes, assignment, ratings, unread, live chat channel, attachments via media URLs), macros, outbox events, auto-FAQ with PII scrubber, dedupe/merge, intelligence writer with template fallback, account-deletion anonymisation, Dockerfile, migrations |
+| services/typescript (notifications) | `ticket.created`, `ticket.replied` (staff only) and `ticket.resolved` mapped to the support templates with push and in-app links |
+| services/typescript (gateway) | `support` upstream: public help reads, authenticated votes and tickets, admin support and help CMS routes |
+| packages/emailTemplates | Support templates: no emoji rating labels, ticket links under `/help/tickets`, no reply-by-email promise |
+| apps/intelligence | `POST /v1/help/answer-drafts` (signed, deterministic template, defensive redaction) |
+| services/go (staffauth) | Permission `support:helpContent` in the catalogue and Support template |
+| infra | RabbitMQ topology and definitions, Terraform service, wiring and gateway upstream |
+| apps/admin | Help centre CMS (topics, auto topics, categories, editor with preview, merge, versions, settings); ticket statuses `OPEN/AWAITING_USER/AWAITING_SUPPORT/RESOLVED/CLOSED` and new categories; mocks |
+| apps/mobile | Help centre home, category and article screens with votes; ticket unread badges, read marking, ratings; notification routing to tickets; help links from live reports and the views dialog |
+| apps/webapp | `/help`, category and article pages with SEO, ticket list, form, thread and rating pages; guest rules; links from settings and orders |
+| apps/seller, apps/studio | Help link in the header |
+
+## Fair feed ranking, trends, headlines and the Explore home (4 Oct) — intelligence pytest + ruff + mypy; social vitest + tsc; gateway vitest; go test (admin, moderation); support content test; mobile jest + tsc; webapp tsx tests + tsc; admin tsx tests + tsc
+
+Design: [plans.md §46](./plans.md), [recommendations.md §7](./architecture/recommendations.md).
+
+| Area | Change |
+| --- | --- |
+| apps/intelligence | capped, disclosed boosts (`ranking_boost_caps_constant.py`), engagement integrity discount + manipulation flags to go-trust, safety filter, explanations; ingestion-time velocity cap and cluster/low-trust discounts; trending per category with manipulation and spam exclusion; `/v1/trending/headlines`; `INTELLIGENCE_SERVER_WORKERS`; consent read folded into one Valkey round trip; `content.sensitivityAdvised` publisher from processed images; tests (fairness, trends, headlines, advisory) |
+| services/typescript/social | `explore` module (trends, headlines, who-to-follow, posts-for-you, categories); fair deterministic ranker; signed intelligence feed ranker (250 ms + breaker + fallback); admin ranking settings client; author tiers/Official/country from identity read; DB integrity signals; `PostView.ranking`; tests |
+| services/typescript/gateway | `/api/v1/explore/` → social (guest GET); test |
+| services/go | admin settings `feed.ranking` (hard caps, tier order, no push fields) and `trending.moderation` (removal only) + `GET/PUT /api/v1/admin/trending/moderation`; moderation `modelVersion` filter on suspension cases; users grant on `admin_created_accounts` |
+| apps/mobile | Explore home on the Search screen (headline cards, trends, category tabs, who to follow, posts for you with "Why am I seeing this?"), service, types, mocks, guest access, test |
+| apps/webapp | Explore home on `/explore`, service, types, mocks, guest API pattern, test |
+| apps/admin | Feed ranking, Trends & headlines and Manipulation flags pages, mocks, validation, nav, API access, test |
+| infra | social env (`ADMIN_INTERNAL_URL`, `INTELLIGENCE_URL`, `FEED_RANK_TIMEOUT_MS`, secrets), intelligence workers and media bucket, RabbitMQ publish permission for intelligence |
+| docs | help article "How your feed works", terms "How we rank content", recommendations §7, plans §46 |
+
+---
+
+## Regional pricing follow-up: USD web billing, single price book, research-based ad pricing and estimates (4 Oct) — go test (regionpricing, payments, subscriptions, wallet incl. integration, ads, admin incl. integration, users checkmarks), gateway vitest, tsc admin/ads/mobile/seller, contract tests
+
+| Area | Change |
+| --- | --- |
+| services/go (payments) | `PAYSTACK_SUPPORTED_CURRENCIES` is read (default `NGN,USD`) |
+| services/go (subscriptions, wallet) | Web prices fall back to the US price in USD with `billingNote: "Billed in USD"`; `canBuyOnWeb`; `422 WEB_CURRENCY_NOT_ENABLED` when neither the region currency nor USD can be charged; legacy NGN price overrides removed (price book only); wallet integration tests updated for the regional coin catalogue |
+| services/go (admin, users) | `checkmark-pricing` keeps bundle and grace rules only; suggestion emails quote the regional default price; seeded-settings test counts 12 |
+| services/go (platform, ads) | Research-based floors and suggested CPM/CPC/CPV and budgets per region; `EstimateCampaign` (duration, per-region split by audience size, FX notes, cost per result) and regional boost packages; `POST /api/v1/ads/pricing/estimate`; richer `/api/v1/ads/pricing`, boost options and boost estimates; tests |
+| services/typescript (gateway) | `/api/v1/ads/pricing` accepts POST |
+| apps/admin | "Plans & prices" → "Plans & perks" (prices removed, links to Regional pricing); checkmark pricing editor without prices; regional editor shows suggested bids and budgets |
+| apps/ads | Budget step shows the cost picture (suggested and minimum budgets, totals for the schedule, per-region breakdown with FX notes); mocks |
+| apps/mobile | Boost screen shows regional packages with reach, impressions, cost per result and the minimum daily budget |
+| apps/seller | `regionalPrices.test.ts` typing fixed |
+| docs | pricing.md §5 (benchmarks, floors, estimates, boost packages), §7 (USD decision, owner setup checklist) |
+
+---
+
+## Regional pricing for checkmarks, Premium, coins, creator bands, boosts and ads (4 Oct) — go test (platform/regionpricing, subscriptions, wallet, ads, admin), gateway vitest, tsc admin/ads/mobile/studio
+
+Design and research: [pricing.md](./pricing.md), [backendPlan.md §4.8](./backendPlan.md).
+
+| Area | Change |
+| --- | --- |
+| services/go (platform) | `regionpricing`: regions NG/GH/KE/ZA/GB/EU/US with US/USD fallback, storefront parsing (Apple alpha-3, Play alpha-2), resolution storefront > profile > CDN/IP > client hint > US, price-point rounding, default plan/coin/creator-band/ad price book, FX conversion and strictest-floor maths; `staffaudit` HTTP recorder for the admin audit log; tests |
+| services/go (subscriptions) | `plan_prices` gains yearly, iOS and Android monthly/yearly and store product ids (migration `20261004120000_regional_plan_prices`); seeds every region; channel-aware quotes; explicit yearly prices; unknown countries and uncharged web currencies use the US price; store receipts map product ids through the price book; `GET /api/v1/pricing/region|plans|creator-subscription-bands`; audited admin price edits |
+| services/go (wallet) | Coin packs priced per channel × 7 currencies (tier 6 added, store ids `com.zudomart.app.coins.tierN`), missing currencies merged into existing packs, pricing currency from the region resolver (no `?currency` on purchases), store receipts matched per platform, audited price edits |
+| services/go (ads) | Floors, minimum budgets and boost minimums per targeted region in the billing currency (FX from the currency schema), bid floors on max CPM/CPC, viewer-region auction reserve, `GET /api/v1/ads/pricing`, USD `reportingSpend`; creator share unchanged (test) |
+| services/go (admin) | Platform setting `regional-pricing` (validated, versioned, audited, public) |
+| services/typescript (gateway) | Routes `/api/v1/pricing/*` (money) and `/api/v1/ads/pricing` (ads), optional auth; forwards `X-Client-Platform`, `X-Store-Storefront`, `CloudFront-Viewer-Country` |
+| apps/admin | Configuration → Regional pricing (plan price book, coin packs, ad floors and creator bands), step-up and reason on every edit, mocks and seed |
+| apps/ads | Budget step shows the minimum daily budget for the targeted regions from `/ads/pricing`; mock route |
+| apps/mobile | Store billing adapter (`storeBilling.service.ts`): sends `X-Client-Platform` and `X-Store-Storefront` when a native store module is installed; coin packs bought in the app use the server's `storeProductId` and redeem via `/api/v1/coins/iap/receipts` |
+| apps/seller, apps/studio | Removed hardcoded ₦50 verification-charge and withdrawal-fee copy |
+| docs | `pricing.md` rewritten with per-region tables, research and Paystack constraints; `backendPlan.md` §4.8 |
+
 ## Seller prices per country, region-based product visibility, 30-day deletion grace (4 Oct) — Go, search and social tests; tsc per app
 
 Design: [plans.md §45](./plans.md).

@@ -138,6 +138,13 @@ Rules either way: unverified stores always escrow; 3-day auto-release after deli
 - Zudomart's main account is presumably liable on every transaction, split or not (**UNCONFIRMED**, paystack.md Q5). A lost dispute on a settled direct group becomes seller debt.
 - Zudomart's own buyer-seller disputes (item not as described) stay in Zudomart's flow and end in a refund or a release.
 
+### 6.3a Payment mode choice at checkout (4 Oct 2026)
+
+- `POST /api/v1/orders/checkout` accepts `paymentModes: [{ storeId, paymentMode: "escrow" | "direct" }]` (default escrow, max 20). go-commerce validates per seller group: `direct` for a store that is not verified (Gold) is rejected with 422 `DIRECT_PAYMENT_NOT_ALLOWED`; unknown values are 400 `VALIDATION_FAILED`. The mode is stored immutably on the order group (`order_groups.payment_mode`), sent to go-money's `RegisterCheckoutPayables` (`payment_mode`, `store_verified`), and part of the idempotency fingerprint.
+- Order views (buyer and seller) expose `paymentMode`; the buyer store summary exposes `verified`. Cart seller groups expose `store.verified`, `rating`, `ratingCount`.
+- Clients show the choice only for verified stores (success rate where available, else rating, plus the Gold badge): "Escrow protection (recommended)" vs "Pay directly". Unverified stores show "Protected by Zudomart Escrow". No fee lines for buyers.
+- Direct orders have no escrow hold, so no in-app dispute button; refunds go through the seller or support (seller-initiated refund books a seller debt per 6.3). Store success rate: share of paid order groups of the last 90 days that completed with no refund (settled = completed, refunded, returned or cancelled after payment), kept in `orders.store_success_stats` (rebuilt every 6h by a sweep, env `ORDERS_SUCCESS_RATE_ROLLUP_INTERVAL`), shown only from 20 settled orders (else `successRate: null`, clients say "New store"). Served as `successRate` (0..1) on store, product, cart-group and order store summaries via the `StoreSuccessRates` port.
+
 ## 7. Clients
 
 - **Web (webapp, seller dashboard, ads, Studio web):** Paystack Popup with the server-created `access_code`, or redirect to `authorization_url`. The client never sees the secret key (ACCEPT).

@@ -1338,7 +1338,7 @@ Spec: owner (3 Oct 2026). Every email is branded, carries the company legal name
 - `renderEmail(templateKey, props, { locale, theme, timeZone, brand, links })` → `{ subject, html, text }`. `theme` is `auto` (light + `prefers-color-scheme` dark overrides, also `[data-ogsc]` for Outlook.com), `light` or `dark`. Defaults: `en-NG`, `Africa/Lagos`. The worker passes the per-recipient `unsubscribeUrl` (signed token) for marketing emails.
 - Money is always `{ amountMinor, currency }`, formatted with `Intl` using the currency's minor digits. Nothing hardcodes ₦.
 - Layout: 600 px table layout, inline styles, no JS, alt text on every image, colours from `@zudomart/design-tokens` (contrast checked for text and buttons; danger buttons use the AA-safe red in both themes), Inter with system fallbacks. Header: wordmark (CDN image from `ZUDOMART_EMAIL_LOGO_URL`, otherwise an HTML "z" tile + "zudomart" wordmark that renders everywhere), an optional mono reference (order, case, ticket number). Brand strip (blue with the yellow accent), hero with a tone eyebrow, content blocks, bulletproof button (table cell with `bgcolor` + React Email's MSO padding). Signature block: a progress "track" showing where the order or money is (Ordered → Paid → Shipped → Delivered → Complete; In escrow → Locked 24h → Available → Payout sent; dispute stages).
-- Footer: app store links (badge images when `ZUDOMART_EMAIL_APP_STORE_BADGE_URL` / `..._PLAY_STORE_BADGE_URL` are set), social links, a "why you got this email" line, **Unsubscribe + Manage email preferences only on marketing emails**, Manage notifications on transactional, security and legal emails, Help Centre, support emails (oyinlola.tech@icloud.com, oluwayemioyinlola2@icloud.com until a support address exists), "we never ask for your password or code", © legal name and address.
+- Footer: app store links (badge images when `ZUDOMART_EMAIL_APP_STORE_BADGE_URL` / `..._PLAY_STORE_BADGE_URL` are set), social links, a "why you got this email" line, **Unsubscribe + Manage email preferences only on marketing emails**, Manage notifications on transactional, security and legal emails, Help Centre, support email (support@zudomart.com; see docs/emailAddresses.md), official App Store and Google Play badges, "we never ask for your password or code", © legal name and address.
 - **OWNER TO FILL:** `ZUDOMART_COMPANY_LEGAL_NAME` and `ZUDOMART_COMPANY_ADDRESS` (placeholders render literally until set; `isBrandConfigComplete()` lets the worker refuse to send in production), the App Store id, social handles, and a hosted PNG wordmark + store badges on the CDN. `readEmailBrandFromEnvironment(process.env)` reads them.
 - Marketing products are typed `VerifiedProduct` (`sellerVerified: true`) so only verified sellers and brands can appear.
 - `pnpm --filter @zudomart/email-templates preview` renders every template (light, dark, text) into `packages/emailTemplates/previews/` (gitignored) with an `index.html`. `pnpm --filter @zudomart/email-templates test` runs the vitest suite (render in light and dark, footer/legal content present, unsubscribe only on marketing, money formatting, 4 plain-text snapshots).
@@ -1802,6 +1802,24 @@ Ad type picker, carousel card editor (add, remove, reorder with Earlier/Later, p
 - **Deletion grace:** 30 days (`USERS_DELETION_GRACE_DAYS`). Logging in again cancels the request and shows "Your account deletion has been cancelled". Financial-record retention is unchanged.
 - **Open:** per-product (not per-variant) editing of country prices; no IP-geolocation lookup inside goCommerce (relies on the edge header); help centre and legal copy have no deletion-period text yet.
 
+## 46. Fair feed ranking, trends and the Explore home **[DONE (intelligence, social, gateway, go-admin, go-trust, go-users grant, mobile + webapp + admin, mock UI)]**
+
+Owner rules (4 Oct): the feed cannot be manipulated and favours nobody in secret; suggestions follow trends and what the viewer engages with; checkmarks get a modest, capped, disclosed boost (Black/Official >= Gold Business >= Premium >= Blue Verified >= Blue Essential); admin-created accounts with a checkmark are labelled **Official** with a disclosed editorial boost; free accounts can go viral; all weights are admin-configurable inside server-side caps and audited; disclosed in "How your feed works" and the terms. Architecture: [recommendations.md §7](./architecture/recommendations.md).
+
+| Area | Delivered |
+| --- | --- |
+| Ranking (Python) | `feed_fairness_service.py` (safety filter, integrity discount before scoring, quality prior and completion, capped boost, explanations), `ranking_boost_policy_service.py` (hard caps, tier order), `engagement_integrity_service.py`; `author_is_verified` neutralised; manipulated authors advised to go-trust; response adds `explanations`, `boostMultiplier`, `trustedEngagementShare`, `manipulatedItemIds` |
+| Ranking (social) | candidates with checkmark tier, Official flag, country and DB integrity signals (new accounts, suspended engagers, pods, bursts, spam tags); `intelligenceFeedRanker` (signed, 250 ms, circuit breaker) with the deterministic fair ranker as fallback; `PostView.ranking` carries "Why am I seeing this?" |
+| Anti-manipulation | ingestion: per-actor velocity cap (60/h), same-cluster and low-trust discounts, integrity counters in Valkey; trending excludes manipulated and spammy items; politics needs 2x distinct actors |
+| Trends and headlines | `/v1/trending` per country + category; `/v1/trending/headlines` clusters public posts into stories with neutral extractive titles, template fallback, "Summarised from posts"; social endpoints `/api/v1/explore/{categories,trends,headlines,who-to-follow,posts-for-you}` (guest GET) |
+| Admin | Configuration > Feed ranking (`feed.ranking`, caps enforced in Go and re-applied in social/Python); Trust & safety > Trends & headlines (`trending.moderation`, removal only, policy reason + audit); Trust & safety > Manipulation flags (suspension cases filtered by `modelVersion=engagement_integrity`) |
+| Explore UI | mobile Search screen and webapp `/explore`: What's happening cards, Trends for you, category tabs, Who to follow (Official label), Posts for you with "Why am I seeing this?"; skeletons, empty and error states, dark/light, guest-viewable; typing switches to search results |
+| Latency | Python path 4-5 ms per request in-process; p95 119 ms was single-worker queueing. `INTELLIGENCE_SERVER_WORKERS`, one Valkey round trip for consent + features, client timeout 250 ms with fallback |
+| Also | intelligence publishes `content.sensitivityAdvised` from processed images (Rekognition when credentials exist, no signal otherwise) for social's advisory labels; RabbitMQ topology lets intelligence publish domain events |
+| Docs | help article `services/typescript/support/content/help/posts-and-feed/how-your-feed-works.md`, terms section "How we rank content" (`apps/web`) |
+
+Open: run the k6 feed scenario with 2 workers; producers should start sending `context.actorClusterKey` (hashed /24 + device) and `context.actorTrust` with events; the "Why am I seeing this?" item in the main feed post menu waits for the feed UI work in progress (data is already on `PostView.ranking`).
+
 ## 47. Birthday and Zudoversary celebrations **[DONE (go-identity users, notifications, email templates, mobile + webapp, mock)]**
 
 Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join date. No birthday email. Anniversary email respects the "Milestones" notification preference. The date of birth is never exposed.
@@ -1831,6 +1849,115 @@ Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join d
 
 ### 47.4 Open items
 
-- **[BACKEND]** posts and lives counts in the anniversary stats come from social and live; the card shows followers and orders from `profile_signals` plus the client's own post count.
-- **[LATER]** a Milestones row in the notification preference screens (the category exists in the API, the mobile and webapp preference lists were not extended); a timezone picker in settings (today the device timezone is synced once).
+- Posts and lives (last 12 months) come from new internal endpoints `GET /api/v1/internal/accounts/{id}/activity-counts` in social (`posts`) and go-live (`lives`); users reads them via `USERS_SOCIAL_INTERNAL_URL` + `SOCIAL_INTERNAL_API_TOKEN` and `USERS_LIVE_INTERNAL_URL` + `LIVE_INTERNAL_API_TOKEN` (best effort, zero or failure is omitted). The Milestones push and email switches live in mobile Settings > Notifications and webapp Settings.
+- **[LATER]** a timezone picker in settings (today the device timezone is synced once).
 - Go integration tests need the local Postgres (`pnpm backend:up`) and were compiled but skipped here; unit tests, vitest, jest and tsc were run.
+
+---
+
+## 44. Help Centre **[DONE (ts-support, notifications, gateway, intelligence, admin + mobile + webapp, mock UI)]**
+
+Owner requirements (4 Oct): a Help Centre that explains every part of Zudomart; tickets with email on every staff reply; admins answer tickets; a deep FAQ that grows by itself from resolved questions, with admin create, edit and delete.
+
+### 44.1 Backend: `services/typescript/support` (port 8111, Prisma schema `support`)
+
+- **Help content**: categories → topics (Markdown, slug unique per locale, tags, related topics, version history, helpful votes one per account). Search uses the Prisma API only (keyword `contains` on a normalised `search_text` column + tags, ranked in TypeScript with trigram and keyword scores; no raw SQL). 82 starter articles live in `content/help/<category>/<slug>.md` and are seeded at start-up; staff edits are never overwritten and untouched seed topics refresh when the file changes. Merged topics redirect to their target.
+- **Tickets**: categories (order, payment, account, seller, verification, creator, live, ads, safety, other), linked order/payment/live/report/dispute, attachments restricted to media-service URLs, statuses `open | awaiting_user | awaiting_support | resolved | closed`, SLA due dates by priority, internal notes, assignment (self, or others with `support:assign`), satisfaction rating 1-5, unread counts, reopen within 7 days, auto-close 7 days after resolution, live chat as a ticket channel (`chat`, recorded, not E2EE). Account deletion anonymises the requester's tickets (consumes `account.deletionExecuted`).
+- **Events** (outbox → `zudomart.events`): `ticket.created`, `ticket.replied` (agent replies carry the message), `ticket.resolved`. Notifications maps them to `supportTicketReceived`, `supportAgentReplied` (email + push + in-app, sent immediately) and `supportTicketResolved`.
+- **Auto-FAQ** (job every 30 s on tickets queued at resolution): customer question + staff answer → PII scrubber (emails incl. obfuscated, phones in Nigerian and international formats, cards with Luhn, bank/BVN/NIN digits, order/ticket/payment references, UUIDs, amounts in every supported currency, addresses and postcodes, IPs, dates, @handles, links, names from greetings, sign-offs, introductions, honorifics, participants and capitalised pairs) → residual check → intelligence `POST /v1/help/answer-drafts` (HMAC, deterministic template; never called when residue remains) with a TypeScript template fallback → re-scrub → dedupe (title trigram + keyword Jaccard against published topics and their related-question headings): ≥ 0.55 appends a "Related question" section to that topic, ≥ 0.8 is skipped as already answered, otherwise a new topic is created with related links. Topics are published automatically and marked "From a resolved question" unless the admin setting `autoFaqRequiresReview` is on (default off) or residue was found. Safety tickets are never used. Every outcome is logged for the admin list.
+- **Access**: guests read published help (`GET /api/v1/help/*`); voting and every ticket route need an account; admin routes verify the staff JWT (`zudomart-admin` audience) and permissions `support:tickets`, `support:assign`, `support:chat`, new `support:helpContent`; `/internal/support/*` needs the internal token. Gateway, RabbitMQ topology (`support-domain-events`, ticket events on `notifications-domain-events`), Dockerfile, `pnpm backend:dev:support`, CI matrix and Terraform entry added.
+
+### 44.2 Frontends
+
+| Surface | Scope |
+| --- | --- |
+| Mobile | Help centre home (search, categories, Contact support, My requests with unread badge), category list, article view (Markdown, helpful votes, related, contact support), ticket form with the new categories, ticket list with unread badges and references, thread marks replies read, rating card, closed state; notification taps open the ticket; Settings > Support shows unread replies; live report sheet links to "How live safety works"; views dialog opens the new article |
+| Webapp | `/help` (search, categories), `/help/[category]`, `/help/[category]/[slug]` (SSR metadata, canonical, Open Graph, Article + breadcrumb JSON-LD, votes), `/help/tickets`, `/help/tickets/new` (deep links with category and linked order), `/help/tickets/[id]` (live thread, rating), `/help/tickets/[id]/rate` (email rating links); `/help/views` redirects; guests can read help but tickets need sign-in; Settings and order detail link here |
+| Admin | Support → Help centre: topics table with filters, auto-topic log, categories CRUD, auto-publish setting; topic editor with Markdown + live preview, related topics, publish/unpublish, merge, delete and version history; ticket queue uses the new statuses, shows references, channel, rating and help-topic outcome |
+| Seller dashboard, Studio | Header "Help" links to the web Help Centre (selling, live) |
+
+### 44.3 Open items
+
+- **[LATER]** Real push delivery from the mobile app (no expo-notifications handler yet; in-app notifications route to the ticket).
+- **[LATER]** Feeding help topics into the search service (no `helpTopic.*` events are bound yet) and localisation beyond `en`.
+- **[LATER]** Staff email on the agents list needs an identity endpoint; agents are discovered from recent support activity.
+
+## 48. Abuse protection: access probing, bots and human checks **[DONE (gateway, go-trust, go-identity, intelligence, contracts, infra, admin + webapp + mobile)]**
+
+Owner rules (4 Oct): probing other people's endpoints or data flags the account and requires a human check; repeated failures suspend it temporarily; deletion or a ban only after a person analyses the evidence; suspected bots are challenged every time. Architecture: [security.md §10](./architecture/security.md).
+
+| Area | Delivered |
+| --- | --- |
+| Gateway | Probe classifier (route templates, private resource families, admin routes, internal paths, tampered tokens, replayed idempotency keys) and detector with Valkey sliding windows per account and device; reports to go-trust; human verification gate (428 `HUMAN_VERIFICATION_REQUIRED`) with a 15 s state cache, 12 h session pass and single-use action pass; `POST/GET /api/v1/security/human-verification` with Turnstile (or hCaptcha) siteverify, rate limits, no token logging; routes for client signals and the admin queue |
+| go-trust | New `accessSecurity` module: tables `security_account_states`, `security_events`, `security_cases` (migration `20261004103816`); deterministic policy (challenge, clear for 24 h, suspend after 5 failed checks or probing after 3 checks in 24 h, suspected bot rules); automatic suspension through go-identity; outbox events `security.challengeRequired/challengeCleared/caseOpened/accountAutoSuspended/botSuspected/caseDecided`; consumes `security.accessViolationDetected` on `trust-domain-events` and `intelligence-trust-bot-scores`; client signals with Play Integrity / App Attest verifier interfaces; admin list, detail and decide (clear, keep restricted, suspend, ban, delete) with step-up, per-action permission and audit; 365-day evidence retention |
+| go-identity | Suspension source `security`, reason code `SECURITY`; internal enforcement accepts `delete` (reuses the admin delete flow with financial-record anonymisation and the pending-payout guard) |
+| Intelligence | `bot_detection` module: `POST /v1/trust/bot-score` (cadence, headless signals, attestation verdict, account age, follow/like/comment velocity, duplicate comments, engagement manipulation share, shared device/IP clusters), advisory only, publishes high scores once per 6 h |
+| Consistent 404s | Orders, seller orders, conversations, messages, disputes and escrow return the same 404 for "not yours" and "missing" (tests in orders and social); `getMyOrder` no longer panics on an empty view |
+| Admin | Trust & safety > Security cases: filters (status, trigger, severity), evidence timeline, linked devices and network prefixes, challenge history, bot signals, actions shown only with the matching permission; `security:cases` permission (Trust & Safety template) |
+| Web and mobile | Webapp: Turnstile sheet on any 428 and one retry; session-free `/security-check` page for the app. Mobile: in-app browser sheet to `/security-check`, deep-link return `zudomart://security-check#token=…`, shared in-flight check, retry |
+| Contracts and infra | JSON schemas and AsyncAPI entries for `security.accessViolationDetected`, `security.accountAutoSuspended`, `security.caseDecided`, `security.botScoreComputed`; RabbitMQ topology and definitions; Terraform secrets `TRUST_INTERNAL_TOKEN`, `TURNSTILE_SECRET_KEY` (gateway) and queue env |
+| Privacy and help | Privacy policy draft ("Security", Cloudflare in "Who we share data with"); help article `services/typescript/support/content/help/account-and-login/security-checks.md` for the help agent to import |
+
+### 48.1 Where the Turnstile keys go
+
+Never commit real keys. Defaults everywhere are Cloudflare's public **test** keys (site `1x00000000000000000000AA` always passes, secret `1x0000000000000000000000000000000AA` always passes; `2x0000000000000000000000000000000AA` always fails, for negative tests). The gateway refuses the test secret when `NODE_ENV=production`.
+
+| Key | Local (gitignored files) | AWS |
+| --- | --- | --- |
+| `TURNSTILE_SECRET_KEY` (server only) | `services/typescript/gateway/.env` | Secrets Manager `zudomart/<environment>/gateway/app`, JSON key `TURNSTILE_SECRET_KEY` (created by Terraform with `CHANGE_ME`; paste the real value in the console or `aws secretsmanager put-secret-value`) |
+| `TRUST_INTERNAL_TOKEN` (gateway → go-trust, same value as go-trust's `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` key `TRUST_INTERNAL_TOKEN`, and `zudomart/<environment>/go-trust/app` key `MODERATION_INTERNAL_API_TOKEN` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/webapp/.env.local` | build-time variable of the webapp deployment (not a secret) |
+| `EXPO_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/mobile/.env` | EAS environment variable; reserved for a native WebView, the app currently uses the webapp page |
+
+In the Cloudflare dashboard add every web origin (app, and any preview domains) to the widget's hostnames. `HUMAN_VERIFICATION_HOSTNAMES` is filled from `app_origins` by Terraform.
+
+### 48.2 Open items
+
+- **[LATER]** Real Play Integrity and App Attest verifiers (interfaces exist; verdict is `unavailable` until then), and the mobile client sending `client-signals`.
+- **[LATER]** Producers for the bot score: call `/v1/trust/bot-score` from the events pipeline with cadence and velocity features (today it is on-demand).
+- **[LATER]** Go services can publish `security.accessViolationDetected` directly (the consumer exists); the gateway is the only producer today.
+- **[LATER]** "Clear" does not reinstate an automatically suspended account; staff reinstate from Suspensions > Suspended accounts.
+- **[LATER]** A native WebView renderer for mobile if the in-app browser sheet feels heavy.
+
+## 49. Copyright for videos, clips and sounds, and account status **[DONE (go-trust, media, social, notifications, email templates, gateway, contracts, mobile + webapp + studio + seller + admin, mock UI)]**
+
+Owner rules (2026-10-04). Legal wording (claim declarations, counter-notice declaration, help article, email copy) is **pending counsel review**: a DMCA-style notice and counter-notice process adapted for Nigeria's Copyright Act 2022.
+
+### 49.1 Claims with proof
+
+- `POST /api/v1/copyright/claims` now requires the claimant's full legal name, the original work (link or upload media id), proof of ownership (up to 10 links and 10 uploaded documents), the infringing segments (start and end seconds; optional only for whole-sound claims), the good-faith and accuracy declarations and an electronic signature that must match the legal name. `claimScope` is `audio` or `video` (sounds default to audio).
+- Mobile: "Report copyright" in the post/clip menu, a report action on the sound page, and the existing Report > Copyright path; evidence uploads go through the media queue as private `dispute_evidence`. Webapp: "Report copyright" and "Report the sound for copyright" in the content menu, and Report > Copyright continues into the claim form. Guests are asked to sign in.
+
+### 49.2 Remedies on uphold (go-trust `copyrightClaims`)
+
+| Claim | Remedy | Strike |
+| --- | --- | --- |
+| Audio on a clip, post or sound | `copyrightClaim.audioMuteOrdered` → social disables the sound for reuse and emits `clipAudio.muteRequested` for every clip using it → media produces a muted rendition (silent AAC track, picture copied, HLS ladder rebuilt under `muted/`), swaps variants and re-emits `media.processed` so social swaps playback URLs | No |
+| Video on a clip or post | Warning record (strike kind `warning`), `copyrightClaim.warningIssued` with the deadline (default 48 h). A worker takes it down at the deadline (`content.visibilityChanged` → hidden) and issues a strike. `post.deleted` before the deadline marks it `removed_voluntarily` with no strike | Only at the deadline |
+| Live, or unknown uploader | Immediate takedown | Yes (when the uploader is known) |
+
+Audio fingerprint matches stay advice only in the admin console.
+
+### 49.3 Strikes, thresholds and expiry
+
+Admin-configurable in `copyright_policy_settings` (`GET/PUT /api/v1/admin/copyright-policy`, step-up): takedown deadline 48 h, strike lifetime 90 days, warning kept 180 days, counting window 90 days, restriction at 3 copyright strikes in the window (monetisation and going live paused; `GOING_LIVE` restricted through go-users for 30 days), suspension review at 3 (a `copyright_strikes` suspension case). An hourly job announces `strike.expired` once per strike. Users can appeal a strike (`POST /api/v1/account/status/strikes/{id}/appeal`); staff decide in `/api/v1/admin/strike-appeals`.
+
+### 49.4 Account status
+
+`GET /api/v1/account/status` (and the admin and internal equivalents) returns Good standing / At risk / Restricted, restrictions, `canMonetise` and `canGoLive`, warnings, strikes with expiry and affected content, copyright notices with deadlines and counter-notice state, and help links. Pages: mobile Settings > Account status (with a countdown banner on the owner's clip), webapp `/settings/account-status` (countdown on the owner's post card), Studio earnings and seller dashboard summaries, admin user detail "Account health" with appeal decisions. `accountHealth.changed` is published on every change for creator eligibility and monetisation consumers.
+
+### 49.5 Counter-notice and restore
+
+Unchanged 10-business-day restore with court-action hold. Restoring an audio claim emits `copyrightClaim.restored` with `remedy: audio_muted`, so social re-enables the sound and media swaps the original rendition back; restoring a takedown publishes visibility `visible`. Any strike and warning from the claim are revoked.
+
+### 49.6 Events and notifications
+
+New schemas: `copyrightClaim.audioMuteOrdered`, `.warningIssued`, `.contentTakenDown`, `.contentRemovedVoluntarily`, `strike.expired`, `strike.appealed`, `strike.appealDecided`, `accountHealth.changed`, `clipAudio.muteRequested`, `clipAudio.restoreRequested`, `media.audioMuted`, `media.audioRestored`; extended `copyrightClaim.received/decided/counterNoticeReceived/restored`, `post.deleted`, `sound.updated`. Topology: trust consumes `post.deleted`; social consumes the audio mute and restore; media consumes `clipAudio.*`; notifications consume the copyright and strike events. Email templates (branded layout): `copyrightWarning`, `audioMuted`, `contentTakenDown`, `strikeIssued`, `strikeExpired`, `counterNoticeReceived`, `contentRestored`.
+
+### 49.7 Open items
+
+- **[LATER]** Counsel review of all legal wording, then move the help draft `services/typescript/support/content/drafts/copyright-and-account-status.md` into `content/help/safety-and-reporting/` (the apps already link to that slug).
+- **[LATER]** Creator program, ads revenue share and live consumers of `accountHealth.changed` (go-users only enforces `GOING_LIVE` today; there is no `MONETISATION` restriction feature yet).
+- **[LATER]** Automatic fingerprint matching on `copyrightClaim.received` in intelligence (the internal audio-matches endpoint already accepts results).
+- **[LATER]** A restore only unmutes clips currently using the sound; clips muted by a different claim on the same sound are not tracked separately.
+- **[LATER]** Webapp claim form takes links only (mobile also supports uploads).
