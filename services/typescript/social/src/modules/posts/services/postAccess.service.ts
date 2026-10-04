@@ -5,11 +5,14 @@ import { followRepository } from "../../follows/repositories/follow.repository.j
 import { filterAuthorsVisibleToViewer } from "../../follows/services/profileAccess.service.js";
 import { postRepository, type PostRow } from "../repositories/post.repository.js";
 import { canViewerSeePostByAudience } from "./postRules.service.js";
+import { isPostWithheldFromViewer, labelsWithheldFromAgeBracket } from "./sensitiveContent.service.js";
+import { currentViewerAgeBracket } from "../../../utils/viewerAgeContext.util.js";
 
 export async function loadPostVisibleToViewer(context: HandlerContext, viewerId: string | undefined, postId: string): Promise<PostRow> {
   const db = context.database.client;
   const post = await postRepository.findById(db, postId);
   if (post === null || (post.expiresAt !== null && post.expiresAt <= context.clock.now())) throw notFound("POST_NOT_FOUND", "Post not found.");
+  if (isPostWithheldFromViewer(post, { viewerId, withheldLabels: labelsWithheldFromAgeBracket(currentViewerAgeBracket()) })) throw notFound("POST_NOT_AVAILABLE", "This post isn't available.");
   const authorVisible = await filterAuthorsVisibleToViewer(context, viewerId, [post.authorId]);
   if (!authorVisible.has(post.authorId)) {
     if (viewerId !== undefined && (await blockRepository.eitherDirection(db, viewerId, post.authorId))) throw notFound("POST_NOT_FOUND", "Post not found.");
