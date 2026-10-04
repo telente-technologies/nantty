@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AppearanceSection } from "@/components/settings/appearanceSection";
 import { NotificationPreferencesSection } from "@/components/settings/notificationPreferencesSection";
 import styles from "@/components/settings/settingsHome.module.css";
-import { BookmarkIcon, ChevronRightIcon, LockIcon, MailIcon, MapPinIcon, OrdersIcon, UserIcon } from "@/components/ui/icons";
+import { BookmarkIcon, ChatIcon, ChevronRightIcon, LockIcon, MailIcon, MapPinIcon, OrdersIcon, UserIcon } from "@/components/ui/icons";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -14,8 +14,10 @@ const settingsLinks = [
   { href: "/verify-email", label: "Email", description: "Verify the email used for receipts and payments", icon: <MailIcon size={20} /> },
   { href: "/me", label: "Profile", description: "Your public profile, posts and followers", icon: <UserIcon size={20} /> },
   { href: "/saved", label: "Saved items", description: "Posts, videos, clips and products you bookmarked", icon: <BookmarkIcon size={20} /> },
+  { href: "/settings/account-status", label: "Account status", description: "Standing, copyright notices, strikes and appeals", icon: <LockIcon size={20} /> },
   { href: "/settings/reports", label: "Your reports", description: "Status of chats, messages and accounts you reported", icon: <LockIcon size={20} /> },
   { href: "/orders", label: "Orders", description: "Tracking, escrow and receipts", icon: <OrdersIcon size={20} /> },
+  { href: "/help", label: "Help Centre", description: "Answers, contact support and your support requests", icon: <ChatIcon size={20} /> },
 ];
 
 export default function SettingsPage() {
