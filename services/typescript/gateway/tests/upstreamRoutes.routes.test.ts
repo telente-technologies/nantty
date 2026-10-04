@@ -39,7 +39,6 @@ describe("live routes", () => {
     ["GET", "/api/v1/gifts"],
     ["GET", "/api/v1/rankings"],
     ["GET", "/api/v1/creators/me/analytics/gifts/streams/abc"],
-    ["DELETE", "/api/v1/admin/gifts/gift_rose"],
   ];
 
   it.each(liveCases)("%s %s goes to go-live and requires a token", (method, path) => {
@@ -132,5 +131,36 @@ describe("media routes", () => {
 
   it("never exposes the internal media api", () => {
     expect(resolveUpstreamRouteForRequest("POST", "/internal/v1/media/intents")).toBeUndefined();
+  });
+});
+
+describe("routes added after the full API sweep", () => {
+  it.each([
+    ["POST", "/api/v1/ads/decide", "ads", "required"],
+    ["GET", "/api/v1/ads/accounts/acc_1/campaigns", "ads", "required"],
+    ["GET", "/api/v1/ads/balance", "money", "required"],
+    ["GET", "/api/v1/admin/ads", "ads", "optional"],
+    ["GET", "/api/v1/admin/advertisers", "ads", "optional"],
+    ["GET", "/api/v1/admin/wallet/seller-reserves", "money", "optional"],
+    ["GET", "/api/v1/admin/subscriptions/price-table", "money", "optional"],
+    ["GET", "/api/v1/subscriptions/plans", "money", "required"],
+    ["POST", "/api/v1/seller/subscription/checkout", "money", "required"],
+    ["GET", "/api/v1/returns", "commerce", "required"],
+    ["POST", "/api/v1/seller/returns/ret_1/approve", "commerce", "required"],
+    ["GET", "/api/v1/overlay-scenes/scene_1", "live", "optional"],
+    ["DELETE", "/api/v1/admin/gifts/gift_rose", "live", "optional"],
+    ["GET", "/api/v1/admin/live-incidents", "trust", "optional"],
+    ["POST", "/api/v1/admin/live-incidents/inc_1/end-and-suspend", "trust", "optional"],
+    ["POST", "/api/v1/live-safety/live_1/appeal", "trust", "required"],
+    ["GET", "/api/v1/lives/live_1/safety", "live", "required"],
+  ])("%s %s goes to %s (%s)", (method, path, upstream, authentication) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe(upstream);
+    expect(route?.authentication).toBe(authentication);
+  });
+
+  it("lets LiveKit webhooks through without a Zudomart token and with the raw body", () => {
+    const route = resolveUpstreamRouteForRequest("POST", "/api/v1/live/webhooks/livekit");
+    expect(route).toMatchObject({ upstream: "live", authentication: "optional", rawBodyPassthrough: true });
   });
 });

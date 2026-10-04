@@ -41,7 +41,7 @@ function buildConfig(upstreamUrl: string): GatewayConfig {
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience },
     policyGate: null,
     guestRateLimits: { perMinute: 120, sensitivePerMinute: 3 },
-    upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl },
+    upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl },
   };
 }
 
