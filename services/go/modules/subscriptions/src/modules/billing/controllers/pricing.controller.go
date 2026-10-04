@@ -119,7 +119,7 @@ func (controller BillingController) UpsertPrice(writer http.ResponseWriter, requ
 	}
 	before, _ := controller.Billing.FindPriceRow(request.Context(), planCode, region)
 	if audit := controller.Billing.Container.Audit; audit != nil {
-		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.plan_price.update", "plan_price", planCode+":"+region, before, row); err != nil {
+		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.plan_price.update", "plan_price", planCode+":"+region, body.Reason, before, row); err != nil {
 			controller.fail(writer, request, httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change couldn't be audited, so it wasn't saved. Try again."))
 			return
 		}
