@@ -21,7 +21,10 @@ func TestEntitlementMessagesAreDispatchedAndOthersIgnored(t *testing.T) {
 	if err := handler(context.Background(), []byte(`{"id":"2","type":"order.placed","data":{}}`)); err != nil {
 		t.Fatal(err)
 	}
-	if len(applied) != 1 || applied[0] != `entitlement.granted:{"plan":"blue"}` {
+	if err := handler(context.Background(), []byte(`{"id":"3","type":"account.registered","data":{"accountId":"a"}}`)); err != nil {
+		t.Fatal(err)
+	}
+	if len(applied) != 2 || applied[0] != `entitlement.granted:{"plan":"blue"}` || applied[1] != `account.registered:{"accountId":"a"}` {
 		t.Fatalf("applied %v", applied)
 	}
 	if err := handler(context.Background(), []byte(`not json`)); !errors.Is(err, platformevents.ErrPoisonMessage) {

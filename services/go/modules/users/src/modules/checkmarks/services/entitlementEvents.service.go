@@ -9,6 +9,8 @@ import (
 	platformevents "zudomart/platform/events"
 )
 
+const AccountRegisteredEventType = "account.registered"
+
 type EntitlementApplier func(ctx context.Context, eventType string, data json.RawMessage) error
 
 func HandleEntitlementEventMessage(apply EntitlementApplier) platformevents.MessageHandler {
@@ -17,7 +19,7 @@ func HandleEntitlementEventMessage(apply EntitlementApplier) platformevents.Mess
 		if err := json.Unmarshal(body, &envelope); err != nil || envelope.Type == "" {
 			return fmt.Errorf("%w: entitlement event: %v", platformevents.ErrPoisonMessage, err)
 		}
-		if !strings.HasPrefix(envelope.Type, "entitlement.") {
+		if !strings.HasPrefix(envelope.Type, "entitlement.") && envelope.Type != AccountRegisteredEventType {
 			return nil
 		}
 		return apply(ctx, envelope.Type, envelope.Data)
