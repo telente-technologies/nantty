@@ -14,6 +14,7 @@ type Registry struct {
 	sessions    StaffSessionChecker
 	history     AuditHistoryReader
 	currencies  CurrencyResolver
+	deletions   DeletionGraceCanceller
 }
 
 var Default = &Registry{}
@@ -126,4 +127,14 @@ func (registry *Registry) RegisterCurrencyResolver(port CurrencyResolver) {
 
 func (registry *Registry) CurrencyResolver() (CurrencyResolver, error) {
 	return readPort(registry, func() CurrencyResolver { return registry.currencies })
+}
+
+func (registry *Registry) RegisterDeletionGraceCanceller(port DeletionGraceCanceller) {
+	registry.mutex.Lock()
+	registry.deletions = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) DeletionGraceCanceller() (DeletionGraceCanceller, error) {
+	return readPort(registry, func() DeletionGraceCanceller { return registry.deletions })
 }

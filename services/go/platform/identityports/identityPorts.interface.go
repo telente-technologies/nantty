@@ -116,6 +116,7 @@ type AccountEnforcement interface {
 	MarkAccountDeleted(ctx context.Context, accountId uuid.UUID, anonymizedUsername string) error
 	ChangeAccountPassword(ctx context.Context, accountId uuid.UUID, newPassword string, mustChange bool) error
 	CreateAccountOnBehalf(ctx context.Context, request CreateAccountRequest) (uuid.UUID, error)
+	SetAccountRole(ctx context.Context, accountId uuid.UUID, role string, granted bool) error
 }
 
 type CreateAccountRequest struct {
@@ -135,4 +136,8 @@ type StaffSessionChecker interface {
 
 type AuditHistoryReader interface {
 	ListAuditHistoryForSubject(ctx context.Context, subjectType, subjectId string, limit int) ([]json.RawMessage, error)
+}
+
+type DeletionGraceCanceller interface {
+	CancelPendingDeletionOnLogin(ctx context.Context, accountId uuid.UUID) (bool, error)
 }

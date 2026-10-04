@@ -85,3 +85,21 @@ func (directory *FakeAccountDirectory) SetPhoneVerified(accountId uuid.UUID) {
 	summary.PhoneVerified = true
 	directory.accounts[accountId] = summary
 }
+
+func (directory *FakeAccountDirectory) SetAccountRole(_ context.Context, accountId uuid.UUID, role string, granted bool) error {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	summary := directory.accounts[accountId]
+	roles := make([]string, 0, len(summary.Roles)+1)
+	for _, existing := range summary.Roles {
+		if existing != role {
+			roles = append(roles, existing)
+		}
+	}
+	if granted {
+		roles = append(roles, role)
+	}
+	summary.Roles = roles
+	directory.accounts[accountId] = summary
+	return nil
+}
