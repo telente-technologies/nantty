@@ -49,7 +49,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		"legalName": command.LegalName, "documentType": command.DocumentType, "documentNumber": maskDocumentNumber(command.DocumentNumber),
 		"businessName": command.BusinessName, "registrationNumber": command.RegistrationNumber, "businessAddress": command.BusinessAddress, "country": acting.CountryCode,
 	})
-	documents := append(command.DocumentUrls, command.DocumentPhotoUrl, command.SelfiePhotoUrl)
+	documents := command.DocumentUrls
 	var created *ent.VerificationApplication
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		if created, err = tx.VerificationApplication.Create().SetProfileID(acting.ID).SetAccountID(owner).SetColor(verificationapplication.Color(color)).SetPlanID(command.PlanId).SetApplicant(applicant).SetDocumentKeys(nonEmpty(documents)).Save(ctx); err != nil {

@@ -47,10 +47,11 @@ func (scheduler SuggestionScheduler) suggestIfEligible(ctx context.Context, dire
 		return err
 	}
 	suggestion := suggestions[0]
-	price := LoadPricingRules(ctx).BlueMonthlyPrice
-	if suggestion.Color == "gold" {
-		price = LoadPricingRules(ctx).GoldOnlyMonthlyPrice
+	country := ""
+	if profile.CountryCode != nil {
+		country = *profile.CountryCode
 	}
+	price := SuggestedCheckmarkPrice(suggestion.Color, country)
 	reasons := make([]string, 0, len(suggestion.Rules))
 	for _, rule := range suggestion.Rules {
 		reasons = append(reasons, rule.Label)

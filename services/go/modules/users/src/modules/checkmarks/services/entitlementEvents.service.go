@@ -19,7 +19,7 @@ func HandleEntitlementEventMessage(apply EntitlementApplier) platformevents.Mess
 		if err := json.Unmarshal(body, &envelope); err != nil || envelope.Type == "" {
 			return fmt.Errorf("%w: entitlement event: %v", platformevents.ErrPoisonMessage, err)
 		}
-		if !strings.HasPrefix(envelope.Type, "entitlement.") && envelope.Type != AccountRegisteredEventType {
+		if !strings.HasPrefix(envelope.Type, "entitlement.") && !strings.HasPrefix(envelope.Type, "verificationRefund.") && envelope.Type != AccountRegisteredEventType {
 			return nil
 		}
 		return apply(ctx, envelope.Type, envelope.Data)

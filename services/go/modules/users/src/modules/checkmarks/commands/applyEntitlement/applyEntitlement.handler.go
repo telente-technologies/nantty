@@ -3,6 +3,7 @@ package applyentitlement
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -12,6 +13,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/profilesignal"
 	businessservices "zudomart/modules/users/src/modules/businessDocuments/services"
 	"zudomart/modules/users/src/modules/checkmarks/services"
+	verificationservices "zudomart/modules/users/src/modules/identityVerification/services"
 )
 
 type Decision struct {
@@ -72,12 +74,17 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		if err != nil {
 			return err
 		}
-		decision := DecideEntitlementChange(command, services.ColorForProfileType(owner.ProfileType), goldVerified)
-		if decision.ChangeCheckmark {
-			existing, err := tx.ProfileCheckmark.Query().Where(profilecheckmark.ProfileID(owner.ID)).Only(ctx)
-			if err != nil && !ent.IsNotFound(err) {
-				return err
-			}
+		color := services.ColorForProfileType(owner.ProfileType)
+		decision := DecideEntitlementChange(command, color, goldVerified)
+		existing, err := tx.ProfileCheckmark.Query().Where(profilecheckmark.ProfileID(owner.ID)).Only(ctx)
+		if err != nil && !ent.IsNotFound(err) {
+			return err
+		}
+		opened, err := openVerificationCaseWhenIdentityUnverified(ctx, tx, handler.Container.Now(), owner, existing, DecideEntitlementChange(command, color, true), command)
+		if err != nil {
+			return err
+		}
+		if decision.ChangeCheckmark && !opened {
 			protected := existing != nil && (existing.Source == profilecheckmark.SourceLifetimeGrant || existing.Status == profilecheckmark.StatusRevoked || existing.Status == profilecheckmark.StatusSuspended)
 			skipRevoke := existing == nil && decision.CheckmarkStatus != profilecheckmark.StatusVerified
 			if !protected && !skipRevoke {
@@ -117,4 +124,23 @@ func upsertPlanSignals(ctx context.Context, tx *ent.Tx, owner *ent.Profile, deci
 		}
 	}
 	return update.Exec(ctx)
+}
+
+// openVerificationCaseWhenIdentityUnverified implements "pay first, verify after": a paid Blue or Gold plan opens a
+// Smile ID case instead of switching the badge on, unless this profile already passed identity verification.
+func openVerificationCaseWhenIdentityUnverified(ctx context.Context, tx *ent.Tx, now time.Time, owner *ent.Profile, existing *ent.ProfileCheckmark, decision Decision, command Command) (bool, error) {
+	if command.EventType != "entitlement.granted" || command.SubscriptionId == "" || !decision.ChangeCheckmark || decision.Checkmark == profilecheckmark.ColorBlack {
+		return false, nil
+	}
+	if existing != nil && (services.BadgeVisible(existing.Status) || existing.Source == profilecheckmark.SourceLifetimeGrant || existing.Status == profilecheckmark.StatusRevoked || existing.Status == profilecheckmark.StatusSuspended) {
+		return false, nil
+	}
+	verified, err := verificationservices.IdentityAlreadyVerified(ctx, tx, owner.ID)
+	if err != nil || verified {
+		return false, err
+	}
+	_, err = verificationservices.OpenVerificationCaseInTransaction(ctx, tx, now, verificationservices.OpenCaseRequest{
+		Profile: owner, Color: string(decision.Checkmark), SubscriptionId: command.SubscriptionId, PlanCode: command.Plan, Channel: command.Channel,
+	})
+	return err == nil, err
 }

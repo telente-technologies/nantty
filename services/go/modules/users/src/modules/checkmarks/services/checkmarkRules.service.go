@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"zudomart/platform/identityports"
+	"zudomart/platform/regionpricing"
 )
 
 type SuggestionRules struct {
@@ -28,9 +29,19 @@ type MoneyAmount struct {
 }
 
 type PricingRules struct {
-	BlackGraceDays       int         `json:"blackGraceDays"`
-	BlueMonthlyPrice     MoneyAmount `json:"blueMonthlyPrice"`
-	GoldOnlyMonthlyPrice MoneyAmount `json:"goldOnlyMonthlyPrice"`
+	BlackGraceDays int `json:"blackGraceDays"`
+}
+
+// SuggestedCheckmarkPrice quotes the research default for the viewer's region; go-money's price book is the source
+// of truth at checkout, so the email says "from".
+func SuggestedCheckmarkPrice(color string, countryCode string) MoneyAmount {
+	region, _ := regionpricing.RegionForCountry(countryCode)
+	planCode := "blue"
+	if color == "gold" {
+		planCode = "gold_only"
+	}
+	price, _ := regionpricing.FindDefaultPlanPrice(planCode, region.Code)
+	return MoneyAmount{AmountMinor: price.WebMonthlyMinor, Currency: price.Currency}
 }
 
 func LoadSuggestionRules(ctx context.Context) SuggestionRules {
@@ -42,7 +53,7 @@ func LoadSuggestionRules(ctx context.Context) SuggestionRules {
 }
 
 func LoadPricingRules(ctx context.Context) PricingRules {
-	rules := PricingRules{BlackGraceDays: 14, BlueMonthlyPrice: MoneyAmount{AmountMinor: 250000, Currency: "NGN"}, GoldOnlyMonthlyPrice: MoneyAmount{AmountMinor: 300000, Currency: "NGN"}}
+	rules := PricingRules{BlackGraceDays: 14}
 	readSetting(ctx, "checkmark-pricing", &rules)
 	return rules
 }
