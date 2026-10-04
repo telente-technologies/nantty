@@ -20,7 +20,12 @@ interface MediaImageProps {
 
 export function MediaImage({ src, alt, sizes, className, priority = false }: MediaImageProps) {
   if (!src) return null;
-  return <Image src={src} alt={alt} fill sizes={sizes} className={[styles.fill, className ?? ""].filter(Boolean).join(" ")} priority={priority} />;
+  return (
+    <>
+      <Image src={src} alt={alt} fill sizes={sizes} className={[styles.fill, className ?? ""].filter(Boolean).join(" ")} priority={priority} />
+      <span aria-hidden className={styles.frame} />
+    </>
+  );
 }
 
 interface AvatarProps {

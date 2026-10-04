@@ -7,7 +7,6 @@ export type AppIconName =
   | "arrowLeft24"
   | "bell24"
   | "bookmarkSimple24"
-  | "bookmarkSimpleFill24"
   | "buildingStore20"
   | "cameraBolt24"
   | "cancel20"

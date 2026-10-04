@@ -6,6 +6,14 @@
   object-fit: cover;
 }
 
+.frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--media-frame);
+}
+
 .avatar {
   position: relative;
   display: inline-flex;
