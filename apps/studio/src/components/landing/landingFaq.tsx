@@ -1,4 +1,4 @@
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
 
 import { landingQuestions } from "./landingContent.constant";
 import { LandingIcon } from "./landingIcons";
@@ -14,7 +14,7 @@ export function LandingFaq() {
             Questions, answered.
           </h2>
           <p className={styles.contactNote}>
-            Something else? Email <a href={buildContactMailtoLinkForBothAddresses("Zudomart Studio question")}>{contactEmailDisplayText}</a>.
+            Something else? Email <a href={buildContactMailtoLink("Zudomart Studio question")}>{contactEmailDisplayText}</a>.
           </p>
         </div>
         <div className={styles.list}>
