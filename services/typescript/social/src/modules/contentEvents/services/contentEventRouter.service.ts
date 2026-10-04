@@ -2,6 +2,7 @@ import { PoisonEventError } from "../../../errors/social.error.js";
 import type { Handler } from "../../../types/handlerContext.type.js";
 import type { ApplyContentVisibilityCommand, ModerationVisibilityValue } from "../commands/applyContentVisibility/applyContentVisibility.command.js";
 import type { ApplyProcessedMediaCommand, ProcessedMediaVariant } from "../commands/applyProcessedMedia/applyProcessedMedia.command.js";
+import type { ApplyCopyrightAudioRemedyCommand } from "../commands/applyCopyrightAudioRemedy/applyCopyrightAudioRemedy.command.js";
 import type { ApplySensitiveLabelsCommand } from "../commands/applySensitiveLabels/applySensitiveLabels.command.js";
 import { advisoryLabelsAboveThreshold, normaliseSensitiveLabels, type AdvisoryLabelScore } from "../../posts/services/sensitiveContent.service.js";
 
@@ -40,6 +41,13 @@ export interface ContentEventHandlers {
   readonly applyContentVisibility: Handler<ApplyContentVisibilityCommand, boolean>;
   readonly applyProcessedMedia: Handler<ApplyProcessedMediaCommand, unknown>;
   readonly applySensitiveLabels?: Handler<ApplySensitiveLabelsCommand, boolean>;
+  readonly applyCopyrightAudioRemedy?: Handler<ApplyCopyrightAudioRemedyCommand, unknown>;
+}
+
+function copyrightAudioModeFor(envelope: Envelope): "mute" | "restore" | undefined {
+  if (envelope.type === "copyrightClaim.audioMuteOrdered") return "mute";
+  if (envelope.type === "copyrightClaim.restored" && envelope.data["remedy"] === "audio_muted") return "restore";
+  return undefined;
 }
 
 function readAdvisoryScores(value: unknown): AdvisoryLabelScore[] {
@@ -68,6 +76,13 @@ export function createContentEventRouter(handlers: ContentEventHandlers) {
     if (envelope.type === "content.sensitivityAdvised") {
       if (typeof data["targetType"] !== "string" || typeof data["targetId"] !== "string") throw new PoisonEventError("content.sensitivityAdvised data is malformed");
       await handlers.applySensitiveLabels?.({ targetType: data["targetType"], targetId: data["targetId"], source: "advisory", labels: advisoryLabelsAboveThreshold(readAdvisoryScores(data["scores"])), occurredAt });
+      return;
+    }
+    const copyrightAudioMode = copyrightAudioModeFor(envelope);
+    if (copyrightAudioMode !== undefined) {
+      const claimId = optionalString(data["claimId"]);
+      if (claimId === undefined || typeof data["targetType"] !== "string" || typeof data["targetId"] !== "string") throw new PoisonEventError(`${envelope.type} data is malformed`);
+      await handlers.applyCopyrightAudioRemedy?.({ claimId, targetType: data["targetType"], targetId: data["targetId"], mode: copyrightAudioMode, occurredAt });
       return;
     }
     if (envelope.type !== "media.processed" && envelope.type !== "media.rejected") return;
