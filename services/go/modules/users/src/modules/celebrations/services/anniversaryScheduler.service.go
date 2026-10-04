@@ -126,7 +126,7 @@ func (scheduler AnniversaryScheduler) emitOnce(ctx context.Context, candidate *e
 		JoinedAt: candidate.JoinedAt.UTC().Format(time.RFC3339),
 	}
 	if stats != nil {
-		data.Stats = &celebrationevents.AnniversaryStats{Followers: stats.Followers, Orders: stats.Orders}
+		data.Stats = &celebrationevents.AnniversaryStats{Posts: stats.Posts, Lives: stats.Lives, Followers: stats.Followers, Orders: stats.Orders}
 	}
 	err = scheduler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		if err := tx.CelebrationView.Create().SetAccountID(candidate.AccountID).SetKind(celebrationview.KindAnniversary).SetSurface(celebrationview.SurfaceEmail).SetLocalDate(day.LocalDate).Exec(ctx); err != nil {

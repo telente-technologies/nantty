@@ -94,8 +94,19 @@ func LoadAnniversaryStats(ctx context.Context, application *container.Container,
 		orders := signal.CompletedOrders
 		stats.Orders = &orders
 	}
-	if stats.Followers == nil && stats.Orders == nil {
+	if application.ActivityCounts != nil {
+		stats.Posts, stats.Lives = application.ActivityCounts.PostsAndLivesLastYear(ctx, accountId)
+		stats.Posts, stats.Lives = positiveOrNil(stats.Posts), positiveOrNil(stats.Lives)
+	}
+	if stats.Followers == nil && stats.Orders == nil && stats.Posts == nil && stats.Lives == nil {
 		return nil
 	}
 	return &stats
+}
+
+func positiveOrNil(value *int) *int {
+	if value == nil || *value <= 0 {
+		return nil
+	}
+	return value
 }

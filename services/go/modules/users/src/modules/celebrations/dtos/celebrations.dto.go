@@ -12,6 +12,8 @@ type BirthdayCelebration struct {
 }
 
 type AnniversaryStats struct {
+	Posts     *int `json:"posts,omitempty"`
+	Lives     *int `json:"lives,omitempty"`
 	Followers *int `json:"followers,omitempty"`
 	Orders    *int `json:"orders,omitempty"`
 }

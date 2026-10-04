@@ -3,6 +3,8 @@ package events
 const AnniversaryReachedType = "account.anniversaryReached"
 
 type AnniversaryStats struct {
+	Posts     *int `json:"posts,omitempty"`
+	Lives     *int `json:"lives,omitempty"`
 	Followers *int `json:"followers,omitempty"`
 	Orders    *int `json:"orders,omitempty"`
 }
