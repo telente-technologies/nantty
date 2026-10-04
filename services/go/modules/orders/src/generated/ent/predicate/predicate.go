@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CampaignRedemption is the predicate function for campaignredemption builders.
+type CampaignRedemption func(*sql.Selector)
+
 // Cart is the predicate function for cart builders.
 type Cart func(*sql.Selector)
 
@@ -17,6 +20,12 @@ type Checkout func(*sql.Selector)
 
 // CustomerNote is the predicate function for customernote builders.
 type CustomerNote func(*sql.Selector)
+
+// FlashSale is the predicate function for flashsale builders.
+type FlashSale func(*sql.Selector)
+
+// FlashSaleItem is the predicate function for flashsaleitem builders.
+type FlashSaleItem func(*sql.Selector)
 
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
@@ -38,6 +47,12 @@ type OutboxEvent func(*sql.Selector)
 
 // ProcessedEvent is the predicate function for processedevent builders.
 type ProcessedEvent func(*sql.Selector)
+
+// ProductBundle is the predicate function for productbundle builders.
+type ProductBundle func(*sql.Selector)
+
+// ProductBundleItem is the predicate function for productbundleitem builders.
+type ProductBundleItem func(*sql.Selector)
 
 // Promotion is the predicate function for promotion builders.
 type Promotion func(*sql.Selector)

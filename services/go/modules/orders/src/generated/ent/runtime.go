@@ -5,10 +5,13 @@ package ent
 import (
 	"time"
 	"zudomart/modules/orders/src/databases/schema"
+	"zudomart/modules/orders/src/generated/ent/campaignredemption"
 	"zudomart/modules/orders/src/generated/ent/cart"
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/flashsale"
+	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
 	"zudomart/modules/orders/src/generated/ent/orderevent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
@@ -16,6 +19,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/ordernote"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
 	"zudomart/modules/orders/src/generated/ent/processedevent"
+	"zudomart/modules/orders/src/generated/ent/productbundle"
+	"zudomart/modules/orders/src/generated/ent/productbundleitem"
 	"zudomart/modules/orders/src/generated/ent/promotion"
 	"zudomart/modules/orders/src/generated/ent/promotionredemption"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
@@ -35,6 +40,23 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	campaignredemptionMixin := schema.CampaignRedemption{}.Mixin()
+	campaignredemptionMixinFields0 := campaignredemptionMixin[0].Fields()
+	_ = campaignredemptionMixinFields0
+	campaignredemptionFields := schema.CampaignRedemption{}.Fields()
+	_ = campaignredemptionFields
+	// campaignredemptionDescCreatedAt is the schema descriptor for created_at field.
+	campaignredemptionDescCreatedAt := campaignredemptionMixinFields0[1].Descriptor()
+	// campaignredemption.DefaultCreatedAt holds the default value on creation for the created_at field.
+	campaignredemption.DefaultCreatedAt = campaignredemptionDescCreatedAt.Default.(func() time.Time)
+	// campaignredemptionDescCampaignKind is the schema descriptor for campaign_kind field.
+	campaignredemptionDescCampaignKind := campaignredemptionFields[3].Descriptor()
+	// campaignredemption.CampaignKindValidator is a validator for the "campaign_kind" field. It is called by the builders before save.
+	campaignredemption.CampaignKindValidator = campaignredemptionDescCampaignKind.Validators[0].(func(string) error)
+	// campaignredemptionDescID is the schema descriptor for id field.
+	campaignredemptionDescID := campaignredemptionMixinFields0[0].Descriptor()
+	// campaignredemption.DefaultID holds the default value on creation for the id field.
+	campaignredemption.DefaultID = campaignredemptionDescID.Default.(func() uuid.UUID)
 	cartMixin := schema.Cart{}.Mixin()
 	cartMixinFields0 := cartMixin[0].Fields()
 	_ = cartMixinFields0
@@ -195,6 +217,94 @@ func init() {
 	customernoteDescID := customernoteMixinFields0[0].Descriptor()
 	// customernote.DefaultID holds the default value on creation for the id field.
 	customernote.DefaultID = customernoteDescID.Default.(func() uuid.UUID)
+	flashsaleMixin := schema.FlashSale{}.Mixin()
+	flashsaleMixinFields0 := flashsaleMixin[0].Fields()
+	_ = flashsaleMixinFields0
+	flashsaleFields := schema.FlashSale{}.Fields()
+	_ = flashsaleFields
+	// flashsaleDescCreatedAt is the schema descriptor for created_at field.
+	flashsaleDescCreatedAt := flashsaleMixinFields0[1].Descriptor()
+	// flashsale.DefaultCreatedAt holds the default value on creation for the created_at field.
+	flashsale.DefaultCreatedAt = flashsaleDescCreatedAt.Default.(func() time.Time)
+	// flashsaleDescName is the schema descriptor for name field.
+	flashsaleDescName := flashsaleFields[1].Descriptor()
+	// flashsale.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	flashsale.NameValidator = func() func(string) error {
+		validators := flashsaleDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// flashsaleDescPaused is the schema descriptor for paused field.
+	flashsaleDescPaused := flashsaleFields[4].Descriptor()
+	// flashsale.DefaultPaused holds the default value on creation for the paused field.
+	flashsale.DefaultPaused = flashsaleDescPaused.Default.(bool)
+	// flashsaleDescReach is the schema descriptor for reach field.
+	flashsaleDescReach := flashsaleFields[6].Descriptor()
+	// flashsale.DefaultReach holds the default value on creation for the reach field.
+	flashsale.DefaultReach = flashsaleDescReach.Default.(int)
+	// flashsaleDescRevenueMinor is the schema descriptor for revenue_minor field.
+	flashsaleDescRevenueMinor := flashsaleFields[7].Descriptor()
+	// flashsale.DefaultRevenueMinor holds the default value on creation for the revenue_minor field.
+	flashsale.DefaultRevenueMinor = flashsaleDescRevenueMinor.Default.(int64)
+	// flashsaleDescCurrency is the schema descriptor for currency field.
+	flashsaleDescCurrency := flashsaleFields[8].Descriptor()
+	// flashsale.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	flashsale.CurrencyValidator = func() func(string) error {
+		validators := flashsaleDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// flashsaleDescUpdatedAt is the schema descriptor for updated_at field.
+	flashsaleDescUpdatedAt := flashsaleFields[9].Descriptor()
+	// flashsale.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	flashsale.DefaultUpdatedAt = flashsaleDescUpdatedAt.Default.(func() time.Time)
+	// flashsale.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	flashsale.UpdateDefaultUpdatedAt = flashsaleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// flashsaleDescID is the schema descriptor for id field.
+	flashsaleDescID := flashsaleMixinFields0[0].Descriptor()
+	// flashsale.DefaultID holds the default value on creation for the id field.
+	flashsale.DefaultID = flashsaleDescID.Default.(func() uuid.UUID)
+	flashsaleitemMixin := schema.FlashSaleItem{}.Mixin()
+	flashsaleitemMixinFields0 := flashsaleitemMixin[0].Fields()
+	_ = flashsaleitemMixinFields0
+	flashsaleitemFields := schema.FlashSaleItem{}.Fields()
+	_ = flashsaleitemFields
+	// flashsaleitemDescCreatedAt is the schema descriptor for created_at field.
+	flashsaleitemDescCreatedAt := flashsaleitemMixinFields0[1].Descriptor()
+	// flashsaleitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	flashsaleitem.DefaultCreatedAt = flashsaleitemDescCreatedAt.Default.(func() time.Time)
+	// flashsaleitemDescSalePriceMinor is the schema descriptor for sale_price_minor field.
+	flashsaleitemDescSalePriceMinor := flashsaleitemFields[4].Descriptor()
+	// flashsaleitem.SalePriceMinorValidator is a validator for the "sale_price_minor" field. It is called by the builders before save.
+	flashsaleitem.SalePriceMinorValidator = flashsaleitemDescSalePriceMinor.Validators[0].(func(int64) error)
+	// flashsaleitemDescSoldCount is the schema descriptor for sold_count field.
+	flashsaleitemDescSoldCount := flashsaleitemFields[7].Descriptor()
+	// flashsaleitem.DefaultSoldCount holds the default value on creation for the sold_count field.
+	flashsaleitem.DefaultSoldCount = flashsaleitemDescSoldCount.Default.(int)
+	// flashsaleitemDescID is the schema descriptor for id field.
+	flashsaleitemDescID := flashsaleitemMixinFields0[0].Descriptor()
+	// flashsaleitem.DefaultID holds the default value on creation for the id field.
+	flashsaleitem.DefaultID = flashsaleitemDescID.Default.(func() uuid.UUID)
 	idempotentrequestMixin := schema.IdempotentRequest{}.Mixin()
 	idempotentrequestMixinFields0 := idempotentrequestMixin[0].Fields()
 	_ = idempotentrequestMixinFields0
@@ -596,6 +706,100 @@ func init() {
 	processedeventDescID := processedeventMixinFields0[0].Descriptor()
 	// processedevent.DefaultID holds the default value on creation for the id field.
 	processedevent.DefaultID = processedeventDescID.Default.(func() uuid.UUID)
+	productbundleMixin := schema.ProductBundle{}.Mixin()
+	productbundleMixinFields0 := productbundleMixin[0].Fields()
+	_ = productbundleMixinFields0
+	productbundleFields := schema.ProductBundle{}.Fields()
+	_ = productbundleFields
+	// productbundleDescCreatedAt is the schema descriptor for created_at field.
+	productbundleDescCreatedAt := productbundleMixinFields0[1].Descriptor()
+	// productbundle.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productbundle.DefaultCreatedAt = productbundleDescCreatedAt.Default.(func() time.Time)
+	// productbundleDescName is the schema descriptor for name field.
+	productbundleDescName := productbundleFields[1].Descriptor()
+	// productbundle.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	productbundle.NameValidator = func() func(string) error {
+		validators := productbundleDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// productbundleDescDescription is the schema descriptor for description field.
+	productbundleDescDescription := productbundleFields[2].Descriptor()
+	// productbundle.DefaultDescription holds the default value on creation for the description field.
+	productbundle.DefaultDescription = productbundleDescDescription.Default.(string)
+	// productbundle.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	productbundle.DescriptionValidator = productbundleDescDescription.Validators[0].(func(string) error)
+	// productbundleDescBundlePriceMinor is the schema descriptor for bundle_price_minor field.
+	productbundleDescBundlePriceMinor := productbundleFields[3].Descriptor()
+	// productbundle.BundlePriceMinorValidator is a validator for the "bundle_price_minor" field. It is called by the builders before save.
+	productbundle.BundlePriceMinorValidator = productbundleDescBundlePriceMinor.Validators[0].(func(int64) error)
+	// productbundleDescCurrency is the schema descriptor for currency field.
+	productbundleDescCurrency := productbundleFields[4].Descriptor()
+	// productbundle.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	productbundle.CurrencyValidator = func() func(string) error {
+		validators := productbundleDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// productbundleDescStatus is the schema descriptor for status field.
+	productbundleDescStatus := productbundleFields[5].Descriptor()
+	// productbundle.DefaultStatus holds the default value on creation for the status field.
+	productbundle.DefaultStatus = productbundleDescStatus.Default.(string)
+	// productbundleDescSoldCount is the schema descriptor for sold_count field.
+	productbundleDescSoldCount := productbundleFields[6].Descriptor()
+	// productbundle.DefaultSoldCount holds the default value on creation for the sold_count field.
+	productbundle.DefaultSoldCount = productbundleDescSoldCount.Default.(int)
+	// productbundleDescRevenueMinor is the schema descriptor for revenue_minor field.
+	productbundleDescRevenueMinor := productbundleFields[7].Descriptor()
+	// productbundle.DefaultRevenueMinor holds the default value on creation for the revenue_minor field.
+	productbundle.DefaultRevenueMinor = productbundleDescRevenueMinor.Default.(int64)
+	// productbundleDescUpdatedAt is the schema descriptor for updated_at field.
+	productbundleDescUpdatedAt := productbundleFields[8].Descriptor()
+	// productbundle.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productbundle.DefaultUpdatedAt = productbundleDescUpdatedAt.Default.(func() time.Time)
+	// productbundle.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productbundle.UpdateDefaultUpdatedAt = productbundleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productbundleDescID is the schema descriptor for id field.
+	productbundleDescID := productbundleMixinFields0[0].Descriptor()
+	// productbundle.DefaultID holds the default value on creation for the id field.
+	productbundle.DefaultID = productbundleDescID.Default.(func() uuid.UUID)
+	productbundleitemMixin := schema.ProductBundleItem{}.Mixin()
+	productbundleitemMixinFields0 := productbundleitemMixin[0].Fields()
+	_ = productbundleitemMixinFields0
+	productbundleitemFields := schema.ProductBundleItem{}.Fields()
+	_ = productbundleitemFields
+	// productbundleitemDescCreatedAt is the schema descriptor for created_at field.
+	productbundleitemDescCreatedAt := productbundleitemMixinFields0[1].Descriptor()
+	// productbundleitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productbundleitem.DefaultCreatedAt = productbundleitemDescCreatedAt.Default.(func() time.Time)
+	// productbundleitemDescQuantity is the schema descriptor for quantity field.
+	productbundleitemDescQuantity := productbundleitemFields[3].Descriptor()
+	// productbundleitem.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
+	productbundleitem.QuantityValidator = productbundleitemDescQuantity.Validators[0].(func(int) error)
+	// productbundleitemDescID is the schema descriptor for id field.
+	productbundleitemDescID := productbundleitemMixinFields0[0].Descriptor()
+	// productbundleitem.DefaultID holds the default value on creation for the id field.
+	productbundleitem.DefaultID = productbundleitemDescID.Default.(func() uuid.UUID)
 	promotionMixin := schema.Promotion{}.Mixin()
 	promotionMixinFields0 := promotionMixin[0].Fields()
 	_ = promotionMixinFields0

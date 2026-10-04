@@ -14,6 +14,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// CampaignRedemption is the client for interacting with the CampaignRedemption builders.
+	CampaignRedemption *CampaignRedemptionClient
 	// Cart is the client for interacting with the Cart builders.
 	Cart *CartClient
 	// CartItem is the client for interacting with the CartItem builders.
@@ -22,6 +24,10 @@ type Tx struct {
 	Checkout *CheckoutClient
 	// CustomerNote is the client for interacting with the CustomerNote builders.
 	CustomerNote *CustomerNoteClient
+	// FlashSale is the client for interacting with the FlashSale builders.
+	FlashSale *FlashSaleClient
+	// FlashSaleItem is the client for interacting with the FlashSaleItem builders.
+	FlashSaleItem *FlashSaleItemClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderEvent is the client for interacting with the OrderEvent builders.
@@ -36,6 +42,10 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// ProcessedEvent is the client for interacting with the ProcessedEvent builders.
 	ProcessedEvent *ProcessedEventClient
+	// ProductBundle is the client for interacting with the ProductBundle builders.
+	ProductBundle *ProductBundleClient
+	// ProductBundleItem is the client for interacting with the ProductBundleItem builders.
+	ProductBundleItem *ProductBundleItemClient
 	// Promotion is the client for interacting with the Promotion builders.
 	Promotion *PromotionClient
 	// PromotionRedemption is the client for interacting with the PromotionRedemption builders.
@@ -189,10 +199,13 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.CampaignRedemption = NewCampaignRedemptionClient(tx.config)
 	tx.Cart = NewCartClient(tx.config)
 	tx.CartItem = NewCartItemClient(tx.config)
 	tx.Checkout = NewCheckoutClient(tx.config)
 	tx.CustomerNote = NewCustomerNoteClient(tx.config)
+	tx.FlashSale = NewFlashSaleClient(tx.config)
+	tx.FlashSaleItem = NewFlashSaleItemClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OrderEvent = NewOrderEventClient(tx.config)
 	tx.OrderGroup = NewOrderGroupClient(tx.config)
@@ -200,6 +213,8 @@ func (tx *Tx) init() {
 	tx.OrderNote = NewOrderNoteClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.ProcessedEvent = NewProcessedEventClient(tx.config)
+	tx.ProductBundle = NewProductBundleClient(tx.config)
+	tx.ProductBundleItem = NewProductBundleItemClient(tx.config)
 	tx.Promotion = NewPromotionClient(tx.config)
 	tx.PromotionRedemption = NewPromotionRedemptionClient(tx.config)
 	tx.ReportExportJob = NewReportExportJobClient(tx.config)
@@ -220,7 +235,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Cart.QueryXXX(), the query will be executed
+// applies a query, for example: CampaignRedemption.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
