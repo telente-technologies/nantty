@@ -1,5 +1,5 @@
 import type { ProductBrandTag } from "@/types/brand.type";
-import type { Money } from "@/types/money.type";
+import type { CurrencyCode, Money } from "@/types/money.type";
 
 export type ProductStatus = "draft" | "active" | "archived";
 export type ProductVisibility = "public" | "store_only" | "link_only";

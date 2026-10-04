@@ -40,13 +40,13 @@ export function ProductRegionalPricesSection({ variants, options, fieldErrors, o
           <tbody>
             {variants.map((variant, index) => (
               <tr key={variant.key}>
-                <th scope="row">{describeVariantDraftTitle(variant, options) || `Variant ${index + 1}`}</th>
+                <td className={styles.variantTitle}>{describeVariantDraftTitle(variant, options) || `Variant ${index + 1}`}</td>
                 {markets.map((currency) => {
                   const message = fieldErrors[`variants.${index}.regionalPrices.${currency}`];
                   return (
                     <td key={currency}>
                       <input
-                        className={styles.variantInput}
+                        className={styles.cellInput}
                         inputMode="decimal"
                         aria-label={`${currency} price for ${describeVariantDraftTitle(variant, options) || `variant ${index + 1}`}`}
                         aria-invalid={message ? true : undefined}
