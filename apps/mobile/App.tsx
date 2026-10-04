@@ -25,6 +25,7 @@ import {
 import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offlineReplayInvalidation.util";
 import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/appWideRealtimeConnection";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
+import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/locale.service";
 import { cancelAndRemoveUpload } from "@/services/mediaUploadQueue.service";
@@ -103,6 +104,7 @@ export default function App() {
             <StatusBarFollowingTheme />
             <KeepRealtimeMessagingConnectedWhileSignedIn />
             <RootNavigator />
+            <CelebrationHost />
             <OfflineIndicator />
           </PersistQueryClientProvider>
         </DeviceFrame>
