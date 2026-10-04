@@ -35,7 +35,7 @@ export const accountDeletionScheduled = defineEmailTemplate<{ readonly firstName
   preheader: () => "Changed your mind? Cancel any time before then.",
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Account deletion", title: `Scheduled for ${c.date(p.deleteAt)}`, tone: "warn" },
-    { type: "paragraph", text: `Hi ${p.firstName}, we've received your request to delete your account. Until ${c.date(p.deleteAt)}, your profile is hidden and you can still change your mind.` },
+    { type: "paragraph", text: `Hi ${p.firstName}, we've received your request to delete your account. Your account will be permanently deleted in 30 days, on ${c.date(p.deleteAt)}. Log in any time before then to cancel.` },
     { type: "list", title: "What gets deleted", items: ["Your profile, posts, clips, comments and saved items", "Messages you sent and chat media", "Followers, following and ZudoPoints"] },
     { type: "list", title: "What we keep, and why", items: ["Order, payment and tax records — anonymised and kept for the period the law requires", "Records needed to resolve open disputes or prevent fraud"] },
     ...(p.openOrders > 0 ? [{ type: "callout" as const, tone: "warn" as const, title: `${p.openOrders} open ${p.openOrders === 1 ? "order" : "orders"}`, text: "These will finish normally. Deletion waits until they're complete." }] : []),

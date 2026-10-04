@@ -1,9 +1,11 @@
 import { render } from "@react-email/render";
 
+import { runWithEmailEnvironment } from "../blocks/emailRenderContext";
 import { defaultEmailBrand } from "../config/emailBrand.config";
 import type { EmailBrandConfig, EmailContext, EmailLinks, EmailTheme } from "../emailTypes";
 import { formatDate, formatDateTime, formatMoney } from "../format/emailFormat";
 import { readEmailTemplate, type EmailTemplateKey, type EmailTemplateProps } from "../templates/templateRegistry";
+import { selectPalette } from "../theme/emailPalette";
 import { renderPlainText } from "./plainText";
 
 export interface RenderEmailOptions {
@@ -45,7 +47,7 @@ export async function renderEmail<K extends EmailTemplateKey>(templateKey: K, pr
   const template = readEmailTemplate(templateKey);
   const context = createEmailContext(options);
   const { Component } = template;
-  const html = await render(<Component data={props} context={context} />);
+  const html = await runWithEmailEnvironment({ palette: selectPalette(context.theme), context }, () => render(<Component data={props} context={context} />));
   const text = renderPlainText(template.blocks(props, context), context, template.kind, template.reason?.(props));
   return { subject: template.subject(props, context), html, text };
 }
