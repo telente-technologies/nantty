@@ -31,3 +31,8 @@ export function multiplyMoneyByQuantity(money: Money, quantity: number): Money {
 export function addMoneyAmounts(amounts: readonly Money[], currency: Money["currency"]): Money {
   return { amountMinor: amounts.reduce((total, money) => total + money.amountMinor, 0), currency };
 }
+
+export function formatProductPriceForDisplay(product: { readonly price: Money; readonly approxPrice?: Money | null }, options: { showDecimals?: boolean } = {}): string {
+  const main = formatMoneyForDisplay(product.price, options);
+  return product.approxPrice ? `${main} (approx. ${formatMoneyForDisplay(product.approxPrice, options)})` : main;
+}
