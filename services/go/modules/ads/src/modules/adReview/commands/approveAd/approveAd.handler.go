@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/ads/src/modules/adReview/dtos"
 	"zudomart/modules/ads/src/modules/adReview/services"
 	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
+	adsservices "zudomart/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }
@@ -29,6 +30,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdFor
 	}
 	if campaignservices.HasCriticalFlag(review.Ad.AutoCheckFlags) && !command.OverrideCriticalFlags {
 		return dtos.AdForReview{}, adserrors.CriticalFlagUnresolved
+	}
+	advertiser := adsservices.AdvertiserIdentity{OwnerUserId: review.Account.OwnerUserID.String(), StoreId: review.Account.StoreID}
+	if err := adsservices.VerifyCreativeOwnership(ctx, deployed.Ownership, advertiser, review.Ad.Creative.Input, "creative"); err != nil {
+		return dtos.AdForReview{}, err
 	}
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		return services.ApproveInTransaction(ctx, tx, review, command.Reviewer, command.Reason, deployed.Now())

@@ -9,10 +9,21 @@ type AdvertiserRef struct {
 }
 
 type ReviewCreative struct {
-	Format       string `json:"format"`
+	Format       string             `json:"format"`
+	ImageUrl     string             `json:"imageUrl"`
+	Headline     string             `json:"headline"`
+	PrimaryText  string             `json:"primaryText"`
+	CallToAction string             `json:"callToAction"`
+	LandingUrl   string             `json:"landingUrl"`
+	Type         string             `json:"type"`
+	Cards        []ReviewCard       `json:"cards"`
+	App          *types.CreativeApp `json:"app"`
+}
+
+type ReviewCard struct {
 	ImageUrl     string `json:"imageUrl"`
 	Headline     string `json:"headline"`
-	PrimaryText  string `json:"primaryText"`
+	Description  string `json:"description"`
 	CallToAction string `json:"callToAction"`
 	LandingUrl   string `json:"landingUrl"`
 }

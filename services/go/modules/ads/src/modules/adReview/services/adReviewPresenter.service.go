@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/ad"
 	"zudomart/modules/ads/src/modules/adReview/dtos"
+	adsservices "zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
 )
 
@@ -31,7 +32,7 @@ func PresentAdForReview(row *ent.Ad, account *ent.AdAccount, campaign *ent.AdCam
 	}
 	presented := dtos.AdForReview{
 		Id: row.ID.String(), CampaignName: campaign.Name, Advertiser: PresentAdvertiserRef(account), IsBoostedPost: isBoost,
-		Creative:  dtos.ReviewCreative{Format: kind, ImageUrl: imageUrl, Headline: creative.Headline, PrimaryText: creative.PrimaryText, CallToAction: creative.CallToAction, LandingUrl: landingUrl(creative)},
+		Creative:  dtos.ReviewCreative{Format: kind, ImageUrl: imageUrl, Headline: creative.Headline, PrimaryText: creative.PrimaryText, CallToAction: creative.CallToAction, LandingUrl: landingUrl(creative.Destination), Type: creative.Type, Cards: reviewCards(creative), App: creative.App},
 		Targeting: presentTargeting(group), DailyBudget: dailyBudgetOf(campaign, group, account.Currency), TotalBudget: totalBudgetOf(campaign, group, account.Currency),
 		Schedule: dtos.ReviewSchedule{StartsAt: group.StartAt.UTC().Format(time.RFC3339)}, AutoCheckFlags: row.AutoCheckFlags, Status: reviewStatusLabels[row.ReviewStatus],
 	}
@@ -59,14 +60,25 @@ func PresentAdForReview(row *ent.Ad, account *ent.AdAccount, campaign *ent.AdCam
 	return presented
 }
 
-func landingUrl(creative types.Creative) string {
-	if creative.Destination.Url != nil {
-		return *creative.Destination.Url
+func landingUrl(destination types.CreativeDestination) string {
+	if destination.Url != nil {
+		if tagged, err := adsservices.ApplyUtm(*destination.Url, destination.Utm); err == nil {
+			return tagged
+		}
+		return *destination.Url
 	}
-	if creative.Destination.TargetId != nil {
-		return fmt.Sprintf("zudomart://%s/%s", creative.Destination.Type, *creative.Destination.TargetId)
+	if destination.TargetId != nil {
+		return fmt.Sprintf("zudomart://%s/%s", destination.Type, *destination.TargetId)
 	}
 	return ""
+}
+
+func reviewCards(creative types.Creative) []dtos.ReviewCard {
+	cards := make([]dtos.ReviewCard, 0, len(creative.Cards))
+	for _, card := range creative.Cards {
+		cards = append(cards, dtos.ReviewCard{ImageUrl: card.Media.Url, Headline: card.Headline, Description: card.Description, CallToAction: card.CallToAction, LandingUrl: landingUrl(card.Destination)})
+	}
+	return cards
 }
 
 func presentTargeting(group *ent.AdGroup) dtos.ReviewTargeting {
