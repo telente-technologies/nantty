@@ -1,5 +1,6 @@
 import type { Money } from "@/types/api.type";
 import type { VerificationColor, VerificationTier } from "@/types/platformUser.type";
+import type { RegionalPricingDocument } from "@/types/regionalPricing.type";
 
 export interface VersionAuthor {
   readonly id: string;
@@ -16,7 +17,7 @@ export interface VersionedRecord<Content> {
   readonly content: Content;
 }
 
-export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing";
+export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing";
 
 export interface PlanPrice {
   readonly currency: string;
@@ -140,4 +141,5 @@ export interface ConfigurationDocumentContentByKey {
   readonly "creator-thresholds": CreatorProgramThresholds;
   readonly "trial-rules": TrialRules;
   readonly "checkmark-pricing": CheckmarkPricingRules;
+  readonly "regional-pricing": RegionalPricingDocument;
 }
