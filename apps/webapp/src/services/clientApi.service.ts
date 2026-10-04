@@ -1,4 +1,5 @@
 import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
+import { useHumanVerificationStore } from "@/components/security/humanVerification.store";
 
 export interface ApiErrorBody {
   readonly message: string;
@@ -17,6 +18,7 @@ export class WebappRequestError extends Error {
     public readonly status: number,
     public readonly code: string,
     message: string,
+    public readonly suggestions?: readonly string[],
   ) {
     super(message);
     this.name = "WebappRequestError";
@@ -33,6 +35,7 @@ export interface WebappRequestOptions {
   readonly body?: unknown;
   readonly idempotencyKey?: string;
   readonly signal?: AbortSignal;
+  readonly skipHumanVerification?: boolean;
 }
 
 export function buildQueryString(query: WebappRequestOptions["query"]): string {
@@ -82,8 +85,12 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
     throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
   }
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    throw new WebappRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.");
+    const errorBody = (await response.json().catch(() => null)) as (ApiErrorBody & { readonly reason?: string }) | null;
+    if (response.status === 428 && errorBody?.code === "HUMAN_VERIFICATION_REQUIRED" && options.skipHumanVerification !== true && typeof window !== "undefined") {
+      const passed = await useHumanVerificationStore.getState().requestHumanVerification(errorBody.reason ?? "security_check");
+      if (passed) return sendRequestToWebappServer<Payload>(apiPath, { ...options, skipHumanVerification: true });
+    }
+    throw new WebappRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.suggestions);
   }
   if (response.status === 204) return undefined as Payload;
   return (await response.json()) as Payload;

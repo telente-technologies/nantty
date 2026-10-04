@@ -1,12 +1,14 @@
 import type { CheckoutResult } from "@/types/commerce.type";
+import type { PaymentMode } from "@/types/orders.type";
+import { toPaymentModeChoices } from "@/utils/paymentMode.util";
 import type { Address, Order, OrderStatus } from "@/types";
 
 import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clientApi.service";
 
 export const ordersService = {
   fetchMyShippingAddresses: () => sendListRequestToWebappServer<Address>("/api/v1/users/me/addresses"),
-  checkoutCartIntoOrders: (addressId: string, idempotencyKey: string) =>
-    sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", { method: "POST", body: { addressId }, idempotencyKey }),
+  checkoutCartIntoOrders: (addressId: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
+    sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", { method: "POST", body: { addressId, paymentModes: toPaymentModeChoices(paymentModes) }, idempotencyKey }),
   fetchMyOrders: (status: OrderStatus | null) => sendListRequestToWebappServer<Order>("/api/v1/orders", { query: { status: status ?? undefined } }),
   fetchOrderById: (orderId: string) => sendRequestToWebappServer<Order>(`/api/v1/orders/${orderId}`),
   confirmOrderReceipt: (orderId: string, idempotencyKey: string) =>
