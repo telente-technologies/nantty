@@ -9,7 +9,7 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | account.passwordChanged | goIdentity | R accountId; O device, location, ipAddress |
 | session.revoked | goIdentity | R accountId, reason; O sessionCount |
 | session.refreshTokenReuseDetected | goIdentity | R accountId; O sessionCount |
-| account.anniversaryReached | goIdentity | R accountId, years, localDate, joinedAt; O timezone, stats.followers, stats.orders. Milestones category, email + in-app |
+| account.anniversaryReached | goIdentity | R accountId, years, localDate, joinedAt; O timezone, stats.posts, stats.lives, stats.followers, stats.orders. Milestones category, email + in-app |
 | account.deletionRequested | goIdentity | R accountId, scheduledFor; O cancelUrl, openOrders |
 | account.deletionExecuted | goIdentity | R accountId, executedAt; O finalEmail (no email without it), referenceId |
 | dataExport.completed | goIdentity | R accountId, exportId, completedAt, expiresAt, sizeBytes; O downloadUrl, requestedAt |
