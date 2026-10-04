@@ -26,7 +26,10 @@ var (
 	ErrSubscriptionMissing = httpserver.NewApiError(http.StatusNotFound, "SUBSCRIPTION_NOT_FOUND", "Subscription was not found.")
 	ErrPlanNotSelfServe    = httpserver.NewApiError(http.StatusForbidden, "PLAN_BY_INVITATION_ONLY", "This plan is available by invitation only.")
 	ErrAlreadySubscribed   = httpserver.NewApiError(http.StatusConflict, "ALREADY_SUBSCRIBED", "This profile already has this plan.")
+	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", WebCurrencyNotEnabledMessage)
 )
+
+const WebCurrencyNotEnabledMessage = "Web checkout isn't available in your currency or in USD yet. Buy in the Zudomart app, or try again later."
 
 type Billing struct {
 	Container *container.Container
@@ -120,7 +123,7 @@ func entitlementData(row *ent.Subscription, status string) map[string]any {
 	definition := constants.Plans[row.PlanCode]
 	return map[string]any{
 		"subscriptionId": row.ID.String(), "profileId": row.ProfileID, "profileType": row.ProfileType, "ownerUserId": row.OwnerUserID, "plan": row.PlanCode,
-		"checkmark": definition.Checkmark, "sellerPlan": definition.SellerPlan, "status": status, "validUntil": isoTime(row.CurrentPeriodEndsAt),
+		"checkmark": definition.Checkmark, "sellerPlan": definition.SellerPlan, "status": status, "validUntil": isoTime(row.CurrentPeriodEndsAt), "channel": row.Channel.String(),
 	}
 }
 

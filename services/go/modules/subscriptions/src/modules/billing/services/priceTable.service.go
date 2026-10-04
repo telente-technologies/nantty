@@ -91,11 +91,19 @@ func (billing Billing) RegionalPriceFor(ctx context.Context, client *ent.Client,
 		region, _ = regionpricing.RegionForCountry(countryOrRegion)
 	}
 	row, err := billing.findActivePrice(ctx, client, planCode, region.Code)
-	if err == nil && channel == "web" && !billing.webCanCharge(row.Currency) {
-		err = &ent.NotFoundError{}
+	usdFallback, notChargeable := false, false
+	if err == nil && channel == "web" {
+		decision := regionpricing.DecideWebBilling(row.Currency, billing.webCanCharge)
+		usdFallback, notChargeable = decision.UsdFallback, decision.NotAvailable
+		if usdFallback {
+			err = &ent.NotFoundError{}
+		}
 	}
 	if ent.IsNotFound(err) && region.Code != regionpricing.FallbackRegion.Code {
 		row, err = billing.findActivePrice(ctx, client, planCode, regionpricing.FallbackRegion.Code)
+		if err == nil && channel == "web" && !billing.webCanCharge(row.Currency) {
+			notChargeable = true
+		}
 	}
 	if ent.IsNotFound(err) {
 		return regionpricing.PlanRegionalPrice{}, ErrPlanNotFound
@@ -104,15 +112,7 @@ func (billing Billing) RegionalPriceFor(ctx context.Context, client *ent.Client,
 		return regionpricing.PlanRegionalPrice{}, err
 	}
 	price := convertPlanPrice(row).regional()
-	if row.Currency == "NGN" {
-		_, pricing := billing.rules(ctx)
-		switch {
-		case planCode == constants.PlanGoldOnly && pricing.GoldOnlyMonthlyMinor > 0:
-			price.WebMonthlyMinor, price.WebYearlyMinor = pricing.GoldOnlyMonthlyMinor, 0
-		case planCode == constants.PlanBlack && pricing.BlackMonthlyMinor > 0:
-			price.WebMonthlyMinor, price.WebYearlyMinor = pricing.BlackMonthlyMinor, 0
-		}
-	}
+	price.BilledInUsdFallback, price.NotChargeableOnWeb = usdFallback, notChargeable
 	return price, nil
 }
 

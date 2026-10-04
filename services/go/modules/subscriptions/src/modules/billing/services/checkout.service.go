@@ -24,6 +24,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
 	"zudomart/modules/subscriptions/src/models"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 type CheckoutRequest struct {
@@ -46,6 +47,7 @@ type CheckoutView struct {
 	Price            map[string]any    `json:"price"`
 	Discount         models.PriceQuote `json:"discount"`
 	Trial            bool              `json:"trial"`
+	BillingNote      string            `json:"billingNote,omitempty"`
 }
 
 type TrialNotAvailableError struct {
@@ -75,11 +77,18 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if !PlanAllowedForProfile(request.PlanCode, profile.ProfileType) {
 		return CheckoutView{}, ErrProfileNotEligible
 	}
+	if err := billing.RequireCheckmarkPurchaseAllowed(ctx, request.PlanCode, profile.ProfileId); err != nil {
+		return CheckoutView{}, err
+	}
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	quote, currency, err := billing.QuoteForOwner(ctx, client, request.UserId, request.PlanCode, firstNonEmpty(profile.CountryCode, request.ViewerCountry), request.Interval)
+	quote, price, err := billing.QuoteForOwnerOnChannel(ctx, client, request.UserId, request.PlanCode, firstNonEmpty(profile.CountryCode, request.ViewerCountry), request.Interval, "web")
 	if err != nil {
 		return CheckoutView{}, err
 	}
+	if price.NotChargeableOnWeb {
+		return CheckoutView{}, ErrWebCurrencyDisabled
+	}
+	currency := price.Currency
 	trialRules, _ := billing.rules(ctx)
 	if request.WithTrial {
 		if reasons, err := billing.TrialIneligibility(ctx, client, request, definition.TrialAllowed); err != nil || len(reasons) > 0 {
@@ -113,10 +122,13 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if err != nil {
 		return CheckoutView{}, err
 	}
-	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "paystack", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial}
+	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "paystack", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial, BillingNote: webBillingNote(price)}
 	metadata := map[string]string{"subscriptionId": subscriptionId.String(), "profileId": profile.ProfileId}
 	if request.WithTrial {
-		started, err := billing.Container.Payments.StartSavedCardSetup(ctx, paymentservices.CardSetupRequest{UserId: request.UserId, ReturnTo: request.ReturnTo, Purpose: "trial", SubjectId: subscriptionId.String(), Metadata: metadata})
+		verificationAmount, verificationCurrency := regionpricing.CardVerificationCharge(currency)
+		started, err := billing.Container.Payments.StartSavedCardSetup(ctx, paymentservices.CardSetupRequest{
+			UserId: request.UserId, ReturnTo: request.ReturnTo, Purpose: "trial", SubjectId: subscriptionId.String(), Metadata: metadata, AmountMinor: verificationAmount, Currency: verificationCurrency,
+		})
 		if err != nil {
 			return CheckoutView{}, billing.failStartedSubscription(ctx, subscriptionId, err)
 		}

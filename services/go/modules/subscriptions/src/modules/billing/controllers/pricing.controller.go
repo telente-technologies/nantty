@@ -15,6 +15,8 @@ import (
 	"zudomart/platform/staffauth"
 )
 
+var errAuditUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change couldn't be audited, so it wasn't saved. Try again.")
+
 var (
 	countryPattern     = regexp.MustCompile(`^[A-Z]{2}$`)
 	currencyPattern    = regexp.MustCompile(`^[A-Z]{3}$`)
@@ -118,9 +120,14 @@ func (controller BillingController) UpsertPrice(writer http.ResponseWriter, requ
 		StoreProductIds: body.StoreProductIds, Active: body.Active,
 	}
 	before, _ := controller.Billing.FindPriceRow(request.Context(), planCode, region)
-	if audit := controller.Billing.Container.Audit; audit != nil {
+	audit := controller.Billing.Container.Audit
+	if audit == nil && controller.Billing.Container.Settings.Money.IsProduction() {
+		controller.fail(writer, request, errAuditUnavailable)
+		return
+	}
+	if audit != nil {
 		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.plan_price.update", "plan_price", planCode+":"+region, body.Reason, before, row); err != nil {
-			controller.fail(writer, request, httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change couldn't be audited, so it wasn't saved. Try again."))
+			controller.fail(writer, request, errAuditUnavailable)
 			return
 		}
 	}
