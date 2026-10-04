@@ -65,7 +65,7 @@ func sellerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, timeline []*
 		ShippingAddress: types.SellerAddressView{RecipientName: address.RecipientName, Phone: address.Phone, Line1: address.Line1, City: firstNonEmpty(address.CityName, address.AdminAreaName), State: address.RegionName, Country: address.CountryCode},
 		Lines:           []types.SellerOrderLineView{}, Subtotal: groupMoney(group, group.SubtotalMinor), Discount: groupMoney(group, group.DiscountMinor), StoreCredit: groupMoney(group, group.StoreCreditMinor), ShippingFee: groupMoney(group, group.ShippingMinor),
 		Total: groupMoney(group, group.TotalMinor), SellerPayout: groupMoney(group, group.SubtotalMinor-group.DiscountMinor-group.StoreCreditMinor), Status: group.Status, EscrowStatus: EscrowStatusFor(group),
-		EscrowReleaseAt: group.EscrowReleaseAt, CreatedAt: group.CreatedAt, DeliveredAt: group.DeliveredAt, PaymentStatus: group.PaymentStatus, PaymentProvider: "transfer",
+		EscrowReleaseAt: group.EscrowReleaseAt, CreatedAt: group.CreatedAt, DeliveredAt: group.DeliveredAt, PaymentStatus: group.PaymentStatus, PaymentMode: group.PaymentMode, PaymentProvider: "transfer",
 		PaymentReference: group.Reference, PaidAt: group.PaidAt, RefundedAmount: groupMoney(group, group.RefundedMinor), Refunds: []types.RefundView{},
 		Delivery: types.SellerDeliveryView{Status: group.DeliveryStatus, RiderName: group.RiderName, RiderPhone: group.RiderPhone, EstimatedDeliveryAt: group.EstimatedDeliveryAt, Attempts: group.DeliveryAttempts, LastAttemptNote: group.LastAttemptNote},
 		Timeline: []types.TimelineEventView{}, Notes: []types.InternalNoteView{},
