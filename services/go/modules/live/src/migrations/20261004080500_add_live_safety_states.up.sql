@@ -1,0 +1,6 @@
+-- create "live_safety_states" table
+CREATE TABLE "live_safety_states" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "live_id" uuid NOT NULL, "host_id" uuid NOT NULL, "hold_active" boolean NOT NULL DEFAULT false, "hold_incident_id" character varying NOT NULL DEFAULT '', "hold_category" character varying NOT NULL DEFAULT '', "hold_reason" character varying NOT NULL DEFAULT '', "hold_source" character varying NOT NULL DEFAULT '', "hold_started_at" timestamptz NULL, "warning_message" character varying NOT NULL DEFAULT '', "warned_at" timestamptz NULL, "sampling_boost_until" timestamptz NULL, "frame_egress_id" character varying NOT NULL DEFAULT '', "audio_egress_id" character varying NOT NULL DEFAULT '', "last_frame_key" character varying NOT NULL DEFAULT '', "last_frame_enqueued_at" timestamptz NULL, "last_audio_key" character varying NOT NULL DEFAULT '', "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
+-- create index "livesafetystate_live_id" to table: "live_safety_states"
+CREATE UNIQUE INDEX "livesafetystate_live_id" ON "live_safety_states" ("live_id");
+-- create index "livesafetystate_hold_active" to table: "live_safety_states"
+CREATE INDEX "livesafetystate_hold_active" ON "live_safety_states" ("hold_active");
