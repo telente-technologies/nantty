@@ -115,6 +115,11 @@ func PaymentStatus(v string) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldPaymentStatus, v))
 }
 
+// PaymentMode applies equality check predicate on the "payment_mode" field. It's identical to PaymentModeEQ.
+func PaymentMode(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPaymentMode, v))
+}
+
 // DeliveryStatus applies equality check predicate on the "delivery_status" field. It's identical to DeliveryStatusEQ.
 func DeliveryStatus(v string) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldDeliveryStatus, v))
@@ -908,6 +913,71 @@ func PaymentStatusEqualFold(v string) predicate.OrderGroup {
 // PaymentStatusContainsFold applies the ContainsFold predicate on the "payment_status" field.
 func PaymentStatusContainsFold(v string) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldContainsFold(FieldPaymentStatus, v))
+}
+
+// PaymentModeEQ applies the EQ predicate on the "payment_mode" field.
+func PaymentModeEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeNEQ applies the NEQ predicate on the "payment_mode" field.
+func PaymentModeNEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNEQ(FieldPaymentMode, v))
+}
+
+// PaymentModeIn applies the In predicate on the "payment_mode" field.
+func PaymentModeIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldIn(FieldPaymentMode, vs...))
+}
+
+// PaymentModeNotIn applies the NotIn predicate on the "payment_mode" field.
+func PaymentModeNotIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNotIn(FieldPaymentMode, vs...))
+}
+
+// PaymentModeGT applies the GT predicate on the "payment_mode" field.
+func PaymentModeGT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGT(FieldPaymentMode, v))
+}
+
+// PaymentModeGTE applies the GTE predicate on the "payment_mode" field.
+func PaymentModeGTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGTE(FieldPaymentMode, v))
+}
+
+// PaymentModeLT applies the LT predicate on the "payment_mode" field.
+func PaymentModeLT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLT(FieldPaymentMode, v))
+}
+
+// PaymentModeLTE applies the LTE predicate on the "payment_mode" field.
+func PaymentModeLTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLTE(FieldPaymentMode, v))
+}
+
+// PaymentModeContains applies the Contains predicate on the "payment_mode" field.
+func PaymentModeContains(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContains(FieldPaymentMode, v))
+}
+
+// PaymentModeHasPrefix applies the HasPrefix predicate on the "payment_mode" field.
+func PaymentModeHasPrefix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasPrefix(FieldPaymentMode, v))
+}
+
+// PaymentModeHasSuffix applies the HasSuffix predicate on the "payment_mode" field.
+func PaymentModeHasSuffix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasSuffix(FieldPaymentMode, v))
+}
+
+// PaymentModeEqualFold applies the EqualFold predicate on the "payment_mode" field.
+func PaymentModeEqualFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEqualFold(FieldPaymentMode, v))
+}
+
+// PaymentModeContainsFold applies the ContainsFold predicate on the "payment_mode" field.
+func PaymentModeContainsFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContainsFold(FieldPaymentMode, v))
 }
 
 // DeliveryStatusEQ applies the EQ predicate on the "delivery_status" field.

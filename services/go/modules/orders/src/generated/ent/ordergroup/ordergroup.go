@@ -38,6 +38,8 @@ const (
 	FieldPreviousStatus = "previous_status"
 	// FieldPaymentStatus holds the string denoting the payment_status field in the database.
 	FieldPaymentStatus = "payment_status"
+	// FieldPaymentMode holds the string denoting the payment_mode field in the database.
+	FieldPaymentMode = "payment_mode"
 	// FieldDeliveryStatus holds the string denoting the delivery_status field in the database.
 	FieldDeliveryStatus = "delivery_status"
 	// FieldCurrency holds the string denoting the currency field in the database.
@@ -115,6 +117,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldPreviousStatus,
 	FieldPaymentStatus,
+	FieldPaymentMode,
 	FieldDeliveryStatus,
 	FieldCurrency,
 	FieldSubtotalMinor,
@@ -177,6 +180,10 @@ var (
 	DefaultPreviousStatus string
 	// DefaultPaymentStatus holds the default value on creation for the "payment_status" field.
 	DefaultPaymentStatus string
+	// DefaultPaymentMode holds the default value on creation for the "payment_mode" field.
+	DefaultPaymentMode string
+	// PaymentModeValidator is a validator for the "payment_mode" field. It is called by the builders before save.
+	PaymentModeValidator func(string) error
 	// DefaultDeliveryStatus holds the default value on creation for the "delivery_status" field.
 	DefaultDeliveryStatus string
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
@@ -281,6 +288,11 @@ func ByPreviousStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByPaymentStatus orders the results by the payment_status field.
 func ByPaymentStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPaymentStatus, opts...).ToFunc()
+}
+
+// ByPaymentMode orders the results by the payment_mode field.
+func ByPaymentMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPaymentMode, opts...).ToFunc()
 }
 
 // ByDeliveryStatus orders the results by the delivery_status field.

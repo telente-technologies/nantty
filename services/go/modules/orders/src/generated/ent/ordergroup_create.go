@@ -145,6 +145,20 @@ func (_c *OrderGroupCreate) SetNillablePaymentStatus(v *string) *OrderGroupCreat
 	return _c
 }
 
+// SetPaymentMode sets the "payment_mode" field.
+func (_c *OrderGroupCreate) SetPaymentMode(v string) *OrderGroupCreate {
+	_c.mutation.SetPaymentMode(v)
+	return _c
+}
+
+// SetNillablePaymentMode sets the "payment_mode" field if the given value is not nil.
+func (_c *OrderGroupCreate) SetNillablePaymentMode(v *string) *OrderGroupCreate {
+	if v != nil {
+		_c.SetPaymentMode(*v)
+	}
+	return _c
+}
+
 // SetDeliveryStatus sets the "delivery_status" field.
 func (_c *OrderGroupCreate) SetDeliveryStatus(v string) *OrderGroupCreate {
 	_c.mutation.SetDeliveryStatus(v)
@@ -584,6 +598,10 @@ func (_c *OrderGroupCreate) defaults() {
 		v := ordergroup.DefaultPaymentStatus
 		_c.mutation.SetPaymentStatus(v)
 	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		v := ordergroup.DefaultPaymentMode
+		_c.mutation.SetPaymentMode(v)
+	}
 	if _, ok := _c.mutation.DeliveryStatus(); !ok {
 		v := ordergroup.DefaultDeliveryStatus
 		_c.mutation.SetDeliveryStatus(v)
@@ -679,6 +697,14 @@ func (_c *OrderGroupCreate) check() error {
 	}
 	if _, ok := _c.mutation.PaymentStatus(); !ok {
 		return &ValidationError{Name: "payment_status", err: errors.New(`ent: missing required field "OrderGroup.payment_status"`)}
+	}
+	if _, ok := _c.mutation.PaymentMode(); !ok {
+		return &ValidationError{Name: "payment_mode", err: errors.New(`ent: missing required field "OrderGroup.payment_mode"`)}
+	}
+	if v, ok := _c.mutation.PaymentMode(); ok {
+		if err := ordergroup.PaymentModeValidator(v); err != nil {
+			return &ValidationError{Name: "payment_mode", err: fmt.Errorf(`ent: validator failed for field "OrderGroup.payment_mode": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.DeliveryStatus(); !ok {
 		return &ValidationError{Name: "delivery_status", err: errors.New(`ent: missing required field "OrderGroup.delivery_status"`)}
@@ -842,6 +868,10 @@ func (_c *OrderGroupCreate) createSpec() (*OrderGroup, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PaymentStatus(); ok {
 		_spec.SetField(ordergroup.FieldPaymentStatus, field.TypeString, value)
 		_node.PaymentStatus = value
+	}
+	if value, ok := _c.mutation.PaymentMode(); ok {
+		_spec.SetField(ordergroup.FieldPaymentMode, field.TypeString, value)
+		_node.PaymentMode = value
 	}
 	if value, ok := _c.mutation.DeliveryStatus(); ok {
 		_spec.SetField(ordergroup.FieldDeliveryStatus, field.TypeString, value)
@@ -1468,6 +1498,9 @@ func (u *OrderGroupUpsertOne) UpdateNewValues() *OrderGroupUpsertOne {
 		}
 		if _, exists := u.create.mutation.BuyerAccountID(); exists {
 			s.SetIgnore(ordergroup.FieldBuyerAccountID)
+		}
+		if _, exists := u.create.mutation.PaymentMode(); exists {
+			s.SetIgnore(ordergroup.FieldPaymentMode)
 		}
 		if _, exists := u.create.mutation.Currency(); exists {
 			s.SetIgnore(ordergroup.FieldCurrency)
@@ -2217,6 +2250,9 @@ func (u *OrderGroupUpsertBulk) UpdateNewValues() *OrderGroupUpsertBulk {
 			}
 			if _, exists := b.mutation.BuyerAccountID(); exists {
 				s.SetIgnore(ordergroup.FieldBuyerAccountID)
+			}
+			if _, exists := b.mutation.PaymentMode(); exists {
+				s.SetIgnore(ordergroup.FieldPaymentMode)
 			}
 			if _, exists := b.mutation.Currency(); exists {
 				s.SetIgnore(ordergroup.FieldCurrency)
