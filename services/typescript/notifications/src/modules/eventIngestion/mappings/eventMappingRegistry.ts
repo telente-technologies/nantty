@@ -1,9 +1,12 @@
 import * as escrowMoney from "./escrowMoney.mapping.js";
 import * as identity from "./identity.mapping.js";
+import * as identityVerification from "./identityVerification.mapping.js";
+import * as copyright from "./copyright.mapping.js";
 import * as milestones from "./milestones.mapping.js";
 import type { EventMapping } from "./mappingHelpers.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
+import * as support from "./support.mapping.js";
 import * as verification from "./verification.mapping.js";
 
 export const eventMappings: Readonly<Record<string, EventMapping>> = {
@@ -62,6 +65,10 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "checkmark.rejected": verification.checkmarkRejected,
   "checkmark.revoked": verification.checkmarkRevoked,
   "checkmark.renewalFailed": verification.checkmarkRenewalFailed,
+  "verification.eligible": identityVerification.verificationEligible,
+  "verification.underReview": identityVerification.verificationUnderReview,
+  "verification.approved": identityVerification.verificationApproved,
+  "verification.rejectedRefunded": identityVerification.verificationRejectedRefunded,
   "creatorApplication.submitted": verification.creatorApplicationSubmitted,
   "creatorApplication.approved": verification.creatorApplicationApproved,
   "creatorApplication.needsReview": verification.creatorApplicationNeedsReview,
@@ -75,6 +82,16 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "planInvoice.paymentFailed": verification.planInvoicePaymentFailed,
   "planInvoice.paid": verification.planInvoicePaid,
   "cardVerification.refunded": verification.cardVerificationRefunded,
+  "copyrightClaim.warningIssued": copyright.copyrightWarningIssued,
+  "copyrightClaim.audioMuteOrdered": copyright.copyrightAudioMuted,
+  "copyrightClaim.contentTakenDown": copyright.copyrightContentTakenDown,
+  "copyrightClaim.counterNoticeReceived": copyright.copyrightCounterNoticeReceived,
+  "copyrightClaim.restored": copyright.copyrightContentRestored,
+  "strike.issued": copyright.strikeIssued,
+  "strike.expired": copyright.strikeExpired,
+  "ticket.created": support.ticketCreated,
+  "ticket.replied": support.ticketReplied,
+  "ticket.resolved": support.ticketResolved,
 };
 
 export const domainEventTypesConsumed: readonly string[] = [...Object.keys(eventMappings), "policyVersion.published"];
