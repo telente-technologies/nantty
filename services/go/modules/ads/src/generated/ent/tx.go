@@ -38,6 +38,8 @@ type Tx struct {
 	AdConversion *AdConversionClient
 	// AdCreatorEarning is the client for interacting with the AdCreatorEarning builders.
 	AdCreatorEarning *AdCreatorEarningClient
+	// AdCreatorMonetisationHold is the client for interacting with the AdCreatorMonetisationHold builders.
+	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
@@ -205,6 +207,7 @@ func (tx *Tx) init() {
 	tx.AdContentSignal = NewAdContentSignalClient(tx.config)
 	tx.AdConversion = NewAdConversionClient(tx.config)
 	tx.AdCreatorEarning = NewAdCreatorEarningClient(tx.config)
+	tx.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(tx.config)
 	tx.AdCustomAudience = NewAdCustomAudienceClient(tx.config)
 	tx.AdFrequencyPolicy = NewAdFrequencyPolicyClient(tx.config)
 	tx.AdFundsTransaction = NewAdFundsTransactionClient(tx.config)

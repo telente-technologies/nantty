@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
@@ -585,6 +586,36 @@ func init() {
 	adcreatorearningDescID := adcreatorearningMixinFields0[0].Descriptor()
 	// adcreatorearning.DefaultID holds the default value on creation for the id field.
 	adcreatorearning.DefaultID = adcreatorearningDescID.Default.(func() uuid.UUID)
+	adcreatormonetisationholdFields := schema.AdCreatorMonetisationHold{}.Fields()
+	_ = adcreatormonetisationholdFields
+	// adcreatormonetisationholdDescIsPaused is the schema descriptor for is_paused field.
+	adcreatormonetisationholdDescIsPaused := adcreatormonetisationholdFields[1].Descriptor()
+	// adcreatormonetisationhold.DefaultIsPaused holds the default value on creation for the is_paused field.
+	adcreatormonetisationhold.DefaultIsPaused = adcreatormonetisationholdDescIsPaused.Default.(bool)
+	// adcreatormonetisationholdDescUpdatedAt is the schema descriptor for updated_at field.
+	adcreatormonetisationholdDescUpdatedAt := adcreatormonetisationholdFields[3].Descriptor()
+	// adcreatormonetisationhold.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adcreatormonetisationhold.DefaultUpdatedAt = adcreatormonetisationholdDescUpdatedAt.Default.(func() time.Time)
+	// adcreatormonetisationhold.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adcreatormonetisationhold.UpdateDefaultUpdatedAt = adcreatormonetisationholdDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adcreatormonetisationholdDescID is the schema descriptor for id field.
+	adcreatormonetisationholdDescID := adcreatormonetisationholdFields[0].Descriptor()
+	// adcreatormonetisationhold.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	adcreatormonetisationhold.IDValidator = func() func(string) error {
+		validators := adcreatormonetisationholdDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	adcustomaudienceMixin := schema.AdCustomAudience{}.Mixin()
 	adcustomaudienceMixinFields0 := adcustomaudienceMixin[0].Fields()
 	_ = adcustomaudienceMixinFields0
