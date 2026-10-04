@@ -15,11 +15,12 @@ var AllPermissionKeys = []string{
 	"applications:sellers", "applications:creators",
 	"brands:review", "brands:revoke", "ip-claims:review",
 	"moderation:reports", "moderation:appeals", "chat-reports:review", "chat-reports:legal", "copyright:review",
+	"security:cases",
 	"orders:read", "disputes:resolve", "refunds:issue", "payouts:approve", "coins:review", "ledger:read",
 	"ads:review", "advertisers:manage",
 	"catalog:manage",
 	"config:read", "config:plans", "config:revenue", "config:rules", "flags:manage", "automation:manage", "templates:manage",
-	"support:tickets", "support:assign", "support:chat", "support:email",
+	"support:tickets", "support:assign", "support:chat", "support:email", "support:helpContent",
 	"marketing:campaigns", "marketing:email", "sales:leads", "content:review",
 	"legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send",
 	"finance:reports",
@@ -28,11 +29,11 @@ var AllPermissionKeys = []string{
 }
 
 var DepartmentRoleTemplates = []DepartmentRoleTemplate{
-	{"support", "Support", "Support", []string{"users:read", "orders:read", "support:tickets", "support:chat", "support:email", "support:assign"}},
+	{"support", "Support", "Support", []string{"users:read", "orders:read", "support:tickets", "support:chat", "support:email", "support:assign", "support:helpContent"}},
 	{"marketing", "Marketing", "Marketing", []string{"metrics:read", "marketing:campaigns", "marketing:email", "catalog:manage"}},
 	{"sales", "Sales", "Sales", []string{"metrics:read", "users:read", "sales:leads", "applications:sellers", "brands:review"}},
 	{"finance", "Finance", "Finance", []string{"metrics:read", "orders:read", "payouts:approve", "refunds:issue", "coins:review", "ledger:read", "finance:reports", "audit:read"}},
-	{"trust", "Trust & Safety", "Trust & Safety", []string{"users:read", "users:moderate", "users:restrict", "users:suspend", "moderation:reports", "moderation:appeals", "chat-reports:review", "copyright:review", "ip-claims:review"}},
+	{"trust", "Trust & Safety", "Trust & Safety", []string{"users:read", "users:moderate", "users:restrict", "users:suspend", "moderation:reports", "moderation:appeals", "chat-reports:review", "copyright:review", "ip-claims:review", "security:cases"}},
 	{"verification", "Verification", "Verification", []string{"users:read", "verification:review", "verification:documents", "verification:grant", "applications:sellers", "applications:creators"}},
 	{"content", "Content", "Content", []string{"content:review", "catalog:manage", "applications:creators", "moderation:reports"}},
 	{"ads", "Ads", "Ads", []string{"ads:review", "advertisers:manage", "metrics:read"}},
