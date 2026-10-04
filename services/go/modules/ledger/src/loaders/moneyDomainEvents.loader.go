@@ -16,13 +16,13 @@ type MoneyDomainEventHandler func(ctx context.Context, envelope events.EventEnve
 
 var (
 	moneyDomainEventHandlersMutex sync.RWMutex
-	moneyDomainEventHandlers      = map[string]MoneyDomainEventHandler{}
+	moneyDomainEventHandlers      = map[string][]MoneyDomainEventHandler{}
 )
 
 func RegisterMoneyDomainEventHandler(eventType string, handler MoneyDomainEventHandler) {
 	moneyDomainEventHandlersMutex.Lock()
 	defer moneyDomainEventHandlersMutex.Unlock()
-	moneyDomainEventHandlers[eventType] = handler
+	moneyDomainEventHandlers[eventType] = append(moneyDomainEventHandlers[eventType], handler)
 }
 
 func DispatchMoneyDomainEvent(ctx context.Context, body []byte) error {
@@ -31,12 +31,14 @@ func DispatchMoneyDomainEvent(ctx context.Context, body []byte) error {
 		return fmt.Errorf("%w: %v", events.ErrPoisonMessage, err)
 	}
 	moneyDomainEventHandlersMutex.RLock()
-	handler, found := moneyDomainEventHandlers[envelope.Type]
+	handlers := moneyDomainEventHandlers[envelope.Type]
 	moneyDomainEventHandlersMutex.RUnlock()
-	if !found {
-		return nil
+	for _, handler := range handlers {
+		if err := handler(ctx, envelope); err != nil {
+			return err
+		}
 	}
-	return handler(ctx, envelope)
+	return nil
 }
 
 func ConsumeMoneyDomainEventsUntilContextDone(ctx context.Context, production bool, logger *slog.Logger) error {
