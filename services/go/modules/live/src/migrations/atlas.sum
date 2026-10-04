@@ -1,6 +1,7 @@
-h1:zvu9eM5uAys+ayEcrm5lgYTsbG0zChX/Z3kVzX3e/10=
+h1:Z5Ts+sWzYOskvftsRw7s/v+6r1pPSVrdxuAOgJa3HS8=
 20261003102843_create_live_tables.up.sql h1:eWwBy8a9/PqMTjm1Eut18Z46Q1Z4j4AMpLKvQOPPuaw=
 20261003102900_grant_read_access_to_other_services.up.sql h1:74b8Za/4Rne8W2Z+ak5TqixMcYvc8MHhNd0u3uUcO0Q=
 20261003120000_add_comments_moderation_streaming_overlays.up.sql h1:Z/lVHVqAqkKNLF9VA2x/nFHQ3efYuZSuyWUQ0IXgh00=
 20261004001954_add_live_moderation_visibility.up.sql h1:x1XMKhMoU/1X9of1z7u4CA8oBXGSPL/e1B94nTTqiMU=
 20261004080500_add_live_safety_states.up.sql h1:eEzCLwfNOCUjsFSF2e78SbM0L8A8xk99KkyCHw2fbKg=
+20261004140000_add_live_host_restrictions.up.sql h1:JQbKCdHi8uB9Qfil7Vs6E+k0/QEYD04nUjn8evOLHHE=
