@@ -23,6 +23,10 @@ type UsersSettings struct {
 	MediaUploadIntentTimeToLive time.Duration
 	Privacy                     PrivacySettings
 	EntitlementEventsQueue      string
+	SocialInternalUrl           string
+	SocialInternalToken         string
+	LiveInternalUrl             string
+	LiveInternalToken           string
 }
 
 func (settings UsersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -44,6 +48,10 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		MediaUploadIntentTimeToLive: reader.ReadDurationOrDefault("USERS_MEDIA_UPLOAD_INTENT_TTL", 10*time.Minute),
 		Privacy:                     ReadPrivacySettingsFromEnvironment(reader),
 		EntitlementEventsQueue:      reader.ReadStringOrDefault("USERS_ENTITLEMENT_EVENTS_QUEUE", ""),
+		SocialInternalUrl:           reader.ReadStringOrDefault("USERS_SOCIAL_INTERNAL_URL", ""),
+		SocialInternalToken:         reader.ReadStringOrDefault("SOCIAL_INTERNAL_API_TOKEN", ""),
+		LiveInternalUrl:             reader.ReadStringOrDefault("USERS_LIVE_INTERNAL_URL", ""),
+		LiveInternalToken:           reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
 	}
 	return settings
 }

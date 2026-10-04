@@ -86,6 +86,9 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	if settings.Privacy.MoneyInternalUrl != "" {
 		usersContainer.PendingWithdrawals = integrations.NewHttpPendingWithdrawalChecker(settings.Privacy.MoneyInternalUrl, settings.Privacy.MoneyInternalToken)
 	}
+	if settings.SocialInternalUrl != "" || settings.LiveInternalUrl != "" {
+		usersContainer.ActivityCounts = integrations.NewHttpActivityCounts(settings.SocialInternalUrl, settings.SocialInternalToken, settings.LiveInternalUrl, settings.LiveInternalToken)
+	}
 	identityports.Default.RegisterUsernameGuard(services.UsernameGuardService{Container: usersContainer})
 	identityports.Default.RegisterAccountCountryLookup(services.AccountCountryService{Container: usersContainer})
 	identityports.Default.RegisterDeletionGraceCanceller(services.DeletionGraceCancelService{Container: usersContainer})
