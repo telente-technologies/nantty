@@ -4,6 +4,56 @@
   "title": "PostCreated",
   "type": "object",
   "additionalProperties": false,
-  "required": ["postId","authorId","kind","audience","visibility","isAiGenerated"],
-  "properties": { "postId": { "type": "string", "format": "uuid" }, "authorId": { "type": "string", "format": "uuid" }, "kind": { "enum": ["post", "clip", "story"] }, "audience": { "enum": ["everyone", "followers"] }, "visibility": { "enum": ["public", "subscribers"] }, "isAiGenerated": { "type": "boolean" } }
+  "required": [
+    "postId",
+    "authorId",
+    "kind",
+    "audience",
+    "visibility",
+    "isAiGenerated"
+  ],
+  "properties": {
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip",
+        "story"
+      ]
+    },
+    "audience": {
+      "enum": [
+        "everyone",
+        "followers"
+      ]
+    },
+    "visibility": {
+      "enum": [
+        "public",
+        "subscribers"
+      ]
+    },
+    "isAiGenerated": {
+      "type": "boolean"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "mediaIds": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
 }

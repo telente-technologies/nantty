@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/flashSale.saved.v1.json",
+  "title": "FlashSaleSaved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "flashSaleId",
+    "storeId"
+  ],
+  "properties": {
+    "flashSaleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "storeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "startsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endsAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "productIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "action": {
+      "enum": [
+        "pause",
+        "resume",
+        "end"
+      ]
+    }
+  }
+}

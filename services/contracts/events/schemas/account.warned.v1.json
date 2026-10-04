@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/account.warned.v1.json",
+  "title": "AccountWarned",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "reason",
+    "policy",
+    "policyUrl",
+    "appealUrl"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "string"
+    },
+    "policyUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "appealUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "source": {
+      "type": "string"
+    }
+  }
+}

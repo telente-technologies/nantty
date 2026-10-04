@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/contentScore.generated.v1.json",
+  "title": "ContentScoreGenerated (job on intelligence-trust-content-scores, raw body, no envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scoreId",
+    "targetType",
+    "targetId",
+    "ownerId",
+    "score",
+    "suggestedAction",
+    "categories",
+    "modelVersion",
+    "advisoryOnly",
+    "generatedAt"
+  ],
+  "properties": {
+    "scoreId": {
+      "type": "string"
+    },
+    "targetType": {
+      "enum": [
+        "post",
+        "comment",
+        "clip",
+        "live",
+        "product",
+        "store",
+        "sound"
+      ]
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "ownerId": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "suggestedAction": {
+      "enum": [
+        "allow",
+        "review",
+        "block"
+      ]
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "score"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "modelVersion": {
+      "type": "string"
+    },
+    "advisoryOnly": {
+      "const": true
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
