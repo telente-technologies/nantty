@@ -1,0 +1,243 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model HelpCategory {
+  id          String      @id @db.Uuid
+  slug        String      @unique
+  title       String
+  description String      @default("")
+  iconName    String      @default("question") @map("icon_name")
+  position    Int         @default(0)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  topics      HelpTopic[]
+
+  @@map("help_categories")
+}
+
+model HelpTopic {
+  id                String             @id @db.Uuid
+  categoryId        String             @map("category_id") @db.Uuid
+  slug              String
+  locale            String             @default("en")
+  title             String
+  summary           String             @default("")
+  bodyMarkdown      String             @map("body_markdown")
+  tags              String[]
+  searchText        String             @default("") @map("search_text")
+  status            String             @default("draft")
+  origin            String             @default("editorial")
+  sourceTicketId    String?            @map("source_ticket_id") @db.Uuid
+  mergedIntoTopicId String?            @map("merged_into_topic_id") @db.Uuid
+  seedKey           String?            @unique @map("seed_key")
+  seedHash          String?            @map("seed_hash")
+  editedByStaff     Boolean            @default(false) @map("edited_by_staff")
+  version           Int                @default(1)
+  helpfulCount      Int                @default(0) @map("helpful_count")
+  notHelpfulCount   Int                @default(0) @map("not_helpful_count")
+  relatedQuestions  Int                @default(0) @map("related_questions")
+  updatedByName     String             @default("Zudomart") @map("updated_by_name")
+  publishedAt       DateTime?          @map("published_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  category          HelpCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  versions          HelpTopicVersion[]
+  votes             HelpTopicVote[]
+  relatedFrom       HelpTopicRelation[] @relation("relatedFrom")
+  relatedTo         HelpTopicRelation[] @relation("relatedTo")
+
+  @@unique([slug, locale])
+  @@index([categoryId, status])
+  @@index([status, origin])
+  @@index([tags], type: Gin)
+  @@map("help_topics")
+}
+
+model HelpTopicVersion {
+  id            String   @id @db.Uuid
+  topicId       String   @map("topic_id") @db.Uuid
+  version       Int
+  title         String
+  summary       String
+  bodyMarkdown  String   @map("body_markdown")
+  tags          String[]
+  editedByName  String   @map("edited_by_name")
+  changeNote    String   @default("") @map("change_note")
+  createdAt     DateTime @default(now()) @map("created_at")
+  topic         HelpTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, version])
+  @@map("help_topic_versions")
+}
+
+model HelpTopicRelation {
+  topicId        String    @map("topic_id") @db.Uuid
+  relatedTopicId String    @map("related_topic_id") @db.Uuid
+  topic          HelpTopic @relation("relatedFrom", fields: [topicId], references: [id], onDelete: Cascade)
+  relatedTopic   HelpTopic @relation("relatedTo", fields: [relatedTopicId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, relatedTopicId])
+  @@map("help_topic_relations")
+}
+
+model HelpTopicVote {
+  topicId   String    @map("topic_id") @db.Uuid
+  voterKey  String    @map("voter_key")
+  helpful   Boolean
+  createdAt DateTime  @default(now()) @map("created_at")
+  topic     HelpTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, voterKey])
+  @@map("help_topic_votes")
+}
+
+model AutoTopicLog {
+  id         String   @id @db.Uuid
+  ticketId   String   @unique @map("ticket_id") @db.Uuid
+  ticketRef  String   @map("ticket_ref")
+  topicId    String?  @map("topic_id") @db.Uuid
+  action     String
+  similarity Float    @default(0)
+  writer     String   @default("template")
+  note       String   @default("")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("auto_topic_logs")
+}
+
+model SupportSetting {
+  key       String   @id
+  value     Json
+  updatedBy String   @default("system") @map("updated_by")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model SupportTicket {
+  id                  String                 @id @db.Uuid
+  number              Int                    @unique @default(autoincrement())
+  requesterAccountId  String                 @map("requester_account_id") @db.Uuid
+  requesterName       String                 @map("requester_name")
+  requesterUsername   String                 @default("") @map("requester_username")
+  subject             String
+  category            String
+  priority            String
+  status              String
+  channel             String                 @default("form")
+  linkedKind          String?                @map("linked_kind")
+  linkedId            String?                @map("linked_id")
+  linkedLabel         String?                @map("linked_label")
+  assigneeStaffId     String?                @map("assignee_staff_id")
+  assigneeName        String?                @map("assignee_name")
+  firstResponseDueAt  DateTime               @map("first_response_due_at")
+  firstRespondedAt    DateTime?              @map("first_responded_at")
+  resolutionDueAt     DateTime               @map("resolution_due_at")
+  resolvedAt          DateTime?              @map("resolved_at")
+  closedAt            DateTime?              @map("closed_at")
+  satisfactionScore   Int?                   @map("satisfaction_score")
+  satisfactionComment String?                @map("satisfaction_comment")
+  lastMessageAt       DateTime               @default(now()) @map("last_message_at")
+  lastMessagePreview  String                 @default("") @map("last_message_preview")
+  requesterUnread     Int                    @default(0) @map("requester_unread")
+  messageCount        Int                    @default(0) @map("message_count")
+  autoFaqStatus       String                 @default("none") @map("auto_faq_status")
+  autoFaqLockedUntil  DateTime?              @map("auto_faq_locked_until")
+  idempotencyKey      String?                @map("idempotency_key")
+  anonymizedAt        DateTime?              @map("anonymized_at")
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
+  messages            SupportTicketMessage[]
+  history             SupportTicketEvent[]
+
+  @@unique([requesterAccountId, idempotencyKey])
+  @@index([requesterAccountId, updatedAt])
+  @@index([status, priority])
+  @@index([assigneeStaffId, status])
+  @@index([autoFaqStatus])
+  @@map("tickets")
+}
+
+model SupportTicketMessage {
+  id          String        @id @db.Uuid
+  ticketId    String        @map("ticket_id") @db.Uuid
+  authorKind  String        @map("author_kind")
+  authorId    String?       @map("author_id")
+  authorName  String        @map("author_name")
+  body        String
+  attachments Json          @default("[]")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_messages")
+}
+
+model SupportTicketEvent {
+  id        String        @id @db.Uuid
+  ticketId  String        @map("ticket_id") @db.Uuid
+  action    String
+  actorId   String        @map("actor_id")
+  actorName String        @map("actor_name")
+  reason    String?
+  detail    Json          @default("{}")
+  createdAt DateTime      @default(now()) @map("created_at")
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_events")
+}
+
+model SupportMacro {
+  id            String   @id @db.Uuid
+  title         String
+  body          String
+  category      String?
+  updatedByName String   @map("updated_by_name")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("macros")
+}
+
+model SupportAgent {
+  staffId    String   @id @map("staff_id")
+  name       String
+  canAnswer  Boolean  @default(true) @map("can_answer")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  @@map("agents")
+}
+
+model OutboxEvent {
+  id          String    @id @db.Uuid
+  eventType   String    @map("event_type")
+  subject     String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lockedUntil DateTime? @map("locked_until")
+  lockToken   String?   @map("lock_token")
+  attempts    Int       @default(0)
+  publishedAt DateTime? @map("published_at")
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+model ProcessedEvent {
+  eventId     String   @id @map("event_id")
+  eventType   String   @map("event_type")
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@index([processedAt])
+  @@map("processed_events")
+}
