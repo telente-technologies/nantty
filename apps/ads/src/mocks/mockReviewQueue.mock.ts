@@ -11,10 +11,38 @@ const policyScanners: readonly { readonly pattern: RegExp; readonly code: string
   { pattern: /\bare you (hiv|pregnant|broke|in debt)/i, code: "personal_attributes", reason: "The ad implies it knows a private personal attribute of the viewer." },
 ];
 
+const blockedDestinationDomains: readonly string[] = ["malware.example", "phishing.example"];
+const linkShorteners: readonly string[] = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "rb.gy"];
+
+function collectDestinationUrls(ad: MockAdRecord): string[] {
+  const { creative } = ad;
+  const urls = [creative.destination.url, ...(creative.cards ?? []).map((card) => card.destination.url), creative.app?.webFallbackUrl];
+  return urls.filter((url): url is string => Boolean(url));
+}
+
+function matchesDomain(host: string, domain: string): boolean {
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+export function scanDestinationsForPolicyViolation(ad: MockAdRecord): { code: string; reason: string } | null {
+  for (const rawUrl of collectDestinationUrls(ad)) {
+    let host = "";
+    try {
+      host = new URL(rawUrl).hostname.toLowerCase();
+    } catch {
+      continue;
+    }
+    if (blockedDestinationDomains.some((domain) => matchesDomain(host, domain))) return { code: "malicious_destination", reason: `The link to ${host} is on the blocked list. Use a destination you own.` };
+    if (linkShorteners.some((domain) => matchesDomain(host, domain)) || /^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return { code: "malicious_destination", reason: "Shortened links and raw IP addresses hide the real destination. Use the full link." };
+  }
+  return null;
+}
+
 export function scanCreativeTextForPolicyViolation(ad: MockAdRecord): { code: string; reason: string } | null {
-  const text = `${ad.creative.headline} ${ad.creative.primaryText}`;
+  const cardText = (ad.creative.cards ?? []).map((card) => `${card.headline} ${card.description}`).join(" ");
+  const text = `${ad.creative.headline} ${ad.creative.primaryText} ${cardText} ${ad.creative.app?.appName ?? ""}`;
   const match = policyScanners.find((scanner) => scanner.pattern.test(text));
-  return match ? { code: match.code, reason: match.reason } : null;
+  return match ? { code: match.code, reason: match.reason } : scanDestinationsForPolicyViolation(ad);
 }
 
 function refreshParentStatusesAfterReview(ad: MockAdRecord): void {

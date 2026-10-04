@@ -133,6 +133,8 @@ export function buildDemoAd(seed: DemoAdSeed): MockAdRecord {
     status,
     review: seed.review ?? (status === "draft" ? { status: "not_submitted", policyCode: null, policyReason: null, reviewedAt: null, appeal: null } : approvedReview),
     creative: {
+      type: "single",
+      mediaClickable: false,
       format: seed.format,
       source: { type: seed.source.type, id: seed.source.id },
       media: seed.media ?? seed.source.media,
