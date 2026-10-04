@@ -12,4 +12,4 @@ Go to your profile and tap **Edit profile**.
 - **Username**: see [Usernames](/help/account-and-login/usernames).
 - **Date of birth**: used for age rules and your birthday celebration. It isn't shown publicly.
 
-Your faded @username appears under your name on posts and comments. Tapping your name anywhere opens your profile.
+Your username appears in lighter text under your name on posts and comments. Tapping your name anywhere opens your profile.
