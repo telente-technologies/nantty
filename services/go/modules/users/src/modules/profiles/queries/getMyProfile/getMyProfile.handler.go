@@ -7,6 +7,7 @@ import (
 
 	"zudomart/modules/users/src/container"
 	usersErrors "zudomart/modules/users/src/errors"
+	celebrationservices "zudomart/modules/users/src/modules/celebrations/services"
 	"zudomart/modules/users/src/services"
 	"zudomart/modules/users/src/types"
 )
@@ -24,5 +25,8 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.UserView
 	if err != nil {
 		return types.UserView{}, err
 	}
-	return types.BuildUserView(row, summary, true), nil
+	view := types.BuildUserView(row, summary, true)
+	flags := celebrationservices.ComputePublicFlags(ctx, handler.Container, summary, true)
+	view.BirthdayToday, view.AnniversaryToday = flags.BirthdayToday, flags.AnniversaryToday
+	return view, nil
 }
