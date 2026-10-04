@@ -10,6 +10,7 @@ import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
 import { coinsMocks } from "./coins.mock";
 import { commentsMocks } from "./comments.mock";
+import { postThreadMocks } from "./postThread.mock";
 import { soundsMocks } from "./sounds.mock";
 import { creatorProgramMocks } from "./creatorProgram.mock";
 import { creatorsMocks } from "./creators.mock";
@@ -23,6 +24,7 @@ import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
+import { postAudienceMocks } from "./postAudience.mock";
 import { legalMocks } from "./legal.mock";
 import { privacyMocks } from "./privacy.mock";
 import { productsMocks } from "./products.mock";
@@ -43,6 +45,8 @@ import { savesMocks } from "./saves.mock";
 import { webActionsMocks } from "./webActions.mock";
 import { mentionsMocks } from "./mentions.mock";
 import { videosMocks } from "./videos.mock";
+import { sitemapMocks } from "./sitemap.mock";
+import { linkPreviewsMocks } from "./linkPreviews.mock";
 
 export const routes: MockRoute[] = [
   ...localeMocks,
@@ -53,8 +57,11 @@ export const routes: MockRoute[] = [
   ...webActionsMocks,
   ...mentionsMocks,
   ...videosMocks,
+  ...sitemapMocks,
+  ...linkPreviewsMocks,
   ...usersMocks,
   ...feedMocks,
+  ...postAudienceMocks,
   ...postsMocks,
   ...productsMocks,
   ...cartMocks,
@@ -72,6 +79,7 @@ export const routes: MockRoute[] = [
   ...chatsMocks,
   ...clipsMocks,
   ...commentsMocks,
+  ...postThreadMocks,
   ...soundsMocks,
   ...mediaMocks,
   ...adEventsMocks,

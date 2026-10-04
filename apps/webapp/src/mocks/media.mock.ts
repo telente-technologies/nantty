@@ -142,6 +142,7 @@ export const mediaMocks: MockRoute[] = [
       views: 0,
       liked: false,
       bookmarked: false,
+      saveCount: 0,
       isFollowingAuthor: true,
       friendsLiked: null,
       products: [],

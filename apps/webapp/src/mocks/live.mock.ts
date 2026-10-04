@@ -1,4 +1,4 @@
-import type { LiveComment, LiveSessionDetails } from "@/types";
+import type { LiveComment, LiveSafetyState, LiveSessionDetails } from "@/types";
 
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
@@ -6,6 +6,13 @@ import { productImageUrlsForProduct } from "./mockImages.mock";
 import { productSummaryByKey } from "./productCatalog.mock";
 import { findDirectoryUserById, summariseUser, userSummaryById, type DirectoryUserId } from "./userDirectory.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+
+const MOCK_PAUSED_LIVE_ID = "live_safety_paused";
+
+function readMockLiveSafety(liveId: string): LiveSafetyState | null {
+  if (liveId !== MOCK_PAUSED_LIVE_ID) return null;
+  return { state: "paused", viewerMessage: "This live is paused while we review it", heldAt: new Date(Date.now() - 90_000).toISOString(), appealable: true };
+}
 
 const viewer = (i: number) => buildMockUserSummary(70 + i);
 
@@ -70,7 +77,9 @@ export const liveMocks: MockRoute[] = [
     })),
     nextCursor: null,
   })),
-  createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
+  createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => ({ ...(hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)), safety: readMockLiveSafety(params.liveId!) })),
+  createMockRoute("GET", "/api/v1/lives/:liveId/safety", ({ params }) => ({ safety: readMockLiveSafety(params.liveId!) })),
+  createMockRoute("POST", "/api/v1/live-safety/:liveId/appeal", ({ params }) => ({ status: "received", incidentId: `inc_${params.liveId!}` })),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
     const session = {
       ...buildLiveSession(`live_${Date.now()}`, summariseUser(getSignedInMockUser())),
