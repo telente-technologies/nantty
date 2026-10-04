@@ -12,9 +12,17 @@ export interface ShippingQuote {
   readonly amountToFreeShipping: Money | null;
 }
 
+export interface CartGroupStore {
+  readonly verified?: boolean;
+  readonly rating?: number;
+  readonly ratingCount?: number;
+  readonly successRate?: number | null;
+}
+
 export interface CartSellerGroup {
   readonly storeId: string;
   readonly storeName: string;
+  readonly store?: CartGroupStore | null;
   readonly items: readonly CartItem[];
   readonly subtotal: Money;
   readonly discounts: Money;

@@ -17,3 +17,6 @@ export * from "./storeRewards.type";
 export * from "./chatReport.type";
 export * from "./liveSafety.type";
 export * from "./postAudience.type";
+export * from "./accountHealth.type";
+export * from "./clipCreate.type";
+export * from "./tagCandidate.type";

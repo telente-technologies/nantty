@@ -1,3 +1,4 @@
+import type { ClipMediaInput, ClipSlideshowInput, PostLocationTag } from "./clipCreate.type";
 import type { LiveGiftSentEvent } from "./liveGift.type";
 import type { LiveSafetyRealtimeEvent, LiveSafetyState } from "./liveSafety.type";
 import type { Comment, CommentStickerLayout, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, ReplyToComment, UserSummary } from "./models.type";
@@ -87,6 +88,10 @@ export interface NewPostInput {
   readonly replyPolicy?: ReplyPolicy;
   readonly visibility?: "public" | "subscribers";
   readonly sensitiveLabels?: readonly SensitiveLabel[];
+  readonly media?: readonly ClipMediaInput[];
+  readonly slideshow?: ClipSlideshowInput;
+  readonly location?: PostLocationTag;
+  readonly taggedUserIds?: readonly ID[];
 }
 
 export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live" | "feedCommentThread";
@@ -252,13 +257,32 @@ export interface UpdateSoundInput {
 
 export type CopyrightClaimTargetType = "clip" | "sound" | "post" | "live";
 
+export type CopyrightClaimScope = "audio" | "video";
+
+export interface CopyrightInfringingSegment {
+  readonly startSeconds: number;
+  readonly endSeconds: number;
+}
+
 export interface CopyrightClaimInput {
   readonly targetType: CopyrightClaimTargetType;
   readonly targetId: ID;
+  readonly claimScope: CopyrightClaimScope;
+  readonly claimantName: string;
+  readonly organization?: string;
+  readonly representativeOf?: string;
+  readonly claimantPhone?: string;
   readonly workDescription: string;
   readonly ownershipStatement: string;
   readonly contactEmail: string;
+  readonly originalWorkUrl?: string;
+  readonly originalWorkMediaId?: ID;
+  readonly proofUrls: readonly string[];
+  readonly proofMediaIds?: readonly ID[];
+  readonly segments: readonly CopyrightInfringingSegment[];
   readonly goodFaith: true;
+  readonly accuracyDeclared: true;
+  readonly signatureName: string;
 }
 
 export interface CopyrightClaimReceipt {

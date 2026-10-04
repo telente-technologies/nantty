@@ -1,3 +1,4 @@
+import type { PostLocationTag } from "./clipCreate.type";
 import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
 import type { Money } from "./money.type";
 import type { Order } from "./cartOrder.type";
@@ -81,6 +82,7 @@ export interface StoreSummary {
   readonly ratingCount: number;
   readonly reviewCount: number;
   readonly verification?: Verification | null;
+  readonly successRate?: number | null;
   readonly earnBackBasisPoints?: number | null;
 }
 
@@ -169,6 +171,7 @@ export interface Post {
   readonly replyRestriction?: ReplyRestriction | null;
   readonly sensitive?: SensitiveContent | null;
   readonly isAiGenerated?: boolean;
+  readonly location?: PostLocationTag | null;
   readonly mentions?: readonly MentionEntity[];
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
