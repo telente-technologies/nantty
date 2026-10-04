@@ -98,6 +98,11 @@ func (handler Handler) store(ctx context.Context, command Command, personal *ent
 	links, _ := json.Marshal(command.Input.SocialLinks)
 	var created *ent.CreatorApplication
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if status == creatorapplication.StatusApproved {
+			if err := services.GrantCreatorRoleToAccount(ctx, personal.AccountID); err != nil {
+				return err
+			}
+		}
 		create := tx.CreatorApplication.Create().SetAccountID(personal.AccountID).SetProfileID(personal.ID).SetStatus(status).SetDecision(creatorapplication.Decision(eligibility.Decision)).
 			SetDecisionNote(eligibility.DecisionNote).SetRequirements(requirements).SetContentCategories(command.Input.ContentCategories).SetSocialLinks(links).
 			SetSampleContentUrls(command.Input.SampleContentUrls).SetPayoutAccountID(command.Input.PayoutAccountId).SetAcceptedTermsVersion(command.Input.AcceptedCreatorTermsVersion).SetDecisionReason(reason)

@@ -47,6 +47,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		update := application.Update().SetReviewedBy(command.Actor.Id).SetReviewedByName(command.Actor.Name).SetReviewedAt(now).SetDecisionReason(reason)
 		if command.Approve {
 			status, creatorStatus, action = creatorapplication.StatusApproved, profile.CreatorStatusApproved, "creator_application.approved"
+			if err := creatorservices.GrantCreatorRoleToAccount(ctx, application.AccountID); err != nil {
+				return err
+			}
 		} else {
 			update.SetReapplyAvailableAt(now.Add(30 * 24 * time.Hour))
 		}
