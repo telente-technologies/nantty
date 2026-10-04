@@ -3,9 +3,10 @@ import type { WizardStepProps } from "@/components/campaignWizard/wizardStepProp
 import { CheckboxField, SegmentedControl, SelectField, TextField } from "@/components/ui/formFields";
 import { bidStrategyOptions } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
+import { billingApi } from "@/services/billingApi.service";
 import { toolsApi } from "@/services/toolsApi.service";
 import type { BidStrategyType, BudgetType } from "@/types/campaign.type";
-import { readCurrencySymbol } from "@/utils/money.util";
+import { formatMoneyForDisplay, readCurrencySymbol } from "@/utils/money.util";
 
 import styles from "./wizardSteps.module.css";
 
@@ -20,6 +21,10 @@ export function BudgetScheduleStep({ state, dispatch, errors, currency, accountI
   const conversionEventsQuery = useAdsQuery(() => toolsApi.listConversionEvents(accountId), `conversion-events-${accountId}`, state.objective === "sales");
   const conversionEventOptions = [{ value: "", label: "Purchase (default for your store)" }, ...(conversionEventsQuery.data?.items ?? []).filter((event) => event.status !== "paused").map((event) => ({ value: event.id, label: `${event.name} · ${event.storeName}` }))];
   const selectedBidOption = bidStrategyOptions.find((option) => option.type === state.bidType);
+  const targetedCountryCodes = [...new Set(state.audience.locations.map((location) => location.countryCode).filter(Boolean))].sort();
+  const regionalPricingQuery = useAdsQuery(() => billingApi.fetchRegionalPricing(targetedCountryCodes, currency), `ads-pricing-${currency}-${targetedCountryCodes.join(",")}`);
+  const minimumDailyBudget = regionalPricingQuery.data?.minimumDailyBudget;
+  const dailyBudgetHint = `Average spend per day. Some days may spend up to 25% more, balanced over the week.${minimumDailyBudget ? ` The minimum for the regions you target is ${formatMoneyForDisplay(minimumDailyBudget)}.` : ""}`;
   return (
     <div className={styles.stepBody}>
       <h2 className={styles.stepHeading}>Budget and schedule</h2>
@@ -27,7 +32,7 @@ export function BudgetScheduleStep({ state, dispatch, errors, currency, accountI
       <div className={styles.inlineFields}>
         <SegmentedControl label="Budget type" value={state.budgetType} options={budgetTypeOptions} onValueChange={(budgetType) => updateFields({ budgetType })} />
       </div>
-      <TextField label={state.budgetType === "daily" ? "Daily budget" : "Lifetime budget"} prefix={currencySymbol} inputMode="decimal" value={state.budgetAmountText} onValueChange={(budgetAmountText) => updateFields({ budgetAmountText })} error={errors.budgetAmount} hint={state.budgetType === "daily" ? "Average spend per day. Some days may spend up to 25% more, balanced over the week." : "Total spend spread across the schedule."} fieldClassName={styles.narrowField} />
+      <TextField label={state.budgetType === "daily" ? "Daily budget" : "Lifetime budget"} prefix={currencySymbol} inputMode="decimal" value={state.budgetAmountText} onValueChange={(budgetAmountText) => updateFields({ budgetAmountText })} error={errors.budgetAmount} hint={state.budgetType === "daily" ? dailyBudgetHint : "Total spend spread across the schedule."} fieldClassName={styles.narrowField} />
       <div className={styles.twoColumnFields}>
         <TextField label="Start" type="datetime-local" value={state.startAtLocal} onValueChange={(startAtLocal) => updateFields({ startAtLocal })} error={errors.startAt} />
         <TextField label={state.budgetType === "lifetime" ? "End" : "End (optional)"} type="datetime-local" value={state.endAtLocal} onValueChange={(endAtLocal) => updateFields({ endAtLocal })} error={errors.endAt} hint={state.budgetType === "daily" ? "Leave empty to run until you pause it." : undefined} />
