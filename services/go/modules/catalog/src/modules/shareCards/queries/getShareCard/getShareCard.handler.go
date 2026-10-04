@@ -65,7 +65,11 @@ func (handler Handler) productCard(ctx context.Context, query Query) (ShareCard,
 	if row.Visibility == enums.VisibilityStoreOnly {
 		return ShareCard{Availability: "private"}, nil
 	}
-	if !services.StoreVisibleInRegion(ctx, handler.Container, store, query.Country, query.Viewer) {
+	country := query.Country
+	if country == "" {
+		country = services.ViewerCountry(ctx, handler.Container, query.Viewer)
+	}
+	if !services.StoreVisibleInRegion(ctx, handler.Container, store, country, query.Viewer) {
 		return notInRegion, nil
 	}
 	summaries, err := services.LoadProductSummaries(ctx, handler.Container, []*ent.Product{row}, nil)

@@ -36,7 +36,7 @@ func (controller ShareCardsController) GetShareCard(writer http.ResponseWriter, 
 }
 
 func viewerOfQuery(request *http.Request) *uuid.UUID {
-	if parsed, err := uuid.Parse(request.URL.Query().Get("viewer")); err == nil {
+	if parsed, err := uuid.Parse(request.URL.Query().Get("viewerId")); err == nil {
 		return &parsed
 	}
 	return nil
