@@ -107,6 +107,7 @@ export const productsMocks: MockRoute[] = [
       ...detail,
       liked: likedProductIds.has(detail.id),
       savedByViewer: isSavedBySignedInViewer("product", detail.id),
+      saveCount: 120 + (detail.id.length * 37) % 900,
       related: detail.related.map(withLikeState),
       brand: brandTagForProductKey(seed.key),
       isOfficialStore: !!brand && isVerifiedOfficialStoreOfBrand(brand, seed.storeId),
