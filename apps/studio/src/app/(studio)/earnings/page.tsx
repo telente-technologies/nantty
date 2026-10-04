@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 
+import { AccountHealthSummary } from "@/components/accountHealth/accountHealthSummary";
 import { PayoutOnboardingPanel } from "@/components/payouts/payoutOnboardingPanel";
 import { usePayoutStateQuery } from "@/components/payouts/payoutStateQuery.hook";
 import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
@@ -22,6 +23,7 @@ export default function EarningsPage() {
       {state && state.status !== "verified" && state.pendingWithdrawable ? (
         <p className={styles.notice}>Verify your ID to withdraw {formatMoneyForDisplay(state.pendingWithdrawable)}. Everything else in Studio keeps working.</p>
       ) : null}
+      <AccountHealthSummary />
       <Suspense fallback={null}>
         <PayoutOnboardingPanel />
       </Suspense>

@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { AuthSplitLayout } from "@/components/auth/authSplitLayout";
 import { LoginForm } from "@/components/auth/loginForm";
 import { isMockBackendEnabled } from "@/config/studioEnvironment.config";
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
 
 import styles from "@/components/auth/loginForm.module.css";
 
@@ -22,7 +22,7 @@ export default function StudioLoginPage() {
         </p>
       ) : null}
       <p className={styles.contact}>
-        Need help? <a href={buildContactMailtoLinkForBothAddresses("Zudomart Studio sign-in help")}>{contactEmailDisplayText}</a>
+        Need help? <a href={buildContactMailtoLink("Zudomart Studio sign-in help")}>{contactEmailDisplayText}</a>
       </p>
     </AuthSplitLayout>
   );
