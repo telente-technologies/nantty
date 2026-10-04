@@ -1,3 +1,6 @@
-h1:Sc5WO4IfzfUaqvP6qWimFbglPmkvwXXP2hIjG5ny0Yc=
+h1:Qh06rjOg/3oGp1jevypi890+slIfGv2nrD9RC+h5oMk=
 20261003211222_create_orders_tables.up.sql h1:pbNSwzL+emKRIA9gQLC8R/1FSMpALZClaanNypduIwU=
 20261004000534_add_flash_sales_bundles_and_campaign_redemptions.up.sql h1:mscFQZjSqfCGceopLlIIuaLuPTV6OYBO21jEAzof1DI=
+20261004120000_add_order_group_payment_mode.up.sql h1:zXTflJWM/H9qyLYr6nJkqOuNDeTglUoeyCgecsScL8Q=
+20261004130000_add_store_success_stats.up.sql h1:tzULDhglSIKhvxUkiNXfnUmqS4fP7/YZ5U7CfLY3x+o=
+20261004140000_add_invoice_counters.up.sql h1:9hl49LhDBTsMhRxJf/UF1UXjE2WoafXFks+brmdK4Kk=
