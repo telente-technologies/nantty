@@ -10,6 +10,6 @@ type Command struct {
 	Events    []dtos.AdEventDto
 }
 
-var acceptedTypes = map[string]bool{"impression": true, "view": true, "complete": true, "click": true, "skip": true, "hide": true}
+var acceptedTypes = map[string]bool{"impression": true, "view": true, "complete": true, "click": true, "card_view": true, "skip": true, "hide": true}
 
 func IsKnownEventType(eventType string) bool { return acceptedTypes[eventType] }

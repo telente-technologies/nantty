@@ -54,6 +54,9 @@ func (handler Handler) recordOne(ctx context.Context, command Command, event dto
 	if event.Type == "skip" || event.Type == "hide" {
 		return outcomeAccepted, "", handler.recordNegativeFeedback(ctx, claims)
 	}
+	if event.Type == "card_view" {
+		return outcomeAccepted, "", handler.recordCardView(ctx, claims, event)
+	}
 	verdict, err := handler.evaluateFraud(ctx, command, claims, event)
 	if err != nil {
 		return outcomeAccepted, "", err
@@ -67,6 +70,9 @@ func (handler Handler) recordOne(ctx context.Context, command Command, event dto
 		if err := handler.Container.Spend.Add(ctx, scope, effects.Charge.ChargeMicros); err != nil {
 			handler.Container.Logger.Warn("spend counter update failed; the next candidate refresh reseeds it", "error", err)
 		}
+	}
+	if effects.CountClick && event.CardIndex != nil {
+		handler.bumpCardStats(ctx, claims, *event.CardIndex, 0, 1)
 	}
 	if duplicate {
 		return outcomeDuplicate, "", nil

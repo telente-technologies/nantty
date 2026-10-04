@@ -6,6 +6,7 @@ import (
 	"zudomart/modules/ads/src/container"
 	recordadevents "zudomart/modules/ads/src/modules/tracking/commands/recordAdEvents"
 	recordconversion "zudomart/modules/ads/src/modules/tracking/commands/recordConversion"
+	redirectadclick "zudomart/modules/ads/src/modules/tracking/commands/redirectAdClick"
 	"zudomart/modules/ads/src/modules/tracking/dtos"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
@@ -52,4 +53,15 @@ func (controller TrackingController) RecordConversion(writer http.ResponseWriter
 		httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]bool{"attributed": result.Attributed})
 		return nil
 	})
+}
+
+func (controller TrackingController) RedirectClick(writer http.ResponseWriter, request *http.Request) {
+	target, err := (redirectadclick.Handler{Container: controller.Container}).Execute(request.Context(), redirectadclick.Command{Token: request.PathValue("token"), UserAgent: request.UserAgent(), Platform: request.URL.Query().Get("platform")})
+	if err != nil {
+		http.Error(writer, "This ad link is no longer valid.", http.StatusNotFound)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	writer.Header().Set("Referrer-Policy", "no-referrer")
+	http.Redirect(writer, request, target, http.StatusFound)
 }
