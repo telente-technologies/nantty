@@ -7,6 +7,7 @@ export interface SearchRequest {
   readonly limit: number;
   readonly cursor: SearchCursor | undefined;
   readonly region: string | undefined;
+  readonly viewerIsAdult?: boolean;
 }
 
 export interface SearchCursor {

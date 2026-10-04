@@ -12,6 +12,8 @@ export interface SearchDocument {
   readonly summary: Readonly<Record<string, unknown>>;
   readonly visibility: DocumentVisibility;
   readonly available: boolean;
+  readonly restrictedForMinors?: boolean;
+  readonly shippingRegions?: readonly string[];
   readonly popularity: number;
   readonly region: string | null;
   readonly version: number;
