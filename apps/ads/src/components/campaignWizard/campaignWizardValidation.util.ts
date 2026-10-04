@@ -3,6 +3,8 @@ import type { CampaignWizardState, WizardAdDraft } from "@/components/campaignWi
 import { buildCreativeShapeFromAdDraft, readChosenPlacements } from "@/components/campaignWizard/campaignWizardSubmission.util";
 import type { AdPlacement } from "@/types/campaign.type";
 import { describeWhyCreativeCannotRunAnywhere } from "@/utils/adPlacementRules.util";
+import { validateAppInstallFields, validateCarouselFields } from "@/utils/adCreativeFormats.util";
+import { buildAppFromDraft, buildCreativeInputFromAdDraft } from "@/components/campaignWizard/campaignWizardSubmission.util";
 import { isSafeHttpsUrl } from "@/utils/formValidation.util";
 import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
@@ -10,13 +12,22 @@ export type WizardFieldErrors = Record<string, string>;
 
 function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly AdPlacement[], errors: WizardFieldErrors): void {
   const prefix = `ads.${index}`;
-  if (ad.sourceType === "upload" && ad.uploadedMedia.length === 0) errors[`${prefix}.media`] = "Upload at least one image or video.";
-  if (ad.sourceType !== "upload" && !ad.selectedSource) errors[`${prefix}.source`] = "Choose a post, clip, product or store to promote.";
+  const usesContentSource = ad.creativeType === "single" || ad.creativeType === "promoted_post";
+  if (ad.creativeType === "carousel") {
+    for (const [field, message] of Object.entries(validateCarouselFields(buildCreativeInputFromAdDraft(ad).cards))) errors[`${prefix}.${field}`] = message;
+  }
+  if (ad.creativeType === "app_install") {
+    for (const [field, message] of Object.entries(validateAppInstallFields(buildAppFromDraft(ad.app)))) errors[`${prefix}.${field}`] = message;
+    if (ad.uploadedMedia.length === 0) errors[`${prefix}.media`] = "Upload an image or video for the ad.";
+  }
+  if (ad.creativeType === "promoted_post" && ad.sourceType !== "post" && ad.sourceType !== "clip") errors[`${prefix}.source`] = "Promote an existing post or clip.";
+  if (usesContentSource && ad.sourceType === "upload" && ad.uploadedMedia.length === 0) errors[`${prefix}.media`] = "Upload at least one image or video.";
+  if (usesContentSource && ad.sourceType !== "upload" && !ad.selectedSource) errors[`${prefix}.source`] = "Choose a post, clip, product or store to promote.";
   if (!ad.headline.trim()) errors[`${prefix}.headline`] = "Add a headline.";
   if (ad.headline.trim().length > headlineMaximumLength) errors[`${prefix}.headline`] = `Keep the headline under ${headlineMaximumLength} characters.`;
   if (ad.primaryText.trim().length > primaryTextMaximumLength) errors[`${prefix}.primaryText`] = `Keep the text under ${primaryTextMaximumLength} characters.`;
-  if (ad.destinationType === "url" && !isSafeHttpsUrl(ad.destinationUrl.trim())) errors[`${prefix}.destinationUrl`] = "Enter a full https:// website address.";
-  const hasCreative = ad.sourceType === "upload" ? ad.uploadedMedia.length > 0 : Boolean(ad.selectedSource);
+  if (ad.creativeType === "single" && ad.destinationType === "url" && !isSafeHttpsUrl(ad.destinationUrl.trim())) errors[`${prefix}.destinationUrl`] = "Enter a full https:// website address.";
+  const hasCreative = ad.creativeType === "carousel" ? ad.cards.some((card) => card.media) : ad.sourceType === "upload" ? ad.uploadedMedia.length > 0 : Boolean(ad.selectedSource);
   const placementProblem = hasCreative ? describeWhyCreativeCannotRunAnywhere(buildCreativeShapeFromAdDraft(ad), placements) : null;
   if (placementProblem) errors[`${prefix}.placements`] = placementProblem;
 }

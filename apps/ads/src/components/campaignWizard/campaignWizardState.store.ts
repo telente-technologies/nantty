@@ -1,9 +1,44 @@
 import { findObjectiveOption } from "@/constants/campaignOptions.constant";
 import type { AudienceSpec } from "@/types/audience.type";
 import type { AdPlacement, BidStrategyType, BudgetLevel, BudgetType, CampaignObjective, PlacementMode } from "@/types/campaign.type";
-import type { CallToAction, ContentSource, CreativeFormat, CreativeMedia, CreativeSourceType, DestinationType } from "@/types/creative.type";
+import type { CallToAction, ContentSource, CreativeFormat, CreativeMedia, CreativeSourceType, CreativeType, CreativeUtm, DestinationType } from "@/types/creative.type";
+
+export interface WizardCardDraft {
+  readonly key: string;
+  readonly media: CreativeMedia | null;
+  readonly headline: string;
+  readonly description: string;
+  readonly callToAction: CallToAction;
+  readonly destinationType: DestinationType;
+  readonly destinationUrl: string;
+}
+
+export interface WizardAppDraft {
+  readonly appName: string;
+  readonly iconMedia: CreativeMedia | null;
+  readonly ratingText: string;
+  readonly iosStoreUrl: string;
+  readonly androidStoreUrl: string;
+  readonly webFallbackUrl: string;
+  readonly iosDeepLink: string;
+  readonly androidDeepLink: string;
+}
+
+export const emptyAppDraft: WizardAppDraft = { appName: "", iconMedia: null, ratingText: "", iosStoreUrl: "", androidStoreUrl: "", webFallbackUrl: "", iosDeepLink: "", androidDeepLink: "" };
+
+let cardDraftCounter = 0;
+
+export function createEmptyCardDraft(): WizardCardDraft {
+  cardDraftCounter += 1;
+  return { key: `card-draft-${cardDraftCounter}`, media: null, headline: "", description: "", callToAction: "learn_more", destinationType: "url", destinationUrl: "" };
+}
 
 export interface WizardAdDraft {
+  readonly creativeType: CreativeType;
+  readonly mediaClickable: boolean;
+  readonly cards: readonly WizardCardDraft[];
+  readonly app: WizardAppDraft;
+  readonly utm: CreativeUtm;
   readonly key: string;
   readonly name: string;
   readonly format: CreativeFormat;
@@ -69,6 +104,11 @@ export function createEmptyAdDraft(objective: CampaignObjective | null, index: n
   return {
     key: `ad-draft-${adDraftCounter}`,
     name: `Ad ${index + 1}`,
+    creativeType: "single",
+    mediaClickable: false,
+    cards: [],
+    app: emptyAppDraft,
+    utm: {},
     format: "feed_post",
     sourceType: "post",
     selectedSource: null,

@@ -1,8 +1,8 @@
-import type { CampaignWizardState, WizardAdDraft } from "@/components/campaignWizard/campaignWizardState.store";
+import type { CampaignWizardState, WizardAdDraft, WizardAppDraft, WizardCardDraft } from "@/components/campaignWizard/campaignWizardState.store";
 import type { AdAccount } from "@/types/adAccount.type";
 import type { AudienceEstimateRequest } from "@/types/audience.type";
 import type { AdPlacement, BidStrategy, Budget, CampaignDraftSubmission, Schedule } from "@/types/campaign.type";
-import type { Creative, CreativeInput } from "@/types/creative.type";
+import type { Creative, CreativeApp, CreativeCard, CreativeCardInput, CreativeDestination, CreativeInput } from "@/types/creative.type";
 import type { CreativeShape } from "@/utils/adPlacementRules.util";
 import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
@@ -31,27 +31,67 @@ export function readChosenPlacements(state: CampaignWizardState): readonly AdPla
   return state.placementMode === "automatic" ? everyPlacement : state.placements;
 }
 
-export function buildCreativeInputFromAdDraft(ad: WizardAdDraft): CreativeInput {
+function hasUtm(ad: WizardAdDraft): boolean {
+  return Object.values(ad.utm).some((value) => Boolean(value?.trim()));
+}
+
+function buildDestinationFromParts(ad: WizardAdDraft, type: CreativeDestination["type"], url: string, targetId: string | null): CreativeDestination {
+  return { type, targetId, url: type === "url" ? url.trim() : null, ...(type === "url" && hasUtm(ad) ? { utm: ad.utm } : {}) };
+}
+
+export function buildAppFromDraft(app: WizardAppDraft): CreativeApp {
+  const rating = app.ratingText.trim() ? Number(app.ratingText) : null;
   return {
+    appName: app.appName.trim(),
+    ...(app.iconMedia ? { iconMediaId: app.iconMedia.id, iconUrl: app.iconMedia.url } : {}),
+    rating: rating !== null && Number.isFinite(rating) ? rating : null,
+    iosStoreUrl: app.iosStoreUrl.trim(),
+    androidStoreUrl: app.androidStoreUrl.trim(),
+    webFallbackUrl: app.webFallbackUrl.trim(),
+    iosDeepLink: app.iosDeepLink.trim(),
+    androidDeepLink: app.androidDeepLink.trim(),
+  };
+}
+
+function buildCardInput(ad: WizardAdDraft, card: WizardCardDraft): CreativeCardInput {
+  return { mediaId: card.media?.id ?? "", headline: card.headline.trim(), description: card.description.trim(), callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, null) };
+}
+
+function buildPreviewCard(ad: WizardAdDraft, card: WizardCardDraft, index: number): CreativeCard {
+  const placeholderMedia = { id: `empty-${index}`, kind: "image" as const, url: "", posterUrl: null, width: 1, height: 1, durationSeconds: null };
+  return { media: card.media ?? placeholderMedia, headline: card.headline || `Card ${index + 1}`, description: card.description, callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, null) };
+}
+
+export function buildCreativeInputFromAdDraft(ad: WizardAdDraft): CreativeInput {
+  const isInstall = ad.creativeType === "app_install";
+  return {
+    type: ad.creativeType,
+    mediaClickable: ad.creativeType === "single" && ad.mediaClickable,
+    cards: ad.creativeType === "carousel" ? ad.cards.map((card) => buildCardInput(ad, card)) : [],
+    app: isInstall ? buildAppFromDraft(ad.app) : null,
     format: ad.format,
     source: { type: ad.sourceType, id: ad.sourceType === "upload" ? "" : (ad.selectedSource?.id ?? "") },
     mediaIds: ad.sourceType === "upload" ? ad.uploadedMedia.map((media) => media.id) : [],
     headline: ad.headline.trim(),
     primaryText: ad.primaryText.trim(),
     callToAction: ad.callToAction,
-    destination: { type: ad.destinationType, targetId: ad.selectedSource?.id ?? null, url: ad.destinationType === "url" ? ad.destinationUrl.trim() : null },
+    destination: isInstall ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, ad.selectedSource?.id ?? null),
   };
 }
 
 export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAccount): Creative {
   return {
+    type: ad.creativeType,
+    mediaClickable: ad.creativeType === "single" && ad.mediaClickable,
+    cards: ad.creativeType === "carousel" ? ad.cards.map((card, index) => buildPreviewCard(ad, card, index)) : [],
+    app: ad.creativeType === "app_install" ? buildAppFromDraft(ad.app) : null,
     format: ad.format,
     source: { type: ad.sourceType, id: ad.selectedSource?.id ?? "" },
     media: ad.sourceType === "upload" ? ad.uploadedMedia : (ad.selectedSource?.media ?? []),
     headline: ad.headline || "Your headline",
     primaryText: ad.primaryText,
     callToAction: ad.callToAction,
-    destination: { type: ad.destinationType, targetId: ad.selectedSource?.id ?? null, url: ad.destinationUrl || null },
+    destination: ad.creativeType === "app_install" ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, ad.selectedSource?.id ?? null),
     identity: {
       name: account.business?.storeName ?? account.name,
       handle: account.business?.handle ?? account.name.toLowerCase().replace(/[^a-z0-9]+/g, "."),
@@ -97,6 +137,7 @@ export function buildEstimateRequestFromWizard(state: CampaignWizardState, curre
 }
 
 export function buildCreativeShapeFromAdDraft(ad: WizardAdDraft): CreativeShape {
-  const media = ad.sourceType === "upload" ? ad.uploadedMedia : (ad.selectedSource?.media ?? []);
-  return { sourceType: ad.sourceType, media, hasProduct: ad.sourceType !== "upload" && Boolean(ad.selectedSource?.product), hasLiveStream: ad.sourceType === "live" && Boolean(ad.selectedSource?.live) };
+  const cardMedia = ad.creativeType === "carousel" ? ad.cards.flatMap((card) => (card.media ? [card.media] : [])) : [];
+  const media = cardMedia.length > 0 ? cardMedia : ad.sourceType === "upload" ? ad.uploadedMedia : (ad.selectedSource?.media ?? []);
+  return { creativeType: ad.creativeType, sourceType: ad.sourceType, media, hasProduct: ad.sourceType !== "upload" && Boolean(ad.selectedSource?.product), hasLiveStream: ad.sourceType === "live" && Boolean(ad.selectedSource?.live) };
 }
