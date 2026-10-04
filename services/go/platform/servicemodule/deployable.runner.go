@@ -17,6 +17,7 @@ import (
 	"zudomart/platform/httpserver"
 	"zudomart/platform/logging"
 	"zudomart/platform/telemetry"
+	"zudomart/platform/viewerregion"
 )
 
 func RunDeployableWithModulesUntilTerminationSignal(deployableName string, factories ...Factory) error {
@@ -47,6 +48,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 		httpserver.AssignRequestIdToEveryRequest,
 		telemetry.TraceEveryHttpRequest(deployableName),
 		httpserver.RecoverFromPanicsAsInternalErrors(logger),
+		viewerregion.CaptureSignals(environment.ReadStringOrDefault("TRUSTED_COUNTRY_HEADER", viewerregion.DefaultTrustedCountryName)),
 		httpserver.LogEveryRequestWithDuration(logger),
 	)
 	group, groupContext := errgroup.WithContext(ctx)
