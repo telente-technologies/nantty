@@ -10,9 +10,10 @@ import (
 )
 
 type AccessTokenClaims struct {
-	AccountId string
-	SessionId string
-	Roles     []string
+	AccountId  string
+	SessionId  string
+	Roles      []string
+	AgeBracket string
 }
 
 type AccessTokenIssuer struct {
@@ -43,7 +44,7 @@ func (issuer *AccessTokenIssuer) SignTokenForAudience(audience string, timeToLiv
 		return "", err
 	}
 	issuedAt := issuer.now()
-	token, err := jwt.NewBuilder().
+	builder := jwt.NewBuilder().
 		Issuer(issuer.issuer).
 		Audience([]string{audience}).
 		Subject(claims.AccountId).
@@ -52,8 +53,11 @@ func (issuer *AccessTokenIssuer) SignTokenForAudience(audience string, timeToLiv
 		NotBefore(issuedAt).
 		Expiration(issuedAt.Add(timeToLive)).
 		Claim("sid", claims.SessionId).
-		Claim("roles", claims.Roles).
-		Build()
+		Claim("roles", claims.Roles)
+	if claims.AgeBracket != "" {
+		builder = builder.Claim("age", claims.AgeBracket)
+	}
+	token, err := builder.Build()
 	if err != nil {
 		return "", fmt.Errorf("build access token: %w", err)
 	}

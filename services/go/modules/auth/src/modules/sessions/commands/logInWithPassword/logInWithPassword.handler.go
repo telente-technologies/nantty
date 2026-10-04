@@ -49,7 +49,8 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		return types.AuthenticationResult{}, err
 	}
 	tokens, err := services.SignAccessTokenAndBuildIssuedTokens(application.Container, existing, session.SessionId, session.RefreshToken)
-	return types.AuthenticationResult{Tokens: tokens, Account: existing}, err
+	cancelled := services.CancelPendingDeletionOnLogin(ctx, application.Container, existing.ID)
+	return types.AuthenticationResult{Tokens: tokens, Account: existing, DeletionCancelled: cancelled}, err
 }
 
 func (application Handler) findActiveAccountByEmailOrUsername(ctx context.Context, identifier string) (*ent.Account, error) {

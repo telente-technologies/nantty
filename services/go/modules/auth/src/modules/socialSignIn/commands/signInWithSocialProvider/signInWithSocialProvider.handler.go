@@ -59,7 +59,8 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		return types.AuthenticationResult{}, err
 	}
 	tokens, err := services.SignAccessTokenAndBuildIssuedTokens(application.Container, owner, session.SessionId, session.RefreshToken)
-	return types.AuthenticationResult{Tokens: tokens, Account: owner, IsNewUser: isNewUser}, err
+	cancelled := !isNewUser && services.CancelPendingDeletionOnLogin(ctx, application.Container, owner.ID)
+	return types.AuthenticationResult{Tokens: tokens, Account: owner, IsNewUser: isNewUser, DeletionCancelled: cancelled}, err
 }
 
 func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName, deviceId string) (*ent.Account, bool, error) {
