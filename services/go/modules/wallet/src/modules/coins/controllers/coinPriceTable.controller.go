@@ -34,6 +34,7 @@ func (controller CoinsController) UpsertCoinPriceRow(writer http.ResponseWriter,
 		collector.RequireLength("storeProductId", body.StoreProductId, 0, 200)
 		collector.RequireRange("coins", body.Coins, 0, 100_000_000)
 		collector.RequireRange("bonusCoins", body.BonusCoins, 0, 100_000_000)
+		collector.RequireLength("reason", body.Reason, 0, 300)
 		return collector.Result()
 	})
 	if err != nil {
@@ -41,6 +42,8 @@ func (controller CoinsController) UpsertCoinPriceRow(writer http.ResponseWriter,
 		return
 	}
 	body.Id = packageId
+	reason := body.Reason
+	body.Reason = ""
 	if audit := controller.Application.Container.Audit; audit != nil {
 		staff, _ := staffauth.StaffFromContext(request.Context())
 		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.coin_pack.update", "coin_pack", packageId, nil, body); err != nil {

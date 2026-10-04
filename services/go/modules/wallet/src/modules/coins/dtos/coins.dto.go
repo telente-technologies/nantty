@@ -29,6 +29,7 @@ type CoinPackagePriceRowDto struct {
 	StoreProductId string           `json:"storeProductId"`
 	Active         bool             `json:"active"`
 	SortOrder      int              `json:"sortOrder"`
+	Reason         string           `json:"reason,omitempty"`
 }
 
 type CoinBalanceDto struct {
