@@ -4,6 +4,7 @@ import { Share } from "react-native";
 import { postsService } from "@/services/posts.service";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { Page, Post } from "@/types";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 export const feedQueryKeyPrefix = ["feed"] as const;
 
@@ -57,7 +58,7 @@ export function usePostInteractions() {
   };
 
   const sharePost = async (post: Post) => {
-    const result = await Share.share({ message: `${post.author.name} on Zudomart: https://zudomart.com/p/${post.id}` }).catch(() => null);
+    const result = await Share.share({ message: `${post.author.name} on Zudomart: ${webAppLinks.post(post.id)}` }).catch(() => null);
     if (result?.action === Share.sharedAction) postsService.recordPostShare(post.id).catch(() => undefined);
   };
 
