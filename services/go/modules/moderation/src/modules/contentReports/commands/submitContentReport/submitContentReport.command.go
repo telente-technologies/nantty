@@ -8,6 +8,8 @@ type Command struct {
 	Details       string
 	AuthorId      string
 	SourceEventId string
+	OffsetSeconds *float64
+	FrameRef      string
 }
 
 type Result struct {

@@ -80,6 +80,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	if rule.needsAuthor && report.AuthorID == nil {
 		return conflict("AUTHOR_UNKNOWN", "The author of this content could not be determined.")
 	}
+	if command.Action == "WARN_AUTHOR" {
+		actor := integrations.StaffActor{Id: command.Staff.Id, Name: command.Staff.Name, Role: command.Staff.Role, IpAddress: command.IpAddress, RequestId: command.RequestId, StepUp: command.Staff.SteppedUp}
+		if err := handler.Container.Users.Enforce(ctx, integrations.EnforcementRequest{
+			Action: "warn", UserId: report.AuthorID.String(), Actor: actor, Reason: "Content report: " + reason, Source: "content_report", CaseId: report.ID.String(),
+		}); err != nil {
+			return err
+		}
+	}
 	if command.Action == "SUSPEND_AUTHOR" {
 		actor := integrations.StaffActor{Id: command.Staff.Id, Name: command.Staff.Name, Role: command.Staff.Role, IpAddress: command.IpAddress, RequestId: command.RequestId, StepUp: true}
 		if err := handler.Container.Users.Enforce(ctx, integrations.EnforcementRequest{

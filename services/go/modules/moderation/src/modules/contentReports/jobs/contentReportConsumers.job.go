@@ -22,6 +22,10 @@ type reportCreatedData struct {
 	ReportedUserId string `json:"reportedUserId"`
 	Reason         string `json:"reason"`
 	Details        string `json:"details"`
+	LiveContext    *struct {
+		OffsetSeconds *float64 `json:"offsetSeconds"`
+		FrameRef      string   `json:"frameRef"`
+	} `json:"liveContext"`
 }
 
 func HandleReportCreatedMessage(application *container.Container, submit func(context.Context, submitcontentreport.Command) error) platformevents.MessageHandler {
@@ -40,7 +44,11 @@ func HandleReportCreatedMessage(application *container.Container, submit func(co
 		if !slices.Contains(services.ContentTargetTypes, data.TargetType) {
 			return nil
 		}
-		err := submit(ctx, submitcontentreport.Command{ReporterId: data.ReporterId, TargetType: data.TargetType, TargetId: data.TargetId, Reason: data.Reason, Details: data.Details, AuthorId: data.ReportedUserId, SourceEventId: "event:" + envelope.Id})
+		command := submitcontentreport.Command{ReporterId: data.ReporterId, TargetType: data.TargetType, TargetId: data.TargetId, Reason: data.Reason, Details: data.Details, AuthorId: data.ReportedUserId, SourceEventId: "event:" + envelope.Id}
+		if data.LiveContext != nil {
+			command.OffsetSeconds, command.FrameRef = data.LiveContext.OffsetSeconds, data.LiveContext.FrameRef
+		}
+		err := submit(ctx, command)
 		return poisonWhenInvalid(err)
 	}
 }

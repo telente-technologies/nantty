@@ -10,6 +10,7 @@ import (
 	submitcontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/submitContentReport"
 	"zudomart/modules/moderation/src/modules/contentReports/jobs"
 	"zudomart/modules/moderation/src/modules/contentReports/routes"
+	livesafety "zudomart/modules/moderation/src/modules/liveSafety"
 	platformevents "zudomart/platform/events"
 )
 
@@ -20,7 +21,13 @@ func Mount(mux *http.ServeMux, c *container.Container) {
 func SubmitHandler(c *container.Container) func(context.Context, submitcontentreport.Command) error {
 	return func(ctx context.Context, command submitcontentreport.Command) error {
 		_, err := submitcontentreport.Handler{Container: c}.Execute(ctx, command)
-		return err
+		if err != nil || command.TargetType != "live" {
+			return err
+		}
+		return livesafety.RecordLiveReport(ctx, c, livesafety.LiveReport{
+			SourceEventId: command.SourceEventId, ReporterId: command.ReporterId, LiveId: command.TargetId, HostId: command.AuthorId, Reason: command.Reason,
+			Details: command.Details, OffsetSeconds: command.OffsetSeconds, FrameRef: command.FrameRef,
+		})
 	}
 }
 
@@ -38,13 +45,19 @@ func RunConsumersUntilContextDone(ctx context.Context, c *container.Container, q
 			}
 		}()
 	}
-	consume(c.Settings.ReportEventsQueue, jobs.HandleReportCreatedMessage(c, SubmitHandler(c)))
+	consume(c.Settings.ReportEventsQueue, ReportCreatedHandler(c))
 	consume(c.Settings.ContentScoresQueue, jobs.HandleContentScoreMessage(c))
 	group.Wait()
 }
 
 func ReportCreatedHandler(c *container.Container) platformevents.MessageHandler {
-	return jobs.HandleReportCreatedMessage(c, SubmitHandler(c))
+	reportCreated, liveEnded := jobs.HandleReportCreatedMessage(c, SubmitHandler(c)), livesafety.LiveEndedHandler(c)
+	return func(ctx context.Context, body []byte) error {
+		if err := reportCreated(ctx, body); err != nil {
+			return err
+		}
+		return liveEnded(ctx, body)
+	}
 }
 
 func ContentScoreHandler(c *container.Container) platformevents.MessageHandler {

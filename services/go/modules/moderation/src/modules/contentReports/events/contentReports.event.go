@@ -7,11 +7,12 @@ const (
 )
 
 type ContentVisibilityChangedData struct {
-	TargetType  string `json:"targetType"`
-	TargetId    string `json:"targetId"`
-	OwnerId     string `json:"ownerId,omitempty"`
-	Visibility  string `json:"visibility"`
-	Source      string `json:"source"`
-	ReferenceId string `json:"referenceId"`
-	Reason      string `json:"reason"`
+	TargetType  string   `json:"targetType"`
+	TargetId    string   `json:"targetId"`
+	OwnerId     string   `json:"ownerId,omitempty"`
+	Visibility  string   `json:"visibility"`
+	Source      string   `json:"source"`
+	ReferenceId string   `json:"referenceId"`
+	Reason      string   `json:"reason"`
+	Labels      []string `json:"labels,omitempty"`
 }
