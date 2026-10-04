@@ -1,3 +1,4 @@
+import { buildProductPath } from "@/utils/seoPaths.util";
 import { ApiError } from "@/errors/api.error";
 import type { Page, SavedItem, SavedItemFilter, SaveTargetRequest, SaveTargetType } from "@/types";
 
@@ -25,7 +26,7 @@ const buildSavedItem = (record: SavedTargetRecord): SavedItem | null => {
     const seed = findCatalogSeedByProductId(record.targetId);
     if (!seed) return null;
     const product = buildCatalogProductSummary(seed);
-    return { ...base, preview: { title: product.name, thumbnailUrl: product.imageUrl, href: `/product/${product.id}`, author: null, price: product.price, durationSeconds: null } };
+    return { ...base, preview: { title: product.name, thumbnailUrl: product.imageUrl, href: buildProductPath(product), author: null, price: product.price, durationSeconds: null } };
   }
   const post = record.targetType === "clip" ? findMockClipsByIds([record.targetId])[0] : record.targetType === "video" ? findMockVideoById(record.targetId) : findPostIncludingSponsored(record.targetId);
   if (!post) return null;

@@ -78,6 +78,7 @@ const buildVideoPostFromSeed = (seed: VideoSeed): Post => {
     views,
     liked: false,
     bookmarked: false,
+    saveCount: 0,
     isFollowingAuthor: isFollowingUser(seed.authorId),
     friendsLiked: null,
     products: [],
