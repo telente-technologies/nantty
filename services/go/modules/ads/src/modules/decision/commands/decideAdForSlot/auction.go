@@ -19,7 +19,7 @@ func (handler Handler) scoreAndAuction(ctx context.Context, slot *slotContext, e
 	auctionCandidates := make([]services.AuctionCandidate, 0, len(eligible))
 	byAdId := make(map[string]types.CandidateAd, len(eligible))
 	for _, candidate := range eligible {
-		auctionCandidate, usable := handler.toAuctionCandidate(candidate, scores[candidate.AdId])
+		auctionCandidate, usable := handler.toAuctionCandidate(ctx, candidate, scores[candidate.AdId], slot.command.Viewer.Country)
 		if usable {
 			auctionCandidates = append(auctionCandidates, auctionCandidate)
 			byAdId[candidate.AdId] = candidate
@@ -32,8 +32,11 @@ func (handler Handler) scoreAndAuction(ctx context.Context, slot *slotContext, e
 	return outcome, byAdId[outcome.WinnerAdId], scores[outcome.WinnerAdId], true, nil
 }
 
-func (handler Handler) toAuctionCandidate(candidate types.CandidateAd, pctrPpm int64) (services.AuctionCandidate, bool) {
-	reserveMinor, known := handler.Container.Settings.ReservePerMilleMinor[candidate.Currency]
+func (handler Handler) toAuctionCandidate(ctx context.Context, candidate types.CandidateAd, pctrPpm int64, viewerCountry string) (services.AuctionCandidate, bool) {
+	reserveMinor, known := handler.Container.Pricing.ReservePerMilleMinor(ctx, viewerCountry, candidate.Currency)
+	if !known {
+		reserveMinor, known = handler.Container.Settings.ReservePerMilleMinor[candidate.Currency]
+	}
 	if !known || pctrPpm <= 0 {
 		return services.AuctionCandidate{}, false
 	}

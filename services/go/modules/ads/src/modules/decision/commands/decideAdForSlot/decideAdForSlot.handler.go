@@ -65,7 +65,11 @@ func (handler Handler) runAuctionAndIssueToken(ctx context.Context, slot *slotCo
 	if err != nil {
 		return Result{}, err
 	}
-	return Result{Ad: &dtos.DecidedAd{
+	clickLinks, err := handler.buildClickLinks(winner.Creative, token, claims)
+	if err != nil {
+		return Result{}, err
+	}
+	return Result{Ad: &dtos.DecidedAd{ClickLinks: clickLinks,
 		AdId: winner.AdId, ImpressionToken: token, ExpiresAt: deployed.Now().Add(deployed.Settings.AdTokenTimeToLive).UTC().Format(time.RFC3339),
 		Placement: slot.placement, SlotKind: slot.command.Slot.Kind, Format: winner.Format, Label: "Ad", Creative: winner.Creative, SkipAfterSeconds: skipAfter(slot, deployed.Settings.SkipAfterSeconds),
 	}}, nil

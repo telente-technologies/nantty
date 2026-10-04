@@ -56,15 +56,16 @@ type InternalDecideRequest struct {
 }
 
 type DecidedAd struct {
-	AdId             string         `json:"adId"`
-	ImpressionToken  string         `json:"impressionToken"`
-	ExpiresAt        string         `json:"expiresAt"`
-	Placement        string         `json:"placement"`
-	SlotKind         string         `json:"slotKind"`
-	Format           string         `json:"format"`
-	Label            string         `json:"label"`
-	Creative         types.Creative `json:"creative"`
-	SkipAfterSeconds *int           `json:"skipAfterSeconds"`
+	AdId             string                    `json:"adId"`
+	ImpressionToken  string                    `json:"impressionToken"`
+	ExpiresAt        string                    `json:"expiresAt"`
+	Placement        string                    `json:"placement"`
+	SlotKind         string                    `json:"slotKind"`
+	Format           string                    `json:"format"`
+	Label            string                    `json:"label"`
+	Creative         types.Creative            `json:"creative"`
+	SkipAfterSeconds *int                      `json:"skipAfterSeconds"`
+	ClickLinks       *types.CreativeClickLinks `json:"clickLinks"`
 }
 
 type DecideResponse struct {
